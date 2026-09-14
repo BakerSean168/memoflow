@@ -10,7 +10,7 @@ export const PortableAccountProfileV3Schema = z
   .object({
     nickname: z.string().min(2).max(20),
     realName: z.string().nullable(),
-    avatarUrl: z.string().nullable(),
+    avatarUrl: z.string().url().nullable(),
     bio: z.string().max(500).nullable(),
     gender: z.enum(GenderType),
     birthday: YmdSchema.nullable(),

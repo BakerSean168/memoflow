@@ -59,6 +59,9 @@ import { createAccountApiModule } from '@memoflow/account/api';
 
 const fakeDb = {} as unknown as PrismaClient;
 const fakeClock = createFixedClock(1_700_000_000_000);
+const fakeTimeContextPort = {
+  getUserTimeContext: vi.fn(async () => ({ timeZone: 'UTC', weekStartsOn: 1 as const })),
+};
 const fakeCloudAuth = {
   revokeAllSessions: vi.fn(async () => ({ revokedSessions: 0 })),
 } as unknown as CloudAuthLike;
@@ -70,7 +73,12 @@ describe('composeAccount assembly order', () => {
   });
 
   it('assembles in plan §3.3 order: repositories → runtime contributions → module → api module', () => {
-    composeAccount({ db: fakeDb, cloudAuth: fakeCloudAuth, clock: fakeClock });
+    composeAccount({
+      db: fakeDb,
+      cloudAuth: fakeCloudAuth,
+      clock: fakeClock,
+      userTimeContextPort: fakeTimeContextPort,
+    });
 
     const reposOrder = createAccountPrismaRepositories.mock.invocationCallOrder[0];
     const runtimeOrder = createAccountRuntimeContributions.mock.invocationCallOrder[0];
@@ -83,11 +91,17 @@ describe('composeAccount assembly order', () => {
   });
 
   it('passes the exact host cloudAuth port into the repository factory unchanged', () => {
-    composeAccount({ db: fakeDb, cloudAuth: fakeCloudAuth, clock: fakeClock });
+    composeAccount({
+      db: fakeDb,
+      cloudAuth: fakeCloudAuth,
+      clock: fakeClock,
+      userTimeContextPort: fakeTimeContextPort,
+    });
 
     expect(createAccountPrismaRepositories).toHaveBeenCalledWith({
       db: fakeDb,
       clock: fakeClock,
+      userTimeContextPort: fakeTimeContextPort,
       cloudAuth: fakeCloudAuth,
     });
   });
@@ -97,6 +111,7 @@ describe('composeAccount assembly order', () => {
       db: fakeDb,
       cloudAuth: fakeCloudAuth,
       clock: fakeClock,
+      userTimeContextPort: fakeTimeContextPort,
       runtimeContributions: hostRuntime,
     });
 
@@ -125,7 +140,12 @@ describe('composeAccount assembly order', () => {
   });
 
   it('returns the pure module handle plus the Account-owned portability capability', () => {
-    const composed = composeAccount({ db: fakeDb, cloudAuth: fakeCloudAuth, clock: fakeClock });
+    const composed = composeAccount({
+      db: fakeDb,
+      cloudAuth: fakeCloudAuth,
+      clock: fakeClock,
+      userTimeContextPort: fakeTimeContextPort,
+    });
 
     expect(composed.module).toMatchObject({ name: 'Account' });
     expect(typeof composed.module.register).toBe('function');
@@ -158,7 +178,12 @@ describe('composeAccount structural registration', () => {
   });
 
   it('mounts /accounts on the router and starts the owned instance', () => {
-    const composed = composeAccount({ db: fakeDb, cloudAuth: fakeCloudAuth, clock: fakeClock });
+    const composed = composeAccount({
+      db: fakeDb,
+      cloudAuth: fakeCloudAuth,
+      clock: fakeClock,
+      userTimeContextPort: fakeTimeContextPort,
+    });
 
     const instance = createAccountModule.mock.results[0].value;
     const startSpy = vi.spyOn(instance, 'start');

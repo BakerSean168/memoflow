@@ -46,7 +46,7 @@ import {
   type AccountRuntimeContributionsInput,
   type CloudAuthLike,
 } from '@memoflow/account';
-import type { Clock } from '@memoflow/time';
+import type { Clock, UserTimeContextPort } from '@memoflow/time';
 import { createAccountApiModule, type AccountApiModuleDef } from '@memoflow/account/api';
 
 /**
@@ -60,6 +60,8 @@ export interface ComposeAccountDependencies {
   readonly cloudAuth: CloudAuthLike;
   /** Host-owned Product Time clock for Account mutations. */
   readonly clock: Clock;
+  /** Host-owned identity time context capability. */
+  readonly userTimeContextPort: UserTimeContextPort;
   /** Extra runtime contributions from the host. 宿主提供的额外运行时贡献。 */
   readonly runtimeContributions?: AccountRuntimeContributionsInput;
 }
@@ -112,12 +114,14 @@ export function composeAccount(dependencies: ComposeAccountDependencies): Compos
   const repositories = createAccountPrismaRepositories({
     db: dependencies.db,
     clock: dependencies.clock,
+    userTimeContextPort: dependencies.userTimeContextPort,
     cloudAuth: dependencies.cloudAuth,
   });
 
   const instance = createAccountModule({
     accountRepository: repositories.accountRepository,
     clock: dependencies.clock,
+    userTimeContextPort: dependencies.userTimeContextPort,
     closureOperationRepository: repositories.closureOperationRepository,
     revocationPort: repositories.revocationPort,
     eventPublisher: repositories.eventPublisher,

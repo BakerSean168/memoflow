@@ -14,6 +14,7 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import type { IAccountRepository } from '../../domain';
+import { createTimeContext } from '@memoflow/time';
 import {
   createAccountModule,
   type AccountModuleDependencies,
@@ -37,11 +38,16 @@ function makeContribution(name: string, failOnStart = false): FakeContribution {
   return { name, start, stop, contribution: { start, stop } };
 }
 
-function makeDeps(runtimeContributions: AccountModuleRuntimeContribution[]): AccountModuleDependencies {
+function makeDeps(
+  runtimeContributions: AccountModuleRuntimeContribution[],
+): AccountModuleDependencies {
   return {
     accountRepository: {} as unknown as IAccountRepository,
     laneCapability: 'desktop',
     runtimeContributions,
+    userTimeContextPort: {
+      getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+    },
   };
 }
 
@@ -51,7 +57,9 @@ describe('createAccountModule partial-start cleanup', () => {
     const b = makeContribution('b');
     const c = makeContribution('c', true);
 
-    const instance = createAccountModule(makeDeps([a.contribution, b.contribution, c.contribution]));
+    const instance = createAccountModule(
+      makeDeps([a.contribution, b.contribution, c.contribution]),
+    );
 
     expect(() => instance.start()).toThrow('c start failed');
 

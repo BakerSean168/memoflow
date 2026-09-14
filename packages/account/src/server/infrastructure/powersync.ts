@@ -21,11 +21,12 @@ import {
   type AccountRuntimeContributionsInput,
 } from './runtime';
 import type { IAccountRepository } from '../domain';
-import type { Clock } from '@memoflow/time';
+import type { Clock, UserTimeContextPort } from '@memoflow/time';
 
 export interface CreateAccountPowerSyncModuleOptions {
   readonly runtimeContributions?: AccountRuntimeContributionsInput;
   readonly clock: Clock;
+  readonly userTimeContextPort: UserTimeContextPort;
 }
 
 /**
@@ -73,6 +74,7 @@ export function createAccountPowerSyncModule(
   return createAccountModule({
     accountRepository,
     clock: options.clock,
+    userTimeContextPort: options.userTimeContextPort,
     laneCapability: 'desktop',
     runtimeContributions: createAccountRuntimeContributions(
       accountRepository,

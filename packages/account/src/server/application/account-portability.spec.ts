@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { PortableAccountProfileV3Schema } from '@memoflow/contracts/account';
 import type { PortableCapabilityExecutionContext } from '@memoflow/contracts/data-portability';
 import type { Instant } from '@memoflow/contracts/primitives';
-import type { Clock } from '@memoflow/time';
+import { createTimeContext, type Clock, type UserTimeContextPort } from '@memoflow/time';
 import { Account } from '../domain/aggregates/account';
 import type { IAccountRepository } from '../domain/repositories/i-account-repository';
 import { AccountProfilePortableCapability } from './account-portability';
@@ -22,13 +22,21 @@ function createFixture() {
     now: (now - 1000) as Instant,
   });
   const save = vi.fn(async () => undefined);
+  const userTimeContextPort: UserTimeContextPort = {
+    getUserTimeContext: vi.fn(async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 })),
+  };
   const repository: IAccountRepository = {
     save,
     findById: vi.fn(async (id: string) => (id === identityId ? account : null)),
     delete: vi.fn(async () => undefined),
     findAll: vi.fn(async () => ({ accounts: [account], total: 1 })),
   };
-  return { account, save, capability: new AccountProfilePortableCapability(repository, clock) };
+  return {
+    account,
+    save,
+    userTimeContextPort,
+    capability: new AccountProfilePortableCapability(repository, clock, userTimeContextPort),
+  };
 }
 
 const target = PortableAccountProfileV3Schema.parse({
@@ -87,6 +95,32 @@ describe('AccountProfilePortableCapability', () => {
     expect(save).toHaveBeenCalledTimes(1);
   });
 
+  it('rejects invalid avatars and future birthdays before saving', async () => {
+    const { capability, save } = createFixture();
+    const invalidAvatar = { ...target, avatarUrl: 'not-a-url' };
+    const futureBirthday = { ...target, birthday: '2026-09-11' };
+
+    await expect(capability.dryRun(invalidAvatar as never, context)).rejects.toThrow();
+    await expect(capability.apply(invalidAvatar as never, context)).rejects.toThrow();
+    await expect(capability.dryRun(futureBirthday, context)).rejects.toThrow(
+      'Birthday cannot be in the future',
+    );
+    await expect(capability.apply(futureBirthday, context)).rejects.toThrow(
+      'Birthday cannot be in the future',
+    );
+    expect(save).not.toHaveBeenCalled();
+  });
+
+  it('uses the identity time zone when resolving today', async () => {
+    const { capability, userTimeContextPort } = createFixture();
+    vi.mocked(userTimeContextPort.getUserTimeContext).mockResolvedValue(
+      createTimeContext({ timeZone: 'Asia/Tokyo', weekStartsOn: 1 }),
+    );
+    const localToday = { ...target, birthday: '2026-09-10' };
+
+    await expect(capability.apply(localToday, context)).resolves.toMatchObject({ updated: 1 });
+  });
+
   it('fails closed instead of creating a host account during import', async () => {
     const repository: IAccountRepository = {
       save: vi.fn(async () => undefined),
@@ -94,7 +128,9 @@ describe('AccountProfilePortableCapability', () => {
       delete: vi.fn(async () => undefined),
       findAll: vi.fn(async () => ({ accounts: [], total: 0 })),
     };
-    const capability = new AccountProfilePortableCapability(repository, clock);
+    const capability = new AccountProfilePortableCapability(repository, clock, {
+      getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+    });
 
     await expect(capability.apply(target, context)).rejects.toThrow(
       'requires an existing host account',

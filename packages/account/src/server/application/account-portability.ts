@@ -7,7 +7,7 @@ import {
   PortableAccountProfileV3Schema,
   type PortableAccountProfileV3,
 } from '@memoflow/contracts/account';
-import type { Clock } from '@memoflow/time';
+import { instantToYmdInTimeZone, type Clock, type UserTimeContextPort } from '@memoflow/time';
 import type { IAccountRepository } from '../domain/repositories/i-account-repository';
 import { AccountProfile } from '../domain/value-objects/account-profile';
 
@@ -34,6 +34,7 @@ export class AccountProfilePortableCapability implements PortableCapability<Port
   constructor(
     private readonly accountRepository: IAccountRepository,
     private readonly clock: Clock,
+    private readonly userTimeContextPort: UserTimeContextPort,
   ) {}
 
   async export(
@@ -48,7 +49,7 @@ export class AccountProfilePortableCapability implements PortableCapability<Port
     payload: PortableAccountProfileV3,
     context: PortableCapabilityExecutionContext,
   ): Promise<PortableCapabilityReceipt> {
-    const target = PortableAccountProfileV3Schema.parse(payload);
+    const { target } = await this.validateTarget(payload, context.identityId, this.clock.now());
     const account = await this.requireHostAccount(context.identityId);
     const current = PortableAccountProfileV3Schema.parse(account.profile.toDTO());
     return profilesEqual(current, target)
@@ -60,16 +61,32 @@ export class AccountProfilePortableCapability implements PortableCapability<Port
     payload: PortableAccountProfileV3,
     context: PortableCapabilityExecutionContext,
   ): Promise<PortableCapabilityReceipt> {
-    const target = PortableAccountProfileV3Schema.parse(payload);
+    const now = this.clock.now();
     const account = await this.requireHostAccount(context.identityId);
+    const { target, profile } = await this.validateTarget(payload, context.identityId, now);
     const current = PortableAccountProfileV3Schema.parse(account.profile.toDTO());
     if (profilesEqual(current, target)) {
       return { created: 0, updated: 0, skipped: 1, warnings: [] };
     }
 
-    account.updateProfile(AccountProfile.create(target), this.clock.now());
+    account.updateProfile(profile, now);
     await this.accountRepository.save(account);
     return { created: 0, updated: 1, skipped: 0, warnings: [] };
+  }
+
+  private async validateTarget(
+    payload: PortableAccountProfileV3,
+    identityId: string,
+    now: ReturnType<Clock['now']>,
+  ): Promise<{ target: PortableAccountProfileV3; profile: AccountProfile }> {
+    const target = PortableAccountProfileV3Schema.parse(payload);
+    let profile = AccountProfile.create(target);
+    if (target.birthday != null) {
+      const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
+      const today = instantToYmdInTimeZone(now, timeContext.timeZone);
+      profile = profile.setBirthday(target.birthday, today);
+    }
+    return { target, profile };
   }
 
   private async requireHostAccount(identityId: string) {
@@ -86,6 +103,7 @@ export class AccountProfilePortableCapability implements PortableCapability<Port
 export function createAccountProfilePortableCapability(
   accountRepository: IAccountRepository,
   clock: Clock,
+  userTimeContextPort: UserTimeContextPort,
 ): AccountProfilePortableCapability {
-  return new AccountProfilePortableCapability(accountRepository, clock);
+  return new AccountProfilePortableCapability(accountRepository, clock, userTimeContextPort);
 }

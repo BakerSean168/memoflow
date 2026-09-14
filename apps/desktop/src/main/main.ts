@@ -394,6 +394,7 @@ async function registerBusinessModules(
   const accountComposed = composeAccount({
     db,
     clock: createSystemClock(),
+    userTimeContextPort: settingElectronModule.userTimeContextPort,
     syncOptions: {
       getCloudAccountId: () =>
         mainRuntime?.profileRuntimeManager.getActiveProfileDescriptorSync()?.cloudBinding
