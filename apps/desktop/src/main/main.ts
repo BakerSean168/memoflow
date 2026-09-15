@@ -37,7 +37,11 @@ import {
 } from '@memoflow/repository/electron';
 import { createSchedulePowerSyncRepositories } from '@memoflow/schedule';
 import { createSchedulerPowerSyncRepositories } from '@memoflow/scheduler';
-import { LabelService, PowerSyncLabelRepository } from '@memoflow/label';
+import {
+  LabelService,
+  PowerSyncLabelRepository,
+  createLabelPortableCapability,
+} from '@memoflow/label';
 import {
   GoalKnowledgeService,
   TaskKnowledgeService,
@@ -373,7 +377,9 @@ async function registerBusinessModules(
   const goalWorkspaceElectronModule = createGoalWorkspaceElectronModule({
     port: goalWorkspaceService,
   });
-  const taskWorkspaceElectronModule = createTaskWorkspaceElectronModule({ port: taskWorkspaceService });
+  const taskWorkspaceElectronModule = createTaskWorkspaceElectronModule({
+    port: taskWorkspaceService,
+  });
 
   const dashboardRepositories: DashboardReadDependencies = {
     goalRepository: goalComposed.repositories.goalRepository,
@@ -392,6 +398,7 @@ async function registerBusinessModules(
   const accountComposed = composeAccount({
     db,
     clock: createSystemClock(),
+    userTimeContextPort: settingElectronModule.userTimeContextPort,
     syncOptions: {
       getCloudAccountId: () =>
         mainRuntime?.profileRuntimeManager.getActiveProfileDescriptorSync()?.cloudBinding
@@ -516,8 +523,11 @@ async function registerBusinessModules(
   const dataPortabilityElectronModule = composeDataPortability({
     db,
     portableCapabilities: [
+      accountComposed.portableCapability,
       settingElectronModule.portableCapability,
       notificationComposed.module.portableCapability,
+      createLabelPortableCapability(labelService),
+      goalComposed.portableCapability,
     ],
   });
 

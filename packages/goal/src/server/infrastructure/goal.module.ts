@@ -190,6 +190,7 @@ export interface GoalModuleInstance {
   readonly goalDeletionTransactionRunner: GoalDeletionTransactionRunner;
   readonly useCases: GoalModuleUseCases;
   readonly api: GoalApplicationPort;
+  readonly portability: import('../application').GoalPortabilityApplicationPort;
   start(): void;
   dispose(): void;
 }
@@ -469,6 +470,7 @@ export function createGoalModule(deps: GoalModuleDependencies): GoalModuleInstan
     goalDeletionTransactionRunner: deps.goalDeletionTransactionRunner,
     useCases,
     api,
+    portability: useCases.createGoal,
 
     start(): void {
       if (started) return;

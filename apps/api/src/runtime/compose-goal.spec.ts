@@ -157,6 +157,7 @@ describe('composeGoal assembly order', () => {
     const instance = createGoalModule.mock.results[0].value;
     const repoSet = createGoalPrismaRepositories.mock.results[0].value;
     expect(composed.applicationPort).toBe(instance.api);
+    expect(composed.portableCapability).toMatchObject({ key: 'goals', schemaVersion: 3 });
     expect(composed.repositories).toEqual({
       goalRepository: repoSet.goalRepository,
       goalRecordRepository: repoSet.goalRecordRepository,

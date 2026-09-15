@@ -79,6 +79,14 @@ export class PrismaLabelRepository implements LabelRepository {
     });
     return rows.map(toRecord);
   }
+
+  async listAll(identityId: string): Promise<LabelRecord[]> {
+    const rows = await this.db.label.findMany({
+      where: { identityId },
+      orderBy: [{ name: 'asc' }, { id: 'asc' }],
+    });
+    return rows.map(toRecord);
+  }
 }
 
 function toRecord(row: NonNullable<LabelRow>): LabelRecord {

@@ -363,7 +363,11 @@ test('CI has one long-lived main branch target and full-main policy is encoded b
     readRepoFile('.github/workflows/ci.yml'),
     readRepoFile('tools/ci-cd-platform/generate-delivery-manifest.mjs'),
   ]);
-  assert.equal((workflow.match(/branches:\s*\[main\]/gu) ?? []).length, 2);
+  assert.equal((workflow.match(/branches:\s*\[main\]/gu) ?? []).length, 1);
+  assert.match(
+    workflow,
+    /pull_request:\s*\n\s*branches: \[main, feat\/system-wide-vnext-convergence\]/u,
+  );
   assert.doesNotMatch(workflow, /develop/u);
   assert.match(generator, /event === 'push' && ref === 'refs\/heads\/main'/u);
 });

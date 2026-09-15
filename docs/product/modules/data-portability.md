@@ -2,7 +2,7 @@
 tags: [product, module, data-portability]
 description: Data Portability 当前 V2 与 owner-driven V3 目标边界
 created: 2026-09-09T00:31:00+08:00
-updated: 2026-09-10T21:18:00+08:00
+updated: 2026-09-14T00:00:00+08:00
 ---
 
 # Data Portability 模块说明
@@ -33,18 +33,23 @@ PortableBackupEnvelopeV3
       -> Task capability
       -> Routine capability
       -> Knowledge capability
-      -> Preferences capability
+      -> Account account-profile@3
+      -> Setting preferences@3
+      -> Notification notification-delivery-preferences@3
       -> ...
 ```
 
 Owner module 对自己的 V3 portable schema、validation 和 apply 负责；Data Portability 对 orchestration、reference resolution、安全和版本控制负责。本轮不实现 V1/V2 legacy migrator。
 
-## 当前 V3 实施 checkpoint（2026-09-10）
+## 当前 V3 实施 checkpoint（2026-09-14）
 
-当前 API 与 Desktop 宿主已经把两个 owner capability 注册进 Data Portability 自有的 `PortableCapabilityRegistry`：
+当前 API 与 Desktop 宿主已经把三个 owner capability 注册进 Data Portability 自有的 `PortableCapabilityRegistry`：
 
+- `account-profile@3`：Account owner，仅包含用户拥有的六个资料字段：`nickname`、`realName`、`avatarUrl`、`bio`、`gender`、`birthday`；
 - `preferences@3`：Setting owner，仅包含 canonical presentation/regional preferences；
 - `notification-delivery-preferences@3`：Notification owner，仅包含稳定的 `globalChannels + workflowOverrides` 用户 delivery choice。
+
+`account-profile@3` 的边界是刻意收窄的：portable payload 不包含 host identity、Account 记录、auth 状态、lifecycle 状态、版本/时间戳或任何凭据。导入只能应用到已经存在的 host Account；它不会从 portable payload 创建 Account 或恢复身份、认证、生命周期、时间戳和凭据。
 
 Notification capability **不**导出 identity/id/version/timestamp、Desktop device presentation/sound，也暂不导出当前 `doNotDisturb/rateLimit`。后两者仍受 ADR-088 的 QuietHours / SystemDeliveryGuard 最终模型收敛约束，不能在模型未冻结前固化成 V3 协议。
 

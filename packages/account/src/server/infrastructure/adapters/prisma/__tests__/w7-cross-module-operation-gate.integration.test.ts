@@ -267,6 +267,9 @@ describe('W7 cross-module operation gate (real DB)', () => {
     });
     const account = createAccountPrismaModule(prisma, {
       clock: createSystemClock(),
+      userTimeContextPort: {
+        getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+      },
       cloudAuth: {
         revokeAllSessions: async () => ({ revokedSessions: 0 }),
         deleteUserData: async () => ({ deletedRecords: 0 }),

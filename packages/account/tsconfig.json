@@ -12,6 +12,7 @@
       "@memoflow/contracts": ["../contracts/src/index.ts"],
       "@memoflow/domain-shared/shared": ["../domain-shared/src/shared/index.ts"],
       "@memoflow/contracts/account": ["../contracts/src/modules/account/index.ts"],
+      "@memoflow/contracts/setting": ["../contracts/src/modules/setting/index.ts"],
       "@memoflow/contracts/electron": ["../contracts/src/electron/index.ts"],
       "@memoflow/contracts/primitives": ["../contracts/src/primitives/index.ts"],
       "@memoflow/contracts/result": ["../contracts/src/result/index.ts"],

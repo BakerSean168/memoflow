@@ -12,7 +12,7 @@
  */
 
 import type { PrismaClient } from '@memoflow/database';
-import type { Clock } from '@memoflow/time';
+import type { Clock, UserTimeContextPort } from '@memoflow/time';
 // Structural cloud-auth shape (boundary: scope:account must not import scope:authentication libs directly)
 export interface CloudAuthLike {
   revokeAllSessions(identityId: string): Promise<{ revokedSessions: number }>;
@@ -43,6 +43,7 @@ export interface CreateAccountPrismaModuleOptions {
   readonly eventPublisher?: AccountClosureEventPublisher;
   readonly cloudAuth?: CloudAuthLike;
   readonly clock: Clock;
+  readonly userTimeContextPort: UserTimeContextPort;
 }
 
 /**
@@ -97,6 +98,7 @@ export function createAccountPrismaRepository(db: PrismaClient) {
 export function createAccountPrismaRepositories(deps: {
   readonly db: PrismaClient;
   readonly clock: Clock;
+  readonly userTimeContextPort: UserTimeContextPort;
   readonly cloudAuth?: CloudAuthLike;
 }): AccountPrismaRepositorySet {
   return {
@@ -115,12 +117,14 @@ export function createAccountPrismaModule(
   const repositories = createAccountPrismaRepositories({
     db,
     clock: options.clock,
+    userTimeContextPort: options.userTimeContextPort,
     cloudAuth: options.cloudAuth,
   });
 
   return createAccountModule({
     accountRepository: repositories.accountRepository,
     clock: options.clock,
+    userTimeContextPort: options.userTimeContextPort,
     closureOperationRepository:
       options.closureOperationRepository ?? repositories.closureOperationRepository,
     revocationPort: options.revocationPort ?? repositories.revocationPort,

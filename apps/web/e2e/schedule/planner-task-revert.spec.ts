@@ -4,7 +4,7 @@ import { registerAndLogin } from '../helpers/testHelpers';
 
 const password = 'Test123456!';
 
-test.use({ timezoneId: 'Asia/Shanghai' });
+test.use({ timezoneId: 'UTC' });
 
 test.describe('Planner owner-command acceptance', () => {
   test('[P0][Fixture J] Task 14:00 -> 16:00 owner conflict reverts the optimistic FullCalendar drag', async ({
@@ -100,12 +100,14 @@ test.describe('Planner owner-command acceptance', () => {
     await page.mouse.up();
     await requestPromise;
 
-    await expect.poll(() => reschedulePayload, { timeout: TIMEOUT_CONFIG.ELEMENT_WAIT }).toMatchObject({
-      scheduleSnapshot: {
-        date: taskDate,
-        timing: { kind: 'At', time: '16:00' },
-      },
-    });
+    await expect
+      .poll(() => reschedulePayload, { timeout: TIMEOUT_CONFIG.ELEMENT_WAIT })
+      .toMatchObject({
+        scheduleSnapshot: {
+          date: taskDate,
+          timing: { kind: 'At', time: '16:00' },
+        },
+      });
 
     await expect
       .poll(
