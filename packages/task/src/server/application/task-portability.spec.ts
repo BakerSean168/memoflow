@@ -291,6 +291,106 @@ describe('TaskPortableCapability', () => {
     expect(references.resolveImportedReference(ref('tasks:3'))).toBe(bundle.occurrences[0].id);
   });
 
+  it('skips the Goal binding comparison when keyResultRef stays unbound during replay', async () => {
+    const references = new FakeReferences();
+    // Mixed resolution: the imported Goal is already bound while its Key Result is
+    // still unbound, which is exactly how a replay sees a partially applied Goal
+    // dependency set. The binding comparison must stay off rather than compare the
+    // current host Key Result against the portable ref proxy.
+    references.seedImport('goals:1', 'GoalId_target');
+    const payload = structuredClone(portablePayload());
+    payload.plans[0]!.goalLink = {
+      goalRef: ref('goals:1'),
+      keyResultRef: ref('goals:2'),
+      contribution: null,
+    };
+    const { capability } = makeCapability({
+      planRepository: {
+        findByIdForIdentity: vi.fn(async () => ({
+          toServerDTO: () => ({
+            id: 'ITaskPlanId_target',
+            identityId: 'IdentityId_target',
+            name: 'Portable Task',
+            description: null,
+            schedule: { kind: 'OneTime', date: '2026-09-14', timing: { kind: 'AllDay' } },
+            reminderConfig: null,
+            importance: 'Moderate',
+            status: 'Active',
+            outcome: 'Open',
+            completionPolicy: 'AllowCorrection',
+            closedAt: null,
+            archivedAt: null,
+            abandonedReason: null,
+            goalBinding: {
+              goalId: 'GoalId_target',
+              keyResultId: 'KeyResultId_target',
+              contribution: null,
+            },
+            checklist: [{ id: 'check-target', title: 'Proof', order: 0 }],
+            createdAt: 1,
+            updatedAt: 2,
+            deletedAt: null,
+            version: 3,
+          }),
+        })),
+      } as never,
+    });
+
+    await expect(capability.dryRun(payload, makeContext(references))).resolves.toEqual({
+      created: 1,
+      updated: 0,
+      skipped: 1,
+      warnings: [],
+    });
+  });
+
+  it('still reports a Goal binding conflict once every imported ref is resolved', async () => {
+    const references = new FakeReferences();
+    references.seedImport('goals:1', 'GoalId_target');
+    references.seedImport('goals:2', 'KeyResultId_other');
+    const payload = structuredClone(portablePayload());
+    payload.plans[0]!.goalLink = {
+      goalRef: ref('goals:1'),
+      keyResultRef: ref('goals:2'),
+      contribution: null,
+    };
+    const { capability } = makeCapability({
+      planRepository: {
+        findByIdForIdentity: vi.fn(async () => ({
+          toServerDTO: () => ({
+            id: 'ITaskPlanId_target',
+            identityId: 'IdentityId_target',
+            name: 'Portable Task',
+            description: null,
+            schedule: { kind: 'OneTime', date: '2026-09-14', timing: { kind: 'AllDay' } },
+            reminderConfig: null,
+            importance: 'Moderate',
+            status: 'Active',
+            outcome: 'Open',
+            completionPolicy: 'AllowCorrection',
+            closedAt: null,
+            archivedAt: null,
+            abandonedReason: null,
+            goalBinding: {
+              goalId: 'GoalId_target',
+              keyResultId: 'KeyResultId_target',
+              contribution: null,
+            },
+            checklist: [{ id: 'check-target', title: 'Proof', order: 0 }],
+            createdAt: 1,
+            updatedAt: 2,
+            deletedAt: null,
+            version: 3,
+          }),
+        })),
+      } as never,
+    });
+
+    await expect(capability.dryRun(payload, makeContext(references))).rejects.toThrow(
+      /deterministic plan target conflicts/,
+    );
+  });
+
   it('derives the same host identities for the same batch during replay', async () => {
     const firstRefs = new FakeReferences();
     firstRefs.seedImport('labels:1', 'LabelId_target');

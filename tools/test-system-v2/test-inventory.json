@@ -10135,7 +10135,27 @@
       ]
     },
     {
+      "path": "packages/task/src/server/application/services/task-canonical-restore.service.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/task/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/task/src/server/application/services/task-workspace-query.service.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/task/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/task/src/server/application/task-portability.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -11693,7 +11713,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 76
+      "fileCount": 78
     },
     {
       "id": "packages/task/vitest.mappers.config.ts",
@@ -12134,7 +12154,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 76
+      "fileCount": 78
     },
     {
       "id": "packages/time/vitest.config.ts",
@@ -12706,7 +12726,9 @@
       "packages/task/src/electron/task-electron.surface.spec.ts",
       "packages/task/src/infrastructure-client/adapters/http/task-occurrence-http.adapter.spec.ts",
       "packages/task/src/server/application/outbox/task-goal-outbox-dispatcher.test.ts",
+      "packages/task/src/server/application/services/task-canonical-restore.service.spec.ts",
       "packages/task/src/server/application/services/task-workspace-query.service.spec.ts",
+      "packages/task/src/server/application/task-portability.spec.ts",
       "packages/task/src/server/application/use-cases/commands/__tests__/abandon-task-plan.test.ts",
       "packages/task/src/server/application/use-cases/commands/__tests__/activate-task-plan.test.ts",
       "packages/task/src/server/application/use-cases/commands/__tests__/archive-task-plan.test.ts",
@@ -12777,7 +12799,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1107,
+    "unit": 1109,
     "integration": 38,
     "smoke": 3,
     "boundary-ipc": 9,

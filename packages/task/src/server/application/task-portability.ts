@@ -36,6 +36,43 @@ function requireImportedReference(
   }
 }
 
+/**
+ * Deterministic dry-run planning must not depend on whether imported dependency
+ * refs are already bound: dependency capabilities bind their refs during their own
+ * apply, so a standalone dry-run cannot require them. Resolve when the ref is bound
+ * to keep dry-run/replay parity with apply, and otherwise fall back to the stable
+ * portable ref itself so conflict comparison stays deterministic.
+ */
+function resolveDryRunReference(
+  context: PortableCapabilityExecutionContext,
+  portableRef: PortableReferenceV3,
+): string {
+  if (isImportedReferenceResolved(context, portableRef)) {
+    return context.references.resolveImportedReference(portableRef);
+  }
+  return portableRef;
+}
+
+/**
+ * True only when the reference seam can confirm the imported ref is bound.
+ * `hasImportedReference` is optional, so a seam without it is treated as unbound
+ * until resolution proves otherwise; dry-run never assumes a dependency is bound.
+ */
+function isImportedReferenceResolved(
+  context: PortableCapabilityExecutionContext,
+  portableRef: PortableReferenceV3,
+): boolean {
+  if (typeof context.references.hasImportedReference === 'function') {
+    return context.references.hasImportedReference(portableRef);
+  }
+  try {
+    context.references.resolveImportedReference(portableRef);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function deterministicPlanId(
   identityId: string,
   batchId: string,
@@ -74,15 +111,24 @@ function throwIfPlanConflict(
   if (dto.deletedAt !== null) {
     throw new Error(`tasks@3 cannot restore over deleted plan: ${String(current.id)}`);
   }
+  // Dependency refs may be unbound during a standalone dry-run; only compare the
+  // Goal binding when every imported ref the binding needs is resolvable.
+  // Enforcing the comparison while any of those refs is still unbound would fall
+  // back to the portable ref proxy and report a false conflict on replay.
   const goalBinding = incoming.goalLink
     ? {
-        goalId: context.references.resolveImportedReference(incoming.goalLink.goalRef),
+        goalId: resolveDryRunReference(context, incoming.goalLink.goalRef),
         keyResultId: incoming.goalLink.keyResultRef
-          ? context.references.resolveImportedReference(incoming.goalLink.keyResultRef)
+          ? resolveDryRunReference(context, incoming.goalLink.keyResultRef)
           : null,
         contribution: incoming.goalLink.contribution,
       }
     : null;
+  const goalBindingRefsResolved =
+    incoming.goalLink === null ||
+    (isImportedReferenceResolved(context, incoming.goalLink.goalRef) &&
+      (incoming.goalLink.keyResultRef === null ||
+        isImportedReferenceResolved(context, incoming.goalLink.keyResultRef)));
   const same =
     dto.name === incoming.title.trim() &&
     dto.description === incoming.description &&
@@ -95,7 +141,7 @@ function throwIfPlanConflict(
     dto.closedAt === incoming.closedAt &&
     (dto.archivedAt !== null) === incoming.archived &&
     dto.abandonedReason === incoming.abandonedReason &&
-    JSON.stringify(dto.goalBinding) === JSON.stringify(goalBinding) &&
+    (!goalBindingRefsResolved || JSON.stringify(dto.goalBinding) === JSON.stringify(goalBinding)) &&
     dto.checklist.length === incoming.checklist.length &&
     incoming.checklist.every((item) =>
       dto.checklist.some(
@@ -253,15 +299,6 @@ export class TaskPortableCapability implements PortableCapability<TaskPortablePa
           throw new Error(`tasks@3 duplicate checklist reference: ${definition.ref}`);
         }
       }
-      for (const labelRef of plan.labelRefs) {
-        requireImportedReference(context, labelRef, 'label');
-      }
-      if (plan.goalLink) {
-        requireImportedReference(context, plan.goalLink.goalRef, 'goal');
-        if (plan.goalLink.keyResultRef) {
-          requireImportedReference(context, plan.goalLink.keyResultRef, 'key result');
-        }
-      }
       const current = await this.planRepository.findByIdForIdentity(context.identityId, id);
       if (current) {
         throwIfPlanConflict(current, plan, context, batchId);
@@ -325,11 +362,11 @@ export class TaskPortableCapability implements PortableCapability<TaskPortablePa
           plan.goalLink === null
             ? null
             : {
-                goalId: context.references.resolveImportedReference(plan.goalLink.goalRef),
+                goalId: requireImportedReference(context, plan.goalLink.goalRef, 'goal'),
                 keyResultId:
                   plan.goalLink.keyResultRef === null
                     ? null
-                    : context.references.resolveImportedReference(plan.goalLink.keyResultRef),
+                    : requireImportedReference(context, plan.goalLink.keyResultRef, 'key result'),
                 contribution: plan.goalLink.contribution,
               },
         checklist: plan.checklist.map((definition) => ({
@@ -337,7 +374,7 @@ export class TaskPortableCapability implements PortableCapability<TaskPortablePa
           title: definition.title,
           order: definition.order,
         })),
-        labelIds: plan.labelRefs.map((ref) => context.references.resolveImportedReference(ref)),
+        labelIds: plan.labelRefs.map((ref) => requireImportedReference(context, ref, 'label')),
         createdAt: restoredAt,
         updatedAt: restoredAt,
       })),
