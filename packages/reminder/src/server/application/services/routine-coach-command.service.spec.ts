@@ -1,5 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
-import { RoutineDefinition, RoutineProfile } from '../../domain/routine';
+import {
+  createElapsedTrigger,
+  ProfileMembership,
+  RoutineDefinition,
+  RoutineProfile,
+} from '../../domain/routine';
 import { createInMemoryProtocolSessionStore } from '../../runtime/protocol';
 import type { RoutineProfileStore, RoutineTemporaryOverrideStore } from '../../domain/ports';
 import { createInMemoryRoutineRuntimeContextStore } from '../../runtime/routine-runtime-context';
@@ -8,11 +13,17 @@ import { createRoutineCoachCommandService } from './routine-coach-command.servic
 function profileStore(): RoutineProfileStore {
   const definitions = new Map<string, RoutineDefinition>();
   const profiles = new Map<string, RoutineProfile>();
+  const membershipRows = new Map<string, ProfileMembership>();
   return {
     upsertDefinition: vi.fn(async (value) => {
       definitions.set(value.id, value);
     }),
-    createDefinitionWithMemberships: vi.fn(async () => {}),
+    createDefinitionWithMemberships: vi.fn(async ({ definition, memberships: nextMemberships }) => {
+      definitions.set(definition.id, definition);
+      for (const membership of nextMemberships) {
+        membershipRows.set(`${membership.identityId}:${membership.profileId}:${membership.routineId}`, membership);
+      }
+    }),
     findDefinition: vi.fn(async ({ routineId }) => definitions.get(routineId) ?? null),
     deleteDefinition: vi.fn(async ({ routineId }) => {
       definitions.delete(routineId);
@@ -28,11 +39,27 @@ function profileStore(): RoutineProfileStore {
     deleteProfile: vi.fn(async ({ profileId }) => {
       profiles.delete(profileId);
     }),
-    upsertMembership: vi.fn(),
-    listMembershipsForRoutine: vi.fn(async () => []),
-    listMembershipsForRoutines: vi.fn(async () => []),
-    listMembershipsForProfile: vi.fn(async () => []),
-    deleteMembership: vi.fn(),
+    upsertMembership: vi.fn(async (value) => {
+      membershipRows.set(`${value.identityId}:${value.profileId}:${value.routineId}`, value);
+    }),
+    listMembershipsForRoutine: vi.fn(async ({ identityId, routineId }) =>
+      [...membershipRows.values()].filter(
+        (membership) => membership.identityId === identityId && membership.routineId === routineId,
+      ),
+    ),
+    listMembershipsForRoutines: vi.fn(async ({ identityId, routineIds }) =>
+      [...membershipRows.values()].filter(
+        (membership) => membership.identityId === identityId && routineIds.includes(membership.routineId),
+      ),
+    ),
+    listMembershipsForProfile: vi.fn(async ({ identityId, profileId }) =>
+      [...membershipRows.values()].filter(
+        (membership) => membership.identityId === identityId && membership.profileId === profileId,
+      ),
+    ),
+    deleteMembership: vi.fn(async ({ identityId, profileId, routineId }) => {
+      membershipRows.delete(`${identityId}:${profileId}:${routineId}`);
+    }),
     replaceRoutineMemberships: vi.fn(),
   };
 }
@@ -51,6 +78,87 @@ function overrideStore(): RoutineTemporaryOverrideStore & { current: Map<string,
 }
 
 describe('RoutineCoachCommandService', () => {
+  it('creates a canonical RoutineDefinition and memberships atomically', async () => {
+    const profiles = profileStore();
+    const now = 1_000;
+    await profiles.upsertProfile(RoutineProfile.create({ id: 'work', identityId: 'i-1', name: 'Work' }));
+    await profiles.upsertProfile(RoutineProfile.create({ id: 'study', identityId: 'i-1', name: 'Study' }));
+    const service = createRoutineCoachCommandService({
+      routineProfileStore: profiles,
+      runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
+      temporaryOverrideStore: overrideStore(),
+      protocolSessionStore: createInMemoryProtocolSessionStore(),
+    });
+
+    const receipt = await service.createRoutine({
+      identityId: 'i-1',
+      name: 'Move',
+      trigger: createElapsedTrigger({ durationMs: 50 * 60_000 }),
+      profileIds: ['work', 'study'],
+      at: now,
+    });
+
+    expect(receipt).toMatchObject({ identityId: 'i-1', name: 'Move', version: 1 });
+    expect(await profiles.findDefinition({ identityId: 'i-1', routineId: receipt.routineId })).toMatchObject({
+      id: receipt.routineId,
+      trigger: expect.objectContaining({ type: 'Elapsed', durationMs: 50 * 60_000 }),
+    });
+    expect(
+      (await profiles.listMembershipsForRoutine({ identityId: 'i-1', routineId: receipt.routineId }))
+        .map((membership) => membership.profileId)
+        .sort(),
+    ).toEqual(['study', 'work']);
+  });
+
+  it('rejects duplicate and missing profiles before durable mutation', async () => {
+    const profiles = profileStore();
+    await profiles.upsertProfile(RoutineProfile.create({ id: 'work', identityId: 'i-1', name: 'Work' }));
+    const service = createRoutineCoachCommandService({
+      routineProfileStore: profiles,
+      runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
+      temporaryOverrideStore: overrideStore(),
+      protocolSessionStore: createInMemoryProtocolSessionStore(),
+    });
+
+    await expect(
+      service.createRoutine({ identityId: 'i-1', name: 'Move', profileIds: ['work', 'work'] }),
+    ).rejects.toThrow(/Duplicate Routine profile membership/);
+    await expect(
+      service.createRoutine({ identityId: 'i-1', name: 'Move', profileIds: ['missing'] }),
+    ).rejects.toThrow(/profiles were not found/);
+    expect(profiles.createDefinitionWithMemberships).not.toHaveBeenCalled();
+  });
+
+  it('rejects a profile belonging to another identity before durable mutation', async () => {
+    const profiles = profileStore();
+    await profiles.upsertProfile(RoutineProfile.create({ id: 'foreign', identityId: 'i-2', name: 'Foreign' }));
+    const service = createRoutineCoachCommandService({
+      routineProfileStore: profiles,
+      runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
+      temporaryOverrideStore: overrideStore(),
+      protocolSessionStore: createInMemoryProtocolSessionStore(),
+    });
+
+    await expect(
+      service.createRoutine({ identityId: 'i-1', name: 'Move', profileIds: ['foreign'] }),
+    ).rejects.toThrow(/profiles were not found/);
+    expect(profiles.createDefinitionWithMemberships).not.toHaveBeenCalled();
+  });
+
+  it('supports a Routine with no profile memberships', async () => {
+    const profiles = profileStore();
+    const service = createRoutineCoachCommandService({
+      routineProfileStore: profiles,
+      runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
+      temporaryOverrideStore: overrideStore(),
+      protocolSessionStore: createInMemoryProtocolSessionStore(),
+    });
+
+    const receipt = await service.createRoutine({ identityId: 'i-1', name: 'Move' });
+    expect(receipt.name).toBe('Move');
+    expect(await profiles.listMembershipsForRoutine({ identityId: 'i-1', routineId: receipt.routineId })).toEqual([]);
+  });
+
   it('activates a profile without mutating memberships', async () => {
     const profiles = profileStore();
     const profile = RoutineProfile.create({ id: 'work', identityId: 'i-1', name: 'Work' });
