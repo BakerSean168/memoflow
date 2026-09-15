@@ -5198,6 +5198,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/goal/portable-v3.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/goal/protocol/goal-rpc-map.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11986,7 +11994,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 88
+      "fileCount": 89
     },
     {
       "id": "packages/dashboard/vitest.config.ts",
@@ -12769,7 +12777,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1106,
+    "unit": 1107,
     "integration": 38,
     "smoke": 3,
     "boundary-ipc": 9,
