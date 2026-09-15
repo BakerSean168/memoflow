@@ -82,7 +82,11 @@ import { composeTaskWorkspaceApiModule } from './modules/task/task-workspace.mod
 import { composePowerSyncApiModule } from './modules/powersync/module.js';
 import { composeDashboardApiModule } from './modules/dashboard/module.js';
 import { composeLabelApiModule } from './modules/label/module.js';
-import { LabelService, PrismaLabelRepository } from '@memoflow/label';
+import {
+  LabelService,
+  PrismaLabelRepository,
+  createLabelPortableCapability,
+} from '@memoflow/label';
 import {
   GoalKnowledgeService,
   TaskKnowledgeService,
@@ -231,15 +235,9 @@ async function bootstrap(): Promise<void> {
     githubApp: getGithubAppConfig() ?? undefined,
     knowledgeRepositoryCloudDataPurger: new RepositoryKnowledgeCloudDataPurgerAdapter(prisma),
   });
-  const dataPortabilityApiModule = composeDataPortability({
-    db: prisma,
-    portableCapabilities: [
-      accountApiModule.portableCapability,
-      settingApiModule.portableCapability,
-      notificationApiModule.module.portableCapability,
-    ],
+  const labelService = new LabelService(new PrismaLabelRepository(prisma), {
+    clock: createSystemClock(),
   });
-
   // CLEAN-6304: Calendar and Temporal Engine own separate repository sets.
   // Orchestration shares the ONE Scheduler task repository; Calendar receives
   // the Scheduler lease coordinator only through the shared lease port.
@@ -311,6 +309,17 @@ async function bootstrap(): Promise<void> {
     userTimeContextPort: settingApiModule.userTimeContextPort,
     relationCleanupFactory: (tx) => new PrismaGoalRelationCleanupCapability(tx),
   });
+
+  const dataPortabilityApiModule = composeDataPortability({
+    db: prisma,
+    portableCapabilities: [
+      accountApiModule.portableCapability,
+      settingApiModule.portableCapability,
+      notificationApiModule.module.portableCapability,
+      createLabelPortableCapability(labelService),
+      goalComposed.portableCapability,
+    ],
+  });
   const goalWorkspaceService = new GoalWorkspaceQueryService({
     goalRepository: goalComposed.repositories.goalRepository,
     goalRecordRepository: goalComposed.repositories.goalRecordRepository,
@@ -321,9 +330,6 @@ async function bootstrap(): Promise<void> {
   if (!env.DATABASE_URL) {
     throw new Error('AI Mastra runtime requires DATABASE_URL after environment normalization');
   }
-  const labelService = new LabelService(new PrismaLabelRepository(prisma), {
-    clock: createSystemClock(),
-  });
   const aiApiModule = composeAI({
     db: prisma,
     repositoryApiPort: repositoryApiModule.getApplicationPort(),

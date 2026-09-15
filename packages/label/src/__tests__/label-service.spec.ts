@@ -13,6 +13,7 @@ function repositoryMock(): LabelRepository {
     findById: vi.fn(),
     findByNormalizedNames: vi.fn(async () => []),
     list: vi.fn(async () => []),
+    listAll: vi.fn(async () => []),
   };
 }
 
@@ -37,6 +38,10 @@ describe('shared label semantics', () => {
   it('rejects empty or oversized names', () => {
     expect(() => validateLabelName('   ')).toThrow('must not be empty');
     expect(() => validateLabelName('x'.repeat(51))).toThrow('at most 50');
+  });
+
+  it('trims whitespace introduced by NFKC normalization', () => {
+    expect(validateLabelName('\u00a8')).toEqual({ name: '\u0308', normalizedName: '\u0308' });
   });
 
   it('rejects non-canonical color input even for internal service callers', async () => {

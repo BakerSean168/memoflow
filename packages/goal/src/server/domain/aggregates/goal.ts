@@ -573,6 +573,7 @@ export class Goal extends AggregateRoot<GoalId> {
     aggregationMethod?: KeyResultServerDTO['progress']['aggregationMethod'];
     initialValue?: number;
     currentValue?: number;
+    trackingBaseValue?: number;
     targetValue: number;
     target?: GoalTimeframe | null;
     unit?: string | null;
@@ -591,7 +592,7 @@ export class Goal extends AggregateRoot<GoalId> {
         initialValue,
         currentValue,
         targetValue: params.targetValue,
-        trackingBaseValue: currentValue,
+        trackingBaseValue: params.trackingBaseValue ?? currentValue,
         aggregationMethod: params.aggregationMethod ?? 'Sum',
         unit: params.unit?.trim() || null,
       },

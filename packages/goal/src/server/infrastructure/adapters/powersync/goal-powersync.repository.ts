@@ -148,6 +148,8 @@ export class GoalPowerSyncRepository
         filters.push('g.archived_at IS NOT NULL');
         break;
       case 'all':
+        filters.splice(filters.indexOf('g.archived_at IS NULL'), 1);
+        break;
       case undefined:
         break;
     }

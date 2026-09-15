@@ -26,6 +26,8 @@ describe('data-portability API runtime composer surface', () => {
     expect(server).toContain('accountApiModule.portableCapability');
     expect(server).toContain('settingApiModule.portableCapability');
     expect(server).toContain('notificationApiModule.module.portableCapability');
+    expect(server).toContain('createLabelPortableCapability(labelService)');
+    expect(server).toContain('goalComposed.portableCapability');
     expect(server).toContain('.register(dataPortabilityApiModule.module)');
   });
 

@@ -4,16 +4,16 @@ import type { Instant } from '@memoflow/contracts/primitives';
 const MAX_LABEL_NAME_LENGTH = 50;
 
 export function normalizeLabelName(name: string): string {
-  return name.trim().normalize('NFKC').toLowerCase();
+  return name.normalize('NFKC').trim().toLowerCase();
 }
 
 export function validateLabelName(name: string): { name: string; normalizedName: string } {
-  const trimmed = name.trim().normalize('NFKC');
-  if (!trimmed) throw new TypeError('Label name must not be empty.');
-  if (trimmed.length > MAX_LABEL_NAME_LENGTH) {
+  const normalized = name.normalize('NFKC').trim();
+  if (!normalized) throw new TypeError('Label name must not be empty.');
+  if (normalized.length > MAX_LABEL_NAME_LENGTH) {
     throw new TypeError(`Label name must be at most ${MAX_LABEL_NAME_LENGTH} characters.`);
   }
-  return { name: trimmed, normalizedName: normalizeLabelName(trimmed) };
+  return { name: normalized, normalizedName: normalizeLabelName(normalized) };
 }
 
 export function normalizeLabelColor(color: string | null | undefined): LabelColor | null {
