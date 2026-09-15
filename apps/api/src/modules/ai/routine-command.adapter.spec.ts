@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { RoutineAICommandAdapter } from './routine-command.adapter';
 
@@ -12,36 +11,31 @@ const context: ExecutionContext = {
 };
 
 describe('RoutineAICommandAdapter', () => {
-  it('maps a WallClock method preset into the existing Reminder application mutation', async () => {
-    const createTemplate = vi.fn(async () => ok({ id: 'ReminderTemplateId_1', name: '20-20-20' } as never));
-    const adapter = new RoutineAICommandAdapter({ createTemplate } as never, {} as never);
+  it('maps a method preset into canonical Routine creation and preserves the receipt', async () => {
+      const createRoutine = vi.fn(async () => ({ routineId: 'r-1', identityId: 'identity-1', name: 'Eye break', version: 1 }));
+      const adapter = new RoutineAICommandAdapter({ createRoutine } as never);
 
-    await expect(adapter.createRoutine({
-      context,
-      title: 'Eye break',
-      methodId: '20-20-20',
-      profileIds: ['work'],
-    })).resolves.toMatchObject({ kind: 'routine', status: 'created' });
-
-    expect(createTemplate).toHaveBeenCalledWith(
-      expect.objectContaining({
+      await expect(adapter.createRoutine({
+        context,
         title: 'Eye break',
-        type: 'Recurring',
-        trigger: expect.objectContaining({
-          type: 'Interval',
-          interval: { minutes: 20, startTime: null },
-        }),
+        methodId: '20-20-20',
         profileIds: ['work'],
-      }),
-      context,
-    );
-  });
+      })).resolves.toEqual({ kind: 'routine', id: 'r-1', status: 'created', details: { title: 'Eye break' } });
 
-  it('rejects Protocol presets on the ReminderTemplate creation path', async () => {
-    const adapter = new RoutineAICommandAdapter({} as never, {} as never);
-    await expect(adapter.createRoutine({ context, title: 'Focus', methodId: 'pomodoro' }))
-      .rejects.toThrow(/routine_start_protocol/);
-  });
+      expect(createRoutine).toHaveBeenCalledWith(expect.objectContaining({
+        identityId: 'identity-1',
+        name: 'Eye break',
+        profileIds: ['work'],
+        at: context.startedAt,
+        trigger: expect.objectContaining({ type: 'Elapsed', durationMs: 20 * 60_000 }),
+      }));
+    });
+
+    it('rejects Protocol presets on the Routine creation path', async () => {
+      const adapter = new RoutineAICommandAdapter({} as never);
+      await expect(adapter.createRoutine({ context, title: 'Focus', methodId: 'pomodoro' }))
+        .rejects.toThrow(/routine_start_protocol/);
+    });
 
   it('delegates profile, override, and protocol state to the Routine owner port', async () => {
     const routine = {
@@ -51,7 +45,7 @@ describe('RoutineAICommandAdapter', () => {
       startPresetProtocol: vi.fn(async () => ({ sessionId: 's-1', protocolId: 'p-1', state: 'Running', phaseKey: 'focus' })),
       transitionProtocol: vi.fn(async () => ({ sessionId: 's-1', state: 'Paused', phaseKey: 'focus' })),
     };
-    const adapter = new RoutineAICommandAdapter({} as never, routine as never);
+    const adapter = new RoutineAICommandAdapter(routine as never);
 
     await adapter.setProfileActive({ context, profileId: 'work', active: true });
     await adapter.setTemporaryOverride({ context, routineId: 'r-1', expiresAt: 2_000, reason: 'focus' });

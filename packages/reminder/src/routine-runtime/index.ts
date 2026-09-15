@@ -85,6 +85,7 @@ export {
   createRoutineCoachCommandService,
   type CreateRoutineCoachCommandServiceOptions,
   type RoutineCoachCommandPort,
+  type RoutineDefinitionReceipt,
   type RoutineRuntimeContextReceipt,
   type RoutineProtocolMethodId,
   type RoutineProtocolSessionReceipt,

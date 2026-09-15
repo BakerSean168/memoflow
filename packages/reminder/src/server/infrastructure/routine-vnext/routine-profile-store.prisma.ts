@@ -27,6 +27,48 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
     });
   }
 
+  async createDefinitionWithMemberships(input: {
+    readonly definition: RoutineDefinition;
+    readonly memberships: readonly ProfileMembership[];
+  }): Promise<void> {
+    assertDefinitionCreation(input);
+    const definitionData = routineDefinitionToPrisma(input.definition.snapshot());
+    const membershipData = input.memberships.map((membership) =>
+      profileMembershipToPrisma(membership.snapshot()),
+    );
+    await this.prisma.$transaction(async (tx) => {
+      const existingDefinition = await tx.routineDefinition.findUnique({
+        where: { id: definitionData.id },
+      });
+      if (existingDefinition) {
+        throw new TypeError(
+          existingDefinition.identityId === definitionData.identityId
+            ? `Routine '${definitionData.id}' already exists`
+            : `Routine '${definitionData.id}' belongs to another identity`,
+        );
+      }
+      if (membershipData.length > 0) {
+        const profiles = await tx.routineProfile.findMany({
+          where: { id: { in: membershipData.map((membership) => membership.profileId) } },
+        });
+        const profilesById = new Map(profiles.map((profile) => [profile.id, profile.identityId]));
+        for (const membership of membershipData) {
+          const profileIdentity = profilesById.get(membership.profileId);
+          if (!profileIdentity) {
+            throw new TypeError(`Routine profile '${membership.profileId}' was not found`);
+          }
+          if (profileIdentity !== definitionData.identityId) {
+            throw new TypeError('Routine creation profile ownership mismatch');
+          }
+        }
+      }
+      await tx.routineDefinition.create({ data: definitionData });
+      for (const data of membershipData) {
+        await tx.routineProfileMembership.create({ data });
+      }
+    });
+  }
+
   async findDefinition(input: {
     readonly identityId: string;
     readonly routineId: string;
@@ -243,6 +285,21 @@ function mapMembership(row: {
   updatedAt: Date;
 }): ProfileMembership {
   return ProfileMembership.load({ ...row });
+}
+
+function assertDefinitionCreation(input: {
+  readonly definition: RoutineDefinition;
+  readonly memberships: readonly ProfileMembership[];
+}): void {
+  const definition = input.definition;
+  if (!definition.identityId.trim() || !definition.id.trim()) {
+    throw new TypeError('Routine definition ownership is invalid');
+  }
+  assertMembershipSet({
+    identityId: definition.identityId,
+    routineId: definition.id,
+    memberships: input.memberships,
+  });
 }
 
 function assertMembershipSet(input: {

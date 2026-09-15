@@ -3,7 +3,6 @@ import type { PrismaClient } from '@memoflow/database';
 import type { RepositoryApplicationPort } from '@memoflow/repository';
 import type { GoalApplicationPort } from '@memoflow/goal';
 import type { TaskApplicationPort } from '@memoflow/task';
-import type { ReminderApplicationPort } from '@memoflow/reminder/server';
 
 vi.mock('@memoflow/ai', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@memoflow/ai')>();
@@ -117,7 +116,6 @@ const fakeDb = { tag: 'fake-db' } as unknown as PrismaClient;
 const repositoryApiPort = { tag: 'repository-port' } as unknown as RepositoryApplicationPort;
 const goalApplicationPort = { tag: 'goal-port' } as unknown as GoalApplicationPort;
 const taskApplicationPort = { tag: 'task-port' } as unknown as TaskApplicationPort;
-const reminderApplicationPort = { tag: 'reminder-port' } as unknown as ReminderApplicationPort;
 const routineCommandPort = { tag: 'routine-command-port' } as never;
 const scheduleRepository = { tag: 'schedule-repository' } as never;
 const notificationRepository = { tag: 'notification-repository' } as never;
@@ -136,7 +134,6 @@ const dependencies = {
   repositoryStorageBaseDir,
   goalApplicationPort,
   taskApplicationPort,
-  reminderApplicationPort,
   routineCommandPort,
   scheduleRepository,
   notificationRepository,
@@ -191,10 +188,7 @@ describe('API composeAI Mastra-only ownership', () => {
       goalKnowledgeService,
     );
     expect(TaskPlanMutationAdapter).toHaveBeenCalledWith(taskApplicationPort, labelService);
-    expect(RoutineAICommandAdapter).toHaveBeenCalledWith(
-      reminderApplicationPort,
-      routineCommandPort,
-    );
+    expect(RoutineAICommandAdapter).toHaveBeenCalledWith(routineCommandPort);
     expect(PlannerAIReadAdapter).toHaveBeenCalledWith(scheduleRepository, taskApplicationPort);
     expect(NotificationAIReadAdapter).toHaveBeenCalledWith(notificationRepository);
 

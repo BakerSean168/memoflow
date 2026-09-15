@@ -9,6 +9,10 @@ import type { ProfileMembership, RoutineDefinition, RoutineProfile } from '../ro
  */
 export interface RoutineProfileStore {
   upsertDefinition(definition: RoutineDefinition): Promise<void>;
+  createDefinitionWithMemberships(input: {
+    readonly definition: RoutineDefinition;
+    readonly memberships: readonly ProfileMembership[];
+  }): Promise<void>;
   findDefinition(input: {
     readonly identityId: string;
     readonly routineId: string;

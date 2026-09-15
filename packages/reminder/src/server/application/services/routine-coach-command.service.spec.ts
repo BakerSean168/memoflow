@@ -9,14 +9,25 @@ function profileStore(): RoutineProfileStore {
   const definitions = new Map<string, RoutineDefinition>();
   const profiles = new Map<string, RoutineProfile>();
   return {
-    upsertDefinition: vi.fn(async (value) => { definitions.set(value.id, value); }),
+    upsertDefinition: vi.fn(async (value) => {
+      definitions.set(value.id, value);
+    }),
+    createDefinitionWithMemberships: vi.fn(async () => {}),
     findDefinition: vi.fn(async ({ routineId }) => definitions.get(routineId) ?? null),
-    deleteDefinition: vi.fn(async ({ routineId }) => { definitions.delete(routineId); }),
-    upsertProfile: vi.fn(async (value) => { profiles.set(value.id, value); }),
+    deleteDefinition: vi.fn(async ({ routineId }) => {
+      definitions.delete(routineId);
+    }),
+    upsertProfile: vi.fn(async (value) => {
+      profiles.set(value.id, value);
+    }),
     findProfile: vi.fn(async ({ profileId }) => profiles.get(profileId) ?? null),
     listProfiles: vi.fn(async () => [...profiles.values()]),
-    findProfilesByIds: vi.fn(async ({ profileIds }) => profileIds.flatMap((id) => profiles.get(id) ?? [])),
-    deleteProfile: vi.fn(async ({ profileId }) => { profiles.delete(profileId); }),
+    findProfilesByIds: vi.fn(async ({ profileIds }) =>
+      profileIds.flatMap((id) => profiles.get(id) ?? []),
+    ),
+    deleteProfile: vi.fn(async ({ profileId }) => {
+      profiles.delete(profileId);
+    }),
     upsertMembership: vi.fn(),
     listMembershipsForRoutine: vi.fn(async () => []),
     listMembershipsForRoutines: vi.fn(async () => []),
@@ -52,20 +63,24 @@ describe('RoutineCoachCommandService', () => {
       now: () => 1_000,
     });
 
-    await expect(service.setProfileActive({ identityId: 'i-1', profileId: 'work', active: true }))
-      .resolves.toMatchObject({ profileId: 'work', active: true, version: 1 });
+    await expect(
+      service.setProfileActive({ identityId: 'i-1', profileId: 'work', active: true }),
+    ).resolves.toMatchObject({ profileId: 'work', active: true, version: 1 });
     expect(profile.enabled).toBe(true);
     expect(profile.version).toBe(1);
     expect(profiles.upsertProfile).toHaveBeenCalledTimes(1);
     expect(
-      (await service.setProfileActive({ identityId: 'i-1', profileId: 'work', active: false })).version,
+      (await service.setProfileActive({ identityId: 'i-1', profileId: 'work', active: false }))
+        .version,
     ).toBe(2);
     expect(profiles.replaceRoutineMemberships).not.toHaveBeenCalled();
   });
 
   it('persists an AI temporary override and emits only the owner-domain change callback', async () => {
     const profiles = profileStore();
-    await profiles.upsertDefinition(RoutineDefinition.create({ id: 'r-1', identityId: 'i-1', name: 'Move' }));
+    await profiles.upsertDefinition(
+      RoutineDefinition.create({ id: 'r-1', identityId: 'i-1', name: 'Move' }),
+    );
     const overrides = overrideStore();
     const changed = vi.fn();
     const service = createRoutineCoachCommandService({
@@ -101,7 +116,9 @@ describe('RoutineCoachCommandService', () => {
     expect(started).toMatchObject({ identityId: 'i-1', state: 'Running' });
     const persisted = await sessions.findById({ identityId: 'i-1', sessionId: started.sessionId });
     expect(persisted?.snapshot().protocolSnapshot.cyclePolicy.cycles).toBe(4);
-    expect(persisted?.snapshot().protocolSnapshot.breakPolicy.longBreakDurationMs).toBe(15 * 60_000);
+    expect(persisted?.snapshot().protocolSnapshot.breakPolicy.longBreakDurationMs).toBe(
+      15 * 60_000,
+    );
   });
 
   it('pauses, resumes and ends an existing protocol session through one fenced runtime', async () => {
@@ -113,12 +130,33 @@ describe('RoutineCoachCommandService', () => {
       protocolSessionStore: sessions,
       now: () => 1_000,
     });
-    const started = await service.startPresetProtocol({ identityId: 'i-1', methodId: '50-10-protocol' });
-    await expect(service.transitionProtocol({ identityId: 'i-1', sessionId: started.sessionId, action: 'pause', at: 2_000 }))
-      .resolves.toMatchObject({ state: 'Paused' });
-    await expect(service.transitionProtocol({ identityId: 'i-1', sessionId: started.sessionId, action: 'resume', at: 3_000 }))
-      .resolves.toMatchObject({ state: 'Running' });
-    await expect(service.transitionProtocol({ identityId: 'i-1', sessionId: started.sessionId, action: 'end', at: 4_000 }))
-      .resolves.toMatchObject({ state: 'Completed' });
+    const started = await service.startPresetProtocol({
+      identityId: 'i-1',
+      methodId: '50-10-protocol',
+    });
+    await expect(
+      service.transitionProtocol({
+        identityId: 'i-1',
+        sessionId: started.sessionId,
+        action: 'pause',
+        at: 2_000,
+      }),
+    ).resolves.toMatchObject({ state: 'Paused' });
+    await expect(
+      service.transitionProtocol({
+        identityId: 'i-1',
+        sessionId: started.sessionId,
+        action: 'resume',
+        at: 3_000,
+      }),
+    ).resolves.toMatchObject({ state: 'Running' });
+    await expect(
+      service.transitionProtocol({
+        identityId: 'i-1',
+        sessionId: started.sessionId,
+        action: 'end',
+        at: 4_000,
+      }),
+    ).resolves.toMatchObject({ state: 'Completed' });
   });
 });

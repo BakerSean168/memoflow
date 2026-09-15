@@ -31,6 +31,7 @@ function createTemplate(identityId: IdentityId) {
 function createStore(overrides: Partial<RoutineProfileStore> = {}): RoutineProfileStore {
   return {
     upsertDefinition: vi.fn(async () => {}),
+    createDefinitionWithMemberships: vi.fn(async () => {}),
     findDefinition: vi.fn(async () => null),
     deleteDefinition: vi.fn(async () => {}),
     upsertProfile: vi.fn(async () => {}),

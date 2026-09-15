@@ -326,7 +326,6 @@ async function bootstrap(): Promise<void> {
     repositoryStorageBaseDir,
     goalApplicationPort: goalComposed.applicationPort,
     taskApplicationPort: taskComposed.applicationPort,
-    reminderApplicationPort: reminderComposed.executorReminderPort,
     goalKnowledgeService,
     knowledgeDocumentRefResolver: repositoryApiModule.knowledgeDocumentRefResolver,
     routineCommandPort: reminderComposed.routineCommandPort,

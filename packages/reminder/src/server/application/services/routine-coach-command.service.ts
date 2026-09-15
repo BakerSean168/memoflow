@@ -1,5 +1,6 @@
 import type { Instant } from '@memoflow/time';
 import { findRoutineMethod, type RoutineMethodId } from '../../../method-library';
+import { ProfileMembership, RoutineDefinition, type RoutineTrigger } from '../../domain/routine';
 import {
   ProtocolDefinition,
   ProtocolSession,
@@ -19,6 +20,13 @@ import {
 } from '../../runtime/protocol';
 
 export type RoutineProtocolMethodId = Extract<RoutineMethodId, '50-10-protocol' | 'pomodoro'>;
+
+export interface RoutineDefinitionReceipt {
+  readonly routineId: string;
+  readonly identityId: string;
+  readonly name: string;
+  readonly version: number;
+}
 
 export interface RoutineRuntimeContextReceipt {
   readonly profileId: string;
@@ -43,6 +51,15 @@ export interface RoutineProtocolSessionReceipt {
 }
 
 export interface RoutineCoachCommandPort {
+  createRoutine(input: {
+    readonly identityId: string;
+    readonly name: string;
+    readonly description?: string | null;
+    readonly trigger?: RoutineTrigger | null;
+    readonly profileIds?: readonly string[];
+    readonly at?: number;
+  }): Promise<RoutineDefinitionReceipt>;
+
   setProfileActive(input: {
     readonly identityId: string;
     readonly profileId: string;
@@ -144,6 +161,47 @@ export function createRoutineCoachCommandService(
   };
 
   return {
+    async createRoutine(input) {
+      const at = input.at ?? now();
+      const profileIds = [...(input.profileIds ?? [])];
+      const uniqueProfileIds = new Set(profileIds);
+      if (uniqueProfileIds.size !== profileIds.length) {
+        throw new TypeError('Duplicate Routine profile membership');
+      }
+      const profiles = await options.routineProfileStore.findProfilesByIds({
+        identityId: input.identityId,
+        profileIds,
+      });
+      if (profiles.length !== profileIds.length) {
+        throw new Error('One or more Routine profiles were not found');
+      }
+      const routine = RoutineDefinition.create({
+        identityId: input.identityId,
+        name: input.name,
+        description: input.description,
+        trigger: input.trigger ?? null,
+        now: new Date(at),
+      });
+      const memberships = profileIds.map((profileId) =>
+        ProfileMembership.create({
+          identityId: input.identityId,
+          profileId,
+          routineId: routine.id,
+          now: new Date(at),
+        }),
+      );
+      await options.routineProfileStore.createDefinitionWithMemberships({
+        definition: routine,
+        memberships,
+      });
+      return {
+        routineId: routine.id,
+        identityId: routine.identityId,
+        name: routine.name,
+        version: routine.version,
+      };
+    },
+
     async setProfileActive(input) {
       const profile = await options.routineProfileStore.findProfile({
         identityId: input.identityId,
