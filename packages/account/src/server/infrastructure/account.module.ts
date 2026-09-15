@@ -5,10 +5,13 @@ import {
   UpdateAccountProfileUseCase,
   CloseAccountUseCase,
   AccountClosureCoordinator,
+  createAccountProfilePortableCapability,
+  type AccountProfilePortableCapability,
   type CloudAuthRevocationPort,
   type AccountClosureEventPublisher,
 } from '../application';
 import type { Clock } from '@memoflow/time';
+import type { UserTimeContextPort } from '@memoflow/time';
 import type { AccountApplicationPort } from '../application';
 import type { OperationAuditRepository } from '@memoflow/patterns/operations';
 import {
@@ -31,6 +34,7 @@ export interface AccountModuleDependencies {
   readonly eventPublisher?: AccountClosureEventPublisher;
   readonly coordinator?: AccountClosureCoordinator;
   readonly clock: Clock;
+  readonly userTimeContextPort: UserTimeContextPort;
   readonly laneCapability?: 'api' | 'desktop';
   readonly runtimeContributions?:
     AccountModuleRuntimeContribution | readonly AccountModuleRuntimeContribution[];
@@ -54,6 +58,7 @@ export interface AccountModuleUseCases {
 
 export interface AccountModuleInstance {
   readonly accountRepository: IAccountRepository;
+  readonly portableCapability: AccountProfilePortableCapability;
   readonly useCases: AccountModuleUseCases;
   readonly api: AccountApplicationPort;
   start(): void;
@@ -135,12 +140,18 @@ export function createAccountModule(
   const { accountRepository } = dependencies;
   const runtimeContributions = normalizeRuntimeContributions(dependencies.runtimeContributions);
   const useCases = createAccountUseCases(dependencies);
+  const portableCapability = createAccountProfilePortableCapability(
+    accountRepository,
+    dependencies.clock,
+    dependencies.userTimeContextPort,
+  );
   const auditRepository = dependencies.auditRepository;
 
   let started = false;
 
   return {
     accountRepository,
+    portableCapability,
     useCases,
     api: {
       listAccounts: (options) => useCases.listAccounts.execute(options),

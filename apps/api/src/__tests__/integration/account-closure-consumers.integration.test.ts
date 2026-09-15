@@ -8,7 +8,7 @@ import { NotificationAccountClosedConsumer } from '@memoflow/notification/server
 import { RepositoryAccountClosedConsumer } from '@memoflow/repository/server';
 import { AccountClosedWorker } from '@memoflow/account/server';
 import { cleanAll, disconnectPrisma } from '@memoflow/test-utils/setup/integration-helpers';
-import { asInstant, createSystemClock } from '@memoflow/time';
+import { asInstant, createSystemClock, createTimeContext } from '@memoflow/time';
 
 /**
  * W3 real-path integration: closure saga -> account-closed outbox ->
@@ -44,6 +44,9 @@ describe('API host account-closed consumer chain', () => {
     });
     const module = createAccountPrismaModule(prisma, {
       clock: createSystemClock(),
+      userTimeContextPort: {
+        getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+      },
       revocationPort: { revokeAll: async () => ({ revokedSessions: 1 }) },
     });
     await module.accountRepository.save(account);

@@ -398,6 +398,7 @@ async function registerBusinessModules(
   const accountComposed = composeAccount({
     db,
     clock: createSystemClock(),
+    userTimeContextPort: settingElectronModule.userTimeContextPort,
     syncOptions: {
       getCloudAccountId: () =>
         mainRuntime?.profileRuntimeManager.getActiveProfileDescriptorSync()?.cloudBinding
@@ -522,6 +523,7 @@ async function registerBusinessModules(
   const dataPortabilityElectronModule = composeDataPortability({
     db,
     portableCapabilities: [
+      accountComposed.portableCapability,
       settingElectronModule.portableCapability,
       notificationComposed.module.portableCapability,
       createLabelPortableCapability(labelService),

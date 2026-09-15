@@ -14,7 +14,7 @@
  *
  * const app = await new ApiBootstrapper(db)
  *   .register(governanceApiModule)
- *   .register(accountApiModule)
+ *   .register(accountApiModule.module)
  *   .init();
  *
  * app.listen(3000);

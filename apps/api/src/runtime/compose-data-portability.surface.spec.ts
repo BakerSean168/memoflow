@@ -23,6 +23,7 @@ describe('data-portability API runtime composer surface', () => {
   it('server.ts composes data-portability with the stable owner V3 capabilities', () => {
     expect(server).toContain("from './runtime/compose-data-portability'");
     expect(server).toMatch(/composeDataPortability\(\{[\s\S]*?db: prisma,/);
+    expect(server).toContain('accountApiModule.portableCapability');
     expect(server).toContain('settingApiModule.portableCapability');
     expect(server).toContain('notificationApiModule.module.portableCapability');
     expect(server).toContain('createLabelPortableCapability(labelService)');

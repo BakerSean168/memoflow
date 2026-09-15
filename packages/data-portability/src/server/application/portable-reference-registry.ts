@@ -60,6 +60,11 @@ export class PortableReferenceRegistry implements PortableReferencePort {
     return targetKey;
   }
 
+  hasImportedReference(portableRef: PortableReferenceV3): boolean {
+    PortableReferenceV3Schema.parse(portableRef);
+    return this.importTargets.has(portableRef);
+  }
+
   private exportMapKey(capabilityKey: PortableCapabilityKey, sourceKey: string): string {
     return `${capabilityKey}\u0000${sourceKey}`;
   }

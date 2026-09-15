@@ -280,10 +280,10 @@ export class GoalPortableCapability implements PortableCapability<GoalPortablePa
     for (const goal of target.goals) {
       const id = deterministicGoalId(context.identityId, batchId, goal.ref);
       const current = await this.portability.getGoalSnapshot(id, context.identityId);
+      const labelIds = goal.labelRefs.map((ref) =>
+        context.references.resolveImportedReference(ref),
+      );
       if (current) {
-        const labelIds = goal.labelRefs.map((ref) =>
-          context.references.resolveImportedReference(ref),
-        );
         assertExistingGoalMatchesPortableDefinition(current, goal, batchId, labelIds);
         assertLifecycleCanConverge(current, goal);
         skipped += 1;

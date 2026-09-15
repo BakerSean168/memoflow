@@ -6,10 +6,19 @@ import { GoalStatus } from './value-objects/goal-status';
 import { GoalTimeframeSchema } from './value-objects/goal-timeframe';
 import { KeyResultCalculationMethod } from './value-objects/key-result-calculation-method';
 
+const GoalPortableReferenceV3Schema = PortableReferenceV3Schema.refine(
+  (ref) => ref.startsWith('goals:'),
+  'Goal portable references must use the goals capability',
+);
+const LabelPortableReferenceV3Schema = PortableReferenceV3Schema.refine(
+  (ref) => ref.startsWith('labels:'),
+  'Goal label references must use the labels capability',
+);
+
 /** Stable user-owned KR facts for `goals@3`; host ids and history stay out of this payload. */
 export const GoalPortableKeyResultV3Schema = z
   .object({
-    ref: PortableReferenceV3Schema,
+    ref: GoalPortableReferenceV3Schema,
     title: z.string().min(1).max(200),
     description: z.string().max(2000).nullable(),
     calculationMethod: z.enum(KeyResultCalculationMethod),
@@ -27,7 +36,7 @@ export type GoalPortableKeyResultV3 = z.infer<typeof GoalPortableKeyResultV3Sche
 /** Owner-owned definition payload. Records/reviews remain separate residual coverage until PORT-1610. */
 export const GoalPortableDefinitionV3Schema = z
   .object({
-    ref: PortableReferenceV3Schema,
+    ref: GoalPortableReferenceV3Schema,
     name: z.string().trim().min(1).max(200),
     summary: z.string().max(500).nullable(),
     status: z.enum(GoalStatus),
@@ -35,7 +44,14 @@ export const GoalPortableDefinitionV3Schema = z
     target: GoalTimeframeSchema.nullable(),
     reminderConfig: GoalReminderConfigDTOSchema.nullable(),
     archived: z.boolean(),
-    labelRefs: z.array(PortableReferenceV3Schema),
+    labelRefs: z.array(LabelPortableReferenceV3Schema).superRefine((refs, ctx) => {
+      if (new Set(refs).size !== refs.length) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Goal label references must be unique',
+        });
+      }
+    }),
     keyResults: z.array(GoalPortableKeyResultV3Schema),
   })
   .strict();
@@ -64,6 +80,16 @@ export const GoalPortablePayloadV3Schema = z
           });
         }
         refs.add(keyResult.ref);
+      }
+      for (const [labelIndex, labelRef] of goal.labelRefs.entries()) {
+        if (refs.has(labelRef)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['goals', goalIndex, 'labelRefs', labelIndex],
+            message: `Portable entity reference collides with label ref: ${labelRef}`,
+          });
+        }
+        refs.add(labelRef);
       }
     }
   });

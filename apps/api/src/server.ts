@@ -312,6 +312,7 @@ async function bootstrap(): Promise<void> {
   const dataPortabilityApiModule = composeDataPortability({
     db: prisma,
     portableCapabilities: [
+      accountApiModule.portableCapability,
       settingApiModule.portableCapability,
       notificationApiModule.module.portableCapability,
       createLabelPortableCapability(labelService),

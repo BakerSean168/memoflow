@@ -43,7 +43,7 @@ export class LabelPortableCapability implements PortableCapability<LabelPortable
     for (const item of target.labels) {
       const current = byName.get(normalizeLabelName(item.name));
       if (!current) created += 1;
-      else if (current.color !== item.color) updated += 1;
+      else if (current.name !== item.name || current.color !== item.color) updated += 1;
       else skipped += 1;
     }
 
@@ -72,10 +72,11 @@ export class LabelPortableCapability implements PortableCapability<LabelPortable
         });
         byName.set(normalizedName, current);
         created += 1;
-      } else if (current.color !== item.color) {
+      } else if (current.name !== item.name || current.color !== item.color) {
         current = await this.service.update({
           identityId: context.identityId,
           labelId: current.id,
+          name: item.name,
           color: item.color,
         });
         byName.set(normalizedName, current);

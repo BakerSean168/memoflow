@@ -131,6 +131,7 @@ describe('LabelPortableCapability', () => {
     expect(service.update).toHaveBeenCalledWith({
       identityId: 'identity-1',
       labelId: 'label-b',
+      name: 'Health',
       color: '#445566',
     });
     expect(service.create).toHaveBeenCalledWith({

@@ -3,6 +3,15 @@ import { z } from 'zod';
 import type { Instant } from '../../primitives/instant';
 import { PortableReferenceV3Schema } from '../data-portability/dtos/portable-v3.dto';
 
+const LabelPortableReferenceV3Schema = PortableReferenceV3Schema.refine(
+  (ref) => ref.startsWith('labels:'),
+  'Label portable references must use the labels capability',
+);
+
+function normalizePortableLabelName(name: string): string {
+  return name.trim().normalize('NFKC').toLowerCase();
+}
+
 /** Canonical Shared Label RGB color. Runtime contract is exactly #RRGGBB. */
 export type LabelColor = `#${string}`;
 
@@ -76,7 +85,7 @@ export interface ListLabelsQuery {
 /** Owner-owned payload for the `labels@3` portability capability. */
 export const LabelPortableItemV3Schema = z
   .object({
-    ref: PortableReferenceV3Schema,
+    ref: LabelPortableReferenceV3Schema,
     name: z.string().trim().min(1).max(50),
     color: LabelColorSchema.nullable(),
   })
@@ -90,7 +99,7 @@ export const LabelPortablePayloadV3Schema = z
     const names = new Set<string>();
     const refs = new Set<string>();
     payload.labels.forEach((label, index) => {
-      const normalized = label.name.trim().toLocaleLowerCase();
+      const normalized = normalizePortableLabelName(label.name);
       if (names.has(normalized)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
