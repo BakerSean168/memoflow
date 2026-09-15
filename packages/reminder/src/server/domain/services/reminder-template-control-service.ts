@@ -11,7 +11,7 @@ import type { IReminderTemplateRepository } from '../repositories/i-reminder-tem
 import type { IUserReminderPreferenceRepository } from '../repositories/i-user-reminder-preference-repository';
 import type { RoutineProfileStore } from '../ports';
 import type { ProfileMembership, RoutineProfile } from '../routine';
-import { evaluateRoutineEffectiveEnabled } from '../routine';
+import { evaluateRoutineEligibility } from '../routine';
 
 interface RoutineMembershipPath {
   readonly membership: ProfileMembership;
@@ -140,26 +140,25 @@ export class ReminderTemplateControlService {
       globalReminderEnabled && template.selfEnabled && template.status === ReminderStatus.Active;
 
     const profileMemberships = paths.map(({ membership, profile }) => {
-      const evaluation = evaluateRoutineEffectiveEnabled({
+      const evaluation = evaluateRoutineEligibility({
         routineEnabled,
         profileEnabled: profile?.enabled ?? false,
-        profileActive: profile?.active ?? false,
         membershipEnabled: membership.enabled,
+        profileId: membership.profileId,
       });
       return {
         profileId: membership.profileId as RoutineProfileMembershipView['profileId'],
         profileName: profile?.name ?? null,
         enabled: membership.enabled,
         profileEnabled: profile?.enabled ?? false,
-        profileActive: profile?.active ?? false,
-        effectiveEnabled: evaluation.effectiveEnabled,
+        effectiveEnabled: evaluation.eligible,
       } satisfies RoutineProfileMembershipView;
     });
 
-    const unprofiledEvaluation = evaluateRoutineEffectiveEnabled({ routineEnabled });
+    const unprofiledEvaluation = evaluateRoutineEligibility({ routineEnabled });
     const isEffectivelyEnabled =
       profileMemberships.length === 0
-        ? unprofiledEvaluation.effectiveEnabled
+        ? unprofiledEvaluation.eligible
         : profileMemberships.some((membership) => membership.effectiveEnabled);
 
     let statusReason: string;

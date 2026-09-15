@@ -32,7 +32,7 @@ function createHarness(options?: { naturalBreakMs?: number | null }) {
     gates: {
       routineEnabled: true,
       profileEnabled: true,
-      profileActive: true,
+      profileEnabled: true,
       membershipEnabled: true,
     },
   });
@@ -129,8 +129,7 @@ describe('ActiveUsage local runtime (ROUTINE-4102)', () => {
       at: asInstant(base + 20 * minute),
       gates: {
         routineEnabled: true,
-        profileEnabled: true,
-        profileActive: false,
+        profileEnabled: false,
         membershipEnabled: true,
       },
     });
@@ -144,7 +143,6 @@ describe('ActiveUsage local runtime (ROUTINE-4102)', () => {
       gates: {
         routineEnabled: true,
         profileEnabled: true,
-        profileActive: true,
         membershipEnabled: true,
       },
     });
@@ -163,7 +161,6 @@ describe('ActiveUsage local runtime (ROUTINE-4102)', () => {
       gates: {
         routineEnabled: true,
         profileEnabled: true,
-        profileActive: true,
         membershipEnabled: true,
         temporaryOverride: createSnoozeOverride({
           now: asInstant(base + 15 * minute),
@@ -203,7 +200,7 @@ describe('ActiveUsage local runtime (ROUTINE-4102)', () => {
       identityId: 'identity-1',
       routineId: 'stand-40m',
       trigger: createActiveUsageTrigger({ requiredActiveMs: 40 * minute }),
-      gates: { routineEnabled: true, profileActive: true },
+      gates: { routineEnabled: true, profileEnabled: true },
       restoredSnapshot: snapshot,
     });
     restarted.start();

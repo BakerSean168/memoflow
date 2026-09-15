@@ -42,7 +42,6 @@ describe('PrismaRoutineProfileStore integration', () => {
       identityId,
       name: 'Work',
       enabled: true,
-      active: true,
       now,
     });
     const gaming = RoutineProfile.create({
@@ -50,7 +49,6 @@ describe('PrismaRoutineProfileStore integration', () => {
       identityId,
       name: 'Gaming',
       enabled: true,
-      active: false,
       now,
     });
     await store.upsertDefinition(routine);
@@ -81,7 +79,7 @@ describe('PrismaRoutineProfileStore integration', () => {
       (await store.findDefinition({ identityId, routineId: routine.id }))?.snapshot(),
     ).toMatchObject({ id: routine.id, identityId, name: 'Drink Water' });
     expect((await store.findProfile({ identityId, profileId: work.id }))?.snapshot()).toMatchObject(
-      { id: work.id, active: true },
+      { id: work.id, enabled: true },
     );
     expect(
       (

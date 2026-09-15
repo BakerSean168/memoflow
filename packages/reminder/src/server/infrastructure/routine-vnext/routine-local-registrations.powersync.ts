@@ -14,7 +14,6 @@ interface RoutineMembershipPathRow {
   routine_id: string;
   membership_enabled: 0 | 1;
   profile_enabled: 0 | 1;
-  profile_active: 0 | 1;
 }
 
 export interface RoutineLocalRegistrationsSnapshot {
@@ -22,17 +21,7 @@ export interface RoutineLocalRegistrationsSnapshot {
   readonly protocolBreakCredits: readonly AmbientBreakCreditRegistration[];
 }
 
-/**
- * Projects the current profile's durable RoutineDefinition/Profile/Membership
- * snapshot into the local ActiveUsage runtime. The persisted ActiveUsage
- * trigger owns protocol-break compatibility; names are never interpreted as
- * Stand/Eye/Movement semantics.
- *
- * A routine may belong to several profiles. The local runtime owns one lane per
- * routine, so the M:N path is collapsed to one boolean: at least one complete
- * membership path must have membership + profile enabled + profile active.
- * This deliberately avoids combining true gates from different profiles.
- */
+/** Projects durable Routine state into the local ActiveUsage runtime. */
 export async function loadPowerSyncRoutineLocalRegistrations(
   db: IElectronDatabase,
   identityId: string,
@@ -51,8 +40,7 @@ export async function loadPowerSyncRoutineLocalRegistrations(
     db.getAll<RoutineMembershipPathRow>(
       `SELECT m.routine_id,
               m.enabled AS membership_enabled,
-              p.enabled AS profile_enabled,
-              p.active AS profile_active
+              p.enabled AS profile_enabled
          FROM routine_profile_memberships m
          JOIN routine_profiles p
            ON p.identity_id = m.identity_id
@@ -84,12 +72,7 @@ export async function loadPowerSyncRoutineLocalRegistrations(
     const membershipPathEnabled =
       paths.length === 0
         ? null
-        : paths.some(
-            (path) =>
-              path.membership_enabled === 1 &&
-              path.profile_enabled === 1 &&
-              path.profile_active === 1,
-          );
+        : paths.some((path) => path.membership_enabled === 1 && path.profile_enabled === 1);
 
     activeUsage.push({
       identityId: owner,
@@ -101,7 +84,6 @@ export async function loadPowerSyncRoutineLocalRegistrations(
           ? {}
           : {
               profileEnabled: membershipPathEnabled,
-              profileActive: membershipPathEnabled,
               membershipEnabled: membershipPathEnabled,
             }),
       },

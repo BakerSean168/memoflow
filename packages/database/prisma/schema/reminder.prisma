@@ -211,6 +211,7 @@ model RoutineDefinition {
   account     Account                    @relation(fields: [identityId], references: [id], onDelete: Cascade)
   memberships RoutineProfileMembership[]
   occurrences RoutineOccurrence[]
+  interactions RoutineInteraction[]
   temporaryOverride RoutineTemporaryOverride?
 
   @@unique([identityId, id])
@@ -224,7 +225,6 @@ model RoutineProfile {
   name        String
   description String?
   enabled     Boolean  @default(true)
-  active      Boolean  @default(false)
   version     Int      @default(1)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
@@ -233,7 +233,7 @@ model RoutineProfile {
   memberships RoutineProfileMembership[]
 
   @@unique([identityId, id])
-  @@index([identityId, enabled, active])
+  @@index([identityId, enabled])
   @@map("routine_profiles")
 }
 
@@ -325,6 +325,7 @@ model RoutineOccurrence {
 
   routine RoutineDefinition @relation(fields: [routineId, identityId], references: [id, identityId], onDelete: Cascade)
   account Account           @relation("AccountRoutineOccurrences", fields: [identityId], references: [id])
+  interactions RoutineInteraction[]
 
   @@unique([identityId, routineId, occurrenceKey])
   @@index([identityId])
@@ -337,6 +338,27 @@ model RoutineOccurrence {
 /// Temporary override is runtime state kept separate from long-lived trigger
 /// config so a snooze never rewrites `trigger_json` (ADR-059 §6). One row per
 /// routine; the decoded payload uses the W2 trigger-parity codec.
+model RoutineInteraction {
+  id                 String   @id
+  identityId         String   @map("identity_id")
+  routineId          String   @map("routine_id")
+  occurrenceKey      String   @map("occurrence_key")
+  action             String
+  actedAt            DateTime @map("acted_at")
+  responseLatencyMs  Int?     @map("response_latency_ms")
+  snoozeDurationMs   Int?     @map("snooze_duration_ms")
+  metadataJson       String?  @map("metadata_json")
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  account    Account          @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  routine    RoutineDefinition @relation(fields: [routineId, identityId], references: [id, identityId], onDelete: Cascade)
+  occurrence RoutineOccurrence? @relation(fields: [identityId, routineId, occurrenceKey], references: [identityId, routineId, occurrenceKey], onDelete: Cascade)
+
+  @@index([identityId, routineId, actedAt])
+  @@index([identityId, occurrenceKey])
+  @@map("routine_interactions")
+}
+
 model RoutineTemporaryOverride {
   identityId   String   @map("identity_id")
   routineId    String   @map("routine_id")

@@ -69,7 +69,7 @@ export function getProfileMembershipLabel(t: Translate, template: ReminderTempla
 export function getProfileGateStateLabel(t: Translate, template: ReminderTemplateClientDTO) {
   if (template.profileMemberships.length === 0) return t('reminder.lifecycle.noProfile');
   const hasOpenPath = template.profileMemberships.some(
-    (membership) => membership.enabled && membership.profileEnabled && membership.profileActive,
+    (membership) => membership.enabled && membership.profileEnabled,
   );
   return hasOpenPath
     ? t('reminder.lifecycle.profileGateOpen')

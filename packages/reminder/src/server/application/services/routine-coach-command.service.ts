@@ -1,8 +1,5 @@
 import type { Instant } from '@memoflow/time';
-import {
-  findRoutineMethod,
-  type RoutineMethodId,
-} from '../../../method-library';
+import { findRoutineMethod, type RoutineMethodId } from '../../../method-library';
 import {
   ProtocolDefinition,
   ProtocolSession,
@@ -22,7 +19,7 @@ import {
 
 export type RoutineProtocolMethodId = Extract<RoutineMethodId, '50-10-protocol' | 'pomodoro'>;
 
-export interface RoutineProfileActivationReceipt {
+export interface RoutineRuntimeContextReceipt {
   readonly profileId: string;
   readonly identityId: string;
   readonly active: boolean;
@@ -50,7 +47,7 @@ export interface RoutineCoachCommandPort {
     readonly profileId: string;
     readonly active: boolean;
     readonly at?: number;
-  }): Promise<RoutineProfileActivationReceipt>;
+  }): Promise<RoutineRuntimeContextReceipt>;
 
   setTemporaryOverride(input: {
     readonly identityId: string;
@@ -135,7 +132,10 @@ export function createRoutineCoachCommandService(
   options: CreateRoutineCoachCommandServiceOptions,
 ): RoutineCoachCommandPort {
   const now = options.now ?? Date.now;
-  const protocolRuntime = createProtocolSessionRuntime({ store: options.protocolSessionStore, now });
+  const protocolRuntime = createProtocolSessionRuntime({
+    store: options.protocolSessionStore,
+    now,
+  });
 
   const notifyOverrideChanged = async (identityId: string, routineId: string) => {
     await options.onOverrideChanged?.({ identityId, routineId });
@@ -148,14 +148,13 @@ export function createRoutineCoachCommandService(
         profileId: input.profileId,
       });
       if (!profile) throw new Error(`Routine profile '${input.profileId}' was not found`);
-      const at = new Date(input.at ?? now());
-      if (input.active) profile.activate(at);
-      else profile.deactivate(at);
+      if (input.active) profile.enable();
+      else profile.disable();
       await options.routineProfileStore.upsertProfile(profile);
       return {
         profileId: profile.id,
         identityId: profile.identityId,
-        active: profile.active,
+        active: input.active,
         version: profile.version,
       };
     },
@@ -213,7 +212,9 @@ export function createRoutineCoachCommandService(
         'longBreakMinutes',
       );
       if ((longBreakEveryCycles == null) !== (longBreakMinutes == null)) {
-        throw new TypeError('longBreakEveryCycles and longBreakMinutes must be configured together');
+        throw new TypeError(
+          'longBreakEveryCycles and longBreakMinutes must be configured together',
+        );
       }
       const at = input.at ?? now();
       const protocol = ProtocolDefinition.create({
@@ -263,7 +264,8 @@ export function createRoutineCoachCommandService(
         identityId: input.identityId,
         sessionId: input.sessionId,
       });
-      if (!persisted) throw new Error(`Protocol session '${input.sessionId}' disappeared after transition`);
+      if (!persisted)
+        throw new Error(`Protocol session '${input.sessionId}' disappeared after transition`);
       return protocolReceipt(persisted, transition);
     },
   };

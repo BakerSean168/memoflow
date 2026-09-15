@@ -288,12 +288,7 @@ async function registerBusinessModules(
         settingElectronModule.userTimeContextPort,
       ),
     },
-    reminderProjection: {
-      source: reminderComposed.scheduleProjectionSource,
-    },
-    execution: {
-      reminderSource: reminderComposed.scheduleExecutionSource,
-    },
+    execution: {},
   });
   scheduleOrchestrationModule.handlerRegistry.register(
     createGoalPowerSyncReminderFireHandler(db, notificationComposed.requestedWriter),

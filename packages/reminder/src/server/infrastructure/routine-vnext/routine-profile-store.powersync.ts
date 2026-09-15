@@ -51,7 +51,7 @@ export class PowerSyncRoutineProfileStore implements RoutineProfileStore {
     readonly profileId: string;
   }): Promise<RoutineProfile | null> {
     const row = await this.db.getOptional<RoutineProfilePowerSyncRecord>(
-      `SELECT id, identity_id, name, description, enabled, active, version, created_at, updated_at
+      `SELECT id, identity_id, name, description, enabled, version, created_at, updated_at
        FROM routine_profiles WHERE id = ? AND identity_id = ? LIMIT 1`,
       [input.profileId, input.identityId],
     );
@@ -60,7 +60,7 @@ export class PowerSyncRoutineProfileStore implements RoutineProfileStore {
 
   async listProfiles(input: { readonly identityId: string }): Promise<RoutineProfile[]> {
     const rows = await this.db.getAll<RoutineProfilePowerSyncRecord>(
-      `SELECT id, identity_id, name, description, enabled, active, version, created_at, updated_at
+      `SELECT id, identity_id, name, description, enabled, version, created_at, updated_at
        FROM routine_profiles WHERE identity_id = ? ORDER BY created_at ASC, id ASC`,
       [input.identityId],
     );
@@ -74,7 +74,7 @@ export class PowerSyncRoutineProfileStore implements RoutineProfileStore {
     if (input.profileIds.length === 0) return [];
     const placeholders = input.profileIds.map(() => '?').join(', ');
     const rows = await this.db.getAll<RoutineProfilePowerSyncRecord>(
-      `SELECT id, identity_id, name, description, enabled, active, version, created_at, updated_at
+      `SELECT id, identity_id, name, description, enabled, version, created_at, updated_at
        FROM routine_profiles
        WHERE identity_id = ? AND id IN (${placeholders})
        ORDER BY id ASC`,
@@ -227,13 +227,12 @@ async function upsertProfile(
   if (existing) {
     await tx.execute(
       `UPDATE routine_profiles
-       SET name = ?, description = ?, enabled = ?, active = ?, version = ?, updated_at = ?
+       SET name = ?, description = ?, enabled = ?, version = ?, updated_at = ?
        WHERE id = ? AND identity_id = ?`,
       [
         row.name,
         row.description,
         row.enabled,
-        row.active,
         row.version,
         row.updated_at,
         row.id,
@@ -244,15 +243,14 @@ async function upsertProfile(
   }
   await tx.execute(
     `INSERT INTO routine_profiles
-      (id, identity_id, name, description, enabled, active, version, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (id, identity_id, name, description, enabled, version, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       row.id,
       row.identity_id,
       row.name,
       row.description,
       row.enabled,
-      row.active,
       row.version,
       row.created_at,
       row.updated_at,
@@ -322,7 +320,6 @@ function mapProfile(row: RoutineProfilePowerSyncRecord): RoutineProfile {
     name: row.name,
     description: row.description,
     enabled: row.enabled === 1,
-    active: row.active === 1,
     version: Number(row.version),
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),

@@ -35,7 +35,6 @@ function createDb(): IElectronDatabase & { close(): void } {
       name TEXT NOT NULL,
       description TEXT,
       enabled INTEGER NOT NULL,
-      active INTEGER NOT NULL,
       version INTEGER NOT NULL,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
@@ -101,7 +100,6 @@ function fixture() {
     identityId: 'identity-1',
     name: 'Work',
     enabled: true,
-    active: true,
     now,
   });
   const gaming = RoutineProfile.create({
@@ -109,7 +107,6 @@ function fixture() {
     identityId: 'identity-1',
     name: 'Gaming',
     enabled: true,
-    active: false,
     now,
   });
   return { routine, work, gaming, now };

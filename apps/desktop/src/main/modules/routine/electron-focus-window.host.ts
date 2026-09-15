@@ -2,7 +2,7 @@ import { BrowserWindow } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import type { FocusWindowProjection } from '@memoflow/contracts/electron';
-import { RoutineChannels } from '@memoflow/contracts/electron';
+import { RoutineWindowChannels } from '@memoflow/contracts/electron';
 import type { FocusWindowHost } from './focus-window-controller';
 import { resolvePreloadPath } from '../../utils/resolve-preload-path';
 import { getDesktopDevServerUrlOrDefault, usesDesktopViteDevServer } from '../../utils';
@@ -126,6 +126,6 @@ export class ElectronFocusWindowHost implements FocusWindowHost {
     const window = this.window;
     if (!window || window.isDestroyed() || window.webContents.isLoading() || !this.projection)
       return;
-    window.webContents.send(RoutineChannels.FOCUS_WINDOW_PROJECTION, this.projection);
+    window.webContents.send(RoutineWindowChannels.FOCUS_WINDOW_PROJECTION, this.projection);
   }
 }

@@ -67,7 +67,6 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
         name: data.name,
         description: data.description,
         enabled: data.enabled,
-        active: data.active,
         version: data.version,
         updatedAt: data.updatedAt,
       },
@@ -88,7 +87,7 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
           name: row.name,
           description: row.description,
           enabled: row.enabled,
-          active: row.active,
+
           version: row.version,
           createdAt: row.createdAt,
           updatedAt: row.updatedAt,
@@ -108,7 +107,7 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
         name: row.name,
         description: row.description,
         enabled: row.enabled,
-        active: row.active,
+
         version: row.version,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
@@ -132,7 +131,7 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
         name: row.name,
         description: row.description,
         enabled: row.enabled,
-        active: row.active,
+
         version: row.version,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
