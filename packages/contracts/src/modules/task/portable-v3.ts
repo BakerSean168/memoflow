@@ -13,10 +13,22 @@ import { TaskPlanStatus } from './value-objects/task-plan-status';
 import { TaskReminderConfigSchema } from './value-objects/task-reminder-config';
 
 const PortableInstantSchema = z.number().int().nonnegative();
+const TaskPortableReferenceV3Schema = PortableReferenceV3Schema.refine(
+  (ref) => ref.startsWith('tasks:'),
+  'Task portable references must use the tasks capability',
+);
+const GoalPortableReferenceV3Schema = PortableReferenceV3Schema.refine(
+  (ref) => ref.startsWith('goals:'),
+  'Task Goal references must use the goals capability',
+);
+const LabelPortableReferenceV3Schema = PortableReferenceV3Schema.refine(
+  (ref) => ref.startsWith('labels:'),
+  'Task label references must use the labels capability',
+);
 
 export const TaskPortableChecklistDefinitionV3Schema = z
   .object({
-    ref: PortableReferenceV3Schema,
+    ref: TaskPortableReferenceV3Schema,
     title: z.string().trim().min(1).max(200),
     order: z.number().int().nonnegative(),
   })
@@ -27,8 +39,8 @@ export type TaskPortableChecklistDefinitionV3 = z.infer<
 
 export const TaskPortableGoalLinkV3Schema = z
   .object({
-    goalRef: PortableReferenceV3Schema,
-    keyResultRef: PortableReferenceV3Schema.nullable(),
+    goalRef: GoalPortableReferenceV3Schema,
+    keyResultRef: GoalPortableReferenceV3Schema.nullable(),
     contribution: GoalContributionRuleSchema.nullable(),
   })
   .strict()
@@ -45,7 +57,7 @@ export type TaskPortableGoalLinkV3 = z.infer<typeof TaskPortableGoalLinkV3Schema
 
 export const TaskPortablePlanV3Schema = z
   .object({
-    ref: PortableReferenceV3Schema,
+    ref: TaskPortableReferenceV3Schema,
     title: z.string().trim().min(1).max(200),
     description: z.string().nullable(),
     schedule: TaskPlanScheduleSchema,
@@ -58,7 +70,14 @@ export const TaskPortablePlanV3Schema = z
     archived: z.boolean(),
     abandonedReason: z.string().nullable(),
     goalLink: TaskPortableGoalLinkV3Schema.nullable(),
-    labelRefs: z.array(PortableReferenceV3Schema),
+    labelRefs: z.array(LabelPortableReferenceV3Schema).superRefine((refs, ctx) => {
+      if (new Set(refs).size !== refs.length) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Task label references must be unique',
+        });
+      }
+    }),
     checklist: z.array(TaskPortableChecklistDefinitionV3Schema),
   })
   .strict()
@@ -104,7 +123,7 @@ export type TaskPortablePlanV3 = z.infer<typeof TaskPortablePlanV3Schema>;
 const PortableTaskOccurrenceChecklistItemV3Schema = TaskOccurrenceChecklistItemSchema.omit({
   definitionId: true,
 })
-  .extend({ definitionRef: PortableReferenceV3Schema })
+  .extend({ definitionRef: TaskPortableReferenceV3Schema })
   .strict();
 export type TaskPortableOccurrenceChecklistItemV3 = z.infer<
   typeof PortableTaskOccurrenceChecklistItemV3Schema
@@ -112,8 +131,8 @@ export type TaskPortableOccurrenceChecklistItemV3 = z.infer<
 
 export const TaskPortableOccurrenceV3Schema = z
   .object({
-    ref: PortableReferenceV3Schema,
-    planRef: PortableReferenceV3Schema,
+    ref: TaskPortableReferenceV3Schema,
+    planRef: TaskPortableReferenceV3Schema,
     scheduleSnapshot: TaskOccurrenceScheduleSnapshotSchema,
     importanceSnapshot: z.enum(ImportanceLevel),
     status: z.enum(TaskOccurrenceStatus),

@@ -24,20 +24,110 @@ function requireBatchId(context: PortableCapabilityExecutionContext): string {
   return context.batchId;
 }
 
-function deterministicPlanId(batchId: string, ref: PortableReferenceV3): string {
-  return `ITaskPlanId_${stableUuid(`portable:${batchId}:task-plan:${ref}`)}`;
+function requireImportedReference(
+  context: PortableCapabilityExecutionContext,
+  portableRef: PortableReferenceV3,
+  capability: string,
+): string {
+  try {
+    return context.references.resolveImportedReference(portableRef);
+  } catch {
+    throw new Error(`tasks@3 ${capability} reference is not bound: ${portableRef}`);
+  }
 }
 
-function deterministicOccurrenceId(batchId: string, ref: PortableReferenceV3): string {
-  return `ITaskOccurrenceId_${stableUuid(`portable:${batchId}:task-occurrence:${ref}`)}`;
+function deterministicPlanId(
+  identityId: string,
+  batchId: string,
+  ref: PortableReferenceV3,
+): string {
+  return `ITaskPlanId_${stableUuid(`portable:${identityId}:${batchId}:task-plan:${ref}`)}`;
 }
 
-function deterministicChecklistId(batchId: string, ref: PortableReferenceV3): string {
-  return `portable-checklist-${stableUuid(`portable:${batchId}:task-checklist:${ref}`)}`;
+function deterministicOccurrenceId(
+  identityId: string,
+  batchId: string,
+  ref: PortableReferenceV3,
+): string {
+  return `ITaskOccurrenceId_${stableUuid(`portable:${identityId}:${batchId}:task-occurrence:${ref}`)}`;
+}
+
+function deterministicChecklistId(
+  identityId: string,
+  batchId: string,
+  ref: PortableReferenceV3,
+): string {
+  return `portable-checklist-${stableUuid(`portable:${identityId}:${batchId}:task-checklist:${ref}`)}`;
 }
 
 function checklistSourceKey(planId: string, definitionId: string): string {
   return `checklist:${planId}:${definitionId}`;
+}
+
+function throwIfPlanConflict(
+  current: import('../domain/aggregates/task-plan').TaskPlan,
+  incoming: TaskPortablePayloadV3['plans'][number],
+  context: PortableCapabilityExecutionContext,
+  batchId: string,
+): void {
+  const dto = current.toServerDTO();
+  if (dto.deletedAt !== null) {
+    throw new Error(`tasks@3 cannot restore over deleted plan: ${String(current.id)}`);
+  }
+  const goalBinding = incoming.goalLink
+    ? {
+        goalId: context.references.resolveImportedReference(incoming.goalLink.goalRef),
+        keyResultId: incoming.goalLink.keyResultRef
+          ? context.references.resolveImportedReference(incoming.goalLink.keyResultRef)
+          : null,
+        contribution: incoming.goalLink.contribution,
+      }
+    : null;
+  const same =
+    dto.name === incoming.title.trim() &&
+    dto.description === incoming.description &&
+    JSON.stringify(dto.schedule) === JSON.stringify(incoming.schedule) &&
+    JSON.stringify(dto.reminderConfig) === JSON.stringify(incoming.reminderConfig) &&
+    dto.importance === incoming.importance &&
+    dto.status === incoming.status &&
+    dto.outcome === incoming.outcome &&
+    dto.completionPolicy === incoming.completionPolicy &&
+    dto.closedAt === incoming.closedAt &&
+    (dto.archivedAt !== null) === incoming.archived &&
+    dto.abandonedReason === incoming.abandonedReason &&
+    JSON.stringify(dto.goalBinding) === JSON.stringify(goalBinding) &&
+    dto.checklist.length === incoming.checklist.length &&
+    incoming.checklist.every((item) =>
+      dto.checklist.some(
+        (definition) => definition.title === item.title && definition.order === item.order,
+      ),
+    );
+  if (!same) {
+    throw new Error(
+      `tasks@3 deterministic plan target conflicts with imported state: ${batchId}:${incoming.ref}`,
+    );
+  }
+}
+
+function throwIfOccurrenceConflict(
+  current: import('../domain/aggregates/task-occurrence').TaskOccurrence,
+  incoming: TaskPortablePayloadV3['occurrences'][number],
+  planId: string,
+): void {
+  const dto = current.toServerDTO();
+  if (dto.deletedAt !== null) {
+    throw new Error(`tasks@3 cannot restore over deleted occurrence: ${String(current.id)}`);
+  }
+  if (
+    dto.planId !== planId ||
+    JSON.stringify(dto.scheduleSnapshot) !== JSON.stringify(incoming.scheduleSnapshot) ||
+    dto.importanceSnapshot !== incoming.importanceSnapshot ||
+    dto.status !== incoming.status ||
+    dto.actualStartAt !== incoming.actualStartAt ||
+    JSON.stringify(dto.result) !== JSON.stringify(incoming.result)
+  ) {
+    throw new Error(`tasks@3 deterministic occurrence target conflicts with imported state: ${String(current.id)}`);
+  }
 }
 
 /** Task-owned V3 capability. Persistence ids never enter the portable payload. */
@@ -137,30 +227,60 @@ export class TaskPortableCapability implements PortableCapability<TaskPortablePa
     });
   }
 
+  async validateImport(
+    payload: TaskPortablePayloadV3,
+    context: PortableCapabilityExecutionContext,
+  ): Promise<void> {
+    await this.dryRun(payload, context);
+  }
+
   async dryRun(
     payload: TaskPortablePayloadV3,
     context: PortableCapabilityExecutionContext,
   ): Promise<PortableCapabilityReceipt> {
     const target = TaskPortablePayloadV3Schema.parse(payload);
     const batchId = requireBatchId(context);
+    const planIdsByRef = new Map<PortableReferenceV3, string>();
+    const checklistRefs = new Set<PortableReferenceV3>();
     let created = 0;
     let skipped = 0;
 
     for (const plan of target.plans) {
-      const current = await this.planRepository.findByIdForIdentity(
-        context.identityId,
-        deterministicPlanId(batchId, plan.ref),
-      );
-      if (current) skipped += 1;
-      else created += 1;
+      const id = deterministicPlanId(context.identityId, batchId, plan.ref);
+      planIdsByRef.set(plan.ref, id);
+      for (const definition of plan.checklist) {
+        if (!checklistRefs.add(definition.ref)) {
+          throw new Error(`tasks@3 duplicate checklist reference: ${definition.ref}`);
+        }
+      }
+      for (const labelRef of plan.labelRefs) {
+        requireImportedReference(context, labelRef, 'label');
+      }
+      if (plan.goalLink) {
+        requireImportedReference(context, plan.goalLink.goalRef, 'goal');
+        if (plan.goalLink.keyResultRef) {
+          requireImportedReference(context, plan.goalLink.keyResultRef, 'key result');
+        }
+      }
+      const current = await this.planRepository.findByIdForIdentity(context.identityId, id);
+      if (current) {
+        throwIfPlanConflict(current, plan, context, batchId);
+        skipped += 1;
+      } else {
+        created += 1;
+      }
     }
     for (const occurrence of target.occurrences) {
-      const current = await this.occurrenceRepository.findByIdForIdentity(
-        context.identityId,
-        deterministicOccurrenceId(batchId, occurrence.ref),
-      );
-      if (current) skipped += 1;
-      else created += 1;
+      const id = deterministicOccurrenceId(context.identityId, batchId, occurrence.ref);
+      const planId = planIdsByRef.get(occurrence.planRef);
+      if (!planId) throw new Error(`tasks@3 occurrence references an unknown plan: ${occurrence.planRef}`);
+      const current = await this.occurrenceRepository.findByIdForIdentity(context.identityId, id);
+      if (current) {
+        throwIfOccurrenceConflict(current, occurrence, planId);
+        skipped += 1;
+      } else {
+        created += 1;
+      }
     }
 
     return { created, updated: 0, skipped, warnings: [] };
@@ -177,9 +297,12 @@ export class TaskPortableCapability implements PortableCapability<TaskPortablePa
     const checklistIdsByRef = new Map<PortableReferenceV3, string>();
 
     for (const plan of target.plans) {
-      planIdsByRef.set(plan.ref, deterministicPlanId(batchId, plan.ref));
+      planIdsByRef.set(plan.ref, deterministicPlanId(context.identityId, batchId, plan.ref));
       for (const definition of plan.checklist) {
-        checklistIdsByRef.set(definition.ref, deterministicChecklistId(batchId, definition.ref));
+        checklistIdsByRef.set(
+          definition.ref,
+          deterministicChecklistId(context.identityId, batchId, definition.ref),
+        );
       }
     }
 
@@ -215,11 +338,11 @@ export class TaskPortableCapability implements PortableCapability<TaskPortablePa
           order: definition.order,
         })),
         labelIds: plan.labelRefs.map((ref) => context.references.resolveImportedReference(ref)),
-        createdAt: restoredAt as never,
-        updatedAt: restoredAt as never,
+        createdAt: restoredAt,
+        updatedAt: restoredAt,
       })),
       occurrences: target.occurrences.map((occurrence) => ({
-        id: deterministicOccurrenceId(batchId, occurrence.ref),
+        id: deterministicOccurrenceId(context.identityId, batchId, occurrence.ref),
         planId: planIdsByRef.get(occurrence.planRef)!,
         scheduleSnapshot: occurrence.scheduleSnapshot,
         importanceSnapshot: occurrence.importanceSnapshot,
@@ -233,8 +356,8 @@ export class TaskPortableCapability implements PortableCapability<TaskPortablePa
           completed: item.completed,
           completedAt: item.completedAt,
         })),
-        createdAt: restoredAt as never,
-        updatedAt: restoredAt as never,
+        createdAt: restoredAt,
+        updatedAt: restoredAt,
       })),
     });
 
@@ -250,7 +373,7 @@ export class TaskPortableCapability implements PortableCapability<TaskPortablePa
     for (const occurrence of target.occurrences) {
       context.references.bindImportedReference(
         occurrence.ref,
-        deterministicOccurrenceId(batchId, occurrence.ref),
+        deterministicOccurrenceId(context.identityId, batchId, occurrence.ref),
       );
     }
 
