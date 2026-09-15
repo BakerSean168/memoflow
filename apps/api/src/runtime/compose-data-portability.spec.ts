@@ -29,6 +29,7 @@ import type { Express, Router } from 'express';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { z } from 'zod';
 import type { PrismaClient } from '@memoflow/database';
 import type { DataPortabilityApiModuleContext } from '@memoflow/data-portability/api';
 
@@ -37,9 +38,7 @@ vi.mock('@memoflow/data-portability', async (importOriginal) => {
   return {
     ...actual,
     createDataPortabilityModule: vi.fn(actual.createDataPortabilityModule),
-    createPrismaDataPortabilityDependencies: vi.fn(
-      actual.createPrismaDataPortabilityDependencies,
-    ),
+    createPrismaDataPortabilityDependencies: vi.fn(actual.createPrismaDataPortabilityDependencies),
     createPrismaDataPortabilityImportStore: vi.fn(actual.createPrismaDataPortabilityImportStore),
     createPrismaServerHeldDataDisclosureApplicationPort: vi.fn(
       actual.createPrismaServerHeldDataDisclosureApplicationPort,
@@ -65,6 +64,26 @@ import {
 import { createDataPortabilityApiModule } from '@memoflow/data-portability/api';
 
 const fakeDb = {} as unknown as PrismaClient;
+
+const portableReceipt = { created: 0, updated: 0, skipped: 1, warnings: [] } as const;
+const portableCapabilities = [
+  {
+    key: 'preferences',
+    schemaVersion: 3,
+    payloadSchema: z.object({}).strict(),
+    export: vi.fn(async () => ({})),
+    dryRun: vi.fn(async () => portableReceipt),
+    apply: vi.fn(async () => portableReceipt),
+  },
+  {
+    key: 'notification-delivery-preferences',
+    schemaVersion: 3,
+    payloadSchema: z.object({}).strict(),
+    export: vi.fn(async () => ({})),
+    dryRun: vi.fn(async () => portableReceipt),
+    apply: vi.fn(async () => portableReceipt),
+  },
+] as const;
 
 describe('composeDataPortability assembly order', () => {
   beforeEach(() => {
@@ -105,12 +124,30 @@ describe('composeDataPortability assembly order', () => {
     });
 
     const instance = createDataPortabilityModule.mock.results[0].value;
-    const disclosurePort = createPrismaServerHeldDataDisclosureApplicationPort.mock.results[0]
-      .value;
+    const disclosurePort =
+      createPrismaServerHeldDataDisclosureApplicationPort.mock.results[0].value;
     expect(createDataPortabilityApiModule).toHaveBeenCalledWith({
       instance,
       serverHeldDataDisclosureApi: disclosurePort,
     });
+  });
+
+  it('registers owner-provided V3 capabilities in the module-owned registry', () => {
+    composeDataPortability({ db: fakeDb, portableCapabilities });
+
+    const moduleCall = createDataPortabilityModule.mock.calls[0][0];
+    expect(moduleCall.portableCapabilities).toBe(portableCapabilities);
+
+    const instance = createDataPortabilityModule.mock.results[0].value;
+    expect(
+      instance.portableCapabilityRegistry.list().map((capability) => ({
+        key: capability.key,
+        schemaVersion: capability.schemaVersion,
+      })),
+    ).toEqual([
+      { key: 'preferences', schemaVersion: 3 },
+      { key: 'notification-delivery-preferences', schemaVersion: 3 },
+    ]);
   });
 
   it('returns the module handle plus the disclosure port', () => {
@@ -180,7 +217,9 @@ describe('composeDataPortability layering boundary', () => {
     expect(composer).toContain("from '@memoflow/data-portability'");
     expect(composer).toContain("from '@memoflow/data-portability/api'");
     expect(composer).not.toMatch(/from '.*server\/application\/prisma-adapters'/);
-    expect(composer).not.toMatch(/from '.*server\/application\/import-store\/prisma-data-portability-import-store'/);
+    expect(composer).not.toMatch(
+      /from '.*server\/application\/import-store\/prisma-data-portability-import-store'/,
+    );
     expect(composer).not.toContain('new PrismaDataPortabilityImportStore');
     expect(composer).not.toContain('new PrismaFocusSessionAdapter');
   });

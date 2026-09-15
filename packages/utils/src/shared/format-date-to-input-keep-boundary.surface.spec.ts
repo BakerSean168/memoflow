@@ -5,7 +5,8 @@ import { describe, expect, it } from 'vitest';
 /**
  * Residual 1210: formatDateToInput dual retired onto @memoflow/time (ADR-037 T9).
  * - utils shared/date product bridges deleted (no formatDateToInput export)
- * - app-vue TimeConfigSection: epoch ms → getProductTime().format.dateToYmd
+ * - app-vue TimeConfigSection owns canonical Ymd schedule dates through the
+ *   TaskPlanScheduleSchema and calendar/display helpers; it performs no epoch conversion.
  * Soft residual 1207: formatMessageTime keep-boundary remains separate.
  * Soft residual 1204: formatDateTime keep-boundary remains separate.
  * Does not flip §13.2 checkboxes.
@@ -24,7 +25,7 @@ describe('formatDateToInput dual retired (residual 1210)', () => {
   const vue = readFileSync(
     resolve(
       dir,
-      '../../../app-vue/src/modules/task/components/TaskTemplateForm/sections/TimeConfigSection.vue',
+      '../../../app-vue/src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue',
     ),
     'utf8',
   );
@@ -41,28 +42,21 @@ describe('formatDateToInput dual retired (residual 1210)', () => {
     }
   });
 
-  it('app-vue task formatDateToInput uses @memoflow/time product facade', () => {
-    expect(vue).toContain('Residual 1210');
-    expect(vue).toMatch(/const formatDateToInput\b/);
-    expect(vue).toContain('getProductTime');
-    expect(vue).toContain('input.dateValue');
-    const body = vue.match(/const formatDateToInput\s*=\s*\([\s\S]*?\};/)?.[0] ?? '';
-    expect(body).toContain('getProductTime()');
-    expect(body).toContain('dateValue');
-    expect(body).not.toContain('date-fns');
+  it('app-vue task form keeps canonical Ymd dates at the schedule boundary', () => {
+    expect(vue).toContain('TaskPlanScheduleSchema');
+    expect(vue).toContain('formatDisplayDate');
+    expect(vue).toContain('parseToCalendarDate');
+    expect(vue).toContain('handleCalendarSelect');
+    expect(vue).not.toContain('formatDateToInput');
+    expect(vue).not.toContain('getProductTime');
+    expect(vue).not.toContain('new Date(');
+    expect(vue).not.toContain('toISOString');
   });
 
-  it('runtime: documents epoch→YMD contract via body shape', () => {
-    function vueFormatDateToInput(timestamp: number): string {
-      const date = new Date(timestamp);
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, '0');
-      const d = String(date.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
-    }
-    const fixed = new Date(2024, 0, 2);
-    expect(vueFormatDateToInput(fixed.getTime())).toBe('2024-01-02');
-    expect(vue).toContain('timestamp: number');
+  it('runtime: documents that schedule dates remain canonical Ymd values', () => {
+    const schedule = { kind: 'OneTime', date: '2024-01-02', timing: { kind: 'AllDay' } };
+    expect(schedule.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(vue).toContain('startDate.value = currentDate(schedule)');
   });
 
   it('documents residual 1210 lock intent without claiming §13.2 complete', () => {
@@ -73,5 +67,6 @@ describe('formatDateToInput dual retired (residual 1210)', () => {
     expect(self).toContain('Residual 1210');
     expect(self).toContain('Does not flip §13.2 checkboxes');
     expect(self).toContain('retired');
+    expect(self).toContain('epoch conversion');
   });
 });

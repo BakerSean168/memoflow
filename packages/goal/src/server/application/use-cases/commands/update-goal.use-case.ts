@@ -5,7 +5,11 @@
  * 遵循 governance 模块 Result<T> 规范
  */
 
-import { GoalLabelOwnershipError, GoalVersionConflictError, type IGoalRepository } from '../../../domain';
+import {
+  GoalLabelOwnershipError,
+  GoalVersionConflictError,
+  type IGoalRepository,
+} from '../../../domain';
 import { GoalPolicy } from '../../../domain';
 import type { UpdateGoalReq, UpdateGoalRes } from '@memoflow/contracts/goal';
 import type { Result } from '@memoflow/contracts/result';
@@ -63,16 +67,14 @@ export class UpdateGoalUseCase {
     // 3. Update canonical Direction fields.
     goal.updateBasicInfo({
       name: input.name,
-      description: input.description,
-      feasibilityAnalysis: input.feasibilityAnalysis,
-      motivation: input.motivation,
+      summary: input.summary,
     });
 
-    // 4. Update the product time window using canonical dueDate naming.
-    if (input.startDate !== undefined || input.dueDate !== undefined) {
-      goal.updateTimeRange({
+    // 4. Update calendar-native planning time without inventing a deadline.
+    if (input.startDate !== undefined || input.target !== undefined) {
+      goal.updatePlanningTime({
         startDate: input.startDate !== undefined ? (input.startDate ?? null) : undefined,
-        dueDate: input.dueDate !== undefined ? (input.dueDate ?? null) : undefined,
+        target: input.target !== undefined ? (input.target ?? null) : undefined,
       });
     }
 
@@ -91,10 +93,10 @@ export class UpdateGoalUseCase {
             title: keyResult.title,
             description: keyResult.description,
             aggregationMethod: keyResult.calculationMethod,
-            startingValue: keyResult.startingValue,
+            initialValue: keyResult.initialValue,
             currentValue: keyResult.currentValue,
             targetValue: keyResult.targetValue,
-            progressBaselineValue: keyResult.progressBaselineValue,
+            target: keyResult.target ?? null,
             unit: keyResult.unit ?? null,
             weight: keyResult.weight,
           });
@@ -105,10 +107,10 @@ export class UpdateGoalUseCase {
           title: keyResult.title,
           description: keyResult.description,
           aggregationMethod: keyResult.calculationMethod,
-          startingValue: keyResult.startingValue,
+          initialValue: keyResult.initialValue,
           currentValue: keyResult.currentValue,
           targetValue: keyResult.targetValue,
-          progressBaselineValue: keyResult.progressBaselineValue,
+          target: keyResult.target ?? null,
           unit: keyResult.unit,
           weight: keyResult.weight,
         });

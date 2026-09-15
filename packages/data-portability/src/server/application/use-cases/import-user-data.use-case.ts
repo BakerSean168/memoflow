@@ -20,7 +20,6 @@ import { importGoals } from './importers/goal.importer';
 import { importTasks } from './importers/task.importer';
 import { importReminders } from './importers/reminder.importer';
 import { importSchedules } from './importers/schedule.importer';
-import { importEditor } from './importers/editor.importer';
 import { importAI } from './importers/ai.importer';
 import { throwValidationError } from './importers/import-helpers';
 
@@ -94,7 +93,6 @@ export class ImportUserDataUseCase {
       if (data.tasks) await importTasks(tx, ctx, data.tasks);
       if (data.reminders) await importReminders(tx, ctx, data.reminders);
       if (data.schedules) await importSchedules(tx, ctx, data.schedules);
-      if (data.editor) await importEditor(tx, ctx, data.editor);
       if (data.ai) await importAI(tx, ctx, data.ai);
     });
 

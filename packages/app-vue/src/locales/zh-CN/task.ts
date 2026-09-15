@@ -2,15 +2,15 @@ export default {
   "route": {
     "management": "任务管理",
     "dependencyDemo": "依赖验证演示 (STORY-024)",
-    "detail": "任务详情"
+    "detail": "任务计划工作区"
   },
   "error": {
     "operationFailed": "操作失败",
     "loadTemplatesFailed": "加载任务计划失败",
     "createFailed": "创建任务计划失败",
     "createSuccess": "任务计划创建成功",
-    "createTemplateWithTodayInstanceSuccess": "任务计划已创建，并生成今日待办任务（共生成 {count} 个）",
-    "createTemplateWithoutTodayInstanceSuccess": "任务计划已创建，今天不会生成待办任务（共生成 {count} 个）",
+    "createPlanWithTodayInstanceSuccess": "任务计划已创建，并生成今日待办任务（共生成 {count} 个）",
+    "createPlanWithoutTodayInstanceSuccess": "任务计划已创建，今天不会生成待办任务（共生成 {count} 个）",
     "createQuickTaskWithTodayInstanceSuccess": "已创建快速任务，并加入今天的待办。",
     "createQuickTaskWithoutTodayInstanceSuccess": "已创建快速任务，但今天没有生成待办，请检查开始日期。",
     "updateFailed": "更新任务计划失败",
@@ -42,7 +42,7 @@ export default {
     "loading": "加载中...",
     "createSuccess": "任务计划创建成功",
     "editSuccess": "任务计划更新成功",
-    "deleteTemplate": "删除任务计划",
+    "deletePlan": "删除任务计划",
     "confirmDelete": "删除任务计划「{name}」会同时删除其全部待办任务和执行历史，且无法撤销。确认删除？",
     "confirmDeleteAll": "确认删除全部任务计划？此操作不可撤销！",
     "pauseTitle": "暂停任务计划？",
@@ -79,7 +79,7 @@ export default {
     "emptyOccurrenceDescription": "创建或调整计划后，系统会生成符合条件的发生项。"
   },
   "detail": {
-    "title": "任务详情",
+    "title": "任务计划工作区",
     "loading": "加载中...",
     "notFound": "未找到该任务计划",
     "basicInfo": "基本信息",
@@ -110,7 +110,7 @@ export default {
     "instanceStatusMissed": "已错过",
     "instanceStatusNotGenerated": "尚未生成",
     "edit": "编辑",
-    "subtitle": "查看一项长期计划、它的配置，以及它已经生成的发生项。",
+    "subtitle": "在一个工作区中管理长期计划、属性、检查清单与任务发生项。",
     "planSettings": "计划设置",
     "planSettingsDescription": "调度、重复、提醒与 Goal 贡献属于计划本身，而不是某一个发生项。",
     "editSettings": "编辑设置",
@@ -119,6 +119,13 @@ export default {
     "reminders": "提醒",
     "reminderAuthority": "提醒策略通过统一计划编辑器维护。",
     "goalBindingDescription": "完成发生项时，可按配置贡献到对应 Goal / Key Result。",
+    "linkedNotes": "关联知识",
+    "linkedNoteMissing": "该关联笔记暂不可用。",
+    "noLinkedNotes": "暂无关联知识",
+    "goalContextAvailable": "{name}",
+    "goalContextMissing": "关联的 Goal 不可用。",
+    "goalContextUnavailable": "Goal 上下文暂时不可用。",
+    "keyResultValue": "关键结果：{name}",
     "noStartDate": "未设置开始日期",
     "startsOn": "开始于 {date}",
     "oneTimePlan": "一次性计划",
@@ -407,6 +414,13 @@ export default {
     "invalidTime": "请选择有效的提醒时间",
     "selectMethodRequired": "请选择通知方式"
   },
+  "checklist": {
+    "title": "检查清单",
+    "placeholder": "添加清单项",
+    "add": "添加",
+    "empty": "暂无清单项",
+    "remove": "删除清单项"
+  },
   "templateForm": {
     "loadError": "无法加载任务计划",
     "notFoundMessage": "没有找到正在编辑的任务计划，请重新选择或创建任务计划。",
@@ -448,7 +462,7 @@ export default {
     "completedAt": "完成于 {time}"
   },
   "infoCard": {
-    "title": "任务详情",
+    "title": "任务计划工作区",
     "close": "关闭",
     "dateLabel": "任务日期: ",
     "timeLabel": "时间: "

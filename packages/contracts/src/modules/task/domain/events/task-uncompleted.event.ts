@@ -8,11 +8,11 @@
  * - aggregateId 已由 addDomainEvent 自动生成，无需重复定义
  * - occurredAt 已由 addDomainEvent 自动生成，无需重复定义
  */
-import type { IdentityId, TaskInstanceId, TaskTemplateId } from '../../../../primitives';
+import type { IdentityId, TaskOccurrenceId, TaskPlanId } from '../../../../primitives';
 
 export interface TaskUncompletedEvent {
   identityId: IdentityId;
-  taskInstanceId: TaskInstanceId;
-  taskTemplateId: TaskTemplateId;
+  taskOccurrenceId: TaskOccurrenceId;
+  taskPlanId: TaskPlanId;
   uncompletedAt: number;
 }

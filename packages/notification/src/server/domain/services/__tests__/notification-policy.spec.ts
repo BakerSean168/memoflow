@@ -13,10 +13,15 @@ import { NotificationWorkflowCatalog } from '../notification-workflow-catalog';
 import { NotificationPreference } from '../../aggregates/notification-preference';
 import { DoNotDisturbConfig } from '../../value-objects/do-not-disturb-config';
 import { RateLimit } from '../../value-objects/rate-limit';
+import { createTimeContext, type TimeContext } from '@memoflow/time';
+import type { NotificationPolicyContext } from '../notification-policy';
 
 const policy = new NotificationPolicy();
 const catalog = new NotificationWorkflowCatalog();
 const identityId = 'user-1' as never;
+const timeContext = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
+const evaluate = (context: Omit<NotificationPolicyContext, 'timeContext'>) =>
+  policy.evaluate({ ...context, timeContext });
 
 function configurableWorkflow(enabledByDefault: boolean): NotificationWorkflowDefinitionDTO {
   return {
@@ -37,7 +42,7 @@ describe('NOTIF-2402 Notification preference precedence', () => {
   it('does not let the read-only allowlist bypass rate-limit policy implicitly', () => {
     const rateLimit = RateLimit.create({ enabled: true, maxPerHour: 1, maxPerDay: 5 });
     expect(
-      policy.evaluate({
+      evaluate({
         workflow: catalog.resolve('system.account-security'),
         channel: NotificationChannelType.Desktop,
         rateLimit,
@@ -108,7 +113,7 @@ describe('NOTIF-2402 Notification preference precedence', () => {
       );
     }
 
-    expect(policy.evaluate({ workflow, channel: NotificationChannelType.Email, preference })).toEqual({
+    expect(evaluate({ workflow, channel: NotificationChannelType.Email, preference })).toEqual({
       channel: NotificationChannelType.Email,
       outcome,
       reason,
@@ -126,7 +131,7 @@ describe('NOTIF-2402 Notification preference precedence', () => {
     );
 
     expect(
-      policy.evaluate({
+      evaluate({
         workflow: catalog.resolve('system.account-security'),
         channel: NotificationChannelType.Desktop,
         preference,
@@ -148,7 +153,7 @@ describe('NOTIF-2402 Notification preference precedence', () => {
     const preference = NotificationPreference.create({ identityId });
     preference.setGlobalChannel(NotificationChannelType.Email, true);
 
-    expect(policy.evaluate({ workflow, channel: NotificationChannelType.Email, preference })).toEqual({
+    expect(evaluate({ workflow, channel: NotificationChannelType.Email, preference })).toEqual({
       channel: NotificationChannelType.Email,
       outcome: NotificationDeliveryPlanOutcome.Unsupported,
       reason: NotificationDeliveryReason.UnsupportedChannel,
@@ -164,11 +169,11 @@ describe('NOTIF-2401/2402 delivery policy outcomes', () => {
     endTime: '08:00',
     daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
   });
-  const activeAt = new Date('2026-08-25T23:30:00');
+  const activeAt = new Date('2026-08-25T23:30:00.000Z');
 
   it('suppresses Desktop during DND with a stable typed reason', () => {
     expect(
-      policy.evaluate({
+      evaluate({
         workflow: catalog.resolve('system.general'),
         channel: NotificationChannelType.Desktop,
         doNotDisturb: dnd,
@@ -181,7 +186,7 @@ describe('NOTIF-2401/2402 delivery policy outcomes', () => {
   });
 
   it('defers InApp during DND and carries the retry instant', () => {
-    const decision = policy.evaluate({
+    const decision = evaluate({
       workflow: catalog.resolve('system.general'),
       channel: NotificationChannelType.InApp,
       doNotDisturb: dnd,
@@ -191,12 +196,14 @@ describe('NOTIF-2401/2402 delivery policy outcomes', () => {
       outcome: NotificationDeliveryPlanOutcome.Deferred,
       reason: NotificationDeliveryReason.DndActive,
     });
-    expect(decision.retryAt?.toISOString()).toBe(dnd.nextInactiveAt(activeAt)?.toISOString());
+    expect(decision.retryAt?.toISOString()).toBe(
+      dnd.nextInactiveAt(activeAt, timeContext)?.toISOString(),
+    );
   });
 
   it('bypasses DND only for the explicitly allowlisted read-only channel', () => {
     expect(
-      policy.evaluate({
+      evaluate({
         workflow: catalog.resolve('system.account-security'),
         channel: NotificationChannelType.Desktop,
         doNotDisturb: dnd,
@@ -214,7 +221,7 @@ describe('NOTIF-2401/2402 delivery policy outcomes', () => {
   ] as const)('rate-limits with deterministic reason for usage %o', (usage, reason) => {
     const rateLimit = RateLimit.create({ enabled: true, maxPerHour: 2, maxPerDay: 5 });
     expect(
-      policy.evaluate({
+      evaluate({
         workflow: catalog.resolve('system.general'),
         channel: NotificationChannelType.InApp,
         rateLimit,

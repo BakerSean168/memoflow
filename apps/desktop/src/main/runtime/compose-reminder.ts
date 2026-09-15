@@ -41,6 +41,7 @@
 
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import type { NotificationRequestedWriterPort } from '@memoflow/notification';
+import type { UserTimeContextPort } from '@memoflow/time';
 import {
   createReminderModule,
   createReminderPowerSyncRepositories,
@@ -87,6 +88,8 @@ export interface ComposeReminderDesktopDependencies {
   readonly identityId: string;
   /** Reminder-owned durable NotificationRequested writer; Scheduler never receives it. */
   readonly notificationRequestedWriter: NotificationRequestedWriterPort;
+  /** Canonical identity-scoped Product Time context owned by Setting preferences. */
+  readonly userTimeContextPort: UserTimeContextPort;
   /** Optional per-profile sink for protocol break completion credit. */
   readonly protocolBreakCreditRuntime?: ProtocolBreakCreditRuntime;
   readonly idleSensor?: IdleSensorPort;
@@ -196,6 +199,7 @@ export function composeReminder(
     userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
     routineProfileStore: repositories.routineProfileStore,
     closureChecker: repositories.closureChecker,
+    userTimeContextPort: dependencies.userTimeContextPort,
   });
 
   const reminderTemplateRepository = repositories.reminderTemplateRepository;

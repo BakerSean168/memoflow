@@ -14,8 +14,8 @@ export class GoalPolicy {
   }
 
   /**
-   * 检查目标是否可以归档
-   * 活跃目标必须先完成才能归档
+   * Archive is independent from Goal business lifecycle.
+   * 归档与 Goal 业务生命周期相互独立；任一未归档状态都可进入归档。
    */
   ensureGoalCanBeArchived(goal: Goal): void {
     if (goal.archivedAt) {

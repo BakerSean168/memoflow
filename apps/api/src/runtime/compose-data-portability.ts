@@ -36,6 +36,7 @@
  * 交由宿主显式持有。
  */
 
+import type { PortableCapability } from '@memoflow/contracts/data-portability';
 import type { PrismaClient } from '@memoflow/database';
 import {
   createDataPortabilityModule,
@@ -56,6 +57,8 @@ import {
 export interface ComposeDataPortabilityDependencies {
   /** Shared API-lane Prisma client owned by apps/api. 由 apps/api 持有的共享 API lane Prisma client。 */
   readonly db: PrismaClient;
+  /** Owner-provided V3 capability seams; product routes remain V2 until full owner coverage. */
+  readonly portableCapabilities?: readonly PortableCapability<unknown>[];
 }
 
 /**
@@ -110,12 +113,14 @@ export function composeDataPortability(
 ): ComposedDataPortability {
   const exportDependencies = createPrismaDataPortabilityDependencies(dependencies.db);
   const importStore = createPrismaDataPortabilityImportStore(dependencies.db);
-  const serverHeldDataDisclosureApi =
-    createPrismaServerHeldDataDisclosureApplicationPort(dependencies.db);
+  const serverHeldDataDisclosureApi = createPrismaServerHeldDataDisclosureApplicationPort(
+    dependencies.db,
+  );
 
   const instance = createDataPortabilityModule({
     exportDependencies,
     importStore,
+    portableCapabilities: dependencies.portableCapabilities,
   });
 
   return {

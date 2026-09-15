@@ -3,6 +3,7 @@ import type {
   ReminderGroupClientDTO,
   ReminderTemplateClientDTO,
 } from '@memoflow/contracts/reminder';
+import { getProductTime, productTimeRevision } from '../../../shared/utils/product-time';
 
 type Translate = ComposerTranslation;
 
@@ -139,10 +140,9 @@ export function getTemplateNextTriggerLabel(
     return t('reminder.schedule.noNextTrigger');
   }
 
-  return new Intl.DateTimeFormat(locale, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(template.nextTriggerAt));
+  void locale;
+  void productTimeRevision.value;
+  return getProductTime().format.dateTime(template.nextTriggerAt);
 }
 
 export function getTemplateScheduleState(

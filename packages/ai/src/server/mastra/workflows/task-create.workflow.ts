@@ -329,7 +329,7 @@ export function createTaskCreateWorkflow(input: {
           return applyAndResolve(priorReceipt);
         }
         if (resumeData.type === 'accept_partial') {
-          if (priorReceipt.status !== 'partial' || !priorReceipt.taskTemplateId) {
+          if (priorReceipt.status !== 'partial' || !priorReceipt.taskPlanId) {
             throw new Error('task.create has no partial business result to accept');
           }
           await persist({ ...current, phase: 'completed' });
@@ -339,7 +339,7 @@ export function createTaskCreateWorkflow(input: {
           });
         }
         if (resumeData.type === 'cancel_remaining') {
-          if (priorReceipt.status === 'partial' && priorReceipt.taskTemplateId) {
+          if (priorReceipt.status === 'partial' && priorReceipt.taskPlanId) {
             await persist({ ...current, phase: 'completed' });
             return TaskCreateWorkflowOutputSchema.parse({
               outcome: 'completed',

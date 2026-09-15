@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import type { KnowledgeNotePersistedRef } from '@memoflow/contracts/ai';
 import type { LocalVaultNoteDTO } from '@memoflow/contracts/repository';
 import type {
@@ -22,8 +21,9 @@ export class DesktopKnowledgeNotePersistenceAdapter implements IKnowledgeNotePer
       throw new Error('A confirmed knowledge-note proposal is required for local Vault writes');
     }
 
-    const result = await this.localVault.writeConfirmedNote(input.identityId, {
+    const result = await this.localVault.writeConfirmedNote({
       relativePath: input.path,
+      knowledgeDocumentId: input.knowledgeDocumentId,
       contentMarkdown: input.content,
       proposalId: input.proposalId,
       proposalRevision: input.proposalRevision,
@@ -37,16 +37,20 @@ export class DesktopKnowledgeNotePersistenceAdapter implements IKnowledgeNotePer
 }
 
 /**
- * Residual 1149 keep-boundary: Desktop local-Vault persisted-ref mapping.
- * id = local-vault-<sha256(path)[:24]>; scope = local-vault-<identityId>;
- * timestamps from note.updatedAt; size from vault DTO.
- * Soft residual 1149: API GitHub connection mapping stays separate (no force-merge).
+ * Desktop confirmed creates are managed documents. Their persisted AI reference
+ * must use the reviewed KnowledgeDocumentId; a path-derived fallback would
+ * silently reintroduce unstable identity after rename or move.
  */
-function toKnowledgeNoteRef(identityId: string, note: LocalVaultNoteDTO): KnowledgeNotePersistedRef {
-  const id = `local-vault-${createHash('sha256').update(note.relativePath).digest('hex').slice(0, 24)}`;
+function toKnowledgeNoteRef(
+  identityId: string,
+  note: LocalVaultNoteDTO,
+): KnowledgeNotePersistedRef {
+  if (!note.knowledgeDocumentId) {
+    throw new Error('Confirmed Local Vault write did not return a stable KnowledgeDocumentId');
+  }
   const timestamp = Number(note.updatedAt);
   return {
-    id,
+    id: note.knowledgeDocumentId,
     repositoryScopeId: `local-vault-${identityId}`,
     name: note.relativePath.split('/').pop() ?? note.title,
     path: note.relativePath,

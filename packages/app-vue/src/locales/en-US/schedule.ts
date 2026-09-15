@@ -44,7 +44,8 @@ export default {
     "taskPaused": "Schedule task paused",
     "taskResumed": "Schedule task resumed",
     "taskDeleted": "Schedule task deleted",
-    "scheduleCreated": "Schedule created"
+    "scheduleCreated": "Schedule created",
+    "scheduleCreatedRefreshFailed": "Schedule created, but the planner could not refresh. Refresh the page to reload the latest view."
   },
   "confirm": {
     "deleteTask": "Delete schedule \"{name}\"?",

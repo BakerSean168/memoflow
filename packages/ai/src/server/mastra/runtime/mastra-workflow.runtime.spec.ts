@@ -11,9 +11,14 @@ import {
 import { ok } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { createTimeContext } from '@memoflow/time';
 import { MastraModelResolver } from '../models';
 import type { GoalPlanMutationPort } from '../workflows';
 import { MastraAIRuntime } from './mastra-ai.runtime';
+
+const TEST_USER_TIME_CONTEXT_PORT = {
+  getUserTimeContext: async () => createTimeContext({ timeZone: 'Asia/Tokyo', weekStartsOn: 1 }),
+};
 
 const resources: Array<{ runtime: MastraAIRuntime; file: string }> = [];
 
@@ -26,24 +31,28 @@ afterEach(async () => {
 
 const draft = GoalPlanDraftContentSchema.parse({
   goal: {
+    draftRef: 'goal',
     name: 'Ship the Mastra reference workflow',
-    description: 'Make durable workflow semantics the production path.',
-    startDate: Date.UTC(2026, 7, 20),
-    dueDate: Date.UTC(2026, 8, 20),
+    summary: 'Make durable workflow semantics the production path.',
+    status: 'Planned',
+    startDate: '2026-08-20',
+    target: { kind: 'month', year: 2026, month: 9 },
+    labels: [],
   },
   keyResults: [
     {
+      draftRef: 'kr:reference-journey',
       title: 'Pass the reference acceptance journey',
-      calculationMethod: 'Sum',
-      startingValue: 0,
+      aggregationMethod: 'Sum',
+      initialValue: 0,
       currentValue: 0,
       targetValue: 1,
       unit: 'journey',
       weight: 5,
     },
   ],
-  taskTemplates: [],
-  reminders: [],
+  tasks: [],
+  knowledge: [],
   rationale: 'The workflow must be restart-safe before later workflow batches build on it.',
   warnings: [],
 });
@@ -79,24 +88,29 @@ function context(identityId: string, requestId: string): ExecutionContext {
   };
 }
 
-function mutationPort(): GoalPlanMutationPort & {
-  resolveLabels: ReturnType<typeof vi.fn>;
-  createGoal: ReturnType<typeof vi.fn>;
-  createTaskTemplate: ReturnType<typeof vi.fn>;
-  createReminder: ReturnType<typeof vi.fn>;
-} {
+function mutationPort(): GoalPlanMutationPort & Record<string, ReturnType<typeof vi.fn>> {
   return {
     resolveLabels: vi.fn(async (names: readonly string[]) =>
-      ok(names.map((name) => `label:${name.trim().toLowerCase()}`)),
+      ok(names.map((name) => 'label:' + name.trim().toLowerCase())),
     ),
     createGoal: vi.fn(async (request) =>
       ok({
         goalId: String(request.id),
+        goalVersion: 1,
         keyResultIds: (request.initialKeyResults ?? []).map((item) => String(item.id)),
       }),
     ),
-    createTaskTemplate: vi.fn(async (request) => ok({ taskId: String(request.id) })),
-    createReminder: vi.fn(async (request) => ok({ reminderId: String(request.id) })),
+    activateGoal: vi.fn(async () => ok({ goalVersion: 2 })),
+    createTaskPlan: vi.fn(async (request) => ok({ taskId: String(request.id) })),
+    createKnowledgeDocument: vi.fn(async () =>
+      ok({
+        knowledgeDocument: {
+          knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440010',
+          documentId: 'kdoc_550e8400-e29b-41d4-a716-446655440011',
+        },
+      }),
+    ),
+    linkGoalKnowledge: vi.fn(async () => ok({ relationId: 'relation-1' })),
   };
 }
 
@@ -108,8 +122,10 @@ async function createRuntime() {
   const file = join(tmpdir(), `memoflow-mastra-runtime-${randomUUID()}.db`);
   const storage = new LibSQLStore({ id: randomUUID(), url: `file:${file}` });
   const mutations = mutationPort();
-  const createTaskTemplate = taskMutationPort();
-  const saveKnowledgeNote = vi.fn(async (request) => ok({ noteId: String(request.requestId) }));
+  const createTaskPlan = taskMutationPort();
+  const createConfirmedKnowledgeNote = vi.fn(async (request) =>
+    ok({ noteId: request.knowledgeDocumentId }),
+  );
   const summarizeUsage = vi.fn(async () => ({
     executionCount: 2,
     promptTokens: 200,
@@ -126,10 +142,11 @@ async function createRuntime() {
       resolveLabels: vi.fn(async (names: readonly string[]) =>
         ok(names.map((name) => `label:${name.trim().toLowerCase()}`)),
       ),
-      createTaskTemplate,
+      createTaskPlan,
     },
-    knowledgeCaptureMutationPort: { saveKnowledgeNote },
+    knowledgeCaptureMutationPort: { createConfirmedKnowledgeNote },
     usageReadPort: { summarizeUsage },
+    userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
   });
   vi.spyOn(runtime.goalPlanner, 'plan').mockResolvedValue({
     status: 'draft_ready',
@@ -147,7 +164,7 @@ async function createRuntime() {
     candidateDraft: knowledgeDraft,
   });
   resources.push({ runtime, file });
-  return { runtime, mutations, createTaskTemplate, saveKnowledgeNote, summarizeUsage };
+  return { runtime, mutations, createTaskPlan, createConfirmedKnowledgeNote, summarizeUsage };
 }
 
 describe('MastraAIRuntime goal.create product projection', () => {
@@ -163,6 +180,12 @@ describe('MastraAIRuntime goal.create product projection', () => {
         input: { idea: 'Ship the Mastra reference workflow' },
         locale: 'en-US',
       },
+    });
+
+    const plannerContext = vi.mocked(runtime.goalPlanner.plan).mock.calls[0]?.[1];
+    expect(plannerContext?.getRaw('timeContext')).toEqual({
+      timeZone: 'Asia/Tokyo',
+      weekStartsOn: 1,
     });
 
     expect(started).toMatchObject({
@@ -240,7 +263,7 @@ describe('MastraAIRuntime goal.create product projection', () => {
   });
 
   it('owns a task.create workflow: start → draft review → approve creates one task template', async () => {
-    const { runtime, createTaskTemplate } = await createRuntime();
+    const { runtime, createTaskPlan } = await createRuntime();
     const identityId = 'identity-task';
 
     const started = await runtime.start({
@@ -275,8 +298,8 @@ describe('MastraAIRuntime goal.create product projection', () => {
       status: 'completed',
       result: { workflowRunId: started.runId, revision: 1, status: 'success' },
     });
-    expect(createTaskTemplate).toHaveBeenCalledTimes(1);
-    expect(createTaskTemplate.mock.calls[0]?.[1]).toMatchObject({
+    expect(createTaskPlan).toHaveBeenCalledTimes(1);
+    expect(createTaskPlan.mock.calls[0]?.[1]).toMatchObject({
       requestId: 'request-task-approve',
       identityId,
     });
@@ -299,7 +322,7 @@ describe('MastraAIRuntime goal.create product projection', () => {
 
 describe('MastraAIRuntime knowledge.capture product projection', () => {
   it('owns start/get/list/resume and persists a note only after approval', async () => {
-    const { runtime, saveKnowledgeNote } = await createRuntime();
+    const { runtime, createConfirmedKnowledgeNote } = await createRuntime();
     const identityId = 'identity-knowledge';
 
     const started = await runtime.start({
@@ -325,7 +348,36 @@ describe('MastraAIRuntime knowledge.capture product projection', () => {
     expect(await runtime.get({ identityId: 'identity-b', runId: started.runId })).toBeNull();
     expect(await runtime.list({ identityId })).toHaveLength(1);
     // No note write should occur before explicit approval.
-    expect(saveKnowledgeNote).not.toHaveBeenCalled();
+    expect(createConfirmedKnowledgeNote).not.toHaveBeenCalled();
+    const reviewedDocumentId =
+      started.suspension?.type === 'knowledge_draft_review'
+        ? started.suspension.draft.knowledgeDocumentId
+        : '';
+    expect(reviewedDocumentId).toMatch(/^kdoc_[0-9a-f-]{36}$/i);
+
+    const revised = await runtime.resume({
+      context: context(identityId, 'request-kedit'),
+      request: {
+        runId: started.runId,
+        command: {
+          type: 'edit_structured',
+          patch: { title: 'Mastra durable workflow notes revised' },
+        },
+      },
+    });
+    expect(revised).toMatchObject({
+      status: 'suspended',
+      suspension: {
+        type: 'knowledge_draft_review',
+        revision: 2,
+        draft: {
+          revision: 2,
+          title: 'Mastra durable workflow notes revised',
+          knowledgeDocumentId: reviewedDocumentId,
+        },
+      },
+    });
+    expect(createConfirmedKnowledgeNote).not.toHaveBeenCalled();
 
     const completed = await runtime.resume({
       context: context(identityId, 'request-kapprove'),
@@ -336,22 +388,23 @@ describe('MastraAIRuntime knowledge.capture product projection', () => {
       status: 'completed',
       result: {
         workflowRunId: started.runId,
-        revision: 1,
+        revision: 2,
         status: 'success',
       },
     });
-    expect(saveKnowledgeNote).toHaveBeenCalledTimes(1);
-    const saveCall = saveKnowledgeNote.mock.calls[0]?.[0];
-    expect(saveCall).toMatchObject({
+    expect(createConfirmedKnowledgeNote).toHaveBeenCalledTimes(1);
+    const createCall = createConfirmedKnowledgeNote.mock.calls[0]?.[0];
+    expect(createCall).toMatchObject({
       workflowRunId: started.runId,
-      revision: 1,
+      revision: 2,
+      knowledgeDocumentId: reviewedDocumentId,
       path: 'Notes/Engineering',
-      title: 'Mastra durable workflow notes',
+      title: 'Mastra durable workflow notes revised',
     });
     // requestId is a deterministic idempotency key, not a caller-supplied value.
-    expect(typeof saveCall.requestId).toBe('string');
-    expect(saveCall.requestId.length).toBeGreaterThan(0);
-    expect(saveCall.context).toMatchObject({
+    expect(typeof createCall.requestId).toBe('string');
+    expect(createCall.requestId.length).toBeGreaterThan(0);
+    expect(createCall.context).toMatchObject({
       identityId,
       requestId: 'request-kapprove',
     });
@@ -362,6 +415,6 @@ describe('MastraAIRuntime knowledge.capture product projection', () => {
       request: { runId: started.runId, command: { type: 'approve' } },
     });
     expect(duplicateApprove).toEqual(completed);
-    expect(saveKnowledgeNote).toHaveBeenCalledTimes(1);
+    expect(createConfirmedKnowledgeNote).toHaveBeenCalledTimes(1);
   });
 });

@@ -4,50 +4,51 @@ import { describe, expect, it } from 'vitest';
 
 /**
  * Residual 1225 closed: Goal/Task date inputs converge on Product Time.
- * UI strings are parsed as Ymd and converted to Instant through startOfYmd;
- * direct Date.parse/new Date calendar conversion must not return.
+ * Goal targets retain GoalTimeframe precision; UI calendar strings stay Ymd.
+ * Direct Date.parse/new Date calendar conversion must not return.
  */
 describe('date input Product Time boundary (residual 1225)', () => {
   const dir = __dirname;
   const vue = readFileSync(
-    resolve(
-      dir,
-      '../../modules/task/components/TaskTemplateForm/sections/TimeConfigSection.vue',
-    ),
+    resolve(dir, '../../modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue'),
     'utf8',
   );
   const react = readFileSync(
     resolve(dir, '../../../../app-react/src/screens/GoalEditorScreen.tsx'),
     'utf8',
   );
+  const calendarSelect = readFileSync(resolve(dir, 'handle-calendar-select.ts'), 'utf8');
+  const parseCalendar = readFileSync(resolve(dir, 'parse-to-date.ts'), 'utf8');
+  const formatDisplay = readFileSync(resolve(dir, 'format-display-date.ts'), 'utf8');
 
-  it('keeps app-vue Task date parsing on Product Time', () => {
-    expect(vue).toMatch(/const parseDateInput\b/);
-    expect(vue).toContain('getProductTime');
-    expect(vue).toContain('parseDateValue');
-    expect(vue).toContain('startOfYmd');
-    const body = vue.match(/const parseDateInput = \([\s\S]*?\n\};/)?.[0] ?? '';
-    expect(body).not.toContain('Date.parse');
-    expect(body).not.toContain('new Date(');
-    expect(body).not.toContain('.getTime()');
+  it('keeps app-vue Task date parsing on canonical Ymd calendar adapters', () => {
+    expect(vue).toContain('parseToCalendarDate');
+    expect(vue).toContain('handleCalendarSelect');
+    expect(parseCalendar).toContain('ymdToCalendarDateValue');
+    expect(parseCalendar).toContain('requireYmd');
+    expect(calendarSelect).toContain('calendarDateValueToYmd');
+    for (const source of [vue, parseCalendar, calendarSelect]) {
+      expect(source).not.toContain('Date.parse');
+      expect(source).not.toContain('getTimezoneOffset');
+      expect(source).not.toContain('toISOString().slice');
+    }
   });
 
-  it('keeps app-react Goal date parsing on the same Product Time boundary', () => {
-    expect(react).toMatch(/function parseDateInput\b/);
-    expect(react).toContain('getProductTime');
-    expect(react).toContain('parseDateValue');
-    expect(react).toContain('startOfYmd');
-    const body = react.match(/function parseDateInput\([\s\S]*?\n\}/)?.[0] ?? '';
-    expect(body).not.toContain('Date.parse');
-    expect(body).not.toContain('new Date(');
-    expect(body).not.toContain('.getTime()');
+  it('keeps app-react Goal target parsing on canonical Product Time helpers', () => {
+    expect(react).toContain('goalTimeframeInputValue');
+    expect(react).toContain('parseGoalTimeframeInput');
+    expect(react).toContain('parseProductYmdInput');
+    expect(react).toContain("from '../utils/product-time'");
+    expect(react).not.toMatch(/function parseDateInput\b/);
+    expect(react).not.toContain('Date.parse');
+    expect(react).not.toContain('new Date(');
   });
 
-  it('keeps date formatting on Product Time too', () => {
-    expect(vue).toMatch(/const formatDateToInput\b/);
-    expect(vue).toContain('dateValue');
-    expect(react).toMatch(/function toDateInput\b/);
-    expect(react).toContain('input.dateValue');
+  it('keeps date formatting on the shared Product Time formatter', () => {
+    expect(vue).toContain('formatDisplayDate');
+    expect(formatDisplay).toContain("from '@memoflow/time'");
+    expect(react).toContain('goalTimeframeInputValue');
+    expect(react).not.toMatch(/function toDateInput\b/);
   });
 
   it('documents the anti-resurrection boundary', () => {
@@ -57,6 +58,6 @@ describe('date input Product Time boundary (residual 1225)', () => {
     );
     expect(self).toContain('Residual 1225 closed');
     expect(self).toContain('Product Time');
-    expect(self).toContain('direct Date.parse/new Date calendar conversion must not return');
+    expect(self).toContain('Direct Date.parse/new Date calendar conversion must not return');
   });
 });

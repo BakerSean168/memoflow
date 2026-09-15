@@ -7,7 +7,7 @@ import { useGoals } from '../hooks/useGoals';
 import { useNotifications } from '../hooks/useNotifications';
 import { useReminders } from '../hooks/useReminders';
 import { useScheduleTasks } from '../hooks/useScheduleTasks';
-import { useTaskTemplates } from '../hooks/useTaskTemplates';
+import { useTaskPlans } from '../hooks/useTaskPlans';
 import { useAppSession } from '../providers/app-session-provider';
 
 import {
@@ -32,7 +32,7 @@ function buildGreeting(name: string | null) {
 export function HomeScreen() {
   const router = useRouter();
   const { currentUser, isGuest, isRemoteAuthenticated, sessionKind, signInDemo, signOut } = useAppSession();
-  const { templates } = useTaskTemplates();
+  const { templates } = useTaskPlans();
   const { goals } = useGoals();
   const { tasks: scheduleTasks } = useScheduleTasks();
   const { todaySchedule } = useReminders();
@@ -124,7 +124,7 @@ export function HomeScreen() {
                   </ThemedText>
                   <View style={styles.previewMetaRow}>
                     <StatusPill label={template.status} tone={template.status === 'Active' ? 'success' : 'warning'} />
-                    <StatusPill label={`${template.pendingInstanceCount} pending`} tone="textSecondary" />
+                    <StatusPill label={`${template.pendingOccurrenceCount} pending`} tone="textSecondary" />
                   </View>
                 </ThemedView>
               ))}

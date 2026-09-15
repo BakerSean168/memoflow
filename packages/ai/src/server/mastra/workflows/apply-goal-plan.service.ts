@@ -1,34 +1,19 @@
-import type {
-  GoalPlanExecutionFailure,
-  GoalPlanExecutionReceipt,
-  GoalPlanReminder,
-  GoalPlanTaskTemplate,
+import {
+  GoalPlanExecutionReceiptSchema,
+  type GoalPlanDraft,
+  type GoalPlanDraftRef,
+  type GoalPlanExecutionFailure,
+  type GoalPlanExecutionReceipt,
+  type GoalPlanTask,
 } from '@memoflow/contracts/ai';
 import type { CreateGoalReq } from '@memoflow/contracts/goal';
-import {
-  NotificationChannel,
-  ReminderType,
-  TriggerType,
-  type CreateReminderTemplateReq,
-} from '@memoflow/contracts/reminder';
-import type { Result, ResultError } from '@memoflow/contracts/result';
-import {
-  TaskGoalBindingTrigger,
-  TaskTimeType,
-  TaskType,
-  type CreateTaskTemplateReq,
-} from '@memoflow/contracts/task';
-import { goalWorkflowEntityId } from './deterministic-entity-id';
-import type {
-  ApplyGoalPlanInput,
-  GoalMutationResult,
-  GoalPlanMutationPort,
-  ReminderMutationResult,
-  TaskTemplateMutationResult,
-} from './goal-plan-mutation.port';
+import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
+import type { KnowledgeDocumentRef } from '@memoflow/contracts/repository';
+import type { ResultError } from '@memoflow/contracts/result';
+import type { CreateTaskPlanReq } from '@memoflow/contracts/task';
+import { goalWorkflowEntityId, goalWorkflowMutationRequestId } from './deterministic-entity-id';
+import type { ApplyGoalPlanInput, GoalPlanMutationPort } from './goal-plan-mutation.port';
 
-const DAILY_MINUTES = 24 * 60;
-const WEEKLY_MINUTES = 7 * DAILY_MINUTES;
 const RETRYABLE_LEGACY_CODES = new Set([
   'DATABASE_ERROR',
   'DB_ERROR',
@@ -48,225 +33,209 @@ function retryableFailure(error: ResultError): boolean {
 
 function failure(
   operation: GoalPlanExecutionFailure['operation'],
+  draftRef: GoalPlanDraftRef,
   error: Pick<ResultError, 'code' | 'message' | 'failure'>,
-  index?: number,
 ): GoalPlanExecutionFailure {
   return {
     operation,
-    ...(index === undefined ? {} : { index }),
+    draftRef,
     code: String(error.code),
     message: error.message,
     retryable: retryableFailure(error as ResultError),
   };
 }
 
-/**
- * Fold an exception thrown by a mutation application port (past its own Result
- * boundary) into a retryable workflow failure entry instead of letting it escape
- * and crash the durable workflow run. INTERNAL_ERROR is classified retryable by
- * retryableFailure, so the durable workflow resumes as recovery_required rather
- * than failing terminally.
- */
 function throwToFailure(
   operation: GoalPlanExecutionFailure['operation'],
+  draftRef: GoalPlanDraftRef,
   cause: unknown,
-  index?: number,
 ): GoalPlanExecutionFailure {
-  return failure(
-    operation,
-    {
+  return failure(operation, draftRef, {
+    code: 'INTERNAL_ERROR',
+    message: cause instanceof Error ? cause.message : String(cause),
+    failure: {
       code: 'INTERNAL_ERROR',
-      message: cause instanceof Error ? cause.message : String(cause),
-      failure: { code: 'INTERNAL_ERROR', category: 'unavailable', retryHint: { kind: 'transient' } },
+      category: 'unavailable',
+      retryHint: { kind: 'transient' },
     },
-    index,
-  );
+  });
 }
 
-function uniqueInOrder(values: readonly string[]): string[] {
-  return Array.from(new Set(values));
-}
-
-function parseMinuteOfDay(value: string): number {
-  const match = /^(\d{2}):(\d{2})$/.exec(value);
-  if (!match) throw new Error(`Invalid timeOfDay: ${value}`);
-  const hour = Number(match[1]);
-  const minute = Number(match[2]);
-  if (hour > 23 || minute > 59) throw new Error(`Invalid timeOfDay: ${value}`);
-  return hour * 60 + minute;
-}
-
-function localParts(epochMs: number, timeZone: string): {
-  year: number;
-  month: number;
-  day: number;
-  hour: number;
-  minute: number;
-} {
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23',
-  }).formatToParts(new Date(epochMs));
-  const value = (type: Intl.DateTimeFormatPartTypes) =>
-    Number(parts.find((part) => part.type === type)?.value ?? Number.NaN);
+function mismatchFailure(
+  operation: GoalPlanExecutionFailure['operation'],
+  draftRef: GoalPlanDraftRef,
+  entity: string,
+): GoalPlanExecutionFailure {
   return {
-    year: value('year'),
-    month: value('month'),
-    day: value('day'),
-    hour: value('hour'),
-    minute: value('minute'),
+    operation,
+    draftRef,
+    code: 'AI_WORKFLOW_MUTATION_ID_MISMATCH',
+    message: `${entity} application port returned an unexpected deterministic identity`,
+    retryable: false,
   };
 }
 
-/** Resolve local calendar day + HH:mm without ever consulting the server timezone. */
-function combineAnchorAndTime(anchorMs: number, timeOfDay: string, timeZone: string): number {
-  const anchor = localParts(anchorMs, timeZone);
-  const minuteOfDay = parseMinuteOfDay(timeOfDay);
-  const hour = Math.floor(minuteOfDay / 60);
-  const minute = minuteOfDay % 60;
-  let candidate = Date.UTC(anchor.year, anchor.month - 1, anchor.day, hour, minute);
-
-  // Convert the UTC-shaped candidate into the requested zone. Repeating once
-  // handles DST offset transitions for ordinary wall-clock reminder times.
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    const observed = localParts(candidate, timeZone);
-    const desiredAsUtc = Date.UTC(anchor.year, anchor.month - 1, anchor.day, hour, minute);
-    const observedAsUtc = Date.UTC(
-      observed.year,
-      observed.month - 1,
-      observed.day,
-      observed.hour,
-      observed.minute,
-    );
-    candidate += desiredAsUtc - observedAsUtc;
+function expectedReferenceMap(workflowRunId: string, draft: GoalPlanDraft): Record<string, string> {
+  const refs: Record<string, string> = {
+    goal: goalWorkflowEntityId({
+      workflowRunId,
+      revision: draft.revision,
+      kind: 'goal',
+      draftRef: 'goal',
+    }),
+  };
+  for (const keyResult of draft.keyResults) {
+    refs[keyResult.draftRef] = goalWorkflowEntityId({
+      workflowRunId,
+      revision: draft.revision,
+      kind: 'key_result',
+      draftRef: keyResult.draftRef,
+    });
   }
-  return candidate;
+  for (const task of draft.tasks) {
+    refs[task.draftRef] = goalWorkflowEntityId({
+      workflowRunId,
+      revision: draft.revision,
+      kind: 'task_plan',
+      draftRef: task.draftRef,
+    });
+  }
+  for (const knowledge of draft.knowledge) {
+    refs[knowledge.draftRef] =
+      knowledge.mode === 'create'
+        ? goalWorkflowEntityId({
+            workflowRunId,
+            revision: draft.revision,
+            kind: 'knowledge_document',
+            draftRef: knowledge.draftRef,
+          })
+        : knowledge.knowledgeDocument.documentId;
+  }
+  return refs;
+}
+
+function restoreCurrentReceiptState(
+  prior: GoalPlanExecutionReceipt | undefined,
+  expected: Readonly<Record<string, string>>,
+  knowledgeRefs: readonly string[],
+): {
+  referenceMap: Record<string, string>;
+  relationIds: Record<string, string>;
+  goalVersion?: number;
+  appliedGoalStatus?: 'Planned' | 'InProgress';
+} {
+  if (!prior) return { referenceMap: {}, relationIds: {} };
+  const referenceMap: Record<string, string> = {};
+  for (const [draftRef, expectedId] of Object.entries(expected)) {
+    if (prior.referenceMap[draftRef as GoalPlanDraftRef] === expectedId) {
+      referenceMap[draftRef] = expectedId;
+    }
+  }
+  const relationIds: Record<string, string> = {};
+  for (const draftRef of knowledgeRefs) {
+    const relationId = prior.relationIds[draftRef as `note:${string}`];
+    if (relationId) relationIds[draftRef] = relationId;
+  }
+  return {
+    referenceMap,
+    relationIds,
+    ...(referenceMap.goal && prior.goalVersion ? { goalVersion: prior.goalVersion } : {}),
+    ...(referenceMap.goal && prior.appliedGoalStatus
+      ? { appliedGoalStatus: prior.appliedGoalStatus }
+      : {}),
+  };
+}
+
+function receipt(input: {
+  workflowRunId: string;
+  revision: number;
+  referenceMap: Record<string, string>;
+  relationIds: Record<string, string>;
+  goalVersion?: number;
+  appliedGoalStatus?: 'Planned' | 'InProgress';
+  failures: GoalPlanExecutionFailure[];
+  forceStatus?: GoalPlanExecutionReceipt['status'];
+}): GoalPlanExecutionReceipt {
+  const status =
+    input.forceStatus ??
+    (input.failures.length === 0 ? 'success' : input.referenceMap.goal ? 'partial' : 'failed');
+  return GoalPlanExecutionReceiptSchema.parse({
+    workflowRunId: input.workflowRunId,
+    revision: input.revision,
+    status,
+    referenceMap: input.referenceMap,
+    relationIds: input.relationIds,
+    ...(input.goalVersion ? { goalVersion: input.goalVersion } : {}),
+    ...(input.appliedGoalStatus ? { appliedGoalStatus: input.appliedGoalStatus } : {}),
+    failures: input.failures,
+    retryable: input.failures.some((item) => item.retryable),
+  });
+}
+
+function goalRequest(
+  draft: GoalPlanDraft,
+  expected: Readonly<Record<string, string>>,
+  labelIds: readonly string[],
+): CreateGoalReq {
+  return {
+    id: expected.goal as NonNullable<CreateGoalReq['id']>,
+    name: draft.goal.name,
+    ...(draft.goal.summary == null ? {} : { summary: draft.goal.summary }),
+    ...(draft.goal.startDate == null ? {} : { startDate: draft.goal.startDate }),
+    ...(draft.goal.target == null ? {} : { target: draft.goal.target }),
+    labelIds: [...labelIds],
+    initialKeyResults: draft.keyResults.map((keyResult) => ({
+      id: expected[keyResult.draftRef] as NonNullable<
+        NonNullable<CreateGoalReq['initialKeyResults']>[number]['id']
+      >,
+      title: keyResult.title,
+      description: keyResult.description ?? null,
+      calculationMethod: keyResult.aggregationMethod,
+      initialValue: keyResult.initialValue,
+      currentValue: keyResult.currentValue,
+      targetValue: keyResult.targetValue,
+      ...(keyResult.target == null ? {} : { target: keyResult.target }),
+      unit: keyResult.unit ?? '',
+      weight: keyResult.weight,
+    })),
+  };
 }
 
 function taskRequest(
-  task: GoalPlanTaskTemplate,
-  input: {
-    id: string;
-    goalId: string;
-    keyResultIds: readonly string[];
-    goalStartDate: number | null;
-    labelIds: readonly string[];
-  },
-): CreateTaskTemplateReq {
-  const startDate = task.startDate ?? input.goalStartDate;
-  const timePoint = task.timeOfDay ? parseMinuteOfDay(task.timeOfDay) : null;
-  const recurrenceRule: CreateTaskTemplateReq['recurrenceRule'] =
-    task.cadence === 'once'
-      ? null
-      : {
-          frequency: task.cadence === 'daily' ? ('Daily' as const) : ('Weekly' as const),
-          interval: 1,
-          daysOfWeek:
-            task.cadence === 'weekly'
-              ? (task.daysOfWeek as NonNullable<
-                  CreateTaskTemplateReq['recurrenceRule']
-                >['daysOfWeek'])
-              : [],
-          endDate: null,
-          occurrences: task.occurrences,
-        };
-  const keyResultId =
-    task.keyResultIndex === undefined ? undefined : input.keyResultIds[task.keyResultIndex];
-
-  return {
-    id: input.id as NonNullable<CreateTaskTemplateReq['id']>,
-    name: task.name,
-    description: task.description ?? null,
-    taskType: task.cadence === 'once' ? TaskType.OneTime : TaskType.Recurring,
-    timeConfig: {
-      timeType: timePoint === null ? TaskTimeType.AllDay : TaskTimeType.TimePoint,
-      startDate,
-      timePoint,
-      timeRange: null,
-    },
-    recurrenceRule,
-    reminderConfig: null,
-    importance: task.importance,
-    labelIds: [...input.labelIds],
-    goalBinding: keyResultId
-      ? {
-          goalId: input.goalId as NonNullable<NonNullable<CreateTaskTemplateReq['goalBinding']>['goalId']>,
-          keyResultId:
-            keyResultId as NonNullable<NonNullable<CreateTaskTemplateReq['goalBinding']>['keyResultId']>,
-          contribution: {
-            value: task.contributionValue,
-            trigger: TaskGoalBindingTrigger.EachCompletion,
-          },
-        }
-      : null,
-  };
-}
-
-function reminderRequest(
-  reminder: GoalPlanReminder,
-  input: { id: string; goalStartDate: number | null },
-): CreateReminderTemplateReq {
-  const timeZone = reminder.timezone ?? 'UTC';
-  const baseAnchor = reminder.scheduledAt ?? input.goalStartDate;
-  if (baseAnchor == null) {
-    throw new Error('Reminder requires scheduledAt or a goal startDate anchor');
+  task: GoalPlanTask,
+  expected: Readonly<Record<string, string>>,
+  labelIds: readonly string[],
+): CreateTaskPlanReq {
+  const goalId = expected.goal;
+  if (!goalId) throw new Error('Goal persistent identity is missing');
+  const keyResultId = task.keyResultRef ? expected[task.keyResultRef] : undefined;
+  if (task.keyResultRef && !keyResultId) {
+    throw new Error(`Key Result persistent identity is missing for ${task.keyResultRef}`);
   }
-  const startTime = reminder.timeOfDay
-    ? combineAnchorAndTime(baseAnchor, reminder.timeOfDay, timeZone)
-    : baseAnchor;
-  const timeOfDay =
-    reminder.timeOfDay ??
-    (() => {
-      const parts = localParts(startTime, timeZone);
-      return `${String(parts.hour).padStart(2, '0')}:${String(parts.minute).padStart(2, '0')}`;
-    })();
-  const oneTime = reminder.cadence === 'once';
-
   return {
-    id: input.id as NonNullable<CreateReminderTemplateReq['id']>,
-    title: reminder.title,
-    description: reminder.description,
-    type: oneTime ? ReminderType.OneTime : ReminderType.Recurring,
-    trigger: oneTime
-      ? {
-          type: TriggerType.FixedTime,
-          fixedTime: { time: timeOfDay, timezone: timeZone },
-          interval: null,
-        }
-      : {
-          type: TriggerType.Interval,
-          fixedTime: null,
-          interval: {
-            minutes: reminder.cadence === 'daily' ? DAILY_MINUTES : WEEKLY_MINUTES,
-            startTime,
-          },
-        },
-    activeTime: { activatedAt: startTime },
-    notificationConfig: {
-      channels: reminder.channels.length ? reminder.channels : [NotificationChannel.InApp],
-      title: reminder.title,
-      body: reminder.description ?? null,
-      sound: null,
-      vibration: null,
-      actions: null,
+    id: expected[task.draftRef] as NonNullable<CreateTaskPlanReq['id']>,
+    name: task.title,
+    description: task.description ?? null,
+    schedule: task.schedule,
+    reminderConfig: task.reminderConfig ?? null,
+    importance: task.importance,
+    labelIds: [...labelIds],
+    goalBinding: {
+      goalId: goalId as NonNullable<NonNullable<CreateTaskPlanReq['goalBinding']>['goalId']>,
+      keyResultId: (keyResultId ?? null) as NonNullable<
+        CreateTaskPlanReq['goalBinding']
+      >['keyResultId'],
+      contribution: task.contribution ?? null,
     },
-    importanceLevel: reminder.importance,
-    tags: reminder.tags,
   };
 }
 
 /**
- * Deterministic, restart-safe application of one approved GoalPlanDraft.
+ * Deterministic, restart-safe V2 application of one approved GoalPlanDraft.
  *
- * Every domain create carries a stable aggregate ID derived from
- * `(workflowRunId, revision, entity kind, index)`. Therefore the application
- * ports themselves can replay the durable fact even if the process dies after
- * a domain commit but before Mastra persists the workflow step output.
+ * Each operation is owner-local and idempotent. There is intentionally no
+ * cross-module transaction: Mastra persists the receipt in Workflow state and
+ * retries only the missing draftRef operations using stable child identities.
  */
 export class ApplyGoalPlanService {
   constructor(private readonly mutations: GoalPlanMutationPort) {}
@@ -278,236 +247,212 @@ export class ApplyGoalPlanService {
       input.priorReceipt.revision === draft.revision
         ? input.priorReceipt
         : undefined;
-
-    const expectedGoalId = goalWorkflowEntityId({
-      workflowRunId,
-      revision: draft.revision,
-      kind: 'goal',
-    });
-    const expectedKeyResultIds = draft.keyResults.map((_, index) =>
-      goalWorkflowEntityId({
-        workflowRunId,
-        revision: draft.revision,
-        kind: 'key_result',
-        index,
-      }),
+    const expected = expectedReferenceMap(workflowRunId, draft);
+    const state = restoreCurrentReceiptState(
+      prior,
+      expected,
+      draft.knowledge.map((item) => item.draftRef),
     );
-    const expectedTaskIds = draft.taskTemplates.map((_, index) =>
-      goalWorkflowEntityId({
-        workflowRunId,
-        revision: draft.revision,
-        kind: 'task_template',
-        index,
-      }),
-    );
-    const expectedReminderIds = draft.reminders.map((_, index) =>
-      goalWorkflowEntityId({
-        workflowRunId,
-        revision: draft.revision,
-        kind: 'reminder',
-        index,
-      }),
-    );
-
-    let goalId = prior?.goalId === expectedGoalId ? prior.goalId : undefined;
-    let keyResultIds = prior?.keyResultIds.filter((id) => expectedKeyResultIds.includes(id)) ?? [];
-    const taskIds = prior?.taskIds.filter((id) => expectedTaskIds.includes(id)) ?? [];
-    const reminderIds =
-      prior?.reminderIds.filter((id) => expectedReminderIds.includes(id)) ?? [];
     const failures: GoalPlanExecutionFailure[] = [];
 
-    const goalFullyApplied =
-      goalId === expectedGoalId &&
-      expectedKeyResultIds.every((expectedId) => keyResultIds.includes(expectedId));
+    const expectedGoalId = expected.goal!;
+    const expectedKeyResultIds = draft.keyResults.map((item) => expected[item.draftRef]!);
+    const goalAlreadyCreated =
+      state.referenceMap.goal === expectedGoalId &&
+      state.goalVersion !== undefined &&
+      draft.keyResults.every(
+        (item) => state.referenceMap[item.draftRef] === expected[item.draftRef],
+      );
 
-    if (!goalFullyApplied) {
-      const goalLabelsResult = await this.mutations.resolveLabels(draft.goal.labels, context);
-      if (!goalLabelsResult.ok) {
-        failures.push(failure('goal', goalLabelsResult.error));
-        return {
-          workflowRunId,
-          revision: draft.revision,
-          status: 'failed',
-          keyResultIds: [],
-          taskIds: [],
-          reminderIds: [],
-          failures,
-          retryable: failures.some((item) => item.retryable),
-        };
-      }
-
-      const request: CreateGoalReq = {
-        id: expectedGoalId as NonNullable<CreateGoalReq['id']>,
-        name: draft.goal.name,
-        description: draft.goal.description,
-        motivation: draft.goal.motivation,
-        feasibilityAnalysis: draft.goal.feasibilityAnalysis,
-        startDate: draft.goal.startDate ?? undefined,
-        dueDate: draft.goal.dueDate ?? undefined,
-        labelIds: goalLabelsResult.data,
-        initialKeyResults: draft.keyResults.map((keyResult, index) => ({
-          id: expectedKeyResultIds[index] as NonNullable<
-            NonNullable<CreateGoalReq['initialKeyResults']>[number]['id']
-          >,
-          title: keyResult.title,
-          description: keyResult.description,
-          calculationMethod: keyResult.calculationMethod,
-          startingValue: keyResult.startingValue,
-          progressBaselineValue: keyResult.progressBaselineValue,
-          currentValue: keyResult.currentValue,
-          targetValue: keyResult.targetValue,
-          unit: keyResult.unit,
-          weight: keyResult.weight,
-        })),
-      };
-      let result: Result<GoalMutationResult> | undefined;
+    if (!goalAlreadyCreated) {
+      let labels;
       try {
-        result = await this.mutations.createGoal(request, context);
+        labels = await this.mutations.resolveLabels(draft.goal.labels, context);
       } catch (cause) {
-        failures.push(throwToFailure('goal', cause));
-        return {
+        failures.push(throwToFailure('label_resolve', 'goal', cause));
+        return receipt({
           workflowRunId,
           revision: draft.revision,
-          status: 'failed',
-          keyResultIds: [],
-          taskIds: [],
-          reminderIds: [],
+          ...state,
           failures,
-          retryable: failures.some((item) => item.retryable),
-        };
+        });
       }
-      if (!result.ok) {
-        failures.push(failure('goal', result.error));
-        return {
-          workflowRunId,
-          revision: draft.revision,
-          status: 'failed',
-          keyResultIds: [],
-          taskIds: [],
-          reminderIds: [],
-          failures,
-          retryable: failures.some((item) => item.retryable),
-        };
-      }
-      goalId = result.data.goalId;
-      keyResultIds = uniqueInOrder(result.data.keyResultIds);
-    }
-
-    if (goalId !== expectedGoalId || !expectedKeyResultIds.every((id) => keyResultIds.includes(id))) {
-      failures.push({
-        operation: 'goal',
-        code: 'AI_WORKFLOW_MUTATION_ID_MISMATCH',
-        message: 'Goal application port returned entity IDs that do not match the workflow mutation identity',
-        retryable: false,
-      });
-      return {
-        workflowRunId,
-        revision: draft.revision,
-        status: 'failed',
-        keyResultIds,
-        taskIds: uniqueInOrder(taskIds),
-        reminderIds: uniqueInOrder(reminderIds),
-        failures,
-        retryable: false,
-      };
-    }
-
-    for (const [index, task] of draft.taskTemplates.entries()) {
-      const expectedId = expectedTaskIds[index]!;
-      if (taskIds.includes(expectedId)) continue;
-
-      const taskLabelsResult = await this.mutations.resolveLabels(task.labels, context);
-      if (!taskLabelsResult.ok) {
-        failures.push(failure('task_template', taskLabelsResult.error, index));
-        continue;
+      if (!labels.ok) {
+        failures.push(failure('label_resolve', 'goal', labels.error));
+        return receipt({ workflowRunId, revision: draft.revision, ...state, failures });
       }
 
-      let result: Result<TaskTemplateMutationResult> | undefined;
       try {
-        result = await this.mutations.createTaskTemplate(
-          taskRequest(task, {
-            id: expectedId,
-            goalId,
-            keyResultIds: expectedKeyResultIds,
-            goalStartDate: draft.goal.startDate,
-            labelIds: taskLabelsResult.data,
-          }),
+        const result = await this.mutations.createGoal(
+          goalRequest(draft, expected, labels.data),
           context,
         );
-      } catch (cause) {
-        failures.push(throwToFailure('task_template', cause, index));
-        continue;
-      }
-      if (result.ok) {
-        if (result.data.taskId !== expectedId) {
-          failures.push({
-            operation: 'task_template',
-            index,
-            code: 'AI_WORKFLOW_MUTATION_ID_MISMATCH',
-            message: 'Task application port returned an unexpected deterministic entity ID',
-            retryable: false,
-          });
-        } else {
-          taskIds.push(result.data.taskId);
+        if (!result.ok) {
+          failures.push(failure('goal_create', 'goal', result.error));
+          return receipt({ workflowRunId, revision: draft.revision, ...state, failures });
         }
-      } else {
-        failures.push(failure('task_template', result.error, index));
+        const returnedKeyResults = new Set(result.data.keyResultIds);
+        if (
+          result.data.goalId !== expectedGoalId ||
+          result.data.keyResultIds.length !== expectedKeyResultIds.length ||
+          !expectedKeyResultIds.every((id) => returnedKeyResults.has(id))
+        ) {
+          failures.push(mismatchFailure('goal_create', 'goal', 'Goal/Key Result'));
+          return receipt({
+            workflowRunId,
+            revision: draft.revision,
+            ...state,
+            failures,
+            forceStatus: 'failed',
+          });
+        }
+        state.referenceMap.goal = expectedGoalId;
+        state.goalVersion = result.data.goalVersion;
+        for (const keyResult of draft.keyResults) {
+          state.referenceMap[keyResult.draftRef] = expected[keyResult.draftRef]!;
+        }
+      } catch (cause) {
+        failures.push(throwToFailure('goal_create', 'goal', cause));
+        return receipt({ workflowRunId, revision: draft.revision, ...state, failures });
       }
     }
 
-    for (const [index, reminder] of draft.reminders.entries()) {
-      const expectedId = expectedReminderIds[index]!;
-      if (reminderIds.includes(expectedId)) continue;
-      let request: CreateReminderTemplateReq;
+    if (draft.goal.status === 'InProgress' && state.appliedGoalStatus !== 'InProgress') {
       try {
-        request = reminderRequest(reminder, {
-          id: expectedId,
-          goalStartDate: draft.goal.startDate,
-        });
+        const result = await this.mutations.activateGoal(
+          expectedGoalId,
+          state.goalVersion!,
+          context,
+        );
+        if (!result.ok) {
+          failures.push(failure('goal_activate', 'goal', result.error));
+          return receipt({ workflowRunId, revision: draft.revision, ...state, failures });
+        }
+        state.goalVersion = result.data.goalVersion;
+        state.appliedGoalStatus = 'InProgress';
       } catch (cause) {
+        failures.push(throwToFailure('goal_activate', 'goal', cause));
+        return receipt({ workflowRunId, revision: draft.revision, ...state, failures });
+      }
+    } else if (draft.goal.status === 'Planned') {
+      state.appliedGoalStatus = 'Planned';
+    }
+
+    for (const knowledge of draft.knowledge) {
+      let knowledgeDocument: KnowledgeDocumentRef | null =
+        knowledge.mode === 'linkExisting' ? knowledge.knowledgeDocument : null;
+      const expectedDocumentId = expected[knowledge.draftRef]!;
+
+      if (knowledge.mode === 'create' && !state.relationIds[knowledge.draftRef]) {
+        try {
+          const result = await this.mutations.createKnowledgeDocument(
+            {
+              workflowRunId,
+              revision: draft.revision,
+              draftRef: knowledge.draftRef,
+              knowledgeDocumentId: expectedDocumentId as KnowledgeDocumentId,
+              title: knowledge.title,
+              markdown: knowledge.markdown,
+              targetSubpath: knowledge.targetSubpath,
+              sourceRefs: knowledge.sourceRefs,
+              requestId: goalWorkflowMutationRequestId({
+                workflowRunId,
+                revision: draft.revision,
+                draftRef: knowledge.draftRef,
+                operation: 'knowledge_create',
+              }),
+            },
+            context,
+          );
+          if (!result.ok) {
+            failures.push(failure('knowledge_create', knowledge.draftRef, result.error));
+            continue;
+          }
+          if (result.data.knowledgeDocument.documentId !== expectedDocumentId) {
+            failures.push(
+              mismatchFailure('knowledge_create', knowledge.draftRef, 'KnowledgeDocument'),
+            );
+            continue;
+          }
+          knowledgeDocument = result.data.knowledgeDocument;
+          state.referenceMap[knowledge.draftRef] = expectedDocumentId;
+        } catch (cause) {
+          failures.push(throwToFailure('knowledge_create', knowledge.draftRef, cause));
+          continue;
+        }
+      } else if (knowledge.mode === 'linkExisting') {
+        state.referenceMap[knowledge.draftRef] = knowledge.knowledgeDocument.documentId;
+      }
+
+      if (state.relationIds[knowledge.draftRef]) continue;
+      if (!knowledgeDocument) {
+        // A created note with a durable ref but no relation receipt is replayed
+        // through createKnowledgeDocument above, so reaching here is a bug.
         failures.push({
-          operation: 'reminder',
-          index,
-          code: 'VALIDATION_ERROR',
-          message: cause instanceof Error ? cause.message : 'Invalid reminder plan',
+          operation: 'knowledge_link',
+          draftRef: knowledge.draftRef,
+          code: 'AI_WORKFLOW_KNOWLEDGE_REF_MISSING',
+          message: 'KnowledgeDocumentRef is required before linking Goal Knowledge',
           retryable: false,
         });
         continue;
       }
-      let result: Result<ReminderMutationResult> | undefined;
       try {
-        result = await this.mutations.createReminder(request, context);
-      } catch (cause) {
-        failures.push(throwToFailure('reminder', cause, index));
-        continue;
-      }
-      if (result.ok) {
-        if (result.data.reminderId !== expectedId) {
-          failures.push({
-            operation: 'reminder',
-            index,
-            code: 'AI_WORKFLOW_MUTATION_ID_MISMATCH',
-            message: 'Reminder application port returned an unexpected deterministic entity ID',
-            retryable: false,
-          });
-        } else {
-          reminderIds.push(result.data.reminderId);
+        const result = await this.mutations.linkGoalKnowledge(
+          expectedGoalId,
+          knowledgeDocument,
+          context,
+        );
+        if (!result.ok) {
+          failures.push(failure('knowledge_link', knowledge.draftRef, result.error));
+          continue;
         }
-      } else {
-        failures.push(failure('reminder', result.error, index));
+        state.relationIds[knowledge.draftRef] = result.data.relationId;
+      } catch (cause) {
+        failures.push(throwToFailure('knowledge_link', knowledge.draftRef, cause));
       }
     }
 
-    return {
+    for (const task of draft.tasks) {
+      const expectedTaskId = expected[task.draftRef]!;
+      if (state.referenceMap[task.draftRef] === expectedTaskId) continue;
+
+      let labels;
+      try {
+        labels = await this.mutations.resolveLabels(task.labels, context);
+      } catch (cause) {
+        failures.push(throwToFailure('label_resolve', task.draftRef, cause));
+        continue;
+      }
+      if (!labels.ok) {
+        failures.push(failure('label_resolve', task.draftRef, labels.error));
+        continue;
+      }
+
+      try {
+        const result = await this.mutations.createTaskPlan(
+          taskRequest(task, expected, labels.data),
+          context,
+        );
+        if (!result.ok) {
+          failures.push(failure('task_create', task.draftRef, result.error));
+          continue;
+        }
+        if (result.data.taskId !== expectedTaskId) {
+          failures.push(mismatchFailure('task_create', task.draftRef, 'Task'));
+          continue;
+        }
+        state.referenceMap[task.draftRef] = expectedTaskId;
+      } catch (cause) {
+        failures.push(throwToFailure('task_create', task.draftRef, cause));
+      }
+    }
+
+    return receipt({
       workflowRunId,
       revision: draft.revision,
-      status: failures.length === 0 ? 'success' : 'partial',
-      goalId,
-      keyResultIds: expectedKeyResultIds,
-      taskIds: uniqueInOrder(taskIds),
-      reminderIds: uniqueInOrder(reminderIds),
+      ...state,
       failures,
-      retryable: failures.some((item) => item.retryable),
-    };
+    });
   }
 }

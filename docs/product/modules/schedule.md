@@ -5,7 +5,7 @@ tags:
   - schedule
 description: Planner / Calendar 产品模块与 Scheduler 边界说明
 created: 2026-06-02T00:00:00
-updated: 2026-09-07T15:20:00+08:00
+updated: 2026-09-08T20:45:00+08:00
 ---
 
 # 日程模块说明
@@ -91,3 +91,39 @@ updated: 2026-09-07T15:20:00+08:00
 - [目标模块说明](./goal.md)
 - [任务模块说明](./task.md)
 - [日程 / Scheduler 文件索引](../module-index/schedule-files.md)
+
+## 11. 2026-09-08 vNext Model Freeze
+
+在 CLEAN-6304 已完成 package boundary 后，Schedule/Scheduler 进入第二阶段模型收敛。该阶段**尚未实施**，目标由 ADR-080~083 固定：
+
+```text
+CalendarEntry
+  -> CalendarEntryRange(Timed | AllDay)
+  -> duration derived
+  -> conflict moved to Planner projection
+  -> calendar priority retired
+
+PlannerEventProjection
+  -> occupancy(blocking | non-blocking | marker)
+  -> Goal/Task/Routine/external calendar cross-source conflict
+
+ScheduleTask
+  -> ScheduledInvocation
+
+ScheduleExecution
+  -> InvocationAttempt
+
+ScheduleConfig / SourceModule / payload envelope
+  -> retire from canonical Scheduler model
+```
+
+其中 `SchedulingPort.reconcile`、stable schedulingKey、Handler Registry、lease、claim、retry/backoff、restart recovery、Prisma/PowerSync parity 都是受保护资产，不因模型改名而重写。
+
+相关文档：
+
+- [Schedule / Planner + Scheduler / Temporal Engine vNext](../schedule-planner-scheduler-vnext.md)
+- [Schedule / Scheduler Current System Map](../../analysis/2026-09-08-schedule-scheduler-current-system-map.md)
+- [ADR-080](../../architecture/adr/ADR-080-planner-calendar-range-occupancy-and-conflict-model.md)
+- [ADR-081](../../architecture/adr/ADR-081-scheduled-invocation-model-and-legacy-schedule-task-retirement.md)
+- [ADR-082](../../architecture/adr/ADR-082-scheduler-invocation-attempt-and-runtime-state-machine.md)
+- [ADR-083](../../architecture/adr/ADR-083-schedule-scheduler-contract-diagnostics-and-persistence-boundary.md)

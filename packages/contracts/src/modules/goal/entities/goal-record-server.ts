@@ -13,8 +13,8 @@ import type {
 } from '../../../primitives';
 
 export const GoalRecordSourceType = {
-  TaskInstance: 'TASK_INSTANCE',
-  TaskTemplate: 'TASK_TEMPLATE',
+  TaskOccurrence: 'TASK_INSTANCE',
+  TaskPlan: 'TASK_TEMPLATE',
 } as const;
 
 export type GoalRecordSourceType =

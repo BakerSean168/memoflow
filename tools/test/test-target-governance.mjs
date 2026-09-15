@@ -92,12 +92,12 @@ for (const projectFile of projectFiles) {
     changed = true;
   }
 
-  const targetTemplates = getBoundaryTargetTemplates(json.name);
-  if (targetTemplates) {
-    for (const [targetName, targetTemplate] of Object.entries(targetTemplates)) {
-      if (!areTargetsEqual(targets[targetName], targetTemplate)) {
+  const targetPlans = getBoundaryTargetPlans(json.name);
+  if (targetPlans) {
+    for (const [targetName, targetPlan] of Object.entries(targetPlans)) {
+      if (!areTargetsEqual(targets[targetName], targetPlan)) {
         if (shouldWrite) {
-          targets[targetName] = structuredClone(targetTemplate);
+          targets[targetName] = structuredClone(targetPlan);
           changed = true;
         } else {
           errors.push(
@@ -117,15 +117,15 @@ for (const projectFile of projectFiles) {
       usesVitest(targets['test:coverage']));
 
   if (shouldNormalizeLocalVitestTargets) {
-    const localVitestTargets = getLocalVitestTargetTemplates(
+    const localVitestTargets = getLocalVitestTargetPlans(
       projectRoot,
       isGovernedDomainProject,
       json.name,
     );
-    for (const [targetName, targetTemplate] of Object.entries(localVitestTargets)) {
-      if (!areTargetsEqual(targets[targetName], targetTemplate)) {
+    for (const [targetName, targetPlan] of Object.entries(localVitestTargets)) {
+      if (!areTargetsEqual(targets[targetName], targetPlan)) {
         if (shouldWrite) {
-          targets[targetName] = structuredClone(targetTemplate);
+          targets[targetName] = structuredClone(targetPlan);
           changed = true;
         } else {
           errors.push(
@@ -135,7 +135,7 @@ for (const projectFile of projectFiles) {
       }
     }
   } else if (isGovernedDomainProject && hasLocalVitestConfig) {
-    const coverageTarget = getLocalVitestTargetTemplates(projectRoot, true, json.name)[
+    const coverageTarget = getLocalVitestTargetPlans(projectRoot, true, json.name)[
       'test:coverage'
     ];
     if (!areTargetsEqual(targets['test:coverage'], coverageTarget)) {
@@ -260,7 +260,7 @@ function deriveWatchTarget(testTarget) {
   };
 }
 
-function getLocalVitestTargetTemplates(projectRoot, includeCoverage = false, projectName = '') {
+function getLocalVitestTargetPlans(projectRoot, includeCoverage = false, projectName = '') {
   const templates = {
     test: {
       executor: 'nx:run-commands',
@@ -306,7 +306,7 @@ function getLocalVitestTargetTemplates(projectRoot, includeCoverage = false, pro
   return templates;
 }
 
-function getBoundaryTargetTemplates(projectName) {
+function getBoundaryTargetPlans(projectName) {
   const templates = {
     api: {
       test: {

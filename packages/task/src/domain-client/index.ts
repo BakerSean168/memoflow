@@ -6,7 +6,7 @@
  * 管理任务（Task）的客户端领域模型
  *
  * 【包含内容】
- * - 聚合根（Aggregates）：TaskTemplate, TaskInstance
+ * - 聚合根（Aggregates）：TaskPlan, TaskOccurrence
  * - 值对象（Value Objects）：从 domain-shared 导入
  *
  * 【依赖规则】
@@ -22,5 +22,5 @@ export * from './aggregates/index.js';
 // ===== Entities =====
 export * from './entities/index.js';
 
-// ===== Value Objects (re-export from domain-shared) =====
-export * from '../server/domain/value-objects';
+// Client-domain public surface intentionally stops at client aggregates/entities.
+// Server value objects are not re-exported: doing so pulls Node-only server code into Web bundles.

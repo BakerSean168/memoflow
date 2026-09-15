@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { createTimeContext } from '@memoflow/time';
 import type { PrismaClient } from '@memoflow/database';
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import {
@@ -17,6 +18,11 @@ import {
   type INotificationTemplateRepository,
   type ChannelCapabilitySpec,
 } from '../../../../src';
+
+const TEST_TIME_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
+const TEST_USER_TIME_CONTEXT_PORT = {
+  getUserTimeContext: async () => TEST_TIME_CONTEXT,
+};
 
 /**
  * Notification repository seam surface.
@@ -74,7 +80,10 @@ describe('notification repository factories surface', () => {
   });
 
   it('convenience module factories preserve api/start/dispose and fail-closed closure checker', () => {
-    const prismaInstance = createNotificationPrismaModule(fakePrisma, { closureChecker });
+    const prismaInstance = createNotificationPrismaModule(fakePrisma, {
+      closureChecker,
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
+    });
     expect(prismaInstance).toHaveProperty('api');
     expect(typeof prismaInstance.start).toBe('function');
     expect(typeof prismaInstance.dispose).toBe('function');
@@ -85,7 +94,11 @@ describe('notification repository factories surface', () => {
       /FAIL-CLOSED/,
     );
 
-    const powerSyncInstance = createNotificationPowerSyncModule(fakeElectronDb);
+    expect(() => createNotificationPowerSyncModule(fakeElectronDb)).toThrow(/userTimeContextPort/);
+
+    const powerSyncInstance = createNotificationPowerSyncModule(fakeElectronDb, {
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
+    });
     expect(powerSyncInstance).toHaveProperty('api');
     expect(typeof powerSyncInstance.start).toBe('function');
     expect(typeof powerSyncInstance.dispose).toBe('function');
@@ -100,6 +113,7 @@ describe('notification repository factories surface', () => {
       { channelType: 'Desktop', status: 'available' },
     ];
     const runtime = createNotificationDurableRuntime({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       notificationRepository: set.notificationRepository,
       reliableAdapter: set.reliableAdapter,
       channelCapabilities: capabilities,

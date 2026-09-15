@@ -16,13 +16,12 @@ describe('PrismaDataPortabilityImportStore', () => {
   function createFakePrisma() {
     const writeCalls: string[] = [];
     const transactionClient = {
-      userSetting: { upsert: vi.fn(async () => undefined) },
+      userPreferenceRecord: { upsert: vi.fn(async () => undefined) },
       repository: { create: vi.fn(async () => undefined) },
       goal: { create: vi.fn(async () => undefined) },
-      taskTemplate: { create: vi.fn(async () => undefined) },
+      taskPlan: { create: vi.fn(async () => undefined) },
       scheduleTask: { create: vi.fn(async () => undefined) },
       reminderResponse: { create: vi.fn(async () => undefined) },
-      editorWorkspace: { create: vi.fn(async () => undefined) },
       aiConversation: { create: vi.fn(async () => undefined) },
       aiMessage: { create: vi.fn(async () => undefined) },
     };
@@ -52,9 +51,10 @@ describe('PrismaDataPortabilityImportStore', () => {
     const store = new PrismaDataPortabilityImportStore(prisma as never);
 
     await store.transaction(async (tx) => {
-      await tx.upsertUserSetting({
+      await tx.upsertUserPreferences({
         identityId: 'identity-1',
-        preferences: { locale: 'zh-CN' },
+        presentation: { theme: 'dark', language: 'en-US' },
+        regional: { timeZone: 'UTC', dateStyle: 'medium', timeStyle: '24h', weekStartsOn: 1 },
       });
       await tx.createRepository({
         id: 'repo-1',
@@ -70,26 +70,18 @@ describe('PrismaDataPortabilityImportStore', () => {
         id: 'goal-1',
         identityId: 'identity-1',
         name: 'Ship',
-        description: null,
-        color: '#000',
-        feasibilityAnalysis: null,
-        motivation: null,
-        status: 'active',
-        importance: 'high',
-        priority: 1,
-        category: null,
-        tags: [],
+        summary: null,
+        status: 'Planned',
         startDate: null,
-        targetDate: null,
+        target: null,
         completedAt: null,
-        folderId: null,
-        parentGoalId: null,
+        archivedAt: null,
         sortOrder: 0,
         reminderConfig: null,
       });
     });
 
-    expect(transactionClient.userSetting.upsert).toHaveBeenCalledTimes(1);
+    expect(transactionClient.userPreferenceRecord.upsert).toHaveBeenCalledTimes(2);
     expect(transactionClient.repository.create).toHaveBeenCalledTimes(1);
     expect(transactionClient.goal.create).toHaveBeenCalledTimes(1);
   });

@@ -30,18 +30,39 @@ vi.mock('electron', () => ({
 function createFakeDb(): IElectronDatabase {
   return {
     execute: vi.fn(async () => ({ rowsAffected: 1 })),
-    getAll: vi.fn(async () => []),
-    get: vi.fn(async () => ({})),
-    getOptional: vi.fn(async (sql: string) => {
-      if (sql.includes('FROM user_settings')) {
-        return {
-          id: 'settings-1',
-          identity_id: 'identity-test',
-          preferences: '{"theme":"dark"}',
-        };
+    getAll: vi.fn(async (sql: string) => {
+      if (sql.includes('FROM user_preference_records')) {
+        const timestamp = '2026-09-10T00:00:00.000Z';
+        return [
+          {
+            id: 'preference-presentation-1',
+            identity_id: 'identity-test',
+            namespace: 'presentation',
+            payload: JSON.stringify({ theme: 'dark', language: 'en-US' }),
+            revision: 1,
+            created_at: timestamp,
+            updated_at: timestamp,
+          },
+          {
+            id: 'preference-regional-1',
+            identity_id: 'identity-test',
+            namespace: 'regional',
+            payload: JSON.stringify({
+              timeZone: 'UTC',
+              dateStyle: 'medium',
+              timeStyle: '24h',
+              weekStartsOn: 1,
+            }),
+            revision: 1,
+            created_at: timestamp,
+            updated_at: timestamp,
+          },
+        ];
       }
-      return null;
+      return [];
     }),
+    get: vi.fn(async () => ({})),
+    getOptional: vi.fn(async () => null),
     writeTransaction: vi.fn(async (callback) =>
       callback({
         execute: vi.fn(async () => ({ rowsAffected: 1 })),
@@ -119,6 +140,10 @@ describe('DataPortabilityElectronModule IPC handler integration', () => {
     expect(envelope.kind).toBe('memoflow.user-data-export');
     expect(envelope.schemaVersion).toBe(2);
     expect(envelope).toHaveProperty('data');
+    expect(envelope.data.settings?.preferences).toEqual({
+      presentation: { theme: 'dark', language: 'en-US' },
+      regional: { timeZone: 'UTC', dateStyle: 'medium', timeStyle: '24h', weekStartsOn: 1 },
+    });
   });
 
   it('import handler succeeds with valid export content', async () => {
@@ -156,9 +181,12 @@ describe('DataPortabilityElectronModule IPC handler integration', () => {
 
     // Export first to get a valid envelope, then inject a banned field
     const exportHandler = getHandler(DataPortabilityChannels.EXPORT);
-    const exportResult = (await exportHandler({}, {})) as { ok: boolean; data: { content: string } };
+    const exportResult = (await exportHandler({}, { include: ['settings'] })) as {
+      ok: boolean;
+      data: { content: string };
+    };
     const envelope = JSON.parse(exportResult.data.content);
-    envelope.data.settings.identityId = 'stolen-identity';
+    envelope.data.settings.preferences.presentation.identityId = 'stolen-identity';
 
     const importHandler = getHandler(DataPortabilityChannels.IMPORT);
     const importResult = (await importHandler({}, { content: JSON.stringify(envelope) })) as {

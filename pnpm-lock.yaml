@@ -296,7 +296,7 @@ importers:
         version: 5.0.3(@vue/language-core@3.3.7)(esbuild@0.28.1)(rolldown@1.2.7)(rollup@4.57.1)(supports-color@10.2.2)(typescript@6.0.3)(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.4.2)(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0))
       vitest:
         specifier: 4.1.10
-        version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(happy-dom@20.10.6)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.15.0(@types/node@24.13.3)(typescript@6.0.3))(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.4.2)(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0))
+        version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(esbuild@0.28.1)(happy-dom@20.10.6)(jiti@2.4.2)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.15.0(@types/node@24.13.3)(typescript@6.0.3))(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0)
       vue-eslint-parser:
         specifier: 10.3.0
         version: 10.3.0(eslint@10.7.0(jiti@2.4.2)(supports-color@10.2.2))(supports-color@10.2.2)
@@ -354,6 +354,9 @@ importers:
       '@memoflow/powersync-schema':
         specifier: workspace:*
         version: link:../../packages/powersync-schema
+      '@memoflow/relation':
+        specifier: workspace:*
+        version: link:../../packages/relation
       '@memoflow/reminder':
         specifier: workspace:*
         version: link:../../packages/reminder
@@ -556,6 +559,9 @@ importers:
       '@memoflow/powersync-schema':
         specifier: workspace:*
         version: link:../../packages/powersync-schema
+      '@memoflow/relation':
+        specifier: workspace:*
+        version: link:../../packages/relation
       '@memoflow/reminder':
         specifier: workspace:*
         version: link:../../packages/reminder
@@ -827,7 +833,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: 4.1.10
-        version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(happy-dom@20.10.6)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.15.0(@types/node@24.13.3)(typescript@6.0.3))(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.4.2)(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0))
+        version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(esbuild@0.28.1)(happy-dom@20.10.6)(jiti@2.4.2)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.15.0(@types/node@24.13.3)(typescript@6.0.3))(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0)
 
   apps/mobile:
     dependencies:
@@ -1140,6 +1146,9 @@ importers:
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../setting
+      '@memoflow/time':
+        specifier: workspace:*
+        version: link:../time
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
@@ -1466,6 +1475,9 @@ importers:
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@memoflow/time':
+        specifier: workspace:*
+        version: link:../time
       zod:
         specifier: ^4.4.3
         version: 4.4.3
@@ -1711,6 +1723,9 @@ importers:
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client
+      '@memoflow/time':
+        specifier: workspace:*
+        version: link:../time
     devDependencies:
       '@memoflow/test-utils':
         specifier: workspace:*
@@ -1723,7 +1738,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: 4.1.10
-        version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(happy-dom@20.10.6)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.15.0(@types/node@24.13.3)(typescript@6.0.3))(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.4.2)(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0))
+        version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(esbuild@0.28.1)(happy-dom@20.10.6)(jiti@2.4.2)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.15.0(@types/node@24.13.3)(typescript@6.0.3))(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0)
 
   packages/notification:
     dependencies:
@@ -1788,7 +1803,7 @@ importers:
         version: 8.2.2(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.4.2)(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0)
       vitest:
         specifier: 4.1.10
-        version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(happy-dom@20.10.6)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.15.0(@types/node@24.13.3)(typescript@6.0.3))(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.4.2)(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0))
+        version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(esbuild@0.28.1)(happy-dom@20.10.6)(jiti@2.4.2)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.15.0(@types/node@24.13.3)(typescript@6.0.3))(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0)
 
   packages/powersync-schema:
     dependencies:
@@ -1802,6 +1817,34 @@ importers:
       typescript:
         specifier: ~6.0.3
         version: 6.0.3
+
+  packages/relation:
+    dependencies:
+      '@memoflow/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@memoflow/database':
+        specifier: workspace:*
+        version: link:../database
+      '@memoflow/http-client':
+        specifier: workspace:*
+        version: link:../http-client
+      '@memoflow/ipc-client':
+        specifier: workspace:*
+        version: link:../ipc-client
+    devDependencies:
+      '@memoflow/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(@swc/core@1.15.43(@swc/helpers@0.5.17))(jiti@2.4.2)(postcss@8.5.19)(supports-color@10.2.2)(tsx@4.23.1)(typescript@6.0.3)(yaml@2.9.0)
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: 4.1.10
+        version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(esbuild@0.28.1)(happy-dom@20.10.6)(jiti@2.4.2)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.15.0(@types/node@24.13.3)(typescript@6.0.3))(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0)
 
   packages/reminder:
     dependencies:
@@ -2020,6 +2063,9 @@ importers:
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client
+      '@memoflow/time':
+        specifier: workspace:*
+        version: link:../time
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
@@ -2108,7 +2154,7 @@ importers:
         version: 3.0.4(typescript@6.0.3)(vue@3.5.39(typescript@6.0.3))
       vitest:
         specifier: 4.1.10
-        version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(happy-dom@20.10.6)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.15.0(@types/node@24.13.3)(typescript@6.0.3))(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.4.2)(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0))
+        version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(esbuild@0.28.1)(happy-dom@20.10.6)(jiti@2.4.2)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.15.0(@types/node@24.13.3)(typescript@6.0.3))(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0)
     devDependencies:
       '@types/node':
         specifier: 24.13.3
@@ -2125,6 +2171,9 @@ importers:
 
   packages/time:
     dependencies:
+      '@date-fns/tz':
+        specifier: 1.5.0
+        version: 1.5.0
       '@internationalized/date':
         specifier: 3.11.0
         version: 3.11.0
@@ -2165,7 +2214,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: 4.1.10
-        version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(happy-dom@20.10.6)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.15.0(@types/node@24.13.3)(typescript@6.0.3))(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.4.2)(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0))
+        version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(esbuild@0.28.1)(happy-dom@20.10.6)(jiti@2.4.2)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.15.0(@types/node@24.13.3)(typescript@6.0.3))(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0)
 
   packages/ui-react-native:
     devDependencies:
@@ -3382,6 +3431,9 @@ packages:
 
   '@dabh/diagnostics@2.0.8':
     resolution: {integrity: sha512-R4MSXTVnuMzGD7bzHdW2ZhhdPC/igELENcq5IjEverBvq5hn1SXCWcsi6eSsdWP0/Ur+SItRRjAktmdoX/8R/Q==}
+
+  '@date-fns/tz@1.5.0':
+    resolution: {integrity: sha512-lwYN/vDPeNRULcepoE/LO2Pgx+7/RV+S9ARfbc9lr2DtGkOD7pAiruHvbR1RX3Qyf6ja47EWJDMsNK5vK08DJg==}
 
   '@dependents/detective-less@5.0.1':
     resolution: {integrity: sha512-Y6+WUMsTFWE5jb20IFP4YGa5IrGY/+a/FbOSjDF/wz9gepU2hwCYSXRHP/vPwBvwcY3SVMASt4yXxbXNXigmZQ==}
@@ -15391,7 +15443,6 @@ packages:
       '@vitest/ui': 4.1.10
       happy-dom: '*'
       jsdom: '*'
-      vite: 8.2.2
     peerDependenciesMeta:
       '@edge-runtime/vm':
         optional: true
@@ -17215,6 +17266,8 @@ snapshots:
       '@so-ric/colorspace': 1.1.6
       enabled: 2.0.0
       kuler: 2.0.0
+
+  '@date-fns/tz@1.5.0': {}
 
   '@dependents/detective-less@5.0.1':
     dependencies:
@@ -19090,7 +19143,7 @@ snapshots:
     optionalDependencies:
       '@nx/eslint': 23.0.2(@babel/traverse@7.29.7(supports-color@10.2.2))(@swc-node/register@1.11.1(@swc/core@1.15.43(@swc/helpers@0.5.17))(@swc/types@0.1.27)(supports-color@10.2.2)(typescript@6.0.3))(@swc/core@1.15.43(@swc/helpers@0.5.17))(@zkochan/js-yaml@0.0.7)(eslint@10.7.0(jiti@2.4.2)(supports-color@10.2.2))(nx@23.0.2(@swc-node/register@1.11.1(@swc/core@1.15.43(@swc/helpers@0.5.17))(@swc/types@0.1.27)(supports-color@10.2.2)(typescript@6.0.3))(@swc/core@1.15.43(@swc/helpers@0.5.17)))(supports-color@10.2.2)(verdaccio@6.2.5(supports-color@10.2.2))
       vite: 8.2.2(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.4.2)(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0)
-      vitest: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(happy-dom@20.10.6)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.15.0(@types/node@24.13.3)(typescript@6.0.3))(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.4.2)(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0))
+      vitest: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(esbuild@0.28.1)(happy-dom@20.10.6)(jiti@2.4.2)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.15.0(@types/node@24.13.3)(typescript@6.0.3))(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0)
     transitivePeerDependencies:
       - '@babel/traverse'
       - '@swc-node/register'
@@ -21661,7 +21714,7 @@ snapshots:
       obug: 2.1.1
       std-env: 4.2.0
       tinyrainbow: 3.1.0
-      vitest: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(happy-dom@20.10.6)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.15.0(@types/node@24.13.3)(typescript@6.0.3))(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.4.2)(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0))
+      vitest: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(esbuild@0.28.1)(happy-dom@20.10.6)(jiti@2.4.2)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.15.0(@types/node@24.13.3)(typescript@6.0.3))(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0)
 
   '@vitest/expect@3.2.4':
     dependencies:
@@ -21761,7 +21814,7 @@ snapshots:
       sirv: 3.0.2
       tinyglobby: 0.2.17
       tinyrainbow: 3.1.0
-      vitest: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(happy-dom@20.10.6)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.15.0(@types/node@24.13.3)(typescript@6.0.3))(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.4.2)(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0))
+      vitest: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(esbuild@0.28.1)(happy-dom@20.10.6)(jiti@2.4.2)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.15.0(@types/node@24.13.3)(typescript@6.0.3))(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0)
 
   '@vitest/utils@3.2.4':
     dependencies:
@@ -22606,7 +22659,7 @@ snapshots:
       prisma: 7.8.0(@types/react@19.2.14)(better-sqlite3@12.11.1)(magicast@0.5.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
-      vitest: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(happy-dom@20.10.6)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.15.0(@types/node@24.13.3)(typescript@6.0.3))(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.4.2)(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0))
+      vitest: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(esbuild@0.28.1)(happy-dom@20.10.6)(jiti@2.4.2)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.15.0(@types/node@24.13.3)(typescript@6.0.3))(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0)
       vue: 3.5.39(typescript@6.0.3)
     transitivePeerDependencies:
       - '@cloudflare/workers-types'
@@ -31524,7 +31577,7 @@ snapshots:
       - tsx
       - yaml
 
-  vitest@4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(happy-dom@20.10.6)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.15.0(@types/node@24.13.3)(typescript@6.0.3))(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.4.2)(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0)):
+  vitest@4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(esbuild@0.28.1)(happy-dom@20.10.6)(jiti@2.4.2)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.15.0(@types/node@24.13.3)(typescript@6.0.3))(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0):
     dependencies:
       '@vitest/expect': 4.1.10
       '@vitest/mocker': 4.1.10(msw@2.15.0(@types/node@24.13.3)(typescript@6.0.3))(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.4.2)(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0))
@@ -31554,7 +31607,18 @@ snapshots:
       happy-dom: 20.10.6
       jsdom: 29.1.1(@noble/hashes@2.2.0)
     transitivePeerDependencies:
+      - '@vitejs/devtools'
+      - esbuild
+      - jiti
+      - less
       - msw
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - terser
+      - tsx
+      - yaml
 
   vlq@1.0.1: {}
 

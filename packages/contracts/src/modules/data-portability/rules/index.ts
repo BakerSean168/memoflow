@@ -4,6 +4,10 @@ export {
   isBannedPortableDataKey,
   findBannedImportKey,
   parseUserDataExportEnvelope,
+  parsePortableBackupEnvelopeV3,
 } from './import-safety';
 
-export type { ParseUserDataExportEnvelopeResult } from './import-safety';
+export type {
+  ParseUserDataExportEnvelopeResult,
+  ParsePortableBackupEnvelopeV3Result,
+} from './import-safety';

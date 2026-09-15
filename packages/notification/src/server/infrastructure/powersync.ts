@@ -30,10 +30,12 @@ import {
 } from './adapters/powersync';
 import type { NotificationMetricsService } from '../domain/services/notification-metrics-service';
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { UserTimeContextPort } from '@memoflow/time';
 import type { INotificationRepository, INotificationPreferenceRepository, INotificationTemplateRepository } from '../domain/repositories';
 import type { NotificationRequestedWriterPort } from '@memoflow/contracts/notification';
 
 export interface CreateNotificationPowerSyncModuleOptions {
+  readonly userTimeContextPort: UserTimeContextPort;
   readonly runtimeContributions?: NotificationRuntimeContributionsInput;
   readonly durableRuntime?: NotificationDurableRuntimePort;
   readonly transport?: unknown;
@@ -237,8 +239,12 @@ export class PowerSyncDesktopTransportAckStore implements DesktopTransportAckSto
  */
 export function createDefaultElectronDesktopTransport(optionsOrDb?: unknown): unknown {
   let ackStore: DesktopTransportAckStore;
+  let renderer: ((dto: unknown, context?: unknown) => boolean | Promise<boolean>) | null = null;
   if (optionsOrDb && typeof optionsOrDb === 'object') {
     const opts = optionsOrDb as Record<string, unknown>;
+    if (typeof opts.renderer === 'function') {
+      renderer = opts.renderer as (dto: unknown, context?: unknown) => boolean | Promise<boolean>;
+    }
     if ('getAck' in opts && 'saveAck' in opts) {
       ackStore = opts as unknown as DesktopTransportAckStore;
     } else if ('ackStore' in opts && opts.ackStore) {
@@ -288,7 +294,23 @@ export function createDefaultElectronDesktopTransport(optionsOrDb?: unknown): un
       }
 
       try {
-        // Try Electron native Notification if running inside main process GUI context
+        if (renderer) {
+          const rendered = await renderer(dto, context);
+          if (!rendered) {
+            throw new Error('Desktop notification renderer is unavailable or declined delivery');
+          }
+          const deliveredAck = {
+            ackId,
+            status: 'delivered' as const,
+            timestamp,
+          };
+          if (idempotencyKey) {
+            await ackStore.saveAck(idempotencyKey, deliveredAck);
+          }
+          return deliveredAck;
+        }
+
+        // Fallback for hosts without an injected renderer: use Electron native Notification.
         const electron = require('electron');
         if (
           electron &&
@@ -380,6 +402,7 @@ export function createNotificationPowerSyncModule(
   let transport: unknown | undefined;
   let channelCapabilities: ChannelCapabilitySpec[] | undefined;
   let metricsService: NotificationMetricsService | undefined;
+  let userTimeContextPort: UserTimeContextPort | undefined;
 
   if (options) {
     if (
@@ -387,7 +410,8 @@ export function createNotificationPowerSyncModule(
       'runtimeContributions' in options ||
       'transport' in options ||
       'channelCapabilities' in options ||
-      'metricsService' in options
+      'metricsService' in options ||
+      'userTimeContextPort' in options
     ) {
       const opts = options as CreateNotificationPowerSyncModuleOptions;
       durableRuntime = opts.durableRuntime;
@@ -395,9 +419,14 @@ export function createNotificationPowerSyncModule(
       transport = opts.transport;
       channelCapabilities = opts.channelCapabilities;
       metricsService = opts.metricsService;
+      userTimeContextPort = opts.userTimeContextPort;
     } else if (Array.isArray(options)) {
       runtimeContributions = options as NotificationRuntimeContributionsInput;
     }
+  }
+
+  if (!userTimeContextPort) {
+    throw new Error('[FAIL-CLOSED] createNotificationPowerSyncModule requires userTimeContextPort');
   }
 
   const repositories = createNotificationPowerSyncRepositories(db, metricsService);
@@ -414,6 +443,7 @@ export function createNotificationPowerSyncModule(
       notificationRepository,
       preferenceRepository: repositories.notificationPreferenceRepository,
       closureChecker,
+      userTimeContextPort,
       reliableAdapter: powerSyncReliableAdapter,
       channelCapabilities: channelCapabilities ?? [
         { channelType: 'InApp', status: 'available' },
@@ -431,6 +461,7 @@ export function createNotificationPowerSyncModule(
     durableRuntime,
     runtimeContributions: runtimeContributions ?? [durableRuntime],
     closureChecker,
+    userTimeContextPort,
   });
 }
 

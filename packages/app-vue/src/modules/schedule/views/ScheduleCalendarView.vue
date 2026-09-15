@@ -160,7 +160,7 @@ const task = useTask();
 
 const ownerCommands = createPlannerOwnerCommandRouter({
   schedule: { updateSchedule: schedule.updateCalendarEntry },
-  task: { rescheduleInstance: task.rescheduleInstance },
+  task: { rescheduleOccurrence: task.rescheduleOccurrence },
 });
 
 const plannerCalendarRef = ref<InstanceType<typeof PlannerCalendar> | null>(null);
@@ -238,7 +238,7 @@ function handleEventClick(event: CalendarEventItem): void {
 }
 
 async function handleCompleteTask(originalId: string): Promise<void> {
-  const result = await task.completeInstance(originalId);
+  const result = await task.completeOccurrence(originalId);
   if (result && windowStart.value && windowEnd.value) {
     await fetchForRange(windowStart.value, windowEnd.value);
   }
@@ -260,7 +260,13 @@ async function handleCreateSchedule(data: CreateScheduleRequest): Promise<boolea
   const result = await schedule.createCalendarEntry(data);
   if (result) {
     if (windowStart.value && windowEnd.value) {
-      await fetchForRange(windowStart.value, windowEnd.value);
+      try {
+        await fetchForRange(windowStart.value, windowEnd.value);
+      } catch {
+        // The command already committed and the local Schedule store contains the returned DTO.
+        // A read-model refresh failure must never be reported as a failed create.
+        toast.warning(t('schedule.toast.scheduleCreatedRefreshFailed'));
+      }
     }
     toast.success(t('schedule.toast.scheduleCreated'));
     return true;

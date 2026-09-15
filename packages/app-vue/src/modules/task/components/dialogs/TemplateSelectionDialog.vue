@@ -70,14 +70,14 @@ import {
   Button,
 } from '@memoflow/ui-vue-shadcn';
 import { LayoutGrid, Loader2, FolderOpen, FileText } from '@lucide/vue';
-import type { TaskTemplateViewModel } from '../types';
+import type { TaskPlanViewModel } from '../types';
 
 const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{
     modelValue: boolean;
-    templates: TaskTemplateViewModel[];
+    templates: TaskPlanViewModel[];
     loading?: boolean;
   }>(),
   {

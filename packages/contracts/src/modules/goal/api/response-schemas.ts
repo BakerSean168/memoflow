@@ -6,7 +6,8 @@
  */
 
 import { z } from 'zod';
-import { brandedId } from '../../../primitives';
+import { LabelColorSchema } from '../../label';
+import { brandedId, YmdSchema } from '../../../primitives';
 import type {
   GoalId,
   GoalReviewId,
@@ -29,6 +30,7 @@ import {
   GoalReminderConfigDTOSchema,
   ReminderTriggerSchema,
 } from '../value-objects/goal-reminder-config';
+import { GoalTimeframeSchema } from '../value-objects/goal-timeframe';
 
 // Residual 741: GoalReminderConfigDTOSchema / ReminderTriggerSchema owned by value-objects
 // (semantic DTOs are z.infer aliases). Re-export for OpenAPI/route consumers.
@@ -48,6 +50,7 @@ export const KeyResultClientDTOSchema = z.object({
   title: z.string(),
   description: z.string().nullable(),
   progress: KeyResultProgressDTOSchema,
+  target: GoalTimeframeSchema.nullable(),
   progressPercentage: z.number().min(0).max(100),
   isCompleted: z.boolean(),
   weight: z.number().int().min(1).max(5),
@@ -78,9 +81,9 @@ export const GoalLabelProjectionSchema = z.object({
   identityId: z.string().min(1),
   name: z.string(),
   normalizedName: z.string(),
-  color: z.string().nullable(),
-  createdAt: z.number(),
-  updatedAt: z.number(),
+  color: LabelColorSchema.nullable(),
+  createdAt: z.number().finite(),
+  updatedAt: z.number().finite(),
 });
 export type GoalLabelProjection = z.infer<typeof GoalLabelProjectionSchema>;
 
@@ -93,18 +96,16 @@ export type GoalLabelProjection = z.infer<typeof GoalLabelProjectionSchema>;
  *
  * Goal answers only Direction + Measurement.
  * Legacy fields retired: color, importance, priority, category, tags, folderId, parentGoalId.
- * `targetDate` renamed to `dueDate`. `archivedAt` is a display attribute.
+ * Planning uses calendar-native startDate + precision-preserving target timeframe.
  */
 export const GoalClientDTOSchema = z.object({
   id: brandedId<GoalId>(),
   identityId: brandedId<IdentityId>(),
   name: z.string(),
-  description: z.string().nullable(),
-  feasibilityAnalysis: z.string().nullable(),
-  motivation: z.string().nullable(),
+  summary: z.string().max(500).nullable(),
   status: z.enum(GoalStatus),
-  startDate: z.number().nullable(),
-  dueDate: z.number().nullable(),
+  startDate: YmdSchema.nullable(),
+  target: GoalTimeframeSchema.nullable(),
   completedAt: z.number().nullable(),
   archivedAt: z.number().nullable(),
   sortOrder: z.number(),
@@ -241,7 +242,6 @@ export const GoalReviewListResSchema = z.object({
 // ============================================================================
 // Simple Response Schemas
 // ============================================================================
-
 
 // ============================================================================
 // Request Schemas

@@ -4,13 +4,18 @@ import type { IAccountRepository } from '../../../../domain/repositories/i-accou
 import { Account } from '../../../../domain/aggregates/account';
 import { IdentityId } from '@memoflow/domain-shared/shared';
 import { UpdateAccountProfileUseCase } from '../update-account-profile.use-case';
+import { asInstant, createFixedClock } from '@memoflow/time';
 
 describe('UpdateAccountProfileUseCase', () => {
   let repo: ReturnType<typeof createMockRepo<IAccountRepository>>;
   let useCase: UpdateAccountProfileUseCase;
 
-  function anAccount(email = 'profile@example.com') {
-    return Account.create({ id: IdentityId.generate(), email });
+  function anAccount(nicknameSeed = 'Profile User') {
+    return Account.create({
+      id: IdentityId.generate(),
+      nicknameSeed,
+      now: asInstant(1_700_000_000_000),
+    });
   }
 
   beforeEach(() => {
@@ -18,14 +23,17 @@ describe('UpdateAccountProfileUseCase', () => {
     repo = createMockRepo<IAccountRepository>({
       save: vi.fn().mockResolvedValue(undefined),
     });
-    useCase = new UpdateAccountProfileUseCase(repo);
+    useCase = new UpdateAccountProfileUseCase(repo, createFixedClock(1_700_000_000_100));
   });
 
   it('should update nickname', async () => {
     const account = anAccount();
     (repo.findById as ReturnType<typeof vi.fn>).mockResolvedValue(account);
 
-    const result = await useCase.execute({ nickname: 'NewNick' }, { identityId: account.id.toString() });
+    const result = await useCase.execute(
+      { nickname: 'NewNick' },
+      { identityId: account.id.toString() },
+    );
 
     expect(result.ok).toBe(true);
     expect(account.profile.nickname).toBe('NewNick');
@@ -36,9 +44,12 @@ describe('UpdateAccountProfileUseCase', () => {
     const account = anAccount();
     (repo.findById as ReturnType<typeof vi.fn>).mockResolvedValue(account);
 
-    const result = await useCase.execute({
-      avatar: 'https://example.com/new-avatar.png',
-    }, { identityId: account.id.toString() });
+    const result = await useCase.execute(
+      {
+        avatar: 'https://example.com/new-avatar.png',
+      },
+      { identityId: account.id.toString() },
+    );
 
     expect(result.ok).toBe(true);
     expect(account.profile.avatarUrl).toBe('https://example.com/new-avatar.png');
@@ -48,7 +59,10 @@ describe('UpdateAccountProfileUseCase', () => {
     const account = anAccount();
     (repo.findById as ReturnType<typeof vi.fn>).mockResolvedValue(account);
 
-    const result = await useCase.execute({ bio: 'Hello world' }, { identityId: account.id.toString() });
+    const result = await useCase.execute(
+      { bio: 'Hello world' },
+      { identityId: account.id.toString() },
+    );
 
     expect(result.ok).toBe(true);
     expect(account.profile.bio).toBe('Hello world');
@@ -58,11 +72,14 @@ describe('UpdateAccountProfileUseCase', () => {
     const account = anAccount();
     (repo.findById as ReturnType<typeof vi.fn>).mockResolvedValue(account);
 
-    const result = await useCase.execute({
-      nickname: 'Multi',
-      avatar: 'https://example.com/a.png',
-      bio: 'Multi update',
-    }, { identityId: account.id.toString() });
+    const result = await useCase.execute(
+      {
+        nickname: 'Multi',
+        avatar: 'https://example.com/a.png',
+        bio: 'Multi update',
+      },
+      { identityId: account.id.toString() },
+    );
 
     expect(result.ok).toBe(true);
     expect(account.profile.nickname).toBe('Multi');
@@ -74,7 +91,10 @@ describe('UpdateAccountProfileUseCase', () => {
     const account = anAccount();
     (repo.findById as ReturnType<typeof vi.fn>).mockResolvedValue(account);
 
-    const result = await useCase.execute({ nickname: 'WithDTO' }, { identityId: account.id.toString() });
+    const result = await useCase.execute(
+      { nickname: 'WithDTO' },
+      { identityId: account.id.toString() },
+    );
 
     expect(result.ok).toBe(true);
     if (result.ok) {

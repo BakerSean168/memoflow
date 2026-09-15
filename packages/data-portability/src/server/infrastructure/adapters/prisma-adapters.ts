@@ -16,10 +16,6 @@ import type {
   ResourceRepoPort,
   ScheduleRepoPort,
   ScheduleTaskRepoPort,
-  EditorWorkspaceRepoPort,
-  EditorSessionRepoPort,
-  EditorGroupRepoPort,
-  EditorTabRepoPort,
   AIConversationRepoPort,
   RoutineProfileMembershipRepoPort,
   RoutineDefinitionRepoPort,
@@ -80,33 +76,6 @@ export class PrismaScheduleTaskAdapter implements ScheduleTaskRepoPort {
   }
 }
 
-export class PrismaEditorWorkspaceAdapter implements EditorWorkspaceRepoPort {
-  constructor(private readonly prisma: PrismaClient) {}
-  async findByIdentityId(identityId: string): Promise<unknown[]> {
-    return this.prisma.editorWorkspace.findMany({ where: { identityId, deletedAt: null } });
-  }
-}
-
-export class PrismaEditorSessionAdapter implements EditorSessionRepoPort {
-  constructor(private readonly prisma: PrismaClient) {}
-  async findByWorkspaceId(workspaceId: string): Promise<unknown[]> {
-    return this.prisma.editorWorkspaceSession.findMany({ where: { workspaceId, deletedAt: null } });
-  }
-}
-
-export class PrismaEditorGroupAdapter implements EditorGroupRepoPort {
-  constructor(private readonly prisma: PrismaClient) {}
-  async findBySessionId(sessionId: string): Promise<unknown[]> {
-    return this.prisma.editorWorkspaceSessionGroup.findMany({ where: { sessionId, deletedAt: null } });
-  }
-}
-
-export class PrismaEditorTabAdapter implements EditorTabRepoPort {
-  constructor(private readonly prisma: PrismaClient) {}
-  async findByGroupId(groupId: string): Promise<unknown[]> {
-    return this.prisma.editorWorkspaceSessionGroupTab.findMany({ where: { groupId, deletedAt: null } });
-  }
-}
 
 export class PrismaAIConversationAdapter implements AIConversationRepoPort {
   constructor(private readonly prisma: PrismaClient) {}

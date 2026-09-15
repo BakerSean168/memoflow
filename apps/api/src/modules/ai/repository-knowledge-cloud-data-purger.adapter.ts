@@ -4,8 +4,8 @@ import { Prisma } from '@memoflow/database/prisma';
 /**
  * Composition-edge cleanup for a disconnected GitHub knowledge repository.
  *
- * The Repository module owns the connection lifecycle, while the AI index is
- * an independent table with no foreign key to that connection. Keeping this
+ * The Repository module owns the durable remote binding, while the AI index is
+ * an independent table with no foreign key to that binding. Keeping this
  * transaction at the host edge lets both modules be cleaned up atomically
  * without making either module depend on the other's internals.
  */
@@ -14,17 +14,17 @@ export class RepositoryKnowledgeCloudDataPurgerAdapter {
 
   async purge(identityId: string, connectionId: string): Promise<boolean> {
     return this.db.$transaction(async (tx: Prisma.TransactionClient) => {
-      const connection = await tx.knowledgeRepositoryConnection.findFirst({
-        where: { id: connectionId, identityId, deletedAt: null },
+      const binding = await tx.knowledgeRemoteBinding.findFirst({
+        where: { id: connectionId, identityId, disconnectedAt: null },
         select: { id: true },
       });
-      if (!connection) return false;
+      if (!binding) return false;
 
       await tx.aiKnowledgeIndexEntry.deleteMany({
-        where: { identityId, repositoryId: connection.id },
+        where: { identityId, repositoryId: binding.id },
       });
-      await tx.knowledgeRepositoryConnection.deleteMany({
-        where: { id: connection.id, identityId },
+      await tx.knowledgeRemoteBinding.deleteMany({
+        where: { id: binding.id, identityId },
       });
       return true;
     });

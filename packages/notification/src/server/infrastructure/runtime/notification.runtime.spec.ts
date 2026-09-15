@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { createTimeContext } from '@memoflow/time';
 import { ChannelStatus } from '@memoflow/contracts/notification';
 import {
   createNotificationRuntimeContribution,
@@ -11,6 +12,11 @@ import {
   InMemoryReliableAdapter,
   type DurableOutboxRow,
 } from './__tests__/helpers/in-memory-reliable-adapter';
+
+const TEST_TIME_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
+const TEST_USER_TIME_CONTEXT_PORT = {
+  getUserTimeContext: async () => TEST_TIME_CONTEXT,
+};
 
 /** 构造一个带指定渠道状态的最小 Notification 聚合（经 Notification.load）。 */
 function notificationWithChannel(status: string, options: { attempts?: number; failedAt?: Date | null } = {}) {
@@ -112,6 +118,7 @@ describe('NotificationChannel durable worker (R3 收尾)', () => {
     const adapter = new InMemoryReliableAdapter();
 
     const runtime = createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       environment: 'test',
       repository,
       reliableAdapter: adapter,
@@ -156,6 +163,7 @@ describe('NotificationChannel durable worker (R3 收尾)', () => {
     const adapter = new InMemoryReliableAdapter();
 
     const runtime = createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       environment: 'test',
       repository,
       reliableAdapter: adapter,
@@ -197,6 +205,7 @@ describe('NotificationChannel durable worker (R3 收尾)', () => {
     const adapter = new InMemoryReliableAdapter();
 
     const runtime = createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       environment: 'test',
       repository,
       reliableAdapter: adapter,
@@ -244,6 +253,7 @@ describe('NotificationChannel durable worker (R3 收尾)', () => {
     const adapter = new InMemoryReliableAdapter();
 
     const runtime = createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       environment: 'test',
       repository,
       reliableAdapter: adapter,

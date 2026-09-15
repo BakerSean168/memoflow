@@ -17,6 +17,7 @@ import {
   SettingChannels,
   SystemChannels,
   TaskChannels,
+  TaskWorkspaceChannels,
   WindowChannels,
 } from '@memoflow/contracts/electron';
 import { GovernanceChannels } from '@memoflow/contracts/governance';
@@ -27,6 +28,7 @@ export const SUPPORTED_REPOSITORY_CHANNELS = [
   RepositoryChannels.KNOWLEDGE_CONNECTION_INSTALLATION_STATUS,
   RepositoryChannels.KNOWLEDGE_CONNECTION_INSTALLATION_FINALIZE,
   RepositoryChannels.KNOWLEDGE_CONNECTION_LIST,
+  RepositoryChannels.KNOWLEDGE_CONNECTION_REFRESH_OBSERVATION,
   RepositoryChannels.KNOWLEDGE_CONNECTION_CONNECT,
   RepositoryChannels.KNOWLEDGE_CONNECTION_DISCONNECT,
   RepositoryChannels.KNOWLEDGE_CONNECTION_RECONCILIATION_PREVIEW,
@@ -49,6 +51,7 @@ export const ALLOWED_CHANNELS = [
   ...Object.values(SystemChannels),
   ...Object.values(GoalChannels),
   ...Object.values(TaskChannels),
+  ...Object.values(TaskWorkspaceChannels),
   ...Object.values(ScheduleChannels),
   ...Object.values(ReminderChannels),
   ...Object.values(RoutineChannels),

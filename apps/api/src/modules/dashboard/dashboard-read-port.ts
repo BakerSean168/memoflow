@@ -12,6 +12,7 @@
 
 import type { PrismaClient } from '@memoflow/database';
 import type { DashboardData } from '@memoflow/contracts/dashboard';
+import type { UserTimeContextPort } from '@memoflow/time';
 import { getApiDashboardData } from './dashboard-read-service.js';
 
 /**
@@ -40,9 +41,12 @@ export class PrismaDashboardReadPort implements DashboardReadPort {
    *
    * @param db - Prisma client bound by the host runtime.
    */
-  constructor(private readonly db: PrismaClient) {}
+  constructor(
+    private readonly db: PrismaClient,
+    private readonly userTimeContextPort: UserTimeContextPort,
+  ) {}
 
   getDashboardData(identityId: string): Promise<DashboardData> {
-    return getApiDashboardData(this.db, identityId);
+    return getApiDashboardData(this.db, identityId, this.userTimeContextPort);
   }
 }

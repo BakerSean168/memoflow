@@ -89,7 +89,10 @@ export type NotificationApiModuleContext = ServerTransportModuleContext;
  * Notification API module handle extending the shared lifecycle contract.
  * Notification API 模块 handle，继承共享生命周期契约。
  */
-export interface NotificationApiModuleDef extends ServerModuleHandle<NotificationApiModuleContext> {}
+export interface NotificationApiModuleDef extends ServerModuleHandle<NotificationApiModuleContext> {
+  /** Notification-owned stable delivery preference portability capability. */
+  readonly portableCapability: NotificationModuleInstance['portableCapability'];
+}
 
 /**
  * Options carrying the already-assembled notification instance.
@@ -123,6 +126,7 @@ export function createNotificationApiModule(
 
   return {
     name: 'Notification',
+    portableCapability: options.instance.portableCapability,
 
     register(context) {
       if (state !== 'created') {

@@ -3695,16 +3695,6 @@
               },
               "configurations": {},
               "parallelism": true
-            },
-            "editor-workspace-natural-key-bootstrap": {
-              "executor": "nx:run-commands",
-              "cache": false,
-              "options": {
-                "cwd": "packages/database",
-                "command": "tsx ./scripts/prepare-editor-workspace-natural-key.ts"
-              },
-              "configurations": {},
-              "parallelism": true
             }
           },
           "projectType": "library",

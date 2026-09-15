@@ -13,6 +13,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
+import { createTimeContext } from '@memoflow/time';
 import type { IReminderTemplateRepository } from '../../domain/repositories/i-reminder-template-repository';
 import type { IReminderGroupRepository } from '../../domain/repositories/i-reminder-group-repository';
 import type { IReminderResponseRepository } from '../../domain/repositories/i-reminder-response-repository';
@@ -68,6 +69,9 @@ function makeDeps(
     userReminderPreferenceRepository: {} as unknown as IUserReminderPreferenceRepository,
     routineProfileStore: makeRoutineProfileStore(),
     closureChecker: async (): Promise<boolean> => false,
+    userTimeContextPort: {
+      getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+    },
     runtimeContributions,
   };
 }

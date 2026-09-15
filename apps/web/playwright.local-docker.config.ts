@@ -16,6 +16,7 @@ export default defineConfig({
     '**/authentication/auth-login.spec.ts',
     '**/authentication/auth-password.spec.ts',
     '**/authentication/auth-register.spec.ts',
+    '**/goal/goal-crud.spec.ts',
     '**/local-docker/core-product-phase-*.spec.ts',
   ],
   globalSetup: './e2e/local-docker/global-setup.ts',

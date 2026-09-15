@@ -19,7 +19,12 @@ export interface CloudPrincipal {
   readonly emailVerified: boolean;
 }
 
-export interface CloudUserProvisioner {
+export interface CloudSessionCapability {
+  resolvePrincipal(headers: Headers): Promise<CloudPrincipal | null>;
+  resolveNodePrincipal(headers: IncomingHttpHeaders): Promise<CloudPrincipal | null>;
+}
+
+interface CloudUserProvisioner {
   provision(input: {
     readonly identityId: string;
     readonly email: string;
@@ -28,7 +33,7 @@ export interface CloudUserProvisioner {
   }): Promise<void>;
 }
 
-export interface CloudAuthOptions {
+interface CloudAuthOptions {
   readonly database: PrismaClient;
   readonly secret: string;
   readonly baseUrl: string;
@@ -41,10 +46,15 @@ export interface CloudAuthOptions {
   readonly userProvisioner: CloudUserProvisioner;
   readonly emailDelivery: CloudAuthEmailDelivery;
   readonly closureChecker?: (identityId: string) => Promise<boolean>;
-  readonly rateLimit?: BetterAuthOptions['rateLimit'];
+  readonly rateLimit?: {
+    readonly enabled?: boolean;
+    readonly customRules?: Readonly<
+      Record<string, { readonly window: number; readonly max: number }>
+    >;
+  };
 }
 
-export interface CloudAuth {
+interface CloudAuth extends CloudSessionCapability {
   readonly handler: (request: Request) => Promise<Response>;
   readonly expressHandler: RequestHandler;
   resolvePrincipal(headers: Headers): Promise<CloudPrincipal | null>;
@@ -54,7 +64,8 @@ export interface CloudAuth {
 }
 
 interface CloudAuthDependencies {
-  readonly database?: BetterAuthOptions['database'];
+  /** Opaque test/internal adapter override; Better Auth types stay implementation-private. */
+  readonly database?: unknown;
 }
 
 export function createCloudAuth(
@@ -68,22 +79,23 @@ export function createCloudAuth(
     if (typeof options.database.cloudAuthUser?.findUnique === 'function') {
       const user = await options.database.cloudAuthUser.findUnique({
         where: { id: identityId },
-        select: { status: true, disabledAt: true },
+        select: { disabledAt: true },
       });
-      if (user && (user.status === 'disabled' || user.disabledAt !== null)) {
+      if (user && user.disabledAt !== null) {
         return true;
       }
     }
     return false;
   }
 
+  const databaseOverride = dependencies.database as BetterAuthOptions['database'] | undefined;
   const auth = betterAuth({
     appName: 'MemoFlow',
     baseURL: options.baseUrl,
     secret: options.secret,
     trustedOrigins: [...options.trustedOrigins],
     database:
-      dependencies.database ??
+      databaseOverride ??
       prismaAdapter(options.database, {
         provider: 'postgresql',
         transaction: true,
@@ -218,11 +230,7 @@ export function createCloudAuth(
     };
   };
 
-  const checkRequestAccess = async (
-    headers: Headers,
-    body?: unknown,
-    pathname?: string,
-  ): Promise<Response | null> => {
+  const checkRequestAccess = async (headers: Headers, body?: unknown): Promise<Response | null> => {
     // 1. Check existing session in request headers (e.g. get-session, refresh, or session-authenticated calls)
     const resolved = await auth.api.getSession({ headers }).catch(() => null);
     let sessionUserId: string | null = resolved?.user?.id ?? null;
@@ -259,15 +267,6 @@ export function createCloudAuth(
             where: { email: targetEmail.toLowerCase() },
             select: { id: true },
           });
-          if (user && pathname?.endsWith('/sign-up/email')) {
-            return new Response(
-              JSON.stringify({ code: 'USER_ALREADY_EXISTS', message: 'User already exists.' }),
-              {
-                status: 409,
-                headers: { 'content-type': 'application/json' },
-              },
-            );
-          }
           if (user && (await isClosureBlocked(user.id))) {
             return new Response(
               JSON.stringify({
@@ -328,11 +327,7 @@ export function createCloudAuth(
   const expressHandler: RequestHandler = async (req, res, next) => {
     const headers = fromNodeHeaders(req.headers);
     const body = await readExpressBody(req);
-    const accessResponse = await checkRequestAccess(
-      headers,
-      body,
-      (req.originalUrl ?? req.url).split('?')[0],
-    );
+    const accessResponse = await checkRequestAccess(headers, body);
     if (accessResponse) {
       res.status(accessResponse.status);
       for (const [key, value] of accessResponse.headers.entries()) {
@@ -353,11 +348,7 @@ export function createCloudAuth(
         .json()
         .catch(() => undefined);
     }
-    const accessResponse = await checkRequestAccess(
-      request.headers,
-      body,
-      new URL(request.url).pathname,
-    );
+    const accessResponse = await checkRequestAccess(request.headers, body);
     if (accessResponse) {
       return accessResponse;
     }
@@ -381,13 +372,6 @@ export function createCloudAuth(
       });
       await options.database.cloudAuthDeviceCode.deleteMany({
         where: { userId: identityId },
-      });
-      await options.database.cloudAuthUser.updateMany({
-        where: { id: identityId },
-        data: {
-          status: 'disabled',
-          disabledAt: new Date(),
-        },
       });
       return { revokedSessions: sessionResult.count };
     },

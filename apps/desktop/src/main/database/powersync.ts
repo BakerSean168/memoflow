@@ -43,15 +43,8 @@ export interface CloudCredentialProvider {
 const NON_SYNCABLE_LOCAL_TABLES = ['accounts'] as const;
 
 const PRE_HYDRATION_BOOTSTRAP_SYNC_TABLES = [
-  'user_settings',
+  'user_preference_records',
   'repositories',
-  // Residual 539: editor_* bootstrap tables are portable backup continuity only —
-  // Residual 885: portable boundary re-lock — no first-party @memoflow/editor remount.
-  // Desktop never remounts @memoflow/editor as a first-party editing surface.
-  'editor_workspaces',
-  'editor_workspace_sessions',
-  'editor_workspace_session_groups',
-  'editor_workspace_session_group_tabs',
 ] as const;
 
 // ──────────────────────────────────────────────
@@ -91,7 +84,9 @@ function createPowerSyncDatabase(dbPath: string): PowerSyncDatabase {
     database: {
       dbFilename: dbPath,
       openWorker: (filename, options) => {
-        const resolvedFilename = resolvePackagedWorkerPath(filename, { isPackaged: app.isPackaged });
+        const resolvedFilename = resolvePackagedWorkerPath(filename, {
+          isPackaged: app.isPackaged,
+        });
 
         return new Worker(resolvedFilename, options);
       },
@@ -229,7 +224,9 @@ class DesktopPowerSyncConnector implements PowerSyncBackendConnector {
     const accessToken = await this.credentialProvider.getAccessToken();
 
     if (!accessToken) {
-      throw new Error('[PowerSync] No cloud-eligible access token — guest/offline profiles stay local');
+      throw new Error(
+        '[PowerSync] No cloud-eligible access token — guest/offline profiles stay local',
+      );
     }
 
     const response = await fetch(`${this.apiBaseUrl}/powersync/token`, {

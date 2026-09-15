@@ -17,8 +17,8 @@
 // Domain: port interface + record types
 export type {
   DashboardGoalRecord,
-  DashboardTaskTemplateRecord,
-  DashboardTaskInstanceRecord,
+  DashboardTaskPlanRecord,
+  DashboardTaskOccurrenceRecord,
   DashboardScheduleRecord,
   DashboardReminderRecord,
   DashboardReadSource,
@@ -29,8 +29,8 @@ export { getDashboardData } from './domain/projection';
 
 export { toDashboardGoalRecord, type DashboardGoalSource } from './domain/to-dashboard-goal-record';
 
-// Domain: TaskInstance → DashboardTaskInstanceRecord sole (Residual 1156)
+// Domain: TaskOccurrence → DashboardTaskOccurrenceRecord sole (Residual 1156)
 export {
-  toDashboardTaskInstanceRecord,
-  type DashboardTaskInstanceSource,
-} from './domain/to-dashboard-task-instance-record';
+  toDashboardTaskOccurrenceRecord,
+  type DashboardTaskOccurrenceSource,
+} from './domain/to-dashboard-task-occurrence-record';

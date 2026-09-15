@@ -249,7 +249,7 @@
         {
           "runner": "goal-integration",
           "file": "packages/goal/src/server/application/event-handlers/register-goal-event-listeners.integration.test.ts",
-          "title": "applies an explicit TaskInstance source once and reverts it explicitly"
+          "title": "applies an explicit TaskOccurrence source once and reverts it explicitly"
         }
       ]
     },

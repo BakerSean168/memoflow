@@ -48,6 +48,7 @@ import type { CalendarApi, CalendarOptions, EventApi, EventInput } from '@fullca
 import type { CalendarEventProjection } from '@memoflow/contracts/schedule';
 import { Loader2 } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
+import { getProductTime, productTimeRevision } from '../../../shared/utils/product-time';
 import {
   applyFullCalendarPlannerMutation,
   defaultPlannerMutationTimePort,
@@ -143,80 +144,83 @@ async function applyMutation(
   emit('mutation', outcome);
 }
 
-const calendarOptions = computed<CalendarOptions>(() => ({
-  plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, classicThemePlugin],
-  initialView: fullCalendarView[props.view],
-  initialDate: new Date(props.initialDate),
-  headerToolbar: false,
-  locales: [zhCnLocale],
-  locale: props.locale.toLowerCase().startsWith('zh') ? 'zh-cn' : 'en',
-  firstDay: 1,
-  height: '100%',
-  nowIndicator: true,
-  selectable: true,
-  selectMirror: true,
-  editable: true,
-  allDaySlot: true,
-  dayMaxEvents: 3,
-  slotDuration: '00:30:00',
-  slotMinTime: '00:00:00',
-  slotMaxTime: '24:00:00',
-  eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
-  events: props.projections.map(projectionToEvent),
-  datesSet(info) {
-    const range: PlannerVisibleRange = {
-      start: info.start.getTime(),
-      end: Math.max(info.start.getTime(), info.end.getTime() - 1),
-      title: info.view.title,
-      view: plannerViewFromFullCalendar(info.view.type),
-    };
-    const rangeKey = `${range.view}:${range.start}:${range.end}:${range.title}`;
-    if (lastVisibleRangeKey.value === rangeKey) return;
-    lastVisibleRangeKey.value = rangeKey;
-    emit('range-change', range);
-  },
-  eventClick(info) {
-    const projection = projectionOf(info.event);
-    if (projection) emit('event-click', projection);
-  },
-  eventDidMount(info) {
-    const projection = projectionOf(info.event);
-    if (!projection) return;
-    info.el.setAttribute('role', 'button');
-    info.el.setAttribute('tabindex', '0');
-    info.el.setAttribute('aria-label', projection.title);
-    info.el.setAttribute(
-      'data-testid',
-      `schedule-event-${projection.sourceType}-${projection.sourceId}`,
-    );
-    info.el.onkeydown = (event: KeyboardEvent) => {
-      if (event.key !== 'Enter' && event.key !== ' ') return;
-      event.preventDefault();
-      emit('event-click', projection);
-    };
-  },
-  eventWillUnmount(info) {
-    info.el.onkeydown = null;
-  },
-  dayCellDidMount(info) {
-    const year = info.date.getFullYear();
-    const month = String(info.date.getMonth() + 1).padStart(2, '0');
-    const day = String(info.date.getDate()).padStart(2, '0');
-    info.el.setAttribute('data-testid', `schedule-day-${year}-${month}-${day}`);
-  },
-  dateClick(info) {
-    if (info.view.type === 'dayGridMonth') emit('day-click', info.date);
-  },
-  select(info) {
-    emit('select-range', {
-      start: info.start.getTime(),
-      end: info.end.getTime(),
-      allDay: info.allDay,
-    });
-  },
-  eventDrop: (info) => void applyMutation('move', info),
-  eventResize: (info) => void applyMutation('resize', info),
-}));
+const calendarOptions = computed<CalendarOptions>(() => {
+  void productTimeRevision.value;
+  const productTime = getProductTime();
+  return {
+    plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, classicThemePlugin],
+    initialView: fullCalendarView[props.view],
+    initialDate: new Date(props.initialDate),
+    headerToolbar: false,
+    locales: [zhCnLocale],
+    locale: props.locale.toLowerCase().startsWith('zh') ? 'zh-cn' : 'en',
+    timeZone: String(productTime.context.timeZone),
+    firstDay: productTime.context.weekStartsOn,
+    height: '100%',
+    nowIndicator: true,
+    selectable: true,
+    selectMirror: true,
+    editable: true,
+    allDaySlot: true,
+    dayMaxEvents: 3,
+    slotDuration: '00:30:00',
+    slotMinTime: '00:00:00',
+    slotMaxTime: '24:00:00',
+    eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+    events: props.projections.map(projectionToEvent),
+    datesSet(info) {
+      const range: PlannerVisibleRange = {
+        start: info.start.getTime(),
+        end: Math.max(info.start.getTime(), info.end.getTime() - 1),
+        title: info.view.title,
+        view: plannerViewFromFullCalendar(info.view.type),
+      };
+      const rangeKey = `${range.view}:${range.start}:${range.end}:${range.title}`;
+      if (lastVisibleRangeKey.value === rangeKey) return;
+      lastVisibleRangeKey.value = rangeKey;
+      emit('range-change', range);
+    },
+    eventClick(info) {
+      const projection = projectionOf(info.event);
+      if (projection) emit('event-click', projection);
+    },
+    eventDidMount(info) {
+      const projection = projectionOf(info.event);
+      if (!projection) return;
+      info.el.setAttribute('role', 'button');
+      info.el.setAttribute('tabindex', '0');
+      info.el.setAttribute('aria-label', projection.title);
+      info.el.setAttribute(
+        'data-testid',
+        `schedule-event-${projection.sourceType}-${projection.sourceId}`,
+      );
+      info.el.onkeydown = (event: KeyboardEvent) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        emit('event-click', projection);
+      };
+    },
+    eventWillUnmount(info) {
+      info.el.onkeydown = null;
+    },
+    dayCellDidMount(info) {
+      const dayKey = String(productTime.calendar.toYmd(info.date.getTime()));
+      info.el.setAttribute('data-testid', 'schedule-day-' + dayKey);
+    },
+    dateClick(info) {
+      if (info.view.type === 'dayGridMonth') emit('day-click', info.date);
+    },
+    select(info) {
+      emit('select-range', {
+        start: info.start.getTime(),
+        end: info.end.getTime(),
+        allDay: info.allDay,
+      });
+    },
+    eventDrop: (info) => void applyMutation('move', info),
+    eventResize: (info) => void applyMutation('resize', info),
+  };
+});
 
 watch(
   () => props.view,

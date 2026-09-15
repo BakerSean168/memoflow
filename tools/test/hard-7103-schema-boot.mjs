@@ -18,8 +18,8 @@ const requiredTables = [
   'goals',
   'key_results',
   'goal_records',
-  'task_templates',
-  'task_instances',
+  'task_plans',
+  'task_occurrences',
   'task_goal_outbox',
   'schedules',
   'schedule_tasks',
@@ -108,8 +108,8 @@ try {
         pg_get_constraintdef(oid) AS definition,
         obj_description(oid, 'pg_constraint') AS comment
       FROM pg_constraint
-      WHERE conname = 'task_templates_goal_binding_complete'
-        AND conrelid = 'public.task_templates'::regclass
+      WHERE conname = 'task_plans_goal_binding_complete'
+        AND conrelid = 'public.task_plans'::regclass
     `);
     const taskGoalBindingRow = taskGoalBinding.rows[0];
     const taskGoalBindingDefinition = String(taskGoalBindingRow?.definition ?? '');
@@ -121,7 +121,7 @@ try {
       taskGoalBindingDefinition.includes('PER_INSTANCE') ||
       taskGoalBindingDefinition.includes('ALL_INSTANCES_COMPLETED')
     ) {
-      throw new Error('task_templates has no canonical v2 Goal-binding constraint after boot');
+      throw new Error('task_plans has no canonical v2 Goal-binding constraint after boot');
     }
 
     console.log(

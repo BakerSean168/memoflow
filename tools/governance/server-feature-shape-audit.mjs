@@ -2,13 +2,15 @@
 /**
  * Server Feature Shape Audit
  *
- * Checks that business feature packages follow the expected shape.
- * The canonical shape is now `src/server/*`.
- * Legacy server roots are forbidden for audited packages.
+ * Checks that business feature packages follow the expected server-first shape.
+ * The canonical root shape is `src/server/*`; package-specific semantic cores
+ * are allowed only when explicitly declared here. Legacy server roots remain
+ * forbidden for audited packages.
  */
 
 import { readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 const PACKAGES_DIR = join(import.meta.dirname, '..', '..', 'packages');
 
@@ -22,8 +24,17 @@ const FORBIDDEN_LEGACY_ROOT_DIRS = [
 ];
 
 const SERVER_FIRST_REQUIRED_DIRS = ['server', 'api', 'client', 'electron'];
-const SERVER_SUBDIRS = ['domain', 'application', 'transport', 'infrastructure'];
+const SERVER_REQUIRED_SUBDIRS = ['application', 'transport', 'infrastructure'];
 const SERVER_REQUIRED_FILES = ['server/index.ts'];
+
+/**
+ * A server-first package must expose one explicit semantic core. Most packages
+ * use `server/domain`; Setting intentionally uses `server/preferences` after
+ * ADR-095 retired the empty UserSetting aggregate/DDD ceremony.
+ */
+const SERVER_SEMANTIC_CORE_DIRS = new Map([
+  ['setting', ['preferences']],
+]);
 
 const EXCEPTIONS = new Set([
   'powersync-schema',
@@ -59,7 +70,53 @@ const AUDITED_PACKAGES = new Set([
   'task',
 ]);
 
-function main() {
+function semanticCoreDirsFor(pkg) {
+  return SERVER_SEMANTIC_CORE_DIRS.get(pkg) ?? ['domain'];
+}
+
+/**
+ * Audits one package source root and returns a structured violation or null.
+ * Exported so the governance rule itself has regression coverage.
+ */
+export function auditPackageShape(pkg, srcDir) {
+  if (!existsSync(srcDir)) return null;
+
+  const srcContents = readdirSync(srcDir);
+  const missingRootDirs = SERVER_FIRST_REQUIRED_DIRS.filter((dir) => !srcContents.includes(dir));
+  if (missingRootDirs.length > 0) {
+    return { package: pkg, missing: missingRootDirs };
+  }
+
+  const forbiddenRootDirs = FORBIDDEN_LEGACY_ROOT_DIRS.filter((dir) => srcContents.includes(dir));
+  if (forbiddenRootDirs.length > 0) {
+    return { package: pkg, forbidden: forbiddenRootDirs };
+  }
+
+  const serverDir = join(srcDir, 'server');
+  const serverContents = readdirSync(serverDir);
+  const missingServerDirs = SERVER_REQUIRED_SUBDIRS
+    .filter((dir) => !serverContents.includes(dir))
+    .map((dir) => `server/${dir}`);
+
+  const allowedSemanticCores = semanticCoreDirsFor(pkg);
+  if (!allowedSemanticCores.some((dir) => serverContents.includes(dir))) {
+    missingServerDirs.push(
+      allowedSemanticCores.length === 1
+        ? `server/${allowedSemanticCores[0]}`
+        : `one of ${allowedSemanticCores.map((dir) => `server/${dir}`).join(', ')}`,
+    );
+  }
+
+  const missingServerFiles = SERVER_REQUIRED_FILES.filter((file) => !existsSync(join(srcDir, file)));
+  const missingServerEntries = [...missingServerDirs, ...missingServerFiles];
+  if (missingServerEntries.length > 0) {
+    return { package: pkg, missing: missingServerEntries };
+  }
+
+  return null;
+}
+
+export function main() {
   const packages = readdirSync(PACKAGES_DIR, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name);
@@ -69,34 +126,8 @@ function main() {
     if (EXCEPTIONS.has(pkg)) continue;
     if (!AUDITED_PACKAGES.has(pkg)) continue;
 
-    const srcDir = join(PACKAGES_DIR, pkg, 'src');
-    if (!existsSync(srcDir)) continue;
-
-    const srcContents = readdirSync(srcDir);
-
-    const missingRootDirs = SERVER_FIRST_REQUIRED_DIRS.filter((dir) => !srcContents.includes(dir));
-    if (missingRootDirs.length > 0) {
-      violations.push({ package: pkg, missing: missingRootDirs });
-      continue;
-    }
-
-    const forbiddenRootDirs = FORBIDDEN_LEGACY_ROOT_DIRS.filter((dir) => srcContents.includes(dir));
-    if (forbiddenRootDirs.length > 0) {
-      violations.push({ package: pkg, forbidden: forbiddenRootDirs });
-      continue;
-    }
-
-    const serverDir = join(srcDir, 'server');
-    const serverContents = readdirSync(serverDir);
-    const missingServerDirs = SERVER_SUBDIRS
-      .filter((dir) => !serverContents.includes(dir))
-      .map((dir) => `server/${dir}`);
-    const missingServerFiles = SERVER_REQUIRED_FILES.filter((file) => !existsSync(join(srcDir, file)));
-
-    const missingServerEntries = [...missingServerDirs, ...missingServerFiles];
-    if (missingServerEntries.length > 0) {
-      violations.push({ package: pkg, missing: missingServerEntries });
-    }
+    const violation = auditPackageShape(pkg, join(PACKAGES_DIR, pkg, 'src'));
+    if (violation) violations.push(violation);
   }
 
   if (violations.length > 0) {
@@ -110,10 +141,14 @@ function main() {
         console.error(`  ${violation.package}: forbidden legacy root ${violation.forbidden.join(', ')}`);
       }
     }
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   console.log('✅ Server Feature Shape Audit passed');
 }
 
-main();
+const entryArg = process.argv[1];
+if (entryArg && import.meta.url === pathToFileURL(entryArg).href) {
+  main();
+}

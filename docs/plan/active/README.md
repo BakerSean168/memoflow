@@ -4,7 +4,7 @@ tags:
   - active
 description: 进行中的计划目录与当前状态
 created: 2026-04-26T00:00:00
-updated: 2026-09-08T12:14:00+08:00
+updated: 2026-09-14T13:06:51+08:00
 ---
 
 # Active Plans
@@ -13,12 +13,31 @@ updated: 2026-09-08T12:14:00+08:00
 
 ## 当前计划
 
-当前没有仍在推进中的 active plan。
+当前有 2 个仍在推进中的 active plan。
+
+| 计划                                                                                                      | 当前状态                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [AI vNext Model Convergence](./2026-09-09-ai-vnext-model-convergence.md)                                  | **ACTIVE / design frozen** — 保留 Mastra 单一 runtime，收敛 Conversation shell、Provider Secret/Model Capability、AI Context、Knowledge stable identity、Workflow Draft/Apply、ExecutionRecord；`AI-9601` 文档完成，其余 production implementation 未开始。                                                                                                                                                                                                                                                                                   |
+| [System-wide vNext Model Convergence](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) | **ACTIVE / canonical execution order** — ADR-067～111 统一 ownership review 已通过；ADR-111 明确零旧数据 destructive cutover，协调所有 module subplan 的依赖、共享 schema 单写者、直接删除与最终 exact-head closure。                                                                                                                                                                                                                                                                                                                         |
+
+## 本轮已归档（2026-09-14）
+
+| 计划                                                                                  | 结果                                                                                                                                                                                                                                                                            |
+| ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Time + Label vNext Model Convergence](../archive/2026-09-09-time-label-vnext-model-convergence.md) | `TIME-1201～1206`、`LABEL-1301～1305`、`FOUNDATION-1401` 全部 DONE；五层复审 P0/P1=0。PR #340 首个 exact head `40f0b0a1efaa` / run `34809651084` 与 archive head `95721d3a256` / run `34811284555` 两道 gate 均全绿，Time + Label vNext 已正式归档闭环。 |
+| [Setting vNext Model Convergence](../archive/2026-09-08-setting-vnext-model-convergence.md) | `SETTING-9201～9210` 全部 DONE；五层 review P0/P1 = 0。PR #340 首个 exact head `f94de6de664` / run `34804907664` 与 archive head `3a79b4b5eb6` / run `34808509548` 两道 gate 均全绿，Setting vNext 已正式归档闭环。 |
+| [Task vNext Model Convergence](../archive/2026-09-08-task-vnext-model-convergence.md) | `TASK-7301～7310` 全部 DONE；`TASK-7310` 五层 review P0/P1 = 0。PR #340 首个 exact head `2465c1b0506` / run `34799711173` 与 archive head `7101589ac25` / run `34800927772` 两道 gate 均全绿，Task vNext 已正式归档闭环。 |
+
+## 本轮已归档（2026-09-13）
+
+| 计划                                                                                  | 结果                                                                                                                                                                                                 |
+| ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Goal vNext Model Convergence](../archive/2026-09-08-goal-vnext-model-convergence.md) | `GOAL-7201～7211` 全部 DONE；五层 review P0/P1 = 0。PR #340 首个 exact head `a6c9d622f0b` run `34730694318` 全绿，archive head `4101ff3e52c` run `34731400439` 再次全绿，Goal vNext 已正式归档闭环。 |
 
 ## 本轮已归档（2026-09-08）
 
-| 计划 | 结果 |
-| --- | --- |
+| 计划                                                                                                      | 结果                                                                                                                                                                                                 |
+| --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [MemoFlow Core vNext — Unified Refactor Orchestration](../archive/2026-08-25-core-vnext-orchestration.md) | Goal/Task/Routine/Planner/Scheduler/Notification/EventBus 全面收口；产品 parity、Schedule/Scheduler 物理拆分、HARD-7101~7105 全部完成；PR #338 第四轮 exact-head CI 19/19 全绿并合入 `088a9f16499`。 |
 
 ## 本轮已归档（2026-09-06）

@@ -1,6 +1,6 @@
 import type {
   ConfirmKnowledgeRepositoryHeadReq,
-  KnowledgeRepositoryConnectionClientDTO,
+  KnowledgeRemoteBindingClientDTO,
   KnowledgeRepositoryContentState,
   KnowledgeRepositoryInstallationTokenRes,
   KnowledgeRepositoryReconciliationPreview,
@@ -24,5 +24,5 @@ export interface KnowledgeRepositoryDesktopRemotePort {
   confirmKnowledgeRepositoryHead(
     connectionId: string,
     request: ConfirmKnowledgeRepositoryHeadReq,
-  ): Promise<Result<KnowledgeRepositoryConnectionClientDTO>>;
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>>;
 }

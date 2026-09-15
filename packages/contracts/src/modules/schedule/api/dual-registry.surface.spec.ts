@@ -530,7 +530,7 @@ import { describe, expect, it } from 'vitest';
    * (see notification-preference-calendar-prefs-client-dto-dual surface).
     *
    * Soft residual 831: ScheduleTaskClientDTO dual retired via ScheduleTaskResponseSchema
-   * (see task-instance-dependency-schedule-task-client-dto-dual surface).
+   * (see task-occurrence-dependency-schedule-task-client-dto-dual surface).
     *
    * Soft residual 833: ScheduleExecutionResponseSchema exported without ZodType dual; nested under ScheduleTask
    * (see reminder-template-active-time-schedule-execution-dual surface).

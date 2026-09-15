@@ -4,7 +4,7 @@ import { registerAndLogin } from '../helpers/testHelpers';
 
 const password = 'Test123456!';
 
-test.use({ timezoneId: 'Asia/Shanghai' });
+test.use({ timezoneId: 'UTC' });
 
 test.describe('Planner owner-command acceptance', () => {
   test('[P0][Fixture J] Task 14:00 -> 16:00 owner conflict reverts the optimistic FullCalendar drag', async ({
@@ -19,22 +19,28 @@ test.describe('Planner owner-command acceptance', () => {
       landingPath: '/tasks',
     });
 
+    const taskDate = await page.evaluate(() => {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    });
+
     const creation = await expectApiData<{
-      template: { id: string };
-      todayInstanceCreated: boolean;
+      plan: { id: string };
+      occurrenceCount: number;
+      todayOccurrenceCreated: boolean;
     }>(
-      await page.request.post(`${API_CONFIG.API_PREFIX}/task-templates`, {
+      await page.request.post(`${API_CONFIG.API_PREFIX}/task-plans`, {
         data: {
           name: taskName,
           description: 'HARD-7103 Fixture J owner-command rollback',
-          taskType: 'OneTime',
-          timeConfig: {
-            timeType: 'TimePoint',
-            startDate: Date.now(),
-            timePoint: 14 * 60,
-            timeRange: null,
+          schedule: {
+            kind: 'OneTime',
+            date: taskDate,
+            timing: { kind: 'At', time: '14:00' },
           },
-          recurrenceRule: null,
           reminderConfig: null,
           importance: 'Moderate',
           labelIds: [],
@@ -42,7 +48,7 @@ test.describe('Planner owner-command acceptance', () => {
         },
       }),
     );
-    expect(creation.todayInstanceCreated).toBe(true);
+    expect(creation.todayOccurrenceCreated).toBe(true);
 
     await page.goto('/schedule/calendar', { waitUntil: 'domcontentloaded' });
     await expect(page.getByTestId('schedule-calendar-view')).toBeVisible({
@@ -65,7 +71,7 @@ test.describe('Planner owner-command acceptance', () => {
     expect(before).not.toBeNull();
 
     let reschedulePayload: unknown = null;
-    await page.route('**/api/v1/task-instances/*/reschedule', async (route) => {
+    await page.route('**/api/v1/task-occurrences/*/reschedule', async (route) => {
       reschedulePayload = route.request().postDataJSON();
       await route.fulfill({
         status: 409,
@@ -83,7 +89,7 @@ test.describe('Planner owner-command acceptance', () => {
     const requestPromise = page.waitForRequest(
       (request) =>
         request.method() === 'POST' &&
-        /\/api\/v1\/task-instances\/[^/]+\/reschedule$/.test(new URL(request.url()).pathname),
+        /\/api\/v1\/task-occurrences\/[^/]+\/reschedule$/.test(new URL(request.url()).pathname),
     );
 
     await page.mouse.move(before!.x + before!.width / 2, before!.y + before!.height / 2);
@@ -94,9 +100,14 @@ test.describe('Planner owner-command acceptance', () => {
     await page.mouse.up();
     await requestPromise;
 
-    await expect.poll(() => reschedulePayload, { timeout: TIMEOUT_CONFIG.ELEMENT_WAIT }).toMatchObject({
-      newTime: { timeType: 'TimePoint', timePoint: 16 * 60 },
-    });
+    await expect
+      .poll(() => reschedulePayload, { timeout: TIMEOUT_CONFIG.ELEMENT_WAIT })
+      .toMatchObject({
+        scheduleSnapshot: {
+          date: taskDate,
+          timing: { kind: 'At', time: '16:00' },
+        },
+      });
 
     await expect
       .poll(

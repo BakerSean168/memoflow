@@ -38,9 +38,9 @@ test('Debug - Check page content', async ({ page }) => {
   }
 
   // 查找特定的 test-id
-  const createBtn = page.locator('[data-testid="create-task-template-button"]');
+  const createBtn = page.locator('[data-testid="create-task-plan-button"]');
   const isVisible = await createBtn.isVisible().catch(() => false);
-  console.log('create-task-template-button visible:', isVisible);
+  console.log('create-task-plan-button visible:', isVisible);
 
 
   // 打印所有 data-testid 属性

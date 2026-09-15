@@ -51,13 +51,15 @@ describe('PowerSync desktop data portability round trip', () => {
     expect(exported.content).not.toContain('apiKey');
     expect(exported.content).not.toContain('secret-key');
     expect(exported.content).not.toContain('sessionToken');
+    expect(exported.content).not.toContain('lastGeneratedDate');
+    expect(exported.content).not.toContain('generateAheadDays');
     expect(exported.content).toContain('"repositories"');
     expect(exported.content).toContain('"goals"');
     expect(JSON.parse(exported.content).schemaVersion).toBe(2);
     expect(exported.content).toContain('"templates"');
     expect(exported.content).toContain('"groups"');
     expect(exported.content).toContain('"tasks"');
-    expect(exported.content).toContain('"workspaces"');
+    expect(exported.content).not.toContain('"workspaces"');
     expect(exported.content).toContain('"conversations"');
 
     const targetDb = new FakePowerSyncDb({}, { existingSingletonsIdentityId: identityB });
@@ -76,9 +78,13 @@ describe('PowerSync desktop data portability round trip', () => {
     expect(JSON.stringify(firstStatements)).not.toContain('resource-a');
     expect(JSON.stringify(firstStatements)).not.toContain('goal-a');
     expect(JSON.stringify(firstStatements)).not.toContain('kr-a');
-    expect(JSON.stringify(firstStatements)).not.toContain('task-template-a');
+    expect(JSON.stringify(firstStatements)).not.toContain('task-plan-a');
     expect(JSON.stringify(firstStatements)).not.toContain('reminder-template-a');
     expect(JSON.stringify(firstStatements)).not.toContain('workspace-a');
+    expect(JSON.stringify(firstStatements)).not.toContain('editor_workspaces');
+    expect(JSON.stringify(firstStatements)).not.toContain('editor_workspace_sessions');
+    expect(JSON.stringify(firstStatements)).not.toContain('editor_workspace_session_groups');
+    expect(JSON.stringify(firstStatements)).not.toContain('editor_workspace_session_group_tabs');
     expect(JSON.stringify(firstStatements)).not.toContain('conversation-a');
 
     const repository = insertedRow(firstStatements, 'repositories');
@@ -87,8 +93,8 @@ describe('PowerSync desktop data portability round trip', () => {
     const goal = insertedRow(firstStatements, 'goals');
     const keyResult = insertedRow(firstStatements, 'key_results');
     const goalRecord = insertedRow(firstStatements, 'goal_records');
-    const taskTemplate = insertedRow(firstStatements, 'task_templates');
-    const taskInstance = insertedRow(firstStatements, 'task_instances');
+    const taskPlan = insertedRow(firstStatements, 'task_plans');
+    const taskOccurrence = insertedRow(firstStatements, 'task_occurrences');
     const scheduleTask = insertedRow(firstStatements, 'schedule_tasks');
     const reminderGroup = insertedRow(firstStatements, 'reminder_groups');
     const reminderTemplate = insertedRow(firstStatements, 'reminder_templates');
@@ -96,22 +102,48 @@ describe('PowerSync desktop data portability round trip', () => {
     const routineDefinition = insertedRow(firstStatements, 'routine_definitions');
     const routineMembership = insertedRow(firstStatements, 'routine_profile_memberships');
     const reminderResponse = insertedRow(firstStatements, 'reminder_responses');
-    const workspace = insertedRow(firstStatements, 'editor_workspaces');
-    const session = insertedRow(firstStatements, 'editor_workspace_sessions');
-    const group = insertedRow(firstStatements, 'editor_workspace_session_groups');
-    const tab = insertedRow(firstStatements, 'editor_workspace_session_group_tabs');
     const conversation = insertedRow(firstStatements, 'ai_conversations');
     const message = insertedRow(firstStatements, 'ai_messages');
 
     expect(folder.repository_id).toBe(repository.id);
     expect(resource.repository_id).toBe(repository.id);
     expect(resource.folder_id).toBe(folder.id);
+    expect(goal.start_date).toBe('2026-06-04');
+    expect(goal.target_kind).toBe('quarter');
+    expect(goal.target_end_date).toBe('2026-09-30');
     expect(keyResult.goal_id).toBe(goal.id);
     expect(goalRecord.key_result_id).toBe(keyResult.id);
-    expect(taskTemplate.goal_id).toBe(goal.id);
-    expect(taskTemplate.key_result_id).toBe(keyResult.id);
-    expect(taskInstance.template_id).toBe(taskTemplate.id);
-    expect(scheduleTask.source_entity_id).toBe(taskTemplate.id);
+    expect(taskPlan.goal_id).toBe(goal.id);
+    expect(taskPlan.key_result_id).toBe(keyResult.id);
+    expect(JSON.parse(String(taskPlan.schedule))).toEqual({
+      kind: 'OneTime',
+      date: '2026-06-04',
+      timing: { kind: 'At', time: '09:00' },
+    });
+    expect(JSON.parse(String(taskPlan.reminder_config))).toMatchObject({
+      enabled: true,
+      triggers: [{ type: 'Relative', relativeValue: 15, relativeUnit: 'Minutes' }],
+    });
+    expect(taskPlan).not.toHaveProperty('time_config_type');
+    expect(taskPlan).not.toHaveProperty('recurrence_rule_type');
+    expect(taskPlan).not.toHaveProperty('reminder_config_enabled');
+    expect(taskOccurrence.plan_id).toBe(taskPlan.id);
+    expect(taskOccurrence.schedule_date).toBe('2026-06-04');
+    expect(JSON.parse(String(taskOccurrence.schedule_timing))).toEqual({
+      kind: 'At',
+      time: '09:00',
+    });
+    const importedPlanChecklist = JSON.parse(String(taskPlan.checklist)) as Array<{ id: string }>;
+    const importedOccurrenceChecklist = JSON.parse(
+      String(taskOccurrence.checklist_state),
+    ) as Array<{
+      definitionId: string;
+    }>;
+    expect(importedPlanChecklist).toHaveLength(1);
+    expect(importedOccurrenceChecklist).toHaveLength(1);
+    expect(importedOccurrenceChecklist[0]?.definitionId).toBe(importedPlanChecklist[0]?.id);
+    expect(importedPlanChecklist[0]?.id).not.toBe('check-a');
+    expect(scheduleTask.source_entity_id).toBe(taskPlan.id);
     expect(reminderTemplate).not.toHaveProperty('reminder_group_id');
     expect(routineProfile.id).toBe(reminderGroup.id);
     expect(routineDefinition.id).toBe(reminderTemplate.id);
@@ -119,25 +151,18 @@ describe('PowerSync desktop data portability round trip', () => {
     expect(routineMembership.routine_id).toBe(routineDefinition.id);
     expect(routineMembership.enabled).toBe(0);
     expect(reminderResponse.template_id).toBe(reminderTemplate.id);
-    expect(reminderResponse.action).toBe("SNOOZED");
+    expect(reminderResponse.action).toBe('SNOOZED');
     expect(reminderResponse.response_time).toBe(7);
     expect(reminderResponse.snooze_duration_seconds).toBe(900);
-    expect(session.workspace_id).toBe(workspace.id);
-    expect(group.session_id).toBe(session.id);
-    expect(group.workspace_id).toBe(workspace.id);
-    expect(tab.group_id).toBe(group.id);
-    expect(tab.session_id).toBe(session.id);
-    expect(tab.workspace_id).toBe(workspace.id);
-    expect(tab.resource_id).toBe(resource.id);
     expect(message.conversation_id).toBe(conversation.id);
 
     await importUseCase.execute(identityB, exported.content);
     const secondStatements = targetDb.committedStatements.slice(firstStatementCount);
     const secondRepository = insertedRow(secondStatements, 'repositories');
-    const secondTaskTemplate = insertedRow(secondStatements, 'task_templates');
+    const secondTaskPlan = insertedRow(secondStatements, 'task_plans');
 
     expect(secondRepository.id).not.toBe(repository.id);
-    expect(secondTaskTemplate.id).not.toBe(taskTemplate.id);
+    expect(secondTaskPlan.id).not.toBe(taskPlan.id);
 
     expect(eventSpy).toHaveBeenCalledWith(
       DataPortabilityEventTopics.EXPORTED,
@@ -287,16 +312,20 @@ class FakePowerSyncDb {
     const table = tableFromSelect(sql);
     const identityUuid = parameters?.[0];
 
-    if (
-      table &&
-      ['user_settings', 'notification_preferences', 'user_reminder_preferences'].includes(table)
-    ) {
-      const seeded = this.liveRows(table).find((row) => row.identity_id === identityUuid);
-
-      if (seeded) {
-        return Promise.resolve(seeded as T);
+    if (table === 'user_preference_records') {
+      const namespace = parameters?.[1];
+      const seeded = this.liveRows(table).find(
+        (row) => row.identity_id === identityUuid && row.namespace === namespace,
+      );
+      if (seeded) return Promise.resolve(seeded as T);
+      if (identityUuid === this.options.existingSingletonsIdentityId) {
+        return Promise.resolve(existingPreference(identityUuid, namespace) as T);
       }
+    }
 
+    if (table && ['notification_preferences', 'user_reminder_preferences'].includes(table)) {
+      const seeded = this.liveRows(table).find((row) => row.identity_id === identityUuid);
+      if (seeded) return Promise.resolve(seeded as T);
       if (identityUuid === this.options.existingSingletonsIdentityId) {
         return Promise.resolve(existingSingleton(table, identityUuid) as T);
       }
@@ -357,8 +386,7 @@ class FakePowerSyncDb {
           .map((row) => row.id);
 
         return rows.filter(
-          (row) =>
-            row.identity_id === identityId && keyResultIds.includes(row.key_result_id),
+          (row) => row.identity_id === identityId && keyResultIds.includes(row.key_result_id),
         );
       }
       case 'key_results':
@@ -418,16 +446,28 @@ function rowFromInsert(statement: ExecutedStatement): Row {
   );
 }
 
+function existingPreference(identityUuid: unknown, namespace: unknown): Row {
+  return {
+    id: `existing-preference-${String(namespace)}`,
+    identity_id: identityUuid,
+    namespace,
+    payload:
+      namespace === 'presentation'
+        ? JSON.stringify({ theme: 'auto', language: 'en-US' })
+        : JSON.stringify({
+            timeZone: 'UTC',
+            dateStyle: 'medium',
+            timeStyle: '24h',
+            weekStartsOn: 1,
+          }),
+    revision: 1,
+    created_at: now,
+    updated_at: now,
+  };
+}
+
 function existingSingleton(table: string, identityUuid: unknown): Row {
   switch (table) {
-    case 'user_settings':
-      return {
-        id: 'existing-settings-b',
-        identity_id: identityUuid,
-        preferences: '{}',
-        created_at: now,
-        updated_at: now,
-      };
     case 'notification_preferences':
       return {
         id: 'existing-notification-b',
@@ -474,14 +514,27 @@ function existingSingleton(table: string, identityUuid: unknown): Row {
  */
 function seedProfile(identityUuid: string): SeedTables {
   return {
-    user_settings: [
+    user_preference_records: [
       {
-        id: 'settings-a',
+        id: 'preference-presentation-a',
         identity_id: identityUuid,
-        preferences: JSON.stringify({
-          appearance: { theme: 'dark' },
-          editor: { fontSize: 14 },
+        namespace: 'presentation',
+        payload: JSON.stringify({ theme: 'dark', language: 'en-US' }),
+        revision: 2,
+        created_at: now,
+        updated_at: later,
+      },
+      {
+        id: 'preference-regional-a',
+        identity_id: identityUuid,
+        namespace: 'regional',
+        payload: JSON.stringify({
+          timeZone: 'Asia/Shanghai',
+          dateStyle: 'long',
+          timeStyle: '24h',
+          weekStartsOn: 1,
         }),
+        revision: 3,
         created_at: now,
         updated_at: later,
       },
@@ -577,12 +630,11 @@ function seedProfile(identityUuid: string): SeedTables {
         id: 'goal-a',
         identity_id: identityUuid,
         name: 'Ship portability',
-        description: 'Complete desktop portability',
-        feasibility_analysis: 'Executable',
-        motivation: 'Protect user data',
-        status: 'Active',
-        start_date: now,
-        due_date: later,
+        summary: 'Complete desktop portability while protecting user data',
+        status: 'InProgress',
+        start_date: '2026-06-04',
+        target_kind: 'quarter',
+        target_end_date: '2026-09-30',
         completed_at: null,
         archived_at: null,
         sort_order: 0,
@@ -601,10 +653,12 @@ function seedProfile(identityUuid: string): SeedTables {
         title: 'Round trip passes',
         description: 'Automated proof',
         aggregation_method: 'Last',
-        starting_value: 0,
-        progress_baseline_value: null,
+        initial_value: 0,
+        tracking_base_value: 0,
         current_value: 1,
         target_value: 1,
+        target_kind: 'month',
+        target_end_date: '2026-09-30',
         unit: 'test',
         weight: 1,
         order: 0,
@@ -624,18 +678,20 @@ function seedProfile(identityUuid: string): SeedTables {
           windowStartAt: Date.parse(now),
           windowEndAt: Date.parse(later),
           overallProgress: { startPercentage: 0, endPercentage: 100, deltaPercentage: 100 },
-          keyResults: [{
-            keyResultId: 'kr-a',
-            title: 'Round trip passes',
-            unit: 'test',
-            startPercentage: 0,
-            endPercentage: 100,
-            deltaPercentage: 100,
-            trend: [
-              { at: Date.parse(now), progressPercentage: 0 },
-              { at: Date.parse(later), progressPercentage: 100 },
-            ],
-          }],
+          keyResults: [
+            {
+              keyResultId: 'kr-a',
+              title: 'Round trip passes',
+              unit: 'test',
+              startPercentage: 0,
+              endPercentage: 100,
+              deltaPercentage: 100,
+              trend: [
+                { at: Date.parse(now), progressPercentage: 0 },
+                { at: Date.parse(later), progressPercentage: 100 },
+              ],
+            },
+          ],
           summary: { recordCount: 1, manualRecordCount: 1, taskContributionCount: 0 },
         }),
         reviewed_at: later,
@@ -657,9 +713,9 @@ function seedProfile(identityUuid: string): SeedTables {
         updated_at: later,
       },
     ],
-    task_templates: [
+    task_plans: [
       {
-        id: 'task-template-a',
+        id: 'task-plan-a',
         identity_id: identityUuid,
         name: 'Write tests',
         description: 'Cover profile round trip',
@@ -670,27 +726,23 @@ function seedProfile(identityUuid: string): SeedTables {
         archived_at: null,
         abandoned_reason: null,
         importance: 'high',
-        color: null,
-        tags: JSON.stringify(['qa']),
-        checklist: JSON.stringify([{ title: 'run tests', checked: true }]),
-        time_config_type: 'FixedTime',
-        time_config_start_time: null,
-        time_config_end_time: null,
-        time_config_duration_minutes: null,
-        time_config_time_point: 540,
-        time_config_time_range_start: null,
-        time_config_time_range_end: null,
-        recurrence_rule_type: null,
-        recurrence_rule_interval: null,
-        recurrence_rule_days_of_week: null,
-        recurrence_rule_end_date: null,
-        recurrence_rule_count: null,
-        reminder_config_enabled: 1,
-        reminder_config_time_offset_minutes: 15,
-        reminder_config_unit: 'Minute',
-        reminder_config_channel: 'Desktop',
-        last_generated_date: null,
-        generate_ahead_days: 14,
+        checklist: JSON.stringify([{ id: 'check-a', title: 'run tests', order: 0 }]),
+        schedule: JSON.stringify({
+          kind: 'OneTime',
+          date: '2026-06-04',
+          timing: { kind: 'At', time: '09:00' },
+        }),
+        reminder_config: JSON.stringify({
+          enabled: true,
+          triggers: [
+            {
+              type: 'Relative',
+              absoluteTime: null,
+              relativeValue: 15,
+              relativeUnit: 'Minutes',
+            },
+          ],
+        }),
         goal_id: 'goal-a',
         key_result_id: 'kr-a',
         goal_record_value: 1,
@@ -701,19 +753,33 @@ function seedProfile(identityUuid: string): SeedTables {
         deleted_at: null,
       },
     ],
-    task_instances: [
+    task_occurrences: [
       {
-        id: 'task-instance-a',
-        template_id: 'task-template-a',
+        id: 'task-occurrence-a',
+        plan_id: 'task-plan-a',
         identity_id: identityUuid,
-        instance_date: now,
-        occurrence_key: 'task-template-a:2026-06-04',
+        occurrence_key: 'task-plan-a:2026-06-04',
+        schedule_date: '2026-06-04',
+        schedule_timing: JSON.stringify({ kind: 'At', time: '09:00' }),
+        importance_snapshot: 'Important',
         status: 'Completed',
-        importance: 'high',
-        time_config: JSON.stringify({ type: 'FixedTime', timePoint: 540 }),
-        actual_start_time: now,
-        actual_end_time: later,
-        comment: 'done',
+        actual_start_at: now,
+        result: JSON.stringify({
+          kind: 'Completed',
+          recordedAt: Date.parse(later),
+          actualDurationMinutes: 60,
+          note: 'done',
+          rating: null,
+        }),
+        checklist_state: JSON.stringify([
+          {
+            definitionId: 'check-a',
+            titleSnapshot: 'run tests',
+            orderSnapshot: 0,
+            completed: true,
+            completedAt: Date.parse(later),
+          },
+        ]),
         version: 1,
         created_at: now,
         updated_at: later,
@@ -827,7 +893,7 @@ function seedProfile(identityUuid: string): SeedTables {
         name: 'Daily test run',
         description: 'Run portability tests',
         source_module: 'task',
-        source_entity_id: 'task-template-a',
+        source_entity_id: 'task-plan-a',
         status: 'active',
         enabled: 1,
         cron_expression: '0 8 * * *',

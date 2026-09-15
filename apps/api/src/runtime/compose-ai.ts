@@ -37,6 +37,8 @@ import type { RoutineCoachCommandPort } from '@memoflow/reminder/routine-runtime
 import type { IScheduleRepository } from '@memoflow/schedule';
 import type { INotificationRepository } from '@memoflow/notification';
 import type { LabelService } from '@memoflow/label';
+import type { GoalKnowledgeService, KnowledgeDocumentRefResolver } from '@memoflow/relation';
+import type { UserTimeContextPort } from '@memoflow/time';
 import { GoalPlanMutationAdapter } from '../modules/ai/goal-plan-mutation.adapter';
 import { TaskPlanMutationAdapter } from '../modules/ai/task-plan-mutation.adapter';
 import { ControlledAnalyticsReadAdapter } from '../modules/ai/controlled-analytics-read.adapter';
@@ -58,13 +60,18 @@ export interface ComposeAIDependencies {
   readonly goalApplicationPort: GoalApplicationPort;
   /** The shared Task application port composed once by the API runtime. */
   readonly taskApplicationPort: TaskApplicationPort;
-  /** The Reminder application port wired for the AI executor. */
+  /** The Reminder application port wired for standalone Routine AI tools. */
   readonly reminderApplicationPort: ReminderApplicationPort;
+  /** Existing Shared Relation facade reused by GoalPlan V2. */
+  readonly goalKnowledgeService: Pick<GoalKnowledgeService, 'link'>;
+  /** Repository-owned stable KnowledgeDocumentRef resolver. */
+  readonly knowledgeDocumentRefResolver: KnowledgeDocumentRefResolver;
   /** Identity-scoped Shared Label resolver reused by AI workflow application. */
   readonly labelService: LabelService;
   readonly routineCommandPort: RoutineCoachCommandPort;
   readonly scheduleRepository: IScheduleRepository;
   readonly notificationRepository: INotificationRepository;
+  readonly userTimeContextPort: UserTimeContextPort;
   /** Host-selected persistent Mastra storage; API uses PostgreSQL. */
   readonly mastraStorage: MastraStorageConfig;
 }
@@ -83,18 +90,24 @@ export interface ComposeAIDependencies {
  */
 export function composeAI(dependencies: ComposeAIDependencies): AIApiModuleDef {
   const repositorySet = createAIPrismaRepositories(dependencies.db);
+  const knowledgeSourcePort = new RepositoryKnowledgeSourceAdapter(
+    dependencies.db,
+    dependencies.repositoryStorageBaseDir,
+  );
+  const knowledgeNotePersistence = new RepositoryKnowledgeNotePersistenceAdapter(
+    dependencies.repositoryApiPort,
+  );
   const goalPlanMutationPort = new GoalPlanMutationAdapter(
     dependencies.goalApplicationPort,
     dependencies.taskApplicationPort,
-    dependencies.reminderApplicationPort,
     dependencies.labelService,
+    knowledgeNotePersistence,
+    dependencies.knowledgeDocumentRefResolver,
+    dependencies.goalKnowledgeService,
   );
   const taskPlanMutationPort = new TaskPlanMutationAdapter(
     dependencies.taskApplicationPort,
     dependencies.labelService,
-  );
-  const knowledgeNotePersistence = new RepositoryKnowledgeNotePersistenceAdapter(
-    dependencies.repositoryApiPort,
   );
   const mastraRuntime = new MastraAIRuntime({
     storage: createMastraStorage(dependencies.mastraStorage),
@@ -105,6 +118,7 @@ export function composeAI(dependencies: ComposeAIDependencies): AIApiModuleDef {
     goalPlanMutationPort,
     taskPlanMutationPort,
     knowledgeCaptureMutationPort: new KnowledgeCapturePersistenceAdapter(knowledgeNotePersistence),
+    knowledgeSourcePort,
     executionLogPort: repositorySet.executionLogPort,
     usageReadPort: repositorySet.executionLogPort,
     routineCommandPort: new RoutineAICommandAdapter(
@@ -116,15 +130,15 @@ export function composeAI(dependencies: ComposeAIDependencies): AIApiModuleDef {
       dependencies.taskApplicationPort,
     ),
     notificationReadPort: new NotificationAIReadAdapter(dependencies.notificationRepository),
+    userTimeContextPort: dependencies.userTimeContextPort,
   });
-  const knowledgeSourcePort = new RepositoryKnowledgeSourceAdapter(
-    dependencies.db,
-    dependencies.repositoryStorageBaseDir,
-  );
   const knowledgeIndexStatusPort = new RepositoryKnowledgeIndexStatusAdapter(
     dependencies.repositoryApiPort,
   );
-  const analyticsReadPort = new ControlledAnalyticsReadAdapter(dependencies.db);
+  const analyticsReadPort = new ControlledAnalyticsReadAdapter(
+    dependencies.db,
+    dependencies.userTimeContextPort,
+  );
   const evaluationReportPort = new AIEvaluationReportFileAdapter();
 
   const instance = createAIModule({

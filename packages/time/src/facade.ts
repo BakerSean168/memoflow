@@ -1,11 +1,12 @@
 import type { Instant } from '@memoflow/contracts/primitives';
 import type {
   Clock,
-  PartialTimeStyle,
+  PartialTimePresentationStyle,
+  TimeContext,
   TimeEngine,
-  TimeStyle,
+  TimePresentationStyle,
 } from './types';
-import { DEFAULT_TIME_STYLE, mergeTimeStyle } from './style/default-style';
+import { DEFAULT_TIME_PRESENTATION_STYLE, mergeTimePresentationStyle } from './style/default-style';
 import { createSystemClock } from './clock/system-clock';
 import { createFixedClock } from './clock/fixed-clock';
 import { createDateFnsEngine } from './engine/date-fns-engine';
@@ -13,15 +14,20 @@ import { createCodec, type TimeCodec } from './codec/codec';
 import { createFormat, type FormatApi } from './format/format';
 import { createInput, type InputApi } from './input/input';
 import { createCalendar, type CalendarApi } from './calendar/calendar';
+import { createTimeContext } from './timezone/time-zone';
 
 export interface TimeFacadeOptions {
-  style?: PartialTimeStyle | TimeStyle;
+  /** Canonical calendar/wall-clock semantics. Required: no ambient timezone fallback. */
+  context: TimeContext;
+  /** Canonical presentation-only preferences. */
+  presentation?: PartialTimePresentationStyle | TimePresentationStyle;
   clock?: Clock;
   engine?: TimeEngine;
 }
 
 export interface TimeFacade {
-  readonly style: TimeStyle;
+  readonly context: TimeContext;
+  readonly presentation: TimePresentationStyle;
   readonly clock: Clock;
   readonly codec: TimeCodec;
   readonly format: FormatApi;
@@ -29,26 +35,32 @@ export interface TimeFacade {
   readonly calendar: CalendarApi;
   readonly engine: TimeEngine;
   now(): Instant;
-  withStyle(partial: PartialTimeStyle): TimeFacade;
+  withContext(context: TimeContext): TimeFacade;
+  withPresentation(partial: PartialTimePresentationStyle): TimeFacade;
   withClock(clock: Clock): TimeFacade;
   /** Engine adapter seam (P11) — swap DateFnsEngine / Temporal / test double. */
   withEngine(engine: TimeEngine): TimeFacade;
 }
 
-export function createTimeFacade(options: TimeFacadeOptions = {}): TimeFacade {
-  const style = mergeTimeStyle(
-    DEFAULT_TIME_STYLE,
-    options.style as PartialTimeStyle | undefined,
+export function createTimeFacade(options: TimeFacadeOptions): TimeFacade {
+  const context = createTimeContext({
+    timeZone: options.context.timeZone,
+    weekStartsOn: options.context.weekStartsOn,
+  });
+  const presentation = mergeTimePresentationStyle(
+    DEFAULT_TIME_PRESENTATION_STYLE,
+    options.presentation as PartialTimePresentationStyle | undefined,
   );
   const clock = options.clock ?? createSystemClock();
   const engine = options.engine ?? createDateFnsEngine();
-  const codec = createCodec(engine, style);
-  const format = createFormat(style, engine, clock);
-  const input = createInput(style, codec, engine);
-  const calendar = createCalendar(style, engine, clock);
+  const codec = createCodec(context.timeZone);
+  const format = createFormat(presentation, context, engine, clock);
+  const input = createInput(presentation, context, codec);
+  const calendar = createCalendar(context, clock);
 
-  const facade: TimeFacade = {
-    style,
+  return {
+    context,
+    presentation,
     clock,
     codec,
     format,
@@ -58,25 +70,44 @@ export function createTimeFacade(options: TimeFacadeOptions = {}): TimeFacade {
     now() {
       return clock.now();
     },
-    withStyle(partial) {
+    withContext(nextContext) {
       return createTimeFacade({
-        style: mergeTimeStyle(style, partial),
+        context: nextContext,
+        presentation,
+        clock,
+        engine,
+      });
+    },
+    withPresentation(partial) {
+      return createTimeFacade({
+        context,
+        presentation: mergeTimePresentationStyle(presentation, partial),
         clock,
         engine,
       });
     },
     withClock(nextClock) {
-      return createTimeFacade({ style, clock: nextClock, engine });
+      return createTimeFacade({
+        context,
+        presentation,
+        clock: nextClock,
+        engine,
+      });
     },
     withEngine(nextEngine) {
-      return createTimeFacade({ style, clock, engine: nextEngine });
+      return createTimeFacade({
+        context,
+        presentation,
+        clock,
+        engine: nextEngine,
+      });
     },
   };
-
-  return facade;
 }
 
-/** Default app-wide facade (system clock + default style). Prefer inject in apps. */
-export const defaultTime = createTimeFacade();
-
-export { createSystemClock, createFixedClock, DEFAULT_TIME_STYLE, mergeTimeStyle };
+export {
+  createSystemClock,
+  createFixedClock,
+  DEFAULT_TIME_PRESENTATION_STYLE,
+  mergeTimePresentationStyle,
+};

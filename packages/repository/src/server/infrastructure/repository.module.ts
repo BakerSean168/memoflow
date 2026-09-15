@@ -92,6 +92,10 @@ function buildApplicationPort(deps: RepositoryModuleDependencies): RepositoryApp
         : unavailable(),
     listKnowledgeRepositoryConnections: async (ctx) =>
       connectionService ? connectionService.list(ctx.identityId) : unavailable(),
+    refreshKnowledgeRepositoryObservation: async (ctx, connectionId) =>
+      connectionService
+        ? connectionService.refreshObservation(ctx.identityId, connectionId)
+        : unavailable(),
     connectKnowledgeRepository: async (ctx, request) =>
       connectionService ? connectionService.connect(ctx.identityId, request) : unavailable(),
     disconnectKnowledgeRepository: async (ctx, connectionId, purgeCloudData) =>
@@ -154,6 +158,8 @@ function buildApplicationPort(deps: RepositoryModuleDependencies): RepositoryApp
         : unavailable(),
     createConfirmedKnowledgeNote: async (ctx, request) =>
       noteCommitService ? noteCommitService.create(ctx.identityId, request) : unavailable(),
+    adoptKnowledgeDocument: async (ctx, request) =>
+      noteCommitService ? noteCommitService.adopt(ctx.identityId, request) : unavailable(),
     updateKnowledgeNoteProjectionIndexStatus: async (ctx, request) =>
       projectionService
         ? projectionService.updateIndexStatus(ctx.identityId, request)

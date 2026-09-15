@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { fromDate, getLocalTimeZone, type DateValue } from '@internationalized/date';
+import { CalendarDate, type DateValue } from '@internationalized/date';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import { Input } from '@memoflow/ui-vue-shadcn';
 import { Label } from '@memoflow/ui-vue-shadcn';
 import { Textarea } from '@memoflow/ui-vue-shadcn';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@memoflow/ui-vue-shadcn';
 import { Avatar, AvatarImage, AvatarFallback } from '@memoflow/ui-vue-shadcn';
-import { formatProductDateTime } from '../../../shared/utils/product-time';
+import { getProductTime } from '../../../shared/utils/product-time';
 import {
   Select,
   SelectContent,
@@ -19,6 +19,7 @@ import {
 import { Calendar } from '@memoflow/ui-vue-shadcn';
 import { Popover, PopoverContent, PopoverTrigger } from '@memoflow/ui-vue-shadcn';
 import type { AccountProfileDTO } from '@memoflow/contracts/account';
+import { requireYmd } from '@memoflow/contracts/primitives';
 
 interface ProfileFormProps {
   profile: AccountProfileDTO;
@@ -41,7 +42,6 @@ const emit = defineEmits<ProfileFormEmits>();
 
 const { t } = useI18n();
 const formData = ref<AccountProfileDTO>({ ...props.profile });
-const timeZone = getLocalTimeZone();
 
 watch(
   () => props.profile,
@@ -72,7 +72,8 @@ const handleUploadAvatar = () => {
 
 const calendarValue = computed<DateValue | undefined>(() => {
   if (!formData.value.birthday) return undefined;
-  return fromDate(new Date(formData.value.birthday), timeZone);
+  const [year, month, day] = requireYmd(formData.value.birthday).split('-').map(Number);
+  return new CalendarDate(year, month, day);
 });
 
 const handleDateSelect = (date: DateValue | undefined) => {
@@ -80,8 +81,12 @@ const handleDateSelect = (date: DateValue | undefined) => {
     formData.value.birthday = null;
     return;
   }
-  formData.value.birthday = date.toDate(timeZone).getTime();
+  const ymd = `${String(date.year).padStart(4, '0')}-${String(date.month).padStart(2, '0')}-${String(date.day).padStart(2, '0')}`;
+  formData.value.birthday = requireYmd(ymd);
 };
+
+const formatBirthday = (birthday: AccountProfileDTO['birthday']): string =>
+  birthday ? getProductTime().format.ymdDisplay(birthday) : '';
 
 const realNameValue = computed({
   get: () => formData.value.realName ?? '',
@@ -188,7 +193,7 @@ const bioValue = computed({
               class="w-full justify-start text-left font-normal"
               :disabled="loading"
             >
-              {{ formatProductDateTime(formData.birthday) || t('account.placeholder.selectDate') }}
+              {{ formatBirthday(formData.birthday) || t('account.placeholder.selectDate') }}
             </Button>
           </PopoverTrigger>
           <PopoverContent class="w-auto p-0">

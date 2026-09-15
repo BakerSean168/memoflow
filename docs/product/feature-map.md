@@ -4,7 +4,7 @@ tags:
   - feature-map
 description: MemoFlow 当前核心功能与 vNext 产品边界地图
 created: 2026-06-02T00:00:00
-updated: 2026-09-08T09:00:00+08:00
+updated: 2026-09-12T12:13:00+08:00
 ---
 
 # 功能地图
@@ -13,7 +13,7 @@ updated: 2026-09-08T09:00:00+08:00
 
 | 模块 | 当前核心能力 | 当前状态 | 主要入口 | 关键边界 |
 | --- | --- | --- | --- | --- |
-| Goal | Direction + KR Measurement V2、Record、Review、Shared Label、AI Goal draft | Core vNext 已落地 | `packages/goal`、`packages/app-vue/src/modules/goal`、`packages/app-react` | 无 GoalFolder/category/string tags/Focus/Comparison；`archivedAt` 与业务状态分离 |
+| Goal | Direction + KR Measurement V3、Record、Review、Shared Label、AI Goal draft | Core vNext 已落地 | `packages/goal`、`packages/app-vue/src/modules/goal`、`packages/app-react` | 无 GoalFolder/category/string tags/Focus/Comparison；`archivedAt` 与业务状态分离 |
 | Task | Plan + Occurrence、Today/Upcoming/Plans、Missed/Skipped、recurrence、Shared Label、Goal Link/optional contribution | Core vNext 已落地 | `packages/task`、`packages/app-vue/src/modules/task`、`packages/app-react` | 无 TaskFolder/Dependency/DAG/CriticalPath；Overdue 为派生事实；无 raw Scheduler mutation |
 | Routine / Reminder | RoutineDefinition、ProfileMembership、WallClock/ActiveUsage/Protocol、Temporary Override、Occurrence、Method Library | Core vNext 已落地 | `packages/reminder`、`packages/app-vue/src/modules/reminder` | ReminderTemplate 是迁移兼容写入入口；无 ControlMode/独立 cron scanner；Scheduler 仅负责 durable wake-up |
 | Planner / Calendar | CalendarEntry、Day/Week/Month Planner、冲突检测、drag/resize owner commands | Core vNext 已落地 | `packages/schedule`、`packages/app-vue/src/modules/schedule` | `@memoflow/schedule` 是产品 Planner；不拥有 worker job |

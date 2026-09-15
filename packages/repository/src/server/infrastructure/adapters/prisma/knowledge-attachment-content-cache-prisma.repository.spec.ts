@@ -4,7 +4,7 @@ import { KnowledgeAttachmentContentCachePrismaRepository } from './knowledge-att
 
 function row(overrides: Record<string, unknown> = {}) {
   return {
-    connectionId: 'connection-1',
+    bindingId: 'connection-1',
     blobSha: 'blob-1',
     byteSize: 3,
     contentBytes: Uint8Array.from([1, 2, 3]),
@@ -35,11 +35,11 @@ describe('KnowledgeAttachmentContentCachePrismaRepository', () => {
     });
     await expect(repository.find('connection-1', 'blob-1', 2_000)).resolves.toBeNull();
     expect(deleteMany).toHaveBeenCalledWith({
-      where: { connectionId: 'connection-1', blobSha: 'blob-1' },
+      where: { bindingId: 'connection-1', blobSha: 'blob-1' },
     });
   });
 
-  it('upserts bytes under the connection/blob composite key and prunes expired rows', async () => {
+  it('upserts bytes under the binding/blob composite key and prunes expired rows', async () => {
     const upsert = vi.fn(async () => row());
     const deleteMany = vi.fn(async () => ({ count: 2 }));
     const repository = new KnowledgeAttachmentContentCachePrismaRepository({
@@ -56,9 +56,9 @@ describe('KnowledgeAttachmentContentCachePrismaRepository', () => {
     });
 
     expect(upsert).toHaveBeenCalledWith({
-      where: { connectionId_blobSha: { connectionId: 'connection-1', blobSha: 'blob-1' } },
+      where: { bindingId_blobSha: { bindingId: 'connection-1', blobSha: 'blob-1' } },
       create: expect.objectContaining({
-        connectionId: 'connection-1',
+        bindingId: 'connection-1',
         blobSha: 'blob-1',
         byteSize: 3,
         contentBytes: Buffer.from([1, 2, 3]),

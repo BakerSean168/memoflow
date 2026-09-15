@@ -29,6 +29,7 @@ import type { ReminderScheduleExecutionSource } from '../../schedule-execution';
 import type { ReminderScheduleExecutionCommitPort } from './schedule-execution-commit.port';
 import type { ReminderScheduleProjectionSource } from '../../schedule-projection';
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { UserTimeContextPort } from '@memoflow/time';
 import type { NotificationRequestedWriterPort } from '@memoflow/contracts/notification';
 import type {
   IReminderTemplateRepository,
@@ -142,8 +143,14 @@ export function createReminderPowerSyncRepositories(db: Queryable): ReminderPowe
 
 export function createReminderPowerSyncModule(
   db: Queryable,
-  runtimeContributions?: ReminderRuntimeContributionsInput,
+  options: {
+    readonly userTimeContextPort: UserTimeContextPort;
+    readonly runtimeContributions?: ReminderRuntimeContributionsInput;
+  },
 ): ReminderModuleInstance {
+  if (!options?.userTimeContextPort) {
+    throw new Error('[FAIL-CLOSED] createReminderPowerSyncModule requires options.userTimeContextPort');
+  }
   const repositories = createReminderPowerSyncRepositories(db);
 
   return createReminderModule({
@@ -152,7 +159,8 @@ export function createReminderPowerSyncModule(
     reminderResponseRepository: repositories.reminderResponseRepository,
     userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
     routineProfileStore: repositories.routineProfileStore,
-    runtimeContributions,
+    userTimeContextPort: options.userTimeContextPort,
+    runtimeContributions: options.runtimeContributions,
     closureChecker: repositories.closureChecker,
   });
 }

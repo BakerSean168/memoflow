@@ -28,44 +28,46 @@ export interface TaskReminderConfig {
 export const TaskReminderConfigSchema = z
   .object({
     enabled: z.boolean(),
-    triggers: z.array(
-      z
-        .object({
-          type: z.enum([TaskReminderType.Absolute, TaskReminderType.Relative]),
-          absoluteTime: z.number().int().nullable(),
-          relativeValue: z.number().int().nullable(),
-          relativeUnit: z
-            .enum([ReminderTimeUnit.Minutes, ReminderTimeUnit.Hours, ReminderTimeUnit.Days])
-            .nullable(),
-        })
-        .superRefine((trigger, ctx) => {
-          if (trigger.type === TaskReminderType.Absolute && trigger.absoluteTime == null) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              path: ['absoluteTime'],
-              message: '绝对时间提醒必须提供 absoluteTime',
-            });
-          }
-
-          if (trigger.type === TaskReminderType.Relative) {
-            if (trigger.relativeValue == null) {
+    triggers: z
+      .array(
+        z
+          .object({
+            type: z.enum([TaskReminderType.Absolute, TaskReminderType.Relative]),
+            absoluteTime: z.number().int().nullable(),
+            relativeValue: z.number().int().nullable(),
+            relativeUnit: z
+              .enum([ReminderTimeUnit.Minutes, ReminderTimeUnit.Hours, ReminderTimeUnit.Days])
+              .nullable(),
+          })
+          .superRefine((trigger, ctx) => {
+            if (trigger.type === TaskReminderType.Absolute && trigger.absoluteTime == null) {
               ctx.addIssue({
                 code: z.ZodIssueCode.custom,
-                path: ['relativeValue'],
-                message: '相对时间提醒必须提供 relativeValue',
+                path: ['absoluteTime'],
+                message: '绝对时间提醒必须提供 absoluteTime',
               });
             }
 
-            if (trigger.relativeUnit == null) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                path: ['relativeUnit'],
-                message: '相对时间提醒必须提供 relativeUnit',
-              });
+            if (trigger.type === TaskReminderType.Relative) {
+              if (trigger.relativeValue == null) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  path: ['relativeValue'],
+                  message: '相对时间提醒必须提供 relativeValue',
+                });
+              }
+
+              if (trigger.relativeUnit == null) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  path: ['relativeUnit'],
+                  message: '相对时间提醒必须提供 relativeUnit',
+                });
+              }
             }
-          }
-        }),
-    ),
+          }),
+      )
+      .max(10),
   })
   .openapi({ type: 'object', description: '任务提醒配置' });
 

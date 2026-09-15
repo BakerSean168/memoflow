@@ -1,38 +1,22 @@
-/**
- * Free-function format helpers (ADR-037).
- * Thin wrappers over defaultTime.format — stable signatures for app-vue soles
- * and form helpers. Style-aware empty display: prefer createTimeFacade().format.*.
- */
-import { defaultTime } from '../facade';
+import { formatYmdForDisplay } from '../format/intl-format';
 
+/** Pure string helper; no clock, locale, or timezone dependency. */
 export function padTwoDigits(n: number): string {
-  return defaultTime.format.padTwoDigits(n);
+  return String(Math.trunc(n)).padStart(2, '0');
 }
 
-/** ms timestamp → local HH:mm (empty override → '') */
-export function formatLocalHHmm(ms: number): string {
-  return defaultTime.format.localHHmm(ms, { empty: { display: '' } });
-}
-
-/** Date → YYYY-MM-DD local calendar string */
-export function formatDateToYMD(date: Date): string {
-  return defaultTime.format.dateToYmd(date);
-}
-
-/** hour+minute → HH:mm */
+/** Pure minute-of-day presentation helper. */
 export function formatHHmmParts(hour: number, minute: number): string {
-  return defaultTime.format.hhmmParts(hour, minute);
+  return `${padTwoDigits(hour)}:${padTwoDigits(minute)}`;
 }
 
-/** hour → HH:00 */
+/** Pure hour label helper. */
 export function formatHour(hour: number): string {
-  return defaultTime.format.hourLabel(hour);
+  return `${padTwoDigits(hour)}:00`;
 }
 
-/** YYYY-MM-DD → locale short month/day display */
+/** Date-only Ymd display; no Instant/timezone interpretation occurs. */
 export function formatDisplayDate(dateStr: string, locale: string): string {
   if (!dateStr) return '';
-  return defaultTime.withStyle({ locale }).format.ymdDisplay(dateStr, {
-    empty: { display: '' },
-  });
+  return formatYmdForDisplay(dateStr, locale, 'medium') ?? '';
 }

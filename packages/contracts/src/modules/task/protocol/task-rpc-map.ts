@@ -1,52 +1,53 @@
 import type {
-  CreateTaskTemplateReq,
-  CreateTaskTemplateRes,
-  GetTaskTemplateReq,
-  GetTaskTemplateRes,
-  ListTaskTemplateFilters,
-  QueryTaskTemplatesRes,
+  CreateTaskPlanReq,
+  CreateTaskPlanRes,
+  GetTaskPlanReq,
+  GetTaskPlanRes,
+  ListTaskPlanFilters,
+  QueryTaskPlansRes,
   RescheduleTaskReq,
   RescheduleTaskRes,
 } from '../api';
 import type {
   AbandonTaskPlanInvocation,
   BindTaskToGoalInvocation,
-  CompleteTaskInstanceInvocation,
-  GenerateInstancesInvocation,
-  MarkTaskInstanceMissedInvocation,
-  SkipTaskInstanceInvocation,
-  TaskInstanceIdCommandInvocation,
-  TaskTemplateIdCommandInvocation,
-  UpdateTaskTemplateInvocation,
+  CompleteTaskOccurrenceInvocation,
+  GenerateOccurrencesInvocation,
+  MarkTaskOccurrenceMissedInvocation,
+  SetTaskOccurrenceChecklistItemInvocation,
+  SkipTaskOccurrenceInvocation,
+  TaskOccurrenceIdCommandInvocation,
+  TaskPlanIdCommandInvocation,
+  UpdateTaskPlanInvocation,
 } from '../api/task-invocation.schemas';
-import type { GetTaskInstancesByRangeReq, GetTaskInstancesByRangeRes } from '../api/task-instance.dto';
 import type {
-  TaskInstanceResponse,
-  TaskTemplateResponse,
-} from '../api/response-schemas';
+  GetTaskOccurrencesByRangeReq,
+  GetTaskOccurrencesByRangeRes,
+} from '../api/task-occurrence.dto';
+import type { TaskOccurrenceResponse, TaskPlanResponse } from '../api/response-schemas';
 
 export type TaskRpcMap = {
-  'task:template:create': [CreateTaskTemplateReq, CreateTaskTemplateRes];
-  'task:template:update': [UpdateTaskTemplateInvocation, TaskTemplateResponse];
-  'task:template:delete': [TaskTemplateIdCommandInvocation, null];
-  'task:template:activate': [TaskTemplateIdCommandInvocation, TaskTemplateResponse];
-  'task:template:abandon': [AbandonTaskPlanInvocation, TaskTemplateResponse];
-  'task:template:pause': [TaskTemplateIdCommandInvocation, TaskTemplateResponse];
-  'task:template:archive': [TaskTemplateIdCommandInvocation, TaskTemplateResponse];
-  'task:template:generate-instances': [GenerateInstancesInvocation, TaskInstanceResponse[]];
-  'task:template:bind-goal': [BindTaskToGoalInvocation, TaskTemplateResponse];
-  'task:template:unbind-goal': [TaskTemplateIdCommandInvocation, TaskTemplateResponse];
-  'task:template:get': [GetTaskTemplateReq, GetTaskTemplateRes];
-  'task:template:list': [ListTaskTemplateFilters, QueryTaskTemplatesRes];
+  'task:plan:create': [CreateTaskPlanReq, CreateTaskPlanRes];
+  'task:plan:update': [UpdateTaskPlanInvocation, TaskPlanResponse];
+  'task:plan:delete': [TaskPlanIdCommandInvocation, null];
+  'task:plan:activate': [TaskPlanIdCommandInvocation, TaskPlanResponse];
+  'task:plan:abandon': [AbandonTaskPlanInvocation, TaskPlanResponse];
+  'task:plan:pause': [TaskPlanIdCommandInvocation, TaskPlanResponse];
+  'task:plan:archive': [TaskPlanIdCommandInvocation, TaskPlanResponse];
+  'task:plan:generate-occurrences': [GenerateOccurrencesInvocation, TaskOccurrenceResponse[]];
+  'task:plan:bind-goal': [BindTaskToGoalInvocation, TaskPlanResponse];
+  'task:plan:unbind-goal': [TaskPlanIdCommandInvocation, TaskPlanResponse];
+  'task:plan:get': [GetTaskPlanReq, GetTaskPlanRes];
+  'task:plan:list': [ListTaskPlanFilters, QueryTaskPlansRes];
 
-  'task:instance:create': [TaskInstanceIdCommandInvocation, TaskInstanceResponse];
-  'task:instance:delete': [TaskInstanceIdCommandInvocation, null];
-  'task:instance:complete': [CompleteTaskInstanceInvocation, TaskInstanceResponse];
-  'task:instance:uncomplete': [TaskInstanceIdCommandInvocation, TaskInstanceResponse];
-  'task:instance:skip': [SkipTaskInstanceInvocation, TaskInstanceResponse];
-  'task:instance:mark-missed': [MarkTaskInstanceMissedInvocation, TaskInstanceResponse];
-  'task:instance:get-by-date-range': [GetTaskInstancesByRangeReq, GetTaskInstancesByRangeRes];
+  'task:occurrence:create': [TaskOccurrenceIdCommandInvocation, TaskOccurrenceResponse];
+  'task:occurrence:delete': [TaskOccurrenceIdCommandInvocation, null];
+  'task:occurrence:complete': [CompleteTaskOccurrenceInvocation, TaskOccurrenceResponse];
+  'task:occurrence:uncomplete': [TaskOccurrenceIdCommandInvocation, TaskOccurrenceResponse];
+  'task:occurrence:skip': [SkipTaskOccurrenceInvocation, TaskOccurrenceResponse];
+  'task:occurrence:mark-missed': [MarkTaskOccurrenceMissedInvocation, TaskOccurrenceResponse];
+  'task:occurrence:checklist-set': [SetTaskOccurrenceChecklistItemInvocation, TaskOccurrenceResponse];
+  'task:occurrence:get-by-date-range': [GetTaskOccurrencesByRangeReq, GetTaskOccurrencesByRangeRes];
 
-
-  'task:reschedule-instance': [RescheduleTaskReq, RescheduleTaskRes];
+  'task:reschedule-occurrence': [RescheduleTaskReq, RescheduleTaskRes];
 };

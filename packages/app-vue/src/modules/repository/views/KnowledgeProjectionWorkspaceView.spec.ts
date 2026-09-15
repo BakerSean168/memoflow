@@ -5,8 +5,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fail, ok } from '@memoflow/contracts/result';
 import type {
   CreateConfirmedKnowledgeNoteReq,
+  AdoptKnowledgeDocumentReq,
   KnowledgeNoteProjectionClientDTO,
-  KnowledgeRepositoryConnectionClientDTO,
+  KnowledgeRemoteBindingClientDTO,
 } from '@memoflow/contracts/repository';
 import { REPOSITORY_SERVICE_KEY } from '../../../di/keys';
 import type { IRepositoryService } from '../../../di/types';
@@ -50,6 +51,13 @@ const messages = {
       noSearchResults: 'No search results',
       noNotes: 'No notes',
       readOnly: 'Read only',
+      documentId: 'Stable document identity',
+      adoptAction: 'Adopt into MemoFlow',
+      adoptTitle: 'Adopt this note',
+      adoptDescription: 'Add a stable metadata identity.',
+      adoptPatch: 'Metadata patch',
+      adoptImmutable: 'Bound to the current Git blob.',
+      adoptConfirmAction: 'Confirm metadata commit',
       noteViews: 'Knowledge note views',
       previewTab: 'Preview',
       relationsTab: 'Relations',
@@ -67,13 +75,10 @@ const messages = {
       reviewAction: 'Review',
       confirmAction: 'Commit note',
       invalidDraft: 'Invalid draft',
-      status: {
-        Active: 'Connected',
-        Suspended: 'Suspended',
-        Revoked: 'Revoked',
-        Error: 'Error',
-        PendingInstall: 'Pending',
-        Unknown: 'Unknown',
+      providerStatus: {
+        Ready: 'Provider ready',
+        Blocked: 'Provider blocked',
+        Unchecked: 'Not checked',
       },
       indexStatus: {
         pending: 'Pending index',
@@ -169,26 +174,53 @@ const RelationsStub = defineComponent({
   },
 });
 
+const BINDING_ID = 'KnowledgeRemoteBindingId_550e8400-e29b-41d4-a716-446655440401' as never;
+const SPACE_ID = 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440402' as never;
+const SECOND_BINDING_ID = 'KnowledgeRemoteBindingId_550e8400-e29b-41d4-a716-446655440403' as never;
+
 function connection(
-  overrides: Partial<KnowledgeRepositoryConnectionClientDTO> = {},
-): KnowledgeRepositoryConnectionClientDTO {
-  return {
-    id: 'connection-1',
+  overrides: Partial<KnowledgeRemoteBindingClientDTO> = {},
+): KnowledgeRemoteBindingClientDTO {
+  const base: KnowledgeRemoteBindingClientDTO = {
+    id: BINDING_ID,
+    knowledgeSpaceId: SPACE_ID,
     identityId: 'IdentityId_11111111-1111-4111-8111-111111111111' as never,
-    githubUserId: '42',
-    githubRepositoryId: 'repository-1',
-    githubRepositoryFullName: 'owner/knowledge',
+    provider: 'GitHub',
     installationId: 'installation-1',
-    defaultBranch: 'main',
-    status: 'Active',
-    lastSyncedCommitSha: 'a'.repeat(40),
-    lastProjectedCommitSha: 'b'.repeat(40),
-    lastErrorCode: null,
-    canSync: true,
-    createdAt: 1,
-    updatedAt: 1,
-    ...overrides,
+    repositoryId: 'repository-1',
+    repositoryFullNameSnapshot: 'owner/knowledge',
+    connectedAt: 1,
+    disconnectedAt: null,
+    observation: {
+      bindingId: BINDING_ID,
+      observedAt: 1,
+      accountId: '42',
+      repositoryFullName: 'owner/knowledge',
+      defaultBranch: 'main',
+      private: true,
+      archived: false,
+      disabled: false,
+      contentsPermission: 'write',
+      installationSuspended: false,
+      eligibility: { state: 'Ready' },
+    },
+    historyFence: {
+      bindingId: BINDING_ID,
+      defaultBranch: 'main',
+      lastConfirmedRemoteHeadSha: 'a'.repeat(40),
+      confirmedAt: 1,
+    },
+    projectionCheckpoint: {
+      bindingId: BINDING_ID,
+      branch: 'main',
+      projectedCommitSha: 'b'.repeat(40),
+      state: 'Ready',
+      failure: null,
+      lastAttemptAt: 1,
+      projectedAt: 1,
+    },
   };
+  return { ...base, ...overrides };
 }
 
 function projection(
@@ -196,7 +228,8 @@ function projection(
 ): KnowledgeNoteProjectionClientDTO {
   return {
     id: 'projection-1',
-    connectionId: 'connection-1',
+    connectionId: BINDING_ID,
+    knowledgeDocumentId: null,
     relativePath: 'notes/architecture.md',
     title: 'Architecture',
     commitSha: 'b'.repeat(40),
@@ -218,6 +251,7 @@ function createService(overrides: Partial<IRepositoryService> = {}): IRepository
     listKnowledgeNoteProjections: vi.fn(async () => ok({ notes: [projection()] })),
     getKnowledgeNoteProjection: vi.fn(),
     createConfirmedKnowledgeNote: vi.fn(),
+    adoptKnowledgeDocument: vi.fn(),
     ...overrides,
   } as unknown as IRepositoryService;
 }
@@ -313,7 +347,7 @@ describe('KnowledgeProjectionWorkspaceView', () => {
     await flushPromises();
 
     expect(listKnowledgeNoteProjections).toHaveBeenLastCalledWith({
-      connectionId: 'connection-1',
+      connectionId: BINDING_ID,
       query: 'result',
       limit: 100,
     });
@@ -357,18 +391,33 @@ describe('KnowledgeProjectionWorkspaceView', () => {
 
   it('reloads projections for the explicitly selected repository connection', async () => {
     const secondConnection = connection({
-      id: 'connection-2',
-      githubRepositoryId: 'repository-2',
-      githubRepositoryFullName: 'owner/second-knowledge',
+      id: SECOND_BINDING_ID,
+      repositoryId: 'repository-2',
+      repositoryFullNameSnapshot: 'owner/second-knowledge',
+      observation: {
+        ...connection().observation!,
+        bindingId: SECOND_BINDING_ID,
+        repositoryFullName: 'owner/second-knowledge',
+      },
+      historyFence: {
+        ...connection().historyFence!,
+        bindingId: SECOND_BINDING_ID,
+      },
+      projectionCheckpoint: {
+        ...connection().projectionCheckpoint!,
+        bindingId: SECOND_BINDING_ID,
+      },
     });
     const listKnowledgeNoteProjections = vi.fn(async (request?: { connectionId?: string }) =>
       ok({
         notes: [
           projection({
             id: `projection-${request?.connectionId}`,
-            connectionId: request?.connectionId ?? 'connection-1',
+            connectionId: request?.connectionId ?? BINDING_ID,
             title:
-              request?.connectionId === 'connection-2' ? 'Second repository note' : 'Architecture',
+              request?.connectionId === SECOND_BINDING_ID
+                ? 'Second repository note'
+                : 'Architecture',
           }),
         ],
       }),
@@ -385,12 +434,12 @@ describe('KnowledgeProjectionWorkspaceView', () => {
 
     await wrapper
       .get('[data-testid="knowledge-projection-connection-select"]')
-      .setValue('connection-2');
+      .setValue(String(SECOND_BINDING_ID));
     await flushPromises();
 
     expect(listKnowledgeNoteProjections).toHaveBeenCalledTimes(2);
     expect(listKnowledgeNoteProjections).toHaveBeenLastCalledWith({
-      connectionId: 'connection-2',
+      connectionId: SECOND_BINDING_ID,
       query: undefined,
       limit: 100,
     });
@@ -434,7 +483,7 @@ describe('KnowledgeProjectionWorkspaceView', () => {
     expect(createConfirmedKnowledgeNote).toHaveBeenCalledOnce();
     expect(createConfirmedKnowledgeNote).toHaveBeenCalledWith(
       expect.objectContaining({
-        connectionId: 'connection-1',
+        connectionId: BINDING_ID,
         proposalId: expect.stringMatching(/^proposal-/),
         revision: 1,
         requestId: expect.stringMatching(/^request-/),
@@ -446,6 +495,55 @@ describe('KnowledgeProjectionWorkspaceView', () => {
     );
     expect(wrapper.find('[data-testid="knowledge-projection-create-dialog"]').exists()).toBe(false);
     expect(wrapper.text()).toContain('New note');
+  });
+
+  it('shows and confirms an explicit metadata-only adoption for an unmanaged note', async () => {
+    let adoptedRequest: AdoptKnowledgeDocumentReq | undefined;
+    const adoptKnowledgeDocument = vi.fn(async (request: AdoptKnowledgeDocumentReq) => {
+      adoptedRequest = request;
+      return ok({
+        requestId: request.requestId,
+        knowledgeDocumentId: request.knowledgeDocumentId,
+        relativePath: 'notes/architecture.md',
+        commitSha: 'e'.repeat(40),
+        status: 'Committed' as const,
+      });
+    });
+    const service = createService({ adoptKnowledgeDocument });
+    const wrapper = mountWorkspace(service);
+    await flushPromises();
+
+    await wrapper.get('[data-testid="knowledge-projection-adopt"]').trigger('click');
+    await flushPromises();
+    const marker = wrapper.get('[data-testid="knowledge-projection-adopt-document-id"]').text();
+    expect(marker).toMatch(/^memoflow_id: kdoc_[0-9a-f-]{36}$/i);
+
+    await wrapper.get('[data-testid="knowledge-projection-adopt-confirm"]').trigger('click');
+    await flushPromises();
+
+    expect(adoptKnowledgeDocument).toHaveBeenCalledOnce();
+    expect(adoptedRequest).toMatchObject({
+      projectionId: 'projection-1',
+      expectedBlobSha: 'c'.repeat(40),
+      knowledgeDocumentId: expect.stringMatching(/^kdoc_[0-9a-f-]{36}$/i),
+      requestId: expect.stringMatching(/^adopt-/),
+    });
+  });
+
+  it('shows the stable id instead of adoption controls for an already managed note', async () => {
+    const managedId = 'kdoc_550e8400-e29b-41d4-a716-446655440095' as never;
+    const service = createService({
+      listKnowledgeNoteProjections: vi.fn(async () =>
+        ok({ notes: [projection({ knowledgeDocumentId: managedId })] }),
+      ),
+    });
+    const wrapper = mountWorkspace(service);
+    await flushPromises();
+
+    expect(wrapper.find('[data-testid="knowledge-projection-adopt"]').exists()).toBe(false);
+    expect(wrapper.get('[data-testid="knowledge-projection-document-id"]').text()).toContain(
+      managedId,
+    );
   });
 
   it('does not seed a hidden notes directory in a new proposal', async () => {

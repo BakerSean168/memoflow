@@ -2,27 +2,28 @@ import type { PrismaClient } from '@memoflow/database';
 import {
   getDashboardData,
   toDashboardGoalRecord,
-  toDashboardTaskInstanceRecord,
-  type DashboardTaskTemplateRecord,
+  toDashboardTaskOccurrenceRecord,
+  type DashboardTaskPlanRecord,
   type DashboardScheduleRecord,
   type DashboardReminderRecord,
 } from '@memoflow/dashboard';
 import type { DashboardData } from '@memoflow/contracts/dashboard';
+import type { UserTimeContextPort } from '@memoflow/time';
 import { createGoalPrismaRepositories } from '@memoflow/goal';
 import { createTaskPrismaRepositories } from '@memoflow/task';
 import { createSchedulePrismaRepository } from '@memoflow/schedule';
 import { createReminderPrismaRepositories } from '@memoflow/reminder';
 import { createNotificationPrismaRepositories } from '@memoflow/notification';
 
-/** Soft residual 1156: dual toDashboardTaskInstanceRecord retired onto @memoflow/dashboard sole. */
+/** Soft residual 1156: dual toDashboardTaskOccurrenceRecord retired onto @memoflow/dashboard sole. */
 
-function toTaskTemplateRecord(template: {
+function toTaskPlanRecord(template: {
   id: { toString(): string } | string;
   title: string;
   status: string;
   deletedAt: number | null;
   createdAt: number;
-}): DashboardTaskTemplateRecord {
+}): DashboardTaskPlanRecord {
   return {
     id: String(template.id),
     title: template.title,
@@ -94,12 +95,14 @@ function toReminderRecord(reminder: {
 export async function getApiDashboardData(
   db: PrismaClient,
   identityId: string,
+  userTimeContextPort: UserTimeContextPort,
 ): Promise<DashboardData> {
   const goalRepos = createGoalPrismaRepositories(db);
   const taskRepos = createTaskPrismaRepositories(db);
   const scheduleRepository = createSchedulePrismaRepository(db);
   const reminderRepos = createReminderPrismaRepositories(db);
   const notificationRepos = createNotificationPrismaRepositories(db);
+  const timeContext = await userTimeContextPort.getUserTimeContext(identityId);
 
   return getDashboardData(identityId, {
     listGoals: async (id) =>
@@ -109,11 +112,11 @@ export async function getApiDashboardData(
           systemView: 'active',
         })
       ).map((goal) => toDashboardGoalRecord(goal.toClientDTO(true))),
-    listTaskTemplates: async (id) =>
-      (await taskRepos.taskTemplateRepository.findByIdentityId(id)).map(toTaskTemplateRecord),
-    listTaskInstances: async (id) =>
-      (await taskRepos.taskInstanceRepository.findByIdentityId(id)).map(
-        toDashboardTaskInstanceRecord,
+    listTaskPlans: async (id) =>
+      (await taskRepos.taskPlanRepository.findByIdentityId(id)).map(toTaskPlanRecord),
+    listTaskOccurrences: async (id) =>
+      (await taskRepos.taskOccurrenceRepository.findByIdentityId(id)).map((instance) =>
+        toDashboardTaskOccurrenceRecord(instance.toClientDTOAt(timeContext)),
       ),
     listSchedules: async (id) =>
       (await scheduleRepository.findByIdentityId(id)).map(toScheduleRecord),
@@ -139,5 +142,5 @@ export async function getApiDashboardData(
         timestamp: row.occurredAt.getTime(),
       }));
     },
-  });
+  }, timeContext);
 }

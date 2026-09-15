@@ -13,8 +13,6 @@ function createMockApi(): AccountApplicationPort {
     listAccounts: vi.fn(),
     getProfile: vi.fn(),
     updateProfile: vi.fn(),
-    updateSettings: vi.fn(),
-    checkAvailability: vi.fn(),
     closeAccount: vi.fn(),
   } as unknown as AccountApplicationPort;
 }
@@ -26,7 +24,7 @@ const FAKE_CONTEXT: Context = {
 
 const FAKE_ACCOUNT_DTO = {
   id: 'test-identity-123',
-  status: 'ACTIVE',
+  status: 'Active',
   profile: {
     nickname: 'TestUser',
     gender: 'PreferNotToSay',
@@ -35,18 +33,9 @@ const FAKE_ACCOUNT_DTO = {
     bio: null,
     birthday: null,
   },
-  settings: {
-    theme: 'System',
-    language: 'zh-CN',
-    timezone: 'Asia/Shanghai',
-    notificationEnabled: true,
-  },
-  email: { address: 'test@example.com', isVerified: false, verifiedAt: null, isPrimary: true },
-  phone: null,
-  version: 1,
   createdAt: 1000,
   updatedAt: 1000,
-  deletedAt: null,
+  closedAt: null,
 };
 
 // ---------------------------------------------------------------------------
@@ -145,54 +134,6 @@ describe('AccountController', () => {
   });
 
   // =========================================================================
-  // checkAvailability
-  // =========================================================================
-  describe('checkAvailability', () => {
-    it('should validate input and call use case', async () => {
-      (api.checkAvailability as ReturnType<typeof vi.fn>).mockResolvedValue(
-        ok({ available: true }),
-      );
-
-      const result = await controller.checkAvailability({
-        type: 'email',
-        value: 'test@example.com',
-      });
-
-      expect(isOk(result)).toBe(true);
-      expect(api.checkAvailability).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'email', value: 'test@example.com' }),
-      );
-    });
-
-    it('should return VALIDATION_ERROR for missing type', async () => {
-      const result = await controller.checkAvailability({ value: 'test' });
-
-      expect(isOk(result)).toBe(false);
-      if (!isOk(result)) {
-        expect(result.error.code).toBe('VALIDATION_ERROR');
-      }
-    });
-
-    it('should return VALIDATION_ERROR for invalid type', async () => {
-      const result = await controller.checkAvailability({
-        type: 'INVALID',
-        value: 'test',
-      });
-
-      expect(isOk(result)).toBe(false);
-      if (!isOk(result)) {
-        expect(result.error.code).toBe('VALIDATION_ERROR');
-      }
-    });
-
-    it('should return VALIDATION_ERROR for missing value', async () => {
-      const result = await controller.checkAvailability({ type: 'email' });
-
-      expect(isOk(result)).toBe(false);
-    });
-  });
-
-  // =========================================================================
   // closeAccount
   // =========================================================================
   describe('closeAccount', () => {
@@ -204,7 +145,6 @@ describe('AccountController', () => {
         phase: 'closed' as const,
         status: 'succeeded' as const,
         attempts: 1,
-        version: 4,
         ownerToken: null,
         leaseExpiresAt: null,
         nextRetryAt: null,

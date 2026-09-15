@@ -9,7 +9,7 @@ import {
 } from '@memoflow/contracts/reminder';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import type { IReminderTemplateRepository } from '../../domain/repositories/i-reminder-template-repository';
-import type { AccountTimezonePort } from '../../domain/ports/account-timezone.port';
+import { createTimeContext, type UserTimeContextPort } from '@memoflow/time';
 import { ReminderScheduleQueryApplicationService } from './reminder-schedule-query-application-service';
 
 const IDENTITY_ID = 'IdentityId_550e8400-e29b-41d4-a716-446655440001';
@@ -59,7 +59,7 @@ function createReminder(overrides: Partial<ReminderTemplateServerDTO>): Reminder
 describe('ReminderScheduleQueryApplicationService', () => {
   let reminderTemplateRepository: ReturnType<typeof createMockRepo<IReminderTemplateRepository>>;
   let service: ReminderScheduleQueryApplicationService;
-  let accountTimezonePort: AccountTimezonePort;
+  let userTimeContextPort: UserTimeContextPort;
 
   beforeEach(() => {
     vi.useFakeTimers();
@@ -68,12 +68,14 @@ describe('ReminderScheduleQueryApplicationService', () => {
     reminderTemplateRepository = createMockRepo<IReminderTemplateRepository>({
       findByIdentityId: vi.fn().mockResolvedValue([]),
     });
-    accountTimezonePort = {
-      getUserTimezone: vi.fn().mockResolvedValue(null),
+    userTimeContextPort = {
+      getUserTimeContext: vi.fn().mockResolvedValue(
+        createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+      ),
     };
     service = new ReminderScheduleQueryApplicationService({
       reminderTemplateRepository,
-      accountTimezonePort,
+      userTimeContextPort,
     });
   });
 
@@ -135,10 +137,12 @@ describe('ReminderScheduleQueryApplicationService', () => {
     });
   });
 
-  describe('Timezone Fallback Chain (Request -> Account -> Explicit UTC)', () => {
-    it('uses account timezone when request timezone is missing', async () => {
-      // Set account timezone to Asia/Tokyo (UTC+9)
-      (accountTimezonePort.getUserTimezone as ReturnType<typeof vi.fn>).mockResolvedValue('Asia/Tokyo');
+  describe('Canonical timezone resolution (Request -> UserTimeContext)', () => {
+    it('uses canonical user time context when request timezone is missing', async () => {
+      // Set canonical user timezone to Asia/Tokyo (UTC+9).
+      (userTimeContextPort.getUserTimeContext as ReturnType<typeof vi.fn>).mockResolvedValue(
+        createTimeContext({ timeZone: 'Asia/Tokyo', weekStartsOn: 1 }),
+      );
 
       // 2026-08-10T00:00:00.000Z is 09:00:00 Tokyo time on 2026-08-10.
       const nowMs = Date.parse('2026-08-10T00:00:00.000Z');
@@ -167,7 +171,7 @@ describe('ReminderScheduleQueryApplicationService', () => {
       );
 
       expect(res.ok).toBe(true);
-      expect(accountTimezonePort.getUserTimezone).toHaveBeenCalledWith(IDENTITY_ID);
+      expect(userTimeContextPort.getUserTimeContext).toHaveBeenCalledWith(IDENTITY_ID);
       // In Tokyo (UTC+9), 12:00 corresponds to 03:00 UTC (2026-08-10T03:00:00.000Z).
       expect(res.data?.data).toHaveLength(1);
       expect(res.data?.data[0].nextTriggerAt).toBe(Date.parse('2026-08-10T03:00:00.000Z'));
@@ -175,9 +179,7 @@ describe('ReminderScheduleQueryApplicationService', () => {
       expect(res.data?.data[0].nextTriggerAt).not.toBe(Date.parse('2026-08-10T12:00:00.000Z'));
     });
 
-    it('uses explicit default UTC when both request timezone and account timezone are missing', async () => {
-      (accountTimezonePort.getUserTimezone as ReturnType<typeof vi.fn>).mockResolvedValue(null);
-
+    it('uses canonical virtual UTC default supplied by UserTimeContext', async () => {
       const nowMs = Date.parse('2026-08-10T00:00:00.000Z');
       vi.setSystemTime(new Date(nowMs));
 
@@ -207,8 +209,10 @@ describe('ReminderScheduleQueryApplicationService', () => {
       expect(res.data?.data[0].nextTriggerAt).toBe(Date.parse('2026-08-10T12:00:00.000Z'));
     });
 
-    it('prioritizes explicit request timezone over account timezone', async () => {
-      (accountTimezonePort.getUserTimezone as ReturnType<typeof vi.fn>).mockResolvedValue('Asia/Tokyo');
+    it('prioritizes explicit request timezone over canonical user time context', async () => {
+      (userTimeContextPort.getUserTimeContext as ReturnType<typeof vi.fn>).mockResolvedValue(
+        createTimeContext({ timeZone: 'Asia/Tokyo', weekStartsOn: 1 }),
+      );
 
       const nowMs = Date.parse('2026-08-10T00:00:00.000Z');
       vi.setSystemTime(new Date(nowMs));
@@ -236,9 +240,19 @@ describe('ReminderScheduleQueryApplicationService', () => {
       );
 
       expect(res.ok).toBe(true);
-      // Should NOT read account timezone when request timezone is explicitly supplied
-      expect(accountTimezonePort.getUserTimezone).not.toHaveBeenCalled();
+      // Explicit request timezone is a snapshot override; canonical context is not consulted.
+      expect(userTimeContextPort.getUserTimeContext).not.toHaveBeenCalled();
       expect(res.data?.data[0].nextTriggerAt).toBe(Date.parse('2026-08-10T12:00:00.000Z'));
+    });
+
+    it('fails closed when canonical user time context cannot be resolved', async () => {
+      (userTimeContextPort.getUserTimeContext as ReturnType<typeof vi.fn>).mockRejectedValue(
+        new Error('preference store unavailable'),
+      );
+
+      await expect(
+        service.getTodaySchedule({ includeExpired: true }, { identityId: IDENTITY_ID }),
+      ).rejects.toThrow('preference store unavailable');
     });
   });
 });

@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 
+import { compareGoalTimeframesByEnd } from '@memoflow/contracts/goal';
 import type {
   GoalAggregateReadModel,
   GoalClientDTO,
   GoalStatus,
+  GoalTimeframe,
   KeyResultClientDTO,
 } from '@memoflow/contracts/goal';
 import type { Goal } from '@memoflow/goal/client';
+import type { Ymd } from '@memoflow/contracts/primitives';
 import { presentErrorMessage } from '@memoflow/http-client';
 
 import { useAppSession } from './useAppSession';
@@ -16,10 +19,11 @@ export type GoalSummary = {
   id: string;
   version: number;
   name: string;
-  description: string | null;
+  summary: string | null;
   status: GoalStatus;
-  startDate: number | null;
-  dueDate: number | null;
+  startDate: Ymd | null;
+  target: GoalTimeframe | null;
+  reminderConfig: GoalClientDTO['reminderConfig'];
   archivedAt: number | null;
   updatedAt: number;
   labels: GoalClientDTO['labels'];
@@ -29,7 +33,7 @@ export type GoalSummary = {
 };
 
 export type GoalStatusFilter = 'all' | GoalStatus;
-export type GoalSortField = 'progress' | 'dueDate' | 'updatedAt';
+export type GoalSortField = 'progress' | 'target' | 'updatedAt';
 export type GoalSortDirection = 'asc' | 'desc';
 
 export interface GoalSortOption {
@@ -38,16 +42,16 @@ export interface GoalSortOption {
 }
 
 export type GoalDetail = GoalSummary & {
-  motivation: string | null;
   keyResults: Array<{
     id: string;
     title: string;
     description: string | null;
     currentValue: number;
     targetValue: number;
-    startingValue: number;
+    initialValue: number;
     unit: string | null;
     progress: number;
+    target: GoalTimeframe | null;
   }>;
   reviewsCount: number;
 };
@@ -61,10 +65,11 @@ function mapGoalDTO(dto: GoalClientDTO): GoalSummary {
     id: String(dto.id),
     version: dto.version,
     name: dto.name,
-    description: dto.description,
+    summary: dto.summary,
     status: dto.status,
     startDate: dto.startDate,
-    dueDate: dto.dueDate,
+    target: dto.target,
+    reminderConfig: dto.reminderConfig,
     archivedAt: dto.archivedAt,
     updatedAt: dto.updatedAt,
     labels: dto.labels,
@@ -81,16 +86,16 @@ function mapGoal(goal: Goal): GoalSummary {
 export function mapGoalDetail(goal: GoalAggregateReadModel): GoalDetail {
   return {
     ...mapGoalDTO(goal),
-    motivation: goal.motivation,
     keyResults: goal.keyResults.map((item) => ({
       id: String(item.id),
       title: item.title,
       description: item.description,
       currentValue: item.progress.currentValue,
       targetValue: item.progress.targetValue,
-      startingValue: item.progress.startingValue,
+      initialValue: item.progress.initialValue,
       unit: item.progress.unit,
       progress: progressPercentage(item),
+      target: item.target,
     })),
     reviewsCount: goal.reviews.length,
   };
@@ -177,11 +182,7 @@ export function useGoals() {
 
     if (normalizedQuery.length > 0) {
       result = result.filter((goal) => {
-        const text = [
-          goal.name,
-          goal.description ?? '',
-          ...goal.labels.map((label) => label.name),
-        ]
+        const text = [goal.name, goal.summary ?? '', ...goal.labels.map((label) => label.name)]
           .join(' ')
           .toLowerCase();
         return text.includes(normalizedQuery);
@@ -194,11 +195,8 @@ export function useGoals() {
         case 'progress':
           comparison = a.overallProgress - b.overallProgress;
           break;
-        case 'dueDate':
-          if (a.dueDate === null && b.dueDate === null) comparison = 0;
-          else if (a.dueDate === null) comparison = 1;
-          else if (b.dueDate === null) comparison = -1;
-          else comparison = a.dueDate - b.dueDate;
+        case 'target':
+          comparison = compareGoalTimeframesByEnd(a.target, b.target);
           break;
         case 'updatedAt':
           comparison = a.updatedAt - b.updatedAt;

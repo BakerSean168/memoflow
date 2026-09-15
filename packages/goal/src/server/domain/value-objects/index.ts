@@ -17,7 +17,6 @@ export * from './reminder-trigger-type';
 
 // Class Value Objects
 export * from './goal-reminder-config';
-export * from './goal-time-range';
 export * from './key-result-progress';
 export * from './key-result-snapshot';
 export * from './key-result-weight-snapshot';

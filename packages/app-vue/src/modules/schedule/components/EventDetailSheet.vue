@@ -78,6 +78,7 @@ import {
 } from '@memoflow/ui-vue-shadcn';
 import { AlertTriangle } from '@lucide/vue';
 import { calendarEventSourceLabel, type CalendarEventItem } from '../composables/useCalendarView';
+import { getProductTime, productTimeRevision } from '../../../shared/utils/product-time';
 // Residual 1291: sourceLabel dual retired onto calendarEventSourceLabel sole.
 
 const props = defineProps<{
@@ -89,17 +90,12 @@ const emit = defineEmits<{
   'update:open': [value: boolean];
 }>();
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 
 const timeRange = computed(() => {
+  void productTimeRevision.value;
   if (!props.event) return '';
-  const formatter = new Intl.DateTimeFormat(locale.value, {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-  return `${formatter.format(props.event.startTime)} – ${formatter.format(props.event.endTime)}`;
+  const time = getProductTime();
+  return `${time.format.pattern(props.event.startTime, 'MMM d HH:mm')} – ${time.format.pattern(props.event.endTime, 'MMM d HH:mm')}`;
 });
-
 </script>

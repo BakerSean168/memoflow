@@ -9,14 +9,10 @@ import type { IAccountApiClient } from '../types';
 import type { IResultHttpClient } from '@memoflow/http-client';
 import type { Result } from '@memoflow/contracts/result';
 import type {
-  AccountClientDTO,
+  AccountView,
   UpdateAccountReq,
-  CheckAvailabilityReq,
-  CheckAvailabilityRes,
   CloseAccountReq,
   CloseAccountRes,
-  UpdateAccountSettingsReq,
-  UpdateAccountSettingsRes,
 } from '@memoflow/contracts/account';
 
 export class AccountHttpAdapter implements IAccountApiClient {
@@ -24,22 +20,12 @@ export class AccountHttpAdapter implements IAccountApiClient {
 
   constructor(private readonly httpClient: IResultHttpClient) {}
 
-  async getMyProfile(): Promise<Result<AccountClientDTO>> {
+  async getMyProfile(): Promise<Result<AccountView>> {
     return this.httpClient.get(`${this.baseUrl}/me`);
   }
 
-  async updateMyProfile(request: UpdateAccountReq): Promise<Result<AccountClientDTO>> {
+  async updateMyProfile(request: UpdateAccountReq): Promise<Result<AccountView>> {
     return this.httpClient.put(`${this.baseUrl}/me`, request);
-  }
-
-  async updateSettings(
-    request: UpdateAccountSettingsReq,
-  ): Promise<Result<UpdateAccountSettingsRes>> {
-    return this.httpClient.patch(`${this.baseUrl}/me/settings`, request);
-  }
-
-  async checkAvailability(request: CheckAvailabilityReq): Promise<Result<CheckAvailabilityRes>> {
-    return this.httpClient.post(`${this.baseUrl}/availability`, request);
   }
 
   async closeAccount(request: CloseAccountReq): Promise<Result<CloseAccountRes>> {

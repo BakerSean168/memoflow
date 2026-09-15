@@ -1,4 +1,5 @@
 import type { PrismaClient } from '@memoflow/database';
+import type { Clock } from '@memoflow/time';
 // Structural cloud-auth shape (boundary: scope:account must not import scope:authentication libs directly)
 export interface CloudAuthLike {
   revokeAllSessions(identityId: string): Promise<{ revokedSessions: number }>;
@@ -13,6 +14,7 @@ import type {
 export class PrismaCloudAuthRevocationAdapter implements CloudAuthRevocationPort {
   constructor(
     private readonly prisma: PrismaClient,
+    private readonly clock: Clock,
     private readonly cloudAuth?: CloudAuthLike,
   ) {}
 
@@ -34,8 +36,7 @@ export class PrismaCloudAuthRevocationAdapter implements CloudAuthRevocationPort
     await this.prisma.cloudAuthUser.updateMany({
       where: { id: identityId },
       data: {
-        status: 'disabled',
-        disabledAt: new Date(),
+        disabledAt: new Date(this.clock.now()),
       },
     });
 

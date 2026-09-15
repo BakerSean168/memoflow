@@ -122,7 +122,7 @@ export class NotificationTemplate extends AggregateRoot<NotificationTemplateId> 
   /**
    * 更新模板配置
    */
-  public updateTemplate(template: Partial<NotificationTemplateConfigServerDTO>): void {
+  public updatePlan(template: Partial<NotificationTemplateConfigServerDTO>): void {
     const current = this._props.template.toContract();
     const updated = { ...current, ...template };
     this._props.template = NotificationTemplateConfig.fromContract(updated);

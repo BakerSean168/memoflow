@@ -26,3 +26,4 @@ export * from './api';
 
 // ============ DTOs ============
 export * from './dtos';
+export * from './portable-v3';

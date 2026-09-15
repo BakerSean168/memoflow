@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { GoalPlanDraftSchema, type GoalPlanExecutionReceipt } from '@memoflow/contracts/ai';
+import { GoalPlanDraftSchema, GoalPlanExecutionReceiptSchema } from '@memoflow/contracts/ai';
 import { error, ok } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { ApplyGoalPlanService } from './apply-goal-plan.service';
@@ -14,71 +14,116 @@ const context: ExecutionContext = {
   source: 'http',
 };
 
+const existingKnowledge = {
+  knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440010',
+  documentId: 'kdoc_550e8400-e29b-41d4-a716-446655440011',
+} as const;
+
 const draft = GoalPlanDraftSchema.parse({
   revision: 1,
   goal: {
+    draftRef: 'goal',
     name: 'Pass JLPT N1',
-    description: 'Build a durable study plan.',
-    motivation: 'Study in Japan',
-    feasibilityAnalysis: 'One focused hour per day is available.',
-    startDate: Date.UTC(2026, 8, 1),
-    dueDate: Date.UTC(2026, 11, 1),
+    summary: 'Build a durable study plan.',
+    status: 'InProgress',
+    startDate: '2026-09-15',
+    target: { kind: 'year', year: 2027 },
     labels: ['Learning'],
   },
   keyResults: [
     {
+      draftRef: 'kr:mock-exams',
       title: 'Complete mock exams',
-      calculationMethod: 'Sum',
-      startingValue: 0,
-      progressBaselineValue: null,
+      aggregationMethod: 'Sum',
+      initialValue: 0,
       currentValue: 0,
       targetValue: 8,
       unit: 'exams',
       weight: 5,
     },
   ],
-  taskTemplates: [
+  tasks: [
     {
-      name: 'Daily N1 study',
-      description: 'One focused study block',
+      draftRef: 'task:daily-study',
+      title: 'Daily N1 study',
       importance: 'Important',
-      cadence: 'daily',
-      timeOfDay: '20:00',
-      keyResultIndex: 0,
-      contributionValue: 1,
+      schedule: {
+        kind: 'Recurring',
+        startDate: '2026-09-15',
+        timing: { kind: 'At', time: '20:00' },
+        recurrence: {
+          frequency: 'Daily',
+          interval: 1,
+          byWeekday: [],
+          end: { kind: 'Never' },
+        },
+      },
       labels: ['Japanese'],
+      goalRef: 'goal',
+      keyResultRef: 'kr:mock-exams',
+      contribution: { value: 1, trigger: 'EachCompletion' },
     },
     {
-      name: 'Weekly mock exam',
-      importance: 'Important',
-      cadence: 'weekly',
-      daysOfWeek: [6],
-      occurrences: 8,
-      keyResultIndex: 0,
-      contributionValue: 1,
-    },
-  ],
-  reminders: [
-    {
-      title: 'Start N1 study',
+      draftRef: 'task:company-research',
+      title: 'Research Japanese companies',
       importance: 'Moderate',
-      cadence: 'daily',
-      timeOfDay: '19:55',
-      timezone: 'Asia/Shanghai',
-      channels: ['InApp'],
-      tags: ['japanese'],
+      schedule: { kind: 'OneTime', date: '2026-09-20', timing: { kind: 'AllDay' } },
+      labels: [],
+      goalRef: 'goal',
     },
   ],
-  rationale: 'Daily study plus weekly mock exams makes progress measurable.',
+  knowledge: [
+    {
+      draftRef: 'note:goal-brief',
+      mode: 'create',
+      title: 'JLPT N1 Goal Brief',
+      markdown: '# Goal Brief\n\nDaily study plus measurable mock exams.',
+      targetSubpath: 'goals/jlpt-n1-goal-brief.md',
+      sourceRefs: ['conversation:user-intent'],
+    },
+    {
+      draftRef: 'note:grammar-index',
+      mode: 'linkExisting',
+      title: 'Existing N1 grammar index',
+      knowledgeDocument: existingKnowledge,
+    },
+  ],
+  rationale: 'Daily work plus measurable mocks.',
   warnings: [],
 });
 
-function mutationPort(): GoalPlanMutationPort & {
-  resolveLabels: ReturnType<typeof vi.fn>;
-  createGoal: ReturnType<typeof vi.fn>;
-  createTaskTemplate: ReturnType<typeof vi.fn>;
-  createReminder: ReturnType<typeof vi.fn>;
-} {
+function ids(workflowRunId = 'workflow-1', revision = 1) {
+  return {
+    goal: goalWorkflowEntityId({ workflowRunId, revision, kind: 'goal', draftRef: 'goal' }),
+    kr: goalWorkflowEntityId({
+      workflowRunId,
+      revision,
+      kind: 'key_result',
+      draftRef: 'kr:mock-exams',
+    }),
+    taskDaily: goalWorkflowEntityId({
+      workflowRunId,
+      revision,
+      kind: 'task_plan',
+      draftRef: 'task:daily-study',
+    }),
+    taskResearch: goalWorkflowEntityId({
+      workflowRunId,
+      revision,
+      kind: 'task_plan',
+      draftRef: 'task:company-research',
+    }),
+    noteBrief: goalWorkflowEntityId({
+      workflowRunId,
+      revision,
+      kind: 'knowledge_document',
+      draftRef: 'note:goal-brief',
+    }),
+  };
+}
+
+function mutationPort(): GoalPlanMutationPort & Record<string, ReturnType<typeof vi.fn>> {
+  const expected = ids();
   return {
     resolveLabels: vi.fn(async (names: readonly string[]) =>
       ok(names.map((name) => `label:${name.trim().toLowerCase()}`)),
@@ -86,262 +131,256 @@ function mutationPort(): GoalPlanMutationPort & {
     createGoal: vi.fn(async (request) =>
       ok({
         goalId: String(request.id),
+        goalVersion: 1,
         keyResultIds: (request.initialKeyResults ?? []).map((item) => String(item.id)),
       }),
     ),
-    createTaskTemplate: vi.fn(async (request) => ok({ taskId: String(request.id) })),
-    createReminder: vi.fn(async (request) => ok({ reminderId: String(request.id) })),
+    activateGoal: vi.fn(async () => ok({ goalVersion: 2 })),
+    createTaskPlan: vi.fn(async (request) => ok({ taskId: String(request.id) })),
+    createKnowledgeDocument: vi.fn(async (request) =>
+      ok({
+        knowledgeDocument: {
+          knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440020',
+          documentId: request.knowledgeDocumentId,
+        },
+      }),
+    ),
+    linkGoalKnowledge: vi.fn(async (_goalId, knowledgeDocument) =>
+      ok({
+        relationId:
+          knowledgeDocument.documentId === expected.noteBrief
+            ? 'relation:brief'
+            : 'relation:existing',
+      }),
+    ),
   };
 }
 
-function ids(workflowRunId = 'workflow-1', revision = 1) {
-  return {
-    goal: goalWorkflowEntityId({ workflowRunId, revision, kind: 'goal' }),
-    kr0: goalWorkflowEntityId({ workflowRunId, revision, kind: 'key_result', index: 0 }),
-    task0: goalWorkflowEntityId({ workflowRunId, revision, kind: 'task_template', index: 0 }),
-    task1: goalWorkflowEntityId({ workflowRunId, revision, kind: 'task_template', index: 1 }),
-    reminder0: goalWorkflowEntityId({ workflowRunId, revision, kind: 'reminder', index: 0 }),
-  };
-}
-
-describe('ApplyGoalPlanService', () => {
-  it('maps one approved draft to deterministic Goal/KR/Task/Reminder mutations through the narrow port', async () => {
+describe('ApplyGoalPlanService V2', () => {
+  it('applies Goal/KR, explicit lifecycle, Knowledge create/link and Task owner requests by draftRef', async () => {
     const port = mutationPort();
     const service = new ApplyGoalPlanService(port);
     const expected = ids();
 
     const receipt = await service.apply({ workflowRunId: 'workflow-1', draft, context });
 
-    expect(receipt).toMatchObject({
+    expect(receipt).toEqual({
       workflowRunId: 'workflow-1',
       revision: 1,
       status: 'success',
-      goalId: expected.goal,
-      keyResultIds: [expected.kr0],
-      taskIds: [expected.task0, expected.task1],
-      reminderIds: [expected.reminder0],
+      referenceMap: {
+        goal: expected.goal,
+        'kr:mock-exams': expected.kr,
+        'note:goal-brief': expected.noteBrief,
+        'note:grammar-index': existingKnowledge.documentId,
+        'task:daily-study': expected.taskDaily,
+        'task:company-research': expected.taskResearch,
+      },
+      relationIds: {
+        'note:goal-brief': 'relation:brief',
+        'note:grammar-index': 'relation:existing',
+      },
+      goalVersion: 2,
+      appliedGoalStatus: 'InProgress',
       failures: [],
       retryable: false,
     });
-    expect(port.createGoal).toHaveBeenCalledTimes(1);
-    expect(port.createGoal.mock.calls[0]?.[0]).toMatchObject({
-      id: expected.goal,
-      name: 'Pass JLPT N1',
-      initialKeyResults: [{ id: expected.kr0, title: 'Complete mock exams' }],
-      labelIds: ['label:learning'],
-    });
-    expect(port.createTaskTemplate.mock.calls[0]?.[0]).toMatchObject({
-      id: expected.task0,
-      taskType: 'Recurring',
-      timeConfig: {
-        timeType: 'TimePoint',
-        timePoint: 20 * 60,
-        startDate: draft.goal.startDate,
-      },
-      recurrenceRule: { frequency: 'Daily', interval: 1 },
-      labelIds: ['label:japanese'],
-      goalBinding: {
-        goalId: expected.goal,
-        keyResultId: expected.kr0,
-        contribution: { value: 1, trigger: 'EachCompletion' },
-      },
-    });
-    expect(port.createTaskTemplate.mock.calls[1]?.[0]).toMatchObject({
-      id: expected.task1,
-      recurrenceRule: { frequency: 'Weekly', daysOfWeek: [6], occurrences: 8 },
-    });
-    expect(port.createReminder.mock.calls[0]?.[0]).toMatchObject({
-      id: expected.reminder0,
-      type: 'Recurring',
-      trigger: {
-        type: 'Interval',
-        interval: { minutes: 1440 },
-      },
-      notificationConfig: { channels: ['InApp'] },
-    });
-    expect(port.createGoal.mock.calls[0]?.[1]).toBe(context);
-    expect(port.createTaskTemplate.mock.calls[0]?.[1]).toBe(context);
-    expect(port.createReminder.mock.calls[0]?.[1]).toBe(context);
+
+    expect(port.createGoal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: expected.goal,
+        name: 'Pass JLPT N1',
+        summary: 'Build a durable study plan.',
+        startDate: '2026-09-15',
+        target: { kind: 'year', year: 2027 },
+        initialKeyResults: [
+          expect.objectContaining({
+            id: expected.kr,
+            initialValue: 0,
+            currentValue: 0,
+            targetValue: 8,
+            calculationMethod: 'Sum',
+          }),
+        ],
+      }),
+      context,
+    );
+    expect(port.activateGoal).toHaveBeenCalledWith(expected.goal, 1, context);
+    expect(port.createKnowledgeDocument).toHaveBeenCalledWith(
+      expect.objectContaining({
+        draftRef: 'note:goal-brief',
+        knowledgeDocumentId: expected.noteBrief,
+        targetSubpath: 'goals/jlpt-n1-goal-brief.md',
+        sourceRefs: ['conversation:user-intent'],
+      }),
+      context,
+    );
+    expect(port.createKnowledgeDocument).toHaveBeenCalledTimes(1);
+    expect(port.linkGoalKnowledge).toHaveBeenCalledTimes(2);
+    expect(port.createTaskPlan).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: expected.taskDaily,
+        schedule: draft.tasks[0]?.schedule,
+        goalBinding: {
+          goalId: expected.goal,
+          keyResultId: expected.kr,
+          contribution: { value: 1, trigger: 'EachCompletion' },
+        },
+      }),
+      context,
+    );
   });
 
-  it('uses the prior partial receipt as a checkpoint and retries only missing children', async () => {
-    const port = mutationPort();
-    const service = new ApplyGoalPlanService(port);
+  it('resumes a partial receipt and retries only the missing Task draftRef', async () => {
     const expected = ids();
-    const priorReceipt: GoalPlanExecutionReceipt = {
+    const firstPort = mutationPort();
+    firstPort.createTaskPlan.mockImplementation(async (request) =>
+      String(request.id) === expected.taskResearch
+        ? error('SERVICE_UNAVAILABLE', 'task database unavailable')
+        : ok({ taskId: String(request.id) }),
+    );
+    const service = new ApplyGoalPlanService(firstPort);
+
+    const partial = await service.apply({ workflowRunId: 'workflow-1', draft, context });
+    expect(partial.status).toBe('partial');
+    expect(partial.referenceMap['task:daily-study']).toBe(expected.taskDaily);
+    expect(partial.referenceMap['task:company-research']).toBeUndefined();
+    expect(partial.failures).toEqual([
+      expect.objectContaining({
+        operation: 'task_create',
+        draftRef: 'task:company-research',
+        retryable: true,
+      }),
+    ]);
+
+    const retryPort = mutationPort();
+    const retry = await new ApplyGoalPlanService(retryPort).apply({
+      workflowRunId: 'workflow-1',
+      draft,
+      context,
+      priorReceipt: partial,
+    });
+
+    expect(retry.status).toBe('success');
+    expect(retry.referenceMap['task:company-research']).toBe(expected.taskResearch);
+    expect(retryPort.createGoal).not.toHaveBeenCalled();
+    expect(retryPort.activateGoal).not.toHaveBeenCalled();
+    expect(retryPort.createKnowledgeDocument).not.toHaveBeenCalled();
+    expect(retryPort.linkGoalKnowledge).not.toHaveBeenCalled();
+    expect(retryPort.createTaskPlan).toHaveBeenCalledTimes(1);
+    expect(retryPort.createTaskPlan).toHaveBeenCalledWith(
+      expect.objectContaining({ id: expected.taskResearch }),
+      context,
+    );
+  });
+
+  it('replays deterministic Knowledge create + exact link when the process died before relation receipt persistence', async () => {
+    const expected = ids();
+    const knowledgeOnly = GoalPlanDraftSchema.parse({
+      ...draft,
+      tasks: [],
+      knowledge: [draft.knowledge[0]],
+    });
+    const prior = GoalPlanExecutionReceiptSchema.parse({
       workflowRunId: 'workflow-1',
       revision: 1,
       status: 'partial',
-      goalId: expected.goal,
-      keyResultIds: [expected.kr0],
-      taskIds: [expected.task0],
-      reminderIds: [],
+      referenceMap: {
+        goal: expected.goal,
+        'kr:mock-exams': expected.kr,
+        'note:goal-brief': expected.noteBrief,
+      },
+      relationIds: {},
+      goalVersion: 2,
+      appliedGoalStatus: 'InProgress',
       failures: [
         {
-          operation: 'task_template',
-          index: 1,
+          operation: 'knowledge_link',
+          draftRef: 'note:goal-brief',
           code: 'SERVICE_UNAVAILABLE',
-          message: 'temporary failure',
+          message: 'crashed before receipt persistence',
           retryable: true,
         },
       ],
       retryable: true,
-    };
+    });
+    const port = mutationPort();
 
-    const receipt = await service.apply({
+    const replayed = await new ApplyGoalPlanService(port).apply({
+      workflowRunId: 'workflow-1',
+      draft: knowledgeOnly,
+      context,
+      priorReceipt: prior,
+    });
+
+    expect(replayed.status).toBe('success');
+    expect(replayed.referenceMap['note:goal-brief']).toBe(expected.noteBrief);
+    expect(replayed.relationIds['note:goal-brief']).toBe('relation:brief');
+    expect(port.createGoal).not.toHaveBeenCalled();
+    expect(port.createKnowledgeDocument).toHaveBeenCalledTimes(1);
+    expect(port.linkGoalKnowledge).toHaveBeenCalledTimes(1);
+  });
+
+  it('links an existing stable KnowledgeDocument without invoking create', async () => {
+    const expected = ids();
+    const linkOnly = GoalPlanDraftSchema.parse({
+      ...draft,
+      tasks: [],
+      knowledge: [draft.knowledge[1]],
+    });
+    const port = mutationPort();
+
+    const receipt = await new ApplyGoalPlanService(port).apply({
+      workflowRunId: 'workflow-1',
+      draft: linkOnly,
+      context,
+    });
+
+    expect(receipt.referenceMap['note:grammar-index']).toBe(existingKnowledge.documentId);
+    expect(receipt.relationIds['note:grammar-index']).toBe('relation:existing');
+    expect(port.createKnowledgeDocument).not.toHaveBeenCalled();
+    expect(port.linkGoalKnowledge).toHaveBeenCalledWith(expected.goal, existingKnowledge, context);
+  });
+
+  it('fails closed when an owner returns a non-deterministic Goal/KR identity', async () => {
+    const port = mutationPort();
+    port.createGoal.mockResolvedValue(
+      ok({ goalId: 'wrong-goal', goalVersion: 1, keyResultIds: ['wrong-kr'] }),
+    );
+
+    const receipt = await new ApplyGoalPlanService(port).apply({
       workflowRunId: 'workflow-1',
       draft,
       context,
-      priorReceipt,
     });
 
-    expect(port.createGoal).not.toHaveBeenCalled();
-    expect(port.createTaskTemplate).toHaveBeenCalledTimes(1);
-    expect(port.createTaskTemplate.mock.calls[0]?.[0]).toMatchObject({ id: expected.task1 });
-    expect(port.createReminder).toHaveBeenCalledTimes(1);
-    expect(receipt.status).toBe('success');
-    expect(receipt.taskIds).toEqual([expected.task0, expected.task1]);
-    expect(receipt.reminderIds).toEqual([expected.reminder0]);
-  });
-
-  it('fails closed and never creates dependent children when goal creation fails', async () => {
-    const port = mutationPort();
-    port.createGoal.mockResolvedValueOnce(error('VALIDATION_ERROR', 'goal is invalid'));
-    const service = new ApplyGoalPlanService(port);
-
-    const receipt = await service.apply({ workflowRunId: 'workflow-1', draft, context });
-
     expect(receipt.status).toBe('failed');
-    expect(receipt.goalId).toBeUndefined();
-    expect(receipt.failures).toEqual([
-      {
-        operation: 'goal',
-        code: 'VALIDATION_ERROR',
-        message: 'goal is invalid',
-        retryable: false,
-      },
-    ]);
-    expect(port.createTaskTemplate).not.toHaveBeenCalled();
-    expect(port.createReminder).not.toHaveBeenCalled();
-  });
-
-  it('returns a retryable partial receipt when one deterministic child mutation has a transient failure', async () => {
-    const port = mutationPort();
-    port.createTaskTemplate
-      .mockImplementationOnce(async (request) => ok({ taskId: String(request.id) }))
-      .mockResolvedValueOnce(error('SERVICE_UNAVAILABLE', 'task database unavailable'));
-    const service = new ApplyGoalPlanService(port);
-    const expected = ids();
-
-    const receipt = await service.apply({ workflowRunId: 'workflow-1', draft, context });
-
-    expect(receipt.status).toBe('partial');
-    expect(receipt.retryable).toBe(true);
-    expect(receipt.taskIds).toEqual([expected.task0]);
-    expect(receipt.reminderIds).toEqual([expected.reminder0]);
-    expect(receipt.failures).toEqual([
-      {
-        operation: 'task_template',
-        index: 1,
-        code: 'SERVICE_UNAVAILABLE',
-        message: 'task database unavailable',
-        retryable: true,
-      },
-    ]);
-  });
-
-  it('rejects an application-port ID mismatch instead of accepting a duplicate business fact', async () => {
-    const port = mutationPort();
-    port.createReminder.mockResolvedValueOnce(
-      ok({ reminderId: 'IReminderTemplateId_550e8400-e29b-41d4-a716-446655440777' }),
-    );
-    const service = new ApplyGoalPlanService(port);
-
-    const receipt = await service.apply({ workflowRunId: 'workflow-1', draft, context });
-
-    expect(receipt.status).toBe('partial');
     expect(receipt.retryable).toBe(false);
     expect(receipt.failures).toEqual([
       expect.objectContaining({
-        operation: 'reminder',
-        index: 0,
+        operation: 'goal_create',
+        draftRef: 'goal',
         code: 'AI_WORKFLOW_MUTATION_ID_MISMATCH',
-        retryable: false,
       }),
     ]);
+    expect(port.createTaskPlan).not.toHaveBeenCalled();
   });
 
-  it('folds a goal mutation throw into a retryable failed receipt instead of escaping the Result contract', async () => {
+  it('does not let a temporary label resolution failure escape the durable workflow', async () => {
     const port = mutationPort();
-    port.createGoal.mockRejectedValueOnce(
-      new Error('duplicate key value violates unique constraint "goals_pkey"'),
-    );
-    const service = new ApplyGoalPlanService(port);
+    port.resolveLabels.mockRejectedValue(new Error('label service offline'));
 
-    const receipt = await service.apply({ workflowRunId: 'workflow-1', draft, context });
+    const receipt = await new ApplyGoalPlanService(port).apply({
+      workflowRunId: 'workflow-1',
+      draft,
+      context,
+    });
 
-    expect(receipt.status).toBe('failed');
-    expect(receipt.retryable).toBe(true);
-    expect(receipt.goalId).toBeUndefined();
-    expect(receipt.failures).toEqual([
-      expect.objectContaining({
-        operation: 'goal',
-        code: 'INTERNAL_ERROR',
-        retryable: true,
-      }),
-    ]);
-    expect(port.createTaskTemplate).not.toHaveBeenCalled();
-    expect(port.createReminder).not.toHaveBeenCalled();
-  });
-
-  it('folds a task mutation throw into a retryable partial receipt and continues other mutations', async () => {
-    const port = mutationPort();
-    port.createTaskTemplate
-      .mockImplementationOnce(async (request) => ok({ taskId: String(request.id) }))
-      .mockRejectedValueOnce(
-        new Error('duplicate key value violates unique constraint "task_templates_pkey"'),
-      );
-    const service = new ApplyGoalPlanService(port);
-    const expected = ids();
-
-    const receipt = await service.apply({ workflowRunId: 'workflow-1', draft, context });
-
-    expect(receipt.status).toBe('partial');
-    expect(receipt.retryable).toBe(true);
-    expect(receipt.taskIds).toEqual([expected.task0]);
-    expect(receipt.reminderIds).toEqual([expected.reminder0]);
-    expect(receipt.failures).toEqual([
-      expect.objectContaining({
-        operation: 'task_template',
-        index: 1,
-        code: 'INTERNAL_ERROR',
-        retryable: true,
-      }),
-    ]);
-    expect(port.createReminder).toHaveBeenCalledTimes(1);
-  });
-
-  it('folds a reminder mutation throw into a retryable partial receipt', async () => {
-    const port = mutationPort();
-    port.createReminder.mockRejectedValueOnce(
-      new Error('duplicate key value violates unique constraint "reminder_templates_pkey"'),
-    );
-    const service = new ApplyGoalPlanService(port);
-    const expected = ids();
-
-    const receipt = await service.apply({ workflowRunId: 'workflow-1', draft, context });
-
-    expect(receipt.status).toBe('partial');
-    expect(receipt.retryable).toBe(true);
-    expect(receipt.taskIds).toEqual([expected.task0, expected.task1]);
-    expect(receipt.reminderIds).toEqual([]);
-    expect(receipt.failures).toEqual([
-      expect.objectContaining({
-        operation: 'reminder',
-        index: 0,
-        code: 'INTERNAL_ERROR',
-        retryable: true,
-      }),
-    ]);
+    expect(receipt).toMatchObject({ status: 'failed', retryable: true });
+    expect(receipt.failures[0]).toMatchObject({
+      operation: 'label_resolve',
+      draftRef: 'goal',
+      code: 'INTERNAL_ERROR',
+    });
   });
 });

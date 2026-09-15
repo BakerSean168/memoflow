@@ -6,7 +6,7 @@
  *
  * 订阅集合保持克制（只记录可解释的变化）：
  * - goal:created / goal:completed / goal:review-added
- * - task:instance-completed / task:instance-uncompleted
+ * - task:occurrence-completed / task:occurrence-uncompleted
  * - reminder:response-recorded
  * - schedule:task-executed
  */
@@ -118,8 +118,8 @@ export function createActivityLedgerRecorder(writer: IActivityLedgerWriter): {
     | 'goal:created'
     | 'goal:completed'
     | 'goal:review-added'
-    | 'task:instance-completed'
-    | 'task:instance-uncompleted'
+    | 'task:occurrence-completed'
+    | 'task:occurrence-uncompleted'
     | 'reminder:response-recorded'
     | 'schedule:task-executed';
   const events =
@@ -129,8 +129,8 @@ export function createActivityLedgerRecorder(writer: IActivityLedgerWriter): {
         | 'goal:created'
         | 'goal:completed'
         | 'goal:review-added'
-        | 'task:instance-completed'
-        | 'task:instance-uncompleted'
+        | 'task:occurrence-completed'
+        | 'task:occurrence-uncompleted'
         | 'reminder:response-recorded'
         | 'schedule:task-executed'
       >
@@ -207,30 +207,30 @@ export function createActivityLedgerRecorder(writer: IActivityLedgerWriter): {
           }),
       );
       subscribe(
-        'task:instance-completed',
+        'task:occurrence-completed',
         (e) =>
           void safeAppend({
             identityId: String(e.identityId ?? ''),
             actorId: String(e.identityId ?? ''),
             subjectType: 'task',
-            subjectId: String(e.taskInstanceId ?? ''),
+            subjectId: String(e.taskOccurrenceId ?? ''),
             action: 'completed',
             title: e.taskTitle != null ? String(e.taskTitle) : null,
-            sourceEvent: 'task:instance-completed',
+            sourceEvent: 'task:occurrence-completed',
             occurredAt: Date.now(),
           }),
       );
       subscribe(
-        'task:instance-uncompleted',
+        'task:occurrence-uncompleted',
         (e) =>
           void safeAppend({
             identityId: String(e.identityId ?? ''),
             actorId: String(e.identityId ?? ''),
             subjectType: 'task',
-            subjectId: String(e.taskInstanceId ?? ''),
+            subjectId: String(e.taskOccurrenceId ?? ''),
             action: 'uncompleted',
-            title: e.taskTitle != null ? String(e.taskTitle) : null,
-            sourceEvent: 'task:instance-uncompleted',
+            title: null,
+            sourceEvent: 'task:occurrence-uncompleted',
             occurredAt: Date.now(),
           }),
       );

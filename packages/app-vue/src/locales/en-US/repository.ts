@@ -17,7 +17,15 @@ export default {
     "refresh": "Refresh projection",
     "createAction": "New note",
     "commit": "commit {sha}",
-    "readOnly": "Read-only projection",    "noteViews": "Knowledge note views",
+    "readOnly": "Read-only projection",
+    "documentId": "Stable document identity",
+    "adoptAction": "Adopt into MemoFlow",
+    "adoptTitle": "Adopt this knowledge note",
+    "adoptDescription": "MemoFlow will make one metadata-only Git commit that adds a stable document identity. The note body is not edited.",
+    "adoptPatch": "Metadata patch",
+    "adoptImmutable": "This confirmation is bound to the currently projected Git blob. If the file changes before commit, adoption stops instead of overwriting it.",
+    "adoptConfirmAction": "Confirm metadata commit",
+    "noteViews": "Knowledge note views",
     "previewTab": "Preview",
     "relationsTab": "Relations",
     "graphDepth": "Depth",
@@ -57,13 +65,10 @@ export default {
       "indexed": "Searchable",
       "failed": "Indexing failed"
     },
-    "status": {
-      "Active": "Connected",
-      "Suspended": "Suspended",
-      "Revoked": "Revoked",
-      "Error": "Needs attention",
-      "PendingInstall": "Pending installation",
-      "Unknown": "Unknown status"
+    "providerStatus": {
+      "Ready": "Provider ready",
+      "Blocked": "Provider blocked",
+      "Unchecked": "Not checked"
     }
   },
   "writeRequestLedger": {

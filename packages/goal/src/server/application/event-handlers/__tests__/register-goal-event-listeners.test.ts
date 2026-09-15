@@ -26,8 +26,8 @@ function aGoalBinding(overrides: Partial<TaskGoalBindingDTO> = {}): TaskGoalBind
 function aCompletedEvent(overrides: Partial<CompletedEvent> = {}): CompletedEvent {
   return {
     identityId: 'identity-1' as CompletedEvent['identityId'],
-    taskInstanceId: 'ti-1' as CompletedEvent['taskInstanceId'],
-    taskTemplateId: 'tt-1' as CompletedEvent['taskTemplateId'],
+    taskOccurrenceId: 'ti-1' as CompletedEvent['taskOccurrenceId'],
+    taskPlanId: 'tt-1' as CompletedEvent['taskPlanId'],
     completedAt: Date.now(),
     taskTitle: 'Write ADR',
     goalBinding: aGoalBinding(),

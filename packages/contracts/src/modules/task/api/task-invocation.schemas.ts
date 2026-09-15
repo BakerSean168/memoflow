@@ -19,66 +19,67 @@
 
 import { z } from 'zod';
 import { brandedId } from '../../../primitives';
-import type { TaskInstanceId, TaskTemplateId } from '../../../primitives';
+import type { TaskOccurrenceId, TaskPlanId } from '../../../primitives';
 import {
-  GenerateInstancesSchema,
+  GenerateOccurrencesSchema,
   TaskGoalBindingSchema,
-  UpdateTaskTemplateSchema,
+  UpdateTaskPlanSchema,
   AbandonTaskPlanSchema,
-} from './task-template.dto';
+} from './task-plan.dto';
 import {
-  CompleteTaskInstanceSchema,
-  MarkTaskInstanceMissedSchema,
-  SkipTaskInstanceSchema,
-} from './task-instance.dto';
+  CompleteTaskOccurrenceSchema,
+  MarkTaskOccurrenceMissedSchema,
+  SetTaskOccurrenceChecklistItemSchema,
+  SkipTaskOccurrenceSchema,
+} from './task-occurrence.dto';
 import { RescheduleTaskBodySchema } from './task-schedule.dto';
 
 // ============================================================================
 // Shared route params
 // ============================================================================
 
-/** `:id` path param for a task-template-scoped route. 任务模板作用域路由的 `:id` path 参数。 */
-export const TaskTemplateIdParamsSchema = z.object({ id: brandedId<TaskTemplateId>() });
-export type TaskTemplateIdParams = z.infer<typeof TaskTemplateIdParamsSchema>;
+/** `:id` path param for a task-plan-scoped route. 任务模板作用域路由的 `:id` path 参数。 */
+export const TaskPlanIdParamsSchema = z.object({ id: brandedId<TaskPlanId>() });
+export type TaskPlanIdParams = z.infer<typeof TaskPlanIdParamsSchema>;
 
-/** `:id` path param for a task-instance-scoped route. 任务实例作用域路由的 `:id` path 参数。 */
-export const TaskInstanceIdParamsSchema = z.object({ id: brandedId<TaskInstanceId>() });
-export type TaskInstanceIdParams = z.infer<typeof TaskInstanceIdParamsSchema>;
+/** `:id` path param for a task-occurrence-scoped route. 任务实例作用域路由的 `:id` path 参数。 */
+export const TaskOccurrenceIdParamsSchema = z.object({ id: brandedId<TaskOccurrenceId>() });
+export type TaskOccurrenceIdParams = z.infer<typeof TaskOccurrenceIdParamsSchema>;
 
 // ============================================================================
 // Template mutations
 // ============================================================================
 
-/** PUT/PATCH /:id — update a template. 更新任务模板。 */
-export const UpdateTaskTemplateInvocationSchema = z.object({
-  params: TaskTemplateIdParamsSchema,
-  body: UpdateTaskTemplateSchema,
+/** PUT/PATCH /:id — update a plan. 更新任务模板。 */
+export const UpdateTaskPlanInvocationSchema = z.object({
+  params: TaskPlanIdParamsSchema,
+  body: UpdateTaskPlanSchema,
 });
-export type UpdateTaskTemplateInvocation = z.infer<typeof UpdateTaskTemplateInvocationSchema>;
+export type UpdateTaskPlanInvocation = z.infer<typeof UpdateTaskPlanInvocationSchema>;
 
-/** POST /:id/generate-instances — generate instances for a template. 为模板生成实例。 */
-export const GenerateInstancesInvocationSchema = z.object({
-  params: TaskTemplateIdParamsSchema,
-  body: GenerateInstancesSchema,
+/** POST /:id/generate-occurrences — generate occurrences for a plan. 为模板生成实例。 */
+export const GenerateOccurrencesInvocationSchema = z.object({
+  params: TaskPlanIdParamsSchema,
+  body: GenerateOccurrencesSchema,
 });
-export type GenerateInstancesInvocation = z.infer<typeof GenerateInstancesInvocationSchema>;
+export type GenerateOccurrencesInvocation = z.infer<typeof GenerateOccurrencesInvocationSchema>;
 
-/** POST /:id/bind-goal — bind a template to a goal. 绑定模板到目标。 */
+/** POST /:id/bind-goal — bind a plan to a goal. 绑定模板到目标。 */
 export const BindTaskToGoalInvocationSchema = z.object({
-  params: TaskTemplateIdParamsSchema,
+  params: TaskPlanIdParamsSchema,
   body: TaskGoalBindingSchema,
 });
 export type BindTaskToGoalInvocation = z.infer<typeof BindTaskToGoalInvocationSchema>;
 
-/** POST /:id/activate | /pause | /archive | /unbind-goal — id-only template commands. 模板 id-only 命令。 */
-export const TaskTemplateIdCommandInvocationSchema = z.object({
-  params: TaskTemplateIdParamsSchema,
+/** POST /:id/activate | /pause | /archive | /unbind-goal — id-only plan commands. 模板 id-only 命令。 */
+export const TaskPlanIdCommandInvocationSchema = z.object({
+  params: TaskPlanIdParamsSchema,
 });
-export type TaskTemplateIdCommandInvocation = z.infer<typeof TaskTemplateIdCommandInvocationSchema>;
+export type TaskPlanIdCommandInvocation = z.infer<typeof TaskPlanIdCommandInvocationSchema>;
 
 /** POST /:id/abandon — explicit user abandonment of the Task plan. */
 export const AbandonTaskPlanInvocationSchema = z.object({
-  params: TaskTemplateIdParamsSchema,
+  params: TaskPlanIdParamsSchema,
   body: AbandonTaskPlanSchema,
 });
 export type AbandonTaskPlanInvocation = z.infer<typeof AbandonTaskPlanInvocationSchema>;
@@ -87,40 +88,53 @@ export type AbandonTaskPlanInvocation = z.infer<typeof AbandonTaskPlanInvocation
 // Instance mutations
 // ============================================================================
 
-/** POST /:id/complete — complete an instance. 完成任务实例。 */
-export const CompleteTaskInstanceInvocationSchema = z.object({
-  params: TaskInstanceIdParamsSchema,
-  body: CompleteTaskInstanceSchema,
+/** POST /:id/complete — complete an occurrence. 完成任务实例。 */
+export const CompleteTaskOccurrenceInvocationSchema = z.object({
+  params: TaskOccurrenceIdParamsSchema,
+  body: CompleteTaskOccurrenceSchema,
 });
-export type CompleteTaskInstanceInvocation = z.infer<typeof CompleteTaskInstanceInvocationSchema>;
+export type CompleteTaskOccurrenceInvocation = z.infer<
+  typeof CompleteTaskOccurrenceInvocationSchema
+>;
 
-/** POST /:id/skip — skip an instance. 跳过任务实例。 */
-export const SkipTaskInstanceInvocationSchema = z.object({
-  params: TaskInstanceIdParamsSchema,
-  body: SkipTaskInstanceSchema,
+/** POST /:id/skip — skip an occurrence. 跳过任务实例。 */
+export const SkipTaskOccurrenceInvocationSchema = z.object({
+  params: TaskOccurrenceIdParamsSchema,
+  body: SkipTaskOccurrenceSchema,
 });
-export type SkipTaskInstanceInvocation = z.infer<typeof SkipTaskInstanceInvocationSchema>;
+export type SkipTaskOccurrenceInvocation = z.infer<typeof SkipTaskOccurrenceInvocationSchema>;
 
 /** POST /:id/missed — explicitly record a missed occurrence. */
-export const MarkTaskInstanceMissedInvocationSchema = z.object({
-  params: TaskInstanceIdParamsSchema,
-  body: MarkTaskInstanceMissedSchema,
+export const MarkTaskOccurrenceMissedInvocationSchema = z.object({
+  params: TaskOccurrenceIdParamsSchema,
+  body: MarkTaskOccurrenceMissedSchema,
 });
-export type MarkTaskInstanceMissedInvocation = z.infer<
-  typeof MarkTaskInstanceMissedInvocationSchema
+export type MarkTaskOccurrenceMissedInvocation = z.infer<
+  typeof MarkTaskOccurrenceMissedInvocationSchema
 >;
 
-/** POST /:id/reschedule — mutate this occurrence's own time, never the template or Scheduler row. */
-export const RescheduleTaskInstanceInvocationSchema = z.object({
-  params: TaskInstanceIdParamsSchema,
+/** POST /:id/checklist — set one occurrence-owned checklist item state. */
+export const SetTaskOccurrenceChecklistItemInvocationSchema = z.object({
+  params: TaskOccurrenceIdParamsSchema,
+  body: SetTaskOccurrenceChecklistItemSchema,
+});
+export type SetTaskOccurrenceChecklistItemInvocation = z.infer<
+  typeof SetTaskOccurrenceChecklistItemInvocationSchema
+>;
+
+/** POST /:id/reschedule — mutate this occurrence's own time, never the plan or Scheduler row. */
+export const RescheduleTaskOccurrenceInvocationSchema = z.object({
+  params: TaskOccurrenceIdParamsSchema,
   body: RescheduleTaskBodySchema,
 });
-export type RescheduleTaskInstanceInvocation = z.infer<
-  typeof RescheduleTaskInstanceInvocationSchema
+export type RescheduleTaskOccurrenceInvocation = z.infer<
+  typeof RescheduleTaskOccurrenceInvocationSchema
 >;
 
-/** POST /:id/start | /uncomplete — id-only instance commands. 实例 id-only 命令。 */
-export const TaskInstanceIdCommandInvocationSchema = z.object({
-  params: TaskInstanceIdParamsSchema,
+/** POST /:id/start | /uncomplete — id-only occurrence commands. 实例 id-only 命令。 */
+export const TaskOccurrenceIdCommandInvocationSchema = z.object({
+  params: TaskOccurrenceIdParamsSchema,
 });
-export type TaskInstanceIdCommandInvocation = z.infer<typeof TaskInstanceIdCommandInvocationSchema>;
+export type TaskOccurrenceIdCommandInvocation = z.infer<
+  typeof TaskOccurrenceIdCommandInvocationSchema
+>;

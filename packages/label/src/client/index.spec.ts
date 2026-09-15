@@ -11,11 +11,11 @@ describe('Label client seam', () => {
         identityId: 'identity-secret',
         name: 'Work',
         normalizedName: 'work',
-        color: '#fff',
+        color: '#ffffff',
         createdAt: 1,
         updatedAt: 2,
       }),
-    ).toEqual({ id: 'label-1', name: 'Work', color: '#fff', createdAt: 1, updatedAt: 2 });
+    ).toEqual({ id: 'label-1', name: 'Work', color: '#ffffff', createdAt: 1, updatedAt: 2 });
   });
 
   it('uses the canonical HTTP current-user endpoints', async () => {

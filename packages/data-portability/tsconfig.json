@@ -14,6 +14,7 @@
       "@memoflow/contracts/shared": ["../contracts/src/shared/index.ts"],
       "@memoflow/contracts/primitives": ["../contracts/src/primitives/index.ts"],
       "@memoflow/contracts/electron": ["../contracts/src/electron/index.ts"],
+      "@memoflow/contracts/data-portability": ["../contracts/src/modules/data-portability/index.ts"],
       "@memoflow/utils": ["../utils/src/index.ts"],
       "@memoflow/utils/result": ["../utils/src/result/index.ts"],
       "@memoflow/utils/logger": ["../utils/src/logger/index.ts"]

@@ -64,7 +64,7 @@
                 <PopoverContent class="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    :selected="parseToDate(formData.startDate)"
+                    :selected="parseToCalendarDate(formData.startDate)"
                     @update:model-value="
                       (d: unknown) =>
                         handleCalendarSelect(d, (v) => {
@@ -133,7 +133,7 @@
                 <PopoverContent class="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    :selected="parseToDate(formData.endDate)"
+                    :selected="parseToCalendarDate(formData.endDate)"
                     @update:model-value="
                       (d: unknown) =>
                         handleCalendarSelect(d, (v) => {
@@ -317,7 +317,7 @@ import {
 } from '@memoflow/ui-vue-shadcn';
 import { MapPin, X, Loader2, Calendar as CalendarIcon } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
-import { parseToDate } from '../../../shared/utils/parse-to-date';
+import { parseToCalendarDate } from '../../../shared/utils/parse-to-date';
 import { handleCalendarSelect } from '../../../shared/utils/handle-calendar-select';
 import { formatDisplayDate } from '../../../shared/utils/format-display-date';
 import { padTwoDigits } from '../../../shared/utils/pad-two-digits';
@@ -346,7 +346,7 @@ const submitting = ref(false);
 const submitError = ref('');
 const busy = computed(() => props.loading || submitting.value);
 
-// Residual 1249 / Residual 1252: formatDisplayDate dual retired onto shared sole; formatDateToYMD dual retired onto shared sole (Residual 1252); parseToDate dual retired onto shared sole (Residual 1255); handleCalendarSelect dual retired onto shared sole (Residual 1258).
+// TIME-1206: schedule date fields use canonical Ymd plus CalendarDate boundary adapters; no Date -> Ymd compatibility path remains.
 
 // ── Time picker options ────────────────────────────────────────────────
 /** Residual 1312: hour/minute option pad dual retired onto padTwoDigits sole. */

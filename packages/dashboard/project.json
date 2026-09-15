@@ -13,7 +13,7 @@
         "cwd": "packages/dashboard"
       },
       "cache": true,
-      "dependsOn": ["contracts:build"]
+      "dependsOn": ["contracts:build", "time:build"]
     },
     "typecheck": {
       "executor": "nx:run-commands",

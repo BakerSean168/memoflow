@@ -12,3 +12,6 @@ export * from './dtos';
 
 // ============ Rules ============
 export * from './rules';
+
+// ============ Owner Capability Protocol ============
+export * from './portable-capability';

@@ -59,7 +59,13 @@
       "cache": false,
       "options": {
         "command": "node ./node_modules/vitest/vitest.mjs run --config apps/api/vitest.integration.config.ts"
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": ["relation"]
+        }
+      ]
     },
     "lint": {
       "executor": "@nx/eslint:lint",
@@ -70,10 +76,7 @@
     },
     "typecheck": {
       "executor": "nx:run-commands",
-      "dependsOn": [
-        { "target": "prisma-generate", "projects": ["database"] },
-        "^build"
-      ],
+      "dependsOn": [{ "target": "prisma-generate", "projects": ["database"] }, "^build"],
       "options": {
         "command": "tsc --noEmit -p tsconfig.typecheck.json && tsc --noEmit -p tsconfig.typecheck.spec.json",
         "cwd": "apps/api"

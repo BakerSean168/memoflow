@@ -4,7 +4,7 @@ tags:
   - index
 description: 架构决策记录索引
 created: 2025-11-23T15:00:00
-updated: 2026-09-02T16:15:00+08:00
+updated: 2026-09-11T00:02:00+08:00
 ---
 
 # ADR 索引
@@ -68,20 +68,66 @@ updated: 2026-09-02T16:15:00+08:00
 | [ADR-050](./ADR-050-mastra-native-ai-runtime.md) | MemoFlow AI vNext — Mastra-native Runtime 与单一状态所有权 | 已采纳 | 2026-08-20 |
 | [ADR-051](./ADR-051-ai-primitive-taxonomy.md) | AI Primitive Taxonomy — Agent / Tool / Workflow / Skill / Memory / Context | 已采纳 | 2026-08-20 |
 | [ADR-052](./ADR-052-goal-create-reference-workflow.md) | `goal.create` Reference Workflow 与确定性业务执行 | 已采纳（Goal/Task draft schema 由 ADR-053~056 修订） | 2026-08-20 |
-| [ADR-053](./ADR-053-goal-task-personal-product-boundary.md) | Goal / Task 个人产品边界与信息架构收敛 | 已采纳（待实施） | 2026-08-25 |
-| [ADR-054](./ADR-054-shared-labels-and-system-views.md) | Shared Labels 与 System Views 分离 | 已采纳（待实施） | 2026-08-25 |
-| [ADR-055](./ADR-055-key-result-measurement-progress-v2.md) | Key Result Measurement & Progress V2 | 已采纳（待实施） | 2026-08-25 |
-| [ADR-056](./ADR-056-task-plan-goal-link-contribution-settlement.md) | Task Plan → Goal Link / Contribution / Settlement | 已采纳（待实施） | 2026-08-25 |
+| [ADR-053](./ADR-053-goal-task-personal-product-boundary.md) | Goal / Task 个人产品边界与信息架构收敛 | 已采纳并实施（Goal 新模型由 ADR-067/069 修订） | 2026-08-25 |
+| [ADR-054](./ADR-054-shared-labels-and-system-views.md) | Shared Labels 与 System Views 分离 | 已采纳并实施 | 2026-08-25 |
+| [ADR-055](./ADR-055-key-result-measurement-progress-v2.md) | Key Result Measurement & Progress V2 | 已采纳并实施（待 ADR-068 V3 替代） | 2026-08-25 |
+| [ADR-056](./ADR-056-task-plan-goal-link-contribution-settlement.md) | Task Plan → Goal Link / Contribution / Settlement | 已采纳并实施（Goal-level link 由 ADR-069 修订） | 2026-08-25 |
 | [ADR-057](./ADR-057-task-occurrence-outcome-and-plan-lifecycle.md) | Task Occurrence Outcome、Overdue 与 Task Plan 生命周期 | 已采纳（待实施） | 2026-08-25 |
 | [ADR-058](./ADR-058-oss-first-standard-capability-reuse.md) | OSS-first 标准能力复用与领域所有权边界 | 已采纳（从 Goal / Task vNext 开始执行） | 2026-08-25 |
 | [ADR-059](./ADR-059-routine-coach-domain-runtime-and-surfaces.md) | Routine Coach 领域、Runtime 与交互 Surface | 已采纳（待实施） | 2026-08-25 |
 | [ADR-060](./ADR-060-schedule-planner-and-scheduler-boundary.md) | Schedule / Planner 与 Scheduler / Temporal Engine 分离 | 已采纳并实施 | 2026-08-25 |
-| [ADR-061](./ADR-061-business-module-scheduling-port-and-handler-registry.md) | 业务模块通过 Scheduling Port 与 Handler Registry 接入 Scheduler | 已采纳（待实施） | 2026-08-25 |
+| [ADR-061](./ADR-061-business-module-scheduling-port-and-handler-registry.md) | 业务模块通过 Scheduling Port 与 Handler Registry 接入 Scheduler | 已采纳并实施（由 ADR-081~083 继续收敛） | 2026-08-25 |
 | [ADR-062](./ADR-062-reminder-routine-single-scheduling-authority.md) | Reminder / Routine 单一调度权与可靠 Occurrence 执行 | 已采纳（待实施） | 2026-08-25 |
 | [ADR-063](./ADR-063-notification-fact-delivery-policy-and-device-surfaces.md) | Notification Fact、Delivery Policy 与 Device Surface 分离 | 已采纳（待实施） | 2026-08-25 |
 | [ADR-064](./ADR-064-emittery-runtime-event-delivery.md) | Runtime EventBus 采用 Emittery 与 Delivery-scoped Async Publish | 已采纳并实施 | 2026-08-25 |
 | [ADR-065](./ADR-065-durable-github-installation-intent-gateway.md) | Durable GitHub App Installation Intent 与 Setup Gateway | 已采纳 | 2026-08-28 |
 | [ADR-066](./ADR-066-adopt-delivery-platform-v3.md) | MemoFlow Delivery Platform V3 与跨平台 build-once/promote-many 交付模型 | 已采纳并实施 | 2026-09-02 |
+| [ADR-067](./ADR-067-goal-vnext-product-model-and-lifecycle.md) | Goal vNext Product Model、Lifecycle 与 Target Timeframe | 已采纳（待实施） | 2026-09-08 |
+| [ADR-068](./ADR-068-key-result-measurement-v3.md) | Key Result Measurement V3 — Initial / Current / Target | 已采纳（待实施） | 2026-09-08 |
+| [ADR-069](./ADR-069-goal-workspace-cross-module-context.md) | Goal Workspace 与跨模块 Context Read Model | 已采纳（待实施） | 2026-09-08 |
+| [ADR-070](./ADR-070-ai-goal-plan-orchestration.md) | AI GoalPlanDraft V2 与多实体 Goal Context Orchestration | 已采纳（待实施） | 2026-09-08 |
+| [ADR-071](./ADR-071-task-plan-occurrence-aggregate-boundary.md) | Task Plan / Task Occurrence 聚合边界 | 已采纳（实施中） | 2026-09-08 |
+| [ADR-072](./ADR-072-task-plan-schedule-algebra.md) | Task Plan Schedule Algebra | 已采纳（实施中） | 2026-09-08 |
+| [ADR-073](./ADR-073-task-occurrence-result-and-checklist.md) | Task Occurrence Result 与 Checklist | 已采纳（实施中） | 2026-09-08 |
+| [ADR-074](./ADR-074-task-reminder-policy-persistence.md) | Task Reminder Policy 与 Persistence Parity | 已采纳（实施中） | 2026-09-08 |
+| [ADR-075](./ADR-075-task-workspace-context-and-goal-link.md) | Task Workspace、Context 与 Goal Link | 已采纳（实施中） | 2026-09-08 |
+| [ADR-076](./ADR-076-routine-definition-trigger-and-legacy-reminder-retirement.md) | Routine Definition、Trigger Algebra 与 Legacy Reminder 退役 | 已采纳（待实施） | 2026-09-08 |
+| [ADR-077](./ADR-077-routine-occurrence-interaction-and-reliability-boundary.md) | Routine Occurrence、Interaction 与 Reliability Boundary | 已采纳（待实施） | 2026-09-08 |
+| [ADR-078](./ADR-078-routine-profile-eligibility-runtime-context-and-overrides.md) | Routine Profile、Eligibility、Runtime Context 与 Temporary Override | 已采纳（待实施） | 2026-09-08 |
+| [ADR-079](./ADR-079-routine-intervention-policy-notification-and-surface-boundary.md) | Routine Intervention Policy、Notification 与 Device Surface 边界 | 已采纳（待实施） | 2026-09-08 |
+
+| [ADR-080](./ADR-080-planner-calendar-range-occupancy-and-conflict-model.md) | Planner Calendar Range、Occupancy 与 Conflict Model | 已采纳（待实施） | 2026-09-08 |
+| [ADR-081](./ADR-081-scheduled-invocation-model-and-legacy-schedule-task-retirement.md) | ScheduledInvocation Model 与 Legacy ScheduleTask 退役 | 已采纳（待实施） | 2026-09-08 |
+| [ADR-082](./ADR-082-scheduler-invocation-attempt-and-runtime-state-machine.md) | Scheduler Invocation Attempt 与 Runtime State Machine | 已采纳（待实施） | 2026-09-08 |
+| [ADR-083](./ADR-083-schedule-scheduler-contract-diagnostics-and-persistence-boundary.md) | Schedule / Scheduler Contract、Diagnostics 与 Persistence Boundary | 已采纳（待实施） | 2026-09-08 |
+| [ADR-084](./ADR-084-notification-fact-and-inbox-lifecycle.md) | Notification Fact 与 Inbox Lifecycle | 已采纳（待实施） | 2026-09-08 |
+| [ADR-085](./ADR-085-notification-workflow-semantics-and-template-retirement.md) | Notification Workflow Semantics 与 Template 退役 | 已采纳（待实施） | 2026-09-08 |
+| [ADR-086](./ADR-086-notification-delivery-plan-projection-and-channel-retirement.md) | Notification DeliveryPlan、Projection 与 Legacy Channel 退役 | 已采纳（待实施） | 2026-09-08 |
+| [ADR-087](./ADR-087-notification-interaction-and-typed-action-intents.md) | Notification Interaction 与 Typed Action Intents | 已采纳（待实施） | 2026-09-08 |
+| [ADR-088](./ADR-088-notification-preference-quiet-hours-realtime-and-operations-boundary.md) | Notification Preference、QuietHours、Realtime 与 Operations Boundary | 已采纳（待实施） | 2026-09-08 |
+| [ADR-089](./ADR-089-knowledge-space-source-binding-and-health-boundaries.md) | KnowledgeSpace、Source Binding 与 Health/Observation Boundary | 已采纳（已实施） | 2026-09-08 |
+| [ADR-090](./ADR-090-stable-knowledge-document-identity.md) | Stable KnowledgeDocument Identity | 已采纳（已实施） | 2026-09-08 |
+| [ADR-091](./ADR-091-knowledge-projection-index-and-operation-boundaries.md) | Knowledge Projection、AI Index 与 Operation Boundary | 已采纳（待实施） | 2026-09-08 |
+| [ADR-092](./ADR-092-settings-hub-and-preference-ownership-boundary.md) | Settings Hub 与 Preference Ownership Boundary | 已采纳（待实施） | 2026-09-08 |
+| [ADR-093](./ADR-093-user-preference-profile-and-product-time-context.md) | User Preference Profile 与 Product Time Context | 已采纳（已实施） | 2026-09-08 |
+| [ADR-094](./ADR-094-device-preference-feature-policy-and-consent-boundary.md) | Device Preference、Feature Policy 与 Consent Boundary | 已采纳（待实施） | 2026-09-08 |
+| [ADR-095](./ADR-095-preference-persistence-sync-migration-and-portability.md) | Preference Persistence、Sync、Migration 与 Portability | 已采纳（待实施） | 2026-09-08 |
+| [ADR-096](./ADR-096-assistant-conversation-shell-and-mastra-runtime-state-boundary.md) | Assistant Conversation Shell 与 Mastra Runtime State Boundary | 已采纳（待实施） | 2026-09-09 |
+| [ADR-097](./ADR-097-ai-provider-connection-secret-and-model-capability-boundary.md) | AI Provider Connection、Secret 与 Model Capability Boundary | 已采纳（待实施） | 2026-09-09 |
+| [ADR-098](./ADR-098-ai-context-knowledge-index-and-owner-contract-boundary.md) | AI Context、Knowledge Index 与 Owner Contract Boundary | 已采纳（待实施） | 2026-09-09 |
+| [ADR-099](./ADR-099-ai-workflow-draft-apply-and-execution-record-boundary.md) | AI Workflow Draft、Apply 与 Execution Record Boundary | 已采纳（待实施） | 2026-09-09 |
+| [ADR-100](./ADR-100-product-time-context-and-timezone-aware-calendar.md) | Product Time Context 与 Timezone-aware Calendar | 已采纳（已实施） | 2026-09-09 |
+| [ADR-101](./ADR-101-product-time-presentation-and-compatibility-surface.md) | Product Time Presentation 与 Compatibility Surface | 已采纳（已实施） | 2026-09-09 |
+| [ADR-102](./ADR-102-label-registry-and-owner-assignment-boundary.md) | Label Registry 与 Owner Assignment Boundary | 已采纳（已实施） | 2026-09-09 |
+| [ADR-103](./ADR-103-label-identity-normalization-time-and-color-contract.md) | Label Identity、Normalization、Time 与 Color Contract | 已采纳（已实施） | 2026-09-09 |
+| [ADR-104](./ADR-104-account-profile-lifecycle-and-cloud-identity-projection.md) | Account Profile、Lifecycle 与 Cloud Identity Projection | 已采纳（待实施） | 2026-09-09 |
+| [ADR-105](./ADR-105-cloud-auth-access-enforcement-and-local-profile-boundary.md) | Cloud Auth、Access Enforcement 与 Local Profile Boundary | 已采纳（待实施） | 2026-09-09 |
+| [ADR-106](./ADR-106-owner-driven-data-portability-v3.md) | Owner-driven Data Portability V3 | 已采纳（待实施） | 2026-09-09 |
+| [ADR-107](./ADR-107-legacy-editor-persistence-retirement.md) | Legacy Editor Persistence Retirement | 已采纳（待实施） | 2026-09-09 |
+| [ADR-108](./ADR-108-dashboard-retirement-and-home-composition.md) | Dashboard Retirement 与 Home Composition | 已采纳（待实施） | 2026-09-09 |
+| [ADR-109](./ADR-109-product-governance-to-knowledge-standards.md) | Product Governance → Knowledge Standards | 已被 ADR-110 取代 | 2026-09-09 |
+| [ADR-110](./ADR-110-governance-permanent-executable-reference-module.md) | Governance 永久可执行参考模块与开发规范工作台 | 已采纳 | 2026-09-09 |
+| [ADR-111](./ADR-111-zero-legacy-data-destructive-cutover-policy.md) | Zero-Legacy-Data Destructive Cutover Policy | 已采纳（立即生效） | 2026-09-09 |
 
 ## 维护规则
 

@@ -12,15 +12,13 @@
  */
 
 import type { PrismaClient } from '@memoflow/database';
+import type { Clock, UserTimeContextPort } from '@memoflow/time';
 // Structural cloud-auth shape (boundary: scope:account must not import scope:authentication libs directly)
 export interface CloudAuthLike {
   revokeAllSessions(identityId: string): Promise<{ revokedSessions: number }>;
   deleteUserData?(identityId: string): Promise<{ deletedRecords: number }>;
 }
-import {
-  createAccountModule,
-  type AccountModuleInstance,
-} from './account.module';
+import { createAccountModule, type AccountModuleInstance } from './account.module';
 import { PrismaAccountRepository } from './adapters/prisma/account-prisma.repository';
 import { PrismaAccountClosureOperationRepository } from './adapters/prisma/account-closure-operation-prisma.repository';
 import { AccountClosureOutboxEventPublisher } from './adapters/outbox/account-closure-outbox-event-publisher';
@@ -44,6 +42,8 @@ export interface CreateAccountPrismaModuleOptions {
   readonly revocationPort?: CloudAuthRevocationPort;
   readonly eventPublisher?: AccountClosureEventPublisher;
   readonly cloudAuth?: CloudAuthLike;
+  readonly clock: Clock;
+  readonly userTimeContextPort: UserTimeContextPort;
 }
 
 /**
@@ -97,12 +97,14 @@ export function createAccountPrismaRepository(db: PrismaClient) {
  */
 export function createAccountPrismaRepositories(deps: {
   readonly db: PrismaClient;
+  readonly clock: Clock;
+  readonly userTimeContextPort: UserTimeContextPort;
   readonly cloudAuth?: CloudAuthLike;
 }): AccountPrismaRepositorySet {
   return {
     accountRepository: createAccountPrismaRepository(deps.db),
     closureOperationRepository: new PrismaAccountClosureOperationRepository(deps.db),
-    revocationPort: new PrismaCloudAuthRevocationAdapter(deps.db, deps.cloudAuth),
+    revocationPort: new PrismaCloudAuthRevocationAdapter(deps.db, deps.clock, deps.cloudAuth),
     eventPublisher: new AccountClosureOutboxEventPublisher(deps.db),
     auditRepository: new PrismaOperationAuditRepository(deps.db),
   };
@@ -110,15 +112,19 @@ export function createAccountPrismaRepositories(deps: {
 
 export function createAccountPrismaModule(
   db: PrismaClient,
-  options: CreateAccountPrismaModuleOptions = {},
+  options: CreateAccountPrismaModuleOptions,
 ): AccountModuleInstance {
   const repositories = createAccountPrismaRepositories({
     db,
+    clock: options.clock,
+    userTimeContextPort: options.userTimeContextPort,
     cloudAuth: options.cloudAuth,
   });
 
   return createAccountModule({
     accountRepository: repositories.accountRepository,
+    clock: options.clock,
+    userTimeContextPort: options.userTimeContextPort,
     closureOperationRepository:
       options.closureOperationRepository ?? repositories.closureOperationRepository,
     revocationPort: options.revocationPort ?? repositories.revocationPort,

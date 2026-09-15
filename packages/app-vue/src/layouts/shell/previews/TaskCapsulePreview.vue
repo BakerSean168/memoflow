@@ -6,8 +6,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useTask } from '../../../modules/task/composables/useTask';
-import type { TaskInstanceClientDTO, TaskTemplateClientDTO } from '@memoflow/contracts/task';
-import { formatHHmmParts } from '../../../shared/utils/format-hhmm-parts';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
 import { startOfDayMs, endOfDayMs, isTodayMs } from '../../../shared/utils/product-time';
 
 const RECENT_LIMIT = 3;
@@ -34,10 +33,8 @@ function getTodayRange() {
   };
 }
 
-const todayInstances = computed<TaskInstanceClientDTO[]>(() => {
-  return (task.instances.value ?? []).filter((inst) =>
-    isTodayMs(inst.instanceDate),
-  );
+const todayInstances = computed<TaskOccurrenceClientDTO[]>(() => {
+  return (task.instances.value ?? []).filter((inst) => isTodayMs(inst.dueAt));
 });
 
 const pending = computed(() =>
@@ -51,30 +48,23 @@ const completedCount = computed(
 );
 
 const templateMap = computed(() => {
-  const map = new Map<string, TaskTemplateClientDTO>();
+  const map = new Map<string, TaskPlanClientDTO>();
   for (const tpl of task.templates.value ?? []) {
     map.set(String(tpl.id), tpl);
   }
   return map;
 });
 
-/** Residual 1297: minutes-of-day HH:mm dual retired onto formatHHmmParts sole. */
-function timeLabel(inst: TaskInstanceClientDTO): string {
-  const fmt = (minutes: number) => {
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
-    return formatHHmmParts(h, m);
-  };
-  const tr = inst.timeConfig?.timeRange;
-  if (tr && typeof tr.start === 'number') return fmt(tr.start);
-  const tp = inst.timeConfig?.timePoint;
-  if (typeof tp === 'number') return fmt(tp);
+function timeLabel(inst: TaskOccurrenceClientDTO): string {
+  const timing = inst.scheduleSnapshot.timing;
+  if (timing.kind === 'At') return timing.time;
+  if (timing.kind === 'Window') return timing.start;
   return t('shell.preview.allDay');
 }
 
-function titleOf(inst: TaskInstanceClientDTO): string {
-  const tpl = templateMap.value.get(String(inst.templateId));
-  return tpl?.name || String(inst.templateId);
+function titleOf(inst: TaskOccurrenceClientDTO): string {
+  const plan = templateMap.value.get(String(inst.planId));
+  return plan?.name || String(inst.planId);
 }
 
 async function load(force = false) {
@@ -110,13 +100,22 @@ onMounted(() => {
       </span>
     </div>
 
-    <div v-if="isLoading && pending.length === 0" class="space-y-2 py-2" data-testid="task-capsule-loading">
+    <div
+      v-if="isLoading && pending.length === 0"
+      class="space-y-2 py-2"
+      data-testid="task-capsule-loading"
+    >
       <div v-for="i in 3" :key="i" class="h-8 animate-pulse rounded bg-muted" />
     </div>
 
     <div v-else-if="localError" class="space-y-2 py-3 text-center" data-testid="task-capsule-error">
       <p class="text-[11px] text-muted-foreground">{{ localError }}</p>
-      <button type="button" class="text-[11px] font-medium text-primary" data-testid="task-capsule-retry" @click="load(true)">
+      <button
+        type="button"
+        class="text-[11px] font-medium text-primary"
+        data-testid="task-capsule-retry"
+        @click="load(true)"
+      >
         {{ t('common.retry') }}
       </button>
     </div>
@@ -137,7 +136,9 @@ onMounted(() => {
           :data-testid="`task-capsule-item-${inst.id}`"
           @click="$emit('select', String(inst.id))"
         >
-          <span class="shrink-0 font-mono text-[10px] text-muted-foreground">{{ timeLabel(inst) }}</span>
+          <span class="shrink-0 font-mono text-[10px] text-muted-foreground">{{
+            timeLabel(inst)
+          }}</span>
           <span class="min-w-0 flex-1 truncate text-[11px] font-medium">{{ titleOf(inst) }}</span>
         </button>
       </li>

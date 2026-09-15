@@ -22,11 +22,11 @@ describe('notification settings preference surface', () => {
   );
 
   it('settings mounts module channel card and loads preferences on mount', () => {
-    expect(settings).toContain('data-testid="notification-module-channels-card"');
+    expect(settings).toContain('data-testid="notification-delivery-card"');
     expect(settings).toContain('useNotificationPreferences');
     expect(settings).toContain('loadPreferences');
-    expect(settings).toContain('setModuleChannel');
-    expect(settings).toContain('onMounted(() => {\n  void loadPreferences();\n})');
+    expect(settings).toContain('setGlobalChannel');
+    expect(settings).toContain('void loadPreferences();');
   });
 
   it('composable calls service.getPreferences/updatePreferences without identity args', () => {

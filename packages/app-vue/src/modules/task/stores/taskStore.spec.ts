@@ -1,16 +1,16 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { TaskInstanceClientDTO } from '@memoflow/contracts/task';
-import type { TaskInstanceId, TaskTemplateId } from '@memoflow/contracts/primitives';
+import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceId, TaskPlanId } from '@memoflow/contracts/primitives';
 import { createTestPinia } from '@memoflow/test-utils';
 import { useTaskStore } from './task-store';
 
-function createInstance(overrides: Partial<TaskInstanceClientDTO> = {}): TaskInstanceClientDTO {
+function createInstance(overrides: Partial<TaskOccurrenceClientDTO> = {}): TaskOccurrenceClientDTO {
   return {
-    id: 'instance-1' as TaskInstanceId,
-    templateId: 'template-1' as TaskTemplateId,
+    id: 'instance-1' as TaskOccurrenceId,
+    templateId: 'template-1' as TaskPlanId,
     status: 'Pending',
     ...overrides,
-  } as TaskInstanceClientDTO;
+  } as TaskOccurrenceClientDTO;
 }
 
 describe('useTaskStore (instances/currentInstance + UI state; templates in query cache)', () => {
@@ -28,7 +28,7 @@ describe('useTaskStore (instances/currentInstance + UI state; templates in query
 
     store.setInstances([instance]);
     store.setCurrentInstance(instance);
-    store.addInstance(createInstance({ id: 'instance-2' as TaskInstanceClientDTO['id'] }));
+    store.addInstance(createInstance({ id: 'instance-2' as TaskOccurrenceClientDTO['id'] }));
     store.updateInstance(updated);
     store.setLoading(true);
     store.setError('failed');

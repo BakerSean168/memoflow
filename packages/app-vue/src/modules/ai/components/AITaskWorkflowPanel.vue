@@ -53,7 +53,7 @@
       </p>
       <p
         v-for="(failure, index) in taskWorkflowRun.suspension.failures"
-        :key="`${failure.operation}-${failure.index ?? 'root'}-${failure.code}-${index}`"
+        :key="`${failure.operation}-${failure.code}-${index}`"
         class="text-sm text-destructive"
       >
         {{ failure.operation }} · {{ publicFailureMessage(failure) }}
@@ -73,7 +73,7 @@
     >
       <p class="text-sm text-muted-foreground">{{ taskWorkflowRun.result.status }}</p>
       <p class="text-sm text-muted-foreground">
-        {{ taskWorkflowRun.result.taskTemplateId || '—' }} ·
+        {{ taskWorkflowRun.result.taskPlanId || '—' }} ·
         {{ taskWorkflowRun.result.taskIds.length }} tasks
       </p>
     </div>

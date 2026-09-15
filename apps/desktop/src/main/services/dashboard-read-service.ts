@@ -1,14 +1,15 @@
 import {
   getDashboardData,
   toDashboardGoalRecord,
-  toDashboardTaskInstanceRecord,
-  type DashboardTaskTemplateRecord,
+  toDashboardTaskOccurrenceRecord,
+  type DashboardTaskPlanRecord,
   type DashboardScheduleRecord,
   type DashboardReminderRecord,
 } from '@memoflow/dashboard';
 import type { DashboardData } from '@memoflow/contracts/dashboard';
+import type { UserTimeContextPort } from '@memoflow/time';
 import type { IGoalRepository } from '@memoflow/goal';
-import type { ITaskInstanceRepository, ITaskTemplateRepository } from '@memoflow/task';
+import type { ITaskOccurrenceRepository, ITaskPlanRepository } from '@memoflow/task';
 import type { IScheduleRepository } from '@memoflow/schedule';
 import type { IScheduleTaskRepository } from '@memoflow/scheduler';
 import type { IReminderTemplateRepository } from '@memoflow/reminder';
@@ -31,25 +32,26 @@ const logger = createLogger('DashboardReadService');
  * 实例，通过显式注入而非包级全局读取。`scheduleTaskRepository` 属于该视图，使
  * 兄弟消费者（analytics）共享同一个 instance-bound schedule task 仓储。
  */
-export interface DashboardRepositoryDependencies {
+export interface DashboardReadDependencies {
   readonly goalRepository: IGoalRepository;
-  readonly taskTemplateRepository: ITaskTemplateRepository;
-  readonly taskInstanceRepository: ITaskInstanceRepository;
+  readonly taskPlanRepository: ITaskPlanRepository;
+  readonly taskOccurrenceRepository: ITaskOccurrenceRepository;
   readonly scheduleRepository: IScheduleRepository;
   readonly scheduleTaskRepository: IScheduleTaskRepository;
   readonly reminderTemplateRepository: IReminderTemplateRepository;
   readonly notificationRepository: INotificationRepository;
+  readonly userTimeContextPort: UserTimeContextPort;
 }
 
-/** Soft residual 1156: dual toDashboardTaskInstanceRecord retired onto @memoflow/dashboard sole. */
+/** Soft residual 1156: dual toDashboardTaskOccurrenceRecord retired onto @memoflow/dashboard sole. */
 
-function toTaskTemplateRecord(template: {
+function toTaskPlanRecord(template: {
   id: { toString(): string } | string;
   title: string;
   status: string;
   deletedAt: number | null;
   createdAt: number;
-}): DashboardTaskTemplateRecord {
+}): DashboardTaskPlanRecord {
   return {
     id: String(template.id),
     title: template.title,
@@ -120,16 +122,18 @@ function toReminderRecord(reminder: {
 
 export async function getDesktopDashboardData(
   identityId: string,
-  dependencies: DashboardRepositoryDependencies,
+  dependencies: DashboardReadDependencies,
 ): Promise<DashboardData> {
   const {
     goalRepository,
-    taskTemplateRepository,
-    taskInstanceRepository,
+    taskPlanRepository,
+    taskOccurrenceRepository,
     scheduleRepository,
     reminderTemplateRepository,
     notificationRepository,
+    userTimeContextPort,
   } = dependencies;
+  const timeContext = await userTimeContextPort.getUserTimeContext(identityId);
 
   const data = await getDashboardData(identityId, {
     listGoals: async (id) =>
@@ -139,10 +143,12 @@ export async function getDesktopDashboardData(
           systemView: 'active',
         })
       ).map((goal) => toDashboardGoalRecord(goal.toClientDTO(true))),
-    listTaskTemplates: async (id) =>
-      (await taskTemplateRepository.findByIdentityId(id)).map(toTaskTemplateRecord),
-    listTaskInstances: async (id) =>
-      (await taskInstanceRepository.findByIdentityId(id)).map(toDashboardTaskInstanceRecord),
+    listTaskPlans: async (id) =>
+      (await taskPlanRepository.findByIdentityId(id)).map(toTaskPlanRecord),
+    listTaskOccurrences: async (id) =>
+      (await taskOccurrenceRepository.findByIdentityId(id)).map((instance) =>
+        toDashboardTaskOccurrenceRecord(instance.toClientDTOAt(timeContext)),
+      ),
     listSchedules: async (id) =>
       (await scheduleRepository.findByIdentityId(id)).map(toScheduleRecord),
     listUpcomingReminders: async (id, beforeTime) =>
@@ -150,7 +156,7 @@ export async function getDesktopDashboardData(
         toReminderRecord,
       ),
     countUnreadNotifications: (id) => notificationRepository.countUnread(id),
-  });
+  }, timeContext);
 
   logger.debug('Dashboard data aggregated', {
     identityId,

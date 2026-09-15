@@ -8,21 +8,18 @@
  *
  * Residual 1055: createComposableHandleError toast report path
  * (profile/settings/close setError+toast duals retired).
- * Soft residual / Residual 1075 keep-boundary: checkAvailability toast-only
- * (no setError; not createComposableHandleError dual body).
  */
 
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { toast } from 'vue-sonner';
 import { useI18n } from 'vue-i18n';
 import type {
   UpdateAccountReq,
-  CheckAvailabilityReq,
   CloseAccountReq,
-  UpdateAccountSettingsReq,
-  AccountClientDTO,
+  CloudIdentitySummary,
 } from '@memoflow/contracts/account';
 import { useAccountStore } from '../stores/account-store';
+import { useAuthenticationStore } from '../../authentication/stores/authentication-store';
 import { ACCOUNT_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import { createComposableHandleError } from '../../../shared/utils/create-composable-handle-error';
@@ -30,8 +27,10 @@ import { translateResultError } from '../../../shared/utils/translate-result-err
 
 export function useAccount() {
   const accountStore = useAccountStore();
+  const authStore = useAuthenticationStore();
   const accountService = useStrictInject(ACCOUNT_SERVICE_KEY, 'AccountService');
   const { t } = useI18n();
+  const viewCloudIdentity = ref<CloudIdentitySummary | null>(null);
 
   // ========== Computed State ==========
   const currentAccount = computed(() => accountStore.currentAccount);
@@ -39,10 +38,10 @@ export function useAccount() {
   const error = computed(() => accountStore.error);
   const nickname = computed(() => accountStore.getNickname);
   const avatarUrl = computed(() => accountStore.getAvatarUrl);
-  const email = computed(() => accountStore.getEmail);
-  const isGuest = computed(
-    () => accountStore.currentAccount?.email.address.endsWith('@local.memoflow') === true,
-  );
+  const loginIdentity = computed(() => viewCloudIdentity.value ?? authStore.currentIdentity);
+  const email = computed(() => loginIdentity.value?.email ?? null);
+  const isEmailVerified = computed(() => loginIdentity.value?.emailVerified ?? false);
+  const isGuest = computed(() => loginIdentity.value === null);
 
   function makeAccountHandleError(toastKey: string) {
     return createComposableHandleError({
@@ -63,7 +62,8 @@ export function useAccount() {
     const result = await accountService.getMyProfile();
     accountStore.setLoading(false);
     if (result.ok) {
-      accountStore.setCurrentAccount(result.data.toDTO());
+      accountStore.setCurrentAccount(result.data.account.toDTO());
+      viewCloudIdentity.value = result.data.cloudIdentity;
       return true;
     } else {
       handleLoadError(result.error, 'account.toast.loadProfileFailed');
@@ -77,48 +77,14 @@ export function useAccount() {
     const result = await accountService.updateMyProfile(req);
     accountStore.setLoading(false);
     if (result.ok) {
-      accountStore.setCurrentAccount(result.data.toDTO());
+      accountStore.setCurrentAccount(result.data.account.toDTO());
+      viewCloudIdentity.value = result.data.cloudIdentity;
       toast.success(t('account.toast.profileUpdated'));
       return true;
     } else {
       handleUpdateError(result.error, 'account.toast.updateProfileFailed');
       return false;
     }
-  }
-
-  async function checkAvailability(req: CheckAvailabilityReq): Promise<boolean> {
-    const result = await accountService.checkAvailability(req);
-    if (result.ok) {
-      return result.data.available;
-    } else {
-      // Residual 1075 keep-boundary: toast-only (no store.setError) vs handleError sole.
-      const message = translateResultError(result.error, t, {
-        fallbackKey: 'account.toast.checkAvailabilityFailed',
-      });
-      toast.error(t('account.toast.checkFailed'), { description: message });
-      return false;
-    }
-  }
-
-  async function updateSettings(req: UpdateAccountSettingsReq): Promise<boolean> {
-    accountStore.setLoading(true);
-    accountStore.setError(null);
-    const result = await accountService.updateSettings(req);
-    accountStore.setLoading(false);
-    if (result.ok) {
-      const current = accountStore.currentAccount;
-      if (current) {
-        accountStore.setCurrentAccount({
-          ...current,
-          settings: result.data,
-        });
-      }
-      toast.success(t('account.toast.settingsUpdated'));
-      return true;
-    }
-
-    handleUpdateError(result.error, 'account.toast.updateFailed');
-    return false;
   }
 
   async function closeAccount(req: CloseAccountReq): Promise<boolean> {
@@ -131,6 +97,7 @@ export function useAccount() {
     accountStore.setLoading(false);
     if (result.ok) {
       accountStore.clearCurrentAccount();
+      viewCloudIdentity.value = null;
       toast.success(t('account.toast.accountClosed'));
       return true;
     } else {
@@ -147,13 +114,12 @@ export function useAccount() {
     nickname,
     avatarUrl,
     email,
+    isEmailVerified,
     isGuest,
 
     // Actions
     loadMyProfile,
     updateMyProfile,
-    checkAvailability,
-    updateSettings,
     closeAccount,
   };
 }

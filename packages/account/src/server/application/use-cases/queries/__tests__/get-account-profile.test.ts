@@ -5,13 +5,18 @@ import { Account } from '../../../../domain/aggregates/account';
 import { AccountStatus } from '@memoflow/contracts/account';
 import { IdentityId } from '@memoflow/domain-shared/shared';
 import { GetAccountProfileUseCase } from '../get-account-profile.use-case';
+import { asInstant } from '@memoflow/time';
 
 describe('GetAccountProfileUseCase', () => {
   let repo: ReturnType<typeof createMockRepo<IAccountRepository>>;
   let useCase: GetAccountProfileUseCase;
 
-  function anAccount(email = 'get@example.com') {
-    return Account.create({ id: IdentityId.generate(), email });
+  function anAccount(nicknameSeed = 'Get User') {
+    return Account.create({
+      id: IdentityId.generate(),
+      nicknameSeed,
+      now: asInstant(1_700_000_000_000),
+    });
   }
 
   beforeEach(() => {
@@ -29,7 +34,8 @@ describe('GetAccountProfileUseCase', () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.data).not.toBeNull();
-      expect(result.data!.email.address).toBe('get@example.com');
+      expect(result.data!.profile.nickname).toBe('Get User');
+      expect(result.data).not.toHaveProperty('email');
       expect(result.data!.status).toBe(AccountStatus.Active);
     }
   });

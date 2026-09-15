@@ -225,6 +225,7 @@ class StubAnalyticsReadPort implements IAnalyticsReadPort {
   public readonly buildContext = vi.fn<
     (identityId: string, question: string) => Promise<AnalyticsQueryContext>
   >(async () => ({
+    timeContext: { timeZone: 'UTC' as never, weekStartsOn: 1 },
     dashboard: { stats: { activeGoals: 4 } },
     taskDashboard: { summary: { overdue: 2 } },
     goals: [],

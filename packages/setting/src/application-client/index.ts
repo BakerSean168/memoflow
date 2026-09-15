@@ -1,85 +1,64 @@
-/**
- * Setting Application Client Layer
- *
- * Provides the client-side facade over any transport adapter (HTTP / IPC).
- * Consumers should depend on `ISettingApiClient` (the port) and inject a
- * concrete adapter from `infrastructure-client`.
- */
-
+/** Canonical Setting application client facade. */
 import type { Result } from '@memoflow/contracts/result';
-import type { UserSettingClientDTO, PreferenceCategory } from '@memoflow/contracts/setting';
+import type {
+  PreferenceMutationReceipt,
+  PreferenceNamespace,
+  PreferenceNamespacePatch,
+  PreferenceNamespaceResponse,
+  ResetUserPreferencesResponse,
+  UserPreferenceProfile,
+  ExportSettingsRes,
+  ImportSettingsRes,
+} from '@memoflow/contracts/setting';
 import type { ISettingApiClient } from './ports/setting-api-client.port';
 
-// Re-export the port so consumers can import from the application layer.
 export type { ISettingApiClient } from './ports/setting-api-client.port';
-
-// ─── Client Application Port ────────────────────────────────────────────────
-
-/**
- * Application-facing client port.
- * Identical to ISettingApiClient (importSettings options included).
- */
 export type SettingClientPort = ISettingApiClient;
 
-// ─── Client Service ──────────────────────────────────────────────────────────
-
-/**
- * Setting Client Service — thin facade that delegates to an `ISettingApiClient`.
- *
- * Returns `Result<T>` (no throwing) so the caller keeps full control.
- */
 export class SettingClientService implements ISettingApiClient {
   constructor(private readonly apiClient: ISettingApiClient) {
-    this.getUserSettings = this.getUserSettings.bind(this);
-    this.getUserSettingDefaults = this.getUserSettingDefaults.bind(this);
-    this.patchCategory = this.patchCategory.bind(this);
-    this.resetUserSettings = this.resetUserSettings.bind(this);
+    this.getPreferenceProfile = this.getPreferenceProfile.bind(this);
+    this.getPreferenceNamespace = this.getPreferenceNamespace.bind(this);
+    this.patchPreferenceNamespace = this.patchPreferenceNamespace.bind(this);
+    this.resetPreferenceNamespace = this.resetPreferenceNamespace.bind(this);
+    this.resetUserPreferences = this.resetUserPreferences.bind(this);
     this.exportSettings = this.exportSettings.bind(this);
     this.importSettings = this.importSettings.bind(this);
   }
 
-  getUserSettings(): Promise<Result<UserSettingClientDTO>> {
-    return this.apiClient.getUserSettings();
+  getPreferenceProfile(): Promise<Result<UserPreferenceProfile>> {
+    return this.apiClient.getPreferenceProfile();
   }
-
-  getUserSettingDefaults(): Promise<Result<UserSettingClientDTO>> {
-    return this.apiClient.getUserSettingDefaults();
+  getPreferenceNamespace(namespace: PreferenceNamespace): Promise<Result<PreferenceNamespaceResponse>> {
+    return this.apiClient.getPreferenceNamespace(namespace);
   }
-
-  patchCategory(
-    category: PreferenceCategory,
-    patch: Record<string, unknown>,
-  ): Promise<Result<UserSettingClientDTO>> {
-    return this.apiClient.patchCategory(category, patch);
+  patchPreferenceNamespace<N extends PreferenceNamespace>(
+    namespace: N,
+    patch: PreferenceNamespacePatch<N>,
+    expectedRevision?: number,
+  ): Promise<Result<PreferenceMutationReceipt>> {
+    return this.apiClient.patchPreferenceNamespace(namespace, patch, expectedRevision);
   }
-
-  resetUserSettings(category?: string): Promise<Result<UserSettingClientDTO>> {
-    return this.apiClient.resetUserSettings(category);
+  resetPreferenceNamespace(
+    namespace: PreferenceNamespace,
+    expectedRevision?: number,
+  ): Promise<Result<PreferenceMutationReceipt>> {
+    return this.apiClient.resetPreferenceNamespace(namespace, expectedRevision);
   }
-
-  exportSettings(): Promise<Result<string>> {
+  resetUserPreferences(
+    expectedRevisions?: Partial<Record<PreferenceNamespace, number>>,
+  ): Promise<Result<ResetUserPreferencesResponse>> {
+    return this.apiClient.resetUserPreferences(expectedRevisions);
+  }
+  exportSettings(): Promise<Result<ExportSettingsRes>> {
     return this.apiClient.exportSettings();
   }
-
-  importSettings(
-    data: string,
-    options?: { merge?: boolean },
-  ): Promise<Result<UserSettingClientDTO>> {
-    return this.apiClient.importSettings(data, options);
+  importSettings(data: string): Promise<Result<ImportSettingsRes>> {
+    return this.apiClient.importSettings(data);
   }
 }
 
-// ─── Factory ─────────────────────────────────────────────────────────────────
-
-/**
- * Create a `SettingClientService` from any transport adapter.
- *
- * ```ts
- * const client = createSettingClientService(new SettingHttpAdapter(httpClient));
- * ```
- */
 export function createSettingClientService(apiClient: ISettingApiClient): SettingClientService {
   return new SettingClientService(apiClient);
 }
-
 export { createSettingServiceFromHttpClient } from './setting-http-service-factory';

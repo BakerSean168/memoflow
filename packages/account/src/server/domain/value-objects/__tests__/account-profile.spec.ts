@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { AccountProfile } from '../account-profile';
 import { GenderType } from '../gender-type';
 import type { AccountProfileDTO } from '@memoflow/contracts/account';
+import { requireYmd } from '@memoflow/contracts/primitives';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -61,29 +62,38 @@ describe('AccountProfile', () => {
         'Invalid gender type',
       );
     });
+
+    it('should reject an impossible birthday instead of coercing an epoch/date', () => {
+      expect(() =>
+        AccountProfile.create(
+          aProfileDTO({ birthday: '2025-02-29' as AccountProfileDTO['birthday'] }),
+        ),
+      ).toThrow('Invalid calendar date');
+    });
   });
 
   // =========================================================================
   // createDefault
   // =========================================================================
   describe('createDefault', () => {
-    it('should derive nickname from email local part', () => {
-      const profile = AccountProfile.createDefault('john.doe@example.com');
-      expect(profile.nickname).toBe('john.doe');
+    it('uses a product display-name seed directly', () => {
+      const profile = AccountProfile.createDefault('John Doe');
+      expect(profile.nickname).toBe('John Doe');
     });
 
-    it('should truncate long email local part to 10 characters', () => {
-      const profile = AccountProfile.createDefault('areallylongemail@example.com');
-      expect(profile.nickname).toBe('areallylon');
+    it('truncates a long display-name seed to the Account nickname limit', () => {
+      const profile = AccountProfile.createDefault('A'.repeat(30));
+      expect(profile.nickname).toBe('A'.repeat(20));
     });
 
-    it('should set default gender as PreferNotToSay', () => {
-      const profile = AccountProfile.createDefault('test@example.com');
+    it('uses a neutral fallback for an unusably short seed', () => {
+      const profile = AccountProfile.createDefault('A');
+      expect(profile.nickname).toBe('User');
+    });
+
+    it('sets default gender and optional fields without auth-derived data', () => {
+      const profile = AccountProfile.createDefault('Test User');
       expect(profile.gender).toBe(GenderType.PreferNotToSay);
-    });
-
-    it('should set all optional fields to null', () => {
-      const profile = AccountProfile.createDefault('test@example.com');
       expect(profile.realName).toBeNull();
       expect(profile.avatarUrl).toBeNull();
       expect(profile.bio).toBeNull();
@@ -155,15 +165,15 @@ describe('AccountProfile', () => {
   describe('setBirthday', () => {
     it('should return a new profile with birthday set as Ymd', () => {
       const profile = AccountProfile.create(aProfileDTO());
-      const pastDate = new Date(2000, 0, 1).getTime();
-      const updated = profile.setBirthday(pastDate);
+      const updated = profile.setBirthday(requireYmd('2000-01-01'), requireYmd('2026-09-09'));
       expect(updated.birthday).toBe('2000-01-01');
     });
 
     it('should reject future birthday', () => {
       const profile = AccountProfile.create(aProfileDTO());
-      const futureDate = Date.now() + 86400000;
-      expect(() => profile.setBirthday(futureDate)).toThrow('Birthday cannot be in the future');
+      expect(() => profile.setBirthday(requireYmd('2026-09-10'), requireYmd('2026-09-09'))).toThrow(
+        'Birthday cannot be in the future',
+      );
     });
   });
 
@@ -182,19 +192,16 @@ describe('AccountProfile', () => {
     });
   });
 
-  describe('getAge', () => {
+  describe('getAgeAt', () => {
     it('should return null when birthday is not set', () => {
       const profile = AccountProfile.create(aProfileDTO());
-      expect(profile.getAge()).toBeNull();
+      expect(profile.getAgeAt(requireYmd('2026-09-09'))).toBeNull();
     });
 
     it('should calculate age correctly', () => {
-      const twentyYearsAgo = new Date();
-      twentyYearsAgo.setFullYear(twentyYearsAgo.getFullYear() - 20);
-      twentyYearsAgo.setMonth(0, 1); // Jan 1
-      const profile = AccountProfile.create(aProfileDTO({ birthday: twentyYearsAgo.getTime() }));
-      expect(profile.getAge()).toBeGreaterThanOrEqual(19);
-      expect(profile.getAge()).toBeLessThanOrEqual(20);
+      const profile = AccountProfile.create(aProfileDTO({ birthday: requireYmd('2006-09-10') }));
+      expect(profile.getAgeAt(requireYmd('2026-09-09'))).toBe(19);
+      expect(profile.getAgeAt(requireYmd('2026-09-10'))).toBe(20);
     });
   });
 

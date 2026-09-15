@@ -96,16 +96,12 @@ export const AI_PROVIDER_TEMPLATES: AIProviderTemplate[] = [
   },
 ];
 
-/**
- * Residual 1186 keep-boundary: AI provider getTemplateById — AIProviderTemplate catalog lookup.
- * Finds in AI_PROVIDER_TEMPLATES (providerType/baseUrl/model fields).
- * Soft residual 1186: goal getTemplateById returns GoalTemplate OKR catalog (no force-merge).
- */
-export function getTemplateById(id: string): AIProviderTemplate | undefined {
+/** AI provider template lookup. Goal product templates were retired by GOAL-7210. */
+export function getPlanById(id: string): AIProviderTemplate | undefined {
   return AI_PROVIDER_TEMPLATES.find((template) => template.id === id);
 }
 
-export function getTemplatesByType(
+export function getPlansByType(
   type: typeof AIProviderType.OpenAICompatible,
 ): AIProviderTemplate[] {
   return AI_PROVIDER_TEMPLATES.filter((template) => template.providerType === type);

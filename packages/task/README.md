@@ -40,10 +40,10 @@ packages/task/src/
 
 ## 关键收敛点
 
-- 具体 `*Repository` class（`TaskTemplatePrismaRepository`、`PowerSyncTaskInstanceRepository` 等）是内部实现，不通过 root / api / electron 公开导出
+- 具体 `*Repository` class（`TaskPlanPrismaRepository`、`PowerSyncTaskOccurrenceRepository` 等）是内部实现，不通过 root / api / electron 公开导出
 - `createTaskPrismaModule` / `createTaskPowerSyncModule` 是包内 convenience roots（测试与 rollback 用），不是宿主组合入口
-- Task -> Goal outbox runtime 由 host 在提供 `goalProgressHandler` 时构造（API 用 `createTaskPrismaGoalOutboxRuntime`，Desktop 用 `createTaskPowerSyncGoalOutboxRuntime`），dispatch store 随之是 Prisma / PowerSync；Task->Goal read port（`PrismaTaskBindingReadPort` / `PowerSyncTaskBindingReadPort`）由 Task 包暴露给宿主
-- Task 路由固定挂载 `/task-templates`、`/task-instances`、`/tasks`，无自定义 prefix
+- Task -> Goal outbox runtime 由 host 在提供 `goalProgressHandler` 时构造（API 用 `createTaskPrismaGoalOutboxRuntime`，Desktop 用 `createTaskPowerSyncGoalOutboxRuntime`），dispatch store 随之是 Prisma / PowerSync；`PrismaTaskBindingReadPort` / `PowerSyncTaskBindingReadPort` 同时实现 Goal 删除依赖检查与 Task-owned `TaskGoalContextReadPort`，对外提供 `listTasksByGoal`、Goal+KR owner-scoped 查询和 bounded context summary，不允许 Goal 直接读取 Task repository
+- Task 路由固定挂载 `/task-plans`、`/task-occurrences`、`/tasks`，无自定义 prefix
 
 ## Composition ownership
 

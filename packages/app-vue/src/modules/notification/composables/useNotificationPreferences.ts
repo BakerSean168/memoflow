@@ -28,11 +28,12 @@ export const NOTIFICATION_PREFERENCE_MODULES = [
 
 export type NotificationPreferenceModule = (typeof NOTIFICATION_PREFERENCE_MODULES)[number];
 
-export type PreferenceChannelFlag = 'inApp' | 'push';
+export type PreferenceChannelFlag = 'inApp' | 'push' | 'email';
 
 const CHANNEL_FLAG_TO_TYPE: Record<PreferenceChannelFlag, NotificationChannelType> = {
   inApp: 'InApp',
   push: 'Push',
+  email: 'Email',
 };
 
 function toPreferenceErrorMessage(
@@ -64,6 +65,10 @@ export function useNotificationPreferences() {
     const workflowValue = preference.value?.workflowOverrides?.[workflowKey]?.[type];
     if (workflowValue !== undefined) return workflowValue;
     return preference.value?.globalChannels?.[type] ?? true;
+  }
+
+  function hasGlobalChannel(flag: PreferenceChannelFlag): boolean {
+    return preference.value?.globalChannels?.[CHANNEL_FLAG_TO_TYPE[flag]] ?? true;
   }
 
   async function loadPreferences(): Promise<void> {
@@ -124,6 +129,12 @@ export function useNotificationPreferences() {
     });
   }
 
+  function setGlobalChannel(flag: PreferenceChannelFlag, enabled: boolean): Promise<boolean> {
+    return updatePreferences({
+      globalChannels: { [CHANNEL_FLAG_TO_TYPE[flag]]: enabled },
+    });
+  }
+
   return {
     preference,
     settings,
@@ -132,8 +143,10 @@ export function useNotificationPreferences() {
     error,
     modules: NOTIFICATION_PREFERENCE_MODULES,
     hasChannel,
+    hasGlobalChannel,
     loadPreferences,
     updatePreferences,
     setModuleChannel,
+    setGlobalChannel,
   };
 }

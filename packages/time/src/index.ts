@@ -1,7 +1,8 @@
 /**
  * @memoflow/time — Product Time Facade (ADR-037)
  *
- * Business and UI import from here. date-fns is confined to `engine/`.
+ * Business and UI import from here. Calendar/wall-clock semantics always require
+ * an explicit TimeContext; date-fns is confined to `engine/`.
  */
 
 export type {
@@ -10,22 +11,27 @@ export type {
   Ymd,
   Hm,
   Clock,
-  TimeStyle,
-  PartialTimeStyle,
+  PartialTimePresentationStyle,
+  TimeContext,
+  UserTimeContext,
+  UserTimeContextPort,
+  TimePresentationStyle,
+  TimeDateStyle,
+  TimeHourStyle,
+  Weekday,
   TimeEngine,
   OnInvalid,
   LocaleId,
   TimeZoneId,
-  TimeZonePolicy,
+  TimeDisplaySlot,
 } from './types';
 
 export {
   createTimeFacade,
-  defaultTime,
   createSystemClock,
   createFixedClock,
-  DEFAULT_TIME_STYLE,
-  mergeTimeStyle,
+  DEFAULT_TIME_PRESENTATION_STYLE,
+  mergeTimePresentationStyle,
   type TimeFacade,
   type TimeFacadeOptions,
 } from './facade';
@@ -38,7 +44,6 @@ export {
   formatDurationParts,
   type DurationParts,
 } from './format/duration';
-export type { TimeDisplaySlot } from './types';
 export type { InputApi } from './input/input';
 export type { CalendarApi } from './calendar/calendar';
 
@@ -62,26 +67,30 @@ export type { TimeZoneSource } from './timezone/time-zone';
 export {
   createFixedTimeZoneSource,
   createSystemTimeZoneSource,
+  createTimeContext,
   isIanaTimeZoneId,
-  resolveTimeZoneId,
+  parseTimeZoneId,
+  requireTimeZoneId,
 } from './timezone/time-zone';
-export { createDateFnsEngine, combineYmdHmWithTimeZone } from './engine/date-fns-engine';
+export { TimeZoneIdSchema } from '@memoflow/contracts/primitives';
+export { createDateFnsEngine } from './engine/date-fns-engine';
+export {
+  WALL_CLOCK_RESOLUTION_POLICY,
+  addYmdDays,
+  combineYmdHmWithTimeZone,
+  instantToYmdInTimeZone,
+  instantToHmInTimeZone,
+  startOfYmdInTimeZone,
+  type WallClockResolutionPolicy,
+} from './timezone/wall-clock';
 
-// Free-function helpers (thin defaultTime wrappers). Prefer facade.format.* when Style injection is available.
+// Pure helpers only. Context-sensitive date/time formatting belongs on TimeFacade.
 export {
   padTwoDigits,
-  formatLocalHHmm,
-  formatDateToYMD,
   formatHHmmParts,
   formatHour,
   formatDisplayDate,
 } from './free/format-helpers';
-
-export {
-  timeStyleFromPresentationLocale,
-  partialTimeStyleFromLocale,
-  type PresentationLocaleLike,
-} from './style/from-presentation-preference';
 
 export {
   resolveEmptyLabel,

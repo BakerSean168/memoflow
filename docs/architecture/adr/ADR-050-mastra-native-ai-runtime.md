@@ -9,10 +9,12 @@ tags:
   - observability
 description: MemoFlow AI vNext - Mastra-native runtime、单一状态所有权与 TypeScript 模块化单体
 created: 2026-08-20T00:00:00+08:00
-updated: 2026-08-20T00:00:00+08:00
+updated: 2026-09-09T00:00:00+08:00
 ---
 
 # ADR-050: MemoFlow AI vNext — Mastra-native Runtime 与单一状态所有权
+
+> **2026-09-09 后续收敛：** 本 ADR 关于 Mastra 单一 runtime、MemoFlow product truth、owner application port 与 observability/accounting 分离的决策继续有效；Conversation shell、UI durable state、Provider secret/model capability、Context/Knowledge index 与 execution persistence 由 ADR-096～099 进一步收敛。ADR-096～099 不引入第二 runtime。
 
 **状态：** 已采纳  
 **日期：** 2026-08-20  

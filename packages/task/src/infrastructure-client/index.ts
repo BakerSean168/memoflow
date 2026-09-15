@@ -6,24 +6,24 @@
 
 // Port Interfaces
 export type {
-  ITaskTemplateApiClient,
-  ITaskInstanceApiClient,
+  ITaskPlanApiClient,
+  ITaskOccurrenceApiClient,
   IResultIpcClient,
-  TaskTemplateListParams,
+  TaskPlanListParams,
 } from './adapters/types';
 
 // HTTP Adapters
 export {
-  TaskTemplateHttpAdapter,
-  TaskInstanceHttpAdapter,
+  TaskPlanHttpAdapter,
+  TaskOccurrenceHttpAdapter,
   createTaskHttpAdapters,
   type TaskHttpAdapters,
 } from './adapters/http';
 
 // IPC Adapters
 export {
-  TaskTemplateIpcAdapter,
-  TaskInstanceIpcAdapter,
+  TaskPlanIpcAdapter,
+  TaskOccurrenceIpcAdapter,
   createTaskIpcAdapters,
   type TaskIpcAdapters,
 } from './adapters/ipc';

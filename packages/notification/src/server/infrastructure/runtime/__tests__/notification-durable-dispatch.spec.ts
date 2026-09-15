@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
+import { createTimeContext } from '@memoflow/time';
 import {
   createNotificationRuntimeContribution,
   type NotificationChannelDeliverer,
@@ -12,6 +13,11 @@ import { Notification } from '../../../domain/aggregates/notification';
 import { NotificationChannel } from '../../../domain/entities/notification-channel';
 import { NotificationChannelType } from '@memoflow/contracts/notification';
 import { InMemoryReliableAdapter } from './helpers/in-memory-reliable-adapter';
+
+const TEST_TIME_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
+const TEST_USER_TIME_CONTEXT_PORT = {
+  getUserTimeContext: async () => TEST_TIME_CONTEXT,
+};
 
 /** 将 Notification 的单个渠道作为 durable outbox 投递意图写入内存 adapter。 */
 async function dispatchNotificationOutbox(
@@ -40,6 +46,7 @@ describe('Notification Durable Dispatch Worker & Capability (W2)', () => {
   it('1. Startup fails fast when required channel capability is missing in production', () => {
     expect(() =>
       createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
         environment: 'production',
         reliableAdapter: new InMemoryReliableAdapter(),
         channelCapabilities: [
@@ -56,6 +63,7 @@ describe('Notification Durable Dispatch Worker & Capability (W2)', () => {
   it('2. Startup fails fast when test double is used in production', () => {
     expect(() =>
       createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
         environment: 'production',
         reliableAdapter: new InMemoryReliableAdapter(),
         channelCapabilities: [
@@ -72,6 +80,7 @@ describe('Notification Durable Dispatch Worker & Capability (W2)', () => {
   it('3. Test double forbidden exception thrown when allowTestDoubleInTest is false in test env', () => {
     expect(() =>
       createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
         environment: 'test',
         reliableAdapter: new InMemoryReliableAdapter(),
         channelCapabilities: [
@@ -121,6 +130,7 @@ describe('Notification Durable Dispatch Worker & Capability (W2)', () => {
     await dispatchNotificationOutbox(adapter, notification, channel);
 
     const runtime = createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       environment: 'test',
       repository: mockRepo as any,
       reliableAdapter: adapter,
@@ -191,6 +201,7 @@ describe('Notification Durable Dispatch Worker & Capability (W2)', () => {
     await dispatchNotificationOutbox(adapter, notification, channel);
 
     const runtime = createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       environment: 'test',
       repository: mockRepo as any,
       reliableAdapter: adapter,

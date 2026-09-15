@@ -1,15 +1,13 @@
 // Goal Module Components
-export { default as AIGenerateKRButton } from './AIGenerateKRButton.vue';
-export { default as AIKeyResultsSection } from './AIKeyResultsSection.vue';
 export { default as GoalRecordCard } from './GoalRecordCard.vue';
-export { default as KRPreviewList } from './KRPreviewList.vue';
 
 // Product list rows
 export { default as GoalProgressRow } from './GoalProgressRow.vue';
+export { default as GoalTimeframePicker } from './GoalTimeframePicker.vue';
+export { default as GoalReminderChip } from './GoalReminderChip.vue';
 
 // Cards
 export { default as GoalRecordCardFromCards } from './cards/GoalRecordCard.vue';
-export { default as MotivateCard } from './cards/MotivateCard.vue';
 
 // Comparison
 
@@ -27,9 +25,6 @@ export { default as KrWeightDistributionChart } from './echarts/KrWeightDistribu
 export { default as PeriodBarChart } from './echarts/PeriodBarChart.vue';
 
 // Rules
-
-// Template
-export { default as TemplateBrowser } from './template/TemplateBrowser.vue';
 
 // Timeline
 export { default as GoalTimelineView } from './timeline/GoalTimelineView.vue';

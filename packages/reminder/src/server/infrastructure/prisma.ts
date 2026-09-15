@@ -12,6 +12,7 @@
  */
 
 import type { PrismaClient } from '@memoflow/database';
+import type { UserTimeContextPort } from '@memoflow/time';
 import type { NotificationRequestedWriterPort } from '@memoflow/contracts/notification';
 import {
   createReminderModule,
@@ -53,6 +54,7 @@ import type {
 
 export interface CreateReminderPrismaModuleOptions {
   readonly closureChecker: (identityId: string) => Promise<boolean>;
+  readonly userTimeContextPort: UserTimeContextPort;
   readonly runtimeContributions?:
     ReminderModuleRuntimeContribution | readonly ReminderModuleRuntimeContribution[];
 }
@@ -109,6 +111,9 @@ export function createReminderPrismaModule(
   if (!options?.closureChecker) {
     throw new Error('[FAIL-CLOSED] createReminderPrismaModule requires options.closureChecker');
   }
+  if (!options.userTimeContextPort) {
+    throw new Error('[FAIL-CLOSED] createReminderPrismaModule requires options.userTimeContextPort');
+  }
 
   const repositories = createReminderPrismaRepositories(db);
 
@@ -119,6 +124,7 @@ export function createReminderPrismaModule(
     userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
     routineProfileStore: repositories.routineProfileStore,
     closureChecker: options.closureChecker,
+    userTimeContextPort: options.userTimeContextPort,
     runtimeContributions: options.runtimeContributions,
     snoozeOverrideWriter: repositories.snoozeOverrideWriter,
     reliablePort: repositories.reliablePort,

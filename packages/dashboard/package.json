@@ -15,6 +15,7 @@
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.5.0",
     "@memoflow/contracts": "workspace:*",
+    "@memoflow/time": "workspace:*",
     "zod": "^4.4.3"
   },
   "devDependencies": {

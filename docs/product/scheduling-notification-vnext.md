@@ -10,10 +10,54 @@ tags:
   - vnext
 description: MemoFlow Scheduling / Planner / Routine / Notification vNext 的统一产品语义、端到端用户场景与 North Star 架构
 created: 2026-08-25T17:49:00+08:00
-updated: 2026-08-25T17:49:00+08:00
+updated: 2026-09-08T20:45:00+08:00
 ---
 
 # Scheduling / Planner / Routine / Notification vNext
+
+## 2026-09-08 Schedule / Scheduler Model Convergence Freeze
+
+ADR-060/061 的 bounded-context、SchedulingPort 与 Handler Registry 方向继续保持；本轮进一步冻结 ADR-080~083：
+
+```text
+Planner / Calendar
+  CalendarEntryRange = Timed | AllDay
+  PlannerEventProjection + occupancy
+  cross-source PlannerConflictProjection
+
+Scheduler / Temporal Engine
+  ScheduledIntent -> SchedulingPort.reconcile
+  ScheduledInvocation
+  InvocationAttempt
+  host lease / claim / retry / recovery
+```
+
+当前代码仍存在 legacy `ScheduleTask / ScheduleExecution / ScheduleConfig` 实现壳以及 CalendarEntry 的 `duration/conflict/priority` 残差。它们属于**待实施迁移**，不能因为本文已冻结 North Star 就当作代码已完成。详细模型见 [Schedule / Planner + Scheduler / Temporal Engine vNext](./schedule-planner-scheduler-vnext.md) 和 [Current System Map](../analysis/2026-09-08-schedule-scheduler-current-system-map.md)。
+
+## 2026-09-08 Notification Model Convergence Freeze
+
+ADR-063 已落地的 Notification 主干继续保护：
+
+```text
+NotificationRequested
+  -> Notification Fact
+  -> per-channel policy
+  -> durable dispatch / receipt
+```
+
+本轮进一步冻结 ADR-084~088：
+
+```text
+NotificationFact + InboxLifecycle
+NotificationWorkflowDefinition
+DeliveryPlan + DeliveryProjection
+NotificationInteraction + typed OwnerCommand
+QuietHours(TimeZoneId,Hm)
+InboxPort / OperationsPort
+InboxRealtime / DeliveryRealtime
+```
+
+当前代码仍保留 `NotificationChannel[] / NotificationHistory / NotificationTemplate / NotificationCategory / RelatedEntityType / host-local DND` 等第一代或过渡模型；这些属于**待实施迁移**。详细见 [Notification vNext](./notification-vnext.md) 与 [Notification Current System Map](../analysis/2026-09-08-notification-current-system-map.md)。
 
 ## 1. 为什么需要这一份统一设计
 

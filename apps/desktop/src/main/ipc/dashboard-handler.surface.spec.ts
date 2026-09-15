@@ -46,8 +46,8 @@ describe('desktop goal/task repository accessor retirement surface', () => {
       const source = readFileSync(resolve(mainDir, file), 'utf8');
       expect(source).not.toMatch(/\bgetGoalRepository\b/);
       expect(source).not.toMatch(/\bgetGoalRecordRepository\b/);
-      expect(source).not.toMatch(/\bgetTaskTemplateRepository\b/);
-      expect(source).not.toMatch(/\bgetTaskInstanceRepository\b/);
+      expect(source).not.toMatch(/\bgetTaskPlanRepository\b/);
+      expect(source).not.toMatch(/\bgetTaskOccurrenceRepository\b/);
     });
   }
 

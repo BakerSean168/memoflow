@@ -42,20 +42,20 @@ describe('task API runtime composer surface', () => {
   });
 
   it('composer exposes the task repositories needed for scheduled-handler registration', () => {
-    expect(composer).toContain('taskInstanceRepository: ITaskInstanceRepository');
-    expect(composer).toContain('taskTemplateRepository: ITaskTemplateRepository');
-    expect(composer).toContain('taskInstanceRepository,');
-    expect(composer).toContain('taskTemplateRepository,');
+    expect(composer).toContain('taskOccurrenceRepository: ITaskOccurrenceRepository');
+    expect(composer).toContain('taskPlanRepository: ITaskPlanRepository');
+    expect(composer).toContain('taskOccurrenceRepository,');
+    expect(composer).toContain('taskPlanRepository,');
   });
 
   it('server.ts registers the task.reminder.fire handler on the schedule handlerRegistry after composeTask', () => {
     expect(server).toContain('createTaskReminderScheduledHandlerRegistration');
     expect(server).toContain('scheduleOrchestrationModule.handlerRegistry.register(');
     expect(server).toMatch(
-      /taskInstanceRepository: taskComposed\.taskInstanceRepository/,
+      /taskOccurrenceRepository: taskComposed\.taskOccurrenceRepository/,
     );
     expect(server).toMatch(
-      /taskTemplateRepository: taskComposed\.taskTemplateRepository/,
+      /taskPlanRepository: taskComposed\.taskPlanRepository/,
     );
     expect(server).toMatch(
       /notificationRequestedWriter: notificationApiModule\.repositories\.requestedWriter/,

@@ -83,8 +83,8 @@ export class GoalTaskProgressHandler implements TaskGoalProgressHandler {
 
 function toGoalRecordSource(source: TaskGoalSettlementSource) {
   return source.type === TaskGoalSettlementSourceType.TaskPlan
-    ? { type: GoalRecordSourceType.TaskTemplate, id: source.id }
-    : { type: GoalRecordSourceType.TaskInstance, id: source.id };
+    ? { type: GoalRecordSourceType.TaskPlan, id: source.id }
+    : { type: GoalRecordSourceType.TaskOccurrence, id: source.id };
 }
 
 export function createGoalTaskProgressHandler(

@@ -1,4 +1,5 @@
 export interface KnowledgeIndexStatusUpdate {
+  repositoryId: string;
   resourceId: string;
   contentHash: string;
   status: 'indexed' | 'failed';

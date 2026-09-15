@@ -15,7 +15,8 @@ const canonicalNotificationFiles = [
     `,
   },
   {
-    relPath: 'packages/notification/src/server/application/use-cases/commands/create-notification.use-case.ts',
+    relPath:
+      'packages/notification/src/server/application/use-cases/commands/create-notification.use-case.ts',
     content: `
       class NotificationPolicy { evaluate() {} }
       const NotificationDeliveryPlanOutcome = {};
@@ -24,8 +25,33 @@ const canonicalNotificationFiles = [
   },
 ];
 
+const canonicalTaskGoalFiles = [
+  {
+    relPath: 'packages/database/src/schema/task-goal-binding-constraint.ts',
+    content: `
+      const VERSION = 'memoflow.task-goal-binding/v3';
+      const sql = 'goal_id IS NOT NULL AND key_result_id IS NULL';
+      const contribution = 'goal_record_value IS NULL AND goal_progress_trigger IS NULL';
+    `,
+  },
+  {
+    relPath: 'packages/task/src/server/application/ports/task-goal-context-read.port.ts',
+    content: `
+      interface TaskGoalContextReadPort {
+        listTasksByGoal(): unknown;
+        listTasksByKeyResult(): unknown;
+        getTaskGoalContextSummary(): unknown;
+      }
+    `,
+  },
+];
+
 function scan(...files) {
-  return findCoreVnextArchitectureLockViolations([...canonicalNotificationFiles, ...files]);
+  return findCoreVnextArchitectureLockViolations([
+    ...canonicalNotificationFiles,
+    ...canonicalTaskGoalFiles,
+    ...files,
+  ]);
 }
 
 describe('HARD-7102 core vNext architecture lock', () => {
@@ -88,12 +114,44 @@ describe('HARD-7102 core vNext architecture lock', () => {
         content: `function read(template) { return template.tags; }`,
       },
       {
-        relPath: 'packages/contracts/src/modules/task/api/task-template.dto.ts',
+        relPath: 'packages/contracts/src/modules/task/api/task-plan.dto.ts',
         content: `export interface LegacyTaskInput { tags?: string[]; color?: string | null; }`,
       },
       {
         relPath: 'packages/database/prisma/schema/task.prisma',
-        content: `model TaskTemplate {\n  id String @id\n  tags String\n}`,
+        content: `model TaskPlan {\n  id String @id\n  tags String\n}`,
+      },
+      {
+        relPath: 'packages/goal/src/server/domain/legacy-time.ts',
+        content: `const overdue = goal.isOverdue || goal.dueDate;`,
+      },
+      {
+        relPath: 'packages/goal/src/server/domain/legacy-identity.ts',
+        content: `const motivation = goal.motivation; const feasibilityAnalysis = goal.feasibilityAnalysis;`,
+      },
+      {
+        relPath: 'packages/goal/src/application-client/legacy-template.ts',
+        content: `interface GoalTemplate { suggestedStartValue?: number } const BUILT_IN_TEMPLATES = [];`,
+      },
+      {
+        relPath: 'packages/contracts/src/modules/ai/api/ai-goal-create-workflow.dto.ts',
+        content: `const legacy = { dueDate: 1, startingValue: 0, progressBaselineValue: 0 };`,
+      },
+      {
+        relPath: 'packages/goal/src/server/domain/legacy-measurement.ts',
+        content: `const base = kr.startingValue ?? kr.progressBaselineValue;`,
+      },
+      {
+        relPath: 'packages/app-vue/src/modules/goal/LegacyKr.vue',
+        content: `const hidden = keyResult.trackingBaseValue;`,
+      },
+      {
+        relPath: 'packages/task/src/server/domain/repositories/legacy-task-plan-repository.ts',
+        content: `findByKeyResultId(identityId, keyResultId);`,
+      },
+      {
+        relPath: 'packages/task/src/domain-client/aggregates/task-plan.ts',
+        content: `return { keyResultId: String(binding.keyResultId) };`,
       },
     );
     const kinds = new Set(violations.map((v) => v.kind));
@@ -115,6 +173,13 @@ describe('HARD-7102 core vNext architecture lock', () => {
       'ai-raw-scheduler-access',
       'ai-retired-goal-task-draft',
       'task-legacy-classification',
+      'goal-legacy-due-time',
+      'goal-legacy-identity-field',
+      'goal-retired-template-track',
+      'kr-legacy-measurement',
+      'kr-tracking-base-ui-leak',
+      'task-goal-ownerless-kr-query',
+      'task-goal-null-kr-stringify',
     ]) {
       expect(kinds.has(kind), `missing violation kind ${kind}`).toBe(true);
     }
@@ -127,7 +192,8 @@ describe('HARD-7102 core vNext architecture lock', () => {
         content: `export { createTaskScheduledHandlerRegistration } from '../server/infrastructure/scheduled-handler';`,
       },
       {
-        relPath: 'packages/reminder/src/server/domain/repositories/i-reminder-template-repository.ts',
+        relPath:
+          'packages/reminder/src/server/domain/repositories/i-reminder-template-repository.ts',
         content: `findByNextTriggerBefore(beforeTime: number, identityId?: string): Promise<ReminderTemplate[]>;`,
       },
       {
@@ -163,23 +229,51 @@ describe('HARD-7102 core vNext architecture lock', () => {
         content: `export interface RecurrenceRule { frequency: 'daily' | 'weekly'; }`,
       },
       {
-        relPath: 'packages/contracts/src/modules/task/api/task-template.dto.ts',
+        relPath: 'packages/contracts/src/modules/task/api/task-plan.dto.ts',
         content: `export interface TaskInput { labelIds?: string[]; }`,
       },
       {
-        relPath: 'packages/task/src/server/domain/aggregates/task-template.state.ts',
-        content: `export interface TaskTemplateState { labels: readonly string[]; }`,
+        relPath: 'packages/task/src/server/domain/aggregates/task-plan.state.ts',
+        content: `export interface TaskPlanState { labels: readonly string[]; }`,
       },
       {
         relPath: 'packages/database/prisma/schema/task.prisma',
-        content: `model TaskTemplate { id String @id }\nmodel TaskLabel { labelId String }`,
+        content: `model TaskPlan { id String @id }\nmodel TaskLabel { labelId String }`,
       },
       {
         relPath: 'packages/app-vue/src/modules/task/TaskView.vue',
         content: `const labelIds = template.labels.map((label) => label.id);`,
       },
+      {
+        relPath: 'packages/task/src/server/domain/task-time.ts',
+        content: `const overdue = occurrence.isOverdue; const dueDate = occurrence.dueDate;`,
+      },
+      {
+        relPath: 'packages/contracts/src/modules/ai/api/ai-goal-create-workflow.dto.ts',
+        content: `const GoalPlanDraftV2 = z.object({ target: GoalTimeframeSchema, initialValue: z.number(), currentValue: z.number(), targetValue: z.number() });`,
+      },
+      {
+        relPath: 'packages/task/src/server/domain/task-metric.ts',
+        content: `const startingValue = occurrence.metric.startingValue;`,
+      },
     );
     expect(violations).toHaveLength(0);
+  });
+
+  it('requires the canonical Task Goal binding v3 constraint and owner read port', () => {
+    const files = [
+      ...canonicalNotificationFiles.map((file) => ({ ...file })),
+      ...canonicalTaskGoalFiles.map((file) => ({ ...file })),
+    ];
+    files.find((file) => file.relPath.endsWith('task-goal-binding-constraint.ts')).content =
+      `const VERSION = 'memoflow.task-goal-binding/v2';`;
+    files.find((file) => file.relPath.endsWith('task-goal-context-read.port.ts')).content =
+      `interface TaskGoalContextReadPort { listTasksByGoal(): unknown; }`;
+
+    const { violations } = findCoreVnextArchitectureLockViolations(files);
+    const kinds = violations.map((violation) => violation.kind);
+    expect(kinds).toContain('task-goal-binding-v3-missing');
+    expect(kinds).toContain('task-goal-context-read-port-missing');
   });
 
   it('requires the canonical NotificationRequested -> policy/DeliveryPlan path', () => {

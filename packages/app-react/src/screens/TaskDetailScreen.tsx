@@ -5,10 +5,10 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { presentErrorMessage } from '@memoflow/http-client';
 
-import { getProductTime, formatProductDateTime, emptyKind } from '../utils/product-time';
+import { emptyKind, formatProductDateTime, formatProductYmd } from '../utils/product-time';
 
-import { useTaskInstances } from '../hooks/useTaskInstances';
-import { useTaskTemplateDetail } from '../hooks/useTaskTemplateDetail';
+import { useTaskOccurrences } from '../hooks/useTaskOccurrences';
+import { useTaskPlanDetail } from '../hooks/useTaskPlanDetail';
 import { useAppSession } from '../hooks/useAppSession';
 import { useTaskService } from '../hooks/useTaskService';
 
@@ -22,26 +22,22 @@ import {
   ThemedView,
 } from '@memoflow/ui-react-native';
 
-function formatTimeConfig(input: {
-  timeType: string;
-  timePoint: number | null;
-  timeRange?: { start: number; end: number } | null;
-}) {
-  if (input.timeType === 'AllDay') {
-    return 'All day';
-  }
+function formatOccurrenceTiming(
+  timing: import('@memoflow/contracts/task').TaskOccurrenceClientDTO['scheduleSnapshot']['timing'],
+): string {
+  if (timing.kind === 'AllDay') return 'All day';
+  if (timing.kind === 'At') return `At ${timing.time}`;
+  return `${timing.start} - ${timing.end}`;
+}
 
-  if (input.timeType === 'TimePoint' && input.timePoint !== null) {
-    return `At ${getProductTime().format.hm(input.timePoint)}`;
-  }
+function formatPlanSchedule(schedule: import('@memoflow/contracts/task').TaskPlanSchedule): string {
+  if (schedule.timing.kind === 'AllDay') return 'All day';
+  if (schedule.timing.kind === 'At') return `At ${schedule.timing.time}`;
+  return `${schedule.timing.start} - ${schedule.timing.end}`;
+}
 
-  if (input.timeType === 'TimeRange' && input.timeRange) {
-    const start = getProductTime().format.hm(input.timeRange.start);
-    const end = getProductTime().format.hm(input.timeRange.end);
-    return `${start} - ${end}`;
-  }
-
-  return input.timeType;
+function planScheduleDate(schedule: import('@memoflow/contracts/task').TaskPlanSchedule): string {
+  return schedule.kind === 'OneTime' ? schedule.date : schedule.startDate;
 }
 
 export function TaskDetailScreen() {
@@ -51,16 +47,16 @@ export function TaskDetailScreen() {
     typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : null;
   const { signOut } = useAppSession();
   const service = useTaskService();
-  const { error, isLoading, refresh, template } = useTaskTemplateDetail(taskId);
+  const { error, isLoading, refresh, template } = useTaskPlanDetail(taskId);
   const {
-    completeInstance,
+    completeOccurrence,
     error: instancesError,
     instances,
     isLoading: instancesLoading,
     refresh: refreshInstances,
-    skipInstance,
-    startInstance,
-  } = useTaskInstances(taskId);
+    skipOccurrence,
+    startOccurrence,
+  } = useTaskOccurrences(taskId);
   const [isMutating, setIsMutating] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [activeInstanceId, setActiveInstanceId] = useState<string | null>(null);
@@ -76,7 +72,7 @@ export function TaskDetailScreen() {
 
     setIsMutating(true);
     setActionError(null);
-    const result = await service.pauseTemplate(taskId);
+    const result = await service.pausePlan(taskId);
     setIsMutating(false);
 
     if (!result.ok) {
@@ -94,7 +90,7 @@ export function TaskDetailScreen() {
 
     setIsMutating(true);
     setActionError(null);
-    const result = await service.activateTemplate(taskId);
+    const result = await service.activatePlan(taskId);
     setIsMutating(false);
 
     if (!result.ok) {
@@ -112,7 +108,7 @@ export function TaskDetailScreen() {
 
     setIsMutating(true);
     setActionError(null);
-    const result = await service.archiveTemplate(taskId);
+    const result = await service.archivePlan(taskId);
     setIsMutating(false);
 
     if (!result.ok) {
@@ -129,10 +125,10 @@ export function TaskDetailScreen() {
 
     const ok =
       action === 'start'
-        ? await startInstance(instanceId)
+        ? await startOccurrence(instanceId)
         : action === 'complete'
-          ? await completeInstance(instanceId)
-          : await skipInstance(instanceId);
+          ? await completeOccurrence(instanceId)
+          : await skipOccurrence(instanceId);
 
     setActiveInstanceId(null);
 
@@ -226,7 +222,9 @@ export function TaskDetailScreen() {
               />
               <StatusPill label={template.importance} tone="tint" />
               <StatusPill label={template.outcome} tone="textSecondary" />
-              {template.archivedAt !== null ? <StatusPill label="Archived" tone="textSecondary" /> : null}
+              {template.archivedAt !== null ? (
+                <StatusPill label="Archived" tone="textSecondary" />
+              ) : null}
             </View>
             <View style={styles.actionRow}>
               {template.status === 'Active' ? (
@@ -260,14 +258,16 @@ export function TaskDetailScreen() {
           </SectionCard>
 
           <SectionCard title="Schedule" description="桌面端细分区域先收敛成移动端可读的摘要。">
-            <MetricRow label="Time mode" value={formatTimeConfig(template.timeConfig)} />
+            <MetricRow label="Time mode" value={formatPlanSchedule(template.schedule)} />
+            <MetricRow label="Start date" value={planScheduleDate(template.schedule)} />
             <MetricRow
-              label="Start date"
-              value={formatProductDateTime(template.startDate ?? template.timeConfig.startDate, emptyKind('notSet'))}
+              label="Created"
+              value={formatProductDateTime(template.createdAt, emptyKind('notSet'))}
             />
-            <MetricRow label="Due date" value={formatProductDateTime(template.dueDate, emptyKind('notSet'))} />
-            <MetricRow label="Created" value={formatProductDateTime(template.createdAt, emptyKind('notSet'))} />
-            <MetricRow label="Updated" value={formatProductDateTime(template.updatedAt, emptyKind('notSet'))} />
+            <MetricRow
+              label="Updated"
+              value={formatProductDateTime(template.updatedAt, emptyKind('notSet'))}
+            />
           </SectionCard>
 
           <SectionCard
@@ -275,9 +275,9 @@ export function TaskDetailScreen() {
             description="执行统计后续还会继续接实例详情，这里先给摘要。"
           >
             <View style={styles.metricGrid}>
-              <MetricBox label="Instances" value={String(template.instanceCount)} />
-              <MetricBox label="Pending" value={String(template.pendingInstanceCount)} />
-              <MetricBox label="Completed" value={String(template.completedInstanceCount)} />
+              <MetricBox label="Instances" value={String(template.occurrenceCount)} />
+              <MetricBox label="Pending" value={String(template.pendingOccurrenceCount)} />
+              <MetricBox label="Completed" value={String(template.completedOccurrenceCount)} />
               <MetricBox label="Completion" value={`${Math.round(template.completionRate)}%`} />
             </View>
           </SectionCard>
@@ -300,7 +300,9 @@ export function TaskDetailScreen() {
                     style={styles.instanceCard}
                   >
                     <View style={styles.instanceHeader}>
-                      <ThemedText type="smallBold">{formatProductDateTime(instance.instanceDate, emptyKind('notSet'))}</ThemedText>
+                      <ThemedText type="smallBold">
+                        {formatProductYmd(instance.scheduleSnapshot.date)}
+                      </ThemedText>
                       <StatusPill
                         label={instance.status}
                         tone={
@@ -313,10 +315,12 @@ export function TaskDetailScreen() {
                       />
                     </View>
                     <ThemedText type="small" themeColor="textSecondary">
-                      {formatTimeConfig(instance.timeConfig)}
+                      {formatOccurrenceTiming(instance.scheduleSnapshot.timing)}
                     </ThemedText>
-                    {instance.comment ? (
-                      <ThemedText type="small">{instance.comment}</ThemedText>
+                    {instance.result?.kind === 'Completed' && instance.result.note ? (
+                      <ThemedText type="small">{instance.result.note}</ThemedText>
+                    ) : instance.result?.kind === 'Skipped' && instance.result.reason ? (
+                      <ThemedText type="small">{instance.result.reason}</ThemedText>
                     ) : null}
                     <View style={styles.actionRow}>
                       {instance.status === 'Pending' ? (
@@ -357,15 +361,6 @@ export function TaskDetailScreen() {
             title="Notes"
             description={template.description ?? 'No description provided yet.'}
           >
-            <MetricRow
-              label="Estimated minutes"
-              value={template.estimatedMinutes ? String(template.estimatedMinutes) : 'Not set'}
-            />
-            <MetricRow
-              label="Actual minutes"
-              value={template.actualMinutes ? String(template.actualMinutes) : 'Not set'}
-            />
-            <MetricRow label="Comment" value={template.comment ?? 'No comment'} />
             <View style={styles.tagRow}>
               {template.labels.length > 0 ? (
                 template.labels.map((label) => (

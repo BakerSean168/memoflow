@@ -1,6 +1,7 @@
 import {
   asInstant,
-  defaultTime,
+  createTimeContext,
+  createTimeFacade,
   isIanaTimeZoneId,
   type Hm,
   type Instant,
@@ -95,16 +96,21 @@ export interface CreateWallClockTriggerInput {
 }
 
 export function createWallClockTrigger(input: CreateWallClockTriggerInput): WallClockTrigger {
-  const localTime = defaultTime.input.parseTimeValue(input.localTime);
+  if (!isIanaTimeZoneId(input.timeZone)) {
+    throw new TypeError(`Invalid IANA time zone: ${input.timeZone}`);
+  }
+  // WallClock owns an explicit schedule timezone snapshot. Parsing its Hm/Ymd
+  // values must never instantiate the host-local default facade.
+  const scheduleTime = createTimeFacade({
+    context: createTimeContext({ timeZone: input.timeZone, weekStartsOn: 1 }),
+  });
+  const localTime = scheduleTime.input.parseTimeValue(input.localTime);
   if (localTime == null) {
     throw new TypeError(`Invalid local time: ${input.localTime}`);
   }
-  const startDate = defaultTime.input.parseDateValue(input.recurrence.startDate);
+  const startDate = scheduleTime.input.parseDateValue(input.recurrence.startDate);
   if (startDate == null) {
     throw new TypeError(`Invalid recurrence start date: ${input.recurrence.startDate}`);
-  }
-  if (!isIanaTimeZoneId(input.timeZone)) {
-    throw new TypeError(`Invalid IANA time zone: ${input.timeZone}`);
   }
 
   const interval = input.recurrence.interval ?? 1;

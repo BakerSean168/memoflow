@@ -1,25 +1,13 @@
-import type { PartialTimeStyle, TimeStyle } from '../types';
+import type { PartialTimePresentationStyle, TimePresentationStyle } from '../types';
 
-export const DEFAULT_TIME_STYLE: TimeStyle = Object.freeze({
+export const DEFAULT_TIME_PRESENTATION_STYLE: TimePresentationStyle = Object.freeze({
   locale: 'zh-CN',
-  timeZone: 'local',
-  calendar: Object.freeze({
-    dayBoundary: 'local-midnight',
-    weekStartsOn: 1,
-  }),
+  dateStyle: 'medium',
+  timeStyle: '24h',
   empty: Object.freeze({
     display: '—',
     input: '',
     unknown: '—',
-  }),
-  display: Object.freeze({
-    date: 'medium',
-    dateTime: 'medium',
-    hm: 'HH:mm',
-    periodDay: 'EEEE, yyyy MMMM d',
-    periodMonth: 'yyyy MMMM',
-    periodWeekDay: 'EEEE',
-    chartMonthDay: 'MMM d',
   }),
   relative: Object.freeze({
     enabled: true,
@@ -30,19 +18,18 @@ export const DEFAULT_TIME_STYLE: TimeStyle = Object.freeze({
     style: 'narrow',
     zero: '0m',
   }),
-}) as TimeStyle;
+}) as TimePresentationStyle;
 
-export function mergeTimeStyle(
-  base: TimeStyle,
-  partial?: PartialTimeStyle | null,
-): TimeStyle {
+export function mergeTimePresentationStyle(
+  base: TimePresentationStyle,
+  partial?: PartialTimePresentationStyle | null,
+): TimePresentationStyle {
   if (!partial) return base;
   return {
     locale: partial.locale ?? base.locale,
-    timeZone: partial.timeZone ?? base.timeZone,
-    calendar: { ...base.calendar, ...partial.calendar },
+    dateStyle: partial.dateStyle ?? base.dateStyle,
+    timeStyle: partial.timeStyle ?? base.timeStyle,
     empty: { ...base.empty, ...partial.empty },
-    display: { ...base.display, ...partial.display },
     relative: { ...base.relative, ...partial.relative },
     duration: { ...base.duration, ...partial.duration },
   };

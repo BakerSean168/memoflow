@@ -26,7 +26,7 @@ describe('reminder API runtime composer surface', () => {
   it('server.ts composes reminder with the NotificationRequested writer owned by Reminder', () => {
     expect(server).toContain("from './runtime/compose-reminder'");
     expect(server).toMatch(
-      /composeReminder\(\{\s*db: prisma,\s*notificationRequestedWriter: notificationApiModule\.requestedWriter,\s*closureChecker: accountActiveChecker,\s*executorClosureChecker,?\s*\}/,
+      /composeReminder\(\{\s*db: prisma,\s*notificationRequestedWriter: notificationApiModule\.requestedWriter,\s*userTimeContextPort: settingApiModule\.userTimeContextPort,\s*closureChecker: accountActiveChecker,\s*executorClosureChecker,?\s*\}/,
     );
     expect(server).toContain('.register(reminderComposed.module)');
   });

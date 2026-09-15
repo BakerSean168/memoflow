@@ -15,7 +15,7 @@ export class KnowledgeAttachmentContentCachePrismaRepository implements IKnowled
     now: number,
   ): Promise<KnowledgeAttachmentContentCacheEntry | null> {
     const row = await this.db.knowledgeAttachmentContentCache.findUnique({
-      where: { connectionId_blobSha: { connectionId, blobSha } },
+      where: { bindingId_blobSha: { bindingId: connectionId, blobSha } },
     });
     if (!row) return null;
     if (row.expiresAt.getTime() <= now) {
@@ -28,13 +28,13 @@ export class KnowledgeAttachmentContentCachePrismaRepository implements IKnowled
   async save(entry: KnowledgeAttachmentContentCacheEntry): Promise<void> {
     await this.db.knowledgeAttachmentContentCache.upsert({
       where: {
-        connectionId_blobSha: {
-          connectionId: entry.connectionId,
+        bindingId_blobSha: {
+          bindingId: entry.connectionId,
           blobSha: entry.blobSha,
         },
       },
       create: {
-        connectionId: entry.connectionId,
+        bindingId: entry.connectionId,
         blobSha: entry.blobSha,
         byteSize: entry.byteSize,
         contentBytes: Buffer.from(entry.bytes),
@@ -55,13 +55,13 @@ export class KnowledgeAttachmentContentCachePrismaRepository implements IKnowled
 
   async remove(connectionId: string, blobSha: string): Promise<void> {
     await this.db.knowledgeAttachmentContentCache.deleteMany({
-      where: { connectionId, blobSha },
+      where: { bindingId: connectionId, blobSha },
     });
   }
 
   private toEntry(row: NonNullable<CacheRow>): KnowledgeAttachmentContentCacheEntry {
     return {
-      connectionId: row.connectionId,
+      connectionId: row.bindingId,
       blobSha: row.blobSha,
       byteSize: row.byteSize,
       bytes: Uint8Array.from(row.contentBytes),

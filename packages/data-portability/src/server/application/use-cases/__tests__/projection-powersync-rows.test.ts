@@ -1,14 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { RefAllocator, type ExportContext } from '../../portable-runtime';
 import { projectGoalRecords, projectGoals } from '../projections/goal.projection';
-import { projectEditorWorkspaces } from '../projections/editor.projection';
 import {
   projectReminderResponses,
   projectReminderTemplates,
 } from '../projections/reminder.projection';
 import { projectScheduleTasks } from '../projections/schedule.projection';
-import { projectTaskTemplates } from '../projections/task.projection';
-import type { DataPortabilityDependencies } from '../../data-portability.dependencies';
+import { projectTaskPlans } from '../projections/task.projection';
 
 function createExportContext(refs: Record<string, string> = {}): ExportContext {
   return {
@@ -29,16 +27,19 @@ describe('projection from PowerSync-shaped rows', () => {
         {
           id: 'goal-db-id',
           name: 'Ship portability',
-          status: 'Active',
+          summary: 'Ship portability',
+          status: 'InProgress',
           keyResults: [
             {
               id: 'kr-db-id',
               title: 'Round trip passes',
               aggregationMethod: 'Sum',
-              startingValue: 0,
-              progressBaselineValue: null,
+              initialValue: 0,
+              trackingBaseValue: 0,
               targetValue: 1,
               currentValue: 1,
+              target_kind: 'month',
+              target_end_date: '2026-09-30',
               weight: 2,
               order: 3,
             },
@@ -62,15 +63,17 @@ describe('projection from PowerSync-shaped rows', () => {
 
     expect(goals[0]).toMatchObject({
       _ref: 'goal:1',
-      status: 'Active',
+      summary: 'Ship portability',
+      status: 'InProgress',
       keyResults: [
         {
           _ref: 'keyResult:1',
           calculationMethod: 'Sum',
-          startingValue: 0,
-          progressBaselineValue: null,
+          initialValue: 0,
+          trackingBaseValue: 0,
           targetValue: 1,
           currentValue: 1,
+          target: { kind: 'month', year: 2026, month: 9 },
           sortOrder: 3,
         },
       ],
@@ -79,30 +82,46 @@ describe('projection from PowerSync-shaped rows', () => {
     expect(JSON.stringify({ goals, records })).not.toContain('kr-db-id');
   });
 
-  it('exports task templates from flattened persistence fields', () => {
+  it('exports task templates from canonical schedule/reminder persistence', () => {
     const ctx = createExportContext({
       'goal-db-id': 'goal:1',
       'kr-db-id': 'keyResult:1',
     });
 
-    const templates = projectTaskTemplates(
+    const templates = projectTaskPlans(
       [
         {
           id: 'task-db-id',
           name: 'Write tests',
           status: 'active',
           importance: 'moderate',
-          tags: '["qa"]',
-          recurrenceRuleType: 'Daily',
-          recurrenceRuleInterval: 1,
+          schedule: JSON.stringify({
+            kind: 'Recurring',
+            startDate: '2026-09-13',
+            timing: { kind: 'AllDay' },
+            recurrence: {
+              frequency: 'Daily',
+              interval: 1,
+              byWeekday: [],
+              end: { kind: 'Never' },
+            },
+          }),
           goalId: 'goal-db-id',
           keyResultId: 'kr-db-id',
           goalRecordValue: 2.5,
           goalProgressTrigger: 'EachCompletion',
-          checklist: '[{"title":"cover IPC","order":0}]',
-          reminderConfigEnabled: 1,
-          reminderConfigTimeOffsetMinutes: 15,
-          reminderConfigUnit: 'Minute',
+          checklist: '[{"id":"check-db-id","title":"cover IPC","order":0}]',
+          reminderConfig: JSON.stringify({
+            enabled: true,
+            triggers: [
+              {
+                type: 'Relative',
+                absoluteTime: null,
+                relativeValue: 15,
+                relativeUnit: 'Minutes',
+              },
+            ],
+          }),
         },
       ],
       ctx,
@@ -110,15 +129,26 @@ describe('projection from PowerSync-shaped rows', () => {
 
     expect(templates[0]).toMatchObject({
       title: 'Write tests',
-      taskType: 'Recurring',
-      tags: ['qa'],
+      schedule: {
+        kind: 'Recurring',
+        startDate: '2026-09-13',
+        timing: { kind: 'AllDay' },
+      },
+      tags: [],
       goalRef: 'goal:1',
       keyResultRef: 'keyResult:1',
       contribution: { value: 2.5, trigger: 'EachCompletion' },
       checklist: [{ title: 'cover IPC', order: 0 }],
       reminderConfig: {
         enabled: true,
-        triggers: [{ relativeValue: 15, relativeUnit: 'Minute' }],
+        triggers: [
+          {
+            type: 'Relative',
+            absoluteTime: null,
+            relativeValue: 15,
+            relativeUnit: 'Minutes',
+          },
+        ],
       },
     });
     expect(templates[0]).not.toHaveProperty('goalBinding');
@@ -126,28 +156,36 @@ describe('projection from PowerSync-shaped rows', () => {
     expect(templates[0]).not.toHaveProperty('goalProgressTrigger');
   });
 
-
   it('exports a Task Goal link without inventing a zero contribution', () => {
     const ctx = createExportContext({
       'goal-db-id': 'goal:1',
       'kr-db-id': 'keyResult:1',
     });
-    const [template] = projectTaskTemplates([
-      {
-        id: 'task-link-only',
-        name: 'Read linked context',
-        status: 'Active',
-        outcome: 'Open',
-        completionPolicy: 'AllowCorrection',
-        importance: 'moderate',
-        tags: '[]',
-        goalId: 'goal-db-id',
-        keyResultId: 'kr-db-id',
-        goalRecordValue: null,
-        goalProgressTrigger: null,
-        checklist: '[]',
-      },
-    ], ctx);
+    const [template] = projectTaskPlans(
+      [
+        {
+          id: 'task-link-only',
+          name: 'Read linked context',
+          status: 'Active',
+          outcome: 'Open',
+          completionPolicy: 'AllowCorrection',
+          importance: 'moderate',
+          tags: '[]',
+          goalId: 'goal-db-id',
+          keyResultId: 'kr-db-id',
+          goalRecordValue: null,
+          goalProgressTrigger: null,
+          checklist: '[]',
+          schedule: JSON.stringify({
+            kind: 'OneTime',
+            date: '2026-09-13',
+            timing: { kind: 'AllDay' },
+          }),
+          reminderConfig: null,
+        },
+      ],
+      ctx,
+    );
 
     expect(template).toMatchObject({
       goalRef: 'goal:1',
@@ -211,9 +249,7 @@ describe('projection from PowerSync-shaped rows', () => {
         enabled: true,
         trigger: { type: 'WallClock' },
       },
-      profileMemberships: [
-        { profileRef: 'reminderGroup:1', enabled: false },
-      ],
+      profileMemberships: [{ profileRef: 'reminderGroup:1', enabled: false }],
       tags: ['work'],
     });
     expect(responses[0]?.templateRef).toBe('reminderTemplate:1');
@@ -249,82 +285,5 @@ describe('projection from PowerSync-shaped rows', () => {
     });
     expect(Object.prototype.hasOwnProperty.call(tasks[0], 'schedule')).toBe(true);
     expect(Object.prototype.hasOwnProperty.call(tasks[0], 'execution')).toBe(true);
-  });
-
-  it('exports editor rows using persistence field aliases and parsed JSON', async () => {
-    const ctx = createExportContext();
-    const deps = {
-      editorSessionRepository: {
-        findByWorkspaceId: async () => [
-          {
-            id: 'session-db-id',
-            name: 'Main',
-            layout: '{"activeGroupIndex":0}',
-            isActive: 1,
-          },
-        ],
-      },
-      editorGroupRepository: {
-        findBySessionId: async () => [
-          {
-            id: 'group-db-id',
-            groupIndex: 0,
-            name: 'Group',
-          },
-        ],
-      },
-      editorTabRepository: {
-        findByGroupId: async () => [
-          {
-            id: 'tab-db-id',
-            tabIndex: 0,
-            tabType: 'resource',
-            title: 'Note.md',
-            viewState: '{"cursor":4}',
-            isPinned: 0,
-            isActive: 1,
-          },
-        ],
-      },
-    } as unknown as DataPortabilityDependencies;
-
-    const workspaces = await projectEditorWorkspaces(
-      [
-        {
-          id: 'workspace-db-id',
-          name: 'Workspace',
-          projectPath: '/workspace',
-          projectType: 'local',
-          layout: '{}',
-          setting: '{"theme":"dark"}',
-          isActive: 1,
-        },
-      ],
-      ctx,
-      deps,
-    );
-
-    expect(workspaces[0]).toMatchObject({
-      settings: { theme: 'dark' },
-      isActive: true,
-      sessions: [
-        {
-          layout: { activeGroupIndex: 0 },
-          isActive: true,
-          groups: [
-            {
-              tabs: [
-                {
-                  name: 'Note.md',
-                  viewState: { cursor: 4 },
-                  isPinned: false,
-                  isActive: true,
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    });
   });
 });

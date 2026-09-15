@@ -10,7 +10,11 @@ import type { Instant } from '@memoflow/contracts/primitives';
  * - Instance toDTO(): KeyResultClientDTO
  */
 
-import type { KeyResultClientDTO, KeyResultProgress } from '@memoflow/contracts/goal';
+import type {
+  GoalTimeframe,
+  KeyResultClientDTO,
+  KeyResultProgress,
+} from '@memoflow/contracts/goal';
 import { Entity } from '@memoflow/utils/domain';
 import { KeyResultId } from '../../server/domain';
 
@@ -19,6 +23,7 @@ export interface KeyResultState {
   title: string;
   description: string | null;
   progress: KeyResultProgress;
+  target: GoalTimeframe | null;
   progressPercentage: number;
   isCompleted: boolean;
   weight: number;
@@ -48,6 +53,10 @@ export class KeyResult extends Entity<KeyResultId> {
 
   get progress(): KeyResultProgress {
     return this._props.progress;
+  }
+
+  get target(): GoalTimeframe | null {
+    return this._props.target;
   }
 
   get weight(): number {
@@ -88,6 +97,7 @@ export class KeyResult extends Entity<KeyResultId> {
       title: this._props.title,
       description: this._props.description,
       progress: { ...this._props.progress },
+      target: this._props.target,
       progressPercentage: this._props.progressPercentage,
       isCompleted: this._props.isCompleted,
       weight: this._props.weight,

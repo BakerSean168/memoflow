@@ -40,6 +40,14 @@ export {
   type AuthenticatedIdentityIpcWrapperOptions,
 } from './authenticated-ipc';
 export * from './ipc-channels';
+export type {
+  DesktopNotificationPreference,
+  DesktopNotificationPreferencePatch,
+} from './device-notification-preference';
+export {
+  DesktopNotificationPreferenceSchema,
+  DesktopNotificationPreferencePatchSchema,
+} from './device-notification-preference';
 export { AIStreamChannels } from './ipc-channels';
 export type {
   IElectronDatabase,

@@ -311,4 +311,60 @@ describe('UpcomingReminderCalculationService.calculateTodaySchedule', () => {
     expect(pathBItem).toBeDefined();
     expect(pathBItem?.nextTriggerAt).toBe(pathATriggerAt);
   });
+
+  it('uses a Product Time calendar-day horizon across spring-forward DST', () => {
+    const afterTime = Date.parse('2026-03-07T14:30:00.000Z'); // 09:30 America/New_York
+    const beforeBoundary = Date.parse('2026-03-08T13:15:00.000Z'); // 09:15 EDT, 22h45m later
+    const afterBoundary = Date.parse('2026-03-08T13:45:00.000Z'); // 09:45 EDT, 23h15m later
+    const intervalTrigger = {
+      type: TriggerType.Interval,
+      fixedTime: null,
+      interval: { minutes: 60, startTime: null },
+    } as const;
+
+    const upcoming = UpcomingReminderCalculationService.calculateUpcomingReminders(
+      [
+        createReminder({
+          id: 'before-boundary' as ReminderTemplateServerDTO['id'],
+          trigger: intervalTrigger,
+          activeTime: { activatedAt: beforeBoundary },
+          nextTriggerAt: beforeBoundary,
+        }),
+        createReminder({
+          id: 'after-boundary' as ReminderTemplateServerDTO['id'],
+          trigger: intervalTrigger,
+          activeTime: { activatedAt: afterBoundary },
+          nextTriggerAt: afterBoundary,
+        }),
+      ],
+      { days: 1, afterTime, timezone: 'America/New_York' },
+    );
+
+    expect(upcoming.map((item) => item.templateId)).toEqual(['before-boundary']);
+    expect(upcoming[0]?.daysUntilTrigger).toBe(1);
+  });
+
+  it('reports a later trigger on the same Product Time date as zero days away', () => {
+    const afterTime = Date.parse('2026-03-08T14:00:00.000Z'); // 10:00 EDT
+    const triggerAt = Date.parse('2026-03-08T20:00:00.000Z'); // 16:00 EDT
+    const upcoming = UpcomingReminderCalculationService.calculateUpcomingReminders(
+      [
+        createReminder({
+          id: 'same-day' as ReminderTemplateServerDTO['id'],
+          trigger: {
+            type: TriggerType.Interval,
+            fixedTime: null,
+            interval: { minutes: 60, startTime: null },
+          },
+          activeTime: { activatedAt: Date.parse('2026-03-01T00:00:00.000Z') },
+          nextTriggerAt: triggerAt,
+        }),
+      ],
+      { days: 1, afterTime, timezone: 'America/New_York' },
+    );
+
+    expect(upcoming).toHaveLength(1);
+    expect(upcoming[0]?.daysUntilTrigger).toBe(0);
+  });
+
 });

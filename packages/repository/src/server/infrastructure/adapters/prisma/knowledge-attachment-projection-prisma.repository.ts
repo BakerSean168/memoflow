@@ -5,11 +5,11 @@ import type {
   KnowledgeAttachmentProjectionUpsert,
 } from '../../../application/ports/knowledge-attachment-projection.repository';
 
-type ProjectionRow = Awaited<ReturnType<PrismaClient['knowledgeAttachmentProjection']['findUnique']>>;
+type ProjectionRow = Awaited<
+  ReturnType<PrismaClient['knowledgeAttachmentProjection']['findUnique']>
+>;
 
-export class KnowledgeAttachmentProjectionPrismaRepository
-  implements IKnowledgeAttachmentProjectionRepository
-{
+export class KnowledgeAttachmentProjectionPrismaRepository implements IKnowledgeAttachmentProjectionRepository {
   constructor(private readonly db: PrismaClient) {}
 
   async applySnapshot(
@@ -21,7 +21,7 @@ export class KnowledgeAttachmentProjectionPrismaRepository
     await this.upsertMany(attachments);
     await this.db.knowledgeAttachmentProjection.updateMany({
       where: {
-        connectionId,
+        bindingId: connectionId,
         deletedAt: null,
         ...(paths.length ? { relativePath: { notIn: paths } } : {}),
       },
@@ -38,7 +38,7 @@ export class KnowledgeAttachmentProjectionPrismaRepository
     await this.upsertMany(attachments);
     if (deletedPaths.length) {
       await this.db.knowledgeAttachmentProjection.updateMany({
-        where: { connectionId, relativePath: { in: [...new Set(deletedPaths)] } },
+        where: { bindingId: connectionId, relativePath: { in: [...new Set(deletedPaths)] } },
         data: { deletedAt: new Date(), commitSha },
       });
     }
@@ -51,12 +51,8 @@ export class KnowledgeAttachmentProjectionPrismaRepository
     const query = options.query?.trim();
     const rows = await this.db.knowledgeAttachmentProjection.findMany({
       where: {
-        connection: {
-          identityId,
-          deletedAt: null,
-          status: { in: ['Active', 'Suspended'] },
-        },
-        connectionId: options.connectionId,
+        binding: { identityId, disconnectedAt: null },
+        bindingId: options.connectionId,
         deletedAt: null,
         ...(query ? { relativePath: { contains: query, mode: 'insensitive' } } : {}),
       },
@@ -75,11 +71,7 @@ export class KnowledgeAttachmentProjectionPrismaRepository
         where: {
           id: projectionId,
           deletedAt: null,
-          connection: {
-            identityId,
-            deletedAt: null,
-            status: { in: ['Active', 'Suspended'] },
-          },
+          binding: { identityId, disconnectedAt: null },
         },
       }),
     );
@@ -89,12 +81,20 @@ export class KnowledgeAttachmentProjectionPrismaRepository
     for (const attachment of attachments) {
       await this.db.knowledgeAttachmentProjection.upsert({
         where: {
-          connectionId_relativePath: {
-            connectionId: attachment.connectionId,
+          bindingId_relativePath: {
+            bindingId: attachment.connectionId,
             relativePath: attachment.relativePath,
           },
         },
-        create: attachment,
+        create: {
+          id: attachment.id,
+          bindingId: attachment.connectionId,
+          relativePath: attachment.relativePath,
+          commitSha: attachment.commitSha,
+          blobSha: attachment.blobSha,
+          byteSize: attachment.byteSize,
+          mediaType: attachment.mediaType,
+        },
         update: {
           commitSha: attachment.commitSha,
           blobSha: attachment.blobSha,
@@ -113,7 +113,7 @@ export class KnowledgeAttachmentProjectionPrismaRepository
   private toClient(row: NonNullable<ProjectionRow>): KnowledgeAttachmentProjectionClientDTO {
     return {
       id: row.id,
-      connectionId: row.connectionId,
+      connectionId: row.bindingId,
       relativePath: row.relativePath,
       fileName: row.relativePath.split('/').slice(-1)[0] ?? row.relativePath,
       commitSha: row.commitSha,

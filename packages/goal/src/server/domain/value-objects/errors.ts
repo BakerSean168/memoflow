@@ -4,6 +4,7 @@
  */
 
 import { ResultErrorException } from '@memoflow/contracts/result';
+import type { Ymd } from '@memoflow/contracts/primitives';
 import type { GoalId } from './goal-id';
 
 /**
@@ -15,48 +16,19 @@ export class GoalNameRequiredError extends ResultErrorException {
   }
 }
 
-/**
- * Goal due-date range error
- */
-export class GoalInvalidDateRangeError extends ResultErrorException {
+/** Goal planning window is incoherent when it begins after the target timeframe ends. */
+export class GoalInvalidPlanningWindowError extends ResultErrorException {
   constructor(
-    public readonly startDate: number,
-    public readonly dueDate: number,
+    public readonly startDate: Ymd,
+    public readonly targetEndDate: Ymd,
   ) {
     super(
-      `截止日期范围无效：开始日期 ${startDate} 晚于截止日期 ${dueDate}`,
-      'goal_invalid_date_range',
+      `目标时间范围无效：开始日期 ${startDate} 晚于目标时间范围结束 ${targetEndDate}`,
+      'goal_invalid_planning_window',
       undefined,
       undefined,
       400,
     );
-  }
-}
-
-/**
- * Goal due-date modification error
- */
-export class GoalInvalidDateModificationError extends ResultErrorException {
-  constructor(
-    public readonly operation: 'Extend' | 'Shorten',
-    public readonly days: number,
-  ) {
-    super(
-      `无效的日期${operation === 'Extend' ? '延长' : '缩短'}操作：天数 ${days} 必须为正数`,
-      'goal_invalid_date_modification',
-      undefined,
-      undefined,
-      400,
-    );
-  }
-}
-
-/**
- * 目标截止日期未设置错误
- */
-export class GoalDueDateNotSetError extends ResultErrorException {
-  constructor() {
-    super('截止日期未设置', 'goal_due_date_not_set', undefined, undefined, 400);
   }
 }
 
@@ -119,6 +91,19 @@ export class GoalArchivedError extends ResultErrorException {
       undefined,
       undefined,
       400,
+    );
+  }
+}
+
+/** Explicit Goal lifecycle transition is not allowed by ADR-067. */
+export class GoalInvalidLifecycleTransitionError extends ResultErrorException {
+  constructor(from: string, to: string) {
+    super(
+      `Invalid Goal lifecycle transition: ${from} -> ${to}`,
+      'goal_invalid_lifecycle_transition',
+      undefined,
+      { from, to },
+      409,
     );
   }
 }

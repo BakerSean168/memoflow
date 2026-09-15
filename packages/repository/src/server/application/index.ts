@@ -14,7 +14,8 @@ export * from './services';
 // ===== Ports =====
 export * from './ports/i-storage-port';
 export * from './ports/github-app-client.port';
-export * from './ports/knowledge-repository-connection.repository';
+export * from './ports/knowledge-remote-binding.repositories';
+export * from './ports/knowledge-document-identity.repository';
 export * from './ports/knowledge-note-projection.repository';
 export * from './ports/knowledge-attachment-projection.repository';
 export * from './ports/knowledge-attachment-content-cache.port';

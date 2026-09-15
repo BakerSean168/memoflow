@@ -44,13 +44,11 @@ export class CloneGoalUseCase {
 }
 
 function toCreateGoalReqFromCloneSource(
-  original: Pick<GoalClientDTO, 'name' | 'description' | 'feasibilityAnalysis' | 'motivation'>,
+  original: Pick<GoalClientDTO, 'name' | 'summary'>,
   params: CloneGoalReq,
 ): CreateGoalReq {
   return CreateGoalSchema.parse({
     name: params.name ?? `${original.name} (Copy)`,
-    description: params.description ?? original.description ?? undefined,
-    feasibilityAnalysis: original.feasibilityAnalysis ?? undefined,
-    motivation: original.motivation ?? undefined,
+    summary: params.summary ?? original.summary ?? undefined,
   });
 }

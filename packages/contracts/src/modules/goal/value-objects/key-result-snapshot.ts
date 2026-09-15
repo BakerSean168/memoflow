@@ -9,7 +9,7 @@ export const KeyResultSnapshotDTOSchema = z.object({
   title: z.string(),
   currentValue: z.number(),
   targetValue: z.number(),
-  progressBaselineValue: z.number().nullable(),
+  initialValue: z.number(),
   aggregationMethod: z.enum(KeyResultCalculationMethod),
   weight: z.number().int().min(1).max(5),
   progressPercentage: z.number().min(0).max(100),

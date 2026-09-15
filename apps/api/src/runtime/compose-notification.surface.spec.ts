@@ -26,7 +26,7 @@ describe('notification API runtime composer surface', () => {
   it('server.ts composes notification via composeNotification({ db: prisma, closureChecker, channelCapabilities })', () => {
     expect(server).toContain("from './runtime/compose-notification'");
     expect(server).toMatch(
-      /composeNotification\(\{\s*db: prisma,\s*closureChecker: accountActiveChecker,\s*channelCapabilities:/,
+      /composeNotification\(\{\s*db: prisma,\s*closureChecker: accountActiveChecker,\s*userTimeContextPort: settingApiModule\.userTimeContextPort,\s*channelCapabilities:/,
     );
     expect(server).toContain('.register(notificationApiModule.module)');
   });

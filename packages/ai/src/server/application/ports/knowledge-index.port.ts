@@ -1,8 +1,7 @@
 import type { KnowledgeIndexedNote } from './knowledge-ingestion.port';
 
 export interface KnowledgeIndexDiagnostics {
-  persistenceBackend:
-    'powersync-resource-metadata' | 'prisma-index-table';
+  persistenceBackend: 'powersync-local-knowledge-index' | 'prisma-index-table';
   persistenceStatus: 'enabled' | 'fallback';
   persistenceReason?: string;
   vectorRecallBackend: 'none' | 'local-js-hybrid' | 'pgvector-ivfflat';

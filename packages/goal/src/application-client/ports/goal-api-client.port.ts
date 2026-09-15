@@ -32,6 +32,12 @@ import type {
   DeleteGoalRecordReq,
   GetGoalRecordsRes,
   GetGoalAggregateRes,
+  GetGoalWorkspaceReq,
+  GoalWorkspaceReadModel,
+  GoalWorkspaceTaskPageRequest,
+  GoalWorkspaceTaskPage,
+  GoalWorkspacePageRequest,
+  GoalWorkspaceKnowledgePage,
 } from '@memoflow/contracts/goal';
 
 export interface IGoalApiClient {
@@ -44,15 +50,30 @@ export interface IGoalApiClient {
     status?: string[];
     systemView?: GoalSystemView;
     labelIdsAll?: string[];
-    startDate?: number;
-    endDate?: number;
+    targetStart?: import('@memoflow/contracts/primitives').Ymd;
+    targetEnd?: import('@memoflow/contracts/primitives').Ymd;
     includeChildren?: boolean;
   }): Promise<Result<QueryGoalsRes>>;
   getGoalById(id: string, includeChildren?: boolean): Promise<Result<GoalClientDTO>>;
   updateGoal(id: string, request: UpdateGoalReq): Promise<Result<GoalMutationReceipt>>;
   deleteGoal(id: string, request: DeleteGoalReq): Promise<Result<GoalMutationReceipt>>;
 
+  // Goal Workspace read composition
+  getGoalWorkspace(
+    goalId: string,
+    request?: GetGoalWorkspaceReq,
+  ): Promise<Result<GoalWorkspaceReadModel>>;
+  getGoalWorkspaceTasks(
+    goalId: string,
+    request?: GoalWorkspaceTaskPageRequest,
+  ): Promise<Result<GoalWorkspaceTaskPage>>;
+  getGoalWorkspaceKnowledge(
+    goalId: string,
+    request?: GoalWorkspacePageRequest,
+  ): Promise<Result<GoalWorkspaceKnowledgePage>>;
+
   // Goal Status
+  planGoal(id: string, expectedVersion: number): Promise<Result<GoalMutationReceipt>>;
   activateGoal(id: string, expectedVersion: number): Promise<Result<GoalMutationReceipt>>;
   completeGoal(id: string, expectedVersion: number): Promise<Result<GoalMutationReceipt>>;
   archiveGoal(id: string, expectedVersion: number): Promise<Result<GoalMutationReceipt>>;
@@ -97,7 +118,10 @@ export interface IGoalApiClient {
     request: CreateGoalReviewReq,
   ): Promise<Result<GoalMutationReceipt>>;
   getGoalReviewsByGoal(goalId: string): Promise<Result<GetGoalReviewsRes>>;
-  getGoalReviewContext(goalId: string, windowDays?: number): Promise<Result<GoalReviewSystemContext>>;
+  getGoalReviewContext(
+    goalId: string,
+    windowDays?: number,
+  ): Promise<Result<GoalReviewSystemContext>>;
   updateGoalReview(
     goalId: string,
     reviewId: string,

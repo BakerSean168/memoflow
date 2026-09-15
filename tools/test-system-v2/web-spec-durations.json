@@ -16,7 +16,7 @@
   "reminder/reminder-template-crud.spec.ts": { "durationMs": 82408 },
   "schedule/schedule-calendar.spec.ts": { "durationMs": 40637 },
   "task/task-completion-loop.spec.ts": { "durationMs": 18239 },
-  "task/task-template-crud.spec.ts": { "durationMs": 82285 },
+  "task/task-plan-crud.spec.ts": { "durationMs": 82285 },
   "user-settings/data-portability.spec.ts": { "durationMs": 100529 },
   "user-settings/notifications.spec.ts": { "durationMs": 49708 },
   "user-settings/persistence.spec.ts": { "durationMs": 55073 }

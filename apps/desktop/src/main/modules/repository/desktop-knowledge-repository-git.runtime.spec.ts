@@ -158,7 +158,9 @@ async function removeDirectoryQuietly(directory: string): Promise<void> {
 }
 
 afterEach(async () => {
-  await Promise.all(temporaryDirectories.splice(0).map((directory) => removeDirectoryQuietly(directory)));
+  await Promise.all(
+    temporaryDirectories.splice(0).map((directory) => removeDirectoryQuietly(directory)),
+  );
 });
 
 // Residual 1332: real multi-git flows exceed default 5s under concurrent suite load.
@@ -369,7 +371,7 @@ describe('DesktopKnowledgeRepositoryGitRuntime', { timeout: 30_000 }, () => {
       repositoryId: REPOSITORY_ID,
       repositoryFullName: REPOSITORY_FULL_NAME,
       defaultBranch: 'main',
-      lastSyncedCommitSha: remoteHeadBefore,
+      lastConfirmedRemoteHeadSha: remoteHeadBefore,
     });
 
     expect(prepared.localCommitCreated).toBe(true);
@@ -398,7 +400,7 @@ describe('DesktopKnowledgeRepositoryGitRuntime', { timeout: 30_000 }, () => {
       repositoryId: REPOSITORY_ID,
       repositoryFullName: REPOSITORY_FULL_NAME,
       defaultBranch: 'main',
-      lastSyncedCommitSha: initialized.headSha,
+      lastConfirmedRemoteHeadSha: initialized.headSha,
       token: TOKEN,
     });
 
@@ -433,7 +435,7 @@ describe('DesktopKnowledgeRepositoryGitRuntime', { timeout: 30_000 }, () => {
       repositoryId: REPOSITORY_ID,
       repositoryFullName: 'owner/renamed-knowledge',
       defaultBranch: 'main',
-      lastSyncedCommitSha: initialized.headSha,
+      lastConfirmedRemoteHeadSha: initialized.headSha,
       token: TOKEN,
     });
 
@@ -466,7 +468,7 @@ describe('DesktopKnowledgeRepositoryGitRuntime', { timeout: 30_000 }, () => {
       repositoryId: REPOSITORY_ID,
       repositoryFullName: REPOSITORY_FULL_NAME,
       defaultBranch: 'main',
-      lastSyncedCommitSha: initialized.headSha,
+      lastConfirmedRemoteHeadSha: initialized.headSha,
       token: TOKEN,
     });
 
@@ -498,7 +500,7 @@ describe('DesktopKnowledgeRepositoryGitRuntime', { timeout: 30_000 }, () => {
       repositoryId: REPOSITORY_ID,
       repositoryFullName: REPOSITORY_FULL_NAME,
       defaultBranch: 'main',
-      lastSyncedCommitSha: initialized.headSha,
+      lastConfirmedRemoteHeadSha: initialized.headSha,
       token: TOKEN,
     });
 
@@ -541,7 +543,7 @@ describe('DesktopKnowledgeRepositoryGitRuntime', { timeout: 30_000 }, () => {
         repositoryId: REPOSITORY_ID,
         repositoryFullName: REPOSITORY_FULL_NAME,
         defaultBranch: 'main',
-        lastSyncedCommitSha: initialized.headSha,
+        lastConfirmedRemoteHeadSha: initialized.headSha,
         token: TOKEN,
       }),
     ).rejects.toMatchObject({
@@ -562,7 +564,7 @@ describe('DesktopKnowledgeRepositoryGitRuntime', { timeout: 30_000 }, () => {
         repositoryId: REPOSITORY_ID,
         repositoryFullName: REPOSITORY_FULL_NAME,
         defaultBranch: 'main',
-        lastSyncedCommitSha: initialized.headSha,
+        lastConfirmedRemoteHeadSha: initialized.headSha,
       }),
     ).rejects.toMatchObject({
       code: 'CONFLICT',
@@ -599,7 +601,7 @@ describe('DesktopKnowledgeRepositoryGitRuntime', { timeout: 30_000 }, () => {
         repositoryId: REPOSITORY_ID,
         repositoryFullName: REPOSITORY_FULL_NAME,
         defaultBranch: 'main',
-        lastSyncedCommitSha: initialized.headSha,
+        lastConfirmedRemoteHeadSha: initialized.headSha,
         token: TOKEN,
       }),
     ).rejects.toMatchObject({
@@ -640,7 +642,7 @@ describe('DesktopKnowledgeRepositoryGitRuntime', { timeout: 30_000 }, () => {
       repositoryId: REPOSITORY_ID,
       repositoryFullName: REPOSITORY_FULL_NAME,
       defaultBranch: 'main',
-      lastSyncedCommitSha: initialized.headSha,
+      lastConfirmedRemoteHeadSha: initialized.headSha,
       token: TOKEN,
     });
 

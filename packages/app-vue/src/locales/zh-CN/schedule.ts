@@ -44,7 +44,8 @@ export default {
     "taskPaused": "调度任务已暂停",
     "taskResumed": "调度任务已恢复",
     "taskDeleted": "调度任务已删除",
-    "scheduleCreated": "日程已创建"
+    "scheduleCreated": "日程已创建",
+    "scheduleCreatedRefreshFailed": "日程已创建，但规划视图刷新失败。请刷新页面以重新加载最新状态。"
   },
   "confirm": {
     "deleteTask": "确认删除调度「{name}」？",

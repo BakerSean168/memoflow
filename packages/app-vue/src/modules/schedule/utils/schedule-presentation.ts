@@ -89,7 +89,9 @@ export function getHealthStatusLabel(
 /**
  * Computes health status from consecutive failure count.
  */
-export function computeHealthStatus(consecutiveFailures: number): 'healthy' | 'warning' | 'critical' {
+export function computeHealthStatus(
+  consecutiveFailures: number,
+): 'healthy' | 'warning' | 'critical' {
   if (consecutiveFailures === 0) return 'healthy';
   if (consecutiveFailures < 3) return 'warning';
   return 'critical';
@@ -100,7 +102,7 @@ export function computeHealthStatus(consecutiveFailures: number): 'healthy' | 'w
  * Not an L5 formatDate* wrapper — module presentation sole for schedule lists.
  */
 export function formatScheduleTimestamp(timestamp: number | null | undefined): string {
-  if (!timestamp) return getProductTime().style.empty.display;
+  if (!timestamp) return getProductTime().presentation.empty.display;
   return getProductTime().format.dateTime(timestamp);
 }
 

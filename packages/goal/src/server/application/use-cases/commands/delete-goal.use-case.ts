@@ -10,6 +10,7 @@ import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
 import { createGoalMutationReceipt } from './goal-mutation-receipt';
 import type { GoalDependencyReadPort } from '@memoflow/contracts/reliable-messaging';
+import type { GoalDeletionTransactionRunner } from './goal-deletion-support';
 
 /**
  * Delete Goal Use Case
@@ -21,9 +22,15 @@ export class DeleteGoalUseCase {
     private readonly goalRepository: IGoalRepository,
     private readonly goalPolicy: GoalPolicy,
     private readonly taskBindingReadPort: GoalDependencyReadPort,
+    private readonly deletionTransactionRunner: GoalDeletionTransactionRunner,
   ) {
     if (!taskBindingReadPort) {
       throw new Error('ITaskBindingReadPort must be explicitly provided to DeleteGoalUseCase');
+    }
+    if (!deletionTransactionRunner) {
+      throw new Error(
+        'GoalDeletionTransactionRunner must be explicitly provided to DeleteGoalUseCase',
+      );
     }
   }
 
@@ -57,7 +64,10 @@ export class DeleteGoalUseCase {
     const keyResultCount = keyResults.length;
     const reviewCount = goalReviews.length;
 
-    const bindingCheck = await this.taskBindingReadPort.checkActiveTaskBindings({ identityId, goalId: id });
+    const bindingCheck = await this.taskBindingReadPort.checkActiveTaskBindings({
+      identityId,
+      goalId: id,
+    });
     const taskBindingCount = bindingCheck.activeCount;
 
     const warnings: string[] = [];
@@ -94,32 +104,38 @@ export class DeleteGoalUseCase {
     identityId: string,
     expectedVersion: number,
   ): Promise<Result<GoalMutationReceipt>> {
-    const goal = await this.goalRepository.findByIdForIdentity(identityId, id, {
-      includeChildren: true,
-    });
-    if (!goal) {
-      return error('NOT_FOUND', `Goal not found: ${id}`);
-    }
-    if (expectedVersion !== goal.version) {
-      return error('CONFLICT', 'Goal has been modified by another client');
-    }
-
-    const bindingCheck = await this.taskBindingReadPort.checkActiveTaskBindings({ identityId, goalId: id });
-    if (bindingCheck.activeCount > 0) {
-      return error(
-        'CONFLICT',
-        `Goal has ${bindingCheck.activeCount} active task binding(s); delete rejected`,
-      );
-    }
-
-    goal.softDelete();
-    goal.advanceVersion();
     try {
-      await this.goalRepository.saveRootWithExpectedVersion(goal, expectedVersion);
+      return await this.deletionTransactionRunner.run(
+        async ({ goalRepository, relationCleanup }) => {
+          const goal = await goalRepository.findByIdForIdentity(identityId, id, {
+            includeChildren: true,
+          });
+          if (!goal) return error('NOT_FOUND', `Goal not found: ${id}`);
+          if (expectedVersion !== goal.version) {
+            return error('CONFLICT', 'Goal has been modified by another client');
+          }
+
+          const bindingCheck = await this.taskBindingReadPort.checkActiveTaskBindings({
+            identityId,
+            goalId: id,
+          });
+          if (bindingCheck.activeCount > 0) {
+            return error(
+              'CONFLICT',
+              `Goal has ${bindingCheck.activeCount} active task binding(s); delete rejected`,
+            );
+          }
+
+          goal.softDelete();
+          goal.advanceVersion();
+          await goalRepository.saveRootWithExpectedVersion(goal, expectedVersion);
+          await relationCleanup.unlinkAllForGoal(identityId, id);
+          return ok(createGoalMutationReceipt(goal));
+        },
+      );
     } catch (cause) {
       if (cause instanceof GoalVersionConflictError) return error('CONFLICT', cause.message);
       throw cause;
     }
-    return ok(createGoalMutationReceipt(goal));
   }
 }

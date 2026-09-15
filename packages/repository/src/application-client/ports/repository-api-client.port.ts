@@ -7,7 +7,7 @@
 
 import type { Result } from '@memoflow/contracts/result';
 import type {
-  LocalVaultBindingClientDTO,
+  LocalVaultBindingSnapshotDTO,
   SelectLocalVaultReq,
   ScanLocalVaultRes,
   ReadLocalVaultNoteReq,
@@ -20,7 +20,7 @@ import type {
   CompleteKnowledgeRepositoryInstallationReq,
   CompleteKnowledgeRepositoryInstallationRes,
   CreateKnowledgeRepositoryConnectionReq,
-  KnowledgeRepositoryConnectionClientDTO,
+  KnowledgeRemoteBindingClientDTO,
   KnowledgeRepositoryInstallationTokenRes,
   KnowledgeRepositoryInstallationIntentStatusResponse,
   KnowledgeRepositoryReconciliationPreview,
@@ -34,6 +34,8 @@ import type {
   SyncKnowledgeRepositoryRes,
   CreateConfirmedKnowledgeNoteReq,
   CreateConfirmedKnowledgeNoteResponse,
+  AdoptKnowledgeDocumentReq,
+  AdoptKnowledgeDocumentResponse,
   KnowledgeNoteProjectionClientDTO,
   KnowledgeNoteProjectionListResponse,
   ListKnowledgeNoteProjectionsReq,
@@ -61,9 +63,12 @@ export interface IRepositoryApiClient {
     intentId: string,
   ): Promise<Result<CompleteKnowledgeRepositoryInstallationRes>>;
   listKnowledgeRepositoryConnections(): Promise<Result<ListKnowledgeRepositoryConnectionsRes>>;
+  refreshKnowledgeRepositoryObservation(
+    connectionId: string,
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>>;
   connectKnowledgeRepository(
     request: CreateKnowledgeRepositoryConnectionReq,
-  ): Promise<Result<KnowledgeRepositoryConnectionClientDTO>>;
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>>;
   disconnectKnowledgeRepository(
     connectionId: string,
     purgeCloudData?: boolean,
@@ -100,6 +105,9 @@ export interface IRepositoryApiClient {
   createConfirmedKnowledgeNote(
     request: CreateConfirmedKnowledgeNoteReq,
   ): Promise<Result<CreateConfirmedKnowledgeNoteResponse>>;
+  adoptKnowledgeDocument(
+    request: AdoptKnowledgeDocumentReq,
+  ): Promise<Result<AdoptKnowledgeDocumentResponse>>;
   listKnowledgeWriteRequests(
     request?: ListKnowledgeWriteRequestsReq,
   ): Promise<Result<ListKnowledgeWriteRequestsRes>>;
@@ -107,10 +115,10 @@ export interface IRepositoryApiClient {
     writeRequestId: string,
   ): Promise<Result<KnowledgeWriteRequestReplayResponse>>;
 
-  getLocalVaultBinding(): Promise<Result<LocalVaultBindingClientDTO | null>>;
+  getLocalVaultBinding(): Promise<Result<LocalVaultBindingSnapshotDTO | null>>;
   selectLocalVault(
     request?: SelectLocalVaultReq,
-  ): Promise<Result<LocalVaultBindingClientDTO | null>>;
+  ): Promise<Result<LocalVaultBindingSnapshotDTO | null>>;
   detachLocalVault(): Promise<Result<void>>;
   scanLocalVault(): Promise<Result<ScanLocalVaultRes>>;
   readLocalVaultNote(request: ReadLocalVaultNoteReq): Promise<Result<ReadLocalVaultNoteRes>>;

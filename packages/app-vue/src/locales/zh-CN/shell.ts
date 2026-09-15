@@ -1,7 +1,6 @@
 export default {
   "newChat": "新对话",
   "search": "搜索",
-  "help": "帮助",
   "guest": "本地访客",
   "back": "后退",
   "forward": "前进",
@@ -82,13 +81,6 @@ export default {
     "logout": "退出登录",
     "loginOrRegister": "登录/注册",
     "connectCloud": "连接 MemoFlow 账号"
-  },
-  "helpMenu": {
-    "shortcuts": "快捷键",
-    "guide": "使用指南",
-    "feedback": "问题反馈",
-    "about": "关于",
-    "soon": "即将推出"
   },
   "auth": {
     "unverifiedBanner": "验证邮箱后可解锁全部功能",

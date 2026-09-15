@@ -8,11 +8,11 @@
  */
 
 import { defineStore } from 'pinia';
-import type { TaskInstanceClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
 
 export interface TaskState {
-  instances: TaskInstanceClientDTO[];
-  currentInstance: TaskInstanceClientDTO | null;
+  instances: TaskOccurrenceClientDTO[];
+  currentInstance: TaskOccurrenceClientDTO | null;
   isLoading: boolean;
   error: string | null;
   pagination: { page: number; pageSize: number };
@@ -34,13 +34,13 @@ export const useTaskStore = defineStore('task', {
   },
 
   actions: {
-    setInstances(i: TaskInstanceClientDTO[]) {
+    setInstances(i: TaskOccurrenceClientDTO[]) {
       this.instances = i;
     },
-    addInstance(i: TaskInstanceClientDTO) {
+    addInstance(i: TaskOccurrenceClientDTO) {
       this.instances.push(i);
     },
-    updateInstance(i: TaskInstanceClientDTO) {
+    updateInstance(i: TaskOccurrenceClientDTO) {
       const idx = this.instances.findIndex((x) => x.id === i.id);
       if (idx !== -1) this.instances[idx] = i;
       if (this.currentInstance?.id === i.id) this.currentInstance = i;
@@ -48,7 +48,7 @@ export const useTaskStore = defineStore('task', {
     removeInstance(id: string) {
       this.instances = this.instances.filter((i) => i.id !== id);
     },
-    setCurrentInstance(i: TaskInstanceClientDTO | null) {
+    setCurrentInstance(i: TaskOccurrenceClientDTO | null) {
       this.currentInstance = i;
     },
     setLoading(v: boolean) {

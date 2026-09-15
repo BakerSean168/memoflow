@@ -16,10 +16,7 @@ import { describe, expect, it } from 'vitest';
    */
   describe('github installation repository dual retired (residual 701)', () => {
     const apiDir = __dirname;
-    const dto = readFileSync(
-      resolve(apiDir, 'knowledge-repository-connection.dto.ts'),
-      'utf8',
-    );
+    const dto = readFileSync(resolve(apiDir, 'knowledge-repository-connection.dto.ts'), 'utf8');
     const routes = readFileSync(
       resolve(
         apiDir,
@@ -31,9 +28,7 @@ import { describe, expect, it } from 'vitest';
     it('exports GitHubInstallationRepositorySchema as sole repository shape', () => {
       expect(dto).toContain('Residual 701');
       expect(dto).toContain('export const GitHubInstallationRepositorySchema = z.object({');
-      expect(dto).toContain(
-        'repositories: z.array(GitHubInstallationRepositorySchema)',
-      );
+      expect(dto).toContain('repositories: z.array(GitHubInstallationRepositorySchema)');
     });
 
     it('semantic DTO type is z.infer alias without interface dual body', () => {
@@ -53,45 +48,45 @@ import { describe, expect, it } from 'vitest';
 // --- merged from knowledge-connection-client-dto-dual.surface.spec.ts ---
 {
   /**
-   * Residual 803: KnowledgeRepositoryConnectionClientDTO dual body retired.
-   * Sole KnowledgeRepositoryConnectionClientSchema + z.infer (no installation tokens).
-   * ServerDTO remains aggregate-owned (extra lastErrorMessage/version/deletedAt).
+   * Residual 803 + ADR-089: KnowledgeRemoteBindingClientDTO has one composed schema.
+   * Durable binding lives in the aggregate; observation/history/projection remain independent axes.
+   * ServerDTO adds only technical optimistic-concurrency version metadata.
    */
   describe('knowledge connection client dto dual retired (residual 803)', () => {
     const apiDir = __dirname;
     const dto = readFileSync(resolve(apiDir, 'knowledge-repository-connection.dto.ts'), 'utf8');
     const aggregate = readFileSync(
-      resolve(apiDir, '../aggregates/knowledge-repository-connection.ts'),
+      resolve(apiDir, '../aggregates/knowledge-remote-binding.ts'),
       'utf8',
     );
 
-    it('owns ClientDTO as z.infer of KnowledgeRepositoryConnectionClientSchema', () => {
-      expect(dto).toContain('Residual 803');
+    it('owns ClientDTO as z.infer of KnowledgeRemoteBindingClientSchema', () => {
+      expect(aggregate).toContain('ADR-089 canonical remote knowledge-source contracts');
       expect(dto).toContain(
-        'export const KnowledgeRepositoryConnectionClientSchema = z.object({',
+        'export const KnowledgeRemoteBindingClientSchema = KnowledgeRemoteBindingSchema.extend({',
       );
-      expect(dto).toContain(
-        'export type KnowledgeRepositoryConnectionClientDTO = z.infer<',
-      );
-      expect(dto).toContain('typeof KnowledgeRepositoryConnectionClientSchema');
-      expect(dto).not.toMatch(/export interface KnowledgeRepositoryConnectionClientDTO\b/);
+      expect(dto).toContain('export type KnowledgeRemoteBindingClientDTO = z.infer<');
+      expect(dto).toContain('typeof KnowledgeRemoteBindingClientSchema');
+      expect(dto).not.toMatch(/export interface KnowledgeRemoteBindingClientDTO\b/);
     });
 
-    it('drops aggregate ClientDTO interface dual; keeps ServerDTO', () => {
-      expect(aggregate).toContain('Residual 803');
-      expect(aggregate).not.toMatch(/export interface KnowledgeRepositoryConnectionClientDTO\b/);
-      expect(aggregate).toContain('export interface KnowledgeRepositoryConnectionServerDTO');
-      expect(aggregate).toContain('lastErrorMessage: string | null');
-      expect(aggregate).toContain('version: number');
-      expect(aggregate).toContain('deletedAt: TransferDate | null');
+    it('keeps durable binding and server concurrency metadata aggregate-owned', () => {
+      expect(aggregate).toContain('ADR-089 canonical remote knowledge-source contracts');
+      expect(aggregate).toContain('export const KnowledgeRemoteBindingSchema = z');
+      expect(aggregate).not.toMatch(/export interface KnowledgeRemoteBindingClientDTO\b/);
+      expect(aggregate).toContain('export interface KnowledgeRemoteBindingServerDTO');
+      expect(aggregate).toContain('readonly version: number');
+      expect(aggregate).not.toMatch(
+        /lastErrorMessage|lastSyncedCommitSha|lastProjectedCommitSha|canSync/,
+      );
     });
 
-    it('ClientSchema never carries installation tokens or private keys', () => {
-      expect(dto).toContain('canSync: z.boolean()');
-      expect(dto).toContain('installationId: z.string().min(1)');
+    it('ClientSchema composes independent observation, history fence and projection checkpoint axes', () => {
+      expect(dto).toContain('observation: RemoteRepositoryObservationSchema.nullable()');
+      expect(dto).toContain('historyFence: RemoteHistoryFenceSchema.nullable()');
+      expect(dto).toContain('projectionCheckpoint: KnowledgeProjectionCheckpointSchema.nullable()');
       expect(dto).not.toMatch(/installationToken|privateKey|accessToken|clientSecret/);
-      expect(dto).toContain('lastSyncedCommitSha: z.string().nullable()');
-      expect(dto).toContain('lastProjectedCommitSha: z.string().nullable().optional()');
+      expect(dto).not.toMatch(/lastSyncedCommitSha|lastProjectedCommitSha|canSync/);
     });
   });
 }
@@ -104,10 +99,7 @@ import { describe, expect, it } from 'vitest';
    */
   describe('knowledge installation res dual retired (residual 699)', () => {
     const apiDir = __dirname;
-    const dto = readFileSync(
-      resolve(apiDir, 'knowledge-repository-connection.dto.ts'),
-      'utf8',
-    );
+    const dto = readFileSync(resolve(apiDir, 'knowledge-repository-connection.dto.ts'), 'utf8');
     const routes = readFileSync(
       resolve(
         apiDir,
@@ -118,33 +110,17 @@ import { describe, expect, it } from 'vitest';
 
     it('exports installation ResponseSchemas as sole response shapes', () => {
       expect(dto).toContain('Residual 699');
-      expect(dto).toContain(
-        'export const StartKnowledgeRepositoryInstallationResponseSchema',
-      );
-      expect(dto).toContain(
-        'export const CompleteKnowledgeRepositoryInstallationResponseSchema',
-      );
+      expect(dto).toContain('export const StartKnowledgeRepositoryInstallationResponseSchema');
+      expect(dto).toContain('export const CompleteKnowledgeRepositoryInstallationResponseSchema');
     });
 
     it('semantic installation Res types are z.infer aliases without interface dual bodies', () => {
-      expect(dto).toContain(
-        'export type StartKnowledgeRepositoryInstallationRes = z.infer<',
-      );
-      expect(dto).toContain(
-        'typeof StartKnowledgeRepositoryInstallationResponseSchema',
-      );
-      expect(dto).toContain(
-        'export type CompleteKnowledgeRepositoryInstallationRes = z.infer<',
-      );
-      expect(dto).toContain(
-        'typeof CompleteKnowledgeRepositoryInstallationResponseSchema',
-      );
-      expect(dto).not.toMatch(
-        /export interface StartKnowledgeRepositoryInstallationRes\b/,
-      );
-      expect(dto).not.toMatch(
-        /export interface CompleteKnowledgeRepositoryInstallationRes\b/,
-      );
+      expect(dto).toContain('export type StartKnowledgeRepositoryInstallationRes = z.infer<');
+      expect(dto).toContain('typeof StartKnowledgeRepositoryInstallationResponseSchema');
+      expect(dto).toContain('export type CompleteKnowledgeRepositoryInstallationRes = z.infer<');
+      expect(dto).toContain('typeof CompleteKnowledgeRepositoryInstallationResponseSchema');
+      expect(dto).not.toMatch(/export interface StartKnowledgeRepositoryInstallationRes\b/);
+      expect(dto).not.toMatch(/export interface CompleteKnowledgeRepositoryInstallationRes\b/);
     });
 
     it('OpenAPI knowledge connection routes use installation ResponseSchemas only', () => {
@@ -152,9 +128,7 @@ import { describe, expect, it } from 'vitest';
       expect(routes).toContain(
         'successResponse(StartKnowledgeRepositoryInstallationResponseSchema',
       );
-      expect(routes).toContain(
-        'CompleteKnowledgeRepositoryInstallationResponseSchema',
-      );
+      expect(routes).toContain('CompleteKnowledgeRepositoryInstallationResponseSchema');
       expect(routes).toContain(
         'successResponse(CompleteKnowledgeRepositoryInstallationResponseSchema',
       );
@@ -204,8 +178,7 @@ import { describe, expect, it } from 'vitest';
       expect(controller).toContain('ListKnowledgeProjectionsSchema');
       expect(controller).not.toContain('ListKnowledgeNoteProjectionsSchema');
       expect(controller).not.toContain('ListKnowledgeAttachmentProjectionsSchema');
-      const parseHits =
-        controller.split('ListKnowledgeProjectionsSchema.safeParse').length - 1;
+      const parseHits = controller.split('ListKnowledgeProjectionsSchema.safeParse').length - 1;
       expect(parseHits).toBeGreaterThanOrEqual(2);
     });
   });
@@ -231,9 +204,7 @@ import { describe, expect, it } from 'vitest';
     });
 
     it('disconnect still extends the shared connection params schema', () => {
-      expect(dto).toContain(
-        'KnowledgeRepositoryConnectionParamsSchema.extend({',
-      );
+      expect(dto).toContain('KnowledgeRepositoryConnectionParamsSchema.extend({');
     });
 
     it('desktop sync service parses KnowledgeRepositoryConnectionParamsSchema only', () => {
@@ -247,7 +218,6 @@ import { describe, expect, it } from 'vitest';
       expect(desktop).toContain('KnowledgeRepositoryConnectionParamsSchema.safeParse');
       expect(desktop).not.toContain('SyncKnowledgeRepositorySchema');
     });
-
   });
 }
 
@@ -256,29 +226,22 @@ import { describe, expect, it } from 'vitest';
   /**
    * Residual 773: ListKnowledgeRepositoryConnectionsRes dual body retired.
    * Res is z.infer of ListKnowledgeRepositoryConnectionsResSchema.
-   * Soft residual 803: nested KnowledgeRepositoryConnectionClientDTO dual retired via ClientSchema
+   * Soft residual 803: nested KnowledgeRemoteBindingClientDTO dual retired via ClientSchema
    * (see knowledge-connection-client-dto-dual surface; not asserted here to avoid dual-surface lock drift).
    */
   describe('list knowledge connections res dual retired (residual 773)', () => {
-    const dto = readFileSync(
-      resolve(__dirname, 'knowledge-repository-connection.dto.ts'),
-      'utf8',
-    );
+    const dto = readFileSync(resolve(__dirname, 'knowledge-repository-connection.dto.ts'), 'utf8');
 
     it('owns sole list ResSchema body', () => {
       expect(dto).toContain('Residual 773');
       expect(dto).toContain(
         'export const ListKnowledgeRepositoryConnectionsResSchema = z.object({',
       );
-      expect(dto).toContain(
-        'connections: z.array(KnowledgeRepositoryConnectionClientSchema)',
-      );
+      expect(dto).toContain('connections: z.array(KnowledgeRemoteBindingClientSchema)');
     });
 
     it('Res type is z.infer alias without object dual body', () => {
-      expect(dto).toContain(
-        'export type ListKnowledgeRepositoryConnectionsRes = z.infer<',
-      );
+      expect(dto).toContain('export type ListKnowledgeRepositoryConnectionsRes = z.infer<');
       expect(dto).toContain('typeof ListKnowledgeRepositoryConnectionsResSchema');
       expect(dto).not.toMatch(
         /export type ListKnowledgeRepositoryConnectionsRes = \{\s*connections:/,
@@ -287,7 +250,7 @@ import { describe, expect, it } from 'vitest';
 
     it('nested connection transport uses ClientSchema', () => {
       expect(dto).toContain(
-        'export const KnowledgeRepositoryConnectionClientSchema = z.object({',
+        'export const KnowledgeRemoteBindingClientSchema = KnowledgeRemoteBindingSchema.extend({',
       );
     });
   });

@@ -25,6 +25,7 @@ import type {
   UpcomingReminderDTO,
 } from '@memoflow/contracts/reminder';
 import { InvalidTimezoneError } from '../errors/reminder-errors';
+import { addYmdDays, asHm, asYmd, createTimeContext, createTimeFacade } from '@memoflow/time';
 
 const REMINDER_CALCULATION_DEBUG =
   typeof process !== 'undefined' && process.env.DEBUG_REMINDER_CALCULATION === 'true';
@@ -46,6 +47,17 @@ function debugUpcomingReminderCalculation(message: string, payload?: unknown): v
  * 即将到来的提醒计算服务
  */
 export class UpcomingReminderCalculationService {
+  private static productTime(timezone?: string | null) {
+    const timeZone = timezone && timezone.trim().length > 0 ? timezone : 'UTC';
+    try {
+      return createTimeFacade({
+        context: createTimeContext({ timeZone, weekStartsOn: 1 }),
+      });
+    } catch {
+      throw new InvalidTimezoneError(timeZone);
+    }
+  }
+
   /**
    * 计算即将到来的提醒列表
    *
@@ -69,21 +81,20 @@ export class UpcomingReminderCalculationService {
       timezone = null,
     } = options;
 
-    if (timezone) {
-      this.validateTimezone(timezone);
-    }
+    const effectiveTimezone = timezone && timezone.trim().length > 0 ? timezone : 'UTC';
+    const queryTime = this.productTime(effectiveTimezone);
+
+    // `days` is a Product Time calendar-day horizon, not a fixed N×24h duration.
+    const endTime = Number(queryTime.calendar.addDays(afterTime, days));
 
     debugUpcomingReminderCalculation('📊 [UpcomingReminderCalculation] 开始计算', {
       remindersCount: reminders.length,
       days,
       limit,
       afterTime: new Date(afterTime).toISOString(),
-      endTime: new Date(afterTime + days * 24 * 60 * 60 * 1000).toISOString(),
-      timezone,
+      endTime: new Date(endTime).toISOString(),
+      timezone: effectiveTimezone,
     });
-
-    // 计算查询范围
-    const endTime = afterTime + days * 24 * 60 * 60 * 1000;
 
     const upcomingReminders: UpcomingReminderDTO[] = [];
 
@@ -118,7 +129,7 @@ export class UpcomingReminderCalculationService {
             nextTriggerAt: new Date(reminder.nextTriggerAt).toISOString(),
           },
         );
-        const dto = this.convertToUpcomingDTO(reminder, afterTime, timezone);
+        const dto = this.convertToUpcomingDTO(reminder, afterTime, effectiveTimezone);
         if (dto) {
           upcomingReminders.push(dto);
         }
@@ -153,7 +164,7 @@ export class UpcomingReminderCalculationService {
           const dto = this.convertToUpcomingDTO(
             { ...reminder, nextTriggerAt: nextTrigger },
             afterTime,
-            timezone,
+            effectiveTimezone,
           );
           if (dto) {
             upcomingReminders.push(dto);
@@ -225,14 +236,8 @@ export class UpcomingReminderCalculationService {
    * 如果 timezone 非空且无效，抛出 Error (fail-fast)。
    */
   public static validateTimezone(timezone?: string | null): void {
-    if (!timezone) {
-      return;
-    }
-    try {
-      Intl.DateTimeFormat(undefined, { timeZone: timezone });
-    } catch {
-      throw new InvalidTimezoneError(timezone);
-    }
+    if (!timezone) return;
+    void this.productTime(timezone);
   }
 
   private static getZonedEpochMs(
@@ -243,41 +248,18 @@ export class UpcomingReminderCalculationService {
     minute: number,
     timezone?: string | null,
   ): number {
-    if (!timezone) {
-      return new Date(year, month - 1, day, hour, minute, 0, 0).getTime();
+    const time = this.productTime(timezone);
+    const ymd = asYmd(
+      String(year).padStart(4, '0') + '-' +
+        String(month).padStart(2, '0') + '-' +
+        String(day).padStart(2, '0'),
+    );
+    const hm = asHm(String(hour).padStart(2, '0') + ':' + String(minute).padStart(2, '0'));
+    const resolved = time.input.combine(ymd, hm);
+    if (resolved == null) {
+      throw new TypeError('Unable to resolve reminder wall clock ' + ymd + ' ' + hm);
     }
-    this.validateTimezone(timezone);
-    if (timezone === 'UTC') {
-      return Date.UTC(year, month - 1, day, hour, minute, 0, 0);
-    }
-
-    let utcGuess = Date.UTC(year, month - 1, day, hour, minute, 0, 0);
-    for (let i = 0; i < 3; i++) {
-      const formatter = new Intl.DateTimeFormat('en-US', {
-        timeZone: timezone,
-        year: 'numeric',
-        month: 'numeric',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric',
-        hourCycle: 'h23',
-      });
-      const parts = formatter.formatToParts(new Date(utcGuess));
-      const bag: Record<string, number> = {};
-      for (const p of parts) {
-        if (p.type !== 'literal') {
-          bag[p.type] = parseInt(p.value, 10);
-        }
-      }
-      const h = (bag.hour ?? 0) % 24;
-      const asUtc = Date.UTC(bag.year, (bag.month ?? 1) - 1, bag.day ?? 1, h, bag.minute ?? 0, 0, 0);
-      const desired = Date.UTC(year, month - 1, day, hour, minute, 0, 0);
-      const delta = desired - asUtc;
-      if (delta === 0) break;
-      utcGuess += delta;
-    }
-    return utcGuess;
+    return Number(resolved);
   }
 
   /**
@@ -297,29 +279,11 @@ export class UpcomingReminderCalculationService {
 
       this.validateTimezone(tz);
 
-      let y: number, m: number, d: number;
-      if (tz !== 'UTC') {
-        const formatter = new Intl.DateTimeFormat('en-US', {
-          timeZone: tz,
-          year: 'numeric',
-          month: 'numeric',
-          day: 'numeric',
-          hourCycle: 'h23',
-        });
-        const parts = formatter.formatToParts(new Date(reminder.activeTime.activatedAt));
-        const bag: Record<string, number> = {};
-        for (const p of parts) {
-          if (p.type !== 'literal') bag[p.type] = parseInt(p.value, 10);
-        }
-        y = bag.year;
-        m = bag.month;
-        d = bag.day;
-      } else {
-        const dateObj = new Date(reminder.activeTime.activatedAt);
-        y = dateObj.getUTCFullYear();
-        m = dateObj.getUTCMonth() + 1;
-        d = dateObj.getUTCDate();
-      }
+      const [y, m, d] = String(
+        this.productTime(tz).calendar.toYmd(reminder.activeTime.activatedAt),
+      )
+        .split('-')
+        .map(Number);
 
       const triggerTime = this.getZonedEpochMs(y, m, d, targetHour, targetMinute, tz);
 
@@ -364,40 +328,10 @@ export class UpcomingReminderCalculationService {
 
     this.validateTimezone(tz);
 
-    let startYear: number;
-    let startMonth: number;
-    let startDay: number;
-
-    if (tz !== 'UTC') {
-      const formatter = new Intl.DateTimeFormat('en-US', {
-        timeZone: tz,
-        year: 'numeric',
-        month: 'numeric',
-        day: 'numeric',
-        hourCycle: 'h23',
-      });
-      const parts = formatter.formatToParts(new Date(afterTime));
-      const bag: Record<string, number> = {};
-      for (const p of parts) {
-        if (p.type !== 'literal') bag[p.type] = parseInt(p.value, 10);
-      }
-      startYear = bag.year;
-      startMonth = bag.month;
-      startDay = bag.day;
-    } else {
-      const d = new Date(afterTime);
-      startYear = d.getUTCFullYear();
-      startMonth = d.getUTCMonth() + 1;
-      startDay = d.getUTCDate();
-    }
-
-    const baseUtc = Date.UTC(startYear, startMonth - 1, startDay);
+    const startYmd = this.productTime(tz).calendar.toYmd(afterTime);
 
     for (let daysOffset = 0; daysOffset < 365; daysOffset++) {
-      const curDate = new Date(baseUtc + daysOffset * 86400000);
-      const y = curDate.getUTCFullYear();
-      const m = curDate.getUTCMonth() + 1;
-      const d = curDate.getUTCDate();
+      const [y, m, d] = String(addYmdDays(startYmd, daysOffset)).split('-').map(Number);
 
       const triggerTime = this.getZonedEpochMs(y, m, d, targetHour, targetMinute, tz);
 
@@ -464,7 +398,11 @@ export class UpcomingReminderCalculationService {
     }
 
     const nextTriggerAt = reminder.nextTriggerAt;
-    const daysUntilTrigger = Math.ceil((nextTriggerAt - baseTime) / (24 * 60 * 60 * 1000));
+    const queryTimezone = effectiveTimezone?.trim() || 'UTC';
+    const daysUntilTrigger = this.productTime(queryTimezone).calendar.diffCalendarDays(
+      nextTriggerAt,
+      baseTime,
+    );
 
     const tz =
       reminder.trigger.type === TriggerType.FixedTime
@@ -491,42 +429,7 @@ export class UpcomingReminderCalculationService {
    * 格式化时间戳为可读字符串（按指定 IANA 时区格式化，禁止依赖宿主进程 TZ）
    */
   private static formatDateTime(timestamp: number, timezone?: string | null): string {
-    const tz = timezone || 'UTC';
-    this.validateTimezone(tz);
-
-    if (tz === 'UTC') {
-      const d = new Date(timestamp);
-      const year = d.getUTCFullYear();
-      const month = String(d.getUTCMonth() + 1).padStart(2, '0');
-      const day = String(d.getUTCDate()).padStart(2, '0');
-      const hours = String(d.getUTCHours()).padStart(2, '0');
-      const minutes = String(d.getUTCMinutes()).padStart(2, '0');
-      return `${year}-${month}-${day} ${hours}:${minutes}`;
-    }
-
-    const formatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: tz,
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      hourCycle: 'h23',
-    });
-    const parts = formatter.formatToParts(new Date(timestamp));
-    const bag: Record<string, number> = {};
-    for (const p of parts) {
-      if (p.type !== 'literal') bag[p.type] = parseInt(p.value, 10);
-    }
-    const yearStr = String(bag.year);
-    const monthStr = String(bag.month).padStart(2, '0');
-    const dayStr = String(bag.day).padStart(2, '0');
-    let hourNum = bag.hour;
-    if (hourNum === 24) hourNum = 0;
-    const hourStr = String(hourNum).padStart(2, '0');
-    const minuteStr = String(bag.minute).padStart(2, '0');
-
-    return `${yearStr}-${monthStr}-${dayStr} ${hourStr}:${minuteStr}`;
+    return this.productTime(timezone).format.pattern(timestamp, 'yyyy-MM-dd HH:mm');
   }
 
   /**
@@ -595,6 +498,7 @@ export class UpcomingReminderCalculationService {
         todayEnd,
         maxItemsPerReminder,
         effectiveTz,
+        now,
       );
 
       debugUpcomingReminderCalculation(
@@ -636,6 +540,7 @@ export class UpcomingReminderCalculationService {
     todayEnd: number,
     maxItems: number,
     effectiveTimezone?: string | null,
+    baseTime: number = Date.now(),
   ): UpcomingReminderDTO[] {
     const result: UpcomingReminderDTO[] = [];
     const trigger = reminder.trigger as TriggerConfigDTO;
@@ -647,6 +552,8 @@ export class UpcomingReminderCalculationService {
         trigger.fixedTime,
         todayStart,
         todayEnd,
+        effectiveTimezone,
+        baseTime,
       );
       result.push(...triggerTimes.slice(0, maxItems));
     } else if (trigger.type === TriggerType.Interval && trigger.interval) {
@@ -658,6 +565,7 @@ export class UpcomingReminderCalculationService {
         todayEnd,
         maxItems,
         effectiveTimezone,
+        baseTime,
       );
       result.push(...triggerTimes);
     }
@@ -673,6 +581,8 @@ export class UpcomingReminderCalculationService {
     fixedTime: FixedTimeTrigger,
     todayStart: number,
     todayEnd: number,
+    effectiveTimezone?: string | null,
+    baseTime: number = Date.now(),
   ): UpcomingReminderDTO[] {
     const result: UpcomingReminderDTO[] = [];
 
@@ -685,24 +595,10 @@ export class UpcomingReminderCalculationService {
     const targetMinute = parseInt(minuteStr, 10);
 
     const getParts = (ts: number): { year: number; month: number; day: number } => {
-      if (tz === 'UTC') {
-        const d = new Date(ts);
-        return { year: d.getUTCFullYear(), month: d.getUTCMonth() + 1, day: d.getUTCDate() };
-      } else {
-        const formatter = new Intl.DateTimeFormat('en-US', {
-          timeZone: tz,
-          year: 'numeric',
-          month: 'numeric',
-          day: 'numeric',
-          hourCycle: 'h23',
-        });
-        const parts = formatter.formatToParts(new Date(ts));
-        const bag: Record<string, number> = {};
-        for (const p of parts) {
-          if (p.type !== 'literal') bag[p.type] = parseInt(p.value, 10);
-        }
-        return { year: bag.year, month: bag.month, day: bag.day };
-      }
+      const [year, month, day] = String(this.productTime(tz).calendar.toYmd(ts))
+        .split('-')
+        .map(Number);
+      return { year, month, day };
     };
 
     const startParts = getParts(todayStart);
@@ -718,18 +614,13 @@ export class UpcomingReminderCalculationService {
     }
 
     for (const { year, month, day } of datesToCheck) {
-      let triggerTime: number;
-      if (tz === 'UTC') {
-        triggerTime = Date.UTC(year, month - 1, day, targetHour, targetMinute, 0, 0);
-      } else {
-        triggerTime = this.getZonedEpochMs(year, month, day, targetHour, targetMinute, tz);
-      }
+      const triggerTime = this.getZonedEpochMs(year, month, day, targetHour, targetMinute, tz);
 
       if (triggerTime >= todayStart && triggerTime <= todayEnd) {
         const dto = this.convertToUpcomingDTO(
           { ...reminder, nextTriggerAt: triggerTime },
-          Date.now(),
-          tz,
+          baseTime,
+          effectiveTimezone,
         );
         if (dto && !result.some((item) => item.nextTriggerAt === dto.nextTriggerAt)) {
           result.push(dto);
@@ -750,6 +641,7 @@ export class UpcomingReminderCalculationService {
     todayEnd: number,
     maxItems: number,
     effectiveTimezone?: string | null,
+    baseTime: number = Date.now(),
   ): UpcomingReminderDTO[] {
     const result: UpcomingReminderDTO[] = [];
     const intervalMs = interval.minutes * 60 * 1000;
@@ -780,7 +672,7 @@ export class UpcomingReminderCalculationService {
       if (triggerTime >= todayStart && triggerTime <= todayEnd) {
         const dto = this.convertToUpcomingDTO(
           { ...reminder, nextTriggerAt: triggerTime },
-          Date.now(),
+          baseTime,
           effectiveTimezone,
         );
         if (dto) {
@@ -804,49 +696,14 @@ export class UpcomingReminderCalculationService {
    * 获取今天的开始时间（00:00:00，指定时区或默认 UTC）
    */
   public static getTodayStart(timestamp: number = Date.now(), timezone?: string | null): number {
-    const tz = timezone || 'UTC';
-    this.validateTimezone(tz);
-    if (tz === 'UTC') {
-      const d = new Date(timestamp);
-      return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 0, 0, 0, 0);
-    }
-    const formatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: tz,
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hourCycle: 'h23',
-    });
-    const parts = formatter.formatToParts(new Date(timestamp));
-    const bag: Record<string, number> = {};
-    for (const p of parts) {
-      if (p.type !== 'literal') bag[p.type] = parseInt(p.value, 10);
-    }
-    return this.getZonedEpochMs(bag.year, bag.month, bag.day, 0, 0, tz);
+    return Number(this.productTime(timezone).calendar.startOfDay(timestamp));
   }
 
   /**
    * 获取今天的结束时间（23:59:59.999，指定时区或默认 UTC）
    */
   public static getTodayEnd(timestamp: number = Date.now(), timezone?: string | null): number {
-    const tz = timezone || 'UTC';
-    this.validateTimezone(tz);
-    if (tz === 'UTC') {
-      const d = new Date(timestamp);
-      return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 23, 59, 59, 999);
-    }
-    const formatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: tz,
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hourCycle: 'h23',
-    });
-    const parts = formatter.formatToParts(new Date(timestamp));
-    const bag: Record<string, number> = {};
-    for (const p of parts) {
-      if (p.type !== 'literal') bag[p.type] = parseInt(p.value, 10);
-    }
-    return this.getZonedEpochMs(bag.year, bag.month, bag.day, 23, 59, tz) + 59999;
+    return Number(this.productTime(timezone).calendar.endOfDay(timestamp));
   }
+
 }

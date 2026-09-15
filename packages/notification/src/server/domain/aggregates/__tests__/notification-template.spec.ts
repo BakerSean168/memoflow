@@ -109,11 +109,11 @@ describe('NotificationTemplate Aggregate Root', () => {
     });
   });
 
-  describe('updateTemplate()', () => {
+  describe('updatePlan()', () => {
     it('should update the template configuration', () => {
       const tmpl = aTemplate();
 
-      tmpl.updateTemplate({
+      tmpl.updatePlan({
         template: { title: 'Updated {{name}}', content: 'New content', variables: ['name'] },
         channels: { inApp: true, email: true, push: false, sms: false },
       });
@@ -126,7 +126,7 @@ describe('NotificationTemplate Aggregate Root', () => {
     it('should partially update template (merge with existing)', () => {
       const tmpl = aTemplate();
 
-      tmpl.updateTemplate({
+      tmpl.updatePlan({
         channels: { inApp: true, email: true, push: true, sms: false },
       });
 

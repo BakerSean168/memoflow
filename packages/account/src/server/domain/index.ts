@@ -16,7 +16,3 @@ export {
   type AccountClosurePhase,
   type AccountClosureStatus,
 } from './repositories/i-account-closure-operation-repository';
-
-
-// Services
-export { AccountUniquenessChecker } from './services/account-uniqueness-checker';

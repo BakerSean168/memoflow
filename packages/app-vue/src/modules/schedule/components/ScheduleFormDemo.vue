@@ -125,8 +125,7 @@ import type {
   ConflictSuggestion,
   CreateScheduleRequest,
 } from '@memoflow/contracts/schedule';
-import { formatDateToYMD } from '../../../shared/utils/format-date-to-ymd';
-import { formatLocalHHmm } from '../../../shared/utils/format-local-hhmm';
+import { getProductTime } from '../../../shared/utils/product-time';
 import { formatScheduleDurationMinutes } from '../../../shared/utils/format-schedule-duration-minutes';
 
 interface Props {
@@ -154,9 +153,10 @@ const { t } = useI18n();
 const now = Date.now();
 const oneHourLater = now + 60 * 60 * 1000;
 
-/** Residual 1315: datetime-local pad dual retired onto formatDateToYMD + formatLocalHHmm soles. */
+/** datetime-local value resolved through the session Product Time context. */
 function formatDateTimeToInput(timestamp: number): string {
-  return `${formatDateToYMD(new Date(timestamp))}T${formatLocalHHmm(timestamp)}`;
+  const time = getProductTime();
+  return time.input.dateValue(timestamp) + 'T' + time.input.timeValue(timestamp);
 }
 
 const form = reactive({

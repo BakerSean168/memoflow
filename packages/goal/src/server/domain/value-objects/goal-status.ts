@@ -8,7 +8,8 @@ export type GoalStatus = IGoalStatus & { readonly __brand: unique symbol };
 const VALUES: IGoalStatus[] = Object.values(GoalStatusContract);
 
 export const GoalStatus = {
-  Active: 'Active' as GoalStatus,
+  Planned: 'Planned' as GoalStatus,
+  InProgress: 'InProgress' as GoalStatus,
   Completed: 'Completed' as GoalStatus,
   Abandoned: 'Abandoned' as GoalStatus,
 
@@ -25,8 +26,12 @@ export const GoalStatus = {
     return VALUES as GoalStatus[];
   },
 
-  isActive(status: GoalStatus): boolean {
-    return status === this.Active;
+  isPlanned(status: GoalStatus): boolean {
+    return status === this.Planned;
+  },
+
+  isInProgress(status: GoalStatus): boolean {
+    return status === this.InProgress;
   },
 
   isCompleted(status: GoalStatus): boolean {

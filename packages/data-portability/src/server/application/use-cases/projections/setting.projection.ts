@@ -1,13 +1,29 @@
-/**
- * Setting Module — Export Projections
- */
+/** Temporary V2 envelope projection backed exclusively by canonical User Preferences. */
 
+import {
+  UserPreferenceProfileSchema,
+  createDefaultUserPreferenceProfile,
+  parsePreferenceNamespacePayload,
+  type UserPreferenceProfile,
+} from '@memoflow/contracts/setting';
 import type { PortableSettings } from '@memoflow/contracts/data-portability';
-import { parseJsonField } from './projection-helpers';
+import type { UserPreferenceDocumentPort } from '../../data-portability.dependencies';
 
-export function projectSettings(setting: unknown): PortableSettings {
-  const entity = setting as Record<string, unknown>;
-  return {
-    preferences: (parseJsonField(entity.preferences, {}) as Record<string, unknown>) ?? {},
-  };
+export function projectSettings(
+  documents: readonly UserPreferenceDocumentPort[],
+): PortableSettings {
+  const preferences: UserPreferenceProfile = createDefaultUserPreferenceProfile();
+
+  for (const document of documents) {
+    if (document.namespace === 'presentation') {
+      preferences.presentation = parsePreferenceNamespacePayload(
+        'presentation',
+        document.payload,
+      );
+    } else if (document.namespace === 'regional') {
+      preferences.regional = parsePreferenceNamespacePayload('regional', document.payload);
+    }
+  }
+
+  return { preferences: UserPreferenceProfileSchema.parse(preferences) };
 }

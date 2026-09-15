@@ -47,7 +47,9 @@ vi.mock('../modules/ai/task-plan-mutation.adapter', () => ({
   }),
 }));
 vi.mock('../modules/ai/routine-command.adapter', () => ({
-  DesktopRoutineAICommandAdapter: vi.fn(function DesktopRoutineAICommandAdapterMock(...args: unknown[]) {
+  DesktopRoutineAICommandAdapter: vi.fn(function DesktopRoutineAICommandAdapterMock(
+    ...args: unknown[]
+  ) {
     return { tag: 'desktop-routine-command', args };
   }),
 }));
@@ -57,7 +59,9 @@ vi.mock('../modules/ai/planner-read.adapter', () => ({
   }),
 }));
 vi.mock('../modules/ai/notification-read.adapter', () => ({
-  DesktopNotificationAIReadAdapter: vi.fn(function DesktopNotificationAIReadAdapterMock(repository: unknown) {
+  DesktopNotificationAIReadAdapter: vi.fn(function DesktopNotificationAIReadAdapterMock(
+    repository: unknown,
+  ) {
     return { tag: 'desktop-notification-read', repository };
   }),
 }));
@@ -90,7 +94,10 @@ const reminderApplicationPort = { tag: 'reminder-application' } as never;
 const routineCommandPort = { tag: 'routine-command-port' } as never;
 const scheduleRepository = { tag: 'schedule-repository' } as never;
 const notificationRepository = { tag: 'notification-repository' } as never;
+const userTimeContextPort = { tag: 'user-time-context-port' } as never;
 const labelService = { tag: 'label-service' } as never;
+const goalKnowledgeService = { tag: 'goal-knowledge-service' } as never;
+const knowledgeDocumentRefResolver = { tag: 'knowledge-ref-resolver' } as never;
 const mastraStorage = {
   kind: 'libsql' as const,
   url: 'file:///profiles/profile-1/storage/mastra.db',
@@ -114,7 +121,10 @@ const dependencies = {
   routineCommandPort,
   scheduleRepository,
   notificationRepository,
+  userTimeContextPort,
   labelService,
+  goalKnowledgeService,
+  knowledgeDocumentRefResolver,
   mastraStorage,
 };
 
@@ -148,12 +158,20 @@ describe('Desktop composeAI Mastra-only ownership', () => {
     expect(DesktopGoalPlanMutationAdapter).toHaveBeenCalledWith(
       goalApplicationPort,
       taskApplicationPort,
-      reminderApplicationPort,
       labelService,
+      knowledgeNotePersistence,
+      knowledgeDocumentRefResolver,
+      goalKnowledgeService,
     );
     expect(DesktopTaskPlanMutationAdapter).toHaveBeenCalledWith(taskApplicationPort, labelService);
-    expect(DesktopRoutineAICommandAdapter).toHaveBeenCalledWith(reminderApplicationPort, routineCommandPort);
-    expect(DesktopPlannerAIReadAdapter).toHaveBeenCalledWith(scheduleRepository, taskApplicationPort);
+    expect(DesktopRoutineAICommandAdapter).toHaveBeenCalledWith(
+      reminderApplicationPort,
+      routineCommandPort,
+    );
+    expect(DesktopPlannerAIReadAdapter).toHaveBeenCalledWith(
+      scheduleRepository,
+      taskApplicationPort,
+    );
     expect(DesktopNotificationAIReadAdapter).toHaveBeenCalledWith(notificationRepository);
     expect(KnowledgeCapturePersistenceAdapter).toHaveBeenCalledWith(knowledgeNotePersistence);
 
@@ -161,15 +179,19 @@ describe('Desktop composeAI Mastra-only ownership', () => {
     expect(MastraAIRuntime).toHaveBeenCalledWith({
       storage: vi.mocked(createMastraStorage).mock.results[0].value,
       modelResolver: vi.mocked(MastraModelResolver).mock.results[0].value,
-      transcriptBootstrapSource: vi.mocked(ConversationTranscriptBootstrapSource).mock.results[0].value,
+      transcriptBootstrapSource: vi.mocked(ConversationTranscriptBootstrapSource).mock.results[0]
+        .value,
       goalPlanMutationPort: vi.mocked(DesktopGoalPlanMutationAdapter).mock.results[0].value,
       taskPlanMutationPort: vi.mocked(DesktopTaskPlanMutationAdapter).mock.results[0].value,
-      knowledgeCaptureMutationPort: vi.mocked(KnowledgeCapturePersistenceAdapter).mock.results[0].value,
+      knowledgeCaptureMutationPort: vi.mocked(KnowledgeCapturePersistenceAdapter).mock.results[0]
+        .value,
+      knowledgeSourcePort,
       executionLogPort: repositorySet.executionLogPort,
       usageReadPort: repositorySet.executionLogPort,
       routineCommandPort: vi.mocked(DesktopRoutineAICommandAdapter).mock.results[0].value,
       plannerReadPort: vi.mocked(DesktopPlannerAIReadAdapter).mock.results[0].value,
       notificationReadPort: vi.mocked(DesktopNotificationAIReadAdapter).mock.results[0].value,
+      userTimeContextPort,
     });
   });
 
@@ -182,7 +204,9 @@ describe('Desktop composeAI Mastra-only ownership', () => {
     expect(moduleInput.providerOnboardingSessionRepository).toBe(
       repositorySet.providerOnboardingSessionRepository,
     );
-    expect(moduleInput.providerOnboardingCommitPort).toBe(repositorySet.providerOnboardingCommitPort);
+    expect(moduleInput.providerOnboardingCommitPort).toBe(
+      repositorySet.providerOnboardingCommitPort,
+    );
     expect(moduleInput.knowledgeIndexRepository).toBe(repositorySet.knowledgeIndexRepository);
     expect(moduleInput.executionLogPort).toBe(repositorySet.executionLogPort);
     expect(moduleInput.knowledgeNotePersistence).toBe(knowledgeNotePersistence);

@@ -1,9 +1,7 @@
-import type {
-  ExportUserDataReq,
-  ImportUserDataReq,
-} from '@memoflow/contracts/data-portability';
+import type { PortableCapability } from '@memoflow/contracts/data-portability';
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import type { DataPortabilityApplicationPort } from '../application';
+import { PortableCapabilityRegistry } from '../application/portable-capability';
 import type { DataPortabilityDependencies } from '../application/data-portability.dependencies';
 import type { DataPortabilityImportStore } from '../application/import-store/data-portability-import-store';
 import { ExportUserDataUseCase } from '../application/use-cases/export-user-data.use-case';
@@ -17,9 +15,10 @@ const logger = createLogger('DataPortabilityModule');
 export interface DataPortabilityModuleDependencies {
   readonly exportDependencies: DataPortabilityDependencies;
   readonly importStore: DataPortabilityImportStore;
+  /** Owner-provided V3 capabilities registered without changing the V2 product route yet. */
+  readonly portableCapabilities?: readonly PortableCapability<unknown>[];
   readonly runtimeContributions?:
-    | DataPortabilityModuleRuntimeContribution
-    | readonly DataPortabilityModuleRuntimeContribution[];
+    DataPortabilityModuleRuntimeContribution | readonly DataPortabilityModuleRuntimeContribution[];
 }
 
 export interface DataPortabilityModuleUseCases {
@@ -35,6 +34,7 @@ export interface DataPortabilityModuleRuntimeContribution {
 export interface DataPortabilityModuleInstance {
   readonly exportDependencies: DataPortabilityDependencies;
   readonly importStore: DataPortabilityImportStore;
+  readonly portableCapabilityRegistry: PortableCapabilityRegistry;
   readonly useCases: DataPortabilityModuleUseCases;
   readonly api: DataPortabilityApplicationPort;
   start(): void;
@@ -52,8 +52,7 @@ export function createDataPortabilityUseCases(
 
 function normalizeRuntimeContributions(
   runtimeContributions?:
-    | DataPortabilityModuleRuntimeContribution
-    | readonly DataPortabilityModuleRuntimeContribution[],
+    DataPortabilityModuleRuntimeContribution | readonly DataPortabilityModuleRuntimeContribution[],
 ): readonly DataPortabilityModuleRuntimeContribution[] {
   if (!runtimeContributions) {
     return [];
@@ -72,12 +71,17 @@ export function createDataPortabilityModule(
   dependencies: DataPortabilityModuleDependencies,
 ): DataPortabilityModuleInstance {
   const useCases = createDataPortabilityUseCases(dependencies);
+  const portableCapabilityRegistry = new PortableCapabilityRegistry();
+  for (const capability of dependencies.portableCapabilities ?? []) {
+    portableCapabilityRegistry.register(capability);
+  }
   const runtimeContributions = normalizeRuntimeContributions(dependencies.runtimeContributions);
   let started = false;
 
   return {
     exportDependencies: dependencies.exportDependencies,
     importStore: dependencies.importStore,
+    portableCapabilityRegistry,
     useCases,
     api: {
       exportUserData: (identityId, request) =>

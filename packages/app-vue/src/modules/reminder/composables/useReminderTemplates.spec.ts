@@ -4,7 +4,7 @@ import type { ReminderContext } from './useReminderContext';
 import { ref } from 'vue';
 
 describe('useReminderTemplates timezone behavior', () => {
-  it('carries user timezone when calling getTodaySchedule without explicit timezone', async () => {
+  it('omits timezone so the server resolves the identity-scoped Product Time context', async () => {
     const getTodayScheduleMock = vi.fn().mockResolvedValue({
       ok: true,
       data: { data: [], total: 0 },
@@ -31,12 +31,7 @@ describe('useReminderTemplates timezone behavior', () => {
 
     await getTodaySchedule({ limit: 10 });
 
-    expect(getTodayScheduleMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        limit: 10,
-        timezone: expect.any(String),
-      }),
-    );
+    expect(getTodayScheduleMock).toHaveBeenCalledWith({ limit: 10 });
   });
 
   it('preserves explicit timezone when passed to getTodaySchedule', async () => {

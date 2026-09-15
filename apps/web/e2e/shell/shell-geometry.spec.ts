@@ -267,16 +267,6 @@ test.describe('Electron shell geometry matrix', () => {
     await saveMatrixShot(page, '1440x900-focus-goal-single-toolbar.png');
   });
 
-  test('[P1] Help menu does not open Settings', async () => {
-    const page = desktop.page;
-    await desktop.setWindowSize({ width: 1200, height: 800 });
-
-    await page.getByTestId('shell-help-menu').click();
-    await expect(page.getByTestId('shell-help-shortcuts')).toBeVisible();
-    await expect(page.getByTestId('standalone-settings-layout')).toHaveCount(0);
-    await expect(page.getByTestId('app-shell')).toHaveAttribute('data-shell-scene', 'workspace');
-  });
-
   test('[P1] Account menu opens independent Settings scene', async () => {
     const page = desktop.page;
     await desktop.setWindowSize({ width: 1200, height: 800 });
@@ -332,8 +322,8 @@ test.describe('Electron shell geometry matrix', () => {
     // Shell chrome should reflect English copy after return.
     await page.getByTestId('settings-return-to-app').click();
     await expect(page.getByTestId('app-shell')).toHaveAttribute('data-shell-scene', 'workspace');
-    // Help control remains reachable; label may switch language.
-    await expect(page.getByTestId('shell-help-menu')).toBeVisible();
+    // Account control remains reachable after the shell returns.
+    await expect(page.getByTestId('shell-account-menu')).toBeVisible();
     await saveMatrixShot(page, '1200-theme-light-en-workspace.png');
 
     // Switch back to Chinese for isolation of later serial tests (serial suite is fine either way).

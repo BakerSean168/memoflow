@@ -100,7 +100,7 @@ src/modules/account/
 ```typescript
 // ✅ 方式: 从子路径导入完整模块（推荐，极致 Tree-Shaking）
 import { GoalServerDTO, GoalClientDTO } from '@memoflow/contracts/goal';
-import { TaskTemplateServer } from '@memoflow/contracts/task';
+import { TaskPlanServer } from '@memoflow/contracts/task';
 import { AccountDTO } from '@memoflow/contracts/account';
 ```
 
@@ -150,8 +150,8 @@ import {
   FolderType,
   // Task
   TaskType,
-  TaskTemplateStatus,
-  TaskInstanceStatus,
+  TaskPlanStatus,
+  TaskOccurrenceStatus,
   TimeType,
   // AI
   AIProvider,
@@ -171,7 +171,7 @@ import {
 ```typescript
 // ✅ 推荐：明确的模块边界
 import { GoalServerDTO, GoalStatus } from '@memoflow/contracts/goal';
-import { TaskTemplateServer } from '@memoflow/contracts/task';
+import { TaskPlanServer } from '@memoflow/contracts/task';
 ```
 
 ### 2. 避免命名冲突时使用命名空间

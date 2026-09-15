@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
  * Residual 1189: getCorsOrigins keep-boundary (API env list vs Playwright E2E joined string).
  * - API env: CORS_ORIGIN → string[] (trim/filter only)
  * - Playwright: E2E web + legacy localhost + env → comma-joined string
- * Soft residual 1186: getTemplateById keep-boundary remains separate.
+ * Soft residual 1186: getPlanById keep-boundary remains separate.
  * Soft residual 1183: defaultExtractContext keep-boundary remains separate.
  * Does not flip §13.2 checkboxes.
  */

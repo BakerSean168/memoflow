@@ -27,7 +27,7 @@ export class SearchGoalsUseCase {
     const filteredGoals = allGoals.filter(
       (g) =>
         g.name.toLowerCase().includes(query.toLowerCase()) ||
-        g.description?.toLowerCase().includes(query.toLowerCase()),
+        g.summary?.toLowerCase().includes(query.toLowerCase()),
     );
 
     const total = filteredGoals.length;

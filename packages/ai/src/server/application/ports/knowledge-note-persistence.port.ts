@@ -1,4 +1,5 @@
 import type { KnowledgeNotePersistedRef } from '@memoflow/contracts/ai';
+import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 
 export interface CreateKnowledgeNotePersistenceInput {
@@ -12,6 +13,7 @@ export interface CreateKnowledgeNotePersistenceInput {
   context: ExecutionContext;
   /** Explicit GitHub knowledge-repository connection for multi-repository users. */
   connectionId?: string;
+  knowledgeDocumentId: KnowledgeDocumentId;
   fileName: string;
   path: string;
   content: string;

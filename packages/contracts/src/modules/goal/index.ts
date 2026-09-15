@@ -15,9 +15,6 @@ export * from './value-objects';
 // ============ Domain Events ============
 export * from './domain/events';
 
-// ============ Rules ============
-export * from './rules';
-
 // ============ Protocol ============
 export * from './protocol';
 
@@ -26,3 +23,5 @@ export * from './api';
 
 // ============ DTOs ============
 export * from './dtos';
+
+export * from './portable-v3';

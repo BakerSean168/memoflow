@@ -14,11 +14,10 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import type { GoalDependencyReadPort } from '@memoflow/contracts/reliable-messaging';
+import { createTimeContext } from '@memoflow/time';
 import type { GoalWriteTransactionRunner } from '../../application/use-cases/commands/goal-write-support';
-import type {
-  IGoalRecordRepository,
-  IGoalRepository,
-} from '../../domain';
+import type { GoalDeletionTransactionRunner } from '../../application/use-cases/commands/goal-deletion-support';
+import type { IGoalRecordRepository, IGoalRepository } from '../../domain';
 import {
   createGoalModule,
   type GoalModuleDependencies,
@@ -43,11 +42,24 @@ function makeContribution(name: string, failOnStart = false): FakeContribution {
 }
 
 function makeDeps(runtimeContributions: GoalModuleRuntimeContribution[]): GoalModuleDependencies {
+  const goalRepository = {} as unknown as IGoalRepository;
+  const goalDeletionTransactionRunner: GoalDeletionTransactionRunner = {
+    run: (work) =>
+      work({
+        goalRepository,
+        relationCleanup: { unlinkAllForGoal: async () => 0 },
+      }),
+  };
+
   return {
-    goalRepository: {} as unknown as IGoalRepository,
+    goalRepository,
     goalRecordRepository: {} as unknown as IGoalRecordRepository,
     goalWriteTransactionRunner: {} as unknown as GoalWriteTransactionRunner,
+    goalDeletionTransactionRunner,
     taskBindingReadPort: {} as unknown as GoalDependencyReadPort,
+    userTimeContextPort: {
+      getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+    },
     runtimeContributions,
   };
 }

@@ -2,15 +2,15 @@ export default {
   "route": {
     "management": "Task Management",
     "dependencyDemo": "Dependency Validation Demo (STORY-024)",
-    "detail": "Task Detail"
+    "detail": "Task Plan Workspace"
   },
   "error": {
     "operationFailed": "Operation failed",
     "loadTemplatesFailed": "Failed to load task plans",
     "createFailed": "Could not create task plan",
     "createSuccess": "Task plan created",
-    "createTemplateWithTodayInstanceSuccess": "Task plan created and today's to-do generated ({count} total)",
-    "createTemplateWithoutTodayInstanceSuccess": "Task plan created with no to-do due today ({count} total)",
+    "createPlanWithTodayInstanceSuccess": "Task plan created and today's to-do generated ({count} total)",
+    "createPlanWithoutTodayInstanceSuccess": "Task plan created with no to-do due today ({count} total)",
     "createQuickTaskWithTodayInstanceSuccess": "Quick task created and added to today's to-dos.",
     "createQuickTaskWithoutTodayInstanceSuccess": "Quick task created, but no to-do was generated for today. Check its start date.",
     "updateFailed": "Could not update task plan",
@@ -42,7 +42,7 @@ export default {
     "loading": "Loading...",
     "createSuccess": "Task plan created",
     "editSuccess": "Task plan updated",
-    "deleteTemplate": "Delete task plan",
+    "deletePlan": "Delete task plan",
     "confirmDelete": "Deleting task plan \"{name}\" also deletes all of its to-dos and execution history. This cannot be undone. Delete it?",
     "confirmDeleteAll": "Delete all task plans? This cannot be undone!",
     "pauseTitle": "Pause task plan?",
@@ -79,7 +79,7 @@ export default {
     "emptyOccurrenceDescription": "Create or adjust a plan to generate eligible occurrences."
   },
   "detail": {
-    "title": "Task Detail",
+    "title": "Task Plan Workspace",
     "loading": "Loading...",
     "notFound": "Task plan not found",
     "basicInfo": "Basic Info",
@@ -110,7 +110,7 @@ export default {
     "instanceStatusMissed": "Missed",
     "instanceStatusNotGenerated": "Not generated",
     "edit": "Edit",
-    "subtitle": "Inspect one long-lived plan, its settings, and the occurrences it generated.",
+    "subtitle": "Manage one long-lived plan, its properties, checklist, and task occurrences in one workspace.",
     "planSettings": "Plan settings",
     "planSettingsDescription": "Scheduling, recurrence, reminders, and Goal contribution belong to the plan—not to one occurrence.",
     "editSettings": "Edit settings",
@@ -119,6 +119,13 @@ export default {
     "reminders": "Reminders",
     "reminderAuthority": "Reminder policy is edited through the shared plan editor.",
     "goalBindingDescription": "Completion can contribute to the configured Goal / Key Result.",
+    "linkedNotes": "Linked knowledge",
+    "linkedNoteMissing": "This linked note is unavailable.",
+    "noLinkedNotes": "No linked knowledge",
+    "goalContextAvailable": "{name}",
+    "goalContextMissing": "The linked Goal is unavailable.",
+    "goalContextUnavailable": "Goal context is temporarily unavailable.",
+    "keyResultValue": "Key result: {name}",
     "noStartDate": "No start date",
     "startsOn": "Starts {date}",
     "oneTimePlan": "One-time plan",
@@ -407,6 +414,13 @@ export default {
     "invalidTime": "Please select a valid reminder time",
     "selectMethodRequired": "Please select a notification method"
   },
+  "checklist": {
+    "title": "Checklist",
+    "placeholder": "Add a checklist item",
+    "add": "Add",
+    "empty": "No checklist items yet",
+    "remove": "Remove checklist item"
+  },
   "templateForm": {
     "loadError": "Failed to load task plan",
     "notFoundMessage": "The task plan being edited was not found. Please select or create a task plan.",
@@ -448,7 +462,7 @@ export default {
     "completedAt": "Completed at {time}"
   },
   "infoCard": {
-    "title": "Task Detail",
+    "title": "Task Plan Workspace",
     "close": "Close",
     "dateLabel": "Date: ",
     "timeLabel": "Time: "

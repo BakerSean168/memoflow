@@ -3,21 +3,15 @@
  */
 
 import type { Result } from '@memoflow/contracts/result';
-import type { AccountClientDTO } from '@memoflow/contracts/account';
+import type { AccountView } from '@memoflow/contracts/account';
 import type {
   UpdateAccountReq,
-  CheckAvailabilityReq,
-  CheckAvailabilityRes,
   CloseAccountReq,
   CloseAccountRes,
-  UpdateAccountSettingsReq,
-  UpdateAccountSettingsRes,
 } from '@memoflow/contracts/account';
 
 export interface IAccountApiClient {
-  getMyProfile(): Promise<Result<AccountClientDTO>>;
-  updateMyProfile(request: UpdateAccountReq): Promise<Result<AccountClientDTO>>;
-  updateSettings(request: UpdateAccountSettingsReq): Promise<Result<UpdateAccountSettingsRes>>;
-  checkAvailability(request: CheckAvailabilityReq): Promise<Result<CheckAvailabilityRes>>;
+  getMyProfile(): Promise<Result<AccountView>>;
+  updateMyProfile(request: UpdateAccountReq): Promise<Result<AccountView>>;
   closeAccount(request: CloseAccountReq): Promise<Result<CloseAccountRes>>;
 }

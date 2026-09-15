@@ -19,8 +19,8 @@
         <button
           type="button"
           class="inline-flex h-8 w-8 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          title="复制代码"
-          aria-label="复制代码"
+          :title="t('governance.codeSnippet.copyCode')"
+          :aria-label="t('governance.codeSnippet.copyCode')"
           @click="copyToClipboard"
         >
           <Copy :size="14" />
@@ -39,6 +39,7 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted, nextTick, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { Copy } from '@lucide/vue';
 import hljs from 'highlight.js/lib/core';
 import typescript from 'highlight.js/lib/languages/typescript';
@@ -63,6 +64,8 @@ const props = defineProps<{
   snippet: CodeSnippetDTO;
 }>();
 
+const { t } = useI18n();
+
 const codeEl = ref<HTMLElement | null>(null);
 
 const typeClasses = computed(() =>
@@ -71,7 +74,11 @@ const typeClasses = computed(() =>
     : 'bg-destructive/15 text-destructive dark:bg-destructive/30 dark:text-destructive',
 );
 
-const typeLabel = computed(() => (props.snippet.type === 'GoodExample' ? '✓ Good' : '✗ Bad'));
+const typeLabel = computed(() =>
+  props.snippet.type === 'GoodExample'
+    ? `✓ ${t('governance.codeSnippet.goodExample')}`
+    : `✗ ${t('governance.codeSnippet.badExample')}`,
+);
 
 const languageClass = computed(() => {
   const lang = props.snippet.language.toLowerCase();

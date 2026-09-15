@@ -5,7 +5,7 @@
 /**
  * 任务实例生成配置
  */
-export const TASK_INSTANCE_GENERATION_CONFIG = {
+export const TASK_OCCURRENCE_GENERATION_CONFIG = {
   /**
    * 目标提前生成天数
    * 系统会自动维护每个模板有未来 100 天内的所有实例
@@ -27,7 +27,7 @@ export const TASK_INSTANCE_GENERATION_CONFIG = {
 /**
  * 任务实例查看范围配置
  */
-export const TASK_INSTANCE_VIEW_CONFIG = {
+export const TASK_OCCURRENCE_VIEW_CONFIG = {
   /**
    * 默认查看范围（天）
    */

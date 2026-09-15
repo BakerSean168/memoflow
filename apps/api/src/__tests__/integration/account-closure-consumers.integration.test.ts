@@ -7,10 +7,8 @@ import { ReminderAccountClosedConsumer } from '@memoflow/reminder/server';
 import { NotificationAccountClosedConsumer } from '@memoflow/notification/server';
 import { RepositoryAccountClosedConsumer } from '@memoflow/repository/server';
 import { AccountClosedWorker } from '@memoflow/account/server';
-import {
-  cleanAll,
-  disconnectPrisma,
-} from '@memoflow/test-utils/setup/integration-helpers';
+import { cleanAll, disconnectPrisma } from '@memoflow/test-utils/setup/integration-helpers';
+import { asInstant, createSystemClock, createTimeContext } from '@memoflow/time';
 
 /**
  * W3 real-path integration: closure saga -> account-closed outbox ->
@@ -41,9 +39,14 @@ describe('API host account-closed consumer chain', () => {
 
     const account = Account.create({
       id: IdentityId.of(identityId),
-      email: `chain-${identityId}@example.com`,
+      nicknameSeed: 'Chain User',
+      now: asInstant(1_700_000_000_000),
     });
     const module = createAccountPrismaModule(prisma, {
+      clock: createSystemClock(),
+      userTimeContextPort: {
+        getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+      },
       revocationPort: { revokeAll: async () => ({ revokedSessions: 1 }) },
     });
     await module.accountRepository.save(account);
@@ -120,16 +123,19 @@ describe('API host account-closed consumer chain', () => {
         status: 'ACTIVE',
       },
     });
-    const connId = crypto.randomUUID();
-    await prisma.knowledgeRepositoryConnection.create({
+    const connId = `KnowledgeRemoteBindingId_${crypto.randomUUID()}`;
+    const knowledgeSpaceId = `KnowledgeSpaceId_${crypto.randomUUID()}`;
+    await prisma.knowledgeSpace.create({ data: { id: knowledgeSpaceId } });
+    await prisma.knowledgeRemoteBinding.create({
       data: {
         id: connId,
+        knowledgeSpaceId,
         identityId,
-        githubUserId: 'gh-1',
-        githubRepositoryId: 'gh-repo-1',
-        githubRepositoryFullName: 'user/repo',
+        provider: 'GitHub',
         installationId: 'inst-1',
-        status: 'ACTIVE',
+        repositoryId: `gh-repo-${crypto.randomUUID()}`,
+        repositoryFullNameSnapshot: 'user/repo',
+        connectedAt: new Date(),
       },
     });
     const writeReqId = crypto.randomUUID();
@@ -137,7 +143,8 @@ describe('API host account-closed consumer chain', () => {
       data: {
         id: writeReqId,
         identityId,
-        connectionId: connId,
+        bindingId: connId,
+        knowledgeDocumentId: `kdoc_${crypto.randomUUID()}`,
         requestId: 'req-1',
         requestHash: 'hash-1',
         relativePath: 'note.md',
@@ -146,10 +153,10 @@ describe('API host account-closed consumer chain', () => {
     });
 
     // Full closure saga via the real use-case
-    const result = await module.useCases.closeAccount.execute(
-      { reason: 'Chain test' },
-      { identityId, deviceId: 'device-1' } as never,
-    );
+    const result = await module.useCases.closeAccount.execute({ reason: 'Chain test' }, {
+      identityId,
+      deviceId: 'device-1',
+    } as never);
     expect(result.ok).toBe(true);
 
     // Worker consumes the outbox with REAL consumers

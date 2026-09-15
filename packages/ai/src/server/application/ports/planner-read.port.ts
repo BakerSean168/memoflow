@@ -9,10 +9,10 @@ export interface AIPlannerCalendarItem {
 
 export interface AIPlannerTaskItem {
   readonly id: string;
-  readonly templateId: string;
+  readonly planId: string;
   readonly title: string;
-  readonly instanceDate: number;
-  readonly dueDate: number | null;
+  readonly scheduleDate: string;
+  readonly dueAt: number;
   readonly status: string;
 }
 

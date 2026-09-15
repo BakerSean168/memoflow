@@ -26,8 +26,9 @@ describe('status presentation ownership', () => {
 
   it('keeps Goal lifecycle status presentation local without resurrecting Draft/Archived mapping logic', () => {
     expect(goalDetail).toContain('goal.status');
-    expect(goalRow).toContain('goal.list.overdue');
+    expect(goalRow).toContain('goal.list.pastTarget');
     expect(goalRow).toContain("props.goal.status === 'Completed'");
+    expect(goalRow).toContain("props.goal.status === 'Abandoned'");
     for (const source of [goalDetail, goalRow]) {
       expect(source).not.toMatch(/getStatusLabel\b/);
       expect(source).not.toContain('goal.cards.goalStatus.draft');

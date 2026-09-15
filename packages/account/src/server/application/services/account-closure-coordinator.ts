@@ -11,14 +11,7 @@ import { AccountStatus } from '../../domain/value-objects';
 import type { UnifiedOperationMetricsRecorder } from '@memoflow/patterns/operations';
 import { accountClosureFailureCode, accountNotFoundForClosure } from './account-closure-failure';
 import type { AccountClosureFailureCode } from '../../domain/repositories/i-account-closure-operation-repository';
-
-export interface Clock {
-  now(): Date;
-}
-
-export const systemClock: Clock = {
-  now: () => new Date(),
-};
+import type { Clock } from '@memoflow/time';
 
 export interface AccountClosureReceipt {
   operationId: string;
@@ -48,7 +41,7 @@ export interface AccountClosureCoordinatorDependencies {
   closureOperationRepository: IAccountClosureOperationRepository;
   revocationPort: CloudAuthRevocationPort;
   eventPublisher: AccountClosureEventPublisher;
-  clock?: Clock;
+  clock: Clock;
   leaseDurationMs?: number;
   enableHeartbeat?: boolean;
   metrics?: UnifiedOperationMetricsRecorder;
@@ -69,7 +62,7 @@ export class AccountClosureCoordinator {
     this.closureOperationRepository = deps.closureOperationRepository;
     this.revocationPort = deps.revocationPort;
     this.eventPublisher = deps.eventPublisher;
-    this.clock = deps.clock ?? systemClock;
+    this.clock = deps.clock;
     this.leaseDurationMs = deps.leaseDurationMs ?? 30000;
     this.enableHeartbeat = deps.enableHeartbeat ?? true;
     this.metrics = deps.metrics;
@@ -80,7 +73,7 @@ export class AccountClosureCoordinator {
     idempotencyKey: string,
     options?: AccountClosureOptions,
   ): Promise<AccountClosureReceipt> {
-    const now = this.clock.now();
+    const now = new Date(this.clock.now());
     const leaseDurationMs = this.leaseDurationMs;
     const leaseExpiresAt = new Date(now.getTime() + leaseDurationMs);
     const ownerToken = crypto.randomUUID();
@@ -217,7 +210,7 @@ export class AccountClosureCoordinator {
       const intervalMs = Math.max(50, Math.floor(leaseDurationMs / 3));
       heartbeatTimer = setInterval(async () => {
         try {
-          const currentTime = this.clock.now();
+          const currentTime = new Date(this.clock.now());
           const nextLease = new Date(currentTime.getTime() + leaseDurationMs);
           const renewed = await this.closureOperationRepository.renewHeartbeat({
             id: record.id,
@@ -242,7 +235,7 @@ export class AccountClosureCoordinator {
     try {
       // Phase 1: requested -> revoking
       if (record.phase === 'requested') {
-        const newLease = new Date(this.clock.now().getTime() + leaseDurationMs);
+        const newLease = new Date(this.clock.now() + leaseDurationMs);
         const okCAS = await this.closureOperationRepository.updatePhaseCAS({
           id: record.id,
           identityId: record.identityId,
@@ -295,7 +288,7 @@ export class AccountClosureCoordinator {
           piiReason = piiResult.reason;
         }
 
-        const newLease = new Date(this.clock.now().getTime() + leaseDurationMs);
+        const newLease = new Date(this.clock.now() + leaseDurationMs);
         const okCAS = await this.closureOperationRepository.updatePhaseCAS({
           id: record.id,
           identityId: record.identityId,
@@ -327,7 +320,7 @@ export class AccountClosureCoordinator {
       // Phase 3: revoked -> closing -> closed
       if (record.phase === 'revoked' || record.phase === 'closing') {
         if (record.phase === 'revoked') {
-          const newLease = new Date(this.clock.now().getTime() + leaseDurationMs);
+          const newLease = new Date(this.clock.now() + leaseDurationMs);
           const okCAS = await this.closureOperationRepository.updatePhaseCAS({
             id: record.id,
             identityId: record.identityId,
@@ -354,7 +347,7 @@ export class AccountClosureCoordinator {
           throw accountNotFoundForClosure(identityId);
         }
 
-        if (!AccountStatus.isDeactivated(account.status)) {
+        if (!AccountStatus.isClosed(account.status)) {
           const stillOwner = await this.heartbeat(
             record.id,
             identityId,
@@ -369,11 +362,11 @@ export class AccountClosureCoordinator {
             if (latest) return this.toReceipt(latest);
             throw new Error('Ownership lost before account close side effect');
           }
-          account.close();
+          account.close(this.clock.now());
           await this.accountRepository.save(account);
         }
 
-        const newLease = new Date(this.clock.now().getTime() + leaseDurationMs);
+        const newLease = new Date(this.clock.now() + leaseDurationMs);
         const okCAS = await this.closureOperationRepository.updatePhaseCAS({
           id: record.id,
           identityId: record.identityId,
@@ -404,7 +397,7 @@ export class AccountClosureCoordinator {
               id: identityId,
             } as unknown as import('@memoflow/contracts/account').AccountServerDTO);
 
-        const finishedNow = this.clock.now();
+        const finishedNow = new Date(this.clock.now());
         const eventId = record.eventId ?? `closure:${record.id}:closed`;
 
         await this.eventPublisher.publishAccountClosed({
@@ -455,7 +448,7 @@ export class AccountClosureCoordinator {
       record.status = 'failed';
       record.lastErrorCode = failureCode;
       record.lastError = errorMessage;
-      record.updatedAt = this.clock.now();
+      record.updatedAt = new Date(this.clock.now());
 
       const failedReceipt = this.toReceipt(record);
       record.receiptJson = JSON.stringify(failedReceipt);
@@ -495,7 +488,7 @@ export class AccountClosureCoordinator {
     ownerToken: string,
     leaseDurationMs = 30000,
   ): Promise<boolean> {
-    const now = this.clock.now();
+    const now = new Date(this.clock.now());
     const leaseExpiresAt = new Date(now.getTime() + leaseDurationMs);
     return this.closureOperationRepository.claimOwnership({
       id: recordId,

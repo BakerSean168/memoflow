@@ -9,6 +9,7 @@ import type { IReminderResponseRepository } from '../domain/repositories/i-remin
 import type { RoutineProfileStore } from '../domain/ports/routine-profile-store.port';
 import type { IUserReminderPreferenceRepository } from '../domain/repositories/i-user-reminder-preference-repository';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { UserTimeContextPort } from '@memoflow/time';
 import { fail, ok } from '@memoflow/contracts/result';
 import type { ReminderResponseAction } from '@memoflow/contracts/reminder';
 import type {
@@ -53,7 +54,7 @@ export interface ReminderModuleDependencies {
   readonly userReminderPreferenceRepository: IUserReminderPreferenceRepository;
   readonly routineProfileStore: RoutineProfileStore;
   readonly closureChecker: (identityId: string) => Promise<boolean>;
-  readonly accountTimezonePort?: import('../domain/ports/account-timezone.port').AccountTimezonePort;
+  readonly userTimeContextPort: UserTimeContextPort;
   readonly runtimeContributions?: ReminderRuntimeContributionsInput;
   /** Snooze command writer: persists canonical Routine temporary override state. */
   readonly snoozeOverrideWriter?: import('../application/use-cases/commands/record-reminder-response.use-case').ReminderSnoozeOverrideWriter;
@@ -104,6 +105,9 @@ export function createReminderUseCases(
   }
   if (!dependencies.routineProfileStore) {
     throw new Error('[FAIL-CLOSED] ReminderModule requires routineProfileStore dependency');
+  }
+  if (!dependencies.userTimeContextPort) {
+    throw new Error('[FAIL-CLOSED] ReminderModule requires userTimeContextPort dependency');
   }
 
   const { reminderTemplateRepository, reminderGroupRepository, reminderResponseRepository } =
@@ -213,7 +217,7 @@ export function createReminderModule(
   });
   const reminderScheduleQueryApplicationService = new ReminderScheduleQueryApplicationService({
     reminderTemplateRepository,
-    accountTimezonePort: dependencies.accountTimezonePort,
+    userTimeContextPort: dependencies.userTimeContextPort,
   });
   const reminderTemplateActionApplicationService = new ReminderTemplateActionApplicationService({
     reminderTemplateRepository,

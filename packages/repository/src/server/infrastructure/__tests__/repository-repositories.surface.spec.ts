@@ -10,7 +10,7 @@ import {
   type RepositoryPrismaRepositorySet,
   type RepositoryPrismaRuntimeContributions,
   type RepositoryModuleInstance,
-  type IKnowledgeRepositoryConnectionRepository,
+  type IKnowledgeRemoteBindingRepository,
   type IKnowledgeRepositoryProjectionService,
   type IKnowledgeNoteCommitService,
 } from '../../../../src';
@@ -19,7 +19,7 @@ import {
  * Repository seam surface.
  * 知识仓储模块 seam 的表面契约。
  *
- * `createRepositoryPrismaRepositories` returns the eight knowledge persistence
+ * `createRepositoryPrismaRepositories` returns the knowledge persistence
  * / atomic-write capabilities plus audit; `createRepositoryPrismaRuntimeContributions` returns
  * port-shaped services and the runtime contribution, keeping the fail-closed
  * `githubApp + closureChecker` check. `RepositoryModuleDependencies` consumes
@@ -36,9 +36,13 @@ describe('repository factories surface', () => {
 
   it('createRepositoryPrismaRepositories returns durable installation + atomic connection capabilities plus audit', () => {
     const set = createRepositoryPrismaRepositories(fakePrisma);
-    expect(set).toHaveProperty('connectionRepository');
+    expect(set).toHaveProperty('knowledgeSpaceRepository');
+    expect(set).toHaveProperty('bindingRepository');
+    expect(set).toHaveProperty('observationRepository');
+    expect(set).toHaveProperty('historyFenceRepository');
+    expect(set).toHaveProperty('projectionCheckpointRepository');
     expect(set).toHaveProperty('installationIntentRepository');
-    expect(set).toHaveProperty('connectionWriteTransactionRunner');
+    expect(set).toHaveProperty('bindingWriteTransactionRunner');
     expect(set).toHaveProperty('deliveryRepository');
     expect(set).toHaveProperty('noteProjectionRepository');
     expect(set).toHaveProperty('attachmentProjectionRepository');
@@ -47,7 +51,7 @@ describe('repository factories surface', () => {
     expect(set).toHaveProperty('leaseRepository');
     expect(set).toHaveProperty('auditRepository');
     const typed: RepositoryPrismaRepositorySet = set;
-    expect(typeof typed.connectionRepository.findByIdForIdentity).toBe('function');
+    expect(typeof typed.bindingRepository.findByIdForIdentity).toBe('function');
     expect(typeof typed.installationIntentRepository.findLatestRecoverableVerified).toBe(
       'function',
     );
@@ -94,15 +98,15 @@ describe('repository factories surface', () => {
   });
 
   it('RepositoryModuleDependencies consumes port-shaped services', () => {
-    const connectionRepo: IKnowledgeRepositoryConnectionRepository = {
+    const connectionRepo: IKnowledgeRemoteBindingRepository = {
       findById: async () => null,
       findByIdForIdentity: async () => null,
       findByIdentityId: async () => [],
-      findByGithubRepositoryId: async () => null,
-      findByInstallationAndGithubRepositoryId: async () => null,
+      findByRepositoryId: async () => null,
+      findByInstallationAndRepositoryId: async () => null,
       listProjectionCandidates: async () => [],
       save: async () => undefined,
-      updateStatus: async () => undefined,
+      markDisconnected: async () => false,
     };
     const projectionService = {
       start: () => undefined,
@@ -123,9 +127,9 @@ describe('repository factories surface', () => {
     const forbidden = [
       'GitHubAppClient',
       'FsStorageAdapter',
-      'KnowledgeRepositoryConnectionPrismaRepository',
+      'KnowledgeRemoteBindingPrismaRepository',
       'KnowledgeRepositoryInstallationIntentPrismaRepository',
-      'KnowledgeRepositoryConnectionWritePrismaTransactionRunner',
+      'KnowledgeRemoteBindingWritePrismaTransactionRunner',
       'GithubWebhookDeliveryPrismaRepository',
       'KnowledgeNoteProjectionPrismaRepository',
       'KnowledgeAttachmentProjectionPrismaRepository',

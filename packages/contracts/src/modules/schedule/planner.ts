@@ -3,7 +3,7 @@ import type { Instant, Ymd } from '../../primitives';
 export type PlannerSourceType = 'schedule' | 'task' | 'goal' | 'routine';
 
 export type PlannerDisplaySemantic =
-  'calendar-entry' | 'task-occurrence' | 'goal-start' | 'goal-deadline' | 'routine-wall-clock';
+  'calendar-entry' | 'task-occurrence' | 'goal-start' | 'goal-target' | 'routine-wall-clock';
 
 export type PlannerDisplayTone = 'default' | 'muted' | 'accent' | 'warning' | 'success';
 
@@ -22,7 +22,7 @@ export interface PlannerEditableCapabilities {
 
 export type PlannerOwnerCommandTarget =
   | { readonly ownerType: 'schedule.calendar-entry'; readonly ownerId: string }
-  | { readonly ownerType: 'task.instance'; readonly ownerId: string }
+  | { readonly ownerType: 'task.occurrence'; readonly ownerId: string }
   | { readonly ownerType: 'goal.goal'; readonly ownerId: string }
   | { readonly ownerType: 'routine.routine'; readonly ownerId: string };
 
@@ -68,7 +68,7 @@ export type ScheduleCalendarEventProjection = CalendarEventProjectionFor<
 
 export type TaskCalendarEventProjection = CalendarEventProjectionFor<
   'task',
-  Extract<PlannerOwnerCommandTarget, { ownerType: 'task.instance' }>
+  Extract<PlannerOwnerCommandTarget, { ownerType: 'task.occurrence' }>
 >;
 
 export type GoalCalendarEventProjection = CalendarEventProjectionFor<

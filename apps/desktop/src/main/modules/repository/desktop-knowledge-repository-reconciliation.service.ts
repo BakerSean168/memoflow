@@ -10,6 +10,7 @@ import {
   type KnowledgeRepositoryGitRuntimePort,
 } from './desktop-knowledge-repository-git.runtime';
 import type { KnowledgeRepositoryDesktopRemotePort } from './knowledge-repository-desktop-remote.port';
+import { isActiveKnowledgeRemoteBinding } from './knowledge-remote-binding-sync.policy';
 
 export interface DesktopKnowledgeRepositoryReconciliationServiceOptions {
   localVault: Pick<LocalVaultElectronPort, 'getBinding' | 'inspectSyncContent'>;
@@ -40,26 +41,28 @@ export class DesktopKnowledgeRepositoryReconciliationService {
 
     try {
       const [binding, connections] = await Promise.all([
-        this.options.localVault.getBinding(identityId),
+        this.options.localVault.getBinding(),
         this.options.remote.listKnowledgeRepositoryConnections(),
       ]);
-      if (!binding || binding.status !== 'Active') {
+      if (!binding || binding.health.state !== 'Available') {
         return fail({ code: 'NOT_FOUND', message: 'No active local Vault is selected' });
       }
       if (!connections.ok) return connections;
       const connection = connections.data.connections.find(
-        (candidate) => candidate.id === request.connectionId && candidate.status === 'Active',
+        (candidate) =>
+          candidate.id === request.connectionId &&
+          isActiveKnowledgeRemoteBinding(candidate, binding.binding.knowledgeSpaceId),
       );
       if (!connection) {
         return fail({
           code: 'NOT_FOUND',
-          message: 'Active knowledge repository connection was not found',
+          message: 'Active knowledge remote binding for this Local Vault was not found',
         });
       }
 
       const [localState, inspection] = await Promise.all([
-        this.options.localVault.inspectSyncContent(identityId),
-        this.options.gitRuntime.inspect(binding.rootPath),
+        this.options.localVault.inspectSyncContent(),
+        this.options.gitRuntime.inspect(binding.binding.rootPath),
       ]);
       const preview = await this.options.remote.previewKnowledgeRepositoryReconciliation(
         connection.id,
@@ -67,14 +70,13 @@ export class DesktopKnowledgeRepositoryReconciliationService {
       );
       if (!preview.ok) return preview;
 
-      const appOwnedRepository =
-        inspection.manifest?.repositoryId === connection.githubRepositoryId;
+      const appOwnedRepository = inspection.manifest?.repositoryId === connection.repositoryId;
       if (
         appOwnedRepository &&
         inspection.headSha &&
         inspection.headSha === preview.data.remoteHeadSha
       ) {
-        if (connection.lastSyncedCommitSha === inspection.headSha) {
+        if (connection.historyFence?.lastConfirmedRemoteHeadSha === inspection.headSha) {
           return ok({
             connection,
             action: request.expectedAction,
@@ -113,7 +115,7 @@ export class DesktopKnowledgeRepositoryReconciliationService {
       const token = await this.options.remote.issueDesktopKnowledgeRepositoryToken(connection.id);
       if (!token.ok) return token;
       if (
-        token.data.repositoryId !== connection.githubRepositoryId ||
+        token.data.repositoryId !== connection.repositoryId ||
         token.data.expiresAt <= this.now() + 30_000
       ) {
         return fail({
@@ -123,9 +125,10 @@ export class DesktopKnowledgeRepositoryReconciliationService {
       }
 
       const reconciled = await this.options.gitRuntime.reconcile({
-        rootPath: binding.rootPath,
-        repositoryId: connection.githubRepositoryId,
-        repositoryFullName: connection.githubRepositoryFullName,
+        rootPath: binding.binding.rootPath,
+        repositoryId: connection.repositoryId,
+        repositoryFullName:
+          connection.observation?.repositoryFullName ?? connection.repositoryFullNameSnapshot,
         defaultBranch: request.expectedDefaultBranch,
         expectedRemoteHeadSha: request.expectedRemoteHeadSha,
         action: request.expectedAction,

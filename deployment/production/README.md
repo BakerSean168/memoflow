@@ -69,10 +69,12 @@ The installer deliberately does **not** enable the timer by default. Enable peri
 
 ## Transaction boundary
 
-The watcher owns one deployment transaction:
+The watcher owns one deployment transaction. Its two-minute timer first reconciles only the small `production-selected` control pointer. If the recorded `DEPLOYED` state, control digest, release/control-plane identity, exact live container refs, and health all still match, it exits on a fast path without extracting the runtime bundle or pulling any application/runtime component image. A changed selection or runtime drift falls through to the full fail-closed transaction:
 
 ```text
 lock
+-> pull/inspect production-selected control pointer
+-> unchanged state + exact healthy live runtime => fast exit (no component pulls)
 -> validate production-selected artifact
 -> pull every exact digest
 -> reject unexpected PostgreSQL image changes

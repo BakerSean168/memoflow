@@ -25,7 +25,8 @@ export class RepositoryKnowledgeIndexStatusAdapter implements IKnowledgeIndexSta
     const result = await this.repositoryApi.updateKnowledgeNoteProjectionIndexStatus(
       { identityId },
       {
-        projectionId: update.resourceId,
+        connectionId: update.repositoryId,
+        resourceId: update.resourceId,
         contentHash: update.contentHash,
         status: update.status,
       },

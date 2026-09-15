@@ -31,7 +31,7 @@ describe('ipc-cache channel surface', () => {
 
   it('configures list TTL keys via contracts channel constants', () => {
     expect(source).toContain('GoalChannels.LIST');
-    expect(source).toContain('TaskChannels.TEMPLATE_LIST');
+    expect(source).toContain('TaskChannels.PLAN_LIST');
     expect(source).toContain('DashboardChannels.GET_STATS');
     expect(source).toContain('ReminderChannels.TEMPLATE_LIST');
     expect(GoalChannels.LIST).toBe('goal:list');

@@ -32,10 +32,12 @@ export function isYmdShape(value: string): boolean {
   const mo = Number(m[2]);
   const d = Number(m[3]);
   if (mo < 1 || mo > 12 || d < 1 || d > 31) return false;
-  // Reject impossible calendar days via local Date round-trip.
-  const probe = new Date(y, mo - 1, d);
+  // Reject impossible calendar days via a UTC round-trip; Ymd has no host zone.
+  const probe = new Date(0);
+  probe.setUTCFullYear(y, mo - 1, d);
+  probe.setUTCHours(0, 0, 0, 0);
   return (
-    probe.getFullYear() === y && probe.getMonth() === mo - 1 && probe.getDate() === d
+    probe.getUTCFullYear() === y && probe.getUTCMonth() === mo - 1 && probe.getUTCDate() === d
   );
 }
 

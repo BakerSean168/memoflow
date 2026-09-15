@@ -37,6 +37,7 @@ packages/goal/src/
 
 ## 关键收敛点
 
+- **Goal vNext identity/lifecycle (GOAL-7202)**：Goal 根身份只有 `name + summary`；业务状态只有 `Planned | InProgress | Completed | Abandoned`。状态只通过带 optimistic-concurrency 的 `plan / activate / complete / abandon` 动作改变；archive 独立，时间/KR/提醒/任务副作用不得自动推导状态。
 - 具体 `*Repository` class（`GoalPrismaRepository`、`GoalPowerSyncRepository` 等）是内部实现，不通过 root / api / electron 公开导出
 - `createGoalPrismaModule` / `createGoalPowerSyncModule` 是包内 convenience roots（测试与 rollback 用），不是宿主组合入口
 - Goal -> Task 进度 handler 工厂（`createGoalTaskProgressPrismaHandler` / `createGoalTaskProgressPowerSyncHandler`）由 root 暴露给宿主，由宿主传给 Task composer

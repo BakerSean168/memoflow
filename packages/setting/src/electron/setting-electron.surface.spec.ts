@@ -3,28 +3,23 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { SettingChannels } from '@memoflow/contracts/electron';
 
-/**
- * Setting electron seam surface (stage-6 residual):
- * Channel registration must use contracts SettingChannels only — no dual-track local Ch map.
- */
-describe('SettingElectronModule channel surface', () => {
+describe('Setting Electron canonical IPC surface', () => {
   const source = readFileSync(resolve(__dirname, 'index.ts'), 'utf8');
 
-  it('registers handlers via SettingChannels and does not redefine a local Ch map', () => {
-    expect(source).toContain('SettingChannels');
-    expect(source).toContain("from '@memoflow/contracts/electron'");
-    expect(source).not.toMatch(/const Ch = \{/);
-    expect(source).toContain('Object.values(SettingChannels)');
-    expect(source).toContain('SettingChannels.GET_ALL');
-    expect(source).toContain('SettingChannels.PATCH');
-    expect(source).toContain('SettingChannels.EXPORT');
+  it('registers every surviving Setting channel through the contract registry', () => {
+    for (const key of Object.keys(SettingChannels)) {
+      expect(source).toContain(`SettingChannels.${key}`);
+    }
   });
 
-  it('keeps SettingChannels values aligned with live adapter surface', () => {
-    expect(SettingChannels.GET_ALL).toBe('setting:all');
-    expect(SettingChannels.PATCH).toBe('setting:patch');
-    expect(SettingChannels.RESET).toBe('setting:reset');
-    expect(SettingChannels.IMPORT).toBe('setting:import');
-    expect(SettingChannels.EXPORT).toBe('setting:export');
+  it('does not remount legacy UserSetting RPCs', () => {
+    expect(Object.values(SettingChannels)).not.toContain('setting:all');
+    expect(Object.values(SettingChannels)).not.toContain('setting:defaults');
+    expect(Object.values(SettingChannels)).not.toContain('setting:patch');
+    expect(Object.values(SettingChannels)).not.toContain('setting:reset');
+    expect(source).not.toContain('getUserSetting');
+    expect(source).not.toContain('patchUserSetting');
+    expect(source).not.toContain('resetUserSetting');
+    expect(source).not.toContain('getDefaultSettings');
   });
 });

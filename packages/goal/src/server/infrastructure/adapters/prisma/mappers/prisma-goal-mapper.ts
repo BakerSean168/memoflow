@@ -53,12 +53,11 @@ export class PrismaGoalMapper {
       id: row.id,
       identityId: row.identityId,
       name: row.name,
-      description: row.description ?? null,
-      feasibilityAnalysis: row.feasibilityAnalysis ?? null,
-      motivation: row.motivation ?? null,
+      summary: row.summary ?? null,
       status: row.status,
-      startDate: optionalInstant(row.startDate),
-      dueDate: optionalInstant(row.dueDate),
+      startDate: row.startDate ?? null,
+      targetKind: row.targetKind ?? null,
+      targetEndDate: row.targetEndDate ?? null,
       completedAt: optionalInstant(row.completedAt),
       archivedAt: optionalInstant(row.archivedAt),
       sortOrder: row.sortOrder ?? 0,
@@ -86,13 +85,15 @@ export class PrismaGoalMapper {
       title: row.title,
       description: row.description ?? null,
       progress: {
-        startingValue: row.startingValue ?? 0,
-        progressBaselineValue: row.progressBaselineValue ?? null,
+        initialValue: row.initialValue ?? 0,
+        trackingBaseValue: row.trackingBaseValue ?? row.currentValue ?? 0,
         currentValue: row.currentValue ?? 0,
         targetValue: row.targetValue ?? 100,
         aggregationMethod: row.aggregationMethod ?? 'Last',
         unit: row.unit ?? null,
       },
+      targetKind: row.targetKind ?? null,
+      targetEndDate: row.targetEndDate ?? null,
       weight: row.weight ?? 1,
       sortOrder: row.order ?? 0,
       createdAt: requiredInstant(row.createdAt),
@@ -100,7 +101,9 @@ export class PrismaGoalMapper {
     };
   }
 
-  static parseReviewSystemContext(raw: string): import('@memoflow/contracts/goal').GoalReviewSystemContext {
+  static parseReviewSystemContext(
+    raw: string,
+  ): import('@memoflow/contracts/goal').GoalReviewSystemContext {
     return JSON.parse(raw) as import('@memoflow/contracts/goal').GoalReviewSystemContext;
   }
 
@@ -145,8 +148,8 @@ export class PrismaGoalMapper {
   static parseKeyResultProgress(kr: RawKeyResultData) {
     return {
       aggregationMethod: kr.progress.aggregationMethod ?? 'Last',
-      startingValue: kr.progress.startingValue ?? 0,
-      progressBaselineValue: kr.progress.progressBaselineValue ?? null,
+      initialValue: kr.progress.initialValue ?? 0,
+      trackingBaseValue: kr.progress.trackingBaseValue ?? kr.progress.currentValue ?? 0,
       targetValue: kr.progress.targetValue ?? 100,
       currentValue: kr.progress.currentValue ?? 0,
       unit: kr.progress.unit ?? null,

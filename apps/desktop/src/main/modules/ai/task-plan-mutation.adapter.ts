@@ -26,15 +26,15 @@ export class DesktopTaskPlanMutationAdapter implements TaskPlanMutationPort {
     }
   }
 
-  async createTaskTemplate(
-    request: Parameters<TaskPlanMutationPort['createTaskTemplate']>[0],
-    context: Parameters<TaskPlanMutationPort['createTaskTemplate']>[1],
+  async createTaskPlan(
+    request: Parameters<TaskPlanMutationPort['createTaskPlan']>[0],
+    context: Parameters<TaskPlanMutationPort['createTaskPlan']>[1],
   ) {
-    const result = await this.task.createTaskTemplate({
+    const result = await this.task.createTaskPlan({
       ...request,
       identityId: context.identityId as IdentityId,
     });
     if (!result.ok) return result;
-    return ok({ taskId: String(result.data.template.id) });
+    return ok({ taskId: String(result.data.plan.id) });
   }
 }

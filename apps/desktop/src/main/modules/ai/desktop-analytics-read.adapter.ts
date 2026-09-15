@@ -2,8 +2,9 @@ import type { IAnalyticsReadPort } from '@memoflow/ai/ports';
 import { SearchGoalsUseCase } from '@memoflow/goal/analytics';
 import type { IGoalRepository } from '@memoflow/goal';
 import { GetTaskDashboardUseCase } from '@memoflow/task/analytics';
-import type { ITaskTemplateRepository } from '@memoflow/task';
+import type { ITaskOccurrenceRepository, ITaskPlanRepository } from '@memoflow/task';
 import type { DashboardData } from '@memoflow/contracts/dashboard';
+import type { UserTimeContextPort } from '@memoflow/time';
 
 /**
  * Instance-bound dependencies for the desktop analytics read adapter.
@@ -19,7 +20,9 @@ import type { DashboardData } from '@memoflow/contracts/dashboard';
  */
 export interface DesktopAnalyticsReadAdapterDependencies {
   readonly goalRepository: IGoalRepository;
-  readonly taskTemplateRepository: ITaskTemplateRepository;
+  readonly taskPlanRepository: ITaskPlanRepository;
+  readonly taskOccurrenceRepository: ITaskOccurrenceRepository;
+  readonly userTimeContextPort: UserTimeContextPort;
   /** Loads the dashboard aggregation for an identity through injected repositories. 通过注入的仓储为某个 identity 加载 dashboard 聚合。 */
   readonly dashboardDataLoader: (identityId: string) => Promise<DashboardData>;
 }
@@ -28,11 +31,14 @@ export class DesktopAnalyticsReadAdapter implements IAnalyticsReadPort {
   constructor(private readonly dependencies: DesktopAnalyticsReadAdapterDependencies) {}
 
   async buildContext(identityId: string, question: string) {
-    const { goalRepository, taskTemplateRepository } = this.dependencies;
+    const timeContext = await this.dependencies.userTimeContextPort.getUserTimeContext(identityId);
+    const { goalRepository, taskPlanRepository, taskOccurrenceRepository } = this.dependencies;
     const dashboard = await this.dependencies.dashboardDataLoader(identityId);
-    const taskDashboard = await new GetTaskDashboardUseCase(taskTemplateRepository).execute(
-      identityId,
-    );
+    const taskDashboard = await new GetTaskDashboardUseCase(
+      taskPlanRepository,
+      taskOccurrenceRepository,
+      this.dependencies.userTimeContextPort,
+    ).execute(identityId);
     const activeGoals = await goalRepository.findByIdentityId(identityId, {
       includeChildren: true,
       systemView: 'active',
@@ -44,6 +50,7 @@ export class DesktopAnalyticsReadAdapter implements IAnalyticsReadPort {
     );
 
     return {
+      timeContext,
       dashboard: dashboard as unknown as Record<string, unknown>,
       taskDashboard: taskDashboard.ok
         ? (taskDashboard.data as unknown as Record<string, unknown>)
@@ -52,9 +59,7 @@ export class DesktopAnalyticsReadAdapter implements IAnalyticsReadPort {
         .slice(0, 10)
         .map((goal) => goal.toClientDTO(true) as unknown as Record<string, unknown>),
       goalSearchResults: goalSearch.ok
-        ? goalSearch.data.data.map(
-            (goal) => goal as unknown as Record<string, unknown>,
-          )
+        ? goalSearch.data.data.map((goal) => goal as unknown as Record<string, unknown>)
         : [],
       extra: {},
     };

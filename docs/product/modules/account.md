@@ -6,21 +6,25 @@ tags:
   - desktop-profile
 description: Account 业务资料、Desktop 本地 Profile 投影与 Cloud Auth 边界
 created: 2026-06-02T00:00:00
-updated: 2026-08-03T00:00:00+08:00
+updated: 2026-09-14T00:00:00+08:00
 ---
 
 # Account 模块
+
+> **ADR-111 cutover policy (2026-09-09):** 当前没有需要保留的 MemoFlow 旧业务数据，也不要求兼容旧客户端/旧备份。本文历史推演中仅为旧数据保存设计的 migration/backfill/compatibility window 不再执行；目标模型和真实行为不变量继续有效。实施采用 direct canonical cutover + old-surface deletion + reset/reseed。
+
+> **2026-09-09 vNext notice:** ADR-104 决定 Account 收敛为 Product Profile + Lifecycle；当前 `Account.settings` 与登录邮箱投影仍是实现事实，待 Setting/Auth cutover 后退休。
 
 ## 1. 功能定位
 
 Account 是用户资料和偏好的业务聚合，不负责密码、OAuth、Session 或本地 Profile 解锁。
 
-| 事实 | 真源 |
-| --- | --- |
+| 事实                             | 真源                                 |
+| -------------------------------- | ------------------------------------ |
 | 登录邮箱、验证状态、云端 Session | Better Auth / `@memoflow/cloud-auth` |
-| 昵称、头像、简介和 Account 设置 | Account |
-| Desktop 当前打开哪个本地容器 | Desktop Profile Access |
-| Profile 是否连接云端 Account | `CloudBinding` |
+| 昵称、头像、简介和 Account 设置  | Account                              |
+| Desktop 当前打开哪个本地容器     | Desktop Profile Access               |
+| Profile 是否连接云端 Account     | `CloudBinding`                       |
 
 Better Auth user ID 直接作为云端 `Account.id` 和业务 `identityId`，不再保留平行 `AuthIdentity` 映射。
 
@@ -57,15 +61,22 @@ Web 使用 Better Auth cookie session，Desktop 在线能力使用 main process 
 - Close cloud account 只关闭服务端 Account 并断开当前 cloud connection；本地 Profile、Vault 和业务数据保留。关闭后的 Account 不能继续调用受保护业务 API。
 - HTTP、IPC、Prisma 和 PowerSync adapter 必须遵守同一 Account 聚合规则和 identity 隔离。
 
-## 5. 当前边界
+## 5. Data Portability V3 owner boundary
+
+Account 提供 `account-profile@3` owner capability。portable payload 只包含六个用户拥有的资料字段：`nickname`、`realName`、`avatarUrl`、`bio`、`gender`、`birthday`。
+
+host identity、Account 记录、auth 状态、lifecycle 状态、版本/时间戳和凭据均不属于可移植资料。导入必须针对已经存在的 host Account；`account-profile@3` 不创建 Account，也不恢复身份、认证、生命周期、版本/时间戳或凭据。
+
+## 6. 当前边界
 
 Account 同时服务 Web 云端运行时和 Desktop 本地运行时。Desktop 的 Profile/云端资料协调必须走显式应用服务，不能依赖含混的 `isAuthenticated` 或伪本地 Session。
 
 账户设置与独立 Setting 模块的职责仍按现有 contracts 划分；跨模块合并不属于本次认证重写。
 
-## 6. 相关资料
+## 7. 相关资料
 
 - [云端认证与本地 Profile Access](./authentication.md)
 - [ADR-039: Cloud Auth 与 Local Profile Access 分离](../../architecture/adr/ADR-039-cloud-auth-and-local-profile-access.md)
 - [账户模块文件索引](../module-index/account-files.md)
+- [Data Portability 模块说明](./data-portability.md)
 - [设置模块说明](./setting.md)

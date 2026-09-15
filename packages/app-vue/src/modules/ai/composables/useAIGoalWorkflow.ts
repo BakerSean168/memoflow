@@ -2,25 +2,24 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
-import type {
-  AIWorkflowRunView,
-  GoalPlanDraft,
-  GoalPlanDraftContent,
+import {
+  GoalPlanDraftContentSchema,
+  GoalPlanDraftSchema,
+  type AIWorkflowRunView,
+  type GoalPlanDraft,
+  type GoalPlanDraftContent,
 } from '@memoflow/contracts/ai';
 import {
   createEmptyGoalDraft,
-  createEmptyGoalReminderDraft,
-  createEmptyGoalTaskTemplateDraft,
   type EditableGoal,
+  type EditableGoalKnowledge,
+  type EditableGoalTask,
   type EditableKeyResult,
-  type EditableGoalReminder,
-  type EditableGoalTaskTemplate,
   type GoalWorkflowStage,
   type GoalClarificationView,
   type UseAIGoalWorkflowOptions,
 } from './types';
 import { getAIErrorMessage } from './error';
-import { normalizeReminderTimeOfDay } from '@memoflow/utils/shared';
 
 /**
  * ADR-052 goal.create UI projection.
@@ -48,8 +47,8 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
 
   const editableGoal = ref<EditableGoal>(createEmptyGoalDraft());
   const editableKeyResults = ref<EditableKeyResult[]>([]);
-  const editableTaskTemplates = ref<EditableGoalTaskTemplate[]>([]);
-  const editableReminders = ref<EditableGoalReminder[]>([]);
+  const editableTasks = ref<EditableGoalTask[]>([]);
+  const editableKnowledge = ref<EditableGoalKnowledge[]>([]);
 
   function currentReviewDraft(): GoalPlanDraft | null {
     const suspension = goalWorkflowRun.value?.suspension;
@@ -59,39 +58,27 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
   function projectDraftToEditor(draft: GoalPlanDraft): void {
     editableGoal.value = {
       name: draft.goal.name,
-      description: draft.goal.description,
-      motivation: draft.goal.motivation ?? '',
-      feasibilityAnalysis: draft.goal.feasibilityAnalysis ?? '',
-      startDate: draft.goal.startDate,
-      dueDate: draft.goal.dueDate,
+      summary: draft.goal.summary ?? '',
+      status: draft.goal.status,
+      startDate: draft.goal.startDate ?? null,
+      target: draft.goal.target ?? null,
     };
     editableKeyResults.value = draft.keyResults.map((item) => ({
+      draftRef: item.draftRef,
       title: item.title,
       description: item.description ?? '',
-      calculationMethod: item.calculationMethod,
-      startingValue: item.startingValue,
-      progressBaselineValue: item.progressBaselineValue,
+      aggregationMethod: item.aggregationMethod,
+      initialValue: item.initialValue,
       currentValue: item.currentValue,
       targetValue: item.targetValue,
-      unit: item.unit,
+      target: item.target ?? null,
+      unit: item.unit ?? '',
       weight: item.weight,
     }));
-    editableTaskTemplates.value = draft.taskTemplates.map((item) => ({
-      name: item.name,
-      description: item.description ?? '',
-      importance: item.importance,
-      cadence: item.cadence,
-      timeOfDay: item.timeOfDay ?? '09:00',
-    }));
-    editableReminders.value = draft.reminders.map((item) => ({
-      title: item.title,
-      description: item.description ?? '',
-      importance: item.importance,
-      cadence: item.cadence,
-      timeOfDay: normalizeReminderTimeOfDay(item.timeOfDay ?? '09:00'),
-    }));
+    const parsedDraft = GoalPlanDraftSchema.parse(draft);
+    editableTasks.value = parsedDraft.tasks;
+    editableKnowledge.value = parsedDraft.knowledge;
   }
-
   function projectRun(run: AIWorkflowRunView | null): void {
     if (!run || run.kind !== 'goal.create') {
       goalWorkflowRun.value = null;
@@ -151,80 +138,53 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     const goal = {
       ...draft.goal,
       name: editableGoal.value.name,
-      description: editableGoal.value.description,
-      motivation: editableGoal.value.motivation || undefined,
-      feasibilityAnalysis: editableGoal.value.feasibilityAnalysis || undefined,
+      summary: editableGoal.value.summary.trim() || null,
+      status: editableGoal.value.status,
       startDate: editableGoal.value.startDate,
-      dueDate: editableGoal.value.dueDate,
+      target: editableGoal.value.target,
     };
 
-    const keyResults = editableKeyResults.value.map((item, index) => ({
-      ...(draft.keyResults[index] ?? {}),
+    const priorKeyResults = new Map(draft.keyResults.map((item) => [item.draftRef, item]));
+    const keyResults = editableKeyResults.value.map((item) => ({
+      ...priorKeyResults.get(item.draftRef),
+      draftRef: item.draftRef,
       title: item.title,
-      description: item.description || undefined,
-      calculationMethod: item.calculationMethod,
-      startingValue: item.startingValue,
-      progressBaselineValue: item.progressBaselineValue,
+      description: item.description.trim() || null,
+      aggregationMethod: item.aggregationMethod,
+      initialValue: item.initialValue,
       currentValue: item.currentValue,
       targetValue: item.targetValue,
-      unit: item.unit,
+      target: item.target,
+      unit: item.unit.trim() || null,
       weight: item.weight,
     }));
 
-    const taskTemplates = editableTaskTemplates.value.map((item, index) => {
-      const prior = draft.taskTemplates[index];
-      return {
-        ...(prior ?? {
-          daysOfWeek: item.cadence === 'weekly' ? [1] : [],
-          occurrences: null,
-          startDate: goal.startDate,
-          contributionValue: 1,
-          tags: [],
-        }),
-        name: item.name,
-        description: item.description || undefined,
-        importance: item.importance,
-        cadence: item.cadence,
-        timeOfDay: item.timeOfDay || undefined,
-        daysOfWeek:
-          item.cadence === 'weekly'
-            ? prior?.daysOfWeek?.length
-              ? [...prior.daysOfWeek]
-              : [1]
-            : [],
-      };
-    });
-
-    const reminders = editableReminders.value.map((item, index) => {
-      const prior = draft.reminders[index];
-      return {
-        ...(prior ?? {
-          scheduledAt: goal.startDate ?? undefined,
-          timezone: null,
-          channels: ['InApp' as const],
-          tags: [],
-        }),
-        title: item.title,
-        description: item.description || undefined,
-        importance: item.importance,
-        cadence: item.cadence,
-        timeOfDay: normalizeReminderTimeOfDay(item.timeOfDay) || undefined,
-      };
-    });
-
-    return {
+    return GoalPlanDraftContentSchema.parse({
       goal,
       keyResults,
-      taskTemplates,
-      reminders,
+      tasks: editableTasks.value,
+      knowledge: editableKnowledge.value,
       rationale: draft.rationale,
       warnings: [...draft.warnings],
-    };
+    });
   }
-
   function canonicalDraftContent(draft: GoalPlanDraft): GoalPlanDraftContent {
     const { revision: _revision, ...content } = draft;
-    return content;
+    return GoalPlanDraftContentSchema.parse({
+      ...content,
+      goal: {
+        ...content.goal,
+        summary: content.goal.summary ?? null,
+        startDate: content.goal.startDate ?? null,
+        target: content.goal.target ?? null,
+      },
+      keyResults: content.keyResults.map((item) => ({
+        ...item,
+        description: item.description ?? null,
+        target: item.target ?? null,
+        unit: item.unit ?? null,
+      })),
+    });
   }
 
   async function flushStructuredEdits(): Promise<Extract<
@@ -297,12 +257,14 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
   );
   const canContinueGoalAgentExecution = canRetryGoalAgentExecution;
 
-  const automatedGoalId = computed(() => goalWorkflowRun.value?.result?.goalId ?? null);
+  const automatedGoalId = computed(
+    () => goalWorkflowRun.value?.result?.referenceMap['goal'] ?? null,
+  );
   const goalExecutionSummary = computed(() => {
     const receipt = goalWorkflowRun.value?.result;
     if (!receipt) return null;
     const executedCount =
-      (receipt.goalId ? 1 : 0) + receipt.taskIds.length + receipt.reminderIds.length;
+      Object.keys(receipt.referenceMap).length + Object.keys(receipt.relationIds).length;
     return {
       status: receipt.status,
       executedCount,
@@ -387,7 +349,7 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     if (!run || !goalAgentWaitingForApproval.value || goalAgentResuming.value) return;
     if (hostOptions?.title) editableGoal.value.name = hostOptions.title;
     if (hostOptions?.description !== undefined)
-      editableGoal.value.description = hostOptions.description;
+      editableGoal.value.summary = hostOptions.description;
 
     goalAgentResuming.value = true;
     creatingGoal.value = true;
@@ -445,7 +407,7 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     if (!run || !goalAgentWaitingForApproval.value || goalAgentResuming.value) return;
     if (hostOptions?.title) editableGoal.value.name = hostOptions.title;
     if (hostOptions?.description !== undefined)
-      editableGoal.value.description = hostOptions.description;
+      editableGoal.value.summary = hostOptions.description;
     goalAgentResuming.value = true;
     try {
       await flushStructuredEdits();
@@ -487,15 +449,23 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     await confirmGoalAgentRun();
   }
 
+  function nextKeyResultDraftRef(): EditableKeyResult['draftRef'] {
+    const used = new Set(editableKeyResults.value.map((item) => item.draftRef));
+    let suffix = editableKeyResults.value.length + 1;
+    while (used.has(`kr:new-${suffix}`)) suffix += 1;
+    return `kr:new-${suffix}`;
+  }
+
   function addKeyResultDraft(): void {
     editableKeyResults.value.push({
+      draftRef: nextKeyResultDraftRef(),
       title: '',
       description: '',
-      calculationMethod: 'Sum',
-      startingValue: 0,
-      progressBaselineValue: null,
+      aggregationMethod: 'Sum',
+      initialValue: 0,
       currentValue: 0,
       targetValue: 1,
+      target: null,
       unit: '',
       weight: 3,
     });
@@ -509,29 +479,33 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
   function handleUpdateGoalDraft(payload: EditableGoal): void {
     editableGoal.value = { ...payload };
   }
-  function addTaskTemplateDraft(): void {
-    editableTaskTemplates.value.push(createEmptyGoalTaskTemplateDraft());
+  function removeTaskDraft(index: number): void {
+    editableTasks.value.splice(index, 1);
   }
-  function removeTaskTemplateDraft(index: number): void {
-    editableTaskTemplates.value.splice(index, 1);
+  function updateTaskDraft(payload: { index: number; value: EditableGoalTask }): void {
+    const currentDraft = currentReviewDraft();
+    if (!currentDraft) return;
+    const parsed = GoalPlanDraftSchema.parse({
+      ...currentDraft,
+      tasks: currentDraft.tasks.map((item, index) =>
+        index === payload.index ? payload.value : item,
+      ),
+    });
+    editableTasks.value[payload.index] = parsed.tasks[payload.index]!;
   }
-  function updateTaskTemplateDraft(payload: {
-    index: number;
-    value: EditableGoalTaskTemplate;
-  }): void {
-    editableTaskTemplates.value[payload.index] = { ...payload.value };
+  function removeKnowledgeDraft(index: number): void {
+    editableKnowledge.value.splice(index, 1);
   }
-  function addReminderDraft(): void {
-    editableReminders.value.push(createEmptyGoalReminderDraft());
-  }
-  function removeReminderDraft(index: number): void {
-    editableReminders.value.splice(index, 1);
-  }
-  function updateReminderDraft(payload: { index: number; value: EditableGoalReminder }): void {
-    editableReminders.value[payload.index] = {
-      ...payload.value,
-      timeOfDay: normalizeReminderTimeOfDay(payload.value.timeOfDay),
-    };
+  function updateKnowledgeDraft(payload: { index: number; value: EditableGoalKnowledge }): void {
+    const currentDraft = currentReviewDraft();
+    if (!currentDraft) return;
+    const parsed = GoalPlanDraftSchema.parse({
+      ...currentDraft,
+      knowledge: currentDraft.knowledge.map((item, index) =>
+        index === payload.index ? payload.value : item,
+      ),
+    });
+    editableKnowledge.value[payload.index] = parsed.knowledge[payload.index]!;
   }
   function toggleGoalDraftEditor(): void {
     showGoalDraftEditor.value = !showGoalDraftEditor.value;
@@ -545,8 +519,8 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     showGoalDraftEditor.value = false;
     editableGoal.value = createEmptyGoalDraft();
     editableKeyResults.value = [];
-    editableTaskTemplates.value = [];
-    editableReminders.value = [];
+    editableTasks.value = [];
+    editableKnowledge.value = [];
   }
   return {
     goalDraftLoading,
@@ -562,8 +536,8 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     goalAgentResuming,
     editableGoal,
     editableKeyResults,
-    editableTaskTemplates,
-    editableReminders,
+    editableTasks,
+    editableKnowledge,
     canSubmitGoalClarification,
     canRunGoalWorkflow,
     canPlanGoalAutomation,
@@ -593,12 +567,10 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     removeKeyResultDraft,
     updateKeyResultDraft,
     handleUpdateGoalDraft,
-    addTaskTemplateDraft,
-    removeTaskTemplateDraft,
-    updateTaskTemplateDraft,
-    addReminderDraft,
-    removeReminderDraft,
-    updateReminderDraft,
+    removeTaskDraft,
+    updateTaskDraft,
+    removeKnowledgeDraft,
+    updateKnowledgeDraft,
     toggleGoalDraftEditor,
   };
 }

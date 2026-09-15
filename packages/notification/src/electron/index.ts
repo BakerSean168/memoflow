@@ -198,6 +198,8 @@ type ModuleHandleState = 'created' | 'registered' | 'disposed' | 'failed';
  */
 export interface NotificationElectronModuleDef {
   readonly name: string;
+  /** Notification-owned stable delivery preference portability capability. */
+  readonly portableCapability: NotificationModuleInstance['portableCapability'];
   register(context: IElectronModuleContext): void;
   destroy?(): void;
 }
@@ -238,6 +240,7 @@ export function createNotificationElectronModule(
 
   return {
     name: 'Notification',
+    portableCapability: options.instance.portableCapability,
 
     register(ctx: IElectronModuleContext): void {
       if (state !== 'created') {

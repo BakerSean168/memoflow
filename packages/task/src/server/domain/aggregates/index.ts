@@ -9,19 +9,19 @@
  * - 不变量守护者：确保聚合内的业务规则始终满足
  * - 领域事件发布者：状态变更时发出领域事件
  * 
- * 【TaskTemplate 聚合根】
+ * 【TaskPlan 聚合根】
  * - 任务模板管理：一次性、循环任务的定义
  * - 任务实例生成：管理任务实例的生成逻辑
  * - 用户优先级：保留显式 importance 输入
  * - 有效关联：支持 Goal/KR、标签与 checklist
  * 
- * 【TaskInstance 聚合根】
+ * 【TaskOccurrence 聚合根】
  * - 任务实例管理：具体的任务执行实例
  * - 任务状态跟踪：待办、进行中、已完成、已取消
  * - 执行记录：执行时间、执行时长统计
  */
 
-export { TaskInstance } from './task-instance';
-export type { TaskInstanceState } from './task-instance';
-export { TaskTemplate } from './task-template';
-export type { TaskTemplateProps, TaskTemplateState } from './task-template.state';
+export { TaskOccurrence } from './task-occurrence';
+export type { TaskOccurrenceState } from './task-occurrence';
+export { TaskPlan } from './task-plan';
+export type { TaskPlanProps, TaskPlanState } from './task-plan.state';

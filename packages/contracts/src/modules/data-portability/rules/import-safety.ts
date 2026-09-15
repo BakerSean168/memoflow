@@ -7,6 +7,8 @@
 
 import type { UserDataExportEnvelopeV2 } from '../dtos/portable-envelope.dto';
 import { UserDataExportEnvelopeV2Schema } from '../dtos/portable-envelope.dto';
+import type { PortableBackupEnvelopeV3 } from '../dtos/portable-v3.dto';
+import { PortableBackupEnvelopeV3Schema } from '../dtos/portable-v3.dto';
 
 // ============ Banned Key Detection ============
 
@@ -108,6 +110,53 @@ export function parseUserDataExportEnvelope(raw: unknown): ParseUserDataExportEn
       ok: false,
       error: `Envelope validation failed: data.${bannedPath} — banned import field`,
     };
+  }
+
+  return { ok: true, envelope: result.data };
+}
+
+
+export type ParsePortableBackupEnvelopeV3Result =
+  | { ok: true; envelope: PortableBackupEnvelopeV3 }
+  | { ok: false; error: string };
+
+/**
+ * Parse the canonical owner-driven V3 backup envelope.
+ *
+ * Capability payloads are constrained to JSON at the envelope boundary and
+ * must be parsed again by the owner capability schema before dry-run/apply.
+ */
+export function parsePortableBackupEnvelopeV3(raw: unknown): ParsePortableBackupEnvelopeV3Result {
+  if (
+    raw !== null &&
+    typeof raw === 'object' &&
+    !Array.isArray(raw) &&
+    (raw as { kind?: unknown }).kind === 'memoflow.server-held-data-disclosure'
+  ) {
+    return {
+      ok: false,
+      error:
+        'Server-held data disclosure is not importable. Export/import only memoflow.user-data-export business backups.',
+    };
+  }
+
+  const result = PortableBackupEnvelopeV3Schema.safeParse(raw);
+  if (!result.success) {
+    const issue = result.error.issues[0];
+    return {
+      ok: false,
+      error: `Envelope validation failed: ${issue.path.join('.')} — ${issue.message}`,
+    };
+  }
+
+  for (const [index, capability] of result.data.capabilities.entries()) {
+    const bannedPath = findBannedImportKey(capability.payload);
+    if (bannedPath) {
+      return {
+        ok: false,
+        error: `Envelope validation failed: capabilities.${index}.payload.${bannedPath} — banned import field`,
+      };
+    }
   }
 
   return { ok: true, envelope: result.data };

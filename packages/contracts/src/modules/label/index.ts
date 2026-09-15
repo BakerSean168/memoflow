@@ -1,24 +1,45 @@
-/** Shared personal classification contract (ADR-054). */
+/** Shared personal classification contract (ADR-054 / ADR-103). */
 import { z } from 'zod';
+import type { Instant } from '../../primitives/instant';
+import { PortableReferenceV3Schema } from '../data-portability/dtos/portable-v3.dto';
+
+const LabelPortableReferenceV3Schema = PortableReferenceV3Schema.refine(
+  (ref) => ref.startsWith('labels:'),
+  'Label portable references must use the labels capability',
+);
+
+function normalizePortableLabelName(name: string): string {
+  return name.normalize('NFKC').trim().toLowerCase();
+}
+
+/** Canonical Shared Label RGB color. Runtime contract is exactly #RRGGBB. */
+export type LabelColor = `#${string}`;
+
+export const LabelColorSchema = z
+  .string()
+  .regex(/^#[0-9a-fA-F]{6}$/, 'Label color must be a 6-digit RGB hex value.')
+  .transform((value): LabelColor => value.toLowerCase() as LabelColor);
 
 export interface LabelDto {
   readonly id: string;
   readonly identityId: string;
   readonly name: string;
   readonly normalizedName: string;
-  readonly color: string | null;
-  readonly createdAt: number;
-  readonly updatedAt: number;
+  readonly color: LabelColor | null;
+  readonly createdAt: Instant;
+  readonly updatedAt: Instant;
 }
 
 /** Current-user presentation DTO. Identity ownership remains host-side. */
-export const LabelClientDTOSchema = z.object({
-  id: z.string().min(1),
-  name: z.string(),
-  color: z.string().nullable(),
-  createdAt: z.number(),
-  updatedAt: z.number(),
-});
+export const LabelClientDTOSchema = z
+  .object({
+    id: z.string().min(1),
+    name: z.string(),
+    color: LabelColorSchema.nullable(),
+    createdAt: z.number().finite(),
+    updatedAt: z.number().finite(),
+  })
+  .strict();
 export type LabelClientDTO = z.infer<typeof LabelClientDTOSchema>;
 
 export const ListLabelsReqSchema = z
@@ -31,8 +52,11 @@ export type ListLabelsReq = z.infer<typeof ListLabelsReqSchema>;
 
 export const CreateLabelReqSchema = z
   .object({
-    name: z.string().trim().min(1).max(50),
-    color: z.string().max(32).nullable().optional(),
+    name: z
+      .string()
+      .transform((value) => value.normalize('NFKC').trim())
+      .pipe(z.string().min(1).max(50)),
+    color: LabelColorSchema.nullable().optional(),
   })
   .strict();
 export type CreateLabelReq = z.infer<typeof CreateLabelReqSchema>;
@@ -40,14 +64,14 @@ export type CreateLabelReq = z.infer<typeof CreateLabelReqSchema>;
 export interface CreateLabelCommand {
   readonly identityId: string;
   readonly name: string;
-  readonly color?: string | null;
+  readonly color?: LabelColor | null;
 }
 
 export interface UpdateLabelCommand {
   readonly identityId: string;
   readonly labelId: string;
   readonly name?: string;
-  readonly color?: string | null;
+  readonly color?: LabelColor | null;
 }
 
 export interface DeleteLabelCommand {
@@ -61,15 +85,43 @@ export interface ListLabelsQuery {
   readonly limit?: number;
 }
 
-export interface LabelAssignmentCommand {
-  readonly identityId: string;
-  readonly labelIds: readonly string[];
-}
+/** Owner-owned payload for the `labels@3` portability capability. */
+export const LabelPortableItemV3Schema = z
+  .object({
+    ref: LabelPortableReferenceV3Schema,
+    name: z
+      .string()
+      .transform((value) => value.normalize('NFKC').trim())
+      .pipe(z.string().min(1).max(50)),
+    color: LabelColorSchema.nullable(),
+  })
+  .strict();
+export type LabelPortableItemV3 = z.infer<typeof LabelPortableItemV3Schema>;
 
-export interface GoalLabelAssignmentCommand extends LabelAssignmentCommand {
-  readonly goalId: string;
-}
-
-export interface TaskLabelAssignmentCommand extends LabelAssignmentCommand {
-  readonly taskTemplateId: string;
-}
+export const LabelPortablePayloadV3Schema = z
+  .object({ labels: z.array(LabelPortableItemV3Schema) })
+  .strict()
+  .superRefine((payload, ctx) => {
+    const names = new Set<string>();
+    const refs = new Set<string>();
+    payload.labels.forEach((label, index) => {
+      const normalized = normalizePortableLabelName(label.name);
+      if (names.has(normalized)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['labels', index, 'name'],
+          message: `Duplicate portable label name: ${label.name}`,
+        });
+      }
+      if (refs.has(label.ref)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['labels', index, 'ref'],
+          message: `Duplicate portable label ref: ${label.ref}`,
+        });
+      }
+      names.add(normalized);
+      refs.add(label.ref);
+    });
+  });
+export type LabelPortablePayloadV3 = z.infer<typeof LabelPortablePayloadV3Schema>;

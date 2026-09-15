@@ -10,24 +10,16 @@ import { fail, map as mapResult } from '@memoflow/contracts/result';
 import type { IAccountApiClient } from '../ports/account-api-client.port';
 import type {
   UpdateAccountReq,
-  CheckAvailabilityReq,
-  CheckAvailabilityRes,
   CloseAccountReq,
   CloseAccountRes,
-  UpdateAccountSettingsReq,
-  UpdateAccountSettingsRes,
   AccountClientDTO,
+  AccountView,
+  CloudIdentitySummary,
   AccountProfileDTO,
 } from '@memoflow/contracts/account';
 import { Account } from '../../domain-client';
 import { IdentityId } from '@memoflow/domain-shared/shared';
-import {
-  AccountProfile,
-  AccountSettings,
-  ContactEmail,
-  AccountStatus,
-  ContactPhone,
-} from '../../server/domain/value-objects';
+import { AccountProfile, AccountStatus } from '../../server/domain/value-objects';
 
 function accountFromDTO(dto: AccountClientDTO): Account {
   return Account.load({
@@ -36,33 +28,35 @@ function accountFromDTO(dto: AccountClientDTO): Account {
       ...dto.profile,
       birthday: dto.profile.birthday as AccountProfileDTO['birthday'],
     }),
-    email: ContactEmail.create(dto.email),
-    settings: AccountSettings.create(dto.settings),
     status: AccountStatus.of(dto.status),
-    phone: dto.phone ? ContactPhone.create(dto.phone) : null,
-    version: dto.version,
     createdAt: dto.createdAt,
     updatedAt: dto.updatedAt,
-    deletedAt: dto.deletedAt ? dto.deletedAt : null,
+    closedAt: dto.closedAt ?? null,
   });
 }
 
-function mapAccountResult(result: Result<AccountClientDTO>): Result<Account> {
+export interface AccountClientView {
+  readonly account: Account;
+  readonly cloudIdentity: CloudIdentitySummary | null;
+}
+
+function mapAccountResult(result: Result<AccountView>): Result<AccountClientView> {
   if (result.ok && !result.data) {
     return fail({ code: 'NOT_FOUND', message: 'Account not found' }, result.meta);
   }
 
-  return mapResult(result, (dto) => accountFromDTO(dto));
+  return mapResult(result, (view) => ({
+    account: accountFromDTO(view.account),
+    cloudIdentity: view.cloudIdentity,
+  }));
 }
 
 // ─── Client Application Port ────────────────────────────────────────────────
 
 /** High-level client-side operations for the account module. */
 export interface AccountClientPort {
-  getMyProfile(): Promise<Result<Account>>;
-  updateMyProfile(request: UpdateAccountReq): Promise<Result<Account>>;
-  checkAvailability(request: CheckAvailabilityReq): Promise<Result<CheckAvailabilityRes>>;
-  updateSettings(request: UpdateAccountSettingsReq): Promise<Result<UpdateAccountSettingsRes>>;
+  getMyProfile(): Promise<Result<AccountClientView>>;
+  updateMyProfile(request: UpdateAccountReq): Promise<Result<AccountClientView>>;
   closeAccount(request: CloseAccountReq): Promise<Result<CloseAccountRes>>;
 }
 
@@ -70,29 +64,17 @@ export class AccountClientService implements AccountClientPort {
   constructor(private readonly apiClient: IAccountApiClient) {
     this.getMyProfile = this.getMyProfile.bind(this);
     this.updateMyProfile = this.updateMyProfile.bind(this);
-    this.checkAvailability = this.checkAvailability.bind(this);
-    this.updateSettings = this.updateSettings.bind(this);
     this.closeAccount = this.closeAccount.bind(this);
   }
 
-  async getMyProfile(): Promise<Result<Account>> {
+  async getMyProfile(): Promise<Result<AccountClientView>> {
     const result = await this.apiClient.getMyProfile();
     return mapAccountResult(result);
   }
 
-  async updateMyProfile(request: UpdateAccountReq): Promise<Result<Account>> {
+  async updateMyProfile(request: UpdateAccountReq): Promise<Result<AccountClientView>> {
     const result = await this.apiClient.updateMyProfile(request);
     return mapAccountResult(result);
-  }
-
-  async checkAvailability(request: CheckAvailabilityReq): Promise<Result<CheckAvailabilityRes>> {
-    return this.apiClient.checkAvailability(request);
-  }
-
-  async updateSettings(
-    request: UpdateAccountSettingsReq,
-  ): Promise<Result<UpdateAccountSettingsRes>> {
-    return this.apiClient.updateSettings(request);
   }
 
   async closeAccount(request: CloseAccountReq): Promise<Result<CloseAccountRes>> {

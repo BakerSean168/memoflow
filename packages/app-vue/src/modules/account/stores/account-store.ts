@@ -45,14 +45,6 @@ export const useAccountStore = defineStore('account', {
     getNickname: (state) => state.currentAccount?.profile?.nickname ?? null,
 
     getAvatarUrl: (state) => state.currentAccount?.profile?.avatarUrl ?? null,
-
-    getEmail: (state) => state.currentAccount?.email?.address ?? null,
-
-    isEmailVerified: (state) => state.currentAccount?.email?.isVerified ?? false,
-
-    getPhone: (state) => state.currentAccount?.phone?.number ?? null,
-
-    isPhoneVerified: (state) => state.currentAccount?.phone?.isVerified ?? false,
   },
 
   actions: {
@@ -86,5 +78,4 @@ export const useAccountStore = defineStore('account', {
       this.error = null;
     },
   },
-
 });

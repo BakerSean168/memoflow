@@ -4,23 +4,28 @@
  * 解除任务模板与目标的绑定
  */
 
-import type { ITaskTemplateRepository } from '../../../domain/repositories/i-task-template-repository';
-import type { TaskTemplateClientDTO } from '@memoflow/contracts/task';
+import type { ITaskPlanRepository } from '../../../domain/repositories/i-task-plan-repository';
+import type { TaskPlanClientDTO } from '@memoflow/contracts/task';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
+import type { UserTimeContextPort } from '@memoflow/time';
 
 export class UnbindTaskFromGoalUseCase {
-  constructor(private readonly templateRepository: ITaskTemplateRepository) {}
+  constructor(
+    private readonly planRepository: ITaskPlanRepository,
+    private readonly userTimeContextPort: UserTimeContextPort,
+  ) {}
 
-  async execute(templateId: string, identityId: string): Promise<Result<TaskTemplateClientDTO>> {
-    const template = await this.templateRepository.findByIdForIdentity(identityId, templateId);
-    if (!template) {
-      return error('NOT_FOUND', `TaskTemplate ${templateId} not found`);
+  async execute(planId: string, identityId: string): Promise<Result<TaskPlanClientDTO>> {
+    const plan = await this.planRepository.findByIdForIdentity(identityId, planId);
+    if (!plan) {
+      return error('NOT_FOUND', `TaskPlan ${planId} not found`);
     }
 
-    template.unbindFromGoal();
-    await this.templateRepository.save(template);
+    const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
+    plan.unbindFromGoal();
+    await this.planRepository.save(plan);
 
-    return ok(template.toClientDTO());
+    return ok(plan.toClientDTOAt(timeContext));
   }
 }

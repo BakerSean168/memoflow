@@ -1,9 +1,10 @@
-import type { AddKeyResultReq, CreateGoalReq } from '@memoflow/contracts/goal';
+import type { CreateGoalReq } from '@memoflow/contracts/goal';
 import type { Ref } from 'vue';
 import type {
   ConversationListRes,
-  GoalPlanReminder,
-  GoalPlanTaskTemplate,
+  GoalPlanDraft,
+  GoalPlanKnowledge,
+  GoalPlanTask,
   QueryKnowledgeRes,
 } from '@memoflow/contracts/ai';
 import type { IAIClient, IWorkflowRuntimeService } from '../../../di/types';
@@ -114,7 +115,6 @@ export type AIWorkspaceRecentGoal = {
   title: string;
   status: string;
   updatedAt: number;
-  dueDate: number | null;
   progress: number | null;
 };
 export type AIWorkspaceRecentKnowledgeNote = {
@@ -146,40 +146,30 @@ export interface GoalClarificationView {
 
 export type EditableGoal = {
   name: string;
-  description: string;
-  motivation: string;
-  feasibilityAnalysis: string;
-  startDate: number | null;
-  dueDate: number | null;
+  summary: string;
+  status: GoalPlanDraft['goal']['status'];
+  startDate: GoalPlanDraft['goal']['startDate'];
+  target: GoalPlanDraft['goal']['target'];
 };
 
 export type EditableKeyResult = {
+  draftRef: GoalPlanDraft['keyResults'][number]['draftRef'];
   title: string;
   description: string;
-  calculationMethod: AddKeyResultReq['calculationMethod'];
-  startingValue: number;
-  progressBaselineValue: number | null;
+  aggregationMethod: GoalPlanDraft['keyResults'][number]['aggregationMethod'];
+  initialValue: number;
   currentValue: number;
   targetValue: number;
+  target: GoalPlanDraft['keyResults'][number]['target'];
   unit: string;
   weight: number;
 };
 
-export type EditableGoalTaskTemplate = {
-  name: string;
-  description: string;
-  importance: GoalPlanTaskTemplate['importance'];
-  cadence: GoalPlanTaskTemplate['cadence'];
-  timeOfDay: string;
-};
+/** UI projection of canonical GoalPlanDraft V2 Task. Schedule remains owner vocabulary. */
+export type EditableGoalTask = GoalPlanTask;
 
-export type EditableGoalReminder = {
-  title: string;
-  description: string;
-  importance: GoalPlanReminder['importance'];
-  cadence: GoalPlanReminder['cadence'];
-  timeOfDay: string;
-};
+/** UI projection of canonical GoalPlanDraft V2 Knowledge create/linkExisting entry. */
+export type EditableGoalKnowledge = GoalPlanKnowledge;
 
 export type PersistedWorkflowEntry = {
   /** Canonical WorkflowMode; unknown/legacy values are normalized on read. */
@@ -194,34 +184,20 @@ export type PersistedWorkflowEntry = {
   clarificationAnswers: string[];
   editableGoal: EditableGoal;
   editableKeyResults: EditableKeyResult[];
-  editableTaskTemplates?: EditableGoalTaskTemplate[];
-  editableReminders?: EditableGoalReminder[];
+  editableTasks?: EditableGoalTask[];
+  editableKnowledge?: EditableGoalKnowledge[];
   showGoalDraftEditor: boolean;
 };
 
 export type PersistedConversationModelMap = Record<string, string>;
 
 export function createEmptyGoalDraft(): EditableGoal {
-  return { name: '', description: '', motivation: '', feasibilityAnalysis: '', startDate: null, dueDate: null };
-}
-
-export function createEmptyGoalTaskTemplateDraft(): EditableGoalTaskTemplate {
   return {
     name: '',
-    description: '',
-    importance: 'Moderate' as EditableGoalTaskTemplate['importance'],
-    cadence: 'weekly',
-    timeOfDay: '09:00',
-  };
-}
-
-export function createEmptyGoalReminderDraft(): EditableGoalReminder {
-  return {
-    title: '',
-    description: '',
-    importance: 'Moderate' as EditableGoalReminder['importance'],
-    cadence: 'weekly',
-    timeOfDay: '09:00',
+    summary: '',
+    status: 'Planned',
+    startDate: null,
+    target: null,
   };
 }
 

@@ -104,6 +104,13 @@ describe('CloudAuthHttpClient', () => {
       expectedCode: 'EMAIL_VERIFICATION_REQUIRED',
       expectedMessage: 'Email verification required',
     },
+    {
+      status: 422,
+      providerCode: 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL',
+      providerMessage: 'User already exists. Please use another email.',
+      expectedCode: 'USER_ALREADY_EXISTS',
+      expectedMessage: 'Account already exists',
+    },
   ])(
     'projects Better Auth $providerCode into MemoFlow $expectedCode',
     async ({ status, providerCode, providerMessage, expectedCode, expectedMessage }) => {

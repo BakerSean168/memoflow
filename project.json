@@ -1,10 +1,7 @@
 {
   "name": "memoflow",
   "$schema": "node_modules/nx/schemas/project-schema.json",
-  "tags": [
-    "scope:meta",
-    "type:meta"
-  ],
+  "tags": ["scope:meta", "type:meta"],
   "targets": {
     "docs-check": {
       "executor": "nx:run-commands",
@@ -90,6 +87,10 @@
         "{workspaceRoot}/tools/governance/vitest-no-tests-audit.mjs",
         "{workspaceRoot}/tools/governance/server-feature-shape-audit.mjs",
         "{workspaceRoot}/tools/governance/package-internal-boundary-audit.mjs",
+        "{workspaceRoot}/tools/governance/governance-rule-bundle-adapter.mjs",
+        "{workspaceRoot}/tools/governance/engineering-rule-adapters.json",
+        "{workspaceRoot}/tools/governance/pinned-rule-bundles.json",
+        "{workspaceRoot}/tools/governance/published/**/*.json",
         "{workspaceRoot}/tools/governance/package-export-audit.mjs",
         "{workspaceRoot}/tools/governance/public-surface-audit.mjs",
         "{workspaceRoot}/tools/governance/raw-event-bus-audit.mjs",
@@ -100,6 +101,15 @@
         "{workspaceRoot}/tools/governance/unflushed-events-audit.mjs",
         "{workspaceRoot}/tools/governance/scope-constraint-audit.mjs",
         "{workspaceRoot}/tools/governance/reka-ui-primitive-audit.mjs",
+        "{workspaceRoot}/tools/governance/product-time-surface-audit.mjs",
+        "{workspaceRoot}/tools/governance/shared-relation-ownership-audit.mjs",
+        "{workspaceRoot}/tools/governance/goal-workspace-read-model-audit.mjs",
+        "{workspaceRoot}/packages/goal/package.json",
+        "{workspaceRoot}/apps/api/package.json",
+        "{workspaceRoot}/apps/desktop/package.json",
+        "{workspaceRoot}/docker/powersync/sync-config.yaml",
+        "{workspaceRoot}/tools/governance/label-registry-ownership-audit.mjs",
+        "{workspaceRoot}/tools/governance/label-primitive-audit.mjs",
         "{workspaceRoot}/tools/governance/date-fns-import-audit.mjs",
         "{workspaceRoot}/tools/governance/api-runtime-dependency-audit.mjs",
         "{workspaceRoot}/tools/governance/time-registry.json",
@@ -111,10 +121,14 @@
         "{workspaceRoot}/tools/governance/public-surface-jsdoc-audit.mjs",
         "{workspaceRoot}/.github/workflows/**/*",
         "{workspaceRoot}/.github/actions/**/*",
-        "{workspaceRoot}/tools/governance/github-action-pinning-audit.mjs"
+        "{workspaceRoot}/tools/governance/github-action-pinning-audit.mjs",
+        "{workspaceRoot}/tools/governance/vnext-retirement-manifest.json",
+        "{workspaceRoot}/tools/governance/vnext-retirement-audit.mjs",
+        "{workspaceRoot}/tools/governance/__tests__/vnext-retirement.test.mjs",
+        "{workspaceRoot}/tools/test/fixtures/label-normalization.json"
       ],
       "options": {
-        "command": "node ./tools/docs/check-docs-config.mjs && node ./tools/test/hard-7101-failure-matrix.mjs --check && node ./tools/governance/product-identity-audit.mjs && node ./tools/governance/target-baseline-audit.mjs && node ./tools/governance/file-naming-audit.mjs && node ./tools/governance/github-action-pinning-audit.mjs && node ./tools/governance/failure-contract-inventory-audit.mjs && node ./tools/governance/governance-module-docs-audit.mjs && node ./tools/governance/platform-leakage-audit.mjs && node ./tools/governance/singleton-audit.mjs && node ./tools/governance/desktop-runtime-locator-audit.mjs && node ./tools/governance/vitest-no-tests-audit.mjs && node ./tools/governance/server-feature-shape-audit.mjs && node ./tools/governance/package-internal-boundary-audit.mjs && node ./tools/governance/package-export-audit.mjs && node ./tools/governance/public-surface-audit.mjs && node ./tools/governance/raw-event-bus-audit.mjs && node ./tools/governance/mitt-rpc-forbidden-audit.mjs && node ./tools/governance/schedule-notification-separation-audit.mjs && node ./tools/governance/core-vnext-architecture-lock-audit.mjs && node ./tools/governance/unflushed-events-audit.mjs && node ./tools/governance/scope-constraint-audit.mjs && node ./tools/governance/reka-ui-primitive-audit.mjs && node ./tools/governance/accessible-interaction-audit.mjs && node ./tools/governance/date-fns-import-audit.mjs && node ./tools/governance/architecture-surface-audit.mjs && node ./tools/governance/public-surface-jsdoc-audit.mjs && node ./tools/governance/api-runtime-dependency-audit.mjs"
+        "command": "node ./tools/docs/check-docs-config.mjs && node ./tools/test/hard-7101-failure-matrix.mjs --check && node ./tools/governance/product-identity-audit.mjs && node ./tools/governance/target-baseline-audit.mjs && node ./tools/governance/file-naming-audit.mjs && node ./tools/governance/github-action-pinning-audit.mjs && node ./tools/governance/failure-contract-inventory-audit.mjs && node ./tools/governance/governance-module-docs-audit.mjs && node ./tools/governance/platform-leakage-audit.mjs && node ./tools/governance/singleton-audit.mjs && node ./tools/governance/desktop-runtime-locator-audit.mjs && node ./tools/governance/vitest-no-tests-audit.mjs && node ./tools/governance/server-feature-shape-audit.mjs && node ./tools/governance/package-internal-boundary-audit.mjs && node ./tools/governance/governance-rule-bundle-adapter.mjs --bundle tools/governance/published/governance-rule-bundle.v1.json --mode check && node ./tools/governance/package-export-audit.mjs && node ./tools/governance/public-surface-audit.mjs && node ./tools/governance/raw-event-bus-audit.mjs && node ./tools/governance/mitt-rpc-forbidden-audit.mjs && node ./tools/governance/schedule-notification-separation-audit.mjs && node ./tools/governance/core-vnext-architecture-lock-audit.mjs && node ./tools/governance/vnext-retirement-audit.mjs && node ./tools/governance/unflushed-events-audit.mjs && node ./tools/governance/scope-constraint-audit.mjs && node ./tools/governance/reka-ui-primitive-audit.mjs && node ./tools/governance/accessible-interaction-audit.mjs && node ./tools/governance/product-time-surface-audit.mjs && node ./tools/governance/shared-relation-ownership-audit.mjs && node ./tools/governance/goal-workspace-read-model-audit.mjs && node ./tools/governance/label-registry-ownership-audit.mjs && node ./tools/governance/label-primitive-audit.mjs && node ./tools/governance/date-fns-import-audit.mjs && node ./tools/governance/architecture-surface-audit.mjs && node ./tools/governance/public-surface-jsdoc-audit.mjs && node ./tools/governance/api-runtime-dependency-audit.mjs"
       }
     },
     "test:governance": {

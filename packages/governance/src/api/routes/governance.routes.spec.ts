@@ -39,6 +39,7 @@ function createUseCaseStub(): GovernanceApplicationPort {
     listRules: vi.fn(() => ok([] as never)),
     searchRules: vi.fn(() => ok([] as never)),
     getRevisions: vi.fn(() => ok(null as never)),
+    exportRuleBundle: vi.fn(() => ok(null as never)),
   } as GovernanceApplicationPort;
 }
 
@@ -80,6 +81,11 @@ describe('governance route contracts', () => {
     expect(
       registry.paths.some(
         (route) => route.method === 'get' && route.path === '/api/v1/governance/rules/search',
+      ),
+    ).toBe(true);
+    expect(
+      registry.paths.some(
+        (route) => route.method === 'get' && route.path === '/api/v1/governance/rules/bundle',
       ),
     ).toBe(true);
     expect(

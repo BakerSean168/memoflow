@@ -64,7 +64,7 @@ describe('data portability Prisma adapter placement', () => {
 
     expect(importStoreIndex).toContain('DataPortabilityImportStore');
     expect(importStoreIndex).toContain('DataPortabilityImportTx');
-    expect(importStoreIndex).toContain('UpsertUserSettingInput');
+    expect(importStoreIndex).toContain('UpsertUserPreferencesInput');
     expect(importStoreIndex).toContain('CreateAIMessageInput');
   });
 

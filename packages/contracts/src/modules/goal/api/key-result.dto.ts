@@ -6,6 +6,7 @@
 
 import { z } from 'zod';
 import { KeyResultCalculationMethod } from '../value-objects/key-result-calculation-method';
+import { GoalTimeframeSchema } from '../value-objects/goal-timeframe';
 import { brandedId } from '../../../primitives';
 import type { GoalId, KeyResultId } from '../../../primitives';
 import type { KeyResultClientDTO } from '../entities/key-result-client';
@@ -39,11 +40,11 @@ export const UpdateKeyResultSchema = z.object({
   expectedVersion: z.number().int().min(1),
   title: z.string().min(1).max(256).optional(),
   description: z.string().max(2000).nullable().optional(),
-  startingValue: z.number().optional(),
-  progressBaselineValue: z.number().nullable().optional(),
+  initialValue: z.number().optional(),
   calculationMethod: z.enum(KeyResultCalculationMethod).optional(),
   currentValue: z.number().optional(),
   targetValue: z.number().optional(),
+  target: GoalTimeframeSchema.nullable().optional(),
   unit: z.string().max(50).nullable().optional(),
   weight: z.number().int('权重必须为整数').min(1, '权重最小为 1').max(5, '权重最大为 5').optional(),
 });

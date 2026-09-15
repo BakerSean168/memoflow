@@ -6,38 +6,52 @@ import type {
   IElectronDatabaseTransaction,
 } from '@memoflow/contracts/electron';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
-import { TaskGoalBindingTrigger, TaskPlanOutcome, TaskType } from '@memoflow/contracts/task';
+import {
+  TaskGoalBindingTrigger,
+  TaskPlanOutcome,
+  TaskPlanScheduleKind,
+  TaskRecurrenceEndKind,
+} from '@memoflow/contracts/task';
 import { eventBus } from '@memoflow/utils/domain';
-import { TaskTemplate } from '../../../domain/aggregates/task-template';
-import { RecurrenceRule, TaskInstanceId, TaskTimeConfig } from '../../../domain/value-objects';
-import { anIdentityId } from '../../../../testing';
+import { TaskPlan } from '../../../domain/aggregates/task-plan';
+import {
+  TaskOccurrenceId,
+} from '../../../domain/value-objects';
+import {
+  anIdentityId,
+  aDailyRecurrence,
+  anAllDayTiming,
+  canonicalTaskPlanScheduleForTest,
+  TASK_TEST_TIME_CONTEXT,
+  TASK_TEST_USER_TIME_CONTEXT_PORT,
+} from '../../../../testing';
 import { createTaskPowerSyncModule } from '../../powersync';
-import { PowerSyncTaskInstanceRepository } from './task-instance-powersync.repository';
+import { PowerSyncTaskOccurrenceRepository } from './task-occurrence-powersync.repository';
 import { PowerSyncTaskWriteTransactionRunner } from './powersync-task-write-transaction-runner';
 
 type TemplateRecord = { id: string };
-type InstanceRecord = { id: string; templateId: string };
+type InstanceRecord = { id: string; planId: string };
 type OutboxRecord = { id: string };
 type StateSnapshot = {
-  templates: Map<string, TemplateRecord>;
-  instances: Map<string, InstanceRecord>;
+  plans: Map<string, TemplateRecord>;
+  occurrences: Map<string, InstanceRecord>;
   outbox: Map<string, OutboxRecord>;
 };
 
 class FakePowerSyncTaskDb implements IElectronDatabase {
   failOutbox = false;
   private state: StateSnapshot = {
-    templates: new Map(),
-    instances: new Map(),
+    plans: new Map(),
+    occurrences: new Map(),
     outbox: new Map(),
   };
 
   get templateCount(): number {
-    return this.state.templates.size;
+    return this.state.plans.size;
   }
 
-  get instanceCount(): number {
-    return this.state.instances.size;
+  get occurrenceCount(): number {
+    return this.state.occurrences.size;
   }
 
   get outboxCount(): number {
@@ -91,8 +105,8 @@ class FakePowerSyncTaskDb implements IElectronDatabase {
 
   private cloneState(source: StateSnapshot): StateSnapshot {
     return {
-      templates: new Map(source.templates),
-      instances: new Map(source.instances),
+      plans: new Map(source.plans),
+      occurrences: new Map(source.occurrences),
       outbox: new Map(source.outbox),
     };
   }
@@ -113,84 +127,96 @@ class FakePowerSyncTaskDb implements IElectronDatabase {
       return { rowsAffected: 1 };
     }
 
-    if (sql.includes('INSERT INTO task_templates')) {
+    if (sql.includes('INSERT INTO task_plans')) {
       const id = String(parameters?.[0]);
-      state.templates.set(id, { id, _params: parameters ?? [] });
+      state.plans.set(id, { id, _params: parameters ?? [] });
       return { rowsAffected: 1 };
     }
 
-    if (sql.includes('UPDATE task_templates')) {
+    if (sql.includes('UPDATE task_plans')) {
       const id = String(parameters?.[(parameters?.length ?? 1) - 1]);
-      state.templates.set(id, { id });
+      state.plans.set(id, { id });
       return { rowsAffected: 1 };
     }
 
-    if (sql.includes('DELETE FROM task_templates WHERE id = ?')) {
-      state.templates.delete(String(parameters?.[0]));
+    if (sql.includes('DELETE FROM task_plans WHERE id = ?')) {
+      state.plans.delete(String(parameters?.[0]));
       return { rowsAffected: 1 };
     }
 
-    if (sql.includes('INSERT INTO task_instances')) {
+    if (sql.includes('INSERT INTO task_occurrences')) {
       const id = String(parameters?.[0]);
-      const templateId = String(parameters?.[1]);
+      const planId = String(parameters?.[1]);
       const identityId = String(parameters?.[2]);
-      const instanceDate = String(parameters?.[3]);
-      const occurrenceKey = parameters?.[4] == null ? null : String(parameters[4]);
-      const status = String(parameters?.[5]);
-      const importance = parameters?.[6] == null ? null : String(parameters[6]);
-      const timeConfig = String(parameters?.[7]);
-      state.instances.set(id, {
+      const occurrenceKey = String(parameters?.[3]);
+      const scheduleDate = String(parameters?.[4]);
+      const scheduleTiming = String(parameters?.[5]);
+      const importanceSnapshot = String(parameters?.[6]);
+      const status = String(parameters?.[7]);
+      state.occurrences.set(id, {
         id,
-        template_id: templateId,
+        plan_id: planId,
         identity_id: identityId,
-        instance_date: instanceDate,
         occurrence_key: occurrenceKey,
+        schedule_date: scheduleDate,
+        schedule_timing: scheduleTiming,
+        importance_snapshot: importanceSnapshot,
         status,
-        importance,
-        time_config: timeConfig,
-        actual_start_time: parameters?.[8] ?? null,
-        actual_end_time: parameters?.[9] ?? null,
-        comment: parameters?.[10] ?? null,
+        actual_start_at: parameters?.[8] ?? null,
+        result: parameters?.[9] ?? null,
+        checklist_state: parameters?.[10] ?? '[]',
         version: Number(parameters?.[11] ?? 1),
-        created_at: String(parameters?.[12] ?? instanceDate),
-        updated_at: String(parameters?.[13] ?? instanceDate),
+        created_at: String(parameters?.[12] ?? new Date().toISOString()),
+        updated_at: String(parameters?.[13] ?? new Date().toISOString()),
         deleted_at: parameters?.[14] ?? null,
       });
       return { rowsAffected: 1 };
     }
 
-    if (sql.includes('UPDATE task_instances')) {
-      const id = String(parameters?.[(parameters?.length ?? 1) - 1]);
-      const existing = state.instances.get(id);
+    if (sql.includes('UPDATE task_occurrences')) {
+      const id = String(parameters?.[13]);
+      const existing = state.occurrences.get(id);
       if (existing) {
-        // Apply the status update (status follows occurrence_key in TASK-2204) so the
-        // rollback assertion is a REAL proof, not a vacuous one.
-        const status = parameters?.[4] == null ? (existing as { status?: string }).status : String(parameters[4]);
-        state.instances.set(id, { ...existing, status });
-      } else {
-        state.instances.set(id, { id, template_id: String(parameters?.[0]), status: 'Pending' });
+        const status =
+          parameters?.[6] == null
+            ? (existing as { status?: string }).status
+            : String(parameters[6]);
+        state.occurrences.set(id, {
+          ...existing,
+          plan_id: String(parameters?.[0]),
+          identity_id: String(parameters?.[1]),
+          occurrence_key: String(parameters?.[2]),
+          schedule_date: String(parameters?.[3]),
+          schedule_timing: String(parameters?.[4]),
+          importance_snapshot: String(parameters?.[5]),
+          status,
+          actual_start_at: parameters?.[7] ?? null,
+          result: parameters?.[8] ?? null,
+          checklist_state: parameters?.[9] ?? '[]',
+          version: Number(parameters?.[10] ?? 1),
+          updated_at: String(parameters?.[11] ?? new Date().toISOString()),
+          deleted_at: parameters?.[12] ?? null,
+        });
       }
       return { rowsAffected: 1 };
     }
 
-    if (sql.includes('DELETE FROM task_instances WHERE template_id = ?')) {
-      const templateId = String(parameters?.[0]);
-      for (const [id, record] of state.instances.entries()) {
-        if (record.templateId === templateId) {
-          state.instances.delete(id);
-        }
+    if (sql.includes('DELETE FROM task_occurrences WHERE plan_id = ?')) {
+      const planId = String(parameters?.[0]);
+      for (const [id, record] of state.occurrences.entries()) {
+        if (String((record as any).plan_id) === planId) state.occurrences.delete(id);
       }
       return { rowsAffected: 1 };
     }
 
-    if (sql.includes('DELETE FROM task_instances WHERE id = ?')) {
-      state.instances.delete(String(parameters?.[0]));
+    if (sql.includes('DELETE FROM task_occurrences WHERE id = ?')) {
+      state.occurrences.delete(String(parameters?.[0]));
       return { rowsAffected: 1 };
     }
 
-    if (sql.includes('DELETE FROM task_instances WHERE id IN')) {
+    if (sql.includes('DELETE FROM task_occurrences WHERE id IN')) {
       for (const id of parameters ?? []) {
-        state.instances.delete(String(id));
+        state.occurrences.delete(String(id));
       }
       return { rowsAffected: Array.isArray(parameters) ? parameters.length : 0 };
     }
@@ -203,14 +229,14 @@ class FakePowerSyncTaskDb implements IElectronDatabase {
     sql: string,
     parameters?: unknown[],
   ): Promise<T | null> {
-    if (sql.includes('SELECT id FROM task_templates WHERE id = ?')) {
+    if (sql.includes('SELECT id FROM task_plans WHERE id = ?')) {
       const id = String(parameters?.[0]);
-      return (state.templates.has(id) ? { id } : null) as T | null;
+      return (state.plans.has(id) ? { id } : null) as T | null;
     }
 
-    if (sql.includes('FROM task_templates WHERE id = ? AND identity_id = ?')) {
+    if (sql.includes('FROM task_plans WHERE id = ? AND identity_id = ?')) {
       const id = String(parameters?.[0]);
-      const row = state.templates.get(id);
+      const row = state.plans.get(id);
       if (row) {
         // Rebuild a row from the stored INSERT parameters so goal binding fields survive.
         const prm = (row as { _params?: unknown[] })._params ?? [];
@@ -226,65 +252,56 @@ class FakePowerSyncTaskDb implements IElectronDatabase {
           archived_at: prm[8] ?? null,
           abandoned_reason: prm[9] ?? null,
           importance: prm[10] == null ? null : String(prm[10]),
-          time_config_type: prm[11] ?? null,
-          time_config_start_time: prm[12] ?? null,
-          time_config_end_time: prm[13] ?? null,
-          time_config_duration_minutes: prm[14] ?? null,
-          time_config_time_point: prm[15] ?? null,
-          time_config_time_range_start: prm[16] ?? null,
-          time_config_time_range_end: prm[17] ?? null,
-          recurrence_rule_type: prm[18] ?? null,
-          recurrence_rule_interval: prm[19] ?? null,
-          recurrence_rule_days_of_week: prm[20] ?? null,
-          recurrence_rule_end_date: prm[21] ?? null,
-          recurrence_rule_count: prm[22] ?? null,
-          reminder_config_enabled: prm[23] ?? null,
-          reminder_config_time_offset_minutes: prm[24] ?? null,
-          reminder_config_unit: prm[25] ?? null,
-          reminder_config_channel: prm[26] ?? null,
-          last_generated_date: prm[27] ?? null,
-          generate_ahead_days: prm[28] ?? null,
-          goal_id: prm[29] ?? null,
-          key_result_id: prm[30] ?? null,
-          goal_record_value: prm[31] ?? null,
-          goal_progress_trigger: prm[32] ?? null,
-          checklist: prm[33] ?? null,
-          version: Number(prm[34] ?? 1),
-          updated_at: prm[35] ?? new Date().toISOString(),
-          deleted_at: prm[36] ?? null,
-          created_at: prm[37] ?? new Date().toISOString(),
+          schedule: prm[11],
+          reminder_config: prm[12] ?? null,
+          goal_id: prm[13] ?? null,
+          key_result_id: prm[14] ?? null,
+          goal_record_value: prm[15] ?? null,
+          goal_progress_trigger: prm[16] ?? null,
+          checklist: prm[17] ?? null,
+          version: Number(prm[18] ?? 1),
+          updated_at: prm[19] ?? new Date().toISOString(),
+          deleted_at: prm[20] ?? null,
+          created_at: prm[21] ?? new Date().toISOString(),
         };
         return rowShape as unknown as T;
       }
       return null;
     }
 
-    if (sql.includes('SELECT id FROM task_instances WHERE template_id = ? AND identity_id = ? AND occurrence_key = ?')) {
-      const [templateId, identityId, occurrenceKey] = (parameters ?? []).map(String);
-      const match = Array.from(state.instances.values()).find((row) =>
-        String((row as any).template_id) === templateId &&
-        String((row as any).identity_id) === identityId &&
-        String((row as any).occurrence_key) === occurrenceKey &&
-        (row as any).deleted_at == null,
+    if (
+      sql.includes(
+        'SELECT id FROM task_occurrences WHERE plan_id = ? AND identity_id = ? AND occurrence_key = ?',
+      )
+    ) {
+      const [planId, identityId, occurrenceKey] = (parameters ?? []).map(String);
+      const match = Array.from(state.occurrences.values()).find(
+        (row) =>
+          String((row as any).plan_id) === planId &&
+          String((row as any).identity_id) === identityId &&
+          String((row as any).occurrence_key) === occurrenceKey &&
+          (row as any).deleted_at == null,
       ) as { id?: string } | undefined;
       return (match?.id ? { id: match.id } : null) as T | null;
     }
 
-    if (sql.includes('SELECT id FROM task_instances WHERE id = ?')) {
+    if (sql.includes('SELECT id FROM task_occurrences WHERE id = ?')) {
       const id = String(parameters?.[0]);
-      return (state.instances.has(id) ? { id } : null) as T | null;
+      return (state.occurrences.has(id) ? { id } : null) as T | null;
     }
 
-    if (sql.includes('SELECT status FROM task_instances WHERE id = ?')) {
+    if (sql.includes('SELECT status FROM task_occurrences WHERE id = ?')) {
       const id = String(parameters?.[0]);
-      const row = state.instances.get(id);
-      return (row ? { status: (row as { status?: string }).status ?? 'pending' } : null) as T | null;
+      const row = state.occurrences.get(id);
+      return (
+        row ? { status: (row as { status?: string }).status ?? 'pending' } : null
+      ) as T | null;
     }
 
-    if (sql.includes('FROM task_instances WHERE id = ? AND identity_id = ?')) {
+    if (sql.includes('FROM task_occurrences WHERE id = ? AND identity_id = ?')) {
       const id = String(parameters?.[0]);
       const identityId = String(parameters?.[1]);
-      const row = state.instances.get(id);
+      const row = state.occurrences.get(id);
       if (row && (row as { identity_id?: string }).identity_id === identityId) {
         return row as unknown as T;
       }
@@ -304,19 +321,23 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
     const db = new FakePowerSyncTaskDb();
     const runner = new PowerSyncTaskWriteTransactionRunner(db);
     const dispatchSpy = vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
-    const template = TaskTemplate.create({
+    const plan = TaskPlan.create({
       identityId: anIdentityId(),
       title: 'PowerSync write',
-      taskType: TaskType.Recurring,
-      timeConfig: TaskTimeConfig.createAllDay(new Date()),
-      recurrenceRule: RecurrenceRule.createDaily(1),
+      schedule: canonicalTaskPlanScheduleForTest(
+        TaskPlanScheduleKind.Recurring,
+        Date.now(),
+        anAllDayTiming(),
+        aDailyRecurrence(),
+        TASK_TEST_TIME_CONTEXT,
+      ),
       importance: ImportanceLevel.Moderate,
     });
 
     let sentBeforeCommit = false;
 
-    await runner.run(async ({ templateRepository }) => {
-      await templateRepository.save(template);
+    await runner.run(async ({ planRepository }) => {
+      await planRepository.save(plan);
       sentBeforeCommit = dispatchSpy.mock.calls.length > 0;
     });
 
@@ -326,7 +347,7 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
     // (aggregateId / occurredAt / optional idempotencyKey) as the 3rd arg.
     expect(dispatchSpy).toHaveBeenCalledWith(
       'task:created',
-      expect.objectContaining({ templateId: template.id }),
+      expect.objectContaining({ planId: plan.id }),
       expect.objectContaining({
         aggregateId: expect.any(String),
         occurredAt: expect.any(Date),
@@ -334,37 +355,32 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
     );
   });
 
-  it('rolls back task module writes and publishes nothing when instance persistence fails', async () => {
+  it('rolls back task module writes and publishes nothing when occurrence persistence fails', async () => {
     const db = new FakePowerSyncTaskDb();
-    const module = createTaskPowerSyncModule(db);
+    const module = createTaskPowerSyncModule(db, {
+      userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+    });
     const dispatchSpy = vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
-    vi.spyOn(PowerSyncTaskInstanceRepository.prototype, 'saveMany').mockRejectedValue(
+    vi.spyOn(PowerSyncTaskOccurrenceRepository.prototype, 'saveMany').mockRejectedValue(
       new Error('saveMany failed'),
     );
 
-    const result = await module.api.createTaskTemplate({
+    const result = await module.api.createTaskPlan({
       identityId: anIdentityId(),
       name: 'Daily Review',
-      taskType: TaskType.Recurring,
-      timeConfig: {
-        timeType: 'AllDay',
-        startDate: Date.now(),
-        timePoint: null,
-        timeRange: null,
-      },
-      recurrenceRule: {
-        frequency: 'Daily',
-        interval: 1,
-        daysOfWeek: [],
-        endDate: null,
-        occurrences: null,
-      },
+      schedule: canonicalTaskPlanScheduleForTest(
+        TaskPlanScheduleKind.Recurring,
+        Date.now(),
+        anAllDayTiming(),
+        aDailyRecurrence(),
+        TASK_TEST_TIME_CONTEXT,
+      ).toDTO(),
       importance: ImportanceLevel.Moderate,
     });
 
     expect(result).toBeErrorWithCode('INTERNAL_ERROR');
     expect(db.templateCount).toBe(0);
-    expect(db.instanceCount).toBe(0);
+    expect(db.occurrenceCount).toBe(0);
     expect(dispatchSpy).not.toHaveBeenCalled();
 
     module.dispose();
@@ -372,14 +388,20 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
 
   it('persists PlanCompletion outcome settlement through the same PowerSync transaction boundary', async () => {
     const db = new FakePowerSyncTaskDb();
-    const module = createTaskPowerSyncModule(db);
+    const module = createTaskPowerSyncModule(db, {
+      userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+    });
     const identityId = anIdentityId();
-    const template = TaskTemplate.create({
+    const plan = TaskPlan.create({
       identityId,
       title: 'PowerSync finite plan',
-      taskType: TaskType.Recurring,
-      timeConfig: TaskTimeConfig.createAllDay(new Date()),
-      recurrenceRule: RecurrenceRule.createDaily(1).setOccurrences(15),
+      schedule: canonicalTaskPlanScheduleForTest(
+        TaskPlanScheduleKind.Recurring,
+        Date.now(),
+        anAllDayTiming(),
+        { ...aDailyRecurrence(), end: { kind: TaskRecurrenceEndKind.Count, count: 15 } },
+        TASK_TEST_TIME_CONTEXT,
+      ),
       importance: ImportanceLevel.Moderate,
       goalBinding: {
         goalId: 'goal-1',
@@ -387,14 +409,14 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
         contribution: { value: 1, trigger: TaskGoalBindingTrigger.PlanCompletion },
       },
     });
-    await module.taskTemplateRepository.save(template);
+    await module.taskPlanRepository.save(plan);
 
     const runner = new PowerSyncTaskWriteTransactionRunner(db);
-    await runner.run(async ({ templateRepository }) => {
-      template.applyPlanOutcome(TaskPlanOutcome.Succeeded, {
-        triggeringTaskInstanceId: TaskInstanceId.generate(),
+    await runner.run(async ({ planRepository }) => {
+      plan.applyPlanOutcome(TaskPlanOutcome.Succeeded, {
+        triggeringTaskOccurrenceId: TaskOccurrenceId.generate(),
       });
-      await templateRepository.save(template);
+      await planRepository.save(plan);
     });
 
     expect(db.outboxCount).toBe(1);
@@ -403,27 +425,22 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
 
   it('rolls back task module writes, outbox and publishes nothing when task_goal_outbox insert fails', async () => {
     const db = new FakePowerSyncTaskDb();
-    const module = createTaskPowerSyncModule(db);
+    const module = createTaskPowerSyncModule(db, {
+      userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+    });
     const dispatchSpy = vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
 
     const identityId = anIdentityId();
-    const createRes = await module.api.createTaskTemplate({
+    const createRes = await module.api.createTaskPlan({
       identityId,
       name: 'Goal Task',
-      taskType: TaskType.Recurring,
-      timeConfig: {
-        timeType: 'AllDay',
-        startDate: Date.now(),
-        timePoint: null,
-        timeRange: null,
-      },
-      recurrenceRule: {
-        frequency: 'Daily',
-        interval: 1,
-        daysOfWeek: [],
-        endDate: null,
-        occurrences: null,
-      },
+      schedule: canonicalTaskPlanScheduleForTest(
+        TaskPlanScheduleKind.Recurring,
+        Date.now(),
+        anAllDayTiming(),
+        aDailyRecurrence(),
+        TASK_TEST_TIME_CONTEXT,
+      ).toDTO(),
       importance: ImportanceLevel.Moderate,
       goalBinding: {
         goalId: 'goal-1',
@@ -434,24 +451,24 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
     expect(createRes.ok).toBe(true);
     if (!createRes.ok) return;
 
-    expect(db.instanceCount).toBeGreaterThan(0);
-    const instanceId = Array.from((db as any).state.instances.keys())[0] as string;
+    expect(db.occurrenceCount).toBeGreaterThan(0);
+    const occurrenceId = Array.from((db as any).state.occurrences.keys())[0] as string;
 
     dispatchSpy.mockClear();
 
     db.failOutbox = true;
 
-    const result = await module.api.completeTaskInstance(instanceId, identityId);
+    const result = await module.api.completeTaskOccurrence(occurrenceId, identityId);
 
     expect(result).toBeErrorWithCode('INTERNAL_ERROR');
     expect(db.templateCount).toBe(1);
     expect(db.outboxCount).toBe(0);
     expect(dispatchSpy).not.toHaveBeenCalled();
 
-    // The completed instance must have ROLLED BACK to its pre-complete status
+    // The completed occurrence must have ROLLED BACK to its pre-complete status
     const instanceRow = await db.getOptional<{ status: string }>(
-      'SELECT status FROM task_instances WHERE id = ?',
-      [instanceId],
+      'SELECT status FROM task_occurrences WHERE id = ?',
+      [occurrenceId],
     );
     expect(instanceRow?.status).toBe('Pending');
 

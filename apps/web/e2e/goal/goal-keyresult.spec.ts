@@ -26,7 +26,7 @@ test.describe('Goal KeyResult - 关键结果管理', () => {
     // 创建测试目标
     await createGoal(page, {
       name: testGoalName,
-      description: '用于测试关键结果',
+      summary: '用于测试关键结果',
     });
 
     // 打开目标详情
@@ -227,7 +227,7 @@ test.describe('Goal KeyResult - 关键结果管理', () => {
 
 // ========== 辅助函数 ==========
 
-async function createGoal(page: Page, options: { name: string; description?: string }) {
+async function createGoal(page: Page, options: { name: string; summary?: string }) {
   const createButton = page.getByTestId('create-goal-entry');
   await createButton.click();
   await page.waitForTimeout(500);
@@ -237,8 +237,8 @@ async function createGoal(page: Page, options: { name: string; description?: str
     .or(page.locator('[data-testid="goal-name-input"]'))
     .fill(options.name);
 
-  if (options.description) {
-    await page.locator('textarea[name="description"]').or(page.locator('[data-testid="goal-description-input"]')).fill(options.description);
+  if (options.summary) {
+    await page.locator('textarea[name="summary"]').or(page.locator('[data-testid="goal-summary-input"]')).fill(options.summary);
   }
 
   await page.locator('button:has-text("保存")').or(page.locator('[data-testid="save-goal-button"]')).click();

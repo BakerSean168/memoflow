@@ -26,18 +26,11 @@ describe('combineDateAndTime / parseTimestamp keep-boundary (residual 1234)', ()
     'utf8',
   );
 
-  it('owns Residual 1234 keep-boundary markers on task local combineDateAndTime', () => {
-    expect(task).toContain('Residual 1234 keep-boundary');
-    expect(task).toMatch(/function combineDateAndTime\b/);
-    expect(task).toContain('new Date(year, (month || 1) - 1, day || 1');
-    expect(task).toContain('getTime()');
-    const body = task.match(/function combineDateAndTime\([\s\S]*?\n\}/)?.[0] ?? '';
-    expect(body).toContain('split');
-    expect(body).toContain('getTime()');
-    expect(body).not.toContain('Date.parse');
-    expect(body).not.toContain('Number.isNaN');
-    expect(body).not.toContain('return null');
-    expect(body).not.toContain('.trim()');
+  it('keeps the retired local Date combiner out of TaskEditor and uses TaskPlanSchedule', () => {
+    expect(task).toContain('TaskPlanScheduleSchema');
+    expect(task).not.toMatch(/function combineDateAndTime\b/);
+    expect(task).not.toContain('new Date(year, (month || 1) - 1, day || 1');
+    expect(task).not.toContain('Residual 1234 keep-boundary');
   });
 
   it('differs from schedule parseTimestamp trim+Date.parse+null (no force-merge)', () => {

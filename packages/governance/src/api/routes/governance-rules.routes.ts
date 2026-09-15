@@ -8,6 +8,7 @@ import { Router } from 'express';
 import { RouteRegistrar, successResponse, errorResponse } from '@memoflow/utils/result';
 import {
   CreateRuleSchema,
+  GovernanceRuleBundleSchema,
   ListRulesQuerySchema,
   ListRulesResSchema,
   RuleClientDTOSchema,
@@ -60,6 +61,19 @@ export function registerGovernanceRulesRoutes(
     [auth, requireRole(['TechLead', 'Architect'])],
     (data, ctx) => controller.createRule(data, ctx),
     { successStatus: 201 },
+  );
+
+  r.route(
+    {
+      method: 'get',
+      path: '/bundle',
+      summary: '导出固定哈希 Governance 规则包',
+      responses: {
+        200: successResponse(GovernanceRuleBundleSchema, '导出成功'),
+      },
+    },
+    [auth],
+    () => controller.exportRuleBundle(),
   );
 
   r.route(

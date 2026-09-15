@@ -5,10 +5,7 @@ import { join } from 'node:path';
 import { Mastra } from '@mastra/core/mastra';
 import { RequestContext } from '@mastra/core/request-context';
 import { LibSQLStore } from '@mastra/libsql';
-import {
-  GoalPlanDraftContentSchema,
-  type GoalPlanningDecision,
-} from '@memoflow/contracts/ai';
+import { GoalPlanDraftContentSchema, type GoalPlanningDecision } from '@memoflow/contracts/ai';
 import { error, ok } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -35,31 +32,49 @@ afterEach(async () => {
 
 const draftContent = GoalPlanDraftContentSchema.parse({
   goal: {
+    draftRef: 'goal',
     name: 'Pass JLPT N1',
-    description: 'Build a durable study plan.',
-    startDate: Date.UTC(2026, 8, 1),
-    dueDate: Date.UTC(2026, 11, 1),
+    summary: 'Build a durable study plan.',
+    status: 'InProgress',
+    startDate: '2026-09-01',
+    target: { kind: 'year', year: 2026 },
+    labels: ['Learning'],
   },
   keyResults: [
     {
+      draftRef: 'kr:mock-exams',
       title: 'Complete mock exams',
-      calculationMethod: 'Sum',
-      startingValue: 0,
+      aggregationMethod: 'Sum',
+      initialValue: 0,
       currentValue: 0,
       targetValue: 8,
       unit: 'exams',
       weight: 5,
     },
   ],
-  taskTemplates: [
+  tasks: [
     {
-      name: 'Daily study',
-        cadence: 'daily',
-      keyResultIndex: 0,
-      contributionValue: 1,
+      draftRef: 'task:daily-study',
+      title: 'Daily study',
+      importance: 'Moderate',
+      schedule: {
+        kind: 'Recurring',
+        startDate: '2026-09-01',
+        timing: { kind: 'AllDay' },
+        recurrence: {
+          frequency: 'Daily',
+          interval: 1,
+          byWeekday: [],
+          end: { kind: 'Never' },
+        },
+      },
+      labels: [],
+      goalRef: 'goal',
+      keyResultRef: 'kr:mock-exams',
+      contribution: { value: 1, trigger: 'EachCompletion' },
     },
   ],
-  reminders: [],
+  knowledge: [],
   rationale: 'Daily work plus measurable mocks.',
   warnings: [],
 });
@@ -89,24 +104,29 @@ function mastraRequestContext(requestId: string): RequestContext {
   return context;
 }
 
-function mutationPort(): GoalPlanMutationPort & {
-  resolveLabels: ReturnType<typeof vi.fn>;
-  createGoal: ReturnType<typeof vi.fn>;
-  createTaskTemplate: ReturnType<typeof vi.fn>;
-  createReminder: ReturnType<typeof vi.fn>;
-} {
+function mutationPort(): GoalPlanMutationPort & Record<string, ReturnType<typeof vi.fn>> {
   return {
     resolveLabels: vi.fn(async (names: readonly string[]) =>
-      ok(names.map((name) => `label:${name.trim().toLowerCase()}`)),
+      ok(names.map((name) => 'label:' + name.trim().toLowerCase())),
     ),
     createGoal: vi.fn(async (request) =>
       ok({
         goalId: String(request.id),
+        goalVersion: 1,
         keyResultIds: (request.initialKeyResults ?? []).map((item) => String(item.id)),
       }),
     ),
-    createTaskTemplate: vi.fn(async (request) => ok({ taskId: String(request.id) })),
-    createReminder: vi.fn(async (request) => ok({ reminderId: String(request.id) })),
+    activateGoal: vi.fn(async () => ok({ goalVersion: 2 })),
+    createTaskPlan: vi.fn(async (request) => ok({ taskId: String(request.id) })),
+    createKnowledgeDocument: vi.fn(async () =>
+      ok({
+        knowledgeDocument: {
+          knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440010',
+          documentId: 'kdoc_550e8400-e29b-41d4-a716-446655440011',
+        },
+      }),
+    ),
+    linkGoalKnowledge: vi.fn(async () => ok({ relationId: 'relation-1' })),
   };
 }
 
@@ -151,8 +171,8 @@ describe('ADR-052 goal.create durable Workflow', () => {
         candidateDraft: draftContent,
       },
     ];
-    const plan = vi.fn(
-      async (_request: GoalPlannerRequest): Promise<GoalPlanningDecision> => decisions.shift()!,
+    const plan = vi.fn(async (_request: GoalPlannerRequest): Promise<GoalPlanningDecision> =>
+      decisions.shift()!,
     );
     const planner: GoalPlannerPort = { plan };
     const { buildWorkflow, mutations } = await harness(planner);
@@ -228,7 +248,8 @@ describe('ADR-052 goal.create durable Workflow', () => {
       receipt: { workflowRunId: runId, revision: 2, status: 'success' },
     });
     expect(mutations.createGoal).toHaveBeenCalledTimes(1);
-    expect(mutations.createTaskTemplate).toHaveBeenCalledTimes(1);
+    expect(mutations.activateGoal).toHaveBeenCalledTimes(1);
+    expect(mutations.createTaskPlan).toHaveBeenCalledTimes(1);
     // Domain mutations use the current approval entry context, not the start context.
     expect(mutations.createGoal.mock.calls[0]?.[1]).toMatchObject({
       requestId: 'request-approve',
@@ -268,8 +289,9 @@ describe('ADR-052 goal.create durable Workflow', () => {
     expect(resumed.status).toBe('success');
     expect(resumed.result).toEqual({ outcome: 'cancelled' });
     expect(mutations.createGoal).not.toHaveBeenCalled();
-    expect(mutations.createTaskTemplate).not.toHaveBeenCalled();
-    expect(mutations.createReminder).not.toHaveBeenCalled();
+    expect(mutations.createTaskPlan).not.toHaveBeenCalled();
+    expect(mutations.createKnowledgeDocument).not.toHaveBeenCalled();
+    expect(mutations.linkGoalKnowledge).not.toHaveBeenCalled();
   });
 
   it('persists a partial receipt and retries only the failed deterministic child after restart', async () => {
@@ -281,7 +303,7 @@ describe('ADR-052 goal.create durable Workflow', () => {
       })),
     };
     const mutations = mutationPort();
-    mutations.createTaskTemplate
+    mutations.createTaskPlan
       .mockResolvedValueOnce(error('SERVICE_UNAVAILABLE', 'task store unavailable'))
       .mockImplementationOnce(async (request) => ok({ taskId: String(request.id) }));
     const { buildWorkflow } = await harness(planner, mutations);
@@ -303,10 +325,10 @@ describe('ADR-052 goal.create durable Workflow', () => {
     expect(stepSuspendPayload(recovery)).toMatchObject({
       type: 'recovery_required',
       retryable: true,
-      failures: [{ operation: 'task_template', index: 0, retryable: true }],
+      failures: [{ operation: 'task_create', draftRef: 'task:daily-study', retryable: true }],
     });
     expect(mutations.createGoal).toHaveBeenCalledTimes(1);
-    expect(mutations.createTaskTemplate).toHaveBeenCalledTimes(1);
+    expect(mutations.createTaskPlan).toHaveBeenCalledTimes(1);
 
     const workflow2 = buildWorkflow();
     const retry = await (
@@ -324,8 +346,9 @@ describe('ADR-052 goal.create durable Workflow', () => {
     });
     // Goal is checkpointed in the partial receipt; only the failed task is retried.
     expect(mutations.createGoal).toHaveBeenCalledTimes(1);
-    expect(mutations.createTaskTemplate).toHaveBeenCalledTimes(2);
-    expect(mutations.createTaskTemplate.mock.calls[1]?.[1]).toMatchObject({
+    expect(mutations.activateGoal).toHaveBeenCalledTimes(1);
+    expect(mutations.createTaskPlan).toHaveBeenCalledTimes(2);
+    expect(mutations.createTaskPlan.mock.calls[1]?.[1]).toMatchObject({
       requestId: 'request-retry',
     });
   });

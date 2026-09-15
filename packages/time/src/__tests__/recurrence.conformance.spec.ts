@@ -3,6 +3,7 @@ import {
   asHm,
   asInstant,
   asYmd,
+  requireTimeZoneId,
   type RecurrenceEnginePort,
   type RecurrenceSchedule,
 } from '../index';
@@ -11,13 +12,14 @@ import { createRRuleRecurrenceEngine } from '../recurrence/rrule-recurrence-engi
 const instant = (iso: string) => asInstant(Date.parse(iso));
 const iso = (values: readonly number[]) => values.map((value) => new Date(value).toISOString());
 
-function schedule(
-  overrides: Partial<RecurrenceSchedule> & Pick<RecurrenceSchedule, 'startDate' | 'frequency'>,
-): RecurrenceSchedule {
+type RecurrenceScheduleOverrides = Omit<Partial<RecurrenceSchedule>, 'timeZone'> &
+  Pick<RecurrenceSchedule, 'startDate' | 'frequency'> & { timeZone?: string };
+
+function schedule(overrides: RecurrenceScheduleOverrides): RecurrenceSchedule {
   return {
     startDate: overrides.startDate,
     localTime: overrides.localTime ?? asHm('09:00'),
-    timeZone: overrides.timeZone ?? 'UTC',
+    timeZone: requireTimeZoneId(overrides.timeZone ?? 'UTC'),
     frequency: overrides.frequency,
     interval: overrides.interval ?? 1,
     byWeekday: overrides.byWeekday ?? [],
@@ -28,11 +30,7 @@ function schedule(
 
 function conformanceSuite(name: string, createEngine: () => RecurrenceEnginePort): void {
   describe(name, () => {
-    const between = (
-      recurrence: RecurrenceSchedule,
-      from: string,
-      to: string,
-    ): string[] => {
+    const between = (recurrence: RecurrenceSchedule, from: string, to: string): string[] => {
       const engine = createEngine();
       return iso(
         engine.between(recurrence, {

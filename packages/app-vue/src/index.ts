@@ -58,7 +58,6 @@ export { useTaskStore } from './modules/task';
 export { useScheduleStore } from './modules/schedule';
 export { useReminderStore } from './modules/reminder';
 export { useNotificationStore } from './modules/notification';
-export { useUserSettingStore } from './modules/setting';
 export { useGovernanceStore } from './modules/governance';
 export { usePresentationPreferenceStore } from './modules/setting';
 

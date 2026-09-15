@@ -13,6 +13,8 @@ import type { Result } from '@memoflow/contracts/result';
 import type {
   CreateConfirmedKnowledgeNoteReq,
   CreateConfirmedKnowledgeNoteResponse,
+  AdoptKnowledgeDocumentReq,
+  AdoptKnowledgeDocumentResponse,
 } from '@memoflow/contracts/repository';
 
 export interface IKnowledgeNoteCommitService {
@@ -20,4 +22,8 @@ export interface IKnowledgeNoteCommitService {
     identityId: string,
     input: CreateConfirmedKnowledgeNoteReq,
   ): Promise<Result<CreateConfirmedKnowledgeNoteResponse>>;
+  adopt(
+    identityId: string,
+    input: AdoptKnowledgeDocumentReq,
+  ): Promise<Result<AdoptKnowledgeDocumentResponse>>;
 }

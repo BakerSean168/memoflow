@@ -137,7 +137,7 @@ describe('ScheduleTaskPrismaRepository integration', () => {
         handlerKey: 'task.reminder.fire',
         runAt: Date.now() + 60_000,
         payloadVersion: 1,
-        payload: { taskInstanceId: 'task-instance-1' },
+        payload: { taskOccurrenceId: 'task-occurrence-1' },
         sourceRevision: 7,
       },
     ]);

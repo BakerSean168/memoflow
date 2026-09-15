@@ -8,18 +8,8 @@
 import type { Result } from '@memoflow/contracts/result';
 import { fail, ok } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
-import {
-  UpdateAccountSchema,
-  UpdateAccountSettingsSchema,
-  CheckAvailabilitySchema,
-  CloseAccountSchema,
-} from '@memoflow/contracts/account';
-import type {
-  GetAccountRes,
-  UpdateAccountRes,
-  UpdateAccountSettingsRes,
-  CheckAvailabilityRes,
-} from '@memoflow/contracts/account';
+import { UpdateAccountSchema, CloseAccountSchema } from '@memoflow/contracts/account';
+import type { GetAccountRes, UpdateAccountRes } from '@memoflow/contracts/account';
 import { formatZodErrors } from '@memoflow/utils/result';
 import type { AccountApplicationPort } from '../application';
 
@@ -49,34 +39,10 @@ export class AccountController {
     return this.api.updateProfile(parsed.data, cx);
   }
 
-  async checkAvailability(input: unknown): Promise<Result<CheckAvailabilityRes>> {
-    const parsed = CheckAvailabilitySchema.safeParse(input);
-    if (!parsed.success) {
-      return fail({
-        code: 'VALIDATION_ERROR',
-        message: '参数验证失败',
-        details: formatZodErrors(parsed.error.issues),
-      });
-    }
-    return this.api.checkAvailability(parsed.data);
-  }
-
-  async updateSettings(
+  async closeAccount(
     input: unknown,
     cx: ExecutionContext,
-  ): Promise<Result<UpdateAccountSettingsRes>> {
-    const parsed = UpdateAccountSettingsSchema.safeParse(input);
-    if (!parsed.success) {
-      return fail({
-        code: 'VALIDATION_ERROR',
-        message: '参数验证失败',
-        details: formatZodErrors(parsed.error.issues),
-      });
-    }
-    return this.api.updateSettings(parsed.data, cx);
-  }
-
-  async closeAccount(input: unknown, cx: ExecutionContext): Promise<Result<import('@memoflow/contracts/account').CloseAccountRes>> {
+  ): Promise<Result<import('@memoflow/contracts/account').CloseAccountRes>> {
     const parsed = CloseAccountSchema.safeParse(input);
     if (!parsed.success) {
       return fail({

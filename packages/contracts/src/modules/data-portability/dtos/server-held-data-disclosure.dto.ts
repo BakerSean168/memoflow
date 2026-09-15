@@ -7,34 +7,89 @@
  */
 
 import { z } from 'zod';
+import {
+  KnowledgeDocumentIdSchema,
+  KnowledgeDocumentIdentityOriginSchema,
+} from '../../repository/aggregates/knowledge-document-identity';
 
 const NullableStringSchema = z.string().nullable();
 
-export const ServerHeldKnowledgeRepositoryConnectionSchema = z
+export const ServerHeldKnowledgeSpaceSchema = z
   .object({
     id: z.string(),
-    githubUserId: z.string(),
-    githubRepositoryId: z.string(),
-    githubRepositoryFullName: z.string(),
-    githubInstallationId: z.string(),
-    defaultBranch: z.string(),
-    isPrivate: z.boolean(),
-    status: z.string(),
-    lastSyncedCommitSha: NullableStringSchema,
-    lastProjectedCommitSha: NullableStringSchema,
-    lastErrorCode: NullableStringSchema,
-    lastErrorMessage: NullableStringSchema,
-    version: z.number().int(),
     createdAt: z.string(),
     updatedAt: z.string(),
-    deletedAt: NullableStringSchema,
+  })
+  .strict();
+
+export const ServerHeldKnowledgeDocumentIdentitySchema = z
+  .object({
+    knowledgeSpaceId: z.string(),
+    knowledgeDocumentId: KnowledgeDocumentIdSchema,
+    origin: KnowledgeDocumentIdentityOriginSchema,
+    originRequestId: NullableStringSchema,
+    createdAt: z.string(),
+    updatedAt: z.string(),
+  })
+  .strict();
+
+export const ServerHeldKnowledgeRemoteBindingSchema = z
+  .object({
+    id: z.string(),
+    knowledgeSpaceId: z.string(),
+    provider: z.string(),
+    installationId: z.string(),
+    repositoryId: z.string(),
+    repositoryFullNameSnapshot: z.string(),
+    connectedAt: z.string(),
+    disconnectedAt: NullableStringSchema,
+    version: z.number().int(),
+  })
+  .strict();
+
+export const ServerHeldRemoteRepositoryObservationSchema = z
+  .object({
+    bindingId: z.string(),
+    observedAt: z.string(),
+    accountId: z.string(),
+    repositoryFullName: z.string(),
+    defaultBranch: z.string(),
+    private: z.boolean(),
+    archived: z.boolean(),
+    disabled: z.boolean(),
+    contentsPermission: z.string(),
+    installationSuspended: z.boolean(),
+    eligibilityState: z.string(),
+    blockReason: NullableStringSchema,
+  })
+  .strict();
+
+export const ServerHeldRemoteHistoryFenceSchema = z
+  .object({
+    bindingId: z.string(),
+    defaultBranch: z.string(),
+    lastConfirmedRemoteHeadSha: z.string(),
+    confirmedAt: z.string(),
+  })
+  .strict();
+
+export const ServerHeldKnowledgeProjectionCheckpointSchema = z
+  .object({
+    bindingId: z.string(),
+    branch: z.string(),
+    projectedCommitSha: NullableStringSchema,
+    state: z.string(),
+    failureCode: NullableStringSchema,
+    failureMessage: NullableStringSchema,
+    lastAttemptAt: NullableStringSchema,
+    projectedAt: NullableStringSchema,
   })
   .strict();
 
 export const ServerHeldGithubWebhookDeliverySchema = z
   .object({
     id: z.string(),
-    connectionId: z.string(),
+    bindingId: z.string(),
     deliveryId: z.string(),
     eventName: z.string(),
     beforeSha: NullableStringSchema,
@@ -50,7 +105,8 @@ export const ServerHeldGithubWebhookDeliverySchema = z
 export const ServerHeldKnowledgeNoteProjectionSchema = z
   .object({
     id: z.string(),
-    connectionId: z.string(),
+    bindingId: z.string(),
+    knowledgeDocumentId: KnowledgeDocumentIdSchema.nullable(),
     relativePath: z.string(),
     commitSha: z.string(),
     blobSha: z.string(),
@@ -67,7 +123,7 @@ export const ServerHeldKnowledgeNoteProjectionSchema = z
 export const ServerHeldKnowledgeAttachmentProjectionSchema = z
   .object({
     id: z.string(),
-    connectionId: z.string(),
+    bindingId: z.string(),
     relativePath: z.string(),
     commitSha: z.string(),
     blobSha: z.string(),
@@ -81,7 +137,7 @@ export const ServerHeldKnowledgeAttachmentProjectionSchema = z
 
 export const ServerHeldKnowledgeAttachmentContentCacheSchema = z
   .object({
-    connectionId: z.string(),
+    bindingId: z.string(),
     blobSha: z.string(),
     byteSize: z.number().int().nonnegative(),
     contentBase64: z.string(),
@@ -93,7 +149,8 @@ export const ServerHeldKnowledgeAttachmentContentCacheSchema = z
 export const ServerHeldKnowledgeWriteRequestSchema = z
   .object({
     id: z.string(),
-    connectionId: z.string(),
+    bindingId: z.string(),
+    knowledgeDocumentId: KnowledgeDocumentIdSchema,
     requestId: z.string(),
     requestHash: z.string(),
     relativePath: z.string(),
@@ -133,7 +190,12 @@ export const ServerHeldAiKnowledgeIndexEntrySchema = z
 
 export const ServerHeldDataDisclosureDataV1Schema = z
   .object({
-    knowledgeRepositoryConnections: z.array(ServerHeldKnowledgeRepositoryConnectionSchema),
+    knowledgeSpaces: z.array(ServerHeldKnowledgeSpaceSchema),
+    knowledgeDocumentIdentities: z.array(ServerHeldKnowledgeDocumentIdentitySchema),
+    knowledgeRemoteBindings: z.array(ServerHeldKnowledgeRemoteBindingSchema),
+    remoteRepositoryObservations: z.array(ServerHeldRemoteRepositoryObservationSchema),
+    remoteHistoryFences: z.array(ServerHeldRemoteHistoryFenceSchema),
+    knowledgeProjectionCheckpoints: z.array(ServerHeldKnowledgeProjectionCheckpointSchema),
     githubWebhookDeliveries: z.array(ServerHeldGithubWebhookDeliverySchema),
     knowledgeNoteProjections: z.array(ServerHeldKnowledgeNoteProjectionSchema),
     knowledgeAttachmentProjections: z.array(ServerHeldKnowledgeAttachmentProjectionSchema),
@@ -170,8 +232,19 @@ export const ServerHeldDataDisclosureEnvelopeV1Schema = z
   })
   .strict();
 
-export type ServerHeldKnowledgeRepositoryConnection = z.infer<
-  typeof ServerHeldKnowledgeRepositoryConnectionSchema
+export type ServerHeldKnowledgeSpace = z.infer<typeof ServerHeldKnowledgeSpaceSchema>;
+export type ServerHeldKnowledgeDocumentIdentity = z.infer<
+  typeof ServerHeldKnowledgeDocumentIdentitySchema
+>;
+export type ServerHeldKnowledgeRemoteBinding = z.infer<
+  typeof ServerHeldKnowledgeRemoteBindingSchema
+>;
+export type ServerHeldRemoteRepositoryObservation = z.infer<
+  typeof ServerHeldRemoteRepositoryObservationSchema
+>;
+export type ServerHeldRemoteHistoryFence = z.infer<typeof ServerHeldRemoteHistoryFenceSchema>;
+export type ServerHeldKnowledgeProjectionCheckpoint = z.infer<
+  typeof ServerHeldKnowledgeProjectionCheckpointSchema
 >;
 export type ServerHeldGithubWebhookDelivery = z.infer<typeof ServerHeldGithubWebhookDeliverySchema>;
 export type ServerHeldKnowledgeNoteProjection = z.infer<

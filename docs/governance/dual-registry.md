@@ -4,7 +4,7 @@ tags:
   - dual-registry
 description: Dual Registry — retired locks vs keep-boundary vs open dual debt
 created: 2026-07-26T00:00:00
-updated: 2026-08-22T15:38:00+08:00
+updated: 2026-09-11T11:05:00+08:00
 ---
 
 # Dual Registry
@@ -18,19 +18,19 @@ updated: 2026-08-22T15:38:00+08:00
 | 项 | 值 |
 |----|----|
 | 基线 dual-surface 文件 | 237 |
-| 当前 dual-surface 文件 | 84 |
-| E3b 降幅 | 64.6%（目标 ≥25%） |
-| Registry suites | 25 |
-| keep-boundary 文件 | 66 |
-| 登记条目总数 | 150 |
+| 当前 dual-surface 文件 | 71 |
+| E3b 降幅 | 70.0%（目标 ≥25%） |
+| Registry suites | 120 |
+| keep-boundary 文件 | 49 |
+| 登记条目总数 | 120 |
 | 未分类 | 0（覆盖率 100%） |
 
 ### 按 class
 
 | class | count |
 |-------|------:|
-| `keep_boundary` | 66 |
-| `retired` | 84 |
+| `keep_boundary` | 49 |
+| `retired` | 71 |
 
 ## 分类规则（摘要）
 
@@ -49,13 +49,13 @@ updated: 2026-08-22T15:38:00+08:00
 | package | retired | keep_boundary | other |
 |---------|--------:|--------------:|------:|
 | `apps/api` | 0 | 3 | 0 |
-| `apps/desktop` | 6 | 7 | 0 |
+| `apps/desktop` | 3 | 0 | 0 |
 | `apps/web` | 2 | 1 | 0 |
 | `packages/account` | 1 | 1 | 0 |
 | `packages/ai` | 4 | 7 | 0 |
-| `packages/app-vue` | 10 | 25 | 0 |
+| `packages/app-vue` | 7 | 20 | 0 |
 | `packages/authentication` | 3 | 2 | 0 |
-| `packages/contracts` | 32 | 5 | 0 |
+| `packages/contracts` | 28 | 2 | 0 |
 | `packages/dashboard` | 1 | 1 | 0 |
 | `packages/data-portability` | 3 | 4 | 0 |
 | `packages/goal` | 3 | 3 | 0 |
@@ -79,7 +79,6 @@ updated: 2026-08-22T15:38:00+08:00
 | `keep_boundary` | `apps/api/src/shared/infrastructure/config/get-cors-origins-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `apps/api/src/shared/infrastructure/load-workspace-env-keep-boundary.surface.spec.ts` |
 | `retired` | `apps/desktop/src/main/desktop-shared-ipc-channels-dual.surface.spec.ts` |
-| `keep_boundary` | `apps/desktop/src/main/modules/ai/to-knowledge-note-ref-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `apps/desktop/src/main/modules/authentication/application/auto-login-result-extension-keep-boundary.surface.spec.ts` |
 | `retired` | `apps/desktop/src/main/modules/authentication/application/dual-registry.surface.spec.ts` |
 | `keep_boundary` | `apps/desktop/src/main/modules/authentication/application/refresh-result-layered-keep-boundary.surface.spec.ts` |
@@ -132,7 +131,6 @@ updated: 2026-08-22T15:38:00+08:00
 | `keep_boundary` | `packages/app-vue/src/shared/utils/format-duration-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `packages/app-vue/src/shared/utils/format-event-time-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `packages/app-vue/src/shared/utils/format-message-time-keep-boundary.surface.spec.ts` |
-| `keep_boundary` | `packages/app-vue/src/shared/utils/format-time-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `packages/app-vue/src/shared/utils/format-time-range-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `packages/app-vue/src/shared/utils/format-timestamp-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `packages/app-vue/src/shared/utils/get-importance-label-keep-boundary.surface.spec.ts` |

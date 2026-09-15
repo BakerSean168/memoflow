@@ -13,7 +13,7 @@ import type { PrismaClient, Prisma } from '@memoflow/database';
 import type {
   DataPortabilityImportStore,
   DataPortabilityImportTx,
-  UpsertUserSettingInput,
+  UpsertUserPreferencesInput,
   UpsertNotificationPreferenceInput,
   UpsertUserReminderPreferenceInput,
   CreateRepositoryInput,
@@ -23,17 +23,13 @@ import type {
   CreateKeyResultInput,
   CreateGoalReviewInput,
   CreateGoalRecordInput,
-  CreateTaskTemplateInput,
-  CreateTaskInstanceInput,
+  CreateTaskPlanInput,
+  CreateTaskOccurrenceInput,
   CreateScheduleInput,
   CreateScheduleTaskInput,
   CreateReminderGroupInput,
   CreateReminderTemplateInput,
   CreateReminderResponseInput,
-  CreateEditorWorkspaceInput,
-  CreateEditorSessionInput,
-  CreateEditorGroupInput,
-  CreateEditorTabInput,
   CreateAIConversationInput,
   CreateAIMessageInput,
 } from '../../application/import-store/data-portability-import-store';
@@ -43,12 +39,17 @@ class PrismaDataPortabilityImportTx implements DataPortabilityImportTx {
 
   // --- Singletons ---
 
-  async upsertUserSetting(input: UpsertUserSettingInput): Promise<void> {
-    await this.tx.userSetting.upsert({
-      where: { identityId: input.identityId },
-      create: { identityId: input.identityId, preferences: input.preferences as never },
-      update: { preferences: input.preferences as never },
-    });
+  async upsertUserPreferences(input: UpsertUserPreferencesInput): Promise<void> {
+    for (const [namespace, payload] of [
+      ['presentation', input.presentation],
+      ['regional', input.regional],
+    ] as const) {
+      await this.tx.userPreferenceRecord.upsert({
+        where: { identityId_namespace: { identityId: input.identityId, namespace } },
+        create: { identityId: input.identityId, namespace, payload: payload as never, revision: 1 },
+        update: { payload: payload as never, revision: { increment: 1 } },
+      });
+    }
   }
 
   async upsertNotificationPreference(input: UpsertNotificationPreferenceInput): Promise<void> {
@@ -129,15 +130,36 @@ class PrismaDataPortabilityImportTx implements DataPortabilityImportTx {
 
   // --- Task ---
 
-  async createTaskTemplate(input: CreateTaskTemplateInput): Promise<void> {
-    await this.tx.taskTemplate.create({
-      data: input as unknown as Prisma.TaskTemplateUncheckedCreateInput,
+  async createTaskPlan(input: CreateTaskPlanInput): Promise<void> {
+    await this.tx.taskPlan.create({
+      data: {
+        id: input.id,
+        identityId: input.identityId,
+        name: input.name,
+        description: input.description,
+        status: input.status,
+        outcome: input.outcome,
+        completionPolicy: input.completionPolicy,
+        closedAt: input.closedAt,
+        archivedAt: input.archivedAt,
+        abandonedReason: input.abandonedReason,
+        importance: input.importance,
+        schedule: input.schedule as Prisma.InputJsonValue,
+        reminderConfig: input.reminderConfig,
+        goalId: input.goalId,
+        keyResultId: input.keyResultId,
+        goalRecordValue: input.goalRecordValue,
+        goalProgressTrigger: input.goalProgressTrigger,
+        checklist: input.checklist,
+        createdAt: input.createdAt,
+        updatedAt: input.updatedAt,
+      },
     });
   }
 
-  async createTaskInstance(input: CreateTaskInstanceInput): Promise<void> {
-    await this.tx.taskInstance.create({
-      data: input as unknown as Prisma.TaskInstanceUncheckedCreateInput,
+  async createTaskOccurrence(input: CreateTaskOccurrenceInput): Promise<void> {
+    await this.tx.taskOccurrence.create({
+      data: input as unknown as Prisma.TaskOccurrenceUncheckedCreateInput,
     });
   }
 
@@ -201,32 +223,6 @@ class PrismaDataPortabilityImportTx implements DataPortabilityImportTx {
   async createReminderResponse(input: CreateReminderResponseInput): Promise<void> {
     await this.tx.reminderResponse.create({
       data: input as Prisma.ReminderResponseUncheckedCreateInput,
-    });
-  }
-
-  // --- Editor ---
-
-  async createEditorWorkspace(input: CreateEditorWorkspaceInput): Promise<void> {
-    await this.tx.editorWorkspace.create({
-      data: input as Prisma.EditorWorkspaceUncheckedCreateInput,
-    });
-  }
-
-  async createEditorSession(input: CreateEditorSessionInput): Promise<void> {
-    await this.tx.editorWorkspaceSession.create({
-      data: input as Prisma.EditorWorkspaceSessionUncheckedCreateInput,
-    });
-  }
-
-  async createEditorGroup(input: CreateEditorGroupInput): Promise<void> {
-    await this.tx.editorWorkspaceSessionGroup.create({
-      data: input as Prisma.EditorWorkspaceSessionGroupUncheckedCreateInput,
-    });
-  }
-
-  async createEditorTab(input: CreateEditorTabInput): Promise<void> {
-    await this.tx.editorWorkspaceSessionGroupTab.create({
-      data: input as Prisma.EditorWorkspaceSessionGroupTabUncheckedCreateInput,
     });
   }
 

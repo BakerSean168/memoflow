@@ -12,7 +12,7 @@ describe('dashboard contracts export single-track surface', () => {
   it('exports projection and domain records only (no contracts convenience re-export)', () => {
     expect(index).toContain("export { getDashboardData } from './domain/projection'");
     expect(index).toContain('DashboardReadSource');
-    expect(index).toContain('DashboardTaskInstanceRecord');
+    expect(index).toContain('DashboardTaskOccurrenceRecord');
     expect(index).not.toContain('re-exported for convenience');
     expect(index).not.toContain("from '@memoflow/contracts/dashboard'");
     expect(index).not.toContain('export type { DashboardData }');

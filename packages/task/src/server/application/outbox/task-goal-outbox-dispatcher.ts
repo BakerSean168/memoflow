@@ -63,7 +63,7 @@ function decodeTaskGoalProgressEvent(
   if (value.schemaVersion !== 2 || value.eventType !== 'task.goal-progress-requested') {
     throw new Error('Unsupported Task -> Goal event contract');
   }
-  for (const field of ['identityId', 'taskInstanceId', 'taskTemplateId'] as const) {
+  for (const field of ['identityId', 'taskOccurrenceId', 'taskPlanId'] as const) {
     requireNonEmptyString(value[field], `Task -> Goal ${field}`);
   }
   if (!Number.isFinite(value.occurredAt)) {

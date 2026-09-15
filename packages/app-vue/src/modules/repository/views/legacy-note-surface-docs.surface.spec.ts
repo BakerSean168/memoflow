@@ -43,10 +43,7 @@ describe('legacy note surface docs and menu dual-track retirement', () => {
     'utf8',
   );
   const redesignBrief = readFileSync(resolve(repoRoot, 'docs/UI_REDESIGN_BRIEF.md'), 'utf8');
-  const pageRedesignPlan = readFileSync(
-    resolve(repoRoot, 'docs/UI_PAGE_REDESIGN_PLAN.md'),
-    'utf8',
-  );
+  const pageRedesignPlan = readFileSync(resolve(repoRoot, 'docs/UI_PAGE_REDESIGN_PLAN.md'), 'utf8');
   const repositoryRouter = readFileSync(
     resolve(repoRoot, 'packages/app-vue/src/modules/repository/router/index.ts'),
     'utf8',
@@ -62,9 +59,9 @@ describe('legacy note surface docs and menu dual-track retirement', () => {
     expect(httpAdapterSpec).toContain('does not keep hard-fail stubs for retired CRUD methods');
   });
 
-  it('indexes point at confirmed-create-only surface lock (residual 201)', () => {
-    expect(editorIndex).toContain('confirmed-create-only-note-boundary.surface.spec.ts');
-    expect(repositoryIndex).toContain('confirmed-create-only-note-boundary.surface.spec.ts');
+  it('indexes point at the controlled create/adoption surface lock (residual 201)', () => {
+    expect(editorIndex).toContain('controlled-note-write-boundary.surface.spec.ts');
+    expect(repositoryIndex).toContain('controlled-note-write-boundary.surface.spec.ts');
   });
 
   it('MSW handlers stay knowledge-only without legacy Resource dual-track stubs', () => {
@@ -86,12 +83,13 @@ describe('legacy note surface docs and menu dual-track retirement', () => {
     expect(goalWorkflowE2e).not.toContain('setItem(legacyGoalWorkflowStorageKey');
   });
 
-  it('menu locales drop repository bookmark dual-track keys and keep live template pause/enable', () => {
+  it('menu locales drop repository bookmark dual-track keys and keep live Reminder Template pause/enable keys', () => {
     for (const locale of [enLocale, zhLocale]) {
       // Match legacy `key: '…'` and modular `"key": "…"` forms.
       expect(locale).not.toMatch(/["']?addBookmark["']?\s*:/);
       expect(locale).not.toMatch(/["']?removeBookmark["']?\s*:/);
       expect(locale).not.toMatch(/["']bookmark["']\s*:/);
+      // These are live Reminder Template keys, not plan keys.
       expect(locale).toMatch(/["']?pauseTemplate["']?\s*:/);
       expect(locale).toMatch(/["']?enableTemplate["']?\s*:/);
     }
@@ -107,9 +105,7 @@ describe('legacy note surface docs and menu dual-track retirement', () => {
     // DI key remains for knowledge RepositoryClientPort; do not call it retired.
     expect(redesignBrief).toContain('REPOSITORY_SERVICE_KEY');
     expect(redesignBrief).toContain('RepositoryClientPort');
-    expect(redesignBrief).not.toMatch(
-      /REPOSITORY_SERVICE_KEY` 旧仓储 DI 端口/,
-    );
+    expect(redesignBrief).not.toMatch(/REPOSITORY_SERVICE_KEY` 旧仓储 DI 端口/);
 
     expect(pageRedesignPlan).toContain('RepositoryWorkspaceView.vue');
     expect(pageRedesignPlan).toContain('历史方案（已 supersede）');
@@ -122,5 +118,4 @@ describe('legacy note surface docs and menu dual-track retirement', () => {
     expect(repositoryRouter).not.toContain('RepositoryWorkspaceView');
     expect(repositoryRouter).not.toContain("path: '/note");
   });
-
 });

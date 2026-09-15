@@ -62,14 +62,39 @@
 
 import { ipcMain } from 'electron';
 import { SettingChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
-import type { PreferenceCategory } from '@memoflow/contracts/setting';
+import {
+  PatchPreferenceNamespaceBodySchema,
+  PreferenceNamespaceSchema,
+  ResetPreferenceNamespaceBodySchema,
+  ResetUserPreferencesBodySchema,
+  parsePreferenceNamespacePatch,
+  type PreferenceRevisionConflict,
+} from '@memoflow/contracts/setting';
+import { fail } from '@memoflow/contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
 import type { SettingModuleInstance } from '../server/infrastructure';
+import type { UserTimeContextPort } from '@memoflow/time';
 import { withAuthenticatedIdentity } from './authenticated-ipc';
 
 const logger = createLogger('SettingElectron');
 
 const allChannels = Object.values(SettingChannels);
+
+function isPreferenceConflict(value: unknown): value is PreferenceRevisionConflict {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'code' in value &&
+    value.code === 'preference_revision_conflict'
+  );
+}
+
+function preferenceConflictResult(conflict: PreferenceRevisionConflict) {
+  return fail({
+    code: 'CONFLICT',
+    message: `Preference ${conflict.namespace} changed on another writer`,
+  });
+}
 
 /**
  * Per-handle lifecycle state. Only 'created' may enter 'registered' (or
@@ -93,6 +118,9 @@ type ModuleHandleState = 'created' | 'registered' | 'disposed' | 'failed';
  */
 export interface SettingElectronModuleDef {
   readonly name: string;
+  readonly userTimeContextPort: UserTimeContextPort;
+  /** Owner-provided preferences@3 portability capability for host registry composition. */
+  readonly portableCapability: SettingModuleInstance['portableCapability'];
   register(context: IElectronModuleContext): void;
   destroy?(): void;
 }
@@ -133,6 +161,8 @@ export function createSettingElectronModule(
 
   return {
     name: 'Setting',
+    userTimeContextPort: options.instance.userTimeContextPort,
+    portableCapability: options.instance.portableCapability,
 
     register(ctx: IElectronModuleContext): void {
       if (state !== 'created') {
@@ -146,57 +176,110 @@ export function createSettingElectronModule(
       try {
         const mod = options.instance;
 
-        ipcMain.handle(SettingChannels.GET_ALL, () =>
-          withAuthenticatedIdentity(ctx, (identityId) => mod.api.getUserSetting(identityId)),
+        ipcMain.handle(SettingChannels.PREFERENCES_PROFILE_GET, () =>
+          withAuthenticatedIdentity(ctx, (identityId) => mod.api.getPreferenceProfile(identityId)),
         );
-        installed.push(SettingChannels.GET_ALL);
+        installed.push(SettingChannels.PREFERENCES_PROFILE_GET);
 
-        ipcMain.handle(SettingChannels.GET_DEFAULTS, () =>
-          Promise.resolve(mod.api.getDefaultSettings()),
-        );
-        installed.push(SettingChannels.GET_DEFAULTS);
-
-        ipcMain.handle(SettingChannels.PATCH, (_event, dto) => {
-          const payload = (dto && typeof dto === 'object' ? dto : {}) as Record<string, unknown>;
-          const category = payload.category as string;
-          const patch = (payload.patch as Record<string, unknown>) ?? {};
+        ipcMain.handle(SettingChannels.PREFERENCE_GET, (_event, namespaceInput) => {
+          const namespace = PreferenceNamespaceSchema.safeParse(namespaceInput);
+          if (!namespace.success) {
+            return Promise.resolve(
+              fail({ code: 'VALIDATION_ERROR', message: 'Invalid preference namespace' }),
+            );
+          }
           return withAuthenticatedIdentity(ctx, (identityId) =>
-            mod.api.patchUserSetting(identityId, category as PreferenceCategory, patch),
+            mod.api.getPreferenceNamespace(identityId, namespace.data),
           );
         });
-        installed.push(SettingChannels.PATCH);
+        installed.push(SettingChannels.PREFERENCE_GET);
 
-        ipcMain.handle(SettingChannels.RESET, (_event, params) => {
-          const payload = (params && typeof params === 'object' ? params : {}) as Record<
-            string,
-            unknown
-          >;
-          const category = typeof payload.category === 'string' ? payload.category : undefined;
+        ipcMain.handle(SettingChannels.PREFERENCE_PATCH, (_event, input) => {
+          const raw = (input && typeof input === 'object' ? input : {}) as Record<string, unknown>;
+          const namespace = PreferenceNamespaceSchema.safeParse(raw.namespace);
+          const body = PatchPreferenceNamespaceBodySchema.safeParse(raw.body);
+          if (!namespace.success || !body.success) {
+            return Promise.resolve(
+              fail({ code: 'VALIDATION_ERROR', message: 'Invalid preference mutation' }),
+            );
+          }
+          let patch;
+          try {
+            patch = parsePreferenceNamespacePatch(namespace.data, body.data.patch);
+          } catch {
+            return Promise.resolve(
+              fail({
+                code: 'VALIDATION_ERROR',
+                message: 'Preference patch does not match namespace',
+              }),
+            );
+          }
+          return withAuthenticatedIdentity(ctx, async (identityId) => {
+            const result = await mod.api.patchPreferenceNamespace(
+              identityId,
+              namespace.data,
+              patch,
+              body.data.expectedRevision,
+            );
+            return isPreferenceConflict(result) ? preferenceConflictResult(result) : result;
+          });
+        });
+        installed.push(SettingChannels.PREFERENCE_PATCH);
+
+        ipcMain.handle(SettingChannels.PREFERENCE_RESET, (_event, input) => {
+          const raw = (input && typeof input === 'object' ? input : {}) as Record<string, unknown>;
+          const namespace = PreferenceNamespaceSchema.safeParse(raw.namespace);
+          const body = ResetPreferenceNamespaceBodySchema.safeParse(raw.body);
+          if (!namespace.success || !body.success) {
+            return Promise.resolve(
+              fail({ code: 'VALIDATION_ERROR', message: 'Invalid preference reset' }),
+            );
+          }
+          return withAuthenticatedIdentity(ctx, async (identityId) => {
+            const result = await mod.api.resetPreferenceNamespace(
+              identityId,
+              namespace.data,
+              body.data.expectedRevision,
+            );
+            return isPreferenceConflict(result) ? preferenceConflictResult(result) : result;
+          });
+        });
+        installed.push(SettingChannels.PREFERENCE_RESET);
+
+        ipcMain.handle(SettingChannels.PREFERENCES_RESET, (_event, input) => {
+          const body = ResetUserPreferencesBodySchema.safeParse(input ?? {});
+          if (!body.success) {
+            return Promise.resolve(
+              fail({ code: 'VALIDATION_ERROR', message: 'Invalid preference reset request' }),
+            );
+          }
           return withAuthenticatedIdentity(ctx, (identityId) =>
-            mod.api.resetUserSetting(identityId, category),
+            mod.api.resetUserPreferences(identityId, body.data.expectedRevisions),
           );
         });
-        installed.push(SettingChannels.RESET);
+        installed.push(SettingChannels.PREFERENCES_RESET);
 
         ipcMain.handle(SettingChannels.IMPORT, (_event, dto) => {
           const payload = (dto && typeof dto === 'object' ? dto : {}) as Record<string, unknown>;
-          const raw = payload.data;
-          const data: Record<string, unknown> =
-            typeof raw === 'string'
-              ? (JSON.parse(raw) as Record<string, unknown>)
-              : ((raw as Record<string, unknown>) ?? {});
-          const optionsPayload = payload.options as { merge?: boolean } | undefined;
-          return withAuthenticatedIdentity(ctx, (identityId) =>
-            mod.api.importSettings(identityId, data, optionsPayload),
-          );
+          if (typeof payload.data !== 'string') {
+            return Promise.resolve(
+              fail({ code: 'VALIDATION_ERROR', message: 'Preference import data must be JSON text' }),
+            );
+          }
+          let data: unknown;
+          try {
+            data = JSON.parse(payload.data) as unknown;
+          } catch {
+            return Promise.resolve(
+              fail({ code: 'VALIDATION_ERROR', message: 'Preference import data is not valid JSON' }),
+            );
+          }
+          return withAuthenticatedIdentity(ctx, (identityId) => mod.api.importSettings(identityId, data));
         });
         installed.push(SettingChannels.IMPORT);
 
         ipcMain.handle(SettingChannels.EXPORT, () =>
-          withAuthenticatedIdentity(ctx, async (identityId) => {
-            const exported = await mod.api.exportSettings(identityId);
-            return JSON.stringify(exported);
-          }),
+          withAuthenticatedIdentity(ctx, (identityId) => mod.api.exportSettings(identityId)),
         );
         installed.push(SettingChannels.EXPORT);
 

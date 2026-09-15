@@ -227,24 +227,6 @@ export async function registerAndLogin(
 }
 
 /**
- * Materialize the effective default settings for a freshly registered account.
- * Settings are created lazily by GET /settings, while reset/export tests require
- * a persisted singleton as their fixture precondition.
- */
-export async function ensureUserSettingsRecord(page: Page): Promise<void> {
-  const response = await page.evaluate(async (apiBaseUrl) => {
-    const result = await fetch(`${apiBaseUrl}/settings`, {
-      credentials: 'include',
-    });
-    return { ok: result.ok, status: result.status };
-  }, API_CONFIG.API_PREFIX);
-
-  if (!response.ok) {
-    throw new Error(`Failed to prepare user settings (HTTP ${response.status})`);
-  }
-}
-
-/**
  * 测试数据工厂
  */
 export function createTestTask(

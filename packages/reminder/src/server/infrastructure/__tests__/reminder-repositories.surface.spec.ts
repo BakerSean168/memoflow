@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { PrismaClient } from '@memoflow/database';
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import { createTimeContext } from '@memoflow/time';
 import {
   createReminderPrismaRepositories,
   createReminderPowerSyncRepositories,
@@ -37,6 +38,9 @@ describe('reminder repository factories surface', () => {
   const fakePrisma = {} as unknown as PrismaClient;
   const fakeElectronDb = {} as unknown as IElectronDatabase;
   const closureChecker = async (): Promise<boolean> => false;
+  const userTimeContextPort = {
+    getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+  };
 
   it('createReminderPrismaRepositories returns the full Prisma Port set', () => {
     const set = createReminderPrismaRepositories(fakePrisma);
@@ -77,7 +81,7 @@ describe('reminder repository factories surface', () => {
   });
 
   it('convenience module factories preserve api/start/dispose and fail-closed closure checker', () => {
-    const prismaInstance = createReminderPrismaModule(fakePrisma, { closureChecker });
+    const prismaInstance = createReminderPrismaModule(fakePrisma, { closureChecker, userTimeContextPort });
     expect(prismaInstance).toHaveProperty('api');
     expect(typeof prismaInstance.start).toBe('function');
     expect(typeof prismaInstance.dispose).toBe('function');
@@ -86,7 +90,7 @@ describe('reminder repository factories surface', () => {
 
     expect(() => createReminderPrismaModule(fakePrisma)).toThrow(/FAIL-CLOSED/);
 
-    const powerSyncInstance = createReminderPowerSyncModule(fakeElectronDb);
+    const powerSyncInstance = createReminderPowerSyncModule(fakeElectronDb, { userTimeContextPort });
     expect(powerSyncInstance).toHaveProperty('api');
     expect(typeof powerSyncInstance.start).toBe('function');
     expect(typeof powerSyncInstance.dispose).toBe('function');

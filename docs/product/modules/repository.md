@@ -5,7 +5,7 @@ tags:
   - repository
 description: 资源库模块当前实现、本地 Vault、可选 GitHub 同步与跨端边界
 created: 2026-06-02T00:00:00
-updated: 2026-07-21T00:00:00
+updated: 2026-09-11T00:02:00+08:00
 ---
 
 # 资源库模块说明
@@ -16,10 +16,88 @@ updated: 2026-07-21T00:00:00
 
 [ADR-034](../../architecture/adr/ADR-034-obsidian-vault-repository.md) 已采纳：本地 Vault 优先；GitHub 登录与仓库授权解耦；用户需要同步时再连接 GitHub；绑定后 Web 可以安全地快捷创建新笔记。
 
+## 1.1 vNext 已采纳建模方向（实施中）
+
+2026-09-08 已完成 Repository/Knowledge vNext 建模冻结；2026-09-11 已开始按 ADR-089 destructive cutover。vNext 不恢复旧 Repository/Folder/Resource Aggregate，而是收敛为：
+
+```text
+KnowledgeSpace
+├── LocalVaultBinding + LocalVaultHealth
+├── KnowledgeRemoteBinding + RemoteRepositoryObservation
+├── RemoteHistoryFence
+├── KnowledgeProjectionCheckpoint
+├── Stable KnowledgeDocumentId
+├── Document/Asset Projection
+└── KnowledgeCommitOperation
+```
+
+同时明确：
+
+- `KnowledgeDocumentId` 与 path 分离，跨模块 Goal/Task Relation 不得引用 path-derived projection id；
+- AI 独占 knowledge index state，Repository projection 不再长期保存 `indexStatus` 双真值；
+- Web confirmed commit、Webhook 与 reconciliation 最终共用单一 `KnowledgeProjectionEngine`；
+- Local Vault ownership 从 online identity 收敛到 Local Profile / KnowledgeSpace 语义；
+- 现有 GitHub InstallationIntent、local-first Git、no-force-push、conflict pause、webhook dedup、lease、confirmed-write idempotency 等作为 protected assets。
+
+权威设计包：
+
+- [Knowledge Repository vNext](../knowledge-repository-vnext.md)
+- [Current System Map](../../analysis/2026-09-08-knowledge-repository-vnext-current-system-map.md)
+- [ADR-089](../../architecture/adr/ADR-089-knowledge-space-source-binding-and-health-boundaries.md)
+- [ADR-090](../../architecture/adr/ADR-090-stable-knowledge-document-identity.md)
+- [ADR-091](../../architecture/adr/ADR-091-knowledge-projection-index-and-operation-boundaries.md)
+
+**当前实施状态：** ADR-089 已完成 Local/Remote 全部四轴 cutover；ADR-090 stable document identity 已由 KNOW-2002 实施；ADR-091 single projection engine 仍未完成。
+
+### 1.2 2026-09-11 Local Vault checkpoint
+
+Local Vault 已从旧的 `identityId + status + obsidianVaultId + lastScannedAt` 混合 DTO 切换为：
+
+```text
+LocalVaultBinding
+├── id: LocalVaultBindingId
+├── knowledgeSpaceId: KnowledgeSpaceId
+├── localProfileId
+├── rootPath / displayName
+├── boundAt
+└── detachedAt
+
+LocalVaultHealth
+├── bindingId
+├── state: Available | Missing | Unreadable
+├── observedAt
+└── detail
+```
+
+关键行为：
+
+- binding 文件位于 per-profile storage，owner 由 Desktop composition root 注入的稳定 `profileId` 决定，不再由 cloud identity 决定；
+- `getBinding()` 只读 binding + 实时观察 filesystem health，不再因为读取而重写 owner/status/timestamp；
+- Guest profile 登录/注册后保留同一 `profileId`，因此 Vault 不搬家、不重绑；
+- 本地 Vault port 不再接收 cloud `identityId`；renderer 也不能指定 local owner；
+- schemaVersion 1 binding 不迁移、不作为兼容真值；重新选择 Vault 后写入 V2 binding，但从不删除用户 Vault 内容；
+- sync/reconciliation/auto-sync、Desktop AI、Settings/Local Vault workspace 都消费明确的 `{ binding, health }` snapshot。
+
+### 1.3 2026-09-11 Remote Binding checkpoint
+
+Remote Knowledge 不再持久化单一 Connection lifecycle/status：
+
+```text
+KnowledgeRemoteBinding       = 用户长期选择 + connect/disconnect
+RemoteRepositoryObservation  = GitHub 当前事实/eligibility
+RemoteHistoryFence           = 最后确认的安全 remote HEAD
+KnowledgeProjectionCheckpoint = server projection cursor/state/failure
+```
+
+普通 list 仅组合这四轴数据库状态，不访问 GitHub；Settings 中的“检查 GitHub 状态”是显式 observation refresh。Token、confirmed write、reconciliation 等安全敏感操作仍 live preflight。Provider loss 只令 observation `Blocked`，不会自动 disconnect binding。
+
+Desktop GitHub connect 必须把当前 Local Vault 的 `knowledgeSpaceId` 交给 server；Web connect 不能指定 device-local space。continuous sync 还要求 Local/Remote `knowledgeSpaceId` 完全一致、observation `Ready` 且 history fence 已建立。
+
+Prisma 已删除 `knowledge_repository_connections` canonical model，改为五张四轴表；关联 webhook/projection/cache/write request 使用 `binding_id`。迁移是 ADR-111 destructive cutover，不 backfill 旧数据。
+
 ## 2. 当前实现
 
-- Desktop 已支持 profile-owned 本地 Vault 选择、扫描、搜索、安全预览、Obsidian 打开和确认后写入；未连接 GitHub
-  时不上传 Vault 内容。
+- Desktop Local Vault 已完成 ADR-089 本地侧切换：稳定 profile-owned binding 与 filesystem health 分离；选择、扫描、搜索、安全预览、Obsidian 打开和确认后写入保持可用；未连接 GitHub 时不上传 Vault 内容。
 - GitHub 登录与 GitHub App 仓库授权使用独立 contract、token 和 UI；只允许连接明确选择的 private、active、admin
   repository。
 - Desktop 已实现首次对账、真实 Git commit/fetch/pull-rebase/push、冲突暂停、离线 pending commit 和 profile-scoped
@@ -109,13 +187,18 @@ Web create
   导入；它不是 Vault/GitHub 导出，也不是服务端持有数据披露。
 - GitHub authorization、installation token 和派生投影不得进入可导入文件。权威 Markdown/附件应从 Vault 或 GitHub
   repository 导出/clone。
-- Web 的“服务端持有数据披露”生成 `memoflow.server-held-data-disclosure` JSON；它按认证 identity 包含 repository
-  connection metadata（含不可重放 installation identifier）、Markdown/附件投影、附件 cache bytes、Webhook delivery、
-  Web write ledger 与 AI knowledge index。该 artifact 没有 import route，并明确排除本地 Vault/Git history、GitHub
-  repository history、worker lease、数据库内部 retrieval vector 及所有 MemoFlow 管理的可重放授权材料。Markdown、
-  frontmatter 和 cache bytes 属于用户仓库内容，按原样进入披露文件。
+- Web 的“服务端持有数据披露”生成 `memoflow.server-held-data-disclosure` JSON；它按认证 identity 包含
+  KnowledgeSpace metadata、去重后的 durable `KnowledgeDocumentIdentity` registry（`knowledgeSpaceId`、
+  `knowledgeDocumentId`、`origin`、`originRequestId`、`createdAt`、`updatedAt`）、repository connection metadata（含不可重放
+  installation identifier）、Markdown/附件投影、附件 cache bytes、Webhook delivery、Web write ledger 与 AI knowledge
+  index。Note projection 的 `knowledgeDocumentId` 可为 `null`，write request disclosure 始终带 stable `knowledgeDocumentId`。
+  该 artifact 没有 import route，并明确排除本地 Vault/Git history、GitHub repository history、worker lease、数据库内部
+  retrieval vector 及所有 MemoFlow 管理的可重放授权材料。Markdown、frontmatter 和 cache bytes 属于用户仓库内容，按原样
+  进入披露文件；disclosure 仍保持当前 schemaVersion 1，不是 portable backup。
 
 ## 8. 当前差距
+
+Repository/Knowledge vNext 已完成 ADR-089 的 Local/Remote binding 四轴迁移与 ADR-090 stable document identity；single projection engine（ADR-091）仍未完成。
 
 - 真实 GitHub App fixture E2E 仍依赖外部凭据与受控 private repository。
 - Mobile 尚未接入服务端 GitHub 投影的只读浏览、搜索与预览。
@@ -133,8 +216,13 @@ Web create
 ## 10. 相关资料
 
 - [ADR-034: 本地 Obsidian Vault 与可选 GitHub 知识仓库](../../architecture/adr/ADR-034-obsidian-vault-repository.md)
+- [Knowledge Repository vNext](../knowledge-repository-vnext.md)
+- [ADR-089: KnowledgeSpace、Source Binding 与 Health/Observation Boundary](../../architecture/adr/ADR-089-knowledge-space-source-binding-and-health-boundaries.md)
+- [ADR-090: Stable KnowledgeDocument Identity](../../architecture/adr/ADR-090-stable-knowledge-document-identity.md)
+- [ADR-091: Knowledge Projection、AI Index 与 Operation Boundary](../../architecture/adr/ADR-091-knowledge-projection-index-and-operation-boundaries.md)
+- [Knowledge Repository vNext Current System Map](../../analysis/2026-09-08-knowledge-repository-vnext-current-system-map.md)
 - [ADR-035: 统一助手与可插拔 Agent Host](../../architecture/adr/ADR-035-unified-assistant-agent-host.md)
-- [统一助手与可插拔 Agent Host 实施方案](../../plan/active/2026-07-17-unified-assistant-agent-host.md)
+- [统一助手与可插拔 Agent Host 实施方案](../../plan/archive/2026-07-17-unified-assistant-agent-host.md)
 - [Obsidian Vault 与 GitHub 知识仓库后续优化方案](../../plan/archive/2026-07-16-obsidian-vault-repository-optimization.md)
 - [编辑器模块说明](./editor.md)
 - [AI 模块说明](./ai.md)

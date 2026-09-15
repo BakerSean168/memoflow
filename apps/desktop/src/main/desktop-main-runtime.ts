@@ -37,6 +37,11 @@ export class DesktopMainRuntime {
     return this.profileRuntimeManager.getActiveProfileAccessContext();
   }
 
+  /** Active device notification renderer, or null until desktop capabilities are ready. */
+  get notification(): NotificationPort | null {
+    return this._notification;
+  }
+
   /** Store the notification capability port for lifecycle management. */
   setNotification(port: NotificationPort | null): void {
     this._notification = port;

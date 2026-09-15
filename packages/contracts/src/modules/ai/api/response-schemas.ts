@@ -6,6 +6,7 @@ import type {
   AiMessageId,
   IdentityId,
 } from '../../../primitives';
+import { KnowledgeDocumentIdSchema } from '../../repository/aggregates/knowledge-document-identity';
 import { TestAIProviderResultDTOSchema } from '../dtos/provider-test-result.dto';
 import { TokenUsageSchema } from '../value-objects/token-usage';
 import { ConversationStatus } from '../value-objects/conversation-status';
@@ -125,7 +126,7 @@ export const ExpandKnowledgeResSchema = z.object({
 // Residual 723: KnowledgeNotePersistedRefSchema is the sole persisted-note shape
 // (KnowledgeNotePersistedRef is a z.infer alias).
 export const KnowledgeNotePersistedRefSchema = z.object({
-  id: z.string(),
+  id: KnowledgeDocumentIdSchema,
   repositoryScopeId: z.string(),
   name: z.string(),
   path: z.string(),
