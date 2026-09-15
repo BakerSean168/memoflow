@@ -53,7 +53,7 @@ import {
   type AccountRuntimeContributionsInput,
   type IAccountRepository,
 } from '@memoflow/account';
-import type { Clock } from '@memoflow/time';
+import type { Clock, UserTimeContextPort } from '@memoflow/time';
 import {
   createAccountElectronModule,
   DesktopAccountProfileSync,
@@ -70,6 +70,8 @@ export interface ComposeAccountDesktopDependencies {
   readonly db: IElectronDatabase;
   /** Host-owned Product Time clock for Account mutations. */
   readonly clock: Clock;
+  /** Host-owned identity time context capability. */
+  readonly userTimeContextPort: UserTimeContextPort;
   /** Host-owned cloud-close / profile-sync callbacks (built in main.ts). 宿主持有的 cloud-close / profile-sync 回调（构建于 main.ts）。 */
   readonly syncOptions?: DesktopAccountProfileSyncOptions;
   /** Extra runtime contributions from the host. 宿主提供的额外运行时贡献。 */
@@ -83,6 +85,8 @@ export interface ComposeAccountDesktopDependencies {
 export interface ComposedAccountDesktop {
   /** Already-bound IElectronModule-compatible handle. 已绑定的兼容 IElectronModule 的 handle。 */
   readonly module: AccountElectronModuleDef;
+  /** Account-owned Data Portability V3 capability. */
+  readonly portableCapability: ReturnType<typeof createAccountModule>['portableCapability'];
   /** Instance-bound account repository for desktop consumers. 供 desktop 消费者使用的 instance-bound 账户 repository。 */
   readonly repositories: {
     readonly accountRepository: IAccountRepository;
@@ -136,6 +140,7 @@ export function composeAccount(
   const instance = createAccountModule({
     accountRepository,
     clock: dependencies.clock,
+    userTimeContextPort: dependencies.userTimeContextPort,
     laneCapability: 'desktop',
     runtimeContributions: createAccountRuntimeContributions(
       accountRepository,
@@ -158,6 +163,7 @@ export function composeAccount(
       syncOptions: dependencies.syncOptions,
       profileSync,
     }),
+    portableCapability: instance.portableCapability,
     repositories: {
       accountRepository,
     },

@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { PrismaClient } from '@memoflow/database';
-import { createFixedClock } from '@memoflow/time';
+import { createFixedClock, createTimeContext } from '@memoflow/time';
 import type { Transactional } from '../adapters/powersync/account-powersync.repository';
 import {
   createAccountPrismaRepositories,
@@ -50,9 +50,12 @@ describe('account repository factories surface', () => {
   const fakePrisma = {} as unknown as PrismaClient;
   const fakeElectronDb = {} as unknown as Transactional;
   const clock = createFixedClock(1_700_000_000_000);
+  const userTimeContextPort = {
+    getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+  };
 
   it('createAccountPrismaRepositories returns the full API-lane Port set', () => {
-    const set = createAccountPrismaRepositories({ db: fakePrisma, clock });
+    const set = createAccountPrismaRepositories({ db: fakePrisma, clock, userTimeContextPort });
     expect(set).toHaveProperty('accountRepository');
     expect(set).toHaveProperty('closureOperationRepository');
     expect(set).toHaveProperty('revocationPort');
@@ -73,7 +76,9 @@ describe('account repository factories surface', () => {
   });
 
   it('PowerSync set field names are a lane-capable subset of the Prisma set', () => {
-    const prismaKeys = Object.keys(createAccountPrismaRepositories({ db: fakePrisma, clock })).sort();
+    const prismaKeys = Object.keys(
+      createAccountPrismaRepositories({ db: fakePrisma, clock, userTimeContextPort }),
+    ).sort();
     const powerSyncKeys = Object.keys(createAccountPowerSyncRepositories(fakeElectronDb)).sort();
     for (const key of powerSyncKeys) {
       expect(prismaKeys).toContain(key);
@@ -81,14 +86,17 @@ describe('account repository factories surface', () => {
   });
 
   it('convenience module factories still expose api/start/dispose', () => {
-    const prismaInstance = createAccountPrismaModule(fakePrisma, { clock });
+    const prismaInstance = createAccountPrismaModule(fakePrisma, { clock, userTimeContextPort });
     expect(prismaInstance).toHaveProperty('api');
     expect(typeof prismaInstance.start).toBe('function');
     expect(typeof prismaInstance.dispose).toBe('function');
     const typedPrisma: AccountModuleInstance = prismaInstance;
     expect(typeof typedPrisma.api.listAccounts).toBe('function');
 
-    const powerSyncInstance = createAccountPowerSyncModule(fakeElectronDb, { clock });
+    const powerSyncInstance = createAccountPowerSyncModule(fakeElectronDb, {
+      clock,
+      userTimeContextPort,
+    });
     expect(powerSyncInstance).toHaveProperty('api');
     expect(typeof powerSyncInstance.start).toBe('function');
     expect(typeof powerSyncInstance.dispose).toBe('function');

@@ -198,12 +198,13 @@ async function bootstrap(): Promise<void> {
   // Step C：宿主 runtime 负责 feature 装配。所有 remaining 模块（account /
   // notification / reminder / repository / schedule / setting / data-portability）
   // 都通过 runtime composer 组装成已绑定实例的 module handle，再按原注册顺序注册。
+  const settingApiModule = composeSetting({ db: prisma });
   const accountApiModule = composeAccount({
     db: prisma,
     cloudAuth,
     clock: createSystemClock(),
+    userTimeContextPort: settingApiModule.userTimeContextPort,
   });
-  const settingApiModule = composeSetting({ db: prisma });
   const notificationApiModule = composeNotification({
     db: prisma,
     closureChecker: accountActiveChecker,
@@ -233,6 +234,7 @@ async function bootstrap(): Promise<void> {
   const dataPortabilityApiModule = composeDataPortability({
     db: prisma,
     portableCapabilities: [
+      accountApiModule.portableCapability,
       settingApiModule.portableCapability,
       notificationApiModule.module.portableCapability,
     ],
@@ -362,7 +364,7 @@ async function bootstrap(): Promise<void> {
   const app = await bootstrapper
     // === 核心：白名单注册 ===
     .register(governanceApiModule) // ✅ 治理模块 (runtime composer)
-    .register(accountApiModule) // ✅ 账户模块 (runtime composer)
+    .register(accountApiModule.module) // ✅ 账户模块 (runtime composer)
     .register(notificationApiModule.module) // ✅ 通知模块 (runtime composer)
     .register(reminderComposed.module) // ✅ 提醒模块 (runtime composer)
     .register(repositoryApiModule) // ✅ 仓库模块 (runtime composer)

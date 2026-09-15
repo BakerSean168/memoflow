@@ -18,7 +18,7 @@ import { NotificationAccountClosedConsumer } from '@memoflow/notification/server
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import { RepositoryAccountClosedConsumer } from '@memoflow/repository/server';
 import type { CloudAuthRevocationPort } from '../../../../application/ports/cloud-auth-revocation.port';
-import { asInstant, createSystemClock } from '@memoflow/time';
+import { asInstant, createSystemClock, createTimeContext } from '@memoflow/time';
 
 describe('Account Closure Coordinator & Worker Real DB Concurrency Integration Tests', () => {
   const closureOpRepo = new PrismaAccountClosureOperationRepository(prisma);
@@ -731,6 +731,9 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
     const { createAccountPrismaModule } = await import('../../../prisma');
     const moduleInstance = createAccountPrismaModule(prisma, {
       clock: createSystemClock(),
+      userTimeContextPort: {
+        getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+      },
       cloudAuth: {
         revokeAllSessions: async () => ({ revokedSessions: 0 }),
         deleteUserData: async () => ({ deletedRecords: 0 }),
@@ -828,6 +831,9 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
     };
     const moduleInstance = createAccountModule({
       accountRepository: new PrismaAccountRepository(prisma),
+      userTimeContextPort: {
+        getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+      },
       closureOperationRepository: closureOpRepo,
       revocationPort: {
         revokeAllSessions: async () => ({ revokedSessions: 0, success: true }),
@@ -870,6 +876,9 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
     };
     const moduleInstance = createAccountModule({
       accountRepository: new PrismaAccountRepository(prisma),
+      userTimeContextPort: {
+        getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+      },
       closureOperationRepository: closureOpRepo,
       revocationPort: {
         revokeAllSessions: async () => ({ revokedSessions: 0, success: true }),

@@ -24,7 +24,7 @@ describe('account API runtime composer surface', () => {
     expect(server).toContain("from './runtime/compose-account'");
     expect(server).toMatch(/composeAccount\(\{\s*db: prisma,\s*cloudAuth,/);
     expect(server).toMatch(/clock:\s*createSystemClock\(\)/);
-    expect(server).toContain('.register(accountApiModule)');
+    expect(server).toContain('.register(accountApiModule.module)');
   });
 
   it('server.ts no longer references createAccountApiModule or the account/api seam', () => {
