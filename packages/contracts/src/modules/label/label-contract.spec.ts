@@ -47,6 +47,13 @@ describe('Label contract primitives', () => {
     ).toBe('ffi'.repeat(16));
   });
 
+  it('trims whitespace introduced by NFKC normalization', () => {
+    expect(CreateLabelReqSchema.parse({ name: '\u00a8' }).name).toBe('\u0308');
+    expect(
+      LabelPortableItemV3Schema.parse({ ref: 'labels:1', name: '\u00a8', color: null }).name,
+    ).toBe('\u0308');
+  });
+
   it('keeps null color valid and client DTO strict with finite Instant-like timestamps', () => {
     expect(CreateLabelReqSchema.parse({ name: 'Work', color: null })).toEqual({
       name: 'Work',

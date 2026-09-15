@@ -9,7 +9,7 @@ const LabelPortableReferenceV3Schema = PortableReferenceV3Schema.refine(
 );
 
 function normalizePortableLabelName(name: string): string {
-  return name.trim().normalize('NFKC').toLowerCase();
+  return name.normalize('NFKC').trim().toLowerCase();
 }
 
 /** Canonical Shared Label RGB color. Runtime contract is exactly #RRGGBB. */
@@ -54,8 +54,7 @@ export const CreateLabelReqSchema = z
   .object({
     name: z
       .string()
-      .trim()
-      .transform((value) => value.normalize('NFKC'))
+      .transform((value) => value.normalize('NFKC').trim())
       .pipe(z.string().min(1).max(50)),
     color: LabelColorSchema.nullable().optional(),
   })
@@ -92,8 +91,7 @@ export const LabelPortableItemV3Schema = z
     ref: LabelPortableReferenceV3Schema,
     name: z
       .string()
-      .trim()
-      .transform((value) => value.normalize('NFKC'))
+      .transform((value) => value.normalize('NFKC').trim())
       .pipe(z.string().min(1).max(50)),
     color: LabelColorSchema.nullable(),
   })
