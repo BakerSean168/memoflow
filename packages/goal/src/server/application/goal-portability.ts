@@ -5,6 +5,7 @@ import type {
   GoalPortablePayloadV3,
 } from '@memoflow/contracts/goal';
 import { GoalPortablePayloadV3Schema, GoalStatus } from '@memoflow/contracts/goal';
+import { LabelPortablePayloadV3Schema } from '@memoflow/contracts/label';
 import type {
   PortableCapability,
   PortableCapabilityExecutionContext,
@@ -82,6 +83,35 @@ function sameStringSet(left: readonly string[], right: readonly string[]): boole
   const a = [...new Set(left)].sort();
   const b = [...new Set(right)].sort();
   return a.length === b.length && a.every((value, index) => value === b[index]);
+}
+
+function assertLabelRefsArePresent(
+  payload: GoalPortablePayloadV3,
+  context: PortableCapabilityExecutionContext,
+): void {
+  const labelsPayload = LabelPortablePayloadV3Schema.safeParse(
+    context.importedCapabilityPayloads?.get('labels'),
+  );
+  if (!labelsPayload.success) {
+    throw new Error('goals@3 requires a valid labels@3 payload for label references');
+  }
+  const labelRefs = new Set(labelsPayload.data.labels.map((label) => label.ref));
+  for (const goal of payload.goals) {
+    for (const labelRef of goal.labelRefs) {
+      if (!labelRefs.has(labelRef)) {
+        throw new Error(
+          `goals@3 label reference is missing from labels@3 payload: ${labelRef}`,
+        );
+      }
+    }
+  }
+}
+
+function resolveDryRunLabelIds(
+  goal: GoalPortableDefinitionV3,
+  context: PortableCapabilityExecutionContext,
+): string[] {
+  return goal.labelRefs.map((ref) => context.references.resolveImportedReference(ref));
 }
 
 function assertExistingGoalMatchesPortableDefinition(
@@ -229,6 +259,13 @@ export class GoalPortableCapability implements PortableCapability<GoalPortablePa
   readonly dependsOn = ['labels'] as const;
   readonly payloadSchema = GoalPortablePayloadV3Schema;
 
+  async validateImport(
+    payload: GoalPortablePayloadV3,
+    context: PortableCapabilityExecutionContext,
+  ): Promise<void> {
+    assertLabelRefsArePresent(payload, context);
+  }
+
   constructor(
     private readonly api: GoalApplicationPort,
     private readonly portability: GoalPortabilityApplicationPort,
@@ -280,9 +317,7 @@ export class GoalPortableCapability implements PortableCapability<GoalPortablePa
     for (const goal of target.goals) {
       const id = deterministicGoalId(context.identityId, batchId, goal.ref);
       const current = await this.portability.getGoalSnapshot(id, context.identityId);
-      const labelIds = goal.labelRefs.map((ref) =>
-        context.references.resolveImportedReference(ref),
-      );
+      const labelIds = resolveDryRunLabelIds(goal, context);
       if (current) {
         assertExistingGoalMatchesPortableDefinition(current, goal, batchId, labelIds);
         assertLifecycleCanConverge(current, goal);

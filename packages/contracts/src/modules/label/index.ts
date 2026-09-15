@@ -52,7 +52,11 @@ export type ListLabelsReq = z.infer<typeof ListLabelsReqSchema>;
 
 export const CreateLabelReqSchema = z
   .object({
-    name: z.string().trim().min(1).max(50),
+    name: z
+      .string()
+      .trim()
+      .transform((value) => value.normalize('NFKC'))
+      .pipe(z.string().min(1).max(50)),
     color: LabelColorSchema.nullable().optional(),
   })
   .strict();
@@ -86,14 +90,18 @@ export interface ListLabelsQuery {
 export const LabelPortableItemV3Schema = z
   .object({
     ref: LabelPortableReferenceV3Schema,
-    name: z.string().trim().min(1).max(50),
+    name: z
+      .string()
+      .trim()
+      .transform((value) => value.normalize('NFKC'))
+      .pipe(z.string().min(1).max(50)),
     color: LabelColorSchema.nullable(),
   })
   .strict();
 export type LabelPortableItemV3 = z.infer<typeof LabelPortableItemV3Schema>;
 
 export const LabelPortablePayloadV3Schema = z
-  .object({ labels: z.array(LabelPortableItemV3Schema).max(500) })
+  .object({ labels: z.array(LabelPortableItemV3Schema) })
   .strict()
   .superRefine((payload, ctx) => {
     const names = new Set<string>();

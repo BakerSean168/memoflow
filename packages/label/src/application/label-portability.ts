@@ -19,7 +19,7 @@ export class LabelPortableCapability implements PortableCapability<LabelPortable
   constructor(private readonly service: LabelService) {}
 
   async export(context: PortableCapabilityExecutionContext): Promise<LabelPortablePayloadV3> {
-    const labels = await this.service.list({ identityId: context.identityId, limit: 500 });
+    const labels = await this.service.listAll(context.identityId);
     return {
       labels: labels.map((label) => ({
         ref: context.references.declareExportReference(this.key, label.id),
@@ -34,7 +34,7 @@ export class LabelPortableCapability implements PortableCapability<LabelPortable
     context: PortableCapabilityExecutionContext,
   ): Promise<PortableCapabilityReceipt> {
     const target = LabelPortablePayloadV3Schema.parse(payload);
-    const existing = await this.service.list({ identityId: context.identityId, limit: 500 });
+    const existing = await this.service.listAll(context.identityId);
     const byName = new Map(existing.map((label) => [label.normalizedName, label]));
     let created = 0;
     let updated = 0;
@@ -45,6 +45,10 @@ export class LabelPortableCapability implements PortableCapability<LabelPortable
       if (!current) created += 1;
       else if (current.name !== item.name || current.color !== item.color) updated += 1;
       else skipped += 1;
+      context.references.bindImportedReference(
+        item.ref,
+        current?.id ?? `portable-label:${item.ref}`,
+      );
     }
 
     return { created, updated, skipped, warnings: [] };
@@ -55,7 +59,7 @@ export class LabelPortableCapability implements PortableCapability<LabelPortable
     context: PortableCapabilityExecutionContext,
   ): Promise<PortableCapabilityReceipt> {
     const target = LabelPortablePayloadV3Schema.parse(payload);
-    const existing = await this.service.list({ identityId: context.identityId, limit: 500 });
+    const existing = await this.service.listAll(context.identityId);
     const byName = new Map(existing.map((label) => [label.normalizedName, label]));
     let created = 0;
     let updated = 0;

@@ -73,6 +73,10 @@ export class LabelService {
     });
   }
 
+  listAll(identityId: string): Promise<LabelDto[]> {
+    return this.repository.listAll(identityId);
+  }
+
   /** Resolve human-readable names into replay-safe identity-owned canonical Label rows. */
   async resolveNames(identityId: string, names: readonly string[]): Promise<LabelDto[]> {
     const validated = names.map((name) => validateLabelName(name));

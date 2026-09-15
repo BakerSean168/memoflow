@@ -292,6 +292,18 @@ describe('GoalPortableCapability', () => {
     expect(serialized).not.toContain('version');
   });
 
+  it('dry-run resolves label references already bound by labels portability', async () => {
+    const api = { getGoal: vi.fn().mockResolvedValue(error('NOT_FOUND', 'missing')) } as unknown as GoalApplicationPort;
+    const { context } = referenceContext();
+    const capability = new GoalPortableCapability(api, portabilityFromApi(api));
+
+    context.references.bindImportedReference('labels:1', 'portable-label:labels:1');
+    await expect(capability.dryRun(portableGoalPayload(), context)).resolves.toMatchObject({
+      created: 1,
+      skipped: 0,
+    });
+  });
+
   it('dry-run detects same-batch replay through deterministic host ids', async () => {
     const getGoal = vi
       .fn()

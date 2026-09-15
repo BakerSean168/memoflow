@@ -93,6 +93,20 @@ describe('PowerSyncLabelRepository registry parity', () => {
     expect(db.getAll).toHaveBeenCalledTimes(1);
   });
 
+  it('lists the complete identity snapshot without a UI limit', async () => {
+    const { db } = createDb({
+      getAll: (sql) =>
+        sql.includes('ORDER BY name ASC, id ASC')
+          ? [labelRow('label-1', 'One'), labelRow('label-2', 'Two')]
+          : [],
+    });
+    const repository = new PowerSyncLabelRepository(db);
+
+    await expect(repository.listAll('identity-1')).resolves.toHaveLength(2);
+    expect(vi.mocked(db.getAll).mock.calls[0]?.[0]).not.toContain('LIMIT');
+    expect(vi.mocked(db.getAll).mock.calls[0]?.[1]).toEqual(['identity-1']);
+  });
+
   it('finds and deletes only the identity-owned label row', async () => {
     const { db, executed } = createDb({
       getOptional: () => labelRow('label-work', 'Work'),

@@ -105,6 +105,14 @@ export class PowerSyncLabelRepository implements LabelRepository {
         );
     return rows.map(fromRow);
   }
+
+  async listAll(identityId: string): Promise<LabelRecord[]> {
+    const rows = await this.db.getAll<LabelRow>(
+      'SELECT * FROM labels WHERE identity_id = ? ORDER BY name ASC, id ASC',
+      [identityId],
+    );
+    return rows.map(fromRow);
+  }
 }
 
 function fromRow(row: LabelRow): LabelRecord {

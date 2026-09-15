@@ -57,7 +57,7 @@ function executionContext() {
 describe('LabelPortableCapability', () => {
   it('exports owner facts only and declares capability-scoped refs', async () => {
     const service = {
-      list: vi
+      listAll: vi
         .fn()
         .mockResolvedValue([label('label-a', 'Work', '#112233'), label('label-b', 'Health', null)]),
     } as unknown as LabelService;
@@ -78,14 +78,14 @@ describe('LabelPortableCapability', () => {
 
   it('dry-runs created, updated and skipped labels without mutating', async () => {
     const service = {
-      list: vi
+      listAll: vi
         .fn()
         .mockResolvedValue([label('label-a', 'Work', '#112233'), label('label-b', 'Health', null)]),
       create: vi.fn(),
       update: vi.fn(),
     } as unknown as LabelService;
     const capability = new LabelPortableCapability(service);
-    const { context } = executionContext();
+    const { context, imported } = executionContext();
 
     const receipt = await capability.dryRun(
       {
@@ -101,6 +101,11 @@ describe('LabelPortableCapability', () => {
     expect(receipt).toEqual({ created: 1, updated: 1, skipped: 1, warnings: [] });
     expect(service.create).not.toHaveBeenCalled();
     expect(service.update).not.toHaveBeenCalled();
+    expect(Object.fromEntries(imported)).toEqual({
+      'labels:1': 'label-a',
+      'labels:2': 'label-b',
+      'labels:3': 'portable-label:labels:3',
+    });
   });
 
   it('applies idempotently and binds imported refs to host-owned ids', async () => {
@@ -109,7 +114,7 @@ describe('LabelPortableCapability', () => {
     const updatedHealth = label('label-b', 'Health', '#445566');
     const personal = label('label-c', 'Personal', null);
     const service = {
-      list: vi.fn().mockResolvedValue([work, health]),
+      listAll: vi.fn().mockResolvedValue([work, health]),
       create: vi.fn().mockResolvedValue(personal),
       update: vi.fn().mockResolvedValue(updatedHealth),
     } as unknown as LabelService;

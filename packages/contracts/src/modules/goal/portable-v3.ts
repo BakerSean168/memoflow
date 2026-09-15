@@ -81,16 +81,6 @@ export const GoalPortablePayloadV3Schema = z
         }
         refs.add(keyResult.ref);
       }
-      for (const [labelIndex, labelRef] of goal.labelRefs.entries()) {
-        if (refs.has(labelRef)) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['goals', goalIndex, 'labelRefs', labelIndex],
-            message: `Portable entity reference collides with label ref: ${labelRef}`,
-          });
-        }
-        refs.add(labelRef);
-      }
     }
   });
 export type GoalPortablePayloadV3 = z.infer<typeof GoalPortablePayloadV3Schema>;

@@ -13,6 +13,7 @@ function repositoryMock(): LabelRepository {
     findById: vi.fn(),
     findByNormalizedNames: vi.fn(async () => []),
     list: vi.fn(async () => []),
+    listAll: vi.fn(async () => []),
   };
 }
 
