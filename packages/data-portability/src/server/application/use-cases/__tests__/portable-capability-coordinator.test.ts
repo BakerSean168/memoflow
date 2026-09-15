@@ -580,3 +580,131 @@ describe('PortableCapabilityCoordinator apply preflight', () => {
     expect(receipt.created).toEqual({ labels: 1 });
   });
 });
+
+/**
+ * Goal-like capabilities: the dependency (`goals`) dry-run binds its own
+ * predicted portable Goal/Key Result refs, and the dependent (`tasks`) dry-run
+ * resolves the Goal relation it predicts. Reproduces the exact shape of the
+ * `labels -> goals -> tasks` chain so the dependency-ordered apply preflight must
+ * expose the predicted Goal/KR bindings to the dependent dry-run.
+ */
+function goalChainCapabilities(
+  calls: string[],
+  options: { readonly bindGoalTarget?: (ref: string) => string } = {},
+): readonly [
+  PortableCapability<{ labelRef: string }>,
+  PortableCapability<{ goalRef: string }>,
+  PortableCapability<{ ref: string }>,
+] {
+  const bindGoalTarget = options.bindGoalTarget ?? ((ref: string) => `host-${ref}`);
+  const bindLabels = (
+    payload: unknown,
+    context: Parameters<PortableCapability<{ ref: string }>['dryRun']>[1],
+  ): void => {
+    const item = payload as { ref: string };
+    context.references.bindImportedReference(item.ref as `labels:${number}`, `host-${item.ref}`);
+  };
+  const bindGoals = (
+    payload: unknown,
+    context: Parameters<PortableCapability<{ goalRef: string }>['dryRun']>[1],
+  ): void => {
+    const item = payload as { goalRef: string };
+    context.references.bindImportedReference(
+      item.goalRef as `goals:${number}`,
+      bindGoalTarget(item.goalRef),
+    );
+  };
+  const labelCapability = simpleCapability('labels', calls, {
+    async dryRun(payload, context) {
+      calls.push('dry:labels');
+      bindLabels(payload, context);
+      return { created: 1, updated: 0, skipped: 0, warnings: [] };
+    },
+    async apply(payload, context) {
+      calls.push('apply:labels');
+      bindLabels(payload, context);
+      return { created: 1, updated: 0, skipped: 0, warnings: [] };
+    },
+  });
+  const goalCapability = simpleCapability('goals', calls, {
+    dependsOn: ['labels'],
+    async dryRun(payload, context) {
+      calls.push('dry:goals');
+      bindGoals(payload, context);
+      return { created: 1, updated: 0, skipped: 0, warnings: [] };
+    },
+    async apply(payload, context) {
+      calls.push('apply:goals');
+      bindGoals(payload, context);
+      return { created: 1, updated: 0, skipped: 0, warnings: [] };
+    },
+  });
+  const taskCapability = simpleCapability('tasks', calls, {
+    dependsOn: ['labels', 'goals'],
+    async dryRun(payload, context) {
+      calls.push('dry:tasks');
+      const { goalRef } = payload as { goalRef: string };
+      const bound = context.references.hasImportedReference?.(goalRef as `goals:${number}`);
+      if (bound !== true) {
+        throw new Error(`tasks@3 goal reference is not bound: ${goalRef}`);
+      }
+      const target = context.references.resolveImportedReference(goalRef as `goals:${number}`);
+      if (target !== `host-${goalRef}`) {
+        throw new Error(`tasks@3 goal relation drift: ${goalRef} -> ${target}`);
+      }
+      return { created: 1, updated: 0, skipped: 0, warnings: [] };
+    },
+    async apply(payload, context) {
+      calls.push('apply:tasks');
+      const { goalRef } = payload as { goalRef: string };
+      context.references.resolveImportedReference(goalRef as `goals:${number}`);
+      return { created: 1, updated: 0, skipped: 0, warnings: [] };
+    },
+  });
+  return [taskCapability, goalCapability, labelCapability] as const;
+}
+
+describe('PortableCapabilityCoordinator goal dependency chain preflight', () => {
+  function goalChainEnvelope(): PortableBackupEnvelopeV3 {
+    return envelope([
+      { key: 'tasks', schemaVersion: 1, payload: { goalRef: 'goals:1' } },
+      { key: 'goals', schemaVersion: 1, payload: { goalRef: 'goals:1' } },
+      { key: 'labels', schemaVersion: 1, payload: { ref: 'labels:1' } },
+    ]);
+  }
+
+  it('exposes predicted Goal refs to a dependent Task-like dry-run before any apply mutation', async () => {
+    const calls: string[] = [];
+    const coordinator = createCoordinator(...goalChainCapabilities(calls));
+
+    const receipt = await coordinator.apply(
+      JSON.stringify(goalChainEnvelope()),
+      'target-user',
+      'apply-batch',
+    );
+
+    expect(calls).toEqual([
+      'dry:labels',
+      'dry:goals',
+      'dry:tasks',
+      'apply:labels',
+      'apply:goals',
+      'apply:tasks',
+    ]);
+    expect(receipt.created).toEqual({ labels: 1, goals: 1, tasks: 1 });
+    expect(receipt.dryRun).toBe(false);
+  });
+
+  it('rejects Goal relation drift during preflight and aborts before the first apply mutation', async () => {
+    const calls: string[] = [];
+    const coordinator = createCoordinator(
+      ...goalChainCapabilities(calls, { bindGoalTarget: (ref) => `drifted-${ref}` }),
+    );
+
+    await expect(
+      coordinator.apply(JSON.stringify(goalChainEnvelope()), 'target-user', 'apply-batch'),
+    ).rejects.toThrow('tasks@3 goal relation drift: goals:1 -> drifted-goals:1');
+    // The dependent dry-run observed the dependency prediction, and nothing was applied.
+    expect(calls).toEqual(['dry:labels', 'dry:goals', 'dry:tasks']);
+  });
+});
