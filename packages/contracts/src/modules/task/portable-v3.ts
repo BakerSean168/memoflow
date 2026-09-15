@@ -3,7 +3,10 @@ import { PortableReferenceV3Schema } from '../data-portability/dtos/portable-v3.
 import { ImportanceLevel } from '../../shared/value-objects/importance';
 import { GoalContributionRuleSchema } from './value-objects/task-goal-binding';
 import { TaskOccurrenceChecklistItemSchema } from './value-objects/task-occurrence-checklist';
-import { TaskOccurrenceResultSchema } from './value-objects/task-occurrence-result';
+import {
+  TaskOccurrenceResultKind,
+  TaskOccurrenceResultSchema,
+} from './value-objects/task-occurrence-result';
 import { TaskOccurrenceScheduleSnapshotSchema } from './value-objects/task-occurrence-schedule-snapshot';
 import { TaskOccurrenceStatus } from './value-objects/task-occurrence-status';
 import { TaskPlanCompletionPolicy } from './value-objects/task-plan-completion-policy';
@@ -140,7 +143,33 @@ export const TaskPortableOccurrenceV3Schema = z
     result: TaskOccurrenceResultSchema.nullable(),
     checklistState: z.array(PortableTaskOccurrenceChecklistItemV3Schema),
   })
-  .strict();
+  .strict()
+  .superRefine((occurrence, ctx) => {
+    const { status, result } = occurrence;
+    if (status === TaskOccurrenceStatus.Pending || status === TaskOccurrenceStatus.InProgress) {
+      if (result !== null) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['result'],
+          message: 'Pending/InProgress TaskOccurrence cannot carry a terminal result',
+        });
+      }
+      return;
+    }
+    const terminalKind =
+      status === TaskOccurrenceStatus.Completed
+        ? TaskOccurrenceResultKind.Completed
+        : status === TaskOccurrenceStatus.Missed
+          ? TaskOccurrenceResultKind.Missed
+          : TaskOccurrenceResultKind.Skipped;
+    if (result?.kind !== terminalKind) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['result'],
+        message: `${status} TaskOccurrence requires a ${terminalKind} result`,
+      });
+    }
+  });
 export type TaskPortableOccurrenceV3 = z.infer<typeof TaskPortableOccurrenceV3Schema>;
 
 export const TaskPortablePayloadV3Schema = z
@@ -152,6 +181,7 @@ export const TaskPortablePayloadV3Schema = z
   .superRefine((payload, ctx) => {
     const entityRefs = new Set<string>();
     const checklistRefsByPlan = new Map<string, Set<string>>();
+    const occurrenceKeys = new Set<string>();
 
     for (const [planIndex, plan] of payload.plans.entries()) {
       if (entityRefs.has(plan.ref)) {
@@ -186,6 +216,15 @@ export const TaskPortablePayloadV3Schema = z
         });
       }
       entityRefs.add(occurrence.ref);
+      const occurrenceKey = `${occurrence.planRef}:${occurrence.scheduleSnapshot.date}`;
+      if (occurrenceKeys.has(occurrenceKey)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['occurrences', occurrenceIndex, 'scheduleSnapshot', 'date'],
+          message: `Duplicate Task occurrence date in portable payload: ${occurrenceKey}`,
+        });
+      }
+      occurrenceKeys.add(occurrenceKey);
       const checklistRefs = checklistRefsByPlan.get(occurrence.planRef);
       if (!checklistRefs) {
         ctx.addIssue({
