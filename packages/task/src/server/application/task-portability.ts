@@ -112,8 +112,9 @@ function throwIfPlanConflict(
     throw new Error(`tasks@3 cannot restore over deleted plan: ${String(current.id)}`);
   }
   // Dependency refs may be unbound during a standalone dry-run; only compare the
-  // Goal binding when the imported refs are actually resolvable, otherwise the
-  // comparison would use ref proxies and report a false conflict on replay.
+  // Goal binding when every imported ref the binding needs is resolvable.
+  // Enforcing the comparison while any of those refs is still unbound would fall
+  // back to the portable ref proxy and report a false conflict on replay.
   const goalBinding = incoming.goalLink
     ? {
         goalId: resolveDryRunReference(context, incoming.goalLink.goalRef),
@@ -123,9 +124,11 @@ function throwIfPlanConflict(
         contribution: incoming.goalLink.contribution,
       }
     : null;
-  const goalRefsResolved =
+  const goalBindingRefsResolved =
     incoming.goalLink === null ||
-    isImportedReferenceResolved(context, incoming.goalLink.goalRef);
+    (isImportedReferenceResolved(context, incoming.goalLink.goalRef) &&
+      (incoming.goalLink.keyResultRef === null ||
+        isImportedReferenceResolved(context, incoming.goalLink.keyResultRef)));
   const same =
     dto.name === incoming.title.trim() &&
     dto.description === incoming.description &&
@@ -138,7 +141,7 @@ function throwIfPlanConflict(
     dto.closedAt === incoming.closedAt &&
     (dto.archivedAt !== null) === incoming.archived &&
     dto.abandonedReason === incoming.abandonedReason &&
-    (!goalRefsResolved || JSON.stringify(dto.goalBinding) === JSON.stringify(goalBinding)) &&
+    (!goalBindingRefsResolved || JSON.stringify(dto.goalBinding) === JSON.stringify(goalBinding)) &&
     dto.checklist.length === incoming.checklist.length &&
     incoming.checklist.every((item) =>
       dto.checklist.some(
