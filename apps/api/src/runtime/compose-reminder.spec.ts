@@ -164,6 +164,7 @@ describe('composeReminder assembly order', () => {
     expect(createReminderScheduleProjectionSource).toHaveBeenCalledWith({
       reminderTemplateRepository: templateRepository,
       routineProfileStore: createReminderModule.mock.calls[0][0].routineProfileStore,
+      runtimeContextStore: createReminderModule.mock.calls[0][0].runtimeContextStore,
       userReminderPreferenceRepository:
         createReminderModule.mock.calls[0][0].userReminderPreferenceRepository,
     });

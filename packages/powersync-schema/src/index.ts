@@ -509,7 +509,6 @@ const routine_profiles = new Table({
   name: column.text,
   description: column.text,
   enabled: column.integer,
-  active: column.integer,
   version: column.integer,
   created_at: column.text,
   updated_at: column.text,
@@ -523,6 +522,18 @@ const routine_profile_memberships = new Table({
   version: column.integer,
   created_at: column.text,
   updated_at: column.text,
+});
+
+const routine_interactions = new Table({
+  identity_id: column.text,
+  routine_id: column.text,
+  occurrence_key: column.text,
+  action: column.text,
+  acted_at: column.text,
+  response_latency_ms: column.integer,
+  snooze_duration_ms: column.integer,
+  metadata_json: column.text,
+  created_at: column.text,
 });
 
 const routine_temporary_overrides = new Table({
@@ -1050,6 +1061,7 @@ export const PowerSyncAppSchema = new Schema({
   routine_definitions,
   routine_profiles,
   routine_profile_memberships,
+  routine_interactions,
   routine_temporary_overrides,
   routine_protocol_definitions,
   routine_protocol_sessions,

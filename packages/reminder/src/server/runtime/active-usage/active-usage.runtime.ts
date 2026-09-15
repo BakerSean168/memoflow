@@ -1,15 +1,11 @@
 import { asInstant, type Instant } from '@memoflow/time';
-import {
-  evaluateRoutineEffectiveEnabled,
-  temporaryOverrideAllowsExecution,
-} from '../../domain/routine';
+import { evaluateRoutineEligibility, temporaryOverrideAllowsExecution } from '../../domain/routine';
 import type { ActiveUsageTrigger, RoutineTemporaryOverride } from '../../domain/routine';
 import type { ActivitySensorPort, RoutineActivityEvent } from '../../domain/ports';
 
 export interface ActiveUsageGateState {
   readonly routineEnabled: boolean;
   readonly profileEnabled?: boolean;
-  readonly profileActive?: boolean;
   readonly membershipEnabled?: boolean;
   readonly temporaryOverride?: RoutineTemporaryOverride | null;
 }
@@ -173,26 +169,24 @@ export function createActiveUsageRuntime(
   const resolveAt = (value?: Instant | number): Instant => asInstant(Number(value ?? now()));
 
   const effectiveEnabled = (lane: Lane, at: Instant): boolean =>
-    evaluateRoutineEffectiveEnabled({
+    evaluateRoutineEligibility({
       routineEnabled: lane.gates.routineEnabled,
       profileEnabled: lane.gates.profileEnabled,
-      profileActive: lane.gates.profileActive,
       membershipEnabled: lane.gates.membershipEnabled,
       temporaryOverrideAllowsExecution: temporaryOverrideAllowsExecution(
         lane.gates.temporaryOverride ?? null,
         at,
       ),
-    }).effectiveEnabled;
+    }).eligible;
 
   const eligibleActiveMs = (lane: Lane, from: Instant, to: Instant): number => {
-    const staticGates = evaluateRoutineEffectiveEnabled({
+    const staticGates = evaluateRoutineEligibility({
       routineEnabled: lane.gates.routineEnabled,
       profileEnabled: lane.gates.profileEnabled,
-      profileActive: lane.gates.profileActive,
       membershipEnabled: lane.gates.membershipEnabled,
       temporaryOverrideAllowsExecution: true,
     });
-    if (!staticGates.effectiveEnabled) return 0;
+    if (!staticGates.eligible) return 0;
 
     const fromMs = Number(from);
     const toMs = Number(to);

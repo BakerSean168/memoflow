@@ -38,7 +38,6 @@ describe('Routine vNext Prisma / PowerSync parity contract', () => {
       identityId: 'identity-1',
       name: 'Gaming',
       enabled: true,
-      active: false,
       now,
     });
     const membership = ProfileMembership.create({
@@ -52,12 +51,15 @@ describe('Routine vNext Prisma / PowerSync parity contract', () => {
     const prismaDefinition = routineDefinitionToPrisma(routine.snapshot());
     const powerSyncDefinition = routineDefinitionToPowerSync(routine.snapshot());
     expect(prismaDefinition.triggerJson).toContain('\"type\":\"Elapsed\"');
-    expect(normalizePrismaRoutineDefinition(prismaDefinition))
-      .toEqual(normalizePowerSyncRoutineDefinition(powerSyncDefinition));
-    expect(normalizePrismaRoutineProfile(routineProfileToPrisma(profile.snapshot())))
-      .toEqual(normalizePowerSyncRoutineProfile(routineProfileToPowerSync(profile.snapshot())));
-    expect(normalizePrismaMembership(profileMembershipToPrisma(membership.snapshot())))
-      .toEqual(normalizePowerSyncMembership(profileMembershipToPowerSync(membership.snapshot())));
+    expect(normalizePrismaRoutineDefinition(prismaDefinition)).toEqual(
+      normalizePowerSyncRoutineDefinition(powerSyncDefinition),
+    );
+    expect(normalizePrismaRoutineProfile(routineProfileToPrisma(profile.snapshot()))).toEqual(
+      normalizePowerSyncRoutineProfile(routineProfileToPowerSync(profile.snapshot())),
+    );
+    expect(normalizePrismaMembership(profileMembershipToPrisma(membership.snapshot()))).toEqual(
+      normalizePowerSyncMembership(profileMembershipToPowerSync(membership.snapshot())),
+    );
   });
 
   it('uses a dedicated M:N membership table rather than a single group foreign key', () => {

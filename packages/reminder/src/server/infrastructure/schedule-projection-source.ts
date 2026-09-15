@@ -3,7 +3,7 @@ import type { ScheduledIntent, SchedulingOwner } from '@memoflow/contracts/sched
 import { buildSchedulingKey } from '@memoflow/contracts/schedule';
 import type { IReminderTemplateRepository } from '../domain/repositories/i-reminder-template-repository';
 import type { IUserReminderPreferenceRepository } from '../domain/repositories/i-user-reminder-preference-repository';
-import type { RoutineProfileStore } from '../domain/ports';
+import type { RoutineProfileStore, RoutineRuntimeContextStore } from '../domain/ports';
 import { ReminderTemplateControlService } from '../domain/services/reminder-template-control-service';
 
 export const REMINDER_TEMPLATE_HANDLER_KEY = 'reminder.template.fire';
@@ -53,12 +53,14 @@ function reminderOwner(templateId: string, identityId: string): SchedulingOwner 
 export function createReminderScheduleProjectionSource(deps: {
   reminderTemplateRepository: IReminderTemplateRepository;
   routineProfileStore: RoutineProfileStore;
+  runtimeContextStore?: RoutineRuntimeContextStore;
   userReminderPreferenceRepository?: IUserReminderPreferenceRepository;
 }): ReminderScheduleProjectionSource {
   const controlService = new ReminderTemplateControlService(
     deps.reminderTemplateRepository,
     deps.userReminderPreferenceRepository,
     deps.routineProfileStore,
+    deps.runtimeContextStore,
   );
 
   return {

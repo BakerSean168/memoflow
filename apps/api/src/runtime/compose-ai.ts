@@ -32,7 +32,6 @@ import { createAIApiModule, type AIApiModuleDef } from '@memoflow/ai/api';
 import type { RepositoryApplicationPort } from '@memoflow/repository';
 import type { GoalApplicationPort } from '@memoflow/goal';
 import type { TaskApplicationPort } from '@memoflow/task';
-import type { ReminderApplicationPort } from '@memoflow/reminder';
 import type { RoutineCoachCommandPort } from '@memoflow/reminder/routine-runtime';
 import type { IScheduleRepository } from '@memoflow/schedule';
 import type { INotificationRepository } from '@memoflow/notification';
@@ -60,8 +59,6 @@ export interface ComposeAIDependencies {
   readonly goalApplicationPort: GoalApplicationPort;
   /** The shared Task application port composed once by the API runtime. */
   readonly taskApplicationPort: TaskApplicationPort;
-  /** The Reminder application port wired for standalone Routine AI tools. */
-  readonly reminderApplicationPort: ReminderApplicationPort;
   /** Existing Shared Relation facade reused by GoalPlan V2. */
   readonly goalKnowledgeService: Pick<GoalKnowledgeService, 'link'>;
   /** Repository-owned stable KnowledgeDocumentRef resolver. */
@@ -121,10 +118,7 @@ export function composeAI(dependencies: ComposeAIDependencies): AIApiModuleDef {
     knowledgeSourcePort,
     executionLogPort: repositorySet.executionLogPort,
     usageReadPort: repositorySet.executionLogPort,
-    routineCommandPort: new RoutineAICommandAdapter(
-      dependencies.reminderApplicationPort,
-      dependencies.routineCommandPort,
-    ),
+    routineCommandPort: new RoutineAICommandAdapter(dependencies.routineCommandPort),
     plannerReadPort: new PlannerAIReadAdapter(
       dependencies.scheduleRepository,
       dependencies.taskApplicationPort,

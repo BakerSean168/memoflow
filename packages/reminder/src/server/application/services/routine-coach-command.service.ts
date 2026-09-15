@@ -1,8 +1,6 @@
 import type { Instant } from '@memoflow/time';
-import {
-  findRoutineMethod,
-  type RoutineMethodId,
-} from '../../../method-library';
+import { findRoutineMethod, type RoutineMethodId } from '../../../method-library';
+import { ProfileMembership, RoutineDefinition, type RoutineTrigger } from '../../domain/routine';
 import {
   ProtocolDefinition,
   ProtocolSession,
@@ -13,6 +11,7 @@ import {
 import type {
   ProtocolSessionStore,
   RoutineProfileStore,
+  RoutineRuntimeContextStore,
   RoutineTemporaryOverrideStore,
 } from '../../domain/ports';
 import {
@@ -22,7 +21,14 @@ import {
 
 export type RoutineProtocolMethodId = Extract<RoutineMethodId, '50-10-protocol' | 'pomodoro'>;
 
-export interface RoutineProfileActivationReceipt {
+export interface RoutineDefinitionReceipt {
+  readonly routineId: string;
+  readonly identityId: string;
+  readonly name: string;
+  readonly version: number;
+}
+
+export interface RoutineRuntimeContextReceipt {
   readonly profileId: string;
   readonly identityId: string;
   readonly active: boolean;
@@ -45,12 +51,21 @@ export interface RoutineProtocolSessionReceipt {
 }
 
 export interface RoutineCoachCommandPort {
+  createRoutine(input: {
+    readonly identityId: string;
+    readonly name: string;
+    readonly description?: string | null;
+    readonly trigger?: RoutineTrigger | null;
+    readonly profileIds?: readonly string[];
+    readonly at?: number;
+  }): Promise<RoutineDefinitionReceipt>;
+
   setProfileActive(input: {
     readonly identityId: string;
     readonly profileId: string;
     readonly active: boolean;
     readonly at?: number;
-  }): Promise<RoutineProfileActivationReceipt>;
+  }): Promise<RoutineRuntimeContextReceipt>;
 
   setTemporaryOverride(input: {
     readonly identityId: string;
@@ -88,6 +103,7 @@ export interface RoutineCoachCommandPort {
 
 export interface CreateRoutineCoachCommandServiceOptions {
   readonly routineProfileStore: RoutineProfileStore;
+  readonly runtimeContextStore: RoutineRuntimeContextStore;
   readonly temporaryOverrideStore: RoutineTemporaryOverrideStore;
   readonly protocolSessionStore: ProtocolSessionStore;
   readonly onOverrideChanged?: (input: {
@@ -135,29 +151,69 @@ export function createRoutineCoachCommandService(
   options: CreateRoutineCoachCommandServiceOptions,
 ): RoutineCoachCommandPort {
   const now = options.now ?? Date.now;
-  const protocolRuntime = createProtocolSessionRuntime({ store: options.protocolSessionStore, now });
+  const protocolRuntime = createProtocolSessionRuntime({
+    store: options.protocolSessionStore,
+    now,
+  });
 
   const notifyOverrideChanged = async (identityId: string, routineId: string) => {
     await options.onOverrideChanged?.({ identityId, routineId });
   };
 
   return {
+    async createRoutine(input) {
+      const at = input.at ?? now();
+      const profileIds = [...(input.profileIds ?? [])];
+      const uniqueProfileIds = new Set(profileIds);
+      if (uniqueProfileIds.size !== profileIds.length) {
+        throw new TypeError('Duplicate Routine profile membership');
+      }
+      const profiles = await options.routineProfileStore.findProfilesByIds({
+        identityId: input.identityId,
+        profileIds,
+      });
+      if (profiles.length !== profileIds.length) {
+        throw new Error('One or more Routine profiles were not found');
+      }
+      const routine = RoutineDefinition.create({
+        identityId: input.identityId,
+        name: input.name,
+        description: input.description,
+        trigger: input.trigger ?? null,
+        now: new Date(at),
+      });
+      const memberships = profileIds.map((profileId) =>
+        ProfileMembership.create({
+          identityId: input.identityId,
+          profileId,
+          routineId: routine.id,
+          now: new Date(at),
+        }),
+      );
+      await options.routineProfileStore.createDefinitionWithMemberships({
+        definition: routine,
+        memberships,
+      });
+      return {
+        routineId: routine.id,
+        identityId: routine.identityId,
+        name: routine.name,
+        version: routine.version,
+      };
+    },
+
     async setProfileActive(input) {
       const profile = await options.routineProfileStore.findProfile({
         identityId: input.identityId,
         profileId: input.profileId,
       });
       if (!profile) throw new Error(`Routine profile '${input.profileId}' was not found`);
-      const at = new Date(input.at ?? now());
-      if (input.active) profile.activate(at);
-      else profile.deactivate(at);
-      await options.routineProfileStore.upsertProfile(profile);
-      return {
-        profileId: profile.id,
+      return options.runtimeContextStore.setProfileActive({
         identityId: profile.identityId,
-        active: profile.active,
-        version: profile.version,
-      };
+        profileId: profile.id,
+        active: input.active,
+        at: input.at,
+      });
     },
 
     async setTemporaryOverride(input) {
@@ -213,7 +269,9 @@ export function createRoutineCoachCommandService(
         'longBreakMinutes',
       );
       if ((longBreakEveryCycles == null) !== (longBreakMinutes == null)) {
-        throw new TypeError('longBreakEveryCycles and longBreakMinutes must be configured together');
+        throw new TypeError(
+          'longBreakEveryCycles and longBreakMinutes must be configured together',
+        );
       }
       const at = input.at ?? now();
       const protocol = ProtocolDefinition.create({
@@ -263,7 +321,8 @@ export function createRoutineCoachCommandService(
         identityId: input.identityId,
         sessionId: input.sessionId,
       });
-      if (!persisted) throw new Error(`Protocol session '${input.sessionId}' disappeared after transition`);
+      if (!persisted)
+        throw new Error(`Protocol session '${input.sessionId}' disappeared after transition`);
       return protocolReceipt(persisted, transition);
     },
   };

@@ -13,7 +13,7 @@ import { ReminderGroupBusinessService } from './reminder-group-business-service'
 import { GroupStats, ReminderTemplateId } from '../value-objects';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import type { IUserReminderPreferenceRepository } from '../repositories/i-user-reminder-preference-repository';
-import type { RoutineProfileStore } from '../ports';
+import type { RoutineProfileStore, RoutineRuntimeContextStore } from '../ports';
 import { LegacyRoutineCutoverService } from './legacy-routine-cutover-service';
 import { ProfileMembership } from '../routine';
 
@@ -44,11 +44,13 @@ export class ReminderDomainService {
     private readonly reminderGroupRepository: IReminderGroupRepository,
     private readonly userReminderPreferenceRepository?: IUserReminderPreferenceRepository,
     private readonly routineProfileStore?: RoutineProfileStore,
+    private readonly runtimeContextStore?: RoutineRuntimeContextStore,
   ) {
     this.controlService = new ReminderTemplateControlService(
       reminderTemplateRepository,
       userReminderPreferenceRepository,
       routineProfileStore,
+      runtimeContextStore,
     );
     this.groupBusinessService = new ReminderGroupBusinessService();
     this.routineCutover = routineProfileStore

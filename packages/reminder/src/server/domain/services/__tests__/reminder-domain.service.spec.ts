@@ -98,13 +98,15 @@ function createInMemoryStore() {
 
   const store: RoutineProfileStore = {
     upsertDefinition: vi.fn(async () => {}),
+    createDefinitionWithMemberships: vi.fn(async () => {}),
     findDefinition: vi.fn(async () => null),
     deleteDefinition: vi.fn(async () => {}),
     upsertProfile: vi.fn(async (profile: RoutineProfile) => {
       profiles = [...profiles.filter((item) => item.id !== profile.id), profile];
     }),
-    findProfile: vi.fn(async ({ identityId, profileId }) =>
-      profiles.find((item) => item.identityId === identityId && item.id === profileId) ?? null,
+    findProfile: vi.fn(
+      async ({ identityId, profileId }) =>
+        profiles.find((item) => item.identityId === identityId && item.id === profileId) ?? null,
     ),
     listProfiles: vi.fn(async ({ identityId }) =>
       profiles.filter((item) => item.identityId === identityId),
@@ -134,9 +136,7 @@ function createInMemoryStore() {
       ];
     }),
     listMembershipsForRoutine: vi.fn(async ({ identityId, routineId }) =>
-      memberships.filter(
-        (item) => item.identityId === identityId && item.routineId === routineId,
-      ),
+      memberships.filter((item) => item.identityId === identityId && item.routineId === routineId),
     ),
     listMembershipsForRoutines: vi.fn(async ({ identityId, routineIds }) =>
       memberships.filter(
@@ -144,9 +144,7 @@ function createInMemoryStore() {
       ),
     ),
     listMembershipsForProfile: vi.fn(async ({ identityId, profileId }) =>
-      memberships.filter(
-        (item) => item.identityId === identityId && item.profileId === profileId,
-      ),
+      memberships.filter((item) => item.identityId === identityId && item.profileId === profileId),
     ),
     deleteMembership: vi.fn(async ({ identityId, profileId, routineId }) => {
       memberships = memberships.filter(
@@ -216,16 +214,26 @@ describe('ReminderDomainService', () => {
 
   it('creates an M:N ProfileMembership set and never consults a single Group owner', async () => {
     const work = RoutineProfile.create({
-      id: 'work', identityId: IDENTITY_ID, name: 'Work', enabled: true, active: true,
+      id: 'work',
+      identityId: IDENTITY_ID,
+      name: 'Work',
+      enabled: true,
+      active: true,
     });
     const gaming = RoutineProfile.create({
-      id: 'gaming', identityId: IDENTITY_ID, name: 'Gaming', enabled: true, active: true,
+      id: 'gaming',
+      identityId: IDENTITY_ID,
+      name: 'Gaming',
+      enabled: true,
+      active: true,
     });
     await routineStore.store.upsertProfile(work);
     await routineStore.store.upsertProfile(gaming);
 
     const template = await service.createReminderTemplate(makeCreateInput(['work', 'gaming']));
-    const memberships = routineStore.getMemberships().filter((item) => item.routineId === template.id);
+    const memberships = routineStore
+      .getMemberships()
+      .filter((item) => item.routineId === template.id);
 
     expect(memberships.map((item) => item.profileId).sort()).toEqual(['gaming', 'work']);
     expect(groupRepo.findByIdForIdentity).not.toHaveBeenCalled();
@@ -277,7 +285,11 @@ describe('ReminderDomainService', () => {
     (groupRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(group);
     (templateRepo.findByIds as ReturnType<typeof vi.fn>).mockResolvedValue([template]);
     await routineStore.store.upsertMembership(
-      ProfileMembership.create({ identityId: IDENTITY_ID, profileId: group.id, routineId: template.id }),
+      ProfileMembership.create({
+        identityId: IDENTITY_ID,
+        profileId: group.id,
+        routineId: template.id,
+      }),
     );
 
     await expect(service.deleteGroup(IDENTITY_ID, group.id)).rejects.toThrow(
@@ -303,13 +315,25 @@ describe('ReminderDomainService', () => {
   });
 
   it('recalculates member eligibility after a Profile gate toggles', async () => {
-    const group = ReminderGroup.load(makeGroupState({ id: 'work', enabled: true, status: ReminderStatus.Active }));
+    const group = ReminderGroup.load(
+      makeGroupState({ id: 'work', enabled: true, status: ReminderStatus.Active }),
+    );
     const template = ReminderTemplate.load(makeTemplateState());
     await routineStore.store.upsertProfile(
-      RoutineProfile.create({ id: group.id, identityId: IDENTITY_ID, name: group.name, enabled: true, active: true }),
+      RoutineProfile.create({
+        id: group.id,
+        identityId: IDENTITY_ID,
+        name: group.name,
+        enabled: true,
+        active: true,
+      }),
     );
     await routineStore.store.upsertMembership(
-      ProfileMembership.create({ identityId: IDENTITY_ID, profileId: group.id, routineId: template.id }),
+      ProfileMembership.create({
+        identityId: IDENTITY_ID,
+        profileId: group.id,
+        routineId: template.id,
+      }),
     );
     (groupRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(group);
     (templateRepo.findByIds as ReturnType<typeof vi.fn>).mockResolvedValue([template]);

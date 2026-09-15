@@ -1,7 +1,10 @@
 import { BrowserWindow, screen } from 'electron';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { RoutineChannels, type InterventionWindowProjection } from '@memoflow/contracts/electron';
+import {
+  RoutineWindowChannels,
+  type InterventionWindowProjection,
+} from '@memoflow/contracts/electron';
 import type { InterventionWindowHost } from './intervention-window-controller';
 import { resolvePreloadPath } from '../../utils/resolve-preload-path';
 import { getDesktopDevServerUrlOrDefault, usesDesktopViteDevServer } from '../../utils';
@@ -137,6 +140,6 @@ export class ElectronInterventionWindowHost implements InterventionWindowHost {
   private pushProjection(): void {
     const window = this.browserWindow;
     if (!window || window.webContents.isLoading() || !this.projection) return;
-    window.webContents.send(RoutineChannels.INTERVENTION_WINDOW_PROJECTION, this.projection);
+    window.webContents.send(RoutineWindowChannels.INTERVENTION_WINDOW_PROJECTION, this.projection);
   }
 }

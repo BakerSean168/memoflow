@@ -44,7 +44,6 @@ export function adaptLegacyReminderGroup(group: ReminderGroup): RoutineProfile {
     name: group.name,
     description: group.description,
     enabled: group.enabled,
-    active: group.status === ReminderStatus.Active,
     version: group.version,
     createdAt: group.createdAt,
     updatedAt: group.updatedAt,

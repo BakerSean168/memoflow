@@ -873,7 +873,6 @@ exports.Prisma.RoutineProfileScalarFieldEnum = {
   name: 'name',
   description: 'description',
   enabled: 'enabled',
-  active: 'active',
   version: 'version',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -938,6 +937,19 @@ exports.Prisma.RoutineOccurrenceScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   finishedAt: 'finishedAt'
+};
+
+exports.Prisma.RoutineInteractionScalarFieldEnum = {
+  id: 'id',
+  identityId: 'identityId',
+  routineId: 'routineId',
+  occurrenceKey: 'occurrenceKey',
+  action: 'action',
+  actedAt: 'actedAt',
+  responseLatencyMs: 'responseLatencyMs',
+  snoozeDurationMs: 'snoozeDurationMs',
+  metadataJson: 'metadataJson',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.RoutineTemporaryOverrideScalarFieldEnum = {
@@ -1620,6 +1632,7 @@ exports.Prisma.ModelName = {
   RoutineProtocolDefinition: 'RoutineProtocolDefinition',
   RoutineProtocolSession: 'RoutineProtocolSession',
   RoutineOccurrence: 'RoutineOccurrence',
+  RoutineInteraction: 'RoutineInteraction',
   RoutineTemporaryOverride: 'RoutineTemporaryOverride',
   Repository: 'Repository',
   Folder: 'Folder',

@@ -2,7 +2,6 @@ import type { ScheduledHandlerRegistration, SchedulingPort } from '@memoflow/con
 import type { GoalScheduleProjectionSource } from '@memoflow/goal/schedule-projection';
 import type { RoutineScheduleProjectionSource } from '@memoflow/reminder/schedule-projection/routine';
 import type { RoutineTemporaryOverrideStore } from '@memoflow/reminder/schedule-execution/routine';
-import type { ReminderScheduleProjectionSource } from '@memoflow/reminder/schedule-projection';
 import type { IScheduleTaskRepository, ScheduleTask } from '@memoflow/scheduler';
 import type { TaskScheduleProjectionSource } from '@memoflow/task/schedule-projection';
 import type { ScheduleOrchestrationExecutionDeps } from './execution';
@@ -53,10 +52,8 @@ export interface ScheduleOrchestrationModule {
 export interface CreateScheduleOrchestrationModuleOptions {
   readonly taskProjection: ScheduleOrchestrationScheduleTaskProjectionDeps<TaskScheduleProjectionSource>;
   readonly goalProjection: ScheduleOrchestrationProjectionDeps<GoalScheduleProjectionSource>;
-  readonly reminderProjection: ScheduleOrchestrationProjectionDeps<ReminderScheduleProjectionSource>;
   readonly execution: ScheduleOrchestrationExecutionDeps;
-  /** ROUTINE-3401 durable wall-clock lane; joining wires the handler + routine runtime. */
+  /** ROUTINE durable wall-clock projection; enabled once the host provides it. */
   readonly routineProjection?: ScheduleOrchestrationProjectionDeps<RoutineScheduleProjectionSource>;
-  /** ROUTINE-3401 durable snooze/suppress store; wrapped to converge the Scheduler on write. */
   readonly routineOverrideStore?: RoutineTemporaryOverrideStore;
 }

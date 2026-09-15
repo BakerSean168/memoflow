@@ -31,6 +31,7 @@ import type { ReminderScheduleProjectionSource } from '../../schedule-projection
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import type { UserTimeContextPort } from '@memoflow/time';
 import type { NotificationRequestedWriterPort } from '@memoflow/contracts/notification';
+import { createInMemoryRoutineRuntimeContextStore } from '../runtime/routine-runtime-context';
 import type {
   IReminderTemplateRepository,
   IReminderGroupRepository,
@@ -145,6 +146,7 @@ export function createReminderPowerSyncModule(
   db: Queryable,
   options: {
     readonly userTimeContextPort: UserTimeContextPort;
+    readonly runtimeContextStore?: import('../domain/ports').RoutineRuntimeContextStore;
     readonly runtimeContributions?: ReminderRuntimeContributionsInput;
   },
 ): ReminderModuleInstance {
@@ -152,6 +154,8 @@ export function createReminderPowerSyncModule(
     throw new Error('[FAIL-CLOSED] createReminderPowerSyncModule requires options.userTimeContextPort');
   }
   const repositories = createReminderPowerSyncRepositories(db);
+  const runtimeContextStore =
+    options.runtimeContextStore ?? createInMemoryRoutineRuntimeContextStore();
 
   return createReminderModule({
     reminderTemplateRepository: repositories.reminderTemplateRepository,
@@ -159,6 +163,7 @@ export function createReminderPowerSyncModule(
     reminderResponseRepository: repositories.reminderResponseRepository,
     userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
     routineProfileStore: repositories.routineProfileStore,
+    runtimeContextStore,
     userTimeContextPort: options.userTimeContextPort,
     runtimeContributions: options.runtimeContributions,
     closureChecker: repositories.closureChecker,

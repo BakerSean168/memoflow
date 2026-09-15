@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron';
 import {
   InterventionWindowCommandSchema,
-  RoutineChannels,
+  RoutineWindowChannels,
   type IElectronModule,
 } from '@memoflow/contracts/electron';
 import { error, ok } from '@memoflow/contracts/result';
@@ -13,13 +13,13 @@ export function createInterventionWindowElectronModule(
   return {
     name: 'routine-intervention-window',
     async register() {
-      ipcMain.removeHandler(RoutineChannels.INTERVENTION_WINDOW_GET);
-      ipcMain.removeHandler(RoutineChannels.INTERVENTION_WINDOW_COMMAND);
-      ipcMain.handle(RoutineChannels.INTERVENTION_WINDOW_GET, async () =>
+      ipcMain.removeHandler(RoutineWindowChannels.INTERVENTION_WINDOW_GET);
+      ipcMain.removeHandler(RoutineWindowChannels.INTERVENTION_WINDOW_COMMAND);
+      ipcMain.handle(RoutineWindowChannels.INTERVENTION_WINDOW_GET, async () =>
         ok(controller.getProjection()),
       );
       ipcMain.handle(
-        RoutineChannels.INTERVENTION_WINDOW_COMMAND,
+        RoutineWindowChannels.INTERVENTION_WINDOW_COMMAND,
         async (_event, command: unknown) => {
           const parsed = InterventionWindowCommandSchema.safeParse(command);
           if (!parsed.success) {
@@ -40,8 +40,8 @@ export function createInterventionWindowElectronModule(
       );
     },
     async destroy() {
-      ipcMain.removeHandler(RoutineChannels.INTERVENTION_WINDOW_GET);
-      ipcMain.removeHandler(RoutineChannels.INTERVENTION_WINDOW_COMMAND);
+      ipcMain.removeHandler(RoutineWindowChannels.INTERVENTION_WINDOW_GET);
+      ipcMain.removeHandler(RoutineWindowChannels.INTERVENTION_WINDOW_COMMAND);
       controller.destroy();
     },
   };

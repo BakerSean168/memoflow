@@ -292,12 +292,7 @@ async function registerBusinessModules(
         settingElectronModule.userTimeContextPort,
       ),
     },
-    reminderProjection: {
-      source: reminderComposed.scheduleProjectionSource,
-    },
-    execution: {
-      reminderSource: reminderComposed.scheduleExecutionSource,
-    },
+    execution: {},
   });
   scheduleOrchestrationModule.handlerRegistry.register(
     createGoalPowerSyncReminderFireHandler(db, notificationComposed.requestedWriter),
@@ -506,7 +501,6 @@ async function registerBusinessModules(
     analyticsReadPort: analyticsReadAdapter,
     goalApplicationPort: goalComposed.applicationPort,
     taskApplicationPort: taskComposed.applicationPort,
-    reminderApplicationPort: reminderComposed.applicationPort,
     goalKnowledgeService,
     knowledgeDocumentRefResolver: localVaultKnowledgeRefResolver,
     routineCommandPort: reminderComposed.routineCommandPort,
