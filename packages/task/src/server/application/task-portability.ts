@@ -101,6 +101,18 @@ function checklistSourceKey(planId: string, definitionId: string): string {
   return `checklist:${planId}:${definitionId}`;
 }
 
+/**
+ * Replay comparison mirrors the restore seam's skip path: an existing target is
+ * compared against incoming canonical state and is never rewritten, so the
+ * comparison must model the exact facts apply would persist, not just the
+ * subset that is visible in the portable payload.
+ */
+function sameStringSet(left: readonly string[], right: readonly string[]): boolean {
+  const a = [...new Set(left)].sort();
+  const b = [...new Set(right)].sort();
+  return a.length === b.length && a.every((value, index) => value === b[index]);
+}
+
 function throwIfPlanConflict(
   current: import('../domain/aggregates/task-plan').TaskPlan,
   incoming: TaskPortablePayloadV3['plans'][number],
@@ -108,6 +120,8 @@ function throwIfPlanConflict(
   batchId: string,
 ): void {
   const dto = current.toServerDTO();
+  // The restore seam ignores deleted existing plans and would instead attempt to
+  // create the same deterministic id, so replay must reject the deleted target.
   if (dto.deletedAt !== null) {
     throw new Error(`tasks@3 cannot restore over deleted plan: ${String(current.id)}`);
   }
@@ -129,6 +143,26 @@ function throwIfPlanConflict(
     (isImportedReferenceResolved(context, incoming.goalLink.goalRef) &&
       (incoming.goalLink.keyResultRef === null ||
         isImportedReferenceResolved(context, incoming.goalLink.keyResultRef)));
+  // Label and checklist identities are deterministic, so replay compares them.
+  // Checklist ids never depend on dependency resolution. Label ids do, so the
+  // assignment is compared only once every label ref resolves; otherwise the
+  // comparison would fall back to the portable ref proxy and report a false
+  // conflict for a standalone dry-run that runs before the Labels capability.
+  const incomingLabelIds = incoming.labelRefs.map((ref) => resolveDryRunReference(context, ref));
+  const currentLabelIds = current.labels.map((label) => label.id);
+  const labelRefsResolved = incoming.labelRefs.every((ref) =>
+    isImportedReferenceResolved(context, ref),
+  );
+  const incomingChecklist = incoming.checklist.map((definition) => ({
+    id: deterministicChecklistId(context.identityId, batchId, definition.ref),
+    title: definition.title,
+    order: definition.order,
+  }));
+  const currentChecklist = dto.checklist.map((definition) => ({
+    id: definition.id,
+    title: definition.title,
+    order: definition.order,
+  }));
   const same =
     dto.name === incoming.title.trim() &&
     dto.description === incoming.description &&
@@ -142,12 +176,8 @@ function throwIfPlanConflict(
     (dto.archivedAt !== null) === incoming.archived &&
     dto.abandonedReason === incoming.abandonedReason &&
     (!goalBindingRefsResolved || JSON.stringify(dto.goalBinding) === JSON.stringify(goalBinding)) &&
-    dto.checklist.length === incoming.checklist.length &&
-    incoming.checklist.every((item) =>
-      dto.checklist.some(
-        (definition) => definition.title === item.title && definition.order === item.order,
-      ),
-    );
+    (!labelRefsResolved || sameStringSet(currentLabelIds, incomingLabelIds)) &&
+    JSON.stringify(currentChecklist) === JSON.stringify(incomingChecklist);
   if (!same) {
     throw new Error(
       `tasks@3 deterministic plan target conflicts with imported state: ${batchId}:${incoming.ref}`,
@@ -159,18 +189,27 @@ function throwIfOccurrenceConflict(
   current: import('../domain/aggregates/task-occurrence').TaskOccurrence,
   incoming: TaskPortablePayloadV3['occurrences'][number],
   planId: string,
+  checklistIdsByRef: Map<PortableReferenceV3, string>,
 ): void {
   const dto = current.toServerDTO();
   if (dto.deletedAt !== null) {
     throw new Error(`tasks@3 cannot restore over deleted occurrence: ${String(current.id)}`);
   }
+  const incomingChecklistState = incoming.checklistState.map((item) => ({
+    definitionId: checklistIdsByRef.get(item.definitionRef),
+    titleSnapshot: item.titleSnapshot,
+    orderSnapshot: item.orderSnapshot,
+    completed: item.completed,
+    completedAt: item.completedAt,
+  }));
   if (
     dto.planId !== planId ||
     JSON.stringify(dto.scheduleSnapshot) !== JSON.stringify(incoming.scheduleSnapshot) ||
     dto.importanceSnapshot !== incoming.importanceSnapshot ||
     dto.status !== incoming.status ||
     dto.actualStartAt !== incoming.actualStartAt ||
-    JSON.stringify(dto.result) !== JSON.stringify(incoming.result)
+    JSON.stringify(dto.result) !== JSON.stringify(incoming.result) ||
+    JSON.stringify(dto.checklistState) !== JSON.stringify(incomingChecklistState)
   ) {
     throw new Error(`tasks@3 deterministic occurrence target conflicts with imported state: ${String(current.id)}`);
   }
@@ -288,6 +327,7 @@ export class TaskPortableCapability implements PortableCapability<TaskPortablePa
     const batchId = requireBatchId(context);
     const planIdsByRef = new Map<PortableReferenceV3, string>();
     const checklistRefs = new Set<PortableReferenceV3>();
+    const checklistIdsByRef = new Map<PortableReferenceV3, string>();
     let created = 0;
     let skipped = 0;
 
@@ -298,6 +338,10 @@ export class TaskPortableCapability implements PortableCapability<TaskPortablePa
         if (!checklistRefs.add(definition.ref)) {
           throw new Error(`tasks@3 duplicate checklist reference: ${definition.ref}`);
         }
+        checklistIdsByRef.set(
+          definition.ref,
+          deterministicChecklistId(context.identityId, batchId, definition.ref),
+        );
       }
       const current = await this.planRepository.findByIdForIdentity(context.identityId, id);
       if (current) {
@@ -313,7 +357,7 @@ export class TaskPortableCapability implements PortableCapability<TaskPortablePa
       if (!planId) throw new Error(`tasks@3 occurrence references an unknown plan: ${occurrence.planRef}`);
       const current = await this.occurrenceRepository.findByIdForIdentity(context.identityId, id);
       if (current) {
-        throwIfOccurrenceConflict(current, occurrence, planId);
+        throwIfOccurrenceConflict(current, occurrence, planId, checklistIdsByRef);
         skipped += 1;
       } else {
         created += 1;
