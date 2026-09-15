@@ -57,7 +57,7 @@ import {
 export interface ComposeDataPortabilityDependencies {
   /** Shared API-lane Prisma client owned by apps/api. 由 apps/api 持有的共享 API lane Prisma client。 */
   readonly db: PrismaClient;
-  /** Owner-provided V3 capability seams; product routes remain V2 until full owner coverage. */
+  /** Owner-provided V3 capability seams registered in the production registry. */
   readonly portableCapabilities?: readonly PortableCapability<unknown>[];
 }
 

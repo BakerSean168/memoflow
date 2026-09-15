@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { createHash } from 'node:crypto';
 import type {
   PortableCapabilityExecutionContext,
   PortableReferencePort,
@@ -13,6 +14,23 @@ import type {
   GoalPortabilitySnapshot,
 } from './goal-portability.application.port';
 import { GoalPortableCapability } from './goal-portability';
+
+/** Independent re-derivation of the deterministic portability id seed. */
+function stableUuidForTest(seed: string): string {
+  const hex = createHash('sha256').update(seed, 'utf8').digest('hex').slice(0, 32).split('');
+  hex[12] = '5';
+  hex[16] = ((Number.parseInt(hex[16]!, 16) & 0x3) | 0x8).toString(16);
+  const raw = hex.join('');
+  return `${raw.slice(0, 8)}-${raw.slice(8, 12)}-${raw.slice(12, 16)}-${raw.slice(16, 20)}-${raw.slice(20)}`;
+}
+
+function deterministicGoalId(identityId: string, batchId: string, ref: string): string {
+  return `IGoalId_${stableUuidForTest(`portable:${identityId}:${batchId}:goal:${ref}`)}`;
+}
+
+function deterministicKeyResultId(identityId: string, batchId: string, ref: string): string {
+  return `IKeyResultId_${stableUuidForTest(`portable:${identityId}:${batchId}:key-result:${ref}`)}`;
+}
 
 function referenceContext() {
   let seq = 0;
@@ -98,7 +116,7 @@ function readModelFromCreateInput(
     startDate: createInput.startDate ?? null,
     target: createInput.target ?? null,
     reminderConfig: createInput.reminderConfig ?? null,
-    labels: [{ id: 'label-host-1' }],
+    labels: createInput.labelIds.map((id) => ({ id })),
     keyResults: [
       {
         id: keyResult.id,
@@ -302,6 +320,102 @@ describe('GoalPortableCapability', () => {
       created: 1,
       skipped: 0,
     });
+  });
+
+  it('dry-run binds deterministic Goal and Key Result refs without mutating persistence', async () => {
+    const getGoal = vi.fn().mockResolvedValue(error('NOT_FOUND', 'missing'));
+    const createGoal = vi.fn();
+    const api = { getGoal, createGoal } as unknown as GoalApplicationPort;
+    const { context, imports } = referenceContext();
+
+    const result = await new GoalPortableCapability(api, portabilityFromApi(api)).dryRun(
+      portableGoalPayload(),
+      context,
+    );
+
+    expect(result).toMatchObject({ created: 1, updated: 0, skipped: 0 });
+    // Predictions only: no mutation-capable Goal application call happens.
+    expect(createGoal).not.toHaveBeenCalled();
+    expect(api.activateGoal).toBeUndefined();
+    const goalId = deterministicGoalId(context.identityId, context.batchId!, 'goals:1');
+    const keyResultId = deterministicKeyResultId(context.identityId, context.batchId!, 'goals:2');
+    expect(goalId).toMatch(/^IGoalId_[0-9a-f-]{36}$/);
+    expect(keyResultId).toMatch(/^IKeyResultId_[0-9a-f-]{36}$/);
+    expect(imports.get('goals:1')).toBe(goalId);
+    expect(imports.get('goals:2')).toBe(keyResultId);
+    expect(getGoal).toHaveBeenCalledWith(goalId, 'identity-1', true);
+  });
+
+  it('dry-run re-binds the same deterministic predictions when the Goal already exists', async () => {
+    const existing = readModelFromCreateInput(
+      {
+        id: deterministicGoalId('identity-1', 'batch-1', 'goals:1') as never,
+        name: 'Ship vNext',
+        summary: null,
+        startDate: null,
+        target: null,
+        reminderConfig: null,
+        labelIds: ['label-host-1'],
+        initialKeyResults: [
+          {
+            id: deterministicKeyResultId('identity-1', 'batch-1', 'goals:2') as never,
+            title: 'Finish cutover',
+            description: null,
+            calculationMethod: KeyResultCalculationMethod.Sum,
+            initialValue: 0,
+            currentValue: 50,
+            trackingBaseValue: 40,
+            targetValue: 100,
+            target: null,
+            unit: '%',
+            weight: 3,
+          },
+        ],
+      } as never,
+      { status: GoalStatus.Planned },
+    );
+    const api = {
+      getGoal: vi.fn().mockResolvedValue(ok(existing)),
+      createGoal: vi.fn(),
+    } as unknown as GoalApplicationPort;
+    const { context, imports } = referenceContext();
+    const capability = new GoalPortableCapability(api, portabilityFromApi(api));
+
+    await expect(capability.dryRun(portableGoalPayload(), context)).resolves.toMatchObject({
+      created: 0,
+      updated: 0,
+      skipped: 1,
+    });
+    // A replay prediction must not conflict with itself across operations.
+    await expect(capability.dryRun(portableGoalPayload(), context)).resolves.toMatchObject({
+      created: 0,
+      updated: 0,
+      skipped: 1,
+    });
+
+    expect(api.createGoal).not.toHaveBeenCalled();
+    expect(imports.get('goals:1')).toBe(deterministicGoalId('identity-1', 'batch-1', 'goals:1'));
+    expect(imports.get('goals:2')).toBe(
+      deterministicKeyResultId('identity-1', 'batch-1', 'goals:2'),
+    );
+  });
+
+  it('dry-run keeps predicted Goal and Key Result bindings operation-local', async () => {
+    const api = { getGoal: vi.fn().mockResolvedValue(error('NOT_FOUND', 'missing')) } as unknown as GoalApplicationPort;
+    const capability = new GoalPortableCapability(api, portabilityFromApi(api));
+
+    const first = referenceContext();
+    await capability.dryRun(portableGoalPayload(), first.context);
+    expect(first.imports.has('goals:1')).toBe(true);
+
+    // A separate operation with a fresh registry must not observe the prediction.
+    const second = referenceContext();
+    expect(second.imports.has('goals:1')).toBe(false);
+    await expect(capability.dryRun(portableGoalPayload(), second.context)).resolves.toMatchObject({
+      created: 1,
+    });
+    expect(second.imports.has('goals:2')).toBe(true);
+    expect(first.imports.get('goals:1')).toBe(second.imports.get('goals:1'));
   });
 
   it('dry-run detects same-batch replay through deterministic host ids', async () => {

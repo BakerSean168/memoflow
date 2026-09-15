@@ -94,6 +94,8 @@ export interface ComposedTask {
   readonly taskOccurrenceRepository: ITaskOccurrenceRepository;
   /** Task template repository for scheduled-handler registration (task.reminder.fire). 供 scheduled handler 注册（task.reminder.fire）使用的任务模板仓储。 */
   readonly taskPlanRepository: ITaskPlanRepository;
+  /** Task-owned V3 portability capability registered by the host. */
+  readonly portableCapability: ReturnType<typeof createTaskModule>['portableCapability'];
 }
 
 /**
@@ -169,5 +171,6 @@ export function composeTask(
     applicationPort: instance.api,
     taskOccurrenceRepository,
     taskPlanRepository,
+    portableCapability: instance.portableCapability,
   };
 }

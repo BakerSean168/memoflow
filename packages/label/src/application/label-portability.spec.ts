@@ -108,6 +108,36 @@ describe('LabelPortableCapability', () => {
     });
   });
 
+  it('binds imported refs during dry-run so dependents can resolve them before apply', async () => {
+    const service = {
+      listAll: vi.fn().mockResolvedValue([label('label-a', 'Work', '#112233')]),
+      create: vi.fn(),
+      update: vi.fn(),
+    } as unknown as LabelService;
+    const capability = new LabelPortableCapability(service);
+    const { context, imported } = executionContext();
+
+    const receipt = await capability.dryRun(
+      {
+        labels: [
+          { ref: 'labels:1', name: 'Work', color: '#112233' },
+          { ref: 'labels:2', name: 'Personal', color: null },
+        ],
+      },
+      context,
+    );
+
+    expect(receipt).toEqual({ created: 1, updated: 0, skipped: 1, warnings: [] });
+    expect(service.create).not.toHaveBeenCalled();
+    expect(context.references.resolveImportedReference('labels:1' as PortableReferenceV3)).toBe(
+      'label-a',
+    );
+    expect(Object.fromEntries(imported)).toEqual({
+      'labels:1': 'label-a',
+      'labels:2': 'portable-label:labels:2',
+    });
+  });
+
   it('applies idempotently and binds imported refs to host-owned ids', async () => {
     const work = label('label-a', 'Work', '#112233');
     const health = label('label-b', 'Health', null);
