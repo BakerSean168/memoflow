@@ -32,7 +32,7 @@ import { createAIApiModule, type AIApiModuleDef } from '@memoflow/ai/api';
 import type { RepositoryApplicationPort } from '@memoflow/repository';
 import type { GoalApplicationPort } from '@memoflow/goal';
 import type { TaskApplicationPort } from '@memoflow/task';
-import type { ReminderApplicationPort } from '@memoflow/reminder';
+import type { ReminderApplicationPort } from '@memoflow/reminder/server';
 import type { RoutineCoachCommandPort } from '@memoflow/reminder/routine-runtime';
 import type { IScheduleRepository } from '@memoflow/schedule';
 import type { INotificationRepository } from '@memoflow/notification';

@@ -49,11 +49,13 @@ import {
   createReminderScheduleExecutionSource,
   createReminderScheduleProjectionSource,
   loadPowerSyncRoutineLocalRegistrations,
-  type ReminderApplicationPort,
-  type IReminderTemplateRepository,
   type ReminderScheduleExecutionSource,
   type ReminderScheduleProjectionSource,
 } from '@memoflow/reminder';
+import type {
+  ReminderApplicationPort,
+  IReminderTemplateRepository,
+} from '@memoflow/reminder/server';
 import {
   createReminderElectronModule,
   type ReminderElectronModuleDef,
