@@ -17,7 +17,7 @@
 
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import type { GoalApplicationPort } from '@memoflow/goal';
-import type { ReminderApplicationPort } from '@memoflow/reminder';
+import type { ReminderApplicationPort } from '@memoflow/reminder/server';
 import type { RoutineCoachCommandPort } from '@memoflow/reminder/routine-runtime';
 import type { IScheduleRepository } from '@memoflow/schedule';
 import type { INotificationRepository } from '@memoflow/notification';

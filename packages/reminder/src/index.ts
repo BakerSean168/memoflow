@@ -10,12 +10,17 @@
  * factories and port types. Client / API / Electron seams use dedicated
  * subpaths. Schedule orchestration integrations remain on their dedicated
  * `schedule-execution` / `schedule-projection` seams.
+ * Legacy owner types (application port and template/group/response/preference
+ * repositories) are not part of the root surface; transitional hosts import
+ * them from the `@memoflow/reminder/server` migration seam.
  *
  * 提醒模块运行时根。
  * 公开契约集中在 `@memoflow/contracts/reminder`。
  * 根导出仅限于规范化的服务端组合根：原料工厂、集合类型、模块工厂、
  * 运行时贡献工厂与 Port 类型。Client / API / Electron 使用独立 subpath。
  * Schedule 编排集成保留在独立的 `schedule-execution` / `schedule-projection` seam。
+ * 遗留 owner 类型（应用 Port 与 template/group/response/preference 仓储）
+ * 不属于根导出面；过渡期宿主从 `@memoflow/reminder/server` 迁移 seam 导入。
  */
 
 export {
@@ -26,7 +31,6 @@ export {
   createReminderPowerSyncRepositories,
   createReminderUseCases,
   createPowerSyncClosureChecker,
-  type ReminderApplicationPort,
   type ReminderModuleDependencies,
   type ReminderModuleInstance,
   type ReminderModuleRuntimeContribution,
@@ -36,10 +40,6 @@ export {
   type ReminderPowerSyncRepositorySet,
   type ReminderSnoozeOverrideWriter,
   type RoutineProfileStore,
-  type IReminderTemplateRepository,
-  type IReminderGroupRepository,
-  type IReminderResponseRepository,
-  type IUserReminderPreferenceRepository,
   loadPowerSyncRoutineLocalRegistrations,
   type RoutineLocalRegistrationsSnapshot,
 } from './server';

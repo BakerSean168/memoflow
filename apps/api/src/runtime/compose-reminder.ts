@@ -27,12 +27,14 @@ import {
   createReminderUseCases,
   type ReminderModuleRuntimeContribution,
   type ReminderRuntimeContributionsInput,
-  type IReminderTemplateRepository,
 } from '@memoflow/reminder';
+import type {
+  ReminderApplicationPort,
+  IReminderTemplateRepository,
+} from '@memoflow/reminder/server';
 import { createReminderApiModule, type ReminderApiModuleDef } from '@memoflow/reminder/api';
 import type { ReminderScheduleExecutionSource } from '@memoflow/reminder';
 import type { ReminderScheduleProjectionSource } from '@memoflow/reminder';
-import type { ReminderApplicationPort } from '@memoflow/reminder';
 import {
   createRoutineCoachCommandService,
   createRoutineOverrideChangedNotifier,

@@ -7,7 +7,7 @@ import {
   type CreateReminderTemplateReq,
 } from '@memoflow/contracts/reminder';
 import type { IAIRoutineCommandPort, AIRoutineCreateInput } from '@memoflow/ai';
-import type { ReminderApplicationPort } from '@memoflow/reminder';
+import type { ReminderApplicationPort } from '@memoflow/reminder/server';
 import type { RoutineCoachCommandPort } from '@memoflow/reminder/routine-runtime';
 import {
   getRoutineMethodTemplatePreset,

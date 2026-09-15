@@ -3,7 +3,7 @@ import type { PrismaClient } from '@memoflow/database';
 import type { RepositoryApplicationPort } from '@memoflow/repository';
 import type { GoalApplicationPort } from '@memoflow/goal';
 import type { TaskApplicationPort } from '@memoflow/task';
-import type { ReminderApplicationPort } from '@memoflow/reminder';
+import type { ReminderApplicationPort } from '@memoflow/reminder/server';
 
 vi.mock('@memoflow/ai', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@memoflow/ai')>();
