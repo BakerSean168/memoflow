@@ -6,7 +6,10 @@
 import type { IReminderTemplateRepository } from '../domain/repositories/i-reminder-template-repository';
 import type { IReminderGroupRepository } from '../domain/repositories/i-reminder-group-repository';
 import type { IReminderResponseRepository } from '../domain/repositories/i-reminder-response-repository';
-import type { RoutineProfileStore } from '../domain/ports/routine-profile-store.port';
+import type {
+  RoutineProfileStore,
+  RoutineRuntimeContextStore,
+} from '../domain/ports';
 import type { IUserReminderPreferenceRepository } from '../domain/repositories/i-user-reminder-preference-repository';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { UserTimeContextPort } from '@memoflow/time';
@@ -53,6 +56,7 @@ export interface ReminderModuleDependencies {
   readonly reminderResponseRepository: IReminderResponseRepository;
   readonly userReminderPreferenceRepository: IUserReminderPreferenceRepository;
   readonly routineProfileStore: RoutineProfileStore;
+  readonly runtimeContextStore: RoutineRuntimeContextStore;
   readonly closureChecker: (identityId: string) => Promise<boolean>;
   readonly userTimeContextPort: UserTimeContextPort;
   readonly runtimeContributions?: ReminderRuntimeContributionsInput;
@@ -76,6 +80,7 @@ export interface ReminderModuleInstance {
   readonly reminderResponseRepository: IReminderResponseRepository;
   readonly userReminderPreferenceRepository: IUserReminderPreferenceRepository;
   readonly routineProfileStore: RoutineProfileStore;
+  readonly runtimeContextStore: RoutineRuntimeContextStore;
   readonly useCases: ReminderModuleUseCases;
   readonly api: ReminderApplicationPort;
   start(): void | Promise<void>;
@@ -120,6 +125,7 @@ export function createReminderUseCases(
       reminderGroupRepository,
       dependencies.userReminderPreferenceRepository,
       dependencies.routineProfileStore,
+      dependencies.runtimeContextStore,
     );
   const templateMapper =
     options?.templateMapper ?? new ReminderTemplateClientMapper(reminderDomainService);
@@ -200,6 +206,7 @@ export function createReminderModule(
     reminderGroupRepository,
     userReminderPreferenceRepository,
     routineProfileStore,
+    dependencies.runtimeContextStore,
   );
   const templateMapper = new ReminderTemplateClientMapper(reminderDomainService);
   const useCases = createReminderUseCases(dependencies, {
@@ -411,6 +418,7 @@ export function createReminderModule(
     reminderResponseRepository,
     userReminderPreferenceRepository,
     routineProfileStore,
+    runtimeContextStore: dependencies.runtimeContextStore,
     useCases,
     api,
 

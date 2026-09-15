@@ -71,7 +71,7 @@ describe('PowerSync Routine local registration projection', () => {
       [],
     );
 
-    await expect(loadPowerSyncRoutineLocalRegistrations(db, 'identity-1')).resolves.toEqual({
+    await expect(loadPowerSyncRoutineLocalRegistrations(db, 'identity-1', { activeProfileIds: ['profile-1'] })).resolves.toEqual({
       activeUsage: [
         {
           identityId: 'identity-1',
@@ -106,6 +106,7 @@ describe('PowerSync Routine local registration projection', () => {
       [
         {
           routine_id: 'eyes',
+          profile_id: 'profile-1',
           membership_enabled: 1,
           profile_enabled: 1,
         },
@@ -117,7 +118,7 @@ describe('PowerSync Routine local registration projection', () => {
       ],
     );
 
-    const blocked = await loadPowerSyncRoutineLocalRegistrations(db, 'identity-1');
+    const blocked = await loadPowerSyncRoutineLocalRegistrations(db, 'identity-1', { activeProfileIds: ['profile-1'] });
     expect(blocked.activeUsage[0]?.gates).toEqual({
       routineEnabled: true,
       profileEnabled: false,
@@ -139,13 +140,14 @@ describe('PowerSync Routine local registration projection', () => {
         ...db['memberships'],
         {
           routine_id: 'eyes',
+          profile_id: 'profile-1',
           membership_enabled: 1,
           profile_enabled: 1,
         },
       ],
     );
     expect(
-      (await loadPowerSyncRoutineLocalRegistrations(enabledDb, 'identity-1')).activeUsage[0]?.gates,
+      (await loadPowerSyncRoutineLocalRegistrations(enabledDb, 'identity-1', { activeProfileIds: ['profile-1'] })).activeUsage[0]?.gates,
     ).toEqual({
       routineEnabled: true,
       profileEnabled: true,

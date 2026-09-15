@@ -10,6 +10,7 @@ import {
 import type {
   ProtocolSessionStore,
   RoutineProfileStore,
+  RoutineRuntimeContextStore,
   RoutineTemporaryOverrideStore,
 } from '../../domain/ports';
 import {
@@ -85,6 +86,7 @@ export interface RoutineCoachCommandPort {
 
 export interface CreateRoutineCoachCommandServiceOptions {
   readonly routineProfileStore: RoutineProfileStore;
+  readonly runtimeContextStore: RoutineRuntimeContextStore;
   readonly temporaryOverrideStore: RoutineTemporaryOverrideStore;
   readonly protocolSessionStore: ProtocolSessionStore;
   readonly onOverrideChanged?: (input: {
@@ -148,15 +150,12 @@ export function createRoutineCoachCommandService(
         profileId: input.profileId,
       });
       if (!profile) throw new Error(`Routine profile '${input.profileId}' was not found`);
-      if (input.active) profile.enable();
-      else profile.disable();
-      await options.routineProfileStore.upsertProfile(profile);
-      return {
-        profileId: profile.id,
+      return options.runtimeContextStore.setProfileActive({
         identityId: profile.identityId,
+        profileId: profile.id,
         active: input.active,
-        version: profile.version,
-      };
+        at: input.at,
+      });
     },
 
     async setTemporaryOverride(input) {

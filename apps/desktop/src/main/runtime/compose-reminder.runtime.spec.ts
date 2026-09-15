@@ -33,9 +33,9 @@ class RoutineDb implements IElectronDatabase {
       return [
         {
           routine_id: 'routine-opaque',
+          profile_id: 'profile-1',
           membership_enabled: 1,
           profile_enabled: 1,
-          profile_active: 1,
         },
       ] as T[];
     }

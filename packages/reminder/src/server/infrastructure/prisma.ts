@@ -42,6 +42,7 @@ import type { OperationAuditRepository } from '@memoflow/patterns/operations';
 import type { ReminderReliableOperationPort } from '@memoflow/contracts/reliable-messaging';
 import type { ReminderTransactionRunner } from '../domain/ports/reminder-transaction-runner.port';
 import type { ReminderSnoozeOverrideWriter } from '../application/use-cases/commands/record-reminder-response.use-case';
+import { createInMemoryRoutineRuntimeContextStore } from '../runtime/routine-runtime-context';
 import type {
   IReminderTemplateRepository,
   IReminderGroupRepository,
@@ -54,6 +55,7 @@ import type {
 
 export interface CreateReminderPrismaModuleOptions {
   readonly closureChecker: (identityId: string) => Promise<boolean>;
+  readonly runtimeContextStore?: import('../domain/ports').RoutineRuntimeContextStore;
   readonly userTimeContextPort: UserTimeContextPort;
   readonly runtimeContributions?:
     ReminderModuleRuntimeContribution | readonly ReminderModuleRuntimeContribution[];
@@ -116,6 +118,8 @@ export function createReminderPrismaModule(
   }
 
   const repositories = createReminderPrismaRepositories(db);
+  const runtimeContextStore =
+    options.runtimeContextStore ?? createInMemoryRoutineRuntimeContextStore();
 
   return createReminderModule({
     reminderTemplateRepository: repositories.reminderTemplateRepository,
@@ -123,6 +127,7 @@ export function createReminderPrismaModule(
     reminderResponseRepository: repositories.reminderResponseRepository,
     userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
     routineProfileStore: repositories.routineProfileStore,
+    runtimeContextStore,
     closureChecker: options.closureChecker,
     userTimeContextPort: options.userTimeContextPort,
     runtimeContributions: options.runtimeContributions,

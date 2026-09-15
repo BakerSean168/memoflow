@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { RoutineDefinition, RoutineProfile } from '../../domain/routine';
 import { createInMemoryProtocolSessionStore } from '../../runtime/protocol';
 import type { RoutineProfileStore, RoutineTemporaryOverrideStore } from '../../domain/ports';
+import { createInMemoryRoutineRuntimeContextStore } from '../../runtime/routine-runtime-context';
 import { createRoutineCoachCommandService } from './routine-coach-command.service';
 
 function profileStore(): RoutineProfileStore {
@@ -45,13 +46,20 @@ describe('RoutineCoachCommandService', () => {
     await profiles.upsertProfile(profile);
     const service = createRoutineCoachCommandService({
       routineProfileStore: profiles,
+      runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
       temporaryOverrideStore: overrideStore(),
       protocolSessionStore: createInMemoryProtocolSessionStore(),
       now: () => 1_000,
     });
 
     await expect(service.setProfileActive({ identityId: 'i-1', profileId: 'work', active: true }))
-      .resolves.toMatchObject({ profileId: 'work', active: true, version: 2 });
+      .resolves.toMatchObject({ profileId: 'work', active: true, version: 1 });
+    expect(profile.enabled).toBe(true);
+    expect(profile.version).toBe(1);
+    expect(profiles.upsertProfile).toHaveBeenCalledTimes(1);
+    expect(
+      (await service.setProfileActive({ identityId: 'i-1', profileId: 'work', active: false })).version,
+    ).toBe(2);
     expect(profiles.replaceRoutineMemberships).not.toHaveBeenCalled();
   });
 
@@ -62,6 +70,7 @@ describe('RoutineCoachCommandService', () => {
     const changed = vi.fn();
     const service = createRoutineCoachCommandService({
       routineProfileStore: profiles,
+      runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
       temporaryOverrideStore: overrides,
       protocolSessionStore: createInMemoryProtocolSessionStore(),
       onOverrideChanged: changed,
@@ -82,6 +91,7 @@ describe('RoutineCoachCommandService', () => {
     const sessions = createInMemoryProtocolSessionStore();
     const service = createRoutineCoachCommandService({
       routineProfileStore: profileStore(),
+      runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
       temporaryOverrideStore: overrideStore(),
       protocolSessionStore: sessions,
       now: () => 1_000,
@@ -98,6 +108,7 @@ describe('RoutineCoachCommandService', () => {
     const sessions = createInMemoryProtocolSessionStore();
     const service = createRoutineCoachCommandService({
       routineProfileStore: profileStore(),
+      runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
       temporaryOverrideStore: overrideStore(),
       protocolSessionStore: sessions,
       now: () => 1_000,

@@ -75,6 +75,13 @@ export {
   type ProtocolBreakCreditRuntime,
 } from '../server/runtime/protocol-break-credit';
 export {
+  createInMemoryRoutineRuntimeContextStore,
+} from '../server/runtime/routine-runtime-context';
+export type {
+  RoutineRuntimeContextStore,
+  RoutineRuntimeContextUpdateReceipt,
+} from '../server/domain/ports';
+export {
   createRoutineCoachCommandService,
   type CreateRoutineCoachCommandServiceOptions,
   type RoutineCoachCommandPort,

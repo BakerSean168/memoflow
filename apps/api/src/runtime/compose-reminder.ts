@@ -36,6 +36,7 @@ import type { ReminderApplicationPort } from '@memoflow/reminder';
 import {
   createRoutineCoachCommandService,
   createRoutineOverrideChangedNotifier,
+  createInMemoryRoutineRuntimeContextStore,
   type RoutineCoachCommandPort,
 } from '@memoflow/reminder/routine-runtime';
 
@@ -164,9 +165,11 @@ function normalizeRuntimeContributions(
  */
 export function composeReminder(dependencies: ComposeReminderDependencies): ComposedReminder {
   const repositories = createReminderPrismaRepositories(dependencies.db);
+  const runtimeContextStore = createInMemoryRoutineRuntimeContextStore();
 
   const routineCommandPort = createRoutineCoachCommandService({
     routineProfileStore: repositories.routineProfileStore,
+    runtimeContextStore,
     temporaryOverrideStore: repositories.routineTemporaryOverrideStore,
     protocolSessionStore: repositories.protocolSessionStore,
     onOverrideChanged: createRoutineOverrideChangedNotifier(),
@@ -178,6 +181,7 @@ export function composeReminder(dependencies: ComposeReminderDependencies): Comp
     reminderResponseRepository: repositories.reminderResponseRepository,
     userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
     routineProfileStore: repositories.routineProfileStore,
+    runtimeContextStore,
     closureChecker: dependencies.closureChecker,
     userTimeContextPort: dependencies.userTimeContextPort,
     reliablePort: repositories.reliablePort,
@@ -197,6 +201,7 @@ export function composeReminder(dependencies: ComposeReminderDependencies): Comp
   const scheduleProjectionSource = createReminderScheduleProjectionSource({
     reminderTemplateRepository,
     routineProfileStore: repositories.routineProfileStore,
+    runtimeContextStore,
     userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
   });
 
@@ -218,6 +223,7 @@ export function composeReminder(dependencies: ComposeReminderDependencies): Comp
           reminderResponseRepository: repositories.reminderResponseRepository,
           userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
           routineProfileStore: repositories.routineProfileStore,
+          runtimeContextStore,
           closureChecker: dependencies.executorClosureChecker,
           userTimeContextPort: dependencies.userTimeContextPort,
         });

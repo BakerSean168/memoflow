@@ -72,6 +72,7 @@ import {
   type RoutineActivitySensorRuntime,
   createRoutineCoachCommandService,
   createRoutineOverrideChangedNotifier,
+  createInMemoryRoutineRuntimeContextStore,
   type RoutineCoachCommandPort,
 } from '@memoflow/reminder/routine-runtime';
 import type { IdleSensorPort } from '@memoflow/reminder/routine-runtime';
@@ -184,9 +185,11 @@ export function composeReminder(
   dependencies: ComposeReminderDesktopDependencies,
 ): ComposedReminderDesktop {
   const repositories = createReminderPowerSyncRepositories(dependencies.db);
+  const runtimeContextStore = createInMemoryRoutineRuntimeContextStore();
 
   const routineCommandPort = createRoutineCoachCommandService({
     routineProfileStore: repositories.routineProfileStore,
+    runtimeContextStore,
     temporaryOverrideStore: repositories.routineTemporaryOverrideStore,
     protocolSessionStore: repositories.protocolSessionStore,
     onOverrideChanged: createRoutineOverrideChangedNotifier(),
@@ -198,6 +201,7 @@ export function composeReminder(
     reminderResponseRepository: repositories.reminderResponseRepository,
     userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
     routineProfileStore: repositories.routineProfileStore,
+    runtimeContextStore,
     closureChecker: repositories.closureChecker,
     userTimeContextPort: dependencies.userTimeContextPort,
   });
@@ -213,6 +217,7 @@ export function composeReminder(
   const scheduleProjectionSource = createReminderScheduleProjectionSource({
     reminderTemplateRepository,
     routineProfileStore: repositories.routineProfileStore,
+    runtimeContextStore,
     userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
   });
 
@@ -283,6 +288,7 @@ export function composeReminder(
     const snapshot = await loadPowerSyncRoutineLocalRegistrations(
       dependencies.db,
       dependencies.identityId,
+      runtimeContextStore.get({ identityId: dependencies.identityId }),
     );
     for (const routineId of locallyRegisteredRoutineIds) {
       activeUsageRuntime.unregisterRoutine(dependencies.identityId, routineId);
