@@ -1,24 +1,23 @@
-import { describe, expect, it, vi } from 'vitest';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
-import { RoutineAICommandAdapter } from './routine-command.adapter';
+import { DesktopRoutineAICommandAdapter } from './routine-command.adapter';
 
 const context: ExecutionContext = {
   identityId: 'identity-1',
   requestId: 'request-1',
   traceId: 'request-1',
-  startedAt: 1_000,
-  source: 'http',
+  startedAt: Date.parse('2026-09-15T13:45:00.000Z'),
+  source: 'desktop',
 };
 
-describe('RoutineAICommandAdapter', () => {
-  it('maps a method preset into canonical Routine creation and preserves the receipt', async () => {
+describe('DesktopRoutineAICommandAdapter', () => {
+  it('maps an ambient method preset to a canonical elapsed routine', async () => {
     const createRoutine = vi.fn(async () => ({
       routineId: 'r-1',
       identityId: 'identity-1',
       name: 'Eye break',
       version: 1,
     }));
-    const adapter = new RoutineAICommandAdapter({ createRoutine } as never);
+    const adapter = new DesktopRoutineAICommandAdapter({ createRoutine } as never);
 
     await expect(
       adapter.createRoutine({
@@ -40,19 +39,23 @@ describe('RoutineAICommandAdapter', () => {
         name: 'Eye break',
         profileIds: ['work'],
         at: context.startedAt,
-        trigger: expect.objectContaining({ type: 'Elapsed', durationMs: 20 * 60_000 }),
+        trigger: expect.objectContaining({
+          type: 'Elapsed',
+          durationMs: 20 * 60_000,
+          anchor: 'routine-activation',
+        }),
       }),
     );
   });
 
-  it('maps an explicit fixed-time trigger to a UTC WallClock routine', async () => {
+  it('maps an explicit fixed time through UTC Product Time', async () => {
     const createRoutine = vi.fn(async () => ({
       routineId: 'r-2',
       identityId: 'identity-1',
       name: 'Wind down',
       version: 1,
     }));
-    const adapter = new RoutineAICommandAdapter({ createRoutine } as never);
+    const adapter = new DesktopRoutineAICommandAdapter({ createRoutine } as never);
 
     await adapter.createRoutine({
       context,
@@ -67,7 +70,7 @@ describe('RoutineAICommandAdapter', () => {
           localTime: '22:30',
           timeZone: 'UTC',
           recurrence: expect.objectContaining({
-            startDate: '1970-01-01',
+            startDate: '2026-09-15',
             frequency: 'daily',
           }),
         }),
@@ -75,14 +78,15 @@ describe('RoutineAICommandAdapter', () => {
     );
   });
 
-  it('rejects Protocol presets on the Routine creation path', async () => {
-    const adapter = new RoutineAICommandAdapter({} as never);
+  it('rejects Protocol presets and directs callers to routine_start_protocol', async () => {
+    const adapter = new DesktopRoutineAICommandAdapter({} as never);
+
     await expect(
       adapter.createRoutine({ context, title: 'Focus', methodId: 'pomodoro' }),
     ).rejects.toThrow(/routine_start_protocol/);
   });
 
-  it('delegates profile, override, and protocol state to the Routine owner port', async () => {
+  it('delegates profile, override, and protocol commands to the Routine owner port', async () => {
     const routine = {
       setProfileActive: vi.fn(async () => ({ profileId: 'work', active: true })),
       setTemporaryOverride: vi.fn(async () => ({
@@ -102,7 +106,7 @@ describe('RoutineAICommandAdapter', () => {
         phaseKey: 'focus',
       })),
     };
-    const adapter = new RoutineAICommandAdapter(routine as never);
+    const adapter = new DesktopRoutineAICommandAdapter(routine as never);
 
     await adapter.setProfileActive({ context, profileId: 'work', active: true });
     await adapter.setTemporaryOverride({

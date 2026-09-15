@@ -24,6 +24,127 @@ describe('PrismaRoutineProfileStore integration', () => {
     await cleanAll();
   });
 
+  it('creates a RoutineDefinition and memberships atomically', async () => {
+    const prisma = await getPrisma();
+    const identityId = String(IdentityId.generate());
+    await seedAccount({ id: identityId });
+    const store = new PrismaRoutineProfileStore(prisma);
+    const now = new Date('2026-09-07T00:00:00.000Z');
+    const routine = RoutineDefinition.create({
+      id: 'atomic-routine',
+      identityId,
+      name: 'Atomic Routine',
+      trigger: createElapsedTrigger({ durationMs: 45 * 60_000 }),
+      now,
+    });
+    const work = RoutineProfile.create({ id: 'atomic-work', identityId, name: 'Work', now });
+    const study = RoutineProfile.create({ id: 'atomic-study', identityId, name: 'Study', now });
+    await store.upsertProfile(work);
+    await store.upsertProfile(study);
+
+    await store.createDefinitionWithMemberships({
+      definition: routine,
+      memberships: [work, study].map((profile) =>
+        ProfileMembership.create({ identityId, profileId: profile.id, routineId: routine.id, now }),
+      ),
+    });
+
+    expect(await store.findDefinition({ identityId, routineId: routine.id })).toMatchObject({
+      id: routine.id,
+      name: 'Atomic Routine',
+    });
+    expect(
+      (await store.listMembershipsForRoutine({ identityId, routineId: routine.id }))
+        .map((membership) => membership.profileId)
+        .sort(),
+    ).toEqual(['atomic-study', 'atomic-work']);
+  });
+
+  it('rejects invalid atomic creation without leaving a definition', async () => {
+    const prisma = await getPrisma();
+    const identityId = String(IdentityId.generate());
+    await seedAccount({ id: identityId });
+    const store = new PrismaRoutineProfileStore(prisma);
+    const now = new Date('2026-09-07T00:00:00.000Z');
+    const routine = RoutineDefinition.create({
+      id: 'invalid-atomic-routine',
+      identityId,
+      name: 'Invalid Atomic Routine',
+      now,
+    });
+    const missingMembership = ProfileMembership.create({
+      identityId,
+      profileId: 'missing-profile',
+      routineId: routine.id,
+      now,
+    });
+
+    await expect(
+      store.createDefinitionWithMemberships({
+        definition: routine,
+        memberships: [missingMembership],
+      }),
+    ).rejects.toThrow(/was not found/);
+    expect(await store.findDefinition({ identityId, routineId: routine.id })).toBeNull();
+  });
+
+  it('rejects duplicate and foreign-identity memberships before mutation', async () => {
+    const prisma = await getPrisma();
+    const identityId = String(IdentityId.generate());
+    const foreignIdentityId = String(IdentityId.generate());
+    await seedAccount({ id: identityId });
+    await seedAccount({ id: foreignIdentityId });
+    const store = new PrismaRoutineProfileStore(prisma);
+    const now = new Date('2026-09-07T00:00:00.000Z');
+    const routine = RoutineDefinition.create({
+      id: 'validation-routine',
+      identityId,
+      name: 'Validation Routine',
+      now,
+    });
+    const profile = RoutineProfile.create({
+      id: 'validation-profile',
+      identityId,
+      name: 'Work',
+      now,
+    });
+    const foreignProfile = RoutineProfile.create({
+      id: 'foreign-profile',
+      identityId: foreignIdentityId,
+      name: 'Foreign',
+      now,
+    });
+    await store.upsertProfile(profile);
+    await store.upsertProfile(foreignProfile);
+    const membership = ProfileMembership.create({
+      identityId,
+      profileId: profile.id,
+      routineId: routine.id,
+      now,
+    });
+
+    await expect(
+      store.createDefinitionWithMemberships({
+        definition: routine,
+        memberships: [membership, membership],
+      }),
+    ).rejects.toThrow(/Duplicate Routine profile membership/);
+    await expect(
+      store.createDefinitionWithMemberships({
+        definition: routine,
+        memberships: [
+          ProfileMembership.create({
+            identityId,
+            profileId: foreignProfile.id,
+            routineId: routine.id,
+            now,
+          }),
+        ],
+      }),
+    ).rejects.toThrow(/ownership mismatch/);
+    expect(await store.findDefinition({ identityId, routineId: routine.id })).toBeNull();
+  });
+
   it('round-trips Routine/Profile M:N membership and replaces one routine edge set transactionally', async () => {
     const prisma = await getPrisma();
     const identityId = String(IdentityId.generate());

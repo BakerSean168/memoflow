@@ -21,7 +21,10 @@ function profileStore(): RoutineProfileStore {
     createDefinitionWithMemberships: vi.fn(async ({ definition, memberships: nextMemberships }) => {
       definitions.set(definition.id, definition);
       for (const membership of nextMemberships) {
-        membershipRows.set(`${membership.identityId}:${membership.profileId}:${membership.routineId}`, membership);
+        membershipRows.set(
+          `${membership.identityId}:${membership.profileId}:${membership.routineId}`,
+          membership,
+        );
       }
     }),
     findDefinition: vi.fn(async ({ routineId }) => definitions.get(routineId) ?? null),
@@ -31,10 +34,16 @@ function profileStore(): RoutineProfileStore {
     upsertProfile: vi.fn(async (value) => {
       profiles.set(value.id, value);
     }),
-    findProfile: vi.fn(async ({ profileId }) => profiles.get(profileId) ?? null),
+    findProfile: vi.fn(async ({ identityId, profileId }) => {
+      const profile = profiles.get(profileId);
+      return profile?.identityId === identityId ? profile : null;
+    }),
     listProfiles: vi.fn(async () => [...profiles.values()]),
-    findProfilesByIds: vi.fn(async ({ profileIds }) =>
-      profileIds.flatMap((id) => profiles.get(id) ?? []),
+    findProfilesByIds: vi.fn(async ({ identityId, profileIds }) =>
+      profileIds.flatMap((id) => {
+        const profile = profiles.get(id);
+        return profile?.identityId === identityId ? [profile] : [];
+      }),
     ),
     deleteProfile: vi.fn(async ({ profileId }) => {
       profiles.delete(profileId);
@@ -49,7 +58,8 @@ function profileStore(): RoutineProfileStore {
     ),
     listMembershipsForRoutines: vi.fn(async ({ identityId, routineIds }) =>
       [...membershipRows.values()].filter(
-        (membership) => membership.identityId === identityId && routineIds.includes(membership.routineId),
+        (membership) =>
+          membership.identityId === identityId && routineIds.includes(membership.routineId),
       ),
     ),
     listMembershipsForProfile: vi.fn(async ({ identityId, profileId }) =>
@@ -81,8 +91,12 @@ describe('RoutineCoachCommandService', () => {
   it('creates a canonical RoutineDefinition and memberships atomically', async () => {
     const profiles = profileStore();
     const now = 1_000;
-    await profiles.upsertProfile(RoutineProfile.create({ id: 'work', identityId: 'i-1', name: 'Work' }));
-    await profiles.upsertProfile(RoutineProfile.create({ id: 'study', identityId: 'i-1', name: 'Study' }));
+    await profiles.upsertProfile(
+      RoutineProfile.create({ id: 'work', identityId: 'i-1', name: 'Work' }),
+    );
+    await profiles.upsertProfile(
+      RoutineProfile.create({ id: 'study', identityId: 'i-1', name: 'Study' }),
+    );
     const service = createRoutineCoachCommandService({
       routineProfileStore: profiles,
       runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
@@ -99,12 +113,19 @@ describe('RoutineCoachCommandService', () => {
     });
 
     expect(receipt).toMatchObject({ identityId: 'i-1', name: 'Move', version: 1 });
-    expect(await profiles.findDefinition({ identityId: 'i-1', routineId: receipt.routineId })).toMatchObject({
+    expect(
+      await profiles.findDefinition({ identityId: 'i-1', routineId: receipt.routineId }),
+    ).toMatchObject({
       id: receipt.routineId,
       trigger: expect.objectContaining({ type: 'Elapsed', durationMs: 50 * 60_000 }),
     });
     expect(
-      (await profiles.listMembershipsForRoutine({ identityId: 'i-1', routineId: receipt.routineId }))
+      (
+        await profiles.listMembershipsForRoutine({
+          identityId: 'i-1',
+          routineId: receipt.routineId,
+        })
+      )
         .map((membership) => membership.profileId)
         .sort(),
     ).toEqual(['study', 'work']);
@@ -112,7 +133,9 @@ describe('RoutineCoachCommandService', () => {
 
   it('rejects duplicate and missing profiles before durable mutation', async () => {
     const profiles = profileStore();
-    await profiles.upsertProfile(RoutineProfile.create({ id: 'work', identityId: 'i-1', name: 'Work' }));
+    await profiles.upsertProfile(
+      RoutineProfile.create({ id: 'work', identityId: 'i-1', name: 'Work' }),
+    );
     const service = createRoutineCoachCommandService({
       routineProfileStore: profiles,
       runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
@@ -131,7 +154,9 @@ describe('RoutineCoachCommandService', () => {
 
   it('rejects a profile belonging to another identity before durable mutation', async () => {
     const profiles = profileStore();
-    await profiles.upsertProfile(RoutineProfile.create({ id: 'foreign', identityId: 'i-2', name: 'Foreign' }));
+    await profiles.upsertProfile(
+      RoutineProfile.create({ id: 'foreign', identityId: 'i-2', name: 'Foreign' }),
+    );
     const service = createRoutineCoachCommandService({
       routineProfileStore: profiles,
       runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
@@ -156,7 +181,9 @@ describe('RoutineCoachCommandService', () => {
 
     const receipt = await service.createRoutine({ identityId: 'i-1', name: 'Move' });
     expect(receipt.name).toBe('Move');
-    expect(await profiles.listMembershipsForRoutine({ identityId: 'i-1', routineId: receipt.routineId })).toEqual([]);
+    expect(
+      await profiles.listMembershipsForRoutine({ identityId: 'i-1', routineId: receipt.routineId }),
+    ).toEqual([]);
   });
 
   it('activates a profile without mutating memberships', async () => {
