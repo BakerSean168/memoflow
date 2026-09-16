@@ -45,6 +45,7 @@ function makeContribution(name: string, failOnStart = false): FakeContribution {
 function makeRoutineProfileStore(): RoutineProfileStore {
   return {
     upsertDefinition: async () => {},
+    createDefinitionWithMemberships: vi.fn(async () => {}),
     findDefinition: async () => null,
     deleteDefinition: async () => {},
     upsertProfile: async () => {},

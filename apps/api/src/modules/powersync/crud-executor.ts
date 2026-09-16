@@ -10,6 +10,10 @@ import { normalizeCrudData } from './crud-normalization.js';
 import { executeUserPreferenceCrudOperation } from './user-preference-crud-executor.js';
 import { executeRelationCrudOperation } from './relation-crud-executor.js';
 import {
+  executeRoutineCompoundCrudOperation,
+  isRoutineCompoundCrudTable,
+} from './routine-compound-crud-executor.js';
+import {
   IDENTITY_ID_TABLES,
   getPrismaDelegate,
   type CrudDelegateContainer,
@@ -27,6 +31,7 @@ export interface CrudOperation {
   type: string;
   id: string;
   data?: Record<string, unknown>;
+  old?: Record<string, unknown>;
 }
 
 export interface CrudBatchResult {
@@ -70,6 +75,10 @@ export async function executeCrudBatch(
         }
         if (tableName === 'relations') {
           await executeRelationCrudOperation(tx as never, identityId, op);
+          continue;
+        }
+        if (isRoutineCompoundCrudTable(tableName)) {
+          await executeRoutineCompoundCrudOperation(tx as never, identityId, op);
           continue;
         }
         const delegate = getPrismaDelegate(tx, tableName);

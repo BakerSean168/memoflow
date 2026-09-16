@@ -55,10 +55,14 @@ describe('reminder API runtime composer surface', () => {
     expect(composer).toContain('runtimeContributions: normalizeRuntimeContributions');
   });
 
-  it('composer only touches the narrow seams (no deep server import)', () => {
+  it('composer only touches the narrow seams (server migration seam is type-only)', () => {
     expect(composer).toContain('interface ComposeReminderDependencies');
     expect(composer).toContain("from '@memoflow/reminder'");
     expect(composer).toContain("from '@memoflow/reminder/api'");
-    expect(composer).not.toMatch(/@memoflow\/reminder\/server/);
+    expect(composer).toMatch(/import type[\s\S]+from '@memoflow\/reminder\/server';/);
+    expect(composer).not.toMatch(
+      /import\s+(?!type\b)[^'\"]*from\s+['\"]@memoflow\/reminder\/server['\"]/,
+    );
+    expect(composer).not.toMatch(/@memoflow\/reminder\/server\/[^'"\s]+/);
   });
 });

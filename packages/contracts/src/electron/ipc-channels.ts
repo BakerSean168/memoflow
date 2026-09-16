@@ -325,8 +325,22 @@ export const WindowChannels = {
   FOCUS_MAIN_WINDOW: 'window:focus-main-window',
 } as const;
 
-/** Routine-owned dedicated-window IPC. Kept separate from legacy ReminderChannels. */
+/** Routine-owned dedicated-window IPC. */
 export const RoutineChannels = {
+  LIST: 'routine:list',
+  GET: 'routine:get',
+  CREATE: 'routine:create',
+  UPDATE: 'routine:update',
+  DELETE: 'routine:delete',
+  TOGGLE_ENABLED: 'routine:toggle-enabled',
+  REPLACE_PROFILES: 'routine:replace-profiles',
+  UPCOMING_GET: 'routine:upcoming:get',
+  TODAY_SCHEDULE_GET: 'routine:today-schedule:get',
+  PREFERENCES_GET: 'routine:preferences:get',
+  PREFERENCES_UPDATE: 'routine:preferences:update',
+} as const;
+
+export const RoutineWindowChannels = {
   INTERVENTION_WINDOW_GET: 'routine:intervention-window:get',
   INTERVENTION_WINDOW_COMMAND: 'routine:intervention-window:command',
   INTERVENTION_WINDOW_PROJECTION: 'routine:intervention-window:projection',

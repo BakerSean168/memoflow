@@ -228,6 +228,16 @@
       ]
     },
     {
+      "path": "apps/api/src/modules/powersync/routine-compound-crud-executor.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/modules/powersync/snapshot-builder.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -887,6 +897,14 @@
     },
     {
       "path": "apps/desktop/src/main/modules/ai/__tests__/desktop-knowledge-source.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/ai/routine-command.adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -8093,6 +8111,16 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/reminder/src/__tests__/package-root-owner-surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/reminder/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/reminder/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/reminder/src/api/module-lifecycle.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11571,7 +11599,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 70
+      "fileCount": 71
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -11648,7 +11676,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 74
+      "fileCount": 75
     },
     {
       "id": "packages/reminder/vitest.mappers.config.ts",
@@ -11949,14 +11977,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 70
+      "fileCount": 71
     },
     {
       "id": "apps/desktop/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 68
+      "fileCount": 69
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -12110,7 +12138,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 74
+      "fileCount": 75
     },
     {
       "id": "packages/repository/vitest.config.ts",
@@ -12202,6 +12230,7 @@
       "apps/api/src/modules/powersync/parse-json-like-string-keep-boundary.surface.spec.ts",
       "apps/api/src/modules/powersync/powersync-schema-result-envelope.surface.spec.ts",
       "apps/api/src/modules/powersync/relation-crud-executor.spec.ts",
+      "apps/api/src/modules/powersync/routine-compound-crud-executor.spec.ts",
       "apps/api/src/modules/powersync/snapshot-builder.spec.ts",
       "apps/api/src/modules/powersync/snapshot-storage.spec.ts",
       "apps/api/src/modules/powersync/user-preference-crud-executor.spec.ts",
@@ -12569,6 +12598,7 @@
       "packages/notification/src/server/infrastructure/runtime/notification.runtime.spec.ts",
       "packages/notification/src/server/transport/__tests__/notification-transport-parity.spec.ts",
       "packages/notification/src/server/transport/notification-usecases-export.surface.spec.ts",
+      "packages/reminder/src/__tests__/package-root-owner-surface.spec.ts",
       "packages/reminder/src/api/module-lifecycle.spec.ts",
       "packages/reminder/src/api/routes/reminder-group.routes.spec.ts",
       "packages/reminder/src/api/routes/reminder-template.routes.spec.ts",
@@ -12796,7 +12826,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1109,
+    "unit": 1112,
     "integration": 38,
     "smoke": 3,
     "boundary-ipc": 9,

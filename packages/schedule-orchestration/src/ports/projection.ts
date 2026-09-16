@@ -55,8 +55,7 @@ export interface CreateScheduleOrchestrationModuleOptions {
   readonly goalProjection: ScheduleOrchestrationProjectionDeps<GoalScheduleProjectionSource>;
   readonly reminderProjection: ScheduleOrchestrationProjectionDeps<ReminderScheduleProjectionSource>;
   readonly execution: ScheduleOrchestrationExecutionDeps;
-  /** ROUTINE-3401 durable wall-clock lane; joining wires the handler + routine runtime. */
+  /** ROUTINE durable wall-clock projection; enabled once the host provides it. */
   readonly routineProjection?: ScheduleOrchestrationProjectionDeps<RoutineScheduleProjectionSource>;
-  /** ROUTINE-3401 durable snooze/suppress store; wrapped to converge the Scheduler on write. */
   readonly routineOverrideStore?: RoutineTemporaryOverrideStore;
 }

@@ -50,7 +50,7 @@ function makeTemplateState(overrides: Partial<ReminderTemplateState> = {}): Remi
 
 function makeGroupState(overrides: Partial<ReminderGroupState> = {}): ReminderGroupState {
   const now = new Date();
-  return {
+  const state: ReminderGroupState = {
     id: generateUUID(),
     identityId: SHARED_IDENTITY,
     name: 'Policy Group',
@@ -67,6 +67,10 @@ function makeGroupState(overrides: Partial<ReminderGroupState> = {}): ReminderGr
     version: 1,
     ...overrides,
   };
+  if (overrides.enabled === undefined && state.status === ReminderStatus.Paused) {
+    state.enabled = false;
+  }
+  return state;
 }
 
 // ===========================================================================
@@ -154,9 +158,7 @@ describe('ReminderPolicy', () => {
     });
 
     it('should not throw when identities match', () => {
-      const template = ReminderTemplate.load(
-        makeTemplateState({ identityId: SHARED_IDENTITY }),
-      );
+      const template = ReminderTemplate.load(makeTemplateState({ identityId: SHARED_IDENTITY }));
       const group = ReminderGroup.load(makeGroupState({ identityId: SHARED_IDENTITY }));
 
       expect(() => policy.assertValidGroupAssignment(template, group)).not.toThrow();

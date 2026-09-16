@@ -3,7 +3,7 @@
 import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { RoutineChannels, type FocusWindowProjection } from '@memoflow/contracts/electron';
+import { RoutineWindowChannels, type FocusWindowProjection } from '@memoflow/contracts/electron';
 import { ok } from '@memoflow/contracts/result';
 import FocusWindowApp from './FocusWindowApp.vue';
 
@@ -43,8 +43,8 @@ describe('FocusWindowApp (ROUTINE-4202)', () => {
     vi.setSystemTime(t0);
     projectionListener = null;
     invoke.mockReset().mockImplementation(async (channel: string, command?: unknown) => {
-      if (channel === RoutineChannels.FOCUS_WINDOW_GET) return ok(runningProjection());
-      if (channel === RoutineChannels.FOCUS_WINDOW_COMMAND) {
+      if (channel === RoutineWindowChannels.FOCUS_WINDOW_GET) return ok(runningProjection());
+      if (channel === RoutineWindowChannels.FOCUS_WINDOW_COMMAND) {
         if ((command as { action?: string })?.action === 'pause') {
           return ok(
             runningProjection({
@@ -65,7 +65,8 @@ describe('FocusWindowApp (ROUTINE-4202)', () => {
       value: {
         invoke,
         on: vi.fn((channel: string, callback: (payload: unknown) => void) => {
-          if (channel === RoutineChannels.FOCUS_WINDOW_PROJECTION) projectionListener = callback;
+          if (channel === RoutineWindowChannels.FOCUS_WINDOW_PROJECTION)
+            projectionListener = callback;
         }),
         off,
       },
@@ -87,7 +88,7 @@ describe('FocusWindowApp (ROUTINE-4202)', () => {
     await nextTick();
     expect(wrapper.get('[data-testid="focus-countdown"]').text()).toBe('03:59');
     expect(invoke).toHaveBeenCalledTimes(1);
-    expect(invoke).toHaveBeenCalledWith(RoutineChannels.FOCUS_WINDOW_GET);
+    expect(invoke).toHaveBeenCalledWith(RoutineWindowChannels.FOCUS_WINDOW_GET);
 
     projectionListener?.(
       runningProjection({
@@ -105,7 +106,10 @@ describe('FocusWindowApp (ROUTINE-4202)', () => {
     expect(wrapper.text()).toContain('Phase 2/4');
 
     wrapper.unmount();
-    expect(off).toHaveBeenCalledWith(RoutineChannels.FOCUS_WINDOW_PROJECTION, expect.any(Function));
+    expect(off).toHaveBeenCalledWith(
+      RoutineWindowChannels.FOCUS_WINDOW_PROJECTION,
+      expect.any(Function),
+    );
   });
 
   it('routes pause/collapse/always-on-top/hide commands through Main Process IPC', async () => {
@@ -114,7 +118,7 @@ describe('FocusWindowApp (ROUTINE-4202)', () => {
 
     await wrapper.get('.focus-window__session-actions button').trigger('click');
     await vi.waitFor(() =>
-      expect(invoke).toHaveBeenCalledWith(RoutineChannels.FOCUS_WINDOW_COMMAND, {
+      expect(invoke).toHaveBeenCalledWith(RoutineWindowChannels.FOCUS_WINDOW_COMMAND, {
         action: 'pause',
       }),
     );
@@ -126,15 +130,17 @@ describe('FocusWindowApp (ROUTINE-4202)', () => {
     await wrapper.get('button[aria-label="Hide focus window"]').trigger('click');
 
     await vi.waitFor(() => {
-      expect(invoke).toHaveBeenCalledWith(RoutineChannels.FOCUS_WINDOW_COMMAND, {
+      expect(invoke).toHaveBeenCalledWith(RoutineWindowChannels.FOCUS_WINDOW_COMMAND, {
         action: 'collapse',
         collapsed: true,
       });
-      expect(invoke).toHaveBeenCalledWith(RoutineChannels.FOCUS_WINDOW_COMMAND, {
+      expect(invoke).toHaveBeenCalledWith(RoutineWindowChannels.FOCUS_WINDOW_COMMAND, {
         action: 'always-on-top',
         enabled: true,
       });
-      expect(invoke).toHaveBeenCalledWith(RoutineChannels.FOCUS_WINDOW_COMMAND, { action: 'hide' });
+      expect(invoke).toHaveBeenCalledWith(RoutineWindowChannels.FOCUS_WINDOW_COMMAND, {
+        action: 'hide',
+      });
     });
     expect(wrapper.classes()).toContain('is-collapsed');
     wrapper.unmount();

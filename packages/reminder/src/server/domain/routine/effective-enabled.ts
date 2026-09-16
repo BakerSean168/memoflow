@@ -1,65 +1,56 @@
 import type { ProfileMembership, RoutineDefinition, RoutineProfile } from './model';
 
-/**
- * The only canonical effective-enabled formula for Routine Coach.
- *
- * effectiveEnabled =
- *   routine.enabled
- *   && profile.enabled
- *   && profile.active
- *   && membership.enabled
- *   && temporaryOverrideAllowsExecution
- *
- * A routine without an explicit profile/membership uses neutral `true` gates.
- * Legacy identity-wide enablement is folded into the routine gate at the
- * adapter seam; it must not become a second effective-state algorithm.
- */
-export interface RoutineEffectiveEnabledInput {
-  routineEnabled: boolean;
-  profileEnabled?: boolean;
-  profileActive?: boolean;
-  membershipEnabled?: boolean;
-  temporaryOverrideAllowsExecution?: boolean;
+export type RoutineEligibilityReasonCode =
+  | 'eligible'
+  | 'routine-disabled'
+  | 'profile-disabled'
+  | 'membership-disabled'
+  | 'runtime-context-inactive'
+  | 'temporary-override';
+
+export interface RoutineRuntimeContext {
+  readonly activeProfileIds: readonly string[];
 }
 
-export interface RoutineEffectiveEnabledResult {
-  effectiveEnabled: boolean;
-  gates: {
-    routine: boolean;
-    profileEnabled: boolean;
-    profileActive: boolean;
-    membership: boolean;
-    temporaryOverride: boolean;
-  };
-  blockedBy: Array<keyof RoutineEffectiveEnabledResult['gates']>;
+export interface RoutineEligibilityInput {
+  readonly routineEnabled: boolean;
+  readonly profileEnabled?: boolean;
+  readonly membershipEnabled?: boolean;
+  readonly runtimeContext?: RoutineRuntimeContext;
+  readonly profileId?: string;
+  readonly temporaryOverrideAllowsExecution?: boolean;
 }
 
-export function evaluateRoutineEffectiveEnabled(
-  input: RoutineEffectiveEnabledInput,
-): RoutineEffectiveEnabledResult {
-  const gates = {
-    routine: input.routineEnabled,
-    profileEnabled: input.profileEnabled ?? true,
-    profileActive: input.profileActive ?? true,
-    membership: input.membershipEnabled ?? true,
-    temporaryOverride: input.temporaryOverrideAllowsExecution ?? true,
-  };
-  const blockedBy = (Object.entries(gates) as Array<[keyof typeof gates, boolean]>)
-    .filter(([, enabled]) => !enabled)
-    .map(([gate]) => gate);
-  return {
-    effectiveEnabled: blockedBy.length === 0,
-    gates,
-    blockedBy,
-  };
+export interface RoutineEligibilityResult {
+  readonly eligible: boolean;
+  readonly reasonCodes: readonly RoutineEligibilityReasonCode[];
 }
 
-export function evaluateRoutineMembershipEffectiveEnabled(input: {
+export function evaluateRoutineEligibility(
+  input: RoutineEligibilityInput,
+): RoutineEligibilityResult {
+  const reasons: RoutineEligibilityReasonCode[] = [];
+  if (!input.routineEnabled) reasons.push('routine-disabled');
+  if (input.profileEnabled === false) reasons.push('profile-disabled');
+  if (input.membershipEnabled === false) reasons.push('membership-disabled');
+  if (
+    input.profileId !== undefined &&
+    input.runtimeContext !== undefined &&
+    !input.runtimeContext.activeProfileIds.includes(input.profileId)
+  ) {
+    reasons.push('runtime-context-inactive');
+  }
+  if (input.temporaryOverrideAllowsExecution === false) reasons.push('temporary-override');
+  return { eligible: reasons.length === 0, reasonCodes: reasons.length ? reasons : ['eligible'] };
+}
+
+export function evaluateRoutineMembershipEligibility(input: {
   routine: RoutineDefinition;
   profile: RoutineProfile;
   membership: ProfileMembership;
+  runtimeContext?: RoutineRuntimeContext;
   temporaryOverrideAllowsExecution?: boolean;
-}): RoutineEffectiveEnabledResult {
+}): RoutineEligibilityResult {
   if (
     input.routine.identityId !== input.profile.identityId ||
     input.routine.identityId !== input.membership.identityId ||
@@ -68,12 +59,12 @@ export function evaluateRoutineMembershipEffectiveEnabled(input: {
   ) {
     throw new TypeError('Routine/profile/membership ownership mismatch');
   }
-
-  return evaluateRoutineEffectiveEnabled({
+  return evaluateRoutineEligibility({
     routineEnabled: input.routine.enabled,
     profileEnabled: input.profile.enabled,
-    profileActive: input.profile.active,
     membershipEnabled: input.membership.enabled,
+    runtimeContext: input.runtimeContext,
+    profileId: input.profile.id,
     temporaryOverrideAllowsExecution: input.temporaryOverrideAllowsExecution,
   });
 }

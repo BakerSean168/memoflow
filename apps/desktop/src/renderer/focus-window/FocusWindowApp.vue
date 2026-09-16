@@ -80,7 +80,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import {
-  RoutineChannels,
+  RoutineWindowChannels,
   type FocusWindowCommand,
   type FocusWindowProjection,
 } from '@memoflow/contracts/electron';
@@ -136,7 +136,9 @@ function unwrapProjection(value: unknown): FocusWindowProjection | null {
 async function sendCommand(command: FocusWindowCommand): Promise<void> {
   const bridge = window.electronAPI;
   if (!bridge) return;
-  const next = unwrapProjection(await bridge.invoke(RoutineChannels.FOCUS_WINDOW_COMMAND, command));
+  const next = unwrapProjection(
+    await bridge.invoke(RoutineWindowChannels.FOCUS_WINDOW_COMMAND, command),
+  );
   if (next) projection.value = next;
   if (command.action === 'collapse') collapsed.value = command.collapsed;
   if (command.action === 'always-on-top') alwaysOnTop.value = command.enabled;
@@ -158,8 +160,10 @@ const onProjection = (value: unknown): void => {
 onMounted(async () => {
   const bridge = window.electronAPI;
   if (bridge) {
-    projection.value = unwrapProjection(await bridge.invoke(RoutineChannels.FOCUS_WINDOW_GET));
-    bridge.on(RoutineChannels.FOCUS_WINDOW_PROJECTION, onProjection);
+    projection.value = unwrapProjection(
+      await bridge.invoke(RoutineWindowChannels.FOCUS_WINDOW_GET),
+    );
+    bridge.on(RoutineWindowChannels.FOCUS_WINDOW_PROJECTION, onProjection);
   }
   timer = setInterval(() => {
     now.value = Date.now();
@@ -169,7 +173,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   if (timer) clearInterval(timer);
   timer = null;
-  window.electronAPI?.off(RoutineChannels.FOCUS_WINDOW_PROJECTION, onProjection);
+  window.electronAPI?.off(RoutineWindowChannels.FOCUS_WINDOW_PROJECTION, onProjection);
 });
 </script>
 

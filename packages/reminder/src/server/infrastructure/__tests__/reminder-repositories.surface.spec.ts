@@ -13,11 +13,13 @@ import {
   type ReminderPrismaRepositorySet,
   type ReminderPowerSyncRepositorySet,
   type ReminderModuleInstance,
-  type IReminderTemplateRepository,
-  type IReminderGroupRepository,
-  type IReminderResponseRepository,
-  type IUserReminderPreferenceRepository,
 } from '../../../../src';
+import type {
+  IReminderTemplateRepository,
+  IReminderGroupRepository,
+  IReminderResponseRepository,
+  IUserReminderPreferenceRepository,
+} from '../../../server';
 
 /**
  * Reminder repository seam surface.
@@ -133,7 +135,7 @@ describe('reminder repository factories surface', () => {
     }
   });
 
-  it('root barrel type-exports every set field type (compile-time lock)', () => {
+  it('server seam type-exports every set field type (compile-time lock)', () => {
     const template = (_t: IReminderTemplateRepository) => undefined;
     const group = (_t: IReminderGroupRepository) => undefined;
     const response = (_t: IReminderResponseRepository) => undefined;
