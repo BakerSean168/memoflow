@@ -42,7 +42,19 @@ class RoutineDb implements IElectronDatabase {
     throw new Error(`Unexpected SQL: ${sql}`);
   }
 
-  async getOptional<T>(): Promise<T | null> {
+  async getOptional<T>(sql: string): Promise<T | null> {
+    if (sql.includes('FROM routine_profiles')) {
+      return {
+        id: 'profile-1',
+        identity_id: 'identity-1',
+        name: 'Work',
+        description: null,
+        enabled: 1,
+        version: 1,
+        created_at: 1,
+        updated_at: 1,
+      } as T;
+    }
     return null;
   }
 
@@ -123,6 +135,11 @@ function createComposition(idleSensor = new ControlledIdleSensor()) {
 describe('composeReminder local Routine vertical slice', () => {
   it('projects durable ActiveUsage state and turns threshold due into InterventionRuntime truth', async () => {
     const { composed } = createComposition();
+    await composed.routineCommandPort.setProfileActive({
+      identityId: 'identity-1',
+      profileId: 'profile-1',
+      active: true,
+    });
     await composed.refreshLocalRoutineRegistrations();
     const t0 = Date.now();
 
@@ -146,6 +163,11 @@ describe('composeReminder local Routine vertical slice', () => {
 
   it('closes the exact due intervention when an explicit compatible protocol break satisfies the lane', async () => {
     const { composed } = createComposition();
+    await composed.routineCommandPort.setProfileActive({
+      identityId: 'identity-1',
+      profileId: 'profile-1',
+      active: true,
+    });
     await composed.refreshLocalRoutineRegistrations();
     const t0 = Date.now();
     composed.activeUsageRuntime.advance(asInstant(t0));
@@ -179,6 +201,11 @@ describe('composeReminder local Routine vertical slice', () => {
 
   it('closes an already-due intervention when a natural idle break satisfies the lane', async () => {
     const { composed, idleSensor } = createComposition();
+    await composed.routineCommandPort.setProfileActive({
+      identityId: 'identity-1',
+      profileId: 'profile-1',
+      active: true,
+    });
     await composed.refreshLocalRoutineRegistrations();
     const t0 = Date.now();
     composed.activeUsageRuntime.advance(asInstant(t0));

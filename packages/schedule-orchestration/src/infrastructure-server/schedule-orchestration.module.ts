@@ -2,6 +2,10 @@ import type { GoalScheduleProjectionEventMap } from '@memoflow/goal/schedule-pro
 import { GOAL_SCHEDULING_OWNER_TYPE } from '@memoflow/goal/schedule-projection';
 import type { RoutineScheduleProjectionEventMap } from '@memoflow/reminder/schedule-projection/routine';
 import { ROUTINE_SCHEDULING_OWNER_TYPE } from '@memoflow/reminder/schedule-projection/routine';
+import {
+  REMINDER_SCHEDULING_OWNER_TYPE,
+  type ReminderScheduleProjectionEventMap,
+} from '@memoflow/reminder/schedule-projection';
 import type { TaskScheduleProjectionEventMap } from '@memoflow/task/schedule-projection';
 import { TASK_SCHEDULING_OWNER_TYPE } from '@memoflow/task/schedule-projection';
 import {
@@ -14,6 +18,7 @@ import {
   createHandlerRegistryScheduleTaskSourceExecutor,
   createScheduleTaskSchedulingPort,
 } from '@memoflow/scheduler';
+import { createReminderTemplateScheduledHandlerRegistration } from '@memoflow/reminder/schedule-execution';
 import {
   createRoutineWallClockExecutionSource,
   createRoutineWallClockScheduledHandler,
@@ -29,6 +34,7 @@ import {
 import { createCompositeRuntimeContribution } from '../runtime/composite-runtime';
 import { createGoalProjectionRuntime } from '../runtime/goal-projection-runtime';
 import { createProjectionRepairRuntime } from '../runtime/projection-repair-runtime';
+import { createReminderProjectionRuntime } from '../runtime/reminder-projection-runtime';
 import { createRoutineProjectionRuntime } from '../runtime/routine-projection-runtime';
 import { createTaskProjectionRuntime } from '../runtime/task-projection-runtime';
 import { createRoutineOverrideChangedPublishingStore } from './routine-override-changing-store';
@@ -39,6 +45,12 @@ export function createScheduleOrchestrationModule(
   const scheduleTaskRepository = options.taskProjection.scheduleTaskRepository;
   const schedulingPort = createScheduleTaskSchedulingPort(scheduleTaskRepository);
   const handlerRegistry = new ScheduledHandlerRegistry();
+  handlerRegistry.register(
+    createReminderTemplateScheduledHandlerRegistration({
+      executionSource: options.execution.reminderSource,
+    }),
+  );
+
   // SCHED-3601 startup ordering is intentional: every Task/Goal/Reminder/Routine
   // incremental listener is registered before the common durable repair sweep.
   const incrementalRuntimes = [
@@ -51,6 +63,11 @@ export function createScheduleOrchestrationModule(
       source: options.goalProjection.source,
       schedulingPort,
       goalEvents: createTypedEventSubscriber<GoalScheduleProjectionEventMap>(eventBus),
+    }),
+    createReminderProjectionRuntime({
+      source: options.reminderProjection.source,
+      schedulingPort,
+      reminderEvents: createTypedEventSubscriber<ReminderScheduleProjectionEventMap>(eventBus),
     }),
   ];
 
@@ -84,6 +101,25 @@ export function createScheduleOrchestrationModule(
       buildOwner: (ref) => options.goalProjection.source.buildGoalOwner(ref.goalId, ref.identityId),
       listSchedulerOwners: () =>
         scheduleTaskRepository.listSchedulingOwners?.(GOAL_SCHEDULING_OWNER_TYPE) ??
+        Promise.resolve([]),
+      removeOwner: (owner) => schedulingPort.removeOwner(owner),
+      describeOwner: (owner) => `${owner.identityId}/${owner.id}`,
+    }),
+    defineProjectionRepairLane<{ templateId: string; identityId: string }>({
+      source: 'reminder',
+      enumerate: () => options.reminderProjection.source.listTemplateRefs(),
+      describe: (ref) => `${ref.identityId}/${ref.templateId}`,
+      repair: async (ref) => {
+        const plan = await options.reminderProjection.source.buildTemplatePlan(
+          ref.templateId,
+          ref.identityId,
+        );
+        return schedulingPort.reconcile(plan.owner, plan.desired);
+      },
+      buildOwner: (ref) =>
+        options.reminderProjection.source.buildTemplateOwner(ref.templateId, ref.identityId),
+      listSchedulerOwners: () =>
+        scheduleTaskRepository.listSchedulingOwners?.(REMINDER_SCHEDULING_OWNER_TYPE) ??
         Promise.resolve([]),
       removeOwner: (owner) => schedulingPort.removeOwner(owner),
       describeOwner: (owner) => `${owner.identityId}/${owner.id}`,

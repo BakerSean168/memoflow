@@ -9,8 +9,8 @@ import {
   createReminderScheduleProjectionSource,
 } from './schedule-projection-source';
 
-function makeRoutineProfileStore(input?: { profileActive?: boolean }) {
-  if (input?.profileActive === undefined) {
+function makeRoutineProfileStore(input?: { profileEnabled?: boolean }) {
+  if (input?.profileEnabled === undefined) {
     return {
       listMembershipsForRoutines: vi.fn().mockResolvedValue([]),
       findProfilesByIds: vi.fn().mockResolvedValue([]),
@@ -31,8 +31,7 @@ function makeRoutineProfileStore(input?: { profileActive?: boolean }) {
         id: 'IRoutineProfileId_work',
         identityId: 'IdentityId_reminder-owner',
         name: 'Work',
-        enabled: true,
-        active: input.profileActive,
+        enabled: input.profileEnabled,
       },
     ]),
   } as never;
@@ -98,7 +97,7 @@ describe('createReminderScheduleProjectionSource', () => {
         findByIdForIdentity: vi.fn().mockResolvedValue(template),
         findAllTemplateRefs: vi.fn().mockResolvedValue([]),
       } as never,
-      routineProfileStore: makeRoutineProfileStore({ profileActive: false }),
+      routineProfileStore: makeRoutineProfileStore({ profileEnabled: false }),
     });
 
     await expect(source.buildTemplatePlan(template.id, template.identityId)).resolves.toEqual({

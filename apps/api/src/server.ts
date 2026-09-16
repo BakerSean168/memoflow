@@ -260,11 +260,15 @@ async function bootstrap(): Promise<void> {
         settingApiModule.userTimeContextPort,
       ),
     },
+    reminderProjection: {
+      source: reminderComposed.scheduleProjectionSource,
+    },
     routineProjection: {
       source: createRoutinePrismaScheduleProjectionSource(prisma),
     },
     routineOverrideStore: routineExecutionDeps.temporaryOverrideStore,
     execution: {
+      reminderSource: reminderComposed.scheduleExecutionSource,
       routineSource: routineExecutionDeps,
     },
   });
