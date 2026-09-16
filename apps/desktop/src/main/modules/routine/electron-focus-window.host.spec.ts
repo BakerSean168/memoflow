@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { BrowserWindow } from 'electron';
-import { RoutineChannels, type FocusWindowProjection } from '@memoflow/contracts/electron';
+import { RoutineWindowChannels, type FocusWindowProjection } from '@memoflow/contracts/electron';
 import { ElectronFocusWindowHost } from './electron-focus-window.host';
 import { ElectronFocusTaskbarAdapter } from './focus-window-taskbar.adapter';
 
@@ -44,7 +44,7 @@ describe('ElectronFocusWindowHost (ROUTINE-4202)', () => {
     expect(window.loadURL).toHaveBeenCalledWith('http://127.0.0.1:5173#/focus-window');
     expect(window.isVisible()).toBe(true);
     expect(window.webContents.send).toHaveBeenCalledWith(
-      RoutineChannels.FOCUS_WINDOW_PROJECTION,
+      RoutineWindowChannels.FOCUS_WINDOW_PROJECTION,
       projection,
     );
 

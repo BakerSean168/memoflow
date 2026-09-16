@@ -51,7 +51,6 @@ export const RoutineProfileMembershipViewSchema = z.object({
   profileName: z.string().nullable(),
   enabled: z.boolean(),
   profileEnabled: z.boolean(),
-  profileActive: z.boolean(),
   effectiveEnabled: z.boolean(),
 });
 

@@ -50,12 +50,14 @@ function requirePort<T>(port: T | undefined, name: string): T {
   return port;
 }
 
-const windowSchema = z.object({
-  startTime: z.number().int().nonnegative(),
-  endTime: z.number().int().positive(),
-}).refine((value) => value.endTime > value.startTime, {
-  message: 'endTime must be greater than startTime',
-});
+const windowSchema = z
+  .object({
+    startTime: z.number().int().nonnegative(),
+    endTime: z.number().int().positive(),
+  })
+  .refine((value) => value.endTime > value.startTime, {
+    message: 'endTime must be greater than startTime',
+  });
 
 export function createMemoFlowProductTools(deps: MemoFlowProductToolDependencies) {
   const routineCreate = createTool({
@@ -66,18 +68,22 @@ export function createMemoFlowProductTools(deps: MemoFlowProductToolDependencies
     inputSchema: z.object({
       title: z.string().trim().min(1).max(200),
       description: z.string().trim().max(1000).optional(),
-      methodId: z.enum([
-        'stand-and-move',
-        '20-20-20',
-        'drink-water',
-        'sleep-wind-down',
-        '50-10-protocol',
-        'pomodoro',
-      ]).optional(),
-      trigger: z.discriminatedUnion('type', [
-        z.object({ type: z.literal('Interval'), intervalMinutes: z.number().int().positive() }),
-        z.object({ type: z.literal('FixedTime'), fixedTime: z.string().regex(/^\d{2}:\d{2}$/) }),
-      ]).optional(),
+      methodId: z
+        .enum([
+          'stand-and-move',
+          '20-20-20',
+          'drink-water',
+          'sleep-wind-down',
+          '50-10-protocol',
+          'pomodoro',
+        ])
+        .optional(),
+      trigger: z
+        .discriminatedUnion('type', [
+          z.object({ type: z.literal('Interval'), intervalMinutes: z.number().int().positive() }),
+          z.object({ type: z.literal('FixedTime'), fixedTime: z.string().regex(/^\d{2}:\d{2}$/) }),
+        ])
+        .optional(),
       profileIds: z.array(z.string().min(1)).max(50).optional(),
     }),
     execute: async (input, { requestContext }) =>
@@ -156,17 +162,18 @@ export function createMemoFlowProductTools(deps: MemoFlowProductToolDependencies
       }),
   });
 
-  const protocolTransition = (action: 'pause' | 'resume' | 'end') => createTool({
-    id: `routine_${action}_protocol`,
-    description: `${action[0].toUpperCase()}${action.slice(1)} an existing deterministic ProtocolSession. This changes only session runtime state; timer truth remains in the Routine Protocol runtime.`,
-    inputSchema: z.object({ sessionId: z.string().min(1) }),
-    execute: async ({ sessionId }, { requestContext }) =>
-      requirePort(deps.routineCommandPort, 'Routine command capability').transitionProtocol({
-        context: executionContext(requestContext),
-        sessionId,
-        action,
-      }),
-  });
+  const protocolTransition = (action: 'pause' | 'resume' | 'end') =>
+    createTool({
+      id: `routine_${action}_protocol`,
+      description: `${action[0].toUpperCase()}${action.slice(1)} an existing deterministic ProtocolSession. This changes only session runtime state; timer truth remains in the Routine Protocol runtime.`,
+      inputSchema: z.object({ sessionId: z.string().min(1) }),
+      execute: async ({ sessionId }, { requestContext }) =>
+        requirePort(deps.routineCommandPort, 'Routine command capability').transitionProtocol({
+          context: executionContext(requestContext),
+          sessionId,
+          action,
+        }),
+    });
 
   const plannerToday = createTool({
     id: 'planner_today_summary',

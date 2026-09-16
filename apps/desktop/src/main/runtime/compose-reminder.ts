@@ -49,10 +49,10 @@ import {
   createReminderScheduleExecutionSource,
   createReminderScheduleProjectionSource,
   loadPowerSyncRoutineLocalRegistrations,
-  type ReminderApplicationPort,
-  type IReminderTemplateRepository,
   type ReminderScheduleExecutionSource,
   type ReminderScheduleProjectionSource,
+  type ReminderModuleInstance,
+  type ReminderPowerSyncRepositorySet,
 } from '@memoflow/reminder';
 import {
   createReminderElectronModule,
@@ -72,6 +72,7 @@ import {
   type RoutineActivitySensorRuntime,
   createRoutineCoachCommandService,
   createRoutineOverrideChangedNotifier,
+  createInMemoryRoutineRuntimeContextStore,
   type RoutineCoachCommandPort,
 } from '@memoflow/reminder/routine-runtime';
 import type { IdleSensorPort } from '@memoflow/reminder/routine-runtime';
@@ -113,11 +114,13 @@ export interface ComposedReminderDesktop {
   /** Already-bound IElectronModule-compatible handle. 已绑定的 IElectronModule 兼容 handle。 */
   readonly module: ReminderElectronModuleDef;
   /** Canonical transport-neutral application port from the SAME module instance. */
-  readonly applicationPort: ReminderApplicationPort;
+  readonly applicationPort: ReminderModuleInstance['api'];
   /** Routine Coach owner-domain command seam for approved AI/product orchestration. */
   readonly routineCommandPort: RoutineCoachCommandPort;
   /** Repository view exposed to sibling modules (dashboard). 暴露给兄弟模块（dashboard）的仓储视图。 */
-  readonly repositories: { readonly reminderTemplateRepository: IReminderTemplateRepository };
+  readonly repositories: {
+    readonly reminderTemplateRepository: ReminderPowerSyncRepositorySet['reminderTemplateRepository'];
+  };
   /** Schedule execution source built from the SAME repository set. 从同一仓储集合构建的 schedule execution source。 */
   readonly scheduleExecutionSource: ReminderScheduleExecutionSource;
   /** Schedule projection source built from the SAME repository set. 从同一仓储集合构建的 schedule projection source。 */
@@ -184,12 +187,18 @@ export function composeReminder(
   dependencies: ComposeReminderDesktopDependencies,
 ): ComposedReminderDesktop {
   const repositories = createReminderPowerSyncRepositories(dependencies.db);
+  const runtimeContextStore = createInMemoryRoutineRuntimeContextStore();
+  let refreshLocalRoutineRegistrations: () => Promise<void> = async () => {};
 
   const routineCommandPort = createRoutineCoachCommandService({
     routineProfileStore: repositories.routineProfileStore,
+    runtimeContextStore,
     temporaryOverrideStore: repositories.routineTemporaryOverrideStore,
     protocolSessionStore: repositories.protocolSessionStore,
     onOverrideChanged: createRoutineOverrideChangedNotifier(),
+    onProfileActiveChanged: async ({ identityId }) => {
+      if (identityId === dependencies.identityId) await refreshLocalRoutineRegistrations();
+    },
   });
 
   const instance = createReminderModule({
@@ -198,6 +207,7 @@ export function composeReminder(
     reminderResponseRepository: repositories.reminderResponseRepository,
     userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
     routineProfileStore: repositories.routineProfileStore,
+    runtimeContextStore,
     closureChecker: repositories.closureChecker,
     userTimeContextPort: dependencies.userTimeContextPort,
   });
@@ -213,6 +223,7 @@ export function composeReminder(
   const scheduleProjectionSource = createReminderScheduleProjectionSource({
     reminderTemplateRepository,
     routineProfileStore: repositories.routineProfileStore,
+    runtimeContextStore,
     userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
   });
 
@@ -279,10 +290,11 @@ export function composeReminder(
     readonly credit: AmbientBreakCreditRegistration;
     readonly activeUsage: ActiveUsageRoutineRegistration;
   }): void => registerActiveUsageRoutine(input);
-  const refreshLocalRoutineRegistrations = async (): Promise<void> => {
+  refreshLocalRoutineRegistrations = async (): Promise<void> => {
     const snapshot = await loadPowerSyncRoutineLocalRegistrations(
       dependencies.db,
       dependencies.identityId,
+      runtimeContextStore.get({ identityId: dependencies.identityId }),
     );
     for (const routineId of locallyRegisteredRoutineIds) {
       activeUsageRuntime.unregisterRoutine(dependencies.identityId, routineId);

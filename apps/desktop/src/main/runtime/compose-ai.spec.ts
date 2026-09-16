@@ -90,7 +90,6 @@ const knowledgeSourcePort = { tag: 'knowledge-source' } as never;
 const analyticsReadPort = { tag: 'analytics-read' } as never;
 const goalApplicationPort = { tag: 'goal-application' } as never;
 const taskApplicationPort = { tag: 'task-application' } as never;
-const reminderApplicationPort = { tag: 'reminder-application' } as never;
 const routineCommandPort = { tag: 'routine-command-port' } as never;
 const scheduleRepository = { tag: 'schedule-repository' } as never;
 const notificationRepository = { tag: 'notification-repository' } as never;
@@ -117,7 +116,6 @@ const dependencies = {
   analyticsReadPort,
   goalApplicationPort,
   taskApplicationPort,
-  reminderApplicationPort,
   routineCommandPort,
   scheduleRepository,
   notificationRepository,
@@ -165,8 +163,8 @@ describe('Desktop composeAI Mastra-only ownership', () => {
     );
     expect(DesktopTaskPlanMutationAdapter).toHaveBeenCalledWith(taskApplicationPort, labelService);
     expect(DesktopRoutineAICommandAdapter).toHaveBeenCalledWith(
-      reminderApplicationPort,
       routineCommandPort,
+      userTimeContextPort,
     );
     expect(DesktopPlannerAIReadAdapter).toHaveBeenCalledWith(
       scheduleRepository,

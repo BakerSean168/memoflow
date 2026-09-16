@@ -12,7 +12,7 @@ import type { IGoalRepository } from '@memoflow/goal';
 import type { ITaskOccurrenceRepository, ITaskPlanRepository } from '@memoflow/task';
 import type { IScheduleRepository } from '@memoflow/schedule';
 import type { IScheduleTaskRepository } from '@memoflow/scheduler';
-import type { IReminderTemplateRepository } from '@memoflow/reminder';
+import type { IReminderTemplateRepository } from '@memoflow/reminder/server';
 import type { INotificationRepository } from '@memoflow/notification';
 import { createLogger } from '@memoflow/utils/logger';
 

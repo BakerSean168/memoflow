@@ -17,7 +17,6 @@
 
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import type { GoalApplicationPort } from '@memoflow/goal';
-import type { ReminderApplicationPort } from '@memoflow/reminder';
 import type { RoutineCoachCommandPort } from '@memoflow/reminder/routine-runtime';
 import type { IScheduleRepository } from '@memoflow/schedule';
 import type { INotificationRepository } from '@memoflow/notification';
@@ -53,7 +52,6 @@ export interface ComposeAIElectronDependencies {
   readonly analyticsReadPort: IAnalyticsReadPort;
   readonly goalApplicationPort: GoalApplicationPort;
   readonly taskApplicationPort: TaskApplicationPort;
-  readonly reminderApplicationPort: ReminderApplicationPort;
   readonly goalKnowledgeService: Pick<GoalKnowledgeService, 'link'>;
   readonly knowledgeDocumentRefResolver: KnowledgeDocumentRefResolver;
   readonly labelService: LabelService;
@@ -101,8 +99,8 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): AIElectr
     executionLogPort,
     usageReadPort: executionLogPort,
     routineCommandPort: new DesktopRoutineAICommandAdapter(
-      dependencies.reminderApplicationPort,
       dependencies.routineCommandPort,
+      dependencies.userTimeContextPort,
     ),
     plannerReadPort: new DesktopPlannerAIReadAdapter(
       dependencies.scheduleRepository,

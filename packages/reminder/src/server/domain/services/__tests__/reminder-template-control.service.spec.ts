@@ -3,6 +3,7 @@ import { ReminderStatus, ReminderType } from '@memoflow/contracts/reminder';
 import { IdentityId } from '@memoflow/domain-shared';
 import { ReminderTemplate } from '../../aggregates/reminder-template';
 import type { RoutineProfileStore } from '../../ports';
+import { createInMemoryRoutineRuntimeContextStore } from '../../../runtime/routine-runtime-context';
 import { ProfileMembership, RoutineProfile } from '../../routine';
 import { ReminderTemplateControlService } from '../reminder-template-control-service';
 
@@ -42,7 +43,6 @@ function createProfile(
     id: string;
     name: string;
     enabled?: boolean;
-    active?: boolean;
   },
 ) {
   return RoutineProfile.create({
@@ -50,7 +50,6 @@ function createProfile(
     identityId,
     name: input.name,
     enabled: input.enabled ?? true,
-    active: input.active ?? true,
   });
 }
 
@@ -65,10 +64,12 @@ describe('ReminderTemplateControlService -> canonical ProfileMembership gate', (
   let memberships: ProfileMembership[];
   let profiles: RoutineProfile[];
   let routineProfileStore: RoutineProfileStore;
+  let runtimeContextStore: ReturnType<typeof createInMemoryRoutineRuntimeContextStore>;
   let service: ReminderTemplateControlService;
 
   beforeEach(() => {
     vi.clearAllMocks();
+    runtimeContextStore = createInMemoryRoutineRuntimeContextStore();
     memberships = [];
     profiles = [];
     preferenceRepository.findByIdentityId.mockResolvedValue(null);
@@ -89,6 +90,7 @@ describe('ReminderTemplateControlService -> canonical ProfileMembership gate', (
       templateRepository,
       preferenceRepository,
       routineProfileStore,
+      runtimeContextStore,
     );
   });
 
@@ -135,7 +137,6 @@ describe('ReminderTemplateControlService -> canonical ProfileMembership gate', (
         profileId: 'missing-profile',
         profileName: null,
         profileEnabled: false,
-        profileActive: false,
         effectiveEnabled: false,
       }),
     ]);
@@ -144,7 +145,8 @@ describe('ReminderTemplateControlService -> canonical ProfileMembership gate', (
   it('Profile OFF disables its path without changing membership-local enabled state', async () => {
     const template = createTemplate();
     const identityId = String(template.identityId);
-    profiles = [createProfile(identityId, { id: 'work', name: 'Work', active: false })];
+    profiles = [createProfile(identityId, { id: 'work', name: 'Work', enabled: false })];
+    runtimeContextStore.setProfileActive({ identityId, profileId: 'work', active: true });
     memberships = [
       ProfileMembership.create({
         identityId,
@@ -161,7 +163,7 @@ describe('ReminderTemplateControlService -> canonical ProfileMembership gate', (
     expect(result.profileMemberships[0]).toMatchObject({
       profileId: 'work',
       enabled: true,
-      profileActive: false,
+      profileEnabled: false,
       effectiveEnabled: false,
     });
   });
@@ -170,9 +172,10 @@ describe('ReminderTemplateControlService -> canonical ProfileMembership gate', (
     const template = createTemplate();
     const identityId = String(template.identityId);
     profiles = [
-      createProfile(identityId, { id: 'work', name: 'Work', active: false }),
-      createProfile(identityId, { id: 'gaming', name: 'Gaming', active: true }),
+      createProfile(identityId, { id: 'work', name: 'Work' }),
+      createProfile(identityId, { id: 'gaming', name: 'Gaming' }),
     ];
+    runtimeContextStore.setProfileActive({ identityId, profileId: 'gaming', active: true });
     memberships = [
       ProfileMembership.create({
         identityId,
@@ -201,7 +204,8 @@ describe('ReminderTemplateControlService -> canonical ProfileMembership gate', (
   it('Profile ON never revives a disabled Routine', async () => {
     const template = createTemplate({ status: ReminderStatus.Paused });
     const identityId = String(template.identityId);
-    profiles = [createProfile(identityId, { id: 'work', name: 'Work', active: true })];
+    profiles = [createProfile(identityId, { id: 'work', name: 'Work' })];
+    runtimeContextStore.setProfileActive({ identityId, profileId: 'work', active: true });
     memberships = [
       ProfileMembership.create({
         identityId,
@@ -223,7 +227,12 @@ describe('ReminderTemplateControlService -> canonical ProfileMembership gate', (
     const enabled = createTemplate({ identityId });
     const paused = createTemplate({ identityId, status: ReminderStatus.Paused });
     const unprofiled = createTemplate({ identityId });
-    profiles = [createProfile(String(identityId), { id: 'work', name: 'Work', active: true })];
+    profiles = [createProfile(String(identityId), { id: 'work', name: 'Work' })];
+    runtimeContextStore.setProfileActive({
+      identityId: String(identityId),
+      profileId: 'work',
+      active: true,
+    });
     memberships = [
       ProfileMembership.create({
         identityId: String(identityId),

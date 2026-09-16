@@ -48,15 +48,33 @@ export class RoutineDefinition {
     return new RoutineDefinition({ ...state, trigger: state.trigger ?? null });
   }
 
-  get id(): string { return this.state.id; }
-  get identityId(): string { return this.state.identityId; }
-  get name(): string { return this.state.name; }
-  get description(): string | null { return this.state.description; }
-  get enabled(): boolean { return this.state.enabled; }
-  get trigger(): RoutineTrigger | null { return this.state.trigger; }
-  get version(): number { return this.state.version; }
-  get createdAt(): Date { return this.state.createdAt; }
-  get updatedAt(): Date { return this.state.updatedAt; }
+  get id(): string {
+    return this.state.id;
+  }
+  get identityId(): string {
+    return this.state.identityId;
+  }
+  get name(): string {
+    return this.state.name;
+  }
+  get description(): string | null {
+    return this.state.description;
+  }
+  get enabled(): boolean {
+    return this.state.enabled;
+  }
+  get trigger(): RoutineTrigger | null {
+    return this.state.trigger;
+  }
+  get version(): number {
+    return this.state.version;
+  }
+  get createdAt(): Date {
+    return this.state.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.state.updatedAt;
+  }
 
   enable(now = new Date()): void {
     if (this.state.enabled) return;
@@ -92,7 +110,6 @@ export interface RoutineProfileState {
   name: string;
   description: string | null;
   enabled: boolean;
-  active: boolean;
   version: number;
   createdAt: Date;
   updatedAt: Date;
@@ -108,7 +125,6 @@ export class RoutineProfile {
     name: string;
     description?: string | null;
     enabled?: boolean;
-    active?: boolean;
     now?: Date;
   }): RoutineProfile {
     assertNonEmpty(input.identityId, 'identityId');
@@ -120,7 +136,6 @@ export class RoutineProfile {
       name: input.name.trim(),
       description: input.description?.trim() || null,
       enabled: input.enabled ?? true,
-      active: input.active ?? false,
       version: 1,
       createdAt: now,
       updatedAt: now,
@@ -131,15 +146,30 @@ export class RoutineProfile {
     return new RoutineProfile({ ...state });
   }
 
-  get id(): string { return this.state.id; }
-  get identityId(): string { return this.state.identityId; }
-  get name(): string { return this.state.name; }
-  get description(): string | null { return this.state.description; }
-  get enabled(): boolean { return this.state.enabled; }
-  get active(): boolean { return this.state.active; }
-  get version(): number { return this.state.version; }
-  get createdAt(): Date { return this.state.createdAt; }
-  get updatedAt(): Date { return this.state.updatedAt; }
+  get id(): string {
+    return this.state.id;
+  }
+  get identityId(): string {
+    return this.state.identityId;
+  }
+  get name(): string {
+    return this.state.name;
+  }
+  get description(): string | null {
+    return this.state.description;
+  }
+  get enabled(): boolean {
+    return this.state.enabled;
+  }
+  get version(): number {
+    return this.state.version;
+  }
+  get createdAt(): Date {
+    return this.state.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.state.updatedAt;
+  }
 
   enable(now = new Date()): void {
     if (this.state.enabled) return;
@@ -150,18 +180,6 @@ export class RoutineProfile {
   disable(now = new Date()): void {
     if (!this.state.enabled) return;
     this.state.enabled = false;
-    this.touch(now);
-  }
-
-  activate(now = new Date()): void {
-    if (this.state.active) return;
-    this.state.active = true;
-    this.touch(now);
-  }
-
-  deactivate(now = new Date()): void {
-    if (!this.state.active) return;
-    this.state.active = false;
     this.touch(now);
   }
 
@@ -215,13 +233,27 @@ export class ProfileMembership {
     return new ProfileMembership({ ...state });
   }
 
-  get identityId(): string { return this.state.identityId; }
-  get profileId(): string { return this.state.profileId; }
-  get routineId(): string { return this.state.routineId; }
-  get enabled(): boolean { return this.state.enabled; }
-  get version(): number { return this.state.version; }
-  get createdAt(): Date { return this.state.createdAt; }
-  get updatedAt(): Date { return this.state.updatedAt; }
+  get identityId(): string {
+    return this.state.identityId;
+  }
+  get profileId(): string {
+    return this.state.profileId;
+  }
+  get routineId(): string {
+    return this.state.routineId;
+  }
+  get enabled(): boolean {
+    return this.state.enabled;
+  }
+  get version(): number {
+    return this.state.version;
+  }
+  get createdAt(): Date {
+    return this.state.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.state.updatedAt;
+  }
 
   enable(now = new Date()): void {
     if (this.state.enabled) return;

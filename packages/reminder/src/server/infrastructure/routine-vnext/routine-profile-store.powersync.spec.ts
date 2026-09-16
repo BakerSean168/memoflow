@@ -13,7 +13,7 @@ import {
 } from '../../domain/routine';
 import { PowerSyncRoutineProfileStore } from './routine-profile-store.powersync';
 
-function createDb(): IElectronDatabase & { close(): void } {
+function createDb(failMembershipInsert = false): IElectronDatabase & { close(): void } {
   const sqlite = new Database(':memory:');
   sqlite.exec(`
     PRAGMA foreign_keys = ON;
@@ -35,7 +35,6 @@ function createDb(): IElectronDatabase & { close(): void } {
       name TEXT NOT NULL,
       description TEXT,
       enabled INTEGER NOT NULL,
-      active INTEGER NOT NULL,
       version INTEGER NOT NULL,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
@@ -57,6 +56,9 @@ function createDb(): IElectronDatabase & { close(): void } {
 
   const db: IElectronDatabase = {
     async execute(sql: string, parameters: unknown[] = []): Promise<IElectronDatabaseQueryResult> {
+      if (failMembershipInsert && sql.includes('INSERT INTO routine_profile_memberships')) {
+        throw new Error('membership insert failed');
+      }
       const info = sqlite.prepare(sql).run(...parameters);
       return { rowsAffected: info.changes };
     },
@@ -101,7 +103,6 @@ function fixture() {
     identityId: 'identity-1',
     name: 'Work',
     enabled: true,
-    active: true,
     now,
   });
   const gaming = RoutineProfile.create({
@@ -109,13 +110,134 @@ function fixture() {
     identityId: 'identity-1',
     name: 'Gaming',
     enabled: true,
-    active: false,
     now,
   });
   return { routine, work, gaming, now };
 }
 
 describe('PowerSyncRoutineProfileStore', () => {
+  it('creates a RoutineDefinition and multiple memberships in one transaction', async () => {
+    const db = createDb();
+    try {
+      const store = new PowerSyncRoutineProfileStore(db);
+      const { routine, work, gaming, now } = fixture();
+      await store.upsertProfile(work);
+      await store.upsertProfile(gaming);
+      const memberships = [work, gaming].map((profile) =>
+        ProfileMembership.create({
+          identityId: routine.identityId,
+          profileId: profile.id,
+          routineId: routine.id,
+          now,
+        }),
+      );
+
+      await store.createDefinitionWithMemberships({ definition: routine, memberships });
+
+      expect(
+        await store.findDefinition({ identityId: routine.identityId, routineId: routine.id }),
+      ).toMatchObject({
+        id: routine.id,
+        identityId: routine.identityId,
+      });
+      expect(
+        (
+          await store.listMembershipsForRoutine({
+            identityId: routine.identityId,
+            routineId: routine.id,
+          })
+        )
+          .map((membership) => membership.profileId)
+          .sort(),
+      ).toEqual(['gaming', 'work']);
+    } finally {
+      db.close();
+    }
+  });
+
+  it('rejects missing, foreign-identity, and duplicate memberships before mutation', async () => {
+    const db = createDb();
+    try {
+      const store = new PowerSyncRoutineProfileStore(db);
+      const { routine, work, now } = fixture();
+      const missingMembership = ProfileMembership.create({
+        identityId: routine.identityId,
+        profileId: work.id,
+        routineId: routine.id,
+        now,
+      });
+      await expect(
+        store.createDefinitionWithMemberships({
+          definition: routine,
+          memberships: [missingMembership],
+        }),
+      ).rejects.toThrow(/was not found/);
+
+      await store.upsertProfile(work);
+      await expect(
+        store.createDefinitionWithMemberships({
+          definition: routine,
+          memberships: [missingMembership, missingMembership],
+        }),
+      ).rejects.toThrow(/Duplicate Routine profile membership/);
+
+      const foreign = RoutineProfile.create({
+        id: 'foreign',
+        identityId: 'identity-2',
+        name: 'Foreign',
+        now,
+      });
+      await store.upsertProfile(foreign);
+      const foreignMembership = ProfileMembership.create({
+        identityId: routine.identityId,
+        profileId: foreign.id,
+        routineId: routine.id,
+        now,
+      });
+      await expect(
+        store.createDefinitionWithMemberships({
+          definition: routine,
+          memberships: [foreignMembership],
+        }),
+      ).rejects.toThrow(/ownership mismatch/);
+      expect(
+        await store.findDefinition({ identityId: routine.identityId, routineId: routine.id }),
+      ).toBeNull();
+    } finally {
+      db.close();
+    }
+  });
+
+  it('rolls back the definition when membership insertion fails', async () => {
+    const db = createDb(true);
+    try {
+      const store = new PowerSyncRoutineProfileStore(db);
+      const { routine, work, now } = fixture();
+      await store.upsertProfile(work);
+      const membership = ProfileMembership.create({
+        identityId: routine.identityId,
+        profileId: work.id,
+        routineId: routine.id,
+        now,
+      });
+
+      await expect(
+        store.createDefinitionWithMemberships({ definition: routine, memberships: [membership] }),
+      ).rejects.toThrow('membership insert failed');
+      expect(
+        await store.findDefinition({ identityId: routine.identityId, routineId: routine.id }),
+      ).toBeNull();
+      expect(
+        await store.listMembershipsForRoutine({
+          identityId: routine.identityId,
+          routineId: routine.id,
+        }),
+      ).toEqual([]);
+    } finally {
+      db.close();
+    }
+  });
+
   it('persists one Routine across multiple Profiles and atomically replaces its edge set', async () => {
     const db = createDb();
     try {

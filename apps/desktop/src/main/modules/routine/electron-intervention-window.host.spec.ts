@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { BrowserWindow, screen } from 'electron';
-import { RoutineChannels, type InterventionWindowProjection } from '@memoflow/contracts/electron';
+import {
+  RoutineWindowChannels,
+  type InterventionWindowProjection,
+} from '@memoflow/contracts/electron';
 import { ElectronInterventionWindowHost } from './electron-intervention-window.host';
 
 const projection: InterventionWindowProjection = {
@@ -59,7 +62,7 @@ describe('ElectronInterventionWindowHost (ROUTINE-4104)', () => {
     expect(intervention.isVisible()).toBe(true);
     expect(BrowserWindow.getFocusedWindow()).toBe(mainWindow);
     expect(intervention.webContents.send).toHaveBeenCalledWith(
-      RoutineChannels.INTERVENTION_WINDOW_PROJECTION,
+      RoutineWindowChannels.INTERVENTION_WINDOW_PROJECTION,
       projection,
     );
 
@@ -103,7 +106,7 @@ describe('ElectronInterventionWindowHost (ROUTINE-4104)', () => {
     expect(window.webContents.reload).toHaveBeenCalledTimes(1);
     window.webContents.emit('did-finish-load');
     expect(window.webContents.send).toHaveBeenCalledWith(
-      RoutineChannels.INTERVENTION_WINDOW_PROJECTION,
+      RoutineWindowChannels.INTERVENTION_WINDOW_PROJECTION,
       guided,
     );
     host.destroy();

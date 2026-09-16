@@ -83,8 +83,7 @@ export function createScheduleOrchestrationModule(
         );
         return schedulingPort.reconcile(plan.owner, plan.desired);
       },
-      buildOwner: (ref) =>
-        options.taskProjection.source.buildPlanOwner(ref.planId, ref.identityId),
+      buildOwner: (ref) => options.taskProjection.source.buildPlanOwner(ref.planId, ref.identityId),
       listSchedulerOwners: () =>
         scheduleTaskRepository.listSchedulingOwners?.(TASK_SCHEDULING_OWNER_TYPE) ??
         Promise.resolve([]),
@@ -129,11 +128,13 @@ export function createScheduleOrchestrationModule(
 
   // ROUTINE-3401: durable wall-clock lane. Register its event listener before
   // the repair runtime, then repair from the feature-owned durable source.
-  if (options.routineProjection && options.execution.routineSource) {
+  const routineProjection = options.routineProjection;
+  const routineSource = options.execution.routineSource;
+  if (routineProjection && routineSource) {
     const routineCommittedPublisher =
       createTypedEventPublisher<RoutineScheduleProjectionEventMap>(eventBus);
     const routineExecutionSource = createRoutineWallClockExecutionSource({
-      ...options.execution.routineSource,
+      ...routineSource,
       publishOccurrenceCommitted: (event) => {
         routineCommittedPublisher.send('routine:occurrence-committed', event);
       },
@@ -143,7 +144,7 @@ export function createScheduleOrchestrationModule(
     );
     incrementalRuntimes.push(
       createRoutineProjectionRuntime({
-        source: options.routineProjection.source,
+        source: routineProjection.source,
         schedulingPort,
         routineEvents: createTypedEventSubscriber<RoutineScheduleProjectionEventMap>(eventBus),
       }),
@@ -151,17 +152,17 @@ export function createScheduleOrchestrationModule(
     repairLanes.push(
       defineProjectionRepairLane<{ routineId: string; identityId: string }>({
         source: 'routine',
-        enumerate: () => options.routineProjection!.source.listRoutineRefs(),
+        enumerate: () => routineProjection.source.listRoutineRefs(),
         describe: (ref) => `${ref.identityId}/${ref.routineId}`,
         repair: async (ref) => {
-          const plan = await options.routineProjection!.source.buildRoutinePlan(
+          const plan = await routineProjection.source.buildRoutinePlan(
             ref.routineId,
             ref.identityId,
           );
           return schedulingPort.reconcile(plan.owner, plan.desired);
         },
         buildOwner: (ref) =>
-          options.routineProjection!.source.buildRoutineOwner(ref.routineId, ref.identityId),
+          routineProjection.source.buildRoutineOwner(ref.routineId, ref.identityId),
         listSchedulerOwners: () =>
           scheduleTaskRepository.listSchedulingOwners?.(ROUTINE_SCHEDULING_OWNER_TYPE) ??
           Promise.resolve([]),

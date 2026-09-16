@@ -1,24 +1,40 @@
-import { unwrap } from '@memoflow/contracts/result';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
 import {
-  NotificationChannel,
-  ReminderType,
-  TriggerType,
-  type CreateReminderTemplateReq,
-} from '@memoflow/contracts/reminder';
+  asInstant,
+  createTimeContext,
+  createTimeFacade,
+  type UserTimeContextPort,
+} from '@memoflow/time';
 import type { IAIRoutineCommandPort, AIRoutineCreateInput } from '@memoflow/ai';
-import type { ReminderApplicationPort } from '@memoflow/reminder';
+import { createElapsedTrigger, createWallClockTrigger } from '@memoflow/reminder/server';
 import type { RoutineCoachCommandPort } from '@memoflow/reminder/routine-runtime';
 import {
   getRoutineMethodTemplatePreset,
   type RoutineMethodId,
 } from '@memoflow/reminder/method-library';
 
+function canonicalTrigger(input: AIRoutineCreateInput['trigger'], at: number, timeZone: string) {
+  if (!input) return null;
+  if (input.type === 'Interval') {
+    return createElapsedTrigger({
+      durationMs: input.intervalMinutes * 60_000,
+      anchor: 'routine-activation',
+    });
+  }
+  const startDate = createTimeFacade({
+    context: createTimeContext({ timeZone, weekStartsOn: 1 }),
+  }).calendar.toYmd(asInstant(at));
+  return createWallClockTrigger({
+    localTime: input.fixedTime,
+    timeZone,
+    recurrence: { startDate, frequency: 'daily' },
+  });
+}
+
 /** Host adapter: AI commands terminate at Reminder-owned application/runtime seams. */
 export class DesktopRoutineAICommandAdapter implements IAIRoutineCommandPort {
   constructor(
-    private readonly reminder: ReminderApplicationPort,
     private readonly routine: RoutineCoachCommandPort,
+    private readonly userTimeContextPort: UserTimeContextPort,
   ) {}
 
   async createRoutine(input: AIRoutineCreateInput) {
@@ -29,42 +45,19 @@ export class DesktopRoutineAICommandAdapter implements IAIRoutineCommandPort {
       throw new TypeError(`Protocol method '${input.methodId}' must use routine_start_protocol`);
     }
     const trigger = input.trigger ?? preset?.trigger;
-    if (!trigger) throw new TypeError('Routine creation requires a WallClock method or explicit trigger');
-    const request: CreateReminderTemplateReq = {
-      title: input.title,
+    if (!trigger) throw new TypeError('Routine creation requires a method or explicit trigger');
+    const timeContext = await this.userTimeContextPort.getUserTimeContext(input.context.identityId);
+    const created = await this.routine.createRoutine({
+      identityId: input.context.identityId,
+      name: input.title,
       description: input.description ?? preset?.description,
-      type: ReminderType.Recurring,
-      trigger: trigger.type === 'Interval'
-        ? {
-            type: TriggerType.Interval,
-            fixedTime: null,
-            interval: { minutes: trigger.intervalMinutes, startTime: null },
-          }
-        : {
-            type: TriggerType.FixedTime,
-            fixedTime: { time: trigger.fixedTime, timezone: null },
-            interval: null,
-          },
-      activeTime: { activatedAt: input.context.startedAt || Date.now() },
-      notificationConfig: {
-        channels: [NotificationChannel.InApp],
-        title: null,
-        body: null,
-        sound: null,
-        vibration: null,
-        actions: null,
-      },
-      importanceLevel: preset?.importanceLevel === 'Important'
-        ? ImportanceLevel.Important
-        : ImportanceLevel.Moderate,
-      tags: preset ? [...preset.tags] : [],
-      icon: preset?.icon ?? 'mdi-bell-outline',
-      ...(input.profileIds ? { profileIds: input.profileIds as CreateReminderTemplateReq['profileIds'] } : {}),
-    };
-    const created = unwrap(await this.reminder.createTemplate(request, input.context));
+      trigger: canonicalTrigger(trigger, input.context.startedAt, timeContext.timeZone),
+      profileIds: input.profileIds,
+      at: input.context.startedAt,
+    });
     return {
       kind: 'routine' as const,
-      id: String(created.id),
+      id: created.routineId,
       status: 'created',
       details: { title: created.name },
     };
@@ -77,7 +70,11 @@ export class DesktopRoutineAICommandAdapter implements IAIRoutineCommandPort {
       active: input.active,
       at: input.context.startedAt,
     });
-    return { kind: 'profile' as const, id: receipt.profileId, status: receipt.active ? 'active' : 'inactive' };
+    return {
+      kind: 'profile' as const,
+      id: receipt.profileId,
+      status: receipt.active ? 'active' : 'inactive',
+    };
   }
 
   async setTemporaryOverride(input: Parameters<IAIRoutineCommandPort['setTemporaryOverride']>[0]) {
@@ -98,7 +95,9 @@ export class DesktopRoutineAICommandAdapter implements IAIRoutineCommandPort {
     };
   }
 
-  async clearTemporaryOverride(input: Parameters<IAIRoutineCommandPort['clearTemporaryOverride']>[0]) {
+  async clearTemporaryOverride(
+    input: Parameters<IAIRoutineCommandPort['clearTemporaryOverride']>[0],
+  ) {
     const receipt = await this.routine.clearTemporaryOverride({
       identityId: input.context.identityId,
       routineId: input.routineId,
@@ -130,7 +129,7 @@ export class DesktopRoutineAICommandAdapter implements IAIRoutineCommandPort {
       identityId: input.context.identityId,
       sessionId: input.sessionId,
       action: input.action,
-      at: Date.now(),
+      at: input.context.startedAt,
     });
     return {
       kind: 'protocol' as const,

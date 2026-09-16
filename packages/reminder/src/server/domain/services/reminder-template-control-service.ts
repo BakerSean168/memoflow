@@ -9,9 +9,9 @@ import { ReminderStatus, type RoutineProfileMembershipView } from '@memoflow/con
 import type { ReminderTemplate } from '../aggregates/reminder-template';
 import type { IReminderTemplateRepository } from '../repositories/i-reminder-template-repository';
 import type { IUserReminderPreferenceRepository } from '../repositories/i-user-reminder-preference-repository';
-import type { RoutineProfileStore } from '../ports';
+import type { RoutineProfileStore, RoutineRuntimeContextStore } from '../ports';
 import type { ProfileMembership, RoutineProfile } from '../routine';
-import { evaluateRoutineEffectiveEnabled } from '../routine';
+import { evaluateRoutineEligibility } from '../routine';
 
 interface RoutineMembershipPath {
   readonly membership: ProfileMembership;
@@ -34,6 +34,7 @@ export class ReminderTemplateControlService {
     private readonly templateRepository: IReminderTemplateRepository,
     private readonly preferenceRepository?: IUserReminderPreferenceRepository,
     private readonly routineProfileStore?: RoutineProfileStore,
+    private readonly runtimeContextStore?: RoutineRuntimeContextStore,
   ) {}
 
   private async getGlobalReminderEnabled(identityId: string): Promise<boolean> {
@@ -66,6 +67,12 @@ export class ReminderTemplateControlService {
     );
     const globalByIdentity = new Map(globalEntries);
     const pathsByRoutine = await this.loadMembershipPaths(templates);
+    const runtimeContexts = new Map(
+      identities.map((identityId) => [
+        identityId,
+        this.runtimeContextStore?.get({ identityId }) ?? { activeProfileIds: [] },
+      ]),
+    );
 
     return templates.map((template) => {
       const identityId = String(template.identityId);
@@ -73,6 +80,7 @@ export class ReminderTemplateControlService {
         template,
         globalByIdentity.get(identityId) ?? true,
         pathsByRoutine.get(`${identityId}:${template.id}`) ?? [],
+        runtimeContexts.get(identityId) ?? { activeProfileIds: [] },
       );
     });
   }
@@ -135,31 +143,32 @@ export class ReminderTemplateControlService {
     template: ReminderTemplate,
     globalReminderEnabled: boolean,
     paths: readonly RoutineMembershipPath[],
+    runtimeContext: import('../routine').RoutineRuntimeContext,
   ): ITemplateEffectiveStatus {
     const routineEnabled =
       globalReminderEnabled && template.selfEnabled && template.status === ReminderStatus.Active;
 
     const profileMemberships = paths.map(({ membership, profile }) => {
-      const evaluation = evaluateRoutineEffectiveEnabled({
+      const evaluation = evaluateRoutineEligibility({
         routineEnabled,
         profileEnabled: profile?.enabled ?? false,
-        profileActive: profile?.active ?? false,
         membershipEnabled: membership.enabled,
+        profileId: membership.profileId,
+        runtimeContext,
       });
       return {
         profileId: membership.profileId as RoutineProfileMembershipView['profileId'],
         profileName: profile?.name ?? null,
         enabled: membership.enabled,
         profileEnabled: profile?.enabled ?? false,
-        profileActive: profile?.active ?? false,
-        effectiveEnabled: evaluation.effectiveEnabled,
+        effectiveEnabled: evaluation.eligible,
       } satisfies RoutineProfileMembershipView;
     });
 
-    const unprofiledEvaluation = evaluateRoutineEffectiveEnabled({ routineEnabled });
+    const unprofiledEvaluation = evaluateRoutineEligibility({ routineEnabled });
     const isEffectivelyEnabled =
       profileMemberships.length === 0
-        ? unprofiledEvaluation.effectiveEnabled
+        ? unprofiledEvaluation.eligible
         : profileMemberships.some((membership) => membership.effectiveEnabled);
 
     let statusReason: string;
