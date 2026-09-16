@@ -513,6 +513,8 @@ Core outputs:
 
 # Phase 4 — Routine, Planner/Scheduler and Notification
 
+> Execution control (2026-09-16): the remaining Phase 4-7 implementation is compiled into the repository-owned TaskGraph [`2026-09-16-system-vnext-execution.tasks.json`](./2026-09-16-system-vnext-execution.tasks.json). The TaskGraph is execution-ready planning truth; ForgeFlow runtime threads own live status. ChatGPT Web remains the planner, automatic AI decomposition stays disabled, and bounded mutation capacity is a ceiling of four rather than a target.
+
 ## ROUTINE-2201 — Replace Legacy Reminder with Routine
 
 Implement ADR-076~079:
