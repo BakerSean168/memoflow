@@ -68,6 +68,7 @@ export type PrismaNotificationRow = {
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
+  archivedAt: Date | null;
 };
 
 export type PrismaNotificationChannelRow = {
@@ -171,7 +172,7 @@ export class NotificationPrismaMapper {
       relatedEntityId: row.relatedEntityId,
       correlationId: row.correlationId,
       causationId: row.causationId,
-      isRead: row.isRead,
+      isRead: row.readAt !== null,
       readAt: row.readAt ? row.readAt.getTime() : null,
       actions: actions ? actions.map((a) => NotificationAction.fromDTO(a)) : null,
       metadata: metadata ? NotificationMetadata.fromDTO(metadata) : null,
@@ -179,6 +180,7 @@ export class NotificationPrismaMapper {
       expiresAt: row.expiresAt ? row.expiresAt.getTime() : null,
       version: row.version,
       deletedAt: row.deletedAt,
+      archivedAt: row.archivedAt,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
       notificationChannels: row.channels ? row.channels.map(NotificationPrismaMapper.channelToDomain) : [],

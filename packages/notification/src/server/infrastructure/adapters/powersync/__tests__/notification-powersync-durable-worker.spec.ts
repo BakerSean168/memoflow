@@ -92,6 +92,7 @@ function createTestSqliteDatabase(): IElectronDatabase {
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
       deleted_at TEXT,
+      archived_at TEXT,
       UNIQUE(identity_id, idempotency_key)
     );
 
@@ -272,6 +273,7 @@ function createFileSqliteDatabase(dbPath: string): { db: IElectronDatabase; clos
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
       deleted_at TEXT,
+      archived_at TEXT,
       UNIQUE(identity_id, idempotency_key)
     );
 

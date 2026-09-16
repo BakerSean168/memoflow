@@ -5,10 +5,13 @@
  * 遵循 governance 模块 Result<T> 规范
  */
 
-import type { IGoalRepository } from '../../../domain';
+import type { IGoalRepository, IGoalRecordRepository } from '../../../domain';
 import {
   Goal,
   GoalId,
+  GoalRecord,
+  GoalRecordId,
+  GoalReviewId,
   GoalLabelOwnershipError,
   GoalPolicy,
   GoalReminderConfig,
@@ -25,6 +28,7 @@ import type { GoalWriteTransactionRunner } from './goal-write-support';
 import type {
   GoalPortabilityApplicationPort,
   GoalPortabilityCreateInput,
+  GoalPortabilityRestoreInput,
   GoalPortabilitySnapshot,
 } from '../../goal-portability.application.port';
 import { createGoalPortabilitySnapshot } from '../../goal-portability.application.port';
@@ -38,6 +42,7 @@ export class CreateGoalUseCase implements GoalPortabilityApplicationPort {
     private readonly goalRepository: IGoalRepository,
     private readonly goalPolicy: GoalPolicy,
     private readonly goalWriteTransactionRunner?: GoalWriteTransactionRunner,
+    private readonly goalRecordRepository?: IGoalRecordRepository,
   ) {}
 
   async execute(input: CreateGoalReq, cx: ExecutionContext): Promise<Result<GoalMutationReceipt>> {
@@ -49,14 +54,32 @@ export class CreateGoalUseCase implements GoalPortabilityApplicationPort {
       includeChildren: true,
       systemView: 'all',
     });
-    return goals.map(createGoalPortabilitySnapshot);
+    return Promise.all(
+      goals.map(async (goal) =>
+        createGoalPortabilitySnapshot(
+          goal,
+          this.goalRecordRepository
+            ? await this.goalRecordRepository.findByGoalId(identityId, String(goal.id), {
+                orderBy: 'asc',
+              })
+            : [],
+        ),
+      ),
+    );
   }
 
   async getGoalSnapshot(id: string, identityId: string): Promise<GoalPortabilitySnapshot | null> {
     const goal = await this.goalRepository.findByIdForIdentity(identityId, id, {
       includeChildren: true,
     });
-    return goal ? createGoalPortabilitySnapshot(goal) : null;
+    return goal
+      ? createGoalPortabilitySnapshot(
+          goal,
+          this.goalRecordRepository
+            ? await this.goalRecordRepository.findByGoalId(identityId, id, { orderBy: 'asc' })
+            : [],
+        )
+      : null;
   }
 
   async createGoalForPortability(
@@ -64,6 +87,95 @@ export class CreateGoalUseCase implements GoalPortabilityApplicationPort {
     cx: ExecutionContext,
   ): Promise<Result<GoalMutationReceipt>> {
     return this.executeInternal(input, cx);
+  }
+
+  async restoreGoalForPortability(
+    input: GoalPortabilityRestoreInput,
+    cx: ExecutionContext,
+  ): Promise<Result<GoalMutationReceipt>> {
+    if (!this.goalRecordRepository || !this.goalWriteTransactionRunner) {
+      return error('INTERNAL_ERROR', 'Goal portability restore dependencies are unavailable');
+    }
+    if (!cx.identityId?.trim()) return error('UNAUTHORIZED', 'Identity ID is required');
+
+    return this.goalWriteTransactionRunner.run(async ({ goalRepository, goalRecordRepository }) => {
+      const existing = input.id
+        ? await goalRepository.findByIdForIdentity(cx.identityId, input.id, {
+            includeChildren: true,
+          })
+        : null;
+      if (existing) {
+        return error(
+          'CONFLICT',
+          'Deterministic Goal restore requires capability-level conflict validation',
+        );
+      }
+
+      const goal = Goal.create({
+        id: input.id ? GoalId.of(input.id) : undefined,
+        identityId: IdentityId.of(cx.identityId),
+        name: input.name,
+        summary: input.summary ?? null,
+        startDate: input.startDate ?? null,
+        target: input.target ?? null,
+        reminderConfig: input.reminderConfig
+          ? GoalReminderConfig.fromDTO(input.reminderConfig)
+          : null,
+      });
+      for (const keyResult of input.initialKeyResults) {
+        goal.createAndAddKeyResult({
+          ...keyResult,
+          id: keyResult.id ? KeyResultId.of(keyResult.id) : undefined,
+          aggregationMethod: keyResult.calculationMethod,
+          trackingBaseValue: keyResult.trackingBaseValue,
+        });
+      }
+      for (const review of input.reviews) {
+        goal.restoreReview({
+          id: GoalReviewId.of(review.id),
+          goalId: goal.id,
+          reflection: review.reflection,
+          challenges: review.challenges,
+          adjustments: review.adjustments,
+          systemContext: review.systemContext,
+          reviewedAt: review.reviewedAt,
+          createdAt: review.createdAt,
+          updatedAt: review.updatedAt,
+        });
+      }
+      await goalRepository.save(goal);
+      if (input.labelIds !== undefined) {
+        const labels = await goalRepository.replaceLabels(
+          cx.identityId,
+          String(goal.id),
+          input.labelIds,
+        );
+        goal.hydrateLabels(labels);
+      }
+      for (const record of input.records) {
+        await goalRecordRepository.save(
+          GoalRecord.load({
+            id: GoalRecordId.of(record.id),
+            keyResultId: KeyResultId.of(record.keyResultId),
+            identityId: IdentityId.of(cx.identityId),
+            value: record.value,
+            note: record.note,
+            sourceType: record.sourceType,
+            sourceId: record.sourceId,
+            recordedAt: record.recordedAt,
+            createdAt: record.createdAt,
+            updatedAt: record.updatedAt,
+          }),
+        );
+      }
+      return ok(
+        createGoalMutationReceipt(goal, {
+          keyResultIds: goal.keyResults.map((keyResult) => keyResult.id),
+          recordIds: input.records.map((record) => record.id),
+          reviewIds: input.reviews.map((review) => review.id),
+        }),
+      );
+    });
   }
 
   private async executeInternal(

@@ -29,6 +29,7 @@ export interface CanonicalNotificationListQuery {
   limit: number;
   type?: string;
   isRead?: boolean;
+  archiveState?: 'active' | 'archived' | 'all';
   startDate?: string;
   endDate?: string;
 }
@@ -43,12 +44,13 @@ export type NotificationListQueryInput = Partial<CanonicalNotificationListQuery>
 export function canonicalizeNotificationListQuery(
   query?: NotificationListQueryInput,
 ): CanonicalNotificationListQuery {
-  const { page, limit, type, isRead, startDate, endDate } = query ?? {};
+  const { page, limit, type, isRead, archiveState, startDate, endDate } = query ?? {};
   return {
     page: page ?? 1,
     limit: limit ?? 20,
     ...(type !== undefined ? { type } : {}),
     ...(isRead !== undefined ? { isRead } : {}),
+    ...(archiveState !== undefined ? { archiveState } : {}),
     ...(startDate !== undefined ? { startDate: String(startDate) } : {}),
     ...(endDate !== undefined ? { endDate: String(endDate) } : {}),
   };

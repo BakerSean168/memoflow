@@ -37,6 +37,8 @@ model Account {
   schedules                       Schedule[]
   scheduleTasks                   ScheduleTask[]
   schedulingReconcileOperations   SchedulingReconcileOperation[]
+  scheduledInvocations            ScheduledInvocation[]
+  invocationAttempts              InvocationAttempt[]
   scheduleStatistics              ScheduleStatistic?
   habits                          Habit[]
   relations                       Relation[]

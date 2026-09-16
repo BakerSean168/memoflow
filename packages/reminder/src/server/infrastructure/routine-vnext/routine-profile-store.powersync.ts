@@ -76,14 +76,44 @@ export class PowerSyncRoutineProfileStore implements RoutineProfileStore {
     return row ? mapDefinition(row) : null;
   }
 
+  async updateDefinition(input: {
+    readonly definition: RoutineDefinition;
+    readonly expectedVersion: number;
+  }): Promise<void> {
+    const row = routineDefinitionToPowerSync(input.definition.snapshot());
+    const result = await this.db.execute(
+      `UPDATE routine_definitions
+       SET name = ?, description = ?, enabled = ?, trigger_json = ?, version = ?, updated_at = ?
+       WHERE id = ? AND identity_id = ? AND version = ?`,
+      [
+        row.name,
+        row.description,
+        row.enabled,
+        row.trigger_json,
+        row.version,
+        row.updated_at,
+        row.id,
+        row.identity_id,
+        input.expectedVersion,
+      ],
+    );
+    if (result.rowsAffected !== 1) throw new Error(`Routine '${row.id}' version conflict`);
+  }
+
   async deleteDefinition(input: {
     readonly identityId: string;
     readonly routineId: string;
+    readonly expectedVersion?: number;
   }): Promise<void> {
-    await this.db.execute('DELETE FROM routine_definitions WHERE id = ? AND identity_id = ?', [
-      input.routineId,
-      input.identityId,
-    ]);
+    const result = await this.db.execute(
+      `DELETE FROM routine_definitions WHERE id = ? AND identity_id = ?${input.expectedVersion === undefined ? '' : ' AND version = ?'}`,
+      input.expectedVersion === undefined
+        ? [input.routineId, input.identityId]
+        : [input.routineId, input.identityId, input.expectedVersion],
+    );
+    if (input.expectedVersion !== undefined && result.rowsAffected !== 1) {
+      throw new Error(`Routine '${input.routineId}' version conflict`);
+    }
   }
 
   async upsertProfile(profile: RoutineProfile): Promise<void> {
@@ -128,18 +158,65 @@ export class PowerSyncRoutineProfileStore implements RoutineProfileStore {
     return rows.map(mapProfile);
   }
 
+  async updateProfile(input: {
+    readonly profile: RoutineProfile;
+    readonly expectedVersion: number;
+  }): Promise<void> {
+    const row = routineProfileToPowerSync(input.profile.snapshot());
+    const result = await this.db.execute(
+      `UPDATE routine_profiles
+       SET name = ?, description = ?, enabled = ?, version = ?, updated_at = ?
+       WHERE id = ? AND identity_id = ? AND version = ?`,
+      [
+        row.name,
+        row.description,
+        row.enabled,
+        row.version,
+        row.updated_at,
+        row.id,
+        row.identity_id,
+        input.expectedVersion,
+      ],
+    );
+    if (result.rowsAffected !== 1) throw new Error(`Profile '${row.id}' version conflict`);
+  }
+
   async deleteProfile(input: {
     readonly identityId: string;
     readonly profileId: string;
+    readonly expectedVersion?: number;
   }): Promise<void> {
-    await this.db.execute('DELETE FROM routine_profiles WHERE id = ? AND identity_id = ?', [
-      input.profileId,
-      input.identityId,
-    ]);
+    const result = await this.db.execute(
+      `DELETE FROM routine_profiles WHERE id = ? AND identity_id = ?${input.expectedVersion === undefined ? '' : ' AND version = ?'}`,
+      input.expectedVersion === undefined
+        ? [input.profileId, input.identityId]
+        : [input.profileId, input.identityId, input.expectedVersion],
+    );
+    if (input.expectedVersion !== undefined && result.rowsAffected !== 1) {
+      throw new Error(`Profile '${input.profileId}' version conflict`);
+    }
   }
 
-  async upsertMembership(membership: ProfileMembership): Promise<void> {
+  async upsertMembership(membership: ProfileMembership, expectedVersion?: number): Promise<void> {
     const row = profileMembershipToPowerSync(membership.snapshot());
+    if (expectedVersion !== undefined) {
+      const result = await this.db.execute(
+        `UPDATE routine_profile_memberships
+         SET enabled = ?, version = ?, updated_at = ?
+         WHERE identity_id = ? AND profile_id = ? AND routine_id = ? AND version = ?`,
+        [
+          row.enabled,
+          row.version,
+          row.updated_at,
+          row.identity_id,
+          row.profile_id,
+          row.routine_id,
+          expectedVersion,
+        ],
+      );
+      if (result.rowsAffected !== 1) throw new Error('Routine membership version conflict');
+      return;
+    }
     await this.db.writeTransaction((tx) => upsertMembership(tx, row));
   }
 
@@ -191,21 +268,38 @@ export class PowerSyncRoutineProfileStore implements RoutineProfileStore {
     readonly identityId: string;
     readonly profileId: string;
     readonly routineId: string;
+    readonly expectedVersion?: number;
   }): Promise<void> {
-    await this.db.execute(
+    const result = await this.db.execute(
       `DELETE FROM routine_profile_memberships
-       WHERE identity_id = ? AND profile_id = ? AND routine_id = ?`,
-      [input.identityId, input.profileId, input.routineId],
+       WHERE identity_id = ? AND profile_id = ? AND routine_id = ?${input.expectedVersion === undefined ? '' : ' AND version = ?'}`,
+      input.expectedVersion === undefined
+        ? [input.identityId, input.profileId, input.routineId]
+        : [input.identityId, input.profileId, input.routineId, input.expectedVersion],
     );
+    if (input.expectedVersion !== undefined && result.rowsAffected !== 1) {
+      throw new Error('Routine membership version conflict');
+    }
   }
 
   async replaceRoutineMemberships(input: {
     readonly identityId: string;
     readonly routineId: string;
     readonly memberships: readonly ProfileMembership[];
+    readonly expectedVersion?: number;
   }): Promise<void> {
     assertMembershipSet(input);
     await this.db.writeTransaction(async (tx) => {
+      if (input.expectedVersion !== undefined) {
+        const result = await tx.execute(
+          `UPDATE routine_definitions
+           SET version = version + 1
+           WHERE id = ? AND identity_id = ? AND version = ?`,
+          [input.routineId, input.identityId, input.expectedVersion],
+        );
+        if (result.rowsAffected !== 1)
+          throw new Error(`Routine '${input.routineId}' version conflict`);
+      }
       await tx.execute(
         'DELETE FROM routine_profile_memberships WHERE identity_id = ? AND routine_id = ?',
         [input.identityId, input.routineId],

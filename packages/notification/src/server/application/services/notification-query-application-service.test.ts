@@ -23,6 +23,7 @@ type NotificationDtoOverrides = Partial<{
   createdAt: number;
   updatedAt: number;
   deletedAt: number | null;
+  archivedAt: number | null;
 }>;
 
 function createNotificationRecord(overrides: NotificationDtoOverrides = {}) {
@@ -52,6 +53,7 @@ function createNotificationRecord(overrides: NotificationDtoOverrides = {}) {
     createdAt: 100,
     updatedAt: 110,
     deletedAt: null,
+    archivedAt: null,
     notificationChannels: null,
     ...overrides,
   };
@@ -122,10 +124,11 @@ describe('NotificationQueryApplicationService', () => {
     expect(notificationRepository.findByIdentityId).toHaveBeenCalledWith(IDENTITY_ID, {
       includeDeleted: false,
       includeRead: false,
+      archiveState: 'active',
     });
-    expect(result).toEqual({
-      ok: true,
-      data: {
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.data).toEqual({
         notifications: [
           expect.objectContaining({
             id: 'INotificationId_550e8400-e29b-41d4-a716-446655440002',
@@ -136,8 +139,8 @@ describe('NotificationQueryApplicationService', () => {
         page: 1,
         pageSize: 1,
         hasMore: true,
-      },
-    });
+      });
+    }
   });
 
   it('uses related-entity lookup when relatedEntity filters are provided', async () => {
@@ -157,6 +160,7 @@ describe('NotificationQueryApplicationService', () => {
       IDENTITY_ID,
       'Task',
       'TaskId_550e8400-e29b-41d4-a716-446655440001',
+      { archiveState: 'active' },
     );
     expect(result.ok).toBe(true);
     if (result.ok) {

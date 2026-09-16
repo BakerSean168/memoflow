@@ -27,6 +27,9 @@ import type {
 import type {
   DeleteNotificationInvocation,
   MarkNotificationReadInvocation,
+  MarkNotificationUnreadInvocation,
+  ArchiveNotificationInvocation,
+  RestoreNotificationInvocation,
   NotificationBatchInvocation,
   ReplayDeadLetterInvocation,
 } from '../api/notification-invocation.schemas';
@@ -46,6 +49,9 @@ export type NotificationRpcMap = {
   'notification:create': [CreateNotificationReq, CreateNotificationRes];
   'notification:delete': [DeleteNotificationInvocation, null];
   'notification:mark-read': [MarkNotificationReadInvocation, NotificationResponse];
+  'notification:mark-unread': [MarkNotificationUnreadInvocation, NotificationResponse];
+  'notification:archive': [ArchiveNotificationInvocation, NotificationResponse];
+  'notification:restore': [RestoreNotificationInvocation, NotificationResponse];
   'notification:mark-all-read': [void, UnreadCountResponse];
   'notification:query': [NotificationQuery, NotificationListRes];
 

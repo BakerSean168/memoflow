@@ -48,6 +48,7 @@ export interface NotificationServerDTO {
   createdAt: TransferDate;
   updatedAt: TransferDate;
   deletedAt: TransferDate | null;
+  archivedAt: TransferDate | null;
 
   /** Convenience projection of durable delivery attempts, not Fact status. */
   notificationChannels?: NotificationChannelServerDTO[] | null;

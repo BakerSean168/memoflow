@@ -27,6 +27,29 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
     });
   }
 
+  async updateDefinition(input: {
+    readonly definition: RoutineDefinition;
+    readonly expectedVersion: number;
+  }): Promise<void> {
+    const data = routineDefinitionToPrisma(input.definition.snapshot());
+    const result = await this.prisma.routineDefinition.updateMany({
+      where: {
+        id: data.id,
+        identityId: data.identityId,
+        version: input.expectedVersion,
+      },
+      data: {
+        name: data.name,
+        description: data.description,
+        enabled: data.enabled,
+        triggerJson: data.triggerJson,
+        version: data.version,
+        updatedAt: data.updatedAt,
+      },
+    });
+    if (result.count !== 1) throw new Error(`Routine '${data.id}' version conflict`);
+  }
+
   async createDefinitionWithMemberships(input: {
     readonly definition: RoutineDefinition;
     readonly memberships: readonly ProfileMembership[];
@@ -94,10 +117,36 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
   async deleteDefinition(input: {
     readonly identityId: string;
     readonly routineId: string;
+    readonly expectedVersion?: number;
   }): Promise<void> {
-    await this.prisma.routineDefinition.deleteMany({
-      where: { id: input.routineId, identityId: input.identityId },
+    const result = await this.prisma.routineDefinition.deleteMany({
+      where: {
+        id: input.routineId,
+        identityId: input.identityId,
+        ...(input.expectedVersion === undefined ? {} : { version: input.expectedVersion }),
+      },
     });
+    if (input.expectedVersion !== undefined && result.count !== 1) {
+      throw new Error(`Routine '${input.routineId}' version conflict`);
+    }
+  }
+
+  async updateProfile(input: {
+    readonly profile: RoutineProfile;
+    readonly expectedVersion: number;
+  }): Promise<void> {
+    const data = routineProfileToPrisma(input.profile.snapshot());
+    const result = await this.prisma.routineProfile.updateMany({
+      where: { id: data.id, identityId: data.identityId, version: input.expectedVersion },
+      data: {
+        name: data.name,
+        description: data.description,
+        enabled: data.enabled,
+        version: data.version,
+        updatedAt: data.updatedAt,
+      },
+    });
+    if (result.count !== 1) throw new Error(`Profile '${data.id}' version conflict`);
   }
 
   async upsertProfile(profile: RoutineProfile): Promise<void> {
@@ -184,14 +233,35 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
   async deleteProfile(input: {
     readonly identityId: string;
     readonly profileId: string;
+    readonly expectedVersion?: number;
   }): Promise<void> {
-    await this.prisma.routineProfile.deleteMany({
-      where: { id: input.profileId, identityId: input.identityId },
+    const result = await this.prisma.routineProfile.deleteMany({
+      where: {
+        id: input.profileId,
+        identityId: input.identityId,
+        ...(input.expectedVersion === undefined ? {} : { version: input.expectedVersion }),
+      },
     });
+    if (input.expectedVersion !== undefined && result.count !== 1) {
+      throw new Error(`Profile '${input.profileId}' version conflict`);
+    }
   }
 
-  async upsertMembership(membership: ProfileMembership): Promise<void> {
+  async upsertMembership(membership: ProfileMembership, expectedVersion?: number): Promise<void> {
     const data = profileMembershipToPrisma(membership.snapshot());
+    if (expectedVersion !== undefined) {
+      const result = await this.prisma.routineProfileMembership.updateMany({
+        where: {
+          identityId: data.identityId,
+          profileId: data.profileId,
+          routineId: data.routineId,
+          version: expectedVersion,
+        },
+        data: { enabled: data.enabled, version: data.version, updatedAt: data.updatedAt },
+      });
+      if (result.count !== 1) throw new Error('Routine membership version conflict');
+      return;
+    }
     await this.prisma.routineProfileMembership.upsert({
       where: {
         identityId_profileId_routineId: {
@@ -247,12 +317,14 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
     readonly identityId: string;
     readonly profileId: string;
     readonly routineId: string;
+    readonly expectedVersion?: number;
   }): Promise<void> {
     await this.prisma.routineProfileMembership.deleteMany({
       where: {
         identityId: input.identityId,
         profileId: input.profileId,
         routineId: input.routineId,
+        ...(input.expectedVersion === undefined ? {} : { version: input.expectedVersion }),
       },
     });
   }
@@ -261,9 +333,22 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
     readonly identityId: string;
     readonly routineId: string;
     readonly memberships: readonly ProfileMembership[];
+    readonly expectedVersion?: number;
   }): Promise<void> {
     assertMembershipSet(input);
     await this.prisma.$transaction(async (tx) => {
+      if (input.expectedVersion !== undefined) {
+        const routineUpdate = await tx.routineDefinition.updateMany({
+          where: {
+            id: input.routineId,
+            identityId: input.identityId,
+            version: input.expectedVersion,
+          },
+          data: { version: input.expectedVersion + 1 },
+        });
+        if (routineUpdate.count !== 1)
+          throw new Error(`Routine '${input.routineId}' version conflict`);
+      }
       await tx.routineProfileMembership.deleteMany({
         where: { identityId: input.identityId, routineId: input.routineId },
       });

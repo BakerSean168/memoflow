@@ -1,8 +1,10 @@
 import type { PrismaClient } from '@memoflow/database';
 import type { IOutboxWriter } from '@memoflow/patterns';
 import {
+  InvocationAttemptPrismaRepository,
   ScheduleExecutionPrismaRepository,
   ScheduleTaskPrismaRepository,
+  ScheduledInvocationPrismaRepository,
 } from './adapters/prisma';
 import { createScheduleLeasePrismaRepository } from './lease/schedule-lease.repository';
 import { ScheduleLeaseCoordinator } from './lease/schedule-lease-coordinator';
@@ -23,6 +25,8 @@ export interface CreateSchedulerPrismaRepositoriesOptions {
 export interface SchedulerRepositorySet {
   readonly scheduleExecutionRepository: IScheduleExecutionRepository;
   readonly scheduleTaskRepository: IScheduleTaskRepository;
+  readonly scheduledInvocationRepository: ScheduledInvocationPrismaRepository;
+  readonly invocationAttemptRepository: InvocationAttemptPrismaRepository;
   readonly leaseCoordinator: ScheduleLeaseCoordinator;
 }
 
@@ -48,9 +52,12 @@ export function createSchedulerPrismaRepositories(
   db: PrismaClient,
   options: CreateSchedulerPrismaRepositoriesOptions = {},
 ): SchedulerRepositorySet {
+  const scheduledInvocationRepository = new ScheduledInvocationPrismaRepository(db, db);
   return {
     scheduleTaskRepository: createSchedulerTaskPrismaRepository(db, options.outboxWriter),
     scheduleExecutionRepository: createSchedulerExecutionPrismaRepository(db),
+    scheduledInvocationRepository,
+    invocationAttemptRepository: new InvocationAttemptPrismaRepository(db),
     leaseCoordinator: new ScheduleLeaseCoordinator(createScheduleLeasePrismaRepository(db)),
   };
 }
@@ -63,6 +70,8 @@ export function createSchedulerPrismaModule(
   return createSchedulerModule({
     scheduleTaskRepository: repositories.scheduleTaskRepository,
     scheduleExecutionRepository: repositories.scheduleExecutionRepository,
+    scheduledInvocationRepository: repositories.scheduledInvocationRepository,
+    invocationAttemptRepository: repositories.invocationAttemptRepository,
     runtimeContributions: options.runtimeContributions,
   });
 }

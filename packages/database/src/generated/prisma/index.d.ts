@@ -440,9 +440,18 @@ export type Schedule = $Result.DefaultSelection<Prisma.$SchedulePayload>
  */
 export type ScheduleTask = $Result.DefaultSelection<Prisma.$ScheduleTaskPayload>
 /**
+ * Model ScheduledInvocation
+ *
+ */
+export type ScheduledInvocation = $Result.DefaultSelection<Prisma.$ScheduledInvocationPayload>
+/**
+ * Model InvocationAttempt
+ *
+ */
+export type InvocationAttempt = $Result.DefaultSelection<Prisma.$InvocationAttemptPayload>
+/**
  * Model SchedulingReconcileOperation
- * Durable evidence for one owner-level desired-state reconcile.
- * Successful rows are written inside the same transaction as ScheduleTask upsert/delete.
+ *
  */
 export type SchedulingReconcileOperation = $Result.DefaultSelection<Prisma.$SchedulingReconcileOperationPayload>
 /**
@@ -1470,6 +1479,26 @@ export class PrismaClient<
   get scheduleTask(): Prisma.ScheduleTaskDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.scheduledInvocation`: Exposes CRUD operations for the **ScheduledInvocation** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ScheduledInvocations
+    * const scheduledInvocations = await prisma.scheduledInvocation.findMany()
+    * ```
+    */
+  get scheduledInvocation(): Prisma.ScheduledInvocationDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.invocationAttempt`: Exposes CRUD operations for the **InvocationAttempt** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more InvocationAttempts
+    * const invocationAttempts = await prisma.invocationAttempt.findMany()
+    * ```
+    */
+  get invocationAttempt(): Prisma.InvocationAttemptDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.schedulingReconcileOperation`: Exposes CRUD operations for the **SchedulingReconcileOperation** model.
     * Example usage:
     * ```ts
@@ -2134,6 +2163,8 @@ export namespace Prisma {
     KnowledgeRepositoryLease: 'KnowledgeRepositoryLease',
     Schedule: 'Schedule',
     ScheduleTask: 'ScheduleTask',
+    ScheduledInvocation: 'ScheduledInvocation',
+    InvocationAttempt: 'InvocationAttempt',
     SchedulingReconcileOperation: 'SchedulingReconcileOperation',
     ScheduleExecution: 'ScheduleExecution',
     ScheduleStatistic: 'ScheduleStatistic',
@@ -2164,7 +2195,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "account" | "activityLedger" | "aiConversation" | "aiMessage" | "aiGenerationTask" | "aiUsageQuota" | "aiProviderConfig" | "aiProviderOnboardingSession" | "knowledgeGenerationTask" | "aiKnowledgeIndexEntry" | "dashboardConfig" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "rule" | "ruleRevision" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationChannel" | "notificationHistory" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationTemplate" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "reminderTemplate" | "reminderGroup" | "reminderInstance" | "reminderHistory" | "reminderStatistic" | "reminderResponse" | "userReminderPreference" | "reminderOccurrence" | "routineDefinition" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "repository" | "folder" | "resource" | "repositoryResource" | "linkedContent" | "resourceReference" | "repositoryExplorer" | "repositoryStatistic" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduleTask" | "schedulingReconcileOperation" | "scheduleExecution" | "scheduleStatistic" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
+      modelProps: "account" | "activityLedger" | "aiConversation" | "aiMessage" | "aiGenerationTask" | "aiUsageQuota" | "aiProviderConfig" | "aiProviderOnboardingSession" | "knowledgeGenerationTask" | "aiKnowledgeIndexEntry" | "dashboardConfig" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "rule" | "ruleRevision" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationChannel" | "notificationHistory" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationTemplate" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "reminderTemplate" | "reminderGroup" | "reminderInstance" | "reminderHistory" | "reminderStatistic" | "reminderResponse" | "userReminderPreference" | "reminderOccurrence" | "routineDefinition" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "repository" | "folder" | "resource" | "repositoryResource" | "linkedContent" | "resourceReference" | "repositoryExplorer" | "repositoryStatistic" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduleTask" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleExecution" | "scheduleStatistic" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -8236,6 +8267,154 @@ export namespace Prisma {
           }
         }
       }
+      ScheduledInvocation: {
+        payload: Prisma.$ScheduledInvocationPayload<ExtArgs>
+        fields: Prisma.ScheduledInvocationFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ScheduledInvocationFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ScheduledInvocationPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ScheduledInvocationFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ScheduledInvocationPayload>
+          }
+          findFirst: {
+            args: Prisma.ScheduledInvocationFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ScheduledInvocationPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ScheduledInvocationFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ScheduledInvocationPayload>
+          }
+          findMany: {
+            args: Prisma.ScheduledInvocationFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ScheduledInvocationPayload>[]
+          }
+          create: {
+            args: Prisma.ScheduledInvocationCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ScheduledInvocationPayload>
+          }
+          createMany: {
+            args: Prisma.ScheduledInvocationCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ScheduledInvocationCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ScheduledInvocationPayload>[]
+          }
+          delete: {
+            args: Prisma.ScheduledInvocationDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ScheduledInvocationPayload>
+          }
+          update: {
+            args: Prisma.ScheduledInvocationUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ScheduledInvocationPayload>
+          }
+          deleteMany: {
+            args: Prisma.ScheduledInvocationDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ScheduledInvocationUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ScheduledInvocationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ScheduledInvocationPayload>[]
+          }
+          upsert: {
+            args: Prisma.ScheduledInvocationUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ScheduledInvocationPayload>
+          }
+          aggregate: {
+            args: Prisma.ScheduledInvocationAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateScheduledInvocation>
+          }
+          groupBy: {
+            args: Prisma.ScheduledInvocationGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ScheduledInvocationGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ScheduledInvocationCountArgs<ExtArgs>
+            result: $Utils.Optional<ScheduledInvocationCountAggregateOutputType> | number
+          }
+        }
+      }
+      InvocationAttempt: {
+        payload: Prisma.$InvocationAttemptPayload<ExtArgs>
+        fields: Prisma.InvocationAttemptFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.InvocationAttemptFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvocationAttemptPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.InvocationAttemptFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvocationAttemptPayload>
+          }
+          findFirst: {
+            args: Prisma.InvocationAttemptFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvocationAttemptPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.InvocationAttemptFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvocationAttemptPayload>
+          }
+          findMany: {
+            args: Prisma.InvocationAttemptFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvocationAttemptPayload>[]
+          }
+          create: {
+            args: Prisma.InvocationAttemptCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvocationAttemptPayload>
+          }
+          createMany: {
+            args: Prisma.InvocationAttemptCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.InvocationAttemptCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvocationAttemptPayload>[]
+          }
+          delete: {
+            args: Prisma.InvocationAttemptDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvocationAttemptPayload>
+          }
+          update: {
+            args: Prisma.InvocationAttemptUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvocationAttemptPayload>
+          }
+          deleteMany: {
+            args: Prisma.InvocationAttemptDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.InvocationAttemptUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.InvocationAttemptUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvocationAttemptPayload>[]
+          }
+          upsert: {
+            args: Prisma.InvocationAttemptUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvocationAttemptPayload>
+          }
+          aggregate: {
+            args: Prisma.InvocationAttemptAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateInvocationAttempt>
+          }
+          groupBy: {
+            args: Prisma.InvocationAttemptGroupByArgs<ExtArgs>
+            result: $Utils.Optional<InvocationAttemptGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.InvocationAttemptCountArgs<ExtArgs>
+            result: $Utils.Optional<InvocationAttemptCountAggregateOutputType> | number
+          }
+        }
+      }
       SchedulingReconcileOperation: {
         payload: Prisma.$SchedulingReconcileOperationPayload<ExtArgs>
         fields: Prisma.SchedulingReconcileOperationFieldRefs
@@ -9536,6 +9715,8 @@ export namespace Prisma {
     knowledgeRepositoryLease?: KnowledgeRepositoryLeaseOmit
     schedule?: ScheduleOmit
     scheduleTask?: ScheduleTaskOmit
+    scheduledInvocation?: ScheduledInvocationOmit
+    invocationAttempt?: InvocationAttemptOmit
     schedulingReconcileOperation?: SchedulingReconcileOperationOmit
     scheduleExecution?: ScheduleExecutionOmit
     scheduleStatistic?: ScheduleStatisticOmit
@@ -9649,6 +9830,8 @@ export namespace Prisma {
     schedules: number
     scheduleTasks: number
     schedulingReconcileOperations: number
+    scheduledInvocations: number
+    invocationAttempts: number
     habits: number
     relations: number
     walletAccounts: number
@@ -9701,6 +9884,8 @@ export namespace Prisma {
     schedules?: boolean | AccountCountOutputTypeCountSchedulesArgs
     scheduleTasks?: boolean | AccountCountOutputTypeCountScheduleTasksArgs
     schedulingReconcileOperations?: boolean | AccountCountOutputTypeCountSchedulingReconcileOperationsArgs
+    scheduledInvocations?: boolean | AccountCountOutputTypeCountScheduledInvocationsArgs
+    invocationAttempts?: boolean | AccountCountOutputTypeCountInvocationAttemptsArgs
     habits?: boolean | AccountCountOutputTypeCountHabitsArgs
     relations?: boolean | AccountCountOutputTypeCountRelationsArgs
     walletAccounts?: boolean | AccountCountOutputTypeCountWalletAccountsArgs
@@ -9869,6 +10054,20 @@ export namespace Prisma {
    */
   export type AccountCountOutputTypeCountSchedulingReconcileOperationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: SchedulingReconcileOperationWhereInput
+  }
+
+  /**
+   * AccountCountOutputType without action
+   */
+  export type AccountCountOutputTypeCountScheduledInvocationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ScheduledInvocationWhereInput
+  }
+
+  /**
+   * AccountCountOutputType without action
+   */
+  export type AccountCountOutputTypeCountInvocationAttemptsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InvocationAttemptWhereInput
   }
 
   /**
@@ -10944,6 +11143,37 @@ export namespace Prisma {
 
 
   /**
+   * Count Type ScheduledInvocationCountOutputType
+   */
+
+  export type ScheduledInvocationCountOutputType = {
+    attempts: number
+  }
+
+  export type ScheduledInvocationCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    attempts?: boolean | ScheduledInvocationCountOutputTypeCountAttemptsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * ScheduledInvocationCountOutputType without action
+   */
+  export type ScheduledInvocationCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScheduledInvocationCountOutputType
+     */
+    select?: ScheduledInvocationCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * ScheduledInvocationCountOutputType without action
+   */
+  export type ScheduledInvocationCountOutputTypeCountAttemptsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InvocationAttemptWhereInput
+  }
+
+
+  /**
    * Count Type TaskPlanCountOutputType
    */
 
@@ -11217,6 +11447,8 @@ export namespace Prisma {
     schedules?: boolean | Account$schedulesArgs<ExtArgs>
     scheduleTasks?: boolean | Account$scheduleTasksArgs<ExtArgs>
     schedulingReconcileOperations?: boolean | Account$schedulingReconcileOperationsArgs<ExtArgs>
+    scheduledInvocations?: boolean | Account$scheduledInvocationsArgs<ExtArgs>
+    invocationAttempts?: boolean | Account$invocationAttemptsArgs<ExtArgs>
     scheduleStatistics?: boolean | Account$scheduleStatisticsArgs<ExtArgs>
     habits?: boolean | Account$habitsArgs<ExtArgs>
     relations?: boolean | Account$relationsArgs<ExtArgs>
@@ -11307,6 +11539,8 @@ export namespace Prisma {
     schedules?: boolean | Account$schedulesArgs<ExtArgs>
     scheduleTasks?: boolean | Account$scheduleTasksArgs<ExtArgs>
     schedulingReconcileOperations?: boolean | Account$schedulingReconcileOperationsArgs<ExtArgs>
+    scheduledInvocations?: boolean | Account$scheduledInvocationsArgs<ExtArgs>
+    invocationAttempts?: boolean | Account$invocationAttemptsArgs<ExtArgs>
     scheduleStatistics?: boolean | Account$scheduleStatisticsArgs<ExtArgs>
     habits?: boolean | Account$habitsArgs<ExtArgs>
     relations?: boolean | Account$relationsArgs<ExtArgs>
@@ -11375,6 +11609,8 @@ export namespace Prisma {
       schedules: Prisma.$SchedulePayload<ExtArgs>[]
       scheduleTasks: Prisma.$ScheduleTaskPayload<ExtArgs>[]
       schedulingReconcileOperations: Prisma.$SchedulingReconcileOperationPayload<ExtArgs>[]
+      scheduledInvocations: Prisma.$ScheduledInvocationPayload<ExtArgs>[]
+      invocationAttempts: Prisma.$InvocationAttemptPayload<ExtArgs>[]
       scheduleStatistics: Prisma.$ScheduleStatisticPayload<ExtArgs> | null
       habits: Prisma.$HabitPayload<ExtArgs>[]
       relations: Prisma.$RelationPayload<ExtArgs>[]
@@ -11833,6 +12069,8 @@ export namespace Prisma {
     schedules<T extends Account$schedulesArgs<ExtArgs> = {}>(args?: Subset<T, Account$schedulesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     scheduleTasks<T extends Account$scheduleTasksArgs<ExtArgs> = {}>(args?: Subset<T, Account$scheduleTasksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScheduleTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     schedulingReconcileOperations<T extends Account$schedulingReconcileOperationsArgs<ExtArgs> = {}>(args?: Subset<T, Account$schedulingReconcileOperationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SchedulingReconcileOperationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    scheduledInvocations<T extends Account$scheduledInvocationsArgs<ExtArgs> = {}>(args?: Subset<T, Account$scheduledInvocationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScheduledInvocationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    invocationAttempts<T extends Account$invocationAttemptsArgs<ExtArgs> = {}>(args?: Subset<T, Account$invocationAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvocationAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     scheduleStatistics<T extends Account$scheduleStatisticsArgs<ExtArgs> = {}>(args?: Subset<T, Account$scheduleStatisticsArgs<ExtArgs>>): Prisma__ScheduleStatisticClient<$Result.GetResult<Prisma.$ScheduleStatisticPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     habits<T extends Account$habitsArgs<ExtArgs> = {}>(args?: Subset<T, Account$habitsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$HabitPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     relations<T extends Account$relationsArgs<ExtArgs> = {}>(args?: Subset<T, Account$relationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RelationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -12789,6 +13027,54 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: SchedulingReconcileOperationScalarFieldEnum | SchedulingReconcileOperationScalarFieldEnum[]
+  }
+
+  /**
+   * Account.scheduledInvocations
+   */
+  export type Account$scheduledInvocationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScheduledInvocation
+     */
+    select?: ScheduledInvocationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScheduledInvocation
+     */
+    omit?: ScheduledInvocationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScheduledInvocationInclude<ExtArgs> | null
+    where?: ScheduledInvocationWhereInput
+    orderBy?: ScheduledInvocationOrderByWithRelationInput | ScheduledInvocationOrderByWithRelationInput[]
+    cursor?: ScheduledInvocationWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ScheduledInvocationScalarFieldEnum | ScheduledInvocationScalarFieldEnum[]
+  }
+
+  /**
+   * Account.invocationAttempts
+   */
+  export type Account$invocationAttemptsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InvocationAttempt
+     */
+    select?: InvocationAttemptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InvocationAttempt
+     */
+    omit?: InvocationAttemptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvocationAttemptInclude<ExtArgs> | null
+    where?: InvocationAttemptWhereInput
+    orderBy?: InvocationAttemptOrderByWithRelationInput | InvocationAttemptOrderByWithRelationInput[]
+    cursor?: InvocationAttemptWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: InvocationAttemptScalarFieldEnum | InvocationAttemptScalarFieldEnum[]
   }
 
   /**
@@ -47462,6 +47748,7 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     deletedAt: Date | null
+    archivedAt: Date | null
     isRead: boolean | null
   }
 
@@ -47490,6 +47777,7 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     deletedAt: Date | null
+    archivedAt: Date | null
     isRead: boolean | null
   }
 
@@ -47518,6 +47806,7 @@ export namespace Prisma {
     createdAt: number
     updatedAt: number
     deletedAt: number
+    archivedAt: number
     isRead: number
     _all: number
   }
@@ -47556,6 +47845,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     deletedAt?: true
+    archivedAt?: true
     isRead?: true
   }
 
@@ -47584,6 +47874,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     deletedAt?: true
+    archivedAt?: true
     isRead?: true
   }
 
@@ -47612,6 +47903,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     deletedAt?: true
+    archivedAt?: true
     isRead?: true
     _all?: true
   }
@@ -47727,6 +48019,7 @@ export namespace Prisma {
     createdAt: Date
     updatedAt: Date
     deletedAt: Date | null
+    archivedAt: Date | null
     isRead: boolean
     _count: NotificationCountAggregateOutputType | null
     _avg: NotificationAvgAggregateOutputType | null
@@ -47774,6 +48067,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
+    archivedAt?: boolean
     isRead?: boolean
     channels?: boolean | Notification$channelsArgs<ExtArgs>
     history?: boolean | Notification$historyArgs<ExtArgs>
@@ -47808,6 +48102,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
+    archivedAt?: boolean
     isRead?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["notification"]>
@@ -47837,6 +48132,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
+    archivedAt?: boolean
     isRead?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["notification"]>
@@ -47866,10 +48162,11 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
+    archivedAt?: boolean
     isRead?: boolean
   }
 
-  export type NotificationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "type" | "category" | "workflowKey" | "topic" | "idempotencyKey" | "title" | "content" | "importance" | "urgency" | "relatedEntityType" | "relatedEntityId" | "metadata" | "actions" | "navigationIntent" | "correlationId" | "causationId" | "readAt" | "expiresAt" | "version" | "createdAt" | "updatedAt" | "deletedAt" | "isRead", ExtArgs["result"]["notification"]>
+  export type NotificationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "type" | "category" | "workflowKey" | "topic" | "idempotencyKey" | "title" | "content" | "importance" | "urgency" | "relatedEntityType" | "relatedEntityId" | "metadata" | "actions" | "navigationIntent" | "correlationId" | "causationId" | "readAt" | "expiresAt" | "version" | "createdAt" | "updatedAt" | "deletedAt" | "archivedAt" | "isRead", ExtArgs["result"]["notification"]>
   export type NotificationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     channels?: boolean | Notification$channelsArgs<ExtArgs>
     history?: boolean | Notification$historyArgs<ExtArgs>
@@ -47919,6 +48216,7 @@ export namespace Prisma {
       createdAt: Date
       updatedAt: Date
       deletedAt: Date | null
+      archivedAt: Date | null
       isRead: boolean
     }, ExtArgs["result"]["notification"]>
     composites: {}
@@ -48372,6 +48670,7 @@ export namespace Prisma {
     readonly createdAt: FieldRef<"Notification", 'DateTime'>
     readonly updatedAt: FieldRef<"Notification", 'DateTime'>
     readonly deletedAt: FieldRef<"Notification", 'DateTime'>
+    readonly archivedAt: FieldRef<"Notification", 'DateTime'>
     readonly isRead: FieldRef<"Notification", 'Boolean'>
   }
 
@@ -80697,14 +80996,25 @@ export namespace Prisma {
 
   export type AggregateRoutineTemporaryOverride = {
     _count: RoutineTemporaryOverrideCountAggregateOutputType | null
+    _avg: RoutineTemporaryOverrideAvgAggregateOutputType | null
+    _sum: RoutineTemporaryOverrideSumAggregateOutputType | null
     _min: RoutineTemporaryOverrideMinAggregateOutputType | null
     _max: RoutineTemporaryOverrideMaxAggregateOutputType | null
+  }
+
+  export type RoutineTemporaryOverrideAvgAggregateOutputType = {
+    version: number | null
+  }
+
+  export type RoutineTemporaryOverrideSumAggregateOutputType = {
+    version: number | null
   }
 
   export type RoutineTemporaryOverrideMinAggregateOutputType = {
     identityId: string | null
     routineId: string | null
     overrideJson: string | null
+    version: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -80713,6 +81023,7 @@ export namespace Prisma {
     identityId: string | null
     routineId: string | null
     overrideJson: string | null
+    version: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -80721,16 +81032,26 @@ export namespace Prisma {
     identityId: number
     routineId: number
     overrideJson: number
+    version: number
     createdAt: number
     updatedAt: number
     _all: number
   }
 
 
+  export type RoutineTemporaryOverrideAvgAggregateInputType = {
+    version?: true
+  }
+
+  export type RoutineTemporaryOverrideSumAggregateInputType = {
+    version?: true
+  }
+
   export type RoutineTemporaryOverrideMinAggregateInputType = {
     identityId?: true
     routineId?: true
     overrideJson?: true
+    version?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -80739,6 +81060,7 @@ export namespace Prisma {
     identityId?: true
     routineId?: true
     overrideJson?: true
+    version?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -80747,6 +81069,7 @@ export namespace Prisma {
     identityId?: true
     routineId?: true
     overrideJson?: true
+    version?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -80790,6 +81113,18 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      *
+     * Select which fields to average
+    **/
+    _avg?: RoutineTemporaryOverrideAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to sum
+    **/
+    _sum?: RoutineTemporaryOverrideSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
      * Select which fields to find the minimum value
     **/
     _min?: RoutineTemporaryOverrideMinAggregateInputType
@@ -80820,6 +81155,8 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: RoutineTemporaryOverrideCountAggregateInputType | true
+    _avg?: RoutineTemporaryOverrideAvgAggregateInputType
+    _sum?: RoutineTemporaryOverrideSumAggregateInputType
     _min?: RoutineTemporaryOverrideMinAggregateInputType
     _max?: RoutineTemporaryOverrideMaxAggregateInputType
   }
@@ -80828,9 +81165,12 @@ export namespace Prisma {
     identityId: string
     routineId: string
     overrideJson: string
+    version: number
     createdAt: Date
     updatedAt: Date
     _count: RoutineTemporaryOverrideCountAggregateOutputType | null
+    _avg: RoutineTemporaryOverrideAvgAggregateOutputType | null
+    _sum: RoutineTemporaryOverrideSumAggregateOutputType | null
     _min: RoutineTemporaryOverrideMinAggregateOutputType | null
     _max: RoutineTemporaryOverrideMaxAggregateOutputType | null
   }
@@ -80853,6 +81193,7 @@ export namespace Prisma {
     identityId?: boolean
     routineId?: boolean
     overrideJson?: boolean
+    version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     routine?: boolean | RoutineDefinitionDefaultArgs<ExtArgs>
@@ -80863,6 +81204,7 @@ export namespace Prisma {
     identityId?: boolean
     routineId?: boolean
     overrideJson?: boolean
+    version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     routine?: boolean | RoutineDefinitionDefaultArgs<ExtArgs>
@@ -80873,6 +81215,7 @@ export namespace Prisma {
     identityId?: boolean
     routineId?: boolean
     overrideJson?: boolean
+    version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     routine?: boolean | RoutineDefinitionDefaultArgs<ExtArgs>
@@ -80883,11 +81226,12 @@ export namespace Prisma {
     identityId?: boolean
     routineId?: boolean
     overrideJson?: boolean
+    version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type RoutineTemporaryOverrideOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"identityId" | "routineId" | "overrideJson" | "createdAt" | "updatedAt", ExtArgs["result"]["routineTemporaryOverride"]>
+  export type RoutineTemporaryOverrideOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"identityId" | "routineId" | "overrideJson" | "version" | "createdAt" | "updatedAt", ExtArgs["result"]["routineTemporaryOverride"]>
   export type RoutineTemporaryOverrideInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     routine?: boolean | RoutineDefinitionDefaultArgs<ExtArgs>
     account?: boolean | AccountDefaultArgs<ExtArgs>
@@ -80911,6 +81255,7 @@ export namespace Prisma {
       identityId: string
       routineId: string
       overrideJson: string
+      version: number
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["routineTemporaryOverride"]>
@@ -81341,6 +81686,7 @@ export namespace Prisma {
     readonly identityId: FieldRef<"RoutineTemporaryOverride", 'String'>
     readonly routineId: FieldRef<"RoutineTemporaryOverride", 'String'>
     readonly overrideJson: FieldRef<"RoutineTemporaryOverride", 'String'>
+    readonly version: FieldRef<"RoutineTemporaryOverride", 'Int'>
     readonly createdAt: FieldRef<"RoutineTemporaryOverride", 'DateTime'>
     readonly updatedAt: FieldRef<"RoutineTemporaryOverride", 'DateTime'>
   }
@@ -109538,6 +109884,2670 @@ export namespace Prisma {
 
 
   /**
+   * Model ScheduledInvocation
+   */
+
+  export type AggregateScheduledInvocation = {
+    _count: ScheduledInvocationCountAggregateOutputType | null
+    _avg: ScheduledInvocationAvgAggregateOutputType | null
+    _sum: ScheduledInvocationSumAggregateOutputType | null
+    _min: ScheduledInvocationMinAggregateOutputType | null
+    _max: ScheduledInvocationMaxAggregateOutputType | null
+  }
+
+  export type ScheduledInvocationAvgAggregateOutputType = {
+    payloadVersion: number | null
+    maxRetries: number | null
+    initialDelayMs: number | null
+    maxDelayMs: number | null
+    backoffMultiplier: number | null
+    timeoutMs: number | null
+    attemptCount: number | null
+    fencingToken: number | null
+  }
+
+  export type ScheduledInvocationSumAggregateOutputType = {
+    payloadVersion: number | null
+    maxRetries: number | null
+    initialDelayMs: number | null
+    maxDelayMs: number | null
+    backoffMultiplier: number | null
+    timeoutMs: number | null
+    attemptCount: number | null
+    fencingToken: number | null
+  }
+
+  export type ScheduledInvocationMinAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    ownerType: string | null
+    ownerId: string | null
+    schedulingKey: string | null
+    handlerKey: string | null
+    payloadVersion: number | null
+    runAt: Date | null
+    retryEnabled: boolean | null
+    maxRetries: number | null
+    initialDelayMs: number | null
+    maxDelayMs: number | null
+    backoffMultiplier: number | null
+    priority: string | null
+    timeoutMs: number | null
+    status: string | null
+    attemptCount: number | null
+    nextAttemptAt: Date | null
+    claimToken: string | null
+    claimExpiresAt: Date | null
+    fencingToken: number | null
+    name: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ScheduledInvocationMaxAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    ownerType: string | null
+    ownerId: string | null
+    schedulingKey: string | null
+    handlerKey: string | null
+    payloadVersion: number | null
+    runAt: Date | null
+    retryEnabled: boolean | null
+    maxRetries: number | null
+    initialDelayMs: number | null
+    maxDelayMs: number | null
+    backoffMultiplier: number | null
+    priority: string | null
+    timeoutMs: number | null
+    status: string | null
+    attemptCount: number | null
+    nextAttemptAt: Date | null
+    claimToken: string | null
+    claimExpiresAt: Date | null
+    fencingToken: number | null
+    name: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ScheduledInvocationCountAggregateOutputType = {
+    id: number
+    identityId: number
+    ownerType: number
+    ownerId: number
+    schedulingKey: number
+    handlerKey: number
+    payloadVersion: number
+    payload: number
+    runAt: number
+    sourceRevision: number
+    retryEnabled: number
+    maxRetries: number
+    initialDelayMs: number
+    maxDelayMs: number
+    backoffMultiplier: number
+    priority: number
+    timeoutMs: number
+    status: number
+    attemptCount: number
+    nextAttemptAt: number
+    claimToken: number
+    claimExpiresAt: number
+    fencingToken: number
+    name: number
+    tags: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ScheduledInvocationAvgAggregateInputType = {
+    payloadVersion?: true
+    maxRetries?: true
+    initialDelayMs?: true
+    maxDelayMs?: true
+    backoffMultiplier?: true
+    timeoutMs?: true
+    attemptCount?: true
+    fencingToken?: true
+  }
+
+  export type ScheduledInvocationSumAggregateInputType = {
+    payloadVersion?: true
+    maxRetries?: true
+    initialDelayMs?: true
+    maxDelayMs?: true
+    backoffMultiplier?: true
+    timeoutMs?: true
+    attemptCount?: true
+    fencingToken?: true
+  }
+
+  export type ScheduledInvocationMinAggregateInputType = {
+    id?: true
+    identityId?: true
+    ownerType?: true
+    ownerId?: true
+    schedulingKey?: true
+    handlerKey?: true
+    payloadVersion?: true
+    runAt?: true
+    retryEnabled?: true
+    maxRetries?: true
+    initialDelayMs?: true
+    maxDelayMs?: true
+    backoffMultiplier?: true
+    priority?: true
+    timeoutMs?: true
+    status?: true
+    attemptCount?: true
+    nextAttemptAt?: true
+    claimToken?: true
+    claimExpiresAt?: true
+    fencingToken?: true
+    name?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ScheduledInvocationMaxAggregateInputType = {
+    id?: true
+    identityId?: true
+    ownerType?: true
+    ownerId?: true
+    schedulingKey?: true
+    handlerKey?: true
+    payloadVersion?: true
+    runAt?: true
+    retryEnabled?: true
+    maxRetries?: true
+    initialDelayMs?: true
+    maxDelayMs?: true
+    backoffMultiplier?: true
+    priority?: true
+    timeoutMs?: true
+    status?: true
+    attemptCount?: true
+    nextAttemptAt?: true
+    claimToken?: true
+    claimExpiresAt?: true
+    fencingToken?: true
+    name?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ScheduledInvocationCountAggregateInputType = {
+    id?: true
+    identityId?: true
+    ownerType?: true
+    ownerId?: true
+    schedulingKey?: true
+    handlerKey?: true
+    payloadVersion?: true
+    payload?: true
+    runAt?: true
+    sourceRevision?: true
+    retryEnabled?: true
+    maxRetries?: true
+    initialDelayMs?: true
+    maxDelayMs?: true
+    backoffMultiplier?: true
+    priority?: true
+    timeoutMs?: true
+    status?: true
+    attemptCount?: true
+    nextAttemptAt?: true
+    claimToken?: true
+    claimExpiresAt?: true
+    fencingToken?: true
+    name?: true
+    tags?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ScheduledInvocationAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ScheduledInvocation to aggregate.
+     */
+    where?: ScheduledInvocationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ScheduledInvocations to fetch.
+     */
+    orderBy?: ScheduledInvocationOrderByWithRelationInput | ScheduledInvocationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: ScheduledInvocationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ScheduledInvocations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ScheduledInvocations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned ScheduledInvocations
+    **/
+    _count?: true | ScheduledInvocationCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to average
+    **/
+    _avg?: ScheduledInvocationAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to sum
+    **/
+    _sum?: ScheduledInvocationSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: ScheduledInvocationMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: ScheduledInvocationMaxAggregateInputType
+  }
+
+  export type GetScheduledInvocationAggregateType<T extends ScheduledInvocationAggregateArgs> = {
+        [P in keyof T & keyof AggregateScheduledInvocation]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateScheduledInvocation[P]>
+      : GetScalarType<T[P], AggregateScheduledInvocation[P]>
+  }
+
+
+
+
+  export type ScheduledInvocationGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ScheduledInvocationWhereInput
+    orderBy?: ScheduledInvocationOrderByWithAggregationInput | ScheduledInvocationOrderByWithAggregationInput[]
+    by: ScheduledInvocationScalarFieldEnum[] | ScheduledInvocationScalarFieldEnum
+    having?: ScheduledInvocationScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ScheduledInvocationCountAggregateInputType | true
+    _avg?: ScheduledInvocationAvgAggregateInputType
+    _sum?: ScheduledInvocationSumAggregateInputType
+    _min?: ScheduledInvocationMinAggregateInputType
+    _max?: ScheduledInvocationMaxAggregateInputType
+  }
+
+  export type ScheduledInvocationGroupByOutputType = {
+    id: string
+    identityId: string
+    ownerType: string
+    ownerId: string
+    schedulingKey: string
+    handlerKey: string
+    payloadVersion: number
+    payload: JsonValue
+    runAt: Date
+    sourceRevision: JsonValue | null
+    retryEnabled: boolean
+    maxRetries: number
+    initialDelayMs: number
+    maxDelayMs: number
+    backoffMultiplier: number
+    priority: string
+    timeoutMs: number | null
+    status: string
+    attemptCount: number
+    nextAttemptAt: Date | null
+    claimToken: string | null
+    claimExpiresAt: Date | null
+    fencingToken: number
+    name: string | null
+    tags: JsonValue
+    createdAt: Date
+    updatedAt: Date
+    _count: ScheduledInvocationCountAggregateOutputType | null
+    _avg: ScheduledInvocationAvgAggregateOutputType | null
+    _sum: ScheduledInvocationSumAggregateOutputType | null
+    _min: ScheduledInvocationMinAggregateOutputType | null
+    _max: ScheduledInvocationMaxAggregateOutputType | null
+  }
+
+  type GetScheduledInvocationGroupByPayload<T extends ScheduledInvocationGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ScheduledInvocationGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ScheduledInvocationGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ScheduledInvocationGroupByOutputType[P]>
+            : GetScalarType<T[P], ScheduledInvocationGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ScheduledInvocationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    ownerType?: boolean
+    ownerId?: boolean
+    schedulingKey?: boolean
+    handlerKey?: boolean
+    payloadVersion?: boolean
+    payload?: boolean
+    runAt?: boolean
+    sourceRevision?: boolean
+    retryEnabled?: boolean
+    maxRetries?: boolean
+    initialDelayMs?: boolean
+    maxDelayMs?: boolean
+    backoffMultiplier?: boolean
+    priority?: boolean
+    timeoutMs?: boolean
+    status?: boolean
+    attemptCount?: boolean
+    nextAttemptAt?: boolean
+    claimToken?: boolean
+    claimExpiresAt?: boolean
+    fencingToken?: boolean
+    name?: boolean
+    tags?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+    attempts?: boolean | ScheduledInvocation$attemptsArgs<ExtArgs>
+    _count?: boolean | ScheduledInvocationCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["scheduledInvocation"]>
+
+  export type ScheduledInvocationSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    ownerType?: boolean
+    ownerId?: boolean
+    schedulingKey?: boolean
+    handlerKey?: boolean
+    payloadVersion?: boolean
+    payload?: boolean
+    runAt?: boolean
+    sourceRevision?: boolean
+    retryEnabled?: boolean
+    maxRetries?: boolean
+    initialDelayMs?: boolean
+    maxDelayMs?: boolean
+    backoffMultiplier?: boolean
+    priority?: boolean
+    timeoutMs?: boolean
+    status?: boolean
+    attemptCount?: boolean
+    nextAttemptAt?: boolean
+    claimToken?: boolean
+    claimExpiresAt?: boolean
+    fencingToken?: boolean
+    name?: boolean
+    tags?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["scheduledInvocation"]>
+
+  export type ScheduledInvocationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    ownerType?: boolean
+    ownerId?: boolean
+    schedulingKey?: boolean
+    handlerKey?: boolean
+    payloadVersion?: boolean
+    payload?: boolean
+    runAt?: boolean
+    sourceRevision?: boolean
+    retryEnabled?: boolean
+    maxRetries?: boolean
+    initialDelayMs?: boolean
+    maxDelayMs?: boolean
+    backoffMultiplier?: boolean
+    priority?: boolean
+    timeoutMs?: boolean
+    status?: boolean
+    attemptCount?: boolean
+    nextAttemptAt?: boolean
+    claimToken?: boolean
+    claimExpiresAt?: boolean
+    fencingToken?: boolean
+    name?: boolean
+    tags?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["scheduledInvocation"]>
+
+  export type ScheduledInvocationSelectScalar = {
+    id?: boolean
+    identityId?: boolean
+    ownerType?: boolean
+    ownerId?: boolean
+    schedulingKey?: boolean
+    handlerKey?: boolean
+    payloadVersion?: boolean
+    payload?: boolean
+    runAt?: boolean
+    sourceRevision?: boolean
+    retryEnabled?: boolean
+    maxRetries?: boolean
+    initialDelayMs?: boolean
+    maxDelayMs?: boolean
+    backoffMultiplier?: boolean
+    priority?: boolean
+    timeoutMs?: boolean
+    status?: boolean
+    attemptCount?: boolean
+    nextAttemptAt?: boolean
+    claimToken?: boolean
+    claimExpiresAt?: boolean
+    fencingToken?: boolean
+    name?: boolean
+    tags?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ScheduledInvocationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "ownerType" | "ownerId" | "schedulingKey" | "handlerKey" | "payloadVersion" | "payload" | "runAt" | "sourceRevision" | "retryEnabled" | "maxRetries" | "initialDelayMs" | "maxDelayMs" | "backoffMultiplier" | "priority" | "timeoutMs" | "status" | "attemptCount" | "nextAttemptAt" | "claimToken" | "claimExpiresAt" | "fencingToken" | "name" | "tags" | "createdAt" | "updatedAt", ExtArgs["result"]["scheduledInvocation"]>
+  export type ScheduledInvocationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+    attempts?: boolean | ScheduledInvocation$attemptsArgs<ExtArgs>
+    _count?: boolean | ScheduledInvocationCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type ScheduledInvocationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+  export type ScheduledInvocationIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+
+  export type $ScheduledInvocationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ScheduledInvocation"
+    objects: {
+      account: Prisma.$AccountPayload<ExtArgs>
+      attempts: Prisma.$InvocationAttemptPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      identityId: string
+      ownerType: string
+      ownerId: string
+      schedulingKey: string
+      handlerKey: string
+      payloadVersion: number
+      payload: Prisma.JsonValue
+      runAt: Date
+      sourceRevision: Prisma.JsonValue | null
+      retryEnabled: boolean
+      maxRetries: number
+      initialDelayMs: number
+      maxDelayMs: number
+      backoffMultiplier: number
+      priority: string
+      timeoutMs: number | null
+      status: string
+      attemptCount: number
+      nextAttemptAt: Date | null
+      claimToken: string | null
+      claimExpiresAt: Date | null
+      fencingToken: number
+      name: string | null
+      tags: Prisma.JsonValue
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["scheduledInvocation"]>
+    composites: {}
+  }
+
+  type ScheduledInvocationGetPayload<S extends boolean | null | undefined | ScheduledInvocationDefaultArgs> = $Result.GetResult<Prisma.$ScheduledInvocationPayload, S>
+
+  type ScheduledInvocationCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ScheduledInvocationFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ScheduledInvocationCountAggregateInputType | true
+    }
+
+  export interface ScheduledInvocationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ScheduledInvocation'], meta: { name: 'ScheduledInvocation' } }
+    /**
+     * Find zero or one ScheduledInvocation that matches the filter.
+     * @param {ScheduledInvocationFindUniqueArgs} args - Arguments to find a ScheduledInvocation
+     * @example
+     * // Get one ScheduledInvocation
+     * const scheduledInvocation = await prisma.scheduledInvocation.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ScheduledInvocationFindUniqueArgs>(args: SelectSubset<T, ScheduledInvocationFindUniqueArgs<ExtArgs>>): Prisma__ScheduledInvocationClient<$Result.GetResult<Prisma.$ScheduledInvocationPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ScheduledInvocation that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ScheduledInvocationFindUniqueOrThrowArgs} args - Arguments to find a ScheduledInvocation
+     * @example
+     * // Get one ScheduledInvocation
+     * const scheduledInvocation = await prisma.scheduledInvocation.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ScheduledInvocationFindUniqueOrThrowArgs>(args: SelectSubset<T, ScheduledInvocationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ScheduledInvocationClient<$Result.GetResult<Prisma.$ScheduledInvocationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ScheduledInvocation that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ScheduledInvocationFindFirstArgs} args - Arguments to find a ScheduledInvocation
+     * @example
+     * // Get one ScheduledInvocation
+     * const scheduledInvocation = await prisma.scheduledInvocation.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ScheduledInvocationFindFirstArgs>(args?: SelectSubset<T, ScheduledInvocationFindFirstArgs<ExtArgs>>): Prisma__ScheduledInvocationClient<$Result.GetResult<Prisma.$ScheduledInvocationPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ScheduledInvocation that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ScheduledInvocationFindFirstOrThrowArgs} args - Arguments to find a ScheduledInvocation
+     * @example
+     * // Get one ScheduledInvocation
+     * const scheduledInvocation = await prisma.scheduledInvocation.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ScheduledInvocationFindFirstOrThrowArgs>(args?: SelectSubset<T, ScheduledInvocationFindFirstOrThrowArgs<ExtArgs>>): Prisma__ScheduledInvocationClient<$Result.GetResult<Prisma.$ScheduledInvocationPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ScheduledInvocations that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ScheduledInvocationFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ScheduledInvocations
+     * const scheduledInvocations = await prisma.scheduledInvocation.findMany()
+     *
+     * // Get first 10 ScheduledInvocations
+     * const scheduledInvocations = await prisma.scheduledInvocation.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const scheduledInvocationWithIdOnly = await prisma.scheduledInvocation.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends ScheduledInvocationFindManyArgs>(args?: SelectSubset<T, ScheduledInvocationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScheduledInvocationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ScheduledInvocation.
+     * @param {ScheduledInvocationCreateArgs} args - Arguments to create a ScheduledInvocation.
+     * @example
+     * // Create one ScheduledInvocation
+     * const ScheduledInvocation = await prisma.scheduledInvocation.create({
+     *   data: {
+     *     // ... data to create a ScheduledInvocation
+     *   }
+     * })
+     *
+     */
+    create<T extends ScheduledInvocationCreateArgs>(args: SelectSubset<T, ScheduledInvocationCreateArgs<ExtArgs>>): Prisma__ScheduledInvocationClient<$Result.GetResult<Prisma.$ScheduledInvocationPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ScheduledInvocations.
+     * @param {ScheduledInvocationCreateManyArgs} args - Arguments to create many ScheduledInvocations.
+     * @example
+     * // Create many ScheduledInvocations
+     * const scheduledInvocation = await prisma.scheduledInvocation.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends ScheduledInvocationCreateManyArgs>(args?: SelectSubset<T, ScheduledInvocationCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ScheduledInvocations and returns the data saved in the database.
+     * @param {ScheduledInvocationCreateManyAndReturnArgs} args - Arguments to create many ScheduledInvocations.
+     * @example
+     * // Create many ScheduledInvocations
+     * const scheduledInvocation = await prisma.scheduledInvocation.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many ScheduledInvocations and only return the `id`
+     * const scheduledInvocationWithIdOnly = await prisma.scheduledInvocation.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends ScheduledInvocationCreateManyAndReturnArgs>(args?: SelectSubset<T, ScheduledInvocationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScheduledInvocationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ScheduledInvocation.
+     * @param {ScheduledInvocationDeleteArgs} args - Arguments to delete one ScheduledInvocation.
+     * @example
+     * // Delete one ScheduledInvocation
+     * const ScheduledInvocation = await prisma.scheduledInvocation.delete({
+     *   where: {
+     *     // ... filter to delete one ScheduledInvocation
+     *   }
+     * })
+     *
+     */
+    delete<T extends ScheduledInvocationDeleteArgs>(args: SelectSubset<T, ScheduledInvocationDeleteArgs<ExtArgs>>): Prisma__ScheduledInvocationClient<$Result.GetResult<Prisma.$ScheduledInvocationPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ScheduledInvocation.
+     * @param {ScheduledInvocationUpdateArgs} args - Arguments to update one ScheduledInvocation.
+     * @example
+     * // Update one ScheduledInvocation
+     * const scheduledInvocation = await prisma.scheduledInvocation.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends ScheduledInvocationUpdateArgs>(args: SelectSubset<T, ScheduledInvocationUpdateArgs<ExtArgs>>): Prisma__ScheduledInvocationClient<$Result.GetResult<Prisma.$ScheduledInvocationPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ScheduledInvocations.
+     * @param {ScheduledInvocationDeleteManyArgs} args - Arguments to filter ScheduledInvocations to delete.
+     * @example
+     * // Delete a few ScheduledInvocations
+     * const { count } = await prisma.scheduledInvocation.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends ScheduledInvocationDeleteManyArgs>(args?: SelectSubset<T, ScheduledInvocationDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ScheduledInvocations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ScheduledInvocationUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ScheduledInvocations
+     * const scheduledInvocation = await prisma.scheduledInvocation.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends ScheduledInvocationUpdateManyArgs>(args: SelectSubset<T, ScheduledInvocationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ScheduledInvocations and returns the data updated in the database.
+     * @param {ScheduledInvocationUpdateManyAndReturnArgs} args - Arguments to update many ScheduledInvocations.
+     * @example
+     * // Update many ScheduledInvocations
+     * const scheduledInvocation = await prisma.scheduledInvocation.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more ScheduledInvocations and only return the `id`
+     * const scheduledInvocationWithIdOnly = await prisma.scheduledInvocation.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends ScheduledInvocationUpdateManyAndReturnArgs>(args: SelectSubset<T, ScheduledInvocationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScheduledInvocationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ScheduledInvocation.
+     * @param {ScheduledInvocationUpsertArgs} args - Arguments to update or create a ScheduledInvocation.
+     * @example
+     * // Update or create a ScheduledInvocation
+     * const scheduledInvocation = await prisma.scheduledInvocation.upsert({
+     *   create: {
+     *     // ... data to create a ScheduledInvocation
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ScheduledInvocation we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ScheduledInvocationUpsertArgs>(args: SelectSubset<T, ScheduledInvocationUpsertArgs<ExtArgs>>): Prisma__ScheduledInvocationClient<$Result.GetResult<Prisma.$ScheduledInvocationPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ScheduledInvocations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ScheduledInvocationCountArgs} args - Arguments to filter ScheduledInvocations to count.
+     * @example
+     * // Count the number of ScheduledInvocations
+     * const count = await prisma.scheduledInvocation.count({
+     *   where: {
+     *     // ... the filter for the ScheduledInvocations we want to count
+     *   }
+     * })
+    **/
+    count<T extends ScheduledInvocationCountArgs>(
+      args?: Subset<T, ScheduledInvocationCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ScheduledInvocationCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ScheduledInvocation.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ScheduledInvocationAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ScheduledInvocationAggregateArgs>(args: Subset<T, ScheduledInvocationAggregateArgs>): Prisma.PrismaPromise<GetScheduledInvocationAggregateType<T>>
+
+    /**
+     * Group by ScheduledInvocation.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ScheduledInvocationGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends ScheduledInvocationGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ScheduledInvocationGroupByArgs['orderBy'] }
+        : { orderBy?: ScheduledInvocationGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ScheduledInvocationGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetScheduledInvocationGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ScheduledInvocation model
+   */
+  readonly fields: ScheduledInvocationFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ScheduledInvocation.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ScheduledInvocationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    attempts<T extends ScheduledInvocation$attemptsArgs<ExtArgs> = {}>(args?: Subset<T, ScheduledInvocation$attemptsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvocationAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ScheduledInvocation model
+   */
+  interface ScheduledInvocationFieldRefs {
+    readonly id: FieldRef<"ScheduledInvocation", 'String'>
+    readonly identityId: FieldRef<"ScheduledInvocation", 'String'>
+    readonly ownerType: FieldRef<"ScheduledInvocation", 'String'>
+    readonly ownerId: FieldRef<"ScheduledInvocation", 'String'>
+    readonly schedulingKey: FieldRef<"ScheduledInvocation", 'String'>
+    readonly handlerKey: FieldRef<"ScheduledInvocation", 'String'>
+    readonly payloadVersion: FieldRef<"ScheduledInvocation", 'Int'>
+    readonly payload: FieldRef<"ScheduledInvocation", 'Json'>
+    readonly runAt: FieldRef<"ScheduledInvocation", 'DateTime'>
+    readonly sourceRevision: FieldRef<"ScheduledInvocation", 'Json'>
+    readonly retryEnabled: FieldRef<"ScheduledInvocation", 'Boolean'>
+    readonly maxRetries: FieldRef<"ScheduledInvocation", 'Int'>
+    readonly initialDelayMs: FieldRef<"ScheduledInvocation", 'Int'>
+    readonly maxDelayMs: FieldRef<"ScheduledInvocation", 'Int'>
+    readonly backoffMultiplier: FieldRef<"ScheduledInvocation", 'Float'>
+    readonly priority: FieldRef<"ScheduledInvocation", 'String'>
+    readonly timeoutMs: FieldRef<"ScheduledInvocation", 'Int'>
+    readonly status: FieldRef<"ScheduledInvocation", 'String'>
+    readonly attemptCount: FieldRef<"ScheduledInvocation", 'Int'>
+    readonly nextAttemptAt: FieldRef<"ScheduledInvocation", 'DateTime'>
+    readonly claimToken: FieldRef<"ScheduledInvocation", 'String'>
+    readonly claimExpiresAt: FieldRef<"ScheduledInvocation", 'DateTime'>
+    readonly fencingToken: FieldRef<"ScheduledInvocation", 'Int'>
+    readonly name: FieldRef<"ScheduledInvocation", 'String'>
+    readonly tags: FieldRef<"ScheduledInvocation", 'Json'>
+    readonly createdAt: FieldRef<"ScheduledInvocation", 'DateTime'>
+    readonly updatedAt: FieldRef<"ScheduledInvocation", 'DateTime'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * ScheduledInvocation findUnique
+   */
+  export type ScheduledInvocationFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScheduledInvocation
+     */
+    select?: ScheduledInvocationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScheduledInvocation
+     */
+    omit?: ScheduledInvocationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScheduledInvocationInclude<ExtArgs> | null
+    /**
+     * Filter, which ScheduledInvocation to fetch.
+     */
+    where: ScheduledInvocationWhereUniqueInput
+  }
+
+  /**
+   * ScheduledInvocation findUniqueOrThrow
+   */
+  export type ScheduledInvocationFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScheduledInvocation
+     */
+    select?: ScheduledInvocationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScheduledInvocation
+     */
+    omit?: ScheduledInvocationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScheduledInvocationInclude<ExtArgs> | null
+    /**
+     * Filter, which ScheduledInvocation to fetch.
+     */
+    where: ScheduledInvocationWhereUniqueInput
+  }
+
+  /**
+   * ScheduledInvocation findFirst
+   */
+  export type ScheduledInvocationFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScheduledInvocation
+     */
+    select?: ScheduledInvocationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScheduledInvocation
+     */
+    omit?: ScheduledInvocationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScheduledInvocationInclude<ExtArgs> | null
+    /**
+     * Filter, which ScheduledInvocation to fetch.
+     */
+    where?: ScheduledInvocationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ScheduledInvocations to fetch.
+     */
+    orderBy?: ScheduledInvocationOrderByWithRelationInput | ScheduledInvocationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for ScheduledInvocations.
+     */
+    cursor?: ScheduledInvocationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ScheduledInvocations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ScheduledInvocations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of ScheduledInvocations.
+     */
+    distinct?: ScheduledInvocationScalarFieldEnum | ScheduledInvocationScalarFieldEnum[]
+  }
+
+  /**
+   * ScheduledInvocation findFirstOrThrow
+   */
+  export type ScheduledInvocationFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScheduledInvocation
+     */
+    select?: ScheduledInvocationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScheduledInvocation
+     */
+    omit?: ScheduledInvocationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScheduledInvocationInclude<ExtArgs> | null
+    /**
+     * Filter, which ScheduledInvocation to fetch.
+     */
+    where?: ScheduledInvocationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ScheduledInvocations to fetch.
+     */
+    orderBy?: ScheduledInvocationOrderByWithRelationInput | ScheduledInvocationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for ScheduledInvocations.
+     */
+    cursor?: ScheduledInvocationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ScheduledInvocations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ScheduledInvocations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of ScheduledInvocations.
+     */
+    distinct?: ScheduledInvocationScalarFieldEnum | ScheduledInvocationScalarFieldEnum[]
+  }
+
+  /**
+   * ScheduledInvocation findMany
+   */
+  export type ScheduledInvocationFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScheduledInvocation
+     */
+    select?: ScheduledInvocationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScheduledInvocation
+     */
+    omit?: ScheduledInvocationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScheduledInvocationInclude<ExtArgs> | null
+    /**
+     * Filter, which ScheduledInvocations to fetch.
+     */
+    where?: ScheduledInvocationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ScheduledInvocations to fetch.
+     */
+    orderBy?: ScheduledInvocationOrderByWithRelationInput | ScheduledInvocationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing ScheduledInvocations.
+     */
+    cursor?: ScheduledInvocationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ScheduledInvocations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ScheduledInvocations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of ScheduledInvocations.
+     */
+    distinct?: ScheduledInvocationScalarFieldEnum | ScheduledInvocationScalarFieldEnum[]
+  }
+
+  /**
+   * ScheduledInvocation create
+   */
+  export type ScheduledInvocationCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScheduledInvocation
+     */
+    select?: ScheduledInvocationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScheduledInvocation
+     */
+    omit?: ScheduledInvocationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScheduledInvocationInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ScheduledInvocation.
+     */
+    data: XOR<ScheduledInvocationCreateInput, ScheduledInvocationUncheckedCreateInput>
+  }
+
+  /**
+   * ScheduledInvocation createMany
+   */
+  export type ScheduledInvocationCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ScheduledInvocations.
+     */
+    data: ScheduledInvocationCreateManyInput | ScheduledInvocationCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ScheduledInvocation createManyAndReturn
+   */
+  export type ScheduledInvocationCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScheduledInvocation
+     */
+    select?: ScheduledInvocationSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScheduledInvocation
+     */
+    omit?: ScheduledInvocationOmit<ExtArgs> | null
+    /**
+     * The data used to create many ScheduledInvocations.
+     */
+    data: ScheduledInvocationCreateManyInput | ScheduledInvocationCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScheduledInvocationIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ScheduledInvocation update
+   */
+  export type ScheduledInvocationUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScheduledInvocation
+     */
+    select?: ScheduledInvocationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScheduledInvocation
+     */
+    omit?: ScheduledInvocationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScheduledInvocationInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ScheduledInvocation.
+     */
+    data: XOR<ScheduledInvocationUpdateInput, ScheduledInvocationUncheckedUpdateInput>
+    /**
+     * Choose, which ScheduledInvocation to update.
+     */
+    where: ScheduledInvocationWhereUniqueInput
+  }
+
+  /**
+   * ScheduledInvocation updateMany
+   */
+  export type ScheduledInvocationUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ScheduledInvocations.
+     */
+    data: XOR<ScheduledInvocationUpdateManyMutationInput, ScheduledInvocationUncheckedUpdateManyInput>
+    /**
+     * Filter which ScheduledInvocations to update
+     */
+    where?: ScheduledInvocationWhereInput
+    /**
+     * Limit how many ScheduledInvocations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ScheduledInvocation updateManyAndReturn
+   */
+  export type ScheduledInvocationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScheduledInvocation
+     */
+    select?: ScheduledInvocationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScheduledInvocation
+     */
+    omit?: ScheduledInvocationOmit<ExtArgs> | null
+    /**
+     * The data used to update ScheduledInvocations.
+     */
+    data: XOR<ScheduledInvocationUpdateManyMutationInput, ScheduledInvocationUncheckedUpdateManyInput>
+    /**
+     * Filter which ScheduledInvocations to update
+     */
+    where?: ScheduledInvocationWhereInput
+    /**
+     * Limit how many ScheduledInvocations to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScheduledInvocationIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ScheduledInvocation upsert
+   */
+  export type ScheduledInvocationUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScheduledInvocation
+     */
+    select?: ScheduledInvocationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScheduledInvocation
+     */
+    omit?: ScheduledInvocationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScheduledInvocationInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ScheduledInvocation to update in case it exists.
+     */
+    where: ScheduledInvocationWhereUniqueInput
+    /**
+     * In case the ScheduledInvocation found by the `where` argument doesn't exist, create a new ScheduledInvocation with this data.
+     */
+    create: XOR<ScheduledInvocationCreateInput, ScheduledInvocationUncheckedCreateInput>
+    /**
+     * In case the ScheduledInvocation was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ScheduledInvocationUpdateInput, ScheduledInvocationUncheckedUpdateInput>
+  }
+
+  /**
+   * ScheduledInvocation delete
+   */
+  export type ScheduledInvocationDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScheduledInvocation
+     */
+    select?: ScheduledInvocationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScheduledInvocation
+     */
+    omit?: ScheduledInvocationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScheduledInvocationInclude<ExtArgs> | null
+    /**
+     * Filter which ScheduledInvocation to delete.
+     */
+    where: ScheduledInvocationWhereUniqueInput
+  }
+
+  /**
+   * ScheduledInvocation deleteMany
+   */
+  export type ScheduledInvocationDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ScheduledInvocations to delete
+     */
+    where?: ScheduledInvocationWhereInput
+    /**
+     * Limit how many ScheduledInvocations to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ScheduledInvocation.attempts
+   */
+  export type ScheduledInvocation$attemptsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InvocationAttempt
+     */
+    select?: InvocationAttemptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InvocationAttempt
+     */
+    omit?: InvocationAttemptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvocationAttemptInclude<ExtArgs> | null
+    where?: InvocationAttemptWhereInput
+    orderBy?: InvocationAttemptOrderByWithRelationInput | InvocationAttemptOrderByWithRelationInput[]
+    cursor?: InvocationAttemptWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: InvocationAttemptScalarFieldEnum | InvocationAttemptScalarFieldEnum[]
+  }
+
+  /**
+   * ScheduledInvocation without action
+   */
+  export type ScheduledInvocationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScheduledInvocation
+     */
+    select?: ScheduledInvocationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScheduledInvocation
+     */
+    omit?: ScheduledInvocationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScheduledInvocationInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model InvocationAttempt
+   */
+
+  export type AggregateInvocationAttempt = {
+    _count: InvocationAttemptCountAggregateOutputType | null
+    _avg: InvocationAttemptAvgAggregateOutputType | null
+    _sum: InvocationAttemptSumAggregateOutputType | null
+    _min: InvocationAttemptMinAggregateOutputType | null
+    _max: InvocationAttemptMaxAggregateOutputType | null
+  }
+
+  export type InvocationAttemptAvgAggregateOutputType = {
+    attemptNumber: number | null
+    fencingToken: number | null
+  }
+
+  export type InvocationAttemptSumAggregateOutputType = {
+    attemptNumber: number | null
+    fencingToken: number | null
+  }
+
+  export type InvocationAttemptMinAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    invocationId: string | null
+    attemptNumber: number | null
+    startedAt: Date | null
+    finishedAt: Date | null
+    outcome: string | null
+    failureCode: string | null
+    failureMessage: string | null
+    failureRetryable: boolean | null
+    workerId: string | null
+    claimToken: string | null
+    fencingToken: number | null
+    createdAt: Date | null
+  }
+
+  export type InvocationAttemptMaxAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    invocationId: string | null
+    attemptNumber: number | null
+    startedAt: Date | null
+    finishedAt: Date | null
+    outcome: string | null
+    failureCode: string | null
+    failureMessage: string | null
+    failureRetryable: boolean | null
+    workerId: string | null
+    claimToken: string | null
+    fencingToken: number | null
+    createdAt: Date | null
+  }
+
+  export type InvocationAttemptCountAggregateOutputType = {
+    id: number
+    identityId: number
+    invocationId: number
+    attemptNumber: number
+    startedAt: number
+    finishedAt: number
+    outcome: number
+    result: number
+    failureCode: number
+    failureMessage: number
+    failureRetryable: number
+    workerId: number
+    claimToken: number
+    fencingToken: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type InvocationAttemptAvgAggregateInputType = {
+    attemptNumber?: true
+    fencingToken?: true
+  }
+
+  export type InvocationAttemptSumAggregateInputType = {
+    attemptNumber?: true
+    fencingToken?: true
+  }
+
+  export type InvocationAttemptMinAggregateInputType = {
+    id?: true
+    identityId?: true
+    invocationId?: true
+    attemptNumber?: true
+    startedAt?: true
+    finishedAt?: true
+    outcome?: true
+    failureCode?: true
+    failureMessage?: true
+    failureRetryable?: true
+    workerId?: true
+    claimToken?: true
+    fencingToken?: true
+    createdAt?: true
+  }
+
+  export type InvocationAttemptMaxAggregateInputType = {
+    id?: true
+    identityId?: true
+    invocationId?: true
+    attemptNumber?: true
+    startedAt?: true
+    finishedAt?: true
+    outcome?: true
+    failureCode?: true
+    failureMessage?: true
+    failureRetryable?: true
+    workerId?: true
+    claimToken?: true
+    fencingToken?: true
+    createdAt?: true
+  }
+
+  export type InvocationAttemptCountAggregateInputType = {
+    id?: true
+    identityId?: true
+    invocationId?: true
+    attemptNumber?: true
+    startedAt?: true
+    finishedAt?: true
+    outcome?: true
+    result?: true
+    failureCode?: true
+    failureMessage?: true
+    failureRetryable?: true
+    workerId?: true
+    claimToken?: true
+    fencingToken?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type InvocationAttemptAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which InvocationAttempt to aggregate.
+     */
+    where?: InvocationAttemptWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of InvocationAttempts to fetch.
+     */
+    orderBy?: InvocationAttemptOrderByWithRelationInput | InvocationAttemptOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: InvocationAttemptWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` InvocationAttempts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` InvocationAttempts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned InvocationAttempts
+    **/
+    _count?: true | InvocationAttemptCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to average
+    **/
+    _avg?: InvocationAttemptAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to sum
+    **/
+    _sum?: InvocationAttemptSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: InvocationAttemptMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: InvocationAttemptMaxAggregateInputType
+  }
+
+  export type GetInvocationAttemptAggregateType<T extends InvocationAttemptAggregateArgs> = {
+        [P in keyof T & keyof AggregateInvocationAttempt]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateInvocationAttempt[P]>
+      : GetScalarType<T[P], AggregateInvocationAttempt[P]>
+  }
+
+
+
+
+  export type InvocationAttemptGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InvocationAttemptWhereInput
+    orderBy?: InvocationAttemptOrderByWithAggregationInput | InvocationAttemptOrderByWithAggregationInput[]
+    by: InvocationAttemptScalarFieldEnum[] | InvocationAttemptScalarFieldEnum
+    having?: InvocationAttemptScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: InvocationAttemptCountAggregateInputType | true
+    _avg?: InvocationAttemptAvgAggregateInputType
+    _sum?: InvocationAttemptSumAggregateInputType
+    _min?: InvocationAttemptMinAggregateInputType
+    _max?: InvocationAttemptMaxAggregateInputType
+  }
+
+  export type InvocationAttemptGroupByOutputType = {
+    id: string
+    identityId: string
+    invocationId: string
+    attemptNumber: number
+    startedAt: Date
+    finishedAt: Date | null
+    outcome: string
+    result: JsonValue | null
+    failureCode: string | null
+    failureMessage: string | null
+    failureRetryable: boolean | null
+    workerId: string | null
+    claimToken: string | null
+    fencingToken: number | null
+    createdAt: Date
+    _count: InvocationAttemptCountAggregateOutputType | null
+    _avg: InvocationAttemptAvgAggregateOutputType | null
+    _sum: InvocationAttemptSumAggregateOutputType | null
+    _min: InvocationAttemptMinAggregateOutputType | null
+    _max: InvocationAttemptMaxAggregateOutputType | null
+  }
+
+  type GetInvocationAttemptGroupByPayload<T extends InvocationAttemptGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<InvocationAttemptGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof InvocationAttemptGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], InvocationAttemptGroupByOutputType[P]>
+            : GetScalarType<T[P], InvocationAttemptGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type InvocationAttemptSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    invocationId?: boolean
+    attemptNumber?: boolean
+    startedAt?: boolean
+    finishedAt?: boolean
+    outcome?: boolean
+    result?: boolean
+    failureCode?: boolean
+    failureMessage?: boolean
+    failureRetryable?: boolean
+    workerId?: boolean
+    claimToken?: boolean
+    fencingToken?: boolean
+    createdAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+    invocation?: boolean | ScheduledInvocationDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["invocationAttempt"]>
+
+  export type InvocationAttemptSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    invocationId?: boolean
+    attemptNumber?: boolean
+    startedAt?: boolean
+    finishedAt?: boolean
+    outcome?: boolean
+    result?: boolean
+    failureCode?: boolean
+    failureMessage?: boolean
+    failureRetryable?: boolean
+    workerId?: boolean
+    claimToken?: boolean
+    fencingToken?: boolean
+    createdAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+    invocation?: boolean | ScheduledInvocationDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["invocationAttempt"]>
+
+  export type InvocationAttemptSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    invocationId?: boolean
+    attemptNumber?: boolean
+    startedAt?: boolean
+    finishedAt?: boolean
+    outcome?: boolean
+    result?: boolean
+    failureCode?: boolean
+    failureMessage?: boolean
+    failureRetryable?: boolean
+    workerId?: boolean
+    claimToken?: boolean
+    fencingToken?: boolean
+    createdAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+    invocation?: boolean | ScheduledInvocationDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["invocationAttempt"]>
+
+  export type InvocationAttemptSelectScalar = {
+    id?: boolean
+    identityId?: boolean
+    invocationId?: boolean
+    attemptNumber?: boolean
+    startedAt?: boolean
+    finishedAt?: boolean
+    outcome?: boolean
+    result?: boolean
+    failureCode?: boolean
+    failureMessage?: boolean
+    failureRetryable?: boolean
+    workerId?: boolean
+    claimToken?: boolean
+    fencingToken?: boolean
+    createdAt?: boolean
+  }
+
+  export type InvocationAttemptOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "invocationId" | "attemptNumber" | "startedAt" | "finishedAt" | "outcome" | "result" | "failureCode" | "failureMessage" | "failureRetryable" | "workerId" | "claimToken" | "fencingToken" | "createdAt", ExtArgs["result"]["invocationAttempt"]>
+  export type InvocationAttemptInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+    invocation?: boolean | ScheduledInvocationDefaultArgs<ExtArgs>
+  }
+  export type InvocationAttemptIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+    invocation?: boolean | ScheduledInvocationDefaultArgs<ExtArgs>
+  }
+  export type InvocationAttemptIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+    invocation?: boolean | ScheduledInvocationDefaultArgs<ExtArgs>
+  }
+
+  export type $InvocationAttemptPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "InvocationAttempt"
+    objects: {
+      account: Prisma.$AccountPayload<ExtArgs>
+      invocation: Prisma.$ScheduledInvocationPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      identityId: string
+      invocationId: string
+      attemptNumber: number
+      startedAt: Date
+      finishedAt: Date | null
+      outcome: string
+      result: Prisma.JsonValue | null
+      failureCode: string | null
+      failureMessage: string | null
+      failureRetryable: boolean | null
+      workerId: string | null
+      claimToken: string | null
+      fencingToken: number | null
+      createdAt: Date
+    }, ExtArgs["result"]["invocationAttempt"]>
+    composites: {}
+  }
+
+  type InvocationAttemptGetPayload<S extends boolean | null | undefined | InvocationAttemptDefaultArgs> = $Result.GetResult<Prisma.$InvocationAttemptPayload, S>
+
+  type InvocationAttemptCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<InvocationAttemptFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: InvocationAttemptCountAggregateInputType | true
+    }
+
+  export interface InvocationAttemptDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['InvocationAttempt'], meta: { name: 'InvocationAttempt' } }
+    /**
+     * Find zero or one InvocationAttempt that matches the filter.
+     * @param {InvocationAttemptFindUniqueArgs} args - Arguments to find a InvocationAttempt
+     * @example
+     * // Get one InvocationAttempt
+     * const invocationAttempt = await prisma.invocationAttempt.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends InvocationAttemptFindUniqueArgs>(args: SelectSubset<T, InvocationAttemptFindUniqueArgs<ExtArgs>>): Prisma__InvocationAttemptClient<$Result.GetResult<Prisma.$InvocationAttemptPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one InvocationAttempt that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {InvocationAttemptFindUniqueOrThrowArgs} args - Arguments to find a InvocationAttempt
+     * @example
+     * // Get one InvocationAttempt
+     * const invocationAttempt = await prisma.invocationAttempt.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends InvocationAttemptFindUniqueOrThrowArgs>(args: SelectSubset<T, InvocationAttemptFindUniqueOrThrowArgs<ExtArgs>>): Prisma__InvocationAttemptClient<$Result.GetResult<Prisma.$InvocationAttemptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first InvocationAttempt that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvocationAttemptFindFirstArgs} args - Arguments to find a InvocationAttempt
+     * @example
+     * // Get one InvocationAttempt
+     * const invocationAttempt = await prisma.invocationAttempt.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends InvocationAttemptFindFirstArgs>(args?: SelectSubset<T, InvocationAttemptFindFirstArgs<ExtArgs>>): Prisma__InvocationAttemptClient<$Result.GetResult<Prisma.$InvocationAttemptPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first InvocationAttempt that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvocationAttemptFindFirstOrThrowArgs} args - Arguments to find a InvocationAttempt
+     * @example
+     * // Get one InvocationAttempt
+     * const invocationAttempt = await prisma.invocationAttempt.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends InvocationAttemptFindFirstOrThrowArgs>(args?: SelectSubset<T, InvocationAttemptFindFirstOrThrowArgs<ExtArgs>>): Prisma__InvocationAttemptClient<$Result.GetResult<Prisma.$InvocationAttemptPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more InvocationAttempts that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvocationAttemptFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all InvocationAttempts
+     * const invocationAttempts = await prisma.invocationAttempt.findMany()
+     *
+     * // Get first 10 InvocationAttempts
+     * const invocationAttempts = await prisma.invocationAttempt.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const invocationAttemptWithIdOnly = await prisma.invocationAttempt.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends InvocationAttemptFindManyArgs>(args?: SelectSubset<T, InvocationAttemptFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvocationAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a InvocationAttempt.
+     * @param {InvocationAttemptCreateArgs} args - Arguments to create a InvocationAttempt.
+     * @example
+     * // Create one InvocationAttempt
+     * const InvocationAttempt = await prisma.invocationAttempt.create({
+     *   data: {
+     *     // ... data to create a InvocationAttempt
+     *   }
+     * })
+     *
+     */
+    create<T extends InvocationAttemptCreateArgs>(args: SelectSubset<T, InvocationAttemptCreateArgs<ExtArgs>>): Prisma__InvocationAttemptClient<$Result.GetResult<Prisma.$InvocationAttemptPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many InvocationAttempts.
+     * @param {InvocationAttemptCreateManyArgs} args - Arguments to create many InvocationAttempts.
+     * @example
+     * // Create many InvocationAttempts
+     * const invocationAttempt = await prisma.invocationAttempt.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends InvocationAttemptCreateManyArgs>(args?: SelectSubset<T, InvocationAttemptCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many InvocationAttempts and returns the data saved in the database.
+     * @param {InvocationAttemptCreateManyAndReturnArgs} args - Arguments to create many InvocationAttempts.
+     * @example
+     * // Create many InvocationAttempts
+     * const invocationAttempt = await prisma.invocationAttempt.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many InvocationAttempts and only return the `id`
+     * const invocationAttemptWithIdOnly = await prisma.invocationAttempt.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends InvocationAttemptCreateManyAndReturnArgs>(args?: SelectSubset<T, InvocationAttemptCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvocationAttemptPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a InvocationAttempt.
+     * @param {InvocationAttemptDeleteArgs} args - Arguments to delete one InvocationAttempt.
+     * @example
+     * // Delete one InvocationAttempt
+     * const InvocationAttempt = await prisma.invocationAttempt.delete({
+     *   where: {
+     *     // ... filter to delete one InvocationAttempt
+     *   }
+     * })
+     *
+     */
+    delete<T extends InvocationAttemptDeleteArgs>(args: SelectSubset<T, InvocationAttemptDeleteArgs<ExtArgs>>): Prisma__InvocationAttemptClient<$Result.GetResult<Prisma.$InvocationAttemptPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one InvocationAttempt.
+     * @param {InvocationAttemptUpdateArgs} args - Arguments to update one InvocationAttempt.
+     * @example
+     * // Update one InvocationAttempt
+     * const invocationAttempt = await prisma.invocationAttempt.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends InvocationAttemptUpdateArgs>(args: SelectSubset<T, InvocationAttemptUpdateArgs<ExtArgs>>): Prisma__InvocationAttemptClient<$Result.GetResult<Prisma.$InvocationAttemptPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more InvocationAttempts.
+     * @param {InvocationAttemptDeleteManyArgs} args - Arguments to filter InvocationAttempts to delete.
+     * @example
+     * // Delete a few InvocationAttempts
+     * const { count } = await prisma.invocationAttempt.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends InvocationAttemptDeleteManyArgs>(args?: SelectSubset<T, InvocationAttemptDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more InvocationAttempts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvocationAttemptUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many InvocationAttempts
+     * const invocationAttempt = await prisma.invocationAttempt.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends InvocationAttemptUpdateManyArgs>(args: SelectSubset<T, InvocationAttemptUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more InvocationAttempts and returns the data updated in the database.
+     * @param {InvocationAttemptUpdateManyAndReturnArgs} args - Arguments to update many InvocationAttempts.
+     * @example
+     * // Update many InvocationAttempts
+     * const invocationAttempt = await prisma.invocationAttempt.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more InvocationAttempts and only return the `id`
+     * const invocationAttemptWithIdOnly = await prisma.invocationAttempt.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends InvocationAttemptUpdateManyAndReturnArgs>(args: SelectSubset<T, InvocationAttemptUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvocationAttemptPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one InvocationAttempt.
+     * @param {InvocationAttemptUpsertArgs} args - Arguments to update or create a InvocationAttempt.
+     * @example
+     * // Update or create a InvocationAttempt
+     * const invocationAttempt = await prisma.invocationAttempt.upsert({
+     *   create: {
+     *     // ... data to create a InvocationAttempt
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the InvocationAttempt we want to update
+     *   }
+     * })
+     */
+    upsert<T extends InvocationAttemptUpsertArgs>(args: SelectSubset<T, InvocationAttemptUpsertArgs<ExtArgs>>): Prisma__InvocationAttemptClient<$Result.GetResult<Prisma.$InvocationAttemptPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of InvocationAttempts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvocationAttemptCountArgs} args - Arguments to filter InvocationAttempts to count.
+     * @example
+     * // Count the number of InvocationAttempts
+     * const count = await prisma.invocationAttempt.count({
+     *   where: {
+     *     // ... the filter for the InvocationAttempts we want to count
+     *   }
+     * })
+    **/
+    count<T extends InvocationAttemptCountArgs>(
+      args?: Subset<T, InvocationAttemptCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], InvocationAttemptCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a InvocationAttempt.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvocationAttemptAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends InvocationAttemptAggregateArgs>(args: Subset<T, InvocationAttemptAggregateArgs>): Prisma.PrismaPromise<GetInvocationAttemptAggregateType<T>>
+
+    /**
+     * Group by InvocationAttempt.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvocationAttemptGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends InvocationAttemptGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: InvocationAttemptGroupByArgs['orderBy'] }
+        : { orderBy?: InvocationAttemptGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, InvocationAttemptGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetInvocationAttemptGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the InvocationAttempt model
+   */
+  readonly fields: InvocationAttemptFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for InvocationAttempt.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__InvocationAttemptClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    invocation<T extends ScheduledInvocationDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ScheduledInvocationDefaultArgs<ExtArgs>>): Prisma__ScheduledInvocationClient<$Result.GetResult<Prisma.$ScheduledInvocationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the InvocationAttempt model
+   */
+  interface InvocationAttemptFieldRefs {
+    readonly id: FieldRef<"InvocationAttempt", 'String'>
+    readonly identityId: FieldRef<"InvocationAttempt", 'String'>
+    readonly invocationId: FieldRef<"InvocationAttempt", 'String'>
+    readonly attemptNumber: FieldRef<"InvocationAttempt", 'Int'>
+    readonly startedAt: FieldRef<"InvocationAttempt", 'DateTime'>
+    readonly finishedAt: FieldRef<"InvocationAttempt", 'DateTime'>
+    readonly outcome: FieldRef<"InvocationAttempt", 'String'>
+    readonly result: FieldRef<"InvocationAttempt", 'Json'>
+    readonly failureCode: FieldRef<"InvocationAttempt", 'String'>
+    readonly failureMessage: FieldRef<"InvocationAttempt", 'String'>
+    readonly failureRetryable: FieldRef<"InvocationAttempt", 'Boolean'>
+    readonly workerId: FieldRef<"InvocationAttempt", 'String'>
+    readonly claimToken: FieldRef<"InvocationAttempt", 'String'>
+    readonly fencingToken: FieldRef<"InvocationAttempt", 'Int'>
+    readonly createdAt: FieldRef<"InvocationAttempt", 'DateTime'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * InvocationAttempt findUnique
+   */
+  export type InvocationAttemptFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InvocationAttempt
+     */
+    select?: InvocationAttemptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InvocationAttempt
+     */
+    omit?: InvocationAttemptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvocationAttemptInclude<ExtArgs> | null
+    /**
+     * Filter, which InvocationAttempt to fetch.
+     */
+    where: InvocationAttemptWhereUniqueInput
+  }
+
+  /**
+   * InvocationAttempt findUniqueOrThrow
+   */
+  export type InvocationAttemptFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InvocationAttempt
+     */
+    select?: InvocationAttemptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InvocationAttempt
+     */
+    omit?: InvocationAttemptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvocationAttemptInclude<ExtArgs> | null
+    /**
+     * Filter, which InvocationAttempt to fetch.
+     */
+    where: InvocationAttemptWhereUniqueInput
+  }
+
+  /**
+   * InvocationAttempt findFirst
+   */
+  export type InvocationAttemptFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InvocationAttempt
+     */
+    select?: InvocationAttemptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InvocationAttempt
+     */
+    omit?: InvocationAttemptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvocationAttemptInclude<ExtArgs> | null
+    /**
+     * Filter, which InvocationAttempt to fetch.
+     */
+    where?: InvocationAttemptWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of InvocationAttempts to fetch.
+     */
+    orderBy?: InvocationAttemptOrderByWithRelationInput | InvocationAttemptOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for InvocationAttempts.
+     */
+    cursor?: InvocationAttemptWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` InvocationAttempts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` InvocationAttempts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of InvocationAttempts.
+     */
+    distinct?: InvocationAttemptScalarFieldEnum | InvocationAttemptScalarFieldEnum[]
+  }
+
+  /**
+   * InvocationAttempt findFirstOrThrow
+   */
+  export type InvocationAttemptFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InvocationAttempt
+     */
+    select?: InvocationAttemptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InvocationAttempt
+     */
+    omit?: InvocationAttemptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvocationAttemptInclude<ExtArgs> | null
+    /**
+     * Filter, which InvocationAttempt to fetch.
+     */
+    where?: InvocationAttemptWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of InvocationAttempts to fetch.
+     */
+    orderBy?: InvocationAttemptOrderByWithRelationInput | InvocationAttemptOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for InvocationAttempts.
+     */
+    cursor?: InvocationAttemptWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` InvocationAttempts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` InvocationAttempts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of InvocationAttempts.
+     */
+    distinct?: InvocationAttemptScalarFieldEnum | InvocationAttemptScalarFieldEnum[]
+  }
+
+  /**
+   * InvocationAttempt findMany
+   */
+  export type InvocationAttemptFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InvocationAttempt
+     */
+    select?: InvocationAttemptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InvocationAttempt
+     */
+    omit?: InvocationAttemptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvocationAttemptInclude<ExtArgs> | null
+    /**
+     * Filter, which InvocationAttempts to fetch.
+     */
+    where?: InvocationAttemptWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of InvocationAttempts to fetch.
+     */
+    orderBy?: InvocationAttemptOrderByWithRelationInput | InvocationAttemptOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing InvocationAttempts.
+     */
+    cursor?: InvocationAttemptWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` InvocationAttempts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` InvocationAttempts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of InvocationAttempts.
+     */
+    distinct?: InvocationAttemptScalarFieldEnum | InvocationAttemptScalarFieldEnum[]
+  }
+
+  /**
+   * InvocationAttempt create
+   */
+  export type InvocationAttemptCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InvocationAttempt
+     */
+    select?: InvocationAttemptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InvocationAttempt
+     */
+    omit?: InvocationAttemptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvocationAttemptInclude<ExtArgs> | null
+    /**
+     * The data needed to create a InvocationAttempt.
+     */
+    data: XOR<InvocationAttemptCreateInput, InvocationAttemptUncheckedCreateInput>
+  }
+
+  /**
+   * InvocationAttempt createMany
+   */
+  export type InvocationAttemptCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many InvocationAttempts.
+     */
+    data: InvocationAttemptCreateManyInput | InvocationAttemptCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * InvocationAttempt createManyAndReturn
+   */
+  export type InvocationAttemptCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InvocationAttempt
+     */
+    select?: InvocationAttemptSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the InvocationAttempt
+     */
+    omit?: InvocationAttemptOmit<ExtArgs> | null
+    /**
+     * The data used to create many InvocationAttempts.
+     */
+    data: InvocationAttemptCreateManyInput | InvocationAttemptCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvocationAttemptIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * InvocationAttempt update
+   */
+  export type InvocationAttemptUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InvocationAttempt
+     */
+    select?: InvocationAttemptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InvocationAttempt
+     */
+    omit?: InvocationAttemptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvocationAttemptInclude<ExtArgs> | null
+    /**
+     * The data needed to update a InvocationAttempt.
+     */
+    data: XOR<InvocationAttemptUpdateInput, InvocationAttemptUncheckedUpdateInput>
+    /**
+     * Choose, which InvocationAttempt to update.
+     */
+    where: InvocationAttemptWhereUniqueInput
+  }
+
+  /**
+   * InvocationAttempt updateMany
+   */
+  export type InvocationAttemptUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update InvocationAttempts.
+     */
+    data: XOR<InvocationAttemptUpdateManyMutationInput, InvocationAttemptUncheckedUpdateManyInput>
+    /**
+     * Filter which InvocationAttempts to update
+     */
+    where?: InvocationAttemptWhereInput
+    /**
+     * Limit how many InvocationAttempts to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * InvocationAttempt updateManyAndReturn
+   */
+  export type InvocationAttemptUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InvocationAttempt
+     */
+    select?: InvocationAttemptSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the InvocationAttempt
+     */
+    omit?: InvocationAttemptOmit<ExtArgs> | null
+    /**
+     * The data used to update InvocationAttempts.
+     */
+    data: XOR<InvocationAttemptUpdateManyMutationInput, InvocationAttemptUncheckedUpdateManyInput>
+    /**
+     * Filter which InvocationAttempts to update
+     */
+    where?: InvocationAttemptWhereInput
+    /**
+     * Limit how many InvocationAttempts to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvocationAttemptIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * InvocationAttempt upsert
+   */
+  export type InvocationAttemptUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InvocationAttempt
+     */
+    select?: InvocationAttemptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InvocationAttempt
+     */
+    omit?: InvocationAttemptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvocationAttemptInclude<ExtArgs> | null
+    /**
+     * The filter to search for the InvocationAttempt to update in case it exists.
+     */
+    where: InvocationAttemptWhereUniqueInput
+    /**
+     * In case the InvocationAttempt found by the `where` argument doesn't exist, create a new InvocationAttempt with this data.
+     */
+    create: XOR<InvocationAttemptCreateInput, InvocationAttemptUncheckedCreateInput>
+    /**
+     * In case the InvocationAttempt was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<InvocationAttemptUpdateInput, InvocationAttemptUncheckedUpdateInput>
+  }
+
+  /**
+   * InvocationAttempt delete
+   */
+  export type InvocationAttemptDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InvocationAttempt
+     */
+    select?: InvocationAttemptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InvocationAttempt
+     */
+    omit?: InvocationAttemptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvocationAttemptInclude<ExtArgs> | null
+    /**
+     * Filter which InvocationAttempt to delete.
+     */
+    where: InvocationAttemptWhereUniqueInput
+  }
+
+  /**
+   * InvocationAttempt deleteMany
+   */
+  export type InvocationAttemptDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which InvocationAttempts to delete
+     */
+    where?: InvocationAttemptWhereInput
+    /**
+     * Limit how many InvocationAttempts to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * InvocationAttempt without action
+   */
+  export type InvocationAttemptDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InvocationAttempt
+     */
+    select?: InvocationAttemptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InvocationAttempt
+     */
+    omit?: InvocationAttemptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvocationAttemptInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model SchedulingReconcileOperation
    */
 
@@ -127604,6 +130614,7 @@ export namespace Prisma {
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     deletedAt: 'deletedAt',
+    archivedAt: 'archivedAt',
     isRead: 'isRead'
   };
 
@@ -128100,6 +131111,7 @@ export namespace Prisma {
     identityId: 'identityId',
     routineId: 'routineId',
     overrideJson: 'overrideJson',
+    version: 'version',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -128539,6 +131551,60 @@ export namespace Prisma {
   };
 
   export type ScheduleTaskScalarFieldEnum = (typeof ScheduleTaskScalarFieldEnum)[keyof typeof ScheduleTaskScalarFieldEnum]
+
+
+  export const ScheduledInvocationScalarFieldEnum: {
+    id: 'id',
+    identityId: 'identityId',
+    ownerType: 'ownerType',
+    ownerId: 'ownerId',
+    schedulingKey: 'schedulingKey',
+    handlerKey: 'handlerKey',
+    payloadVersion: 'payloadVersion',
+    payload: 'payload',
+    runAt: 'runAt',
+    sourceRevision: 'sourceRevision',
+    retryEnabled: 'retryEnabled',
+    maxRetries: 'maxRetries',
+    initialDelayMs: 'initialDelayMs',
+    maxDelayMs: 'maxDelayMs',
+    backoffMultiplier: 'backoffMultiplier',
+    priority: 'priority',
+    timeoutMs: 'timeoutMs',
+    status: 'status',
+    attemptCount: 'attemptCount',
+    nextAttemptAt: 'nextAttemptAt',
+    claimToken: 'claimToken',
+    claimExpiresAt: 'claimExpiresAt',
+    fencingToken: 'fencingToken',
+    name: 'name',
+    tags: 'tags',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ScheduledInvocationScalarFieldEnum = (typeof ScheduledInvocationScalarFieldEnum)[keyof typeof ScheduledInvocationScalarFieldEnum]
+
+
+  export const InvocationAttemptScalarFieldEnum: {
+    id: 'id',
+    identityId: 'identityId',
+    invocationId: 'invocationId',
+    attemptNumber: 'attemptNumber',
+    startedAt: 'startedAt',
+    finishedAt: 'finishedAt',
+    outcome: 'outcome',
+    result: 'result',
+    failureCode: 'failureCode',
+    failureMessage: 'failureMessage',
+    failureRetryable: 'failureRetryable',
+    workerId: 'workerId',
+    claimToken: 'claimToken',
+    fencingToken: 'fencingToken',
+    createdAt: 'createdAt'
+  };
+
+  export type InvocationAttemptScalarFieldEnum = (typeof InvocationAttemptScalarFieldEnum)[keyof typeof InvocationAttemptScalarFieldEnum]
 
 
   export const SchedulingReconcileOperationScalarFieldEnum: {
@@ -129011,6 +132077,8 @@ export namespace Prisma {
     schedules?: ScheduleListRelationFilter
     scheduleTasks?: ScheduleTaskListRelationFilter
     schedulingReconcileOperations?: SchedulingReconcileOperationListRelationFilter
+    scheduledInvocations?: ScheduledInvocationListRelationFilter
+    invocationAttempts?: InvocationAttemptListRelationFilter
     scheduleStatistics?: XOR<ScheduleStatisticNullableScalarRelationFilter, ScheduleStatisticWhereInput> | null
     habits?: HabitListRelationFilter
     relations?: RelationListRelationFilter
@@ -129076,6 +132144,8 @@ export namespace Prisma {
     schedules?: ScheduleOrderByRelationAggregateInput
     scheduleTasks?: ScheduleTaskOrderByRelationAggregateInput
     schedulingReconcileOperations?: SchedulingReconcileOperationOrderByRelationAggregateInput
+    scheduledInvocations?: ScheduledInvocationOrderByRelationAggregateInput
+    invocationAttempts?: InvocationAttemptOrderByRelationAggregateInput
     scheduleStatistics?: ScheduleStatisticOrderByWithRelationInput
     habits?: HabitOrderByRelationAggregateInput
     relations?: RelationOrderByRelationAggregateInput
@@ -129144,6 +132214,8 @@ export namespace Prisma {
     schedules?: ScheduleListRelationFilter
     scheduleTasks?: ScheduleTaskListRelationFilter
     schedulingReconcileOperations?: SchedulingReconcileOperationListRelationFilter
+    scheduledInvocations?: ScheduledInvocationListRelationFilter
+    invocationAttempts?: InvocationAttemptListRelationFilter
     scheduleStatistics?: XOR<ScheduleStatisticNullableScalarRelationFilter, ScheduleStatisticWhereInput> | null
     habits?: HabitListRelationFilter
     relations?: RelationListRelationFilter
@@ -131715,6 +134787,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Notification"> | Date | string
     updatedAt?: DateTimeFilter<"Notification"> | Date | string
     deletedAt?: DateTimeNullableFilter<"Notification"> | Date | string | null
+    archivedAt?: DateTimeNullableFilter<"Notification"> | Date | string | null
     isRead?: BoolFilter<"Notification"> | boolean
     channels?: NotificationChannelListRelationFilter
     history?: NotificationHistoryListRelationFilter
@@ -131748,6 +134821,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
+    archivedAt?: SortOrderInput | SortOrder
     isRead?: SortOrder
     channels?: NotificationChannelOrderByRelationAggregateInput
     history?: NotificationHistoryOrderByRelationAggregateInput
@@ -131785,6 +134859,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Notification"> | Date | string
     updatedAt?: DateTimeFilter<"Notification"> | Date | string
     deletedAt?: DateTimeNullableFilter<"Notification"> | Date | string | null
+    archivedAt?: DateTimeNullableFilter<"Notification"> | Date | string | null
     isRead?: BoolFilter<"Notification"> | boolean
     channels?: NotificationChannelListRelationFilter
     history?: NotificationHistoryListRelationFilter
@@ -131818,6 +134893,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
+    archivedAt?: SortOrderInput | SortOrder
     isRead?: SortOrder
     _count?: NotificationCountOrderByAggregateInput
     _avg?: NotificationAvgOrderByAggregateInput
@@ -131854,6 +134930,7 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"Notification"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Notification"> | Date | string
     deletedAt?: DateTimeNullableWithAggregatesFilter<"Notification"> | Date | string | null
+    archivedAt?: DateTimeNullableWithAggregatesFilter<"Notification"> | Date | string | null
     isRead?: BoolWithAggregatesFilter<"Notification"> | boolean
   }
 
@@ -134390,6 +137467,7 @@ export namespace Prisma {
     identityId?: StringFilter<"RoutineTemporaryOverride"> | string
     routineId?: StringFilter<"RoutineTemporaryOverride"> | string
     overrideJson?: StringFilter<"RoutineTemporaryOverride"> | string
+    version?: IntFilter<"RoutineTemporaryOverride"> | number
     createdAt?: DateTimeFilter<"RoutineTemporaryOverride"> | Date | string
     updatedAt?: DateTimeFilter<"RoutineTemporaryOverride"> | Date | string
     routine?: XOR<RoutineDefinitionScalarRelationFilter, RoutineDefinitionWhereInput>
@@ -134400,6 +137478,7 @@ export namespace Prisma {
     identityId?: SortOrder
     routineId?: SortOrder
     overrideJson?: SortOrder
+    version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     routine?: RoutineDefinitionOrderByWithRelationInput
@@ -134415,6 +137494,7 @@ export namespace Prisma {
     identityId?: StringFilter<"RoutineTemporaryOverride"> | string
     routineId?: StringFilter<"RoutineTemporaryOverride"> | string
     overrideJson?: StringFilter<"RoutineTemporaryOverride"> | string
+    version?: IntFilter<"RoutineTemporaryOverride"> | number
     createdAt?: DateTimeFilter<"RoutineTemporaryOverride"> | Date | string
     updatedAt?: DateTimeFilter<"RoutineTemporaryOverride"> | Date | string
     routine?: XOR<RoutineDefinitionScalarRelationFilter, RoutineDefinitionWhereInput>
@@ -134425,11 +137505,14 @@ export namespace Prisma {
     identityId?: SortOrder
     routineId?: SortOrder
     overrideJson?: SortOrder
+    version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: RoutineTemporaryOverrideCountOrderByAggregateInput
+    _avg?: RoutineTemporaryOverrideAvgOrderByAggregateInput
     _max?: RoutineTemporaryOverrideMaxOrderByAggregateInput
     _min?: RoutineTemporaryOverrideMinOrderByAggregateInput
+    _sum?: RoutineTemporaryOverrideSumOrderByAggregateInput
   }
 
   export type RoutineTemporaryOverrideScalarWhereWithAggregatesInput = {
@@ -134439,6 +137522,7 @@ export namespace Prisma {
     identityId?: StringWithAggregatesFilter<"RoutineTemporaryOverride"> | string
     routineId?: StringWithAggregatesFilter<"RoutineTemporaryOverride"> | string
     overrideJson?: StringWithAggregatesFilter<"RoutineTemporaryOverride"> | string
+    version?: IntWithAggregatesFilter<"RoutineTemporaryOverride"> | number
     createdAt?: DateTimeWithAggregatesFilter<"RoutineTemporaryOverride"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"RoutineTemporaryOverride"> | Date | string
   }
@@ -136722,6 +139806,288 @@ export namespace Prisma {
     deletedAt?: DateTimeNullableWithAggregatesFilter<"ScheduleTask"> | Date | string | null
   }
 
+  export type ScheduledInvocationWhereInput = {
+    AND?: ScheduledInvocationWhereInput | ScheduledInvocationWhereInput[]
+    OR?: ScheduledInvocationWhereInput[]
+    NOT?: ScheduledInvocationWhereInput | ScheduledInvocationWhereInput[]
+    id?: StringFilter<"ScheduledInvocation"> | string
+    identityId?: StringFilter<"ScheduledInvocation"> | string
+    ownerType?: StringFilter<"ScheduledInvocation"> | string
+    ownerId?: StringFilter<"ScheduledInvocation"> | string
+    schedulingKey?: StringFilter<"ScheduledInvocation"> | string
+    handlerKey?: StringFilter<"ScheduledInvocation"> | string
+    payloadVersion?: IntFilter<"ScheduledInvocation"> | number
+    payload?: JsonFilter<"ScheduledInvocation">
+    runAt?: DateTimeFilter<"ScheduledInvocation"> | Date | string
+    sourceRevision?: JsonNullableFilter<"ScheduledInvocation">
+    retryEnabled?: BoolFilter<"ScheduledInvocation"> | boolean
+    maxRetries?: IntFilter<"ScheduledInvocation"> | number
+    initialDelayMs?: IntFilter<"ScheduledInvocation"> | number
+    maxDelayMs?: IntFilter<"ScheduledInvocation"> | number
+    backoffMultiplier?: FloatFilter<"ScheduledInvocation"> | number
+    priority?: StringFilter<"ScheduledInvocation"> | string
+    timeoutMs?: IntNullableFilter<"ScheduledInvocation"> | number | null
+    status?: StringFilter<"ScheduledInvocation"> | string
+    attemptCount?: IntFilter<"ScheduledInvocation"> | number
+    nextAttemptAt?: DateTimeNullableFilter<"ScheduledInvocation"> | Date | string | null
+    claimToken?: StringNullableFilter<"ScheduledInvocation"> | string | null
+    claimExpiresAt?: DateTimeNullableFilter<"ScheduledInvocation"> | Date | string | null
+    fencingToken?: IntFilter<"ScheduledInvocation"> | number
+    name?: StringNullableFilter<"ScheduledInvocation"> | string | null
+    tags?: JsonFilter<"ScheduledInvocation">
+    createdAt?: DateTimeFilter<"ScheduledInvocation"> | Date | string
+    updatedAt?: DateTimeFilter<"ScheduledInvocation"> | Date | string
+    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+    attempts?: InvocationAttemptListRelationFilter
+  }
+
+  export type ScheduledInvocationOrderByWithRelationInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    ownerType?: SortOrder
+    ownerId?: SortOrder
+    schedulingKey?: SortOrder
+    handlerKey?: SortOrder
+    payloadVersion?: SortOrder
+    payload?: SortOrder
+    runAt?: SortOrder
+    sourceRevision?: SortOrderInput | SortOrder
+    retryEnabled?: SortOrder
+    maxRetries?: SortOrder
+    initialDelayMs?: SortOrder
+    maxDelayMs?: SortOrder
+    backoffMultiplier?: SortOrder
+    priority?: SortOrder
+    timeoutMs?: SortOrderInput | SortOrder
+    status?: SortOrder
+    attemptCount?: SortOrder
+    nextAttemptAt?: SortOrderInput | SortOrder
+    claimToken?: SortOrderInput | SortOrder
+    claimExpiresAt?: SortOrderInput | SortOrder
+    fencingToken?: SortOrder
+    name?: SortOrderInput | SortOrder
+    tags?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    account?: AccountOrderByWithRelationInput
+    attempts?: InvocationAttemptOrderByRelationAggregateInput
+  }
+
+  export type ScheduledInvocationWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    identityId_ownerType_ownerId_schedulingKey?: ScheduledInvocationIdentityIdOwnerTypeOwnerIdSchedulingKeyCompoundUniqueInput
+    AND?: ScheduledInvocationWhereInput | ScheduledInvocationWhereInput[]
+    OR?: ScheduledInvocationWhereInput[]
+    NOT?: ScheduledInvocationWhereInput | ScheduledInvocationWhereInput[]
+    identityId?: StringFilter<"ScheduledInvocation"> | string
+    ownerType?: StringFilter<"ScheduledInvocation"> | string
+    ownerId?: StringFilter<"ScheduledInvocation"> | string
+    schedulingKey?: StringFilter<"ScheduledInvocation"> | string
+    handlerKey?: StringFilter<"ScheduledInvocation"> | string
+    payloadVersion?: IntFilter<"ScheduledInvocation"> | number
+    payload?: JsonFilter<"ScheduledInvocation">
+    runAt?: DateTimeFilter<"ScheduledInvocation"> | Date | string
+    sourceRevision?: JsonNullableFilter<"ScheduledInvocation">
+    retryEnabled?: BoolFilter<"ScheduledInvocation"> | boolean
+    maxRetries?: IntFilter<"ScheduledInvocation"> | number
+    initialDelayMs?: IntFilter<"ScheduledInvocation"> | number
+    maxDelayMs?: IntFilter<"ScheduledInvocation"> | number
+    backoffMultiplier?: FloatFilter<"ScheduledInvocation"> | number
+    priority?: StringFilter<"ScheduledInvocation"> | string
+    timeoutMs?: IntNullableFilter<"ScheduledInvocation"> | number | null
+    status?: StringFilter<"ScheduledInvocation"> | string
+    attemptCount?: IntFilter<"ScheduledInvocation"> | number
+    nextAttemptAt?: DateTimeNullableFilter<"ScheduledInvocation"> | Date | string | null
+    claimToken?: StringNullableFilter<"ScheduledInvocation"> | string | null
+    claimExpiresAt?: DateTimeNullableFilter<"ScheduledInvocation"> | Date | string | null
+    fencingToken?: IntFilter<"ScheduledInvocation"> | number
+    name?: StringNullableFilter<"ScheduledInvocation"> | string | null
+    tags?: JsonFilter<"ScheduledInvocation">
+    createdAt?: DateTimeFilter<"ScheduledInvocation"> | Date | string
+    updatedAt?: DateTimeFilter<"ScheduledInvocation"> | Date | string
+    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+    attempts?: InvocationAttemptListRelationFilter
+  }, "id" | "identityId_ownerType_ownerId_schedulingKey">
+
+  export type ScheduledInvocationOrderByWithAggregationInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    ownerType?: SortOrder
+    ownerId?: SortOrder
+    schedulingKey?: SortOrder
+    handlerKey?: SortOrder
+    payloadVersion?: SortOrder
+    payload?: SortOrder
+    runAt?: SortOrder
+    sourceRevision?: SortOrderInput | SortOrder
+    retryEnabled?: SortOrder
+    maxRetries?: SortOrder
+    initialDelayMs?: SortOrder
+    maxDelayMs?: SortOrder
+    backoffMultiplier?: SortOrder
+    priority?: SortOrder
+    timeoutMs?: SortOrderInput | SortOrder
+    status?: SortOrder
+    attemptCount?: SortOrder
+    nextAttemptAt?: SortOrderInput | SortOrder
+    claimToken?: SortOrderInput | SortOrder
+    claimExpiresAt?: SortOrderInput | SortOrder
+    fencingToken?: SortOrder
+    name?: SortOrderInput | SortOrder
+    tags?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ScheduledInvocationCountOrderByAggregateInput
+    _avg?: ScheduledInvocationAvgOrderByAggregateInput
+    _max?: ScheduledInvocationMaxOrderByAggregateInput
+    _min?: ScheduledInvocationMinOrderByAggregateInput
+    _sum?: ScheduledInvocationSumOrderByAggregateInput
+  }
+
+  export type ScheduledInvocationScalarWhereWithAggregatesInput = {
+    AND?: ScheduledInvocationScalarWhereWithAggregatesInput | ScheduledInvocationScalarWhereWithAggregatesInput[]
+    OR?: ScheduledInvocationScalarWhereWithAggregatesInput[]
+    NOT?: ScheduledInvocationScalarWhereWithAggregatesInput | ScheduledInvocationScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ScheduledInvocation"> | string
+    identityId?: StringWithAggregatesFilter<"ScheduledInvocation"> | string
+    ownerType?: StringWithAggregatesFilter<"ScheduledInvocation"> | string
+    ownerId?: StringWithAggregatesFilter<"ScheduledInvocation"> | string
+    schedulingKey?: StringWithAggregatesFilter<"ScheduledInvocation"> | string
+    handlerKey?: StringWithAggregatesFilter<"ScheduledInvocation"> | string
+    payloadVersion?: IntWithAggregatesFilter<"ScheduledInvocation"> | number
+    payload?: JsonWithAggregatesFilter<"ScheduledInvocation">
+    runAt?: DateTimeWithAggregatesFilter<"ScheduledInvocation"> | Date | string
+    sourceRevision?: JsonNullableWithAggregatesFilter<"ScheduledInvocation">
+    retryEnabled?: BoolWithAggregatesFilter<"ScheduledInvocation"> | boolean
+    maxRetries?: IntWithAggregatesFilter<"ScheduledInvocation"> | number
+    initialDelayMs?: IntWithAggregatesFilter<"ScheduledInvocation"> | number
+    maxDelayMs?: IntWithAggregatesFilter<"ScheduledInvocation"> | number
+    backoffMultiplier?: FloatWithAggregatesFilter<"ScheduledInvocation"> | number
+    priority?: StringWithAggregatesFilter<"ScheduledInvocation"> | string
+    timeoutMs?: IntNullableWithAggregatesFilter<"ScheduledInvocation"> | number | null
+    status?: StringWithAggregatesFilter<"ScheduledInvocation"> | string
+    attemptCount?: IntWithAggregatesFilter<"ScheduledInvocation"> | number
+    nextAttemptAt?: DateTimeNullableWithAggregatesFilter<"ScheduledInvocation"> | Date | string | null
+    claimToken?: StringNullableWithAggregatesFilter<"ScheduledInvocation"> | string | null
+    claimExpiresAt?: DateTimeNullableWithAggregatesFilter<"ScheduledInvocation"> | Date | string | null
+    fencingToken?: IntWithAggregatesFilter<"ScheduledInvocation"> | number
+    name?: StringNullableWithAggregatesFilter<"ScheduledInvocation"> | string | null
+    tags?: JsonWithAggregatesFilter<"ScheduledInvocation">
+    createdAt?: DateTimeWithAggregatesFilter<"ScheduledInvocation"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ScheduledInvocation"> | Date | string
+  }
+
+  export type InvocationAttemptWhereInput = {
+    AND?: InvocationAttemptWhereInput | InvocationAttemptWhereInput[]
+    OR?: InvocationAttemptWhereInput[]
+    NOT?: InvocationAttemptWhereInput | InvocationAttemptWhereInput[]
+    id?: StringFilter<"InvocationAttempt"> | string
+    identityId?: StringFilter<"InvocationAttempt"> | string
+    invocationId?: StringFilter<"InvocationAttempt"> | string
+    attemptNumber?: IntFilter<"InvocationAttempt"> | number
+    startedAt?: DateTimeFilter<"InvocationAttempt"> | Date | string
+    finishedAt?: DateTimeNullableFilter<"InvocationAttempt"> | Date | string | null
+    outcome?: StringFilter<"InvocationAttempt"> | string
+    result?: JsonNullableFilter<"InvocationAttempt">
+    failureCode?: StringNullableFilter<"InvocationAttempt"> | string | null
+    failureMessage?: StringNullableFilter<"InvocationAttempt"> | string | null
+    failureRetryable?: BoolNullableFilter<"InvocationAttempt"> | boolean | null
+    workerId?: StringNullableFilter<"InvocationAttempt"> | string | null
+    claimToken?: StringNullableFilter<"InvocationAttempt"> | string | null
+    fencingToken?: IntNullableFilter<"InvocationAttempt"> | number | null
+    createdAt?: DateTimeFilter<"InvocationAttempt"> | Date | string
+    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+    invocation?: XOR<ScheduledInvocationScalarRelationFilter, ScheduledInvocationWhereInput>
+  }
+
+  export type InvocationAttemptOrderByWithRelationInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    invocationId?: SortOrder
+    attemptNumber?: SortOrder
+    startedAt?: SortOrder
+    finishedAt?: SortOrderInput | SortOrder
+    outcome?: SortOrder
+    result?: SortOrderInput | SortOrder
+    failureCode?: SortOrderInput | SortOrder
+    failureMessage?: SortOrderInput | SortOrder
+    failureRetryable?: SortOrderInput | SortOrder
+    workerId?: SortOrderInput | SortOrder
+    claimToken?: SortOrderInput | SortOrder
+    fencingToken?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    account?: AccountOrderByWithRelationInput
+    invocation?: ScheduledInvocationOrderByWithRelationInput
+  }
+
+  export type InvocationAttemptWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    invocationId_attemptNumber?: InvocationAttemptInvocationIdAttemptNumberCompoundUniqueInput
+    AND?: InvocationAttemptWhereInput | InvocationAttemptWhereInput[]
+    OR?: InvocationAttemptWhereInput[]
+    NOT?: InvocationAttemptWhereInput | InvocationAttemptWhereInput[]
+    identityId?: StringFilter<"InvocationAttempt"> | string
+    invocationId?: StringFilter<"InvocationAttempt"> | string
+    attemptNumber?: IntFilter<"InvocationAttempt"> | number
+    startedAt?: DateTimeFilter<"InvocationAttempt"> | Date | string
+    finishedAt?: DateTimeNullableFilter<"InvocationAttempt"> | Date | string | null
+    outcome?: StringFilter<"InvocationAttempt"> | string
+    result?: JsonNullableFilter<"InvocationAttempt">
+    failureCode?: StringNullableFilter<"InvocationAttempt"> | string | null
+    failureMessage?: StringNullableFilter<"InvocationAttempt"> | string | null
+    failureRetryable?: BoolNullableFilter<"InvocationAttempt"> | boolean | null
+    workerId?: StringNullableFilter<"InvocationAttempt"> | string | null
+    claimToken?: StringNullableFilter<"InvocationAttempt"> | string | null
+    fencingToken?: IntNullableFilter<"InvocationAttempt"> | number | null
+    createdAt?: DateTimeFilter<"InvocationAttempt"> | Date | string
+    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+    invocation?: XOR<ScheduledInvocationScalarRelationFilter, ScheduledInvocationWhereInput>
+  }, "id" | "invocationId_attemptNumber">
+
+  export type InvocationAttemptOrderByWithAggregationInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    invocationId?: SortOrder
+    attemptNumber?: SortOrder
+    startedAt?: SortOrder
+    finishedAt?: SortOrderInput | SortOrder
+    outcome?: SortOrder
+    result?: SortOrderInput | SortOrder
+    failureCode?: SortOrderInput | SortOrder
+    failureMessage?: SortOrderInput | SortOrder
+    failureRetryable?: SortOrderInput | SortOrder
+    workerId?: SortOrderInput | SortOrder
+    claimToken?: SortOrderInput | SortOrder
+    fencingToken?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: InvocationAttemptCountOrderByAggregateInput
+    _avg?: InvocationAttemptAvgOrderByAggregateInput
+    _max?: InvocationAttemptMaxOrderByAggregateInput
+    _min?: InvocationAttemptMinOrderByAggregateInput
+    _sum?: InvocationAttemptSumOrderByAggregateInput
+  }
+
+  export type InvocationAttemptScalarWhereWithAggregatesInput = {
+    AND?: InvocationAttemptScalarWhereWithAggregatesInput | InvocationAttemptScalarWhereWithAggregatesInput[]
+    OR?: InvocationAttemptScalarWhereWithAggregatesInput[]
+    NOT?: InvocationAttemptScalarWhereWithAggregatesInput | InvocationAttemptScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"InvocationAttempt"> | string
+    identityId?: StringWithAggregatesFilter<"InvocationAttempt"> | string
+    invocationId?: StringWithAggregatesFilter<"InvocationAttempt"> | string
+    attemptNumber?: IntWithAggregatesFilter<"InvocationAttempt"> | number
+    startedAt?: DateTimeWithAggregatesFilter<"InvocationAttempt"> | Date | string
+    finishedAt?: DateTimeNullableWithAggregatesFilter<"InvocationAttempt"> | Date | string | null
+    outcome?: StringWithAggregatesFilter<"InvocationAttempt"> | string
+    result?: JsonNullableWithAggregatesFilter<"InvocationAttempt">
+    failureCode?: StringNullableWithAggregatesFilter<"InvocationAttempt"> | string | null
+    failureMessage?: StringNullableWithAggregatesFilter<"InvocationAttempt"> | string | null
+    failureRetryable?: BoolNullableWithAggregatesFilter<"InvocationAttempt"> | boolean | null
+    workerId?: StringNullableWithAggregatesFilter<"InvocationAttempt"> | string | null
+    claimToken?: StringNullableWithAggregatesFilter<"InvocationAttempt"> | string | null
+    fencingToken?: IntNullableWithAggregatesFilter<"InvocationAttempt"> | number | null
+    createdAt?: DateTimeWithAggregatesFilter<"InvocationAttempt"> | Date | string
+  }
+
   export type SchedulingReconcileOperationWhereInput = {
     AND?: SchedulingReconcileOperationWhereInput | SchedulingReconcileOperationWhereInput[]
     OR?: SchedulingReconcileOperationWhereInput[]
@@ -138101,6 +141467,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -138165,6 +141533,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -138229,6 +141599,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -138293,6 +141665,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -141137,6 +144511,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
+    archivedAt?: Date | string | null
     isRead?: boolean
     channels?: NotificationChannelCreateNestedManyWithoutNotificationInput
     history?: NotificationHistoryCreateNestedManyWithoutNotificationInput
@@ -141170,6 +144545,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
+    archivedAt?: Date | string | null
     isRead?: boolean
     channels?: NotificationChannelUncheckedCreateNestedManyWithoutNotificationInput
     history?: NotificationHistoryUncheckedCreateNestedManyWithoutNotificationInput
@@ -141201,6 +144577,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
     channels?: NotificationChannelUpdateManyWithoutNotificationNestedInput
     history?: NotificationHistoryUpdateManyWithoutNotificationNestedInput
@@ -141234,6 +144611,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
     channels?: NotificationChannelUncheckedUpdateManyWithoutNotificationNestedInput
     history?: NotificationHistoryUncheckedUpdateManyWithoutNotificationNestedInput
@@ -141266,6 +144644,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
+    archivedAt?: Date | string | null
     isRead?: boolean
   }
 
@@ -141293,6 +144672,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
   }
 
@@ -141321,6 +144701,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
   }
 
@@ -144172,6 +147553,7 @@ export namespace Prisma {
 
   export type RoutineTemporaryOverrideCreateInput = {
     overrideJson: string
+    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     routine: RoutineDefinitionCreateNestedOneWithoutTemporaryOverrideInput
@@ -144182,12 +147564,14 @@ export namespace Prisma {
     identityId: string
     routineId: string
     overrideJson: string
+    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type RoutineTemporaryOverrideUpdateInput = {
     overrideJson?: StringFieldUpdateOperationsInput | string
+    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     routine?: RoutineDefinitionUpdateOneRequiredWithoutTemporaryOverrideNestedInput
@@ -144198,6 +147582,7 @@ export namespace Prisma {
     identityId?: StringFieldUpdateOperationsInput | string
     routineId?: StringFieldUpdateOperationsInput | string
     overrideJson?: StringFieldUpdateOperationsInput | string
+    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -144206,12 +147591,14 @@ export namespace Prisma {
     identityId: string
     routineId: string
     overrideJson: string
+    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type RoutineTemporaryOverrideUpdateManyMutationInput = {
     overrideJson?: StringFieldUpdateOperationsInput | string
+    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -144220,6 +147607,7 @@ export namespace Prisma {
     identityId?: StringFieldUpdateOperationsInput | string
     routineId?: StringFieldUpdateOperationsInput | string
     overrideJson?: StringFieldUpdateOperationsInput | string
+    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -146823,6 +150211,343 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
+  export type ScheduledInvocationCreateInput = {
+    id: string
+    ownerType: string
+    ownerId: string
+    schedulingKey: string
+    handlerKey: string
+    payloadVersion: number
+    payload: JsonNullValueInput | InputJsonValue
+    runAt: Date | string
+    sourceRevision?: NullableJsonNullValueInput | InputJsonValue
+    retryEnabled?: boolean
+    maxRetries: number
+    initialDelayMs: number
+    maxDelayMs: number
+    backoffMultiplier: number
+    priority: string
+    timeoutMs?: number | null
+    status: string
+    attemptCount?: number
+    nextAttemptAt?: Date | string | null
+    claimToken?: string | null
+    claimExpiresAt?: Date | string | null
+    fencingToken?: number
+    name?: string | null
+    tags: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    account: AccountCreateNestedOneWithoutScheduledInvocationsInput
+    attempts?: InvocationAttemptCreateNestedManyWithoutInvocationInput
+  }
+
+  export type ScheduledInvocationUncheckedCreateInput = {
+    id: string
+    identityId: string
+    ownerType: string
+    ownerId: string
+    schedulingKey: string
+    handlerKey: string
+    payloadVersion: number
+    payload: JsonNullValueInput | InputJsonValue
+    runAt: Date | string
+    sourceRevision?: NullableJsonNullValueInput | InputJsonValue
+    retryEnabled?: boolean
+    maxRetries: number
+    initialDelayMs: number
+    maxDelayMs: number
+    backoffMultiplier: number
+    priority: string
+    timeoutMs?: number | null
+    status: string
+    attemptCount?: number
+    nextAttemptAt?: Date | string | null
+    claimToken?: string | null
+    claimExpiresAt?: Date | string | null
+    fencingToken?: number
+    name?: string | null
+    tags: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    attempts?: InvocationAttemptUncheckedCreateNestedManyWithoutInvocationInput
+  }
+
+  export type ScheduledInvocationUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    ownerType?: StringFieldUpdateOperationsInput | string
+    ownerId?: StringFieldUpdateOperationsInput | string
+    schedulingKey?: StringFieldUpdateOperationsInput | string
+    handlerKey?: StringFieldUpdateOperationsInput | string
+    payloadVersion?: IntFieldUpdateOperationsInput | number
+    payload?: JsonNullValueInput | InputJsonValue
+    runAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sourceRevision?: NullableJsonNullValueInput | InputJsonValue
+    retryEnabled?: BoolFieldUpdateOperationsInput | boolean
+    maxRetries?: IntFieldUpdateOperationsInput | number
+    initialDelayMs?: IntFieldUpdateOperationsInput | number
+    maxDelayMs?: IntFieldUpdateOperationsInput | number
+    backoffMultiplier?: FloatFieldUpdateOperationsInput | number
+    priority?: StringFieldUpdateOperationsInput | string
+    timeoutMs?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: StringFieldUpdateOperationsInput | string
+    attemptCount?: IntFieldUpdateOperationsInput | number
+    nextAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    claimToken?: NullableStringFieldUpdateOperationsInput | string | null
+    claimExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fencingToken?: IntFieldUpdateOperationsInput | number
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    account?: AccountUpdateOneRequiredWithoutScheduledInvocationsNestedInput
+    attempts?: InvocationAttemptUpdateManyWithoutInvocationNestedInput
+  }
+
+  export type ScheduledInvocationUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    ownerType?: StringFieldUpdateOperationsInput | string
+    ownerId?: StringFieldUpdateOperationsInput | string
+    schedulingKey?: StringFieldUpdateOperationsInput | string
+    handlerKey?: StringFieldUpdateOperationsInput | string
+    payloadVersion?: IntFieldUpdateOperationsInput | number
+    payload?: JsonNullValueInput | InputJsonValue
+    runAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sourceRevision?: NullableJsonNullValueInput | InputJsonValue
+    retryEnabled?: BoolFieldUpdateOperationsInput | boolean
+    maxRetries?: IntFieldUpdateOperationsInput | number
+    initialDelayMs?: IntFieldUpdateOperationsInput | number
+    maxDelayMs?: IntFieldUpdateOperationsInput | number
+    backoffMultiplier?: FloatFieldUpdateOperationsInput | number
+    priority?: StringFieldUpdateOperationsInput | string
+    timeoutMs?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: StringFieldUpdateOperationsInput | string
+    attemptCount?: IntFieldUpdateOperationsInput | number
+    nextAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    claimToken?: NullableStringFieldUpdateOperationsInput | string | null
+    claimExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fencingToken?: IntFieldUpdateOperationsInput | number
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    attempts?: InvocationAttemptUncheckedUpdateManyWithoutInvocationNestedInput
+  }
+
+  export type ScheduledInvocationCreateManyInput = {
+    id: string
+    identityId: string
+    ownerType: string
+    ownerId: string
+    schedulingKey: string
+    handlerKey: string
+    payloadVersion: number
+    payload: JsonNullValueInput | InputJsonValue
+    runAt: Date | string
+    sourceRevision?: NullableJsonNullValueInput | InputJsonValue
+    retryEnabled?: boolean
+    maxRetries: number
+    initialDelayMs: number
+    maxDelayMs: number
+    backoffMultiplier: number
+    priority: string
+    timeoutMs?: number | null
+    status: string
+    attemptCount?: number
+    nextAttemptAt?: Date | string | null
+    claimToken?: string | null
+    claimExpiresAt?: Date | string | null
+    fencingToken?: number
+    name?: string | null
+    tags: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ScheduledInvocationUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    ownerType?: StringFieldUpdateOperationsInput | string
+    ownerId?: StringFieldUpdateOperationsInput | string
+    schedulingKey?: StringFieldUpdateOperationsInput | string
+    handlerKey?: StringFieldUpdateOperationsInput | string
+    payloadVersion?: IntFieldUpdateOperationsInput | number
+    payload?: JsonNullValueInput | InputJsonValue
+    runAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sourceRevision?: NullableJsonNullValueInput | InputJsonValue
+    retryEnabled?: BoolFieldUpdateOperationsInput | boolean
+    maxRetries?: IntFieldUpdateOperationsInput | number
+    initialDelayMs?: IntFieldUpdateOperationsInput | number
+    maxDelayMs?: IntFieldUpdateOperationsInput | number
+    backoffMultiplier?: FloatFieldUpdateOperationsInput | number
+    priority?: StringFieldUpdateOperationsInput | string
+    timeoutMs?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: StringFieldUpdateOperationsInput | string
+    attemptCount?: IntFieldUpdateOperationsInput | number
+    nextAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    claimToken?: NullableStringFieldUpdateOperationsInput | string | null
+    claimExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fencingToken?: IntFieldUpdateOperationsInput | number
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ScheduledInvocationUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    ownerType?: StringFieldUpdateOperationsInput | string
+    ownerId?: StringFieldUpdateOperationsInput | string
+    schedulingKey?: StringFieldUpdateOperationsInput | string
+    handlerKey?: StringFieldUpdateOperationsInput | string
+    payloadVersion?: IntFieldUpdateOperationsInput | number
+    payload?: JsonNullValueInput | InputJsonValue
+    runAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sourceRevision?: NullableJsonNullValueInput | InputJsonValue
+    retryEnabled?: BoolFieldUpdateOperationsInput | boolean
+    maxRetries?: IntFieldUpdateOperationsInput | number
+    initialDelayMs?: IntFieldUpdateOperationsInput | number
+    maxDelayMs?: IntFieldUpdateOperationsInput | number
+    backoffMultiplier?: FloatFieldUpdateOperationsInput | number
+    priority?: StringFieldUpdateOperationsInput | string
+    timeoutMs?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: StringFieldUpdateOperationsInput | string
+    attemptCount?: IntFieldUpdateOperationsInput | number
+    nextAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    claimToken?: NullableStringFieldUpdateOperationsInput | string | null
+    claimExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fencingToken?: IntFieldUpdateOperationsInput | number
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InvocationAttemptCreateInput = {
+    id: string
+    attemptNumber: number
+    startedAt: Date | string
+    finishedAt?: Date | string | null
+    outcome: string
+    result?: NullableJsonNullValueInput | InputJsonValue
+    failureCode?: string | null
+    failureMessage?: string | null
+    failureRetryable?: boolean | null
+    workerId?: string | null
+    claimToken?: string | null
+    fencingToken?: number | null
+    createdAt?: Date | string
+    account: AccountCreateNestedOneWithoutInvocationAttemptsInput
+    invocation: ScheduledInvocationCreateNestedOneWithoutAttemptsInput
+  }
+
+  export type InvocationAttemptUncheckedCreateInput = {
+    id: string
+    identityId: string
+    invocationId: string
+    attemptNumber: number
+    startedAt: Date | string
+    finishedAt?: Date | string | null
+    outcome: string
+    result?: NullableJsonNullValueInput | InputJsonValue
+    failureCode?: string | null
+    failureMessage?: string | null
+    failureRetryable?: boolean | null
+    workerId?: string | null
+    claimToken?: string | null
+    fencingToken?: number | null
+    createdAt?: Date | string
+  }
+
+  export type InvocationAttemptUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    attemptNumber?: IntFieldUpdateOperationsInput | number
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    outcome?: StringFieldUpdateOperationsInput | string
+    result?: NullableJsonNullValueInput | InputJsonValue
+    failureCode?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureRetryable?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    workerId?: NullableStringFieldUpdateOperationsInput | string | null
+    claimToken?: NullableStringFieldUpdateOperationsInput | string | null
+    fencingToken?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    account?: AccountUpdateOneRequiredWithoutInvocationAttemptsNestedInput
+    invocation?: ScheduledInvocationUpdateOneRequiredWithoutAttemptsNestedInput
+  }
+
+  export type InvocationAttemptUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    invocationId?: StringFieldUpdateOperationsInput | string
+    attemptNumber?: IntFieldUpdateOperationsInput | number
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    outcome?: StringFieldUpdateOperationsInput | string
+    result?: NullableJsonNullValueInput | InputJsonValue
+    failureCode?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureRetryable?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    workerId?: NullableStringFieldUpdateOperationsInput | string | null
+    claimToken?: NullableStringFieldUpdateOperationsInput | string | null
+    fencingToken?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InvocationAttemptCreateManyInput = {
+    id: string
+    identityId: string
+    invocationId: string
+    attemptNumber: number
+    startedAt: Date | string
+    finishedAt?: Date | string | null
+    outcome: string
+    result?: NullableJsonNullValueInput | InputJsonValue
+    failureCode?: string | null
+    failureMessage?: string | null
+    failureRetryable?: boolean | null
+    workerId?: string | null
+    claimToken?: string | null
+    fencingToken?: number | null
+    createdAt?: Date | string
+  }
+
+  export type InvocationAttemptUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    attemptNumber?: IntFieldUpdateOperationsInput | number
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    outcome?: StringFieldUpdateOperationsInput | string
+    result?: NullableJsonNullValueInput | InputJsonValue
+    failureCode?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureRetryable?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    workerId?: NullableStringFieldUpdateOperationsInput | string | null
+    claimToken?: NullableStringFieldUpdateOperationsInput | string | null
+    fencingToken?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InvocationAttemptUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    invocationId?: StringFieldUpdateOperationsInput | string
+    attemptNumber?: IntFieldUpdateOperationsInput | number
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    outcome?: StringFieldUpdateOperationsInput | string
+    result?: NullableJsonNullValueInput | InputJsonValue
+    failureCode?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureRetryable?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    workerId?: NullableStringFieldUpdateOperationsInput | string | null
+    claimToken?: NullableStringFieldUpdateOperationsInput | string | null
+    fencingToken?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type SchedulingReconcileOperationCreateInput = {
     operationId: string
     ownerType: string
@@ -148533,6 +152258,18 @@ export namespace Prisma {
     none?: SchedulingReconcileOperationWhereInput
   }
 
+  export type ScheduledInvocationListRelationFilter = {
+    every?: ScheduledInvocationWhereInput
+    some?: ScheduledInvocationWhereInput
+    none?: ScheduledInvocationWhereInput
+  }
+
+  export type InvocationAttemptListRelationFilter = {
+    every?: InvocationAttemptWhereInput
+    some?: InvocationAttemptWhereInput
+    none?: InvocationAttemptWhereInput
+  }
+
   export type ScheduleStatisticNullableScalarRelationFilter = {
     is?: ScheduleStatisticWhereInput | null
     isNot?: ScheduleStatisticWhereInput | null
@@ -148808,6 +152545,14 @@ export namespace Prisma {
   }
 
   export type SchedulingReconcileOperationOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ScheduledInvocationOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type InvocationAttemptOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -150803,6 +154548,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrder
+    archivedAt?: SortOrder
     isRead?: SortOrder
   }
 
@@ -150835,6 +154581,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrder
+    archivedAt?: SortOrder
     isRead?: SortOrder
   }
 
@@ -150863,6 +154610,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrder
+    archivedAt?: SortOrder
     isRead?: SortOrder
   }
 
@@ -152361,14 +156109,20 @@ export namespace Prisma {
     identityId?: SortOrder
     routineId?: SortOrder
     overrideJson?: SortOrder
+    version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+
+  export type RoutineTemporaryOverrideAvgOrderByAggregateInput = {
+    version?: SortOrder
   }
 
   export type RoutineTemporaryOverrideMaxOrderByAggregateInput = {
     identityId?: SortOrder
     routineId?: SortOrder
     overrideJson?: SortOrder
+    version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -152377,8 +156131,13 @@ export namespace Prisma {
     identityId?: SortOrder
     routineId?: SortOrder
     overrideJson?: SortOrder
+    version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+
+  export type RoutineTemporaryOverrideSumOrderByAggregateInput = {
+    version?: SortOrder
   }
 
   export type RepositoryIdentityIdPathCompoundUniqueInput = {
@@ -153816,9 +157575,202 @@ export namespace Prisma {
     version?: SortOrder
   }
 
+  export type ScheduledInvocationIdentityIdOwnerTypeOwnerIdSchedulingKeyCompoundUniqueInput = {
+    identityId: string
+    ownerType: string
+    ownerId: string
+    schedulingKey: string
+  }
+
+  export type ScheduledInvocationCountOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    ownerType?: SortOrder
+    ownerId?: SortOrder
+    schedulingKey?: SortOrder
+    handlerKey?: SortOrder
+    payloadVersion?: SortOrder
+    payload?: SortOrder
+    runAt?: SortOrder
+    sourceRevision?: SortOrder
+    retryEnabled?: SortOrder
+    maxRetries?: SortOrder
+    initialDelayMs?: SortOrder
+    maxDelayMs?: SortOrder
+    backoffMultiplier?: SortOrder
+    priority?: SortOrder
+    timeoutMs?: SortOrder
+    status?: SortOrder
+    attemptCount?: SortOrder
+    nextAttemptAt?: SortOrder
+    claimToken?: SortOrder
+    claimExpiresAt?: SortOrder
+    fencingToken?: SortOrder
+    name?: SortOrder
+    tags?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ScheduledInvocationAvgOrderByAggregateInput = {
+    payloadVersion?: SortOrder
+    maxRetries?: SortOrder
+    initialDelayMs?: SortOrder
+    maxDelayMs?: SortOrder
+    backoffMultiplier?: SortOrder
+    timeoutMs?: SortOrder
+    attemptCount?: SortOrder
+    fencingToken?: SortOrder
+  }
+
+  export type ScheduledInvocationMaxOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    ownerType?: SortOrder
+    ownerId?: SortOrder
+    schedulingKey?: SortOrder
+    handlerKey?: SortOrder
+    payloadVersion?: SortOrder
+    runAt?: SortOrder
+    retryEnabled?: SortOrder
+    maxRetries?: SortOrder
+    initialDelayMs?: SortOrder
+    maxDelayMs?: SortOrder
+    backoffMultiplier?: SortOrder
+    priority?: SortOrder
+    timeoutMs?: SortOrder
+    status?: SortOrder
+    attemptCount?: SortOrder
+    nextAttemptAt?: SortOrder
+    claimToken?: SortOrder
+    claimExpiresAt?: SortOrder
+    fencingToken?: SortOrder
+    name?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ScheduledInvocationMinOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    ownerType?: SortOrder
+    ownerId?: SortOrder
+    schedulingKey?: SortOrder
+    handlerKey?: SortOrder
+    payloadVersion?: SortOrder
+    runAt?: SortOrder
+    retryEnabled?: SortOrder
+    maxRetries?: SortOrder
+    initialDelayMs?: SortOrder
+    maxDelayMs?: SortOrder
+    backoffMultiplier?: SortOrder
+    priority?: SortOrder
+    timeoutMs?: SortOrder
+    status?: SortOrder
+    attemptCount?: SortOrder
+    nextAttemptAt?: SortOrder
+    claimToken?: SortOrder
+    claimExpiresAt?: SortOrder
+    fencingToken?: SortOrder
+    name?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ScheduledInvocationSumOrderByAggregateInput = {
+    payloadVersion?: SortOrder
+    maxRetries?: SortOrder
+    initialDelayMs?: SortOrder
+    maxDelayMs?: SortOrder
+    backoffMultiplier?: SortOrder
+    timeoutMs?: SortOrder
+    attemptCount?: SortOrder
+    fencingToken?: SortOrder
+  }
+
   export type BoolNullableFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
     not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
+  }
+
+  export type ScheduledInvocationScalarRelationFilter = {
+    is?: ScheduledInvocationWhereInput
+    isNot?: ScheduledInvocationWhereInput
+  }
+
+  export type InvocationAttemptInvocationIdAttemptNumberCompoundUniqueInput = {
+    invocationId: string
+    attemptNumber: number
+  }
+
+  export type InvocationAttemptCountOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    invocationId?: SortOrder
+    attemptNumber?: SortOrder
+    startedAt?: SortOrder
+    finishedAt?: SortOrder
+    outcome?: SortOrder
+    result?: SortOrder
+    failureCode?: SortOrder
+    failureMessage?: SortOrder
+    failureRetryable?: SortOrder
+    workerId?: SortOrder
+    claimToken?: SortOrder
+    fencingToken?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type InvocationAttemptAvgOrderByAggregateInput = {
+    attemptNumber?: SortOrder
+    fencingToken?: SortOrder
+  }
+
+  export type InvocationAttemptMaxOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    invocationId?: SortOrder
+    attemptNumber?: SortOrder
+    startedAt?: SortOrder
+    finishedAt?: SortOrder
+    outcome?: SortOrder
+    failureCode?: SortOrder
+    failureMessage?: SortOrder
+    failureRetryable?: SortOrder
+    workerId?: SortOrder
+    claimToken?: SortOrder
+    fencingToken?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type InvocationAttemptMinOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    invocationId?: SortOrder
+    attemptNumber?: SortOrder
+    startedAt?: SortOrder
+    finishedAt?: SortOrder
+    outcome?: SortOrder
+    failureCode?: SortOrder
+    failureMessage?: SortOrder
+    failureRetryable?: SortOrder
+    workerId?: SortOrder
+    claimToken?: SortOrder
+    fencingToken?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type InvocationAttemptSumOrderByAggregateInput = {
+    attemptNumber?: SortOrder
+    fencingToken?: SortOrder
+  }
+
+  export type BoolNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedBoolNullableFilter<$PrismaModel>
+    _max?: NestedBoolNullableFilter<$PrismaModel>
   }
 
   export type SchedulingReconcileOperationCountOrderByAggregateInput = {
@@ -153892,14 +157844,6 @@ export namespace Prisma {
     updatedCount?: SortOrder
     deletedCount?: SortOrder
     unchangedCount?: SortOrder
-  }
-
-  export type BoolNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
-    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedBoolNullableFilter<$PrismaModel>
-    _max?: NestedBoolNullableFilter<$PrismaModel>
   }
 
   export type ScheduleTaskScalarRelationFilter = {
@@ -154824,6 +158768,20 @@ export namespace Prisma {
     connect?: SchedulingReconcileOperationWhereUniqueInput | SchedulingReconcileOperationWhereUniqueInput[]
   }
 
+  export type ScheduledInvocationCreateNestedManyWithoutAccountInput = {
+    create?: XOR<ScheduledInvocationCreateWithoutAccountInput, ScheduledInvocationUncheckedCreateWithoutAccountInput> | ScheduledInvocationCreateWithoutAccountInput[] | ScheduledInvocationUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: ScheduledInvocationCreateOrConnectWithoutAccountInput | ScheduledInvocationCreateOrConnectWithoutAccountInput[]
+    createMany?: ScheduledInvocationCreateManyAccountInputEnvelope
+    connect?: ScheduledInvocationWhereUniqueInput | ScheduledInvocationWhereUniqueInput[]
+  }
+
+  export type InvocationAttemptCreateNestedManyWithoutAccountInput = {
+    create?: XOR<InvocationAttemptCreateWithoutAccountInput, InvocationAttemptUncheckedCreateWithoutAccountInput> | InvocationAttemptCreateWithoutAccountInput[] | InvocationAttemptUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: InvocationAttemptCreateOrConnectWithoutAccountInput | InvocationAttemptCreateOrConnectWithoutAccountInput[]
+    createMany?: InvocationAttemptCreateManyAccountInputEnvelope
+    connect?: InvocationAttemptWhereUniqueInput | InvocationAttemptWhereUniqueInput[]
+  }
+
   export type ScheduleStatisticCreateNestedOneWithoutAccountInput = {
     create?: XOR<ScheduleStatisticCreateWithoutAccountInput, ScheduleStatisticUncheckedCreateWithoutAccountInput>
     connectOrCreate?: ScheduleStatisticCreateOrConnectWithoutAccountInput
@@ -155201,6 +159159,20 @@ export namespace Prisma {
     connectOrCreate?: SchedulingReconcileOperationCreateOrConnectWithoutAccountInput | SchedulingReconcileOperationCreateOrConnectWithoutAccountInput[]
     createMany?: SchedulingReconcileOperationCreateManyAccountInputEnvelope
     connect?: SchedulingReconcileOperationWhereUniqueInput | SchedulingReconcileOperationWhereUniqueInput[]
+  }
+
+  export type ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput = {
+    create?: XOR<ScheduledInvocationCreateWithoutAccountInput, ScheduledInvocationUncheckedCreateWithoutAccountInput> | ScheduledInvocationCreateWithoutAccountInput[] | ScheduledInvocationUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: ScheduledInvocationCreateOrConnectWithoutAccountInput | ScheduledInvocationCreateOrConnectWithoutAccountInput[]
+    createMany?: ScheduledInvocationCreateManyAccountInputEnvelope
+    connect?: ScheduledInvocationWhereUniqueInput | ScheduledInvocationWhereUniqueInput[]
+  }
+
+  export type InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput = {
+    create?: XOR<InvocationAttemptCreateWithoutAccountInput, InvocationAttemptUncheckedCreateWithoutAccountInput> | InvocationAttemptCreateWithoutAccountInput[] | InvocationAttemptUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: InvocationAttemptCreateOrConnectWithoutAccountInput | InvocationAttemptCreateOrConnectWithoutAccountInput[]
+    createMany?: InvocationAttemptCreateManyAccountInputEnvelope
+    connect?: InvocationAttemptWhereUniqueInput | InvocationAttemptWhereUniqueInput[]
   }
 
   export type ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput = {
@@ -155738,6 +159710,34 @@ export namespace Prisma {
     update?: SchedulingReconcileOperationUpdateWithWhereUniqueWithoutAccountInput | SchedulingReconcileOperationUpdateWithWhereUniqueWithoutAccountInput[]
     updateMany?: SchedulingReconcileOperationUpdateManyWithWhereWithoutAccountInput | SchedulingReconcileOperationUpdateManyWithWhereWithoutAccountInput[]
     deleteMany?: SchedulingReconcileOperationScalarWhereInput | SchedulingReconcileOperationScalarWhereInput[]
+  }
+
+  export type ScheduledInvocationUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<ScheduledInvocationCreateWithoutAccountInput, ScheduledInvocationUncheckedCreateWithoutAccountInput> | ScheduledInvocationCreateWithoutAccountInput[] | ScheduledInvocationUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: ScheduledInvocationCreateOrConnectWithoutAccountInput | ScheduledInvocationCreateOrConnectWithoutAccountInput[]
+    upsert?: ScheduledInvocationUpsertWithWhereUniqueWithoutAccountInput | ScheduledInvocationUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: ScheduledInvocationCreateManyAccountInputEnvelope
+    set?: ScheduledInvocationWhereUniqueInput | ScheduledInvocationWhereUniqueInput[]
+    disconnect?: ScheduledInvocationWhereUniqueInput | ScheduledInvocationWhereUniqueInput[]
+    delete?: ScheduledInvocationWhereUniqueInput | ScheduledInvocationWhereUniqueInput[]
+    connect?: ScheduledInvocationWhereUniqueInput | ScheduledInvocationWhereUniqueInput[]
+    update?: ScheduledInvocationUpdateWithWhereUniqueWithoutAccountInput | ScheduledInvocationUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: ScheduledInvocationUpdateManyWithWhereWithoutAccountInput | ScheduledInvocationUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: ScheduledInvocationScalarWhereInput | ScheduledInvocationScalarWhereInput[]
+  }
+
+  export type InvocationAttemptUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<InvocationAttemptCreateWithoutAccountInput, InvocationAttemptUncheckedCreateWithoutAccountInput> | InvocationAttemptCreateWithoutAccountInput[] | InvocationAttemptUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: InvocationAttemptCreateOrConnectWithoutAccountInput | InvocationAttemptCreateOrConnectWithoutAccountInput[]
+    upsert?: InvocationAttemptUpsertWithWhereUniqueWithoutAccountInput | InvocationAttemptUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: InvocationAttemptCreateManyAccountInputEnvelope
+    set?: InvocationAttemptWhereUniqueInput | InvocationAttemptWhereUniqueInput[]
+    disconnect?: InvocationAttemptWhereUniqueInput | InvocationAttemptWhereUniqueInput[]
+    delete?: InvocationAttemptWhereUniqueInput | InvocationAttemptWhereUniqueInput[]
+    connect?: InvocationAttemptWhereUniqueInput | InvocationAttemptWhereUniqueInput[]
+    update?: InvocationAttemptUpdateWithWhereUniqueWithoutAccountInput | InvocationAttemptUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: InvocationAttemptUpdateManyWithWhereWithoutAccountInput | InvocationAttemptUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: InvocationAttemptScalarWhereInput | InvocationAttemptScalarWhereInput[]
   }
 
   export type ScheduleStatisticUpdateOneWithoutAccountNestedInput = {
@@ -156484,6 +160484,34 @@ export namespace Prisma {
     update?: SchedulingReconcileOperationUpdateWithWhereUniqueWithoutAccountInput | SchedulingReconcileOperationUpdateWithWhereUniqueWithoutAccountInput[]
     updateMany?: SchedulingReconcileOperationUpdateManyWithWhereWithoutAccountInput | SchedulingReconcileOperationUpdateManyWithWhereWithoutAccountInput[]
     deleteMany?: SchedulingReconcileOperationScalarWhereInput | SchedulingReconcileOperationScalarWhereInput[]
+  }
+
+  export type ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<ScheduledInvocationCreateWithoutAccountInput, ScheduledInvocationUncheckedCreateWithoutAccountInput> | ScheduledInvocationCreateWithoutAccountInput[] | ScheduledInvocationUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: ScheduledInvocationCreateOrConnectWithoutAccountInput | ScheduledInvocationCreateOrConnectWithoutAccountInput[]
+    upsert?: ScheduledInvocationUpsertWithWhereUniqueWithoutAccountInput | ScheduledInvocationUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: ScheduledInvocationCreateManyAccountInputEnvelope
+    set?: ScheduledInvocationWhereUniqueInput | ScheduledInvocationWhereUniqueInput[]
+    disconnect?: ScheduledInvocationWhereUniqueInput | ScheduledInvocationWhereUniqueInput[]
+    delete?: ScheduledInvocationWhereUniqueInput | ScheduledInvocationWhereUniqueInput[]
+    connect?: ScheduledInvocationWhereUniqueInput | ScheduledInvocationWhereUniqueInput[]
+    update?: ScheduledInvocationUpdateWithWhereUniqueWithoutAccountInput | ScheduledInvocationUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: ScheduledInvocationUpdateManyWithWhereWithoutAccountInput | ScheduledInvocationUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: ScheduledInvocationScalarWhereInput | ScheduledInvocationScalarWhereInput[]
+  }
+
+  export type InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<InvocationAttemptCreateWithoutAccountInput, InvocationAttemptUncheckedCreateWithoutAccountInput> | InvocationAttemptCreateWithoutAccountInput[] | InvocationAttemptUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: InvocationAttemptCreateOrConnectWithoutAccountInput | InvocationAttemptCreateOrConnectWithoutAccountInput[]
+    upsert?: InvocationAttemptUpsertWithWhereUniqueWithoutAccountInput | InvocationAttemptUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: InvocationAttemptCreateManyAccountInputEnvelope
+    set?: InvocationAttemptWhereUniqueInput | InvocationAttemptWhereUniqueInput[]
+    disconnect?: InvocationAttemptWhereUniqueInput | InvocationAttemptWhereUniqueInput[]
+    delete?: InvocationAttemptWhereUniqueInput | InvocationAttemptWhereUniqueInput[]
+    connect?: InvocationAttemptWhereUniqueInput | InvocationAttemptWhereUniqueInput[]
+    update?: InvocationAttemptUpdateWithWhereUniqueWithoutAccountInput | InvocationAttemptUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: InvocationAttemptUpdateManyWithWhereWithoutAccountInput | InvocationAttemptUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: InvocationAttemptScalarWhereInput | InvocationAttemptScalarWhereInput[]
   }
 
   export type ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput = {
@@ -160485,14 +164513,98 @@ export namespace Prisma {
     deleteMany?: ScheduleExecutionScalarWhereInput | ScheduleExecutionScalarWhereInput[]
   }
 
-  export type AccountCreateNestedOneWithoutSchedulingReconcileOperationsInput = {
-    create?: XOR<AccountCreateWithoutSchedulingReconcileOperationsInput, AccountUncheckedCreateWithoutSchedulingReconcileOperationsInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutSchedulingReconcileOperationsInput
+  export type AccountCreateNestedOneWithoutScheduledInvocationsInput = {
+    create?: XOR<AccountCreateWithoutScheduledInvocationsInput, AccountUncheckedCreateWithoutScheduledInvocationsInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutScheduledInvocationsInput
     connect?: AccountWhereUniqueInput
+  }
+
+  export type InvocationAttemptCreateNestedManyWithoutInvocationInput = {
+    create?: XOR<InvocationAttemptCreateWithoutInvocationInput, InvocationAttemptUncheckedCreateWithoutInvocationInput> | InvocationAttemptCreateWithoutInvocationInput[] | InvocationAttemptUncheckedCreateWithoutInvocationInput[]
+    connectOrCreate?: InvocationAttemptCreateOrConnectWithoutInvocationInput | InvocationAttemptCreateOrConnectWithoutInvocationInput[]
+    createMany?: InvocationAttemptCreateManyInvocationInputEnvelope
+    connect?: InvocationAttemptWhereUniqueInput | InvocationAttemptWhereUniqueInput[]
+  }
+
+  export type InvocationAttemptUncheckedCreateNestedManyWithoutInvocationInput = {
+    create?: XOR<InvocationAttemptCreateWithoutInvocationInput, InvocationAttemptUncheckedCreateWithoutInvocationInput> | InvocationAttemptCreateWithoutInvocationInput[] | InvocationAttemptUncheckedCreateWithoutInvocationInput[]
+    connectOrCreate?: InvocationAttemptCreateOrConnectWithoutInvocationInput | InvocationAttemptCreateOrConnectWithoutInvocationInput[]
+    createMany?: InvocationAttemptCreateManyInvocationInputEnvelope
+    connect?: InvocationAttemptWhereUniqueInput | InvocationAttemptWhereUniqueInput[]
+  }
+
+  export type AccountUpdateOneRequiredWithoutScheduledInvocationsNestedInput = {
+    create?: XOR<AccountCreateWithoutScheduledInvocationsInput, AccountUncheckedCreateWithoutScheduledInvocationsInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutScheduledInvocationsInput
+    upsert?: AccountUpsertWithoutScheduledInvocationsInput
+    connect?: AccountWhereUniqueInput
+    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutScheduledInvocationsInput, AccountUpdateWithoutScheduledInvocationsInput>, AccountUncheckedUpdateWithoutScheduledInvocationsInput>
+  }
+
+  export type InvocationAttemptUpdateManyWithoutInvocationNestedInput = {
+    create?: XOR<InvocationAttemptCreateWithoutInvocationInput, InvocationAttemptUncheckedCreateWithoutInvocationInput> | InvocationAttemptCreateWithoutInvocationInput[] | InvocationAttemptUncheckedCreateWithoutInvocationInput[]
+    connectOrCreate?: InvocationAttemptCreateOrConnectWithoutInvocationInput | InvocationAttemptCreateOrConnectWithoutInvocationInput[]
+    upsert?: InvocationAttemptUpsertWithWhereUniqueWithoutInvocationInput | InvocationAttemptUpsertWithWhereUniqueWithoutInvocationInput[]
+    createMany?: InvocationAttemptCreateManyInvocationInputEnvelope
+    set?: InvocationAttemptWhereUniqueInput | InvocationAttemptWhereUniqueInput[]
+    disconnect?: InvocationAttemptWhereUniqueInput | InvocationAttemptWhereUniqueInput[]
+    delete?: InvocationAttemptWhereUniqueInput | InvocationAttemptWhereUniqueInput[]
+    connect?: InvocationAttemptWhereUniqueInput | InvocationAttemptWhereUniqueInput[]
+    update?: InvocationAttemptUpdateWithWhereUniqueWithoutInvocationInput | InvocationAttemptUpdateWithWhereUniqueWithoutInvocationInput[]
+    updateMany?: InvocationAttemptUpdateManyWithWhereWithoutInvocationInput | InvocationAttemptUpdateManyWithWhereWithoutInvocationInput[]
+    deleteMany?: InvocationAttemptScalarWhereInput | InvocationAttemptScalarWhereInput[]
+  }
+
+  export type InvocationAttemptUncheckedUpdateManyWithoutInvocationNestedInput = {
+    create?: XOR<InvocationAttemptCreateWithoutInvocationInput, InvocationAttemptUncheckedCreateWithoutInvocationInput> | InvocationAttemptCreateWithoutInvocationInput[] | InvocationAttemptUncheckedCreateWithoutInvocationInput[]
+    connectOrCreate?: InvocationAttemptCreateOrConnectWithoutInvocationInput | InvocationAttemptCreateOrConnectWithoutInvocationInput[]
+    upsert?: InvocationAttemptUpsertWithWhereUniqueWithoutInvocationInput | InvocationAttemptUpsertWithWhereUniqueWithoutInvocationInput[]
+    createMany?: InvocationAttemptCreateManyInvocationInputEnvelope
+    set?: InvocationAttemptWhereUniqueInput | InvocationAttemptWhereUniqueInput[]
+    disconnect?: InvocationAttemptWhereUniqueInput | InvocationAttemptWhereUniqueInput[]
+    delete?: InvocationAttemptWhereUniqueInput | InvocationAttemptWhereUniqueInput[]
+    connect?: InvocationAttemptWhereUniqueInput | InvocationAttemptWhereUniqueInput[]
+    update?: InvocationAttemptUpdateWithWhereUniqueWithoutInvocationInput | InvocationAttemptUpdateWithWhereUniqueWithoutInvocationInput[]
+    updateMany?: InvocationAttemptUpdateManyWithWhereWithoutInvocationInput | InvocationAttemptUpdateManyWithWhereWithoutInvocationInput[]
+    deleteMany?: InvocationAttemptScalarWhereInput | InvocationAttemptScalarWhereInput[]
+  }
+
+  export type AccountCreateNestedOneWithoutInvocationAttemptsInput = {
+    create?: XOR<AccountCreateWithoutInvocationAttemptsInput, AccountUncheckedCreateWithoutInvocationAttemptsInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutInvocationAttemptsInput
+    connect?: AccountWhereUniqueInput
+  }
+
+  export type ScheduledInvocationCreateNestedOneWithoutAttemptsInput = {
+    create?: XOR<ScheduledInvocationCreateWithoutAttemptsInput, ScheduledInvocationUncheckedCreateWithoutAttemptsInput>
+    connectOrCreate?: ScheduledInvocationCreateOrConnectWithoutAttemptsInput
+    connect?: ScheduledInvocationWhereUniqueInput
   }
 
   export type NullableBoolFieldUpdateOperationsInput = {
     set?: boolean | null
+  }
+
+  export type AccountUpdateOneRequiredWithoutInvocationAttemptsNestedInput = {
+    create?: XOR<AccountCreateWithoutInvocationAttemptsInput, AccountUncheckedCreateWithoutInvocationAttemptsInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutInvocationAttemptsInput
+    upsert?: AccountUpsertWithoutInvocationAttemptsInput
+    connect?: AccountWhereUniqueInput
+    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutInvocationAttemptsInput, AccountUpdateWithoutInvocationAttemptsInput>, AccountUncheckedUpdateWithoutInvocationAttemptsInput>
+  }
+
+  export type ScheduledInvocationUpdateOneRequiredWithoutAttemptsNestedInput = {
+    create?: XOR<ScheduledInvocationCreateWithoutAttemptsInput, ScheduledInvocationUncheckedCreateWithoutAttemptsInput>
+    connectOrCreate?: ScheduledInvocationCreateOrConnectWithoutAttemptsInput
+    upsert?: ScheduledInvocationUpsertWithoutAttemptsInput
+    connect?: ScheduledInvocationWhereUniqueInput
+    update?: XOR<XOR<ScheduledInvocationUpdateToOneWithWhereWithoutAttemptsInput, ScheduledInvocationUpdateWithoutAttemptsInput>, ScheduledInvocationUncheckedUpdateWithoutAttemptsInput>
+  }
+
+  export type AccountCreateNestedOneWithoutSchedulingReconcileOperationsInput = {
+    create?: XOR<AccountCreateWithoutSchedulingReconcileOperationsInput, AccountUncheckedCreateWithoutSchedulingReconcileOperationsInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutSchedulingReconcileOperationsInput
+    connect?: AccountWhereUniqueInput
   }
 
   export type AccountUpdateOneRequiredWithoutSchedulingReconcileOperationsNestedInput = {
@@ -161592,6 +165704,7 @@ export namespace Prisma {
 
   export type RoutineTemporaryOverrideCreateWithoutAccountInput = {
     overrideJson: string
+    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     routine: RoutineDefinitionCreateNestedOneWithoutTemporaryOverrideInput
@@ -161600,6 +165713,7 @@ export namespace Prisma {
   export type RoutineTemporaryOverrideUncheckedCreateWithoutAccountInput = {
     routineId: string
     overrideJson: string
+    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -162079,6 +166193,120 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type ScheduledInvocationCreateWithoutAccountInput = {
+    id: string
+    ownerType: string
+    ownerId: string
+    schedulingKey: string
+    handlerKey: string
+    payloadVersion: number
+    payload: JsonNullValueInput | InputJsonValue
+    runAt: Date | string
+    sourceRevision?: NullableJsonNullValueInput | InputJsonValue
+    retryEnabled?: boolean
+    maxRetries: number
+    initialDelayMs: number
+    maxDelayMs: number
+    backoffMultiplier: number
+    priority: string
+    timeoutMs?: number | null
+    status: string
+    attemptCount?: number
+    nextAttemptAt?: Date | string | null
+    claimToken?: string | null
+    claimExpiresAt?: Date | string | null
+    fencingToken?: number
+    name?: string | null
+    tags: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    attempts?: InvocationAttemptCreateNestedManyWithoutInvocationInput
+  }
+
+  export type ScheduledInvocationUncheckedCreateWithoutAccountInput = {
+    id: string
+    ownerType: string
+    ownerId: string
+    schedulingKey: string
+    handlerKey: string
+    payloadVersion: number
+    payload: JsonNullValueInput | InputJsonValue
+    runAt: Date | string
+    sourceRevision?: NullableJsonNullValueInput | InputJsonValue
+    retryEnabled?: boolean
+    maxRetries: number
+    initialDelayMs: number
+    maxDelayMs: number
+    backoffMultiplier: number
+    priority: string
+    timeoutMs?: number | null
+    status: string
+    attemptCount?: number
+    nextAttemptAt?: Date | string | null
+    claimToken?: string | null
+    claimExpiresAt?: Date | string | null
+    fencingToken?: number
+    name?: string | null
+    tags: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    attempts?: InvocationAttemptUncheckedCreateNestedManyWithoutInvocationInput
+  }
+
+  export type ScheduledInvocationCreateOrConnectWithoutAccountInput = {
+    where: ScheduledInvocationWhereUniqueInput
+    create: XOR<ScheduledInvocationCreateWithoutAccountInput, ScheduledInvocationUncheckedCreateWithoutAccountInput>
+  }
+
+  export type ScheduledInvocationCreateManyAccountInputEnvelope = {
+    data: ScheduledInvocationCreateManyAccountInput | ScheduledInvocationCreateManyAccountInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type InvocationAttemptCreateWithoutAccountInput = {
+    id: string
+    attemptNumber: number
+    startedAt: Date | string
+    finishedAt?: Date | string | null
+    outcome: string
+    result?: NullableJsonNullValueInput | InputJsonValue
+    failureCode?: string | null
+    failureMessage?: string | null
+    failureRetryable?: boolean | null
+    workerId?: string | null
+    claimToken?: string | null
+    fencingToken?: number | null
+    createdAt?: Date | string
+    invocation: ScheduledInvocationCreateNestedOneWithoutAttemptsInput
+  }
+
+  export type InvocationAttemptUncheckedCreateWithoutAccountInput = {
+    id: string
+    invocationId: string
+    attemptNumber: number
+    startedAt: Date | string
+    finishedAt?: Date | string | null
+    outcome: string
+    result?: NullableJsonNullValueInput | InputJsonValue
+    failureCode?: string | null
+    failureMessage?: string | null
+    failureRetryable?: boolean | null
+    workerId?: string | null
+    claimToken?: string | null
+    fencingToken?: number | null
+    createdAt?: Date | string
+  }
+
+  export type InvocationAttemptCreateOrConnectWithoutAccountInput = {
+    where: InvocationAttemptWhereUniqueInput
+    create: XOR<InvocationAttemptCreateWithoutAccountInput, InvocationAttemptUncheckedCreateWithoutAccountInput>
+  }
+
+  export type InvocationAttemptCreateManyAccountInputEnvelope = {
+    data: InvocationAttemptCreateManyAccountInput | InvocationAttemptCreateManyAccountInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ScheduleStatisticCreateWithoutAccountInput = {
     totalTasks: number
     activeTasks: number
@@ -162458,6 +166686,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
+    archivedAt?: Date | string | null
     isRead?: boolean
     channels?: NotificationChannelCreateNestedManyWithoutNotificationInput
     history?: NotificationHistoryCreateNestedManyWithoutNotificationInput
@@ -162489,6 +166718,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
+    archivedAt?: Date | string | null
     isRead?: boolean
     channels?: NotificationChannelUncheckedCreateNestedManyWithoutNotificationInput
     history?: NotificationHistoryUncheckedCreateNestedManyWithoutNotificationInput
@@ -163879,6 +168109,7 @@ export namespace Prisma {
     identityId?: StringFilter<"RoutineTemporaryOverride"> | string
     routineId?: StringFilter<"RoutineTemporaryOverride"> | string
     overrideJson?: StringFilter<"RoutineTemporaryOverride"> | string
+    version?: IntFilter<"RoutineTemporaryOverride"> | number
     createdAt?: DateTimeFilter<"RoutineTemporaryOverride"> | Date | string
     updatedAt?: DateTimeFilter<"RoutineTemporaryOverride"> | Date | string
   }
@@ -164286,6 +168517,92 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"SchedulingReconcileOperation"> | Date | string
   }
 
+  export type ScheduledInvocationUpsertWithWhereUniqueWithoutAccountInput = {
+    where: ScheduledInvocationWhereUniqueInput
+    update: XOR<ScheduledInvocationUpdateWithoutAccountInput, ScheduledInvocationUncheckedUpdateWithoutAccountInput>
+    create: XOR<ScheduledInvocationCreateWithoutAccountInput, ScheduledInvocationUncheckedCreateWithoutAccountInput>
+  }
+
+  export type ScheduledInvocationUpdateWithWhereUniqueWithoutAccountInput = {
+    where: ScheduledInvocationWhereUniqueInput
+    data: XOR<ScheduledInvocationUpdateWithoutAccountInput, ScheduledInvocationUncheckedUpdateWithoutAccountInput>
+  }
+
+  export type ScheduledInvocationUpdateManyWithWhereWithoutAccountInput = {
+    where: ScheduledInvocationScalarWhereInput
+    data: XOR<ScheduledInvocationUpdateManyMutationInput, ScheduledInvocationUncheckedUpdateManyWithoutAccountInput>
+  }
+
+  export type ScheduledInvocationScalarWhereInput = {
+    AND?: ScheduledInvocationScalarWhereInput | ScheduledInvocationScalarWhereInput[]
+    OR?: ScheduledInvocationScalarWhereInput[]
+    NOT?: ScheduledInvocationScalarWhereInput | ScheduledInvocationScalarWhereInput[]
+    id?: StringFilter<"ScheduledInvocation"> | string
+    identityId?: StringFilter<"ScheduledInvocation"> | string
+    ownerType?: StringFilter<"ScheduledInvocation"> | string
+    ownerId?: StringFilter<"ScheduledInvocation"> | string
+    schedulingKey?: StringFilter<"ScheduledInvocation"> | string
+    handlerKey?: StringFilter<"ScheduledInvocation"> | string
+    payloadVersion?: IntFilter<"ScheduledInvocation"> | number
+    payload?: JsonFilter<"ScheduledInvocation">
+    runAt?: DateTimeFilter<"ScheduledInvocation"> | Date | string
+    sourceRevision?: JsonNullableFilter<"ScheduledInvocation">
+    retryEnabled?: BoolFilter<"ScheduledInvocation"> | boolean
+    maxRetries?: IntFilter<"ScheduledInvocation"> | number
+    initialDelayMs?: IntFilter<"ScheduledInvocation"> | number
+    maxDelayMs?: IntFilter<"ScheduledInvocation"> | number
+    backoffMultiplier?: FloatFilter<"ScheduledInvocation"> | number
+    priority?: StringFilter<"ScheduledInvocation"> | string
+    timeoutMs?: IntNullableFilter<"ScheduledInvocation"> | number | null
+    status?: StringFilter<"ScheduledInvocation"> | string
+    attemptCount?: IntFilter<"ScheduledInvocation"> | number
+    nextAttemptAt?: DateTimeNullableFilter<"ScheduledInvocation"> | Date | string | null
+    claimToken?: StringNullableFilter<"ScheduledInvocation"> | string | null
+    claimExpiresAt?: DateTimeNullableFilter<"ScheduledInvocation"> | Date | string | null
+    fencingToken?: IntFilter<"ScheduledInvocation"> | number
+    name?: StringNullableFilter<"ScheduledInvocation"> | string | null
+    tags?: JsonFilter<"ScheduledInvocation">
+    createdAt?: DateTimeFilter<"ScheduledInvocation"> | Date | string
+    updatedAt?: DateTimeFilter<"ScheduledInvocation"> | Date | string
+  }
+
+  export type InvocationAttemptUpsertWithWhereUniqueWithoutAccountInput = {
+    where: InvocationAttemptWhereUniqueInput
+    update: XOR<InvocationAttemptUpdateWithoutAccountInput, InvocationAttemptUncheckedUpdateWithoutAccountInput>
+    create: XOR<InvocationAttemptCreateWithoutAccountInput, InvocationAttemptUncheckedCreateWithoutAccountInput>
+  }
+
+  export type InvocationAttemptUpdateWithWhereUniqueWithoutAccountInput = {
+    where: InvocationAttemptWhereUniqueInput
+    data: XOR<InvocationAttemptUpdateWithoutAccountInput, InvocationAttemptUncheckedUpdateWithoutAccountInput>
+  }
+
+  export type InvocationAttemptUpdateManyWithWhereWithoutAccountInput = {
+    where: InvocationAttemptScalarWhereInput
+    data: XOR<InvocationAttemptUpdateManyMutationInput, InvocationAttemptUncheckedUpdateManyWithoutAccountInput>
+  }
+
+  export type InvocationAttemptScalarWhereInput = {
+    AND?: InvocationAttemptScalarWhereInput | InvocationAttemptScalarWhereInput[]
+    OR?: InvocationAttemptScalarWhereInput[]
+    NOT?: InvocationAttemptScalarWhereInput | InvocationAttemptScalarWhereInput[]
+    id?: StringFilter<"InvocationAttempt"> | string
+    identityId?: StringFilter<"InvocationAttempt"> | string
+    invocationId?: StringFilter<"InvocationAttempt"> | string
+    attemptNumber?: IntFilter<"InvocationAttempt"> | number
+    startedAt?: DateTimeFilter<"InvocationAttempt"> | Date | string
+    finishedAt?: DateTimeNullableFilter<"InvocationAttempt"> | Date | string | null
+    outcome?: StringFilter<"InvocationAttempt"> | string
+    result?: JsonNullableFilter<"InvocationAttempt">
+    failureCode?: StringNullableFilter<"InvocationAttempt"> | string | null
+    failureMessage?: StringNullableFilter<"InvocationAttempt"> | string | null
+    failureRetryable?: BoolNullableFilter<"InvocationAttempt"> | boolean | null
+    workerId?: StringNullableFilter<"InvocationAttempt"> | string | null
+    claimToken?: StringNullableFilter<"InvocationAttempt"> | string | null
+    fencingToken?: IntNullableFilter<"InvocationAttempt"> | number | null
+    createdAt?: DateTimeFilter<"InvocationAttempt"> | Date | string
+  }
+
   export type ScheduleStatisticUpsertWithoutAccountInput = {
     update: XOR<ScheduleStatisticUpdateWithoutAccountInput, ScheduleStatisticUncheckedUpdateWithoutAccountInput>
     create: XOR<ScheduleStatisticCreateWithoutAccountInput, ScheduleStatisticUncheckedCreateWithoutAccountInput>
@@ -164651,6 +168968,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Notification"> | Date | string
     updatedAt?: DateTimeFilter<"Notification"> | Date | string
     deletedAt?: DateTimeNullableFilter<"Notification"> | Date | string | null
+    archivedAt?: DateTimeNullableFilter<"Notification"> | Date | string | null
     isRead?: BoolFilter<"Notification"> | boolean
   }
 
@@ -165546,6 +169864,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -165609,6 +169929,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -165688,6 +170010,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -165751,6 +170075,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -165814,6 +170140,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -165877,6 +170205,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -165984,6 +170314,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -166047,6 +170379,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -166126,6 +170460,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -166189,6 +170525,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -166299,6 +170637,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -166362,6 +170702,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -166462,6 +170804,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -166525,6 +170869,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -166604,6 +170950,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -166667,6 +171015,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -166730,6 +171080,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -166793,6 +171145,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -166872,6 +171226,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -166935,6 +171291,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -166998,6 +171356,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -167061,6 +171421,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -167140,6 +171502,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -167203,6 +171567,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -167266,6 +171632,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -167329,6 +171697,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -167408,6 +171778,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -167471,6 +171843,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -167534,6 +171908,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -167597,6 +171973,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -167676,6 +172054,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -167739,6 +172119,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -167802,6 +172184,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -167865,6 +172249,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -167944,6 +172330,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -168007,6 +172395,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -168173,6 +172563,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -168236,6 +172628,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -168412,6 +172806,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -168475,6 +172871,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -168754,6 +173152,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -168817,6 +173217,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -169035,6 +173437,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -169098,6 +173502,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -170142,6 +174548,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -170205,6 +174613,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -170333,6 +174743,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -170396,6 +174808,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -170760,6 +175174,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -170823,6 +175239,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -170940,6 +175358,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -171003,6 +175423,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -171098,6 +175520,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -171161,6 +175585,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -171316,6 +175742,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -171379,6 +175807,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -171530,6 +175960,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -171593,6 +176025,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -171757,6 +176191,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -171820,6 +176256,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -172147,6 +176585,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -172210,6 +176650,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -172369,6 +176811,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -172432,6 +176876,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -172495,6 +176941,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -172558,6 +177006,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -172622,6 +177072,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
+    archivedAt?: Date | string | null
     isRead?: boolean
     history?: NotificationHistoryCreateNestedManyWithoutNotificationInput
     dispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutNotificationInput
@@ -172654,6 +177105,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
+    archivedAt?: Date | string | null
     isRead?: boolean
     history?: NotificationHistoryUncheckedCreateNestedManyWithoutNotificationInput
     dispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutNotificationInput
@@ -172704,6 +177156,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -172767,6 +177221,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -172837,6 +177293,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
     history?: NotificationHistoryUpdateManyWithoutNotificationNestedInput
     dispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutNotificationNestedInput
@@ -172869,6 +177326,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
     history?: NotificationHistoryUncheckedUpdateManyWithoutNotificationNestedInput
     dispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutNotificationNestedInput
@@ -172903,6 +177361,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -172966,6 +177426,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -173030,6 +177492,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
+    archivedAt?: Date | string | null
     isRead?: boolean
     channels?: NotificationChannelCreateNestedManyWithoutNotificationInput
     dispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutNotificationInput
@@ -173062,6 +177525,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
+    archivedAt?: Date | string | null
     isRead?: boolean
     channels?: NotificationChannelUncheckedCreateNestedManyWithoutNotificationInput
     dispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutNotificationInput
@@ -173112,6 +177576,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -173175,6 +177641,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -173245,6 +177713,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
     channels?: NotificationChannelUpdateManyWithoutNotificationNestedInput
     dispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutNotificationNestedInput
@@ -173277,6 +177746,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
     channels?: NotificationChannelUncheckedUpdateManyWithoutNotificationNestedInput
     dispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutNotificationNestedInput
@@ -173307,6 +177777,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
+    archivedAt?: Date | string | null
     isRead?: boolean
     channels?: NotificationChannelCreateNestedManyWithoutNotificationInput
     history?: NotificationHistoryCreateNestedManyWithoutNotificationInput
@@ -173339,6 +177810,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
+    archivedAt?: Date | string | null
     isRead?: boolean
     channels?: NotificationChannelUncheckedCreateNestedManyWithoutNotificationInput
     history?: NotificationHistoryUncheckedCreateNestedManyWithoutNotificationInput
@@ -173385,6 +177857,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
     channels?: NotificationChannelUpdateManyWithoutNotificationNestedInput
     history?: NotificationHistoryUpdateManyWithoutNotificationNestedInput
@@ -173417,6 +177890,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
     channels?: NotificationChannelUncheckedUpdateManyWithoutNotificationNestedInput
     history?: NotificationHistoryUncheckedUpdateManyWithoutNotificationNestedInput
@@ -173447,6 +177921,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
+    archivedAt?: Date | string | null
     isRead?: boolean
     channels?: NotificationChannelCreateNestedManyWithoutNotificationInput
     history?: NotificationHistoryCreateNestedManyWithoutNotificationInput
@@ -173479,6 +177954,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
+    archivedAt?: Date | string | null
     isRead?: boolean
     channels?: NotificationChannelUncheckedCreateNestedManyWithoutNotificationInput
     history?: NotificationHistoryUncheckedCreateNestedManyWithoutNotificationInput
@@ -173518,6 +177994,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -173581,6 +178059,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -173656,6 +178136,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
     channels?: NotificationChannelUpdateManyWithoutNotificationNestedInput
     history?: NotificationHistoryUpdateManyWithoutNotificationNestedInput
@@ -173688,6 +178169,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
     channels?: NotificationChannelUncheckedUpdateManyWithoutNotificationNestedInput
     history?: NotificationHistoryUncheckedUpdateManyWithoutNotificationNestedInput
@@ -173733,6 +178215,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -173796,6 +178280,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -173859,6 +178345,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -173922,6 +178410,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -174001,6 +178491,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -174064,6 +178556,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -174284,6 +178778,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -174347,6 +178843,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -174490,6 +178988,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -174553,6 +179053,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -174616,6 +179118,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -174679,6 +179183,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -174758,6 +179264,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -174821,6 +179329,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -174884,6 +179394,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -174947,6 +179459,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -175087,6 +179601,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -175150,6 +179666,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -175281,6 +179799,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -175344,6 +179864,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -175484,6 +180006,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -175547,6 +180071,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -175676,6 +180202,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -175739,6 +180267,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -175818,6 +180348,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -175881,6 +180413,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -175945,6 +180479,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -176008,6 +180544,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -176148,6 +180686,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -176211,6 +180751,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -176340,6 +180882,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -176403,6 +180947,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -176482,6 +181028,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -176545,6 +181093,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -176670,6 +181220,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -176733,6 +181285,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -176879,6 +181433,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -176942,6 +181498,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -177004,6 +181562,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -177067,6 +181627,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -177233,6 +181795,7 @@ export namespace Prisma {
 
   export type RoutineTemporaryOverrideCreateWithoutRoutineInput = {
     overrideJson: string
+    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     account: AccountCreateNestedOneWithoutRoutineTemporaryOverridesInput
@@ -177240,6 +181803,7 @@ export namespace Prisma {
 
   export type RoutineTemporaryOverrideUncheckedCreateWithoutRoutineInput = {
     overrideJson: string
+    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -177287,6 +181851,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -177350,6 +181916,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -177447,6 +182015,7 @@ export namespace Prisma {
 
   export type RoutineTemporaryOverrideUpdateWithoutRoutineInput = {
     overrideJson?: StringFieldUpdateOperationsInput | string
+    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     account?: AccountUpdateOneRequiredWithoutRoutineTemporaryOverridesNestedInput
@@ -177454,6 +182023,7 @@ export namespace Prisma {
 
   export type RoutineTemporaryOverrideUncheckedUpdateWithoutRoutineInput = {
     overrideJson?: StringFieldUpdateOperationsInput | string
+    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -177485,6 +182055,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -177548,6 +182120,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -177654,6 +182228,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -177717,6 +182293,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -177796,6 +182374,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -177859,6 +182439,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -178000,6 +182582,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -178063,6 +182647,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -178200,6 +182786,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -178263,6 +182851,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -178377,6 +182967,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -178440,6 +183032,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -178519,6 +183113,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -178582,6 +183178,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -178686,6 +183284,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -178749,6 +183349,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -178879,6 +183481,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -178942,6 +183546,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -179094,6 +183700,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -179157,6 +183765,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -179236,6 +183846,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -179299,6 +183911,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -179472,6 +184086,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -179535,6 +184151,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -179738,6 +184356,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -179801,6 +184421,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -179921,6 +184543,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -179984,6 +184608,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -180047,6 +184673,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -180110,6 +184738,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -180377,6 +185007,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -180440,6 +185072,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -180568,6 +185202,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -180631,6 +185267,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -180832,6 +185470,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -180895,6 +185535,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -181070,6 +185712,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -181133,6 +185777,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -181263,6 +185909,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -181326,6 +185974,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -181488,6 +186138,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -181551,6 +186203,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -181777,6 +186431,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -181840,6 +186496,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -182317,6 +186975,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -182380,6 +187040,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -182510,6 +187172,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -182573,6 +187237,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -182693,6 +187359,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -182756,6 +187424,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -182835,6 +187505,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -182898,6 +187570,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -182962,6 +187636,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -183025,6 +187701,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -183104,6 +187782,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -183167,6 +187847,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -183416,6 +188098,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -183479,6 +188163,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -183850,6 +188536,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -183913,6 +188601,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -184885,6 +189575,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -184948,6 +189640,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -185072,6 +189766,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -185135,6 +189831,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -185248,6 +189946,8 @@ export namespace Prisma {
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -185311,6 +190011,8 @@ export namespace Prisma {
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -185390,6 +190092,8 @@ export namespace Prisma {
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -185453,6 +190157,8 @@ export namespace Prisma {
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -185550,6 +190256,8 @@ export namespace Prisma {
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -185613,6 +190321,8 @@ export namespace Prisma {
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -185708,6 +190418,8 @@ export namespace Prisma {
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -185771,6 +190483,8 @@ export namespace Prisma {
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -185807,6 +190521,754 @@ export namespace Prisma {
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
 
+  export type AccountCreateWithoutScheduledInvocationsInput = {
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    goals?: GoalCreateNestedManyWithoutAccountInput
+    labels?: LabelCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
+    reminderGroups?: ReminderGroupCreateNestedManyWithoutAccountInput
+    reminderTemplates?: ReminderTemplateCreateNestedManyWithoutAccountInput
+    reminderInstances?: ReminderInstanceCreateNestedManyWithoutAccountInput
+    reminderStatistics?: ReminderStatisticCreateNestedOneWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionCreateNestedManyWithoutAccountInput
+    userReminderPreferences?: UserReminderPreferenceCreateNestedOneWithoutAccountInput
+    repositories?: RepositoryCreateNestedManyWithoutAccountInput
+    repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
+    repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
+    schedules?: ScheduleCreateNestedManyWithoutAccountInput
+    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
+    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
+    habits?: HabitCreateNestedManyWithoutAccountInput
+    relations?: RelationCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
+    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
+    taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
+    notifications?: NotificationCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
+    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
+    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
+    dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
+    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
+    reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
+    reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
+    reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
+    routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
+    notificationChannels?: NotificationChannelCreateNestedManyWithoutIdentityInput
+    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
+    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
+    folders?: FolderCreateNestedManyWithoutIdentityInput
+    resources?: ResourceCreateNestedManyWithoutIdentityInput
+    repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountUncheckedCreateWithoutScheduledInvocationsInput = {
+    id: string
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
+    reminderGroups?: ReminderGroupUncheckedCreateNestedManyWithoutAccountInput
+    reminderTemplates?: ReminderTemplateUncheckedCreateNestedManyWithoutAccountInput
+    reminderInstances?: ReminderInstanceUncheckedCreateNestedManyWithoutAccountInput
+    reminderStatistics?: ReminderStatisticUncheckedCreateNestedOneWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedCreateNestedManyWithoutAccountInput
+    userReminderPreferences?: UserReminderPreferenceUncheckedCreateNestedOneWithoutAccountInput
+    repositories?: RepositoryUncheckedCreateNestedManyWithoutAccountInput
+    repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
+    repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
+    schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
+    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
+    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
+    habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
+    relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
+    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
+    taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
+    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
+    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
+    dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
+    reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
+    reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
+    notificationChannels?: NotificationChannelUncheckedCreateNestedManyWithoutIdentityInput
+    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
+    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
+    folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
+    resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
+    repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountCreateOrConnectWithoutScheduledInvocationsInput = {
+    where: AccountWhereUniqueInput
+    create: XOR<AccountCreateWithoutScheduledInvocationsInput, AccountUncheckedCreateWithoutScheduledInvocationsInput>
+  }
+
+  export type InvocationAttemptCreateWithoutInvocationInput = {
+    id: string
+    attemptNumber: number
+    startedAt: Date | string
+    finishedAt?: Date | string | null
+    outcome: string
+    result?: NullableJsonNullValueInput | InputJsonValue
+    failureCode?: string | null
+    failureMessage?: string | null
+    failureRetryable?: boolean | null
+    workerId?: string | null
+    claimToken?: string | null
+    fencingToken?: number | null
+    createdAt?: Date | string
+    account: AccountCreateNestedOneWithoutInvocationAttemptsInput
+  }
+
+  export type InvocationAttemptUncheckedCreateWithoutInvocationInput = {
+    id: string
+    identityId: string
+    attemptNumber: number
+    startedAt: Date | string
+    finishedAt?: Date | string | null
+    outcome: string
+    result?: NullableJsonNullValueInput | InputJsonValue
+    failureCode?: string | null
+    failureMessage?: string | null
+    failureRetryable?: boolean | null
+    workerId?: string | null
+    claimToken?: string | null
+    fencingToken?: number | null
+    createdAt?: Date | string
+  }
+
+  export type InvocationAttemptCreateOrConnectWithoutInvocationInput = {
+    where: InvocationAttemptWhereUniqueInput
+    create: XOR<InvocationAttemptCreateWithoutInvocationInput, InvocationAttemptUncheckedCreateWithoutInvocationInput>
+  }
+
+  export type InvocationAttemptCreateManyInvocationInputEnvelope = {
+    data: InvocationAttemptCreateManyInvocationInput | InvocationAttemptCreateManyInvocationInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type AccountUpsertWithoutScheduledInvocationsInput = {
+    update: XOR<AccountUpdateWithoutScheduledInvocationsInput, AccountUncheckedUpdateWithoutScheduledInvocationsInput>
+    create: XOR<AccountCreateWithoutScheduledInvocationsInput, AccountUncheckedCreateWithoutScheduledInvocationsInput>
+    where?: AccountWhereInput
+  }
+
+  export type AccountUpdateToOneWithWhereWithoutScheduledInvocationsInput = {
+    where?: AccountWhereInput
+    data: XOR<AccountUpdateWithoutScheduledInvocationsInput, AccountUncheckedUpdateWithoutScheduledInvocationsInput>
+  }
+
+  export type AccountUpdateWithoutScheduledInvocationsInput = {
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    goals?: GoalUpdateManyWithoutAccountNestedInput
+    labels?: LabelUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
+    reminderGroups?: ReminderGroupUpdateManyWithoutAccountNestedInput
+    reminderTemplates?: ReminderTemplateUpdateManyWithoutAccountNestedInput
+    reminderInstances?: ReminderInstanceUpdateManyWithoutAccountNestedInput
+    reminderStatistics?: ReminderStatisticUpdateOneWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUpdateManyWithoutAccountNestedInput
+    userReminderPreferences?: UserReminderPreferenceUpdateOneWithoutAccountNestedInput
+    repositories?: RepositoryUpdateManyWithoutAccountNestedInput
+    repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
+    repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
+    schedules?: ScheduleUpdateManyWithoutAccountNestedInput
+    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
+    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
+    habits?: HabitUpdateManyWithoutAccountNestedInput
+    relations?: RelationUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
+    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
+    taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
+    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
+    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
+    dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
+    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
+    reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
+    reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
+    reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
+    routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
+    notificationChannels?: NotificationChannelUpdateManyWithoutIdentityNestedInput
+    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
+    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
+    folders?: FolderUpdateManyWithoutIdentityNestedInput
+    resources?: ResourceUpdateManyWithoutIdentityNestedInput
+    repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
+  }
+
+  export type AccountUncheckedUpdateWithoutScheduledInvocationsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
+    reminderGroups?: ReminderGroupUncheckedUpdateManyWithoutAccountNestedInput
+    reminderTemplates?: ReminderTemplateUncheckedUpdateManyWithoutAccountNestedInput
+    reminderInstances?: ReminderInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    reminderStatistics?: ReminderStatisticUncheckedUpdateOneWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedUpdateManyWithoutAccountNestedInput
+    userReminderPreferences?: UserReminderPreferenceUncheckedUpdateOneWithoutAccountNestedInput
+    repositories?: RepositoryUncheckedUpdateManyWithoutAccountNestedInput
+    repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
+    repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
+    schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
+    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
+    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
+    habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
+    relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
+    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
+    taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
+    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
+    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
+    dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
+    reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
+    reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
+    notificationChannels?: NotificationChannelUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
+    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
+    folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
+    resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
+    repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
+  }
+
+  export type InvocationAttemptUpsertWithWhereUniqueWithoutInvocationInput = {
+    where: InvocationAttemptWhereUniqueInput
+    update: XOR<InvocationAttemptUpdateWithoutInvocationInput, InvocationAttemptUncheckedUpdateWithoutInvocationInput>
+    create: XOR<InvocationAttemptCreateWithoutInvocationInput, InvocationAttemptUncheckedCreateWithoutInvocationInput>
+  }
+
+  export type InvocationAttemptUpdateWithWhereUniqueWithoutInvocationInput = {
+    where: InvocationAttemptWhereUniqueInput
+    data: XOR<InvocationAttemptUpdateWithoutInvocationInput, InvocationAttemptUncheckedUpdateWithoutInvocationInput>
+  }
+
+  export type InvocationAttemptUpdateManyWithWhereWithoutInvocationInput = {
+    where: InvocationAttemptScalarWhereInput
+    data: XOR<InvocationAttemptUpdateManyMutationInput, InvocationAttemptUncheckedUpdateManyWithoutInvocationInput>
+  }
+
+  export type AccountCreateWithoutInvocationAttemptsInput = {
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    goals?: GoalCreateNestedManyWithoutAccountInput
+    labels?: LabelCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
+    reminderGroups?: ReminderGroupCreateNestedManyWithoutAccountInput
+    reminderTemplates?: ReminderTemplateCreateNestedManyWithoutAccountInput
+    reminderInstances?: ReminderInstanceCreateNestedManyWithoutAccountInput
+    reminderStatistics?: ReminderStatisticCreateNestedOneWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionCreateNestedManyWithoutAccountInput
+    userReminderPreferences?: UserReminderPreferenceCreateNestedOneWithoutAccountInput
+    repositories?: RepositoryCreateNestedManyWithoutAccountInput
+    repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
+    repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
+    schedules?: ScheduleCreateNestedManyWithoutAccountInput
+    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
+    habits?: HabitCreateNestedManyWithoutAccountInput
+    relations?: RelationCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
+    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
+    taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
+    notifications?: NotificationCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
+    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
+    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
+    dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
+    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
+    reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
+    reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
+    reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
+    routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
+    notificationChannels?: NotificationChannelCreateNestedManyWithoutIdentityInput
+    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
+    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
+    folders?: FolderCreateNestedManyWithoutIdentityInput
+    resources?: ResourceCreateNestedManyWithoutIdentityInput
+    repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountUncheckedCreateWithoutInvocationAttemptsInput = {
+    id: string
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
+    reminderGroups?: ReminderGroupUncheckedCreateNestedManyWithoutAccountInput
+    reminderTemplates?: ReminderTemplateUncheckedCreateNestedManyWithoutAccountInput
+    reminderInstances?: ReminderInstanceUncheckedCreateNestedManyWithoutAccountInput
+    reminderStatistics?: ReminderStatisticUncheckedCreateNestedOneWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedCreateNestedManyWithoutAccountInput
+    userReminderPreferences?: UserReminderPreferenceUncheckedCreateNestedOneWithoutAccountInput
+    repositories?: RepositoryUncheckedCreateNestedManyWithoutAccountInput
+    repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
+    repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
+    schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
+    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
+    habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
+    relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
+    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
+    taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
+    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
+    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
+    dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
+    reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
+    reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
+    notificationChannels?: NotificationChannelUncheckedCreateNestedManyWithoutIdentityInput
+    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
+    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
+    folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
+    resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
+    repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountCreateOrConnectWithoutInvocationAttemptsInput = {
+    where: AccountWhereUniqueInput
+    create: XOR<AccountCreateWithoutInvocationAttemptsInput, AccountUncheckedCreateWithoutInvocationAttemptsInput>
+  }
+
+  export type ScheduledInvocationCreateWithoutAttemptsInput = {
+    id: string
+    ownerType: string
+    ownerId: string
+    schedulingKey: string
+    handlerKey: string
+    payloadVersion: number
+    payload: JsonNullValueInput | InputJsonValue
+    runAt: Date | string
+    sourceRevision?: NullableJsonNullValueInput | InputJsonValue
+    retryEnabled?: boolean
+    maxRetries: number
+    initialDelayMs: number
+    maxDelayMs: number
+    backoffMultiplier: number
+    priority: string
+    timeoutMs?: number | null
+    status: string
+    attemptCount?: number
+    nextAttemptAt?: Date | string | null
+    claimToken?: string | null
+    claimExpiresAt?: Date | string | null
+    fencingToken?: number
+    name?: string | null
+    tags: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    account: AccountCreateNestedOneWithoutScheduledInvocationsInput
+  }
+
+  export type ScheduledInvocationUncheckedCreateWithoutAttemptsInput = {
+    id: string
+    identityId: string
+    ownerType: string
+    ownerId: string
+    schedulingKey: string
+    handlerKey: string
+    payloadVersion: number
+    payload: JsonNullValueInput | InputJsonValue
+    runAt: Date | string
+    sourceRevision?: NullableJsonNullValueInput | InputJsonValue
+    retryEnabled?: boolean
+    maxRetries: number
+    initialDelayMs: number
+    maxDelayMs: number
+    backoffMultiplier: number
+    priority: string
+    timeoutMs?: number | null
+    status: string
+    attemptCount?: number
+    nextAttemptAt?: Date | string | null
+    claimToken?: string | null
+    claimExpiresAt?: Date | string | null
+    fencingToken?: number
+    name?: string | null
+    tags: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ScheduledInvocationCreateOrConnectWithoutAttemptsInput = {
+    where: ScheduledInvocationWhereUniqueInput
+    create: XOR<ScheduledInvocationCreateWithoutAttemptsInput, ScheduledInvocationUncheckedCreateWithoutAttemptsInput>
+  }
+
+  export type AccountUpsertWithoutInvocationAttemptsInput = {
+    update: XOR<AccountUpdateWithoutInvocationAttemptsInput, AccountUncheckedUpdateWithoutInvocationAttemptsInput>
+    create: XOR<AccountCreateWithoutInvocationAttemptsInput, AccountUncheckedCreateWithoutInvocationAttemptsInput>
+    where?: AccountWhereInput
+  }
+
+  export type AccountUpdateToOneWithWhereWithoutInvocationAttemptsInput = {
+    where?: AccountWhereInput
+    data: XOR<AccountUpdateWithoutInvocationAttemptsInput, AccountUncheckedUpdateWithoutInvocationAttemptsInput>
+  }
+
+  export type AccountUpdateWithoutInvocationAttemptsInput = {
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    goals?: GoalUpdateManyWithoutAccountNestedInput
+    labels?: LabelUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
+    reminderGroups?: ReminderGroupUpdateManyWithoutAccountNestedInput
+    reminderTemplates?: ReminderTemplateUpdateManyWithoutAccountNestedInput
+    reminderInstances?: ReminderInstanceUpdateManyWithoutAccountNestedInput
+    reminderStatistics?: ReminderStatisticUpdateOneWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUpdateManyWithoutAccountNestedInput
+    userReminderPreferences?: UserReminderPreferenceUpdateOneWithoutAccountNestedInput
+    repositories?: RepositoryUpdateManyWithoutAccountNestedInput
+    repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
+    repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
+    schedules?: ScheduleUpdateManyWithoutAccountNestedInput
+    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
+    habits?: HabitUpdateManyWithoutAccountNestedInput
+    relations?: RelationUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
+    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
+    taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
+    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
+    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
+    dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
+    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
+    reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
+    reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
+    reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
+    routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
+    notificationChannels?: NotificationChannelUpdateManyWithoutIdentityNestedInput
+    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
+    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
+    folders?: FolderUpdateManyWithoutIdentityNestedInput
+    resources?: ResourceUpdateManyWithoutIdentityNestedInput
+    repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
+  }
+
+  export type AccountUncheckedUpdateWithoutInvocationAttemptsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
+    reminderGroups?: ReminderGroupUncheckedUpdateManyWithoutAccountNestedInput
+    reminderTemplates?: ReminderTemplateUncheckedUpdateManyWithoutAccountNestedInput
+    reminderInstances?: ReminderInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    reminderStatistics?: ReminderStatisticUncheckedUpdateOneWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedUpdateManyWithoutAccountNestedInput
+    userReminderPreferences?: UserReminderPreferenceUncheckedUpdateOneWithoutAccountNestedInput
+    repositories?: RepositoryUncheckedUpdateManyWithoutAccountNestedInput
+    repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
+    repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
+    schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
+    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
+    habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
+    relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
+    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
+    taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
+    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
+    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
+    dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
+    reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
+    reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
+    notificationChannels?: NotificationChannelUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
+    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
+    folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
+    resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
+    repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
+  }
+
+  export type ScheduledInvocationUpsertWithoutAttemptsInput = {
+    update: XOR<ScheduledInvocationUpdateWithoutAttemptsInput, ScheduledInvocationUncheckedUpdateWithoutAttemptsInput>
+    create: XOR<ScheduledInvocationCreateWithoutAttemptsInput, ScheduledInvocationUncheckedCreateWithoutAttemptsInput>
+    where?: ScheduledInvocationWhereInput
+  }
+
+  export type ScheduledInvocationUpdateToOneWithWhereWithoutAttemptsInput = {
+    where?: ScheduledInvocationWhereInput
+    data: XOR<ScheduledInvocationUpdateWithoutAttemptsInput, ScheduledInvocationUncheckedUpdateWithoutAttemptsInput>
+  }
+
+  export type ScheduledInvocationUpdateWithoutAttemptsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    ownerType?: StringFieldUpdateOperationsInput | string
+    ownerId?: StringFieldUpdateOperationsInput | string
+    schedulingKey?: StringFieldUpdateOperationsInput | string
+    handlerKey?: StringFieldUpdateOperationsInput | string
+    payloadVersion?: IntFieldUpdateOperationsInput | number
+    payload?: JsonNullValueInput | InputJsonValue
+    runAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sourceRevision?: NullableJsonNullValueInput | InputJsonValue
+    retryEnabled?: BoolFieldUpdateOperationsInput | boolean
+    maxRetries?: IntFieldUpdateOperationsInput | number
+    initialDelayMs?: IntFieldUpdateOperationsInput | number
+    maxDelayMs?: IntFieldUpdateOperationsInput | number
+    backoffMultiplier?: FloatFieldUpdateOperationsInput | number
+    priority?: StringFieldUpdateOperationsInput | string
+    timeoutMs?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: StringFieldUpdateOperationsInput | string
+    attemptCount?: IntFieldUpdateOperationsInput | number
+    nextAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    claimToken?: NullableStringFieldUpdateOperationsInput | string | null
+    claimExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fencingToken?: IntFieldUpdateOperationsInput | number
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    account?: AccountUpdateOneRequiredWithoutScheduledInvocationsNestedInput
+  }
+
+  export type ScheduledInvocationUncheckedUpdateWithoutAttemptsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    ownerType?: StringFieldUpdateOperationsInput | string
+    ownerId?: StringFieldUpdateOperationsInput | string
+    schedulingKey?: StringFieldUpdateOperationsInput | string
+    handlerKey?: StringFieldUpdateOperationsInput | string
+    payloadVersion?: IntFieldUpdateOperationsInput | number
+    payload?: JsonNullValueInput | InputJsonValue
+    runAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sourceRevision?: NullableJsonNullValueInput | InputJsonValue
+    retryEnabled?: BoolFieldUpdateOperationsInput | boolean
+    maxRetries?: IntFieldUpdateOperationsInput | number
+    initialDelayMs?: IntFieldUpdateOperationsInput | number
+    maxDelayMs?: IntFieldUpdateOperationsInput | number
+    backoffMultiplier?: FloatFieldUpdateOperationsInput | number
+    priority?: StringFieldUpdateOperationsInput | string
+    timeoutMs?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: StringFieldUpdateOperationsInput | string
+    attemptCount?: IntFieldUpdateOperationsInput | number
+    nextAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    claimToken?: NullableStringFieldUpdateOperationsInput | string | null
+    claimExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fencingToken?: IntFieldUpdateOperationsInput | number
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type AccountCreateWithoutSchedulingReconcileOperationsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
@@ -185834,6 +191296,8 @@ export namespace Prisma {
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -185897,6 +191361,8 @@ export namespace Prisma {
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -185976,6 +191442,8 @@ export namespace Prisma {
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -186039,6 +191507,8 @@ export namespace Prisma {
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -186103,6 +191573,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -186166,6 +191638,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -186332,6 +191806,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -186395,6 +191871,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -186551,6 +192029,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -186614,6 +192094,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -186693,6 +192175,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -186756,6 +192240,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -186819,6 +192305,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -186882,6 +192370,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -186961,6 +192451,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -187024,6 +192516,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -187087,6 +192581,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -187150,6 +192646,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -187366,6 +192864,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -187429,6 +192929,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -187594,6 +193096,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -187657,6 +193161,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -187794,6 +193300,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -187857,6 +193365,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -187984,6 +193494,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -188047,6 +193559,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -188184,6 +193698,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -188247,6 +193763,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -188374,6 +193892,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -188437,6 +193957,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -188550,6 +194072,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -188613,6 +194137,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -188717,6 +194243,8 @@ export namespace Prisma {
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
@@ -188780,6 +194308,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
     scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
     scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
@@ -188890,6 +194420,8 @@ export namespace Prisma {
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
@@ -188953,6 +194485,8 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
@@ -189092,6 +194626,7 @@ export namespace Prisma {
   export type RoutineTemporaryOverrideCreateManyAccountInput = {
     routineId: string
     overrideJson: string
+    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -189246,6 +194781,52 @@ export namespace Prisma {
     createdAt?: Date | string
   }
 
+  export type ScheduledInvocationCreateManyAccountInput = {
+    id: string
+    ownerType: string
+    ownerId: string
+    schedulingKey: string
+    handlerKey: string
+    payloadVersion: number
+    payload: JsonNullValueInput | InputJsonValue
+    runAt: Date | string
+    sourceRevision?: NullableJsonNullValueInput | InputJsonValue
+    retryEnabled?: boolean
+    maxRetries: number
+    initialDelayMs: number
+    maxDelayMs: number
+    backoffMultiplier: number
+    priority: string
+    timeoutMs?: number | null
+    status: string
+    attemptCount?: number
+    nextAttemptAt?: Date | string | null
+    claimToken?: string | null
+    claimExpiresAt?: Date | string | null
+    fencingToken?: number
+    name?: string | null
+    tags: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type InvocationAttemptCreateManyAccountInput = {
+    id: string
+    invocationId: string
+    attemptNumber: number
+    startedAt: Date | string
+    finishedAt?: Date | string | null
+    outcome: string
+    result?: NullableJsonNullValueInput | InputJsonValue
+    failureCode?: string | null
+    failureMessage?: string | null
+    failureRetryable?: boolean | null
+    workerId?: string | null
+    claimToken?: string | null
+    fencingToken?: number | null
+    createdAt?: Date | string
+  }
+
   export type HabitCreateManyAccountInput = {
     id: string
     name: string
@@ -189379,6 +194960,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
+    archivedAt?: Date | string | null
     isRead?: boolean
   }
 
@@ -190078,6 +195660,7 @@ export namespace Prisma {
 
   export type RoutineTemporaryOverrideUpdateWithoutAccountInput = {
     overrideJson?: StringFieldUpdateOperationsInput | string
+    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     routine?: RoutineDefinitionUpdateOneRequiredWithoutTemporaryOverrideNestedInput
@@ -190086,6 +195669,7 @@ export namespace Prisma {
   export type RoutineTemporaryOverrideUncheckedUpdateWithoutAccountInput = {
     routineId?: StringFieldUpdateOperationsInput | string
     overrideJson?: StringFieldUpdateOperationsInput | string
+    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -190093,6 +195677,7 @@ export namespace Prisma {
   export type RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountInput = {
     routineId?: StringFieldUpdateOperationsInput | string
     overrideJson?: StringFieldUpdateOperationsInput | string
+    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -190561,6 +196146,146 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type ScheduledInvocationUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    ownerType?: StringFieldUpdateOperationsInput | string
+    ownerId?: StringFieldUpdateOperationsInput | string
+    schedulingKey?: StringFieldUpdateOperationsInput | string
+    handlerKey?: StringFieldUpdateOperationsInput | string
+    payloadVersion?: IntFieldUpdateOperationsInput | number
+    payload?: JsonNullValueInput | InputJsonValue
+    runAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sourceRevision?: NullableJsonNullValueInput | InputJsonValue
+    retryEnabled?: BoolFieldUpdateOperationsInput | boolean
+    maxRetries?: IntFieldUpdateOperationsInput | number
+    initialDelayMs?: IntFieldUpdateOperationsInput | number
+    maxDelayMs?: IntFieldUpdateOperationsInput | number
+    backoffMultiplier?: FloatFieldUpdateOperationsInput | number
+    priority?: StringFieldUpdateOperationsInput | string
+    timeoutMs?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: StringFieldUpdateOperationsInput | string
+    attemptCount?: IntFieldUpdateOperationsInput | number
+    nextAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    claimToken?: NullableStringFieldUpdateOperationsInput | string | null
+    claimExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fencingToken?: IntFieldUpdateOperationsInput | number
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    attempts?: InvocationAttemptUpdateManyWithoutInvocationNestedInput
+  }
+
+  export type ScheduledInvocationUncheckedUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    ownerType?: StringFieldUpdateOperationsInput | string
+    ownerId?: StringFieldUpdateOperationsInput | string
+    schedulingKey?: StringFieldUpdateOperationsInput | string
+    handlerKey?: StringFieldUpdateOperationsInput | string
+    payloadVersion?: IntFieldUpdateOperationsInput | number
+    payload?: JsonNullValueInput | InputJsonValue
+    runAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sourceRevision?: NullableJsonNullValueInput | InputJsonValue
+    retryEnabled?: BoolFieldUpdateOperationsInput | boolean
+    maxRetries?: IntFieldUpdateOperationsInput | number
+    initialDelayMs?: IntFieldUpdateOperationsInput | number
+    maxDelayMs?: IntFieldUpdateOperationsInput | number
+    backoffMultiplier?: FloatFieldUpdateOperationsInput | number
+    priority?: StringFieldUpdateOperationsInput | string
+    timeoutMs?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: StringFieldUpdateOperationsInput | string
+    attemptCount?: IntFieldUpdateOperationsInput | number
+    nextAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    claimToken?: NullableStringFieldUpdateOperationsInput | string | null
+    claimExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fencingToken?: IntFieldUpdateOperationsInput | number
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    attempts?: InvocationAttemptUncheckedUpdateManyWithoutInvocationNestedInput
+  }
+
+  export type ScheduledInvocationUncheckedUpdateManyWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    ownerType?: StringFieldUpdateOperationsInput | string
+    ownerId?: StringFieldUpdateOperationsInput | string
+    schedulingKey?: StringFieldUpdateOperationsInput | string
+    handlerKey?: StringFieldUpdateOperationsInput | string
+    payloadVersion?: IntFieldUpdateOperationsInput | number
+    payload?: JsonNullValueInput | InputJsonValue
+    runAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sourceRevision?: NullableJsonNullValueInput | InputJsonValue
+    retryEnabled?: BoolFieldUpdateOperationsInput | boolean
+    maxRetries?: IntFieldUpdateOperationsInput | number
+    initialDelayMs?: IntFieldUpdateOperationsInput | number
+    maxDelayMs?: IntFieldUpdateOperationsInput | number
+    backoffMultiplier?: FloatFieldUpdateOperationsInput | number
+    priority?: StringFieldUpdateOperationsInput | string
+    timeoutMs?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: StringFieldUpdateOperationsInput | string
+    attemptCount?: IntFieldUpdateOperationsInput | number
+    nextAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    claimToken?: NullableStringFieldUpdateOperationsInput | string | null
+    claimExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fencingToken?: IntFieldUpdateOperationsInput | number
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InvocationAttemptUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    attemptNumber?: IntFieldUpdateOperationsInput | number
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    outcome?: StringFieldUpdateOperationsInput | string
+    result?: NullableJsonNullValueInput | InputJsonValue
+    failureCode?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureRetryable?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    workerId?: NullableStringFieldUpdateOperationsInput | string | null
+    claimToken?: NullableStringFieldUpdateOperationsInput | string | null
+    fencingToken?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    invocation?: ScheduledInvocationUpdateOneRequiredWithoutAttemptsNestedInput
+  }
+
+  export type InvocationAttemptUncheckedUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    invocationId?: StringFieldUpdateOperationsInput | string
+    attemptNumber?: IntFieldUpdateOperationsInput | number
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    outcome?: StringFieldUpdateOperationsInput | string
+    result?: NullableJsonNullValueInput | InputJsonValue
+    failureCode?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureRetryable?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    workerId?: NullableStringFieldUpdateOperationsInput | string | null
+    claimToken?: NullableStringFieldUpdateOperationsInput | string | null
+    fencingToken?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InvocationAttemptUncheckedUpdateManyWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    invocationId?: StringFieldUpdateOperationsInput | string
+    attemptNumber?: IntFieldUpdateOperationsInput | number
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    outcome?: StringFieldUpdateOperationsInput | string
+    result?: NullableJsonNullValueInput | InputJsonValue
+    failureCode?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureRetryable?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    workerId?: NullableStringFieldUpdateOperationsInput | string | null
+    claimToken?: NullableStringFieldUpdateOperationsInput | string | null
+    fencingToken?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type HabitUpdateWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
@@ -190923,6 +196648,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
     channels?: NotificationChannelUpdateManyWithoutNotificationNestedInput
     history?: NotificationHistoryUpdateManyWithoutNotificationNestedInput
@@ -190954,6 +196680,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
     channels?: NotificationChannelUncheckedUpdateManyWithoutNotificationNestedInput
     history?: NotificationHistoryUncheckedUpdateManyWithoutNotificationNestedInput
@@ -190985,6 +196712,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
   }
 
@@ -194516,6 +200244,74 @@ export namespace Prisma {
     result?: NullableStringFieldUpdateOperationsInput | string | null
     error?: NullableStringFieldUpdateOperationsInput | string | null
     retryCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InvocationAttemptCreateManyInvocationInput = {
+    id: string
+    identityId: string
+    attemptNumber: number
+    startedAt: Date | string
+    finishedAt?: Date | string | null
+    outcome: string
+    result?: NullableJsonNullValueInput | InputJsonValue
+    failureCode?: string | null
+    failureMessage?: string | null
+    failureRetryable?: boolean | null
+    workerId?: string | null
+    claimToken?: string | null
+    fencingToken?: number | null
+    createdAt?: Date | string
+  }
+
+  export type InvocationAttemptUpdateWithoutInvocationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    attemptNumber?: IntFieldUpdateOperationsInput | number
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    outcome?: StringFieldUpdateOperationsInput | string
+    result?: NullableJsonNullValueInput | InputJsonValue
+    failureCode?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureRetryable?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    workerId?: NullableStringFieldUpdateOperationsInput | string | null
+    claimToken?: NullableStringFieldUpdateOperationsInput | string | null
+    fencingToken?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    account?: AccountUpdateOneRequiredWithoutInvocationAttemptsNestedInput
+  }
+
+  export type InvocationAttemptUncheckedUpdateWithoutInvocationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    attemptNumber?: IntFieldUpdateOperationsInput | number
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    outcome?: StringFieldUpdateOperationsInput | string
+    result?: NullableJsonNullValueInput | InputJsonValue
+    failureCode?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureRetryable?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    workerId?: NullableStringFieldUpdateOperationsInput | string | null
+    claimToken?: NullableStringFieldUpdateOperationsInput | string | null
+    fencingToken?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InvocationAttemptUncheckedUpdateManyWithoutInvocationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    attemptNumber?: IntFieldUpdateOperationsInput | number
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    outcome?: StringFieldUpdateOperationsInput | string
+    result?: NullableJsonNullValueInput | InputJsonValue
+    failureCode?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    failureRetryable?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    workerId?: NullableStringFieldUpdateOperationsInput | string | null
+    claimToken?: NullableStringFieldUpdateOperationsInput | string | null
+    fencingToken?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 

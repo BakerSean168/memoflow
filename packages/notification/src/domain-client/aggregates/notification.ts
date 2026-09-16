@@ -88,6 +88,7 @@ export class Notification extends AggregateRoot<NotificationId> {
       createdAt: this._props.createdAt.getTime(),
       updatedAt: this._props.updatedAt.getTime(),
       deletedAt: this._props.deletedAt?.getTime() ?? null,
+      archivedAt: null,
       notificationChannels: this._props.notificationChannels?.map((channel) => channel.toDTO()) ?? null,
     };
   }

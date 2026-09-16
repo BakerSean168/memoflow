@@ -6,10 +6,7 @@
 import type { IReminderTemplateRepository } from '../domain/repositories/i-reminder-template-repository';
 import type { IReminderGroupRepository } from '../domain/repositories/i-reminder-group-repository';
 import type { IReminderResponseRepository } from '../domain/repositories/i-reminder-response-repository';
-import type {
-  RoutineProfileStore,
-  RoutineRuntimeContextStore,
-} from '../domain/ports';
+import type { RoutineProfileStore, RoutineRuntimeContextStore } from '../domain/ports';
 import type { IUserReminderPreferenceRepository } from '../domain/repositories/i-user-reminder-preference-repository';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { UserTimeContextPort } from '@memoflow/time';
@@ -28,6 +25,7 @@ import { runTimelineQueryWithAudit } from '@memoflow/patterns/operations';
 import type { ReminderTemplate } from '../domain/aggregates/reminder-template';
 import { ReminderDomainService } from '../domain/services/reminder-domain-service';
 import type { ReminderApplicationPort } from '../application';
+import type { RoutineCoachCommandPort } from '../application/services/routine-coach-command.service';
 import { ReminderTemplateClientMapper } from '../application/mappers/reminder-template-client.mapper';
 import {
   ReminderGroupApplicationService,
@@ -57,6 +55,7 @@ export interface ReminderModuleDependencies {
   readonly userReminderPreferenceRepository: IUserReminderPreferenceRepository;
   readonly routineProfileStore: RoutineProfileStore;
   readonly runtimeContextStore: RoutineRuntimeContextStore;
+  readonly routineCommandPort?: RoutineCoachCommandPort;
   readonly closureChecker: (identityId: string) => Promise<boolean>;
   readonly userTimeContextPort: UserTimeContextPort;
   readonly runtimeContributions?: ReminderRuntimeContributionsInput;
@@ -81,6 +80,7 @@ export interface ReminderModuleInstance {
   readonly userReminderPreferenceRepository: IUserReminderPreferenceRepository;
   readonly routineProfileStore: RoutineProfileStore;
   readonly runtimeContextStore: RoutineRuntimeContextStore;
+  routineCommandPort?: RoutineCoachCommandPort;
   readonly useCases: ReminderModuleUseCases;
   readonly api: ReminderApplicationPort;
   start(): void | Promise<void>;
@@ -419,6 +419,7 @@ export function createReminderModule(
     userReminderPreferenceRepository,
     routineProfileStore,
     runtimeContextStore: dependencies.runtimeContextStore,
+    routineCommandPort: dependencies.routineCommandPort,
     useCases,
     api,
 

@@ -27,6 +27,7 @@ export {
   type ScheduleTaskExecutionResult,
   type ScheduleTaskSourceExecutor,
 } from './runtime';
+export { ScheduledInvocationQueue } from '../application/scheduler/scheduled-invocation-queue';
 export {
   LegacyScheduleTaskSchedulingAdapter,
   createHandlerRegistryScheduleTaskSourceExecutor,

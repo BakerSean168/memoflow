@@ -175,6 +175,7 @@ describe('notification route contracts', () => {
           createdAt: Date.now(),
           updatedAt: Date.now(),
           deletedAt: null,
+          archivedAt: null,
         },
         timestamp: Date.now(),
       }).success,

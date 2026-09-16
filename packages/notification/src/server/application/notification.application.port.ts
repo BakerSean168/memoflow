@@ -16,6 +16,9 @@ export interface NotificationApplicationPort {
   getNotification(id: string, identityId: string): Promise<Result<unknown>>;
   deleteNotification(id: string, identityId: string): Promise<Result<unknown>>;
   markAsRead(id: string, identityId: string): Promise<Result<unknown>>;
+  markAsUnread(id: string, identityId: string): Promise<Result<unknown>>;
+  archive(id: string, identityId: string): Promise<Result<unknown>>;
+  restore(id: string, identityId: string): Promise<Result<unknown>>;
   markAllAsRead(identityId: string): Promise<Result<unknown>>;
   getUnreadCount(identityId: string): Promise<Result<unknown>>;
   batchMarkAsRead(

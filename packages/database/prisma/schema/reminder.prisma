@@ -363,6 +363,7 @@ model RoutineTemporaryOverride {
   identityId   String   @map("identity_id")
   routineId    String   @map("routine_id")
   overrideJson String   @map("override_json")
+  version      Int      @default(1)
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 

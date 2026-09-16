@@ -24,9 +24,12 @@ export function createInMemoryRoutineRuntimeContextStore(): RoutineRuntimeContex
         state = { activeProfileIds: new Set(), version: 0 };
         contexts.set(identityId, state);
       }
+      const changed = active
+        ? !state.activeProfileIds.has(profileId)
+        : state.activeProfileIds.has(profileId);
       if (active) state.activeProfileIds.add(profileId);
       else state.activeProfileIds.delete(profileId);
-      state.version += 1;
+      if (changed) state.version += 1;
       return { identityId, profileId, active, version: state.version };
     },
   };

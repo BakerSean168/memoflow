@@ -49,6 +49,7 @@ export const NotificationResponseSchema = z.object({
   createdAt: z.number(),
   updatedAt: z.number(),
   deletedAt: z.number().nullable(),
+  archivedAt: z.number().nullable(),
 });
 
 /**

@@ -86,6 +86,9 @@ import {
   DeleteNotificationInvocationSchema,
   MarkAllNotificationsReadInvocationSchema,
   MarkNotificationReadInvocationSchema,
+  MarkNotificationUnreadInvocationSchema,
+  ArchiveNotificationInvocationSchema,
+  RestoreNotificationInvocationSchema,
   NotificationBatchInvocationSchema,
   UpdateNotificationPreferenceSchema,
 } from '@memoflow/contracts/notification';
@@ -150,6 +153,9 @@ const coreChannels = [
   NotificationChannels.GET,
   NotificationChannels.CREATE,
   NotificationChannels.MARK_READ,
+  NotificationChannels.MARK_UNREAD,
+  NotificationChannels.ARCHIVE,
+  NotificationChannels.RESTORE,
   NotificationChannels.MARK_ALL_READ,
   NotificationChannels.DELETE,
   NotificationChannels.CLEAR_ALL,
@@ -286,6 +292,12 @@ export function createNotificationElectronModule(
           (args) => ({ params: { id: (args as { id?: string }).id ?? (args as string) } }),
         );
         installed.push(NotificationChannels.MARK_READ);
+        registerValidatedChannel(ctx, NotificationChannels.MARK_UNREAD, MarkNotificationUnreadInvocationSchema, (data, requestContext) => controller.markAsUnread(data.params.id, requestContext), (args) => ({ params: { id: (args as { id?: string }).id ?? (args as string) } }));
+        installed.push(NotificationChannels.MARK_UNREAD);
+        registerValidatedChannel(ctx, NotificationChannels.ARCHIVE, ArchiveNotificationInvocationSchema, (data, requestContext) => controller.archive(data.params.id, requestContext), (args) => ({ params: { id: (args as { id?: string }).id ?? (args as string) } }));
+        installed.push(NotificationChannels.ARCHIVE);
+        registerValidatedChannel(ctx, NotificationChannels.RESTORE, RestoreNotificationInvocationSchema, (data, requestContext) => controller.restore(data.params.id, requestContext), (args) => ({ params: { id: (args as { id?: string }).id ?? (args as string) } }));
+        installed.push(NotificationChannels.RESTORE);
         registerValidatedChannel(
           ctx,
           NotificationChannels.MARK_ALL_READ,

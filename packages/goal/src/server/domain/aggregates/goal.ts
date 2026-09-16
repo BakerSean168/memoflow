@@ -863,6 +863,14 @@ export class Goal extends AggregateRoot<GoalId> {
   // ================= 6. 回顾管理 (Review Management) =================
 
   /** Creates a review from server-generated system facts plus user reflection. */
+  public restoreReview(state: import('../entities/goal-review').GoalReviewState): GoalReview {
+    this.ensureNotDeleted();
+    if (String(state.goalId) !== String(this.id)) throw new Error('Review belongs to another Goal');
+    const review = GoalReview.load(state);
+    this._props.goalReviews.push(review);
+    return review;
+  }
+
   public createAndAddReview(params: {
     reflection: string;
     challenges?: string | null;

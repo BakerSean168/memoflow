@@ -341,6 +341,10 @@ const scheduling_reconcile_operations = new Table({
   created_at: column.text,
 });
 
+const scheduled_invocations = new Table({ identity_id: column.text, owner_type: column.text, owner_id: column.text, scheduling_key: column.text, handler_key: column.text, payload_version: column.integer, payload: column.text, run_at: column.text, source_revision: column.text, retry_enabled: column.integer, max_retries: column.integer, initial_delay_ms: column.integer, max_delay_ms: column.integer, backoff_multiplier: column.real, priority: column.text, timeout_ms: column.integer, status: column.text, attempt_count: column.integer, next_attempt_at: column.text, claim_token: column.text, claim_expires_at: column.text, fencing_token: column.integer, name: column.text, tags: column.text, created_at: column.text, updated_at: column.text });
+
+const invocation_attempts = new Table({ identity_id: column.text, invocation_id: column.text, attempt_number: column.integer, started_at: column.text, finished_at: column.text, outcome: column.text, result: column.text, failure_code: column.text, failure_message: column.text, failure_retryable: column.integer, worker_id: column.text, claim_token: column.text, fencing_token: column.integer, created_at: column.text });
+
 const schedule_executions = new Table({
   identity_id: column.text,
   task_id: column.text, // FK
@@ -544,6 +548,7 @@ const routine_temporary_overrides = new Table(
     identity_id: column.text,
     routine_id: column.text,
     override_json: column.text,
+    version: column.integer,
     created_at: column.text,
     updated_at: column.text,
   },
@@ -600,6 +605,7 @@ const notifications = new Table({
   created_at: column.text,
   updated_at: column.text,
   deleted_at: column.text,
+  archived_at: column.text,
   is_read: column.integer, // boolean
 });
 
@@ -1053,6 +1059,8 @@ export const PowerSyncAppSchema = new Schema({
   schedules,
   schedule_tasks,
   scheduling_reconcile_operations,
+  scheduled_invocations,
+  invocation_attempts,
   schedule_executions,
   schedule_statistics,
   schedule_domain_event_outbox,

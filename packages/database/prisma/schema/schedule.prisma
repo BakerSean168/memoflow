@@ -78,6 +78,71 @@ model ScheduleTask {
 
 /// Durable evidence for one owner-level desired-state reconcile.
 /// Successful rows are written inside the same transaction as ScheduleTask upsert/delete.
+
+
+model ScheduledInvocation {
+  id             String   @id
+  identityId     String   @map("identity_id")
+  ownerType      String   @map("owner_type")
+  ownerId        String   @map("owner_id")
+  schedulingKey  String   @map("scheduling_key")
+  handlerKey     String   @map("handler_key")
+  payloadVersion Int      @map("payload_version")
+  payload        Json
+  runAt          DateTime @map("run_at")
+  sourceRevision Json?    @map("source_revision")
+  retryEnabled   Boolean  @default(true) @map("retry_enabled")
+  maxRetries     Int      @map("max_retries")
+  initialDelayMs Int      @map("initial_delay_ms")
+  maxDelayMs     Int      @map("max_delay_ms")
+  backoffMultiplier Float @map("backoff_multiplier")
+  priority       String
+  timeoutMs      Int?     @map("timeout_ms")
+  status         String
+  attemptCount   Int      @default(0) @map("attempt_count")
+  nextAttemptAt  DateTime? @map("next_attempt_at")
+  claimToken     String?  @map("claim_token")
+  claimExpiresAt DateTime? @map("claim_expires_at")
+  fencingToken   Int      @default(0) @map("fencing_token")
+  name           String?
+  tags           Json
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  attempts InvocationAttempt[]
+
+  @@unique([identityId, ownerType, ownerId, schedulingKey], map: "scheduled_invocations_owner_key_unique")
+  @@index([identityId, status, nextAttemptAt], map: "scheduled_invocations_due_idx")
+  @@index([identityId, ownerType, ownerId], map: "scheduled_invocations_owner_idx")
+  @@map("scheduled_invocations")
+}
+
+model InvocationAttempt {
+  id             String   @id
+  identityId     String   @map("identity_id")
+  invocationId   String   @map("invocation_id")
+  attemptNumber  Int      @map("attempt_number")
+  startedAt      DateTime @map("started_at")
+  finishedAt     DateTime? @map("finished_at")
+  outcome        String
+  result         Json?
+  failureCode    String?  @map("failure_code")
+  failureMessage String?  @map("failure_message")
+  failureRetryable Boolean? @map("failure_retryable")
+  workerId       String?  @map("worker_id")
+  claimToken     String?  @map("claim_token")
+  fencingToken   Int?     @map("fencing_token")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  invocation ScheduledInvocation @relation(fields: [invocationId], references: [id], onDelete: Cascade)
+
+  @@unique([invocationId, attemptNumber], map: "invocation_attempts_number_unique")
+  @@index([identityId, invocationId, createdAt], map: "invocation_attempts_lookup_idx")
+  @@map("invocation_attempts")
+}
+
 model SchedulingReconcileOperation {
   operationId      String   @id @map("operation_id")
   identityId       String   @map("identity_id")

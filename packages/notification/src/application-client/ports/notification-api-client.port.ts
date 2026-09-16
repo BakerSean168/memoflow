@@ -31,6 +31,10 @@ export interface QueryNotificationsRequest {
   limit?: number;
   type?: string;
   isRead?: boolean;
+  archiveState?: 'active' | 'archived' | 'all';
+  workflowKey?: string;
+  topic?: string;
+  category?: string;
   startDate?: string;
   endDate?: string;
 }
@@ -58,6 +62,9 @@ export interface INotificationApiClient {
   findNotifications(query?: QueryNotificationsRequest): Promise<Result<NotificationListResponse>>;
   findNotificationById(id: string): Promise<Result<NotificationClientDTO>>;
   markAsRead(id: string): Promise<Result<NotificationClientDTO>>;
+  markAsUnread(id: string): Promise<Result<NotificationClientDTO>>;
+  archiveNotification(id: string): Promise<Result<NotificationClientDTO>>;
+  restoreNotification(id: string): Promise<Result<NotificationClientDTO>>;
   markAllAsRead(): Promise<Result<{ count: number }>>;
   deleteNotification(id: string): Promise<Result<null>>;
   batchDeleteNotifications(ids: string[]): Promise<Result<BatchOperationResultDTO>>;

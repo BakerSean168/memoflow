@@ -37,6 +37,9 @@ export class NotificationClientService implements INotificationApiClient {
     this.findNotifications = this.findNotifications.bind(this);
     this.findNotificationById = this.findNotificationById.bind(this);
     this.markAsRead = this.markAsRead.bind(this);
+    this.markAsUnread = this.markAsUnread.bind(this);
+    this.archiveNotification = this.archiveNotification.bind(this);
+    this.restoreNotification = this.restoreNotification.bind(this);
     this.markAllAsRead = this.markAllAsRead.bind(this);
     this.deleteNotification = this.deleteNotification.bind(this);
     this.batchDeleteNotifications = this.batchDeleteNotifications.bind(this);
@@ -65,6 +68,18 @@ export class NotificationClientService implements INotificationApiClient {
 
   async markAsRead(id: string): Promise<Result<NotificationClientDTO>> {
     return this.notificationApi.markAsRead(id);
+  }
+
+  async markAsUnread(id: string): Promise<Result<NotificationClientDTO>> {
+    return this.notificationApi.markAsUnread(id);
+  }
+
+  async archiveNotification(id: string): Promise<Result<NotificationClientDTO>> {
+    return this.notificationApi.archiveNotification(id);
+  }
+
+  async restoreNotification(id: string): Promise<Result<NotificationClientDTO>> {
+    return this.notificationApi.restoreNotification(id);
   }
 
   async markAllAsRead(): Promise<Result<{ count: number }>> {

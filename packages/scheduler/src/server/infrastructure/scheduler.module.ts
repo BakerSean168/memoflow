@@ -19,6 +19,8 @@ import {
 } from '../application/use-cases';
 import type { SchedulerApplicationPort } from '../application';
 import { ScheduleTaskStatus, SourceModule } from '@memoflow/contracts/schedule';
+import type { IScheduledInvocationRepository } from '../domain/repositories/i-scheduled-invocation-repository';
+import type { IInvocationAttemptRepository } from '../domain/repositories/i-invocation-attempt-repository';
 
 export interface SchedulerModuleRuntimeContribution {
   start(): Promise<void> | void;
@@ -32,6 +34,8 @@ export type SchedulerRuntimeContributionsInput =
 export interface SchedulerModuleDependencies {
   readonly scheduleTaskRepository: IScheduleTaskRepository;
   readonly scheduleExecutionRepository: IScheduleExecutionRepository;
+  readonly scheduledInvocationRepository?: IScheduledInvocationRepository;
+  readonly invocationAttemptRepository?: IInvocationAttemptRepository;
   readonly runtimeContributions?: SchedulerRuntimeContributionsInput;
 }
 
@@ -57,6 +61,8 @@ export interface SchedulerModuleUseCases {
 export interface SchedulerModuleInstance {
   readonly scheduleTaskRepository: IScheduleTaskRepository;
   readonly scheduleExecutionRepository: IScheduleExecutionRepository;
+  readonly scheduledInvocationRepository?: IScheduledInvocationRepository;
+  readonly invocationAttemptRepository?: IInvocationAttemptRepository;
   readonly useCases: SchedulerModuleUseCases;
   readonly api: SchedulerApplicationPort;
   start(): Promise<void>;
@@ -137,6 +143,8 @@ export function createSchedulerModule(
   return {
     scheduleTaskRepository: dependencies.scheduleTaskRepository,
     scheduleExecutionRepository: dependencies.scheduleExecutionRepository,
+    scheduledInvocationRepository: dependencies.scheduledInvocationRepository,
+    invocationAttemptRepository: dependencies.invocationAttemptRepository,
     useCases,
     api,
     async start() {

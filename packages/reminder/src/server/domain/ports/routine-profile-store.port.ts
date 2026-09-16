@@ -9,6 +9,10 @@ import type { ProfileMembership, RoutineDefinition, RoutineProfile } from '../ro
  */
 export interface RoutineProfileStore {
   upsertDefinition(definition: RoutineDefinition): Promise<void>;
+  updateDefinition(input: {
+    readonly definition: RoutineDefinition;
+    readonly expectedVersion: number;
+  }): Promise<void>;
   createDefinitionWithMemberships(input: {
     readonly definition: RoutineDefinition;
     readonly memberships: readonly ProfileMembership[];
@@ -20,9 +24,14 @@ export interface RoutineProfileStore {
   deleteDefinition(input: {
     readonly identityId: string;
     readonly routineId: string;
+    readonly expectedVersion?: number;
   }): Promise<void>;
 
   upsertProfile(profile: RoutineProfile): Promise<void>;
+  updateProfile(input: {
+    readonly profile: RoutineProfile;
+    readonly expectedVersion: number;
+  }): Promise<void>;
   findProfile(input: {
     readonly identityId: string;
     readonly profileId: string;
@@ -32,9 +41,16 @@ export interface RoutineProfileStore {
     readonly identityId: string;
     readonly profileIds: readonly string[];
   }): Promise<RoutineProfile[]>;
-  deleteProfile(input: { readonly identityId: string; readonly profileId: string }): Promise<void>;
+  deleteProfile(input: {
+    readonly identityId: string;
+    readonly profileId: string;
+    readonly expectedVersion?: number;
+  }): Promise<void>;
 
-  upsertMembership(membership: ProfileMembership): Promise<void>;
+  upsertMembership(
+    membership: ProfileMembership,
+    expectedVersion?: number,
+  ): Promise<void>;
   listMembershipsForRoutine(input: {
     readonly identityId: string;
     readonly routineId: string;
@@ -51,6 +67,7 @@ export interface RoutineProfileStore {
     readonly identityId: string;
     readonly profileId: string;
     readonly routineId: string;
+    readonly expectedVersion?: number;
   }): Promise<void>;
 
   /**
@@ -61,5 +78,6 @@ export interface RoutineProfileStore {
     readonly identityId: string;
     readonly routineId: string;
     readonly memberships: readonly ProfileMembership[];
+    readonly expectedVersion?: number;
   }): Promise<void>;
 }

@@ -22,6 +22,8 @@ streams:
       - SELECT * FROM task_template_history WHERE identity_id = auth.user_id()
       - SELECT * FROM schedules WHERE identity_id = auth.user_id()
       - SELECT * FROM schedule_tasks WHERE identity_id = auth.user_id()
+      - SELECT * FROM scheduled_invocations WHERE identity_id = auth.user_id()
+      - SELECT * FROM invocation_attempts WHERE identity_id = auth.user_id()
       - SELECT * FROM schedule_statistics WHERE identity_id = auth.user_id()
       - SELECT * FROM schedule_executions WHERE identity_id = auth.user_id()
       - SELECT * FROM reminder_templates WHERE identity_id = auth.user_id()
