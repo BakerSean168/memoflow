@@ -47,13 +47,26 @@ export interface NotificationState {
   notificationChannels: NotificationChannel[];
 }
 
+function cloneNavigationIntent(
+  navigationIntent: NotificationNavigationIntentDTO | null,
+): NotificationNavigationIntentDTO | null {
+  if (!navigationIntent) return null;
+  return {
+    ...navigationIntent,
+    params: navigationIntent.params ? { ...navigationIntent.params } : undefined,
+  };
+}
+
 /** Durable user-visible Notification Fact. Delivery lifecycle is not root state. */
 export class Notification extends AggregateRoot<NotificationId> {
   private _props: NotificationState;
 
   private constructor(state: NotificationState) {
     super(state.id);
-    this._props = { ...state };
+    this._props = {
+      ...state,
+      navigationIntent: cloneNavigationIntent(state.navigationIntent),
+    };
   }
 
   get identityId(): IdentityId { return this._props.identityId; }
@@ -68,7 +81,9 @@ export class Notification extends AggregateRoot<NotificationId> {
   get urgency(): UrgencyLevel { return this._props.urgency; }
   get relatedEntityType(): RelatedEntityType | null { return this._props.relatedEntityType; }
   get relatedEntityId(): string | null { return this._props.relatedEntityId; }
-  get navigationIntent(): NotificationNavigationIntentDTO | null { return this._props.navigationIntent; }
+  get navigationIntent(): NotificationNavigationIntentDTO | null {
+    return cloneNavigationIntent(this._props.navigationIntent);
+  }
   get correlationId(): string | null { return this._props.correlationId; }
   get causationId(): string | null { return this._props.causationId; }
   get isRead(): boolean { return this._props.isRead; }
@@ -143,7 +158,7 @@ export class Notification extends AggregateRoot<NotificationId> {
       urgency: this._props.urgency,
       relatedEntityType: this._props.relatedEntityType,
       relatedEntityId: this._props.relatedEntityId,
-      navigationIntent: this._props.navigationIntent,
+      navigationIntent: cloneNavigationIntent(this._props.navigationIntent),
       correlationId: this._props.correlationId,
       causationId: this._props.causationId,
       isRead: this._props.isRead,
