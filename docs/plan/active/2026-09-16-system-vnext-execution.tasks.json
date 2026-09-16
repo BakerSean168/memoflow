@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "graph_id": "memoflow-system-vnext-2026-09-16",
-  "revision": 1,
+  "revision": 2,
   "title": "MemoFlow system-wide vNext execution graph",
   "objective": "Complete the remaining Phase 4-7 system-wide vNext convergence as one coherent destructive cutover: Routine, Planner/Scheduler and Notification become canonical owner models; Home/Dashboard and AI align to those owners; Data Portability becomes V3-only; legacy schema is deleted; final whole-system review and exact-head validation close PR #340 without restoring compatibility models.",
   "planned_by": "chatgpt-web",
@@ -96,7 +96,8 @@
         "domain:routine",
         "contract:routine-command",
         "composition:routine-hosts"
-      ]
+      ],
+      "preferred_implementation_route_id": "openswe-current"
     },
     {
       "id": "R4-2201B",
@@ -210,7 +211,8 @@
         "domain:scheduler-runtime",
         "schema:scheduler-runtime",
         "contract:schedule-shared"
-      ]
+      ],
+      "preferred_implementation_route_id": "codebuddy-account-primary"
     },
     {
       "id": "N4-2401A",
@@ -265,7 +267,8 @@
         "domain:notification-fact",
         "contract:notification-fact",
         "schema:notification-fact"
-      ]
+      ],
+      "preferred_implementation_route_id": "openswe-current"
     },
     {
       "id": "PORT-1610A",
@@ -321,7 +324,8 @@
         "domain:data-portability",
         "contract:portable-v3",
         "portability:stable-owners"
-      ]
+      ],
+      "preferred_implementation_route_id": "codebuddy-account-primary"
     },
     {
       "id": "P4-2301A",
