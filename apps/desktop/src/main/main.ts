@@ -527,6 +527,7 @@ async function registerBusinessModules(
       notificationComposed.module.portableCapability,
       createLabelPortableCapability(labelService),
       goalComposed.portableCapability,
+      taskComposed.portableCapability,
     ],
   });
 
