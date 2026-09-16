@@ -190,14 +190,20 @@ describe('RoutineCoachCommandService', () => {
     const profiles = profileStore();
     const profile = RoutineProfile.create({ id: 'work', identityId: 'i-1', name: 'Work' });
     await profiles.upsertProfile(profile);
+    const runtimeContextStore = createInMemoryRoutineRuntimeContextStore();
     const profileActiveChanged = vi.fn();
     const service = createRoutineCoachCommandService({
       routineProfileStore: profiles,
-      runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
+      runtimeContextStore,
       temporaryOverrideStore: overrideStore(),
       protocolSessionStore: createInMemoryProtocolSessionStore(),
       now: () => 1_000,
-      onProfileActiveChanged: profileActiveChanged,
+      onProfileActiveChanged: async (input) => {
+        profileActiveChanged(input);
+        expect(runtimeContextStore.get({ identityId: input.identityId })).toEqual({
+          activeProfileIds: input.active ? ['work'] : [],
+        });
+      },
     });
 
     await expect(
