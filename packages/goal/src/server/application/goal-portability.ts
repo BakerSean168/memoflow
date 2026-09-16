@@ -581,37 +581,19 @@ export class GoalPortableCapability implements PortableCapability<GoalPortablePa
           } as never,
         })),
       };
-      let receipt: GoalMutationReceipt;
+      let lifecycleState: GoalLifecycleState;
       if (existing) {
         assertExistingGoalMatchesPortableDefinition(existing, goal, batchId, labelIds);
         assertLifecycleCanConverge(existing, goal);
         skipped += 1;
-        receipt = {
+        lifecycleState = {
           goalId: existing.id,
           goalVersion: existing.version,
-          affectedEntityIds: {
-            goalIds: [],
-            keyResultIds: existing.keyResults.map((keyResult) => keyResult.id),
-            recordIds: existing.records.map((record) => record.id),
-            reviewIds: existing.reviews.map((review) => review.id),
-          },
-          readModel: {
-            ...existing,
-            labels: [...existing.labels],
-            keyResults: existing.keyResults.map((keyResult) => ({
-              ...keyResult,
-              order: keyResult.sortOrder,
-              progressPercentage: 0,
-              isCompleted: false,
-            })),
-            reviews: existing.reviews.map((review) => review.toClientDTO()),
-            totalKeyResults: existing.keyResults.length,
-            completedKeyResults: 0,
-            overallProgress: 0,
-          },
-        } as unknown as GoalMutationReceipt;
+          status: existing.status,
+          archivedAt: existing.archivedAt,
+        };
       } else {
-        receipt = requireResult(
+        const receipt = requireResult(
           await this.portability.restoreGoalForPortability(input, systemContext(context, goal.ref)),
           'create portable goal',
         );
@@ -622,9 +604,15 @@ export class GoalPortableCapability implements PortableCapability<GoalPortablePa
         }
         assertExistingGoalMatchesPortableDefinition(committed, goal, batchId, labelIds);
         assertLifecycleCanConverge(committed, goal);
+        lifecycleState = {
+          goalId: receipt.goalId,
+          goalVersion: receipt.goalVersion,
+          status: receipt.readModel.status,
+          archivedAt: receipt.readModel.archivedAt,
+        };
       }
 
-      context.references.bindImportedReference(goal.ref, receipt.goalId);
+      context.references.bindImportedReference(goal.ref, lifecycleState.goalId);
       for (const keyResult of goal.keyResults) {
         context.references.bindImportedReference(
           keyResult.ref,
@@ -643,12 +631,6 @@ export class GoalPortableCapability implements PortableCapability<GoalPortablePa
           deterministicReviewId(context.identityId, batchId, review.ref),
         );
       }
-      const lifecycleState: GoalLifecycleState = {
-        goalId: receipt.goalId,
-        goalVersion: receipt.goalVersion,
-        status: receipt.readModel.status,
-        archivedAt: receipt.readModel.archivedAt,
-      };
       await transitionGoal(this.api, goal, context, lifecycleState);
     }
 

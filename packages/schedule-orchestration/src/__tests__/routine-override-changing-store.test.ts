@@ -19,7 +19,9 @@ function createHarness() {
   const cleared: Array<{ identityId: string; routineId: string }> = [];
   const published: RoutineOverrideChangedEvent[] = [];
   const store = {
-    findRoutineTemporaryOverride: vi.fn(async () => null),
+    findRoutineTemporaryOverride: vi.fn<
+      () => Promise<RoutineTemporaryOverride | null>
+    >(async () => null),
     setRoutineTemporaryOverride: vi.fn(async (input) => {
       written.push(input);
     }),
