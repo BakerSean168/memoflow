@@ -1,8 +1,6 @@
 import type {
   CreateNotificationReq,
   CreateNotificationRes,
-  UpdateNotificationReq,
-  UpdateNotificationRes,
   NotificationQuery,
   NotificationListRes,
   MarkAsReadBatchReq,
@@ -41,12 +39,11 @@ import type {
 // === Notification Module RPC Map ===
 // Phase 4: every map entry corresponds to a live HTTP route / IPC channel with
 // the SAME canonical request shape. Protocol-only operations (execute-action,
-// send, retry, channel:list, get-stats, update) remain documented as explicit
+// send, retry, channel:list, get-stats) remain documented as explicit
 // unsupported transport surfaces — never a silently different payload on one host.
 export type NotificationRpcMap = {
   // === CRUD / status ===
   'notification:create': [CreateNotificationReq, CreateNotificationRes];
-  'notification:update': [UpdateNotificationReq, UpdateNotificationRes];
   'notification:delete': [DeleteNotificationInvocation, null];
   'notification:mark-read': [MarkNotificationReadInvocation, NotificationResponse];
   'notification:mark-all-read': [void, UnreadCountResponse];

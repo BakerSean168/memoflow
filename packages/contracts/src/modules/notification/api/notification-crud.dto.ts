@@ -31,16 +31,3 @@ export const CreateNotificationSchema = z.object({
 });
 export type CreateNotificationReq = z.infer<typeof CreateNotificationSchema>;
 export type CreateNotificationRes = NotificationServerDTO;
-
-/** Fact update only. Delivery status is never writable on this endpoint. */
-export const UpdateNotificationSchema = z.object({
-  title: z.string().min(1).max(200).optional(),
-  content: z.string().min(1).optional(),
-  importance: z.enum(ImportanceLevel).optional(),
-  urgency: z.enum(UrgencyLevel).optional(),
-  navigationIntent: z.object({ route: z.string(), params: z.record(z.string(), z.string()).optional() }).nullable().optional(),
-  metadata: z.record(z.string(), openApiJsonValue).optional(),
-  expiresAt: z.number().int().nullable().optional(),
-});
-export type UpdateNotificationReq = z.infer<typeof UpdateNotificationSchema>;
-export type UpdateNotificationRes = NotificationServerDTO;

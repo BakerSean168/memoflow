@@ -106,27 +106,6 @@ export class Notification extends AggregateRoot<NotificationId> {
 
   hasBeenRead(): boolean { return this._props.isRead; }
 
-  updateDetails(patch: {
-    title?: string;
-    content?: string;
-    metadata?: NotificationMetadataDTO | null;
-    navigationIntent?: NotificationNavigationIntentDTO | null;
-    importance?: ImportanceLevel;
-    urgency?: UrgencyLevel;
-    expiresAt?: number | null;
-  }): void {
-    if (patch.title !== undefined) this._props.title = patch.title;
-    if (patch.content !== undefined) this._props.content = patch.content;
-    if (patch.metadata !== undefined) {
-      this._props.metadata = patch.metadata ? NotificationMetadata.fromDTO(patch.metadata) : null;
-    }
-    if (patch.navigationIntent !== undefined) this._props.navigationIntent = patch.navigationIntent;
-    if (patch.importance !== undefined) this._props.importance = patch.importance;
-    if (patch.urgency !== undefined) this._props.urgency = patch.urgency;
-    if (patch.expiresAt !== undefined) this._props.expiresAt = patch.expiresAt;
-    this._props.updatedAt = new Date();
-  }
-
   softDelete(): void {
     if (this._props.deletedAt) return;
     this._props.deletedAt = new Date();

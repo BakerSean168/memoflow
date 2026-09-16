@@ -23,7 +23,6 @@ import type {
 import {
   CreateNotificationUseCase,
   MarkNotificationAsReadUseCase,
-  UpdateNotificationUseCase,
   UpdateNotificationPreferenceUseCase,
   GetUserNotificationsUseCase,
   GetUnreadNotificationsUseCase,
@@ -67,7 +66,6 @@ export interface NotificationModuleDependencies {
 
 export interface NotificationModuleUseCases {
   readonly createNotification: CreateNotificationUseCase;
-  readonly updateNotification: UpdateNotificationUseCase;
   readonly markAsRead: MarkNotificationAsReadUseCase;
   readonly getUserNotifications: GetUserNotificationsUseCase;
   readonly getUnreadNotifications: GetUnreadNotificationsUseCase;
@@ -103,7 +101,6 @@ export function createNotificationUseCases(
       deps.closureChecker,
       deps.userTimeContextPort,
     ),
-    updateNotification: new UpdateNotificationUseCase(notificationRepository),
     markAsRead: new MarkNotificationAsReadUseCase(notificationRepository),
     getUserNotifications: new GetUserNotificationsUseCase(notificationRepository),
     getUnreadNotifications: new GetUnreadNotificationsUseCase(notificationRepository),
@@ -173,14 +170,6 @@ export function createNotificationModule(
 
     getNotification: async (id, identityId) => {
       return notificationQueryApplicationService.getNotification(id, identityId);
-    },
-
-    updateNotification: async (id, identityId, data) => {
-      return useCases.updateNotification.execute(
-        id,
-        identityId,
-        data as Parameters<UpdateNotificationUseCase['execute']>[2],
-      );
     },
 
     deleteNotification: async (id, identityId) => {

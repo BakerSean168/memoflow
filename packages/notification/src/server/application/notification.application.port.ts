@@ -14,7 +14,6 @@ export interface NotificationApplicationPort {
   createNotification(data: unknown): Promise<Result<unknown>>;
   listNotifications(query: unknown): Promise<Result<unknown>>;
   getNotification(id: string, identityId: string): Promise<Result<unknown>>;
-  updateNotification(id: string, identityId: string, data: unknown): Promise<Result<unknown>>;
   deleteNotification(id: string, identityId: string): Promise<Result<unknown>>;
   markAsRead(id: string, identityId: string): Promise<Result<unknown>>;
   markAllAsRead(identityId: string): Promise<Result<unknown>>;

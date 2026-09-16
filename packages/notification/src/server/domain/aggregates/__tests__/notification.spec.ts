@@ -71,18 +71,21 @@ describe('Notification Fact aggregate', () => {
     expect(fact.toServerDTO()).not.toHaveProperty('status');
   });
 
-  it('updates only Fact-owned mutable details', () => {
+  it('keeps the semantic Fact content immutable after creation', () => {
     const fact = createFact();
-    fact.updateDetails({
-      title: 'Updated',
-      content: 'Updated content',
-      navigationIntent: { route: '/tasks/task-1', params: { tab: 'activity' } },
-      expiresAt: 123456,
-    });
-    expect(fact.title).toBe('Updated');
-    expect(fact.content).toBe('Updated content');
-    expect(fact.navigationIntent).toEqual({ route: '/tasks/task-1', params: { tab: 'activity' } });
-    expect(fact.expiresAt).toBe(123456);
+    const content = {
+      title: fact.title,
+      content: fact.content,
+      navigationIntent: fact.navigationIntent,
+      expiresAt: fact.expiresAt,
+    };
+    expect(fact).not.toHaveProperty('updateDetails');
+    expect({
+      title: fact.title,
+      content: fact.content,
+      navigationIntent: fact.navigationIntent,
+      expiresAt: fact.expiresAt,
+    }).toEqual(content);
   });
 
   it('soft deletes the Fact idempotently', () => {
