@@ -139,17 +139,57 @@ export class PortableCapabilityCoordinator {
       capability.validatePayload(entry.payload);
     }
 
-    const references = new PortableReferenceRegistry();
+    const importedCapabilityPayloads = new Map(
+      [...byKey].map(([key, entry]) => [key, entry.payload]),
+    );
+
+    // Import rules are validated on an isolated registry before any
+    // mutation-capable apply call, and dry-run keeps its own operation-local
+    // registry so a preflight binding never leaks into another operation.
+    if (!dryRun) {
+      const validationContext: PortableCapabilityExecutionContext = {
+        identityId,
+        batchId,
+        references: new PortableReferenceRegistry(),
+        importedCapabilityPayloads,
+      };
+      for (const capability of ordered) {
+        const payload = byKey.get(capability.key)?.payload;
+        await capability.validateImportValidated(payload, validationContext);
+      }
+    }
+
     const context: PortableCapabilityExecutionContext = {
       identityId,
       batchId,
-      references,
-      importedCapabilityPayloads: new Map([...byKey].map(([key, entry]) => [key, entry.payload])),
+      references: new PortableReferenceRegistry(),
+      importedCapabilityPayloads,
     };
-    for (const capability of ordered) {
-      const payload = byKey.get(capability.key)?.payload;
-      await capability.validateImportValidated(payload, context);
+    if (dryRun) {
+      for (const capability of ordered) {
+        const payload = byKey.get(capability.key)?.payload;
+        await capability.validateImportValidated(payload, context);
+      }
     }
+
+    // An apply runs a full dependency-ordered dry-run preflight on its own
+    // isolated registry before any mutation-capable apply call. Preflight
+    // placeholder/predicted refs therefore never reach the real apply registry,
+    // and any downstream failure aborts before the first apply mutation.
+    if (!dryRun) {
+      const preflightReferences = new PortableReferenceRegistry();
+      const preflightContext: PortableCapabilityExecutionContext = {
+        identityId,
+        batchId,
+        references: preflightReferences,
+        importedCapabilityPayloads,
+      };
+      for (const capability of ordered) {
+        const payload = byKey.get(capability.key)?.payload;
+        await capability.dryRunValidated(payload, preflightContext);
+      }
+    }
+
     const entries: PortableCapabilityReceiptEntry[] = [];
 
     for (const capability of ordered) {

@@ -23,3 +23,5 @@ export * from './protocol';
 
 // ============ API Requests ============
 export * from './api';
+// ============ Data Portability V3 ============
+export * from './portable-v3';

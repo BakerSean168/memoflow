@@ -15,7 +15,7 @@ const logger = createLogger('DataPortabilityModule');
 export interface DataPortabilityModuleDependencies {
   readonly exportDependencies: DataPortabilityDependencies;
   readonly importStore: DataPortabilityImportStore;
-  /** Owner-provided V3 capabilities registered without changing the V2 product route yet. */
+  /** Owner-provided V3 capabilities registered in the production registry. */
   readonly portableCapabilities?: readonly PortableCapability<unknown>[];
   readonly runtimeContributions?:
     DataPortabilityModuleRuntimeContribution | readonly DataPortabilityModuleRuntimeContribution[];
