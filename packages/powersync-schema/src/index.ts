@@ -514,15 +514,18 @@ const routine_profiles = new Table({
   updated_at: column.text,
 });
 
-const routine_profile_memberships = new Table({
-  identity_id: column.text,
-  profile_id: column.text,
-  routine_id: column.text,
-  enabled: column.integer,
-  version: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-});
+const routine_profile_memberships = new Table(
+  {
+    identity_id: column.text,
+    profile_id: column.text,
+    routine_id: column.text,
+    enabled: column.integer,
+    version: column.integer,
+    created_at: column.text,
+    updated_at: column.text,
+  },
+  { trackPrevious: { columns: ['profile_id', 'routine_id'] } },
+);
 
 const routine_interactions = new Table({
   identity_id: column.text,
@@ -536,13 +539,16 @@ const routine_interactions = new Table({
   created_at: column.text,
 });
 
-const routine_temporary_overrides = new Table({
-  identity_id: column.text,
-  routine_id: column.text,
-  override_json: column.text,
-  created_at: column.text,
-  updated_at: column.text,
-});
+const routine_temporary_overrides = new Table(
+  {
+    identity_id: column.text,
+    routine_id: column.text,
+    override_json: column.text,
+    created_at: column.text,
+    updated_at: column.text,
+  },
+  { trackPrevious: { columns: ['routine_id'] } },
+);
 
 const routine_protocol_definitions = new Table({
   identity_id: column.text,

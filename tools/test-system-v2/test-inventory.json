@@ -228,6 +228,16 @@
       ]
     },
     {
+      "path": "apps/api/src/modules/powersync/routine-compound-crud-executor.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/modules/powersync/snapshot-builder.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11599,7 +11609,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 70
+      "fileCount": 71
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -11977,7 +11987,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 70
+      "fileCount": 71
     },
     {
       "id": "apps/desktop/vitest.config.ts",
@@ -12230,6 +12240,7 @@
       "apps/api/src/modules/powersync/parse-json-like-string-keep-boundary.surface.spec.ts",
       "apps/api/src/modules/powersync/powersync-schema-result-envelope.surface.spec.ts",
       "apps/api/src/modules/powersync/relation-crud-executor.spec.ts",
+      "apps/api/src/modules/powersync/routine-compound-crud-executor.spec.ts",
       "apps/api/src/modules/powersync/snapshot-builder.spec.ts",
       "apps/api/src/modules/powersync/snapshot-storage.spec.ts",
       "apps/api/src/modules/powersync/user-preference-crud-executor.spec.ts",
@@ -12826,7 +12837,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1112,
+    "unit": 1113,
     "integration": 38,
     "smoke": 3,
     "boundary-ipc": 9,
