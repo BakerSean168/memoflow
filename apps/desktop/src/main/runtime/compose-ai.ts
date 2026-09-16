@@ -98,7 +98,10 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): AIElectr
     knowledgeSourcePort: dependencies.knowledgeSourcePort,
     executionLogPort,
     usageReadPort: executionLogPort,
-    routineCommandPort: new DesktopRoutineAICommandAdapter(dependencies.routineCommandPort),
+    routineCommandPort: new DesktopRoutineAICommandAdapter(
+      dependencies.routineCommandPort,
+      dependencies.userTimeContextPort,
+    ),
     plannerReadPort: new DesktopPlannerAIReadAdapter(
       dependencies.scheduleRepository,
       dependencies.taskApplicationPort,

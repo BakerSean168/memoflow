@@ -162,7 +162,10 @@ describe('Desktop composeAI Mastra-only ownership', () => {
       goalKnowledgeService,
     );
     expect(DesktopTaskPlanMutationAdapter).toHaveBeenCalledWith(taskApplicationPort, labelService);
-    expect(DesktopRoutineAICommandAdapter).toHaveBeenCalledWith(routineCommandPort);
+    expect(DesktopRoutineAICommandAdapter).toHaveBeenCalledWith(
+      routineCommandPort,
+      userTimeContextPort,
+    );
     expect(DesktopPlannerAIReadAdapter).toHaveBeenCalledWith(
       scheduleRepository,
       taskApplicationPort,

@@ -188,6 +188,7 @@ export function composeReminder(
 ): ComposedReminderDesktop {
   const repositories = createReminderPowerSyncRepositories(dependencies.db);
   const runtimeContextStore = createInMemoryRoutineRuntimeContextStore();
+  let refreshLocalRoutineRegistrations: () => Promise<void> = async () => {};
 
   const routineCommandPort = createRoutineCoachCommandService({
     routineProfileStore: repositories.routineProfileStore,
@@ -195,6 +196,9 @@ export function composeReminder(
     temporaryOverrideStore: repositories.routineTemporaryOverrideStore,
     protocolSessionStore: repositories.protocolSessionStore,
     onOverrideChanged: createRoutineOverrideChangedNotifier(),
+    onProfileActiveChanged: async ({ identityId }) => {
+      if (identityId === dependencies.identityId) await refreshLocalRoutineRegistrations();
+    },
   });
 
   const instance = createReminderModule({
@@ -286,7 +290,7 @@ export function composeReminder(
     readonly credit: AmbientBreakCreditRegistration;
     readonly activeUsage: ActiveUsageRoutineRegistration;
   }): void => registerActiveUsageRoutine(input);
-  const refreshLocalRoutineRegistrations = async (): Promise<void> => {
+  refreshLocalRoutineRegistrations = async (): Promise<void> => {
     const snapshot = await loadPowerSyncRoutineLocalRegistrations(
       dependencies.db,
       dependencies.identityId,

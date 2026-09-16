@@ -140,7 +140,6 @@ describe('composeReminder local Routine vertical slice', () => {
       profileId: 'profile-1',
       active: true,
     });
-    await composed.refreshLocalRoutineRegistrations();
     const t0 = Date.now();
 
     composed.activeUsageRuntime.advance(asInstant(t0));
@@ -161,6 +160,33 @@ describe('composeReminder local Routine vertical slice', () => {
     });
   });
 
+  it('refreshes local ActiveUsage gates after profile deactivation', async () => {
+    const { composed } = createComposition();
+    await composed.routineCommandPort.setProfileActive({
+      identityId: 'identity-1',
+      profileId: 'profile-1',
+      active: true,
+    });
+    expect(composed.activeUsageRuntime.getSnapshot('identity-1', 'routine-opaque')).not.toBeNull();
+
+    const t0 = Date.now();
+    composed.activeUsageRuntime.advance(asInstant(t0));
+    await composed.routineCommandPort.setProfileActive({
+      identityId: 'identity-1',
+      profileId: 'profile-1',
+      active: false,
+    });
+    composed.activeUsageRuntime.advance(asInstant(t0 + 1_000));
+
+    expect(composed.activeUsageRuntime.getSnapshot('identity-1', 'routine-opaque')).toMatchObject({
+      accumulatedActiveMs: 0,
+      thresholdSignaled: false,
+    });
+    expect(
+      composed.interventionRuntime.getSnapshot('routine:routine-opaque:active-usage:1'),
+    ).toBeNull();
+  });
+
   it('closes the exact due intervention when an explicit compatible protocol break satisfies the lane', async () => {
     const { composed } = createComposition();
     await composed.routineCommandPort.setProfileActive({
@@ -168,7 +194,6 @@ describe('composeReminder local Routine vertical slice', () => {
       profileId: 'profile-1',
       active: true,
     });
-    await composed.refreshLocalRoutineRegistrations();
     const t0 = Date.now();
     composed.activeUsageRuntime.advance(asInstant(t0));
     composed.activeUsageRuntime.advance(asInstant(t0 + 1_000));
@@ -206,7 +231,6 @@ describe('composeReminder local Routine vertical slice', () => {
       profileId: 'profile-1',
       active: true,
     });
-    await composed.refreshLocalRoutineRegistrations();
     const t0 = Date.now();
     composed.activeUsageRuntime.advance(asInstant(t0));
     composed.activeUsageRuntime.advance(asInstant(t0 + 1_000));

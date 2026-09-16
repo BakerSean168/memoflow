@@ -110,6 +110,11 @@ export interface CreateRoutineCoachCommandServiceOptions {
     readonly identityId: string;
     readonly routineId: string;
   }) => void | Promise<void>;
+  readonly onProfileActiveChanged?: (input: {
+    readonly identityId: string;
+    readonly profileId: string;
+    readonly active: boolean;
+  }) => void | Promise<void>;
   readonly now?: () => number;
 }
 
@@ -208,12 +213,18 @@ export function createRoutineCoachCommandService(
         profileId: input.profileId,
       });
       if (!profile) throw new Error(`Routine profile '${input.profileId}' was not found`);
-      return options.runtimeContextStore.setProfileActive({
+      const receipt = options.runtimeContextStore.setProfileActive({
         identityId: profile.identityId,
         profileId: profile.id,
         active: input.active,
         at: input.at,
       });
+      await options.onProfileActiveChanged?.({
+        identityId: profile.identityId,
+        profileId: profile.id,
+        active: input.active,
+      });
+      return receipt;
     },
 
     async setTemporaryOverride(input) {

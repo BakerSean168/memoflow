@@ -1,11 +1,15 @@
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { DesktopRoutineAICommandAdapter } from './routine-command.adapter';
 
+const userTimeContextPort = {
+  getUserTimeContext: vi.fn(async () => ({ timeZone: 'Asia/Tokyo', weekStartsOn: 1 as const })),
+};
+
 const context: ExecutionContext = {
   identityId: 'identity-1',
   requestId: 'request-1',
   traceId: 'request-1',
-  startedAt: Date.parse('2026-09-15T13:45:00.000Z'),
+  startedAt: Date.parse('2026-09-15T23:45:00.000Z'),
   source: 'desktop',
 };
 
@@ -17,7 +21,10 @@ describe('DesktopRoutineAICommandAdapter', () => {
       name: 'Eye break',
       version: 1,
     }));
-    const adapter = new DesktopRoutineAICommandAdapter({ createRoutine } as never);
+    const adapter = new DesktopRoutineAICommandAdapter(
+      { createRoutine } as never,
+      userTimeContextPort,
+    );
 
     await expect(
       adapter.createRoutine({
@@ -48,14 +55,17 @@ describe('DesktopRoutineAICommandAdapter', () => {
     );
   });
 
-  it('maps an explicit fixed time through UTC Product Time', async () => {
+  it('maps an explicit fixed time through the user Product Time context', async () => {
     const createRoutine = vi.fn(async () => ({
       routineId: 'r-2',
       identityId: 'identity-1',
       name: 'Wind down',
       version: 1,
     }));
-    const adapter = new DesktopRoutineAICommandAdapter({ createRoutine } as never);
+    const adapter = new DesktopRoutineAICommandAdapter(
+      { createRoutine } as never,
+      userTimeContextPort,
+    );
 
     await adapter.createRoutine({
       context,
@@ -68,9 +78,9 @@ describe('DesktopRoutineAICommandAdapter', () => {
         trigger: expect.objectContaining({
           type: 'WallClock',
           localTime: '22:30',
-          timeZone: 'UTC',
+          timeZone: 'Asia/Tokyo',
           recurrence: expect.objectContaining({
-            startDate: '2026-09-15',
+            startDate: '2026-09-16',
             frequency: 'daily',
           }),
         }),
@@ -79,7 +89,7 @@ describe('DesktopRoutineAICommandAdapter', () => {
   });
 
   it('rejects Protocol presets and directs callers to routine_start_protocol', async () => {
-    const adapter = new DesktopRoutineAICommandAdapter({} as never);
+    const adapter = new DesktopRoutineAICommandAdapter({} as never, userTimeContextPort);
 
     await expect(
       adapter.createRoutine({ context, title: 'Focus', methodId: 'pomodoro' }),
@@ -106,7 +116,7 @@ describe('DesktopRoutineAICommandAdapter', () => {
         phaseKey: 'focus',
       })),
     };
-    const adapter = new DesktopRoutineAICommandAdapter(routine as never);
+    const adapter = new DesktopRoutineAICommandAdapter(routine as never, userTimeContextPort);
 
     await adapter.setProfileActive({ context, profileId: 'work', active: true });
     await adapter.setTemporaryOverride({

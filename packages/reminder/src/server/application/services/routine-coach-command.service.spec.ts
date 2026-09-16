@@ -186,16 +186,18 @@ describe('RoutineCoachCommandService', () => {
     ).toEqual([]);
   });
 
-  it('activates a profile without mutating memberships', async () => {
+  it('activates a profile without mutating memberships and notifies the runtime', async () => {
     const profiles = profileStore();
     const profile = RoutineProfile.create({ id: 'work', identityId: 'i-1', name: 'Work' });
     await profiles.upsertProfile(profile);
+    const profileActiveChanged = vi.fn();
     const service = createRoutineCoachCommandService({
       routineProfileStore: profiles,
       runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
       temporaryOverrideStore: overrideStore(),
       protocolSessionStore: createInMemoryProtocolSessionStore(),
       now: () => 1_000,
+      onProfileActiveChanged: profileActiveChanged,
     });
 
     await expect(
@@ -204,6 +206,11 @@ describe('RoutineCoachCommandService', () => {
     expect(profile.enabled).toBe(true);
     expect(profile.version).toBe(1);
     expect(profiles.upsertProfile).toHaveBeenCalledTimes(1);
+    expect(profileActiveChanged).toHaveBeenCalledWith({
+      identityId: 'i-1',
+      profileId: 'work',
+      active: true,
+    });
     expect(
       (await service.setProfileActive({ identityId: 'i-1', profileId: 'work', active: false }))
         .version,

@@ -118,7 +118,10 @@ export function composeAI(dependencies: ComposeAIDependencies): AIApiModuleDef {
     knowledgeSourcePort,
     executionLogPort: repositorySet.executionLogPort,
     usageReadPort: repositorySet.executionLogPort,
-    routineCommandPort: new RoutineAICommandAdapter(dependencies.routineCommandPort),
+    routineCommandPort: new RoutineAICommandAdapter(
+      dependencies.routineCommandPort,
+      dependencies.userTimeContextPort,
+    ),
     plannerReadPort: new PlannerAIReadAdapter(
       dependencies.scheduleRepository,
       dependencies.taskApplicationPort,

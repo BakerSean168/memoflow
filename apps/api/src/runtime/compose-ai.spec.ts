@@ -188,7 +188,7 @@ describe('API composeAI Mastra-only ownership', () => {
       goalKnowledgeService,
     );
     expect(TaskPlanMutationAdapter).toHaveBeenCalledWith(taskApplicationPort, labelService);
-    expect(RoutineAICommandAdapter).toHaveBeenCalledWith(routineCommandPort);
+    expect(RoutineAICommandAdapter).toHaveBeenCalledWith(routineCommandPort, userTimeContextPort);
     expect(PlannerAIReadAdapter).toHaveBeenCalledWith(scheduleRepository, taskApplicationPort);
     expect(NotificationAIReadAdapter).toHaveBeenCalledWith(notificationRepository);
 

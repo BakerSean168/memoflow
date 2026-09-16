@@ -1,4 +1,9 @@
-import { asInstant, createTimeContext, createTimeFacade } from '@memoflow/time';
+import {
+  asInstant,
+  createTimeContext,
+  createTimeFacade,
+  type UserTimeContextPort,
+} from '@memoflow/time';
 import type { IAIRoutineCommandPort, AIRoutineCreateInput } from '@memoflow/ai';
 import { createElapsedTrigger, createWallClockTrigger } from '@memoflow/reminder/server';
 import type { RoutineCoachCommandPort } from '@memoflow/reminder/routine-runtime';
@@ -7,7 +12,7 @@ import {
   type RoutineMethodId,
 } from '@memoflow/reminder/method-library';
 
-function canonicalTrigger(input: AIRoutineCreateInput['trigger'], at: number) {
+function canonicalTrigger(input: AIRoutineCreateInput['trigger'], at: number, timeZone: string) {
   if (!input) return null;
   if (input.type === 'Interval') {
     return createElapsedTrigger({
@@ -16,18 +21,21 @@ function canonicalTrigger(input: AIRoutineCreateInput['trigger'], at: number) {
     });
   }
   const startDate = createTimeFacade({
-    context: createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+    context: createTimeContext({ timeZone, weekStartsOn: 1 }),
   }).calendar.toYmd(asInstant(at));
   return createWallClockTrigger({
     localTime: input.fixedTime,
-    timeZone: 'UTC',
+    timeZone,
     recurrence: { startDate, frequency: 'daily' },
   });
 }
 
 /** Host adapter: AI commands terminate at Reminder-owned application/runtime seams. */
 export class DesktopRoutineAICommandAdapter implements IAIRoutineCommandPort {
-  constructor(private readonly routine: RoutineCoachCommandPort) {}
+  constructor(
+    private readonly routine: RoutineCoachCommandPort,
+    private readonly userTimeContextPort: UserTimeContextPort,
+  ) {}
 
   async createRoutine(input: AIRoutineCreateInput) {
     const preset = input.methodId
@@ -38,11 +46,12 @@ export class DesktopRoutineAICommandAdapter implements IAIRoutineCommandPort {
     }
     const trigger = input.trigger ?? preset?.trigger;
     if (!trigger) throw new TypeError('Routine creation requires a method or explicit trigger');
+    const timeContext = await this.userTimeContextPort.getUserTimeContext(input.context.identityId);
     const created = await this.routine.createRoutine({
       identityId: input.context.identityId,
       name: input.title,
       description: input.description ?? preset?.description,
-      trigger: canonicalTrigger(trigger, input.context.startedAt),
+      trigger: canonicalTrigger(trigger, input.context.startedAt, timeContext.timeZone),
       profileIds: input.profileIds,
       at: input.context.startedAt,
     });
