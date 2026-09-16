@@ -70,6 +70,9 @@ export type { GoalApplicationPort } from './goal.application.port';
 export type {
   GoalPortabilityApplicationPort,
   GoalPortabilityCreateInput,
+  GoalPortabilityRestoreInput,
+  GoalPortabilityRecordInput,
+  GoalPortabilityReviewInput,
   GoalPortabilityKeyResultInput,
   GoalPortabilityKeyResult,
   GoalPortabilitySnapshot,

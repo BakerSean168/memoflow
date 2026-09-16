@@ -63,6 +63,18 @@ export class NotificationController {
     return this.useCases.markAsRead(id, ctx.identityId);
   }
 
+  async markAsUnread(id: string, ctx: Context): Promise<Result<unknown>> {
+    return this.useCases.markAsUnread(id, ctx.identityId);
+  }
+
+  async archive(id: string, ctx: Context): Promise<Result<unknown>> {
+    return this.useCases.archive(id, ctx.identityId);
+  }
+
+  async restore(id: string, ctx: Context): Promise<Result<unknown>> {
+    return this.useCases.restore(id, ctx.identityId);
+  }
+
   async markAllAsRead(identityId: string): Promise<Result<{ count: number }>> {
     const result = await this.useCases.markAllAsRead(identityId);
     if (!result.ok) return result as Result<{ count: number }>;

@@ -169,3 +169,74 @@ export interface ScheduledHandlerRegistration<TPayload = unknown> {
   readonly validatePayload: (payload: unknown) => TPayload;
   readonly handler: ScheduledHandler<TPayload>;
 }
+
+export type ScheduledInvocationStatus =
+  | 'pending'
+  | 'running'
+  | 'retry_wait'
+  | 'succeeded'
+  | 'skipped'
+  | 'failed'
+  | 'dead_letter'
+  | 'superseded';
+
+export type InvocationAttemptOutcome =
+  | 'succeeded'
+  | 'skipped'
+  | 'retryable_failure'
+  | 'permanent_failure'
+  | 'timeout';
+
+export interface ScheduledInvocationRetryPolicy {
+  readonly enabled: boolean;
+  readonly maxRetries: number;
+  readonly initialDelayMs: number;
+  readonly maxDelayMs: number;
+  readonly backoffMultiplier: number;
+}
+
+export interface ScheduledInvocation {
+  readonly id: string;
+  readonly identityId: string;
+  readonly ownerType: string;
+  readonly ownerId: string;
+  readonly schedulingKey: string;
+  readonly handlerKey: string;
+  readonly payloadVersion: number;
+  readonly payload: unknown;
+  readonly runAt: Instant;
+  readonly sourceRevision: number | string | null;
+  readonly retryPolicy: ScheduledInvocationRetryPolicy;
+  readonly priority: SchedulingPriority;
+  readonly timeoutMs: number | null;
+  readonly status: ScheduledInvocationStatus;
+  readonly attemptCount: number;
+  readonly nextAttemptAt: Instant | null;
+  readonly claimToken: string | null;
+  readonly claimExpiresAt: Instant | null;
+  readonly fencingToken: number;
+  readonly observability: {
+    readonly name: string | null;
+    readonly tags: readonly string[];
+  };
+  readonly createdAt: Instant;
+  readonly updatedAt: Instant;
+}
+
+export interface InvocationAttempt {
+  readonly id: string;
+  readonly identityId: string;
+  readonly invocationId: string;
+  readonly attemptNumber: number;
+  readonly startedAt: Instant;
+  readonly finishedAt: Instant | null;
+  readonly outcome: InvocationAttemptOutcome;
+  readonly result: Record<string, unknown> | null;
+  readonly failureCode: string | null;
+  readonly failureMessage: string | null;
+  readonly failureRetryable: boolean | null;
+  readonly workerId: string | null;
+  readonly claimToken: string | null;
+  readonly fencingToken: number | null;
+  readonly createdAt: Instant;
+}

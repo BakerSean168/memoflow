@@ -1,17 +1,13 @@
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 
 export type AIRoutineMethodId =
-  | 'stand-and-move'
-  | '20-20-20'
-  | 'drink-water'
-  | 'sleep-wind-down'
-  | '50-10-protocol'
-  | 'pomodoro';
+  'stand-and-move' | '20-20-20' | 'drink-water' | 'sleep-wind-down' | '50-10-protocol' | 'pomodoro';
 
 export type AIProtocolMethodId = Extract<AIRoutineMethodId, '50-10-protocol' | 'pomodoro'>;
 
 export interface AIRoutineCreateInput {
   readonly context: ExecutionContext;
+  readonly routineId?: string;
   readonly title: string;
   readonly description?: string;
   readonly methodId?: AIRoutineMethodId;

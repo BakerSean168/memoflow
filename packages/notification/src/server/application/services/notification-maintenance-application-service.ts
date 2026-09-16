@@ -2,9 +2,11 @@ import type {
   CleanupOldNotificationsReq,
   DeleteNotificationsBatchReq,
   NotificationCategory,
+  NotificationClientDTO,
 } from '@memoflow/contracts/notification';
 import type { Result } from '@memoflow/contracts/result';
 import { fail, ok } from '@memoflow/contracts/result';
+import { toNotificationClientDTO } from '../use-cases/commands/notification-dto-converters';
 import type { INotificationRepository } from '../../domain/repositories';
 
 interface CleanupOldNotificationsCommand extends CleanupOldNotificationsReq {
@@ -17,6 +19,30 @@ interface DeleteNotificationsBatchCommand extends DeleteNotificationsBatchReq {
 
 export class NotificationMaintenanceApplicationService {
   constructor(private readonly notificationRepository: INotificationRepository) {}
+
+  async markAsUnread(id: string, identityId: string): Promise<Result<NotificationClientDTO>> {
+    return this.mutateLifecycle(id, identityId, (notification) => notification.markAsUnread());
+  }
+
+  async archive(id: string, identityId: string): Promise<Result<NotificationClientDTO>> {
+    return this.mutateLifecycle(id, identityId, (notification) => notification.archive());
+  }
+
+  async restore(id: string, identityId: string): Promise<Result<NotificationClientDTO>> {
+    return this.mutateLifecycle(id, identityId, (notification) => notification.restore());
+  }
+
+  private async mutateLifecycle(
+    id: string,
+    identityId: string,
+    mutate: (notification: NonNullable<Awaited<ReturnType<INotificationRepository['findByIdForIdentity']>>>) => void,
+  ): Promise<Result<NotificationClientDTO>> {
+    const notification = await this.notificationRepository.findByIdForIdentity(identityId, id);
+    if (!notification) return fail({ code: 'NOT_FOUND', message: 'notification not found' });
+    mutate(notification);
+    await this.notificationRepository.save(notification);
+    return ok(toNotificationClientDTO(notification.toServerDTO()));
+  }
 
   async deleteNotification(id: string, identityId: string): Promise<Result<void>> {
     const notification = await this.notificationRepository.findByIdForIdentity(identityId, id);

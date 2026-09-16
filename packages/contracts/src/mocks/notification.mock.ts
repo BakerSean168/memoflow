@@ -64,6 +64,7 @@ export function createMockNotification(
     createdAt: now - faker.number.int({ min: 0, max: 7 * 24 * 60 * 60 * 1000 }),
     updatedAt: now,
     deletedAt: null,
+    archivedAt: null,
     notificationChannels: null,
     ...overrides,
   } as unknown as NotificationClientDTO;

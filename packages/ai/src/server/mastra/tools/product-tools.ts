@@ -78,6 +78,7 @@ export function createMemoFlowProductTools(deps: MemoFlowProductToolDependencies
           'pomodoro',
         ])
         .optional(),
+      routineId: z.string().min(1).optional(),
       trigger: z
         .discriminatedUnion('type', [
           z.object({ type: z.literal('Interval'), intervalMinutes: z.number().int().positive() }),

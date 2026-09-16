@@ -11,6 +11,7 @@ import type { GoalApplicationPort } from './goal.application.port';
 import type {
   GoalPortabilityApplicationPort,
   GoalPortabilityCreateInput,
+  GoalPortabilityRestoreInput,
   GoalPortabilitySnapshot,
 } from './goal-portability.application.port';
 import { GoalPortableCapability } from './goal-portability';
@@ -98,6 +99,8 @@ function portableGoalPayload(status: GoalStatus = GoalStatus.Planned) {
             weight: 3,
           },
         ],
+        records: [],
+        reviews: [],
       },
     ],
   };
@@ -154,6 +157,8 @@ function portabilityFromApi(api: GoalApplicationPort): GoalPortabilityApplicatio
     name: model.name,
     summary: model.summary,
     status: model.status,
+    version: model.version ?? 1,
+    completedAt: model.completedAt ?? null,
     startDate: model.startDate,
     target: model.target,
     archivedAt: model.archivedAt,
@@ -173,6 +178,8 @@ function portabilityFromApi(api: GoalApplicationPort): GoalPortabilityApplicatio
       createdAt: keyResult.createdAt,
       updatedAt: keyResult.updatedAt,
     })),
+    records: [],
+    reviews: [],
   });
   return {
     async listGoalSnapshots(identityId) {
@@ -200,6 +207,17 @@ function portabilityFromApi(api: GoalApplicationPort): GoalPortabilityApplicatio
       const result = await api.createGoal(input, cx);
       if (result.ok) {
         snapshots.set(input.id as string, toSnapshot(readModelFromCreateInput(input)));
+      }
+      return result;
+    },
+    async restoreGoalForPortability(input: GoalPortabilityRestoreInput, cx) {
+      const result = await api.createGoal(input, cx);
+      if (result.ok) {
+        snapshots.set(input.id as string, {
+          ...toSnapshot(readModelFromCreateInput(input)),
+          records: [],
+          reviews: [],
+        });
       }
       return result;
     },
@@ -439,6 +457,8 @@ describe('GoalPortableCapability', () => {
           archived: false,
           labelRefs: [],
           keyResults: [],
+          records: [],
+          reviews: [],
         },
       ],
     };
@@ -490,6 +510,8 @@ describe('GoalPortableCapability', () => {
                 weight: 3,
               },
             ],
+            records: [],
+            reviews: [],
           },
         ],
       },
@@ -555,7 +577,7 @@ describe('GoalPortableCapability', () => {
     );
 
     expect(result).toMatchObject({ created: 0, updated: 0, skipped: 1 });
-    expect(replayApi.createGoal).toHaveBeenCalledOnce();
+    expect(replayApi.createGoal).not.toHaveBeenCalled();
     expect(replayApi.activateGoal).toHaveBeenCalledWith(createInput.id, 'identity-1', 7);
     expect(imports.get('goals:1')).toBe(createInput.id);
     expect(imports.get('goals:2')).toBe(createInput.initialKeyResults[0].id);

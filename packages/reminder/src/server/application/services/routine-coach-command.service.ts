@@ -1,6 +1,11 @@
 import type { Instant } from '@memoflow/time';
 import { findRoutineMethod, type RoutineMethodId } from '../../../method-library';
-import { ProfileMembership, RoutineDefinition, type RoutineTrigger } from '../../domain/routine';
+import {
+  ProfileMembership,
+  RoutineDefinition,
+  RoutineProfile,
+  type RoutineTrigger,
+} from '../../domain/routine';
 import {
   ProtocolDefinition,
   ProtocolSession,
@@ -25,6 +30,20 @@ export interface RoutineDefinitionReceipt {
   readonly routineId: string;
   readonly identityId: string;
   readonly name: string;
+  readonly version: number;
+}
+
+export interface RoutineProfileReceipt {
+  readonly profileId: string;
+  readonly identityId: string;
+  readonly name: string;
+  readonly version: number;
+}
+
+export interface RoutineMembershipReceipt {
+  readonly identityId: string;
+  readonly routineId: string;
+  readonly profileIds: readonly string[];
   readonly version: number;
 }
 
@@ -53,12 +72,78 @@ export interface RoutineProtocolSessionReceipt {
 export interface RoutineCoachCommandPort {
   createRoutine(input: {
     readonly identityId: string;
+    readonly routineId?: string;
     readonly name: string;
     readonly description?: string | null;
     readonly trigger?: RoutineTrigger | null;
     readonly profileIds?: readonly string[];
     readonly at?: number;
   }): Promise<RoutineDefinitionReceipt>;
+
+  updateRoutine(input: {
+    readonly identityId: string;
+    readonly routineId: string;
+    readonly expectedVersion: number;
+    readonly name?: string;
+    readonly description?: string | null;
+    readonly enabled?: boolean;
+    readonly trigger?: RoutineTrigger | null;
+    readonly at?: number;
+  }): Promise<RoutineDefinitionReceipt>;
+
+  deleteRoutine(input: {
+    readonly identityId: string;
+    readonly routineId: string;
+    readonly expectedVersion?: number;
+  }): Promise<{ readonly routineId: string; readonly identityId: string }>;
+
+  createProfile(input: {
+    readonly identityId: string;
+    readonly profileId?: string;
+    readonly name: string;
+    readonly description?: string | null;
+    readonly enabled?: boolean;
+    readonly at?: number;
+  }): Promise<RoutineProfileReceipt>;
+
+  updateProfile(input: {
+    readonly identityId: string;
+    readonly profileId: string;
+    readonly expectedVersion: number;
+    readonly name?: string;
+    readonly description?: string | null;
+    readonly enabled?: boolean;
+    readonly at?: number;
+  }): Promise<RoutineProfileReceipt>;
+
+  deleteProfile(input: {
+    readonly identityId: string;
+    readonly profileId: string;
+    readonly expectedVersion?: number;
+  }): Promise<{ readonly profileId: string; readonly identityId: string }>;
+
+  replaceRoutineProfiles(input: {
+    readonly identityId: string;
+    readonly routineId: string;
+    readonly expectedVersion: number;
+    readonly profileIds: readonly string[];
+    readonly at?: number;
+  }): Promise<RoutineMembershipReceipt>;
+
+  setMembershipEnabled(input: {
+    readonly identityId: string;
+    readonly routineId: string;
+    readonly profileId: string;
+    readonly enabled: boolean;
+    readonly expectedVersion: number;
+    readonly at?: number;
+  }): Promise<{
+    readonly identityId: string;
+    readonly routineId: string;
+    readonly profileId: string;
+    readonly enabled: boolean;
+    readonly version: number;
+  }>;
 
   setProfileActive(input: {
     readonly identityId: string;
@@ -75,11 +160,14 @@ export interface RoutineCoachCommandPort {
     readonly overrideIntervalMs?: number | null;
     readonly expiresAt: number;
     readonly reason: string;
+    readonly source?: 'user' | 'ai' | 'runtime';
+    readonly expectedVersion?: number;
   }): Promise<RoutineTemporaryOverrideReceipt>;
 
   clearTemporaryOverride(input: {
     readonly identityId: string;
     readonly routineId: string;
+    readonly expectedVersion?: number;
   }): Promise<RoutineTemporaryOverrideReceipt>;
 
   startPresetProtocol(input: {
@@ -181,6 +269,7 @@ export function createRoutineCoachCommandService(
         throw new Error('One or more Routine profiles were not found');
       }
       const routine = RoutineDefinition.create({
+        id: input.routineId,
         identityId: input.identityId,
         name: input.name,
         description: input.description,
@@ -195,6 +284,28 @@ export function createRoutineCoachCommandService(
           now: new Date(at),
         }),
       );
+      const existing = input.routineId
+        ? await options.routineProfileStore.findDefinition({
+            identityId: input.identityId,
+            routineId: input.routineId,
+          })
+        : null;
+      if (existing) {
+        if (
+          existing.name !== routine.name ||
+          existing.description !== routine.description ||
+          existing.enabled !== routine.enabled ||
+          JSON.stringify(existing.trigger) !== JSON.stringify(routine.trigger)
+        ) {
+          throw new Error(`Routine '${routine.id}' already exists with different data`);
+        }
+        return {
+          routineId: existing.id,
+          identityId: existing.identityId,
+          name: existing.name,
+          version: existing.version,
+        };
+      }
       await options.routineProfileStore.createDefinitionWithMemberships({
         definition: routine,
         memberships,
@@ -204,6 +315,183 @@ export function createRoutineCoachCommandService(
         identityId: routine.identityId,
         name: routine.name,
         version: routine.version,
+      };
+    },
+
+    async updateRoutine(input) {
+      const routine = await options.routineProfileStore.findDefinition({
+        identityId: input.identityId,
+        routineId: input.routineId,
+      });
+      if (!routine) throw new Error(`Routine '${input.routineId}' was not found`);
+      if (routine.version !== input.expectedVersion)
+        throw new Error(`Routine '${input.routineId}' version conflict`);
+      routine.update(
+        {
+          name: input.name,
+          description: input.description,
+          enabled: input.enabled,
+          trigger: input.trigger,
+        },
+        new Date(input.at ?? now()),
+      );
+      await options.routineProfileStore.updateDefinition({
+        definition: routine,
+        expectedVersion: input.expectedVersion,
+      });
+      return {
+        routineId: routine.id,
+        identityId: routine.identityId,
+        name: routine.name,
+        version: routine.version,
+      };
+    },
+
+    async deleteRoutine(input) {
+      await options.routineProfileStore.deleteDefinition(input);
+      return { identityId: input.identityId, routineId: input.routineId };
+    },
+
+    async createProfile(input) {
+      const profile = RoutineProfile.create({
+        id: input.profileId,
+        identityId: input.identityId,
+        name: input.name,
+        description: input.description,
+        enabled: input.enabled,
+        now: new Date(input.at ?? now()),
+      });
+      const existing = input.profileId
+        ? await options.routineProfileStore.findProfile({
+            identityId: input.identityId,
+            profileId: input.profileId,
+          })
+        : null;
+      if (existing) {
+        if (
+          existing.name !== profile.name ||
+          existing.description !== profile.description ||
+          existing.enabled !== profile.enabled
+        ) {
+          throw new Error(`Profile '${profile.id}' already exists with different data`);
+        }
+        return {
+          profileId: existing.id,
+          identityId: existing.identityId,
+          name: existing.name,
+          version: existing.version,
+        };
+      }
+      await options.routineProfileStore.upsertProfile(profile);
+      return {
+        profileId: profile.id,
+        identityId: profile.identityId,
+        name: profile.name,
+        version: profile.version,
+      };
+    },
+
+    async updateProfile(input) {
+      const profile = await options.routineProfileStore.findProfile({
+        identityId: input.identityId,
+        profileId: input.profileId,
+      });
+      if (!profile) throw new Error(`Profile '${input.profileId}' was not found`);
+      if (profile.version !== input.expectedVersion)
+        throw new Error(`Profile '${input.profileId}' version conflict`);
+      profile.update(
+        { name: input.name, description: input.description, enabled: input.enabled },
+        new Date(input.at ?? now()),
+      );
+      await options.routineProfileStore.updateProfile({
+        profile,
+        expectedVersion: input.expectedVersion,
+      });
+      return {
+        profileId: profile.id,
+        identityId: profile.identityId,
+        name: profile.name,
+        version: profile.version,
+      };
+    },
+
+    async deleteProfile(input) {
+      const memberships = await options.routineProfileStore.listMembershipsForProfile({
+        identityId: input.identityId,
+        profileId: input.profileId,
+      });
+      if (memberships.length > 0)
+        throw new Error(`Profile '${input.profileId}' still has Routine memberships`);
+      await options.routineProfileStore.deleteProfile(input);
+      return { identityId: input.identityId, profileId: input.profileId };
+    },
+
+    async replaceRoutineProfiles(input) {
+      const routine = await options.routineProfileStore.findDefinition({
+        identityId: input.identityId,
+        routineId: input.routineId,
+      });
+      if (!routine) throw new Error(`Routine '${input.routineId}' was not found`);
+      if (routine.version !== input.expectedVersion)
+        throw new Error(`Routine '${input.routineId}' version conflict`);
+      const profileIds = [...input.profileIds];
+      if (new Set(profileIds).size !== profileIds.length)
+        throw new TypeError('Duplicate Routine profile membership');
+      const profiles = await options.routineProfileStore.findProfilesByIds({
+        identityId: input.identityId,
+        profileIds,
+      });
+      if (profiles.length !== profileIds.length)
+        throw new Error('One or more Routine profiles were not found');
+      const existing = await options.routineProfileStore.listMembershipsForRoutine({
+        identityId: input.identityId,
+        routineId: input.routineId,
+      });
+      const existingByProfile = new Map(
+        existing.map((membership) => [membership.profileId, membership]),
+      );
+      const memberships = profileIds.map(
+        (profileId) =>
+          existingByProfile.get(profileId) ??
+          ProfileMembership.create({
+            identityId: input.identityId,
+            profileId,
+            routineId: input.routineId,
+            now: new Date(input.at ?? now()),
+          }),
+      );
+      await options.routineProfileStore.replaceRoutineMemberships({
+        identityId: input.identityId,
+        routineId: input.routineId,
+        memberships,
+        expectedVersion: input.expectedVersion,
+      });
+      return {
+        identityId: input.identityId,
+        routineId: input.routineId,
+        profileIds,
+        version: input.expectedVersion + 1,
+      };
+    },
+
+    async setMembershipEnabled(input) {
+      const memberships = await options.routineProfileStore.listMembershipsForRoutine({
+        identityId: input.identityId,
+        routineId: input.routineId,
+      });
+      const membership = memberships.find((entry) => entry.profileId === input.profileId);
+      if (!membership) throw new Error(`Routine membership '${input.profileId}' was not found`);
+      if (membership.version !== input.expectedVersion)
+        throw new Error('Routine membership version conflict');
+      if (input.enabled) membership.enable(new Date(input.at ?? now()));
+      else membership.disable(new Date(input.at ?? now()));
+      await options.routineProfileStore.upsertMembership(membership, input.expectedVersion);
+      return {
+        identityId: input.identityId,
+        routineId: input.routineId,
+        profileId: input.profileId,
+        enabled: membership.enabled,
+        version: membership.version,
       };
     },
 
@@ -239,20 +527,25 @@ export function createRoutineCoachCommandService(
         overrideIntervalMs: input.overrideIntervalMs,
         expiresAt: input.expiresAt,
         reason: input.reason,
-        source: 'ai',
+        source: input.source ?? 'ai',
       });
       await options.temporaryOverrideStore.setRoutineTemporaryOverride({
         identityId: input.identityId,
         routineId: input.routineId,
         override,
+        expectedVersion: input.expectedVersion,
       });
       await notifyOverrideChanged(input.identityId, input.routineId);
       return { identityId: input.identityId, routineId: input.routineId, override };
     },
 
     async clearTemporaryOverride(input) {
+      const existing = await options.temporaryOverrideStore.findRoutineTemporaryOverride(input);
+      if (existing == null && input.expectedVersion !== undefined) {
+        return { identityId: input.identityId, routineId: input.routineId, override: null };
+      }
       await options.temporaryOverrideStore.clearRoutineTemporaryOverride(input);
-      await notifyOverrideChanged(input.identityId, input.routineId);
+      if (existing != null) await notifyOverrideChanged(input.identityId, input.routineId);
       return { identityId: input.identityId, routineId: input.routineId, override: null };
     },
 

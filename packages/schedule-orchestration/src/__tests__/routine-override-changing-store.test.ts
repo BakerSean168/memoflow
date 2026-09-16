@@ -19,6 +19,9 @@ function createHarness() {
   const cleared: Array<{ identityId: string; routineId: string }> = [];
   const published: RoutineOverrideChangedEvent[] = [];
   const store = {
+    findRoutineTemporaryOverride: vi.fn<
+      () => Promise<RoutineTemporaryOverride | null>
+    >(async () => null),
     setRoutineTemporaryOverride: vi.fn(async (input) => {
       written.push(input);
     }),
@@ -36,6 +39,24 @@ function createHarness() {
 }
 
 describe('createRoutineOverrideChangedPublishingStore (ROUTINE-3401)', () => {
+  it('passes through reads without publishing an override-changed event', async () => {
+    const harness = createHarness();
+    harness.store.findRoutineTemporaryOverride.mockResolvedValueOnce(override());
+
+    await expect(
+      harness.publishing.findRoutineTemporaryOverride({
+        identityId: 'identity-1',
+        routineId: 'routine-1',
+      }),
+    ).resolves.toEqual(override());
+
+    expect(harness.store.findRoutineTemporaryOverride).toHaveBeenCalledWith({
+      identityId: 'identity-1',
+      routineId: 'routine-1',
+    });
+    expect(harness.published).toEqual([]);
+  });
+
   it('persists a snooze then publishes override-changed with the same routine identity', async () => {
     const harness = createHarness();
 

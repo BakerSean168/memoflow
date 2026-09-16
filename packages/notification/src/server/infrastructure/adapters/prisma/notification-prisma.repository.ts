@@ -83,6 +83,7 @@ export class NotificationPrismaRepository implements INotificationRepository {
           expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : null,
           version: dto.version,
           deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
+          archivedAt: dto.archivedAt ? new Date(dto.archivedAt) : null,
         },
         update: {
           title: dto.title,
@@ -106,6 +107,7 @@ export class NotificationPrismaRepository implements INotificationRepository {
           expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : null,
           version: dto.version,
           deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
+          archivedAt: dto.archivedAt ? new Date(dto.archivedAt) : null,
           updatedAt: new Date(),
         },
       });
@@ -307,6 +309,7 @@ export class NotificationPrismaRepository implements INotificationRepository {
       includeChildren?: boolean;
       includeRead?: boolean;
       includeDeleted?: boolean;
+      archiveState?: 'active' | 'archived' | 'all';
       limit?: number;
       offset?: number;
     },
@@ -317,7 +320,12 @@ export class NotificationPrismaRepository implements INotificationRepository {
       where.deletedAt = null;
     }
     if (options?.includeRead === false) {
-      where.isRead = false;
+      where.readAt = null;
+    }
+    if (options?.archiveState === 'active' || options?.archiveState === undefined) {
+      where.archivedAt = null;
+    } else if (options.archiveState === 'archived') {
+      where.archivedAt = { not: null };
     }
 
     const rows = await this.prisma.notification.findMany({
@@ -334,13 +342,14 @@ export class NotificationPrismaRepository implements INotificationRepository {
   async findByCategory(
     identityId: string,
     category: NotificationCategory,
-    options?: { limit?: number; offset?: number },
+    options?: { archiveState?: 'active' | 'archived' | 'all'; limit?: number; offset?: number },
   ): Promise<Notification[]> {
     const rows = await this.prisma.notification.findMany({
       where: {
         identityId,
         category,
         deletedAt: null,
+        ...(options?.archiveState === 'archived' ? { archivedAt: { not: null } } : options?.archiveState === 'all' ? {} : { archivedAt: null }),
       },
       include: INCLUDE_CHANNELS,
       orderBy: { createdAt: 'desc' },
@@ -355,8 +364,9 @@ export class NotificationPrismaRepository implements INotificationRepository {
     const rows = await this.prisma.notification.findMany({
       where: {
         identityId,
-        isRead: false,
+        readAt: null,
         deletedAt: null,
+        archivedAt: null,
       },
       include: INCLUDE_CHANNELS,
       orderBy: { createdAt: 'desc' },
@@ -370,6 +380,7 @@ export class NotificationPrismaRepository implements INotificationRepository {
     identityId: string,
     relatedEntityType: string,
     relatedEntityId: string,
+    options?: { archiveState?: 'active' | 'archived' | 'all' },
   ): Promise<Notification[]> {
     const rows = await this.prisma.notification.findMany({
       where: {
@@ -377,6 +388,7 @@ export class NotificationPrismaRepository implements INotificationRepository {
         relatedEntityType,
         relatedEntityId,
         deletedAt: null,
+        ...(options?.archiveState === 'archived' ? { archivedAt: { not: null } } : options?.archiveState === 'all' ? {} : { archivedAt: null }),
       },
       include: INCLUDE_CHANNELS,
       orderBy: { createdAt: 'desc' },
@@ -411,6 +423,22 @@ export class NotificationPrismaRepository implements INotificationRepository {
     }
   }
 
+  async archive(identityId: string, id: string, archivedAt: Date): Promise<void> {
+    const result = await this.prisma.notification.updateMany({
+      where: { id, identityId, deletedAt: null },
+      data: { archivedAt, updatedAt: archivedAt },
+    });
+    if (result.count !== 1) throw new Error('Notification not found for the current identity.');
+  }
+
+  async restore(identityId: string, id: string): Promise<void> {
+    const result = await this.prisma.notification.updateMany({
+      where: { id, identityId, deletedAt: null },
+      data: { archivedAt: null, updatedAt: new Date() },
+    });
+    if (result.count !== 1) throw new Error('Notification not found for the current identity.');
+  }
+
   async exists(identityId: string, id: string): Promise<boolean> {
     const count = await this.prisma.notification.count({ where: { id, identityId } });
     return count > 0;
@@ -420,8 +448,9 @@ export class NotificationPrismaRepository implements INotificationRepository {
     return this.prisma.notification.count({
       where: {
         identityId,
-        isRead: false,
+        readAt: null,
         deletedAt: null,
+        archivedAt: null,
       },
     });
   }
@@ -432,6 +461,7 @@ export class NotificationPrismaRepository implements INotificationRepository {
       where: {
         identityId,
         deletedAt: null,
+        archivedAt: null,
       },
       _count: { id: true },
     });
@@ -457,7 +487,7 @@ export class NotificationPrismaRepository implements INotificationRepository {
     if (ids.length === 0) return;
     const now = new Date();
     await this.prisma.notification.updateMany({
-      where: { id: { in: ids }, identityId },
+      where: { id: { in: ids }, identityId, deletedAt: null },
       data: {
         isRead: true,
         readAt: now,
@@ -471,8 +501,9 @@ export class NotificationPrismaRepository implements INotificationRepository {
     await this.prisma.notification.updateMany({
       where: {
         identityId,
-        isRead: false,
+        readAt: null,
         deletedAt: null,
+        archivedAt: null,
       },
       data: {
         isRead: true,
@@ -486,6 +517,7 @@ export class NotificationPrismaRepository implements INotificationRepository {
     const result = await this.prisma.notification.deleteMany({
       where: {
         deletedAt: null,
+        archivedAt: null,
         expiresAt: {
           not: null,
           lt: new Date(beforeTimestamp),

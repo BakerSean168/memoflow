@@ -41,22 +41,26 @@ export class NotificationQueryApplicationService {
     const page = query.page ?? 1;
     const pageSize = query.limit ?? 20;
     const offset = Math.max((page - 1) * pageSize, 0);
+    const archiveState = query.archiveState ?? 'active';
 
     const notifications = query.relatedEntityType && query.relatedEntityId
       ? await this.notificationRepository.findByRelatedEntity(
           query.identityId,
           query.relatedEntityType,
           query.relatedEntityId,
+          { archiveState },
         )
       : await this.notificationRepository.findByIdentityId(query.identityId, {
           includeDeleted: false,
           includeRead: query.isRead === false ? false : true,
+          archiveState,
         });
 
     const filtered = notifications
       .map((notification) => toNotificationClientDTO(notification.toServerDTO()))
       .filter((notification) => notification.identityId === query.identityId)
       .filter((notification) => notification.deletedAt === null)
+      .filter((notification) => archiveState === 'all' || (archiveState === 'archived' ? notification.archivedAt !== null : notification.archivedAt === null))
       .filter((notification) => query.isRead === undefined || notification.isRead === query.isRead)
       .filter((notification) => !query.type || notification.type === query.type)
       .filter((notification) => !query.category || notification.category === query.category)

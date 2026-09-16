@@ -208,6 +208,7 @@ export function composeReminder(
     userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
     routineProfileStore: repositories.routineProfileStore,
     runtimeContextStore,
+    routineCommandPort,
     closureChecker: repositories.closureChecker,
     userTimeContextPort: dependencies.userTimeContextPort,
   });

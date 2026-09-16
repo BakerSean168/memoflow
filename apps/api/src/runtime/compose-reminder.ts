@@ -184,6 +184,7 @@ export function composeReminder(dependencies: ComposeReminderDependencies): Comp
     userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
     routineProfileStore: repositories.routineProfileStore,
     runtimeContextStore,
+    routineCommandPort,
     closureChecker: dependencies.closureChecker,
     userTimeContextPort: dependencies.userTimeContextPort,
     reliablePort: repositories.reliablePort,

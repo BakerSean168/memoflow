@@ -7,6 +7,7 @@ import type {
 import {
   PowerSyncScheduleExecutionRepository,
   PowerSyncScheduleTaskRepository,
+  PowerSyncScheduledInvocationRepository,
 } from './adapters/powersync';
 import { createScheduleLeasePowerSyncRepository } from './lease/schedule-lease.repository';
 import { ScheduleLeaseCoordinator } from './lease/schedule-lease-coordinator';
@@ -19,6 +20,7 @@ import {
 export interface SchedulerPowerSyncRepositories {
   readonly scheduleExecutionRepository: IScheduleExecutionRepository;
   readonly scheduleTaskRepository: IScheduleTaskRepository;
+  readonly scheduledInvocationRepository: PowerSyncScheduledInvocationRepository;
   readonly leaseCoordinator: ScheduleLeaseCoordinator;
   readonly leaseRepository: IScheduleLeaseRepository;
 }
@@ -30,6 +32,7 @@ export function createSchedulerPowerSyncRepositories(
   return {
     scheduleTaskRepository: new PowerSyncScheduleTaskRepository(db),
     scheduleExecutionRepository: new PowerSyncScheduleExecutionRepository(db),
+    scheduledInvocationRepository: new PowerSyncScheduledInvocationRepository(db),
     leaseCoordinator: new ScheduleLeaseCoordinator(leaseRepository),
     leaseRepository,
   };
@@ -43,6 +46,7 @@ export function createSchedulerPowerSyncModule(
   return createSchedulerModule({
     scheduleTaskRepository: repositories.scheduleTaskRepository,
     scheduleExecutionRepository: repositories.scheduleExecutionRepository,
+    scheduledInvocationRepository: repositories.scheduledInvocationRepository,
     runtimeContributions,
   });
 }

@@ -26,6 +26,10 @@ export function toNotificationQueryParams(
     limit: query.limit,
     type: query.type,
     isRead: query.isRead,
+    archiveState: query.archiveState,
+    workflowKey: query.workflowKey,
+    topic: query.topic,
+    category: query.category,
     startDate: query.startDate,
     endDate: query.endDate,
   };

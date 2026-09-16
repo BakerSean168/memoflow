@@ -28,6 +28,7 @@ model Notification {
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
   deletedAt         DateTime? @map("deleted_at")
+  archivedAt        DateTime? @map("archived_at")
   isRead            Boolean   @default(false) @map("is_read")
 
   channels NotificationChannel[]
@@ -38,6 +39,7 @@ model Notification {
 
   @@unique([identityId, idempotencyKey])
   @@index([identityId, workflowKey])
+  @@index([identityId, archivedAt, createdAt])
   @@map("notifications")
 }
 

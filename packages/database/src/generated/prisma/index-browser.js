@@ -544,6 +544,7 @@ exports.Prisma.NotificationScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt',
+  archivedAt: 'archivedAt',
   isRead: 'isRead'
 };
 
@@ -956,6 +957,7 @@ exports.Prisma.RoutineTemporaryOverrideScalarFieldEnum = {
   identityId: 'identityId',
   routineId: 'routineId',
   overrideJson: 'overrideJson',
+  version: 'version',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -1325,6 +1327,54 @@ exports.Prisma.ScheduleTaskScalarFieldEnum = {
   deletedAt: 'deletedAt'
 };
 
+exports.Prisma.ScheduledInvocationScalarFieldEnum = {
+  id: 'id',
+  identityId: 'identityId',
+  ownerType: 'ownerType',
+  ownerId: 'ownerId',
+  schedulingKey: 'schedulingKey',
+  handlerKey: 'handlerKey',
+  payloadVersion: 'payloadVersion',
+  payload: 'payload',
+  runAt: 'runAt',
+  sourceRevision: 'sourceRevision',
+  retryEnabled: 'retryEnabled',
+  maxRetries: 'maxRetries',
+  initialDelayMs: 'initialDelayMs',
+  maxDelayMs: 'maxDelayMs',
+  backoffMultiplier: 'backoffMultiplier',
+  priority: 'priority',
+  timeoutMs: 'timeoutMs',
+  status: 'status',
+  attemptCount: 'attemptCount',
+  nextAttemptAt: 'nextAttemptAt',
+  claimToken: 'claimToken',
+  claimExpiresAt: 'claimExpiresAt',
+  fencingToken: 'fencingToken',
+  name: 'name',
+  tags: 'tags',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.InvocationAttemptScalarFieldEnum = {
+  id: 'id',
+  identityId: 'identityId',
+  invocationId: 'invocationId',
+  attemptNumber: 'attemptNumber',
+  startedAt: 'startedAt',
+  finishedAt: 'finishedAt',
+  outcome: 'outcome',
+  result: 'result',
+  failureCode: 'failureCode',
+  failureMessage: 'failureMessage',
+  failureRetryable: 'failureRetryable',
+  workerId: 'workerId',
+  claimToken: 'claimToken',
+  fencingToken: 'fencingToken',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SchedulingReconcileOperationScalarFieldEnum = {
   operationId: 'operationId',
   identityId: 'identityId',
@@ -1657,6 +1707,8 @@ exports.Prisma.ModelName = {
   KnowledgeRepositoryLease: 'KnowledgeRepositoryLease',
   Schedule: 'Schedule',
   ScheduleTask: 'ScheduleTask',
+  ScheduledInvocation: 'ScheduledInvocation',
+  InvocationAttempt: 'InvocationAttempt',
   SchedulingReconcileOperation: 'SchedulingReconcileOperation',
   ScheduleExecution: 'ScheduleExecution',
   ScheduleStatistic: 'ScheduleStatistic',

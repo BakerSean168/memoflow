@@ -32,6 +32,8 @@ export interface UseNotificationListQueryOptions {
   limit?: number;
   /** Server-side `isRead` filter. 服务端 isRead 过滤。 */
   isRead?: boolean;
+  /** Server-side archive filter. */
+  archiveState?: 'active' | 'archived' | 'all';
   /** Server-side type filter. 服务端 type 过滤。 */
   type?: string;
   /** Server-side startDate filter. 服务端 startDate 过滤。 */
@@ -55,6 +57,7 @@ export function useNotificationListQuery(options: UseNotificationListQueryOption
       page: options.page ?? store.pagination.page,
       limit: options.limit ?? store.pagination.pageSize,
       isRead: options.isRead,
+      archiveState: options.archiveState,
       type: options.type,
       startDate: options.startDate,
       endDate: options.endDate,

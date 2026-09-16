@@ -17,7 +17,7 @@ import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { GoalApplicationPort } from './goal.application.port';
 import type {
   GoalPortabilityApplicationPort,
-  GoalPortabilityCreateInput,
+  GoalPortabilityRestoreInput,
   GoalPortabilitySnapshot,
 } from './goal-portability.application.port';
 
@@ -44,6 +44,22 @@ function deterministicKeyResultId(
   ref: PortableReferenceV3,
 ): string {
   return `IKeyResultId_${stableUuid(`portable:${identityId}:${batchId}:key-result:${ref}`)}`;
+}
+
+function deterministicRecordId(
+  identityId: string,
+  batchId: string,
+  ref: PortableReferenceV3,
+): string {
+  return `IGoalRecordId_${stableUuid(`portable:${identityId}:${batchId}:goal-record:${ref}`)}`;
+}
+
+function deterministicReviewId(
+  identityId: string,
+  batchId: string,
+  ref: PortableReferenceV3,
+): string {
+  return `IGoalReviewId_${stableUuid(`portable:${identityId}:${batchId}:goal-review:${ref}`)}`;
 }
 
 function requireBatchId(context: PortableCapabilityExecutionContext): string {
@@ -99,9 +115,7 @@ function assertLabelRefsArePresent(
   for (const goal of payload.goals) {
     for (const labelRef of goal.labelRefs) {
       if (!labelRefs.has(labelRef)) {
-        throw new Error(
-          `goals@3 label reference is missing from labels@3 payload: ${labelRef}`,
-        );
+        throw new Error(`goals@3 label reference is missing from labels@3 payload: ${labelRef}`);
       }
     }
   }
@@ -179,6 +193,88 @@ function assertExistingGoalMatchesPortableDefinition(
     if (current.progress.unit !== portableKeyResult.unit) conflict(`keyResults[${index}].unit`);
     if (current.weight !== portableKeyResult.weight) conflict(`keyResults[${index}].weight`);
   }
+
+  const records = [...existing.records].sort((a, b) => {
+    const byRecordedAt = Number(a.recordedAt) - Number(b.recordedAt);
+    return byRecordedAt || String(a.id).localeCompare(String(b.id));
+  });
+  if (records.length !== goal.records.length) conflict('records.length');
+  for (const [index, portableRecord] of goal.records.entries()) {
+    const current = records[index];
+    if (!current) conflict(`records[${index}]`);
+    if (
+      String(current.id) !== deterministicRecordId(existing.identityId, batchId, portableRecord.ref)
+    ) {
+      conflict(`records[${index}].id`);
+    }
+    if (
+      String(current.keyResultId) !==
+      deterministicKeyResultId(existing.identityId, batchId, portableRecord.keyResultRef)
+    ) {
+      conflict(`records[${index}].keyResultId`);
+    }
+    if (
+      current.value !== portableRecord.value ||
+      current.note !== portableRecord.note ||
+      Number(current.recordedAt) !== portableRecord.recordedAt
+    ) {
+      conflict(`records[${index}]`);
+    }
+  }
+  const reviews = [...existing.reviews].sort(
+    (a, b) =>
+      Number(a.reviewedAt) - Number(b.reviewedAt) || String(a.id).localeCompare(String(b.id)),
+  );
+  if (reviews.length !== goal.reviews.length) conflict('reviews.length');
+  for (const [index, portableReview] of goal.reviews.entries()) {
+    const current = reviews[index];
+    if (!current) conflict(`reviews[${index}]`);
+    if (
+      String(current.id) !== deterministicReviewId(existing.identityId, batchId, portableReview.ref)
+    ) {
+      conflict(`reviews[${index}].id`);
+    }
+    const currentContext = current.systemContext;
+    const portableContext = portableReview.systemContext;
+    const normalizedContext = {
+      ...currentContext,
+      keyResults: currentContext.keyResults.map((keyResult) => ({
+        keyResultRef: deterministicKeyResultId(
+          existing.identityId,
+          batchId,
+          String(keyResult.keyResultId),
+        ),
+        title: keyResult.title,
+        unit: keyResult.unit,
+        startPercentage: keyResult.startPercentage,
+        endPercentage: keyResult.endPercentage,
+        deltaPercentage: keyResult.deltaPercentage,
+        trend: keyResult.trend,
+      })),
+    };
+    const portableKeyResults = portableContext.keyResults.map((keyResult) => ({
+      keyResultRef: keyResult.keyResultRef,
+      title: keyResult.title,
+      unit: keyResult.unit,
+      startPercentage: keyResult.startPercentage,
+      endPercentage: keyResult.endPercentage,
+      deltaPercentage: keyResult.deltaPercentage,
+      trend: keyResult.trend,
+    }));
+    const comparablePortableContext = {
+      ...portableContext,
+      keyResults: portableKeyResults,
+    };
+    if (
+      current.reflection !== portableReview.reflection ||
+      current.challenges !== portableReview.challenges ||
+      current.adjustments !== portableReview.adjustments ||
+      Number(current.reviewedAt) !== portableReview.reviewedAt ||
+      stableJson(normalizedContext) !== stableJson(comparablePortableContext)
+    ) {
+      conflict(`reviews[${index}]`);
+    }
+  }
 }
 
 function assertLifecycleCanConverge(
@@ -213,16 +309,20 @@ function assertLifecycleCanConverge(
   }
 }
 
+interface GoalLifecycleState {
+  goalId: string;
+  goalVersion: number;
+  status: GoalStatus;
+  archivedAt: number | null;
+}
+
 async function transitionGoal(
   api: GoalApplicationPort,
   goal: GoalPortableDefinitionV3,
   context: PortableCapabilityExecutionContext,
-  receipt: GoalMutationReceipt,
-): Promise<GoalMutationReceipt> {
-  let current = receipt;
-  const goalId = current.goalId;
+  state: GoalLifecycleState,
+): Promise<void> {
   const identityId = context.identityId;
-  const currentStatus = current.readModel.status;
   const step = async (
     operation: (
       id: string,
@@ -231,26 +331,31 @@ async function transitionGoal(
     ) => Promise<Result<GoalMutationReceipt>>,
     name: string,
   ) => {
-    current = requireResult(await operation(goalId, identityId, current.goalVersion), name);
+    const receipt = requireResult(
+      await operation(state.goalId, identityId, state.goalVersion),
+      name,
+    );
+    state.goalVersion = receipt.goalVersion;
+    state.status = receipt.readModel.status;
+    state.archivedAt = receipt.readModel.archivedAt;
   };
 
-  if (goal.status === GoalStatus.InProgress && currentStatus === GoalStatus.Planned) {
+  if (goal.status === GoalStatus.InProgress && state.status === GoalStatus.Planned) {
     await step(api.activateGoal, 'activate portable goal');
   } else if (goal.status === GoalStatus.Completed) {
-    if (currentStatus === GoalStatus.Planned) {
+    if (state.status === GoalStatus.Planned) {
       await step(api.activateGoal, 'activate portable goal before completion');
     }
-    if (current.readModel.status !== GoalStatus.Completed) {
+    if (state.status !== GoalStatus.Completed) {
       await step(api.completeGoal, 'complete portable goal');
     }
-  } else if (goal.status === GoalStatus.Abandoned && currentStatus !== GoalStatus.Abandoned) {
+  } else if (goal.status === GoalStatus.Abandoned && state.status !== GoalStatus.Abandoned) {
     await step(api.abandonGoal, 'abandon portable goal');
   }
 
-  if (goal.archived && current.readModel.archivedAt === null) {
+  if (goal.archived && state.archivedAt === null) {
     await step(api.archiveGoal, 'archive portable goal');
   }
-  return current;
 }
 
 export class GoalPortableCapability implements PortableCapability<GoalPortablePayloadV3> {
@@ -301,6 +406,47 @@ export class GoalPortableCapability implements PortableCapability<GoalPortablePa
           unit: keyResult.progress.unit,
           weight: keyResult.weight,
         })),
+        records: goal.records
+          .slice()
+          .sort(
+            (a, b) =>
+              Number(a.recordedAt) - Number(b.recordedAt) ||
+              String(a.id).localeCompare(String(b.id)),
+          )
+          .map((record) => ({
+            ref: context.references.declareExportReference('goals', String(record.id)),
+            keyResultRef: context.references.resolveExportReference(
+              'goals',
+              String(record.keyResultId),
+            ),
+            value: record.value,
+            note: record.note,
+            recordedAt: Number(record.recordedAt),
+          })),
+        reviews: goal.reviews
+          .slice()
+          .sort(
+            (a, b) =>
+              Number(a.reviewedAt) - Number(b.reviewedAt) ||
+              String(a.id).localeCompare(String(b.id)),
+          )
+          .map((review) => ({
+            ref: context.references.declareExportReference('goals', String(review.id)),
+            reflection: review.reflection,
+            challenges: review.challenges,
+            adjustments: review.adjustments,
+            reviewedAt: Number(review.reviewedAt),
+            systemContext: {
+              ...review.systemContext,
+              keyResults: review.systemContext.keyResults.map((keyResult) => ({
+                ...keyResult,
+                keyResultRef: context.references.resolveExportReference(
+                  'goals',
+                  String(keyResult.keyResultId),
+                ),
+              })),
+            },
+          })),
       });
     }
     return { goals };
@@ -338,13 +484,25 @@ export class GoalPortableCapability implements PortableCapability<GoalPortablePa
           deterministicKeyResultId(context.identityId, batchId, keyResult.ref),
         );
       }
+      for (const record of goal.records) {
+        context.references.bindImportedReference(
+          record.ref,
+          deterministicRecordId(context.identityId, batchId, record.ref),
+        );
+      }
+      for (const review of goal.reviews) {
+        context.references.bindImportedReference(
+          review.ref,
+          deterministicReviewId(context.identityId, batchId, review.ref),
+        );
+      }
     }
     return {
       created,
       updated: 0,
       skipped,
       warnings: [
-        'goals@3 currently covers Goal definitions and Key Results; Goal records/reviews remain on V2 until PORT-1610.',
+        'goals@3 restores source-neutral Goal records; task-source provenance is not portable.',
       ],
     };
   }
@@ -364,15 +522,9 @@ export class GoalPortableCapability implements PortableCapability<GoalPortablePa
         context.references.resolveImportedReference(ref),
       );
       const existing = await this.portability.getGoalSnapshot(id, context.identityId);
-      if (existing) {
-        assertExistingGoalMatchesPortableDefinition(existing, goal, batchId, labelIds);
-        assertLifecycleCanConverge(existing, goal);
-        skipped += 1;
-      } else {
-        created += 1;
-      }
+      if (!existing) created += 1;
 
-      const input: GoalPortabilityCreateInput = {
+      const input: GoalPortabilityRestoreInput = {
         id: id as never,
         name: goal.name,
         summary: goal.summary ?? undefined,
@@ -393,27 +545,93 @@ export class GoalPortableCapability implements PortableCapability<GoalPortablePa
           unit: keyResult.unit,
           weight: keyResult.weight,
         })),
+        records: goal.records.map((record) => ({
+          id: deterministicRecordId(context.identityId, batchId, record.ref) as never,
+          keyResultId: deterministicKeyResultId(
+            context.identityId,
+            batchId,
+            record.keyResultRef,
+          ) as never,
+          value: record.value,
+          note: record.note,
+          sourceType: null,
+          sourceId: null,
+          recordedAt: record.recordedAt,
+          createdAt: record.recordedAt,
+          updatedAt: record.recordedAt,
+        })),
+        reviews: goal.reviews.map((review) => ({
+          id: deterministicReviewId(context.identityId, batchId, review.ref) as never,
+          reflection: review.reflection,
+          challenges: review.challenges,
+          adjustments: review.adjustments,
+          reviewedAt: review.reviewedAt,
+          createdAt: review.reviewedAt,
+          updatedAt: review.reviewedAt,
+          systemContext: {
+            ...review.systemContext,
+            keyResults: review.systemContext.keyResults.map((keyResult) => ({
+              ...keyResult,
+              keyResultId: deterministicKeyResultId(
+                context.identityId,
+                batchId,
+                keyResult.keyResultRef,
+              ) as never,
+            })),
+          } as never,
+        })),
       };
-      let receipt = requireResult(
-        await this.portability.createGoalForPortability(input, systemContext(context, goal.ref)),
-        'create portable goal',
-      );
+      let lifecycleState: GoalLifecycleState;
+      if (existing) {
+        assertExistingGoalMatchesPortableDefinition(existing, goal, batchId, labelIds);
+        assertLifecycleCanConverge(existing, goal);
+        skipped += 1;
+        lifecycleState = {
+          goalId: existing.id,
+          goalVersion: existing.version,
+          status: existing.status,
+          archivedAt: existing.archivedAt,
+        };
+      } else {
+        const receipt = requireResult(
+          await this.portability.restoreGoalForPortability(input, systemContext(context, goal.ref)),
+          'create portable goal',
+        );
 
-      const committed = await this.portability.getGoalSnapshot(id, context.identityId);
-      if (!committed) {
-        throw new Error(`goals@3 portable goal was not persisted: ${goal.ref}`);
+        const committed = await this.portability.getGoalSnapshot(id, context.identityId);
+        if (!committed) {
+          throw new Error(`goals@3 portable goal was not persisted: ${goal.ref}`);
+        }
+        assertExistingGoalMatchesPortableDefinition(committed, goal, batchId, labelIds);
+        assertLifecycleCanConverge(committed, goal);
+        lifecycleState = {
+          goalId: receipt.goalId,
+          goalVersion: receipt.goalVersion,
+          status: receipt.readModel.status,
+          archivedAt: receipt.readModel.archivedAt,
+        };
       }
-      assertExistingGoalMatchesPortableDefinition(committed, goal, batchId, labelIds);
-      assertLifecycleCanConverge(committed, goal);
 
-      context.references.bindImportedReference(goal.ref, receipt.goalId);
+      context.references.bindImportedReference(goal.ref, lifecycleState.goalId);
       for (const keyResult of goal.keyResults) {
         context.references.bindImportedReference(
           keyResult.ref,
           deterministicKeyResultId(context.identityId, batchId, keyResult.ref),
         );
       }
-      receipt = await transitionGoal(this.api, goal, context, receipt);
+      for (const record of goal.records) {
+        context.references.bindImportedReference(
+          record.ref,
+          deterministicRecordId(context.identityId, batchId, record.ref),
+        );
+      }
+      for (const review of goal.reviews) {
+        context.references.bindImportedReference(
+          review.ref,
+          deterministicReviewId(context.identityId, batchId, review.ref),
+        );
+      }
+      await transitionGoal(this.api, goal, context, lifecycleState);
     }
 
     return {
@@ -421,7 +639,7 @@ export class GoalPortableCapability implements PortableCapability<GoalPortablePa
       updated: 0,
       skipped,
       warnings: [
-        'goals@3 currently covers Goal definitions and Key Results; Goal records/reviews remain on V2 until PORT-1610.',
+        'goals@3 restores source-neutral Goal records; task-source provenance is not portable.',
       ],
     };
   }

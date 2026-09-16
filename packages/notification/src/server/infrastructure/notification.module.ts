@@ -180,6 +180,10 @@ export function createNotificationModule(
       return useCases.markAsRead.execute(id, identityId);
     },
 
+    markAsUnread: async (id, identityId) => notificationMaintenanceApplicationService.markAsUnread(id, identityId),
+    archive: async (id, identityId) => notificationMaintenanceApplicationService.archive(id, identityId),
+    restore: async (id, identityId) => notificationMaintenanceApplicationService.restore(id, identityId),
+
     markAllAsRead: async (identityId) => {
       return useCases.markAsRead.executeAll(identityId);
     },

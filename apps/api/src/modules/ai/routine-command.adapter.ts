@@ -49,6 +49,7 @@ export class RoutineAICommandAdapter implements IAIRoutineCommandPort {
     const timeContext = await this.userTimeContextPort.getUserTimeContext(input.context.identityId);
     const created = await this.routine.createRoutine({
       identityId: input.context.identityId,
+      ...(input.routineId === undefined ? {} : { routineId: input.routineId }),
       name: input.title,
       description: input.description ?? preset?.description,
       trigger: canonicalTrigger(trigger, input.context.startedAt, timeContext.timeZone),
@@ -86,6 +87,7 @@ export class RoutineAICommandAdapter implements IAIRoutineCommandPort {
       overrideIntervalMs: input.overrideIntervalMs,
       expiresAt: input.expiresAt,
       reason: input.reason,
+      source: 'ai',
     });
     return {
       kind: 'override' as const,

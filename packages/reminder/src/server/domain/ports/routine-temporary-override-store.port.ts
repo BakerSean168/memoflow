@@ -11,13 +11,19 @@ import type { RoutineTemporaryOverride } from '../../domain/routine';
  * it — without ever rewriting the long-lived `trigger_json`.
  */
 export interface RoutineTemporaryOverrideStore {
+  findRoutineTemporaryOverride(input: {
+    readonly identityId: string;
+    readonly routineId: string;
+  }): Promise<RoutineTemporaryOverride | null>;
   setRoutineTemporaryOverride(input: {
     readonly identityId: string;
     readonly routineId: string;
     readonly override: RoutineTemporaryOverride;
+    readonly expectedVersion?: number;
   }): Promise<void>;
   clearRoutineTemporaryOverride(input: {
     readonly identityId: string;
     readonly routineId: string;
+    readonly expectedVersion?: number;
   }): Promise<void>;
 }

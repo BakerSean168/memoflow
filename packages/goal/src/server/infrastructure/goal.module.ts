@@ -256,7 +256,12 @@ export function createGoalUseCases(deps: GoalModuleDependencies): GoalModuleUseC
         }
       : {}),
     // Goal CRUD / 目标增删改查
-    createGoal: new CreateGoalUseCase(goalRepository, goalPolicy, goalWriteTransactionRunner),
+    createGoal: new CreateGoalUseCase(
+      goalRepository,
+      goalPolicy,
+      goalWriteTransactionRunner,
+      goalRecordRepository,
+    ),
     getGoal: new GetGoalUseCase(goalRepository),
     listGoals: new ListGoalsUseCase(goalRepository),
     updateGoal: new UpdateGoalUseCase(goalRepository, goalPolicy, goalWriteTransactionRunner),
@@ -321,7 +326,12 @@ export function createGoalUseCases(deps: GoalModuleDependencies): GoalModuleUseC
     getGoalAggregate: new GetGoalAggregateUseCase(goalRepository, goalRecordRepository),
     cloneGoal: new CloneGoalUseCase(
       goalRepository,
-      new CreateGoalUseCase(goalRepository, goalPolicy, goalWriteTransactionRunner),
+      new CreateGoalUseCase(
+        goalRepository,
+        goalPolicy,
+        goalWriteTransactionRunner,
+        goalRecordRepository,
+      ),
     ),
     batchUpdateKeyResultWeights: new BatchUpdateKeyResultWeightsUseCase(
       goalWriteTransactionRunner,

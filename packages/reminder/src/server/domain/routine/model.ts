@@ -27,13 +27,14 @@ export class RoutineDefinition {
     now?: Date;
   }): RoutineDefinition {
     assertNonEmpty(input.identityId, 'identityId');
-    assertNonEmpty(input.name, 'name');
+    const id = input.id === undefined ? randomUUID() : input.id;
+    assertNonEmpty(id, 'id');
     const now = input.now ?? new Date();
     return new RoutineDefinition({
-      id: input.id ?? randomUUID(),
+      id,
       identityId: input.identityId,
-      name: input.name.trim(),
-      description: input.description?.trim() || null,
+      name: normalizeName(input.name),
+      description: normalizeDescription(input.description),
       enabled: input.enabled ?? true,
       trigger: input.trigger ?? null,
       version: 1,
@@ -77,21 +78,47 @@ export class RoutineDefinition {
   }
 
   enable(now = new Date()): void {
-    if (this.state.enabled) return;
-    this.state.enabled = true;
-    this.touch(now);
+    this.update({ enabled: true }, now);
   }
 
   disable(now = new Date()): void {
-    if (!this.state.enabled) return;
-    this.state.enabled = false;
+    this.update({ enabled: false }, now);
+  }
+
+  update(
+    input: {
+      name?: string;
+      description?: string | null;
+      enabled?: boolean;
+      trigger?: RoutineTrigger | null;
+    },
+    now = new Date(),
+  ): boolean {
+    const nextName = input.name === undefined ? this.state.name : normalizeName(input.name);
+    const nextDescription =
+      input.description === undefined
+        ? this.state.description
+        : normalizeDescription(input.description);
+    const nextEnabled = input.enabled === undefined ? this.state.enabled : input.enabled;
+    const nextTrigger = input.trigger === undefined ? this.state.trigger : input.trigger;
+    if (
+      nextName === this.state.name &&
+      nextDescription === this.state.description &&
+      nextEnabled === this.state.enabled &&
+      routineTriggerEquals(nextTrigger, this.state.trigger)
+    ) {
+      return false;
+    }
+    this.state.name = nextName;
+    this.state.description = nextDescription;
+    this.state.enabled = nextEnabled;
+    this.state.trigger = nextTrigger;
     this.touch(now);
+    return true;
   }
 
   setTrigger(trigger: RoutineTrigger | null, now = new Date()): void {
-    if (this.state.trigger === trigger) return;
-    this.state.trigger = trigger;
-    this.touch(now);
+    this.update({ trigger }, now);
   }
 
   snapshot(): RoutineDefinitionState {
@@ -128,13 +155,14 @@ export class RoutineProfile {
     now?: Date;
   }): RoutineProfile {
     assertNonEmpty(input.identityId, 'identityId');
-    assertNonEmpty(input.name, 'name');
+    const id = input.id === undefined ? randomUUID() : input.id;
+    assertNonEmpty(id, 'id');
     const now = input.now ?? new Date();
     return new RoutineProfile({
-      id: input.id ?? randomUUID(),
+      id,
       identityId: input.identityId,
-      name: input.name.trim(),
-      description: input.description?.trim() || null,
+      name: normalizeName(input.name),
+      description: normalizeDescription(input.description),
       enabled: input.enabled ?? true,
       version: 1,
       createdAt: now,
@@ -171,16 +199,36 @@ export class RoutineProfile {
     return this.state.updatedAt;
   }
 
-  enable(now = new Date()): void {
-    if (this.state.enabled) return;
-    this.state.enabled = true;
+  update(
+    input: { name?: string; description?: string | null; enabled?: boolean },
+    now = new Date(),
+  ): boolean {
+    const nextName = input.name === undefined ? this.state.name : normalizeName(input.name);
+    const nextDescription =
+      input.description === undefined
+        ? this.state.description
+        : normalizeDescription(input.description);
+    const nextEnabled = input.enabled === undefined ? this.state.enabled : input.enabled;
+    if (
+      nextName === this.state.name &&
+      nextDescription === this.state.description &&
+      nextEnabled === this.state.enabled
+    ) {
+      return false;
+    }
+    this.state.name = nextName;
+    this.state.description = nextDescription;
+    this.state.enabled = nextEnabled;
     this.touch(now);
+    return true;
+  }
+
+  enable(now = new Date()): void {
+    this.update({ enabled: true }, now);
   }
 
   disable(now = new Date()): void {
-    if (!this.state.enabled) return;
-    this.state.enabled = false;
-    this.touch(now);
+    this.update({ enabled: false }, now);
   }
 
   snapshot(): RoutineProfileState {
@@ -275,6 +323,19 @@ export class ProfileMembership {
     this.state.version += 1;
     this.state.updatedAt = now;
   }
+}
+
+function normalizeName(value: string): string {
+  assertNonEmpty(value, 'name');
+  return value.trim();
+}
+
+function normalizeDescription(value: string | null | undefined): string | null {
+  return value?.trim() || null;
+}
+
+function routineTriggerEquals(left: RoutineTrigger | null, right: RoutineTrigger | null): boolean {
+  return JSON.stringify(left) === JSON.stringify(right);
 }
 
 function assertNonEmpty(value: string, field: string): void {

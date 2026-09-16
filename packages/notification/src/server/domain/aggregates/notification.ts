@@ -42,6 +42,7 @@ export interface NotificationState {
   expiresAt: number | null;
   version: number;
   deletedAt: Date | null;
+  archivedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
   notificationChannels: NotificationChannel[];
@@ -86,24 +87,25 @@ export class Notification extends AggregateRoot<NotificationId> {
   }
   get correlationId(): string | null { return this._props.correlationId; }
   get causationId(): string | null { return this._props.causationId; }
-  get isRead(): boolean { return this._props.isRead; }
+  get isRead(): boolean { return this._props.readAt !== null; }
   get readAt(): number | null { return this._props.readAt; }
   get actions(): NotificationAction[] | null { return this._props.actions ? [...this._props.actions] : null; }
   get metadata(): NotificationMetadata | null { return this._props.metadata; }
   get expiresAt(): number | null { return this._props.expiresAt; }
   get version(): number { return this._props.version; }
   get deletedAt(): Date | null { return this._props.deletedAt; }
+  get archivedAt(): Date | null { return this._props.archivedAt; }
   get createdAt(): Date { return this._props.createdAt; }
   get updatedAt(): Date { return this._props.updatedAt; }
   get notificationChannels(): NotificationChannel[] | null {
     return this._props.notificationChannels.length > 0 ? [...this._props.notificationChannels] : null;
   }
 
-  markAsRead(): void {
-    if (this._props.isRead) return;
+  markAsRead(now: Date = new Date()): void {
+    if (this._props.readAt !== null) return;
+    this._props.readAt = now.getTime();
     this._props.isRead = true;
-    this._props.readAt = Date.now();
-    this._props.updatedAt = new Date();
+    this._props.updatedAt = now;
     this.addDomainEvent<NotificationEventMap['notification:read']>('notification:read', {
       identityId: this._props.identityId,
       notificationId: this.id as NotificationIdBranded,
@@ -112,19 +114,47 @@ export class Notification extends AggregateRoot<NotificationId> {
     });
   }
 
-  markAsUnread(): void {
-    if (!this._props.isRead) return;
+  markAsUnread(now: Date = new Date()): void {
+    if (this._props.readAt === null) return;
     this._props.isRead = false;
     this._props.readAt = null;
-    this._props.updatedAt = new Date();
+    this._props.updatedAt = now;
+    this.addDomainEvent<NotificationEventMap['notification:unread']>('notification:unread', {
+      identityId: this._props.identityId,
+      notificationId: this.id as NotificationIdBranded,
+      notification: this.toServerDTO(),
+    });
   }
 
-  hasBeenRead(): boolean { return this._props.isRead; }
+  archive(now: Date = new Date()): void {
+    if (this._props.archivedAt !== null || this._props.deletedAt !== null) return;
+    this._props.archivedAt = now;
+    this._props.updatedAt = now;
+    this.addDomainEvent<NotificationEventMap['notification:archived']>('notification:archived', {
+      identityId: this._props.identityId,
+      notificationId: this.id as NotificationIdBranded,
+      notification: this.toServerDTO(),
+      archivedAt: now.getTime(),
+    });
+  }
 
-  softDelete(): void {
+  restore(now: Date = new Date()): void {
+    if (this._props.archivedAt === null || this._props.deletedAt !== null) return;
+    this._props.archivedAt = null;
+    this._props.updatedAt = now;
+    this.addDomainEvent<NotificationEventMap['notification:restored']>('notification:restored', {
+      identityId: this._props.identityId,
+      notificationId: this.id as NotificationIdBranded,
+      notification: this.toServerDTO(),
+    });
+  }
+
+  hasBeenRead(): boolean { return this._props.readAt !== null; }
+
+  softDelete(now: Date = new Date()): void {
     if (this._props.deletedAt) return;
-    this._props.deletedAt = new Date();
-    this._props.updatedAt = new Date();
+    this._props.deletedAt = now;
+    this._props.updatedAt = now;
     this.addDomainEvent<NotificationEventMap['notification:deleted']>('notification:deleted', {
       identityId: this._props.identityId,
       notificationId: this.id as NotificationIdBranded,
@@ -161,7 +191,7 @@ export class Notification extends AggregateRoot<NotificationId> {
       navigationIntent: cloneNavigationIntent(this._props.navigationIntent),
       correlationId: this._props.correlationId,
       causationId: this._props.causationId,
-      isRead: this._props.isRead,
+      isRead: this._props.readAt !== null,
       readAt: this._props.readAt,
       actions: this._props.actions?.map((action) => action.toDTO()) ?? null,
       metadata: this._props.metadata?.toDTO() ?? null,
@@ -170,6 +200,7 @@ export class Notification extends AggregateRoot<NotificationId> {
       createdAt: this._props.createdAt.getTime(),
       updatedAt: this._props.updatedAt.getTime(),
       deletedAt: this._props.deletedAt?.getTime() ?? null,
+      archivedAt: this._props.archivedAt?.getTime() ?? null,
       notificationChannels: this._props.notificationChannels.length
         ? this._props.notificationChannels.map((channel) => channel.toServerDTO())
         : null,
@@ -226,6 +257,7 @@ export class Notification extends AggregateRoot<NotificationId> {
       expiresAt: params.expiresAt ?? null,
       version: 1,
       deletedAt: null,
+      archivedAt: null,
       createdAt: now,
       updatedAt: now,
       notificationChannels: [],

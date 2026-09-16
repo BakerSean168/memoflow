@@ -1,5 +1,8 @@
 import type { NotificationCreatedEvent } from '../domain/events/notification-created.event';
 import type { NotificationReadEvent } from '../domain/events/notification-read.event';
+import type { NotificationUnreadEvent } from '../domain/events/notification-unread.event';
+import type { NotificationArchivedEvent } from '../domain/events/notification-archived.event';
+import type { NotificationRestoredEvent } from '../domain/events/notification-restored.event';
 import type { NotificationDeletedEvent } from '../domain/events/notification-deleted.event';
 import type { NotificationChannelFailedEvent } from '../domain/events/notification-channel-failed.event';
 import type { NotificationTemplateCreatedEvent } from '../domain/events/notification-template-created.event';
@@ -20,6 +23,9 @@ import type {
 export type NotificationEventMap = {
   'notification:created': NotificationCreatedEvent;
   'notification:read': NotificationReadEvent;
+  'notification:unread': NotificationUnreadEvent;
+  'notification:archived': NotificationArchivedEvent;
+  'notification:restored': NotificationRestoredEvent;
   'notification:deleted': NotificationDeletedEvent;
   'notification:channel-failed': NotificationChannelFailedEvent;
 
