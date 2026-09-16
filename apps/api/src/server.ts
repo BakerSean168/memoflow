@@ -318,6 +318,7 @@ async function bootstrap(): Promise<void> {
       notificationApiModule.module.portableCapability,
       createLabelPortableCapability(labelService),
       goalComposed.portableCapability,
+      taskComposed.portableCapability,
     ],
   });
   const goalWorkspaceService = new GoalWorkspaceQueryService({

@@ -5,3 +5,5 @@
  */
 
 export { TaskOccurrenceProjectionService } from './task-occurrence-projection.service';
+
+export * from './task-canonical-restore.service';

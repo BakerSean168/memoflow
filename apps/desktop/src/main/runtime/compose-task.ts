@@ -115,6 +115,8 @@ export interface ComposeTaskResult {
     readonly taskPlanRepository: ITaskPlanRepository;
     readonly taskOccurrenceRepository: ITaskOccurrenceRepository;
   };
+  /** Task-owned V3 portability capability registered by the host. */
+  readonly portableCapability: ReturnType<typeof createTaskModule>['portableCapability'];
 }
 
 /**
@@ -187,5 +189,6 @@ export function composeTask(dependencies: ComposeTaskDependencies): ComposeTaskR
       taskPlanRepository,
       taskOccurrenceRepository,
     },
+    portableCapability: instance.portableCapability,
   };
 }

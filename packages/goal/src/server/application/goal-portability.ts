@@ -325,6 +325,19 @@ export class GoalPortableCapability implements PortableCapability<GoalPortablePa
       } else {
         created += 1;
       }
+
+      // Dry-run predicts the same deterministic ids apply persists, so dependents
+      // ordered after goals can compare Goal/Key Result relations before any
+      // mutation-capable call. These bindings are predictions on the operation-local
+      // registry only; dry-run never mutates persistence. An already bound ref is
+      // re-bound to the same deterministic prediction, so replay stays idempotent.
+      context.references.bindImportedReference(goal.ref, id);
+      for (const keyResult of goal.keyResults) {
+        context.references.bindImportedReference(
+          keyResult.ref,
+          deterministicKeyResultId(context.identityId, batchId, keyResult.ref),
+        );
+      }
     }
     return {
       created,
