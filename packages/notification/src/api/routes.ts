@@ -9,7 +9,6 @@
  *   GET    /preferences     — Get notification preferences (identity-scoped)
  *   PUT    /preferences     — Update notification preferences (identity-scoped)
  *   GET    /:id             — Get notification by ID
- *   PUT    /:id             — Update notification (UpdateNotificationSchema)
  *   DELETE /:id             — Delete notification
  *   POST   /:id/read        — Mark single notification as read
  *   POST   /batch-read      — Batch mark as read (shared id-batch schema)

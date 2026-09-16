@@ -7665,16 +7665,6 @@
       ]
     },
     {
-      "path": "packages/notification/src/server/application/use-cases/commands/__tests__/update-notification.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/notification/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/notification/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/notification/src/server/application/use-cases/queries/__tests__/get-notification-preference.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11679,7 +11669,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 46
+      "fileCount": 45
     },
     {
       "id": "packages/reminder/vitest.config.ts",
@@ -12120,7 +12110,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 46
+      "fileCount": 45
     },
     {
       "id": "packages/patterns/vitest.config.ts",
@@ -12577,7 +12567,6 @@
       "packages/notification/src/server/application/use-cases/commands/__tests__/create-notification.test.ts",
       "packages/notification/src/server/application/use-cases/commands/__tests__/mark-notification-as-read.test.ts",
       "packages/notification/src/server/application/use-cases/commands/__tests__/update-notification-preference.test.ts",
-      "packages/notification/src/server/application/use-cases/commands/__tests__/update-notification.test.ts",
       "packages/notification/src/server/application/use-cases/queries/__tests__/get-notification-preference.test.ts",
       "packages/notification/src/server/application/use-cases/queries/__tests__/get-unread-notifications.test.ts",
       "packages/notification/src/server/application/use-cases/queries/__tests__/get-user-notifications.test.ts",
@@ -12837,7 +12826,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1113,
+    "unit": 1112,
     "integration": 38,
     "smoke": 3,
     "boundary-ipc": 9,

@@ -47,13 +47,26 @@ export interface NotificationState {
   notificationChannels: NotificationChannel[];
 }
 
+function cloneNavigationIntent(
+  navigationIntent: NotificationNavigationIntentDTO | null,
+): NotificationNavigationIntentDTO | null {
+  if (!navigationIntent) return null;
+  return {
+    ...navigationIntent,
+    params: navigationIntent.params ? { ...navigationIntent.params } : undefined,
+  };
+}
+
 /** Durable user-visible Notification Fact. Delivery lifecycle is not root state. */
 export class Notification extends AggregateRoot<NotificationId> {
   private _props: NotificationState;
 
   private constructor(state: NotificationState) {
     super(state.id);
-    this._props = { ...state };
+    this._props = {
+      ...state,
+      navigationIntent: cloneNavigationIntent(state.navigationIntent),
+    };
   }
 
   get identityId(): IdentityId { return this._props.identityId; }
@@ -68,7 +81,9 @@ export class Notification extends AggregateRoot<NotificationId> {
   get urgency(): UrgencyLevel { return this._props.urgency; }
   get relatedEntityType(): RelatedEntityType | null { return this._props.relatedEntityType; }
   get relatedEntityId(): string | null { return this._props.relatedEntityId; }
-  get navigationIntent(): NotificationNavigationIntentDTO | null { return this._props.navigationIntent; }
+  get navigationIntent(): NotificationNavigationIntentDTO | null {
+    return cloneNavigationIntent(this._props.navigationIntent);
+  }
   get correlationId(): string | null { return this._props.correlationId; }
   get causationId(): string | null { return this._props.causationId; }
   get isRead(): boolean { return this._props.isRead; }
@@ -105,27 +120,6 @@ export class Notification extends AggregateRoot<NotificationId> {
   }
 
   hasBeenRead(): boolean { return this._props.isRead; }
-
-  updateDetails(patch: {
-    title?: string;
-    content?: string;
-    metadata?: NotificationMetadataDTO | null;
-    navigationIntent?: NotificationNavigationIntentDTO | null;
-    importance?: ImportanceLevel;
-    urgency?: UrgencyLevel;
-    expiresAt?: number | null;
-  }): void {
-    if (patch.title !== undefined) this._props.title = patch.title;
-    if (patch.content !== undefined) this._props.content = patch.content;
-    if (patch.metadata !== undefined) {
-      this._props.metadata = patch.metadata ? NotificationMetadata.fromDTO(patch.metadata) : null;
-    }
-    if (patch.navigationIntent !== undefined) this._props.navigationIntent = patch.navigationIntent;
-    if (patch.importance !== undefined) this._props.importance = patch.importance;
-    if (patch.urgency !== undefined) this._props.urgency = patch.urgency;
-    if (patch.expiresAt !== undefined) this._props.expiresAt = patch.expiresAt;
-    this._props.updatedAt = new Date();
-  }
 
   softDelete(): void {
     if (this._props.deletedAt) return;
@@ -164,7 +158,7 @@ export class Notification extends AggregateRoot<NotificationId> {
       urgency: this._props.urgency,
       relatedEntityType: this._props.relatedEntityType,
       relatedEntityId: this._props.relatedEntityId,
-      navigationIntent: this._props.navigationIntent,
+      navigationIntent: cloneNavigationIntent(this._props.navigationIntent),
       correlationId: this._props.correlationId,
       causationId: this._props.causationId,
       isRead: this._props.isRead,

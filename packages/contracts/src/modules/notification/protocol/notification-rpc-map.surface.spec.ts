@@ -4,7 +4,8 @@
  * Enumerates every Notification mutation ledger row and detects missing
  * schema/type references before transport migration. The RPC map must import
  * only the inferred request/response types from `../api` (no inline object
- * types). Protocol-only rows (execute-action, send, retry, channel:list) are
+ * types). Protocol-only rows (execute-action, send, retry, channel:list,
+ * get-stats) are
  * documented as explicitly unsupported transport surfaces — never silently
  * divergent payloads.
  *
@@ -43,7 +44,6 @@ const NOTIFICATION_LEDGER = [
 
 /** Protocol-only RPC rows with no transport wiring (explicit unsupported surface). */
 const NOTIFICATION_PROTOCOL_ONLY = [
-  'notification:update',
   'notification:get-stats',
   'notification:execute-action',
   'notification:send',
@@ -116,6 +116,11 @@ describe('notification RPC map surface (Phase 4 ledger)', () => {
     for (const key of NOTIFICATION_PROTOCOL_ONLY) {
       expect(rpcMap, `protocol-only ${key} must stay in the map`).toContain(`'${key}':`);
     }
+  });
+
+  it('does not expose an arbitrary Fact update RPC', () => {
+    expect(rpcMap).not.toContain("'notification:update':");
+    expect(readApiFile('notification-crud.dto.ts')).not.toContain('UpdateNotificationSchema');
   });
 
   it('imported names are all referenced by the map body (no dead imports)', () => {

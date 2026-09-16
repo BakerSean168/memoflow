@@ -71,18 +71,50 @@ describe('Notification Fact aggregate', () => {
     expect(fact.toServerDTO()).not.toHaveProperty('status');
   });
 
-  it('updates only Fact-owned mutable details', () => {
+  it('keeps the semantic Fact content immutable after creation', () => {
     const fact = createFact();
-    fact.updateDetails({
-      title: 'Updated',
-      content: 'Updated content',
-      navigationIntent: { route: '/tasks/task-1', params: { tab: 'activity' } },
-      expiresAt: 123456,
+    const content = {
+      title: fact.title,
+      content: fact.content,
+      navigationIntent: fact.navigationIntent,
+      expiresAt: fact.expiresAt,
+    };
+    expect(fact).not.toHaveProperty('updateDetails');
+    expect({
+      title: fact.title,
+      content: fact.content,
+      navigationIntent: fact.navigationIntent,
+      expiresAt: fact.expiresAt,
+    }).toEqual(content);
+  });
+
+  it('defensively copies nested navigation intent content', () => {
+    const input = { route: '/tasks/task-1', params: { tab: 'activity' } };
+    const fact = Notification.create({
+      ...createFact().toServerDTO(),
+      identityId: 'identity-1' as never,
+      navigationIntent: input,
+      type: NotificationType.Reminder,
+      category: NotificationCategory.Task,
+      title: 'Deadline',
+      content: 'Task is due soon',
+      workflowKey: 'task.deadline',
+      topic: 'task.deadline',
+      idempotencyKey: 'task:1:deadline:copy',
     });
-    expect(fact.title).toBe('Updated');
-    expect(fact.content).toBe('Updated content');
-    expect(fact.navigationIntent).toEqual({ route: '/tasks/task-1', params: { tab: 'activity' } });
-    expect(fact.expiresAt).toBe(123456);
+    input.params.tab = 'mutated-input';
+    const exposed = fact.navigationIntent;
+    if (exposed?.params) exposed.params.tab = 'mutated-output';
+    expect(fact.navigationIntent).toEqual({
+      route: '/tasks/task-1',
+      params: { tab: 'activity' },
+    });
+    const dto = fact.toServerDTO();
+    if (dto.navigationIntent?.params) dto.navigationIntent.params.tab = 'mutated-dto';
+    expect(fact.toServerDTO().navigationIntent).toEqual({
+      route: '/tasks/task-1',
+      params: { tab: 'activity' },
+    });
   });
 
   it('soft deletes the Fact idempotently', () => {
