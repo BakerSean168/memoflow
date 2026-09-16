@@ -171,11 +171,12 @@ describe('desktop runtime composer surface (Batch Step D)', () => {
     expect(main).toContain('.register(focusWindowElectronModule)');
   });
 
-  it('wires the stable V3 owner capabilities into Data Portability', () => {
+  it('wires stable V3 owner capabilities into Data Portability', () => {
     expect(main).toMatch(/composeDataPortability\(\{[\s\S]*?portableCapabilities:/);
-    expect(main).toContain('accountComposed.portableCapability');
     expect(main).toContain('settingElectronModule.portableCapability');
     expect(main).toContain('notificationComposed.module.portableCapability');
+    expect(main).toContain('createLabelPortableCapability(labelService)');
+    expect(main).toContain('goalComposed.portableCapability');
   });
 
   it('notification composer exposes the durable NotificationRequested writer from the SAME repository set', () => {

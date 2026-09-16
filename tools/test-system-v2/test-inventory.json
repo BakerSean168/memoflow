@@ -5198,6 +5198,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/goal/portable-v3.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/goal/protocol/goal-rpc-map.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6313,6 +6321,16 @@
     },
     {
       "path": "packages/goal/src/server/application/goal-application-types-barrel.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/goal/src/server/application/goal-portability.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/goal/vitest.config.ts"
@@ -7461,6 +7479,14 @@
       "primarySuite": "integration",
       "collectors": [
         "packages/label/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/label/src/application/label-portability.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/label/vitest.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -11569,7 +11595,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 84
+      "fileCount": 85
     },
     {
       "id": "packages/goal/vitest.mappers.config.ts",
@@ -11968,7 +11994,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 88
+      "fileCount": 89
     },
     {
       "id": "packages/dashboard/vitest.config.ts",
@@ -12003,7 +12029,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 84
+      "fileCount": 85
     },
     {
       "id": "packages/governance/vitest.config.ts",
@@ -12031,7 +12057,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 5
+      "fileCount": 6
     },
     {
       "id": "packages/notification/vitest.config.ts",
@@ -12382,6 +12408,7 @@
       "packages/goal/src/server/application/event-handlers/__tests__/register-goal-event-listeners.test.ts",
       "packages/goal/src/server/application/event-handlers/task-goal-progress.handler.spec.ts",
       "packages/goal/src/server/application/goal-application-types-barrel.surface.spec.ts",
+      "packages/goal/src/server/application/goal-portability.spec.ts",
       "packages/goal/src/server/application/services/__tests__/goal-workspace-query.service.spec.ts",
       "packages/goal/src/server/application/services/goal-review-context-builder.spec.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/abandon-goal.test.ts",
@@ -12750,7 +12777,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1104,
+    "unit": 1107,
     "integration": 38,
     "smoke": 3,
     "boundary-ipc": 9,

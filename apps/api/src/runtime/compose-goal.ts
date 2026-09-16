@@ -40,6 +40,7 @@ import type { PrismaClient } from '@memoflow/database';
 import {
   createGoalEventListenersRuntime,
   createGoalModule,
+  createGoalPortableCapability,
   createGoalPrismaRepositories,
   createGoalPrismaDeletionTransactionRunner,
   createGoalRuntimeContribution,
@@ -80,6 +81,8 @@ export interface ComposedGoal {
   readonly module: GoalApiModuleDef;
   /** The transport-neutral application port (`instance.api`) for sibling modules to orchestrate. 供兄弟模块编排的与传输无关 application port（`instance.api`）。 */
   readonly applicationPort: GoalApplicationPort;
+  /** Owner-provided V3 data portability capability from the same module instance. */
+  readonly portableCapability: ReturnType<typeof createGoalPortableCapability>;
   /** Exact instance-bound owner repositories for host read-composition adapters. */
   readonly repositories: {
     readonly goalRepository: IGoalRepository;
@@ -158,6 +161,7 @@ export function composeGoal(dependencies: ComposeGoalDependencies): ComposedGoal
   return {
     module: createGoalApiModule({ instance }),
     applicationPort: instance.api,
+    portableCapability: createGoalPortableCapability(instance.api, instance.portability),
     repositories: { goalRepository, goalRecordRepository },
   };
 }

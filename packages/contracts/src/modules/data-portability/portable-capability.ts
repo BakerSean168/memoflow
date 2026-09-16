@@ -13,6 +13,7 @@ export interface PortableReferencePort {
   ): PortableReferenceV3;
   bindImportedReference(portableRef: PortableReferenceV3, targetKey: string): void;
   resolveImportedReference(portableRef: PortableReferenceV3): string;
+  hasImportedReference?(portableRef: PortableReferenceV3): boolean;
 }
 
 /** Host-owned execution context. Persistent identity is never part of portable payloads. */

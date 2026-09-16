@@ -26,4 +26,5 @@ export interface LabelRepository {
     normalizedNames: readonly string[],
   ): Promise<LabelRecord[]>;
   list(options: LabelListOptions): Promise<LabelRecord[]>;
+  listAll(identityId: string): Promise<LabelRecord[]>;
 }

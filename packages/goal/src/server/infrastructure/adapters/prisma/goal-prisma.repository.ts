@@ -177,6 +177,8 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
         where.archivedAt = { not: null };
         break;
       case 'all':
+        delete where.archivedAt;
+        break;
       case undefined:
         break;
     }

@@ -37,7 +37,11 @@ import {
 } from '@memoflow/repository/electron';
 import { createSchedulePowerSyncRepositories } from '@memoflow/schedule';
 import { createSchedulerPowerSyncRepositories } from '@memoflow/scheduler';
-import { LabelService, PowerSyncLabelRepository } from '@memoflow/label';
+import {
+  LabelService,
+  PowerSyncLabelRepository,
+  createLabelPortableCapability,
+} from '@memoflow/label';
 import {
   GoalKnowledgeService,
   TaskKnowledgeService,
@@ -516,6 +520,8 @@ async function registerBusinessModules(
       accountComposed.portableCapability,
       settingElectronModule.portableCapability,
       notificationComposed.module.portableCapability,
+      createLabelPortableCapability(labelService),
+      goalComposed.portableCapability,
     ],
   });
 
