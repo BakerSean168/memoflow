@@ -51,11 +51,9 @@ import {
   loadPowerSyncRoutineLocalRegistrations,
   type ReminderScheduleExecutionSource,
   type ReminderScheduleProjectionSource,
+  type ReminderModuleInstance,
+  type ReminderPowerSyncRepositorySet,
 } from '@memoflow/reminder';
-import type {
-  ReminderApplicationPort,
-  IReminderTemplateRepository,
-} from '@memoflow/reminder/server';
 import {
   createReminderElectronModule,
   type ReminderElectronModuleDef,
@@ -116,11 +114,13 @@ export interface ComposedReminderDesktop {
   /** Already-bound IElectronModule-compatible handle. 已绑定的 IElectronModule 兼容 handle。 */
   readonly module: ReminderElectronModuleDef;
   /** Canonical transport-neutral application port from the SAME module instance. */
-  readonly applicationPort: ReminderApplicationPort;
+  readonly applicationPort: ReminderModuleInstance['api'];
   /** Routine Coach owner-domain command seam for approved AI/product orchestration. */
   readonly routineCommandPort: RoutineCoachCommandPort;
   /** Repository view exposed to sibling modules (dashboard). 暴露给兄弟模块（dashboard）的仓储视图。 */
-  readonly repositories: { readonly reminderTemplateRepository: IReminderTemplateRepository };
+  readonly repositories: {
+    readonly reminderTemplateRepository: ReminderPowerSyncRepositorySet['reminderTemplateRepository'];
+  };
   /** Schedule execution source built from the SAME repository set. 从同一仓储集合构建的 schedule execution source。 */
   readonly scheduleExecutionSource: ReminderScheduleExecutionSource;
   /** Schedule projection source built from the SAME repository set. 从同一仓储集合构建的 schedule projection source。 */
