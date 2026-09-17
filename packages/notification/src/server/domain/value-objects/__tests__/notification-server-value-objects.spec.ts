@@ -1,6 +1,4 @@
 import { CategoryPreference } from '../category-preference';
-import { ChannelError } from '../channel-error';
-import { ChannelResponse } from '../channel-response';
 import { DoNotDisturbConfig } from '../do-not-disturb-config';
 import { NotificationAction } from '../notification-action';
 import { NotificationMetadata } from '../notification-metadata';
@@ -10,8 +8,6 @@ import { NotificationActionType } from '../notification-action-type';
 describe('notification server value object re-exports', () => {
   it('exposes shared implementations through server paths', () => {
     expect(CategoryPreference.createDefault().enabled).toBe(true);
-    expect(ChannelError.of('TIMEOUT', 'retry').isRetryable).toBe(true);
-    expect(ChannelResponse.success('message-1').isSuccess).toBe(true);
     expect(DoNotDisturbConfig.createDefault().startTime).toBe('22:00');
     expect(NotificationAction.of('open', 'Open', NotificationActionType.Navigate).label).toBe(
       'Open',

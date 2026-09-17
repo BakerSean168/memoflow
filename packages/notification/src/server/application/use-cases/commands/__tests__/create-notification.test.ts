@@ -132,9 +132,7 @@ describe('NOTIF-2401 CreateNotificationUseCase Fact / DeliveryPlan', () => {
     });
     expect(result.ok).toBe(true);
     if (!result.ok) throw new Error('expected ok');
-    expect(result.data.notificationChannels?.map((channel) => channel.channelType)).toEqual([
-      NotificationChannelType.InApp,
-    ]);
+    expect(result.data).not.toHaveProperty('notificationChannels');
 
     const [, outbox, decisions] = vi.mocked(notificationRepo.save).mock.calls[0];
     expect(outbox?.map((entry) => entry.channel)).toEqual([NotificationChannelType.InApp]);
@@ -179,7 +177,7 @@ describe('NOTIF-2401 CreateNotificationUseCase Fact / DeliveryPlan', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) throw new Error('expected ok');
     expect(result.data.isRead).toBe(false);
-    expect(result.data.notificationChannels).toBeNull();
+    expect(result.data).not.toHaveProperty('notificationChannels');
 
     const [, outbox, decisions] = vi.mocked(notificationRepo.save).mock.calls[0];
     expect(outbox).toEqual([]);
@@ -330,7 +328,7 @@ describe('NOTIF-2401 CreateNotificationUseCase Fact / DeliveryPlan', () => {
     });
     expect(result.ok).toBe(true);
     if (!result.ok) throw new Error('expected ok');
-    expect(result.data.notificationChannels).toHaveLength(1);
+    expect(result.data).not.toHaveProperty('notificationChannels');
     const [, outbox, decisions] = vi.mocked(notificationRepo.save).mock.calls[0];
     expect(outbox).toHaveLength(1);
     expect(decisions).toHaveLength(1);

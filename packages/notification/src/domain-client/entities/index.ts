@@ -1,6 +1,2 @@
-/**
- * Notification Entities
- * Notification 模块实体导出
- */
-
-export { NotificationChannel, type NotificationChannelState } from './notification-channel.js';
+/** Notification has no client-side delivery child entities after N4-2402A. */
+export {};

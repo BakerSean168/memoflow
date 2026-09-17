@@ -1,11 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   NotificationCategory,
-  NotificationChannelType,
   NotificationType,
 } from '@memoflow/contracts/notification';
 import { Notification } from '../notification';
-import { NotificationChannel } from '../../entities/notification-channel';
 
 function createFact() {
   return Notification.create({
@@ -128,17 +126,10 @@ describe('Notification Fact aggregate', () => {
     expect(fact.domainEvents.map((event) => event.eventType)).toEqual(['notification:deleted']);
   });
 
-  it('projects durable channel attempts without making them root Fact status', () => {
-    const fact = createFact();
-    const channel = NotificationChannel.create({
-      notificationId: fact.id,
-      channelType: NotificationChannelType.Desktop,
-      recipient: 'identity-1',
-    });
-    fact.addChannel(channel);
-    expect(fact.getChannelByType(NotificationChannelType.Desktop)).toBe(channel);
-    expect(fact.toServerDTO().notificationChannels).toHaveLength(1);
-    expect(fact.toServerDTO()).not.toHaveProperty('status');
+  it('does not project delivery execution state onto the Fact contract', () => {
+    const dto = createFact().toServerDTO();
+    expect(dto).not.toHaveProperty('notificationChannels');
+    expect(dto).not.toHaveProperty('status');
   });
 
   it('serializes workflow, topic, navigation, related entity, importance and urgency on the Fact', () => {
@@ -185,7 +176,6 @@ describe('Notification Fact aggregate', () => {
       deletedAt: null,
       createdAt: original.createdAt,
       updatedAt: original.updatedAt,
-      notificationChannels: [],
     });
     expect(loaded.toServerDTO()).toMatchObject({
       workflowKey: 'task.deadline',

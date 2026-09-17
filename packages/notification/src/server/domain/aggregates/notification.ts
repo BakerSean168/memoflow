@@ -16,7 +16,6 @@ import {
   NotificationAction,
   NotificationMetadata,
 } from '../value-objects';
-import { NotificationChannel } from '../entities/notification-channel';
 
 export interface NotificationState {
   id: NotificationId;
@@ -45,7 +44,6 @@ export interface NotificationState {
   archivedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
-  notificationChannels: NotificationChannel[];
 }
 
 function cloneNavigationIntent(
@@ -97,9 +95,6 @@ export class Notification extends AggregateRoot<NotificationId> {
   get archivedAt(): Date | null { return this._props.archivedAt; }
   get createdAt(): Date { return this._props.createdAt; }
   get updatedAt(): Date { return this._props.updatedAt; }
-  get notificationChannels(): NotificationChannel[] | null {
-    return this._props.notificationChannels.length > 0 ? [...this._props.notificationChannels] : null;
-  }
 
   markAsRead(now: Date = new Date()): void {
     if (this._props.readAt !== null) return;
@@ -164,14 +159,6 @@ export class Notification extends AggregateRoot<NotificationId> {
     });
   }
 
-  addChannel(channel: NotificationChannel): void {
-    this._props.notificationChannels.push(channel);
-    this._props.updatedAt = new Date();
-  }
-
-  getChannelByType(type: string): NotificationChannel | undefined {
-    return this._props.notificationChannels.find((channel) => channel.channelType === type);
-  }
 
   toServerDTO(): NotificationServerDTO {
     return {
@@ -201,9 +188,6 @@ export class Notification extends AggregateRoot<NotificationId> {
       updatedAt: this._props.updatedAt.getTime(),
       deletedAt: this._props.deletedAt?.getTime() ?? null,
       archivedAt: this._props.archivedAt?.getTime() ?? null,
-      notificationChannels: this._props.notificationChannels.length
-        ? this._props.notificationChannels.map((channel) => channel.toServerDTO())
-        : null,
     };
   }
 
@@ -260,7 +244,6 @@ export class Notification extends AggregateRoot<NotificationId> {
       archivedAt: null,
       createdAt: now,
       updatedAt: now,
-      notificationChannels: [],
     });
 
     notification.addDomainEvent<NotificationEventMap['notification:created']>('notification:created', {

@@ -5,8 +5,6 @@ import {
   NOTIFICATION_REQUESTED_MESSAGE_TYPE,
 } from '@memoflow/contracts/notification';
 import { Notification } from '../../domain/aggregates/notification';
-import { NotificationChannel } from '../../domain/entities/notification-channel';
-import { ChannelError } from '../../domain/value-objects/channel-error';
 import { CreateNotificationUseCase } from '../../application/use-cases/commands/create-notification.use-case';
 import type { INotificationRepository } from '../../domain/repositories/i-notification-repository';
 import type { INotificationPreferenceRepository } from '../../domain/repositories';
@@ -125,11 +123,16 @@ export interface NotificationDeliveryContext {
   readonly identityId: string;
 }
 
+export interface NotificationDeliveryTarget {
+  readonly channelType: string;
+  readonly recipient: string | null;
+}
+
 export interface NotificationChannelDeliverer {
-  /** 投递单个渠道；成功 resolve，失败 throw（worker 会标记 Failed 并安排重试）。 */
+  /** Deliver one execution target. Receipt/outbox owns status; Fact is immutable delivery-wise. */
   deliver(
     notification: Notification,
-    channel: NonNullable<Notification['notificationChannels']>[number],
+    target: NotificationDeliveryTarget,
     context: NotificationDeliveryContext,
   ): Promise<void>;
 }
@@ -342,20 +345,6 @@ export function createNotificationRuntimeContribution(
   let timer: ReturnType<typeof setInterval> | null = null;
   let flushing = false;
 
-  const saveNotificationChannels = async (
-    notification: Notification | null,
-    channel: string,
-    errorMsg?: string,
-  ): Promise<void> => {
-    if (!notification || !repository) return;
-    const ch = notification.notificationChannels?.find((c) => c.channelType === channel);
-    if (!ch) return;
-    if (errorMsg) {
-      ch.markAsFailed(ChannelError.create({ code: 'DELIVERY_FAILED', message: errorMsg }));
-    }
-    await repository.save(notification);
-  };
-
   /**
    * Deliver a claimed durable dispatch outbox entry using W0 lease/claim fencing.
    * Returns the final recorded receipt so callers can reconcile downstream state.
@@ -403,33 +392,14 @@ export function createNotificationRuntimeContribution(
     try {
       const deliverer = getDelivererForChannel(outbox.channel);
 
+      const deliveryTarget: NotificationDeliveryTarget = {
+        channelType: outbox.channel,
+        recipient: outbox.identityId,
+      };
       if (notification) {
-        const ch = notification.notificationChannels?.find((c) => c.channelType === outbox.channel);
-        if (ch) {
-          const alreadyDelivered =
-            ch.status === 'Delivered' ||
-            ((ch.response as { idempotencyKey?: string; deliveryId?: string } | null)?.idempotencyKey ===
-              deliveryContext.idempotencyKey ||
-              (ch.response as { idempotencyKey?: string; deliveryId?: string } | null)?.deliveryId ===
-                deliveryContext.deliveryId);
-
-          if (!alreadyDelivered) {
-            await deliverer.deliver(notification, ch, deliveryContext);
-            if (ch.status === 'Pending') {
-              ch.send();
-              ch.markAsDelivered();
-            }
-          }
-        } else {
-          const tempChannel = NotificationChannel.create({
-            notificationId: notification.id,
-            channelType: outbox.channel as never,
-            recipient: outbox.identityId,
-          });
-          await deliverer.deliver(notification, tempChannel, deliveryContext);
-        }
+        await deliverer.deliver(notification, deliveryTarget, deliveryContext);
       } else {
-        // No persisted Notification aggregate: deliver standalone from the outbox payload.
+        // No persisted Fact is required to execute a durable dispatch.
         await deliverer.deliver(
           {
             id: outbox.notificationId,
@@ -439,10 +409,7 @@ export function createNotificationRuntimeContribution(
             type: (payloadData.type as never) ?? 'Info',
             category: (payloadData.category as never) ?? 'System',
           } as never,
-          {
-            channelType: outbox.channel,
-            recipient: outbox.identityId,
-          } as never,
+          deliveryTarget,
           deliveryContext,
         );
       }
@@ -471,7 +438,6 @@ export function createNotificationRuntimeContribution(
       const isApplied = (recordedReceipt as unknown as { applied?: boolean }).applied !== false;
 
       if (recordedReceipt.status === 'succeeded' && isApplied) {
-        await saveNotificationChannels(notification, outbox.channel);
         metricsService.recordDelivered();
 
         // SSE is a read-only outbox consumer: broadcast the real-time delivery
@@ -526,9 +492,7 @@ export function createNotificationRuntimeContribution(
         };
 
         const recordedReceipt = await reliableAdapter.recordDeliveryReceipt(deadReceipt, claimContext);
-        if (recordedReceipt.status === 'dead_letter') {
-          await saveNotificationChannels(notification, outbox.channel, errorMsg);
-          // W7 互斥语义：dead-letter 是独立终态，不再累计 outbox.failed
+        if (recordedReceipt.status === 'dead_letter') {          // W7 互斥语义：dead-letter 是独立终态，不再累计 outbox.failed
           metricsService.recordDeadLetter();
 
           logger.error('[NotificationRuntime] Outbox dispatch reached dead-letter state', {
@@ -570,9 +534,7 @@ export function createNotificationRuntimeContribution(
       };
 
       const recordedReceipt = await reliableAdapter.recordDeliveryReceipt(retryReceipt, claimContext);
-      if (recordedReceipt.status === 'retryable') {
-        await saveNotificationChannels(notification, outbox.channel, errorMsg);
-        // W7 互斥语义：retryable 是独立状态，不再累计 outbox.failed
+      if (recordedReceipt.status === 'retryable') {        // W7 互斥语义：retryable 是独立状态，不再累计 outbox.failed
         metricsService.recordRetry();
 
         logger.warn('[NotificationRuntime] Outbox dispatch failed, scheduled retry', {
@@ -766,107 +728,6 @@ export function createNotificationRuntimeContribution(
         }
       }
 
-      // Priority 3: Recovery Projection — reconstruct channel response from durable ack for succeeded outboxes with missing channel response
-      const reconcileUnprojectedOutboxes = async (): Promise<void> => {
-        if (!deps?.repository || !deps?.reliableAdapter) return;
-        const querySucceeded = (deps.reliableAdapter as unknown as { querySucceededOutboxes?: (options?: number | { limit?: number; lastCursor?: string }) => Promise<Array<Record<string, unknown>>> }).querySucceededOutboxes;
-        if (typeof querySucceeded !== 'function') return;
-
-        let lastCursor: string | undefined = undefined;
-        let pageCount = 0;
-        const maxPages = 5;
-
-        while (pageCount < maxPages) {
-          pageCount++;
-          const succeededOutboxes = await querySucceeded.call(deps.reliableAdapter, { limit: 50, lastCursor });
-          if (!Array.isArray(succeededOutboxes) || succeededOutboxes.length === 0) {
-            break;
-          }
-
-          for (const outboxItem of succeededOutboxes) {
-            const identityId = (outboxItem.identityId ?? outboxItem.identity_id) as string | undefined;
-            const notificationId = (outboxItem.notificationId ?? outboxItem.notification_id) as string | undefined;
-            const idempotencyKey = (outboxItem.idempotencyKey ?? outboxItem.idempotency_key) as string | undefined;
-            const channelName = outboxItem.channel as string | undefined;
-            const deliveryId = outboxItem.id as string | undefined;
-            const updatedAtIso = (outboxItem.updatedAt ?? outboxItem.updated_at) as string | undefined;
-
-            if (updatedAtIso && deliveryId) {
-              const { encodeReceiptCursor } = await import('../adapters/powersync/power-sync-notification-reliable.adapter');
-              lastCursor = encodeReceiptCursor(updatedAtIso, deliveryId);
-            }
-
-            if (!identityId || !notificationId || !idempotencyKey || !channelName || !deliveryId) continue;
-
-            const notification = await deps.repository.findByIdForIdentity(identityId, notificationId);
-            if (!notification) continue;
-
-            const ch = notification.notificationChannels?.find((c) => c.channelType === channelName);
-            if (!ch) continue;
-
-            const isResponseComplete =
-              (ch.status === 'Sent' || ch.status === 'Delivered') &&
-              Boolean(ch.response);
-            if (isResponseComplete) continue;
-
-            // Channel response is missing! Try fetching durable ack from deliverer/transport
-            try {
-              const deliverer = getDelivererForChannel(channelName);
-              const getAckFn = (deliverer as unknown as { getAck?: (key: string) => Promise<unknown> }).getAck;
-              if (typeof getAckFn === 'function') {
-                const ack = (await getAckFn.call(deliverer, idempotencyKey)) as { ackId?: string; status?: string; timestamp?: number } | null;
-                if (ack && ack.status === 'delivered' && Boolean(ack.ackId)) {
-                  const { ChannelResponse } = await import('../../domain/value-objects/channel-response');
-                  const resp = ChannelResponse.success(idempotencyKey, {
-                    deliveryId,
-                    idempotencyKey,
-                    ack,
-                  });
-                  const chObj = ch as unknown as Record<string, unknown>;
-                  if (typeof chObj.markAsDelivered === 'function') {
-                    try {
-                      if (chObj.status === 'Pending' && typeof chObj.send === 'function') {
-                        (chObj.send as () => void)();
-                      }
-                      (chObj.markAsDelivered as (r: unknown) => void)(resp);
-                    } catch {
-                      if (typeof chObj.setResponse === 'function') {
-                        (chObj.setResponse as (r: unknown) => void)(resp);
-                      } else if (chObj._props && typeof chObj._props === 'object') {
-                        (chObj._props as Record<string, unknown>).response = resp;
-                      } else {
-                        chObj.response = resp.toDTO();
-                      }
-                    }
-                  } else if (typeof chObj.setResponse === 'function') {
-                    (chObj.setResponse as (r: unknown) => void)(resp);
-                  } else {
-                    chObj.response = resp.toDTO();
-                  }
-
-                  await deps.repository.save(notification);
-                  logger.info('[NotificationRuntime] Projected missing channel response from durable ack', {
-                    operationId: deliveryId,
-                    idempotencyKey,
-                    notificationId,
-                  });
-                }
-              }
-            } catch (err) {
-              logger.warn('[NotificationRuntime] Failed to reconcile unprojected channel response', {
-                operationId: deliveryId,
-                error: err instanceof Error ? err.message : String(err),
-              });
-            }
-          }
-
-          if (succeededOutboxes.length < 50) {
-            break;
-          }
-        }
-      };
-
-      await reconcileUnprojectedOutboxes();
       metricsService.recordWorkerOutcome('completed');
     } catch (error) {
       logger.error('[NotificationRuntime] Channel worker tick failed', {
@@ -1001,8 +862,8 @@ export function createNotificationDurableRuntime(deps: {
 }): NotificationDurableRuntimePort {
   const metricsService = deps.metricsService ?? globalNotificationMetrics;
   const defaultDeliverers: Record<string, NotificationChannelDeliverer> = {
-    InApp: new RealInAppChannelDeliverer(deps.notificationRepository),
-    'in-app': new RealInAppChannelDeliverer(deps.notificationRepository),
+    InApp: new RealInAppChannelDeliverer(),
+    'in-app': new RealInAppChannelDeliverer(),
     Desktop: new RealDesktopChannelDeliverer(deps.transport),
     desktop: new RealDesktopChannelDeliverer(deps.transport),
   };

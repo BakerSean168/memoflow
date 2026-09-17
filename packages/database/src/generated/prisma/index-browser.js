@@ -548,22 +548,6 @@ exports.Prisma.NotificationScalarFieldEnum = {
   isRead: 'isRead'
 };
 
-exports.Prisma.NotificationChannelScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  notificationId: 'notificationId',
-  channelType: 'channelType',
-  status: 'status',
-  recipient: 'recipient',
-  maxRetries: 'maxRetries',
-  error: 'error',
-  response: 'response',
-  retryCount: 'retryCount',
-  sentAt: 'sentAt',
-  failedAt: 'failedAt',
-  attempts: 'attempts'
-};
-
 exports.Prisma.NotificationHistoryScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
@@ -1569,7 +1553,6 @@ exports.Prisma.ModelName = {
   GoalLabel: 'GoalLabel',
   TaskLabel: 'TaskLabel',
   Notification: 'Notification',
-  NotificationChannel: 'NotificationChannel',
   NotificationHistory: 'NotificationHistory',
   NotificationDeliveryDecisionRecord: 'NotificationDeliveryDecisionRecord',
   NotificationPreference: 'NotificationPreference',

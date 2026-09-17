@@ -63,28 +63,9 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
         version: 1,
         createdAt: new Date(),
         updatedAt: new Date(),
-        channels: {
-          create: {
-            id: randomUUID(),
-            identityId,
-            channelType: 'InApp',
-            recipient: identityId,
-            status: 'Pending',
-            maxRetries: 3,
-            retryCount: 0,
-            attempts: 0,
-          },
-        },
       },
     });
   }
-
-  afterAll(async () => {
-    if (prisma) {
-      await cleanAll();
-      await disconnectPrisma();
-    }
-  });
 
   it('1. Atomic outbox dispatch creation with canonical idempotency key', async () => {
     const opId = randomUUID();
@@ -298,7 +279,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     expect(deadLettersAfter).toHaveLength(0);
   });
 
-  it('6. CreateNotificationUseCase writes aggregate, channels, and outbox in same transaction', async () => {
+  it('6. CreateNotificationUseCase writes Fact, decisions, and outbox in same transaction', async () => {
     const useCase = new CreateNotificationUseCase(
       notificationRepo,
       preferenceRepo,
@@ -335,10 +316,10 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     expect(res.ok).toBe(true);
     const clientDTO = res.data;
 
-    // Verify Notification and Channels exist in DB
+    // Fact is persisted independently from delivery execution truth.
     const notifInDb = await notificationRepo.findByIdForIdentity(identityId, clientDTO.id);
     expect(notifInDb).not.toBeNull();
-    expect(notifInDb?.notificationChannels).toHaveLength(2);
+    expect(notifInDb?.toServerDTO()).not.toHaveProperty('notificationChannels');
 
     // Verify Outbox rows were written in same transaction
     const outboxes = await prisma.notificationDispatchOutbox.findMany({
@@ -1207,7 +1188,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
 
   it('14. Fault Injection 2: Side effect succeeded but crash before receipt commit -> reclaimed -> does not re-invoke deliverer', async () => {
     let delivererCount = 0;
-    const realInAppDeliverer = new RealInAppChannelDeliverer(notificationRepo);
+    const realInAppDeliverer = new RealInAppChannelDeliverer();
     const countingDeliverer = {
       async deliver(notif: any, ch: any, ctx: any) {
         delivererCount++;
@@ -1255,10 +1236,9 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     });
     expect(claims).toHaveLength(1);
 
-    // Worker 1 executes deliverer (side effect succeeds, channel response updated & saved to DB)
+    // InApp has no pre-receipt external side effect; executing it is replay-safe.
     const notifObj = await notificationRepo.findByIdForIdentity(identityId, notifId);
-    const ch = notifObj!.notificationChannels!.find((c) => c.channelType === 'InApp')!;
-    await countingDeliverer.deliver(notifObj!, ch, {
+    await countingDeliverer.deliver(notifObj!, { channelType: 'InApp', recipient: identityId }, {
       deliveryId: opId,
       idempotencyKey,
       identityId,
@@ -1272,8 +1252,8 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     // Worker 2 claims expired outbox item and ticks
     await worker2.tick();
 
-    // Deliverer call count must STILL be 1 (worker 2 recognized side effect was completed and skipped deliverer)
-    expect(delivererCount).toBe(1);
+    // The pre-receipt no-op may replay; the durable receipt remains the only execution truth.
+    expect(delivererCount).toBe(2);
 
     const receipt = (await reliableAdapter.queryReceipts(identityId)).find(
       (r) => r.operationId === opId,
@@ -1624,7 +1604,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     }
   }, 60000);
 
-  it('18. Fault Injection 6: InApp deliverer repo save failure -> receipt fails/retries and no broadcast', async () => {
+  it('18. Fact repository save is not part of InApp delivery completion after channel retirement', async () => {
     let broadcastCount = 0;
     const mockSseAdapter = {
       broadcastDeliveryEvent() {
@@ -1633,18 +1613,18 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     };
 
     const failingRepo = {
-      ...notificationRepo,
+      findByIdForIdentity: notificationRepo.findByIdForIdentity.bind(notificationRepo),
       async save() {
-        throw new Error('Database disk error simulation');
+        throw new Error('Fact save must never be called by delivery worker');
       },
     } as any;
 
-    const failingDeliverer = new RealInAppChannelDeliverer(failingRepo);
+    const failingDeliverer = new RealInAppChannelDeliverer();
 
     const runtime = createNotificationRuntimeContribution({
       userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       environment: 'test',
-      repository: notificationRepo,
+      repository: failingRepo,
       reliableAdapter,
       deliverer: failingDeliverer,
       sseAdapter: mockSseAdapter as any,
@@ -1676,15 +1656,11 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     // Run worker tick
     await runtime.tick();
 
-    // Outbox receipt must NOT be succeeded (it failed during deliverer save)
     const receipt = (await reliableAdapter.queryReceipts(identityId)).find(
       (r) => r.operationId === opId,
     );
-    expect(receipt?.status).not.toBe('succeeded');
-    expect(receipt?.status).toBe('retryable');
-
-    // SSE broadcast count must be 0 (no success broadcast)
-    expect(broadcastCount).toBe(0);
+    expect(receipt?.status).toBe('succeeded');
+    expect(broadcastCount).toBe(1);
   });
 
   it('19. Fault Injection 7: Shared outbox stale owner completion write returns conflict and does not overwrite new owner', async () => {

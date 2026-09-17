@@ -767,44 +767,6 @@ export class NotificationReliableOperationPrismaAdapter implements NotificationR
     return updateResult.count === 0 ? 'conflict' : 'ok';
   }
 
-  async querySucceededOutboxes(options?: number | { limit?: number; lastCursor?: string }) {
-    const limit = typeof options === 'number' ? options : options?.limit ?? 50;
-    const lastCursor = typeof options === 'object' ? options?.lastCursor : undefined;
 
-    const where: Prisma.NotificationDispatchOutboxWhereInput = {
-      status: 'succeeded',
-      notification: {
-        channels: {
-          some: {
-            OR: [
-              { response: null },
-              { response: '' },
-              { status: { notIn: ['Delivered', 'Sent'] } },
-            ],
-          },
-        },
-      },
-    };
-
-    if (lastCursor) {
-      const { cursorTs, cursorId, valid } = decodeReceiptCursor(lastCursor);
-      if (valid && cursorTs.getTime() >= 0) {
-        where.AND = [
-          {
-            OR: [
-              { updatedAt: { gt: cursorTs } },
-              { updatedAt: cursorTs, id: { gt: cursorId } },
-            ],
-          },
-        ];
-      }
-    }
-
-    return this.prisma.notificationDispatchOutbox.findMany({
-      where,
-      orderBy: [{ updatedAt: 'asc' }, { id: 'asc' }],
-      take: limit,
-    });
-  }
 }
 

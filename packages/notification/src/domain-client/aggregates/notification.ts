@@ -9,7 +9,6 @@ import { AggregateRoot } from '@memoflow/utils/domain';
 import { NotificationId } from '../../server/domain/value-objects/notification-id';
 import { IdentityId } from '@memoflow/domain-shared';
 import type { NotificationId as NotificationIdBranded, IdentityId as IdentityIdBranded } from '@memoflow/contracts/primitives';
-import { NotificationChannel } from '../entities/notification-channel.js';
 
 export interface NotificationState {
   id: NotificationId;
@@ -33,7 +32,6 @@ export interface NotificationState {
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
-  notificationChannels: NotificationChannel[] | null;
 }
 
 export class Notification extends AggregateRoot<NotificationId> {
@@ -54,7 +52,6 @@ export class Notification extends AggregateRoot<NotificationId> {
   get createdAt(): Date { return this._props.createdAt; }
   get updatedAt(): Date { return this._props.updatedAt; }
   get deletedAt(): Date | null { return this._props.deletedAt; }
-  get notificationChannels(): NotificationChannel[] | null { return this._props.notificationChannels; }
   get isDeleted(): boolean { return this._props.deletedAt !== null; }
   get hasActions(): boolean { return false; }
   get displayTitle(): string { return this._props.title; }
@@ -89,7 +86,6 @@ export class Notification extends AggregateRoot<NotificationId> {
       updatedAt: this._props.updatedAt.getTime(),
       deletedAt: this._props.deletedAt?.getTime() ?? null,
       archivedAt: null,
-      notificationChannels: this._props.notificationChannels?.map((channel) => channel.toDTO()) ?? null,
     };
   }
 }

@@ -34,18 +34,6 @@ export type {
   RateLimitDTO,
 } from './rate-limit';
 
-// ============ ChannelError ============
-export type {
-  ChannelError,
-  ChannelErrorDTO,
-} from './channel-error';
-
-// ============ ChannelResponse ============
-export type {
-  ChannelResponse,
-  ChannelResponseDTO,
-} from './channel-response';
-
 // ============ Enum Value Objects ============
 export { NotificationType } from './notification-type';
 
@@ -80,7 +68,6 @@ export { RelatedEntityType } from './related-entity-type';
 
 export { NotificationChannelType } from './notification-channel-type';
 
-export { ChannelStatus } from './channel-status';
 
 export { NotificationActionType } from './notification-action-type';
 

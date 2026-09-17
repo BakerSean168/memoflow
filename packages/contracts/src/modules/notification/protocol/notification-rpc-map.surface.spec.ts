@@ -4,14 +4,13 @@
  * Enumerates every Notification mutation ledger row and detects missing
  * schema/type references before transport migration. The RPC map must import
  * only the inferred request/response types from `../api` (no inline object
- * types). Protocol-only rows (execute-action, send, retry, channel:list,
- * get-stats) are
+ * types). Protocol-only rows (execute-action, get-stats) are
  * documented as explicitly unsupported transport surfaces — never silently
  * divergent payloads.
  *
  * 枚举 Notification 全部 mutation ledger 行，并在 transport 迁移前发现缺失的
  * schema/type 引用。RPC map 只能从 `../api` 导入推导出的请求/响应类型，禁止
- * 内联 object type。Protocol-only 行（execute-action/send/retry/channel:list）
+ * 内联 object type。Protocol-only 行（execute-action/get-stats）
  * 记录为显式 unsupported transport surface，绝不静默使用不同 payload。
  */
 import { readFileSync } from 'node:fs';
@@ -46,9 +45,6 @@ const NOTIFICATION_LEDGER = [
 const NOTIFICATION_PROTOCOL_ONLY = [
   'notification:get-stats',
   'notification:execute-action',
-  'notification:send',
-  'notification-channel:retry',
-  'notification-channel:list',
 ] as const;
 
 const API_DTO_FILES = [

@@ -24,7 +24,6 @@ import type {
   NotificationOutboxDispatchPlan,
 } from '../../../domain/repositories';
 import { Notification } from '../../../domain/aggregates/notification';
-import { NotificationChannel } from '../../../domain/entities/notification-channel';
 import { NotificationPolicy, type NotificationDeliveryDecision } from '../../../domain/services/notification-policy';
 import { NotificationWorkflowCatalog } from '../../../domain/services/notification-workflow-catalog';
 import { toNotificationClientDTO } from './notification-dto-converters';
@@ -147,13 +146,6 @@ export class CreateNotificationUseCase {
       if (decision.outcome === NotificationDeliveryPlanOutcome.Deferred && !decision.retryAt) {
         continue;
       }
-
-      const channel = NotificationChannel.create({
-        notificationId: notification.id,
-        channelType,
-        recipient: params.identityId,
-      });
-      notification.addChannel(channel);
 
       const occurrenceKey = `${idempotencyKey}:${channelType}`;
       const dispatchIdempotencyKey = buildIdempotencyKeyString({

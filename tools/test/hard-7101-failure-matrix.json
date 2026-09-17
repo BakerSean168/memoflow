@@ -152,7 +152,7 @@
         {
           "runner": "notification-unit",
           "file": "packages/notification/src/server/infrastructure/runtime/notification.runtime.spec.ts",
-          "title": "treats a device-offline channel failure as retryable and delivers after recovery"
+          "title": "retries a failed delivery and succeeds after recovery"
         }
       ]
     },

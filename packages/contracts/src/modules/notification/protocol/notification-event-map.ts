@@ -4,7 +4,6 @@ import type { NotificationUnreadEvent } from '../domain/events/notification-unre
 import type { NotificationArchivedEvent } from '../domain/events/notification-archived.event';
 import type { NotificationRestoredEvent } from '../domain/events/notification-restored.event';
 import type { NotificationDeletedEvent } from '../domain/events/notification-deleted.event';
-import type { NotificationChannelFailedEvent } from '../domain/events/notification-channel-failed.event';
 import type {
   NotificationDispatchDesktopEvent,
   NotificationDispatchInAppEvent,
@@ -23,7 +22,6 @@ export type NotificationEventMap = {
   'notification:archived': NotificationArchivedEvent;
   'notification:restored': NotificationRestoredEvent;
   'notification:deleted': NotificationDeletedEvent;
-  'notification:channel-failed': NotificationChannelFailedEvent;
 
   /**
    * Dispatch events (integration, not domain events).

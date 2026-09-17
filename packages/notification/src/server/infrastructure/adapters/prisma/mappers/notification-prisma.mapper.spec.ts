@@ -1,29 +1,45 @@
 import { describe, expect, it } from 'vitest';
-import { ChannelStatus, NotificationChannelType } from '@memoflow/contracts/notification';
-import {
-  NotificationPrismaMapper,
-  type PrismaNotificationChannelRow,
-} from './notification-prisma.mapper';
+import { NotificationPrismaMapper, type PrismaNotificationRow } from './notification-prisma.mapper';
+
+function row(): PrismaNotificationRow {
+  return {
+    id: 'INotificationId_550e8400-e29b-41d4-a716-446655440002',
+    identityId: 'IdentityId_550e8400-e29b-41d4-a716-446655440003',
+    workflowKey: 'system.general',
+    topic: 'system.general',
+    idempotencyKey: 'mapper-fixture',
+    title: 'Mapped Fact',
+    content: 'Fact content',
+    type: 'Info',
+    category: 'System',
+    importance: 'Moderate',
+    urgency: 'Medium',
+    isRead: false,
+    readAt: null,
+    expiresAt: null,
+    relatedEntityType: null,
+    relatedEntityId: null,
+    metadata: null,
+    actions: null,
+    navigationIntent: null,
+    correlationId: null,
+    causationId: null,
+    version: 1,
+    createdAt: new Date('2026-09-17T08:00:00.000Z'),
+    updatedAt: new Date('2026-09-17T08:00:00.000Z'),
+    deletedAt: null,
+    archivedAt: null,
+  };
+}
 
 describe('NotificationPrismaMapper', () => {
-  it('maps the channel row id independently from its parent notification id', () => {
-    const row: PrismaNotificationChannelRow = {
-      id: 'INotificationChannelId_550e8400-e29b-41d4-a716-446655440001',
-      identityId: 'IdentityId_550e8400-e29b-41d4-a716-446655440003',
-      notificationId: 'INotificationId_550e8400-e29b-41d4-a716-446655440002',
-      channelType: NotificationChannelType.InApp,
-      status: ChannelStatus.Pending,
-      recipient: null,
-      maxRetries: 3,
-      retryCount: 0,
-      error: null,
-      response: null,
-    };
-
-    const channel = NotificationPrismaMapper.channelToDomain(row).toServerDTO();
-
-    expect(channel.id).toBe(row.id);
-    expect(channel.notificationId).toBe(row.notificationId);
-    expect(channel.id).not.toBe(channel.notificationId);
+  it('hydrates Notification Fact without delivery-channel child truth', () => {
+    const fact = NotificationPrismaMapper.toDomain(row());
+    expect(fact.toServerDTO()).toMatchObject({
+      workflowKey: 'system.general',
+      title: 'Mapped Fact',
+      isRead: false,
+    });
+    expect(fact.toServerDTO()).not.toHaveProperty('notificationChannels');
   });
 });

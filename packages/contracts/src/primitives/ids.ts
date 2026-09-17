@@ -92,8 +92,6 @@ export type SettingGroupId = string & { readonly __brand: 'SettingGroupId' };
 /** 通知 ID */
 export type NotificationId = string & { readonly __brand: 'NotificationId' };
 
-/** 通知渠道 ID */
-export type NotificationChannelId = string & { readonly __brand: 'NotificationChannelId' };
 
 /** 通知偏好 ID */
 export type NotificationPreferenceId = string & { readonly __brand: 'NotificationPreferenceId' };
@@ -211,7 +209,6 @@ export const ID_PREFIXES = {
 
   // === Notification ===
   NotificationId: 'INotificationId',
-  NotificationChannelId: 'INotificationChannelId',
   NotificationPreferenceId: 'INotificationPreferenceId',
   NotificationHistoryId: 'NotificationHistoryId',
 

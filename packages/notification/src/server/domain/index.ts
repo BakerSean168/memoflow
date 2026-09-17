@@ -6,7 +6,7 @@
  * 管理通知系统的核心业务逻辑，包括通知创建、发送、偏好设置、模板管理等
  * 
  * 【包含内容】
- * - 聚合根（Aggregates）：Notification, NotificationPreference,  * - 实体（Entities）：NotificationChannel, NotificationHistory
+ * - 聚合根（Aggregates）：Notification, NotificationPreference; 实体：NotificationHistory
  * - 仓储接口（Repositories）：INotificationRepository, I * - 领域服务（Domain Services）：NotificationDeliveryService, NotificationBatchService
  * 
  * 【业务特性】
@@ -38,8 +38,6 @@ export { NotificationPreference } from './aggregates/notification-preference';
 export type { NotificationPreferenceState } from './aggregates/notification-preference';
 
 // Entities
-export { NotificationChannel } from './entities/notification-channel';
-export type { NotificationChannelState } from './entities/notification-channel';
 export { NotificationHistory } from './entities/notification-history';
 export type { NotificationHistoryState } from './entities/notification-history';
 

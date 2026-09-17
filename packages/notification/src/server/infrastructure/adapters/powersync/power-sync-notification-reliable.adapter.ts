@@ -888,47 +888,6 @@ export class PowerSyncNotificationReliableAdapter implements NotificationReliabl
     return buildIdempotencyKeyString({ identityId, source: 'notification', occurrenceKey });
   }
 
-  async querySucceededOutboxes(
-    options?: number | { limit?: number; lastCursor?: string },
-  ): Promise<PowerSyncOutboxRow[]> {
-    await this.ensureTablesExist();
-    const limit = typeof options === 'number' ? options : options?.limit ?? 50;
-    const lastCursor = typeof options === 'object' ? options?.lastCursor : undefined;
-
-    const whereClauses = [
-      "o.status = 'succeeded'",
-      "(c.id IS NULL OR c.response IS NULL OR c.response = '' OR c.status NOT IN ('Delivered', 'Sent'))",
-    ];
-    const params: unknown[] = [];
-
-    const orderBy = 'ORDER BY o.updated_at ASC, o.id ASC';
-
-    if (lastCursor) {
-      const { cursorTs, cursorId, valid } = decodeReceiptCursor(lastCursor);
-      if (valid && cursorTs.getTime() >= 0) {
-        const cursorIso = cursorTs.toISOString();
-        if (cursorId) {
-          whereClauses.push('(o.updated_at > ? OR (o.updated_at = ? AND o.id > ?))');
-          params.push(cursorIso, cursorIso, cursorId);
-        } else if (cursorTs.getTime() > 0) {
-          whereClauses.push('o.updated_at > ?');
-          params.push(cursorIso);
-        }
-      }
-    }
-
-    params.push(limit);
-
-    const sql = `
-      SELECT o.* FROM notification_dispatch_outbox o
-      LEFT JOIN notification_channels c ON o.notification_id = c.notification_id AND o.channel = c.channel_type
-      WHERE ${whereClauses.join(' AND ')}
-      ${orderBy}
-      LIMIT ?
-    `;
-    return this.db.getAll<PowerSyncOutboxRow>(sql, params);
-  }
-
   async saveAck(
     idempotencyKey: string,
     record: import('../../powersync').DesktopTransportAckRecord,

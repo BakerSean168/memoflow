@@ -48,8 +48,8 @@ export interface INotificationRepository {
   saveMany(notifications: Notification[]): Promise<void>;
 
   /**
-   * Counts already planned delivery channels for the same workflow surrogate
-   * (current NotificationCategory) and channel over rolling 1h / 24h windows.
+   * Counts canonical planned delivery decisions for the same workflow/channel
+   * over rolling 1h / 24h windows.
    */
   getDeliveryUsage(
     identityId: string,
@@ -62,10 +62,6 @@ export interface INotificationRepository {
    * Find notification by id + identity (ownership fence).
    * Returns null when missing or not owned by identityId.
    */
-  /**
-   * R3e：渠道 worker 用——按渠道状态查询（返回带渠道的聚合，渠道经 status 过滤）。
-   */
-  findChannelsByStatus(status: string, limit?: number): Promise<Notification[]>;
 
   findByIdForIdentity(
     identityId: string,
