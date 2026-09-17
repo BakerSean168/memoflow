@@ -202,7 +202,7 @@ export class NotificationPrismaRepository implements INotificationRepository {
   async findByIdForIdentity(
     identityId: string,
     id: string,
-    options?: { includeChildren?: boolean },
+    _options?: { includeChildren?: boolean },
   ): Promise<Notification | null> {
     const row = await this.prisma.notification.findFirst({
       where: { id, identityId },

@@ -4,7 +4,6 @@ import type { NotificationId } from '../../../primitives';
 import type { NotificationPreferenceServerDTO } from '../aggregates/notification-preference-server';
 import type { NotificationStatsDTO } from '../dtos/notification-result.dto';
 import type { NotificationServerDTO } from '../aggregates/notification-server';
-import { NotificationChannelType } from '../value-objects/notification-channel-type';
 
 const ChannelPreferenceFlagsSchema = z.object({
   InApp: z.boolean().optional(),
