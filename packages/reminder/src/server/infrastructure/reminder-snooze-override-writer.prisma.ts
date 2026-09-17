@@ -4,7 +4,7 @@
  * Snooze is temporary Routine runtime state. It persists a
  * `RoutineTemporaryOverride` and then emits `routine:override-changed` so the
  * neutral Scheduler immediately reconciles the Routine's desired occurrence.
- * It never mutates raw ScheduleTask rows directly.
+ * It never mutates raw Scheduler runtime rows directly.
  */
 
 import type { PrismaClient } from '@memoflow/database';

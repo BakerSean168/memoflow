@@ -4,13 +4,11 @@ import { describe, expect, it } from 'vitest';
 
 /**
  * Residual 1243: formatDuration keep-boundary (schedule ms export vs minutes i18n vs task variants).
- * - app-vue schedule-presentation: durationMs null→'-'; ms/sec presentation i18n
  * - app-vue ScheduleConflictAlert: total minutes → schedule.duration.* (hours-only band)
  * Residual 1324: ScheduleConflictAlert + ScheduleFormDemo minutes maps dual-retired onto
  * formatScheduleDurationMinutes sole (still minutes unit vs presentation durationMs).
  * Soft residual 1243:
  * - ConflictAlert: ms floor; hoursMinutes always when h>0
- * - schedule-presentation durationMs/Sec keep-boundary remains
  * - formatTaskDuration: Intl unit hour/minute
  * - ADR-080: CalendarEntry mutation payload no longer carries duration; read surfaces derive it from range
  * Soft residual 1240: formatDate keep-boundary remains separate.
@@ -18,10 +16,6 @@ import { describe, expect, it } from 'vitest';
  */
 describe('formatDuration keep-boundary (residual 1243)', () => {
   const dir = __dirname;
-  const presentation = readFileSync(
-    resolve(dir, '../../modules/schedule/utils/schedule-presentation.ts'),
-    'utf8',
-  );
   const conflictAlert = readFileSync(
     resolve(dir, '../../modules/schedule/components/ScheduleConflictAlert.vue'),
     'utf8',
@@ -43,20 +37,6 @@ describe('formatDuration keep-boundary (residual 1243)', () => {
     'utf8',
   );
 
-  it('owns Residual 1243 keep-boundary markers on schedule-presentation ms formatDuration', () => {
-    expect(presentation).toContain('Residual 1243 keep-boundary');
-    expect(presentation).toMatch(/export function formatDuration\b/);
-    expect(presentation).toContain('durationMs: number | null | undefined');
-    expect(presentation).toContain("return '-'");
-    expect(presentation).toContain('schedule.presentation.durationMs');
-    expect(presentation).toContain('schedule.presentation.durationSec');
-    const body = presentation.match(/export function formatDuration\([\s\S]*?\n\}/)?.[0] ?? '';
-    expect(body).toContain('durationMs');
-    expect(body).toContain('toFixed(2)');
-    expect(body).not.toContain('schedule.duration.minutes');
-    expect(body).not.toContain('task.dependencyGraph');
-    expect(body).not.toContain('Intl.NumberFormat');
-  });
 
   it('differs from minutes-based ScheduleConflictAlert formatDuration (no force-merge)', () => {
     expect(conflictAlert).toContain('Residual 1243 keep-boundary');

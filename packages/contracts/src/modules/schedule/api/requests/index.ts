@@ -1,8 +1,2 @@
-/**
- * Schedule API Requests Index
- * 调度 API 请求统一导出
- */
-
+/** CalendarEntry product API requests. */
 export * from './schedule-requests';
-export * from './schedule-task-requests';
-export * from './schedule-execution-requests';

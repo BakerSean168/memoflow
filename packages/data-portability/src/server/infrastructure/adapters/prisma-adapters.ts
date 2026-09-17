@@ -15,7 +15,6 @@ import type {
   ResourceFolderRepoPort,
   ResourceRepoPort,
   ScheduleRepoPort,
-  ScheduleTaskRepoPort,
   AIConversationRepoPort,
   RoutineProfileMembershipRepoPort,
   RoutineDefinitionRepoPort,
@@ -69,12 +68,6 @@ export class PrismaScheduleAdapter implements ScheduleRepoPort {
   }
 }
 
-export class PrismaScheduleTaskAdapter implements ScheduleTaskRepoPort {
-  constructor(private readonly prisma: PrismaClient) {}
-  async findByIdentityId(identityId: string): Promise<unknown[]> {
-    return this.prisma.scheduleTask.findMany({ where: { identityId, deletedAt: null } });
-  }
-}
 
 
 export class PrismaAIConversationAdapter implements AIConversationRepoPort {

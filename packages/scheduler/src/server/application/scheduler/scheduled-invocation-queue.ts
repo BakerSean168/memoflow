@@ -18,6 +18,7 @@ export interface ScheduledInvocationRuntimeOptions {
   readonly timer?: IScheduleTimer;
   readonly workerId?: string;
   readonly claimTtlMs?: number;
+  readonly shouldExecuteIdentity?: (identityId: string) => boolean | Promise<boolean>;
 }
 
 export class ScheduledInvocationQueue {
@@ -39,7 +40,9 @@ export class ScheduledInvocationQueue {
   }
 
   async reload(): Promise<void> {
-    const invocations = await this.options.repository.findDue(this.timer.now(), 1000);
+    const now = this.timer.now();
+    await this.options.repository.recoverExpiredClaims(now, 1000);
+    const invocations = await this.options.repository.findRunnable();
     for (const invocation of invocations) this.add(invocation);
   }
 
@@ -78,6 +81,12 @@ export class ScheduledInvocationQueue {
     if (!item) return this.schedule();
     this.executing = true;
     try {
+      if (
+        this.options.shouldExecuteIdentity &&
+        !(await this.options.shouldExecuteIdentity(item.identityId))
+      ) {
+        return;
+      }
       const now = this.timer.now();
       const claim = await this.options.repository.claimAndStart({
         invocationId: item.taskId,

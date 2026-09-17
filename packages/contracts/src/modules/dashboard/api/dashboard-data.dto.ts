@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { GoalId, ScheduleTaskId } from '../../../primitives';
+import type { GoalId, ScheduleId } from '../../../primitives';
 import { brandedId } from '../../../primitives';
 import { GoalStatus } from '../../goal/value-objects/goal-status';
 import { GoalTimeframeSchema } from '../../goal/value-objects/goal-timeframe';
@@ -54,7 +54,7 @@ export const DashboardTaskBoardSummarySchema = z.object({
 export type TaskBoardSummary = z.infer<typeof DashboardTaskBoardSummarySchema>;
 
 export const DashboardScheduleItemSchema = z.object({
-  id: brandedId<ScheduleTaskId>(),
+  id: brandedId<ScheduleId>(),
   title: z.string(),
   startTime: z.number().int(),
   endTime: z.number().int(),

@@ -1,9 +1,14 @@
-import type { ScheduledHandlerRegistration, SchedulingPort } from '@memoflow/contracts/schedule';
+import type {
+  ScheduledHandlerRegistration,
+  ScheduledHandlerResult,
+  ScheduledInvocationContext,
+  SchedulingPort,
+} from '@memoflow/contracts/schedule';
 import type { GoalScheduleProjectionSource } from '@memoflow/goal/schedule-projection';
 import type { RoutineScheduleProjectionSource } from '@memoflow/reminder/schedule-projection/routine';
 import type { RoutineTemporaryOverrideStore } from '@memoflow/reminder/schedule-execution/routine';
 import type { ReminderScheduleProjectionSource } from '@memoflow/reminder/schedule-projection';
-import type { IScheduleTaskRepository, ScheduleTask } from '@memoflow/scheduler';
+import type { IScheduledInvocationRepository } from '@memoflow/scheduler';
 import type { TaskScheduleProjectionSource } from '@memoflow/task/schedule-projection';
 import type { ScheduleOrchestrationExecutionDeps } from './execution';
 import type { ProjectionRepairMetricsReader } from './projection-repair';
@@ -13,11 +18,8 @@ export interface ScheduleOrchestrationProjectionDeps<TSource> {
   readonly source: TSource;
 }
 
-/** Task still supplies the ScheduleTask persistence adapter that backs the neutral SchedulingPort. */
-export interface ScheduleOrchestrationScheduleTaskProjectionDeps<
-  TSource,
-> extends ScheduleOrchestrationProjectionDeps<TSource> {
-  readonly scheduleTaskRepository: IScheduleTaskRepository;
+export interface ScheduleOrchestrationSchedulerDeps {
+  readonly invocationRepository: IScheduledInvocationRepository;
 }
 
 /** Composition-only registration surface; Scheduler core remains feature-neutral. */
@@ -25,6 +27,7 @@ export interface ScheduleOrchestrationHandlerRegistry {
   register<TPayload>(registration: ScheduledHandlerRegistration<TPayload>): void;
   has(handlerKey: string): boolean;
   keys(): readonly string[];
+  execute(context: ScheduledInvocationContext): Promise<ScheduledHandlerResult>;
 }
 
 export interface ScheduleOrchestrationModule {
@@ -33,14 +36,6 @@ export interface ScheduleOrchestrationModule {
   readonly projectionRepairMetrics: ProjectionRepairMetricsReader;
   readonly schedulingPort: SchedulingPort;
   readonly handlerRegistry: ScheduleOrchestrationHandlerRegistry;
-  readonly sourceExecutor: {
-    execute(task: ScheduleTask): Promise<{
-      nextRunAt?: number | null;
-      result?: Record<string, unknown>;
-      disposition?: 'succeeded' | 'skipped' | 'failed' | 'dead_letter';
-      error?: string;
-    } | void>;
-  };
   /**
    * ROUTINE-3401 durable snooze/suppress store bound for the routine wall-clock
    * lane. Writes publish `routine:override-changed` so the projection runtime
@@ -51,7 +46,8 @@ export interface ScheduleOrchestrationModule {
 }
 
 export interface CreateScheduleOrchestrationModuleOptions {
-  readonly taskProjection: ScheduleOrchestrationScheduleTaskProjectionDeps<TaskScheduleProjectionSource>;
+  readonly scheduler: ScheduleOrchestrationSchedulerDeps;
+  readonly taskProjection: ScheduleOrchestrationProjectionDeps<TaskScheduleProjectionSource>;
   readonly goalProjection: ScheduleOrchestrationProjectionDeps<GoalScheduleProjectionSource>;
   readonly reminderProjection: ScheduleOrchestrationProjectionDeps<ReminderScheduleProjectionSource>;
   readonly execution: ScheduleOrchestrationExecutionDeps;

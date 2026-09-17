@@ -35,11 +35,9 @@ model Account {
   repositoryExplorers             RepositoryExplorer[]
   repositoryStatistics            RepositoryStatistic?
   schedules                       Schedule[]
-  scheduleTasks                   ScheduleTask[]
   schedulingReconcileOperations   SchedulingReconcileOperation[]
   scheduledInvocations            ScheduledInvocation[]
   invocationAttempts              InvocationAttempt[]
-  scheduleStatistics              ScheduleStatistic?
   habits                          Habit[]
   relations                       Relation[]
   walletAccounts                  WalletAccount[]
@@ -59,7 +57,6 @@ model Account {
 
   // PowerSync: denormalized identity relations
   taskPlanHistory            TaskPlanHistory[]           @relation("AccountTaskPlanHistory")
-  scheduleExecutions             ScheduleExecution[]             @relation("AccountScheduleExecutions")
   reminderHistory                ReminderHistory[]               @relation("AccountReminderHistory")
   reminderResponses              ReminderResponse[]              @relation("AccountReminderResponses")
   reminderOccurrences            ReminderOccurrence[]            @relation("AccountReminderOccurrences")

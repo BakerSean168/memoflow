@@ -435,11 +435,6 @@ export type KnowledgeRepositoryLease = $Result.DefaultSelection<Prisma.$Knowledg
  */
 export type Schedule = $Result.DefaultSelection<Prisma.$SchedulePayload>
 /**
- * Model ScheduleTask
- *
- */
-export type ScheduleTask = $Result.DefaultSelection<Prisma.$ScheduleTaskPayload>
-/**
  * Model ScheduledInvocation
  *
  */
@@ -455,20 +450,10 @@ export type InvocationAttempt = $Result.DefaultSelection<Prisma.$InvocationAttem
  */
 export type SchedulingReconcileOperation = $Result.DefaultSelection<Prisma.$SchedulingReconcileOperationPayload>
 /**
- * Model ScheduleExecution
- *
- */
-export type ScheduleExecution = $Result.DefaultSelection<Prisma.$ScheduleExecutionPayload>
-/**
- * Model ScheduleStatistic
- *
- */
-export type ScheduleStatistic = $Result.DefaultSelection<Prisma.$ScheduleStatisticPayload>
-/**
  * Model ScheduleLease
  * R3a：调度器宿主互斥租约（DB lease/heartbeat）。
  * 共享数据库的多个宿主（API 多实例、同库进程）通过本表互斥：
- * 只有成功 acquire 的宿主启动 ScheduleTaskQueue；其余宿主只消费读模型。
+ * 只有成功 acquire 的宿主启动 ScheduledInvocationQueue；其余宿主只消费读模型。
  */
 export type ScheduleLease = $Result.DefaultSelection<Prisma.$ScheduleLeasePayload>
 /**
@@ -1469,16 +1454,6 @@ export class PrismaClient<
   get schedule(): Prisma.ScheduleDelegate<ExtArgs, ClientOptions>;
 
   /**
-   * `prisma.scheduleTask`: Exposes CRUD operations for the **ScheduleTask** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more ScheduleTasks
-    * const scheduleTasks = await prisma.scheduleTask.findMany()
-    * ```
-    */
-  get scheduleTask(): Prisma.ScheduleTaskDelegate<ExtArgs, ClientOptions>;
-
-  /**
    * `prisma.scheduledInvocation`: Exposes CRUD operations for the **ScheduledInvocation** model.
     * Example usage:
     * ```ts
@@ -1507,26 +1482,6 @@ export class PrismaClient<
     * ```
     */
   get schedulingReconcileOperation(): Prisma.SchedulingReconcileOperationDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.scheduleExecution`: Exposes CRUD operations for the **ScheduleExecution** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more ScheduleExecutions
-    * const scheduleExecutions = await prisma.scheduleExecution.findMany()
-    * ```
-    */
-  get scheduleExecution(): Prisma.ScheduleExecutionDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.scheduleStatistic`: Exposes CRUD operations for the **ScheduleStatistic** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more ScheduleStatistics
-    * const scheduleStatistics = await prisma.scheduleStatistic.findMany()
-    * ```
-    */
-  get scheduleStatistic(): Prisma.ScheduleStatisticDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.scheduleLease`: Exposes CRUD operations for the **ScheduleLease** model.
@@ -2162,12 +2117,9 @@ export namespace Prisma {
     KnowledgeWriteRequest: 'KnowledgeWriteRequest',
     KnowledgeRepositoryLease: 'KnowledgeRepositoryLease',
     Schedule: 'Schedule',
-    ScheduleTask: 'ScheduleTask',
     ScheduledInvocation: 'ScheduledInvocation',
     InvocationAttempt: 'InvocationAttempt',
     SchedulingReconcileOperation: 'SchedulingReconcileOperation',
-    ScheduleExecution: 'ScheduleExecution',
-    ScheduleStatistic: 'ScheduleStatistic',
     ScheduleLease: 'ScheduleLease',
     ScheduleRebuildOutbox: 'ScheduleRebuildOutbox',
     ScheduleDomainEventOutbox: 'ScheduleDomainEventOutbox',
@@ -2195,7 +2147,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "account" | "activityLedger" | "aiConversation" | "aiMessage" | "aiGenerationTask" | "aiUsageQuota" | "aiProviderConfig" | "aiProviderOnboardingSession" | "knowledgeGenerationTask" | "aiKnowledgeIndexEntry" | "dashboardConfig" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "rule" | "ruleRevision" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationChannel" | "notificationHistory" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationTemplate" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "reminderTemplate" | "reminderGroup" | "reminderInstance" | "reminderHistory" | "reminderStatistic" | "reminderResponse" | "userReminderPreference" | "reminderOccurrence" | "routineDefinition" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "repository" | "folder" | "resource" | "repositoryResource" | "linkedContent" | "resourceReference" | "repositoryExplorer" | "repositoryStatistic" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduleTask" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleExecution" | "scheduleStatistic" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
+      modelProps: "account" | "activityLedger" | "aiConversation" | "aiMessage" | "aiGenerationTask" | "aiUsageQuota" | "aiProviderConfig" | "aiProviderOnboardingSession" | "knowledgeGenerationTask" | "aiKnowledgeIndexEntry" | "dashboardConfig" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "rule" | "ruleRevision" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationChannel" | "notificationHistory" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationTemplate" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "reminderTemplate" | "reminderGroup" | "reminderInstance" | "reminderHistory" | "reminderStatistic" | "reminderResponse" | "userReminderPreference" | "reminderOccurrence" | "routineDefinition" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "repository" | "folder" | "resource" | "repositoryResource" | "linkedContent" | "resourceReference" | "repositoryExplorer" | "repositoryStatistic" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -8193,80 +8145,6 @@ export namespace Prisma {
           }
         }
       }
-      ScheduleTask: {
-        payload: Prisma.$ScheduleTaskPayload<ExtArgs>
-        fields: Prisma.ScheduleTaskFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.ScheduleTaskFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleTaskPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.ScheduleTaskFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleTaskPayload>
-          }
-          findFirst: {
-            args: Prisma.ScheduleTaskFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleTaskPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.ScheduleTaskFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleTaskPayload>
-          }
-          findMany: {
-            args: Prisma.ScheduleTaskFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleTaskPayload>[]
-          }
-          create: {
-            args: Prisma.ScheduleTaskCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleTaskPayload>
-          }
-          createMany: {
-            args: Prisma.ScheduleTaskCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.ScheduleTaskCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleTaskPayload>[]
-          }
-          delete: {
-            args: Prisma.ScheduleTaskDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleTaskPayload>
-          }
-          update: {
-            args: Prisma.ScheduleTaskUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleTaskPayload>
-          }
-          deleteMany: {
-            args: Prisma.ScheduleTaskDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.ScheduleTaskUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.ScheduleTaskUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleTaskPayload>[]
-          }
-          upsert: {
-            args: Prisma.ScheduleTaskUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleTaskPayload>
-          }
-          aggregate: {
-            args: Prisma.ScheduleTaskAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateScheduleTask>
-          }
-          groupBy: {
-            args: Prisma.ScheduleTaskGroupByArgs<ExtArgs>
-            result: $Utils.Optional<ScheduleTaskGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.ScheduleTaskCountArgs<ExtArgs>
-            result: $Utils.Optional<ScheduleTaskCountAggregateOutputType> | number
-          }
-        }
-      }
       ScheduledInvocation: {
         payload: Prisma.$ScheduledInvocationPayload<ExtArgs>
         fields: Prisma.ScheduledInvocationFieldRefs
@@ -8486,154 +8364,6 @@ export namespace Prisma {
           count: {
             args: Prisma.SchedulingReconcileOperationCountArgs<ExtArgs>
             result: $Utils.Optional<SchedulingReconcileOperationCountAggregateOutputType> | number
-          }
-        }
-      }
-      ScheduleExecution: {
-        payload: Prisma.$ScheduleExecutionPayload<ExtArgs>
-        fields: Prisma.ScheduleExecutionFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.ScheduleExecutionFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleExecutionPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.ScheduleExecutionFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleExecutionPayload>
-          }
-          findFirst: {
-            args: Prisma.ScheduleExecutionFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleExecutionPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.ScheduleExecutionFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleExecutionPayload>
-          }
-          findMany: {
-            args: Prisma.ScheduleExecutionFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleExecutionPayload>[]
-          }
-          create: {
-            args: Prisma.ScheduleExecutionCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleExecutionPayload>
-          }
-          createMany: {
-            args: Prisma.ScheduleExecutionCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.ScheduleExecutionCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleExecutionPayload>[]
-          }
-          delete: {
-            args: Prisma.ScheduleExecutionDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleExecutionPayload>
-          }
-          update: {
-            args: Prisma.ScheduleExecutionUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleExecutionPayload>
-          }
-          deleteMany: {
-            args: Prisma.ScheduleExecutionDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.ScheduleExecutionUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.ScheduleExecutionUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleExecutionPayload>[]
-          }
-          upsert: {
-            args: Prisma.ScheduleExecutionUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleExecutionPayload>
-          }
-          aggregate: {
-            args: Prisma.ScheduleExecutionAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateScheduleExecution>
-          }
-          groupBy: {
-            args: Prisma.ScheduleExecutionGroupByArgs<ExtArgs>
-            result: $Utils.Optional<ScheduleExecutionGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.ScheduleExecutionCountArgs<ExtArgs>
-            result: $Utils.Optional<ScheduleExecutionCountAggregateOutputType> | number
-          }
-        }
-      }
-      ScheduleStatistic: {
-        payload: Prisma.$ScheduleStatisticPayload<ExtArgs>
-        fields: Prisma.ScheduleStatisticFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.ScheduleStatisticFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleStatisticPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.ScheduleStatisticFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleStatisticPayload>
-          }
-          findFirst: {
-            args: Prisma.ScheduleStatisticFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleStatisticPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.ScheduleStatisticFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleStatisticPayload>
-          }
-          findMany: {
-            args: Prisma.ScheduleStatisticFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleStatisticPayload>[]
-          }
-          create: {
-            args: Prisma.ScheduleStatisticCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleStatisticPayload>
-          }
-          createMany: {
-            args: Prisma.ScheduleStatisticCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.ScheduleStatisticCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleStatisticPayload>[]
-          }
-          delete: {
-            args: Prisma.ScheduleStatisticDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleStatisticPayload>
-          }
-          update: {
-            args: Prisma.ScheduleStatisticUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleStatisticPayload>
-          }
-          deleteMany: {
-            args: Prisma.ScheduleStatisticDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.ScheduleStatisticUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.ScheduleStatisticUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleStatisticPayload>[]
-          }
-          upsert: {
-            args: Prisma.ScheduleStatisticUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ScheduleStatisticPayload>
-          }
-          aggregate: {
-            args: Prisma.ScheduleStatisticAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateScheduleStatistic>
-          }
-          groupBy: {
-            args: Prisma.ScheduleStatisticGroupByArgs<ExtArgs>
-            result: $Utils.Optional<ScheduleStatisticGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.ScheduleStatisticCountArgs<ExtArgs>
-            result: $Utils.Optional<ScheduleStatisticCountAggregateOutputType> | number
           }
         }
       }
@@ -9714,12 +9444,9 @@ export namespace Prisma {
     knowledgeWriteRequest?: KnowledgeWriteRequestOmit
     knowledgeRepositoryLease?: KnowledgeRepositoryLeaseOmit
     schedule?: ScheduleOmit
-    scheduleTask?: ScheduleTaskOmit
     scheduledInvocation?: ScheduledInvocationOmit
     invocationAttempt?: InvocationAttemptOmit
     schedulingReconcileOperation?: SchedulingReconcileOperationOmit
-    scheduleExecution?: ScheduleExecutionOmit
-    scheduleStatistic?: ScheduleStatisticOmit
     scheduleLease?: ScheduleLeaseOmit
     scheduleRebuildOutbox?: ScheduleRebuildOutboxOmit
     scheduleDomainEventOutbox?: ScheduleDomainEventOutboxOmit
@@ -9828,7 +9555,6 @@ export namespace Prisma {
     repositories: number
     repositoryExplorers: number
     schedules: number
-    scheduleTasks: number
     schedulingReconcileOperations: number
     scheduledInvocations: number
     invocationAttempts: number
@@ -9847,7 +9573,6 @@ export namespace Prisma {
     aiProviderConfigs: number
     aiProviderOnboardingSessions: number
     taskPlanHistory: number
-    scheduleExecutions: number
     reminderHistory: number
     reminderResponses: number
     reminderOccurrences: number
@@ -9882,7 +9607,6 @@ export namespace Prisma {
     repositories?: boolean | AccountCountOutputTypeCountRepositoriesArgs
     repositoryExplorers?: boolean | AccountCountOutputTypeCountRepositoryExplorersArgs
     schedules?: boolean | AccountCountOutputTypeCountSchedulesArgs
-    scheduleTasks?: boolean | AccountCountOutputTypeCountScheduleTasksArgs
     schedulingReconcileOperations?: boolean | AccountCountOutputTypeCountSchedulingReconcileOperationsArgs
     scheduledInvocations?: boolean | AccountCountOutputTypeCountScheduledInvocationsArgs
     invocationAttempts?: boolean | AccountCountOutputTypeCountInvocationAttemptsArgs
@@ -9901,7 +9625,6 @@ export namespace Prisma {
     aiProviderConfigs?: boolean | AccountCountOutputTypeCountAiProviderConfigsArgs
     aiProviderOnboardingSessions?: boolean | AccountCountOutputTypeCountAiProviderOnboardingSessionsArgs
     taskPlanHistory?: boolean | AccountCountOutputTypeCountTaskPlanHistoryArgs
-    scheduleExecutions?: boolean | AccountCountOutputTypeCountScheduleExecutionsArgs
     reminderHistory?: boolean | AccountCountOutputTypeCountReminderHistoryArgs
     reminderResponses?: boolean | AccountCountOutputTypeCountReminderResponsesArgs
     reminderOccurrences?: boolean | AccountCountOutputTypeCountReminderOccurrencesArgs
@@ -10045,13 +9768,6 @@ export namespace Prisma {
   /**
    * AccountCountOutputType without action
    */
-  export type AccountCountOutputTypeCountScheduleTasksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ScheduleTaskWhereInput
-  }
-
-  /**
-   * AccountCountOutputType without action
-   */
   export type AccountCountOutputTypeCountSchedulingReconcileOperationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: SchedulingReconcileOperationWhereInput
   }
@@ -10173,13 +9889,6 @@ export namespace Prisma {
    */
   export type AccountCountOutputTypeCountTaskPlanHistoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: TaskPlanHistoryWhereInput
-  }
-
-  /**
-   * AccountCountOutputType without action
-   */
-  export type AccountCountOutputTypeCountScheduleExecutionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ScheduleExecutionWhereInput
   }
 
   /**
@@ -11112,37 +10821,6 @@ export namespace Prisma {
 
 
   /**
-   * Count Type ScheduleTaskCountOutputType
-   */
-
-  export type ScheduleTaskCountOutputType = {
-    executions: number
-  }
-
-  export type ScheduleTaskCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    executions?: boolean | ScheduleTaskCountOutputTypeCountExecutionsArgs
-  }
-
-  // Custom InputTypes
-  /**
-   * ScheduleTaskCountOutputType without action
-   */
-  export type ScheduleTaskCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleTaskCountOutputType
-     */
-    select?: ScheduleTaskCountOutputTypeSelect<ExtArgs> | null
-  }
-
-  /**
-   * ScheduleTaskCountOutputType without action
-   */
-  export type ScheduleTaskCountOutputTypeCountExecutionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ScheduleExecutionWhereInput
-  }
-
-
-  /**
    * Count Type ScheduledInvocationCountOutputType
    */
 
@@ -11445,11 +11123,9 @@ export namespace Prisma {
     repositoryExplorers?: boolean | Account$repositoryExplorersArgs<ExtArgs>
     repositoryStatistics?: boolean | Account$repositoryStatisticsArgs<ExtArgs>
     schedules?: boolean | Account$schedulesArgs<ExtArgs>
-    scheduleTasks?: boolean | Account$scheduleTasksArgs<ExtArgs>
     schedulingReconcileOperations?: boolean | Account$schedulingReconcileOperationsArgs<ExtArgs>
     scheduledInvocations?: boolean | Account$scheduledInvocationsArgs<ExtArgs>
     invocationAttempts?: boolean | Account$invocationAttemptsArgs<ExtArgs>
-    scheduleStatistics?: boolean | Account$scheduleStatisticsArgs<ExtArgs>
     habits?: boolean | Account$habitsArgs<ExtArgs>
     relations?: boolean | Account$relationsArgs<ExtArgs>
     walletAccounts?: boolean | Account$walletAccountsArgs<ExtArgs>
@@ -11467,7 +11143,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: boolean | Account$aiProviderOnboardingSessionsArgs<ExtArgs>
     dashboardConfigs?: boolean | Account$dashboardConfigsArgs<ExtArgs>
     taskPlanHistory?: boolean | Account$taskPlanHistoryArgs<ExtArgs>
-    scheduleExecutions?: boolean | Account$scheduleExecutionsArgs<ExtArgs>
     reminderHistory?: boolean | Account$reminderHistoryArgs<ExtArgs>
     reminderResponses?: boolean | Account$reminderResponsesArgs<ExtArgs>
     reminderOccurrences?: boolean | Account$reminderOccurrencesArgs<ExtArgs>
@@ -11537,11 +11212,9 @@ export namespace Prisma {
     repositoryExplorers?: boolean | Account$repositoryExplorersArgs<ExtArgs>
     repositoryStatistics?: boolean | Account$repositoryStatisticsArgs<ExtArgs>
     schedules?: boolean | Account$schedulesArgs<ExtArgs>
-    scheduleTasks?: boolean | Account$scheduleTasksArgs<ExtArgs>
     schedulingReconcileOperations?: boolean | Account$schedulingReconcileOperationsArgs<ExtArgs>
     scheduledInvocations?: boolean | Account$scheduledInvocationsArgs<ExtArgs>
     invocationAttempts?: boolean | Account$invocationAttemptsArgs<ExtArgs>
-    scheduleStatistics?: boolean | Account$scheduleStatisticsArgs<ExtArgs>
     habits?: boolean | Account$habitsArgs<ExtArgs>
     relations?: boolean | Account$relationsArgs<ExtArgs>
     walletAccounts?: boolean | Account$walletAccountsArgs<ExtArgs>
@@ -11559,7 +11232,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: boolean | Account$aiProviderOnboardingSessionsArgs<ExtArgs>
     dashboardConfigs?: boolean | Account$dashboardConfigsArgs<ExtArgs>
     taskPlanHistory?: boolean | Account$taskPlanHistoryArgs<ExtArgs>
-    scheduleExecutions?: boolean | Account$scheduleExecutionsArgs<ExtArgs>
     reminderHistory?: boolean | Account$reminderHistoryArgs<ExtArgs>
     reminderResponses?: boolean | Account$reminderResponsesArgs<ExtArgs>
     reminderOccurrences?: boolean | Account$reminderOccurrencesArgs<ExtArgs>
@@ -11607,11 +11279,9 @@ export namespace Prisma {
       repositoryExplorers: Prisma.$RepositoryExplorerPayload<ExtArgs>[]
       repositoryStatistics: Prisma.$RepositoryStatisticPayload<ExtArgs> | null
       schedules: Prisma.$SchedulePayload<ExtArgs>[]
-      scheduleTasks: Prisma.$ScheduleTaskPayload<ExtArgs>[]
       schedulingReconcileOperations: Prisma.$SchedulingReconcileOperationPayload<ExtArgs>[]
       scheduledInvocations: Prisma.$ScheduledInvocationPayload<ExtArgs>[]
       invocationAttempts: Prisma.$InvocationAttemptPayload<ExtArgs>[]
-      scheduleStatistics: Prisma.$ScheduleStatisticPayload<ExtArgs> | null
       habits: Prisma.$HabitPayload<ExtArgs>[]
       relations: Prisma.$RelationPayload<ExtArgs>[]
       walletAccounts: Prisma.$WalletAccountPayload<ExtArgs>[]
@@ -11629,7 +11299,6 @@ export namespace Prisma {
       aiProviderOnboardingSessions: Prisma.$AiProviderOnboardingSessionPayload<ExtArgs>[]
       dashboardConfigs: Prisma.$DashboardConfigPayload<ExtArgs> | null
       taskPlanHistory: Prisma.$TaskPlanHistoryPayload<ExtArgs>[]
-      scheduleExecutions: Prisma.$ScheduleExecutionPayload<ExtArgs>[]
       reminderHistory: Prisma.$ReminderHistoryPayload<ExtArgs>[]
       reminderResponses: Prisma.$ReminderResponsePayload<ExtArgs>[]
       reminderOccurrences: Prisma.$ReminderOccurrencePayload<ExtArgs>[]
@@ -12067,11 +11736,9 @@ export namespace Prisma {
     repositoryExplorers<T extends Account$repositoryExplorersArgs<ExtArgs> = {}>(args?: Subset<T, Account$repositoryExplorersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RepositoryExplorerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     repositoryStatistics<T extends Account$repositoryStatisticsArgs<ExtArgs> = {}>(args?: Subset<T, Account$repositoryStatisticsArgs<ExtArgs>>): Prisma__RepositoryStatisticClient<$Result.GetResult<Prisma.$RepositoryStatisticPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     schedules<T extends Account$schedulesArgs<ExtArgs> = {}>(args?: Subset<T, Account$schedulesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    scheduleTasks<T extends Account$scheduleTasksArgs<ExtArgs> = {}>(args?: Subset<T, Account$scheduleTasksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScheduleTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     schedulingReconcileOperations<T extends Account$schedulingReconcileOperationsArgs<ExtArgs> = {}>(args?: Subset<T, Account$schedulingReconcileOperationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SchedulingReconcileOperationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     scheduledInvocations<T extends Account$scheduledInvocationsArgs<ExtArgs> = {}>(args?: Subset<T, Account$scheduledInvocationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScheduledInvocationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     invocationAttempts<T extends Account$invocationAttemptsArgs<ExtArgs> = {}>(args?: Subset<T, Account$invocationAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvocationAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    scheduleStatistics<T extends Account$scheduleStatisticsArgs<ExtArgs> = {}>(args?: Subset<T, Account$scheduleStatisticsArgs<ExtArgs>>): Prisma__ScheduleStatisticClient<$Result.GetResult<Prisma.$ScheduleStatisticPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     habits<T extends Account$habitsArgs<ExtArgs> = {}>(args?: Subset<T, Account$habitsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$HabitPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     relations<T extends Account$relationsArgs<ExtArgs> = {}>(args?: Subset<T, Account$relationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RelationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     walletAccounts<T extends Account$walletAccountsArgs<ExtArgs> = {}>(args?: Subset<T, Account$walletAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WalletAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -12089,7 +11756,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions<T extends Account$aiProviderOnboardingSessionsArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiProviderOnboardingSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiProviderOnboardingSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     dashboardConfigs<T extends Account$dashboardConfigsArgs<ExtArgs> = {}>(args?: Subset<T, Account$dashboardConfigsArgs<ExtArgs>>): Prisma__DashboardConfigClient<$Result.GetResult<Prisma.$DashboardConfigPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     taskPlanHistory<T extends Account$taskPlanHistoryArgs<ExtArgs> = {}>(args?: Subset<T, Account$taskPlanHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskPlanHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    scheduleExecutions<T extends Account$scheduleExecutionsArgs<ExtArgs> = {}>(args?: Subset<T, Account$scheduleExecutionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScheduleExecutionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     reminderHistory<T extends Account$reminderHistoryArgs<ExtArgs> = {}>(args?: Subset<T, Account$reminderHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReminderHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     reminderResponses<T extends Account$reminderResponsesArgs<ExtArgs> = {}>(args?: Subset<T, Account$reminderResponsesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReminderResponsePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     reminderOccurrences<T extends Account$reminderOccurrencesArgs<ExtArgs> = {}>(args?: Subset<T, Account$reminderOccurrencesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReminderOccurrencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -12982,30 +12648,6 @@ export namespace Prisma {
   }
 
   /**
-   * Account.scheduleTasks
-   */
-  export type Account$scheduleTasksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleTask
-     */
-    select?: ScheduleTaskSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleTask
-     */
-    omit?: ScheduleTaskOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleTaskInclude<ExtArgs> | null
-    where?: ScheduleTaskWhereInput
-    orderBy?: ScheduleTaskOrderByWithRelationInput | ScheduleTaskOrderByWithRelationInput[]
-    cursor?: ScheduleTaskWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: ScheduleTaskScalarFieldEnum | ScheduleTaskScalarFieldEnum[]
-  }
-
-  /**
    * Account.schedulingReconcileOperations
    */
   export type Account$schedulingReconcileOperationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -13075,25 +12717,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: InvocationAttemptScalarFieldEnum | InvocationAttemptScalarFieldEnum[]
-  }
-
-  /**
-   * Account.scheduleStatistics
-   */
-  export type Account$scheduleStatisticsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleStatistic
-     */
-    select?: ScheduleStatisticSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleStatistic
-     */
-    omit?: ScheduleStatisticOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleStatisticInclude<ExtArgs> | null
-    where?: ScheduleStatisticWhereInput
   }
 
   /**
@@ -13492,30 +13115,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: TaskPlanHistoryScalarFieldEnum | TaskPlanHistoryScalarFieldEnum[]
-  }
-
-  /**
-   * Account.scheduleExecutions
-   */
-  export type Account$scheduleExecutionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleExecution
-     */
-    select?: ScheduleExecutionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleExecution
-     */
-    omit?: ScheduleExecutionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleExecutionInclude<ExtArgs> | null
-    where?: ScheduleExecutionWhereInput
-    orderBy?: ScheduleExecutionOrderByWithRelationInput | ScheduleExecutionOrderByWithRelationInput[]
-    cursor?: ScheduleExecutionWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: ScheduleExecutionScalarFieldEnum | ScheduleExecutionScalarFieldEnum[]
   }
 
   /**
@@ -108267,1602 +107866,6 @@ export namespace Prisma {
 
 
   /**
-   * Model ScheduleTask
-   */
-
-  export type AggregateScheduleTask = {
-    _count: ScheduleTaskCountAggregateOutputType | null
-    _avg: ScheduleTaskAvgAggregateOutputType | null
-    _sum: ScheduleTaskSumAggregateOutputType | null
-    _min: ScheduleTaskMinAggregateOutputType | null
-    _max: ScheduleTaskMaxAggregateOutputType | null
-  }
-
-  export type ScheduleTaskAvgAggregateOutputType = {
-    payloadVersion: number | null
-    maxExecutions: number | null
-    executionCount: number | null
-    lastExecutionDuration: number | null
-    consecutiveFailures: number | null
-    maxRetries: number | null
-    initialDelayMs: number | null
-    maxDelayMs: number | null
-    backoffMultiplier: number | null
-    timeout: number | null
-    version: number | null
-  }
-
-  export type ScheduleTaskSumAggregateOutputType = {
-    payloadVersion: number | null
-    maxExecutions: number | null
-    executionCount: number | null
-    lastExecutionDuration: number | null
-    consecutiveFailures: number | null
-    maxRetries: number | null
-    initialDelayMs: number | null
-    maxDelayMs: number | null
-    backoffMultiplier: number | null
-    timeout: number | null
-    version: number | null
-  }
-
-  export type ScheduleTaskMinAggregateOutputType = {
-    id: string | null
-    identityId: string | null
-    name: string | null
-    description: string | null
-    sourceModule: string | null
-    sourceEntityId: string | null
-    schedulingKey: string | null
-    ownerType: string | null
-    ownerId: string | null
-    handlerKey: string | null
-    payloadVersion: number | null
-    sourceRevision: string | null
-    status: string | null
-    enabled: boolean | null
-    cronExpression: string | null
-    timezone: string | null
-    startDate: Date | null
-    endDate: Date | null
-    maxExecutions: number | null
-    nextRunAt: Date | null
-    lastRunAt: Date | null
-    executionCount: number | null
-    lastExecutionStatus: string | null
-    lastExecutionDuration: number | null
-    consecutiveFailures: number | null
-    maxRetries: number | null
-    initialDelayMs: number | null
-    maxDelayMs: number | null
-    backoffMultiplier: number | null
-    retryableStatuses: string | null
-    payload: string | null
-    tags: string | null
-    priority: string | null
-    timeout: number | null
-    version: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-    deletedAt: Date | null
-  }
-
-  export type ScheduleTaskMaxAggregateOutputType = {
-    id: string | null
-    identityId: string | null
-    name: string | null
-    description: string | null
-    sourceModule: string | null
-    sourceEntityId: string | null
-    schedulingKey: string | null
-    ownerType: string | null
-    ownerId: string | null
-    handlerKey: string | null
-    payloadVersion: number | null
-    sourceRevision: string | null
-    status: string | null
-    enabled: boolean | null
-    cronExpression: string | null
-    timezone: string | null
-    startDate: Date | null
-    endDate: Date | null
-    maxExecutions: number | null
-    nextRunAt: Date | null
-    lastRunAt: Date | null
-    executionCount: number | null
-    lastExecutionStatus: string | null
-    lastExecutionDuration: number | null
-    consecutiveFailures: number | null
-    maxRetries: number | null
-    initialDelayMs: number | null
-    maxDelayMs: number | null
-    backoffMultiplier: number | null
-    retryableStatuses: string | null
-    payload: string | null
-    tags: string | null
-    priority: string | null
-    timeout: number | null
-    version: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-    deletedAt: Date | null
-  }
-
-  export type ScheduleTaskCountAggregateOutputType = {
-    id: number
-    identityId: number
-    name: number
-    description: number
-    sourceModule: number
-    sourceEntityId: number
-    schedulingKey: number
-    ownerType: number
-    ownerId: number
-    handlerKey: number
-    payloadVersion: number
-    sourceRevision: number
-    status: number
-    enabled: number
-    cronExpression: number
-    timezone: number
-    startDate: number
-    endDate: number
-    maxExecutions: number
-    nextRunAt: number
-    lastRunAt: number
-    executionCount: number
-    lastExecutionStatus: number
-    lastExecutionDuration: number
-    consecutiveFailures: number
-    maxRetries: number
-    initialDelayMs: number
-    maxDelayMs: number
-    backoffMultiplier: number
-    retryableStatuses: number
-    payload: number
-    tags: number
-    priority: number
-    timeout: number
-    version: number
-    createdAt: number
-    updatedAt: number
-    deletedAt: number
-    _all: number
-  }
-
-
-  export type ScheduleTaskAvgAggregateInputType = {
-    payloadVersion?: true
-    maxExecutions?: true
-    executionCount?: true
-    lastExecutionDuration?: true
-    consecutiveFailures?: true
-    maxRetries?: true
-    initialDelayMs?: true
-    maxDelayMs?: true
-    backoffMultiplier?: true
-    timeout?: true
-    version?: true
-  }
-
-  export type ScheduleTaskSumAggregateInputType = {
-    payloadVersion?: true
-    maxExecutions?: true
-    executionCount?: true
-    lastExecutionDuration?: true
-    consecutiveFailures?: true
-    maxRetries?: true
-    initialDelayMs?: true
-    maxDelayMs?: true
-    backoffMultiplier?: true
-    timeout?: true
-    version?: true
-  }
-
-  export type ScheduleTaskMinAggregateInputType = {
-    id?: true
-    identityId?: true
-    name?: true
-    description?: true
-    sourceModule?: true
-    sourceEntityId?: true
-    schedulingKey?: true
-    ownerType?: true
-    ownerId?: true
-    handlerKey?: true
-    payloadVersion?: true
-    sourceRevision?: true
-    status?: true
-    enabled?: true
-    cronExpression?: true
-    timezone?: true
-    startDate?: true
-    endDate?: true
-    maxExecutions?: true
-    nextRunAt?: true
-    lastRunAt?: true
-    executionCount?: true
-    lastExecutionStatus?: true
-    lastExecutionDuration?: true
-    consecutiveFailures?: true
-    maxRetries?: true
-    initialDelayMs?: true
-    maxDelayMs?: true
-    backoffMultiplier?: true
-    retryableStatuses?: true
-    payload?: true
-    tags?: true
-    priority?: true
-    timeout?: true
-    version?: true
-    createdAt?: true
-    updatedAt?: true
-    deletedAt?: true
-  }
-
-  export type ScheduleTaskMaxAggregateInputType = {
-    id?: true
-    identityId?: true
-    name?: true
-    description?: true
-    sourceModule?: true
-    sourceEntityId?: true
-    schedulingKey?: true
-    ownerType?: true
-    ownerId?: true
-    handlerKey?: true
-    payloadVersion?: true
-    sourceRevision?: true
-    status?: true
-    enabled?: true
-    cronExpression?: true
-    timezone?: true
-    startDate?: true
-    endDate?: true
-    maxExecutions?: true
-    nextRunAt?: true
-    lastRunAt?: true
-    executionCount?: true
-    lastExecutionStatus?: true
-    lastExecutionDuration?: true
-    consecutiveFailures?: true
-    maxRetries?: true
-    initialDelayMs?: true
-    maxDelayMs?: true
-    backoffMultiplier?: true
-    retryableStatuses?: true
-    payload?: true
-    tags?: true
-    priority?: true
-    timeout?: true
-    version?: true
-    createdAt?: true
-    updatedAt?: true
-    deletedAt?: true
-  }
-
-  export type ScheduleTaskCountAggregateInputType = {
-    id?: true
-    identityId?: true
-    name?: true
-    description?: true
-    sourceModule?: true
-    sourceEntityId?: true
-    schedulingKey?: true
-    ownerType?: true
-    ownerId?: true
-    handlerKey?: true
-    payloadVersion?: true
-    sourceRevision?: true
-    status?: true
-    enabled?: true
-    cronExpression?: true
-    timezone?: true
-    startDate?: true
-    endDate?: true
-    maxExecutions?: true
-    nextRunAt?: true
-    lastRunAt?: true
-    executionCount?: true
-    lastExecutionStatus?: true
-    lastExecutionDuration?: true
-    consecutiveFailures?: true
-    maxRetries?: true
-    initialDelayMs?: true
-    maxDelayMs?: true
-    backoffMultiplier?: true
-    retryableStatuses?: true
-    payload?: true
-    tags?: true
-    priority?: true
-    timeout?: true
-    version?: true
-    createdAt?: true
-    updatedAt?: true
-    deletedAt?: true
-    _all?: true
-  }
-
-  export type ScheduleTaskAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which ScheduleTask to aggregate.
-     */
-    where?: ScheduleTaskWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of ScheduleTasks to fetch.
-     */
-    orderBy?: ScheduleTaskOrderByWithRelationInput | ScheduleTaskOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the start position
-     */
-    cursor?: ScheduleTaskWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` ScheduleTasks from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` ScheduleTasks.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Count returned ScheduleTasks
-    **/
-    _count?: true | ScheduleTaskCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to average
-    **/
-    _avg?: ScheduleTaskAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to sum
-    **/
-    _sum?: ScheduleTaskSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the minimum value
-    **/
-    _min?: ScheduleTaskMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the maximum value
-    **/
-    _max?: ScheduleTaskMaxAggregateInputType
-  }
-
-  export type GetScheduleTaskAggregateType<T extends ScheduleTaskAggregateArgs> = {
-        [P in keyof T & keyof AggregateScheduleTask]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateScheduleTask[P]>
-      : GetScalarType<T[P], AggregateScheduleTask[P]>
-  }
-
-
-
-
-  export type ScheduleTaskGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ScheduleTaskWhereInput
-    orderBy?: ScheduleTaskOrderByWithAggregationInput | ScheduleTaskOrderByWithAggregationInput[]
-    by: ScheduleTaskScalarFieldEnum[] | ScheduleTaskScalarFieldEnum
-    having?: ScheduleTaskScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: ScheduleTaskCountAggregateInputType | true
-    _avg?: ScheduleTaskAvgAggregateInputType
-    _sum?: ScheduleTaskSumAggregateInputType
-    _min?: ScheduleTaskMinAggregateInputType
-    _max?: ScheduleTaskMaxAggregateInputType
-  }
-
-  export type ScheduleTaskGroupByOutputType = {
-    id: string
-    identityId: string
-    name: string
-    description: string | null
-    sourceModule: string
-    sourceEntityId: string
-    schedulingKey: string | null
-    ownerType: string | null
-    ownerId: string | null
-    handlerKey: string | null
-    payloadVersion: number | null
-    sourceRevision: string | null
-    status: string
-    enabled: boolean
-    cronExpression: string | null
-    timezone: string
-    startDate: Date | null
-    endDate: Date | null
-    maxExecutions: number | null
-    nextRunAt: Date | null
-    lastRunAt: Date | null
-    executionCount: number
-    lastExecutionStatus: string | null
-    lastExecutionDuration: number | null
-    consecutiveFailures: number
-    maxRetries: number
-    initialDelayMs: number
-    maxDelayMs: number
-    backoffMultiplier: number
-    retryableStatuses: string
-    payload: string | null
-    tags: string
-    priority: string
-    timeout: number | null
-    version: number
-    createdAt: Date
-    updatedAt: Date
-    deletedAt: Date | null
-    _count: ScheduleTaskCountAggregateOutputType | null
-    _avg: ScheduleTaskAvgAggregateOutputType | null
-    _sum: ScheduleTaskSumAggregateOutputType | null
-    _min: ScheduleTaskMinAggregateOutputType | null
-    _max: ScheduleTaskMaxAggregateOutputType | null
-  }
-
-  type GetScheduleTaskGroupByPayload<T extends ScheduleTaskGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<ScheduleTaskGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof ScheduleTaskGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], ScheduleTaskGroupByOutputType[P]>
-            : GetScalarType<T[P], ScheduleTaskGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type ScheduleTaskSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    name?: boolean
-    description?: boolean
-    sourceModule?: boolean
-    sourceEntityId?: boolean
-    schedulingKey?: boolean
-    ownerType?: boolean
-    ownerId?: boolean
-    handlerKey?: boolean
-    payloadVersion?: boolean
-    sourceRevision?: boolean
-    status?: boolean
-    enabled?: boolean
-    cronExpression?: boolean
-    timezone?: boolean
-    startDate?: boolean
-    endDate?: boolean
-    maxExecutions?: boolean
-    nextRunAt?: boolean
-    lastRunAt?: boolean
-    executionCount?: boolean
-    lastExecutionStatus?: boolean
-    lastExecutionDuration?: boolean
-    consecutiveFailures?: boolean
-    maxRetries?: boolean
-    initialDelayMs?: boolean
-    maxDelayMs?: boolean
-    backoffMultiplier?: boolean
-    retryableStatuses?: boolean
-    payload?: boolean
-    tags?: boolean
-    priority?: boolean
-    timeout?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    deletedAt?: boolean
-    executions?: boolean | ScheduleTask$executionsArgs<ExtArgs>
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-    _count?: boolean | ScheduleTaskCountOutputTypeDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["scheduleTask"]>
-
-  export type ScheduleTaskSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    name?: boolean
-    description?: boolean
-    sourceModule?: boolean
-    sourceEntityId?: boolean
-    schedulingKey?: boolean
-    ownerType?: boolean
-    ownerId?: boolean
-    handlerKey?: boolean
-    payloadVersion?: boolean
-    sourceRevision?: boolean
-    status?: boolean
-    enabled?: boolean
-    cronExpression?: boolean
-    timezone?: boolean
-    startDate?: boolean
-    endDate?: boolean
-    maxExecutions?: boolean
-    nextRunAt?: boolean
-    lastRunAt?: boolean
-    executionCount?: boolean
-    lastExecutionStatus?: boolean
-    lastExecutionDuration?: boolean
-    consecutiveFailures?: boolean
-    maxRetries?: boolean
-    initialDelayMs?: boolean
-    maxDelayMs?: boolean
-    backoffMultiplier?: boolean
-    retryableStatuses?: boolean
-    payload?: boolean
-    tags?: boolean
-    priority?: boolean
-    timeout?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    deletedAt?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["scheduleTask"]>
-
-  export type ScheduleTaskSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    name?: boolean
-    description?: boolean
-    sourceModule?: boolean
-    sourceEntityId?: boolean
-    schedulingKey?: boolean
-    ownerType?: boolean
-    ownerId?: boolean
-    handlerKey?: boolean
-    payloadVersion?: boolean
-    sourceRevision?: boolean
-    status?: boolean
-    enabled?: boolean
-    cronExpression?: boolean
-    timezone?: boolean
-    startDate?: boolean
-    endDate?: boolean
-    maxExecutions?: boolean
-    nextRunAt?: boolean
-    lastRunAt?: boolean
-    executionCount?: boolean
-    lastExecutionStatus?: boolean
-    lastExecutionDuration?: boolean
-    consecutiveFailures?: boolean
-    maxRetries?: boolean
-    initialDelayMs?: boolean
-    maxDelayMs?: boolean
-    backoffMultiplier?: boolean
-    retryableStatuses?: boolean
-    payload?: boolean
-    tags?: boolean
-    priority?: boolean
-    timeout?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    deletedAt?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["scheduleTask"]>
-
-  export type ScheduleTaskSelectScalar = {
-    id?: boolean
-    identityId?: boolean
-    name?: boolean
-    description?: boolean
-    sourceModule?: boolean
-    sourceEntityId?: boolean
-    schedulingKey?: boolean
-    ownerType?: boolean
-    ownerId?: boolean
-    handlerKey?: boolean
-    payloadVersion?: boolean
-    sourceRevision?: boolean
-    status?: boolean
-    enabled?: boolean
-    cronExpression?: boolean
-    timezone?: boolean
-    startDate?: boolean
-    endDate?: boolean
-    maxExecutions?: boolean
-    nextRunAt?: boolean
-    lastRunAt?: boolean
-    executionCount?: boolean
-    lastExecutionStatus?: boolean
-    lastExecutionDuration?: boolean
-    consecutiveFailures?: boolean
-    maxRetries?: boolean
-    initialDelayMs?: boolean
-    maxDelayMs?: boolean
-    backoffMultiplier?: boolean
-    retryableStatuses?: boolean
-    payload?: boolean
-    tags?: boolean
-    priority?: boolean
-    timeout?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    deletedAt?: boolean
-  }
-
-  export type ScheduleTaskOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "description" | "sourceModule" | "sourceEntityId" | "schedulingKey" | "ownerType" | "ownerId" | "handlerKey" | "payloadVersion" | "sourceRevision" | "status" | "enabled" | "cronExpression" | "timezone" | "startDate" | "endDate" | "maxExecutions" | "nextRunAt" | "lastRunAt" | "executionCount" | "lastExecutionStatus" | "lastExecutionDuration" | "consecutiveFailures" | "maxRetries" | "initialDelayMs" | "maxDelayMs" | "backoffMultiplier" | "retryableStatuses" | "payload" | "tags" | "priority" | "timeout" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["scheduleTask"]>
-  export type ScheduleTaskInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    executions?: boolean | ScheduleTask$executionsArgs<ExtArgs>
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-    _count?: boolean | ScheduleTaskCountOutputTypeDefaultArgs<ExtArgs>
-  }
-  export type ScheduleTaskIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }
-  export type ScheduleTaskIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }
-
-  export type $ScheduleTaskPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "ScheduleTask"
-    objects: {
-      executions: Prisma.$ScheduleExecutionPayload<ExtArgs>[]
-      account: Prisma.$AccountPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      identityId: string
-      name: string
-      description: string | null
-      sourceModule: string
-      sourceEntityId: string
-      schedulingKey: string | null
-      ownerType: string | null
-      ownerId: string | null
-      handlerKey: string | null
-      payloadVersion: number | null
-      sourceRevision: string | null
-      status: string
-      enabled: boolean
-      cronExpression: string | null
-      timezone: string
-      startDate: Date | null
-      endDate: Date | null
-      maxExecutions: number | null
-      nextRunAt: Date | null
-      lastRunAt: Date | null
-      executionCount: number
-      lastExecutionStatus: string | null
-      lastExecutionDuration: number | null
-      consecutiveFailures: number
-      maxRetries: number
-      initialDelayMs: number
-      maxDelayMs: number
-      backoffMultiplier: number
-      retryableStatuses: string
-      payload: string | null
-      tags: string
-      priority: string
-      timeout: number | null
-      version: number
-      createdAt: Date
-      updatedAt: Date
-      deletedAt: Date | null
-    }, ExtArgs["result"]["scheduleTask"]>
-    composites: {}
-  }
-
-  type ScheduleTaskGetPayload<S extends boolean | null | undefined | ScheduleTaskDefaultArgs> = $Result.GetResult<Prisma.$ScheduleTaskPayload, S>
-
-  type ScheduleTaskCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<ScheduleTaskFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: ScheduleTaskCountAggregateInputType | true
-    }
-
-  export interface ScheduleTaskDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ScheduleTask'], meta: { name: 'ScheduleTask' } }
-    /**
-     * Find zero or one ScheduleTask that matches the filter.
-     * @param {ScheduleTaskFindUniqueArgs} args - Arguments to find a ScheduleTask
-     * @example
-     * // Get one ScheduleTask
-     * const scheduleTask = await prisma.scheduleTask.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends ScheduleTaskFindUniqueArgs>(args: SelectSubset<T, ScheduleTaskFindUniqueArgs<ExtArgs>>): Prisma__ScheduleTaskClient<$Result.GetResult<Prisma.$ScheduleTaskPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one ScheduleTask that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {ScheduleTaskFindUniqueOrThrowArgs} args - Arguments to find a ScheduleTask
-     * @example
-     * // Get one ScheduleTask
-     * const scheduleTask = await prisma.scheduleTask.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends ScheduleTaskFindUniqueOrThrowArgs>(args: SelectSubset<T, ScheduleTaskFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ScheduleTaskClient<$Result.GetResult<Prisma.$ScheduleTaskPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first ScheduleTask that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ScheduleTaskFindFirstArgs} args - Arguments to find a ScheduleTask
-     * @example
-     * // Get one ScheduleTask
-     * const scheduleTask = await prisma.scheduleTask.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends ScheduleTaskFindFirstArgs>(args?: SelectSubset<T, ScheduleTaskFindFirstArgs<ExtArgs>>): Prisma__ScheduleTaskClient<$Result.GetResult<Prisma.$ScheduleTaskPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first ScheduleTask that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ScheduleTaskFindFirstOrThrowArgs} args - Arguments to find a ScheduleTask
-     * @example
-     * // Get one ScheduleTask
-     * const scheduleTask = await prisma.scheduleTask.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends ScheduleTaskFindFirstOrThrowArgs>(args?: SelectSubset<T, ScheduleTaskFindFirstOrThrowArgs<ExtArgs>>): Prisma__ScheduleTaskClient<$Result.GetResult<Prisma.$ScheduleTaskPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more ScheduleTasks that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ScheduleTaskFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all ScheduleTasks
-     * const scheduleTasks = await prisma.scheduleTask.findMany()
-     *
-     * // Get first 10 ScheduleTasks
-     * const scheduleTasks = await prisma.scheduleTask.findMany({ take: 10 })
-     *
-     * // Only select the `id`
-     * const scheduleTaskWithIdOnly = await prisma.scheduleTask.findMany({ select: { id: true } })
-     *
-     */
-    findMany<T extends ScheduleTaskFindManyArgs>(args?: SelectSubset<T, ScheduleTaskFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScheduleTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a ScheduleTask.
-     * @param {ScheduleTaskCreateArgs} args - Arguments to create a ScheduleTask.
-     * @example
-     * // Create one ScheduleTask
-     * const ScheduleTask = await prisma.scheduleTask.create({
-     *   data: {
-     *     // ... data to create a ScheduleTask
-     *   }
-     * })
-     *
-     */
-    create<T extends ScheduleTaskCreateArgs>(args: SelectSubset<T, ScheduleTaskCreateArgs<ExtArgs>>): Prisma__ScheduleTaskClient<$Result.GetResult<Prisma.$ScheduleTaskPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many ScheduleTasks.
-     * @param {ScheduleTaskCreateManyArgs} args - Arguments to create many ScheduleTasks.
-     * @example
-     * // Create many ScheduleTasks
-     * const scheduleTask = await prisma.scheduleTask.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     */
-    createMany<T extends ScheduleTaskCreateManyArgs>(args?: SelectSubset<T, ScheduleTaskCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many ScheduleTasks and returns the data saved in the database.
-     * @param {ScheduleTaskCreateManyAndReturnArgs} args - Arguments to create many ScheduleTasks.
-     * @example
-     * // Create many ScheduleTasks
-     * const scheduleTask = await prisma.scheduleTask.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Create many ScheduleTasks and only return the `id`
-     * const scheduleTaskWithIdOnly = await prisma.scheduleTask.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    createManyAndReturn<T extends ScheduleTaskCreateManyAndReturnArgs>(args?: SelectSubset<T, ScheduleTaskCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScheduleTaskPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a ScheduleTask.
-     * @param {ScheduleTaskDeleteArgs} args - Arguments to delete one ScheduleTask.
-     * @example
-     * // Delete one ScheduleTask
-     * const ScheduleTask = await prisma.scheduleTask.delete({
-     *   where: {
-     *     // ... filter to delete one ScheduleTask
-     *   }
-     * })
-     *
-     */
-    delete<T extends ScheduleTaskDeleteArgs>(args: SelectSubset<T, ScheduleTaskDeleteArgs<ExtArgs>>): Prisma__ScheduleTaskClient<$Result.GetResult<Prisma.$ScheduleTaskPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one ScheduleTask.
-     * @param {ScheduleTaskUpdateArgs} args - Arguments to update one ScheduleTask.
-     * @example
-     * // Update one ScheduleTask
-     * const scheduleTask = await prisma.scheduleTask.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    update<T extends ScheduleTaskUpdateArgs>(args: SelectSubset<T, ScheduleTaskUpdateArgs<ExtArgs>>): Prisma__ScheduleTaskClient<$Result.GetResult<Prisma.$ScheduleTaskPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more ScheduleTasks.
-     * @param {ScheduleTaskDeleteManyArgs} args - Arguments to filter ScheduleTasks to delete.
-     * @example
-     * // Delete a few ScheduleTasks
-     * const { count } = await prisma.scheduleTask.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     *
-     */
-    deleteMany<T extends ScheduleTaskDeleteManyArgs>(args?: SelectSubset<T, ScheduleTaskDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more ScheduleTasks.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ScheduleTaskUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many ScheduleTasks
-     * const scheduleTask = await prisma.scheduleTask.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    updateMany<T extends ScheduleTaskUpdateManyArgs>(args: SelectSubset<T, ScheduleTaskUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more ScheduleTasks and returns the data updated in the database.
-     * @param {ScheduleTaskUpdateManyAndReturnArgs} args - Arguments to update many ScheduleTasks.
-     * @example
-     * // Update many ScheduleTasks
-     * const scheduleTask = await prisma.scheduleTask.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Update zero or more ScheduleTasks and only return the `id`
-     * const scheduleTaskWithIdOnly = await prisma.scheduleTask.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    updateManyAndReturn<T extends ScheduleTaskUpdateManyAndReturnArgs>(args: SelectSubset<T, ScheduleTaskUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScheduleTaskPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one ScheduleTask.
-     * @param {ScheduleTaskUpsertArgs} args - Arguments to update or create a ScheduleTask.
-     * @example
-     * // Update or create a ScheduleTask
-     * const scheduleTask = await prisma.scheduleTask.upsert({
-     *   create: {
-     *     // ... data to create a ScheduleTask
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the ScheduleTask we want to update
-     *   }
-     * })
-     */
-    upsert<T extends ScheduleTaskUpsertArgs>(args: SelectSubset<T, ScheduleTaskUpsertArgs<ExtArgs>>): Prisma__ScheduleTaskClient<$Result.GetResult<Prisma.$ScheduleTaskPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of ScheduleTasks.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ScheduleTaskCountArgs} args - Arguments to filter ScheduleTasks to count.
-     * @example
-     * // Count the number of ScheduleTasks
-     * const count = await prisma.scheduleTask.count({
-     *   where: {
-     *     // ... the filter for the ScheduleTasks we want to count
-     *   }
-     * })
-    **/
-    count<T extends ScheduleTaskCountArgs>(
-      args?: Subset<T, ScheduleTaskCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], ScheduleTaskCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a ScheduleTask.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ScheduleTaskAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends ScheduleTaskAggregateArgs>(args: Subset<T, ScheduleTaskAggregateArgs>): Prisma.PrismaPromise<GetScheduleTaskAggregateType<T>>
-
-    /**
-     * Group by ScheduleTask.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ScheduleTaskGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     *
-    **/
-    groupBy<
-      T extends ScheduleTaskGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: ScheduleTaskGroupByArgs['orderBy'] }
-        : { orderBy?: ScheduleTaskGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, ScheduleTaskGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetScheduleTaskGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the ScheduleTask model
-   */
-  readonly fields: ScheduleTaskFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for ScheduleTask.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__ScheduleTaskClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    executions<T extends ScheduleTask$executionsArgs<ExtArgs> = {}>(args?: Subset<T, ScheduleTask$executionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScheduleExecutionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the ScheduleTask model
-   */
-  interface ScheduleTaskFieldRefs {
-    readonly id: FieldRef<"ScheduleTask", 'String'>
-    readonly identityId: FieldRef<"ScheduleTask", 'String'>
-    readonly name: FieldRef<"ScheduleTask", 'String'>
-    readonly description: FieldRef<"ScheduleTask", 'String'>
-    readonly sourceModule: FieldRef<"ScheduleTask", 'String'>
-    readonly sourceEntityId: FieldRef<"ScheduleTask", 'String'>
-    readonly schedulingKey: FieldRef<"ScheduleTask", 'String'>
-    readonly ownerType: FieldRef<"ScheduleTask", 'String'>
-    readonly ownerId: FieldRef<"ScheduleTask", 'String'>
-    readonly handlerKey: FieldRef<"ScheduleTask", 'String'>
-    readonly payloadVersion: FieldRef<"ScheduleTask", 'Int'>
-    readonly sourceRevision: FieldRef<"ScheduleTask", 'String'>
-    readonly status: FieldRef<"ScheduleTask", 'String'>
-    readonly enabled: FieldRef<"ScheduleTask", 'Boolean'>
-    readonly cronExpression: FieldRef<"ScheduleTask", 'String'>
-    readonly timezone: FieldRef<"ScheduleTask", 'String'>
-    readonly startDate: FieldRef<"ScheduleTask", 'DateTime'>
-    readonly endDate: FieldRef<"ScheduleTask", 'DateTime'>
-    readonly maxExecutions: FieldRef<"ScheduleTask", 'Int'>
-    readonly nextRunAt: FieldRef<"ScheduleTask", 'DateTime'>
-    readonly lastRunAt: FieldRef<"ScheduleTask", 'DateTime'>
-    readonly executionCount: FieldRef<"ScheduleTask", 'Int'>
-    readonly lastExecutionStatus: FieldRef<"ScheduleTask", 'String'>
-    readonly lastExecutionDuration: FieldRef<"ScheduleTask", 'Int'>
-    readonly consecutiveFailures: FieldRef<"ScheduleTask", 'Int'>
-    readonly maxRetries: FieldRef<"ScheduleTask", 'Int'>
-    readonly initialDelayMs: FieldRef<"ScheduleTask", 'Int'>
-    readonly maxDelayMs: FieldRef<"ScheduleTask", 'Int'>
-    readonly backoffMultiplier: FieldRef<"ScheduleTask", 'Float'>
-    readonly retryableStatuses: FieldRef<"ScheduleTask", 'String'>
-    readonly payload: FieldRef<"ScheduleTask", 'String'>
-    readonly tags: FieldRef<"ScheduleTask", 'String'>
-    readonly priority: FieldRef<"ScheduleTask", 'String'>
-    readonly timeout: FieldRef<"ScheduleTask", 'Int'>
-    readonly version: FieldRef<"ScheduleTask", 'Int'>
-    readonly createdAt: FieldRef<"ScheduleTask", 'DateTime'>
-    readonly updatedAt: FieldRef<"ScheduleTask", 'DateTime'>
-    readonly deletedAt: FieldRef<"ScheduleTask", 'DateTime'>
-  }
-
-
-  // Custom InputTypes
-  /**
-   * ScheduleTask findUnique
-   */
-  export type ScheduleTaskFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleTask
-     */
-    select?: ScheduleTaskSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleTask
-     */
-    omit?: ScheduleTaskOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleTaskInclude<ExtArgs> | null
-    /**
-     * Filter, which ScheduleTask to fetch.
-     */
-    where: ScheduleTaskWhereUniqueInput
-  }
-
-  /**
-   * ScheduleTask findUniqueOrThrow
-   */
-  export type ScheduleTaskFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleTask
-     */
-    select?: ScheduleTaskSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleTask
-     */
-    omit?: ScheduleTaskOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleTaskInclude<ExtArgs> | null
-    /**
-     * Filter, which ScheduleTask to fetch.
-     */
-    where: ScheduleTaskWhereUniqueInput
-  }
-
-  /**
-   * ScheduleTask findFirst
-   */
-  export type ScheduleTaskFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleTask
-     */
-    select?: ScheduleTaskSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleTask
-     */
-    omit?: ScheduleTaskOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleTaskInclude<ExtArgs> | null
-    /**
-     * Filter, which ScheduleTask to fetch.
-     */
-    where?: ScheduleTaskWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of ScheduleTasks to fetch.
-     */
-    orderBy?: ScheduleTaskOrderByWithRelationInput | ScheduleTaskOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for ScheduleTasks.
-     */
-    cursor?: ScheduleTaskWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` ScheduleTasks from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` ScheduleTasks.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of ScheduleTasks.
-     */
-    distinct?: ScheduleTaskScalarFieldEnum | ScheduleTaskScalarFieldEnum[]
-  }
-
-  /**
-   * ScheduleTask findFirstOrThrow
-   */
-  export type ScheduleTaskFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleTask
-     */
-    select?: ScheduleTaskSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleTask
-     */
-    omit?: ScheduleTaskOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleTaskInclude<ExtArgs> | null
-    /**
-     * Filter, which ScheduleTask to fetch.
-     */
-    where?: ScheduleTaskWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of ScheduleTasks to fetch.
-     */
-    orderBy?: ScheduleTaskOrderByWithRelationInput | ScheduleTaskOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for ScheduleTasks.
-     */
-    cursor?: ScheduleTaskWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` ScheduleTasks from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` ScheduleTasks.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of ScheduleTasks.
-     */
-    distinct?: ScheduleTaskScalarFieldEnum | ScheduleTaskScalarFieldEnum[]
-  }
-
-  /**
-   * ScheduleTask findMany
-   */
-  export type ScheduleTaskFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleTask
-     */
-    select?: ScheduleTaskSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleTask
-     */
-    omit?: ScheduleTaskOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleTaskInclude<ExtArgs> | null
-    /**
-     * Filter, which ScheduleTasks to fetch.
-     */
-    where?: ScheduleTaskWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of ScheduleTasks to fetch.
-     */
-    orderBy?: ScheduleTaskOrderByWithRelationInput | ScheduleTaskOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for listing ScheduleTasks.
-     */
-    cursor?: ScheduleTaskWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` ScheduleTasks from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` ScheduleTasks.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of ScheduleTasks.
-     */
-    distinct?: ScheduleTaskScalarFieldEnum | ScheduleTaskScalarFieldEnum[]
-  }
-
-  /**
-   * ScheduleTask create
-   */
-  export type ScheduleTaskCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleTask
-     */
-    select?: ScheduleTaskSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleTask
-     */
-    omit?: ScheduleTaskOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleTaskInclude<ExtArgs> | null
-    /**
-     * The data needed to create a ScheduleTask.
-     */
-    data: XOR<ScheduleTaskCreateInput, ScheduleTaskUncheckedCreateInput>
-  }
-
-  /**
-   * ScheduleTask createMany
-   */
-  export type ScheduleTaskCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many ScheduleTasks.
-     */
-    data: ScheduleTaskCreateManyInput | ScheduleTaskCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * ScheduleTask createManyAndReturn
-   */
-  export type ScheduleTaskCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleTask
-     */
-    select?: ScheduleTaskSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleTask
-     */
-    omit?: ScheduleTaskOmit<ExtArgs> | null
-    /**
-     * The data used to create many ScheduleTasks.
-     */
-    data: ScheduleTaskCreateManyInput | ScheduleTaskCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleTaskIncludeCreateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * ScheduleTask update
-   */
-  export type ScheduleTaskUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleTask
-     */
-    select?: ScheduleTaskSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleTask
-     */
-    omit?: ScheduleTaskOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleTaskInclude<ExtArgs> | null
-    /**
-     * The data needed to update a ScheduleTask.
-     */
-    data: XOR<ScheduleTaskUpdateInput, ScheduleTaskUncheckedUpdateInput>
-    /**
-     * Choose, which ScheduleTask to update.
-     */
-    where: ScheduleTaskWhereUniqueInput
-  }
-
-  /**
-   * ScheduleTask updateMany
-   */
-  export type ScheduleTaskUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update ScheduleTasks.
-     */
-    data: XOR<ScheduleTaskUpdateManyMutationInput, ScheduleTaskUncheckedUpdateManyInput>
-    /**
-     * Filter which ScheduleTasks to update
-     */
-    where?: ScheduleTaskWhereInput
-    /**
-     * Limit how many ScheduleTasks to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * ScheduleTask updateManyAndReturn
-   */
-  export type ScheduleTaskUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleTask
-     */
-    select?: ScheduleTaskSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleTask
-     */
-    omit?: ScheduleTaskOmit<ExtArgs> | null
-    /**
-     * The data used to update ScheduleTasks.
-     */
-    data: XOR<ScheduleTaskUpdateManyMutationInput, ScheduleTaskUncheckedUpdateManyInput>
-    /**
-     * Filter which ScheduleTasks to update
-     */
-    where?: ScheduleTaskWhereInput
-    /**
-     * Limit how many ScheduleTasks to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleTaskIncludeUpdateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * ScheduleTask upsert
-   */
-  export type ScheduleTaskUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleTask
-     */
-    select?: ScheduleTaskSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleTask
-     */
-    omit?: ScheduleTaskOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleTaskInclude<ExtArgs> | null
-    /**
-     * The filter to search for the ScheduleTask to update in case it exists.
-     */
-    where: ScheduleTaskWhereUniqueInput
-    /**
-     * In case the ScheduleTask found by the `where` argument doesn't exist, create a new ScheduleTask with this data.
-     */
-    create: XOR<ScheduleTaskCreateInput, ScheduleTaskUncheckedCreateInput>
-    /**
-     * In case the ScheduleTask was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<ScheduleTaskUpdateInput, ScheduleTaskUncheckedUpdateInput>
-  }
-
-  /**
-   * ScheduleTask delete
-   */
-  export type ScheduleTaskDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleTask
-     */
-    select?: ScheduleTaskSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleTask
-     */
-    omit?: ScheduleTaskOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleTaskInclude<ExtArgs> | null
-    /**
-     * Filter which ScheduleTask to delete.
-     */
-    where: ScheduleTaskWhereUniqueInput
-  }
-
-  /**
-   * ScheduleTask deleteMany
-   */
-  export type ScheduleTaskDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which ScheduleTasks to delete
-     */
-    where?: ScheduleTaskWhereInput
-    /**
-     * Limit how many ScheduleTasks to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * ScheduleTask.executions
-   */
-  export type ScheduleTask$executionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleExecution
-     */
-    select?: ScheduleExecutionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleExecution
-     */
-    omit?: ScheduleExecutionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleExecutionInclude<ExtArgs> | null
-    where?: ScheduleExecutionWhereInput
-    orderBy?: ScheduleExecutionOrderByWithRelationInput | ScheduleExecutionOrderByWithRelationInput[]
-    cursor?: ScheduleExecutionWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: ScheduleExecutionScalarFieldEnum | ScheduleExecutionScalarFieldEnum[]
-  }
-
-  /**
-   * ScheduleTask without action
-   */
-  export type ScheduleTaskDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleTask
-     */
-    select?: ScheduleTaskSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleTask
-     */
-    omit?: ScheduleTaskOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleTaskInclude<ExtArgs> | null
-  }
-
-
-  /**
    * Model ScheduledInvocation
    */
 
@@ -113779,2515 +111782,6 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: SchedulingReconcileOperationInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model ScheduleExecution
-   */
-
-  export type AggregateScheduleExecution = {
-    _count: ScheduleExecutionCountAggregateOutputType | null
-    _avg: ScheduleExecutionAvgAggregateOutputType | null
-    _sum: ScheduleExecutionSumAggregateOutputType | null
-    _min: ScheduleExecutionMinAggregateOutputType | null
-    _max: ScheduleExecutionMaxAggregateOutputType | null
-  }
-
-  export type ScheduleExecutionAvgAggregateOutputType = {
-    duration: number | null
-    retryCount: number | null
-  }
-
-  export type ScheduleExecutionSumAggregateOutputType = {
-    duration: number | null
-    retryCount: number | null
-  }
-
-  export type ScheduleExecutionMinAggregateOutputType = {
-    id: string | null
-    identityId: string | null
-    taskId: string | null
-    executionTime: Date | null
-    status: string | null
-    duration: number | null
-    result: string | null
-    error: string | null
-    retryCount: number | null
-    createdAt: Date | null
-  }
-
-  export type ScheduleExecutionMaxAggregateOutputType = {
-    id: string | null
-    identityId: string | null
-    taskId: string | null
-    executionTime: Date | null
-    status: string | null
-    duration: number | null
-    result: string | null
-    error: string | null
-    retryCount: number | null
-    createdAt: Date | null
-  }
-
-  export type ScheduleExecutionCountAggregateOutputType = {
-    id: number
-    identityId: number
-    taskId: number
-    executionTime: number
-    status: number
-    duration: number
-    result: number
-    error: number
-    retryCount: number
-    createdAt: number
-    _all: number
-  }
-
-
-  export type ScheduleExecutionAvgAggregateInputType = {
-    duration?: true
-    retryCount?: true
-  }
-
-  export type ScheduleExecutionSumAggregateInputType = {
-    duration?: true
-    retryCount?: true
-  }
-
-  export type ScheduleExecutionMinAggregateInputType = {
-    id?: true
-    identityId?: true
-    taskId?: true
-    executionTime?: true
-    status?: true
-    duration?: true
-    result?: true
-    error?: true
-    retryCount?: true
-    createdAt?: true
-  }
-
-  export type ScheduleExecutionMaxAggregateInputType = {
-    id?: true
-    identityId?: true
-    taskId?: true
-    executionTime?: true
-    status?: true
-    duration?: true
-    result?: true
-    error?: true
-    retryCount?: true
-    createdAt?: true
-  }
-
-  export type ScheduleExecutionCountAggregateInputType = {
-    id?: true
-    identityId?: true
-    taskId?: true
-    executionTime?: true
-    status?: true
-    duration?: true
-    result?: true
-    error?: true
-    retryCount?: true
-    createdAt?: true
-    _all?: true
-  }
-
-  export type ScheduleExecutionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which ScheduleExecution to aggregate.
-     */
-    where?: ScheduleExecutionWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of ScheduleExecutions to fetch.
-     */
-    orderBy?: ScheduleExecutionOrderByWithRelationInput | ScheduleExecutionOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the start position
-     */
-    cursor?: ScheduleExecutionWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` ScheduleExecutions from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` ScheduleExecutions.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Count returned ScheduleExecutions
-    **/
-    _count?: true | ScheduleExecutionCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to average
-    **/
-    _avg?: ScheduleExecutionAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to sum
-    **/
-    _sum?: ScheduleExecutionSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the minimum value
-    **/
-    _min?: ScheduleExecutionMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the maximum value
-    **/
-    _max?: ScheduleExecutionMaxAggregateInputType
-  }
-
-  export type GetScheduleExecutionAggregateType<T extends ScheduleExecutionAggregateArgs> = {
-        [P in keyof T & keyof AggregateScheduleExecution]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateScheduleExecution[P]>
-      : GetScalarType<T[P], AggregateScheduleExecution[P]>
-  }
-
-
-
-
-  export type ScheduleExecutionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ScheduleExecutionWhereInput
-    orderBy?: ScheduleExecutionOrderByWithAggregationInput | ScheduleExecutionOrderByWithAggregationInput[]
-    by: ScheduleExecutionScalarFieldEnum[] | ScheduleExecutionScalarFieldEnum
-    having?: ScheduleExecutionScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: ScheduleExecutionCountAggregateInputType | true
-    _avg?: ScheduleExecutionAvgAggregateInputType
-    _sum?: ScheduleExecutionSumAggregateInputType
-    _min?: ScheduleExecutionMinAggregateInputType
-    _max?: ScheduleExecutionMaxAggregateInputType
-  }
-
-  export type ScheduleExecutionGroupByOutputType = {
-    id: string
-    identityId: string
-    taskId: string
-    executionTime: Date
-    status: string
-    duration: number | null
-    result: string | null
-    error: string | null
-    retryCount: number
-    createdAt: Date
-    _count: ScheduleExecutionCountAggregateOutputType | null
-    _avg: ScheduleExecutionAvgAggregateOutputType | null
-    _sum: ScheduleExecutionSumAggregateOutputType | null
-    _min: ScheduleExecutionMinAggregateOutputType | null
-    _max: ScheduleExecutionMaxAggregateOutputType | null
-  }
-
-  type GetScheduleExecutionGroupByPayload<T extends ScheduleExecutionGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<ScheduleExecutionGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof ScheduleExecutionGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], ScheduleExecutionGroupByOutputType[P]>
-            : GetScalarType<T[P], ScheduleExecutionGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type ScheduleExecutionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    taskId?: boolean
-    executionTime?: boolean
-    status?: boolean
-    duration?: boolean
-    result?: boolean
-    error?: boolean
-    retryCount?: boolean
-    createdAt?: boolean
-    identity?: boolean | AccountDefaultArgs<ExtArgs>
-    task?: boolean | ScheduleTaskDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["scheduleExecution"]>
-
-  export type ScheduleExecutionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    taskId?: boolean
-    executionTime?: boolean
-    status?: boolean
-    duration?: boolean
-    result?: boolean
-    error?: boolean
-    retryCount?: boolean
-    createdAt?: boolean
-    identity?: boolean | AccountDefaultArgs<ExtArgs>
-    task?: boolean | ScheduleTaskDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["scheduleExecution"]>
-
-  export type ScheduleExecutionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    taskId?: boolean
-    executionTime?: boolean
-    status?: boolean
-    duration?: boolean
-    result?: boolean
-    error?: boolean
-    retryCount?: boolean
-    createdAt?: boolean
-    identity?: boolean | AccountDefaultArgs<ExtArgs>
-    task?: boolean | ScheduleTaskDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["scheduleExecution"]>
-
-  export type ScheduleExecutionSelectScalar = {
-    id?: boolean
-    identityId?: boolean
-    taskId?: boolean
-    executionTime?: boolean
-    status?: boolean
-    duration?: boolean
-    result?: boolean
-    error?: boolean
-    retryCount?: boolean
-    createdAt?: boolean
-  }
-
-  export type ScheduleExecutionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "taskId" | "executionTime" | "status" | "duration" | "result" | "error" | "retryCount" | "createdAt", ExtArgs["result"]["scheduleExecution"]>
-  export type ScheduleExecutionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    identity?: boolean | AccountDefaultArgs<ExtArgs>
-    task?: boolean | ScheduleTaskDefaultArgs<ExtArgs>
-  }
-  export type ScheduleExecutionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    identity?: boolean | AccountDefaultArgs<ExtArgs>
-    task?: boolean | ScheduleTaskDefaultArgs<ExtArgs>
-  }
-  export type ScheduleExecutionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    identity?: boolean | AccountDefaultArgs<ExtArgs>
-    task?: boolean | ScheduleTaskDefaultArgs<ExtArgs>
-  }
-
-  export type $ScheduleExecutionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "ScheduleExecution"
-    objects: {
-      identity: Prisma.$AccountPayload<ExtArgs>
-      task: Prisma.$ScheduleTaskPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      identityId: string
-      taskId: string
-      executionTime: Date
-      status: string
-      duration: number | null
-      result: string | null
-      error: string | null
-      retryCount: number
-      createdAt: Date
-    }, ExtArgs["result"]["scheduleExecution"]>
-    composites: {}
-  }
-
-  type ScheduleExecutionGetPayload<S extends boolean | null | undefined | ScheduleExecutionDefaultArgs> = $Result.GetResult<Prisma.$ScheduleExecutionPayload, S>
-
-  type ScheduleExecutionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<ScheduleExecutionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: ScheduleExecutionCountAggregateInputType | true
-    }
-
-  export interface ScheduleExecutionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ScheduleExecution'], meta: { name: 'ScheduleExecution' } }
-    /**
-     * Find zero or one ScheduleExecution that matches the filter.
-     * @param {ScheduleExecutionFindUniqueArgs} args - Arguments to find a ScheduleExecution
-     * @example
-     * // Get one ScheduleExecution
-     * const scheduleExecution = await prisma.scheduleExecution.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends ScheduleExecutionFindUniqueArgs>(args: SelectSubset<T, ScheduleExecutionFindUniqueArgs<ExtArgs>>): Prisma__ScheduleExecutionClient<$Result.GetResult<Prisma.$ScheduleExecutionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one ScheduleExecution that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {ScheduleExecutionFindUniqueOrThrowArgs} args - Arguments to find a ScheduleExecution
-     * @example
-     * // Get one ScheduleExecution
-     * const scheduleExecution = await prisma.scheduleExecution.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends ScheduleExecutionFindUniqueOrThrowArgs>(args: SelectSubset<T, ScheduleExecutionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ScheduleExecutionClient<$Result.GetResult<Prisma.$ScheduleExecutionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first ScheduleExecution that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ScheduleExecutionFindFirstArgs} args - Arguments to find a ScheduleExecution
-     * @example
-     * // Get one ScheduleExecution
-     * const scheduleExecution = await prisma.scheduleExecution.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends ScheduleExecutionFindFirstArgs>(args?: SelectSubset<T, ScheduleExecutionFindFirstArgs<ExtArgs>>): Prisma__ScheduleExecutionClient<$Result.GetResult<Prisma.$ScheduleExecutionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first ScheduleExecution that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ScheduleExecutionFindFirstOrThrowArgs} args - Arguments to find a ScheduleExecution
-     * @example
-     * // Get one ScheduleExecution
-     * const scheduleExecution = await prisma.scheduleExecution.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends ScheduleExecutionFindFirstOrThrowArgs>(args?: SelectSubset<T, ScheduleExecutionFindFirstOrThrowArgs<ExtArgs>>): Prisma__ScheduleExecutionClient<$Result.GetResult<Prisma.$ScheduleExecutionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more ScheduleExecutions that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ScheduleExecutionFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all ScheduleExecutions
-     * const scheduleExecutions = await prisma.scheduleExecution.findMany()
-     *
-     * // Get first 10 ScheduleExecutions
-     * const scheduleExecutions = await prisma.scheduleExecution.findMany({ take: 10 })
-     *
-     * // Only select the `id`
-     * const scheduleExecutionWithIdOnly = await prisma.scheduleExecution.findMany({ select: { id: true } })
-     *
-     */
-    findMany<T extends ScheduleExecutionFindManyArgs>(args?: SelectSubset<T, ScheduleExecutionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScheduleExecutionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a ScheduleExecution.
-     * @param {ScheduleExecutionCreateArgs} args - Arguments to create a ScheduleExecution.
-     * @example
-     * // Create one ScheduleExecution
-     * const ScheduleExecution = await prisma.scheduleExecution.create({
-     *   data: {
-     *     // ... data to create a ScheduleExecution
-     *   }
-     * })
-     *
-     */
-    create<T extends ScheduleExecutionCreateArgs>(args: SelectSubset<T, ScheduleExecutionCreateArgs<ExtArgs>>): Prisma__ScheduleExecutionClient<$Result.GetResult<Prisma.$ScheduleExecutionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many ScheduleExecutions.
-     * @param {ScheduleExecutionCreateManyArgs} args - Arguments to create many ScheduleExecutions.
-     * @example
-     * // Create many ScheduleExecutions
-     * const scheduleExecution = await prisma.scheduleExecution.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     */
-    createMany<T extends ScheduleExecutionCreateManyArgs>(args?: SelectSubset<T, ScheduleExecutionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many ScheduleExecutions and returns the data saved in the database.
-     * @param {ScheduleExecutionCreateManyAndReturnArgs} args - Arguments to create many ScheduleExecutions.
-     * @example
-     * // Create many ScheduleExecutions
-     * const scheduleExecution = await prisma.scheduleExecution.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Create many ScheduleExecutions and only return the `id`
-     * const scheduleExecutionWithIdOnly = await prisma.scheduleExecution.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    createManyAndReturn<T extends ScheduleExecutionCreateManyAndReturnArgs>(args?: SelectSubset<T, ScheduleExecutionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScheduleExecutionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a ScheduleExecution.
-     * @param {ScheduleExecutionDeleteArgs} args - Arguments to delete one ScheduleExecution.
-     * @example
-     * // Delete one ScheduleExecution
-     * const ScheduleExecution = await prisma.scheduleExecution.delete({
-     *   where: {
-     *     // ... filter to delete one ScheduleExecution
-     *   }
-     * })
-     *
-     */
-    delete<T extends ScheduleExecutionDeleteArgs>(args: SelectSubset<T, ScheduleExecutionDeleteArgs<ExtArgs>>): Prisma__ScheduleExecutionClient<$Result.GetResult<Prisma.$ScheduleExecutionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one ScheduleExecution.
-     * @param {ScheduleExecutionUpdateArgs} args - Arguments to update one ScheduleExecution.
-     * @example
-     * // Update one ScheduleExecution
-     * const scheduleExecution = await prisma.scheduleExecution.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    update<T extends ScheduleExecutionUpdateArgs>(args: SelectSubset<T, ScheduleExecutionUpdateArgs<ExtArgs>>): Prisma__ScheduleExecutionClient<$Result.GetResult<Prisma.$ScheduleExecutionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more ScheduleExecutions.
-     * @param {ScheduleExecutionDeleteManyArgs} args - Arguments to filter ScheduleExecutions to delete.
-     * @example
-     * // Delete a few ScheduleExecutions
-     * const { count } = await prisma.scheduleExecution.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     *
-     */
-    deleteMany<T extends ScheduleExecutionDeleteManyArgs>(args?: SelectSubset<T, ScheduleExecutionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more ScheduleExecutions.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ScheduleExecutionUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many ScheduleExecutions
-     * const scheduleExecution = await prisma.scheduleExecution.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    updateMany<T extends ScheduleExecutionUpdateManyArgs>(args: SelectSubset<T, ScheduleExecutionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more ScheduleExecutions and returns the data updated in the database.
-     * @param {ScheduleExecutionUpdateManyAndReturnArgs} args - Arguments to update many ScheduleExecutions.
-     * @example
-     * // Update many ScheduleExecutions
-     * const scheduleExecution = await prisma.scheduleExecution.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Update zero or more ScheduleExecutions and only return the `id`
-     * const scheduleExecutionWithIdOnly = await prisma.scheduleExecution.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    updateManyAndReturn<T extends ScheduleExecutionUpdateManyAndReturnArgs>(args: SelectSubset<T, ScheduleExecutionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScheduleExecutionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one ScheduleExecution.
-     * @param {ScheduleExecutionUpsertArgs} args - Arguments to update or create a ScheduleExecution.
-     * @example
-     * // Update or create a ScheduleExecution
-     * const scheduleExecution = await prisma.scheduleExecution.upsert({
-     *   create: {
-     *     // ... data to create a ScheduleExecution
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the ScheduleExecution we want to update
-     *   }
-     * })
-     */
-    upsert<T extends ScheduleExecutionUpsertArgs>(args: SelectSubset<T, ScheduleExecutionUpsertArgs<ExtArgs>>): Prisma__ScheduleExecutionClient<$Result.GetResult<Prisma.$ScheduleExecutionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of ScheduleExecutions.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ScheduleExecutionCountArgs} args - Arguments to filter ScheduleExecutions to count.
-     * @example
-     * // Count the number of ScheduleExecutions
-     * const count = await prisma.scheduleExecution.count({
-     *   where: {
-     *     // ... the filter for the ScheduleExecutions we want to count
-     *   }
-     * })
-    **/
-    count<T extends ScheduleExecutionCountArgs>(
-      args?: Subset<T, ScheduleExecutionCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], ScheduleExecutionCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a ScheduleExecution.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ScheduleExecutionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends ScheduleExecutionAggregateArgs>(args: Subset<T, ScheduleExecutionAggregateArgs>): Prisma.PrismaPromise<GetScheduleExecutionAggregateType<T>>
-
-    /**
-     * Group by ScheduleExecution.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ScheduleExecutionGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     *
-    **/
-    groupBy<
-      T extends ScheduleExecutionGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: ScheduleExecutionGroupByArgs['orderBy'] }
-        : { orderBy?: ScheduleExecutionGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, ScheduleExecutionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetScheduleExecutionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the ScheduleExecution model
-   */
-  readonly fields: ScheduleExecutionFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for ScheduleExecution.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__ScheduleExecutionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    identity<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    task<T extends ScheduleTaskDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ScheduleTaskDefaultArgs<ExtArgs>>): Prisma__ScheduleTaskClient<$Result.GetResult<Prisma.$ScheduleTaskPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the ScheduleExecution model
-   */
-  interface ScheduleExecutionFieldRefs {
-    readonly id: FieldRef<"ScheduleExecution", 'String'>
-    readonly identityId: FieldRef<"ScheduleExecution", 'String'>
-    readonly taskId: FieldRef<"ScheduleExecution", 'String'>
-    readonly executionTime: FieldRef<"ScheduleExecution", 'DateTime'>
-    readonly status: FieldRef<"ScheduleExecution", 'String'>
-    readonly duration: FieldRef<"ScheduleExecution", 'Int'>
-    readonly result: FieldRef<"ScheduleExecution", 'String'>
-    readonly error: FieldRef<"ScheduleExecution", 'String'>
-    readonly retryCount: FieldRef<"ScheduleExecution", 'Int'>
-    readonly createdAt: FieldRef<"ScheduleExecution", 'DateTime'>
-  }
-
-
-  // Custom InputTypes
-  /**
-   * ScheduleExecution findUnique
-   */
-  export type ScheduleExecutionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleExecution
-     */
-    select?: ScheduleExecutionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleExecution
-     */
-    omit?: ScheduleExecutionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleExecutionInclude<ExtArgs> | null
-    /**
-     * Filter, which ScheduleExecution to fetch.
-     */
-    where: ScheduleExecutionWhereUniqueInput
-  }
-
-  /**
-   * ScheduleExecution findUniqueOrThrow
-   */
-  export type ScheduleExecutionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleExecution
-     */
-    select?: ScheduleExecutionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleExecution
-     */
-    omit?: ScheduleExecutionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleExecutionInclude<ExtArgs> | null
-    /**
-     * Filter, which ScheduleExecution to fetch.
-     */
-    where: ScheduleExecutionWhereUniqueInput
-  }
-
-  /**
-   * ScheduleExecution findFirst
-   */
-  export type ScheduleExecutionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleExecution
-     */
-    select?: ScheduleExecutionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleExecution
-     */
-    omit?: ScheduleExecutionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleExecutionInclude<ExtArgs> | null
-    /**
-     * Filter, which ScheduleExecution to fetch.
-     */
-    where?: ScheduleExecutionWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of ScheduleExecutions to fetch.
-     */
-    orderBy?: ScheduleExecutionOrderByWithRelationInput | ScheduleExecutionOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for ScheduleExecutions.
-     */
-    cursor?: ScheduleExecutionWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` ScheduleExecutions from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` ScheduleExecutions.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of ScheduleExecutions.
-     */
-    distinct?: ScheduleExecutionScalarFieldEnum | ScheduleExecutionScalarFieldEnum[]
-  }
-
-  /**
-   * ScheduleExecution findFirstOrThrow
-   */
-  export type ScheduleExecutionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleExecution
-     */
-    select?: ScheduleExecutionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleExecution
-     */
-    omit?: ScheduleExecutionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleExecutionInclude<ExtArgs> | null
-    /**
-     * Filter, which ScheduleExecution to fetch.
-     */
-    where?: ScheduleExecutionWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of ScheduleExecutions to fetch.
-     */
-    orderBy?: ScheduleExecutionOrderByWithRelationInput | ScheduleExecutionOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for ScheduleExecutions.
-     */
-    cursor?: ScheduleExecutionWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` ScheduleExecutions from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` ScheduleExecutions.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of ScheduleExecutions.
-     */
-    distinct?: ScheduleExecutionScalarFieldEnum | ScheduleExecutionScalarFieldEnum[]
-  }
-
-  /**
-   * ScheduleExecution findMany
-   */
-  export type ScheduleExecutionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleExecution
-     */
-    select?: ScheduleExecutionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleExecution
-     */
-    omit?: ScheduleExecutionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleExecutionInclude<ExtArgs> | null
-    /**
-     * Filter, which ScheduleExecutions to fetch.
-     */
-    where?: ScheduleExecutionWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of ScheduleExecutions to fetch.
-     */
-    orderBy?: ScheduleExecutionOrderByWithRelationInput | ScheduleExecutionOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for listing ScheduleExecutions.
-     */
-    cursor?: ScheduleExecutionWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` ScheduleExecutions from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` ScheduleExecutions.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of ScheduleExecutions.
-     */
-    distinct?: ScheduleExecutionScalarFieldEnum | ScheduleExecutionScalarFieldEnum[]
-  }
-
-  /**
-   * ScheduleExecution create
-   */
-  export type ScheduleExecutionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleExecution
-     */
-    select?: ScheduleExecutionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleExecution
-     */
-    omit?: ScheduleExecutionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleExecutionInclude<ExtArgs> | null
-    /**
-     * The data needed to create a ScheduleExecution.
-     */
-    data: XOR<ScheduleExecutionCreateInput, ScheduleExecutionUncheckedCreateInput>
-  }
-
-  /**
-   * ScheduleExecution createMany
-   */
-  export type ScheduleExecutionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many ScheduleExecutions.
-     */
-    data: ScheduleExecutionCreateManyInput | ScheduleExecutionCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * ScheduleExecution createManyAndReturn
-   */
-  export type ScheduleExecutionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleExecution
-     */
-    select?: ScheduleExecutionSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleExecution
-     */
-    omit?: ScheduleExecutionOmit<ExtArgs> | null
-    /**
-     * The data used to create many ScheduleExecutions.
-     */
-    data: ScheduleExecutionCreateManyInput | ScheduleExecutionCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleExecutionIncludeCreateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * ScheduleExecution update
-   */
-  export type ScheduleExecutionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleExecution
-     */
-    select?: ScheduleExecutionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleExecution
-     */
-    omit?: ScheduleExecutionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleExecutionInclude<ExtArgs> | null
-    /**
-     * The data needed to update a ScheduleExecution.
-     */
-    data: XOR<ScheduleExecutionUpdateInput, ScheduleExecutionUncheckedUpdateInput>
-    /**
-     * Choose, which ScheduleExecution to update.
-     */
-    where: ScheduleExecutionWhereUniqueInput
-  }
-
-  /**
-   * ScheduleExecution updateMany
-   */
-  export type ScheduleExecutionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update ScheduleExecutions.
-     */
-    data: XOR<ScheduleExecutionUpdateManyMutationInput, ScheduleExecutionUncheckedUpdateManyInput>
-    /**
-     * Filter which ScheduleExecutions to update
-     */
-    where?: ScheduleExecutionWhereInput
-    /**
-     * Limit how many ScheduleExecutions to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * ScheduleExecution updateManyAndReturn
-   */
-  export type ScheduleExecutionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleExecution
-     */
-    select?: ScheduleExecutionSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleExecution
-     */
-    omit?: ScheduleExecutionOmit<ExtArgs> | null
-    /**
-     * The data used to update ScheduleExecutions.
-     */
-    data: XOR<ScheduleExecutionUpdateManyMutationInput, ScheduleExecutionUncheckedUpdateManyInput>
-    /**
-     * Filter which ScheduleExecutions to update
-     */
-    where?: ScheduleExecutionWhereInput
-    /**
-     * Limit how many ScheduleExecutions to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleExecutionIncludeUpdateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * ScheduleExecution upsert
-   */
-  export type ScheduleExecutionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleExecution
-     */
-    select?: ScheduleExecutionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleExecution
-     */
-    omit?: ScheduleExecutionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleExecutionInclude<ExtArgs> | null
-    /**
-     * The filter to search for the ScheduleExecution to update in case it exists.
-     */
-    where: ScheduleExecutionWhereUniqueInput
-    /**
-     * In case the ScheduleExecution found by the `where` argument doesn't exist, create a new ScheduleExecution with this data.
-     */
-    create: XOR<ScheduleExecutionCreateInput, ScheduleExecutionUncheckedCreateInput>
-    /**
-     * In case the ScheduleExecution was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<ScheduleExecutionUpdateInput, ScheduleExecutionUncheckedUpdateInput>
-  }
-
-  /**
-   * ScheduleExecution delete
-   */
-  export type ScheduleExecutionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleExecution
-     */
-    select?: ScheduleExecutionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleExecution
-     */
-    omit?: ScheduleExecutionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleExecutionInclude<ExtArgs> | null
-    /**
-     * Filter which ScheduleExecution to delete.
-     */
-    where: ScheduleExecutionWhereUniqueInput
-  }
-
-  /**
-   * ScheduleExecution deleteMany
-   */
-  export type ScheduleExecutionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which ScheduleExecutions to delete
-     */
-    where?: ScheduleExecutionWhereInput
-    /**
-     * Limit how many ScheduleExecutions to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * ScheduleExecution without action
-   */
-  export type ScheduleExecutionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleExecution
-     */
-    select?: ScheduleExecutionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleExecution
-     */
-    omit?: ScheduleExecutionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleExecutionInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model ScheduleStatistic
-   */
-
-  export type AggregateScheduleStatistic = {
-    _count: ScheduleStatisticCountAggregateOutputType | null
-    _avg: ScheduleStatisticAvgAggregateOutputType | null
-    _sum: ScheduleStatisticSumAggregateOutputType | null
-    _min: ScheduleStatisticMinAggregateOutputType | null
-    _max: ScheduleStatisticMaxAggregateOutputType | null
-  }
-
-  export type ScheduleStatisticAvgAggregateOutputType = {
-    id: number | null
-    totalTasks: number | null
-    activeTasks: number | null
-    pausedTasks: number | null
-    completedTasks: number | null
-    cancelledTasks: number | null
-    failedTasks: number | null
-    totalExecutions: number | null
-    successfulExecutions: number | null
-    failedExecutions: number | null
-    skippedExecutions: number | null
-    timeoutExecutions: number | null
-    avgExecutionDuration: number | null
-    minExecutionDuration: number | null
-    maxExecutionDuration: number | null
-  }
-
-  export type ScheduleStatisticSumAggregateOutputType = {
-    id: number | null
-    totalTasks: number | null
-    activeTasks: number | null
-    pausedTasks: number | null
-    completedTasks: number | null
-    cancelledTasks: number | null
-    failedTasks: number | null
-    totalExecutions: number | null
-    successfulExecutions: number | null
-    failedExecutions: number | null
-    skippedExecutions: number | null
-    timeoutExecutions: number | null
-    avgExecutionDuration: number | null
-    minExecutionDuration: number | null
-    maxExecutionDuration: number | null
-  }
-
-  export type ScheduleStatisticMinAggregateOutputType = {
-    id: number | null
-    identityId: string | null
-    totalTasks: number | null
-    activeTasks: number | null
-    pausedTasks: number | null
-    completedTasks: number | null
-    cancelledTasks: number | null
-    failedTasks: number | null
-    totalExecutions: number | null
-    successfulExecutions: number | null
-    failedExecutions: number | null
-    skippedExecutions: number | null
-    timeoutExecutions: number | null
-    avgExecutionDuration: number | null
-    minExecutionDuration: number | null
-    maxExecutionDuration: number | null
-    moduleStatistics: string | null
-    lastUpdatedAt: Date | null
-    createdAt: Date | null
-  }
-
-  export type ScheduleStatisticMaxAggregateOutputType = {
-    id: number | null
-    identityId: string | null
-    totalTasks: number | null
-    activeTasks: number | null
-    pausedTasks: number | null
-    completedTasks: number | null
-    cancelledTasks: number | null
-    failedTasks: number | null
-    totalExecutions: number | null
-    successfulExecutions: number | null
-    failedExecutions: number | null
-    skippedExecutions: number | null
-    timeoutExecutions: number | null
-    avgExecutionDuration: number | null
-    minExecutionDuration: number | null
-    maxExecutionDuration: number | null
-    moduleStatistics: string | null
-    lastUpdatedAt: Date | null
-    createdAt: Date | null
-  }
-
-  export type ScheduleStatisticCountAggregateOutputType = {
-    id: number
-    identityId: number
-    totalTasks: number
-    activeTasks: number
-    pausedTasks: number
-    completedTasks: number
-    cancelledTasks: number
-    failedTasks: number
-    totalExecutions: number
-    successfulExecutions: number
-    failedExecutions: number
-    skippedExecutions: number
-    timeoutExecutions: number
-    avgExecutionDuration: number
-    minExecutionDuration: number
-    maxExecutionDuration: number
-    moduleStatistics: number
-    lastUpdatedAt: number
-    createdAt: number
-    _all: number
-  }
-
-
-  export type ScheduleStatisticAvgAggregateInputType = {
-    id?: true
-    totalTasks?: true
-    activeTasks?: true
-    pausedTasks?: true
-    completedTasks?: true
-    cancelledTasks?: true
-    failedTasks?: true
-    totalExecutions?: true
-    successfulExecutions?: true
-    failedExecutions?: true
-    skippedExecutions?: true
-    timeoutExecutions?: true
-    avgExecutionDuration?: true
-    minExecutionDuration?: true
-    maxExecutionDuration?: true
-  }
-
-  export type ScheduleStatisticSumAggregateInputType = {
-    id?: true
-    totalTasks?: true
-    activeTasks?: true
-    pausedTasks?: true
-    completedTasks?: true
-    cancelledTasks?: true
-    failedTasks?: true
-    totalExecutions?: true
-    successfulExecutions?: true
-    failedExecutions?: true
-    skippedExecutions?: true
-    timeoutExecutions?: true
-    avgExecutionDuration?: true
-    minExecutionDuration?: true
-    maxExecutionDuration?: true
-  }
-
-  export type ScheduleStatisticMinAggregateInputType = {
-    id?: true
-    identityId?: true
-    totalTasks?: true
-    activeTasks?: true
-    pausedTasks?: true
-    completedTasks?: true
-    cancelledTasks?: true
-    failedTasks?: true
-    totalExecutions?: true
-    successfulExecutions?: true
-    failedExecutions?: true
-    skippedExecutions?: true
-    timeoutExecutions?: true
-    avgExecutionDuration?: true
-    minExecutionDuration?: true
-    maxExecutionDuration?: true
-    moduleStatistics?: true
-    lastUpdatedAt?: true
-    createdAt?: true
-  }
-
-  export type ScheduleStatisticMaxAggregateInputType = {
-    id?: true
-    identityId?: true
-    totalTasks?: true
-    activeTasks?: true
-    pausedTasks?: true
-    completedTasks?: true
-    cancelledTasks?: true
-    failedTasks?: true
-    totalExecutions?: true
-    successfulExecutions?: true
-    failedExecutions?: true
-    skippedExecutions?: true
-    timeoutExecutions?: true
-    avgExecutionDuration?: true
-    minExecutionDuration?: true
-    maxExecutionDuration?: true
-    moduleStatistics?: true
-    lastUpdatedAt?: true
-    createdAt?: true
-  }
-
-  export type ScheduleStatisticCountAggregateInputType = {
-    id?: true
-    identityId?: true
-    totalTasks?: true
-    activeTasks?: true
-    pausedTasks?: true
-    completedTasks?: true
-    cancelledTasks?: true
-    failedTasks?: true
-    totalExecutions?: true
-    successfulExecutions?: true
-    failedExecutions?: true
-    skippedExecutions?: true
-    timeoutExecutions?: true
-    avgExecutionDuration?: true
-    minExecutionDuration?: true
-    maxExecutionDuration?: true
-    moduleStatistics?: true
-    lastUpdatedAt?: true
-    createdAt?: true
-    _all?: true
-  }
-
-  export type ScheduleStatisticAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which ScheduleStatistic to aggregate.
-     */
-    where?: ScheduleStatisticWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of ScheduleStatistics to fetch.
-     */
-    orderBy?: ScheduleStatisticOrderByWithRelationInput | ScheduleStatisticOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the start position
-     */
-    cursor?: ScheduleStatisticWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` ScheduleStatistics from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` ScheduleStatistics.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Count returned ScheduleStatistics
-    **/
-    _count?: true | ScheduleStatisticCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to average
-    **/
-    _avg?: ScheduleStatisticAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to sum
-    **/
-    _sum?: ScheduleStatisticSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the minimum value
-    **/
-    _min?: ScheduleStatisticMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the maximum value
-    **/
-    _max?: ScheduleStatisticMaxAggregateInputType
-  }
-
-  export type GetScheduleStatisticAggregateType<T extends ScheduleStatisticAggregateArgs> = {
-        [P in keyof T & keyof AggregateScheduleStatistic]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateScheduleStatistic[P]>
-      : GetScalarType<T[P], AggregateScheduleStatistic[P]>
-  }
-
-
-
-
-  export type ScheduleStatisticGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ScheduleStatisticWhereInput
-    orderBy?: ScheduleStatisticOrderByWithAggregationInput | ScheduleStatisticOrderByWithAggregationInput[]
-    by: ScheduleStatisticScalarFieldEnum[] | ScheduleStatisticScalarFieldEnum
-    having?: ScheduleStatisticScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: ScheduleStatisticCountAggregateInputType | true
-    _avg?: ScheduleStatisticAvgAggregateInputType
-    _sum?: ScheduleStatisticSumAggregateInputType
-    _min?: ScheduleStatisticMinAggregateInputType
-    _max?: ScheduleStatisticMaxAggregateInputType
-  }
-
-  export type ScheduleStatisticGroupByOutputType = {
-    id: number
-    identityId: string
-    totalTasks: number
-    activeTasks: number
-    pausedTasks: number
-    completedTasks: number
-    cancelledTasks: number
-    failedTasks: number
-    totalExecutions: number
-    successfulExecutions: number
-    failedExecutions: number
-    skippedExecutions: number
-    timeoutExecutions: number
-    avgExecutionDuration: number
-    minExecutionDuration: number
-    maxExecutionDuration: number
-    moduleStatistics: string
-    lastUpdatedAt: Date
-    createdAt: Date
-    _count: ScheduleStatisticCountAggregateOutputType | null
-    _avg: ScheduleStatisticAvgAggregateOutputType | null
-    _sum: ScheduleStatisticSumAggregateOutputType | null
-    _min: ScheduleStatisticMinAggregateOutputType | null
-    _max: ScheduleStatisticMaxAggregateOutputType | null
-  }
-
-  type GetScheduleStatisticGroupByPayload<T extends ScheduleStatisticGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<ScheduleStatisticGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof ScheduleStatisticGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], ScheduleStatisticGroupByOutputType[P]>
-            : GetScalarType<T[P], ScheduleStatisticGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type ScheduleStatisticSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    totalTasks?: boolean
-    activeTasks?: boolean
-    pausedTasks?: boolean
-    completedTasks?: boolean
-    cancelledTasks?: boolean
-    failedTasks?: boolean
-    totalExecutions?: boolean
-    successfulExecutions?: boolean
-    failedExecutions?: boolean
-    skippedExecutions?: boolean
-    timeoutExecutions?: boolean
-    avgExecutionDuration?: boolean
-    minExecutionDuration?: boolean
-    maxExecutionDuration?: boolean
-    moduleStatistics?: boolean
-    lastUpdatedAt?: boolean
-    createdAt?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["scheduleStatistic"]>
-
-  export type ScheduleStatisticSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    totalTasks?: boolean
-    activeTasks?: boolean
-    pausedTasks?: boolean
-    completedTasks?: boolean
-    cancelledTasks?: boolean
-    failedTasks?: boolean
-    totalExecutions?: boolean
-    successfulExecutions?: boolean
-    failedExecutions?: boolean
-    skippedExecutions?: boolean
-    timeoutExecutions?: boolean
-    avgExecutionDuration?: boolean
-    minExecutionDuration?: boolean
-    maxExecutionDuration?: boolean
-    moduleStatistics?: boolean
-    lastUpdatedAt?: boolean
-    createdAt?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["scheduleStatistic"]>
-
-  export type ScheduleStatisticSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    totalTasks?: boolean
-    activeTasks?: boolean
-    pausedTasks?: boolean
-    completedTasks?: boolean
-    cancelledTasks?: boolean
-    failedTasks?: boolean
-    totalExecutions?: boolean
-    successfulExecutions?: boolean
-    failedExecutions?: boolean
-    skippedExecutions?: boolean
-    timeoutExecutions?: boolean
-    avgExecutionDuration?: boolean
-    minExecutionDuration?: boolean
-    maxExecutionDuration?: boolean
-    moduleStatistics?: boolean
-    lastUpdatedAt?: boolean
-    createdAt?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["scheduleStatistic"]>
-
-  export type ScheduleStatisticSelectScalar = {
-    id?: boolean
-    identityId?: boolean
-    totalTasks?: boolean
-    activeTasks?: boolean
-    pausedTasks?: boolean
-    completedTasks?: boolean
-    cancelledTasks?: boolean
-    failedTasks?: boolean
-    totalExecutions?: boolean
-    successfulExecutions?: boolean
-    failedExecutions?: boolean
-    skippedExecutions?: boolean
-    timeoutExecutions?: boolean
-    avgExecutionDuration?: boolean
-    minExecutionDuration?: boolean
-    maxExecutionDuration?: boolean
-    moduleStatistics?: boolean
-    lastUpdatedAt?: boolean
-    createdAt?: boolean
-  }
-
-  export type ScheduleStatisticOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "totalTasks" | "activeTasks" | "pausedTasks" | "completedTasks" | "cancelledTasks" | "failedTasks" | "totalExecutions" | "successfulExecutions" | "failedExecutions" | "skippedExecutions" | "timeoutExecutions" | "avgExecutionDuration" | "minExecutionDuration" | "maxExecutionDuration" | "moduleStatistics" | "lastUpdatedAt" | "createdAt", ExtArgs["result"]["scheduleStatistic"]>
-  export type ScheduleStatisticInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }
-  export type ScheduleStatisticIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }
-  export type ScheduleStatisticIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }
-
-  export type $ScheduleStatisticPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "ScheduleStatistic"
-    objects: {
-      account: Prisma.$AccountPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: number
-      identityId: string
-      totalTasks: number
-      activeTasks: number
-      pausedTasks: number
-      completedTasks: number
-      cancelledTasks: number
-      failedTasks: number
-      totalExecutions: number
-      successfulExecutions: number
-      failedExecutions: number
-      skippedExecutions: number
-      timeoutExecutions: number
-      avgExecutionDuration: number
-      minExecutionDuration: number
-      maxExecutionDuration: number
-      moduleStatistics: string
-      lastUpdatedAt: Date
-      createdAt: Date
-    }, ExtArgs["result"]["scheduleStatistic"]>
-    composites: {}
-  }
-
-  type ScheduleStatisticGetPayload<S extends boolean | null | undefined | ScheduleStatisticDefaultArgs> = $Result.GetResult<Prisma.$ScheduleStatisticPayload, S>
-
-  type ScheduleStatisticCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<ScheduleStatisticFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: ScheduleStatisticCountAggregateInputType | true
-    }
-
-  export interface ScheduleStatisticDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ScheduleStatistic'], meta: { name: 'ScheduleStatistic' } }
-    /**
-     * Find zero or one ScheduleStatistic that matches the filter.
-     * @param {ScheduleStatisticFindUniqueArgs} args - Arguments to find a ScheduleStatistic
-     * @example
-     * // Get one ScheduleStatistic
-     * const scheduleStatistic = await prisma.scheduleStatistic.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends ScheduleStatisticFindUniqueArgs>(args: SelectSubset<T, ScheduleStatisticFindUniqueArgs<ExtArgs>>): Prisma__ScheduleStatisticClient<$Result.GetResult<Prisma.$ScheduleStatisticPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one ScheduleStatistic that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {ScheduleStatisticFindUniqueOrThrowArgs} args - Arguments to find a ScheduleStatistic
-     * @example
-     * // Get one ScheduleStatistic
-     * const scheduleStatistic = await prisma.scheduleStatistic.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends ScheduleStatisticFindUniqueOrThrowArgs>(args: SelectSubset<T, ScheduleStatisticFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ScheduleStatisticClient<$Result.GetResult<Prisma.$ScheduleStatisticPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first ScheduleStatistic that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ScheduleStatisticFindFirstArgs} args - Arguments to find a ScheduleStatistic
-     * @example
-     * // Get one ScheduleStatistic
-     * const scheduleStatistic = await prisma.scheduleStatistic.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends ScheduleStatisticFindFirstArgs>(args?: SelectSubset<T, ScheduleStatisticFindFirstArgs<ExtArgs>>): Prisma__ScheduleStatisticClient<$Result.GetResult<Prisma.$ScheduleStatisticPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first ScheduleStatistic that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ScheduleStatisticFindFirstOrThrowArgs} args - Arguments to find a ScheduleStatistic
-     * @example
-     * // Get one ScheduleStatistic
-     * const scheduleStatistic = await prisma.scheduleStatistic.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends ScheduleStatisticFindFirstOrThrowArgs>(args?: SelectSubset<T, ScheduleStatisticFindFirstOrThrowArgs<ExtArgs>>): Prisma__ScheduleStatisticClient<$Result.GetResult<Prisma.$ScheduleStatisticPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more ScheduleStatistics that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ScheduleStatisticFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all ScheduleStatistics
-     * const scheduleStatistics = await prisma.scheduleStatistic.findMany()
-     *
-     * // Get first 10 ScheduleStatistics
-     * const scheduleStatistics = await prisma.scheduleStatistic.findMany({ take: 10 })
-     *
-     * // Only select the `id`
-     * const scheduleStatisticWithIdOnly = await prisma.scheduleStatistic.findMany({ select: { id: true } })
-     *
-     */
-    findMany<T extends ScheduleStatisticFindManyArgs>(args?: SelectSubset<T, ScheduleStatisticFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScheduleStatisticPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a ScheduleStatistic.
-     * @param {ScheduleStatisticCreateArgs} args - Arguments to create a ScheduleStatistic.
-     * @example
-     * // Create one ScheduleStatistic
-     * const ScheduleStatistic = await prisma.scheduleStatistic.create({
-     *   data: {
-     *     // ... data to create a ScheduleStatistic
-     *   }
-     * })
-     *
-     */
-    create<T extends ScheduleStatisticCreateArgs>(args: SelectSubset<T, ScheduleStatisticCreateArgs<ExtArgs>>): Prisma__ScheduleStatisticClient<$Result.GetResult<Prisma.$ScheduleStatisticPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many ScheduleStatistics.
-     * @param {ScheduleStatisticCreateManyArgs} args - Arguments to create many ScheduleStatistics.
-     * @example
-     * // Create many ScheduleStatistics
-     * const scheduleStatistic = await prisma.scheduleStatistic.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     */
-    createMany<T extends ScheduleStatisticCreateManyArgs>(args?: SelectSubset<T, ScheduleStatisticCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many ScheduleStatistics and returns the data saved in the database.
-     * @param {ScheduleStatisticCreateManyAndReturnArgs} args - Arguments to create many ScheduleStatistics.
-     * @example
-     * // Create many ScheduleStatistics
-     * const scheduleStatistic = await prisma.scheduleStatistic.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Create many ScheduleStatistics and only return the `id`
-     * const scheduleStatisticWithIdOnly = await prisma.scheduleStatistic.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    createManyAndReturn<T extends ScheduleStatisticCreateManyAndReturnArgs>(args?: SelectSubset<T, ScheduleStatisticCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScheduleStatisticPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a ScheduleStatistic.
-     * @param {ScheduleStatisticDeleteArgs} args - Arguments to delete one ScheduleStatistic.
-     * @example
-     * // Delete one ScheduleStatistic
-     * const ScheduleStatistic = await prisma.scheduleStatistic.delete({
-     *   where: {
-     *     // ... filter to delete one ScheduleStatistic
-     *   }
-     * })
-     *
-     */
-    delete<T extends ScheduleStatisticDeleteArgs>(args: SelectSubset<T, ScheduleStatisticDeleteArgs<ExtArgs>>): Prisma__ScheduleStatisticClient<$Result.GetResult<Prisma.$ScheduleStatisticPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one ScheduleStatistic.
-     * @param {ScheduleStatisticUpdateArgs} args - Arguments to update one ScheduleStatistic.
-     * @example
-     * // Update one ScheduleStatistic
-     * const scheduleStatistic = await prisma.scheduleStatistic.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    update<T extends ScheduleStatisticUpdateArgs>(args: SelectSubset<T, ScheduleStatisticUpdateArgs<ExtArgs>>): Prisma__ScheduleStatisticClient<$Result.GetResult<Prisma.$ScheduleStatisticPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more ScheduleStatistics.
-     * @param {ScheduleStatisticDeleteManyArgs} args - Arguments to filter ScheduleStatistics to delete.
-     * @example
-     * // Delete a few ScheduleStatistics
-     * const { count } = await prisma.scheduleStatistic.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     *
-     */
-    deleteMany<T extends ScheduleStatisticDeleteManyArgs>(args?: SelectSubset<T, ScheduleStatisticDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more ScheduleStatistics.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ScheduleStatisticUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many ScheduleStatistics
-     * const scheduleStatistic = await prisma.scheduleStatistic.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    updateMany<T extends ScheduleStatisticUpdateManyArgs>(args: SelectSubset<T, ScheduleStatisticUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more ScheduleStatistics and returns the data updated in the database.
-     * @param {ScheduleStatisticUpdateManyAndReturnArgs} args - Arguments to update many ScheduleStatistics.
-     * @example
-     * // Update many ScheduleStatistics
-     * const scheduleStatistic = await prisma.scheduleStatistic.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Update zero or more ScheduleStatistics and only return the `id`
-     * const scheduleStatisticWithIdOnly = await prisma.scheduleStatistic.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    updateManyAndReturn<T extends ScheduleStatisticUpdateManyAndReturnArgs>(args: SelectSubset<T, ScheduleStatisticUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScheduleStatisticPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one ScheduleStatistic.
-     * @param {ScheduleStatisticUpsertArgs} args - Arguments to update or create a ScheduleStatistic.
-     * @example
-     * // Update or create a ScheduleStatistic
-     * const scheduleStatistic = await prisma.scheduleStatistic.upsert({
-     *   create: {
-     *     // ... data to create a ScheduleStatistic
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the ScheduleStatistic we want to update
-     *   }
-     * })
-     */
-    upsert<T extends ScheduleStatisticUpsertArgs>(args: SelectSubset<T, ScheduleStatisticUpsertArgs<ExtArgs>>): Prisma__ScheduleStatisticClient<$Result.GetResult<Prisma.$ScheduleStatisticPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of ScheduleStatistics.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ScheduleStatisticCountArgs} args - Arguments to filter ScheduleStatistics to count.
-     * @example
-     * // Count the number of ScheduleStatistics
-     * const count = await prisma.scheduleStatistic.count({
-     *   where: {
-     *     // ... the filter for the ScheduleStatistics we want to count
-     *   }
-     * })
-    **/
-    count<T extends ScheduleStatisticCountArgs>(
-      args?: Subset<T, ScheduleStatisticCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], ScheduleStatisticCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a ScheduleStatistic.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ScheduleStatisticAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends ScheduleStatisticAggregateArgs>(args: Subset<T, ScheduleStatisticAggregateArgs>): Prisma.PrismaPromise<GetScheduleStatisticAggregateType<T>>
-
-    /**
-     * Group by ScheduleStatistic.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ScheduleStatisticGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     *
-    **/
-    groupBy<
-      T extends ScheduleStatisticGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: ScheduleStatisticGroupByArgs['orderBy'] }
-        : { orderBy?: ScheduleStatisticGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, ScheduleStatisticGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetScheduleStatisticGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the ScheduleStatistic model
-   */
-  readonly fields: ScheduleStatisticFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for ScheduleStatistic.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__ScheduleStatisticClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the ScheduleStatistic model
-   */
-  interface ScheduleStatisticFieldRefs {
-    readonly id: FieldRef<"ScheduleStatistic", 'Int'>
-    readonly identityId: FieldRef<"ScheduleStatistic", 'String'>
-    readonly totalTasks: FieldRef<"ScheduleStatistic", 'Int'>
-    readonly activeTasks: FieldRef<"ScheduleStatistic", 'Int'>
-    readonly pausedTasks: FieldRef<"ScheduleStatistic", 'Int'>
-    readonly completedTasks: FieldRef<"ScheduleStatistic", 'Int'>
-    readonly cancelledTasks: FieldRef<"ScheduleStatistic", 'Int'>
-    readonly failedTasks: FieldRef<"ScheduleStatistic", 'Int'>
-    readonly totalExecutions: FieldRef<"ScheduleStatistic", 'Int'>
-    readonly successfulExecutions: FieldRef<"ScheduleStatistic", 'Int'>
-    readonly failedExecutions: FieldRef<"ScheduleStatistic", 'Int'>
-    readonly skippedExecutions: FieldRef<"ScheduleStatistic", 'Int'>
-    readonly timeoutExecutions: FieldRef<"ScheduleStatistic", 'Int'>
-    readonly avgExecutionDuration: FieldRef<"ScheduleStatistic", 'Float'>
-    readonly minExecutionDuration: FieldRef<"ScheduleStatistic", 'Float'>
-    readonly maxExecutionDuration: FieldRef<"ScheduleStatistic", 'Float'>
-    readonly moduleStatistics: FieldRef<"ScheduleStatistic", 'String'>
-    readonly lastUpdatedAt: FieldRef<"ScheduleStatistic", 'DateTime'>
-    readonly createdAt: FieldRef<"ScheduleStatistic", 'DateTime'>
-  }
-
-
-  // Custom InputTypes
-  /**
-   * ScheduleStatistic findUnique
-   */
-  export type ScheduleStatisticFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleStatistic
-     */
-    select?: ScheduleStatisticSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleStatistic
-     */
-    omit?: ScheduleStatisticOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleStatisticInclude<ExtArgs> | null
-    /**
-     * Filter, which ScheduleStatistic to fetch.
-     */
-    where: ScheduleStatisticWhereUniqueInput
-  }
-
-  /**
-   * ScheduleStatistic findUniqueOrThrow
-   */
-  export type ScheduleStatisticFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleStatistic
-     */
-    select?: ScheduleStatisticSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleStatistic
-     */
-    omit?: ScheduleStatisticOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleStatisticInclude<ExtArgs> | null
-    /**
-     * Filter, which ScheduleStatistic to fetch.
-     */
-    where: ScheduleStatisticWhereUniqueInput
-  }
-
-  /**
-   * ScheduleStatistic findFirst
-   */
-  export type ScheduleStatisticFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleStatistic
-     */
-    select?: ScheduleStatisticSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleStatistic
-     */
-    omit?: ScheduleStatisticOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleStatisticInclude<ExtArgs> | null
-    /**
-     * Filter, which ScheduleStatistic to fetch.
-     */
-    where?: ScheduleStatisticWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of ScheduleStatistics to fetch.
-     */
-    orderBy?: ScheduleStatisticOrderByWithRelationInput | ScheduleStatisticOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for ScheduleStatistics.
-     */
-    cursor?: ScheduleStatisticWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` ScheduleStatistics from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` ScheduleStatistics.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of ScheduleStatistics.
-     */
-    distinct?: ScheduleStatisticScalarFieldEnum | ScheduleStatisticScalarFieldEnum[]
-  }
-
-  /**
-   * ScheduleStatistic findFirstOrThrow
-   */
-  export type ScheduleStatisticFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleStatistic
-     */
-    select?: ScheduleStatisticSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleStatistic
-     */
-    omit?: ScheduleStatisticOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleStatisticInclude<ExtArgs> | null
-    /**
-     * Filter, which ScheduleStatistic to fetch.
-     */
-    where?: ScheduleStatisticWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of ScheduleStatistics to fetch.
-     */
-    orderBy?: ScheduleStatisticOrderByWithRelationInput | ScheduleStatisticOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for ScheduleStatistics.
-     */
-    cursor?: ScheduleStatisticWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` ScheduleStatistics from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` ScheduleStatistics.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of ScheduleStatistics.
-     */
-    distinct?: ScheduleStatisticScalarFieldEnum | ScheduleStatisticScalarFieldEnum[]
-  }
-
-  /**
-   * ScheduleStatistic findMany
-   */
-  export type ScheduleStatisticFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleStatistic
-     */
-    select?: ScheduleStatisticSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleStatistic
-     */
-    omit?: ScheduleStatisticOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleStatisticInclude<ExtArgs> | null
-    /**
-     * Filter, which ScheduleStatistics to fetch.
-     */
-    where?: ScheduleStatisticWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of ScheduleStatistics to fetch.
-     */
-    orderBy?: ScheduleStatisticOrderByWithRelationInput | ScheduleStatisticOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for listing ScheduleStatistics.
-     */
-    cursor?: ScheduleStatisticWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` ScheduleStatistics from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` ScheduleStatistics.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of ScheduleStatistics.
-     */
-    distinct?: ScheduleStatisticScalarFieldEnum | ScheduleStatisticScalarFieldEnum[]
-  }
-
-  /**
-   * ScheduleStatistic create
-   */
-  export type ScheduleStatisticCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleStatistic
-     */
-    select?: ScheduleStatisticSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleStatistic
-     */
-    omit?: ScheduleStatisticOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleStatisticInclude<ExtArgs> | null
-    /**
-     * The data needed to create a ScheduleStatistic.
-     */
-    data: XOR<ScheduleStatisticCreateInput, ScheduleStatisticUncheckedCreateInput>
-  }
-
-  /**
-   * ScheduleStatistic createMany
-   */
-  export type ScheduleStatisticCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many ScheduleStatistics.
-     */
-    data: ScheduleStatisticCreateManyInput | ScheduleStatisticCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * ScheduleStatistic createManyAndReturn
-   */
-  export type ScheduleStatisticCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleStatistic
-     */
-    select?: ScheduleStatisticSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleStatistic
-     */
-    omit?: ScheduleStatisticOmit<ExtArgs> | null
-    /**
-     * The data used to create many ScheduleStatistics.
-     */
-    data: ScheduleStatisticCreateManyInput | ScheduleStatisticCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleStatisticIncludeCreateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * ScheduleStatistic update
-   */
-  export type ScheduleStatisticUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleStatistic
-     */
-    select?: ScheduleStatisticSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleStatistic
-     */
-    omit?: ScheduleStatisticOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleStatisticInclude<ExtArgs> | null
-    /**
-     * The data needed to update a ScheduleStatistic.
-     */
-    data: XOR<ScheduleStatisticUpdateInput, ScheduleStatisticUncheckedUpdateInput>
-    /**
-     * Choose, which ScheduleStatistic to update.
-     */
-    where: ScheduleStatisticWhereUniqueInput
-  }
-
-  /**
-   * ScheduleStatistic updateMany
-   */
-  export type ScheduleStatisticUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update ScheduleStatistics.
-     */
-    data: XOR<ScheduleStatisticUpdateManyMutationInput, ScheduleStatisticUncheckedUpdateManyInput>
-    /**
-     * Filter which ScheduleStatistics to update
-     */
-    where?: ScheduleStatisticWhereInput
-    /**
-     * Limit how many ScheduleStatistics to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * ScheduleStatistic updateManyAndReturn
-   */
-  export type ScheduleStatisticUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleStatistic
-     */
-    select?: ScheduleStatisticSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleStatistic
-     */
-    omit?: ScheduleStatisticOmit<ExtArgs> | null
-    /**
-     * The data used to update ScheduleStatistics.
-     */
-    data: XOR<ScheduleStatisticUpdateManyMutationInput, ScheduleStatisticUncheckedUpdateManyInput>
-    /**
-     * Filter which ScheduleStatistics to update
-     */
-    where?: ScheduleStatisticWhereInput
-    /**
-     * Limit how many ScheduleStatistics to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleStatisticIncludeUpdateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * ScheduleStatistic upsert
-   */
-  export type ScheduleStatisticUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleStatistic
-     */
-    select?: ScheduleStatisticSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleStatistic
-     */
-    omit?: ScheduleStatisticOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleStatisticInclude<ExtArgs> | null
-    /**
-     * The filter to search for the ScheduleStatistic to update in case it exists.
-     */
-    where: ScheduleStatisticWhereUniqueInput
-    /**
-     * In case the ScheduleStatistic found by the `where` argument doesn't exist, create a new ScheduleStatistic with this data.
-     */
-    create: XOR<ScheduleStatisticCreateInput, ScheduleStatisticUncheckedCreateInput>
-    /**
-     * In case the ScheduleStatistic was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<ScheduleStatisticUpdateInput, ScheduleStatisticUncheckedUpdateInput>
-  }
-
-  /**
-   * ScheduleStatistic delete
-   */
-  export type ScheduleStatisticDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleStatistic
-     */
-    select?: ScheduleStatisticSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleStatistic
-     */
-    omit?: ScheduleStatisticOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleStatisticInclude<ExtArgs> | null
-    /**
-     * Filter which ScheduleStatistic to delete.
-     */
-    where: ScheduleStatisticWhereUniqueInput
-  }
-
-  /**
-   * ScheduleStatistic deleteMany
-   */
-  export type ScheduleStatisticDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which ScheduleStatistics to delete
-     */
-    where?: ScheduleStatisticWhereInput
-    /**
-     * Limit how many ScheduleStatistics to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * ScheduleStatistic without action
-   */
-  export type ScheduleStatisticDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ScheduleStatistic
-     */
-    select?: ScheduleStatisticSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ScheduleStatistic
-     */
-    omit?: ScheduleStatisticOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ScheduleStatisticInclude<ExtArgs> | null
   }
 
 
@@ -131487,50 +126981,6 @@ export namespace Prisma {
   export type ScheduleScalarFieldEnum = (typeof ScheduleScalarFieldEnum)[keyof typeof ScheduleScalarFieldEnum]
 
 
-  export const ScheduleTaskScalarFieldEnum: {
-    id: 'id',
-    identityId: 'identityId',
-    name: 'name',
-    description: 'description',
-    sourceModule: 'sourceModule',
-    sourceEntityId: 'sourceEntityId',
-    schedulingKey: 'schedulingKey',
-    ownerType: 'ownerType',
-    ownerId: 'ownerId',
-    handlerKey: 'handlerKey',
-    payloadVersion: 'payloadVersion',
-    sourceRevision: 'sourceRevision',
-    status: 'status',
-    enabled: 'enabled',
-    cronExpression: 'cronExpression',
-    timezone: 'timezone',
-    startDate: 'startDate',
-    endDate: 'endDate',
-    maxExecutions: 'maxExecutions',
-    nextRunAt: 'nextRunAt',
-    lastRunAt: 'lastRunAt',
-    executionCount: 'executionCount',
-    lastExecutionStatus: 'lastExecutionStatus',
-    lastExecutionDuration: 'lastExecutionDuration',
-    consecutiveFailures: 'consecutiveFailures',
-    maxRetries: 'maxRetries',
-    initialDelayMs: 'initialDelayMs',
-    maxDelayMs: 'maxDelayMs',
-    backoffMultiplier: 'backoffMultiplier',
-    retryableStatuses: 'retryableStatuses',
-    payload: 'payload',
-    tags: 'tags',
-    priority: 'priority',
-    timeout: 'timeout',
-    version: 'version',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt',
-    deletedAt: 'deletedAt'
-  };
-
-  export type ScheduleTaskScalarFieldEnum = (typeof ScheduleTaskScalarFieldEnum)[keyof typeof ScheduleTaskScalarFieldEnum]
-
-
   export const ScheduledInvocationScalarFieldEnum: {
     id: 'id',
     identityId: 'identityId',
@@ -131605,47 +127055,6 @@ export namespace Prisma {
   };
 
   export type SchedulingReconcileOperationScalarFieldEnum = (typeof SchedulingReconcileOperationScalarFieldEnum)[keyof typeof SchedulingReconcileOperationScalarFieldEnum]
-
-
-  export const ScheduleExecutionScalarFieldEnum: {
-    id: 'id',
-    identityId: 'identityId',
-    taskId: 'taskId',
-    executionTime: 'executionTime',
-    status: 'status',
-    duration: 'duration',
-    result: 'result',
-    error: 'error',
-    retryCount: 'retryCount',
-    createdAt: 'createdAt'
-  };
-
-  export type ScheduleExecutionScalarFieldEnum = (typeof ScheduleExecutionScalarFieldEnum)[keyof typeof ScheduleExecutionScalarFieldEnum]
-
-
-  export const ScheduleStatisticScalarFieldEnum: {
-    id: 'id',
-    identityId: 'identityId',
-    totalTasks: 'totalTasks',
-    activeTasks: 'activeTasks',
-    pausedTasks: 'pausedTasks',
-    completedTasks: 'completedTasks',
-    cancelledTasks: 'cancelledTasks',
-    failedTasks: 'failedTasks',
-    totalExecutions: 'totalExecutions',
-    successfulExecutions: 'successfulExecutions',
-    failedExecutions: 'failedExecutions',
-    skippedExecutions: 'skippedExecutions',
-    timeoutExecutions: 'timeoutExecutions',
-    avgExecutionDuration: 'avgExecutionDuration',
-    minExecutionDuration: 'minExecutionDuration',
-    maxExecutionDuration: 'maxExecutionDuration',
-    moduleStatistics: 'moduleStatistics',
-    lastUpdatedAt: 'lastUpdatedAt',
-    createdAt: 'createdAt'
-  };
-
-  export type ScheduleStatisticScalarFieldEnum = (typeof ScheduleStatisticScalarFieldEnum)[keyof typeof ScheduleStatisticScalarFieldEnum]
 
 
   export const ScheduleLeaseScalarFieldEnum: {
@@ -132053,11 +127462,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerListRelationFilter
     repositoryStatistics?: XOR<RepositoryStatisticNullableScalarRelationFilter, RepositoryStatisticWhereInput> | null
     schedules?: ScheduleListRelationFilter
-    scheduleTasks?: ScheduleTaskListRelationFilter
     schedulingReconcileOperations?: SchedulingReconcileOperationListRelationFilter
     scheduledInvocations?: ScheduledInvocationListRelationFilter
     invocationAttempts?: InvocationAttemptListRelationFilter
-    scheduleStatistics?: XOR<ScheduleStatisticNullableScalarRelationFilter, ScheduleStatisticWhereInput> | null
     habits?: HabitListRelationFilter
     relations?: RelationListRelationFilter
     walletAccounts?: WalletAccountListRelationFilter
@@ -132075,7 +127482,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionListRelationFilter
     dashboardConfigs?: XOR<DashboardConfigNullableScalarRelationFilter, DashboardConfigWhereInput> | null
     taskPlanHistory?: TaskPlanHistoryListRelationFilter
-    scheduleExecutions?: ScheduleExecutionListRelationFilter
     reminderHistory?: ReminderHistoryListRelationFilter
     reminderResponses?: ReminderResponseListRelationFilter
     reminderOccurrences?: ReminderOccurrenceListRelationFilter
@@ -132120,11 +127526,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerOrderByRelationAggregateInput
     repositoryStatistics?: RepositoryStatisticOrderByWithRelationInput
     schedules?: ScheduleOrderByRelationAggregateInput
-    scheduleTasks?: ScheduleTaskOrderByRelationAggregateInput
     schedulingReconcileOperations?: SchedulingReconcileOperationOrderByRelationAggregateInput
     scheduledInvocations?: ScheduledInvocationOrderByRelationAggregateInput
     invocationAttempts?: InvocationAttemptOrderByRelationAggregateInput
-    scheduleStatistics?: ScheduleStatisticOrderByWithRelationInput
     habits?: HabitOrderByRelationAggregateInput
     relations?: RelationOrderByRelationAggregateInput
     walletAccounts?: WalletAccountOrderByRelationAggregateInput
@@ -132142,7 +127546,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionOrderByRelationAggregateInput
     dashboardConfigs?: DashboardConfigOrderByWithRelationInput
     taskPlanHistory?: TaskPlanHistoryOrderByRelationAggregateInput
-    scheduleExecutions?: ScheduleExecutionOrderByRelationAggregateInput
     reminderHistory?: ReminderHistoryOrderByRelationAggregateInput
     reminderResponses?: ReminderResponseOrderByRelationAggregateInput
     reminderOccurrences?: ReminderOccurrenceOrderByRelationAggregateInput
@@ -132190,11 +127593,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerListRelationFilter
     repositoryStatistics?: XOR<RepositoryStatisticNullableScalarRelationFilter, RepositoryStatisticWhereInput> | null
     schedules?: ScheduleListRelationFilter
-    scheduleTasks?: ScheduleTaskListRelationFilter
     schedulingReconcileOperations?: SchedulingReconcileOperationListRelationFilter
     scheduledInvocations?: ScheduledInvocationListRelationFilter
     invocationAttempts?: InvocationAttemptListRelationFilter
-    scheduleStatistics?: XOR<ScheduleStatisticNullableScalarRelationFilter, ScheduleStatisticWhereInput> | null
     habits?: HabitListRelationFilter
     relations?: RelationListRelationFilter
     walletAccounts?: WalletAccountListRelationFilter
@@ -132212,7 +127613,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionListRelationFilter
     dashboardConfigs?: XOR<DashboardConfigNullableScalarRelationFilter, DashboardConfigWhereInput> | null
     taskPlanHistory?: TaskPlanHistoryListRelationFilter
-    scheduleExecutions?: ScheduleExecutionListRelationFilter
     reminderHistory?: ReminderHistoryListRelationFilter
     reminderResponses?: ReminderResponseListRelationFilter
     reminderOccurrences?: ReminderOccurrenceListRelationFilter
@@ -139553,232 +134953,6 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"Schedule"> | Date | string
   }
 
-  export type ScheduleTaskWhereInput = {
-    AND?: ScheduleTaskWhereInput | ScheduleTaskWhereInput[]
-    OR?: ScheduleTaskWhereInput[]
-    NOT?: ScheduleTaskWhereInput | ScheduleTaskWhereInput[]
-    id?: StringFilter<"ScheduleTask"> | string
-    identityId?: StringFilter<"ScheduleTask"> | string
-    name?: StringFilter<"ScheduleTask"> | string
-    description?: StringNullableFilter<"ScheduleTask"> | string | null
-    sourceModule?: StringFilter<"ScheduleTask"> | string
-    sourceEntityId?: StringFilter<"ScheduleTask"> | string
-    schedulingKey?: StringNullableFilter<"ScheduleTask"> | string | null
-    ownerType?: StringNullableFilter<"ScheduleTask"> | string | null
-    ownerId?: StringNullableFilter<"ScheduleTask"> | string | null
-    handlerKey?: StringNullableFilter<"ScheduleTask"> | string | null
-    payloadVersion?: IntNullableFilter<"ScheduleTask"> | number | null
-    sourceRevision?: StringNullableFilter<"ScheduleTask"> | string | null
-    status?: StringFilter<"ScheduleTask"> | string
-    enabled?: BoolFilter<"ScheduleTask"> | boolean
-    cronExpression?: StringNullableFilter<"ScheduleTask"> | string | null
-    timezone?: StringFilter<"ScheduleTask"> | string
-    startDate?: DateTimeNullableFilter<"ScheduleTask"> | Date | string | null
-    endDate?: DateTimeNullableFilter<"ScheduleTask"> | Date | string | null
-    maxExecutions?: IntNullableFilter<"ScheduleTask"> | number | null
-    nextRunAt?: DateTimeNullableFilter<"ScheduleTask"> | Date | string | null
-    lastRunAt?: DateTimeNullableFilter<"ScheduleTask"> | Date | string | null
-    executionCount?: IntFilter<"ScheduleTask"> | number
-    lastExecutionStatus?: StringNullableFilter<"ScheduleTask"> | string | null
-    lastExecutionDuration?: IntNullableFilter<"ScheduleTask"> | number | null
-    consecutiveFailures?: IntFilter<"ScheduleTask"> | number
-    maxRetries?: IntFilter<"ScheduleTask"> | number
-    initialDelayMs?: IntFilter<"ScheduleTask"> | number
-    maxDelayMs?: IntFilter<"ScheduleTask"> | number
-    backoffMultiplier?: FloatFilter<"ScheduleTask"> | number
-    retryableStatuses?: StringFilter<"ScheduleTask"> | string
-    payload?: StringNullableFilter<"ScheduleTask"> | string | null
-    tags?: StringFilter<"ScheduleTask"> | string
-    priority?: StringFilter<"ScheduleTask"> | string
-    timeout?: IntNullableFilter<"ScheduleTask"> | number | null
-    version?: IntFilter<"ScheduleTask"> | number
-    createdAt?: DateTimeFilter<"ScheduleTask"> | Date | string
-    updatedAt?: DateTimeFilter<"ScheduleTask"> | Date | string
-    deletedAt?: DateTimeNullableFilter<"ScheduleTask"> | Date | string | null
-    executions?: ScheduleExecutionListRelationFilter
-    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-  }
-
-  export type ScheduleTaskOrderByWithRelationInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    name?: SortOrder
-    description?: SortOrderInput | SortOrder
-    sourceModule?: SortOrder
-    sourceEntityId?: SortOrder
-    schedulingKey?: SortOrderInput | SortOrder
-    ownerType?: SortOrderInput | SortOrder
-    ownerId?: SortOrderInput | SortOrder
-    handlerKey?: SortOrderInput | SortOrder
-    payloadVersion?: SortOrderInput | SortOrder
-    sourceRevision?: SortOrderInput | SortOrder
-    status?: SortOrder
-    enabled?: SortOrder
-    cronExpression?: SortOrderInput | SortOrder
-    timezone?: SortOrder
-    startDate?: SortOrderInput | SortOrder
-    endDate?: SortOrderInput | SortOrder
-    maxExecutions?: SortOrderInput | SortOrder
-    nextRunAt?: SortOrderInput | SortOrder
-    lastRunAt?: SortOrderInput | SortOrder
-    executionCount?: SortOrder
-    lastExecutionStatus?: SortOrderInput | SortOrder
-    lastExecutionDuration?: SortOrderInput | SortOrder
-    consecutiveFailures?: SortOrder
-    maxRetries?: SortOrder
-    initialDelayMs?: SortOrder
-    maxDelayMs?: SortOrder
-    backoffMultiplier?: SortOrder
-    retryableStatuses?: SortOrder
-    payload?: SortOrderInput | SortOrder
-    tags?: SortOrder
-    priority?: SortOrder
-    timeout?: SortOrderInput | SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrderInput | SortOrder
-    executions?: ScheduleExecutionOrderByRelationAggregateInput
-    account?: AccountOrderByWithRelationInput
-  }
-
-  export type ScheduleTaskWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    identityId_ownerType_ownerId_schedulingKey?: ScheduleTaskIdentityIdOwnerTypeOwnerIdSchedulingKeyCompoundUniqueInput
-    AND?: ScheduleTaskWhereInput | ScheduleTaskWhereInput[]
-    OR?: ScheduleTaskWhereInput[]
-    NOT?: ScheduleTaskWhereInput | ScheduleTaskWhereInput[]
-    identityId?: StringFilter<"ScheduleTask"> | string
-    name?: StringFilter<"ScheduleTask"> | string
-    description?: StringNullableFilter<"ScheduleTask"> | string | null
-    sourceModule?: StringFilter<"ScheduleTask"> | string
-    sourceEntityId?: StringFilter<"ScheduleTask"> | string
-    schedulingKey?: StringNullableFilter<"ScheduleTask"> | string | null
-    ownerType?: StringNullableFilter<"ScheduleTask"> | string | null
-    ownerId?: StringNullableFilter<"ScheduleTask"> | string | null
-    handlerKey?: StringNullableFilter<"ScheduleTask"> | string | null
-    payloadVersion?: IntNullableFilter<"ScheduleTask"> | number | null
-    sourceRevision?: StringNullableFilter<"ScheduleTask"> | string | null
-    status?: StringFilter<"ScheduleTask"> | string
-    enabled?: BoolFilter<"ScheduleTask"> | boolean
-    cronExpression?: StringNullableFilter<"ScheduleTask"> | string | null
-    timezone?: StringFilter<"ScheduleTask"> | string
-    startDate?: DateTimeNullableFilter<"ScheduleTask"> | Date | string | null
-    endDate?: DateTimeNullableFilter<"ScheduleTask"> | Date | string | null
-    maxExecutions?: IntNullableFilter<"ScheduleTask"> | number | null
-    nextRunAt?: DateTimeNullableFilter<"ScheduleTask"> | Date | string | null
-    lastRunAt?: DateTimeNullableFilter<"ScheduleTask"> | Date | string | null
-    executionCount?: IntFilter<"ScheduleTask"> | number
-    lastExecutionStatus?: StringNullableFilter<"ScheduleTask"> | string | null
-    lastExecutionDuration?: IntNullableFilter<"ScheduleTask"> | number | null
-    consecutiveFailures?: IntFilter<"ScheduleTask"> | number
-    maxRetries?: IntFilter<"ScheduleTask"> | number
-    initialDelayMs?: IntFilter<"ScheduleTask"> | number
-    maxDelayMs?: IntFilter<"ScheduleTask"> | number
-    backoffMultiplier?: FloatFilter<"ScheduleTask"> | number
-    retryableStatuses?: StringFilter<"ScheduleTask"> | string
-    payload?: StringNullableFilter<"ScheduleTask"> | string | null
-    tags?: StringFilter<"ScheduleTask"> | string
-    priority?: StringFilter<"ScheduleTask"> | string
-    timeout?: IntNullableFilter<"ScheduleTask"> | number | null
-    version?: IntFilter<"ScheduleTask"> | number
-    createdAt?: DateTimeFilter<"ScheduleTask"> | Date | string
-    updatedAt?: DateTimeFilter<"ScheduleTask"> | Date | string
-    deletedAt?: DateTimeNullableFilter<"ScheduleTask"> | Date | string | null
-    executions?: ScheduleExecutionListRelationFilter
-    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-  }, "id" | "identityId_ownerType_ownerId_schedulingKey">
-
-  export type ScheduleTaskOrderByWithAggregationInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    name?: SortOrder
-    description?: SortOrderInput | SortOrder
-    sourceModule?: SortOrder
-    sourceEntityId?: SortOrder
-    schedulingKey?: SortOrderInput | SortOrder
-    ownerType?: SortOrderInput | SortOrder
-    ownerId?: SortOrderInput | SortOrder
-    handlerKey?: SortOrderInput | SortOrder
-    payloadVersion?: SortOrderInput | SortOrder
-    sourceRevision?: SortOrderInput | SortOrder
-    status?: SortOrder
-    enabled?: SortOrder
-    cronExpression?: SortOrderInput | SortOrder
-    timezone?: SortOrder
-    startDate?: SortOrderInput | SortOrder
-    endDate?: SortOrderInput | SortOrder
-    maxExecutions?: SortOrderInput | SortOrder
-    nextRunAt?: SortOrderInput | SortOrder
-    lastRunAt?: SortOrderInput | SortOrder
-    executionCount?: SortOrder
-    lastExecutionStatus?: SortOrderInput | SortOrder
-    lastExecutionDuration?: SortOrderInput | SortOrder
-    consecutiveFailures?: SortOrder
-    maxRetries?: SortOrder
-    initialDelayMs?: SortOrder
-    maxDelayMs?: SortOrder
-    backoffMultiplier?: SortOrder
-    retryableStatuses?: SortOrder
-    payload?: SortOrderInput | SortOrder
-    tags?: SortOrder
-    priority?: SortOrder
-    timeout?: SortOrderInput | SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrderInput | SortOrder
-    _count?: ScheduleTaskCountOrderByAggregateInput
-    _avg?: ScheduleTaskAvgOrderByAggregateInput
-    _max?: ScheduleTaskMaxOrderByAggregateInput
-    _min?: ScheduleTaskMinOrderByAggregateInput
-    _sum?: ScheduleTaskSumOrderByAggregateInput
-  }
-
-  export type ScheduleTaskScalarWhereWithAggregatesInput = {
-    AND?: ScheduleTaskScalarWhereWithAggregatesInput | ScheduleTaskScalarWhereWithAggregatesInput[]
-    OR?: ScheduleTaskScalarWhereWithAggregatesInput[]
-    NOT?: ScheduleTaskScalarWhereWithAggregatesInput | ScheduleTaskScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"ScheduleTask"> | string
-    identityId?: StringWithAggregatesFilter<"ScheduleTask"> | string
-    name?: StringWithAggregatesFilter<"ScheduleTask"> | string
-    description?: StringNullableWithAggregatesFilter<"ScheduleTask"> | string | null
-    sourceModule?: StringWithAggregatesFilter<"ScheduleTask"> | string
-    sourceEntityId?: StringWithAggregatesFilter<"ScheduleTask"> | string
-    schedulingKey?: StringNullableWithAggregatesFilter<"ScheduleTask"> | string | null
-    ownerType?: StringNullableWithAggregatesFilter<"ScheduleTask"> | string | null
-    ownerId?: StringNullableWithAggregatesFilter<"ScheduleTask"> | string | null
-    handlerKey?: StringNullableWithAggregatesFilter<"ScheduleTask"> | string | null
-    payloadVersion?: IntNullableWithAggregatesFilter<"ScheduleTask"> | number | null
-    sourceRevision?: StringNullableWithAggregatesFilter<"ScheduleTask"> | string | null
-    status?: StringWithAggregatesFilter<"ScheduleTask"> | string
-    enabled?: BoolWithAggregatesFilter<"ScheduleTask"> | boolean
-    cronExpression?: StringNullableWithAggregatesFilter<"ScheduleTask"> | string | null
-    timezone?: StringWithAggregatesFilter<"ScheduleTask"> | string
-    startDate?: DateTimeNullableWithAggregatesFilter<"ScheduleTask"> | Date | string | null
-    endDate?: DateTimeNullableWithAggregatesFilter<"ScheduleTask"> | Date | string | null
-    maxExecutions?: IntNullableWithAggregatesFilter<"ScheduleTask"> | number | null
-    nextRunAt?: DateTimeNullableWithAggregatesFilter<"ScheduleTask"> | Date | string | null
-    lastRunAt?: DateTimeNullableWithAggregatesFilter<"ScheduleTask"> | Date | string | null
-    executionCount?: IntWithAggregatesFilter<"ScheduleTask"> | number
-    lastExecutionStatus?: StringNullableWithAggregatesFilter<"ScheduleTask"> | string | null
-    lastExecutionDuration?: IntNullableWithAggregatesFilter<"ScheduleTask"> | number | null
-    consecutiveFailures?: IntWithAggregatesFilter<"ScheduleTask"> | number
-    maxRetries?: IntWithAggregatesFilter<"ScheduleTask"> | number
-    initialDelayMs?: IntWithAggregatesFilter<"ScheduleTask"> | number
-    maxDelayMs?: IntWithAggregatesFilter<"ScheduleTask"> | number
-    backoffMultiplier?: FloatWithAggregatesFilter<"ScheduleTask"> | number
-    retryableStatuses?: StringWithAggregatesFilter<"ScheduleTask"> | string
-    payload?: StringNullableWithAggregatesFilter<"ScheduleTask"> | string | null
-    tags?: StringWithAggregatesFilter<"ScheduleTask"> | string
-    priority?: StringWithAggregatesFilter<"ScheduleTask"> | string
-    timeout?: IntNullableWithAggregatesFilter<"ScheduleTask"> | number | null
-    version?: IntWithAggregatesFilter<"ScheduleTask"> | number
-    createdAt?: DateTimeWithAggregatesFilter<"ScheduleTask"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"ScheduleTask"> | Date | string
-    deletedAt?: DateTimeNullableWithAggregatesFilter<"ScheduleTask"> | Date | string | null
-  }
-
   export type ScheduledInvocationWhereInput = {
     AND?: ScheduledInvocationWhereInput | ScheduledInvocationWhereInput[]
     OR?: ScheduledInvocationWhereInput[]
@@ -140171,218 +135345,6 @@ export namespace Prisma {
     startedAt?: DateTimeWithAggregatesFilter<"SchedulingReconcileOperation"> | Date | string
     finishedAt?: DateTimeWithAggregatesFilter<"SchedulingReconcileOperation"> | Date | string
     createdAt?: DateTimeWithAggregatesFilter<"SchedulingReconcileOperation"> | Date | string
-  }
-
-  export type ScheduleExecutionWhereInput = {
-    AND?: ScheduleExecutionWhereInput | ScheduleExecutionWhereInput[]
-    OR?: ScheduleExecutionWhereInput[]
-    NOT?: ScheduleExecutionWhereInput | ScheduleExecutionWhereInput[]
-    id?: StringFilter<"ScheduleExecution"> | string
-    identityId?: StringFilter<"ScheduleExecution"> | string
-    taskId?: StringFilter<"ScheduleExecution"> | string
-    executionTime?: DateTimeFilter<"ScheduleExecution"> | Date | string
-    status?: StringFilter<"ScheduleExecution"> | string
-    duration?: IntNullableFilter<"ScheduleExecution"> | number | null
-    result?: StringNullableFilter<"ScheduleExecution"> | string | null
-    error?: StringNullableFilter<"ScheduleExecution"> | string | null
-    retryCount?: IntFilter<"ScheduleExecution"> | number
-    createdAt?: DateTimeFilter<"ScheduleExecution"> | Date | string
-    identity?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-    task?: XOR<ScheduleTaskScalarRelationFilter, ScheduleTaskWhereInput>
-  }
-
-  export type ScheduleExecutionOrderByWithRelationInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    taskId?: SortOrder
-    executionTime?: SortOrder
-    status?: SortOrder
-    duration?: SortOrderInput | SortOrder
-    result?: SortOrderInput | SortOrder
-    error?: SortOrderInput | SortOrder
-    retryCount?: SortOrder
-    createdAt?: SortOrder
-    identity?: AccountOrderByWithRelationInput
-    task?: ScheduleTaskOrderByWithRelationInput
-  }
-
-  export type ScheduleExecutionWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    AND?: ScheduleExecutionWhereInput | ScheduleExecutionWhereInput[]
-    OR?: ScheduleExecutionWhereInput[]
-    NOT?: ScheduleExecutionWhereInput | ScheduleExecutionWhereInput[]
-    identityId?: StringFilter<"ScheduleExecution"> | string
-    taskId?: StringFilter<"ScheduleExecution"> | string
-    executionTime?: DateTimeFilter<"ScheduleExecution"> | Date | string
-    status?: StringFilter<"ScheduleExecution"> | string
-    duration?: IntNullableFilter<"ScheduleExecution"> | number | null
-    result?: StringNullableFilter<"ScheduleExecution"> | string | null
-    error?: StringNullableFilter<"ScheduleExecution"> | string | null
-    retryCount?: IntFilter<"ScheduleExecution"> | number
-    createdAt?: DateTimeFilter<"ScheduleExecution"> | Date | string
-    identity?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-    task?: XOR<ScheduleTaskScalarRelationFilter, ScheduleTaskWhereInput>
-  }, "id">
-
-  export type ScheduleExecutionOrderByWithAggregationInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    taskId?: SortOrder
-    executionTime?: SortOrder
-    status?: SortOrder
-    duration?: SortOrderInput | SortOrder
-    result?: SortOrderInput | SortOrder
-    error?: SortOrderInput | SortOrder
-    retryCount?: SortOrder
-    createdAt?: SortOrder
-    _count?: ScheduleExecutionCountOrderByAggregateInput
-    _avg?: ScheduleExecutionAvgOrderByAggregateInput
-    _max?: ScheduleExecutionMaxOrderByAggregateInput
-    _min?: ScheduleExecutionMinOrderByAggregateInput
-    _sum?: ScheduleExecutionSumOrderByAggregateInput
-  }
-
-  export type ScheduleExecutionScalarWhereWithAggregatesInput = {
-    AND?: ScheduleExecutionScalarWhereWithAggregatesInput | ScheduleExecutionScalarWhereWithAggregatesInput[]
-    OR?: ScheduleExecutionScalarWhereWithAggregatesInput[]
-    NOT?: ScheduleExecutionScalarWhereWithAggregatesInput | ScheduleExecutionScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"ScheduleExecution"> | string
-    identityId?: StringWithAggregatesFilter<"ScheduleExecution"> | string
-    taskId?: StringWithAggregatesFilter<"ScheduleExecution"> | string
-    executionTime?: DateTimeWithAggregatesFilter<"ScheduleExecution"> | Date | string
-    status?: StringWithAggregatesFilter<"ScheduleExecution"> | string
-    duration?: IntNullableWithAggregatesFilter<"ScheduleExecution"> | number | null
-    result?: StringNullableWithAggregatesFilter<"ScheduleExecution"> | string | null
-    error?: StringNullableWithAggregatesFilter<"ScheduleExecution"> | string | null
-    retryCount?: IntWithAggregatesFilter<"ScheduleExecution"> | number
-    createdAt?: DateTimeWithAggregatesFilter<"ScheduleExecution"> | Date | string
-  }
-
-  export type ScheduleStatisticWhereInput = {
-    AND?: ScheduleStatisticWhereInput | ScheduleStatisticWhereInput[]
-    OR?: ScheduleStatisticWhereInput[]
-    NOT?: ScheduleStatisticWhereInput | ScheduleStatisticWhereInput[]
-    id?: IntFilter<"ScheduleStatistic"> | number
-    identityId?: StringFilter<"ScheduleStatistic"> | string
-    totalTasks?: IntFilter<"ScheduleStatistic"> | number
-    activeTasks?: IntFilter<"ScheduleStatistic"> | number
-    pausedTasks?: IntFilter<"ScheduleStatistic"> | number
-    completedTasks?: IntFilter<"ScheduleStatistic"> | number
-    cancelledTasks?: IntFilter<"ScheduleStatistic"> | number
-    failedTasks?: IntFilter<"ScheduleStatistic"> | number
-    totalExecutions?: IntFilter<"ScheduleStatistic"> | number
-    successfulExecutions?: IntFilter<"ScheduleStatistic"> | number
-    failedExecutions?: IntFilter<"ScheduleStatistic"> | number
-    skippedExecutions?: IntFilter<"ScheduleStatistic"> | number
-    timeoutExecutions?: IntFilter<"ScheduleStatistic"> | number
-    avgExecutionDuration?: FloatFilter<"ScheduleStatistic"> | number
-    minExecutionDuration?: FloatFilter<"ScheduleStatistic"> | number
-    maxExecutionDuration?: FloatFilter<"ScheduleStatistic"> | number
-    moduleStatistics?: StringFilter<"ScheduleStatistic"> | string
-    lastUpdatedAt?: DateTimeFilter<"ScheduleStatistic"> | Date | string
-    createdAt?: DateTimeFilter<"ScheduleStatistic"> | Date | string
-    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-  }
-
-  export type ScheduleStatisticOrderByWithRelationInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    totalTasks?: SortOrder
-    activeTasks?: SortOrder
-    pausedTasks?: SortOrder
-    completedTasks?: SortOrder
-    cancelledTasks?: SortOrder
-    failedTasks?: SortOrder
-    totalExecutions?: SortOrder
-    successfulExecutions?: SortOrder
-    failedExecutions?: SortOrder
-    skippedExecutions?: SortOrder
-    timeoutExecutions?: SortOrder
-    avgExecutionDuration?: SortOrder
-    minExecutionDuration?: SortOrder
-    maxExecutionDuration?: SortOrder
-    moduleStatistics?: SortOrder
-    lastUpdatedAt?: SortOrder
-    createdAt?: SortOrder
-    account?: AccountOrderByWithRelationInput
-  }
-
-  export type ScheduleStatisticWhereUniqueInput = Prisma.AtLeast<{
-    id?: number
-    identityId?: string
-    AND?: ScheduleStatisticWhereInput | ScheduleStatisticWhereInput[]
-    OR?: ScheduleStatisticWhereInput[]
-    NOT?: ScheduleStatisticWhereInput | ScheduleStatisticWhereInput[]
-    totalTasks?: IntFilter<"ScheduleStatistic"> | number
-    activeTasks?: IntFilter<"ScheduleStatistic"> | number
-    pausedTasks?: IntFilter<"ScheduleStatistic"> | number
-    completedTasks?: IntFilter<"ScheduleStatistic"> | number
-    cancelledTasks?: IntFilter<"ScheduleStatistic"> | number
-    failedTasks?: IntFilter<"ScheduleStatistic"> | number
-    totalExecutions?: IntFilter<"ScheduleStatistic"> | number
-    successfulExecutions?: IntFilter<"ScheduleStatistic"> | number
-    failedExecutions?: IntFilter<"ScheduleStatistic"> | number
-    skippedExecutions?: IntFilter<"ScheduleStatistic"> | number
-    timeoutExecutions?: IntFilter<"ScheduleStatistic"> | number
-    avgExecutionDuration?: FloatFilter<"ScheduleStatistic"> | number
-    minExecutionDuration?: FloatFilter<"ScheduleStatistic"> | number
-    maxExecutionDuration?: FloatFilter<"ScheduleStatistic"> | number
-    moduleStatistics?: StringFilter<"ScheduleStatistic"> | string
-    lastUpdatedAt?: DateTimeFilter<"ScheduleStatistic"> | Date | string
-    createdAt?: DateTimeFilter<"ScheduleStatistic"> | Date | string
-    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-  }, "id" | "identityId">
-
-  export type ScheduleStatisticOrderByWithAggregationInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    totalTasks?: SortOrder
-    activeTasks?: SortOrder
-    pausedTasks?: SortOrder
-    completedTasks?: SortOrder
-    cancelledTasks?: SortOrder
-    failedTasks?: SortOrder
-    totalExecutions?: SortOrder
-    successfulExecutions?: SortOrder
-    failedExecutions?: SortOrder
-    skippedExecutions?: SortOrder
-    timeoutExecutions?: SortOrder
-    avgExecutionDuration?: SortOrder
-    minExecutionDuration?: SortOrder
-    maxExecutionDuration?: SortOrder
-    moduleStatistics?: SortOrder
-    lastUpdatedAt?: SortOrder
-    createdAt?: SortOrder
-    _count?: ScheduleStatisticCountOrderByAggregateInput
-    _avg?: ScheduleStatisticAvgOrderByAggregateInput
-    _max?: ScheduleStatisticMaxOrderByAggregateInput
-    _min?: ScheduleStatisticMinOrderByAggregateInput
-    _sum?: ScheduleStatisticSumOrderByAggregateInput
-  }
-
-  export type ScheduleStatisticScalarWhereWithAggregatesInput = {
-    AND?: ScheduleStatisticScalarWhereWithAggregatesInput | ScheduleStatisticScalarWhereWithAggregatesInput[]
-    OR?: ScheduleStatisticScalarWhereWithAggregatesInput[]
-    NOT?: ScheduleStatisticScalarWhereWithAggregatesInput | ScheduleStatisticScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"ScheduleStatistic"> | number
-    identityId?: StringWithAggregatesFilter<"ScheduleStatistic"> | string
-    totalTasks?: IntWithAggregatesFilter<"ScheduleStatistic"> | number
-    activeTasks?: IntWithAggregatesFilter<"ScheduleStatistic"> | number
-    pausedTasks?: IntWithAggregatesFilter<"ScheduleStatistic"> | number
-    completedTasks?: IntWithAggregatesFilter<"ScheduleStatistic"> | number
-    cancelledTasks?: IntWithAggregatesFilter<"ScheduleStatistic"> | number
-    failedTasks?: IntWithAggregatesFilter<"ScheduleStatistic"> | number
-    totalExecutions?: IntWithAggregatesFilter<"ScheduleStatistic"> | number
-    successfulExecutions?: IntWithAggregatesFilter<"ScheduleStatistic"> | number
-    failedExecutions?: IntWithAggregatesFilter<"ScheduleStatistic"> | number
-    skippedExecutions?: IntWithAggregatesFilter<"ScheduleStatistic"> | number
-    timeoutExecutions?: IntWithAggregatesFilter<"ScheduleStatistic"> | number
-    avgExecutionDuration?: FloatWithAggregatesFilter<"ScheduleStatistic"> | number
-    minExecutionDuration?: FloatWithAggregatesFilter<"ScheduleStatistic"> | number
-    maxExecutionDuration?: FloatWithAggregatesFilter<"ScheduleStatistic"> | number
-    moduleStatistics?: StringWithAggregatesFilter<"ScheduleStatistic"> | string
-    lastUpdatedAt?: DateTimeWithAggregatesFilter<"ScheduleStatistic"> | Date | string
-    createdAt?: DateTimeWithAggregatesFilter<"ScheduleStatistic"> | Date | string
   }
 
   export type ScheduleLeaseWhereInput = {
@@ -141438,11 +136400,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -141460,7 +136420,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -141504,11 +136463,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -141526,7 +136483,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -141570,11 +136526,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -141592,7 +136546,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -141636,11 +136589,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -141658,7 +136609,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -149887,296 +144837,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type ScheduleTaskCreateInput = {
-    id: string
-    name: string
-    description?: string | null
-    sourceModule: string
-    sourceEntityId: string
-    schedulingKey?: string | null
-    ownerType?: string | null
-    ownerId?: string | null
-    handlerKey?: string | null
-    payloadVersion?: number | null
-    sourceRevision?: string | null
-    status: string
-    enabled: boolean
-    cronExpression?: string | null
-    timezone: string
-    startDate?: Date | string | null
-    endDate?: Date | string | null
-    maxExecutions?: number | null
-    nextRunAt?: Date | string | null
-    lastRunAt?: Date | string | null
-    executionCount?: number
-    lastExecutionStatus?: string | null
-    lastExecutionDuration?: number | null
-    consecutiveFailures?: number
-    maxRetries: number
-    initialDelayMs: number
-    maxDelayMs: number
-    backoffMultiplier: number
-    retryableStatuses?: string
-    payload?: string | null
-    tags?: string
-    priority: string
-    timeout?: number | null
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    executions?: ScheduleExecutionCreateNestedManyWithoutTaskInput
-    account: AccountCreateNestedOneWithoutScheduleTasksInput
-  }
-
-  export type ScheduleTaskUncheckedCreateInput = {
-    id: string
-    identityId: string
-    name: string
-    description?: string | null
-    sourceModule: string
-    sourceEntityId: string
-    schedulingKey?: string | null
-    ownerType?: string | null
-    ownerId?: string | null
-    handlerKey?: string | null
-    payloadVersion?: number | null
-    sourceRevision?: string | null
-    status: string
-    enabled: boolean
-    cronExpression?: string | null
-    timezone: string
-    startDate?: Date | string | null
-    endDate?: Date | string | null
-    maxExecutions?: number | null
-    nextRunAt?: Date | string | null
-    lastRunAt?: Date | string | null
-    executionCount?: number
-    lastExecutionStatus?: string | null
-    lastExecutionDuration?: number | null
-    consecutiveFailures?: number
-    maxRetries: number
-    initialDelayMs: number
-    maxDelayMs: number
-    backoffMultiplier: number
-    retryableStatuses?: string
-    payload?: string | null
-    tags?: string
-    priority: string
-    timeout?: number | null
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    executions?: ScheduleExecutionUncheckedCreateNestedManyWithoutTaskInput
-  }
-
-  export type ScheduleTaskUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    sourceModule?: StringFieldUpdateOperationsInput | string
-    sourceEntityId?: StringFieldUpdateOperationsInput | string
-    schedulingKey?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerType?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerId?: NullableStringFieldUpdateOperationsInput | string | null
-    handlerKey?: NullableStringFieldUpdateOperationsInput | string | null
-    payloadVersion?: NullableIntFieldUpdateOperationsInput | number | null
-    sourceRevision?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    enabled?: BoolFieldUpdateOperationsInput | boolean
-    cronExpression?: NullableStringFieldUpdateOperationsInput | string | null
-    timezone?: StringFieldUpdateOperationsInput | string
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    maxExecutions?: NullableIntFieldUpdateOperationsInput | number | null
-    nextRunAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    lastRunAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    executionCount?: IntFieldUpdateOperationsInput | number
-    lastExecutionStatus?: NullableStringFieldUpdateOperationsInput | string | null
-    lastExecutionDuration?: NullableIntFieldUpdateOperationsInput | number | null
-    consecutiveFailures?: IntFieldUpdateOperationsInput | number
-    maxRetries?: IntFieldUpdateOperationsInput | number
-    initialDelayMs?: IntFieldUpdateOperationsInput | number
-    maxDelayMs?: IntFieldUpdateOperationsInput | number
-    backoffMultiplier?: FloatFieldUpdateOperationsInput | number
-    retryableStatuses?: StringFieldUpdateOperationsInput | string
-    payload?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
-    priority?: StringFieldUpdateOperationsInput | string
-    timeout?: NullableIntFieldUpdateOperationsInput | number | null
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    executions?: ScheduleExecutionUpdateManyWithoutTaskNestedInput
-    account?: AccountUpdateOneRequiredWithoutScheduleTasksNestedInput
-  }
-
-  export type ScheduleTaskUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    sourceModule?: StringFieldUpdateOperationsInput | string
-    sourceEntityId?: StringFieldUpdateOperationsInput | string
-    schedulingKey?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerType?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerId?: NullableStringFieldUpdateOperationsInput | string | null
-    handlerKey?: NullableStringFieldUpdateOperationsInput | string | null
-    payloadVersion?: NullableIntFieldUpdateOperationsInput | number | null
-    sourceRevision?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    enabled?: BoolFieldUpdateOperationsInput | boolean
-    cronExpression?: NullableStringFieldUpdateOperationsInput | string | null
-    timezone?: StringFieldUpdateOperationsInput | string
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    maxExecutions?: NullableIntFieldUpdateOperationsInput | number | null
-    nextRunAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    lastRunAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    executionCount?: IntFieldUpdateOperationsInput | number
-    lastExecutionStatus?: NullableStringFieldUpdateOperationsInput | string | null
-    lastExecutionDuration?: NullableIntFieldUpdateOperationsInput | number | null
-    consecutiveFailures?: IntFieldUpdateOperationsInput | number
-    maxRetries?: IntFieldUpdateOperationsInput | number
-    initialDelayMs?: IntFieldUpdateOperationsInput | number
-    maxDelayMs?: IntFieldUpdateOperationsInput | number
-    backoffMultiplier?: FloatFieldUpdateOperationsInput | number
-    retryableStatuses?: StringFieldUpdateOperationsInput | string
-    payload?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
-    priority?: StringFieldUpdateOperationsInput | string
-    timeout?: NullableIntFieldUpdateOperationsInput | number | null
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    executions?: ScheduleExecutionUncheckedUpdateManyWithoutTaskNestedInput
-  }
-
-  export type ScheduleTaskCreateManyInput = {
-    id: string
-    identityId: string
-    name: string
-    description?: string | null
-    sourceModule: string
-    sourceEntityId: string
-    schedulingKey?: string | null
-    ownerType?: string | null
-    ownerId?: string | null
-    handlerKey?: string | null
-    payloadVersion?: number | null
-    sourceRevision?: string | null
-    status: string
-    enabled: boolean
-    cronExpression?: string | null
-    timezone: string
-    startDate?: Date | string | null
-    endDate?: Date | string | null
-    maxExecutions?: number | null
-    nextRunAt?: Date | string | null
-    lastRunAt?: Date | string | null
-    executionCount?: number
-    lastExecutionStatus?: string | null
-    lastExecutionDuration?: number | null
-    consecutiveFailures?: number
-    maxRetries: number
-    initialDelayMs: number
-    maxDelayMs: number
-    backoffMultiplier: number
-    retryableStatuses?: string
-    payload?: string | null
-    tags?: string
-    priority: string
-    timeout?: number | null
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-  }
-
-  export type ScheduleTaskUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    sourceModule?: StringFieldUpdateOperationsInput | string
-    sourceEntityId?: StringFieldUpdateOperationsInput | string
-    schedulingKey?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerType?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerId?: NullableStringFieldUpdateOperationsInput | string | null
-    handlerKey?: NullableStringFieldUpdateOperationsInput | string | null
-    payloadVersion?: NullableIntFieldUpdateOperationsInput | number | null
-    sourceRevision?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    enabled?: BoolFieldUpdateOperationsInput | boolean
-    cronExpression?: NullableStringFieldUpdateOperationsInput | string | null
-    timezone?: StringFieldUpdateOperationsInput | string
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    maxExecutions?: NullableIntFieldUpdateOperationsInput | number | null
-    nextRunAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    lastRunAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    executionCount?: IntFieldUpdateOperationsInput | number
-    lastExecutionStatus?: NullableStringFieldUpdateOperationsInput | string | null
-    lastExecutionDuration?: NullableIntFieldUpdateOperationsInput | number | null
-    consecutiveFailures?: IntFieldUpdateOperationsInput | number
-    maxRetries?: IntFieldUpdateOperationsInput | number
-    initialDelayMs?: IntFieldUpdateOperationsInput | number
-    maxDelayMs?: IntFieldUpdateOperationsInput | number
-    backoffMultiplier?: FloatFieldUpdateOperationsInput | number
-    retryableStatuses?: StringFieldUpdateOperationsInput | string
-    payload?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
-    priority?: StringFieldUpdateOperationsInput | string
-    timeout?: NullableIntFieldUpdateOperationsInput | number | null
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type ScheduleTaskUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    sourceModule?: StringFieldUpdateOperationsInput | string
-    sourceEntityId?: StringFieldUpdateOperationsInput | string
-    schedulingKey?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerType?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerId?: NullableStringFieldUpdateOperationsInput | string | null
-    handlerKey?: NullableStringFieldUpdateOperationsInput | string | null
-    payloadVersion?: NullableIntFieldUpdateOperationsInput | number | null
-    sourceRevision?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    enabled?: BoolFieldUpdateOperationsInput | boolean
-    cronExpression?: NullableStringFieldUpdateOperationsInput | string | null
-    timezone?: StringFieldUpdateOperationsInput | string
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    maxExecutions?: NullableIntFieldUpdateOperationsInput | number | null
-    nextRunAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    lastRunAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    executionCount?: IntFieldUpdateOperationsInput | number
-    lastExecutionStatus?: NullableStringFieldUpdateOperationsInput | string | null
-    lastExecutionDuration?: NullableIntFieldUpdateOperationsInput | number | null
-    consecutiveFailures?: IntFieldUpdateOperationsInput | number
-    maxRetries?: IntFieldUpdateOperationsInput | number
-    initialDelayMs?: IntFieldUpdateOperationsInput | number
-    maxDelayMs?: IntFieldUpdateOperationsInput | number
-    backoffMultiplier?: FloatFieldUpdateOperationsInput | number
-    retryableStatuses?: StringFieldUpdateOperationsInput | string
-    payload?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
-    priority?: StringFieldUpdateOperationsInput | string
-    timeout?: NullableIntFieldUpdateOperationsInput | number | null
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
   export type ScheduledInvocationCreateInput = {
     id: string
     ownerType: string
@@ -150643,245 +145303,6 @@ export namespace Prisma {
     failureRetryable?: NullableBoolFieldUpdateOperationsInput | boolean | null
     startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     finishedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ScheduleExecutionCreateInput = {
-    id: string
-    executionTime: Date | string
-    status: string
-    duration?: number | null
-    result?: string | null
-    error?: string | null
-    retryCount?: number
-    createdAt?: Date | string
-    identity: AccountCreateNestedOneWithoutScheduleExecutionsInput
-    task: ScheduleTaskCreateNestedOneWithoutExecutionsInput
-  }
-
-  export type ScheduleExecutionUncheckedCreateInput = {
-    id: string
-    identityId: string
-    taskId: string
-    executionTime: Date | string
-    status: string
-    duration?: number | null
-    result?: string | null
-    error?: string | null
-    retryCount?: number
-    createdAt?: Date | string
-  }
-
-  export type ScheduleExecutionUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    executionTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: StringFieldUpdateOperationsInput | string
-    duration?: NullableIntFieldUpdateOperationsInput | number | null
-    result?: NullableStringFieldUpdateOperationsInput | string | null
-    error?: NullableStringFieldUpdateOperationsInput | string | null
-    retryCount?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    identity?: AccountUpdateOneRequiredWithoutScheduleExecutionsNestedInput
-    task?: ScheduleTaskUpdateOneRequiredWithoutExecutionsNestedInput
-  }
-
-  export type ScheduleExecutionUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    taskId?: StringFieldUpdateOperationsInput | string
-    executionTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: StringFieldUpdateOperationsInput | string
-    duration?: NullableIntFieldUpdateOperationsInput | number | null
-    result?: NullableStringFieldUpdateOperationsInput | string | null
-    error?: NullableStringFieldUpdateOperationsInput | string | null
-    retryCount?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ScheduleExecutionCreateManyInput = {
-    id: string
-    identityId: string
-    taskId: string
-    executionTime: Date | string
-    status: string
-    duration?: number | null
-    result?: string | null
-    error?: string | null
-    retryCount?: number
-    createdAt?: Date | string
-  }
-
-  export type ScheduleExecutionUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    executionTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: StringFieldUpdateOperationsInput | string
-    duration?: NullableIntFieldUpdateOperationsInput | number | null
-    result?: NullableStringFieldUpdateOperationsInput | string | null
-    error?: NullableStringFieldUpdateOperationsInput | string | null
-    retryCount?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ScheduleExecutionUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    taskId?: StringFieldUpdateOperationsInput | string
-    executionTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: StringFieldUpdateOperationsInput | string
-    duration?: NullableIntFieldUpdateOperationsInput | number | null
-    result?: NullableStringFieldUpdateOperationsInput | string | null
-    error?: NullableStringFieldUpdateOperationsInput | string | null
-    retryCount?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ScheduleStatisticCreateInput = {
-    totalTasks: number
-    activeTasks: number
-    pausedTasks: number
-    completedTasks: number
-    cancelledTasks: number
-    failedTasks: number
-    totalExecutions: number
-    successfulExecutions: number
-    failedExecutions: number
-    skippedExecutions: number
-    timeoutExecutions: number
-    avgExecutionDuration: number
-    minExecutionDuration: number
-    maxExecutionDuration: number
-    moduleStatistics?: string
-    lastUpdatedAt: Date | string
-    createdAt?: Date | string
-    account: AccountCreateNestedOneWithoutScheduleStatisticsInput
-  }
-
-  export type ScheduleStatisticUncheckedCreateInput = {
-    id?: number
-    identityId: string
-    totalTasks: number
-    activeTasks: number
-    pausedTasks: number
-    completedTasks: number
-    cancelledTasks: number
-    failedTasks: number
-    totalExecutions: number
-    successfulExecutions: number
-    failedExecutions: number
-    skippedExecutions: number
-    timeoutExecutions: number
-    avgExecutionDuration: number
-    minExecutionDuration: number
-    maxExecutionDuration: number
-    moduleStatistics?: string
-    lastUpdatedAt: Date | string
-    createdAt?: Date | string
-  }
-
-  export type ScheduleStatisticUpdateInput = {
-    totalTasks?: IntFieldUpdateOperationsInput | number
-    activeTasks?: IntFieldUpdateOperationsInput | number
-    pausedTasks?: IntFieldUpdateOperationsInput | number
-    completedTasks?: IntFieldUpdateOperationsInput | number
-    cancelledTasks?: IntFieldUpdateOperationsInput | number
-    failedTasks?: IntFieldUpdateOperationsInput | number
-    totalExecutions?: IntFieldUpdateOperationsInput | number
-    successfulExecutions?: IntFieldUpdateOperationsInput | number
-    failedExecutions?: IntFieldUpdateOperationsInput | number
-    skippedExecutions?: IntFieldUpdateOperationsInput | number
-    timeoutExecutions?: IntFieldUpdateOperationsInput | number
-    avgExecutionDuration?: FloatFieldUpdateOperationsInput | number
-    minExecutionDuration?: FloatFieldUpdateOperationsInput | number
-    maxExecutionDuration?: FloatFieldUpdateOperationsInput | number
-    moduleStatistics?: StringFieldUpdateOperationsInput | string
-    lastUpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    account?: AccountUpdateOneRequiredWithoutScheduleStatisticsNestedInput
-  }
-
-  export type ScheduleStatisticUncheckedUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    identityId?: StringFieldUpdateOperationsInput | string
-    totalTasks?: IntFieldUpdateOperationsInput | number
-    activeTasks?: IntFieldUpdateOperationsInput | number
-    pausedTasks?: IntFieldUpdateOperationsInput | number
-    completedTasks?: IntFieldUpdateOperationsInput | number
-    cancelledTasks?: IntFieldUpdateOperationsInput | number
-    failedTasks?: IntFieldUpdateOperationsInput | number
-    totalExecutions?: IntFieldUpdateOperationsInput | number
-    successfulExecutions?: IntFieldUpdateOperationsInput | number
-    failedExecutions?: IntFieldUpdateOperationsInput | number
-    skippedExecutions?: IntFieldUpdateOperationsInput | number
-    timeoutExecutions?: IntFieldUpdateOperationsInput | number
-    avgExecutionDuration?: FloatFieldUpdateOperationsInput | number
-    minExecutionDuration?: FloatFieldUpdateOperationsInput | number
-    maxExecutionDuration?: FloatFieldUpdateOperationsInput | number
-    moduleStatistics?: StringFieldUpdateOperationsInput | string
-    lastUpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ScheduleStatisticCreateManyInput = {
-    id?: number
-    identityId: string
-    totalTasks: number
-    activeTasks: number
-    pausedTasks: number
-    completedTasks: number
-    cancelledTasks: number
-    failedTasks: number
-    totalExecutions: number
-    successfulExecutions: number
-    failedExecutions: number
-    skippedExecutions: number
-    timeoutExecutions: number
-    avgExecutionDuration: number
-    minExecutionDuration: number
-    maxExecutionDuration: number
-    moduleStatistics?: string
-    lastUpdatedAt: Date | string
-    createdAt?: Date | string
-  }
-
-  export type ScheduleStatisticUpdateManyMutationInput = {
-    totalTasks?: IntFieldUpdateOperationsInput | number
-    activeTasks?: IntFieldUpdateOperationsInput | number
-    pausedTasks?: IntFieldUpdateOperationsInput | number
-    completedTasks?: IntFieldUpdateOperationsInput | number
-    cancelledTasks?: IntFieldUpdateOperationsInput | number
-    failedTasks?: IntFieldUpdateOperationsInput | number
-    totalExecutions?: IntFieldUpdateOperationsInput | number
-    successfulExecutions?: IntFieldUpdateOperationsInput | number
-    failedExecutions?: IntFieldUpdateOperationsInput | number
-    skippedExecutions?: IntFieldUpdateOperationsInput | number
-    timeoutExecutions?: IntFieldUpdateOperationsInput | number
-    avgExecutionDuration?: FloatFieldUpdateOperationsInput | number
-    minExecutionDuration?: FloatFieldUpdateOperationsInput | number
-    maxExecutionDuration?: FloatFieldUpdateOperationsInput | number
-    moduleStatistics?: StringFieldUpdateOperationsInput | string
-    lastUpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ScheduleStatisticUncheckedUpdateManyInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    identityId?: StringFieldUpdateOperationsInput | string
-    totalTasks?: IntFieldUpdateOperationsInput | number
-    activeTasks?: IntFieldUpdateOperationsInput | number
-    pausedTasks?: IntFieldUpdateOperationsInput | number
-    completedTasks?: IntFieldUpdateOperationsInput | number
-    cancelledTasks?: IntFieldUpdateOperationsInput | number
-    failedTasks?: IntFieldUpdateOperationsInput | number
-    totalExecutions?: IntFieldUpdateOperationsInput | number
-    successfulExecutions?: IntFieldUpdateOperationsInput | number
-    failedExecutions?: IntFieldUpdateOperationsInput | number
-    skippedExecutions?: IntFieldUpdateOperationsInput | number
-    timeoutExecutions?: IntFieldUpdateOperationsInput | number
-    avgExecutionDuration?: FloatFieldUpdateOperationsInput | number
-    minExecutionDuration?: FloatFieldUpdateOperationsInput | number
-    maxExecutionDuration?: FloatFieldUpdateOperationsInput | number
-    moduleStatistics?: StringFieldUpdateOperationsInput | string
-    lastUpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -152212,12 +146633,6 @@ export namespace Prisma {
     none?: ScheduleWhereInput
   }
 
-  export type ScheduleTaskListRelationFilter = {
-    every?: ScheduleTaskWhereInput
-    some?: ScheduleTaskWhereInput
-    none?: ScheduleTaskWhereInput
-  }
-
   export type SchedulingReconcileOperationListRelationFilter = {
     every?: SchedulingReconcileOperationWhereInput
     some?: SchedulingReconcileOperationWhereInput
@@ -152234,11 +146649,6 @@ export namespace Prisma {
     every?: InvocationAttemptWhereInput
     some?: InvocationAttemptWhereInput
     none?: InvocationAttemptWhereInput
-  }
-
-  export type ScheduleStatisticNullableScalarRelationFilter = {
-    is?: ScheduleStatisticWhereInput | null
-    isNot?: ScheduleStatisticWhereInput | null
   }
 
   export type HabitListRelationFilter = {
@@ -152339,12 +146749,6 @@ export namespace Prisma {
     every?: TaskPlanHistoryWhereInput
     some?: TaskPlanHistoryWhereInput
     none?: TaskPlanHistoryWhereInput
-  }
-
-  export type ScheduleExecutionListRelationFilter = {
-    every?: ScheduleExecutionWhereInput
-    some?: ScheduleExecutionWhereInput
-    none?: ScheduleExecutionWhereInput
   }
 
   export type ReminderHistoryListRelationFilter = {
@@ -152506,10 +146910,6 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
-  export type ScheduleTaskOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
   export type SchedulingReconcileOperationOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -152579,10 +146979,6 @@ export namespace Prisma {
   }
 
   export type TaskPlanHistoryOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type ScheduleExecutionOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -157376,164 +151772,6 @@ export namespace Prisma {
     version?: SortOrder
   }
 
-  export type ScheduleTaskIdentityIdOwnerTypeOwnerIdSchedulingKeyCompoundUniqueInput = {
-    identityId: string
-    ownerType: string
-    ownerId: string
-    schedulingKey: string
-  }
-
-  export type ScheduleTaskCountOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    name?: SortOrder
-    description?: SortOrder
-    sourceModule?: SortOrder
-    sourceEntityId?: SortOrder
-    schedulingKey?: SortOrder
-    ownerType?: SortOrder
-    ownerId?: SortOrder
-    handlerKey?: SortOrder
-    payloadVersion?: SortOrder
-    sourceRevision?: SortOrder
-    status?: SortOrder
-    enabled?: SortOrder
-    cronExpression?: SortOrder
-    timezone?: SortOrder
-    startDate?: SortOrder
-    endDate?: SortOrder
-    maxExecutions?: SortOrder
-    nextRunAt?: SortOrder
-    lastRunAt?: SortOrder
-    executionCount?: SortOrder
-    lastExecutionStatus?: SortOrder
-    lastExecutionDuration?: SortOrder
-    consecutiveFailures?: SortOrder
-    maxRetries?: SortOrder
-    initialDelayMs?: SortOrder
-    maxDelayMs?: SortOrder
-    backoffMultiplier?: SortOrder
-    retryableStatuses?: SortOrder
-    payload?: SortOrder
-    tags?: SortOrder
-    priority?: SortOrder
-    timeout?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrder
-  }
-
-  export type ScheduleTaskAvgOrderByAggregateInput = {
-    payloadVersion?: SortOrder
-    maxExecutions?: SortOrder
-    executionCount?: SortOrder
-    lastExecutionDuration?: SortOrder
-    consecutiveFailures?: SortOrder
-    maxRetries?: SortOrder
-    initialDelayMs?: SortOrder
-    maxDelayMs?: SortOrder
-    backoffMultiplier?: SortOrder
-    timeout?: SortOrder
-    version?: SortOrder
-  }
-
-  export type ScheduleTaskMaxOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    name?: SortOrder
-    description?: SortOrder
-    sourceModule?: SortOrder
-    sourceEntityId?: SortOrder
-    schedulingKey?: SortOrder
-    ownerType?: SortOrder
-    ownerId?: SortOrder
-    handlerKey?: SortOrder
-    payloadVersion?: SortOrder
-    sourceRevision?: SortOrder
-    status?: SortOrder
-    enabled?: SortOrder
-    cronExpression?: SortOrder
-    timezone?: SortOrder
-    startDate?: SortOrder
-    endDate?: SortOrder
-    maxExecutions?: SortOrder
-    nextRunAt?: SortOrder
-    lastRunAt?: SortOrder
-    executionCount?: SortOrder
-    lastExecutionStatus?: SortOrder
-    lastExecutionDuration?: SortOrder
-    consecutiveFailures?: SortOrder
-    maxRetries?: SortOrder
-    initialDelayMs?: SortOrder
-    maxDelayMs?: SortOrder
-    backoffMultiplier?: SortOrder
-    retryableStatuses?: SortOrder
-    payload?: SortOrder
-    tags?: SortOrder
-    priority?: SortOrder
-    timeout?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrder
-  }
-
-  export type ScheduleTaskMinOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    name?: SortOrder
-    description?: SortOrder
-    sourceModule?: SortOrder
-    sourceEntityId?: SortOrder
-    schedulingKey?: SortOrder
-    ownerType?: SortOrder
-    ownerId?: SortOrder
-    handlerKey?: SortOrder
-    payloadVersion?: SortOrder
-    sourceRevision?: SortOrder
-    status?: SortOrder
-    enabled?: SortOrder
-    cronExpression?: SortOrder
-    timezone?: SortOrder
-    startDate?: SortOrder
-    endDate?: SortOrder
-    maxExecutions?: SortOrder
-    nextRunAt?: SortOrder
-    lastRunAt?: SortOrder
-    executionCount?: SortOrder
-    lastExecutionStatus?: SortOrder
-    lastExecutionDuration?: SortOrder
-    consecutiveFailures?: SortOrder
-    maxRetries?: SortOrder
-    initialDelayMs?: SortOrder
-    maxDelayMs?: SortOrder
-    backoffMultiplier?: SortOrder
-    retryableStatuses?: SortOrder
-    payload?: SortOrder
-    tags?: SortOrder
-    priority?: SortOrder
-    timeout?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrder
-  }
-
-  export type ScheduleTaskSumOrderByAggregateInput = {
-    payloadVersion?: SortOrder
-    maxExecutions?: SortOrder
-    executionCount?: SortOrder
-    lastExecutionDuration?: SortOrder
-    consecutiveFailures?: SortOrder
-    maxRetries?: SortOrder
-    initialDelayMs?: SortOrder
-    maxDelayMs?: SortOrder
-    backoffMultiplier?: SortOrder
-    timeout?: SortOrder
-    version?: SortOrder
-  }
-
   export type ScheduledInvocationIdentityIdOwnerTypeOwnerIdSchedulingKeyCompoundUniqueInput = {
     identityId: string
     ownerType: string
@@ -157803,162 +152041,6 @@ export namespace Prisma {
     updatedCount?: SortOrder
     deletedCount?: SortOrder
     unchangedCount?: SortOrder
-  }
-
-  export type ScheduleTaskScalarRelationFilter = {
-    is?: ScheduleTaskWhereInput
-    isNot?: ScheduleTaskWhereInput
-  }
-
-  export type ScheduleExecutionCountOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    taskId?: SortOrder
-    executionTime?: SortOrder
-    status?: SortOrder
-    duration?: SortOrder
-    result?: SortOrder
-    error?: SortOrder
-    retryCount?: SortOrder
-    createdAt?: SortOrder
-  }
-
-  export type ScheduleExecutionAvgOrderByAggregateInput = {
-    duration?: SortOrder
-    retryCount?: SortOrder
-  }
-
-  export type ScheduleExecutionMaxOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    taskId?: SortOrder
-    executionTime?: SortOrder
-    status?: SortOrder
-    duration?: SortOrder
-    result?: SortOrder
-    error?: SortOrder
-    retryCount?: SortOrder
-    createdAt?: SortOrder
-  }
-
-  export type ScheduleExecutionMinOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    taskId?: SortOrder
-    executionTime?: SortOrder
-    status?: SortOrder
-    duration?: SortOrder
-    result?: SortOrder
-    error?: SortOrder
-    retryCount?: SortOrder
-    createdAt?: SortOrder
-  }
-
-  export type ScheduleExecutionSumOrderByAggregateInput = {
-    duration?: SortOrder
-    retryCount?: SortOrder
-  }
-
-  export type ScheduleStatisticCountOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    totalTasks?: SortOrder
-    activeTasks?: SortOrder
-    pausedTasks?: SortOrder
-    completedTasks?: SortOrder
-    cancelledTasks?: SortOrder
-    failedTasks?: SortOrder
-    totalExecutions?: SortOrder
-    successfulExecutions?: SortOrder
-    failedExecutions?: SortOrder
-    skippedExecutions?: SortOrder
-    timeoutExecutions?: SortOrder
-    avgExecutionDuration?: SortOrder
-    minExecutionDuration?: SortOrder
-    maxExecutionDuration?: SortOrder
-    moduleStatistics?: SortOrder
-    lastUpdatedAt?: SortOrder
-    createdAt?: SortOrder
-  }
-
-  export type ScheduleStatisticAvgOrderByAggregateInput = {
-    id?: SortOrder
-    totalTasks?: SortOrder
-    activeTasks?: SortOrder
-    pausedTasks?: SortOrder
-    completedTasks?: SortOrder
-    cancelledTasks?: SortOrder
-    failedTasks?: SortOrder
-    totalExecutions?: SortOrder
-    successfulExecutions?: SortOrder
-    failedExecutions?: SortOrder
-    skippedExecutions?: SortOrder
-    timeoutExecutions?: SortOrder
-    avgExecutionDuration?: SortOrder
-    minExecutionDuration?: SortOrder
-    maxExecutionDuration?: SortOrder
-  }
-
-  export type ScheduleStatisticMaxOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    totalTasks?: SortOrder
-    activeTasks?: SortOrder
-    pausedTasks?: SortOrder
-    completedTasks?: SortOrder
-    cancelledTasks?: SortOrder
-    failedTasks?: SortOrder
-    totalExecutions?: SortOrder
-    successfulExecutions?: SortOrder
-    failedExecutions?: SortOrder
-    skippedExecutions?: SortOrder
-    timeoutExecutions?: SortOrder
-    avgExecutionDuration?: SortOrder
-    minExecutionDuration?: SortOrder
-    maxExecutionDuration?: SortOrder
-    moduleStatistics?: SortOrder
-    lastUpdatedAt?: SortOrder
-    createdAt?: SortOrder
-  }
-
-  export type ScheduleStatisticMinOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    totalTasks?: SortOrder
-    activeTasks?: SortOrder
-    pausedTasks?: SortOrder
-    completedTasks?: SortOrder
-    cancelledTasks?: SortOrder
-    failedTasks?: SortOrder
-    totalExecutions?: SortOrder
-    successfulExecutions?: SortOrder
-    failedExecutions?: SortOrder
-    skippedExecutions?: SortOrder
-    timeoutExecutions?: SortOrder
-    avgExecutionDuration?: SortOrder
-    minExecutionDuration?: SortOrder
-    maxExecutionDuration?: SortOrder
-    moduleStatistics?: SortOrder
-    lastUpdatedAt?: SortOrder
-    createdAt?: SortOrder
-  }
-
-  export type ScheduleStatisticSumOrderByAggregateInput = {
-    id?: SortOrder
-    totalTasks?: SortOrder
-    activeTasks?: SortOrder
-    pausedTasks?: SortOrder
-    completedTasks?: SortOrder
-    cancelledTasks?: SortOrder
-    failedTasks?: SortOrder
-    totalExecutions?: SortOrder
-    successfulExecutions?: SortOrder
-    failedExecutions?: SortOrder
-    skippedExecutions?: SortOrder
-    timeoutExecutions?: SortOrder
-    avgExecutionDuration?: SortOrder
-    minExecutionDuration?: SortOrder
-    maxExecutionDuration?: SortOrder
   }
 
   export type ScheduleLeaseCountOrderByAggregateInput = {
@@ -158713,13 +152795,6 @@ export namespace Prisma {
     connect?: ScheduleWhereUniqueInput | ScheduleWhereUniqueInput[]
   }
 
-  export type ScheduleTaskCreateNestedManyWithoutAccountInput = {
-    create?: XOR<ScheduleTaskCreateWithoutAccountInput, ScheduleTaskUncheckedCreateWithoutAccountInput> | ScheduleTaskCreateWithoutAccountInput[] | ScheduleTaskUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: ScheduleTaskCreateOrConnectWithoutAccountInput | ScheduleTaskCreateOrConnectWithoutAccountInput[]
-    createMany?: ScheduleTaskCreateManyAccountInputEnvelope
-    connect?: ScheduleTaskWhereUniqueInput | ScheduleTaskWhereUniqueInput[]
-  }
-
   export type SchedulingReconcileOperationCreateNestedManyWithoutAccountInput = {
     create?: XOR<SchedulingReconcileOperationCreateWithoutAccountInput, SchedulingReconcileOperationUncheckedCreateWithoutAccountInput> | SchedulingReconcileOperationCreateWithoutAccountInput[] | SchedulingReconcileOperationUncheckedCreateWithoutAccountInput[]
     connectOrCreate?: SchedulingReconcileOperationCreateOrConnectWithoutAccountInput | SchedulingReconcileOperationCreateOrConnectWithoutAccountInput[]
@@ -158739,12 +152814,6 @@ export namespace Prisma {
     connectOrCreate?: InvocationAttemptCreateOrConnectWithoutAccountInput | InvocationAttemptCreateOrConnectWithoutAccountInput[]
     createMany?: InvocationAttemptCreateManyAccountInputEnvelope
     connect?: InvocationAttemptWhereUniqueInput | InvocationAttemptWhereUniqueInput[]
-  }
-
-  export type ScheduleStatisticCreateNestedOneWithoutAccountInput = {
-    create?: XOR<ScheduleStatisticCreateWithoutAccountInput, ScheduleStatisticUncheckedCreateWithoutAccountInput>
-    connectOrCreate?: ScheduleStatisticCreateOrConnectWithoutAccountInput
-    connect?: ScheduleStatisticWhereUniqueInput
   }
 
   export type HabitCreateNestedManyWithoutAccountInput = {
@@ -158862,13 +152931,6 @@ export namespace Prisma {
     connectOrCreate?: TaskPlanHistoryCreateOrConnectWithoutIdentityInput | TaskPlanHistoryCreateOrConnectWithoutIdentityInput[]
     createMany?: TaskPlanHistoryCreateManyIdentityInputEnvelope
     connect?: TaskPlanHistoryWhereUniqueInput | TaskPlanHistoryWhereUniqueInput[]
-  }
-
-  export type ScheduleExecutionCreateNestedManyWithoutIdentityInput = {
-    create?: XOR<ScheduleExecutionCreateWithoutIdentityInput, ScheduleExecutionUncheckedCreateWithoutIdentityInput> | ScheduleExecutionCreateWithoutIdentityInput[] | ScheduleExecutionUncheckedCreateWithoutIdentityInput[]
-    connectOrCreate?: ScheduleExecutionCreateOrConnectWithoutIdentityInput | ScheduleExecutionCreateOrConnectWithoutIdentityInput[]
-    createMany?: ScheduleExecutionCreateManyIdentityInputEnvelope
-    connect?: ScheduleExecutionWhereUniqueInput | ScheduleExecutionWhereUniqueInput[]
   }
 
   export type ReminderHistoryCreateNestedManyWithoutIdentityInput = {
@@ -159106,13 +153168,6 @@ export namespace Prisma {
     connect?: ScheduleWhereUniqueInput | ScheduleWhereUniqueInput[]
   }
 
-  export type ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput = {
-    create?: XOR<ScheduleTaskCreateWithoutAccountInput, ScheduleTaskUncheckedCreateWithoutAccountInput> | ScheduleTaskCreateWithoutAccountInput[] | ScheduleTaskUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: ScheduleTaskCreateOrConnectWithoutAccountInput | ScheduleTaskCreateOrConnectWithoutAccountInput[]
-    createMany?: ScheduleTaskCreateManyAccountInputEnvelope
-    connect?: ScheduleTaskWhereUniqueInput | ScheduleTaskWhereUniqueInput[]
-  }
-
   export type SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput = {
     create?: XOR<SchedulingReconcileOperationCreateWithoutAccountInput, SchedulingReconcileOperationUncheckedCreateWithoutAccountInput> | SchedulingReconcileOperationCreateWithoutAccountInput[] | SchedulingReconcileOperationUncheckedCreateWithoutAccountInput[]
     connectOrCreate?: SchedulingReconcileOperationCreateOrConnectWithoutAccountInput | SchedulingReconcileOperationCreateOrConnectWithoutAccountInput[]
@@ -159132,12 +153187,6 @@ export namespace Prisma {
     connectOrCreate?: InvocationAttemptCreateOrConnectWithoutAccountInput | InvocationAttemptCreateOrConnectWithoutAccountInput[]
     createMany?: InvocationAttemptCreateManyAccountInputEnvelope
     connect?: InvocationAttemptWhereUniqueInput | InvocationAttemptWhereUniqueInput[]
-  }
-
-  export type ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput = {
-    create?: XOR<ScheduleStatisticCreateWithoutAccountInput, ScheduleStatisticUncheckedCreateWithoutAccountInput>
-    connectOrCreate?: ScheduleStatisticCreateOrConnectWithoutAccountInput
-    connect?: ScheduleStatisticWhereUniqueInput
   }
 
   export type HabitUncheckedCreateNestedManyWithoutAccountInput = {
@@ -159255,13 +153304,6 @@ export namespace Prisma {
     connectOrCreate?: TaskPlanHistoryCreateOrConnectWithoutIdentityInput | TaskPlanHistoryCreateOrConnectWithoutIdentityInput[]
     createMany?: TaskPlanHistoryCreateManyIdentityInputEnvelope
     connect?: TaskPlanHistoryWhereUniqueInput | TaskPlanHistoryWhereUniqueInput[]
-  }
-
-  export type ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput = {
-    create?: XOR<ScheduleExecutionCreateWithoutIdentityInput, ScheduleExecutionUncheckedCreateWithoutIdentityInput> | ScheduleExecutionCreateWithoutIdentityInput[] | ScheduleExecutionUncheckedCreateWithoutIdentityInput[]
-    connectOrCreate?: ScheduleExecutionCreateOrConnectWithoutIdentityInput | ScheduleExecutionCreateOrConnectWithoutIdentityInput[]
-    createMany?: ScheduleExecutionCreateManyIdentityInputEnvelope
-    connect?: ScheduleExecutionWhereUniqueInput | ScheduleExecutionWhereUniqueInput[]
   }
 
   export type ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput = {
@@ -159643,20 +153685,6 @@ export namespace Prisma {
     deleteMany?: ScheduleScalarWhereInput | ScheduleScalarWhereInput[]
   }
 
-  export type ScheduleTaskUpdateManyWithoutAccountNestedInput = {
-    create?: XOR<ScheduleTaskCreateWithoutAccountInput, ScheduleTaskUncheckedCreateWithoutAccountInput> | ScheduleTaskCreateWithoutAccountInput[] | ScheduleTaskUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: ScheduleTaskCreateOrConnectWithoutAccountInput | ScheduleTaskCreateOrConnectWithoutAccountInput[]
-    upsert?: ScheduleTaskUpsertWithWhereUniqueWithoutAccountInput | ScheduleTaskUpsertWithWhereUniqueWithoutAccountInput[]
-    createMany?: ScheduleTaskCreateManyAccountInputEnvelope
-    set?: ScheduleTaskWhereUniqueInput | ScheduleTaskWhereUniqueInput[]
-    disconnect?: ScheduleTaskWhereUniqueInput | ScheduleTaskWhereUniqueInput[]
-    delete?: ScheduleTaskWhereUniqueInput | ScheduleTaskWhereUniqueInput[]
-    connect?: ScheduleTaskWhereUniqueInput | ScheduleTaskWhereUniqueInput[]
-    update?: ScheduleTaskUpdateWithWhereUniqueWithoutAccountInput | ScheduleTaskUpdateWithWhereUniqueWithoutAccountInput[]
-    updateMany?: ScheduleTaskUpdateManyWithWhereWithoutAccountInput | ScheduleTaskUpdateManyWithWhereWithoutAccountInput[]
-    deleteMany?: ScheduleTaskScalarWhereInput | ScheduleTaskScalarWhereInput[]
-  }
-
   export type SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput = {
     create?: XOR<SchedulingReconcileOperationCreateWithoutAccountInput, SchedulingReconcileOperationUncheckedCreateWithoutAccountInput> | SchedulingReconcileOperationCreateWithoutAccountInput[] | SchedulingReconcileOperationUncheckedCreateWithoutAccountInput[]
     connectOrCreate?: SchedulingReconcileOperationCreateOrConnectWithoutAccountInput | SchedulingReconcileOperationCreateOrConnectWithoutAccountInput[]
@@ -159697,16 +153725,6 @@ export namespace Prisma {
     update?: InvocationAttemptUpdateWithWhereUniqueWithoutAccountInput | InvocationAttemptUpdateWithWhereUniqueWithoutAccountInput[]
     updateMany?: InvocationAttemptUpdateManyWithWhereWithoutAccountInput | InvocationAttemptUpdateManyWithWhereWithoutAccountInput[]
     deleteMany?: InvocationAttemptScalarWhereInput | InvocationAttemptScalarWhereInput[]
-  }
-
-  export type ScheduleStatisticUpdateOneWithoutAccountNestedInput = {
-    create?: XOR<ScheduleStatisticCreateWithoutAccountInput, ScheduleStatisticUncheckedCreateWithoutAccountInput>
-    connectOrCreate?: ScheduleStatisticCreateOrConnectWithoutAccountInput
-    upsert?: ScheduleStatisticUpsertWithoutAccountInput
-    disconnect?: ScheduleStatisticWhereInput | boolean
-    delete?: ScheduleStatisticWhereInput | boolean
-    connect?: ScheduleStatisticWhereUniqueInput
-    update?: XOR<XOR<ScheduleStatisticUpdateToOneWithWhereWithoutAccountInput, ScheduleStatisticUpdateWithoutAccountInput>, ScheduleStatisticUncheckedUpdateWithoutAccountInput>
   }
 
   export type HabitUpdateManyWithoutAccountNestedInput = {
@@ -159937,20 +153955,6 @@ export namespace Prisma {
     update?: TaskPlanHistoryUpdateWithWhereUniqueWithoutIdentityInput | TaskPlanHistoryUpdateWithWhereUniqueWithoutIdentityInput[]
     updateMany?: TaskPlanHistoryUpdateManyWithWhereWithoutIdentityInput | TaskPlanHistoryUpdateManyWithWhereWithoutIdentityInput[]
     deleteMany?: TaskPlanHistoryScalarWhereInput | TaskPlanHistoryScalarWhereInput[]
-  }
-
-  export type ScheduleExecutionUpdateManyWithoutIdentityNestedInput = {
-    create?: XOR<ScheduleExecutionCreateWithoutIdentityInput, ScheduleExecutionUncheckedCreateWithoutIdentityInput> | ScheduleExecutionCreateWithoutIdentityInput[] | ScheduleExecutionUncheckedCreateWithoutIdentityInput[]
-    connectOrCreate?: ScheduleExecutionCreateOrConnectWithoutIdentityInput | ScheduleExecutionCreateOrConnectWithoutIdentityInput[]
-    upsert?: ScheduleExecutionUpsertWithWhereUniqueWithoutIdentityInput | ScheduleExecutionUpsertWithWhereUniqueWithoutIdentityInput[]
-    createMany?: ScheduleExecutionCreateManyIdentityInputEnvelope
-    set?: ScheduleExecutionWhereUniqueInput | ScheduleExecutionWhereUniqueInput[]
-    disconnect?: ScheduleExecutionWhereUniqueInput | ScheduleExecutionWhereUniqueInput[]
-    delete?: ScheduleExecutionWhereUniqueInput | ScheduleExecutionWhereUniqueInput[]
-    connect?: ScheduleExecutionWhereUniqueInput | ScheduleExecutionWhereUniqueInput[]
-    update?: ScheduleExecutionUpdateWithWhereUniqueWithoutIdentityInput | ScheduleExecutionUpdateWithWhereUniqueWithoutIdentityInput[]
-    updateMany?: ScheduleExecutionUpdateManyWithWhereWithoutIdentityInput | ScheduleExecutionUpdateManyWithWhereWithoutIdentityInput[]
-    deleteMany?: ScheduleExecutionScalarWhereInput | ScheduleExecutionScalarWhereInput[]
   }
 
   export type ReminderHistoryUpdateManyWithoutIdentityNestedInput = {
@@ -160417,20 +154421,6 @@ export namespace Prisma {
     deleteMany?: ScheduleScalarWhereInput | ScheduleScalarWhereInput[]
   }
 
-  export type ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput = {
-    create?: XOR<ScheduleTaskCreateWithoutAccountInput, ScheduleTaskUncheckedCreateWithoutAccountInput> | ScheduleTaskCreateWithoutAccountInput[] | ScheduleTaskUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: ScheduleTaskCreateOrConnectWithoutAccountInput | ScheduleTaskCreateOrConnectWithoutAccountInput[]
-    upsert?: ScheduleTaskUpsertWithWhereUniqueWithoutAccountInput | ScheduleTaskUpsertWithWhereUniqueWithoutAccountInput[]
-    createMany?: ScheduleTaskCreateManyAccountInputEnvelope
-    set?: ScheduleTaskWhereUniqueInput | ScheduleTaskWhereUniqueInput[]
-    disconnect?: ScheduleTaskWhereUniqueInput | ScheduleTaskWhereUniqueInput[]
-    delete?: ScheduleTaskWhereUniqueInput | ScheduleTaskWhereUniqueInput[]
-    connect?: ScheduleTaskWhereUniqueInput | ScheduleTaskWhereUniqueInput[]
-    update?: ScheduleTaskUpdateWithWhereUniqueWithoutAccountInput | ScheduleTaskUpdateWithWhereUniqueWithoutAccountInput[]
-    updateMany?: ScheduleTaskUpdateManyWithWhereWithoutAccountInput | ScheduleTaskUpdateManyWithWhereWithoutAccountInput[]
-    deleteMany?: ScheduleTaskScalarWhereInput | ScheduleTaskScalarWhereInput[]
-  }
-
   export type SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput = {
     create?: XOR<SchedulingReconcileOperationCreateWithoutAccountInput, SchedulingReconcileOperationUncheckedCreateWithoutAccountInput> | SchedulingReconcileOperationCreateWithoutAccountInput[] | SchedulingReconcileOperationUncheckedCreateWithoutAccountInput[]
     connectOrCreate?: SchedulingReconcileOperationCreateOrConnectWithoutAccountInput | SchedulingReconcileOperationCreateOrConnectWithoutAccountInput[]
@@ -160471,16 +154461,6 @@ export namespace Prisma {
     update?: InvocationAttemptUpdateWithWhereUniqueWithoutAccountInput | InvocationAttemptUpdateWithWhereUniqueWithoutAccountInput[]
     updateMany?: InvocationAttemptUpdateManyWithWhereWithoutAccountInput | InvocationAttemptUpdateManyWithWhereWithoutAccountInput[]
     deleteMany?: InvocationAttemptScalarWhereInput | InvocationAttemptScalarWhereInput[]
-  }
-
-  export type ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput = {
-    create?: XOR<ScheduleStatisticCreateWithoutAccountInput, ScheduleStatisticUncheckedCreateWithoutAccountInput>
-    connectOrCreate?: ScheduleStatisticCreateOrConnectWithoutAccountInput
-    upsert?: ScheduleStatisticUpsertWithoutAccountInput
-    disconnect?: ScheduleStatisticWhereInput | boolean
-    delete?: ScheduleStatisticWhereInput | boolean
-    connect?: ScheduleStatisticWhereUniqueInput
-    update?: XOR<XOR<ScheduleStatisticUpdateToOneWithWhereWithoutAccountInput, ScheduleStatisticUpdateWithoutAccountInput>, ScheduleStatisticUncheckedUpdateWithoutAccountInput>
   }
 
   export type HabitUncheckedUpdateManyWithoutAccountNestedInput = {
@@ -160711,20 +154691,6 @@ export namespace Prisma {
     update?: TaskPlanHistoryUpdateWithWhereUniqueWithoutIdentityInput | TaskPlanHistoryUpdateWithWhereUniqueWithoutIdentityInput[]
     updateMany?: TaskPlanHistoryUpdateManyWithWhereWithoutIdentityInput | TaskPlanHistoryUpdateManyWithWhereWithoutIdentityInput[]
     deleteMany?: TaskPlanHistoryScalarWhereInput | TaskPlanHistoryScalarWhereInput[]
-  }
-
-  export type ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput = {
-    create?: XOR<ScheduleExecutionCreateWithoutIdentityInput, ScheduleExecutionUncheckedCreateWithoutIdentityInput> | ScheduleExecutionCreateWithoutIdentityInput[] | ScheduleExecutionUncheckedCreateWithoutIdentityInput[]
-    connectOrCreate?: ScheduleExecutionCreateOrConnectWithoutIdentityInput | ScheduleExecutionCreateOrConnectWithoutIdentityInput[]
-    upsert?: ScheduleExecutionUpsertWithWhereUniqueWithoutIdentityInput | ScheduleExecutionUpsertWithWhereUniqueWithoutIdentityInput[]
-    createMany?: ScheduleExecutionCreateManyIdentityInputEnvelope
-    set?: ScheduleExecutionWhereUniqueInput | ScheduleExecutionWhereUniqueInput[]
-    disconnect?: ScheduleExecutionWhereUniqueInput | ScheduleExecutionWhereUniqueInput[]
-    delete?: ScheduleExecutionWhereUniqueInput | ScheduleExecutionWhereUniqueInput[]
-    connect?: ScheduleExecutionWhereUniqueInput | ScheduleExecutionWhereUniqueInput[]
-    update?: ScheduleExecutionUpdateWithWhereUniqueWithoutIdentityInput | ScheduleExecutionUpdateWithWhereUniqueWithoutIdentityInput[]
-    updateMany?: ScheduleExecutionUpdateManyWithWhereWithoutIdentityInput | ScheduleExecutionUpdateManyWithWhereWithoutIdentityInput[]
-    deleteMany?: ScheduleExecutionScalarWhereInput | ScheduleExecutionScalarWhereInput[]
   }
 
   export type ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput = {
@@ -164416,62 +158382,6 @@ export namespace Prisma {
     update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutSchedulesInput, AccountUpdateWithoutSchedulesInput>, AccountUncheckedUpdateWithoutSchedulesInput>
   }
 
-  export type ScheduleExecutionCreateNestedManyWithoutTaskInput = {
-    create?: XOR<ScheduleExecutionCreateWithoutTaskInput, ScheduleExecutionUncheckedCreateWithoutTaskInput> | ScheduleExecutionCreateWithoutTaskInput[] | ScheduleExecutionUncheckedCreateWithoutTaskInput[]
-    connectOrCreate?: ScheduleExecutionCreateOrConnectWithoutTaskInput | ScheduleExecutionCreateOrConnectWithoutTaskInput[]
-    createMany?: ScheduleExecutionCreateManyTaskInputEnvelope
-    connect?: ScheduleExecutionWhereUniqueInput | ScheduleExecutionWhereUniqueInput[]
-  }
-
-  export type AccountCreateNestedOneWithoutScheduleTasksInput = {
-    create?: XOR<AccountCreateWithoutScheduleTasksInput, AccountUncheckedCreateWithoutScheduleTasksInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutScheduleTasksInput
-    connect?: AccountWhereUniqueInput
-  }
-
-  export type ScheduleExecutionUncheckedCreateNestedManyWithoutTaskInput = {
-    create?: XOR<ScheduleExecutionCreateWithoutTaskInput, ScheduleExecutionUncheckedCreateWithoutTaskInput> | ScheduleExecutionCreateWithoutTaskInput[] | ScheduleExecutionUncheckedCreateWithoutTaskInput[]
-    connectOrCreate?: ScheduleExecutionCreateOrConnectWithoutTaskInput | ScheduleExecutionCreateOrConnectWithoutTaskInput[]
-    createMany?: ScheduleExecutionCreateManyTaskInputEnvelope
-    connect?: ScheduleExecutionWhereUniqueInput | ScheduleExecutionWhereUniqueInput[]
-  }
-
-  export type ScheduleExecutionUpdateManyWithoutTaskNestedInput = {
-    create?: XOR<ScheduleExecutionCreateWithoutTaskInput, ScheduleExecutionUncheckedCreateWithoutTaskInput> | ScheduleExecutionCreateWithoutTaskInput[] | ScheduleExecutionUncheckedCreateWithoutTaskInput[]
-    connectOrCreate?: ScheduleExecutionCreateOrConnectWithoutTaskInput | ScheduleExecutionCreateOrConnectWithoutTaskInput[]
-    upsert?: ScheduleExecutionUpsertWithWhereUniqueWithoutTaskInput | ScheduleExecutionUpsertWithWhereUniqueWithoutTaskInput[]
-    createMany?: ScheduleExecutionCreateManyTaskInputEnvelope
-    set?: ScheduleExecutionWhereUniqueInput | ScheduleExecutionWhereUniqueInput[]
-    disconnect?: ScheduleExecutionWhereUniqueInput | ScheduleExecutionWhereUniqueInput[]
-    delete?: ScheduleExecutionWhereUniqueInput | ScheduleExecutionWhereUniqueInput[]
-    connect?: ScheduleExecutionWhereUniqueInput | ScheduleExecutionWhereUniqueInput[]
-    update?: ScheduleExecutionUpdateWithWhereUniqueWithoutTaskInput | ScheduleExecutionUpdateWithWhereUniqueWithoutTaskInput[]
-    updateMany?: ScheduleExecutionUpdateManyWithWhereWithoutTaskInput | ScheduleExecutionUpdateManyWithWhereWithoutTaskInput[]
-    deleteMany?: ScheduleExecutionScalarWhereInput | ScheduleExecutionScalarWhereInput[]
-  }
-
-  export type AccountUpdateOneRequiredWithoutScheduleTasksNestedInput = {
-    create?: XOR<AccountCreateWithoutScheduleTasksInput, AccountUncheckedCreateWithoutScheduleTasksInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutScheduleTasksInput
-    upsert?: AccountUpsertWithoutScheduleTasksInput
-    connect?: AccountWhereUniqueInput
-    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutScheduleTasksInput, AccountUpdateWithoutScheduleTasksInput>, AccountUncheckedUpdateWithoutScheduleTasksInput>
-  }
-
-  export type ScheduleExecutionUncheckedUpdateManyWithoutTaskNestedInput = {
-    create?: XOR<ScheduleExecutionCreateWithoutTaskInput, ScheduleExecutionUncheckedCreateWithoutTaskInput> | ScheduleExecutionCreateWithoutTaskInput[] | ScheduleExecutionUncheckedCreateWithoutTaskInput[]
-    connectOrCreate?: ScheduleExecutionCreateOrConnectWithoutTaskInput | ScheduleExecutionCreateOrConnectWithoutTaskInput[]
-    upsert?: ScheduleExecutionUpsertWithWhereUniqueWithoutTaskInput | ScheduleExecutionUpsertWithWhereUniqueWithoutTaskInput[]
-    createMany?: ScheduleExecutionCreateManyTaskInputEnvelope
-    set?: ScheduleExecutionWhereUniqueInput | ScheduleExecutionWhereUniqueInput[]
-    disconnect?: ScheduleExecutionWhereUniqueInput | ScheduleExecutionWhereUniqueInput[]
-    delete?: ScheduleExecutionWhereUniqueInput | ScheduleExecutionWhereUniqueInput[]
-    connect?: ScheduleExecutionWhereUniqueInput | ScheduleExecutionWhereUniqueInput[]
-    update?: ScheduleExecutionUpdateWithWhereUniqueWithoutTaskInput | ScheduleExecutionUpdateWithWhereUniqueWithoutTaskInput[]
-    updateMany?: ScheduleExecutionUpdateManyWithWhereWithoutTaskInput | ScheduleExecutionUpdateManyWithWhereWithoutTaskInput[]
-    deleteMany?: ScheduleExecutionScalarWhereInput | ScheduleExecutionScalarWhereInput[]
-  }
-
   export type AccountCreateNestedOneWithoutScheduledInvocationsInput = {
     create?: XOR<AccountCreateWithoutScheduledInvocationsInput, AccountUncheckedCreateWithoutScheduledInvocationsInput>
     connectOrCreate?: AccountCreateOrConnectWithoutScheduledInvocationsInput
@@ -164572,48 +158482,6 @@ export namespace Prisma {
     upsert?: AccountUpsertWithoutSchedulingReconcileOperationsInput
     connect?: AccountWhereUniqueInput
     update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutSchedulingReconcileOperationsInput, AccountUpdateWithoutSchedulingReconcileOperationsInput>, AccountUncheckedUpdateWithoutSchedulingReconcileOperationsInput>
-  }
-
-  export type AccountCreateNestedOneWithoutScheduleExecutionsInput = {
-    create?: XOR<AccountCreateWithoutScheduleExecutionsInput, AccountUncheckedCreateWithoutScheduleExecutionsInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutScheduleExecutionsInput
-    connect?: AccountWhereUniqueInput
-  }
-
-  export type ScheduleTaskCreateNestedOneWithoutExecutionsInput = {
-    create?: XOR<ScheduleTaskCreateWithoutExecutionsInput, ScheduleTaskUncheckedCreateWithoutExecutionsInput>
-    connectOrCreate?: ScheduleTaskCreateOrConnectWithoutExecutionsInput
-    connect?: ScheduleTaskWhereUniqueInput
-  }
-
-  export type AccountUpdateOneRequiredWithoutScheduleExecutionsNestedInput = {
-    create?: XOR<AccountCreateWithoutScheduleExecutionsInput, AccountUncheckedCreateWithoutScheduleExecutionsInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutScheduleExecutionsInput
-    upsert?: AccountUpsertWithoutScheduleExecutionsInput
-    connect?: AccountWhereUniqueInput
-    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutScheduleExecutionsInput, AccountUpdateWithoutScheduleExecutionsInput>, AccountUncheckedUpdateWithoutScheduleExecutionsInput>
-  }
-
-  export type ScheduleTaskUpdateOneRequiredWithoutExecutionsNestedInput = {
-    create?: XOR<ScheduleTaskCreateWithoutExecutionsInput, ScheduleTaskUncheckedCreateWithoutExecutionsInput>
-    connectOrCreate?: ScheduleTaskCreateOrConnectWithoutExecutionsInput
-    upsert?: ScheduleTaskUpsertWithoutExecutionsInput
-    connect?: ScheduleTaskWhereUniqueInput
-    update?: XOR<XOR<ScheduleTaskUpdateToOneWithWhereWithoutExecutionsInput, ScheduleTaskUpdateWithoutExecutionsInput>, ScheduleTaskUncheckedUpdateWithoutExecutionsInput>
-  }
-
-  export type AccountCreateNestedOneWithoutScheduleStatisticsInput = {
-    create?: XOR<AccountCreateWithoutScheduleStatisticsInput, AccountUncheckedCreateWithoutScheduleStatisticsInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutScheduleStatisticsInput
-    connect?: AccountWhereUniqueInput
-  }
-
-  export type AccountUpdateOneRequiredWithoutScheduleStatisticsNestedInput = {
-    create?: XOR<AccountCreateWithoutScheduleStatisticsInput, AccountUncheckedCreateWithoutScheduleStatisticsInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutScheduleStatisticsInput
-    upsert?: AccountUpsertWithoutScheduleStatisticsInput
-    connect?: AccountWhereUniqueInput
-    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutScheduleStatisticsInput, AccountUpdateWithoutScheduleStatisticsInput>, AccountUncheckedUpdateWithoutScheduleStatisticsInput>
   }
 
   export type AccountCreateNestedOneWithoutUserPreferenceRecordsInput = {
@@ -166012,98 +159880,6 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type ScheduleTaskCreateWithoutAccountInput = {
-    id: string
-    name: string
-    description?: string | null
-    sourceModule: string
-    sourceEntityId: string
-    schedulingKey?: string | null
-    ownerType?: string | null
-    ownerId?: string | null
-    handlerKey?: string | null
-    payloadVersion?: number | null
-    sourceRevision?: string | null
-    status: string
-    enabled: boolean
-    cronExpression?: string | null
-    timezone: string
-    startDate?: Date | string | null
-    endDate?: Date | string | null
-    maxExecutions?: number | null
-    nextRunAt?: Date | string | null
-    lastRunAt?: Date | string | null
-    executionCount?: number
-    lastExecutionStatus?: string | null
-    lastExecutionDuration?: number | null
-    consecutiveFailures?: number
-    maxRetries: number
-    initialDelayMs: number
-    maxDelayMs: number
-    backoffMultiplier: number
-    retryableStatuses?: string
-    payload?: string | null
-    tags?: string
-    priority: string
-    timeout?: number | null
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    executions?: ScheduleExecutionCreateNestedManyWithoutTaskInput
-  }
-
-  export type ScheduleTaskUncheckedCreateWithoutAccountInput = {
-    id: string
-    name: string
-    description?: string | null
-    sourceModule: string
-    sourceEntityId: string
-    schedulingKey?: string | null
-    ownerType?: string | null
-    ownerId?: string | null
-    handlerKey?: string | null
-    payloadVersion?: number | null
-    sourceRevision?: string | null
-    status: string
-    enabled: boolean
-    cronExpression?: string | null
-    timezone: string
-    startDate?: Date | string | null
-    endDate?: Date | string | null
-    maxExecutions?: number | null
-    nextRunAt?: Date | string | null
-    lastRunAt?: Date | string | null
-    executionCount?: number
-    lastExecutionStatus?: string | null
-    lastExecutionDuration?: number | null
-    consecutiveFailures?: number
-    maxRetries: number
-    initialDelayMs: number
-    maxDelayMs: number
-    backoffMultiplier: number
-    retryableStatuses?: string
-    payload?: string | null
-    tags?: string
-    priority: string
-    timeout?: number | null
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    executions?: ScheduleExecutionUncheckedCreateNestedManyWithoutTaskInput
-  }
-
-  export type ScheduleTaskCreateOrConnectWithoutAccountInput = {
-    where: ScheduleTaskWhereUniqueInput
-    create: XOR<ScheduleTaskCreateWithoutAccountInput, ScheduleTaskUncheckedCreateWithoutAccountInput>
-  }
-
-  export type ScheduleTaskCreateManyAccountInputEnvelope = {
-    data: ScheduleTaskCreateManyAccountInput | ScheduleTaskCreateManyAccountInput[]
-    skipDuplicates?: boolean
-  }
-
   export type SchedulingReconcileOperationCreateWithoutAccountInput = {
     operationId: string
     ownerType: string
@@ -166262,52 +160038,6 @@ export namespace Prisma {
   export type InvocationAttemptCreateManyAccountInputEnvelope = {
     data: InvocationAttemptCreateManyAccountInput | InvocationAttemptCreateManyAccountInput[]
     skipDuplicates?: boolean
-  }
-
-  export type ScheduleStatisticCreateWithoutAccountInput = {
-    totalTasks: number
-    activeTasks: number
-    pausedTasks: number
-    completedTasks: number
-    cancelledTasks: number
-    failedTasks: number
-    totalExecutions: number
-    successfulExecutions: number
-    failedExecutions: number
-    skippedExecutions: number
-    timeoutExecutions: number
-    avgExecutionDuration: number
-    minExecutionDuration: number
-    maxExecutionDuration: number
-    moduleStatistics?: string
-    lastUpdatedAt: Date | string
-    createdAt?: Date | string
-  }
-
-  export type ScheduleStatisticUncheckedCreateWithoutAccountInput = {
-    id?: number
-    totalTasks: number
-    activeTasks: number
-    pausedTasks: number
-    completedTasks: number
-    cancelledTasks: number
-    failedTasks: number
-    totalExecutions: number
-    successfulExecutions: number
-    failedExecutions: number
-    skippedExecutions: number
-    timeoutExecutions: number
-    avgExecutionDuration: number
-    minExecutionDuration: number
-    maxExecutionDuration: number
-    moduleStatistics?: string
-    lastUpdatedAt: Date | string
-    createdAt?: Date | string
-  }
-
-  export type ScheduleStatisticCreateOrConnectWithoutAccountInput = {
-    where: ScheduleStatisticWhereUniqueInput
-    create: XOR<ScheduleStatisticCreateWithoutAccountInput, ScheduleStatisticUncheckedCreateWithoutAccountInput>
   }
 
   export type HabitCreateWithoutAccountInput = {
@@ -166999,40 +160729,6 @@ export namespace Prisma {
 
   export type TaskPlanHistoryCreateManyIdentityInputEnvelope = {
     data: TaskPlanHistoryCreateManyIdentityInput | TaskPlanHistoryCreateManyIdentityInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type ScheduleExecutionCreateWithoutIdentityInput = {
-    id: string
-    executionTime: Date | string
-    status: string
-    duration?: number | null
-    result?: string | null
-    error?: string | null
-    retryCount?: number
-    createdAt?: Date | string
-    task: ScheduleTaskCreateNestedOneWithoutExecutionsInput
-  }
-
-  export type ScheduleExecutionUncheckedCreateWithoutIdentityInput = {
-    id: string
-    taskId: string
-    executionTime: Date | string
-    status: string
-    duration?: number | null
-    result?: string | null
-    error?: string | null
-    retryCount?: number
-    createdAt?: Date | string
-  }
-
-  export type ScheduleExecutionCreateOrConnectWithoutIdentityInput = {
-    where: ScheduleExecutionWhereUniqueInput
-    create: XOR<ScheduleExecutionCreateWithoutIdentityInput, ScheduleExecutionUncheckedCreateWithoutIdentityInput>
-  }
-
-  export type ScheduleExecutionCreateManyIdentityInputEnvelope = {
-    data: ScheduleExecutionCreateManyIdentityInput | ScheduleExecutionCreateManyIdentityInput[]
     skipDuplicates?: boolean
   }
 
@@ -168375,66 +162071,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Schedule"> | Date | string
   }
 
-  export type ScheduleTaskUpsertWithWhereUniqueWithoutAccountInput = {
-    where: ScheduleTaskWhereUniqueInput
-    update: XOR<ScheduleTaskUpdateWithoutAccountInput, ScheduleTaskUncheckedUpdateWithoutAccountInput>
-    create: XOR<ScheduleTaskCreateWithoutAccountInput, ScheduleTaskUncheckedCreateWithoutAccountInput>
-  }
-
-  export type ScheduleTaskUpdateWithWhereUniqueWithoutAccountInput = {
-    where: ScheduleTaskWhereUniqueInput
-    data: XOR<ScheduleTaskUpdateWithoutAccountInput, ScheduleTaskUncheckedUpdateWithoutAccountInput>
-  }
-
-  export type ScheduleTaskUpdateManyWithWhereWithoutAccountInput = {
-    where: ScheduleTaskScalarWhereInput
-    data: XOR<ScheduleTaskUpdateManyMutationInput, ScheduleTaskUncheckedUpdateManyWithoutAccountInput>
-  }
-
-  export type ScheduleTaskScalarWhereInput = {
-    AND?: ScheduleTaskScalarWhereInput | ScheduleTaskScalarWhereInput[]
-    OR?: ScheduleTaskScalarWhereInput[]
-    NOT?: ScheduleTaskScalarWhereInput | ScheduleTaskScalarWhereInput[]
-    id?: StringFilter<"ScheduleTask"> | string
-    identityId?: StringFilter<"ScheduleTask"> | string
-    name?: StringFilter<"ScheduleTask"> | string
-    description?: StringNullableFilter<"ScheduleTask"> | string | null
-    sourceModule?: StringFilter<"ScheduleTask"> | string
-    sourceEntityId?: StringFilter<"ScheduleTask"> | string
-    schedulingKey?: StringNullableFilter<"ScheduleTask"> | string | null
-    ownerType?: StringNullableFilter<"ScheduleTask"> | string | null
-    ownerId?: StringNullableFilter<"ScheduleTask"> | string | null
-    handlerKey?: StringNullableFilter<"ScheduleTask"> | string | null
-    payloadVersion?: IntNullableFilter<"ScheduleTask"> | number | null
-    sourceRevision?: StringNullableFilter<"ScheduleTask"> | string | null
-    status?: StringFilter<"ScheduleTask"> | string
-    enabled?: BoolFilter<"ScheduleTask"> | boolean
-    cronExpression?: StringNullableFilter<"ScheduleTask"> | string | null
-    timezone?: StringFilter<"ScheduleTask"> | string
-    startDate?: DateTimeNullableFilter<"ScheduleTask"> | Date | string | null
-    endDate?: DateTimeNullableFilter<"ScheduleTask"> | Date | string | null
-    maxExecutions?: IntNullableFilter<"ScheduleTask"> | number | null
-    nextRunAt?: DateTimeNullableFilter<"ScheduleTask"> | Date | string | null
-    lastRunAt?: DateTimeNullableFilter<"ScheduleTask"> | Date | string | null
-    executionCount?: IntFilter<"ScheduleTask"> | number
-    lastExecutionStatus?: StringNullableFilter<"ScheduleTask"> | string | null
-    lastExecutionDuration?: IntNullableFilter<"ScheduleTask"> | number | null
-    consecutiveFailures?: IntFilter<"ScheduleTask"> | number
-    maxRetries?: IntFilter<"ScheduleTask"> | number
-    initialDelayMs?: IntFilter<"ScheduleTask"> | number
-    maxDelayMs?: IntFilter<"ScheduleTask"> | number
-    backoffMultiplier?: FloatFilter<"ScheduleTask"> | number
-    retryableStatuses?: StringFilter<"ScheduleTask"> | string
-    payload?: StringNullableFilter<"ScheduleTask"> | string | null
-    tags?: StringFilter<"ScheduleTask"> | string
-    priority?: StringFilter<"ScheduleTask"> | string
-    timeout?: IntNullableFilter<"ScheduleTask"> | number | null
-    version?: IntFilter<"ScheduleTask"> | number
-    createdAt?: DateTimeFilter<"ScheduleTask"> | Date | string
-    updatedAt?: DateTimeFilter<"ScheduleTask"> | Date | string
-    deletedAt?: DateTimeNullableFilter<"ScheduleTask"> | Date | string | null
-  }
-
   export type SchedulingReconcileOperationUpsertWithWhereUniqueWithoutAccountInput = {
     where: SchedulingReconcileOperationWhereUniqueInput
     update: XOR<SchedulingReconcileOperationUpdateWithoutAccountInput, SchedulingReconcileOperationUncheckedUpdateWithoutAccountInput>
@@ -168557,58 +162193,6 @@ export namespace Prisma {
     claimToken?: StringNullableFilter<"InvocationAttempt"> | string | null
     fencingToken?: IntNullableFilter<"InvocationAttempt"> | number | null
     createdAt?: DateTimeFilter<"InvocationAttempt"> | Date | string
-  }
-
-  export type ScheduleStatisticUpsertWithoutAccountInput = {
-    update: XOR<ScheduleStatisticUpdateWithoutAccountInput, ScheduleStatisticUncheckedUpdateWithoutAccountInput>
-    create: XOR<ScheduleStatisticCreateWithoutAccountInput, ScheduleStatisticUncheckedCreateWithoutAccountInput>
-    where?: ScheduleStatisticWhereInput
-  }
-
-  export type ScheduleStatisticUpdateToOneWithWhereWithoutAccountInput = {
-    where?: ScheduleStatisticWhereInput
-    data: XOR<ScheduleStatisticUpdateWithoutAccountInput, ScheduleStatisticUncheckedUpdateWithoutAccountInput>
-  }
-
-  export type ScheduleStatisticUpdateWithoutAccountInput = {
-    totalTasks?: IntFieldUpdateOperationsInput | number
-    activeTasks?: IntFieldUpdateOperationsInput | number
-    pausedTasks?: IntFieldUpdateOperationsInput | number
-    completedTasks?: IntFieldUpdateOperationsInput | number
-    cancelledTasks?: IntFieldUpdateOperationsInput | number
-    failedTasks?: IntFieldUpdateOperationsInput | number
-    totalExecutions?: IntFieldUpdateOperationsInput | number
-    successfulExecutions?: IntFieldUpdateOperationsInput | number
-    failedExecutions?: IntFieldUpdateOperationsInput | number
-    skippedExecutions?: IntFieldUpdateOperationsInput | number
-    timeoutExecutions?: IntFieldUpdateOperationsInput | number
-    avgExecutionDuration?: FloatFieldUpdateOperationsInput | number
-    minExecutionDuration?: FloatFieldUpdateOperationsInput | number
-    maxExecutionDuration?: FloatFieldUpdateOperationsInput | number
-    moduleStatistics?: StringFieldUpdateOperationsInput | string
-    lastUpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ScheduleStatisticUncheckedUpdateWithoutAccountInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    totalTasks?: IntFieldUpdateOperationsInput | number
-    activeTasks?: IntFieldUpdateOperationsInput | number
-    pausedTasks?: IntFieldUpdateOperationsInput | number
-    completedTasks?: IntFieldUpdateOperationsInput | number
-    cancelledTasks?: IntFieldUpdateOperationsInput | number
-    failedTasks?: IntFieldUpdateOperationsInput | number
-    totalExecutions?: IntFieldUpdateOperationsInput | number
-    successfulExecutions?: IntFieldUpdateOperationsInput | number
-    failedExecutions?: IntFieldUpdateOperationsInput | number
-    skippedExecutions?: IntFieldUpdateOperationsInput | number
-    timeoutExecutions?: IntFieldUpdateOperationsInput | number
-    avgExecutionDuration?: FloatFieldUpdateOperationsInput | number
-    minExecutionDuration?: FloatFieldUpdateOperationsInput | number
-    maxExecutionDuration?: FloatFieldUpdateOperationsInput | number
-    moduleStatistics?: StringFieldUpdateOperationsInput | string
-    lastUpdatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type HabitUpsertWithWhereUniqueWithoutAccountInput = {
@@ -169208,38 +162792,6 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"TaskPlanHistory"> | Date | string
   }
 
-  export type ScheduleExecutionUpsertWithWhereUniqueWithoutIdentityInput = {
-    where: ScheduleExecutionWhereUniqueInput
-    update: XOR<ScheduleExecutionUpdateWithoutIdentityInput, ScheduleExecutionUncheckedUpdateWithoutIdentityInput>
-    create: XOR<ScheduleExecutionCreateWithoutIdentityInput, ScheduleExecutionUncheckedCreateWithoutIdentityInput>
-  }
-
-  export type ScheduleExecutionUpdateWithWhereUniqueWithoutIdentityInput = {
-    where: ScheduleExecutionWhereUniqueInput
-    data: XOR<ScheduleExecutionUpdateWithoutIdentityInput, ScheduleExecutionUncheckedUpdateWithoutIdentityInput>
-  }
-
-  export type ScheduleExecutionUpdateManyWithWhereWithoutIdentityInput = {
-    where: ScheduleExecutionScalarWhereInput
-    data: XOR<ScheduleExecutionUpdateManyMutationInput, ScheduleExecutionUncheckedUpdateManyWithoutIdentityInput>
-  }
-
-  export type ScheduleExecutionScalarWhereInput = {
-    AND?: ScheduleExecutionScalarWhereInput | ScheduleExecutionScalarWhereInput[]
-    OR?: ScheduleExecutionScalarWhereInput[]
-    NOT?: ScheduleExecutionScalarWhereInput | ScheduleExecutionScalarWhereInput[]
-    id?: StringFilter<"ScheduleExecution"> | string
-    identityId?: StringFilter<"ScheduleExecution"> | string
-    taskId?: StringFilter<"ScheduleExecution"> | string
-    executionTime?: DateTimeFilter<"ScheduleExecution"> | Date | string
-    status?: StringFilter<"ScheduleExecution"> | string
-    duration?: IntNullableFilter<"ScheduleExecution"> | number | null
-    result?: StringNullableFilter<"ScheduleExecution"> | string | null
-    error?: StringNullableFilter<"ScheduleExecution"> | string | null
-    retryCount?: IntFilter<"ScheduleExecution"> | number
-    createdAt?: DateTimeFilter<"ScheduleExecution"> | Date | string
-  }
-
   export type ReminderHistoryUpsertWithWhereUniqueWithoutIdentityInput = {
     where: ReminderHistoryWhereUniqueInput
     update: XOR<ReminderHistoryUpdateWithoutIdentityInput, ReminderHistoryUncheckedUpdateWithoutIdentityInput>
@@ -169818,11 +163370,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -169839,7 +163389,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -169883,11 +163432,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -169904,7 +163451,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -169964,11 +163510,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -169985,7 +163529,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -170029,11 +163572,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -170050,7 +163591,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -170094,11 +163634,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -170115,7 +163653,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -170159,11 +163696,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -170180,7 +163715,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -170268,11 +163802,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -170289,7 +163821,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -170333,11 +163864,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -170354,7 +163883,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -170414,11 +163942,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -170436,7 +163962,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -170479,11 +164004,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -170501,7 +164024,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -170591,11 +164113,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -170613,7 +164133,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -170656,11 +164175,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -170678,7 +164195,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -170758,11 +164274,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -170779,7 +164293,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -170823,11 +164336,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -170844,7 +164355,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -170904,11 +164414,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -170925,7 +164433,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -170969,11 +164476,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -170990,7 +164495,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -171034,11 +164538,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -171055,7 +164557,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -171099,11 +164600,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -171120,7 +164619,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -171180,11 +164678,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -171201,7 +164697,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -171245,11 +164740,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -171266,7 +164759,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -171310,11 +164802,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -171331,7 +164821,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -171375,11 +164864,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -171396,7 +164883,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -171456,11 +164942,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -171477,7 +164961,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -171521,11 +165004,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -171542,7 +165023,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -171586,11 +165066,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -171607,7 +165085,6 @@ export namespace Prisma {
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -171651,11 +165128,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -171672,7 +165147,6 @@ export namespace Prisma {
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -171732,11 +165206,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -171753,7 +165225,6 @@ export namespace Prisma {
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -171797,11 +165268,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -171818,7 +165287,6 @@ export namespace Prisma {
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -171862,11 +165330,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -171883,7 +165349,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -171927,11 +165392,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -171948,7 +165411,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -172008,11 +165470,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -172029,7 +165489,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -172073,11 +165532,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -172094,7 +165551,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -172138,11 +165594,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -172159,7 +165613,6 @@ export namespace Prisma {
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -172203,11 +165656,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -172224,7 +165675,6 @@ export namespace Prisma {
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -172284,11 +165734,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -172305,7 +165753,6 @@ export namespace Prisma {
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -172349,11 +165796,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -172370,7 +165815,6 @@ export namespace Prisma {
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -172517,11 +165961,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -172539,7 +165981,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -172582,11 +166023,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -172604,7 +166043,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -172760,11 +166198,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -172782,7 +166218,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -172825,11 +166260,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -172847,7 +166280,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -173106,11 +166538,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -173128,7 +166558,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -173171,11 +166600,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -173193,7 +166620,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -173391,11 +166817,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -173413,7 +166837,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -173456,11 +166879,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -173478,7 +166899,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -174502,11 +167922,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
@@ -174523,7 +167941,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -174567,11 +167984,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
@@ -174588,7 +168003,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -174697,11 +168111,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
@@ -174718,7 +168130,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -174762,11 +168173,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
@@ -174783,7 +168192,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -175128,11 +168536,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -175150,7 +168556,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -175193,11 +168598,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -175215,7 +168618,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -175312,11 +168714,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -175334,7 +168734,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -175377,11 +168776,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -175399,7 +168796,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -175474,11 +168870,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -175496,7 +168890,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -175539,11 +168932,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -175561,7 +168952,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -175696,11 +169086,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -175718,7 +169106,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -175761,11 +169148,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -175783,7 +169168,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -175914,11 +169298,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -175936,7 +169318,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -175979,11 +169360,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -176001,7 +169380,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -176145,11 +169523,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -176167,7 +169543,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -176210,11 +169585,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -176232,7 +169605,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -176539,11 +169911,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -176560,7 +169930,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -176604,11 +169973,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -176625,7 +169992,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -176765,11 +170131,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -176786,7 +170150,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -176830,11 +170193,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -176851,7 +170212,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -176895,11 +170255,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -176917,7 +170275,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -176960,11 +170317,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -176982,7 +170337,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -177110,11 +170464,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -177132,7 +170484,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -177175,11 +170526,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -177197,7 +170546,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -177315,11 +170663,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -177337,7 +170683,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -177380,11 +170725,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -177402,7 +170745,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -177530,11 +170872,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -177552,7 +170892,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -177595,11 +170934,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -177617,7 +170954,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -177948,11 +171284,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -177970,7 +171304,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -178013,11 +171346,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -178035,7 +171366,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -178169,11 +171499,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -178191,7 +171519,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -178234,11 +171561,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -178256,7 +171581,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -178299,11 +171623,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
@@ -178320,7 +171642,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -178364,11 +171685,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
@@ -178385,7 +171704,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -178445,11 +171763,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
@@ -178466,7 +171782,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -178510,11 +171825,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
@@ -178531,7 +171844,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -178732,11 +172044,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -178754,7 +172064,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -178797,11 +172106,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -178819,7 +172126,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -178942,11 +172248,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -178964,7 +172268,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -179007,11 +172310,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -179029,7 +172330,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -179072,11 +172372,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -179094,7 +172392,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -179137,11 +172434,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -179159,7 +172454,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -179218,11 +172512,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -179240,7 +172532,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -179283,11 +172574,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -179305,7 +172594,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -179348,11 +172636,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -179370,7 +172656,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -179413,11 +172698,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -179435,7 +172718,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -179555,11 +172837,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -179577,7 +172857,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -179620,11 +172899,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -179642,7 +172919,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -179753,11 +173029,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -179775,7 +173049,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
@@ -179818,11 +173091,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -179840,7 +173111,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -179960,11 +173230,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -179982,7 +173250,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
@@ -180025,11 +173292,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -180047,7 +173312,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -180156,11 +173420,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -180178,7 +173440,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -180221,11 +173482,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -180243,7 +173502,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -180302,11 +173560,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -180324,7 +173580,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -180367,11 +173622,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -180389,7 +173642,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -180433,11 +173685,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -180455,7 +173705,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
@@ -180498,11 +173747,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -180520,7 +173767,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -180640,11 +173886,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -180662,7 +173906,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
@@ -180705,11 +173948,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -180727,7 +173968,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -180836,11 +174076,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -180858,7 +174096,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -180901,11 +174138,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -180923,7 +174158,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -180982,11 +174216,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -181004,7 +174236,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -181047,11 +174278,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -181069,7 +174298,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -181174,11 +174402,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -181196,7 +174422,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
@@ -181239,11 +174464,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -181261,7 +174484,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -181387,11 +174609,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -181409,7 +174629,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
@@ -181452,11 +174671,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -181474,7 +174691,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -181516,11 +174732,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -181538,7 +174752,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -181581,11 +174794,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -181603,7 +174814,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -181805,11 +175015,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -181827,7 +175035,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -181870,11 +175077,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -181892,7 +175097,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -182009,11 +175213,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -182031,7 +175233,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -182074,11 +175275,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -182096,7 +175295,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -182182,11 +175380,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -182204,7 +175400,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -182247,11 +175442,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -182269,7 +175462,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -182328,11 +175520,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -182350,7 +175540,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -182393,11 +175582,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -182415,7 +175602,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -182536,11 +175722,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -182558,7 +175742,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -182601,11 +175784,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -182623,7 +175804,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -182740,11 +175920,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -182762,7 +175940,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -182805,11 +175982,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -182827,7 +176002,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -182921,11 +176095,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -182943,7 +176115,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -182986,11 +176157,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -183008,7 +176177,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -183067,11 +176235,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -183089,7 +176255,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -183132,11 +176297,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -183154,7 +176317,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -183238,11 +176400,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -183260,7 +176420,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -183303,11 +176462,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -183325,7 +176482,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -183435,11 +176591,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -183457,7 +176611,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -183500,11 +176653,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -183522,7 +176673,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -183654,11 +176804,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -183676,7 +176824,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -183719,11 +176866,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -183741,7 +176886,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -183800,11 +176944,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -183822,7 +176964,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -183865,11 +177006,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -183887,7 +177026,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -184040,11 +177178,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -184062,7 +177198,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -184105,11 +177240,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -184127,7 +177260,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -184310,11 +177442,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -184332,7 +177462,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -184375,11 +177504,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -184397,7 +177524,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -184497,11 +177623,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -184519,7 +177643,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -184562,11 +177685,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -184584,7 +177705,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -184627,11 +177747,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -184649,7 +177767,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -184692,11 +177809,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -184714,7 +177829,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -184961,11 +178075,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -184983,7 +178095,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -185026,11 +178137,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -185048,7 +178157,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -185156,11 +178264,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -185178,7 +178284,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -185221,11 +178326,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -185243,7 +178346,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -185424,11 +178526,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -185446,7 +178546,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -185489,11 +178588,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -185511,7 +178608,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -185666,11 +178762,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -185688,7 +178782,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -185731,11 +178824,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -185753,7 +178844,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -185863,11 +178953,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -185885,7 +178973,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -185928,11 +179015,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -185950,7 +179035,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -186092,11 +179176,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -186114,7 +179196,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -186157,11 +179238,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -186179,7 +179258,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -186385,11 +179463,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -186407,7 +179483,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -186450,11 +179525,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -186472,7 +179545,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -186929,11 +180001,9 @@ export namespace Prisma {
     repositories?: RepositoryCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -186951,7 +180021,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -186994,11 +180063,9 @@ export namespace Prisma {
     repositories?: RepositoryUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -187016,7 +180083,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -187126,11 +180192,9 @@ export namespace Prisma {
     repositories?: RepositoryUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -187148,7 +180212,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -187191,11 +180254,9 @@ export namespace Prisma {
     repositories?: RepositoryUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -187213,7 +180274,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -187313,11 +180373,9 @@ export namespace Prisma {
     repositories?: RepositoryCreateNestedManyWithoutAccountInput
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -187335,7 +180393,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -187378,11 +180435,9 @@ export namespace Prisma {
     repositories?: RepositoryUncheckedCreateNestedManyWithoutAccountInput
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -187400,7 +180455,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -187459,11 +180513,9 @@ export namespace Prisma {
     repositories?: RepositoryUpdateManyWithoutAccountNestedInput
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -187481,7 +180533,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -187524,11 +180575,9 @@ export namespace Prisma {
     repositories?: RepositoryUncheckedUpdateManyWithoutAccountNestedInput
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -187546,7 +180595,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -187590,11 +180638,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -187612,7 +180658,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -187655,11 +180700,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -187677,7 +180720,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -187736,11 +180778,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -187758,7 +180798,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -187801,11 +180840,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -187823,7 +180860,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -188052,11 +181088,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -188074,7 +181108,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -188117,11 +181150,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -188139,7 +181170,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -188490,11 +181520,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -188512,7 +181540,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -188555,11 +181582,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -188577,7 +181602,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -189529,11 +182553,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -189551,7 +182573,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -189594,11 +182615,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -189616,7 +182635,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -189720,11 +182738,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -189742,7 +182758,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -189785,11 +182800,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -189807,7 +182820,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -189900,11 +182912,9 @@ export namespace Prisma {
     repositories?: RepositoryCreateNestedManyWithoutAccountInput
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -189922,7 +182932,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -189965,11 +182974,9 @@ export namespace Prisma {
     repositories?: RepositoryUncheckedCreateNestedManyWithoutAccountInput
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -189987,7 +182994,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -190046,11 +183052,9 @@ export namespace Prisma {
     repositories?: RepositoryUpdateManyWithoutAccountNestedInput
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -190068,7 +183072,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -190111,11 +183114,9 @@ export namespace Prisma {
     repositories?: RepositoryUncheckedUpdateManyWithoutAccountNestedInput
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -190133,333 +183134,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationChannels?: NotificationChannelUncheckedUpdateManyWithoutIdentityNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
-    folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
-  }
-
-  export type ScheduleExecutionCreateWithoutTaskInput = {
-    id: string
-    executionTime: Date | string
-    status: string
-    duration?: number | null
-    result?: string | null
-    error?: string | null
-    retryCount?: number
-    createdAt?: Date | string
-    identity: AccountCreateNestedOneWithoutScheduleExecutionsInput
-  }
-
-  export type ScheduleExecutionUncheckedCreateWithoutTaskInput = {
-    id: string
-    identityId: string
-    executionTime: Date | string
-    status: string
-    duration?: number | null
-    result?: string | null
-    error?: string | null
-    retryCount?: number
-    createdAt?: Date | string
-  }
-
-  export type ScheduleExecutionCreateOrConnectWithoutTaskInput = {
-    where: ScheduleExecutionWhereUniqueInput
-    create: XOR<ScheduleExecutionCreateWithoutTaskInput, ScheduleExecutionUncheckedCreateWithoutTaskInput>
-  }
-
-  export type ScheduleExecutionCreateManyTaskInputEnvelope = {
-    data: ScheduleExecutionCreateManyTaskInput | ScheduleExecutionCreateManyTaskInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type AccountCreateWithoutScheduleTasksInput = {
-    status?: string
-    profile: JsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    closedAt?: Date | string | null
-    cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    goals?: GoalCreateNestedManyWithoutAccountInput
-    labels?: LabelCreateNestedManyWithoutAccountInput
-    goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
-    taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
-    reminderGroups?: ReminderGroupCreateNestedManyWithoutAccountInput
-    reminderTemplates?: ReminderTemplateCreateNestedManyWithoutAccountInput
-    reminderInstances?: ReminderInstanceCreateNestedManyWithoutAccountInput
-    reminderStatistics?: ReminderStatisticCreateNestedOneWithoutAccountInput
-    routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
-    routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
-    routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
-    routineProtocolSessions?: RoutineProtocolSessionCreateNestedManyWithoutAccountInput
-    userReminderPreferences?: UserReminderPreferenceCreateNestedOneWithoutAccountInput
-    repositories?: RepositoryCreateNestedManyWithoutAccountInput
-    repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
-    repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
-    schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
-    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
-    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
-    habits?: HabitCreateNestedManyWithoutAccountInput
-    relations?: RelationCreateNestedManyWithoutAccountInput
-    walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
-    walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
-    taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
-    taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
-    notifications?: NotificationCreateNestedManyWithoutAccountInput
-    aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
-    aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
-    dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
-    taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
-    reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
-    reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
-    reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
-    routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
-    routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationChannels?: NotificationChannelCreateNestedManyWithoutIdentityInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
-    folders?: FolderCreateNestedManyWithoutIdentityInput
-    resources?: ResourceCreateNestedManyWithoutIdentityInput
-    repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
-  }
-
-  export type AccountUncheckedCreateWithoutScheduleTasksInput = {
-    id: string
-    status?: string
-    profile: JsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    closedAt?: Date | string | null
-    goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
-    labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
-    goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
-    taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
-    reminderGroups?: ReminderGroupUncheckedCreateNestedManyWithoutAccountInput
-    reminderTemplates?: ReminderTemplateUncheckedCreateNestedManyWithoutAccountInput
-    reminderInstances?: ReminderInstanceUncheckedCreateNestedManyWithoutAccountInput
-    reminderStatistics?: ReminderStatisticUncheckedCreateNestedOneWithoutAccountInput
-    routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
-    routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
-    routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
-    routineProtocolSessions?: RoutineProtocolSessionUncheckedCreateNestedManyWithoutAccountInput
-    userReminderPreferences?: UserReminderPreferenceUncheckedCreateNestedOneWithoutAccountInput
-    repositories?: RepositoryUncheckedCreateNestedManyWithoutAccountInput
-    repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
-    repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
-    schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
-    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
-    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
-    habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
-    relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
-    walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
-    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
-    taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
-    taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
-    notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
-    aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
-    aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
-    dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
-    taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
-    reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
-    reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationChannels?: NotificationChannelUncheckedCreateNestedManyWithoutIdentityInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
-    folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
-    repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
-  }
-
-  export type AccountCreateOrConnectWithoutScheduleTasksInput = {
-    where: AccountWhereUniqueInput
-    create: XOR<AccountCreateWithoutScheduleTasksInput, AccountUncheckedCreateWithoutScheduleTasksInput>
-  }
-
-  export type ScheduleExecutionUpsertWithWhereUniqueWithoutTaskInput = {
-    where: ScheduleExecutionWhereUniqueInput
-    update: XOR<ScheduleExecutionUpdateWithoutTaskInput, ScheduleExecutionUncheckedUpdateWithoutTaskInput>
-    create: XOR<ScheduleExecutionCreateWithoutTaskInput, ScheduleExecutionUncheckedCreateWithoutTaskInput>
-  }
-
-  export type ScheduleExecutionUpdateWithWhereUniqueWithoutTaskInput = {
-    where: ScheduleExecutionWhereUniqueInput
-    data: XOR<ScheduleExecutionUpdateWithoutTaskInput, ScheduleExecutionUncheckedUpdateWithoutTaskInput>
-  }
-
-  export type ScheduleExecutionUpdateManyWithWhereWithoutTaskInput = {
-    where: ScheduleExecutionScalarWhereInput
-    data: XOR<ScheduleExecutionUpdateManyMutationInput, ScheduleExecutionUncheckedUpdateManyWithoutTaskInput>
-  }
-
-  export type AccountUpsertWithoutScheduleTasksInput = {
-    update: XOR<AccountUpdateWithoutScheduleTasksInput, AccountUncheckedUpdateWithoutScheduleTasksInput>
-    create: XOR<AccountCreateWithoutScheduleTasksInput, AccountUncheckedCreateWithoutScheduleTasksInput>
-    where?: AccountWhereInput
-  }
-
-  export type AccountUpdateToOneWithWhereWithoutScheduleTasksInput = {
-    where?: AccountWhereInput
-    data: XOR<AccountUpdateWithoutScheduleTasksInput, AccountUncheckedUpdateWithoutScheduleTasksInput>
-  }
-
-  export type AccountUpdateWithoutScheduleTasksInput = {
-    status?: StringFieldUpdateOperationsInput | string
-    profile?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    goals?: GoalUpdateManyWithoutAccountNestedInput
-    labels?: LabelUpdateManyWithoutAccountNestedInput
-    goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
-    taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
-    reminderGroups?: ReminderGroupUpdateManyWithoutAccountNestedInput
-    reminderTemplates?: ReminderTemplateUpdateManyWithoutAccountNestedInput
-    reminderInstances?: ReminderInstanceUpdateManyWithoutAccountNestedInput
-    reminderStatistics?: ReminderStatisticUpdateOneWithoutAccountNestedInput
-    routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
-    routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
-    routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
-    routineProtocolSessions?: RoutineProtocolSessionUpdateManyWithoutAccountNestedInput
-    userReminderPreferences?: UserReminderPreferenceUpdateOneWithoutAccountNestedInput
-    repositories?: RepositoryUpdateManyWithoutAccountNestedInput
-    repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
-    repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
-    schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
-    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
-    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
-    habits?: HabitUpdateManyWithoutAccountNestedInput
-    relations?: RelationUpdateManyWithoutAccountNestedInput
-    walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
-    walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
-    taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
-    taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
-    notifications?: NotificationUpdateManyWithoutAccountNestedInput
-    aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
-    aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
-    dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
-    taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
-    reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
-    reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
-    reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
-    routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
-    routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationChannels?: NotificationChannelUpdateManyWithoutIdentityNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
-    folders?: FolderUpdateManyWithoutIdentityNestedInput
-    resources?: ResourceUpdateManyWithoutIdentityNestedInput
-    repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
-  }
-
-  export type AccountUncheckedUpdateWithoutScheduleTasksInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    profile?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
-    labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
-    goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
-    taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
-    reminderGroups?: ReminderGroupUncheckedUpdateManyWithoutAccountNestedInput
-    reminderTemplates?: ReminderTemplateUncheckedUpdateManyWithoutAccountNestedInput
-    reminderInstances?: ReminderInstanceUncheckedUpdateManyWithoutAccountNestedInput
-    reminderStatistics?: ReminderStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
-    routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
-    routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
-    routineProtocolSessions?: RoutineProtocolSessionUncheckedUpdateManyWithoutAccountNestedInput
-    userReminderPreferences?: UserReminderPreferenceUncheckedUpdateOneWithoutAccountNestedInput
-    repositories?: RepositoryUncheckedUpdateManyWithoutAccountNestedInput
-    repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
-    repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
-    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
-    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
-    relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
-    walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
-    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
-    taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
-    taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
-    notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
-    aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
-    aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
-    dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
-    taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -190503,10 +183177,8 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -190524,7 +183196,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -190568,10 +183239,8 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -190589,7 +183258,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -190693,10 +183361,8 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -190714,7 +183380,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -190758,10 +183423,8 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -190779,7 +183442,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -190839,10 +183501,8 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -190860,7 +183520,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -190904,10 +183563,8 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -190925,7 +183582,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -191050,10 +183706,8 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -191071,7 +183725,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -191115,10 +183768,8 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -191136,7 +183787,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -191251,10 +183901,8 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -191272,7 +183920,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -191316,10 +183963,8 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -191337,7 +183982,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -191397,10 +184041,8 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -191418,7 +184060,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -191462,740 +184103,6 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
-    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
-    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
-    relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
-    walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
-    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
-    taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
-    taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
-    notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
-    aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
-    aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
-    dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
-    taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationChannels?: NotificationChannelUncheckedUpdateManyWithoutIdentityNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
-    folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
-  }
-
-  export type AccountCreateWithoutScheduleExecutionsInput = {
-    status?: string
-    profile: JsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    closedAt?: Date | string | null
-    cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    goals?: GoalCreateNestedManyWithoutAccountInput
-    labels?: LabelCreateNestedManyWithoutAccountInput
-    goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
-    taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
-    reminderGroups?: ReminderGroupCreateNestedManyWithoutAccountInput
-    reminderTemplates?: ReminderTemplateCreateNestedManyWithoutAccountInput
-    reminderInstances?: ReminderInstanceCreateNestedManyWithoutAccountInput
-    reminderStatistics?: ReminderStatisticCreateNestedOneWithoutAccountInput
-    routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
-    routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
-    routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
-    routineProtocolSessions?: RoutineProtocolSessionCreateNestedManyWithoutAccountInput
-    userReminderPreferences?: UserReminderPreferenceCreateNestedOneWithoutAccountInput
-    repositories?: RepositoryCreateNestedManyWithoutAccountInput
-    repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
-    repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
-    schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
-    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
-    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
-    habits?: HabitCreateNestedManyWithoutAccountInput
-    relations?: RelationCreateNestedManyWithoutAccountInput
-    walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
-    walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
-    taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
-    taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
-    notifications?: NotificationCreateNestedManyWithoutAccountInput
-    aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
-    aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
-    dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
-    taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
-    reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
-    reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
-    routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
-    routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationChannels?: NotificationChannelCreateNestedManyWithoutIdentityInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
-    folders?: FolderCreateNestedManyWithoutIdentityInput
-    resources?: ResourceCreateNestedManyWithoutIdentityInput
-    repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
-  }
-
-  export type AccountUncheckedCreateWithoutScheduleExecutionsInput = {
-    id: string
-    status?: string
-    profile: JsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    closedAt?: Date | string | null
-    goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
-    labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
-    goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
-    taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
-    reminderGroups?: ReminderGroupUncheckedCreateNestedManyWithoutAccountInput
-    reminderTemplates?: ReminderTemplateUncheckedCreateNestedManyWithoutAccountInput
-    reminderInstances?: ReminderInstanceUncheckedCreateNestedManyWithoutAccountInput
-    reminderStatistics?: ReminderStatisticUncheckedCreateNestedOneWithoutAccountInput
-    routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
-    routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
-    routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
-    routineProtocolSessions?: RoutineProtocolSessionUncheckedCreateNestedManyWithoutAccountInput
-    userReminderPreferences?: UserReminderPreferenceUncheckedCreateNestedOneWithoutAccountInput
-    repositories?: RepositoryUncheckedCreateNestedManyWithoutAccountInput
-    repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
-    repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
-    schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
-    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
-    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
-    habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
-    relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
-    walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
-    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
-    taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
-    taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
-    notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
-    aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
-    aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
-    dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
-    taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
-    reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationChannels?: NotificationChannelUncheckedCreateNestedManyWithoutIdentityInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
-    folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
-    repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
-  }
-
-  export type AccountCreateOrConnectWithoutScheduleExecutionsInput = {
-    where: AccountWhereUniqueInput
-    create: XOR<AccountCreateWithoutScheduleExecutionsInput, AccountUncheckedCreateWithoutScheduleExecutionsInput>
-  }
-
-  export type ScheduleTaskCreateWithoutExecutionsInput = {
-    id: string
-    name: string
-    description?: string | null
-    sourceModule: string
-    sourceEntityId: string
-    schedulingKey?: string | null
-    ownerType?: string | null
-    ownerId?: string | null
-    handlerKey?: string | null
-    payloadVersion?: number | null
-    sourceRevision?: string | null
-    status: string
-    enabled: boolean
-    cronExpression?: string | null
-    timezone: string
-    startDate?: Date | string | null
-    endDate?: Date | string | null
-    maxExecutions?: number | null
-    nextRunAt?: Date | string | null
-    lastRunAt?: Date | string | null
-    executionCount?: number
-    lastExecutionStatus?: string | null
-    lastExecutionDuration?: number | null
-    consecutiveFailures?: number
-    maxRetries: number
-    initialDelayMs: number
-    maxDelayMs: number
-    backoffMultiplier: number
-    retryableStatuses?: string
-    payload?: string | null
-    tags?: string
-    priority: string
-    timeout?: number | null
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    account: AccountCreateNestedOneWithoutScheduleTasksInput
-  }
-
-  export type ScheduleTaskUncheckedCreateWithoutExecutionsInput = {
-    id: string
-    identityId: string
-    name: string
-    description?: string | null
-    sourceModule: string
-    sourceEntityId: string
-    schedulingKey?: string | null
-    ownerType?: string | null
-    ownerId?: string | null
-    handlerKey?: string | null
-    payloadVersion?: number | null
-    sourceRevision?: string | null
-    status: string
-    enabled: boolean
-    cronExpression?: string | null
-    timezone: string
-    startDate?: Date | string | null
-    endDate?: Date | string | null
-    maxExecutions?: number | null
-    nextRunAt?: Date | string | null
-    lastRunAt?: Date | string | null
-    executionCount?: number
-    lastExecutionStatus?: string | null
-    lastExecutionDuration?: number | null
-    consecutiveFailures?: number
-    maxRetries: number
-    initialDelayMs: number
-    maxDelayMs: number
-    backoffMultiplier: number
-    retryableStatuses?: string
-    payload?: string | null
-    tags?: string
-    priority: string
-    timeout?: number | null
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-  }
-
-  export type ScheduleTaskCreateOrConnectWithoutExecutionsInput = {
-    where: ScheduleTaskWhereUniqueInput
-    create: XOR<ScheduleTaskCreateWithoutExecutionsInput, ScheduleTaskUncheckedCreateWithoutExecutionsInput>
-  }
-
-  export type AccountUpsertWithoutScheduleExecutionsInput = {
-    update: XOR<AccountUpdateWithoutScheduleExecutionsInput, AccountUncheckedUpdateWithoutScheduleExecutionsInput>
-    create: XOR<AccountCreateWithoutScheduleExecutionsInput, AccountUncheckedCreateWithoutScheduleExecutionsInput>
-    where?: AccountWhereInput
-  }
-
-  export type AccountUpdateToOneWithWhereWithoutScheduleExecutionsInput = {
-    where?: AccountWhereInput
-    data: XOR<AccountUpdateWithoutScheduleExecutionsInput, AccountUncheckedUpdateWithoutScheduleExecutionsInput>
-  }
-
-  export type AccountUpdateWithoutScheduleExecutionsInput = {
-    status?: StringFieldUpdateOperationsInput | string
-    profile?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    goals?: GoalUpdateManyWithoutAccountNestedInput
-    labels?: LabelUpdateManyWithoutAccountNestedInput
-    goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
-    taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
-    reminderGroups?: ReminderGroupUpdateManyWithoutAccountNestedInput
-    reminderTemplates?: ReminderTemplateUpdateManyWithoutAccountNestedInput
-    reminderInstances?: ReminderInstanceUpdateManyWithoutAccountNestedInput
-    reminderStatistics?: ReminderStatisticUpdateOneWithoutAccountNestedInput
-    routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
-    routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
-    routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
-    routineProtocolSessions?: RoutineProtocolSessionUpdateManyWithoutAccountNestedInput
-    userReminderPreferences?: UserReminderPreferenceUpdateOneWithoutAccountNestedInput
-    repositories?: RepositoryUpdateManyWithoutAccountNestedInput
-    repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
-    repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
-    schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
-    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
-    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
-    habits?: HabitUpdateManyWithoutAccountNestedInput
-    relations?: RelationUpdateManyWithoutAccountNestedInput
-    walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
-    walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
-    taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
-    taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
-    notifications?: NotificationUpdateManyWithoutAccountNestedInput
-    aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
-    aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
-    dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
-    taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
-    reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
-    reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
-    routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
-    routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationChannels?: NotificationChannelUpdateManyWithoutIdentityNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
-    folders?: FolderUpdateManyWithoutIdentityNestedInput
-    resources?: ResourceUpdateManyWithoutIdentityNestedInput
-    repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
-  }
-
-  export type AccountUncheckedUpdateWithoutScheduleExecutionsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    profile?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
-    labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
-    goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
-    taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
-    reminderGroups?: ReminderGroupUncheckedUpdateManyWithoutAccountNestedInput
-    reminderTemplates?: ReminderTemplateUncheckedUpdateManyWithoutAccountNestedInput
-    reminderInstances?: ReminderInstanceUncheckedUpdateManyWithoutAccountNestedInput
-    reminderStatistics?: ReminderStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
-    routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
-    routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
-    routineProtocolSessions?: RoutineProtocolSessionUncheckedUpdateManyWithoutAccountNestedInput
-    userReminderPreferences?: UserReminderPreferenceUncheckedUpdateOneWithoutAccountNestedInput
-    repositories?: RepositoryUncheckedUpdateManyWithoutAccountNestedInput
-    repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
-    repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
-    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
-    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
-    relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
-    walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
-    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
-    taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
-    taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
-    notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
-    aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
-    aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
-    dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
-    taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationChannels?: NotificationChannelUncheckedUpdateManyWithoutIdentityNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
-    folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
-  }
-
-  export type ScheduleTaskUpsertWithoutExecutionsInput = {
-    update: XOR<ScheduleTaskUpdateWithoutExecutionsInput, ScheduleTaskUncheckedUpdateWithoutExecutionsInput>
-    create: XOR<ScheduleTaskCreateWithoutExecutionsInput, ScheduleTaskUncheckedCreateWithoutExecutionsInput>
-    where?: ScheduleTaskWhereInput
-  }
-
-  export type ScheduleTaskUpdateToOneWithWhereWithoutExecutionsInput = {
-    where?: ScheduleTaskWhereInput
-    data: XOR<ScheduleTaskUpdateWithoutExecutionsInput, ScheduleTaskUncheckedUpdateWithoutExecutionsInput>
-  }
-
-  export type ScheduleTaskUpdateWithoutExecutionsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    sourceModule?: StringFieldUpdateOperationsInput | string
-    sourceEntityId?: StringFieldUpdateOperationsInput | string
-    schedulingKey?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerType?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerId?: NullableStringFieldUpdateOperationsInput | string | null
-    handlerKey?: NullableStringFieldUpdateOperationsInput | string | null
-    payloadVersion?: NullableIntFieldUpdateOperationsInput | number | null
-    sourceRevision?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    enabled?: BoolFieldUpdateOperationsInput | boolean
-    cronExpression?: NullableStringFieldUpdateOperationsInput | string | null
-    timezone?: StringFieldUpdateOperationsInput | string
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    maxExecutions?: NullableIntFieldUpdateOperationsInput | number | null
-    nextRunAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    lastRunAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    executionCount?: IntFieldUpdateOperationsInput | number
-    lastExecutionStatus?: NullableStringFieldUpdateOperationsInput | string | null
-    lastExecutionDuration?: NullableIntFieldUpdateOperationsInput | number | null
-    consecutiveFailures?: IntFieldUpdateOperationsInput | number
-    maxRetries?: IntFieldUpdateOperationsInput | number
-    initialDelayMs?: IntFieldUpdateOperationsInput | number
-    maxDelayMs?: IntFieldUpdateOperationsInput | number
-    backoffMultiplier?: FloatFieldUpdateOperationsInput | number
-    retryableStatuses?: StringFieldUpdateOperationsInput | string
-    payload?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
-    priority?: StringFieldUpdateOperationsInput | string
-    timeout?: NullableIntFieldUpdateOperationsInput | number | null
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    account?: AccountUpdateOneRequiredWithoutScheduleTasksNestedInput
-  }
-
-  export type ScheduleTaskUncheckedUpdateWithoutExecutionsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    sourceModule?: StringFieldUpdateOperationsInput | string
-    sourceEntityId?: StringFieldUpdateOperationsInput | string
-    schedulingKey?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerType?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerId?: NullableStringFieldUpdateOperationsInput | string | null
-    handlerKey?: NullableStringFieldUpdateOperationsInput | string | null
-    payloadVersion?: NullableIntFieldUpdateOperationsInput | number | null
-    sourceRevision?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    enabled?: BoolFieldUpdateOperationsInput | boolean
-    cronExpression?: NullableStringFieldUpdateOperationsInput | string | null
-    timezone?: StringFieldUpdateOperationsInput | string
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    maxExecutions?: NullableIntFieldUpdateOperationsInput | number | null
-    nextRunAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    lastRunAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    executionCount?: IntFieldUpdateOperationsInput | number
-    lastExecutionStatus?: NullableStringFieldUpdateOperationsInput | string | null
-    lastExecutionDuration?: NullableIntFieldUpdateOperationsInput | number | null
-    consecutiveFailures?: IntFieldUpdateOperationsInput | number
-    maxRetries?: IntFieldUpdateOperationsInput | number
-    initialDelayMs?: IntFieldUpdateOperationsInput | number
-    maxDelayMs?: IntFieldUpdateOperationsInput | number
-    backoffMultiplier?: FloatFieldUpdateOperationsInput | number
-    retryableStatuses?: StringFieldUpdateOperationsInput | string
-    payload?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
-    priority?: StringFieldUpdateOperationsInput | string
-    timeout?: NullableIntFieldUpdateOperationsInput | number | null
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type AccountCreateWithoutScheduleStatisticsInput = {
-    status?: string
-    profile: JsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    closedAt?: Date | string | null
-    cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    goals?: GoalCreateNestedManyWithoutAccountInput
-    labels?: LabelCreateNestedManyWithoutAccountInput
-    goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
-    taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
-    reminderGroups?: ReminderGroupCreateNestedManyWithoutAccountInput
-    reminderTemplates?: ReminderTemplateCreateNestedManyWithoutAccountInput
-    reminderInstances?: ReminderInstanceCreateNestedManyWithoutAccountInput
-    reminderStatistics?: ReminderStatisticCreateNestedOneWithoutAccountInput
-    routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
-    routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
-    routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
-    routineProtocolSessions?: RoutineProtocolSessionCreateNestedManyWithoutAccountInput
-    userReminderPreferences?: UserReminderPreferenceCreateNestedOneWithoutAccountInput
-    repositories?: RepositoryCreateNestedManyWithoutAccountInput
-    repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
-    repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
-    schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
-    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
-    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    habits?: HabitCreateNestedManyWithoutAccountInput
-    relations?: RelationCreateNestedManyWithoutAccountInput
-    walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
-    walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
-    taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
-    taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
-    notifications?: NotificationCreateNestedManyWithoutAccountInput
-    aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
-    aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
-    dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
-    taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
-    reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
-    reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
-    reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
-    routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
-    routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationChannels?: NotificationChannelCreateNestedManyWithoutIdentityInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
-    folders?: FolderCreateNestedManyWithoutIdentityInput
-    resources?: ResourceCreateNestedManyWithoutIdentityInput
-    repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
-  }
-
-  export type AccountUncheckedCreateWithoutScheduleStatisticsInput = {
-    id: string
-    status?: string
-    profile: JsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    closedAt?: Date | string | null
-    goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
-    labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
-    goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
-    taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
-    reminderGroups?: ReminderGroupUncheckedCreateNestedManyWithoutAccountInput
-    reminderTemplates?: ReminderTemplateUncheckedCreateNestedManyWithoutAccountInput
-    reminderInstances?: ReminderInstanceUncheckedCreateNestedManyWithoutAccountInput
-    reminderStatistics?: ReminderStatisticUncheckedCreateNestedOneWithoutAccountInput
-    routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
-    routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
-    routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
-    routineProtocolSessions?: RoutineProtocolSessionUncheckedCreateNestedManyWithoutAccountInput
-    userReminderPreferences?: UserReminderPreferenceUncheckedCreateNestedOneWithoutAccountInput
-    repositories?: RepositoryUncheckedCreateNestedManyWithoutAccountInput
-    repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
-    repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
-    schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
-    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
-    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
-    relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
-    walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
-    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
-    taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
-    taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
-    notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
-    aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
-    aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
-    dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
-    taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
-    reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
-    reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationChannels?: NotificationChannelUncheckedCreateNestedManyWithoutIdentityInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
-    folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
-    repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
-  }
-
-  export type AccountCreateOrConnectWithoutScheduleStatisticsInput = {
-    where: AccountWhereUniqueInput
-    create: XOR<AccountCreateWithoutScheduleStatisticsInput, AccountUncheckedCreateWithoutScheduleStatisticsInput>
-  }
-
-  export type AccountUpsertWithoutScheduleStatisticsInput = {
-    update: XOR<AccountUpdateWithoutScheduleStatisticsInput, AccountUncheckedUpdateWithoutScheduleStatisticsInput>
-    create: XOR<AccountCreateWithoutScheduleStatisticsInput, AccountUncheckedCreateWithoutScheduleStatisticsInput>
-    where?: AccountWhereInput
-  }
-
-  export type AccountUpdateToOneWithWhereWithoutScheduleStatisticsInput = {
-    where?: AccountWhereInput
-    data: XOR<AccountUpdateWithoutScheduleStatisticsInput, AccountUncheckedUpdateWithoutScheduleStatisticsInput>
-  }
-
-  export type AccountUpdateWithoutScheduleStatisticsInput = {
-    status?: StringFieldUpdateOperationsInput | string
-    profile?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    goals?: GoalUpdateManyWithoutAccountNestedInput
-    labels?: LabelUpdateManyWithoutAccountNestedInput
-    goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
-    taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
-    reminderGroups?: ReminderGroupUpdateManyWithoutAccountNestedInput
-    reminderTemplates?: ReminderTemplateUpdateManyWithoutAccountNestedInput
-    reminderInstances?: ReminderInstanceUpdateManyWithoutAccountNestedInput
-    reminderStatistics?: ReminderStatisticUpdateOneWithoutAccountNestedInput
-    routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
-    routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
-    routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
-    routineProtocolSessions?: RoutineProtocolSessionUpdateManyWithoutAccountNestedInput
-    userReminderPreferences?: UserReminderPreferenceUpdateOneWithoutAccountNestedInput
-    repositories?: RepositoryUpdateManyWithoutAccountNestedInput
-    repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
-    repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
-    schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
-    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
-    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    habits?: HabitUpdateManyWithoutAccountNestedInput
-    relations?: RelationUpdateManyWithoutAccountNestedInput
-    walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
-    walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
-    taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
-    taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
-    notifications?: NotificationUpdateManyWithoutAccountNestedInput
-    aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
-    aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
-    dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
-    taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
-    reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
-    reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
-    reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
-    routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
-    routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationChannels?: NotificationChannelUpdateManyWithoutIdentityNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
-    folders?: FolderUpdateManyWithoutIdentityNestedInput
-    resources?: ResourceUpdateManyWithoutIdentityNestedInput
-    repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
-  }
-
-  export type AccountUncheckedUpdateWithoutScheduleStatisticsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    profile?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
-    labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
-    goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
-    taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
-    reminderGroups?: ReminderGroupUncheckedUpdateManyWithoutAccountNestedInput
-    reminderTemplates?: ReminderTemplateUncheckedUpdateManyWithoutAccountNestedInput
-    reminderInstances?: ReminderInstanceUncheckedUpdateManyWithoutAccountNestedInput
-    reminderStatistics?: ReminderStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
-    routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
-    routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
-    routineProtocolSessions?: RoutineProtocolSessionUncheckedUpdateManyWithoutAccountNestedInput
-    userReminderPreferences?: UserReminderPreferenceUncheckedUpdateOneWithoutAccountNestedInput
-    repositories?: RepositoryUncheckedUpdateManyWithoutAccountNestedInput
-    repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
-    repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
@@ -192215,7 +184122,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -192259,11 +184165,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -192280,7 +184184,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -192324,11 +184227,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -192345,7 +184246,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -192405,11 +184305,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -192426,7 +184324,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -192470,11 +184367,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -192491,7 +184386,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -192535,11 +184429,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -192556,7 +184448,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -192600,11 +184491,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -192621,7 +184510,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -192818,11 +184706,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -192839,7 +184725,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -192883,11 +184768,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -192904,7 +184787,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -193050,11 +184932,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -193071,7 +184951,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -193115,11 +184994,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -193136,7 +185013,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -193254,11 +185130,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -193275,7 +185149,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -193319,11 +185192,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -193340,7 +185211,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -193448,11 +185318,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -193469,7 +185337,6 @@ export namespace Prisma {
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -193513,11 +185380,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -193534,7 +185399,6 @@ export namespace Prisma {
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -193652,11 +185516,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -193673,7 +185535,6 @@ export namespace Prisma {
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -193717,11 +185578,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -193738,7 +185597,6 @@ export namespace Prisma {
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -193846,11 +185704,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
@@ -193867,7 +185723,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -193911,11 +185766,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
@@ -193932,7 +185785,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -194026,11 +185878,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
@@ -194047,7 +185897,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -194091,11 +185940,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
@@ -194112,7 +185959,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -194197,11 +186043,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
     schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
@@ -194218,7 +186062,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
@@ -194262,11 +186105,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
     repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
     schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
     scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
     invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
@@ -194283,7 +186124,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
     taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
     reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
@@ -194374,11 +186214,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
@@ -194395,7 +186233,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
@@ -194439,11 +186276,9 @@ export namespace Prisma {
     repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
     repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
     scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
     invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -194460,7 +186295,6 @@ export namespace Prisma {
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
     taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
     reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
@@ -194676,46 +186510,6 @@ export namespace Prisma {
     createdAt?: Date | string
     version?: number
     updatedAt?: Date | string
-  }
-
-  export type ScheduleTaskCreateManyAccountInput = {
-    id: string
-    name: string
-    description?: string | null
-    sourceModule: string
-    sourceEntityId: string
-    schedulingKey?: string | null
-    ownerType?: string | null
-    ownerId?: string | null
-    handlerKey?: string | null
-    payloadVersion?: number | null
-    sourceRevision?: string | null
-    status: string
-    enabled: boolean
-    cronExpression?: string | null
-    timezone: string
-    startDate?: Date | string | null
-    endDate?: Date | string | null
-    maxExecutions?: number | null
-    nextRunAt?: Date | string | null
-    lastRunAt?: Date | string | null
-    executionCount?: number
-    lastExecutionStatus?: string | null
-    lastExecutionDuration?: number | null
-    consecutiveFailures?: number
-    maxRetries: number
-    initialDelayMs: number
-    maxDelayMs: number
-    backoffMultiplier: number
-    retryableStatuses?: string
-    payload?: string | null
-    tags?: string
-    priority: string
-    timeout?: number | null
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
   }
 
   export type SchedulingReconcileOperationCreateManyAccountInput = {
@@ -195015,18 +186809,6 @@ export namespace Prisma {
     planId: string
     action: string
     changes?: string | null
-    createdAt?: Date | string
-  }
-
-  export type ScheduleExecutionCreateManyIdentityInput = {
-    id: string
-    taskId: string
-    executionTime: Date | string
-    status: string
-    duration?: number | null
-    result?: string | null
-    error?: string | null
-    retryCount?: number
     createdAt?: Date | string
   }
 
@@ -195920,128 +187702,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     version?: IntFieldUpdateOperationsInput | number
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ScheduleTaskUpdateWithoutAccountInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    sourceModule?: StringFieldUpdateOperationsInput | string
-    sourceEntityId?: StringFieldUpdateOperationsInput | string
-    schedulingKey?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerType?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerId?: NullableStringFieldUpdateOperationsInput | string | null
-    handlerKey?: NullableStringFieldUpdateOperationsInput | string | null
-    payloadVersion?: NullableIntFieldUpdateOperationsInput | number | null
-    sourceRevision?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    enabled?: BoolFieldUpdateOperationsInput | boolean
-    cronExpression?: NullableStringFieldUpdateOperationsInput | string | null
-    timezone?: StringFieldUpdateOperationsInput | string
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    maxExecutions?: NullableIntFieldUpdateOperationsInput | number | null
-    nextRunAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    lastRunAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    executionCount?: IntFieldUpdateOperationsInput | number
-    lastExecutionStatus?: NullableStringFieldUpdateOperationsInput | string | null
-    lastExecutionDuration?: NullableIntFieldUpdateOperationsInput | number | null
-    consecutiveFailures?: IntFieldUpdateOperationsInput | number
-    maxRetries?: IntFieldUpdateOperationsInput | number
-    initialDelayMs?: IntFieldUpdateOperationsInput | number
-    maxDelayMs?: IntFieldUpdateOperationsInput | number
-    backoffMultiplier?: FloatFieldUpdateOperationsInput | number
-    retryableStatuses?: StringFieldUpdateOperationsInput | string
-    payload?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
-    priority?: StringFieldUpdateOperationsInput | string
-    timeout?: NullableIntFieldUpdateOperationsInput | number | null
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    executions?: ScheduleExecutionUpdateManyWithoutTaskNestedInput
-  }
-
-  export type ScheduleTaskUncheckedUpdateWithoutAccountInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    sourceModule?: StringFieldUpdateOperationsInput | string
-    sourceEntityId?: StringFieldUpdateOperationsInput | string
-    schedulingKey?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerType?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerId?: NullableStringFieldUpdateOperationsInput | string | null
-    handlerKey?: NullableStringFieldUpdateOperationsInput | string | null
-    payloadVersion?: NullableIntFieldUpdateOperationsInput | number | null
-    sourceRevision?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    enabled?: BoolFieldUpdateOperationsInput | boolean
-    cronExpression?: NullableStringFieldUpdateOperationsInput | string | null
-    timezone?: StringFieldUpdateOperationsInput | string
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    maxExecutions?: NullableIntFieldUpdateOperationsInput | number | null
-    nextRunAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    lastRunAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    executionCount?: IntFieldUpdateOperationsInput | number
-    lastExecutionStatus?: NullableStringFieldUpdateOperationsInput | string | null
-    lastExecutionDuration?: NullableIntFieldUpdateOperationsInput | number | null
-    consecutiveFailures?: IntFieldUpdateOperationsInput | number
-    maxRetries?: IntFieldUpdateOperationsInput | number
-    initialDelayMs?: IntFieldUpdateOperationsInput | number
-    maxDelayMs?: IntFieldUpdateOperationsInput | number
-    backoffMultiplier?: FloatFieldUpdateOperationsInput | number
-    retryableStatuses?: StringFieldUpdateOperationsInput | string
-    payload?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
-    priority?: StringFieldUpdateOperationsInput | string
-    timeout?: NullableIntFieldUpdateOperationsInput | number | null
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    executions?: ScheduleExecutionUncheckedUpdateManyWithoutTaskNestedInput
-  }
-
-  export type ScheduleTaskUncheckedUpdateManyWithoutAccountInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    sourceModule?: StringFieldUpdateOperationsInput | string
-    sourceEntityId?: StringFieldUpdateOperationsInput | string
-    schedulingKey?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerType?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerId?: NullableStringFieldUpdateOperationsInput | string | null
-    handlerKey?: NullableStringFieldUpdateOperationsInput | string | null
-    payloadVersion?: NullableIntFieldUpdateOperationsInput | number | null
-    sourceRevision?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
-    enabled?: BoolFieldUpdateOperationsInput | boolean
-    cronExpression?: NullableStringFieldUpdateOperationsInput | string | null
-    timezone?: StringFieldUpdateOperationsInput | string
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    maxExecutions?: NullableIntFieldUpdateOperationsInput | number | null
-    nextRunAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    lastRunAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    executionCount?: IntFieldUpdateOperationsInput | number
-    lastExecutionStatus?: NullableStringFieldUpdateOperationsInput | string | null
-    lastExecutionDuration?: NullableIntFieldUpdateOperationsInput | number | null
-    consecutiveFailures?: IntFieldUpdateOperationsInput | number
-    maxRetries?: IntFieldUpdateOperationsInput | number
-    initialDelayMs?: IntFieldUpdateOperationsInput | number
-    maxDelayMs?: IntFieldUpdateOperationsInput | number
-    backoffMultiplier?: FloatFieldUpdateOperationsInput | number
-    retryableStatuses?: StringFieldUpdateOperationsInput | string
-    payload?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
-    priority?: StringFieldUpdateOperationsInput | string
-    timeout?: NullableIntFieldUpdateOperationsInput | number | null
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type SchedulingReconcileOperationUpdateWithoutAccountInput = {
@@ -196964,42 +188624,6 @@ export namespace Prisma {
     planId?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
     changes?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ScheduleExecutionUpdateWithoutIdentityInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    executionTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: StringFieldUpdateOperationsInput | string
-    duration?: NullableIntFieldUpdateOperationsInput | number | null
-    result?: NullableStringFieldUpdateOperationsInput | string | null
-    error?: NullableStringFieldUpdateOperationsInput | string | null
-    retryCount?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    task?: ScheduleTaskUpdateOneRequiredWithoutExecutionsNestedInput
-  }
-
-  export type ScheduleExecutionUncheckedUpdateWithoutIdentityInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    taskId?: StringFieldUpdateOperationsInput | string
-    executionTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: StringFieldUpdateOperationsInput | string
-    duration?: NullableIntFieldUpdateOperationsInput | number | null
-    result?: NullableStringFieldUpdateOperationsInput | string | null
-    error?: NullableStringFieldUpdateOperationsInput | string | null
-    retryCount?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ScheduleExecutionUncheckedUpdateManyWithoutIdentityInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    taskId?: StringFieldUpdateOperationsInput | string
-    executionTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: StringFieldUpdateOperationsInput | string
-    duration?: NullableIntFieldUpdateOperationsInput | number | null
-    result?: NullableStringFieldUpdateOperationsInput | string | null
-    error?: NullableStringFieldUpdateOperationsInput | string | null
-    retryCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -200149,54 +191773,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type ScheduleExecutionCreateManyTaskInput = {
-    id: string
-    identityId: string
-    executionTime: Date | string
-    status: string
-    duration?: number | null
-    result?: string | null
-    error?: string | null
-    retryCount?: number
-    createdAt?: Date | string
-  }
-
-  export type ScheduleExecutionUpdateWithoutTaskInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    executionTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: StringFieldUpdateOperationsInput | string
-    duration?: NullableIntFieldUpdateOperationsInput | number | null
-    result?: NullableStringFieldUpdateOperationsInput | string | null
-    error?: NullableStringFieldUpdateOperationsInput | string | null
-    retryCount?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    identity?: AccountUpdateOneRequiredWithoutScheduleExecutionsNestedInput
-  }
-
-  export type ScheduleExecutionUncheckedUpdateWithoutTaskInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    executionTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: StringFieldUpdateOperationsInput | string
-    duration?: NullableIntFieldUpdateOperationsInput | number | null
-    result?: NullableStringFieldUpdateOperationsInput | string | null
-    error?: NullableStringFieldUpdateOperationsInput | string | null
-    retryCount?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ScheduleExecutionUncheckedUpdateManyWithoutTaskInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    executionTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: StringFieldUpdateOperationsInput | string
-    duration?: NullableIntFieldUpdateOperationsInput | number | null
-    result?: NullableStringFieldUpdateOperationsInput | string | null
-    error?: NullableStringFieldUpdateOperationsInput | string | null
-    retryCount?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type InvocationAttemptCreateManyInvocationInput = {

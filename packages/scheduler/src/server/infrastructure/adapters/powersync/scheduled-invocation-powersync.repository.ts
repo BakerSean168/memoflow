@@ -1,8 +1,8 @@
-import type { InvocationAttempt, ScheduledInvocation, SchedulingOwner, SchedulingReconcileReceipt } from '@memoflow/contracts/schedule';
+import type { ScheduledInvocation, ScheduledInvocationStatus, SchedulingOwner, SchedulingReconcileReceipt } from '@memoflow/contracts/schedule';
 import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
 import type { IScheduledInvocationRepository, ScheduledInvocationClaim, ScheduledInvocationCompleteInput } from '../../../domain/repositories/i-scheduled-invocation-repository';
 import { InvocationAttempt as InvocationAttemptEntity } from '../../../domain/entities/invocation-attempt';
-import { PowerSyncInvocationAttemptMapper, PowerSyncScheduledInvocationMapper, type PowerSyncInvocationAttemptRow, type PowerSyncScheduledInvocationRow } from './mappers/powersync-scheduled-invocation.mapper';
+import { PowerSyncInvocationAttemptMapper, PowerSyncScheduledInvocationMapper, type PowerSyncScheduledInvocationRow } from './mappers/powersync-scheduled-invocation.mapper';
 import { generateUUID } from '@memoflow/utils/shared';
 
 export class PowerSyncScheduledInvocationRepository implements IScheduledInvocationRepository {
@@ -19,6 +19,44 @@ export class PowerSyncScheduledInvocationRepository implements IScheduledInvocat
   }
   async findByOwner(owner: SchedulingOwner): Promise<ScheduledInvocation[]> {
     const rows = await this.q.getAll<PowerSyncScheduledInvocationRow>('SELECT * FROM scheduled_invocations WHERE identity_id = ? AND owner_type = ? AND owner_id = ? ORDER BY run_at ASC, scheduling_key ASC', [owner.identityId, owner.type, owner.id]);
+    return rows.map(PowerSyncScheduledInvocationMapper.toDomain);
+  }
+
+  async listForIdentity(
+    identityId: string,
+    options: {
+      readonly ownerType?: string;
+      readonly ownerId?: string;
+      readonly status?: ScheduledInvocationStatus;
+      readonly dueBefore?: number;
+      readonly limit?: number;
+    } = {},
+  ): Promise<ScheduledInvocation[]> {
+    const clauses = ["identity_id = ?"];
+    const params: unknown[] = [identityId];
+    if (options.ownerType !== undefined) { clauses.push("owner_type = ?"); params.push(options.ownerType); }
+    if (options.ownerId !== undefined) { clauses.push("owner_id = ?"); params.push(options.ownerId); }
+    if (options.status !== undefined) { clauses.push("status = ?"); params.push(options.status); }
+    if (options.dueBefore !== undefined) {
+      const due = new Date(options.dueBefore).toISOString();
+      clauses.push("((status = \"pending\" AND run_at <= ?) OR (status = \"retry_wait\" AND next_attempt_at <= ?))");
+      params.push(due, due);
+    }
+    const limit = Math.max(1, Math.min(200, options.limit ?? 100));
+    const sql = 'SELECT * FROM scheduled_invocations WHERE ' + clauses.join(' AND ') + ' ORDER BY run_at ASC, next_attempt_at ASC, id ASC LIMIT ?';
+    const rows = await this.q.getAll<PowerSyncScheduledInvocationRow>(sql, [...params, limit]);
+    return rows.map(PowerSyncScheduledInvocationMapper.toDomain);
+  }
+  async listOwnersByType(ownerType: string): Promise<SchedulingOwner[]> {
+    const rows = await this.q.getAll<{ identity_id: string; owner_type: string; owner_id: string }>(
+      "SELECT DISTINCT identity_id, owner_type, owner_id FROM scheduled_invocations WHERE owner_type = ? AND status != 'superseded' ORDER BY identity_id ASC, owner_id ASC",
+      [ownerType],
+    );
+    return rows.map((row) => ({ identityId: row.identity_id, type: row.owner_type, id: row.owner_id }));
+  }
+  async findRunnable(limit?: number): Promise<ScheduledInvocation[]> {
+    const sql = "SELECT * FROM scheduled_invocations WHERE status IN ('pending', 'retry_wait') ORDER BY run_at ASC, next_attempt_at ASC, id ASC" + (limit === undefined ? '' : ' LIMIT ?');
+    const rows = await this.q.getAll<PowerSyncScheduledInvocationRow>(sql, limit === undefined ? [] : [limit]);
     return rows.map(PowerSyncScheduledInvocationMapper.toDomain);
   }
   async findDue(now: number, limit?: number): Promise<ScheduledInvocation[]> {

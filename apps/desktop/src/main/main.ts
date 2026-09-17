@@ -181,7 +181,7 @@ async function registerBusinessModules(
 
   // Step D：宿主 runtime 负责 feature 装配。通知/提醒 composer 先于 schedule
   // 编排（编排消费它们返回的 source/notification ports），schedule 采用两阶段
-  // 装配（单一 PowerSync 集合，scheduleTaskRepository 与编排共享，不建第二套）。
+  // 装配（单一 PowerSync Scheduler invocation 集合，不建第二套 worker truth）。
   // 1. Raw schedule ingredient set — the ONE two-phase schedule repository set.
   //    原始 schedule 原料集合 —— 唯一的、两阶段的 schedule 仓储集合。
   const calendarRepositorySet = createSchedulePowerSyncRepositories(db);
@@ -279,12 +279,14 @@ async function registerBusinessModules(
   //    runtime controller 是桌面 lane 中 schedule 启停的唯一所有者（取代已退役的
   //    schedule runtime 包级全局）。
   const scheduleOrchestrationModule = createScheduleOrchestrationModule({
+    scheduler: {
+      invocationRepository: schedulerRepositorySet.scheduledInvocationRepository,
+    },
     taskProjection: {
       source: createTaskPowerSyncScheduleProjectionSource(
         db,
         settingElectronModule.userTimeContextPort,
       ),
-      scheduleTaskRepository: schedulerRepositorySet.scheduleTaskRepository,
     },
     goalProjection: {
       source: createGoalPowerSyncScheduleProjectionSource(
@@ -305,10 +307,10 @@ async function registerBusinessModules(
   const scheduleComposed = composeSchedule({
     calendarRepositories: calendarRepositorySet,
     schedulerRepositories: schedulerRepositorySet,
-    sourceExecutor: scheduleOrchestrationModule.sourceExecutor,
-    shouldScheduleTask: (task) => {
+    handlerRegistry: scheduleOrchestrationModule.handlerRegistry,
+    shouldExecuteIdentity: (candidateIdentityId) => {
       const identityId = mainRuntime?.profileRuntimeManager.getCurrentIdentityId() ?? null;
-      return identityId !== null && String(task.identityId) === identityId;
+      return identityId !== null && candidateIdentityId === identityId;
     },
   });
 
@@ -386,7 +388,6 @@ async function registerBusinessModules(
     taskPlanRepository: taskComposed.repositories.taskPlanRepository,
     taskOccurrenceRepository: taskComposed.repositories.taskOccurrenceRepository,
     scheduleRepository: scheduleComposed.repositories.scheduleRepository,
-    scheduleTaskRepository: scheduleComposed.repositories.scheduleTaskRepository,
     reminderTemplateRepository: reminderComposed.repositories.reminderTemplateRepository,
     notificationRepository: notificationComposed.repositories.notificationRepository,
     userTimeContextPort: settingElectronModule.userTimeContextPort,

@@ -95,10 +95,6 @@
             "forwardAllArgs": false
           },
           {
-            "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.use-cases.config.ts --coverage",
-            "forwardAllArgs": false
-          },
-          {
             "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.mappers.config.ts --coverage",
             "forwardAllArgs": false
           }

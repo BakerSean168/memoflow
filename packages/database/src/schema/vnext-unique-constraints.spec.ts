@@ -8,7 +8,7 @@ const SHAPE_COLUMNS = new Map<string, string[]>([
   ['goals', ['id', 'identity_id']],
   ['key_results', ['id', 'goal_id', 'identity_id']],
   ['notifications', ['identity_id', 'idempotency_key']],
-  ['schedule_tasks', ['identity_id', 'owner_type', 'owner_id', 'scheduling_key']],
+  ['scheduled_invocations', ['identity_id', 'owner_type', 'owner_id', 'scheduling_key']],
   ['task_occurrences', ['plan_id', 'occurrence_key']],
   ['task_plans', ['id', 'identity_id']],
 ]);
@@ -49,7 +49,7 @@ describe('prepareVnextUniqueConstraints', () => {
     expect(report.skippedMissingTables).toEqual([]);
     expect(fixture.created).toHaveLength(7);
     expect(fixture.created).toContain(
-      'CREATE UNIQUE INDEX "schedule_tasks_owner_scheduling_key_unique" ON "schedule_tasks" ("identity_id", "owner_type", "owner_id", "scheduling_key")',
+      'CREATE UNIQUE INDEX "scheduled_invocations_owner_key_unique" ON "scheduled_invocations" ("identity_id", "owner_type", "owner_id", "scheduling_key")',
     );
   });
 

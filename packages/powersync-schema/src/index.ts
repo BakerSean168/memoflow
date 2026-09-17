@@ -283,45 +283,6 @@ const schedules = new Table({
   updated_at: column.text,
 });
 
-const schedule_tasks = new Table({
-  identity_id: column.text,
-  name: column.text,
-  description: column.text,
-  source_module: column.text,
-  source_entity_id: column.text,
-  scheduling_key: column.text,
-  owner_type: column.text,
-  owner_id: column.text,
-  handler_key: column.text,
-  payload_version: column.integer,
-  source_revision: column.text,
-  status: column.text,
-  enabled: column.integer, // boolean
-  cron_expression: column.text,
-  timezone: column.text,
-  start_date: column.text,
-  end_date: column.text,
-  max_executions: column.integer,
-  next_run_at: column.text,
-  last_run_at: column.text,
-  execution_count: column.integer,
-  last_execution_status: column.text,
-  last_execution_duration: column.integer,
-  consecutive_failures: column.integer,
-  max_retries: column.integer,
-  initial_delay_ms: column.integer,
-  max_delay_ms: column.integer,
-  backoff_multiplier: column.real,
-  retryable_statuses: column.text, // JSON
-  payload: column.text, // JSON
-  tags: column.text, // JSON
-  priority: column.text,
-  timeout: column.integer,
-  version: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-  deleted_at: column.text,
-});
 
 const scheduling_reconcile_operations = new Table({
   identity_id: column.text,
@@ -387,38 +348,7 @@ const invocation_attempts = new Table({
   created_at: column.text,
 });
 
-const schedule_executions = new Table({
-  identity_id: column.text,
-  task_id: column.text, // FK
-  execution_time: column.text,
-  status: column.text,
-  duration: column.integer,
-  result: column.text, // JSON
-  error: column.text,
-  retry_count: column.integer,
-  created_at: column.text,
-});
 
-const schedule_statistics = new Table({
-  identity_id: column.text,
-  total_tasks: column.integer,
-  active_tasks: column.integer,
-  paused_tasks: column.integer,
-  completed_tasks: column.integer,
-  cancelled_tasks: column.integer,
-  failed_tasks: column.integer,
-  total_executions: column.integer,
-  successful_executions: column.integer,
-  failed_executions: column.integer,
-  skipped_executions: column.integer,
-  timeout_executions: column.integer,
-  avg_execution_duration: column.real,
-  min_execution_duration: column.real,
-  max_execution_duration: column.real,
-  module_statistics: column.text, // JSON
-  last_updated_at: column.text,
-  created_at: column.text,
-});
 
 const schedule_domain_event_outbox = new Table(
   {
@@ -1099,12 +1029,9 @@ export const PowerSyncAppSchema = new Schema({
   task_plan_history,
   // Schedule
   schedules,
-  schedule_tasks,
   scheduling_reconcile_operations,
   scheduled_invocations,
   invocation_attempts,
-  schedule_executions,
-  schedule_statistics,
   schedule_domain_event_outbox,
   // Reminder
   reminder_templates,

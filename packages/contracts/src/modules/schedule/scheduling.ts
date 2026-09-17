@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import type { Instant } from '../../primitives';
 
 /** Neutral owner of one complete desired scheduling set. */
@@ -9,7 +10,7 @@ export interface SchedulingOwner {
 
 export type SchedulingPriority = 'low' | 'normal' | 'high' | 'urgent';
 
-/** Retry policy expressed without leaking the legacy ScheduleTask aggregate. */
+/** Retry policy expressed without leaking the retired worker aggregate. */
 export interface SchedulingRetryPolicy {
   readonly enabled?: boolean;
   readonly maxRetries: number;
@@ -240,3 +241,132 @@ export interface InvocationAttempt {
   readonly fencingToken: number | null;
   readonly createdAt: Instant;
 }
+
+/** Read-only internal/ops projection for one canonical scheduled invocation. */
+export interface InvocationAttemptDiagnostic {
+  readonly id: string;
+  readonly attemptNumber: number;
+  readonly startedAt: Instant;
+  readonly finishedAt: Instant | null;
+  readonly outcome: InvocationAttemptOutcome;
+  readonly failure: {
+    readonly code: string | null;
+    readonly message: string | null;
+    readonly retryable: boolean | null;
+  };
+  readonly workerId: string | null;
+}
+
+/**
+ * Redacted Scheduler diagnostics projection.
+ *
+ * Payloads, claim tokens and fencing internals are intentionally excluded from
+ * transport DTOs. Product Planner surfaces must never depend on this worker view.
+ */
+export interface ScheduledInvocationDiagnostic {
+  readonly id: string;
+  readonly owner: SchedulingOwner;
+  readonly schedulingKey: string;
+  readonly handlerKey: string;
+  readonly runAt: Instant;
+  readonly status: ScheduledInvocationStatus;
+  readonly nextAttemptAt: Instant | null;
+  readonly attemptCount: number;
+  readonly sourceRevision: number | string | null;
+  readonly executionPolicy: {
+    readonly priority: SchedulingPriority;
+    readonly timeoutMs: number | null;
+    readonly retryPolicy: ScheduledInvocationRetryPolicy;
+  };
+  readonly observability: {
+    readonly name: string | null;
+    readonly tags: readonly string[];
+  };
+  readonly payloadVersion: number;
+  readonly lastAttempt: InvocationAttemptDiagnostic | null;
+  readonly createdAt: Instant;
+  readonly updatedAt: Instant;
+}
+
+export interface ScheduledInvocationDiagnosticQuery {
+  readonly ownerType?: string;
+  readonly ownerId?: string;
+  readonly status?: ScheduledInvocationStatus;
+  readonly dueOnly?: boolean;
+  readonly limit?: number;
+}
+
+const ScheduledInvocationStatusDiagnosticSchema = z.enum([
+  'pending',
+  'running',
+  'retry_wait',
+  'succeeded',
+  'skipped',
+  'failed',
+  'dead_letter',
+  'superseded',
+]);
+
+const SchedulingPriorityDiagnosticSchema = z.enum(['low', 'normal', 'high', 'urgent']);
+
+export const InvocationAttemptDiagnosticSchema = z.object({
+  id: z.string().min(1),
+  invocationId: z.string().min(1),
+  attemptNumber: z.number().int().positive(),
+  startedAt: z.number().int(),
+  finishedAt: z.number().int().nullable(),
+  outcome: z.enum(['succeeded', 'skipped', 'retryable_failure', 'permanent_failure', 'timeout']),
+  failure: z.object({
+    code: z.string().nullable(),
+    message: z.string().nullable(),
+    retryable: z.boolean().nullable(),
+  }),
+  workerId: z.string().nullable(),
+});
+
+export const ScheduledInvocationDiagnosticSchema = z.object({
+  id: z.string().min(1),
+  owner: z.object({
+    identityId: z.string().min(1),
+    type: z.string().min(1),
+    id: z.string().min(1),
+  }),
+  schedulingKey: z.string().min(1),
+  handlerKey: z.string().min(1),
+  runAt: z.number().int(),
+  status: ScheduledInvocationStatusDiagnosticSchema,
+  nextAttemptAt: z.number().int().nullable(),
+  attemptCount: z.number().int().nonnegative(),
+  sourceRevision: z.union([z.number(), z.string()]).nullable(),
+  executionPolicy: z.object({
+    priority: SchedulingPriorityDiagnosticSchema,
+    timeoutMs: z.number().int().nonnegative().nullable(),
+    retryPolicy: z.object({
+      enabled: z.boolean(),
+      maxRetries: z.number().int().nonnegative(),
+      initialDelayMs: z.number().nonnegative(),
+      maxDelayMs: z.number().nonnegative(),
+      backoffMultiplier: z.number().min(1),
+    }),
+  }),
+  observability: z.object({
+    name: z.string().nullable(),
+    tags: z.array(z.string()),
+  }),
+  payloadVersion: z.number().int().positive(),
+  lastAttempt: InvocationAttemptDiagnosticSchema.nullable(),
+  createdAt: z.number().int(),
+  updatedAt: z.number().int(),
+});
+
+const DiagnosticBooleanQuerySchema = z
+  .union([z.boolean(), z.enum(['true', 'false'])])
+  .transform((value) => value === true || value === 'true');
+
+export const ScheduledInvocationDiagnosticQuerySchema = z.object({
+  ownerType: z.string().min(1).optional(),
+  ownerId: z.string().min(1).optional(),
+  status: ScheduledInvocationStatusDiagnosticSchema.optional(),
+  dueOnly: DiagnosticBooleanQuerySchema.optional(),
+  limit: z.coerce.number().int().min(1).max(200).optional(),
+});

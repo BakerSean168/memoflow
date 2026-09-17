@@ -14,7 +14,7 @@ import type {
   TrendDay,
 } from '@memoflow/contracts/dashboard';
 import { GoalStatus } from '@memoflow/contracts/goal';
-import type { GoalId, ScheduleTaskId } from '@memoflow/contracts/primitives';
+import type { GoalId, ScheduleId } from '@memoflow/contracts/primitives';
 import { ReminderStatus } from '@memoflow/contracts/reminder';
 import { TaskOccurrenceStatus, TaskPlanStatus } from '@memoflow/contracts/task';
 import { createTimeFacade, type CalendarApi, type TimeContext } from '@memoflow/time';
@@ -92,7 +92,7 @@ export async function getDashboardData(
     .sort((left, right) => left.startTime - right.startTime)
     .slice(0, UPCOMING_SCHEDULE_LIMIT)
     .map((schedule) => ({
-      id: String(schedule.id) as ScheduleTaskId,
+      id: String(schedule.id) as ScheduleId,
       title: schedule.title,
       startTime: schedule.startTime,
       endTime: schedule.endTime,

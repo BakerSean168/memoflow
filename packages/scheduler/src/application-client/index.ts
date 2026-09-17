@@ -1,4 +1,4 @@
-export type { IScheduleTaskApiClient } from './ports/schedule-task-api-client.port';
+export type { SchedulerDiagnosticsApiClient } from './ports/scheduler-diagnostics-api-client.port';
 export type { SchedulerClientPort } from './scheduler-client.port';
 export {
   SchedulerClientService,

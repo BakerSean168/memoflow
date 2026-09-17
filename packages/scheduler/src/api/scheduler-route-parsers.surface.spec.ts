@@ -2,17 +2,17 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-/** Scheduler owns raw worker diagnostics query parsing after CLEAN-6304. */
-describe('Scheduler diagnostics query parser ownership', () => {
+describe('Scheduler diagnostics query ownership', () => {
   const routes = readFileSync(resolve(__dirname, 'routes.ts'), 'utf8');
 
-  it('keeps task query parsers with read-only worker diagnostics', () => {
-    expect(routes).toMatch(/function parseNumber\b/);
-    expect(routes).toMatch(/function parseString\b/);
-    expect(routes).toMatch(/function parseBoolean\b/);
-    expect(routes).toContain("path: '/tasks'");
-    expect(routes).toContain("path: '/tasks/due'");
-    expect(routes).toContain("path: '/tasks/:id'");
+  it('uses the canonical invocation query schema without legacy task parsers', () => {
+    expect(routes).toContain('ScheduledInvocationDiagnosticQuerySchema');
+    expect(routes).toContain('ScheduledInvocationDiagnosticQuerySchema.parse(req.query ?? {})');
+    expect(routes).toContain("path: '/invocations'");
+    expect(routes).toContain("path: '/invocations/due'");
+    expect(routes).toContain("path: '/invocations/:id'");
+    expect(routes).not.toMatch(/function parse(?:Number|String|Boolean)\b/);
+    expect(routes).not.toContain("path: '/tasks'");
     expect(routes).not.toMatch(/method: '(?:post|put|patch|delete)'/);
   });
 });

@@ -1,5 +1,3 @@
-export { ScheduleExecution } from './schedule-execution';
-export type { ScheduleExecutionState } from './schedule-execution';
 export {
   ScheduledInvocation,
   ScheduledInvocationTransitionError,

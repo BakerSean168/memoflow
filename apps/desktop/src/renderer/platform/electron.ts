@@ -79,9 +79,6 @@ const TABLE_TO_MODULE: Record<string, string> = {
   task_plan_history: 'task',
   // Schedule
   schedules: 'schedule',
-  schedule_tasks: 'schedule',
-  schedule_executions: 'schedule',
-  schedule_statistics: 'schedule',
   // Reminder
   reminder_templates: 'reminder',
   reminder_groups: 'reminder',

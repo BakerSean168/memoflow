@@ -310,7 +310,12 @@ export function createDefaultElectronDesktopTransport(optionsOrDb?: unknown): un
           return deliveredAck;
         }
 
-        // Fallback for hosts without an injected renderer: use Electron native Notification.
+        // Fallback for Electron main-process hosts without an injected renderer.
+        // Plain Node/Vitest processes must fail closed without loading the Electron package:
+        // requiring it outside a real Electron runtime can trigger binary resolution/download.
+        if (!process.versions.electron) {
+          throw new Error('Electron native Notification unavailable outside Electron runtime');
+        }
         const electron = require('electron');
         if (
           electron &&

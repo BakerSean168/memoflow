@@ -1,6 +1,7 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { randomUUID } from 'crypto';
 import { createTimeContext } from '@memoflow/time';
+import { FakeTimer } from '@memoflow/patterns/scheduler';
 import {
   buildSchedulingKey,
   type ScheduledIntent,
@@ -52,9 +53,9 @@ import { ROUTINE_SCHEDULING_OWNER_TYPE } from '@memoflow/reminder/schedule-proje
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import {
   ScheduledHandlerRegistry,
-  createHandlerRegistryScheduleTaskSourceExecutor,
-  createSchedulerTaskPrismaRepository,
-  createScheduleTaskSchedulingPort,
+  ScheduledInvocationQueue,
+  createSchedulerPrismaRepositories,
+  createScheduledInvocationSchedulingPort,
 } from '@memoflow/scheduler';
 import { NotificationRequestedPrismaWriterAdapter } from '../notification-requested-writer.prisma.adapter';
 import { NotificationPrismaRepository } from '../notification-prisma.repository';
@@ -175,11 +176,45 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
   }
 
   async function reconcileOwner(owner: SchedulingOwner, desired: readonly ScheduledIntent[]) {
-    const repo = createSchedulerTaskPrismaRepository(prisma);
-    const schedulingPort = createScheduleTaskSchedulingPort(repo);
+    const repo = createSchedulerPrismaRepositories(prisma).scheduledInvocationRepository;
+    const schedulingPort = createScheduledInvocationSchedulingPort(repo);
     const receipt = await schedulingPort.reconcile(owner, desired);
     expect(receipt.status).toBe('succeeded');
     return repo;
+  }
+
+  async function executeCanonicalInvocation(
+    repo: ReturnType<typeof createSchedulerPrismaRepositories>['scheduledInvocationRepository'],
+    registry: ScheduledHandlerRegistry,
+  ) {
+    const timer = new FakeTimer(Date.now());
+    const due = await repo.findDue(timer.now());
+    expect(due).toHaveLength(1);
+    const invocation = due[0]!;
+    const queue = new ScheduledInvocationQueue({
+      repository: repo,
+      handlerRegistry: registry,
+      timer,
+      workerId: 'wave3-integration',
+    });
+
+    await queue.start();
+    timer.tick(0);
+
+    const deadline = Date.now() + 5_000;
+    while (Date.now() < deadline) {
+      const persisted = await repo.findById(invocation.id);
+      if (persisted?.status === 'succeeded') break;
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+    queue.stop();
+
+    const persisted = await repo.findById(invocation.id);
+    expect(persisted?.status).toBe('succeeded');
+    return prisma.invocationAttempt.findFirstOrThrow({
+      where: { invocationId: invocation.id },
+      orderBy: { attemptNumber: 'desc' },
+    });
   }
 
   it('D: Task projection persisted -> Scheduler wake -> task.reminder.fire -> Notification Fact', async () => {
@@ -211,11 +246,11 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
     const repo = await reconcileOwner(owner, [intent]);
 
     // The stale-owner enumeration surface observes the persisted Task owner.
-    const owners = (await repo.listSchedulingOwners?.(TASK_SCHEDULING_OWNER_TYPE)) ?? [];
+    const owners = await repo.listOwnersByType(TASK_SCHEDULING_OWNER_TYPE);
     expect(owners).toContainEqual(owner);
-    const persisted = await repo.findBySchedulingOwner(owner);
+    const persisted = await repo.findByOwner(owner);
     expect(persisted).toHaveLength(1);
-    expect(persisted[0]!.nextRunAt?.getTime()).toBe(FIXTURE_D.runAt);
+    expect(persisted[0]!.runAt).toBe(FIXTURE_D.runAt);
 
     // Scheduler wake + registry dispatch to the real Task handler.
     const registry = new ScheduledHandlerRegistry();
@@ -256,10 +291,7 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
         notificationRequestedWriter: writer,
       }),
     );
-    const executor = createHandlerRegistryScheduleTaskSourceExecutor({ registry });
-    const due = await repo.findDueTasksForExecution(new Date(Date.now()));
-    const result = await executor.execute(due[0]!);
-    expect(result.disposition).toBe('succeeded');
+    await executeCanonicalInvocation(repo, registry);
 
     // The handler's only output is the durable NotificationRequested envelope.
     const opId = buildTaskReminderOperationId(FIXTURE_D.schedulingKey);
@@ -308,7 +340,7 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
 
     const repo = await reconcileOwner(owner, [intent]);
 
-    const owners = (await repo.listSchedulingOwners?.('goal.goal')) ?? [];
+    const owners = await repo.listOwnersByType('goal.goal');
     expect(owners).toContainEqual(owner);
 
     const registry = new ScheduledHandlerRegistry();
@@ -338,10 +370,7 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
         requestedWriter: writer,
       }),
     );
-    const executor = createHandlerRegistryScheduleTaskSourceExecutor({ registry });
-    const due = await repo.findDueTasksForExecution(new Date(Date.now()));
-    const result = await executor.execute(due[0]!);
-    expect(result.disposition).toBe('succeeded');
+    await executeCanonicalInvocation(repo, registry);
 
     const context: ScheduledInvocationContext = {
       identityId,
@@ -393,7 +422,7 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
 
     const repo = await reconcileOwner(owner, [intent]);
 
-    const owners = (await repo.listSchedulingOwners?.(ROUTINE_SCHEDULING_OWNER_TYPE)) ?? [];
+    const owners = await repo.listOwnersByType(ROUTINE_SCHEDULING_OWNER_TYPE);
     expect(owners).toContainEqual(owner);
 
     const registry = new ScheduledHandlerRegistry();
@@ -404,11 +433,8 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
         ),
       }),
     );
-    const executor = createHandlerRegistryScheduleTaskSourceExecutor({ registry });
-    const due = await repo.findDueTasksForExecution(new Date(Date.now()));
-    const result = await executor.execute(due[0]!);
-    expect(result.disposition).toBe('succeeded');
-    expect(result.result).toMatchObject({ notificationRequested: true });
+    const attempt = await executeCanonicalInvocation(repo, registry);
+    expect(attempt.result).toMatchObject({ notificationRequested: true });
 
     // The durable occurrence fence committed AND the notification intent landed
     // in the same shared outbox the Notification runtime consumes.

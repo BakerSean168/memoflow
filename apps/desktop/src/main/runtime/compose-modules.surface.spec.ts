@@ -147,8 +147,11 @@ describe('desktop runtime composer surface (Batch Step D)', () => {
     expect(schedule).toContain('calendarModule');
     expect(schedule).toContain('schedulerModule');
     expect(schedule).toContain("from '@memoflow/scheduler'");
-    expect(schedule).toContain('createSchedulerRuntimeContribution');
-    expect(schedule).toContain('schedulerRepositories.scheduleTaskRepository');
+    expect(schedule).toContain('createScheduledInvocationRuntimeContribution');
+    expect(schedule).toContain('schedulerRepositories.scheduledInvocationRepository');
+    expect(schedule).toContain('schedulerRepositories.invocationAttemptRepository');
+    expect(schedule).not.toContain('scheduleTaskRepository');
+    expect(schedule).not.toContain('scheduleExecutionRepository');
   });
 
   it('reminder composer owns one per-profile InterventionRuntime and main wires both Routine windows through bootstrapper', () => {

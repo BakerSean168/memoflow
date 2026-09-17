@@ -1,9 +1,9 @@
-export type { IScheduleTaskApiClient, IResultIpcClient } from './adapters/types';
+export type { SchedulerDiagnosticsApiClient, IResultIpcClient } from './adapters/types';
 export {
-  ScheduleTaskHttpAdapter,
+  SchedulerDiagnosticsHttpAdapter,
   createSchedulerHttpAdapter,
 } from './adapters/http';
 export {
-  ScheduleTaskIpcAdapter,
+  SchedulerDiagnosticsIpcAdapter,
   createSchedulerIpcAdapter,
 } from './adapters/ipc';

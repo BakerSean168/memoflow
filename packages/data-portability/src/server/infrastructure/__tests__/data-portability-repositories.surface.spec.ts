@@ -46,7 +46,6 @@ describe('data portability dependency factories surface', () => {
     'folderRepository',
     'resourceRepository',
     'scheduleRepository',
-    'scheduleTaskRepository',
     'aiConversationRepository',
     'notificationPreferenceRepository',
     'userPreferenceRepository',

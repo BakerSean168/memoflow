@@ -16,7 +16,9 @@
       "id": "editor-runtime-package",
       "status": "active",
       "decision": "ADR-107",
-      "forbiddenPaths": ["packages/editor"]
+      "forbiddenPaths": [
+        "packages/editor"
+      ]
     },
     {
       "id": "standalone-dashboard-bounded-context",
@@ -32,7 +34,9 @@
       "id": "legacy-editor-persistence",
       "status": "staged",
       "decision": "ADR-107 / EDITOR-1702",
-      "forbiddenPaths": ["packages/database/prisma/schema/editor.prisma"]
+      "forbiddenPaths": [
+        "packages/database/prisma/schema/editor.prisma"
+      ]
     },
     {
       "id": "account-settings-legacy",
@@ -47,13 +51,30 @@
       "id": "legacy-reminder-model",
       "status": "staged",
       "decision": "ADR-076..079 / ROUTINE-2201",
-      "forbiddenPaths": ["packages/reminder/src/server/domain/aggregates/reminder-template.ts"]
+      "forbiddenPaths": [
+        "packages/reminder/src/server/domain/aggregates/reminder-template.ts"
+      ]
     },
     {
       "id": "legacy-schedule-task-model",
-      "status": "staged",
-      "decision": "ADR-081..083 / SCHED-2302",
-      "forbiddenPaths": ["packages/scheduler/src/server/domain/aggregates/schedule-task.ts"]
+      "status": "active",
+      "decision": "ADR-081..083 / S4-2302B",
+      "forbiddenPaths": [
+        "packages/scheduler/src/server/domain/aggregates/schedule-task.ts",
+        "packages/scheduler/src/server/domain/entities/schedule-execution.ts",
+        "packages/scheduler/src/server/infrastructure/runtime/schedule.runtime.ts",
+        "packages/scheduler/src/server/infrastructure/scheduling/legacy-schedule-task-scheduling.adapter.ts",
+        "packages/scheduler/src/server/infrastructure/adapters/prisma/schedule-task-prisma.repository.ts",
+        "packages/scheduler/src/server/infrastructure/adapters/prisma/schedule-execution-prisma.repository.ts",
+        "packages/scheduler/src/server/infrastructure/adapters/powersync/schedule-task-powersync.repository.ts",
+        "packages/scheduler/src/server/infrastructure/adapters/powersync/schedule-execution-powersync.repository.ts",
+        "packages/contracts/src/modules/schedule/aggregates/schedule-task-client.ts",
+        "packages/contracts/src/modules/schedule/aggregates/schedule-task-server.ts",
+        "packages/contracts/src/modules/schedule/entities/schedule-execution-client.ts",
+        "packages/contracts/src/modules/schedule/entities/schedule-execution-server.ts",
+        "packages/contracts/src/modules/schedule/value-objects/source-module.ts",
+        "packages/contracts/src/modules/schedule/value-objects/schedule-config.ts"
+      ]
     },
     {
       "id": "legacy-notification-template",

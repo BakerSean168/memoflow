@@ -1,7 +1,7 @@
 /**
  * Planner/Calendar composition root.
  *
- * Temporal Engine worker state, queueing and ScheduleTask use cases live in
+ * Temporal Engine worker state, invocation attempts, and queueing live in
  * @memoflow/scheduler. This module owns CalendarEntry product state plus the
  * Calendar reliability workers (rebuild/outbox delivery).
  */

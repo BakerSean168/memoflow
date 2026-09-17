@@ -1,5 +1,4 @@
 /// <reference types="vitest" />
-import path from 'node:path';
 import { defineConfig, mergeConfig } from 'vitest/config';
 import { createPackageVitestConfig } from '../../vitest.shared';
 
@@ -8,12 +7,6 @@ const baseConfig = createPackageVitestConfig({
   environment: 'node',
   name: 'task',
   governedCoverage: true,
-  aliasEntries: [
-    {
-      find: /^@memoflow\/schedule$/,
-      replacement: path.resolve(__dirname, '../test-utils/src/shims/schedule-package-shim.ts'), // Residual 1035 sole
-    },
-  ],
 });
 
 export default mergeConfig(

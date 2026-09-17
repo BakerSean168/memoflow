@@ -5,7 +5,6 @@ import {
   projectReminderResponses,
   projectReminderTemplates,
 } from '../projections/reminder.projection';
-import { projectScheduleTasks } from '../projections/schedule.projection';
 import { projectTaskPlans } from '../projections/task.projection';
 
 function createExportContext(refs: Record<string, string> = {}): ExportContext {
@@ -255,35 +254,5 @@ describe('projection from PowerSync-shaped rows', () => {
     expect(responses[0]?.templateRef).toBe('reminderTemplate:1');
   });
 
-  it('keeps schedule task required payloads present for re-import', () => {
-    const ctx = createExportContext();
 
-    const tasks = projectScheduleTasks(
-      [
-        {
-          id: 'schedule-task-db-id',
-          name: 'Run source',
-          sourceModule: 'task',
-          sourceEntityId: 'missing-source-id',
-          status: 'active',
-          enabled: true,
-          cronExpression: '0 9 * * *',
-          timezone: 'Asia/Shanghai',
-          maxRetries: 5,
-          retryableStatuses: '["FAILED"]',
-          payload: '{"kind":"metadata"}',
-        },
-      ],
-      ctx,
-    );
-
-    expect(tasks[0]).toMatchObject({
-      enabled: true,
-      schedule: { cronExpression: '0 9 * * *', timezone: 'Asia/Shanghai' },
-      retryPolicy: { maxRetries: 5, retryableStatuses: ['FAILED'] },
-      metadata: { kind: 'metadata' },
-    });
-    expect(Object.prototype.hasOwnProperty.call(tasks[0], 'schedule')).toBe(true);
-    expect(Object.prototype.hasOwnProperty.call(tasks[0], 'execution')).toBe(true);
-  });
 });

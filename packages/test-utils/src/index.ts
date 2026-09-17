@@ -60,5 +60,4 @@ export { createTestPinia, installVuePiniaTestHarness, mountWithPinia } from './s
 export type {} from './setup/database.js';
 
 // Test-only package shims
-export { ScheduleTask } from './shims/schedule-package-shim.js';
 

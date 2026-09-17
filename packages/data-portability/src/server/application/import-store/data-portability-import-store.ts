@@ -189,36 +189,6 @@ export interface CreateScheduleInput extends TimestampedImportInput {
   attendees: string | null;
 }
 
-export interface CreateScheduleTaskInput extends TimestampedImportInput {
-  id: string;
-  identityId: string;
-  name: string;
-  description: string | null;
-  sourceModule: string;
-  sourceEntityId: string;
-  status: string;
-  enabled: boolean;
-  cronExpression: string | null;
-  timezone: string;
-  startDate: string | null;
-  endDate: string | null;
-  maxExecutions: number | null;
-  nextRunAt: string | null;
-  lastRunAt: string | null;
-  executionCount: number;
-  lastExecutionStatus: string | null;
-  lastExecutionDuration: number | null;
-  consecutiveFailures: number;
-  maxRetries: number;
-  initialDelayMs: number;
-  maxDelayMs: number;
-  backoffMultiplier: number;
-  retryableStatuses: string;
-  priority: string;
-  timeout: number | null;
-  payload: string | null;
-  tags: string;
-}
 
 // --- Reminder ---
 
@@ -310,7 +280,6 @@ export interface DataPortabilityImportTx {
 
   // Schedule
   createSchedule(input: CreateScheduleInput): Promise<void>;
-  createScheduleTask(input: CreateScheduleTaskInput): Promise<void>;
 
   // Reminder
   createReminderGroup(input: CreateReminderGroupInput): Promise<void>;

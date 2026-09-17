@@ -1,18 +1,14 @@
-/** Temporal Engine read-only diagnostics Electron transport. */
+/** Canonical Temporal Engine read-only diagnostics Electron transport. */
 import { ipcMain } from 'electron';
-import { ScheduleChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
+import { SchedulerChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
+import type { ScheduledInvocationDiagnosticQuery } from '@memoflow/contracts/schedule';
 import { createLogger } from '@memoflow/utils/logger';
 import type { SchedulerModuleInstance } from '../server/infrastructure';
 import { SchedulerController } from '../server/transport';
 import { withAuthenticatedValue } from './authenticated-ipc';
 
 const logger = createLogger('SchedulerElectron');
-const schedulerChannels = [
-  ScheduleChannels.TASK_LIST,
-  ScheduleChannels.TASK_GET_BY_ID,
-  ScheduleChannels.TASK_GET_DUE,
-  ScheduleChannels.TASK_GET_BY_SOURCE,
-] as const;
+const schedulerChannels = Object.values(SchedulerChannels);
 type State = 'created' | 'registered' | 'disposed' | 'failed';
 
 export interface SchedulerElectronModuleDef {
@@ -26,7 +22,9 @@ export interface SchedulerElectronModuleOptions { readonly instance: SchedulerMo
 export function createSchedulerElectronModule(
   options: SchedulerElectronModuleOptions,
 ): SchedulerElectronModuleDef {
-  if (!options?.instance) throw new Error('[FAIL-CLOSED] createSchedulerElectronModule requires options.instance');
+  if (!options?.instance) {
+    throw new Error('[FAIL-CLOSED] createSchedulerElectronModule requires options.instance');
+  }
   let state: State = 'created';
   let runtimeStarted = false;
   const runtime = {
@@ -49,29 +47,31 @@ export function createSchedulerElectronModule(
     runtime,
     register(ctx) {
       if (state !== 'created') {
-        throw new Error(`SchedulerElectronModule.register() called while in '${state}' state; a handle may only register once from 'created'`);
+        throw new Error(
+          `SchedulerElectronModule.register() called while in '${state}' state; a handle may only register once from 'created'`,
+        );
       }
       const installed: string[] = [];
       try {
         const controller = new SchedulerController(options.instance.api);
-        ipcMain.handle(ScheduleChannels.TASK_LIST, async () =>
-          withAuthenticatedValue(ctx, (requestContext) => controller.listTasks({}, requestContext)));
-        installed.push(ScheduleChannels.TASK_LIST);
-        ipcMain.handle(ScheduleChannels.TASK_GET_BY_ID, async (_event, taskId) =>
-          withAuthenticatedValue(ctx, (requestContext) => controller.getTask(taskId, requestContext)));
-        installed.push(ScheduleChannels.TASK_GET_BY_ID);
-        ipcMain.handle(ScheduleChannels.TASK_GET_DUE, async () =>
-          withAuthenticatedValue(ctx, (requestContext) => controller.getDueTasks(requestContext)));
-        installed.push(ScheduleChannels.TASK_GET_DUE);
-        ipcMain.handle(ScheduleChannels.TASK_GET_BY_SOURCE, async (_event, sourceModule, sourceEntityId) =>
+        ipcMain.handle(SchedulerChannels.INVOCATION_LIST, async (_event, query?: ScheduledInvocationDiagnosticQuery) =>
           withAuthenticatedValue(ctx, (requestContext) =>
-            controller.listTasks({ sourceModule, sourceEntityId }, requestContext)));
-        installed.push(ScheduleChannels.TASK_GET_BY_SOURCE);
+            controller.listInvocations(query ?? {}, requestContext)));
+        installed.push(SchedulerChannels.INVOCATION_LIST);
+        ipcMain.handle(SchedulerChannels.INVOCATION_GET_BY_ID, async (_event, invocationId: string) =>
+          withAuthenticatedValue(ctx, (requestContext) =>
+            controller.getInvocation(invocationId, requestContext)));
+        installed.push(SchedulerChannels.INVOCATION_GET_BY_ID);
+        ipcMain.handle(SchedulerChannels.INVOCATION_GET_DUE, async () =>
+          withAuthenticatedValue(ctx, (requestContext) =>
+            controller.listDueInvocations(requestContext)));
+        installed.push(SchedulerChannels.INVOCATION_GET_DUE);
         state = 'registered';
       } catch (error) {
         state = 'failed';
         for (const channel of installed.reverse()) ipcMain.removeHandler(channel);
-        void options.instance.dispose().catch((disposeError) => logger.error('Scheduler dispose failed after IPC registration failure', disposeError));
+        void options.instance.dispose().catch((disposeError) =>
+          logger.error('Scheduler dispose failed after IPC registration failure', disposeError));
         throw error;
       }
     },

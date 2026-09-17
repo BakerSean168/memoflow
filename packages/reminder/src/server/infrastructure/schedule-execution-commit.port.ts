@@ -2,7 +2,7 @@ import type { NotificationRequestedOutboxInput } from '@memoflow/contracts/notif
 import type { ReminderTemplate } from '../domain/aggregates/reminder-template';
 
 /**
- * Reminder-owned atomic commit boundary for the legacy ScheduleTask execution
+ * Reminder-owned atomic commit boundary for the canonical ScheduledInvocation execution
  * seam during NOTIF-3302 migration. Scheduler never sees Notification types.
  */
 export interface ReminderScheduleExecutionCommitInput {

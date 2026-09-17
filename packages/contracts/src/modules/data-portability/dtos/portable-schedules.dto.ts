@@ -23,30 +23,10 @@ export const PortableScheduleSchema = z
 
 export type PortableSchedule = z.infer<typeof PortableScheduleSchema>;
 
-export const PortableScheduleTaskSchema = z
-  .object({
-    _ref: PortableRefSchema,
-    name: z.string(),
-    description: z.string().nullable().optional(),
-    sourceModule: z.string(),
-    sourceRef: PortableRefSchema.nullable().optional(),
-    status: z.string(),
-    enabled: z.boolean(),
-    schedule: z.unknown(),
-    execution: z.unknown(),
-    retryPolicy: z.unknown().optional(),
-    metadata: z.unknown().optional(),
-    createdAt: IsoDateString.optional(),
-    updatedAt: IsoDateString.optional(),
-  })
-  .strict();
-
-export type PortableScheduleTask = z.infer<typeof PortableScheduleTaskSchema>;
 
 export const PortableScheduleDataSchema = z
   .object({
     entries: z.array(PortableScheduleSchema),
-    tasks: z.array(PortableScheduleTaskSchema),
   })
   .strict();
 

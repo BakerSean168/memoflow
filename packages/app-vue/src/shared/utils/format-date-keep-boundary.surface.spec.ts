@@ -21,10 +21,6 @@ describe('Product date presentation boundary', () => {
     resolve(dir, '../../modules/task/utils/task-plan-presentation.ts'),
     'utf8',
   );
-  const schedule = readFileSync(
-    resolve(dir, '../../modules/schedule/components/ScheduleTaskDetailDialog.vue'),
-    'utf8',
-  );
   const reminder = readFileSync(
     resolve(dir, '../../modules/reminder/components/ReminderTemplateCard.vue'),
     'utf8',
@@ -66,8 +62,6 @@ describe('Product date presentation boundary', () => {
   });
 
   it('keeps other date surfaces on Product Time helpers', () => {
-    expect(schedule).toContain('formatProductDate');
-    expect(schedule).toContain("emptyKind('na')");
     expect(reminder).toContain('formatProductDateTimeSeconds');
     expect(reminder).toContain('emptyUnknown');
     expect(rule).toContain('formatProductMonthDay');

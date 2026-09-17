@@ -13,7 +13,11 @@ describe('PowerSyncAppSchema', () => {
     expect(PowerSyncAppSchema.props).toHaveProperty('user_preference_records');
     expect(PowerSyncAppSchema.props).toHaveProperty('task_plans');
     expect(PowerSyncAppSchema.props).toHaveProperty('relations');
-    expect(PowerSyncAppSchema.props).toHaveProperty('schedule_tasks');
+    expect(PowerSyncAppSchema.props).not.toHaveProperty('schedule_tasks');
+    expect(PowerSyncAppSchema.props).not.toHaveProperty('schedule_executions');
+    expect(PowerSyncAppSchema.props).not.toHaveProperty('schedule_statistics');
+    expect(PowerSyncAppSchema.props).toHaveProperty('scheduled_invocations');
+    expect(PowerSyncAppSchema.props).toHaveProperty('invocation_attempts');
     expect(PowerSyncAppSchema.props).toHaveProperty('notifications');
     expect(PowerSyncAppSchema.props).toHaveProperty('repositories');
     expect(PowerSyncAppSchema.tables).toHaveLength(Object.keys(PowerSyncAppSchema.props).length);
@@ -52,8 +56,6 @@ describe('PowerSyncAppSchema', () => {
     ]) {
       expect(getColumnType('task_plans', retired)).toBeUndefined();
     }
-    expect(getColumnType('schedule_tasks', 'payload')).toBe('TEXT');
-    expect(getColumnType('schedule_tasks', 'enabled')).toBe('INTEGER');
   });
 
   it('keeps the Desktop AI knowledge index device-local and stable-id keyed', () => {

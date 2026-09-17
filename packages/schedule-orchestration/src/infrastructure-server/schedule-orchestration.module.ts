@@ -15,8 +15,7 @@ import {
 } from '@memoflow/utils/domain';
 import {
   ScheduledHandlerRegistry,
-  createHandlerRegistryScheduleTaskSourceExecutor,
-  createScheduleTaskSchedulingPort,
+  createScheduledInvocationSchedulingPort,
 } from '@memoflow/scheduler';
 import { createReminderTemplateScheduledHandlerRegistration } from '@memoflow/reminder/schedule-execution';
 import {
@@ -42,8 +41,8 @@ import { createRoutineOverrideChangedPublishingStore } from './routine-override-
 export function createScheduleOrchestrationModule(
   options: CreateScheduleOrchestrationModuleOptions,
 ): ScheduleOrchestrationModule {
-  const scheduleTaskRepository = options.taskProjection.scheduleTaskRepository;
-  const schedulingPort = createScheduleTaskSchedulingPort(scheduleTaskRepository);
+  const invocationRepository = options.scheduler.invocationRepository;
+  const schedulingPort = createScheduledInvocationSchedulingPort(invocationRepository);
   const handlerRegistry = new ScheduledHandlerRegistry();
   handlerRegistry.register(
     createReminderTemplateScheduledHandlerRegistration({
@@ -85,8 +84,7 @@ export function createScheduleOrchestrationModule(
       },
       buildOwner: (ref) => options.taskProjection.source.buildPlanOwner(ref.planId, ref.identityId),
       listSchedulerOwners: () =>
-        scheduleTaskRepository.listSchedulingOwners?.(TASK_SCHEDULING_OWNER_TYPE) ??
-        Promise.resolve([]),
+        invocationRepository.listOwnersByType(TASK_SCHEDULING_OWNER_TYPE),
       removeOwner: (owner) => schedulingPort.removeOwner(owner),
       describeOwner: (owner) => `${owner.identityId}/${owner.id}`,
     }),
@@ -100,8 +98,7 @@ export function createScheduleOrchestrationModule(
       },
       buildOwner: (ref) => options.goalProjection.source.buildGoalOwner(ref.goalId, ref.identityId),
       listSchedulerOwners: () =>
-        scheduleTaskRepository.listSchedulingOwners?.(GOAL_SCHEDULING_OWNER_TYPE) ??
-        Promise.resolve([]),
+        invocationRepository.listOwnersByType(GOAL_SCHEDULING_OWNER_TYPE),
       removeOwner: (owner) => schedulingPort.removeOwner(owner),
       describeOwner: (owner) => `${owner.identityId}/${owner.id}`,
     }),
@@ -119,8 +116,7 @@ export function createScheduleOrchestrationModule(
       buildOwner: (ref) =>
         options.reminderProjection.source.buildTemplateOwner(ref.templateId, ref.identityId),
       listSchedulerOwners: () =>
-        scheduleTaskRepository.listSchedulingOwners?.(REMINDER_SCHEDULING_OWNER_TYPE) ??
-        Promise.resolve([]),
+        invocationRepository.listOwnersByType(REMINDER_SCHEDULING_OWNER_TYPE),
       removeOwner: (owner) => schedulingPort.removeOwner(owner),
       describeOwner: (owner) => `${owner.identityId}/${owner.id}`,
     }),
@@ -164,8 +160,7 @@ export function createScheduleOrchestrationModule(
         buildOwner: (ref) =>
           routineProjection.source.buildRoutineOwner(ref.routineId, ref.identityId),
         listSchedulerOwners: () =>
-          scheduleTaskRepository.listSchedulingOwners?.(ROUTINE_SCHEDULING_OWNER_TYPE) ??
-          Promise.resolve([]),
+          invocationRepository.listOwnersByType(ROUTINE_SCHEDULING_OWNER_TYPE),
         removeOwner: (owner) => schedulingPort.removeOwner(owner),
         describeOwner: (owner) => `${owner.identityId}/${owner.id}`,
       }),
@@ -194,9 +189,6 @@ export function createScheduleOrchestrationModule(
     projectionRepairMetrics: projectionRepairRuntime.metrics,
     schedulingPort,
     handlerRegistry,
-    sourceExecutor: createHandlerRegistryScheduleTaskSourceExecutor({
-      registry: handlerRegistry,
-    }),
     ...(routineOverrideStore ? { routineOverrideStore } : {}),
   };
 }

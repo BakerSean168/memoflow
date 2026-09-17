@@ -12,19 +12,19 @@ class Registry implements OpenApiRegistryLike {
 }
 const auth = ((_, __, next) => next()) as RequestHandler;
 const api: SchedulerApplicationPort = {
-  listTasks: vi.fn(),
-  getTask: vi.fn(),
-  getDueTasks: vi.fn(),
+  listInvocations: vi.fn(),
+  getInvocation: vi.fn(),
+  listDueInvocations: vi.fn(),
 };
 
 describe('Temporal Engine diagnostics route ownership', () => {
-  it('exposes raw worker diagnostics read-only', () => {
+  it('exposes canonical invocation diagnostics read-only', () => {
     const registry = new Registry();
     registerSchedulerRoutes(api, { auth, requireRole: vi.fn(() => auth) }, registry);
     expect(registry.paths.map((r) => `${r.method.toUpperCase()} ${r.path}`).sort()).toEqual([
-      'GET /api/v1/schedules/tasks',
-      'GET /api/v1/schedules/tasks/due',
-      'GET /api/v1/schedules/tasks/{id}',
+      'GET /api/v1/scheduler/invocations',
+      'GET /api/v1/scheduler/invocations/due',
+      'GET /api/v1/scheduler/invocations/{id}',
     ]);
     expect(registry.paths.every((r) => r.method.toLowerCase() === 'get')).toBe(true);
   });

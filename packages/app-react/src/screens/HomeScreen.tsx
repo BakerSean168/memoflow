@@ -6,7 +6,6 @@ import { APP_DESCRIPTION, APP_NAME } from '../constants/app';
 import { useGoals } from '../hooks/useGoals';
 import { useNotifications } from '../hooks/useNotifications';
 import { useReminders } from '../hooks/useReminders';
-import { useScheduleTasks } from '../hooks/useScheduleTasks';
 import { useTaskPlans } from '../hooks/useTaskPlans';
 import { useAppSession } from '../providers/app-session-provider';
 
@@ -34,7 +33,6 @@ export function HomeScreen() {
   const { currentUser, isGuest, isRemoteAuthenticated, sessionKind, signInDemo, signOut } = useAppSession();
   const { templates } = useTaskPlans();
   const { goals } = useGoals();
-  const { tasks: scheduleTasks } = useScheduleTasks();
   const { todaySchedule } = useReminders();
   const { unreadCount } = useNotifications();
 
@@ -103,7 +101,6 @@ export function HomeScreen() {
         <View style={styles.pillRow}>
           <StatusPill label={`${templates.length} tasks`} tone="tint" />
           <StatusPill label={`${goals.length} goals`} tone="success" />
-          <StatusPill label={`${scheduleTasks.length} schedule items`} tone="textSecondary" />
           <StatusPill label={`${todaySchedule.length} reminders`} tone="textSecondary" />
           <StatusPill label={`${unreadCount} unread`} tone={unreadCount > 0 ? 'warning' : 'success'} />
         </View>

@@ -61,9 +61,6 @@ export interface ResourceRepoPort {
 export interface ScheduleRepoPort {
   findByIdentityId(identityId: string): Promise<unknown[]>;
 }
-export interface ScheduleTaskRepoPort {
-  findByIdentityId(identityId: string): Promise<unknown[]>;
-}
 
 
 // ============ AI ============
@@ -106,7 +103,6 @@ export interface DataPortabilityDependencies {
   folderRepository: ResourceFolderRepoPort;
   resourceRepository: ResourceRepoPort;
   scheduleRepository: ScheduleRepoPort;
-  scheduleTaskRepository: ScheduleTaskRepoPort;
   aiConversationRepository: AIConversationRepoPort;
   notificationPreferenceRepository: NotificationPreferenceRepoPort;
   userPreferenceRepository: UserPreferenceRepoPort;

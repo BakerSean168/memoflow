@@ -30,8 +30,8 @@
       "evidence": [
         {
           "runner": "scheduler-integration",
-          "file": "packages/scheduler/src/server/infrastructure/adapters/prisma/schedule-task-prisma.repository.integration.test.ts",
-          "title": "rolls back a transaction-scoped save when the owner reconcile callback fails"
+          "file": "packages/scheduler/src/server/infrastructure/adapters/prisma/scheduled-invocation-prisma.repository.integration.test.ts",
+          "title": "rolls back a canonical ScheduledInvocation transaction when the owner reconcile callback fails"
         }
       ]
     },
@@ -41,8 +41,8 @@
       "evidence": [
         {
           "runner": "scheduler-integration",
-          "file": "packages/scheduler/src/server/infrastructure/adapters/prisma/schedule-task-prisma.repository.integration.test.ts",
-          "title": "recovers a claimed invocation after the scheduler worker crashes and its host lease expires"
+          "file": "packages/scheduler/src/server/infrastructure/adapters/prisma/scheduled-invocation-prisma.repository.integration.test.ts",
+          "title": "recovers a claimed canonical invocation after the scheduler worker crashes and its host lease expires"
         }
       ]
     },
@@ -52,8 +52,8 @@
       "evidence": [
         {
           "runner": "scheduler-integration",
-          "file": "packages/scheduler/src/server/infrastructure/adapters/prisma/schedule-task-prisma.repository.integration.test.ts",
-          "title": "recovers a claimed invocation after the scheduler worker crashes and its host lease expires"
+          "file": "packages/scheduler/src/server/infrastructure/adapters/prisma/scheduled-invocation-prisma.repository.integration.test.ts",
+          "title": "recovers a claimed canonical invocation after the scheduler worker crashes and its host lease expires"
         }
       ]
     },
@@ -63,7 +63,7 @@
       "evidence": [
         {
           "runner": "scheduler-unit",
-          "file": "packages/scheduler/src/server/infrastructure/scheduling/__tests__/legacy-schedule-task-scheduling.adapter.spec.ts",
+          "file": "packages/scheduler/src/server/infrastructure/scheduling/__tests__/scheduled-invocation-scheduling.adapter.spec.ts",
           "title": "rejects duplicate desired scheduling keys before writing"
         }
       ]

@@ -59,7 +59,7 @@ export function createReminderScheduleExecutionSource(
       }
 
       // Crash/replay guard: if the Reminder aggregate has already advanced past
-      // the ScheduleTask occurrence, the atomic business commit already won.
+      // the scheduled invocation, the atomic business commit already won.
       // Do not append another history row or another notification request.
       if (reminder.nextTriggerAt !== scheduledFor) {
         return {

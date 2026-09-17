@@ -38,9 +38,9 @@ const UNIQUE_CONSTRAINTS: readonly UniqueConstraintSpec[] = [
     indexName: 'notifications_identity_id_idempotency_key_key',
   },
   {
-    table: 'schedule_tasks',
+    table: 'scheduled_invocations',
     columns: ['identity_id', 'owner_type', 'owner_id', 'scheduling_key'],
-    indexName: 'schedule_tasks_owner_scheduling_key_unique',
+    indexName: 'scheduled_invocations_owner_key_unique',
   },
   {
     table: 'task_occurrences',

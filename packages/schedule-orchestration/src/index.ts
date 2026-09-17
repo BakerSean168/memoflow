@@ -11,7 +11,7 @@ export type {
   ScheduleOrchestrationHandlerRegistry,
   ScheduleOrchestrationModule,
   ScheduleOrchestrationProjectionDeps,
-  ScheduleOrchestrationScheduleTaskProjectionDeps,
+  ScheduleOrchestrationSchedulerDeps,
 } from './ports/projection';
 export type { ScheduleOrchestrationExecutionDeps } from './ports/execution';
 export type { RuntimeContribution } from './ports/runtime-contribution';

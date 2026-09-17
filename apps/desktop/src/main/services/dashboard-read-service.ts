@@ -11,7 +11,6 @@ import type { UserTimeContextPort } from '@memoflow/time';
 import type { IGoalRepository } from '@memoflow/goal';
 import type { ITaskOccurrenceRepository, ITaskPlanRepository } from '@memoflow/task';
 import type { IScheduleRepository } from '@memoflow/schedule';
-import type { IScheduleTaskRepository } from '@memoflow/scheduler';
 import type { IReminderTemplateRepository } from '@memoflow/reminder/server';
 import type { INotificationRepository } from '@memoflow/notification';
 import { createLogger } from '@memoflow/utils/logger';
@@ -24,20 +23,16 @@ const logger = createLogger('DashboardReadService');
  *
  * These are the exact Goal/Task/Schedule/Reminder/Notification repository
  * instances owned by the desktop composition root, injected explicitly instead
- * of read through package-level globals. `scheduleTaskRepository` is part of the
- * view so sibling consumers (analytics) share the same instance-bound schedule
- * task repository.
+ * of read through package-level globals.
  *
  * 这些是 desktop 组合根拥有的确切 Goal/Task/Schedule/Reminder/Notification 仓储
- * 实例，通过显式注入而非包级全局读取。`scheduleTaskRepository` 属于该视图，使
- * 兄弟消费者（analytics）共享同一个 instance-bound schedule task 仓储。
+ * 实例，通过显式注入而非包级全局读取。
  */
 export interface DashboardReadDependencies {
   readonly goalRepository: IGoalRepository;
   readonly taskPlanRepository: ITaskPlanRepository;
   readonly taskOccurrenceRepository: ITaskOccurrenceRepository;
   readonly scheduleRepository: IScheduleRepository;
-  readonly scheduleTaskRepository: IScheduleTaskRepository;
   readonly reminderTemplateRepository: IReminderTemplateRepository;
   readonly notificationRepository: INotificationRepository;
   readonly userTimeContextPort: UserTimeContextPort;

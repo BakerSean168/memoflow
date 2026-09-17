@@ -364,7 +364,8 @@ describe('module schemas', () => {
       PortableRepositoryDataSchema.safeParse({ repositories: [], folders: [], resources: [] })
         .success,
     ).toBe(true);
-    expect(PortableScheduleDataSchema.safeParse({ entries: [], tasks: [] }).success).toBe(true);
+    expect(PortableScheduleDataSchema.safeParse({ entries: [] }).success).toBe(true);
+    expect(PortableScheduleDataSchema.safeParse({ entries: [], tasks: [] }).success).toBe(false);
     expect(PortableAIDataSchema.safeParse({ conversations: [] }).success).toBe(true);
     expect(
       PortableSettingsSchema.safeParse({
