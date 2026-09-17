@@ -102,7 +102,6 @@ export function createProjectionRepairRuntime(
   const counters: Record<ProjectionRepairSource, MutableCounters> = {
     task: emptyCounters(),
     goal: emptyCounters(),
-    reminder: emptyCounters(),
     routine: emptyCounters(),
   };
   let started = false;
@@ -111,17 +110,15 @@ export function createProjectionRepairRuntime(
     snapshot(): ProjectionRepairMetricsSnapshot {
       const task = copyCounters(counters.task);
       const goal = copyCounters(counters.goal);
-      const reminder = copyCounters(counters.reminder);
       const routine = copyCounters(counters.routine);
       return {
         task,
         goal,
-        reminder,
         routine,
         total: {
-          repaired: task.repaired + goal.repaired + reminder.repaired + routine.repaired,
-          unchanged: task.unchanged + goal.unchanged + reminder.unchanged + routine.unchanged,
-          failed: task.failed + goal.failed + reminder.failed + routine.failed,
+          repaired: task.repaired + goal.repaired + routine.repaired,
+          unchanged: task.unchanged + goal.unchanged + routine.unchanged,
+          failed: task.failed + goal.failed + routine.failed,
         },
       };
     },

@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { RefAllocator, type ExportContext } from '../../portable-runtime';
 import { projectGoalRecords } from '../projections/goal.projection';
-import { projectReminderResponses } from '../projections/reminder.projection';
 import { projectResources } from '../projections/repository.projection';
 import { projectTaskOccurrences } from '../projections/task.projection';
 
@@ -70,23 +69,4 @@ describe('projection ref safety', () => {
     ).toThrow('EXPORT_VALIDATION_ERROR: Unresolved repository reference to missing-repository');
   });
 
-  it('fails export when a reminder response requires an unresolved plan ref', () => {
-    const ctx = createExportContext();
-
-    expect(() =>
-      projectReminderResponses(
-        [
-          {
-            id: 'response-db-id',
-            reminderTemplateId: 'missing-reminder-template',
-            action: 'ack',
-            timestamp: '2026-06-03T00:00:00.000Z',
-          },
-        ],
-        ctx,
-      ),
-    ).toThrow(
-      'EXPORT_VALIDATION_ERROR: Unresolved reminder reference to missing-reminder-template',
-    );
-  });
 });

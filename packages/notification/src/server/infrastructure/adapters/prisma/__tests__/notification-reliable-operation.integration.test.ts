@@ -7,7 +7,6 @@ import {
   NotificationCategory,
   NotificationChannelType,
 } from '@memoflow/contracts/notification';
-import { ReminderType } from '@memoflow/contracts/reminder';
 import { NotificationReliableOperationPrismaAdapter } from '../notification-reliable-operation-prisma.adapter';
 import { NotificationPrismaRepository } from '../notification-prisma.repository';
 import { NotificationPreferencePrismaRepository } from '../notification-preference-prisma.repository';
@@ -21,8 +20,6 @@ import {
   getPrisma,
   seedAccount,
 } from '@memoflow/test-utils/setup/integration-helpers';
-// eslint-disable-next-line @nx/enforce-module-boundaries
-import { ReminderTemplate, createReminderPrismaRepositories } from '@memoflow/reminder/server';
 
 const TEST_NOTIFICATION_TIME_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
 const TEST_USER_TIME_CONTEXT_PORT = {
@@ -1033,160 +1030,6 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     req2.destroy();
     moduleInstance.dispose();
     await new Promise((resolve) => server.close(resolve as any));
-  });
-
-  it('12. Cross-module Reminder NotificationRequested is materialized, then dispatched with the real FK/id', async () => {
-    // W1 cron trigger intent (0 9 * * *) is expressed via FixedTime trigger in the current contract
-    const template = ReminderTemplate.create({
-      identityId: identityId as any,
-      title: 'Cross Module Reminder',
-      description: 'Testing W1 intent consumption',
-      type: ReminderType.Recurring,
-      trigger: {
-        type: 'FixedTime',
-        fixedTime: { time: '09:00', timezone: 'UTC' },
-        interval: null,
-      },
-      activeTime: { activatedAt: Date.now() - 60_000 },
-      notificationConfig: {
-        channels: ['InApp'],
-        title: 'Cross Module Reminder',
-        body: 'Testing W1 intent consumption',
-        sound: { enabled: true, soundName: null },
-        vibration: { enabled: true, pattern: null },
-        actions: null,
-      },
-    });
-
-    const templateId = template.id as string;
-    // Real W1 occurrenceKey: `${templateId}:${triggerTimeIso}` — its prefix is the
-    // reminder template id, NOT a pre-existing Notification id. No masking seed is allowed.
-    const triggerTime = Date.now();
-    const triggerTimeIso = new Date(triggerTime).toISOString();
-    const occurrenceKey = `${templateId}:${triggerTimeIso}`;
-    const idempotencyKey = buildIdempotencyKeyString({
-      identityId,
-      source: 'reminder',
-      occurrenceKey,
-    });
-    const ownerToken = 'runner-1';
-    const fencingToken = 1;
-    const occurrenceId = randomUUID();
-
-    const tplDto = template.toServerDTO();
-    await prisma.reminderTemplate.create({
-      data: {
-        id: templateId,
-        identityId,
-        name: tplDto.name,
-        description: tplDto.description,
-        type: tplDto.type,
-        selfEnabled: tplDto.selfEnabled,
-        status: tplDto.status,
-        importanceLevel: tplDto.importanceLevel,
-        tags: JSON.stringify(tplDto.tags),
-        color: tplDto.color,
-        icon: tplDto.icon,
-        trigger: JSON.stringify(tplDto.trigger),
-        activeTime: JSON.stringify(tplDto.activeTime),
-        activeHours: tplDto.activeHours ? JSON.stringify(tplDto.activeHours) : null,
-        notificationConfig: JSON.stringify(tplDto.notificationConfig),
-        nextTriggerAt: tplDto.nextTriggerAt != null ? new Date(tplDto.nextTriggerAt) : null,
-        stats: '{}',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    });
-
-    await prisma.reminderOccurrence.create({
-      data: {
-        id: occurrenceId,
-        templateId,
-        identityId,
-        source: 'reminder',
-        occurrenceKey,
-        idempotencyKey,
-        status: 'running',
-        attempt: 1,
-        ownerToken,
-        claimId: randomUUID(),
-        fencingToken,
-        leaseExpiresAt: new Date(Date.now() + 30000),
-        correlationId: occurrenceId,
-        causationId: occurrenceId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    });
-
-    const runner = createReminderPrismaRepositories(prisma).transactionRunner;
-
-    await runner.executeClaimedOccurrenceTransaction({
-      template,
-      occurrence: {
-        id: occurrenceId,
-        identityId,
-        templateId,
-        occurrenceKey,
-        idempotencyKey,
-        fencingToken,
-        ownerToken,
-      },
-      isEnabled: true,
-      triggerTime,
-    });
-
-    // Reminder owns only the business-level NotificationRequested handoff.
-    // Channel expansion stays inside Notification.
-    const pendingOutbox = await prisma.outboxMessage.findFirst({
-      where: { identityId, messageType: 'notification.requested', status: 'pending' },
-    });
-    expect(pendingOutbox).not.toBeNull();
-
-    // First tick materializes the Notification Fact + per-channel dispatch outbox.
-    const mockDeliverer = {
-      async deliver() {},
-    };
-
-    const runtime = createNotificationRuntimeContribution({
-      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
-      environment: 'test',
-      repository: notificationRepo,
-      preferenceRepository: preferenceRepo,
-      reliableAdapter,
-      deliverer: mockDeliverer,
-    });
-
-    await runtime.tick();
-
-    // A second tick owns delivery because dispatch outboxes are Priority 1 and the
-    // NotificationRequested envelope is consumed in Priority 2 of the first tick.
-    await runtime.tick();
-
-    // Verify NotificationRequested shared outbox is succeeded
-    const updatedOutbox = await prisma.outboxMessage.findUnique({
-      where: { id: pendingOutbox!.id },
-    });
-    expect(updatedOutbox?.status).toBe('succeeded');
-    expect(updatedOutbox?.dispatchedAt).not.toBeNull();
-
-    // Verify Notification aggregate is persisted in DB
-    const notifs = await notificationRepo.findByIdentityId(identityId);
-    const persisted = notifs.find((n) => n.title === 'Cross Module Reminder');
-    expect(persisted).toBeDefined();
-    const persistedNotificationId = String(persisted!.id);
-
-    // Verify NotificationDispatchOutbox row exists and its FK points at the real
-    // persisted Notification id (NOT the W1 occurrenceKey prefix = template id),
-    // proving the consumer created correct FK/id itself.
-    const outboxes = await prisma.notificationDispatchOutbox.findMany({
-      where: { identityId, source: 'notification' },
-    });
-    expect(outboxes.length).toBeGreaterThanOrEqual(1);
-    const dispatchOutbox = outboxes.find((o) => o.notificationId === persistedNotificationId);
-    expect(dispatchOutbox).toBeDefined();
-    expect(dispatchOutbox?.status).toBe('succeeded');
-    expect(dispatchOutbox?.notificationId).not.toBe(templateId);
   });
 
   it('14. Fault Injection 2: Side effect succeeded but crash before receipt commit -> reclaimed -> does not re-invoke deliverer', async () => {

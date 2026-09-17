@@ -14,7 +14,6 @@ import { goalHandlers } from './goal.handlers';
 import { accountHandlers } from './account.handlers';
 import { taskHandlers } from './task.handlers';
 import { scheduleHandlers } from './schedule.handlers';
-import { reminderHandlers } from './reminder.handlers';
 import { notificationHandlers } from './notification.handlers';
 import { repositoryHandlers } from './repository.handlers';
 import { governanceHandlers } from './governance.handlers';
@@ -27,7 +26,6 @@ export const handlers = [
   ...accountHandlers,
   ...taskHandlers,
   ...scheduleHandlers,
-  ...reminderHandlers,
   ...notificationHandlers,
   ...repositoryHandlers,
   ...governanceHandlers,

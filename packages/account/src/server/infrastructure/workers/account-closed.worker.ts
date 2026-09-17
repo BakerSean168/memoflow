@@ -7,7 +7,7 @@ export interface AccountClosedConsumerLike {
 }
 
 export class AccountClosedWorker {
-  private readonly reminderConsumer: AccountClosedConsumerLike;
+  private readonly routineConsumer: AccountClosedConsumerLike;
   private readonly notificationConsumer: AccountClosedConsumerLike;
   private readonly repositoryConsumer?: AccountClosedConsumerLike;
   private readonly leaseDurationMs: number;
@@ -16,14 +16,14 @@ export class AccountClosedWorker {
   constructor(
     private readonly prisma: PrismaClient,
     options: {
-      reminderConsumer: AccountClosedConsumerLike;
+      routineConsumer: AccountClosedConsumerLike;
       notificationConsumer: AccountClosedConsumerLike;
       repositoryConsumer?: AccountClosedConsumerLike;
       leaseDurationMs?: number;
       enableHeartbeat?: boolean;
     },
   ) {
-    this.reminderConsumer = options.reminderConsumer;
+    this.routineConsumer = options.routineConsumer;
     this.notificationConsumer = options.notificationConsumer;
     this.repositoryConsumer = options.repositoryConsumer;
     this.leaseDurationMs = options.leaseDurationMs ?? 30000;
@@ -114,7 +114,7 @@ export class AccountClosedWorker {
         const eventPayload = JSON.parse(msg.payloadJson);
         const eventId = msg.idempotencyKey ?? msg.id;
 
-        await this.reminderConsumer.handleAccountClosed(eventPayload, eventId);
+        await this.routineConsumer.handleAccountClosed(eventPayload, eventId);
         await this.notificationConsumer.handleAccountClosed(eventPayload, eventId);
         if (this.repositoryConsumer) {
           await this.repositoryConsumer.handleAccountClosed(eventPayload, eventId);

@@ -13,7 +13,6 @@ import { createLabelIpcClient } from '@memoflow/label/client';
 import { createGovernanceIpcClient } from '@memoflow/governance/client';
 import { createTaskIpcClient } from '@memoflow/task/client';
 import { createScheduleIpcClient } from '@memoflow/schedule/client';
-import { createReminderIpcClient } from '@memoflow/reminder/client';
 import { createRepositoryIpcClient } from '@memoflow/repository/client';
 import { createNotificationIpcClient } from '@memoflow/notification/client';
 import { createSettingIpcClient } from '@memoflow/setting/client';
@@ -31,7 +30,6 @@ import {
   LABEL_SERVICE_KEY,
   TASK_SERVICE_KEY,
   SCHEDULE_SERVICE_KEY,
-  REMINDER_SERVICE_KEY,
   REPOSITORY_SERVICE_KEY,
   NOTIFICATION_SERVICE_KEY,
   SETTING_SERVICE_KEY,
@@ -90,8 +88,6 @@ export function installDesktopAppServices(app: App): void {
   app.provide(TASK_SERVICE_KEY, createTaskIpcClient(resultIpcClient));
 
   app.provide(SCHEDULE_SERVICE_KEY, createScheduleIpcClient(resultIpcClient));
-
-  app.provide(REMINDER_SERVICE_KEY, createReminderIpcClient(resultIpcClient));
 
   app.provide(REPOSITORY_SERVICE_KEY, createRepositoryIpcClient(resultIpcClient));
 

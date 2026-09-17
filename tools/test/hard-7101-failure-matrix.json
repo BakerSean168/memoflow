@@ -74,8 +74,8 @@
       "evidence": [
         {
           "runner": "reminder-unit",
-          "file": "packages/reminder/src/server/infrastructure/reminder-template-scheduled-handler.spec.ts",
-          "title": "maps a stale Reminder occurrence to skipped without replaying the business commit"
+          "file": "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-schedule-execution-source.spec.ts",
+          "title": "skips cleanly on revision drift"
         }
       ]
     },

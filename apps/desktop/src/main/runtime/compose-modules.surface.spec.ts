@@ -8,14 +8,14 @@ import { describe, expect, it } from 'vitest';
  *
  * Locks the Step D wiring: apps/desktop/src/main/main.ts must compose all
  * remaining business modules (account / ai / data-portability / notification /
- * reminder / repository / schedule / setting) through the runtime composers and
+ * routine / repository / schedule / setting) through the runtime composers and
  * must no longer reference the retired electron transport factories or electron
  * repository accessors. Each composer must only touch the narrow seams the plan
  * allows — package root + package electron seam, never `/server` — and must
  * never pass `ctx.db` to a module factory.
  *
  * 锁定 Step D 接线：apps/desktop/src/main/main.ts 必须通过 runtime composer 组装
- * 全部剩余业务模块（account / ai / data-portability / notification / reminder /
+ * 全部剩余业务模块（account / ai / data-portability / notification / routine /
  * repository / schedule / setting），且不再引用已退役的 electron transport 工厂或
  * electron 仓储 accessor。每个 composer 只允许接触计划允许的窄 seam——包根 + 包
  * electron seam，绝不使用 `/server`——且绝不把 `ctx.db` 传给模块工厂。
@@ -30,7 +30,7 @@ describe('desktop runtime composer surface (Batch Step D)', () => {
     { file: 'compose-ai.ts', pkg: '@memoflow/ai' },
     { file: 'compose-data-portability.ts', pkg: '@memoflow/data-portability' },
     { file: 'compose-notification.ts', pkg: '@memoflow/notification' },
-    { file: 'compose-reminder.ts', pkg: '@memoflow/reminder' },
+    { file: 'compose-routine.ts', pkg: '@memoflow/reminder' },
     { file: 'compose-repository.ts', pkg: '@memoflow/repository' },
     { file: 'compose-schedule.ts', pkg: '@memoflow/schedule' },
     { file: 'compose-setting.ts', pkg: '@memoflow/setting' },
@@ -75,7 +75,6 @@ describe('desktop runtime composer surface (Batch Step D)', () => {
       '.register(taskElectronModule)',
       '.register(scheduleComposed.calendarModule)',
       '.register(scheduleComposed.schedulerModule)',
-      '.register(reminderComposed.module)',
       '.register(interventionWindowElectronModule)',
       '.register(focusWindowElectronModule)',
       '.register(AIElectronModule)',
@@ -101,6 +100,10 @@ describe('desktop runtime composer surface (Batch Step D)', () => {
         // the electron seam's port types, never the package root.
         expect(source).toContain(`from '${pkg}/electron'`);
         expect(source).not.toContain(`from '${pkg}'`);
+      } else if (name === 'routine') {
+        expect(source).toContain(`from '${pkg}'`);
+        expect(source).toContain(`from '${pkg}/routine-runtime'`);
+        expect(source).not.toContain(`from '${pkg}/electron'`);
       } else {
         expect(source).toContain(`from '${pkg}'`);
       }
@@ -154,22 +157,22 @@ describe('desktop runtime composer surface (Batch Step D)', () => {
     expect(schedule).not.toContain('scheduleExecutionRepository');
   });
 
-  it('reminder composer owns one per-profile InterventionRuntime and main wires both Routine windows through bootstrapper', () => {
-    const reminder = readFileSync(resolve(composerDir, 'compose-reminder.ts'), 'utf8');
-    expect(reminder).toContain('createInterventionRuntime');
-    expect(reminder).toContain('readonly interventionRuntime: InterventionRuntime');
-    expect(reminder).toContain('const interventionRuntime = createInterventionRuntime()');
-    expect(reminder).toContain('readonly activityRuntime: RoutineActivitySensorRuntime');
-    expect(reminder).toContain('readonly activeUsageRuntime: ActiveUsageRuntime');
-    expect(main).toContain('runtime: reminderComposed.interventionRuntime');
-    expect(main).toContain('await reminderComposed.refreshLocalRoutineRegistrations()');
-    expect(main.indexOf('await reminderComposed.refreshLocalRoutineRegistrations()')).toBeLessThan(
-      main.indexOf('reminderComposed.activityRuntime.start()'),
+  it('routine composer owns one per-profile InterventionRuntime and main wires both Routine windows through bootstrapper', () => {
+    const routine = readFileSync(resolve(composerDir, 'compose-routine.ts'), 'utf8');
+    expect(routine).toContain('createInterventionRuntime');
+    expect(routine).toContain('readonly interventionRuntime: InterventionRuntime');
+    expect(routine).toContain('const interventionRuntime = createInterventionRuntime()');
+    expect(routine).toContain('readonly activityRuntime: RoutineActivitySensorRuntime');
+    expect(routine).toContain('readonly activeUsageRuntime: ActiveUsageRuntime');
+    expect(main).toContain('runtime: routineComposed.interventionRuntime');
+    expect(main).toContain('await routineComposed.refreshLocalRoutineRegistrations()');
+    expect(main.indexOf('await routineComposed.refreshLocalRoutineRegistrations()')).toBeLessThan(
+      main.indexOf('routineComposed.activityRuntime.start()'),
     );
-    expect(main).toContain('reminderComposed.activityRuntime.start()');
-    expect(main).toContain('reminderComposed.activeUsageRuntime.start()');
-    expect(reminder).toContain('loadPowerSyncRoutineLocalRegistrations');
-    expect(reminder).not.toContain('onOccurrenceDue: () => {}');
+    expect(main).toContain('routineComposed.activityRuntime.start()');
+    expect(main).toContain('routineComposed.activeUsageRuntime.start()');
+    expect(routine).toContain('loadPowerSyncRoutineLocalRegistrations');
+    expect(routine).not.toContain('onOccurrenceDue: () => {}');
     expect(main).toContain('.register(interventionWindowElectronModule)');
     expect(main).toContain('.register(focusWindowElectronModule)');
   });
@@ -190,9 +193,9 @@ describe('desktop runtime composer surface (Batch Step D)', () => {
 
   it('dashboard-read-service no longer reads electron accessors', () => {
     const dashboard = readFileSync(resolve(mainDir, 'services/dashboard-read-service.ts'), 'utf8');
-    expect(dashboard).not.toMatch(/get(Schedule|ReminderTemplate|Notification)Repository/);
+    expect(dashboard).not.toMatch(/get(Schedule|Notification)Repository/);
     expect(dashboard).toContain('scheduleRepository');
-    expect(dashboard).toContain('reminderTemplateRepository');
+    expect(dashboard).not.toMatch(/reminderTemplateRepository/);
     expect(dashboard).toContain('notificationRepository');
   });
 

@@ -7,7 +7,9 @@
  * 订阅集合保持克制（只记录可解释的变化）：
  * - goal:created / goal:completed / goal:review-added
  * - task:occurrence-completed / task:occurrence-uncompleted
- * - reminder:response-recorded
+ *
+ * Legacy Reminder response events are retired in R4-2201C. Canonical Routine
+ * interaction ledger projection is owned by the Phase 5 Home/Dashboard cutover.
  *
  * Scheduler worker executions are intentionally excluded: product analytics is
  * driven by owner-domain outcomes, never raw Temporal Engine runtime state.
@@ -121,8 +123,7 @@ export function createActivityLedgerRecorder(writer: IActivityLedgerWriter): {
     | 'goal:completed'
     | 'goal:review-added'
     | 'task:occurrence-completed'
-    | 'task:occurrence-uncompleted'
-    | 'reminder:response-recorded';
+    | 'task:occurrence-uncompleted';
   const events =
     createTypedEventSubscriber<
       Pick<
@@ -132,7 +133,6 @@ export function createActivityLedgerRecorder(writer: IActivityLedgerWriter): {
         | 'goal:review-added'
         | 'task:occurrence-completed'
         | 'task:occurrence-uncompleted'
-        | 'reminder:response-recorded'
       >
     >(eventBus);
   const handlers = new Map<string, (payload: unknown) => void>();
@@ -232,20 +232,6 @@ export function createActivityLedgerRecorder(writer: IActivityLedgerWriter): {
             title: null,
             sourceEvent: 'task:occurrence-uncompleted',
             occurredAt: Date.now(),
-          }),
-      );
-      subscribe(
-        'reminder:response-recorded',
-        (e) =>
-          void safeAppend({
-            identityId: String(e.identityId ?? ''),
-            actorId: String(e.identityId ?? ''),
-            subjectType: 'reminder',
-            subjectId: String(e.responseId ?? ''),
-            action: `response:${String(e.action ?? '').toLowerCase()}`,
-            title: e.templateId != null ? String(e.templateId) : null,
-            sourceEvent: 'reminder:response-recorded',
-            occurredAt: typeof e.recordedAt === 'number' ? e.recordedAt : Date.now(),
           }),
       );
       logger.info('[ActivityLedger] Recorder started');

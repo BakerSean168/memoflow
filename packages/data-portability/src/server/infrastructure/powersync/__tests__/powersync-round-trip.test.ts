@@ -56,8 +56,6 @@ describe('PowerSync desktop data portability round trip', () => {
     expect(exported.content).toContain('"repositories"');
     expect(exported.content).toContain('"goals"');
     expect(JSON.parse(exported.content).schemaVersion).toBe(2);
-    expect(exported.content).toContain('"templates"');
-    expect(exported.content).toContain('"groups"');
     expect(exported.content).toContain('"tasks"');
     expect(exported.content).not.toContain('"workspaces"');
     expect(exported.content).toContain('"conversations"');
@@ -79,7 +77,6 @@ describe('PowerSync desktop data portability round trip', () => {
     expect(JSON.stringify(firstStatements)).not.toContain('goal-a');
     expect(JSON.stringify(firstStatements)).not.toContain('kr-a');
     expect(JSON.stringify(firstStatements)).not.toContain('task-plan-a');
-    expect(JSON.stringify(firstStatements)).not.toContain('reminder-template-a');
     expect(JSON.stringify(firstStatements)).not.toContain('workspace-a');
     expect(JSON.stringify(firstStatements)).not.toContain('editor_workspaces');
     expect(JSON.stringify(firstStatements)).not.toContain('editor_workspace_sessions');
@@ -95,12 +92,6 @@ describe('PowerSync desktop data portability round trip', () => {
     const goalRecord = insertedRow(firstStatements, 'goal_records');
     const taskPlan = insertedRow(firstStatements, 'task_plans');
     const taskOccurrence = insertedRow(firstStatements, 'task_occurrences');
-    const reminderGroup = insertedRow(firstStatements, 'reminder_groups');
-    const reminderTemplate = insertedRow(firstStatements, 'reminder_templates');
-    const routineProfile = insertedRow(firstStatements, 'routine_profiles');
-    const routineDefinition = insertedRow(firstStatements, 'routine_definitions');
-    const routineMembership = insertedRow(firstStatements, 'routine_profile_memberships');
-    const reminderResponse = insertedRow(firstStatements, 'reminder_responses');
     const conversation = insertedRow(firstStatements, 'ai_conversations');
     const message = insertedRow(firstStatements, 'ai_messages');
 
@@ -142,16 +133,6 @@ describe('PowerSync desktop data portability round trip', () => {
     expect(importedOccurrenceChecklist).toHaveLength(1);
     expect(importedOccurrenceChecklist[0]?.definitionId).toBe(importedPlanChecklist[0]?.id);
     expect(importedPlanChecklist[0]?.id).not.toBe('check-a');
-    expect(reminderTemplate).not.toHaveProperty('reminder_group_id');
-    expect(routineProfile.id).toBe(reminderGroup.id);
-    expect(routineDefinition.id).toBe(reminderTemplate.id);
-    expect(routineMembership.profile_id).toBe(routineProfile.id);
-    expect(routineMembership.routine_id).toBe(routineDefinition.id);
-    expect(routineMembership.enabled).toBe(0);
-    expect(reminderResponse.template_id).toBe(reminderTemplate.id);
-    expect(reminderResponse.action).toBe('SNOOZED');
-    expect(reminderResponse.response_time).toBe(7);
-    expect(reminderResponse.snooze_duration_seconds).toBe(900);
     expect(message.conversation_id).toBe(conversation.id);
 
     await importUseCase.execute(identityB, exported.content);
@@ -180,7 +161,6 @@ describe('PowerSync desktop data portability round trip', () => {
         updatedSingletons: expect.objectContaining({
           settings: 1,
           notificationPreference: 1,
-          userReminderPreference: 1,
         }),
       }),
     );
@@ -350,7 +330,7 @@ class FakePowerSyncDb {
       }
     }
 
-    if (table && ['notification_preferences', 'user_reminder_preferences'].includes(table)) {
+    if (table === 'notification_preferences') {
       const seeded = this.liveRows(table).find((row) => row.identity_id === identityUuid);
       if (seeded) return Promise.resolve(seeded as T);
       if (identityUuid === this.options.existingSingletonsIdentityId) {
@@ -501,31 +481,7 @@ function existingSingleton(table: string, identityUuid: unknown): Row {
         identity_id: identityUuid,
         global_channels: '{}',
         workflow_overrides: '{}',
-        do_not_disturb: null,
-        rate_limit: null,
-        created_at: now,
-        updated_at: now,
-      };
-    case 'user_reminder_preferences':
-      return {
-        id: 'existing-reminder-preference-b',
-        identity_id: identityUuid,
-        global_reminder_enabled: 1,
-        default_snooze_minutes: 10,
-        max_daily_reminders: 10,
-        preferred_hours_start: 9,
-        preferred_hours_end: 18,
-        timezone: 'Asia/Shanghai',
-        enable_weekend_reminders: 1,
-        enable_location_based_reminders: 0,
-        enable_voice_reminders: 0,
-        enable_sound: 1,
-        enable_vibration: 1,
-        enable_notification_badge: 1,
-        best_time_slots: '[]',
-        worst_time_slots: '[]',
-        adaptive_timing: 1,
-        learning_enabled: 1,
+        quiet_hours: null,
         created_at: now,
         updated_at: now,
       };

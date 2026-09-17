@@ -14,7 +14,6 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import {
-  AlarmClock,
   Bell,
   Calendar,
   FileText,
@@ -78,7 +77,6 @@ const moduleIcons: Record<ShellModule, Component> = {
   goal: Target,
   task: ListTodo,
   note: FileText,
-  reminder: AlarmClock,
   notification: Bell,
   schedule: Calendar,
 };

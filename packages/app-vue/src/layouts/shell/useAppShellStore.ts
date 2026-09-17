@@ -61,7 +61,7 @@ export interface ShellOrigin {
 }
 
 /** 胶囊/深链可落地的业务模块标识。Settings 已升为独立场景，不在此列。 */
-export type ShellModule = 'goal' | 'task' | 'note' | 'reminder' | 'notification' | 'schedule';
+export type ShellModule = 'goal' | 'task' | 'note' | 'notification' | 'schedule';
 
 export interface BusinessTab {
   id: string;
@@ -130,7 +130,6 @@ const BUSINESS_MODULES = new Set<ShellModule>([
   'goal',
   'task',
   'note',
-  'reminder',
   'notification',
   'schedule',
 ]);

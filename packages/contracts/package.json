@@ -41,10 +41,6 @@
       "types": "./dist/primitives/*.d.ts",
       "import": "./dist/primitives/*.js"
     },
-    "./reminder": {
-      "types": "./dist/modules/reminder/index.d.ts",
-      "import": "./dist/modules/reminder/index.js"
-    },
     "./repository": {
       "types": "./dist/modules/repository/index.d.ts",
       "import": "./dist/modules/repository/index.js"

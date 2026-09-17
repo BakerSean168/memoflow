@@ -5,7 +5,6 @@ import { useRouter } from 'expo-router';
 import { APP_DESCRIPTION, APP_NAME } from '../constants/app';
 import { useGoals } from '../hooks/useGoals';
 import { useNotifications } from '../hooks/useNotifications';
-import { useReminders } from '../hooks/useReminders';
 import { useTaskPlans } from '../hooks/useTaskPlans';
 import { useAppSession } from '../providers/app-session-provider';
 
@@ -33,7 +32,6 @@ export function HomeScreen() {
   const { currentUser, isGuest, isRemoteAuthenticated, sessionKind, signInDemo, signOut } = useAppSession();
   const { templates } = useTaskPlans();
   const { goals } = useGoals();
-  const { todaySchedule } = useReminders();
   const { unreadCount } = useNotifications();
 
   const actionSections = [
@@ -101,7 +99,6 @@ export function HomeScreen() {
         <View style={styles.pillRow}>
           <StatusPill label={`${templates.length} tasks`} tone="tint" />
           <StatusPill label={`${goals.length} goals`} tone="success" />
-          <StatusPill label={`${todaySchedule.length} reminders`} tone="textSecondary" />
           <StatusPill label={`${unreadCount} unread`} tone={unreadCount > 0 ? 'warning' : 'success'} />
         </View>
       </SectionCard>
@@ -163,7 +160,7 @@ export function HomeScreen() {
           <FeatureTile
             eyebrow="Live"
             title="More"
-            description="提醒、通知、仓库和设置。"
+            description="通知、仓库和设置。"
             onPress={() => router.push('./explore')}
           />
         </View>

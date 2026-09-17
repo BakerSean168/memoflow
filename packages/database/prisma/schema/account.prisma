@@ -20,17 +20,12 @@ model Account {
   labels                          Label[]
   goalLabels                      GoalLabel[]
   taskLabels                      TaskLabel[]
-  reminderGroups                  ReminderGroup[]
-  reminderTemplates               ReminderTemplate[]
-  reminderInstances               ReminderInstance[]
-  reminderStatistics              ReminderStatistic?
   routineDefinitions               RoutineDefinition[]
   routineTemporaryOverrides          RoutineTemporaryOverride[]
   routineProfiles                  RoutineProfile[]
   routineProfileMemberships        RoutineProfileMembership[]
   routineProtocolDefinitions       RoutineProtocolDefinition[]
   routineProtocolSessions          RoutineProtocolSession[]
-  userReminderPreferences         UserReminderPreference?
   repositories                    Repository[]
   repositoryExplorers             RepositoryExplorer[]
   repositoryStatistics            RepositoryStatistic?
@@ -57,9 +52,6 @@ model Account {
 
   // PowerSync: denormalized identity relations
   taskPlanHistory            TaskPlanHistory[]           @relation("AccountTaskPlanHistory")
-  reminderHistory                ReminderHistory[]               @relation("AccountReminderHistory")
-  reminderResponses              ReminderResponse[]              @relation("AccountReminderResponses")
-  reminderOccurrences            ReminderOccurrence[]            @relation("AccountReminderOccurrences")
   routineOccurrences             RoutineOccurrence[]             @relation("AccountRoutineOccurrences")
   routineInteractions             RoutineInteraction[]
   notificationInteractions       NotificationInteraction[]        @relation("AccountNotificationInteractions")

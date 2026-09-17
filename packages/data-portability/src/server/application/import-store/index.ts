@@ -3,7 +3,6 @@ export type {
   DataPortabilityImportTx,
   UpsertUserPreferencesInput,
   UpsertNotificationPreferenceInput,
-  UpsertUserReminderPreferenceInput,
   CreateRepositoryInput,
   CreateResourceFolderInput,
   CreateResourceInput,
@@ -14,9 +13,6 @@ export type {
   CreateTaskPlanInput,
   CreateTaskOccurrenceInput,
   CreateScheduleInput,
-  CreateReminderGroupInput,
-  CreateReminderTemplateInput,
-  CreateReminderResponseInput,
   CreateAIConversationInput,
   CreateAIMessageInput,
 } from './data-portability-import-store';

@@ -2,29 +2,58 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "paths": {
-      "@/*": ["src/*"],
-      "@memoflow/contracts": ["../contracts/dist/index.d.ts"],
+      "@/*": [
+        "src/*"
+      ],
+      "@memoflow/contracts": [
+        "../contracts/dist/index.d.ts"
+      ],
       "@memoflow/contracts/*": [
         "../contracts/dist/modules/*/index.d.ts",
         "../contracts/dist/*/index.d.ts"
       ],
-      "@memoflow/assets": ["../assets/dist/index.d.ts"],
-      "@memoflow/assets/*": ["../assets/dist/*/index.d.ts"],
-      "@memoflow/ui-vue-shadcn": ["../ui-vue-shadcn/dist/index.d.ts"],
+      "@memoflow/assets": [
+        "../assets/dist/index.d.ts"
+      ],
+      "@memoflow/assets/*": [
+        "../assets/dist/*/index.d.ts"
+      ],
+      "@memoflow/ui-vue-shadcn": [
+        "../ui-vue-shadcn/dist/index.d.ts"
+      ],
       "@memoflow/ui-vue-shadcn/components/ui/*": [
         "../ui-vue-shadcn/dist/components/ui/*/index.d.ts"
       ],
-      "@memoflow/ui-vue-shadcn/composables/*": ["../ui-vue-shadcn/dist/composables/*.d.ts"],
-      "@memoflow/ui-vue-shadcn/*": ["../ui-vue-shadcn/dist/*"],
-      "@memoflow/http-client": ["../http-client/dist/index.d.ts"],
-      "@memoflow/ai/client": ["../ai/dist/client/index.d.ts"],
-      "@memoflow/goal/client": ["../goal/dist/client/index.d.ts"],
-      "@memoflow/reminder/client": ["../reminder/dist/client/index.d.ts"],
-      "@memoflow/schedule/client": ["../schedule/dist/client/index.d.ts"],
-      "@memoflow/notification/client": ["../notification/dist/client/index.d.ts"],
-      "@memoflow/task/client": ["../task/dist/client/index.d.ts"],
-      "@memoflow/governance/client": ["../governance/dist/client/index.d.ts"],
-      "@memoflow/repository/client": ["../repository/dist/client/index.d.ts"]
+      "@memoflow/ui-vue-shadcn/composables/*": [
+        "../ui-vue-shadcn/dist/composables/*.d.ts"
+      ],
+      "@memoflow/ui-vue-shadcn/*": [
+        "../ui-vue-shadcn/dist/*"
+      ],
+      "@memoflow/http-client": [
+        "../http-client/dist/index.d.ts"
+      ],
+      "@memoflow/ai/client": [
+        "../ai/dist/client/index.d.ts"
+      ],
+      "@memoflow/goal/client": [
+        "../goal/dist/client/index.d.ts"
+      ],
+      "@memoflow/schedule/client": [
+        "../schedule/dist/client/index.d.ts"
+      ],
+      "@memoflow/notification/client": [
+        "../notification/dist/client/index.d.ts"
+      ],
+      "@memoflow/task/client": [
+        "../task/dist/client/index.d.ts"
+      ],
+      "@memoflow/governance/client": [
+        "../governance/dist/client/index.d.ts"
+      ],
+      "@memoflow/repository/client": [
+        "../repository/dist/client/index.d.ts"
+      ]
     }
   }
 }

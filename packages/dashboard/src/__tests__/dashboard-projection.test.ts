@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { GoalStatus } from '@memoflow/contracts/goal';
 import { TaskOccurrenceStatus, TaskPlanStatus } from '@memoflow/contracts/task';
-import { ReminderStatus } from '@memoflow/contracts/reminder';
 import { createTimeContext, createTimeFacade } from '@memoflow/time';
 import type {
   DashboardReadSource,
@@ -9,7 +8,6 @@ import type {
   DashboardTaskPlanRecord,
   DashboardTaskOccurrenceRecord,
   DashboardScheduleRecord,
-  DashboardReminderRecord,
 } from '../domain/types';
 import { getDashboardData } from '../domain/projection';
 
@@ -69,23 +67,12 @@ function makeSchedule(overrides: Partial<DashboardScheduleRecord> = {}): Dashboa
   };
 }
 
-function makeReminder(overrides: Partial<DashboardReminderRecord> = {}): DashboardReminderRecord {
-  return {
-    deletedAt: null,
-    status: ReminderStatus.Active,
-    effectiveEnabled: true,
-    nextTriggerAt: Date.now() + 3600_000,
-    ...overrides,
-  };
-}
-
 function makeSource(overrides: Partial<DashboardReadSource> = {}): DashboardReadSource {
   return {
     listGoals: async () => [],
     listTaskPlans: async () => [],
     listTaskOccurrences: async () => [],
     listSchedules: async () => [],
-    listUpcomingReminders: async () => [],
     countUnreadNotifications: async () => 0,
     ...overrides,
   };
@@ -263,19 +250,5 @@ describe('getDashboardData', () => {
     expect(data.stats.scheduleConflicts).toBe(2);
   });
 
-  it('filters upcoming reminders correctly', async () => {
-    const now = Date.now();
-    const source = makeSource({
-      listUpcomingReminders: async () => [
-        makeReminder({ nextTriggerAt: now + 3600_000 }),
-        makeReminder({ nextTriggerAt: null }),
-        makeReminder({ deletedAt: Date.now() }),
-        makeReminder({ status: ReminderStatus.Paused }),
-        makeReminder({ effectiveEnabled: false }),
-      ],
-    });
 
-    const data = await getDashboardData('user1', source, TEST_TIME_CONTEXT);
-    expect(data.stats.upcomingReminders).toBe(1);
-  });
 });

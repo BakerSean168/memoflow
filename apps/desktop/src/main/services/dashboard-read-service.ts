@@ -4,14 +4,12 @@ import {
   toDashboardTaskOccurrenceRecord,
   type DashboardTaskPlanRecord,
   type DashboardScheduleRecord,
-  type DashboardReminderRecord,
 } from '@memoflow/dashboard';
 import type { DashboardData } from '@memoflow/contracts/dashboard';
 import type { UserTimeContextPort } from '@memoflow/time';
 import type { IGoalRepository } from '@memoflow/goal';
 import type { ITaskOccurrenceRepository, ITaskPlanRepository } from '@memoflow/task';
 import type { IScheduleRepository } from '@memoflow/schedule';
-import type { IReminderTemplateRepository } from '@memoflow/reminder/server';
 import type { INotificationRepository } from '@memoflow/notification';
 import { createLogger } from '@memoflow/utils/logger';
 
@@ -33,7 +31,6 @@ export interface DashboardReadDependencies {
   readonly taskPlanRepository: ITaskPlanRepository;
   readonly taskOccurrenceRepository: ITaskOccurrenceRepository;
   readonly scheduleRepository: IScheduleRepository;
-  readonly reminderTemplateRepository: IReminderTemplateRepository;
   readonly notificationRepository: INotificationRepository;
   readonly userTimeContextPort: UserTimeContextPort;
 }
@@ -101,20 +98,6 @@ function toScheduleRecord(schedule: {
   };
 }
 
-function toReminderRecord(reminder: {
-  deletedAt: number | null;
-  status: string;
-  effectiveEnabled: boolean;
-  nextTriggerAt: number | null;
-}): DashboardReminderRecord {
-  return {
-    deletedAt: reminder.deletedAt,
-    status: reminder.status,
-    effectiveEnabled: reminder.effectiveEnabled,
-    nextTriggerAt: reminder.nextTriggerAt,
-  };
-}
-
 export async function getDesktopDashboardData(
   identityId: string,
   dependencies: DashboardReadDependencies,
@@ -124,7 +107,6 @@ export async function getDesktopDashboardData(
     taskPlanRepository,
     taskOccurrenceRepository,
     scheduleRepository,
-    reminderTemplateRepository,
     notificationRepository,
     userTimeContextPort,
   } = dependencies;
@@ -146,10 +128,6 @@ export async function getDesktopDashboardData(
       ),
     listSchedules: async (id) =>
       (await scheduleRepository.findByIdentityId(id)).map(toScheduleRecord),
-    listUpcomingReminders: async (id, beforeTime) =>
-      (await reminderTemplateRepository.findByNextTriggerBefore(beforeTime, id)).map(
-        toReminderRecord,
-      ),
     countUnreadNotifications: (id) => notificationRepository.countUnread(id),
   }, timeContext);
 

@@ -16,7 +16,6 @@ const logger = createLogger('notification:click-nav');
 
 const CATEGORY_ROUTE: Readonly<Record<string, string>> = {
   goal: '/goals',
-  reminder: '/reminders',
   schedule: '/schedule',
   task: '/tasks',
 };

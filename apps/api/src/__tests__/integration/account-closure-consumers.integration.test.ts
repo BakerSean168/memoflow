@@ -3,7 +3,7 @@ import { prisma } from '@memoflow/database';
 import { IdentityId } from '@memoflow/domain-shared';
 import { Account } from '@memoflow/account/server';
 import { createAccountPrismaModule } from '@memoflow/account/server';
-import { ReminderAccountClosedConsumer } from '@memoflow/reminder/server';
+import { RoutineAccountClosedConsumer } from '@memoflow/reminder/server';
 import { NotificationAccountClosedConsumer } from '@memoflow/notification/server';
 import { RepositoryAccountClosedConsumer } from '@memoflow/repository/server';
 import { AccountClosedWorker } from '@memoflow/account/server';
@@ -161,7 +161,7 @@ describe('API host account-closed consumer chain', () => {
 
     // Worker consumes the outbox with REAL consumers
     const worker = new AccountClosedWorker(prisma, {
-      reminderConsumer: new ReminderAccountClosedConsumer(prisma),
+      routineConsumer: new RoutineAccountClosedConsumer(prisma),
       notificationConsumer: new NotificationAccountClosedConsumer(prisma),
       repositoryConsumer: new RepositoryAccountClosedConsumer(prisma),
     });

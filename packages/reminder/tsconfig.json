@@ -2,32 +2,84 @@
   "extends": "../../tsconfig.workspace-src.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "lib": ["ES2020"],
-    "types": ["node", "vitest/globals"],
+    "lib": [
+      "ES2020"
+    ],
+    "types": [
+      "node",
+      "vitest/globals"
+    ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@memoflow/database": ["../database/src/index.ts"],
-      "@memoflow/http-client": ["../http-client/src/index.ts"],
-      "@memoflow/contracts": ["../contracts/src/index.ts"],
-      "@memoflow/domain-shared": ["../domain-shared/src/index.ts"],
-      "@memoflow/contracts/reminder": ["../contracts/src/modules/reminder/index.ts"],
-      "@memoflow/contracts/notification": ["../contracts/src/modules/notification/index.ts"],
-      "@memoflow/contracts/result": ["../contracts/src/result/index.ts"],
-      "@memoflow/contracts/shared": ["../contracts/src/shared/index.ts"],
-      "@memoflow/contracts/primitives": ["../contracts/src/primitives/index.ts"],
-      "@memoflow/contracts/electron": ["../contracts/src/electron/index.ts"],
-      "@memoflow/contracts/schedule": ["../contracts/src/modules/schedule/index.ts"],
-      "@memoflow/contracts/reliable-messaging": ["../contracts/src/modules/reliable-messaging/index.ts"],
-      "@memoflow/contracts/operations": ["../contracts/src/modules/operations/index.ts"],
-      "@memoflow/time": ["../time/src/index.ts"],
-      "@memoflow/test-utils": ["../test-utils/src/index.ts"],
-      "@memoflow/test-utils/*": ["../test-utils/src/*", "../test-utils/src/*.ts"],
-      "@memoflow/utils": ["../utils/src/index.ts"],
-      "@memoflow/utils/result": ["../utils/src/result/index.ts"],
-      "@memoflow/patterns": ["../patterns/src/index.ts"],
-      "@memoflow/patterns/operations": ["../patterns/src/operations/index.ts"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@memoflow/database": [
+        "../database/src/index.ts"
+      ],
+      "@memoflow/http-client": [
+        "../http-client/src/index.ts"
+      ],
+      "@memoflow/contracts": [
+        "../contracts/src/index.ts"
+      ],
+      "@memoflow/domain-shared": [
+        "../domain-shared/src/index.ts"
+      ],
+      "@memoflow/contracts/notification": [
+        "../contracts/src/modules/notification/index.ts"
+      ],
+      "@memoflow/contracts/result": [
+        "../contracts/src/result/index.ts"
+      ],
+      "@memoflow/contracts/shared": [
+        "../contracts/src/shared/index.ts"
+      ],
+      "@memoflow/contracts/primitives": [
+        "../contracts/src/primitives/index.ts"
+      ],
+      "@memoflow/contracts/electron": [
+        "../contracts/src/electron/index.ts"
+      ],
+      "@memoflow/contracts/schedule": [
+        "../contracts/src/modules/schedule/index.ts"
+      ],
+      "@memoflow/contracts/reliable-messaging": [
+        "../contracts/src/modules/reliable-messaging/index.ts"
+      ],
+      "@memoflow/contracts/operations": [
+        "../contracts/src/modules/operations/index.ts"
+      ],
+      "@memoflow/time": [
+        "../time/src/index.ts"
+      ],
+      "@memoflow/test-utils": [
+        "../test-utils/src/index.ts"
+      ],
+      "@memoflow/test-utils/*": [
+        "../test-utils/src/*",
+        "../test-utils/src/*.ts"
+      ],
+      "@memoflow/utils": [
+        "../utils/src/index.ts"
+      ],
+      "@memoflow/utils/result": [
+        "../utils/src/result/index.ts"
+      ],
+      "@memoflow/patterns": [
+        "../patterns/src/index.ts"
+      ],
+      "@memoflow/patterns/operations": [
+        "../patterns/src/operations/index.ts"
+      ]
     }
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
 }

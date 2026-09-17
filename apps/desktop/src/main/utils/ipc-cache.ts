@@ -13,7 +13,6 @@ import {
   CacheChannels,
   DashboardChannels,
   GoalChannels,
-  ReminderChannels,
   TaskChannels,
 } from '@memoflow/contracts/electron';
 import { ok } from '@memoflow/contracts/result';
@@ -396,7 +395,6 @@ export function getIpcCache(): IpcCache {
     ipcCacheInstance.setChannelTTL(GoalChannels.LIST, 10000); // 10 seconds
     ipcCacheInstance.setChannelTTL(TaskChannels.PLAN_LIST, 10000);
     ipcCacheInstance.setChannelTTL(DashboardChannels.GET_STATS, 30000); // 30 seconds
-    ipcCacheInstance.setChannelTTL(ReminderChannels.TEMPLATE_LIST, 5000); // 5 seconds
   }
   return ipcCacheInstance;
 }

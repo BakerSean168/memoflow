@@ -54,10 +54,6 @@
       "types": "./dist/modules/schedule/index.d.ts",
       "import": "./dist/modules/schedule/index.js"
     },
-    "./modules/reminder": {
-      "types": "./dist/modules/reminder/index.d.ts",
-      "import": "./dist/modules/reminder/index.js"
-    },
     "./modules/notification": {
       "types": "./dist/modules/notification/index.d.ts",
       "import": "./dist/modules/notification/index.js"
@@ -106,7 +102,6 @@
     "@memoflow/ipc-client": "workspace:*",
     "@memoflow/label": "workspace:*",
     "@memoflow/notification": "workspace:*",
-    "@memoflow/reminder": "workspace:*",
     "@memoflow/repository": "workspace:*",
     "@memoflow/schedule": "workspace:*",
     "@memoflow/setting": "workspace:*",

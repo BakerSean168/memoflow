@@ -24,7 +24,6 @@ import type {
   ILabelService,
   ITaskService,
   IScheduleService,
-  IReminderService,
   IRepositoryService,
   INotificationService,
   ISettingService,
@@ -47,7 +46,6 @@ export const GOAL_SERVICE_KEY: InjectionKey<IGoalService> = Symbol('GoalService'
 export const LABEL_SERVICE_KEY: InjectionKey<ILabelService> = Symbol('LabelService');
 export const TASK_SERVICE_KEY: InjectionKey<ITaskService> = Symbol('TaskService');
 export const SCHEDULE_SERVICE_KEY: InjectionKey<IScheduleService> = Symbol('ScheduleService');
-export const REMINDER_SERVICE_KEY: InjectionKey<IReminderService> = Symbol('ReminderService');
 export const REPOSITORY_SERVICE_KEY: InjectionKey<IRepositoryService> = Symbol('RepositoryService');
 export const NOTIFICATION_SERVICE_KEY: InjectionKey<INotificationService> =
   Symbol('NotificationService');

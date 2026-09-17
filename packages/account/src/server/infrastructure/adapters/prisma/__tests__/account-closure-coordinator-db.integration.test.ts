@@ -12,7 +12,7 @@ import { Account } from '../../../../domain/aggregates/account';
 // consumers into AccountClosedWorker. scope:account may not depend on other
 // feature scopes; the boundary exemption is test-only and documented here.
 // eslint-disable-next-line @nx/enforce-module-boundaries
-import { ReminderAccountClosedConsumer } from '@memoflow/reminder/server';
+import { RoutineAccountClosedConsumer } from '@memoflow/reminder/server';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import { NotificationAccountClosedConsumer } from '@memoflow/notification/server';
 // eslint-disable-next-line @nx/enforce-module-boundaries
@@ -272,7 +272,7 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
     // Run worker to process outbox
     const seenEvents: string[] = [];
     const worker = new AccountClosedWorker(prisma, {
-      reminderConsumer: {
+      routineConsumer: {
         handleAccountClosed: async (event, eventId) => {
           seenEvents.push(eventId);
         },
@@ -420,16 +420,16 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
       },
     });
 
-    const realReminderConsumer = new ReminderAccountClosedConsumer(prisma);
+    const realRoutineConsumer = new RoutineAccountClosedConsumer(prisma);
     const realNotificationConsumer = new NotificationAccountClosedConsumer(prisma);
     const realRepositoryConsumer = new RepositoryAccountClosedConsumer(prisma);
 
     const worker1 = new AccountClosedWorker(prisma, {
       leaseDurationMs: 1500,
       enableHeartbeat: false,
-      reminderConsumer: {
+      routineConsumer: {
         handleAccountClosed: async (event, evtId) => {
-          await realReminderConsumer.handleAccountClosed(event as any, evtId);
+          await realRoutineConsumer.handleAccountClosed(event as any, evtId);
           // Sleep 2000ms > 1500ms lease duration to simulate slow consumer
           await new Promise((resolve) => setTimeout(resolve, 2000));
         },
@@ -449,9 +449,9 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
     const worker2 = new AccountClosedWorker(prisma, {
       leaseDurationMs: 1500,
       enableHeartbeat: true,
-      reminderConsumer: {
+      routineConsumer: {
         handleAccountClosed: async (event, evtId) => {
-          await realReminderConsumer.handleAccountClosed(event as any, evtId);
+          await realRoutineConsumer.handleAccountClosed(event as any, evtId);
         },
       },
       notificationConsumer: {

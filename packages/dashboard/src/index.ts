@@ -20,7 +20,6 @@ export type {
   DashboardTaskPlanRecord,
   DashboardTaskOccurrenceRecord,
   DashboardScheduleRecord,
-  DashboardReminderRecord,
   DashboardReadSource,
 } from './domain/types';
 

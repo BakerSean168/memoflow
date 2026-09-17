@@ -1,7 +1,4 @@
-/**
- * Canonical reminder server seam.
- */
-
+/** Canonical Routine vNext server seam. */
 export * from './infrastructure';
-export type * from './application';
+export * from './application';
 export * from './domain';

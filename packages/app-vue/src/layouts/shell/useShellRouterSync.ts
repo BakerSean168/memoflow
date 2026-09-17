@@ -41,7 +41,6 @@ const MODULE_PREFIXES: Array<[prefix: string, module: ShellModule]> = [
   ['/tasks', 'task'],
   ['/repository', 'note'],
   ['/governance', 'note'],
-  ['/reminders', 'reminder'],
   ['/notifications', 'notification'],
   ['/sse-monitor', 'notification'],
   ['/schedule', 'schedule'],
@@ -52,7 +51,6 @@ export const MODULE_TITLE_KEYS: Record<ShellModule, string> = {
   goal: 'nav.capsule.goal',
   task: 'nav.capsule.task',
   note: 'nav.capsule.note',
-  reminder: 'nav.capsule.reminder',
   notification: 'nav.capsule.notification',
   schedule: 'nav.schedule',
 };

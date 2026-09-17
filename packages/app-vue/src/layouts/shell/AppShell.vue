@@ -34,7 +34,6 @@ import WindowHeader, { type WindowHeaderCapsule } from './WindowHeader.vue';
 import GoalCapsulePreview from './previews/GoalCapsulePreview.vue';
 import TaskCapsulePreview from './previews/TaskCapsulePreview.vue';
 import NoteCapsulePreview from './previews/NoteCapsulePreview.vue';
-import ReminderCapsulePreview from './previews/ReminderCapsulePreview.vue';
 import ScheduleCapsulePreview from './previews/ScheduleCapsulePreview.vue';
 import NotificationCapsulePreview from '../../modules/notification/components/NotificationCapsulePreview.vue';
 import ConversationSidebar from './ConversationSidebar.vue';
@@ -620,7 +619,7 @@ function openHeaderNotePreview(closePreview: () => void, noteId: string): void {
   });
 }
 
-function openPanelRoute(_module: 'goal' | 'task' | 'reminder', path: string) {
+function openPanelRoute(_module: 'goal' | 'task', path: string) {
   void router.push(path).catch(() => {});
 }
 
@@ -729,12 +728,6 @@ function panelCacheKey(
         <NoteCapsulePreview
           @view-all="openHeaderPreviewModule(closePreview, { id: 'note', route: '/repository' })"
           @select="openHeaderNotePreview(closePreview, $event)"
-        />
-      </template>
-      <template #capsule-preview-reminder="{ closePreview }">
-        <ReminderCapsulePreview
-          @view-all="openHeaderPreviewModule(closePreview, { id: 'reminder', route: '/reminders' })"
-          @select="openHeaderPreviewModule(closePreview, { id: 'reminder', route: '/reminders' })"
         />
       </template>
       <template #capsule-preview-schedule="{ closePreview }">

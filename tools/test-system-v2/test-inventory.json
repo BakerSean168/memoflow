@@ -418,26 +418,6 @@
       ]
     },
     {
-      "path": "apps/api/src/runtime/compose-reminder.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "apps/api/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "apps/api/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "apps/api/src/runtime/compose-reminder.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "apps/api/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "apps/api/vitest.config.ts"
-      ]
-    },
-    {
       "path": "apps/api/src/runtime/compose-repository.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -449,6 +429,26 @@
     },
     {
       "path": "apps/api/src/runtime/compose-repository.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "apps/api/src/runtime/compose-routine.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "apps/api/src/runtime/compose-routine.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/api/vitest.config.ts"
@@ -1272,7 +1272,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "apps/desktop/src/main/runtime/compose-reminder.runtime.spec.ts",
+      "path": "apps/desktop/src/main/runtime/compose-routine.runtime.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -1778,14 +1778,6 @@
       "primarySuite": "e2e",
       "collectors": [
         "apps/web/playwright.audit.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "apps/web/e2e/reminder/reminder-template-crud.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -3366,14 +3358,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/layouts/shell/previews/ReminderCapsulePreview.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/app-vue/src/layouts/shell/previews/TaskCapsulePreview.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3945,96 +3929,6 @@
     },
     {
       "path": "packages/app-vue/src/modules/notification/views/notificationPanelAdaptation.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/reminder/components/GridTemplateItem.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/reminder/composables/reminder-desktop-api-dual.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/reminder/composables/useReminderTemplates.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/reminder/presentation/lifecyclePresentation.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/reminder/stores/reminderStore.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/reminder/utils/user-timezone.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/reminder/views/ReminderLinearView.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/reminder/views/RoutineConfigurationCenter.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/reminder/views/reminderPanelAdaptation.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -5353,38 +5247,6 @@
     },
     {
       "path": "packages/contracts/src/modules/reliable-messaging/reliable-messaging-contracts.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/reminder/api/dual-registry.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/reminder/api/reminder-response.dto.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/reminder/entities/reminder-response-client-dto-dual.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/reminder/value-objects/reminder-metrics-vo-dto-dual.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -8083,96 +7945,6 @@
       ]
     },
     {
-      "path": "packages/reminder/src/api/module-lifecycle.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/api/routes/reminder-group.routes.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/api/routes/reminder-template.routes.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/api/routes/reminder-void-success-envelope.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/application-client/reminder-client-port-dual.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/electron/index-lifecycle.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/electron/reminder-electron.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/infrastructure-client/adapters/http/reminder-http.adapter.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/infrastructure-client/adapters/ipc/reminder-ipc.adapter.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/reminder/src/method-library/method-library.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -8183,195 +7955,7 @@
       ]
     },
     {
-      "path": "packages/reminder/src/server/application/mappers/reminder-template-client.mapper.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/application/services/reminder-group-application-service.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/application/services/reminder-preferences-application-service.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/application/services/reminder-schedule-query-application-service.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/application/services/reminder-template-action-application-service.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/reminder/src/server/application/services/routine-coach-command.service.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/application/use-cases/commands/adjust-reminder-frequency.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts",
-        "packages/reminder/vitest.use-cases.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/application/use-cases/commands/record-reminder-response.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts",
-        "packages/reminder/vitest.use-cases.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/application/use-cases/commands/reminder-use-cases.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts",
-        "packages/reminder/vitest.use-cases.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/application/use-cases/commands/update-reminder-template.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts",
-        "packages/reminder/vitest.use-cases.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/application/use-cases/queries/analyze-reminder-frequency.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts",
-        "packages/reminder/vitest.use-cases.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/application/use-cases/queries/get-reminder-template.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts",
-        "packages/reminder/vitest.use-cases.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/application/use-cases/queries/list-reminder-templates.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts",
-        "packages/reminder/vitest.use-cases.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/application/use-cases/queries/reminder-query-application-service.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts",
-        "packages/reminder/vitest.use-cases.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/domain/aggregates/__tests__/reminder-group.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/domain/aggregates/__tests__/reminder-template.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/domain/aggregates/__tests__/user-reminder-preferences.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/domain/entities/__tests__/reminder-history.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/domain/entities/__tests__/reminder-response.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/reminder/vitest.config.ts"
@@ -8421,263 +8005,7 @@
       ]
     },
     {
-      "path": "packages/reminder/src/server/domain/services/__tests__/legacy-routine-cutover-service.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/domain/services/__tests__/reminder-domain.service.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/domain/services/__tests__/reminder-group-business.service.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/domain/services/__tests__/reminder-policy.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/domain/services/__tests__/reminder-template-control.service.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/domain/services/__tests__/reminder-trigger.service.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/domain/services/__tests__/upcoming-reminder-calculation.service.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/domain/services/reminder-metrics-unified.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/domain/services/upcoming-reminder-dto-surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/domain/value-objects/__tests__/reminder-enums.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/domain/value-objects/__tests__/reminder-template-id.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/domain/value-objects/__tests__/reminder-value-objects.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/reminder/src/server/infrastructure/__tests__/powersync.closure-checker.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/__tests__/reminder-module-partial-start.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/__tests__/reminder-repositories.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/adapters/prisma/__tests__/reminder-reliable-operation.integration.test.ts",
-      "primarySuite": "integration",
-      "collectors": [
-        "packages/reminder/vitest.integration.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/adapters/prisma/__tests__/reminder-response-ownership.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/adapters/prisma/__tests__/reminder-template-ownership.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/adapters/prisma/mappers/prisma-reminder-group-mapper.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts",
-        "packages/reminder/vitest.mappers.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/adapters/prisma/mappers/prisma-reminder-response-mapper.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts",
-        "packages/reminder/vitest.mappers.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/adapters/prisma/mappers/prisma-reminder-template-mapper.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts",
-        "packages/reminder/vitest.mappers.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/adapters/prisma/mappers/prisma-user-reminder-preference-mapper.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts",
-        "packages/reminder/vitest.mappers.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/adapters/prisma/reminder-response-prisma.repository.integration.test.ts",
-      "primarySuite": "integration",
-      "collectors": [
-        "packages/reminder/vitest.integration.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/adapters/prisma/reminder-template-prisma.repository.integration.test.ts",
-      "primarySuite": "integration",
-      "collectors": [
-        "packages/reminder/vitest.integration.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/adapters/prisma/user-reminder-preference-prisma.repository.integration.test.ts",
-      "primarySuite": "integration",
-      "collectors": [
-        "packages/reminder/vitest.integration.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/reminder-snooze-override-writer.prisma.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/reminder-template-scheduled-handler.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/reminder/vitest.config.ts"
@@ -8821,26 +8149,6 @@
       ]
     },
     {
-      "path": "packages/reminder/src/server/infrastructure/schedule-execution-source.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/schedule-projection-source.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/reminder/src/server/runtime/active-usage/active-usage.runtime.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -8892,16 +8200,6 @@
     },
     {
       "path": "packages/reminder/src/server/runtime/routine-activity/routine-activity-sensor.runtime.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/transport/reminder-usecases-export.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/reminder/vitest.config.ts"
@@ -9256,14 +8554,6 @@
     },
     {
       "path": "packages/schedule-orchestration/src/__tests__/projection-repair-runtime.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule-orchestration/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/schedule-orchestration/src/__tests__/reminder-projection-runtime.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/schedule-orchestration/vitest.config.ts"
@@ -11448,7 +10738,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 9
+      "fileCount": 8
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -11504,21 +10794,21 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 77
+      "fileCount": 25
     },
     {
       "id": "packages/reminder/vitest.mappers.config.ts",
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 4
+      "fileCount": 0
     },
     {
       "id": "packages/reminder/vitest.use-cases.config.ts",
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 8
+      "fileCount": 0
     },
     {
       "id": "packages/schedule/vitest.config.ts",
@@ -11623,7 +10913,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 22
+      "fileCount": 21
     },
     {
       "id": "apps/web/playwright.debug.config.ts",
@@ -11742,7 +11032,7 @@
       "type": "primary",
       "suite": "integration",
       "runner": "vitest",
-      "fileCount": 7
+      "fileCount": 3
     },
     {
       "id": "packages/repository/vitest.integration.config.ts",
@@ -11840,7 +11130,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 209
+      "fileCount": 197
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -11861,7 +11151,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 88
+      "fileCount": 84
     },
     {
       "id": "packages/dashboard/vitest.config.ts",
@@ -11959,7 +11249,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 77
+      "fileCount": 25
     },
     {
       "id": "packages/repository/vitest.config.ts",
@@ -11973,7 +11263,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 8
+      "fileCount": 7
     },
     {
       "id": "packages/schedule/vitest.config.ts",
@@ -12070,10 +11360,10 @@
       "apps/api/src/runtime/compose-governance.surface.spec.ts",
       "apps/api/src/runtime/compose-notification.spec.ts",
       "apps/api/src/runtime/compose-notification.surface.spec.ts",
-      "apps/api/src/runtime/compose-reminder.spec.ts",
-      "apps/api/src/runtime/compose-reminder.surface.spec.ts",
       "apps/api/src/runtime/compose-repository.spec.ts",
       "apps/api/src/runtime/compose-repository.surface.spec.ts",
+      "apps/api/src/runtime/compose-routine.spec.ts",
+      "apps/api/src/runtime/compose-routine.surface.spec.ts",
       "apps/api/src/runtime/compose-schedule.spec.ts",
       "apps/api/src/runtime/compose-schedule.surface.spec.ts",
       "apps/api/src/runtime/compose-setting.spec.ts",
@@ -12218,7 +11508,6 @@
       "packages/app-vue/src/modules/goal/stores/goalStore.spec.ts",
       "packages/app-vue/src/modules/governance/stores/governanceStore.spec.ts",
       "packages/app-vue/src/modules/notification/stores/notificationStore.spec.ts",
-      "packages/app-vue/src/modules/reminder/stores/reminderStore.spec.ts",
       "packages/app-vue/src/modules/schedule/stores/scheduleStore.spec.ts",
       "packages/app-vue/src/modules/setting/stores/presentationPreferenceStore.spec.ts",
       "packages/app-vue/src/modules/task/stores/taskStore.spec.ts",
@@ -12417,62 +11706,13 @@
       "packages/notification/src/server/transport/__tests__/notification-transport-parity.spec.ts",
       "packages/notification/src/server/transport/notification-usecases-export.surface.spec.ts",
       "packages/reminder/src/__tests__/package-root-owner-surface.spec.ts",
-      "packages/reminder/src/api/module-lifecycle.spec.ts",
-      "packages/reminder/src/api/routes/reminder-group.routes.spec.ts",
-      "packages/reminder/src/api/routes/reminder-template.routes.spec.ts",
-      "packages/reminder/src/api/routes/reminder-void-success-envelope.surface.spec.ts",
-      "packages/reminder/src/application-client/reminder-client-port-dual.surface.spec.ts",
-      "packages/reminder/src/electron/index-lifecycle.spec.ts",
-      "packages/reminder/src/electron/reminder-electron.surface.spec.ts",
-      "packages/reminder/src/infrastructure-client/adapters/http/reminder-http.adapter.test.ts",
-      "packages/reminder/src/infrastructure-client/adapters/ipc/reminder-ipc.adapter.surface.spec.ts",
       "packages/reminder/src/method-library/method-library.spec.ts",
-      "packages/reminder/src/server/application/mappers/reminder-template-client.mapper.test.ts",
-      "packages/reminder/src/server/application/services/reminder-group-application-service.test.ts",
-      "packages/reminder/src/server/application/services/reminder-preferences-application-service.test.ts",
-      "packages/reminder/src/server/application/services/reminder-schedule-query-application-service.test.ts",
-      "packages/reminder/src/server/application/services/reminder-template-action-application-service.test.ts",
       "packages/reminder/src/server/application/services/routine-coach-command.service.spec.ts",
-      "packages/reminder/src/server/application/use-cases/commands/adjust-reminder-frequency.test.ts",
-      "packages/reminder/src/server/application/use-cases/commands/record-reminder-response.test.ts",
-      "packages/reminder/src/server/application/use-cases/commands/reminder-use-cases.test.ts",
-      "packages/reminder/src/server/application/use-cases/commands/update-reminder-template.test.ts",
-      "packages/reminder/src/server/application/use-cases/queries/analyze-reminder-frequency.spec.ts",
-      "packages/reminder/src/server/application/use-cases/queries/get-reminder-template.test.ts",
-      "packages/reminder/src/server/application/use-cases/queries/list-reminder-templates.test.ts",
-      "packages/reminder/src/server/application/use-cases/queries/reminder-query-application-service.test.ts",
-      "packages/reminder/src/server/domain/aggregates/__tests__/reminder-group.spec.ts",
-      "packages/reminder/src/server/domain/aggregates/__tests__/reminder-template.spec.ts",
-      "packages/reminder/src/server/domain/aggregates/__tests__/user-reminder-preferences.spec.ts",
-      "packages/reminder/src/server/domain/entities/__tests__/reminder-history.spec.ts",
-      "packages/reminder/src/server/domain/entities/__tests__/reminder-response.spec.ts",
       "packages/reminder/src/server/domain/routine/__tests__/next-eligible-occurrence.spec.ts",
       "packages/reminder/src/server/domain/routine/__tests__/protocol.spec.ts",
       "packages/reminder/src/server/domain/routine/__tests__/routine-profile.spec.ts",
       "packages/reminder/src/server/domain/routine/__tests__/routine-trigger.spec.ts",
-      "packages/reminder/src/server/domain/services/__tests__/legacy-routine-cutover-service.spec.ts",
-      "packages/reminder/src/server/domain/services/__tests__/reminder-domain.service.spec.ts",
-      "packages/reminder/src/server/domain/services/__tests__/reminder-group-business.service.spec.ts",
-      "packages/reminder/src/server/domain/services/__tests__/reminder-policy.spec.ts",
-      "packages/reminder/src/server/domain/services/__tests__/reminder-template-control.service.spec.ts",
-      "packages/reminder/src/server/domain/services/__tests__/reminder-trigger.service.spec.ts",
-      "packages/reminder/src/server/domain/services/__tests__/upcoming-reminder-calculation.service.spec.ts",
-      "packages/reminder/src/server/domain/services/reminder-metrics-unified.surface.spec.ts",
-      "packages/reminder/src/server/domain/services/upcoming-reminder-dto-surface.spec.ts",
-      "packages/reminder/src/server/domain/value-objects/__tests__/reminder-enums.spec.ts",
-      "packages/reminder/src/server/domain/value-objects/__tests__/reminder-template-id.spec.ts",
-      "packages/reminder/src/server/domain/value-objects/__tests__/reminder-value-objects.spec.ts",
       "packages/reminder/src/server/infrastructure/__tests__/powersync.closure-checker.spec.ts",
-      "packages/reminder/src/server/infrastructure/__tests__/reminder-module-partial-start.spec.ts",
-      "packages/reminder/src/server/infrastructure/__tests__/reminder-repositories.surface.spec.ts",
-      "packages/reminder/src/server/infrastructure/adapters/prisma/__tests__/reminder-response-ownership.surface.spec.ts",
-      "packages/reminder/src/server/infrastructure/adapters/prisma/__tests__/reminder-template-ownership.surface.spec.ts",
-      "packages/reminder/src/server/infrastructure/adapters/prisma/mappers/prisma-reminder-group-mapper.spec.ts",
-      "packages/reminder/src/server/infrastructure/adapters/prisma/mappers/prisma-reminder-response-mapper.spec.ts",
-      "packages/reminder/src/server/infrastructure/adapters/prisma/mappers/prisma-reminder-template-mapper.spec.ts",
-      "packages/reminder/src/server/infrastructure/adapters/prisma/mappers/prisma-user-reminder-preference-mapper.spec.ts",
-      "packages/reminder/src/server/infrastructure/reminder-snooze-override-writer.prisma.spec.ts",
-      "packages/reminder/src/server/infrastructure/reminder-template-scheduled-handler.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-schedule-execution-source.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-schedule-projection-source.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-wall-clock-scheduled-handler.spec.ts",
@@ -12484,15 +11724,12 @@
       "packages/reminder/src/server/infrastructure/routine-vnext/routine-occurrence-truth-store.powersync.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.powersync.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-vnext/trigger-persistence-parity.spec.ts",
-      "packages/reminder/src/server/infrastructure/schedule-execution-source.spec.ts",
-      "packages/reminder/src/server/infrastructure/schedule-projection-source.spec.ts",
       "packages/reminder/src/server/runtime/active-usage/active-usage.runtime.spec.ts",
       "packages/reminder/src/server/runtime/elapsed/elapsed.runtime.spec.ts",
       "packages/reminder/src/server/runtime/intervention/intervention.runtime.spec.ts",
       "packages/reminder/src/server/runtime/protocol-break-credit/protocol-break-credit.runtime.spec.ts",
       "packages/reminder/src/server/runtime/protocol/protocol-session.runtime.spec.ts",
       "packages/reminder/src/server/runtime/routine-activity/routine-activity-sensor.runtime.spec.ts",
-      "packages/reminder/src/server/transport/reminder-usecases-export.surface.spec.ts",
       "packages/schedule/src/api/module-lifecycle.spec.ts",
       "packages/schedule/src/api/routes.spec.ts",
       "packages/schedule/src/api/schedule-event-routes-roundtrip.spec.ts",
@@ -12632,12 +11869,12 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1095,
-    "integration": 38,
+    "unit": 1026,
+    "integration": 34,
     "smoke": 3,
     "boundary-ipc": 9,
     "boundary-main": 6,
-    "e2e": 60,
+    "e2e": 59,
     "perf": 1,
     "governance": 57
   }

@@ -159,27 +159,6 @@ describe('PowerSyncDataPortabilityImportStore', () => {
     );
   });
 
-  it('uses the imported generated id for reminder responses', async () => {
-    const { db, statements } = createFakeDb();
-    const store = new PowerSyncDataPortabilityImportStore(db);
-
-    await store.transaction((tx) =>
-      tx.createReminderResponse({
-        id: 'response-1',
-        identityId: 'identity-1',
-        planId: 'template-1',
-        action: 'dismiss',
-        responseTime: 1_700_000_000,
-        timestamp: '2024-03-01T00:00:00.000Z',
-      }),
-    );
-
-    const insert = statements.find((statement) =>
-      statement.sql.includes('INSERT INTO reminder_responses'),
-    );
-    expect(insert?.parameters?.[0]).toBe('response-1');
-  });
-
   it('propagates transaction failures', async () => {
     const { db } = createFakeDb();
     const store = new PowerSyncDataPortabilityImportStore(db);

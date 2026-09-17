@@ -10,8 +10,6 @@ import type { GovernanceEventMap } from '../modules/governance/protocol/governan
 import type { GovernanceRpcMap } from '../modules/governance/protocol/governance-rpc-map';
 import type { NotificationEventMap } from '../modules/notification/protocol/notification-event-map';
 import type { NotificationRpcMap } from '../modules/notification/protocol/notification-rpc-map';
-import type { ReminderEventMap } from '../modules/reminder/protocol/reminder-event-map';
-import type { ReminderRpcMap } from '../modules/reminder/protocol/reminder-rpc-map';
 import type { RepositoryEventMap } from '../modules/repository/protocol/repository-event-map';
 import type { RepositoryRpcMap } from '../modules/repository/protocol/repository-rpc-map';
 import type { ScheduleEventMap } from '../modules/schedule/protocol/schedule-event-map';
@@ -43,7 +41,6 @@ type CoreAppEventRegistry = AccountEventMap &
   GoalEventMap &
   GovernanceEventMap &
   NotificationEventMap &
-  ReminderEventMap &
   RepositoryEventMap &
   ScheduleEventMap &
   SettingEventMap &
@@ -58,7 +55,6 @@ type CoreAppRpcRegistry = AccountRpcMap &
   GoalRpcMap &
   GovernanceRpcMap &
   NotificationRpcMap &
-  ReminderRpcMap &
   RepositoryRpcMap &
   ScheduleRpcMap &
   SettingRpcMap &

@@ -37,17 +37,12 @@ model Account {
   labels                        Label[]
   goalLabels                    GoalLabel[]
   taskLabels                    TaskLabel[]
-  reminderGroups                ReminderGroup[]
-  reminderTemplates             ReminderTemplate[]
-  reminderInstances             ReminderInstance[]
-  reminderStatistics            ReminderStatistic?
   routineDefinitions            RoutineDefinition[]
   routineTemporaryOverrides     RoutineTemporaryOverride[]
   routineProfiles               RoutineProfile[]
   routineProfileMemberships     RoutineProfileMembership[]
   routineProtocolDefinitions    RoutineProtocolDefinition[]
   routineProtocolSessions       RoutineProtocolSession[]
-  userReminderPreferences       UserReminderPreference?
   repositories                  Repository[]
   repositoryExplorers           RepositoryExplorer[]
   repositoryStatistics          RepositoryStatistic?
@@ -74,9 +69,6 @@ model Account {
 
   // PowerSync: denormalized identity relations
   taskPlanHistory                        TaskPlanHistory[]                       @relation("AccountTaskPlanHistory")
-  reminderHistory                        ReminderHistory[]                       @relation("AccountReminderHistory")
-  reminderResponses                      ReminderResponse[]                      @relation("AccountReminderResponses")
-  reminderOccurrences                    ReminderOccurrence[]                    @relation("AccountReminderOccurrences")
   routineOccurrences                     RoutineOccurrence[]                     @relation("AccountRoutineOccurrences")
   routineInteractions                    RoutineInteraction[]
   notificationInteractions               NotificationInteraction[]               @relation("AccountNotificationInteractions")
@@ -1010,202 +1002,7 @@ model OperationAuditLog {
 }
 
 // ==========================================
-// Reminder Module
-// 提醒模板、实例、分组、历史、统计、响应
-// ==========================================
-
-model ReminderTemplate {
-  id                 String    @id
-  identityId         String    @map("identity_id")
-  name               String
-  description        String?
-  type               String
-  selfEnabled        Boolean   @map("self_enabled")
-  status             String
-  importanceLevel    String    @map("importance_level")
-  tags               String
-  color              String?
-  icon               String?
-  nextTriggerAt      DateTime? @map("next_trigger_at")
-  version            Int       @default(1)
-  createdAt          DateTime  @default(now()) @map("created_at")
-  updatedAt          DateTime  @updatedAt @map("updated_at")
-  deletedAt          DateTime? @map("deleted_at")
-  trigger            String
-  recurrence         String?
-  activeTime         String    @map("active_time")
-  activeHours        String?   @map("active_hours")
-  notificationConfig String    @map("notification_config")
-  stats              String
-
-  history     ReminderHistory[]
-  instances   ReminderInstance[]
-  responses   ReminderResponse[]
-  occurrences ReminderOccurrence[]
-  account     Account              @relation(fields: [identityId], references: [id], onDelete: Cascade)
-
-  @@index([status])
-  @@map("reminder_templates")
-}
-
-model ReminderGroup {
-  id          String    @id
-  identityId  String    @map("identity_id")
-  name        String
-  description String?
-  color       String?
-  icon        String?
-  enabled     Boolean
-  status      String
-  order       Int
-  stats       String
-  version     Int       @default(1)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  deletedAt   DateTime? @map("deleted_at")
-
-  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@map("reminder_groups")
-}
-
-model ReminderInstance {
-  id          String    @id
-  templateId  String    @map("template_id")
-  identityId  String    @map("identity_id")
-  triggerAt   DateTime  @map("trigger_at")
-  status      String
-  result      String?
-  processedAt DateTime? @map("processed_at")
-  note        String?
-  payload     String?
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-
-  account  Account          @relation(fields: [identityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  template ReminderTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
-
-  @@index([triggerAt])
-  @@map("reminder_instances")
-}
-
-model ReminderHistory {
-  id                  String   @id
-  identityId          String   @map("identity_id")
-  templateId          String   @map("template_id")
-  triggeredAt         DateTime @map("triggered_at")
-  result              String
-  error               String?
-  notificationSent    Boolean  @map("notification_sent")
-  notificationChannel String?
-  createdAt           DateTime @default(now()) @map("created_at")
-
-  identity Account          @relation("AccountReminderHistory", fields: [identityId], references: [id])
-  template ReminderTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@index([templateId])
-  @@map("reminder_history")
-}
-
-model ReminderStatistic {
-  id            String   @id
-  identityId    String   @unique @map("identity_id")
-  templateStats String   @map("template_stats")
-  groupStats    String   @map("group_stats")
-  triggerStats  String   @map("trigger_stats")
-  calculatedAt  DateTime @map("calculated_at")
-
-  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@map("reminder_statistics")
-}
-
-model ReminderResponse {
-  id                    String   @id @default(uuid())
-  identityId            String   @map("identity_id")
-  templateId            String   @map("template_id")
-  action                String // clicked, ignored, snoozed, dismissed, completed
-  responseTime          Int?     @map("response_time") // actual response latency, seconds
-  snoozeDurationSeconds Int?     @map("snooze_duration_seconds") // requested snooze delay, seconds
-  timestamp             DateTime
-  createdAt             DateTime @default(now()) @map("created_at")
-
-  identity Account          @relation("AccountReminderResponses", fields: [identityId], references: [id])
-  template ReminderTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@index([templateId, timestamp(sort: Desc)])
-  @@map("reminder_responses")
-}
-
-/// UserReminderPreference 聚合根 - 用户提醒偏好
-/// 存储用户的最佳/最差响应时间段与全局提醒总开关
-model UserReminderPreference {
-  // ============ 主键与外键 ============
-  id         String @id
-  identityId String @unique @map("identity_id")
-
-  // ============ 时间段偏好 ============
-  bestTimeSlots  String @map("best_time_slots") /// JSON: TimeSlotDTO[]
-  worstTimeSlots String @map("worst_time_slots") /// JSON: TimeSlotDTO[]
-
-  // ============ 全局提醒 ============
-  globalReminderEnabled Boolean @default(true) @map("global_reminder_enabled")
-
-  // ============ 审计 ============
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  // ============ 关系映射 ============
-  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
-
-  // ============ 索引优化 ============
-  @@index([identityId])
-  @@map("user_reminder_preferences")
-}
-
-/// ReminderOccurrence 触发实例/投递意图（W1: LeaseClaim 与 durable receipt）
-model ReminderOccurrence {
-  id                  String    @id
-  identityId          String    @map("identity_id")
-  templateId          String    @map("template_id")
-  source              String    @default("reminder")
-  occurrenceKey       String    @map("occurrence_key")
-  idempotencyKey      String    @unique @map("idempotency_key")
-  status              String
-  attempt             Int       @default(0)
-  ownerToken          String?   @map("owner_token")
-  claimId             String?   @map("claim_id")
-  fencingToken        Int       @default(0) @map("fencing_token")
-  leaseExpiresAt      DateTime? @map("lease_expires_at")
-  lastHeartbeatAt     DateTime? @map("last_heartbeat_at")
-  heartbeatIntervalMs Int?      @map("heartbeat_interval_ms")
-  lastError           String?   @map("last_error")
-  nextRetryAt         DateTime? @map("next_retry_at")
-  deadLetterAt        DateTime? @map("dead_letter_at")
-  correlationId       String?   @map("correlation_id")
-  causationId         String?   @map("causation_id")
-  attemptsHistoryJson String?   @map("attempts_history_json")
-  createdAt           DateTime  @default(now()) @map("created_at")
-  updatedAt           DateTime  @updatedAt @map("updated_at")
-  finishedAt          DateTime? @map("finished_at")
-
-  template ReminderTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
-  account  Account          @relation("AccountReminderOccurrences", fields: [identityId], references: [id])
-
-  @@unique([templateId, occurrenceKey])
-  @@index([identityId])
-  @@index([status])
-  @@index([leaseExpiresAt])
-  @@map("reminder_occurrences")
-}
-
-// ==========================================
-// Routine Coach vNext — first-class domain truth
-// Legacy Reminder runtime tables above remain for reliability/cutover.
+// Routine Coach vNext — canonical domain truth
 // ==========================================
 
 model RoutineDefinition {

@@ -57,7 +57,6 @@ export default defineConfig({
         'modules/goal/index': path.resolve(__dirname, 'src/modules/goal/index.ts'),
         'modules/task/index': path.resolve(__dirname, 'src/modules/task/index.ts'),
         'modules/schedule/index': path.resolve(__dirname, 'src/modules/schedule/index.ts'),
-        'modules/reminder/index': path.resolve(__dirname, 'src/modules/reminder/index.ts'),
         'modules/notification/index': path.resolve(__dirname, 'src/modules/notification/index.ts'),
         'modules/repository/index': path.resolve(__dirname, 'src/modules/repository/index.ts'),
         'modules/setting/index': path.resolve(__dirname, 'src/modules/setting/index.ts'),

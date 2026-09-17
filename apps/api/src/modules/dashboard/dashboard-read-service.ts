@@ -5,14 +5,12 @@ import {
   toDashboardTaskOccurrenceRecord,
   type DashboardTaskPlanRecord,
   type DashboardScheduleRecord,
-  type DashboardReminderRecord,
 } from '@memoflow/dashboard';
 import type { DashboardData } from '@memoflow/contracts/dashboard';
 import type { UserTimeContextPort } from '@memoflow/time';
 import { createGoalPrismaRepositories } from '@memoflow/goal';
 import { createTaskPrismaRepositories } from '@memoflow/task';
 import { createSchedulePrismaRepository } from '@memoflow/schedule';
-import { createReminderPrismaRepositories } from '@memoflow/reminder';
 import { createNotificationPrismaRepositories } from '@memoflow/notification';
 
 /** Soft residual 1156: dual toDashboardTaskOccurrenceRecord retired onto @memoflow/dashboard sole. */
@@ -78,20 +76,6 @@ function toScheduleRecord(schedule: {
   };
 }
 
-function toReminderRecord(reminder: {
-  deletedAt: number | null;
-  status: string;
-  effectiveEnabled: boolean;
-  nextTriggerAt: number | null;
-}): DashboardReminderRecord {
-  return {
-    deletedAt: reminder.deletedAt,
-    status: reminder.status,
-    effectiveEnabled: reminder.effectiveEnabled,
-    nextTriggerAt: reminder.nextTriggerAt,
-  };
-}
-
 export async function getApiDashboardData(
   db: PrismaClient,
   identityId: string,
@@ -100,7 +84,6 @@ export async function getApiDashboardData(
   const goalRepos = createGoalPrismaRepositories(db);
   const taskRepos = createTaskPrismaRepositories(db);
   const scheduleRepository = createSchedulePrismaRepository(db);
-  const reminderRepos = createReminderPrismaRepositories(db);
   const notificationRepos = createNotificationPrismaRepositories(db);
   const timeContext = await userTimeContextPort.getUserTimeContext(identityId);
 
@@ -120,10 +103,6 @@ export async function getApiDashboardData(
       ),
     listSchedules: async (id) =>
       (await scheduleRepository.findByIdentityId(id)).map(toScheduleRecord),
-    listUpcomingReminders: async (id, beforeTime) =>
-      (await reminderRepos.reminderTemplateRepository.findByNextTriggerBefore(beforeTime, id)).map(
-        toReminderRecord,
-      ),
     countUnreadNotifications: (id) => notificationRepos.notificationRepository.countUnread(id),
     // R6：Activity Ledger 窗口查询（避免全量加载后内存拼接）。
     listActivities: async (id, opts = {}) => {

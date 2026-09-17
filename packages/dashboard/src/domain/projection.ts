@@ -15,7 +15,6 @@ import type {
 } from '@memoflow/contracts/dashboard';
 import { GoalStatus } from '@memoflow/contracts/goal';
 import type { GoalId, ScheduleId } from '@memoflow/contracts/primitives';
-import { ReminderStatus } from '@memoflow/contracts/reminder';
 import { TaskOccurrenceStatus, TaskPlanStatus } from '@memoflow/contracts/task';
 import { createTimeFacade, type CalendarApi, type TimeContext } from '@memoflow/time';
 import type {
@@ -29,7 +28,6 @@ const TREND_DAY_COUNT = 7;
 const ACTIVITY_LIMIT = 10;
 const GOAL_PROGRESS_LIMIT = 5;
 const UPCOMING_SCHEDULE_LIMIT = 5;
-const UPCOMING_REMINDER_WINDOW_MS = DAY_MS;
 const ACTIVITY_WINDOW_MS = 14 * DAY_MS;
 
 /**
@@ -45,13 +43,12 @@ export async function getDashboardData(
   const todayStart = Number(time.calendar.startOfDay(now));
   const todayEnd = Number(time.calendar.endOfDay(now));
 
-  const [goals, taskPlans, taskOccurrences, schedules, reminders, unreadNotifications] =
+  const [goals, taskPlans, taskOccurrences, schedules, unreadNotifications] =
     await Promise.all([
       source.listGoals(identityId),
       source.listTaskPlans(identityId),
       source.listTaskOccurrences(identityId),
       source.listSchedules(identityId),
-      source.listUpcomingReminders(identityId, now + UPCOMING_REMINDER_WINDOW_MS),
       source.countUnreadNotifications(identityId),
     ]);
 
@@ -76,15 +73,6 @@ export async function getDashboardData(
     return completedAt !== null && isWithinRange(completedAt, todayStart, todayEnd);
   }).length;
   const overdueTaskCount = liveTaskOccurrences.filter((instance) => instance.isOverdue()).length;
-
-  const upcomingReminders = reminders.filter(
-    (reminder) =>
-      reminder.deletedAt === null &&
-      reminder.status === ReminderStatus.Active &&
-      reminder.effectiveEnabled &&
-      reminder.nextTriggerAt !== null &&
-      reminder.nextTriggerAt >= now,
-  );
 
   const activeSchedules = schedules.filter((schedule) => schedule.endTime >= now);
   const upcomingSchedule: ScheduleItem[] = activeSchedules
@@ -130,7 +118,9 @@ export async function getDashboardData(
       activeTasks: taskBoard.todo + taskBoard.inProgress,
       completedToday,
       activeGoals: activeGoals.length,
-      upcomingReminders: upcomingReminders.length,
+      // Phase 5 will project canonical Routine interventions into Dashboard.
+      // The legacy Reminder read model was retired in R4-2201C.
+      upcomingReminders: 0,
       unreadNotifications,
       scheduleConflicts: activeSchedules.filter((schedule) => schedule.hasConflict).length,
     },

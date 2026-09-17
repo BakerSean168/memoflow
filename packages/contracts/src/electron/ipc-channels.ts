@@ -98,26 +98,6 @@ export const SchedulerChannels = {
   INVOCATION_GET_DUE: 'scheduler:invocation:get-due',
 } as const;
 
-export const ReminderChannels = {
-  TEMPLATE_LIST: 'reminder:template:list',
-  TEMPLATE_GET: 'reminder:template:get',
-  TEMPLATE_CREATE: 'reminder:template:create',
-  TEMPLATE_UPDATE: 'reminder:template:update',
-  TEMPLATE_DELETE: 'reminder:template:delete',
-  TEMPLATE_TOGGLE_ENABLED: 'reminder:template:toggle-enabled',
-  TEMPLATE_REPLACE_PROFILES: 'reminder:template:replace-profiles',
-  UPCOMING_GET: 'reminder:upcoming:get',
-  TODAY_SCHEDULE_GET: 'reminder:today-schedule:get',
-  GROUP_LIST: 'reminder:group:list',
-  GROUP_GET: 'reminder:group:get',
-  GROUP_CREATE: 'reminder:group:create',
-  GROUP_UPDATE: 'reminder:group:update',
-  GROUP_DELETE: 'reminder:group:delete',
-  GROUP_TOGGLE_STATUS: 'reminder:group:toggle-status',
-  PREFERENCES_GET: 'reminder:preferences:get',
-  PREFERENCES_UPDATE: 'reminder:preferences:update',
-} as const;
-
 export const DashboardChannels = {
   GET_STATS: 'dashboard:get-stats',
 } as const;

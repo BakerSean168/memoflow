@@ -8,8 +8,6 @@ import {
   PrismaResourceAdapter,
   PrismaScheduleAdapter,
   PrismaAIConversationAdapter,
-  PrismaRoutineProfileMembershipAdapter,
-  PrismaRoutineDefinitionAdapter,
 } from './adapters/prisma-adapters';
 import {
   createDataPortabilityModule,
@@ -18,7 +16,6 @@ import {
 } from './data-portability.module';
 import { createGoalPrismaRepositories } from '@memoflow/goal';
 import { createTaskPrismaRepositories } from '@memoflow/task';
-import { createReminderPrismaRepositories } from '@memoflow/reminder';
 import { createNotificationPrismaRepositories } from '@memoflow/notification';
 import { createSettingPrismaRepositories } from '@memoflow/setting';
 
@@ -67,7 +64,6 @@ export function createPrismaDataPortabilityDependencies(
 ): DataPortabilityDependencies {
   const goalRepos = createGoalPrismaRepositories(db);
   const taskRepos = createTaskPrismaRepositories(db);
-  const reminderRepos = createReminderPrismaRepositories(db);
   const notificationRepos = createNotificationPrismaRepositories(db);
   const settingRepos = createSettingPrismaRepositories(db);
 
@@ -76,12 +72,6 @@ export function createPrismaDataPortabilityDependencies(
     goalRecordRepository: goalRepos.goalRecordRepository,
     taskPlanRepository: taskRepos.taskPlanRepository,
     taskOccurrenceRepository: taskRepos.taskOccurrenceRepository,
-    reminderTemplateRepository: reminderRepos.reminderTemplateRepository,
-    reminderGroupRepository: reminderRepos.reminderGroupRepository,
-    reminderResponseRepository: reminderRepos.reminderResponseRepository,
-    routineProfileMembershipRepository: new PrismaRoutineProfileMembershipAdapter(db),
-    routineDefinitionRepository: new PrismaRoutineDefinitionAdapter(db),
-    userReminderPreferenceRepository: reminderRepos.userReminderPreferenceRepository,
     repositoryRepository: new PrismaRepositoryAdapter(db),
     folderRepository: new PrismaFolderAdapter(db),
     resourceRepository: new PrismaResourceAdapter(db),

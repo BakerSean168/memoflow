@@ -43,7 +43,7 @@ import { ensurePowerSyncPublication } from './shared/infrastructure/database/ens
 import { composeGovernance } from './runtime/compose-governance';
 import { composeAccount } from './runtime/compose-account';
 import { composeNotification } from './runtime/compose-notification';
-import { composeReminder, createExecutorClosureChecker } from './runtime/compose-reminder';
+import { composeRoutine } from './runtime/compose-routine';
 import { composeRepository } from './runtime/compose-repository';
 import { composeSchedule } from './runtime/compose-schedule';
 import { composeSetting } from './runtime/compose-setting';
@@ -54,7 +54,7 @@ import {
   PrismaAccountClosureOperationRepository,
   createCloudAccountProvisioner,
 } from '@memoflow/account';
-import { ReminderAccountClosedConsumer } from '@memoflow/reminder/server';
+import { RoutineAccountClosedConsumer } from '@memoflow/reminder/server';
 import { registerRoutineNotificationOwnerCommands } from '@memoflow/reminder';
 import { NotificationAccountClosedConsumer } from '@memoflow/notification/server';
 import { RepositoryAccountClosedConsumer } from '@memoflow/repository/server';
@@ -154,14 +154,6 @@ async function bootstrap(): Promise<void> {
   const closureRepo = new PrismaAccountClosureOperationRepository(prisma);
   const accountActiveChecker = async (identityId: string) =>
     (await closureRepo.findActiveByIdentityId(identityId)) !== null;
-  // Executor-visible closure predicate frozen from merge-base: block when the
-  // account is missing / Closed, or an active closure operation
-  // exists in requested|revoking|closing. The AI executor MUST see this
-  // predicate, not the shared account-active checker.
-  // 从 merge-base 冻结的 executor 可见闭户谓词：账户缺失 / Closed
-  // 或存在 requested|revoking|closing 阶段的有效闭户操作时阻断。AI executor
-  // 必须看到该谓词，而不是共享的账户激活检查器。
-  const executorClosureChecker = createExecutorClosureChecker(prisma);
   const cloudAuth = createCloudAuth({
     database: prisma,
     secret: jwtConfig.secret,
@@ -221,16 +213,10 @@ async function bootstrap(): Promise<void> {
       },
     ],
   });
-  const reminderComposed = composeReminder({
-    db: prisma,
-    notificationRequestedWriter: notificationApiModule.requestedWriter,
-    userTimeContextPort: settingApiModule.userTimeContextPort,
-    closureChecker: accountActiveChecker,
-    executorClosureChecker,
-  });
+  const routineComposed = composeRoutine({ db: prisma });
   registerRoutineNotificationOwnerCommands(
     notificationApiModule.ownerCommandRegistry,
-    reminderComposed.routineCommandPort,
+    routineComposed.routineCommandPort,
   );
   const repositoryApiModule = composeRepository({
     db: prisma,
@@ -264,15 +250,11 @@ async function bootstrap(): Promise<void> {
         settingApiModule.userTimeContextPort,
       ),
     },
-    reminderProjection: {
-      source: reminderComposed.scheduleProjectionSource,
-    },
     routineProjection: {
       source: createRoutinePrismaScheduleProjectionSource(prisma),
     },
     routineOverrideStore: routineExecutionDeps.temporaryOverrideStore,
     execution: {
-      reminderSource: reminderComposed.scheduleExecutionSource,
       routineSource: routineExecutionDeps,
     },
   });
@@ -343,7 +325,7 @@ async function bootstrap(): Promise<void> {
     taskApplicationPort: taskComposed.applicationPort,
     goalKnowledgeService,
     knowledgeDocumentRefResolver: repositoryApiModule.knowledgeDocumentRefResolver,
-    routineCommandPort: reminderComposed.routineCommandPort,
+    routineCommandPort: routineComposed.routineCommandPort,
     scheduleRepository: scheduleApiModule.repositories.scheduleRepository,
     notificationRepository: notificationApiModule.repositories.notificationRepository,
     userTimeContextPort: settingApiModule.userTimeContextPort,
@@ -376,7 +358,6 @@ async function bootstrap(): Promise<void> {
     .register(governanceApiModule) // ✅ 治理模块 (runtime composer)
     .register(accountApiModule.module) // ✅ 账户模块 (runtime composer)
     .register(notificationApiModule.module) // ✅ 通知模块 (runtime composer)
-    .register(reminderComposed.module) // ✅ 提醒模块 (runtime composer)
     .register(repositoryApiModule) // ✅ 仓库模块 (runtime composer)
     .register(scheduleApiModule.calendarModule) // ✅ Calendar/Planner
     .register(scheduleApiModule.schedulerModule) // ✅ Temporal Engine diagnostics/runtime
@@ -403,7 +384,7 @@ async function bootstrap(): Promise<void> {
     cleanupExpiredDeviceCodes: () => cloudAuth.cleanupExpiredDeviceCodes(),
     processAccountClosedOutbox: () =>
       new AccountClosedWorker(prisma, {
-        reminderConsumer: new ReminderAccountClosedConsumer(prisma),
+        routineConsumer: new RoutineAccountClosedConsumer(prisma),
         notificationConsumer: new NotificationAccountClosedConsumer(prisma),
         repositoryConsumer: new RepositoryAccountClosedConsumer(prisma),
       }).processPendingMessages(),

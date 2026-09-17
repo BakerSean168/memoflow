@@ -5,7 +5,6 @@ import { useRouter } from 'expo-router';
 import { APP_NAME } from '../constants/app';
 import { MOBILE_API_BASE_URL_HINT } from '../constants/auth';
 import { useNotifications } from '../hooks/useNotifications';
-import { useReminders } from '../hooks/useReminders';
 import { useAppSession } from '../providers/app-session-provider';
 
 import {
@@ -23,12 +22,6 @@ const MODULE_SCOPE = [
     description: '查看收件箱、未读数和通知详情。',
     phase: 'Live',
     route: './notifications',
-  },
-  {
-    title: 'Reminders',
-    description: '查看今日提醒和全部模板。',
-    phase: 'Live',
-    route: './reminders',
   },
   {
     title: 'Account',
@@ -54,7 +47,6 @@ export function SetupScreen() {
   const router = useRouter();
   const { apiBaseUrl, currentUser, isRemoteAuthenticated, sessionKind } = useAppSession();
   const { unreadCount } = useNotifications();
-  const { templates, todaySchedule } = useReminders();
 
   const actionSections = [
     {
@@ -74,7 +66,7 @@ export function SetupScreen() {
       actionSections={actionSections}
       eyebrow="More"
       title="More"
-      subtitle="账户、消息、提醒和偏好设置。"
+      subtitle="账户、消息和偏好设置。"
     >
       <SectionCard
         title="Workspace"
@@ -98,8 +90,6 @@ export function SetupScreen() {
             label={`${unreadCount} unread`}
             tone={unreadCount > 0 ? 'warning' : 'success'}
           />
-          <StatusPill label={`${todaySchedule.length} today`} tone="textSecondary" />
-          <StatusPill label={`${templates.length} templates`} tone="textSecondary" />
         </View>
         <ThemedText type="small" themeColor="textSecondary">
           API base URL: <ThemedText type="code">{apiBaseUrl}</ThemedText>
