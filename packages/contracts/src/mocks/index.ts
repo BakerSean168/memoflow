@@ -11,7 +11,6 @@
  *   createMockGoalList,
  *   createMockTaskPlan,
  *   createMockAccount,
- *   createMockReminderTemplate,
  *   createMockNotification,
  *   createMockRule,
  *   createMockRuleRevision,

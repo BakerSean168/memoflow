@@ -2,7 +2,7 @@
  * Notification characterization tests.
  *
  * Locks the current NotificationService behavior (DND suppression, native vs
- * custom notification routing, and the reminder/schedule/goal/task helpers) so
+ * custom notification routing, and the schedule/goal/task helpers) so
  * the capability ownership migration cannot change it silently.
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -181,24 +181,6 @@ describe('NotificationService helper notifications', () => {
     Notification.clearInstances();
     window = new BrowserWindow({});
     window.show();
-  });
-
-  it('showReminderNotification prefixes a bell and uses critical urgency for vital reminders', () => {
-    const { service, dispatch } = createService();
-    service.showReminderNotification({
-      id: 'r1',
-      title: 'Stand up',
-      body: 'Now',
-      importance: 'vital',
-    });
-    expect(dispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: '🔔 Stand up',
-        body: 'Now',
-        urgency: 'critical',
-        data: { type: 'reminder', id: 'r1' },
-      }),
-    );
   });
 
   it('showScheduleNotification sets schedule type and default body', () => {

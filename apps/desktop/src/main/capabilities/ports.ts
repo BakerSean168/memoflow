@@ -139,7 +139,7 @@ export interface AutoLaunchPort {
  * Notification capability port.
  *
  * Native/custom desktop notifications, Do-Not-Disturb state, and the typed
- * helper surfaces (reminder/schedule/goal/task). The port returns whether a
+ * helper surfaces (schedule/goal/task). The port returns whether a
  * notification was rendered; callers that need the raw instance cast it.
  */
 export interface NotificationPort {
@@ -162,7 +162,6 @@ export interface NotificationPort {
   show(config: NotificationConfig): boolean;
 
   /** Typed helpers for domain notification types. */
-  showReminder(config: { id: string; title: string; body?: string; importance?: string }): boolean;
   showSchedule(config: { id: string; name: string; description?: string }): boolean;
   showGoalProgress(config: {
     id: string;

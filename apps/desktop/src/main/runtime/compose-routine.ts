@@ -1,42 +1,14 @@
 /**
- * Reminder Electron composition root — desktop lane host runtime.
- * 提醒 Electron 组合根 —— desktop lane 宿主运行时。
+ * Routine desktop composition root.
  *
- * This is the desktop-lane composition root for reminder. The desktop main
- * runtime owns the per-profile PowerSync database (IElectronDatabase), so it
- * selects the PowerSync persistence adapters, assembles the transport-neutral
- * `ReminderModuleInstance` (the desktop fail-closed closure checker built from
- * the profile DB is passed explicitly), and turns it into an already-bound
- * `IElectronModule`-compatible handle via `createReminderElectronModule`. It
- * also returns the schedule execution/projection sources built from the SAME
- * repository set so schedule orchestration shares one set.
+ * The desktop main runtime owns the per-profile PowerSync database and selects
+ * the canonical Routine vNext persistence adapters. This composer assembles the
+ * owner command seam plus per-profile Elapsed/ActiveUsage/Intervention runtimes
+ * and restores durable RoutineDefinition/Profile/Membership state on startup.
  *
- * 这是提醒在 desktop lane 的组合根。桌面主进程运行时拥有按 profile 划分的
- * PowerSync 数据库（IElectronDatabase），因此由它选择 PowerSync 持久化适配器、
- * 装配与传输无关的 `ReminderModuleInstance`（基于 profile DB 构建的桌面
- * fail-closed closure checker 显式传入），再通过 `createReminderElectronModule`
- * 变成已绑定 instance 的、兼容 `IElectronModule` 的 module handle。它还返回从
- * 同一仓储集合构建的 schedule execution/projection sources，使 schedule 编排共享
- * 一套集合。
- *
- * The desktop lane delegates to the canonical PowerSync convenience assembly
- * (`createReminderPowerSyncRepositories` + `createReminderModule`), preserving
- * the historical electron entry behavior exactly: the module owns no extra
- * snooze/reliable/audit runtime (the Prisma lane's snooze rescheduler has no
- * PowerSync counterpart in this package).
- *
- * 桌面 lane 委托给规范化的 PowerSync 便捷装配（`createReminderPowerSyncRepositories`
- * + `createReminderModule`），与历史 electron 入口行为完全一致：模块不自带额外的
- * snooze/reliable/audit runtime（Prisma lane 的 snooze rescheduler 在本包中没有
- * PowerSync 对应实现）。
- *
- * Assembly order (plan §3.3) — MUST be: runtime db → reminder PowerSync module
- * (repository set + closure checker) → schedule execution / projection sources
- * built from the SAME repository set → reminder instance → Electron module.
- *
- * 组装顺序（计划 §3.3）必须为：runtime db → 提醒 PowerSync 模块（仓储集合 +
- * closure checker）→ 从同一仓储集合构建的 schedule execution / projection sources
- * → reminder instance → Electron module。
+ * It intentionally exposes no legacy reminder transport, CRUD module, or
+ * retired template repository authority. Scheduler projection/execution uses
+ * the Routine-owned seams exported by the package separately.
  */
 
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
@@ -66,10 +38,7 @@ import {
 import type { IdleSensorPort } from '@memoflow/reminder/routine-runtime';
 import { WindowsIdleSensorAdapter } from '../modules/routine/windows-idle-sensor.adapter';
 
-/**
- * Dependencies the reminder composer needs from the desktop host runtime.
- * 提醒 composer 需要从 desktop 宿主运行时拿到的依赖。
- */
+/** Dependencies the Routine composer needs from the desktop host runtime. */
 export interface ComposeRoutineDesktopDependencies {
   /** PowerSync-backed desktop business database owned by the desktop main runtime. 桌面主进程持有的 PowerSync 桌面业务数据库。 */
   readonly db: IElectronDatabase;
@@ -90,10 +59,7 @@ const DEFAULT_DESKTOP_INTERVENTION_POLICY: InterventionPolicy = {
   strictEnabled: false,
 };
 
-/**
- * Composed reminder surface for the desktop host.
- * 提醒在 desktop 宿主的组装结果。
- */
+/** Composed Routine surface for the desktop host. */
 export interface ComposedRoutineDesktop {
   /** Routine Coach owner-domain command seam for approved AI/product orchestration. */
   readonly routineCommandPort: RoutineCoachCommandPort;
@@ -121,42 +87,9 @@ export interface ComposedRoutineDesktop {
 }
 
 /**
- * Composes the reminder Electron module handle from the desktop runtime's database.
- * 用 desktop runtime 的数据库组装提醒 Electron module handle。
- *
- * Wire order:
- * 1. createReminderPowerSyncRepositories(db) — select the PowerSync adapters
- *    (four domain repositories + the desktop fail-closed closure checker).
- * 2. createReminderModule({ ...repositories, closureChecker }) — assemble the
- *    transport-neutral reminder instance (same assembly as the historical
- *    createReminderPowerSyncModule convenience root).
- * 3. createReminderScheduleExecutionSource({ reminderTemplateRepository }) and
- *    createReminderScheduleProjectionSource({ reminderTemplateRepository }) —
- *    build the schedule sources from the SAME repository set (consumed by
- *    schedule orchestration).
- * 4. createReminderElectronModule({ instance }) — bind the instance to an
- *    IElectronModule handle (transport + lifecycle only).
- *
- * 接线顺序：
- * 1. createReminderPowerSyncRepositories(db) —— 选择 PowerSync 适配器（四个领域
- *    仓储 + 桌面 fail-closed closure checker）。
- * 2. createReminderModule({ ...repositories, closureChecker }) —— 装配与传输无关的
- *    提醒实例（与历史 createReminderPowerSyncModule 便捷根同一装配）。
- * 3. createReminderScheduleExecutionSource({ reminderTemplateRepository }) 与
- *    createReminderScheduleProjectionSource({ reminderTemplateRepository })
- *    —— 从同一仓储集合构建 schedule sources（供 schedule 编排消费）。
- * 4. createReminderElectronModule({ instance }) —— 把实例绑定到 IElectronModule
- *    handle（只负责 transport 与生命周期）。
- *
- * The returned handle is already fully bound: ElectronBootstrapper.register()
- * must be called with it once (Reminder register is async and awaited), and its
- * destroy() disposes the owned instance.
- *
- * 返回的 handle 已完全绑定：ElectronBootstrapper.register() 必须恰好注册一次
- * （Reminder register 是异步的并会被 await），其 destroy() 会 dispose 所属实例。
- *
- * @param dependencies - ComposeRoutineDesktopDependencies with the runtime Electron database.
- * @returns ComposedRoutineDesktop — the bound module handle, repository view and schedule sources.
+ * Compose the per-profile Routine owner/runtime surface from the desktop
+ * runtime database. The returned object is intentionally transport-free; host
+ * windows consume only the explicit Routine command/runtime ports.
  */
 export function composeRoutine(
   dependencies: ComposeRoutineDesktopDependencies,
