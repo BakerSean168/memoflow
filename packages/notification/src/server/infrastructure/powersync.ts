@@ -24,13 +24,18 @@ import {
 import {
   PowerSyncNotificationRepository,
   PowerSyncNotificationPreferenceRepository,
+  NotificationInteractionPowerSyncRepository,
   PowerSyncNotificationReliableAdapter,
   NotificationRequestedPowerSyncWriterAdapter,
 } from './adapters/powersync';
 import type { NotificationMetricsService } from '../domain/services/notification-metrics-service';
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import type { UserTimeContextPort } from '@memoflow/time';
-import type { INotificationRepository, INotificationPreferenceRepository } from '../domain/repositories';
+import type {
+  INotificationInteractionRepository,
+  INotificationRepository,
+  INotificationPreferenceRepository,
+} from '../domain/repositories';
 import type { NotificationRequestedWriterPort } from '@memoflow/contracts/notification';
 
 export interface CreateNotificationPowerSyncModuleOptions {
@@ -58,6 +63,7 @@ export interface CreateNotificationPowerSyncModuleOptions {
 export interface NotificationPowerSyncRepositorySet {
   readonly notificationRepository: INotificationRepository;
   readonly notificationPreferenceRepository: INotificationPreferenceRepository;
+  readonly notificationInteractionRepository: INotificationInteractionRepository;
   readonly reliableAdapter: NotificationReliableOperationPort;
   /**
    * Durable NotificationRequested writer for business handlers (NOTIF-3301).
@@ -89,6 +95,7 @@ export function createNotificationPowerSyncRepositories(
   return {
     notificationRepository: new PowerSyncNotificationRepository(db, metricsService),
     notificationPreferenceRepository: new PowerSyncNotificationPreferenceRepository(db),
+    notificationInteractionRepository: new NotificationInteractionPowerSyncRepository(db),
     reliableAdapter: new PowerSyncNotificationReliableAdapter(db, metricsService),
     requestedWriter: new NotificationRequestedPowerSyncWriterAdapter(db),
   };
@@ -459,6 +466,7 @@ export function createNotificationPowerSyncModule(
   return createNotificationModule({
     notificationRepository,
     preferenceRepository: repositories.notificationPreferenceRepository,
+    interactionRepository: repositories.notificationInteractionRepository,
     durableRuntime,
     runtimeContributions: runtimeContributions ?? [durableRuntime],
     closureChecker,

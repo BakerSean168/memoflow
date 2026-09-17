@@ -47,14 +47,17 @@ import {
   RestoreNotificationInvocationSchema,
   NotificationIdParamsSchema,
   ReplayDeadLetterInvocationSchema,
+  ExecuteNotificationActionSchema,
+  ExecuteNotificationActionResponseSchema,
 } from '@memoflow/contracts/notification';
 import { BusinessOperationReceiptSchema } from '@memoflow/contracts/reliable-messaging';
 import {
   OperationAuditRecordSchema,
   OperationTimelineEntrySchema,
 } from '@memoflow/contracts/operations';
-import type { NotificationApplicationPort } from '../server/application';
+import type { NotificationInboxPort, NotificationOperationsPort } from '../server/application';
 import { NotificationController } from '../server/transport/notification.controller';
+import { NotificationOperationsController } from '../server/transport/notification-operations.controller';
 
 interface PlatformMiddleware {
   readonly auth: RequestHandler;
@@ -66,13 +69,15 @@ interface PlatformMiddleware {
 // ============ Route Registration ============
 
 export function registerNotificationRoutes(
-  api: NotificationApplicationPort,
+  inbox: NotificationInboxPort,
+  operations: NotificationOperationsPort,
   middleware: PlatformMiddleware,
   openApiRegistry?: OpenApiRegistryLike | null,
 ): Router {
   const router = Router();
   const { auth } = middleware;
-  const controller = new NotificationController(api);
+  const controller = new NotificationController(inbox);
+  const operationsController = new NotificationOperationsController(operations);
 
   const r = new RouteRegistrar(router, openApiRegistry ?? null, {
     basePath: '/api/v1/notifications',
@@ -254,7 +259,24 @@ export function registerNotificationRoutes(
     (data, ctx) => controller.updatePreferences(data, ctx),
   );
 
-  // GET /dead-letters — Identity-scoped dead-letter query
+  // POST /actions — typed Notification action intent execution.
+  r.routeWithValidation(
+    {
+      method: 'post',
+      path: '/actions',
+      summary: '执行类型化通知动作',
+      request: { body: { content: { 'application/json': { schema: ExecuteNotificationActionSchema } } } },
+      responses: {
+        200: successResponse(ExecuteNotificationActionResponseSchema, '动作已记录'),
+        404: errorResponse('通知或动作不存在'),
+      },
+      validation: { schema: ExecuteNotificationActionSchema },
+    },
+    [auth],
+    (data, ctx) => controller.executeAction(data.notificationId, data.actionKey, ctx),
+  );
+
+  // GET /dead-letters — operations-only identity-scoped query
   r.route(
     {
       method: 'get',
@@ -265,7 +287,7 @@ export function registerNotificationRoutes(
       },
     },
     [auth],
-    (_req, ctx) => controller.queryDeadLetters(ctx),
+    (_req, ctx) => operationsController.queryDeadLetters(ctx),
   );
 
   // POST /dead-letters/:id/replay — Identity-scoped dead-letter replay
@@ -285,7 +307,7 @@ export function registerNotificationRoutes(
       },
     },
     [auth],
-    (data, ctx) => controller.replayDeadLetter(data.params.id, ctx),
+    (data, ctx) => operationsController.replayDeadLetter(data.params.id, ctx),
   );
 
   // GET /receipts — Delivery receipt timeline query
@@ -300,7 +322,7 @@ export function registerNotificationRoutes(
     },
     [auth],
     (req, ctx) =>
-      controller.getDeliveryReceipts(ctx, {
+      operationsController.getDeliveryReceipts(ctx, {
         limit: parseNumber(req.query?.limit),
         lastCursor: parseString(req.query?.lastCursor ?? req.query?.since),
         since: parseString(req.query?.since),
@@ -320,7 +342,7 @@ export function registerNotificationRoutes(
     },
     [auth],
     (req, ctx) =>
-      controller.getOperationTimeline(ctx, {
+      operationsController.getOperationTimeline(ctx, {
         status: parseString(req.query?.status),
         limit: parseNumber(req.query?.limit),
       }),
@@ -338,7 +360,7 @@ export function registerNotificationRoutes(
     },
     [auth],
     (req, ctx) =>
-      controller.getOperationAudit(ctx, {
+      operationsController.getOperationAudit(ctx, {
         source: parseString(req.query?.source),
         operationId: parseString(req.query?.operationId),
         limit: parseNumber(req.query?.limit),
@@ -383,7 +405,7 @@ export function registerNotificationRoutes(
     let isHistoricalQueryFinished = false;
 
     // Subscribe via the SSE application port (typed event seam) BEFORE query to eliminate window loss.
-    const unsubscribe = api.subscribeSseEvents((event) => {
+    const unsubscribe = inbox.subscribeSseEvents((event) => {
       if (event.identityId !== identityId) return;
 
       const opId =
@@ -414,7 +436,7 @@ export function registerNotificationRoutes(
 
       while (hasMore) {
         try {
-          const receiptsResult = await api.getDeliveryReceipts(identityId, {
+          const receiptsResult = await operations.getDeliveryReceipts(identityId, {
             lastCursor: currentCursor,
             status: 'succeeded',
             limit: 100,

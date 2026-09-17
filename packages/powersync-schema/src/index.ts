@@ -685,21 +685,24 @@ const goal_operation_receipts = new Table(
   { localOnly: true },
 );
 
-const notification_history = new Table({
+const notification_interactions = new Table({
+  idempotency_key: column.text,
   identity_id: column.text,
-  notification_id: column.text, // FK
-  action: column.text,
-  details: column.text,
-  actor_id: column.text,
-  created_at: column.text,
+  notification_id: column.text,
+  action_key: column.text,
+  action_kind: column.text,
+  occurred_at: column.text,
+  command_receipt_id: column.text,
+  outcome: column.text,
+  correlation_id: column.text,
+  causation_id: column.text,
 });
 
 const notification_preferences = new Table({
   identity_id: column.text,
   global_channels: column.text, // JSON Partial<Record<channel, boolean>>
   workflow_overrides: column.text, // JSON workflowKey -> channel overrides
-  do_not_disturb: column.text, // JSON
-  rate_limit: column.text, // JSON
+  quiet_hours: column.text, // Product-Time aware JSON QuietHours
   version: column.integer,
   created_at: column.text,
   updated_at: column.text,
@@ -1056,7 +1059,7 @@ export const PowerSyncAppSchema = new Schema({
   notification_delivery_decisions,
   notification_dispatch_outbox,
   desktop_delivery_acks,
-  notification_history,
+  notification_interactions,
   notification_preferences,
   // Editor
   // AI

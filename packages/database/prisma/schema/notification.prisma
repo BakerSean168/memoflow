@@ -31,7 +31,7 @@ model Notification {
   archivedAt        DateTime? @map("archived_at")
   isRead            Boolean   @default(false) @map("is_read")
 
-  history  NotificationHistory[]
+  interactions NotificationInteraction[]
   dispatchOutboxes NotificationDispatchOutbox[]
   deliveryDecisions NotificationDeliveryDecisionRecord[]
   account  Account               @relation(fields: [identityId], references: [id], onDelete: Cascade)
@@ -42,21 +42,25 @@ model Notification {
   @@map("notifications")
 }
 
-model NotificationHistory {
-  id             String   @id
-  identityId     String   @map("identity_id")
-  notificationId String   @map("notification_id")
-  action         String
-  details        String?
-  actorId        String?  @map("actor_id")
-  createdAt      DateTime @default(now()) @map("created_at")
+model NotificationInteraction {
+  id               String   @id
+  idempotencyKey   String   @unique @map("idempotency_key")
+  identityId       String   @map("identity_id")
+  notificationId   String   @map("notification_id")
+  actionKey        String   @map("action_key")
+  actionKind       String   @map("action_kind")
+  occurredAt       DateTime @map("occurred_at")
+  commandReceiptId String?  @map("command_receipt_id")
+  outcome          String
+  correlationId    String?  @map("correlation_id")
+  causationId      String?  @map("causation_id")
 
-  identity     Account      @relation("AccountNotificationHistory", fields: [identityId], references: [id])
+  identity     Account      @relation("AccountNotificationInteractions", fields: [identityId], references: [id], onDelete: Cascade)
   notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
 
-  @@index([identityId])
-  @@index([notificationId])
-  @@map("notification_history")
+  @@index([identityId, occurredAt])
+  @@index([notificationId, occurredAt])
+  @@map("notification_interactions")
 }
 
 model NotificationDeliveryDecisionRecord {
@@ -83,8 +87,7 @@ model NotificationPreference {
   identityId   String    @unique @map("identity_id")
   globalChannels    String    @default("{}") @map("global_channels")
   workflowOverrides String    @default("{}") @map("workflow_overrides")
-  doNotDisturb String?   @map("do_not_disturb")
-  rateLimit    String?   @map("rate_limit")
+  quietHours String?   @map("quiet_hours")
   version      Int       @default(1)
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")

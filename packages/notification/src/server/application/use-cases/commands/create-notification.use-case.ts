@@ -26,6 +26,10 @@ import type {
 import { Notification } from '../../../domain/aggregates/notification';
 import { NotificationPolicy, type NotificationDeliveryDecision } from '../../../domain/services/notification-policy';
 import { NotificationWorkflowCatalog } from '../../../domain/services/notification-workflow-catalog';
+import {
+  SystemDeliveryGuard,
+  type SystemDeliveryGuardPort,
+} from '../../../domain/services/system-delivery-guard';
 import { toNotificationClientDTO } from './notification-dto-converters';
 import type { UserTimeContextPort } from '@memoflow/time';
 
@@ -39,6 +43,7 @@ export class CreateNotificationUseCase {
     private readonly userTimeContextPort: UserTimeContextPort,
     private readonly clock: () => Date = () => new Date(),
     private readonly workflowCatalog: NotificationWorkflowCatalog = new NotificationWorkflowCatalog(),
+    private readonly systemDeliveryGuard: SystemDeliveryGuardPort = new SystemDeliveryGuard(),
   ) {
     if (!closureChecker) {
       throw new Error('[FAIL-CLOSED] CreateNotificationUseCase requires closureChecker');
@@ -52,7 +57,7 @@ export class CreateNotificationUseCase {
     idempotencyKey?: string;
     title: string;
     content: string;
-    /** Deprecated compatibility inputs. WorkflowDefinition owns their projection. */
+    /** Compatibility projection only. WorkflowDefinition owns canonical semantics. */
     type?: NotificationType;
     category?: NotificationCategory;
     importance?: ImportanceLevel;
@@ -87,7 +92,10 @@ export class CreateNotificationUseCase {
     }
 
     const preference = await this.preferenceRepository.findByIdentityId(params.identityId);
-    const timeContext = await this.userTimeContextPort.getUserTimeContext(params.identityId);
+    // Resolve identity-scoped Product Time before any wall-clock suppression decision.
+    // QuietHours itself carries the selected IANA timezone, while this port is the
+    // canonical identity time seam and prevents host-local fallback from creeping in.
+    await this.userTimeContextPort.getUserTimeContext(params.identityId);
     const requestedChannels = [...new Set(params.channels ?? [ChannelType.InApp])];
     const now = this.clock();
     const notification = Notification.create({
@@ -115,24 +123,38 @@ export class CreateNotificationUseCase {
     const deliveryDecisions: NotificationDeliveryDecision[] = [];
 
     for (const channelType of requestedChannels) {
-      const rateLimitUsage = preference?.rateLimit?.enabled
-        ? await this.notificationRepository.getDeliveryUsage(
-            params.identityId,
-            workflow.workflowKey,
-            channelType,
-            now,
-          )
-        : undefined;
-      const decision = this.policy.evaluate({
+      let decision = this.policy.evaluate({
         workflow,
         channel: channelType,
         preference,
-        doNotDisturb: preference?.doNotDisturb,
-        rateLimit: preference?.rateLimit,
-        rateLimitUsage,
+        quietHours: preference?.quietHours,
         now,
-        timeContext,
       });
+
+      if (
+        decision.outcome === NotificationDeliveryPlanOutcome.Enqueued
+        || decision.outcome === NotificationDeliveryPlanOutcome.Deferred
+      ) {
+        const usage = await this.notificationRepository.getDeliveryUsage(
+          params.identityId,
+          workflow.workflowKey,
+          channelType,
+          now,
+        );
+        const guardDecision = this.systemDeliveryGuard.evaluate({
+          workflowKey: workflow.workflowKey,
+          channel: channelType,
+          usage,
+        });
+        if (guardDecision) {
+          decision = {
+            channel: channelType,
+            outcome: guardDecision.outcome,
+            reason: guardDecision.reason,
+          };
+        }
+      }
+
       deliveryDecisions.push(decision);
 
       if (
@@ -169,6 +191,7 @@ export class CreateNotificationUseCase {
           category: workflow.legacyProjection.category,
           channelType,
           navigationIntent: params.navigationIntent ?? null,
+          actions: params.actions ?? null,
         }),
         idempotencyKey: dispatchIdempotencyKey,
         ...(decision.outcome === NotificationDeliveryPlanOutcome.Deferred
@@ -180,9 +203,6 @@ export class CreateNotificationUseCase {
     try {
       await this.notificationRepository.save(notification, outboxDispatches, deliveryDecisions);
     } catch (cause) {
-      // The persistence unique key is the concurrency fence. A same-key writer may
-      // win after our initial read; re-read only when the caller supplied a stable
-      // Fact idempotency key, and never hide an unrelated persistence failure.
       if (params.idempotencyKey) {
         const racedExisting = await this.notificationRepository.findByIdempotencyKey(
           params.identityId,

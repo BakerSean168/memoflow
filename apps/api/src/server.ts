@@ -55,6 +55,7 @@ import {
   createCloudAccountProvisioner,
 } from '@memoflow/account';
 import { ReminderAccountClosedConsumer } from '@memoflow/reminder/server';
+import { registerRoutineNotificationOwnerCommands } from '@memoflow/reminder';
 import { NotificationAccountClosedConsumer } from '@memoflow/notification/server';
 import { RepositoryAccountClosedConsumer } from '@memoflow/repository/server';
 import {
@@ -227,6 +228,10 @@ async function bootstrap(): Promise<void> {
     closureChecker: accountActiveChecker,
     executorClosureChecker,
   });
+  registerRoutineNotificationOwnerCommands(
+    notificationApiModule.ownerCommandRegistry,
+    reminderComposed.routineCommandPort,
+  );
   const repositoryApiModule = composeRepository({
     db: prisma,
     storageBaseDir: repositoryStorageBaseDir,

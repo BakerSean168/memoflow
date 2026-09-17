@@ -96,8 +96,8 @@ export type NotificationId = string & { readonly __brand: 'NotificationId' };
 /** 通知偏好 ID */
 export type NotificationPreferenceId = string & { readonly __brand: 'NotificationPreferenceId' };
 
-/** 通知历史 ID */
-export type NotificationHistoryId = string & { readonly __brand: 'NotificationHistoryId' };
+/** Notification interaction fact ID */
+export type NotificationInteractionId = string & { readonly __brand: 'NotificationInteractionId' };
 
 /** AI 对话 ID */
 export type AiConversationId = string & { readonly __brand: 'AiConversationId' };
@@ -210,7 +210,7 @@ export const ID_PREFIXES = {
   // === Notification ===
   NotificationId: 'INotificationId',
   NotificationPreferenceId: 'INotificationPreferenceId',
-  NotificationHistoryId: 'NotificationHistoryId',
+  NotificationInteractionId: 'NotificationInteractionId',
 
   // === AI ===
   AiConversationId: 'IAiConversationId',

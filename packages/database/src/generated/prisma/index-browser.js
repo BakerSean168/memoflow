@@ -548,14 +548,18 @@ exports.Prisma.NotificationScalarFieldEnum = {
   isRead: 'isRead'
 };
 
-exports.Prisma.NotificationHistoryScalarFieldEnum = {
+exports.Prisma.NotificationInteractionScalarFieldEnum = {
   id: 'id',
+  idempotencyKey: 'idempotencyKey',
   identityId: 'identityId',
   notificationId: 'notificationId',
-  action: 'action',
-  details: 'details',
-  actorId: 'actorId',
-  createdAt: 'createdAt'
+  actionKey: 'actionKey',
+  actionKind: 'actionKind',
+  occurredAt: 'occurredAt',
+  commandReceiptId: 'commandReceiptId',
+  outcome: 'outcome',
+  correlationId: 'correlationId',
+  causationId: 'causationId'
 };
 
 exports.Prisma.NotificationDeliveryDecisionRecordScalarFieldEnum = {
@@ -576,8 +580,7 @@ exports.Prisma.NotificationPreferenceScalarFieldEnum = {
   identityId: 'identityId',
   globalChannels: 'globalChannels',
   workflowOverrides: 'workflowOverrides',
-  doNotDisturb: 'doNotDisturb',
-  rateLimit: 'rateLimit',
+  quietHours: 'quietHours',
   version: 'version',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -1553,7 +1556,7 @@ exports.Prisma.ModelName = {
   GoalLabel: 'GoalLabel',
   TaskLabel: 'TaskLabel',
   Notification: 'Notification',
-  NotificationHistory: 'NotificationHistory',
+  NotificationInteraction: 'NotificationInteraction',
   NotificationDeliveryDecisionRecord: 'NotificationDeliveryDecisionRecord',
   NotificationPreference: 'NotificationPreference',
   NotificationDispatchOutbox: 'NotificationDispatchOutbox',

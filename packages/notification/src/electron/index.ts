@@ -25,11 +25,11 @@
  * 启动任何 runtime adapter。
  *
  * `instance.api` is the HTTP/IPC-shared application seam
- * (`NotificationApplicationPort`). Both the Express API transport and this
+ * (`NotificationInboxPort`). Both the Express API transport and this
  * Electron IPC transport consume the same port, so behaviour parity across
  * hosts is guaranteed by construction.
  *
- * `instance.api` 是 HTTP/IPC 共用的应用 seam（`NotificationApplicationPort`）。
+ * `instance.api` 是 HTTP/IPC 共用的应用 seam（`NotificationInboxPort`）。
  * Express API 传输层与本 Electron IPC 传输层消费同一个 port，
  * 从而从构造上保证跨宿主行为一致。
  *
@@ -91,6 +91,7 @@ import {
   RestoreNotificationInvocationSchema,
   NotificationBatchInvocationSchema,
   UpdateNotificationPreferenceSchema,
+  ExecuteNotificationActionSchema,
 } from '@memoflow/contracts/notification';
 import { createLogger } from '@memoflow/utils/logger';
 import type { NotificationModuleInstance } from '../server/infrastructure';
@@ -162,6 +163,7 @@ const coreChannels = [
   NotificationChannels.GET_UNREAD_COUNT,
   NotificationChannels.PREFERENCES_GET,
   NotificationChannels.PREFERENCES_UPDATE,
+  NotificationChannels.EXECUTE_ACTION,
 ] as const;
 
 /**
@@ -346,6 +348,15 @@ export function createNotificationElectronModule(
           (args) => args ?? {},
         );
         installed.push(NotificationChannels.PREFERENCES_UPDATE);
+        registerValidatedChannel(
+          ctx,
+          NotificationChannels.EXECUTE_ACTION,
+          ExecuteNotificationActionSchema,
+          (data, requestContext) =>
+            controller.executeAction(data.notificationId, data.actionKey, requestContext),
+          (args) => args,
+        );
+        installed.push(NotificationChannels.EXECUTE_ACTION);
 
         options.instance.start();
         state = 'registered';

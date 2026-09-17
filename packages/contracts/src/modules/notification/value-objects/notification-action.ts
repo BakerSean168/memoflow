@@ -1,19 +1,36 @@
-/**
- * NotificationAction Value Object
- * 通知动作值对象
- *
- * Residual 851: NotificationActionDTO dual retired — sole NotificationAction interface + type alias.
- */
+import type { JsonValue } from '../../../result';
 
-import type { NotificationActionType } from './notification-action-type';
-
-// Residual 851: sole NotificationAction body.
-export interface NotificationAction {
+export interface NotificationEntityRef {
+  type: string;
   id: string;
-  label: string;
-  type: NotificationActionType;
-  payload?: unknown;
 }
 
-// Residual 851: NotificationActionDTO dual retired — DTO is the NotificationAction shape.
-export type NotificationActionDTO = NotificationAction;
+export interface NotificationNavigationIntent {
+  route: string;
+  params?: Record<string, string>;
+}
+
+export type NotificationActionIntent =
+  | {
+      kind: 'navigate';
+      actionKey: string;
+      labelKey: string;
+      destination: NotificationNavigationIntent;
+    }
+  | {
+      kind: 'owner-command';
+      actionKey: string;
+      labelKey: string;
+      owner: NotificationEntityRef;
+      commandKey: string;
+      input?: JsonValue;
+    }
+  | {
+      kind: 'archive';
+      actionKey: string;
+      labelKey: string;
+    };
+
+/** Canonical typed notification action contract (ADR-087). */
+export type NotificationAction = NotificationActionIntent;
+export type NotificationActionDTO = NotificationActionIntent;

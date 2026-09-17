@@ -8,7 +8,7 @@ import type {
 } from '@memoflow/contracts/electron';
 import { NotificationChannelType } from '@memoflow/contracts/notification';
 import { buildIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
-import { createTimeContext } from '@memoflow/time';
+import { asHm, createTimeContext, requireTimeZoneId } from '@memoflow/time';
 import { PowerSyncNotificationReliableAdapter } from '../power-sync-notification-reliable.adapter';
 import { PowerSyncNotificationRepository } from '../notification-powersync.repository';
 import { PowerSyncNotificationPreferenceRepository } from '../notification-preference-powersync.repository';
@@ -19,8 +19,7 @@ import {
 import { CreateNotificationUseCase } from '../../../../application/use-cases/commands/create-notification.use-case';
 import { Notification } from '../../../../domain/aggregates/notification';
 import { NotificationPreference } from '../../../../domain/aggregates/notification-preference';
-import { DoNotDisturbConfig } from '../../../../domain/value-objects/do-not-disturb-config';
-import { RateLimit } from '../../../../domain/value-objects/rate-limit';
+import { QuietHours } from '../../../../domain/value-objects/quiet-hours';
 import { RealDesktopChannelDeliverer } from '../../deliverers/real-channel-deliverers';
 
 const TEST_TIME_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
@@ -64,8 +63,7 @@ function initializeSchema(sqlite: Database.Database): void {
       identity_id TEXT NOT NULL UNIQUE,
       global_channels TEXT NOT NULL DEFAULT '{}',
       workflow_overrides TEXT NOT NULL DEFAULT '{}',
-      do_not_disturb TEXT,
-      rate_limit TEXT,
+      quiet_hours TEXT,
       version INTEGER DEFAULT 1,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
@@ -335,26 +333,26 @@ describe('PowerSync Notification delivery execution', () => {
     expect(result.ackId).toBeDefined();
   });
 
-  it('preserves DND/rate preferences in PowerSync while channel execution truth is retired', async () => {
+  it('preserves Product-Time QuietHours in PowerSync while system guards stay outside preferences', async () => {
     const { db, sqlite } = createTestDb();
     try {
       const repository = new PowerSyncNotificationPreferenceRepository(db);
       const preference = NotificationPreference.create({ identityId: 'user-policy-pref' as never });
       preference.setGlobalChannel(NotificationChannelType.InApp, true);
-      preference.setDoNotDisturb(
-        DoNotDisturbConfig.create({
-          enabled: true,
-          startTime: '22:00',
-          endTime: '08:00',
+      preference.setQuietHours(QuietHours.create({
+        enabled: true,
+        timeZone: requireTimeZoneId('Asia/Tokyo'),
+        weeklyWindows: [{
           daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
-        }),
-      );
-      preference.setRateLimit(RateLimit.create({ enabled: true, maxPerHour: 2, maxPerDay: 9 }));
+          start: asHm('22:00'),
+          end: asHm('08:00'),
+        }],
+      }));
 
       await repository.save(preference);
       const loaded = await repository.findByIdentityId('user-policy-pref');
-      expect(loaded?.doNotDisturb?.toDTO()).toEqual(preference.doNotDisturb?.toDTO());
-      expect(loaded?.rateLimit?.toDTO()).toEqual(preference.rateLimit?.toDTO());
+      expect(loaded?.quietHours?.toDTO()).toEqual(preference.quietHours?.toDTO());
+      expect(loaded?.toServerDTO()).not.toHaveProperty('rateLimit');
     } finally {
       sqlite.close();
     }

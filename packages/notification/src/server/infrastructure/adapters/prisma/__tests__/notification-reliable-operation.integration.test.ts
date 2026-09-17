@@ -11,6 +11,7 @@ import { ReminderType } from '@memoflow/contracts/reminder';
 import { NotificationReliableOperationPrismaAdapter } from '../notification-reliable-operation-prisma.adapter';
 import { NotificationPrismaRepository } from '../notification-prisma.repository';
 import { NotificationPreferencePrismaRepository } from '../notification-preference-prisma.repository';
+import { NotificationInteractionPrismaRepository } from '../notification-interaction-prisma.repository';
 import { CreateNotificationUseCase } from '../../../../application/use-cases/commands/create-notification.use-case';
 import { createNotificationRuntimeContribution } from '../../../runtime/notification.runtime';
 import { RealInAppChannelDeliverer } from '../../deliverers/real-channel-deliverers';
@@ -462,14 +463,14 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     });
 
     // Query via module API
-    const dlResult = await moduleInstance.api.queryDeadLetters(identityId);
+    const dlResult = await moduleInstance.operations.queryDeadLetters(identityId);
     expect(dlResult.ok).toBe(true);
     const dlList = dlResult.ok ? (dlResult.data as any[]) : [];
     expect(dlList).toHaveLength(1);
     expect(dlList[0].operationId).toBe(opId);
 
     // Replay via module API
-    const replayResult = await moduleInstance.api.replayDeadLetter(opId, identityId);
+    const replayResult = await moduleInstance.operations.replayDeadLetter(opId, identityId);
     expect(replayResult.ok).toBe(true);
     const replayedData = replayResult.ok ? (replayResult.data as any) : null;
     expect(replayedData.status).toBe('retryable');
@@ -507,7 +508,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
       { notificationId },
     );
 
-    const receiptsRes = await moduleInstance.api.getDeliveryReceipts(identityId, { limit: 10 });
+    const receiptsRes = await moduleInstance.operations.getDeliveryReceipts(identityId, { limit: 10 });
     expect(receiptsRes.ok).toBe(true);
     const receipts = receiptsRes.ok ? (receiptsRes.data as any[]) : [];
     expect(receipts.length).toBeGreaterThanOrEqual(1);
@@ -567,7 +568,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
       finishedAt: null,
     });
 
-    const timelineRes = await moduleInstance.api.getOperationTimeline(identityId);
+    const timelineRes = await moduleInstance.operations.getOperationTimeline(identityId);
     expect(timelineRes.ok).toBe(true);
     const entries = timelineRes.ok ? (timelineRes.data as any[]) : [];
     const entry = entries.find((e) => e.operationId === opId);
@@ -620,7 +621,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
       updatedAt: new Date().toISOString(),
     });
 
-    const dlResult = await moduleInstance.api.queryDeadLetters(identityId);
+    const dlResult = await moduleInstance.operations.queryDeadLetters(identityId);
     expect(dlResult.ok).toBe(true);
     const dl = (dlResult.ok ? (dlResult.data as any[]) : []).find((d) => d.operationId === opId);
     expect(dl).toBeDefined();
@@ -628,16 +629,16 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     // Unauthorized identity cannot replay another identity's dead letter
     const otherIdentity = `identity_other_${randomUUID()}`;
     await seedAccount({ id: otherIdentity });
-    const rejected = await moduleInstance.api.replayDeadLetter(opId, otherIdentity);
+    const rejected = await moduleInstance.operations.replayDeadLetter(opId, otherIdentity);
     expect(rejected.ok).toBe(false);
 
     // Authorized replay advances state and records audit
-    const replayResult = await moduleInstance.api.replayDeadLetter(opId, identityId);
+    const replayResult = await moduleInstance.operations.replayDeadLetter(opId, identityId);
     expect(replayResult.ok).toBe(true);
     const replayed = replayResult.ok ? (replayResult.data as any) : null;
     expect(replayed.status).toBe('retryable');
 
-    const auditRes = await moduleInstance.api.getOperationAudit(identityId);
+    const auditRes = await moduleInstance.operations.getOperationAudit(identityId);
     expect(auditRes.ok).toBe(true);
     const audit = auditRes.ok ? (auditRes.data as any[]) : [];
     const replayAudit = audit.find(
@@ -647,7 +648,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     expect(replayAudit.actorIdentityId).toBe(identityId);
 
     // Audit is actor-scoped: other identity sees none of ours
-    const otherAuditRes = await moduleInstance.api.getOperationAudit(otherIdentity);
+    const otherAuditRes = await moduleInstance.operations.getOperationAudit(otherIdentity);
     expect(otherAuditRes.ok).toBe(true);
     const otherAudit = otherAuditRes.ok ? (otherAuditRes.data as any[]) : [];
     expect(otherAudit.some((a) => a.operationId === opId)).toBe(false);
@@ -684,7 +685,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
       { notificationId },
     );
 
-    const timelineRes = await moduleInstance.api.getOperationTimeline(identityId);
+    const timelineRes = await moduleInstance.operations.getOperationTimeline(identityId);
     expect(timelineRes.ok).toBe(true);
     expect((timelineRes.ok ? (timelineRes.data as any[]) : []).length).toBeGreaterThanOrEqual(1);
 
@@ -759,6 +760,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     const moduleInstance = createNotificationModule({
       notificationRepository: notificationRepo,
       preferenceRepository: preferenceRepo,
+      interactionRepository: new NotificationInteractionPrismaRepository(prisma),
       closureChecker: async () => false,
       durableRuntime: createNotificationRuntimeContribution({
         userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
@@ -768,7 +770,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
       auditRepository: failingAudit as never,
     });
 
-    const replayResult = await moduleInstance.api.replayDeadLetter(opId, identityId);
+    const replayResult = await moduleInstance.operations.replayDeadLetter(opId, identityId);
     expect(replayResult.ok).toBe(false);
 
     const after = await prisma.notificationDispatchOutbox.findUniqueOrThrow({
@@ -793,6 +795,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     const moduleInstance = createNotificationModule({
       notificationRepository: notificationRepo,
       preferenceRepository: preferenceRepo,
+      interactionRepository: new NotificationInteractionPrismaRepository(prisma),
       closureChecker: async () => false,
       durableRuntime: createNotificationRuntimeContribution({
         userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
@@ -802,7 +805,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
       auditRepository: failingAudit as never,
     });
 
-    await expect(moduleInstance.api.getOperationTimeline(identityId)).rejects.toThrow(
+    await expect(moduleInstance.operations.getOperationTimeline(identityId)).rejects.toThrow(
       'audit write failure injected',
     );
 
@@ -908,7 +911,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
       next();
     };
 
-    const router = registerNotificationRoutes(moduleInstance.api, {
+    const router = registerNotificationRoutes(moduleInstance.api, moduleInstance.operations, {
       auth: mockAuth,
       requireRole: () => mockAuth,
     });
@@ -1373,7 +1376,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
       next();
     };
 
-    const router = registerNotificationRoutes(moduleInstance.api, {
+    const router = registerNotificationRoutes(moduleInstance.api, moduleInstance.operations, {
       auth: mockAuth,
       requireRole: () => mockAuth,
     });
@@ -1493,7 +1496,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
       next();
     };
 
-    const router = registerNotificationRoutes(moduleInstance.api, {
+    const router = registerNotificationRoutes(moduleInstance.api, moduleInstance.operations, {
       auth: mockAuth,
       requireRole: () => mockAuth,
     });

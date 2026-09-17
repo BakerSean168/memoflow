@@ -68,6 +68,7 @@ const coreChannels = [
   NotificationChannels.GET_UNREAD_COUNT,
   NotificationChannels.PREFERENCES_GET,
   NotificationChannels.PREFERENCES_UPDATE,
+  NotificationChannels.EXECUTE_ACTION,
 ];
 
 function createFakeInstance() {

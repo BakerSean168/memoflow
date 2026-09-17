@@ -7,6 +7,7 @@ import { RelatedEntityType } from '../value-objects/related-entity-type';
 import { NotificationChannelType } from '../value-objects/notification-channel-type';
 import { ImportanceLevel } from '../../../shared/value-objects/importance';
 import { UrgencyLevel } from '../../../shared/value-objects/urgency';
+import { NotificationActionIntentSchema } from './notification-action.dto';
 
 export const CreateNotificationSchema = z.object({
   workflowKey: z.string().min(1).max(200).optional(),
@@ -23,7 +24,7 @@ export const CreateNotificationSchema = z.object({
   navigationIntent: z.object({ route: z.string(), params: z.record(z.string(), z.string()).optional() }).optional(),
   correlationId: z.string().optional(),
   causationId: z.string().optional(),
-  actions: z.array(z.unknown()).optional(),
+  actions: z.array(NotificationActionIntentSchema).optional(),
   metadata: z.record(z.string(), openApiJsonValue).optional(),
   expiresAt: z.number().int().optional(),
   sendImmediately: z.boolean().default(false).optional(),

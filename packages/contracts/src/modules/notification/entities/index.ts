@@ -1,9 +1,6 @@
-/**
- * Notification Entities - Index
- * 通知实体 - 索引
- */
-
-// ===== NotificationHistory Server =====
+/** Notification interaction fact exports. */
 export type {
-  NotificationHistoryServerDTO,
-} from './notification-history-server';
+  NotificationInteractionDTO,
+  NotificationInteractionKind,
+  NotificationInteractionOutcome,
+} from './notification-interaction';

@@ -109,9 +109,10 @@ function replaceDeliveryChoices(
 /**
  * Notification-owned portability for the stable delivery-choice layer only.
  *
- * ADR-088 has not yet finalized QuietHours/SystemDeliveryGuard, so the current
- * doNotDisturb/rateLimit fields are deliberately preserved in-place and never
- * serialized by this capability.
+ * QuietHours is canonical owner state after N4-2402B but remains outside the
+ * existing Portable V3 delivery-choice payload until PORT-1610B expands stable
+ * owner coverage. Import therefore replaces channel choices while preserving
+ * QuietHours in-place. SystemDeliveryGuard is platform policy and is never portable.
  */
 export class NotificationDeliveryPreferencePortableService {
   constructor(private readonly repository: INotificationPreferenceRepository) {}

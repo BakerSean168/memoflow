@@ -138,15 +138,20 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
   ) {}
 
   private async ensureTablesExist(): Promise<void> {
-    if (this.tablesInitialized) return;    await this.db.execute(`
-      CREATE TABLE IF NOT EXISTS notification_history (
+    if (this.tablesInitialized) return;
+    await this.db.execute(`
+      CREATE TABLE IF NOT EXISTS notification_interactions (
         id TEXT PRIMARY KEY,
+        idempotency_key TEXT UNIQUE NOT NULL,
         identity_id TEXT NOT NULL,
         notification_id TEXT NOT NULL,
-        action TEXT NOT NULL,
-        details TEXT,
-        actor_id TEXT,
-        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        action_key TEXT NOT NULL,
+        action_kind TEXT NOT NULL,
+        occurred_at TEXT NOT NULL,
+        command_receipt_id TEXT,
+        outcome TEXT NOT NULL,
+        correlation_id TEXT,
+        causation_id TEXT
       );
     `);
     await this.db.execute(`

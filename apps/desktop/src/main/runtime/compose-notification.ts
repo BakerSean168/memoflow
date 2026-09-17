@@ -45,6 +45,7 @@ import {
   createPowerSyncClosureChecker,
   type ChannelCapabilitySpec,
   type INotificationRepository,
+  type NotificationOwnerCommandRegistry,
   type NotificationRequestedWriterPort,
 } from '@memoflow/notification';
 import {
@@ -83,6 +84,8 @@ export interface ComposedNotificationDesktop {
   };
   /** Trusted writer for durable `notification.requested` envelopes (cross-module consumption). 可信的 durable `notification.requested` 信封写入器（跨模块消费）。 */
   readonly requestedWriter: NotificationRequestedWriterPort;
+  /** Late-bound owner command registry. */
+  readonly ownerCommandRegistry: NotificationOwnerCommandRegistry;
 }
 
 /**
@@ -147,6 +150,7 @@ export function composeNotification(
   const instance = createNotificationModule({
     notificationRepository: repositories.notificationRepository,
     preferenceRepository: repositories.notificationPreferenceRepository,
+    interactionRepository: repositories.notificationInteractionRepository,
     closureChecker,
     userTimeContextPort: dependencies.userTimeContextPort,
     durableRuntime,
@@ -160,5 +164,6 @@ export function composeNotification(
       requestedWriter: repositories.requestedWriter,
     },
     requestedWriter: repositories.requestedWriter,
+    ownerCommandRegistry: instance.ownerCommandRegistry,
   };
 }

@@ -7,7 +7,6 @@ import type {
 } from '@memoflow/contracts/notification';
 import type { ImportanceLevel, UrgencyLevel } from '@memoflow/contracts/shared';
 import { Notification } from '../../../../domain/aggregates/notification';
-import { NotificationHistory } from '../../../../domain/entities/notification-history';
 import {
   NotificationId,
   NotificationAction,
@@ -43,32 +42,10 @@ export type PrismaNotificationRow = {
   archivedAt: Date | null;
 };
 
-export type PrismaNotificationHistoryRow = {
-  id: string;
-  identityId: string;
-  notificationId: string;
-  action: string;
-  details: string | null;
-  actorId: string | null;
-  createdAt: Date;
-};
-
-export type PrismaNotificationWithRelations = PrismaNotificationRow & {
-  history?: PrismaNotificationHistoryRow[];
-};
+export type PrismaNotificationWithRelations = PrismaNotificationRow;
 
 /** Prisma row -> immutable Notification Fact mapper. */
 export class NotificationPrismaMapper {
-  static historyToDomain(row: PrismaNotificationHistoryRow): NotificationHistory {
-    return NotificationHistory.load({
-      id: row.id as never,
-      notificationId: row.notificationId as never,
-      action: row.action,
-      details: parseJsonSafe(row.details),
-      createdAt: row.createdAt,
-    });
-  }
-
   static toDomain(row: PrismaNotificationWithRelations): Notification {
     const actions = parseJsonSafe<NotificationActionDTO[]>(row.actions);
     const metadata = parseJsonSafe<NotificationMetadataDTO>(row.metadata);

@@ -89,7 +89,7 @@ const TABLE_TO_MODULE: Record<string, string> = {
   user_reminder_preferences: 'reminder',
   // Notification
   notifications: 'notification',
-  notification_history: 'notification',
+  notification_interactions: 'notification',
   notification_preferences: 'notification',
 };
 
