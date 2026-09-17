@@ -6,3 +6,5 @@ export * from './protocol-session-store.port';
 export * from './routine-profile-store.port';
 export * from './routine-runtime-context-store.port';
 export * from './routine-temporary-override-store.port';
+
+export * from './routine-occurrence-truth-store.port';

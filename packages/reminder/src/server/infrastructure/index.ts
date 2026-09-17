@@ -121,6 +121,8 @@ export { ReminderAccountClosedConsumer } from './consumers/reminder-account-clos
 // ============ Routine protocol session persistence/recovery (ROUTINE-4201) ============
 export { PrismaProtocolSessionStore } from './routine-vnext/protocol-session-store.prisma';
 export { PowerSyncProtocolSessionStore } from './routine-vnext/protocol-session-store.powersync';
+export { PrismaRoutineOccurrenceTruthStore } from './routine-vnext/routine-occurrence-truth-store.prisma';
+export { PowerSyncRoutineOccurrenceTruthStore } from './routine-vnext/routine-occurrence-truth-store.powersync';
 export {
   loadPowerSyncRoutineLocalRegistrations,
   type RoutineLocalRegistrationsSnapshot,

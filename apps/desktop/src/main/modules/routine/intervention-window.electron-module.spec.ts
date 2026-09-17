@@ -12,7 +12,7 @@ function controllerHarness(): InterventionWindowController {
     present: vi.fn(() => null),
     restoreIdentity: vi.fn(() => null),
     getProjection: vi.fn(() => null),
-    execute: vi.fn(() => null),
+    execute: vi.fn(async () => null),
     destroy: vi.fn(),
   };
 }
@@ -66,9 +66,7 @@ describe('InterventionWindow Electron module (ROUTINE-4104)', () => {
 
   it('returns a stable product error instead of leaking controller exception text', async () => {
     const controller = controllerHarness();
-    vi.mocked(controller.execute).mockImplementation(() => {
-      throw new Error('PowerSync secret internal failure');
-    });
+    vi.mocked(controller.execute).mockRejectedValue(new Error('PowerSync secret internal failure'));
     const module = createInterventionWindowElectronModule(controller);
     await module.register({} as never);
     const commandHandler = vi

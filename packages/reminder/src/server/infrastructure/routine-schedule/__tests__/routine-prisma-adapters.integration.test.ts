@@ -12,12 +12,13 @@ import {
   seedAccount,
 } from '../../../../__tests__/integration-helpers';
 import { serializeRoutineTrigger } from '../../routine-vnext/trigger-persistence-parity';
-import { createTemporaryOverride } from '../../../domain/routine';
+import { createSnoozeOverride, createTemporaryOverride } from '../../../domain/routine';
 import { PrismaRoutineOccurrenceNotificationWriter } from '../routine-occurrence-notification-writer.prisma';
 import { PrismaRoutineOccurrenceStore } from '../routine-occurrence-store.prisma';
 import { createRoutinePrismaScheduleProjectionSource } from '../routine-schedule-projection-source.prisma';
 import { createPrismaRoutineScheduleStateReader } from '../routine-schedule-state-reader.prisma';
 import { PrismaRoutineTemporaryOverrideStore } from '../routine-temporary-override-store.prisma';
+import { PrismaRoutineOccurrenceTruthStore } from '../../routine-vnext/routine-occurrence-truth-store.prisma';
 import { FIXTURE_F, fixtureOccurrenceKey, fixtureTrigger } from './test-support';
 
 async function seedRoutineDefinition(prisma: Awaited<ReturnType<typeof getPrisma>>, identityId: string) {
@@ -112,6 +113,10 @@ describe('ROUTINE-3401 Prisma durable adapters integration', () => {
       where: { id: lease.occurrenceId },
     });
     expect(occurrenceRow.status).toBe('succeeded');
+    // Worker success is infrastructure truth only. The business occurrence stays
+    // Open until a Routine interaction/natural break resolves it (ADR-077).
+    expect(occurrenceRow.resolutionState).toBe('Open');
+    expect(occurrenceRow.resolvedAt).toBeNull();
     expect(occurrenceRow.ownerToken).toBeNull();
     expect(occurrenceRow.leaseExpiresAt).toBeNull();
     expect(occurrenceRow.nextOccurrenceAt?.getTime()).toBe(FIXTURE_F.nextOccurrenceAt);
@@ -246,6 +251,161 @@ describe('ROUTINE-3401 Prisma durable adapters integration', () => {
     });
 
     await expect(stale).rejects.toBeInstanceOf(LeaseFencingException);
+  });
+
+  it('round-trips Routine occurrence/interaction business truth independently from worker status', async () => {
+    const prisma = await getPrisma();
+    const identityId = IdentityId.generate();
+    await seedAccount({ id: identityId });
+    await seedRoutineDefinition(prisma, identityId);
+
+    const truth = new PrismaRoutineOccurrenceTruthStore(prisma);
+    const dueAt = Date.now();
+    const occurrence = await truth.ensureOpenOccurrence({
+      identityId,
+      routineId: FIXTURE_F.routineId,
+      occurrenceKey: `routine:${FIXTURE_F.routineId}:active-usage:1`,
+      triggerKind: 'ActiveUsage',
+      becameDueAt: dueAt,
+      sourceRevision: FIXTURE_F.version,
+    });
+    expect(occurrence.resolutionState).toBe('Open');
+
+    const first = await truth.applyInteraction({
+      idempotencyKey: `${occurrence.occurrenceKey}:v1:complete`,
+      identityId,
+      routineId: FIXTURE_F.routineId,
+      occurrenceKey: occurrence.occurrenceKey,
+      action: 'Completed',
+      actedAt: dueAt + 10_000,
+      responseLatencyMs: 10_000,
+    });
+    const replay = await truth.applyInteraction({
+      idempotencyKey: `${occurrence.occurrenceKey}:v1:complete`,
+      identityId,
+      routineId: FIXTURE_F.routineId,
+      occurrenceKey: occurrence.occurrenceKey,
+      action: 'Completed',
+      actedAt: dueAt + 10_000,
+      responseLatencyMs: 10_000,
+    });
+
+    expect(first.occurrence).toMatchObject({
+      resolutionState: 'Satisfied',
+      resolutionKind: 'ExplicitComplete',
+    });
+    expect(replay.replayed).toBe(true);
+    expect(await prisma.routineInteraction.count()).toBe(1);
+    expect((await truth.findOccurrence({
+      identityId,
+      routineId: FIXTURE_F.routineId,
+      occurrenceKey: occurrence.occurrenceKey,
+    }))?.resolutionState).toBe('Satisfied');
+  });
+
+  it('coalesces concurrent duplicate interaction commands behind the idempotency fence', async () => {
+    const prisma = await getPrisma();
+    const identityId = IdentityId.generate();
+    await seedAccount({ id: identityId });
+    await seedRoutineDefinition(prisma, identityId);
+
+    const truth = new PrismaRoutineOccurrenceTruthStore(prisma);
+    const dueAt = Date.now();
+    const occurrence = await truth.ensureOpenOccurrence({
+      identityId,
+      routineId: FIXTURE_F.routineId,
+      occurrenceKey: `routine:${FIXTURE_F.routineId}:active-usage:concurrent`,
+      triggerKind: 'ActiveUsage',
+      becameDueAt: dueAt,
+    });
+    const command = {
+      idempotencyKey: `${occurrence.occurrenceKey}:v1:complete`,
+      identityId,
+      routineId: FIXTURE_F.routineId,
+      occurrenceKey: occurrence.occurrenceKey,
+      action: 'Completed' as const,
+      actedAt: dueAt + 1_000,
+      responseLatencyMs: 1_000,
+    };
+
+    const receipts = await Promise.all([
+      truth.applyInteraction(command),
+      truth.applyInteraction(command),
+    ]);
+
+    expect(receipts.map((receipt) => receipt.replayed).sort()).toEqual([false, true]);
+    expect(new Set(receipts.map((receipt) => receipt.interaction.id)).size).toBe(1);
+    expect(receipts.map((receipt) => receipt.occurrence.resolutionState)).toEqual([
+      'Satisfied',
+      'Satisfied',
+    ]);
+    expect(await prisma.routineInteraction.count()).toBe(1);
+    expect((await truth.findOccurrence({
+      identityId,
+      routineId: FIXTURE_F.routineId,
+      occurrenceKey: occurrence.occurrenceKey,
+    }))?.resolutionState).toBe('Satisfied');
+  });
+
+  it('commits snooze override + interaction atomically and does not extend it on replay', async () => {
+    const prisma = await getPrisma();
+    const identityId = IdentityId.generate();
+    await seedAccount({ id: identityId });
+    await seedRoutineDefinition(prisma, identityId);
+
+    const truth = new PrismaRoutineOccurrenceTruthStore(prisma);
+    const dueAt = Date.now();
+    const occurrence = await truth.ensureOpenOccurrence({
+      identityId,
+      routineId: FIXTURE_F.routineId,
+      occurrenceKey: `routine:${FIXTURE_F.routineId}:active-usage:snooze`,
+      triggerKind: 'ActiveUsage',
+      becameDueAt: dueAt,
+    });
+    const commandId = `${occurrence.occurrenceKey}:v1:snooze:300000`;
+    const firstActedAt = dueAt + 1_000;
+    const first = await truth.applyInteraction({
+      idempotencyKey: commandId,
+      identityId,
+      routineId: FIXTURE_F.routineId,
+      occurrenceKey: occurrence.occurrenceKey,
+      action: 'Snoozed',
+      actedAt: firstActedAt,
+      snoozeDurationMs: 300_000,
+      temporaryOverride: createSnoozeOverride({
+        now: firstActedAt,
+        durationMs: 300_000,
+        reason: 'first attempt',
+      }),
+    });
+    const retryActedAt = firstActedAt + 5_000;
+    const replay = await truth.applyInteraction({
+      idempotencyKey: commandId,
+      identityId,
+      routineId: FIXTURE_F.routineId,
+      occurrenceKey: occurrence.occurrenceKey,
+      action: 'Snoozed',
+      actedAt: retryActedAt,
+      snoozeDurationMs: 300_000,
+      temporaryOverride: createSnoozeOverride({
+        now: retryActedAt,
+        durationMs: 300_000,
+        reason: 'retry must not extend',
+      }),
+    });
+
+    const override = await prisma.routineTemporaryOverride.findUniqueOrThrow({
+      where: { identityId_routineId: { identityId, routineId: FIXTURE_F.routineId } },
+    });
+    expect(first.replayed).toBe(false);
+    expect(replay.replayed).toBe(true);
+    expect(replay.interaction.id).toBe(first.interaction.id);
+    expect(JSON.parse(override.overrideJson)).toMatchObject({
+      snoozeUntil: firstActedAt + 300_000,
+      expiresAt: firstActedAt + 300_000,
+    });
+    expect(override.version).toBe(1);
+    expect(await prisma.routineInteraction.count()).toBe(1);
   });
 
   it('reads the persisted wall-clock snapshot and enumerates all routine refs for stale-owner repair', async () => {

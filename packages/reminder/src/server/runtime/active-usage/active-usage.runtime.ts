@@ -71,6 +71,8 @@ export interface ActiveUsageRuntime {
     readonly routineId: string;
     readonly at?: Instant | number;
   }): ActiveUsageSatisfactionReceipt | null;
+  /** Re-arm the same generation when durable occurrence creation failed. */
+  rearmOccurrence(identityId: string, routineId: string): void;
   getSnapshot(identityId: string, routineId: string): ActiveUsageAccumulatorSnapshot | null;
   listSnapshots(): ActiveUsageAccumulatorSnapshot[];
   start(): void;
@@ -343,6 +345,10 @@ export function createActiveUsageRuntime(
         previousAccumulatedActiveMs,
         satisfiedAt,
       };
+    },
+    rearmOccurrence(identityId, routineId) {
+      const lane = lanes.get(laneKey(identityId, routineId));
+      if (lane) lane.thresholdSignaled = false;
     },
     getSnapshot(identityId, routineId) {
       const lane = lanes.get(laneKey(identityId, routineId));

@@ -8821,6 +8821,16 @@
       ]
     },
     {
+      "path": "packages/reminder/src/server/infrastructure/routine-vnext/routine-occurrence-truth-store.powersync.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/reminder/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/reminder/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.powersync.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -8870,6 +8880,16 @@
     },
     {
       "path": "packages/reminder/src/server/runtime/active-usage/active-usage.runtime.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/reminder/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/reminder/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/reminder/src/server/runtime/elapsed/elapsed.runtime.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/reminder/vitest.config.ts"
@@ -11522,7 +11542,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 75
+      "fileCount": 77
     },
     {
       "id": "packages/reminder/vitest.mappers.config.ts",
@@ -11977,7 +11997,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 75
+      "fileCount": 77
     },
     {
       "id": "packages/repository/vitest.config.ts",
@@ -12502,11 +12522,13 @@
       "packages/reminder/src/server/infrastructure/routine-vnext/protocol-persistence-parity.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-vnext/protocol-session-store.powersync.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-vnext/routine-local-registrations.powersync.spec.ts",
+      "packages/reminder/src/server/infrastructure/routine-vnext/routine-occurrence-truth-store.powersync.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.powersync.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-vnext/trigger-persistence-parity.spec.ts",
       "packages/reminder/src/server/infrastructure/schedule-execution-source.spec.ts",
       "packages/reminder/src/server/infrastructure/schedule-projection-source.spec.ts",
       "packages/reminder/src/server/runtime/active-usage/active-usage.runtime.spec.ts",
+      "packages/reminder/src/server/runtime/elapsed/elapsed.runtime.spec.ts",
       "packages/reminder/src/server/runtime/intervention/intervention.runtime.spec.ts",
       "packages/reminder/src/server/runtime/protocol-break-credit/protocol-break-credit.runtime.spec.ts",
       "packages/reminder/src/server/runtime/protocol/protocol-session.runtime.spec.ts",
@@ -12651,7 +12673,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1097,
+    "unit": 1099,
     "integration": 38,
     "smoke": 3,
     "boundary-ipc": 9,

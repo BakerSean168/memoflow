@@ -33,6 +33,7 @@ export interface InterventionTransitionRecord {
     | 'explicit-complete'
     | 'natural-stop'
     | 'snooze'
+    | 'snooze-expired'
     | 'dismiss'
     | 'safe-escape';
 }
@@ -218,11 +219,33 @@ export function createInterventionRuntime(
 
   const advanceSession = (session: MutableSession, at: Instant): InterventionTransitionReceipt => {
     const previousState = session.state;
-    if (isTerminal(session.state) || Number(at) < Number(session.dueAt)) {
+    if (Number(at) < Number(session.dueAt)) {
       return noChange(session, previousState);
     }
 
     const transitions: InterventionTransitionRecord[] = [];
+    // Snooze hides presentation but does not resolve the RoutineOccurrence. It
+    // is therefore resumable at the same stable occurrence key once the durable
+    // TemporaryOverride expires. Other terminal states remain terminal.
+    if (session.state === 'Snoozed') {
+      if (session.snoozeUntil == null || Number(at) < Number(session.snoozeUntil)) {
+        return noChange(session, previousState);
+      }
+      const resumedAt = session.snoozeUntil;
+      session.snoozeUntil = null;
+      transitions.push(
+        applyTransition(
+          session,
+          'Gentle',
+          resumedAt,
+          'snooze-expired',
+          asInstant(Number(resumedAt) + session.policy.gentleDurationMs),
+        ),
+      );
+    } else if (isTerminal(session.state)) {
+      return noChange(session, previousState);
+    }
+
     if (session.state === 'Due') {
       const gentleAt = session.dueAt;
       transitions.push(
@@ -330,7 +353,7 @@ export function createInterventionRuntime(
 
     listActive() {
       return [...sessions.values()]
-        .filter((session) => !isTerminal(session.state))
+        .filter((session) => !isTerminal(session.state) || session.state === 'Snoozed')
         .map(cloneSnapshot);
     },
 

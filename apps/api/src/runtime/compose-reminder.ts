@@ -173,6 +173,7 @@ export function composeReminder(dependencies: ComposeReminderDependencies): Comp
     routineProfileStore: repositories.routineProfileStore,
     runtimeContextStore,
     temporaryOverrideStore: repositories.routineTemporaryOverrideStore,
+    occurrenceTruthStore: repositories.routineOccurrenceTruthStore,
     protocolSessionStore: repositories.protocolSessionStore,
     onOverrideChanged: createRoutineOverrideChangedNotifier(),
   });

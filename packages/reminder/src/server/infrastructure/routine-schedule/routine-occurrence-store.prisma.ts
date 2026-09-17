@@ -59,6 +59,9 @@ export class PrismaRoutineOccurrenceStore implements RoutineOccurrenceStore {
             input.sourceRevision == null ? null : String(input.sourceRevision),
           idempotencyKey,
           status: 'running',
+          triggerKind: 'WallClock',
+          becameDueAt: new Date(input.scheduledFor),
+          resolutionState: 'Open',
           attempt: 1,
           ownerToken: `owner:${randomUUID()}`,
           fencingToken: 1,
@@ -211,6 +214,11 @@ export class PrismaRoutineOccurrenceStore implements RoutineOccurrenceStore {
 }
 
 function mapRowToLease(row: RoutineOccurrence): RoutineOccurrenceLease {
+  if (row.scheduledFor == null) {
+    throw new TypeError(
+      `WallClock routine occurrence '${row.occurrenceKey}' is missing scheduledFor`,
+    );
+  }
   const finalized = row.status === 'succeeded' || row.status === 'skipped';
   return {
     occurrenceId: row.id,

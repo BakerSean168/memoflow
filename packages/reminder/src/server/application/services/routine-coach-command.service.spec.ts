@@ -6,7 +6,11 @@ import {
   RoutineProfile,
 } from '../../domain/routine';
 import { createInMemoryProtocolSessionStore } from '../../runtime/protocol';
-import type { RoutineProfileStore, RoutineTemporaryOverrideStore } from '../../domain/ports';
+import type {
+  RoutineOccurrenceTruthStore,
+  RoutineProfileStore,
+  RoutineTemporaryOverrideStore,
+} from '../../domain/ports';
 import { createInMemoryRoutineRuntimeContextStore } from '../../runtime/routine-runtime-context';
 import { createRoutineCoachCommandService } from './routine-coach-command.service';
 
@@ -74,6 +78,17 @@ function profileStore(): RoutineProfileStore {
   };
 }
 
+
+function occurrenceTruthStore(): RoutineOccurrenceTruthStore {
+  return {
+    ensureOpenOccurrence: vi.fn(),
+    findOccurrence: vi.fn(),
+    resolveOccurrence: vi.fn(),
+    applyInteraction: vi.fn(),
+    listInteractions: vi.fn(async () => []),
+  };
+}
+
 function overrideStore(): RoutineTemporaryOverrideStore & { current: Map<string, unknown> } {
   const current = new Map<string, unknown>();
   return {
@@ -101,6 +116,7 @@ describe('RoutineCoachCommandService', () => {
       routineProfileStore: profiles,
       runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
       temporaryOverrideStore: overrideStore(),
+      occurrenceTruthStore: occurrenceTruthStore(),
       protocolSessionStore: createInMemoryProtocolSessionStore(),
     });
 
@@ -140,6 +156,7 @@ describe('RoutineCoachCommandService', () => {
       routineProfileStore: profiles,
       runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
       temporaryOverrideStore: overrideStore(),
+      occurrenceTruthStore: occurrenceTruthStore(),
       protocolSessionStore: createInMemoryProtocolSessionStore(),
     });
 
@@ -161,6 +178,7 @@ describe('RoutineCoachCommandService', () => {
       routineProfileStore: profiles,
       runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
       temporaryOverrideStore: overrideStore(),
+      occurrenceTruthStore: occurrenceTruthStore(),
       protocolSessionStore: createInMemoryProtocolSessionStore(),
     });
 
@@ -176,6 +194,7 @@ describe('RoutineCoachCommandService', () => {
       routineProfileStore: profiles,
       runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
       temporaryOverrideStore: overrideStore(),
+      occurrenceTruthStore: occurrenceTruthStore(),
       protocolSessionStore: createInMemoryProtocolSessionStore(),
     });
 
@@ -196,6 +215,7 @@ describe('RoutineCoachCommandService', () => {
       routineProfileStore: profiles,
       runtimeContextStore,
       temporaryOverrideStore: overrideStore(),
+      occurrenceTruthStore: occurrenceTruthStore(),
       protocolSessionStore: createInMemoryProtocolSessionStore(),
       now: () => 1_000,
       onProfileActiveChanged: async (input) => {
@@ -235,6 +255,7 @@ describe('RoutineCoachCommandService', () => {
       routineProfileStore: profiles,
       runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
       temporaryOverrideStore: overrides,
+      occurrenceTruthStore: occurrenceTruthStore(),
       protocolSessionStore: createInMemoryProtocolSessionStore(),
       onOverrideChanged: changed,
     });
@@ -250,12 +271,87 @@ describe('RoutineCoachCommandService', () => {
     expect(changed).toHaveBeenCalledWith({ identityId: 'i-1', routineId: 'r-1' });
   });
 
+  it('commits snooze product state through the occurrence truth transaction', async () => {
+    const overrides = overrideStore();
+    const truth = occurrenceTruthStore();
+    vi.mocked(truth.findOccurrence).mockResolvedValue({
+      id: 'o-1',
+      identityId: 'i-1',
+      routineId: 'r-1',
+      occurrenceKey: 'routine:r-1:active-usage:1',
+      triggerKind: 'ActiveUsage',
+      scheduledFor: 1_000 as never,
+      becameDueAt: 1_000 as never,
+      sourceRevision: '1',
+      resolutionState: 'Open',
+      resolvedAt: null,
+      resolutionKind: null,
+      resolutionReason: null,
+    });
+    vi.mocked(truth.applyInteraction).mockResolvedValue({
+      interaction: {
+        id: 'interaction-1',
+        idempotencyKey: 'command-1',
+        identityId: 'i-1',
+        routineId: 'r-1',
+        occurrenceKey: 'routine:r-1:active-usage:1',
+        action: 'Snoozed',
+        actedAt: 2_000 as never,
+        responseLatencyMs: 1_000,
+        snoozeDurationMs: 300_000,
+        metadata: null,
+      },
+      occurrence: (await truth.findOccurrence({
+        identityId: 'i-1',
+        routineId: 'r-1',
+        occurrenceKey: 'routine:r-1:active-usage:1',
+      }))!,
+      replayed: false,
+    });
+    const changed = vi.fn();
+    const service = createRoutineCoachCommandService({
+      routineProfileStore: profileStore(),
+      runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
+      temporaryOverrideStore: overrides,
+      occurrenceTruthStore: truth,
+      protocolSessionStore: createInMemoryProtocolSessionStore(),
+      onOverrideChanged: changed,
+      now: () => 2_000,
+    });
+
+    await service.respondToOccurrence({
+      commandId: 'command-1',
+      identityId: 'i-1',
+      routineId: 'r-1',
+      occurrenceKey: 'routine:r-1:active-usage:1',
+      action: 'snooze',
+      snoozeDurationMs: 300_000,
+    });
+
+    expect(overrides.setRoutineTemporaryOverride).not.toHaveBeenCalled();
+    expect(truth.applyInteraction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        idempotencyKey: 'command-1',
+        action: 'Snoozed',
+        responseLatencyMs: 1_000,
+        snoozeDurationMs: 300_000,
+        temporaryOverride: expect.objectContaining({
+          snoozeUntil: 302_000,
+          expiresAt: 302_000,
+          source: 'user',
+        }),
+      }),
+    );
+    expect(changed).toHaveBeenCalledWith({ identityId: 'i-1', routineId: 'r-1' });
+  });
+
   it('starts a Pomodoro through the deterministic ProtocolSession runtime', async () => {
     const sessions = createInMemoryProtocolSessionStore();
     const service = createRoutineCoachCommandService({
       routineProfileStore: profileStore(),
       runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
       temporaryOverrideStore: overrideStore(),
+      occurrenceTruthStore: occurrenceTruthStore(),
       protocolSessionStore: sessions,
       now: () => 1_000,
     });
@@ -275,6 +371,7 @@ describe('RoutineCoachCommandService', () => {
       routineProfileStore: profileStore(),
       runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
       temporaryOverrideStore: overrideStore(),
+      occurrenceTruthStore: occurrenceTruthStore(),
       protocolSessionStore: sessions,
       now: () => 1_000,
     });

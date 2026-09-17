@@ -118,8 +118,11 @@ let mainRuntime: DesktopMainRuntime | null = null;
 const windowManager = new WindowManager();
 let activeFocusWindowController: FocusWindowController | null = null;
 let activeInterventionWindowController: InterventionWindowController | null = null;
-let activeReminderActivityRuntime: { stop: () => void } | null = null;
-let activeReminderUsageRuntime: { stop: () => void } | null = null;
+type StartStopRuntime = { start: () => void; stop: () => void };
+let activeReminderActivityRuntime: StartStopRuntime | null = null;
+let activeReminderElapsedRuntime: StartStopRuntime | null = null;
+let activeReminderUsageRuntime: StartStopRuntime | null = null;
+let activeReminderOccurrenceFlush: (() => Promise<void>) | null = null;
 
 // Composed Goal/Task repository view for the active profile. The dashboard IPC
 // handler is registered once at shell init, but the repositories only exist
@@ -236,9 +239,12 @@ async function registerBusinessModules(
   // Activity truth is a per-profile runtime. Start the sensor before the
   // accumulator so no idle/resume transition is lost during activation.
   reminderComposed.activityRuntime.start();
+  reminderComposed.elapsedRuntime.start();
   reminderComposed.activeUsageRuntime.start();
   activeReminderActivityRuntime = reminderComposed.activityRuntime;
+  activeReminderElapsedRuntime = reminderComposed.elapsedRuntime;
   activeReminderUsageRuntime = reminderComposed.activeUsageRuntime;
+  activeReminderOccurrenceFlush = reminderComposed.flushRoutineOccurrencePersistence;
 
   // Routine InterventionWindow is a Main Process projection over the per-profile
   // InterventionRuntime returned by the Reminder composition root. It owns only
@@ -247,6 +253,39 @@ async function registerBusinessModules(
   const interventionWindowController = createInterventionWindowController({
     runtime: reminderComposed.interventionRuntime,
     host: interventionWindowHost,
+    onCommand: async ({ commandId, snapshot, command, at }) => {
+      const receipt = await reminderComposed.routineCommandPort.respondToOccurrence({
+        commandId,
+        identityId: snapshot.identityId,
+        routineId: snapshot.routineId,
+        occurrenceKey: snapshot.occurrenceKey,
+        action: command.action,
+        snoozeDurationMs: command.action === 'snooze' ? command.durationMs : undefined,
+        metadata: { surface: 'InterventionWindow' },
+        at,
+      });
+
+      if (command.action === 'complete') {
+        if (receipt.occurrence.triggerKind === 'ActiveUsage') {
+          reminderComposed.activeUsageRuntime.markSatisfied({
+            identityId: snapshot.identityId,
+            routineId: snapshot.routineId,
+            at,
+          });
+        } else if (receipt.occurrence.triggerKind === 'Elapsed') {
+          reminderComposed.elapsedRuntime.markSatisfied({
+            identityId: snapshot.identityId,
+            routineId: snapshot.routineId,
+            at,
+          });
+        }
+      }
+      if (command.action === 'snooze') {
+        // Reload the durable override into runtime gates. The composer preserves
+        // the current accumulator snapshot across this refresh.
+        await reminderComposed.refreshLocalRoutineRegistrations();
+      }
+    },
   });
   const interventionWindowElectronModule = createInterventionWindowElectronModule(
     interventionWindowController,
@@ -707,11 +746,28 @@ async function initializeShellRuntime(): Promise<void> {
       logger.warn('FocusWindow restore failed; ProtocolSession remains durable', { error });
     });
   });
-  profileRuntimeManager.setBeforeDeactivation(() => {
-    activeReminderUsageRuntime?.stop();
-    activeReminderActivityRuntime?.stop();
+  profileRuntimeManager.setBeforeDeactivation(async () => {
+    const usageRuntime = activeReminderUsageRuntime;
+    const elapsedRuntime = activeReminderElapsedRuntime;
+    const activityRuntime = activeReminderActivityRuntime;
+    usageRuntime?.stop();
+    elapsedRuntime?.stop();
+    activityRuntime?.stop();
+    try {
+      await activeReminderOccurrenceFlush?.();
+    } catch (error) {
+      // Deactivation is fail-closed for Routine owner truth. Restore the local
+      // runtime in activation order so the current Profile remains usable and
+      // the re-armed occurrence can retry persistence.
+      activityRuntime?.start();
+      elapsedRuntime?.start();
+      usageRuntime?.start();
+      throw error;
+    }
     activeReminderUsageRuntime = null;
+    activeReminderElapsedRuntime = null;
     activeReminderActivityRuntime = null;
+    activeReminderOccurrenceFlush = null;
     activeProfileDashboardRepositories = null;
     activeInterventionWindowController = null;
     activeFocusWindowController = null;

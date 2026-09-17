@@ -923,6 +923,12 @@ exports.Prisma.RoutineOccurrenceScalarFieldEnum = {
   sourceRevision: 'sourceRevision',
   idempotencyKey: 'idempotencyKey',
   status: 'status',
+  triggerKind: 'triggerKind',
+  becameDueAt: 'becameDueAt',
+  resolutionState: 'resolutionState',
+  resolvedAt: 'resolvedAt',
+  resolutionKind: 'resolutionKind',
+  resolutionReason: 'resolutionReason',
   attempt: 'attempt',
   ownerToken: 'ownerToken',
   claimId: 'claimId',
@@ -942,6 +948,7 @@ exports.Prisma.RoutineOccurrenceScalarFieldEnum = {
 
 exports.Prisma.RoutineInteractionScalarFieldEnum = {
   id: 'id',
+  idempotencyKey: 'idempotencyKey',
   identityId: 'identityId',
   routineId: 'routineId',
   occurrenceKey: 'occurrenceKey',
