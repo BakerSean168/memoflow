@@ -8,7 +8,6 @@ import {
   NotificationMetadata,
   NotificationType,
   QuietHours,
-  RelatedEntityType,
 } from '..';
 import { asHm, requireTimeZoneId } from '@memoflow/time';
 
@@ -166,16 +165,6 @@ describe('notification shared value objects', () => {
     expect(NotificationType.isError(NotificationType.Info)).toBe(false);
     expect(() => NotificationType.of('nope')).toThrow('Invalid NotificationType');
 
-    expect(RelatedEntityType.getAll()).toContain(RelatedEntityType.Reminder);
-    expect(RelatedEntityType.of('Goal')).toBe(RelatedEntityType.Goal);
-    expect(RelatedEntityType.isValid('Schedule')).toBe(true);
-    expect(RelatedEntityType.isValid('nope')).toBe(false);
-    expect(RelatedEntityType.isTimeRelated(RelatedEntityType.Schedule)).toBe(true);
-    expect(RelatedEntityType.isTimeRelated(RelatedEntityType.Reminder)).toBe(true);
-    expect(RelatedEntityType.isTimeRelated(RelatedEntityType.Task)).toBe(false);
-    expect(RelatedEntityType.isGoalRelated(RelatedEntityType.Goal)).toBe(true);
-    expect(RelatedEntityType.isGoalRelated(RelatedEntityType.Task)).toBe(false);
-    expect(() => RelatedEntityType.of('nope')).toThrow('Invalid RelatedEntityType');
   });
 
   it('covers NotificationMetadata getters, derived flags, and immutable setters', () => {

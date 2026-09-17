@@ -5,7 +5,6 @@ import {
   NotificationCategory,
   NotificationChannelType,
   NotificationType,
-  RelatedEntityType,
 } from '@memoflow/contracts/notification';
 import { buildIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
 import type { BusinessOperationReceipt } from '@memoflow/contracts/reliable-messaging';
@@ -150,7 +149,7 @@ describe('executeGoalReminderFire', () => {
       idempotencyKey: expectedIdempotencyKey,
       workflowKey: GOAL_REMINDER_WORKFLOW_KEY,
       topic: GOAL_REMINDER_WORKFLOW_KEY,
-      relatedEntity: { type: RelatedEntityType.Goal, id: GOAL_ID },
+      relatedEntity: { type: 'Goal', id: GOAL_ID },
       content: {
         type: NotificationType.Reminder,
         category: NotificationCategory.Goal,

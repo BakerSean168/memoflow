@@ -21,7 +21,7 @@ describe('Routine method library (ROUTINE-5302)', () => {
     }
   });
 
-  it('keeps Protocol methods out of ReminderTemplate presets', () => {
+  it('keeps Protocol methods out of WallClock routine presets', () => {
     expect(getRoutineMethodTemplatePreset('50-10-protocol')).toBeNull();
     expect(getRoutineMethodTemplatePreset('pomodoro')).toBeNull();
     expect(findRoutineMethod('pomodoro').recommendedParameters).toMatchObject({
@@ -31,7 +31,7 @@ describe('Routine method library (ROUTINE-5302)', () => {
     });
   });
 
-  it('projects WallClock methods into existing Routine template configuration', () => {
+  it('projects WallClock methods into canonical Routine trigger presets', () => {
     expect(getRoutineMethodTemplatePreset('20-20-20')).toMatchObject({
       trigger: { type: 'Interval', intervalMinutes: 20 },
     });

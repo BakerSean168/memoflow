@@ -16,7 +16,6 @@ import { NotificationCategory } from '../value-objects/notification-category';
 import { NotificationChannelType } from '../value-objects/notification-channel-type';
 import { ImportanceLevel } from '../../../shared/value-objects/importance';
 import { UrgencyLevel } from '../../../shared/value-objects/urgency';
-import { RelatedEntityType } from '../value-objects/related-entity-type';
 import { QuietHoursSchema } from './notification-preference.dto';
 
 /**
@@ -34,7 +33,7 @@ export const NotificationResponseSchema = z.object({
   category: z.enum(NotificationCategory),
   importance: z.enum(ImportanceLevel),
   urgency: z.enum(UrgencyLevel),
-  relatedEntityType: z.enum(RelatedEntityType).nullable().optional(),
+  relatedEntityType: z.string().trim().min(1).max(120).nullable().optional(),
   relatedEntityId: z.string().nullable().optional(),
   navigationIntent: z.object({
     route: z.string(),

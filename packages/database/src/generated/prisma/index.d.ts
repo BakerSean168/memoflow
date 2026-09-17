@@ -217,7 +217,7 @@ export type AccountClosureOperation = $Result.DefaultSelection<Prisma.$AccountCl
 /**
  * Model OperationAuditLog
  * 运维审计日志 (W7)：记录谁何时对哪个 operation 做了什么（query / replay）。
- * 跨模块共享：Reminder / Notification / Schedule rebuild / Account closure / Knowledge projection
+ * 跨模块共享：Notification / Schedule rebuild / Account closure / Knowledge projection
  * 的最小权限查询与 replay 操作都必须写审计记录，禁止静默操作。
  */
 export type OperationAuditLog = $Result.DefaultSelection<Prisma.$OperationAuditLogPayload>
@@ -249,7 +249,7 @@ export type RoutineProtocolSession = $Result.DefaultSelection<Prisma.$RoutinePro
 /**
  * Model RoutineOccurrence
  * RoutineOccurrence durable occurrence fence for the ROUTINE-3401 wall-clock lane.
- * Mirrors the protected ReminderOccurrence lease-claim contract (ADR-059 §10)
+ * Uses the protected Routine lease-claim/fencing contract (ADR-077)
  * keyed by the canonical occurrenceKey so crash/retry replay is idempotent.
  */
 export type RoutineOccurrence = $Result.DefaultSelection<Prisma.$RoutineOccurrencePayload>
@@ -12515,7 +12515,7 @@ export namespace Prisma {
       identityId: string
       actorId: string
       /**
-       * goal | task | reminder | schedule | habit | knowledge
+       * goal | task (Routine projection joins in Phase 5)
        */
       subjectType: string
       subjectId: string
@@ -52468,7 +52468,7 @@ export namespace Prisma {
       id: string
       identityId: string
       /**
-       * note | goal | task | reminder | habit
+       * note | goal | task | habit | wallet
        */
       subjectType: string
       subjectId: string

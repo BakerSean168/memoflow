@@ -5,8 +5,6 @@ import { describe, expect, it } from 'vitest';
 /**
  * Residual 907: setting themeSync inline electronAPI dual retired.
  * useThemeSync uses DesktopAuthApi sole invoke-api shape (no local inline dual object type).
- * Residual 905 (soft): reminder DesktopApi dual retired
- *   (modules/reminder/.../reminder-desktop-api-dual.surface.spec.ts).
  * Residual 909 (soft): Window.electronAPI + desktop-detect duals retired
  *   (shared/utils/electron-window-desktop-api-dual.surface.spec.ts).
  * Residual 913 (soft): host-access cast duals retired

@@ -5,10 +5,9 @@ import {
   buildIdempotencyKeyString,
   parseIdempotencyKeyString,
 } from './operation-receipt';
-import { IsoDatetimeSchema, type LeaseClaim } from './lease';
+import { IsoDatetimeSchema } from './lease';
 import type { ProjectionOperation } from './projection';
 import { ProjectionOperationSchema, SourceRevisionSchema } from './projection';
-import type { OperationTimelineEntry } from '../operations/timeline-entry';
 
 /**
  * ==========================================
@@ -69,67 +68,7 @@ export function refinePortIdempotencyKey(
   }
 }
 
-/** 1. Reminder 模块 Application Port */
-export const ReminderClaimOccurrenceInputSchema = z
-  .object({
-    identityId: z.string().min(1),
-    source: z.string().min(1).default('reminder'),
-    templateId: z.string().min(1),
-    occurrenceKey: z.string().min(1),
-    ownerToken: z.string().min(1),
-    leaseDurationMs: z.number().int().positive().default(30000),
-    idempotencyKey: z.string().min(1),
-  })
-  .superRefine((data, ctx) => refinePortIdempotencyKey(data, ctx));
-export type ReminderClaimOccurrenceInput = z.infer<typeof ReminderClaimOccurrenceInputSchema>;
-
-export const ReminderHeartbeatInputSchema = z.object({
-  identityId: z.string().min(1),
-  source: z.string().min(1).default('reminder'),
-  templateId: z.string().min(1),
-  occurrenceKey: z.string().min(1),
-  ownerToken: z.string().min(1),
-  claimId: z.string().min(1),
-  fencingToken: z.number().int().positive(),
-  leaseDurationMs: z.number().int().positive().default(30000),
-});
-export type ReminderHeartbeatInput = z.infer<typeof ReminderHeartbeatInputSchema>;
-
-export const ReminderReplayDeadLetterInputSchema = z
-  .object({
-    identityId: z.string().min(1),
-    occurrenceKey: z.string().optional(),
-    operationId: z.string().optional(),
-  })
-  .refine((data) => !!(data.occurrenceKey || data.operationId), {
-    message: 'At least one of occurrenceKey or operationId must be provided',
-  });
-export type ReminderReplayDeadLetterInput = z.infer<typeof ReminderReplayDeadLetterInputSchema>;
-
-export interface ReminderReliableOperationPort {
-  /** 竞争 claim 提醒触发点并获取原子 Lease (输出必须过 BusinessOperationReceiptSchema.parse) */
-  claimOccurrence(input: ReminderClaimOccurrenceInput): Promise<{
-    claimed: boolean;
-    lease: LeaseClaim | null;
-    receipt: BusinessOperationReceipt;
-  }>;
-  /** 续租/心跳 Lease (输出必须过 BusinessOperationReceiptSchema.parse) */
-  heartbeatLease(input: ReminderHeartbeatInput): Promise<{
-    renewed: boolean;
-    lease: LeaseClaim | null;
-    receipt: BusinessOperationReceipt;
-  }>;
-  /** 事务内持久化 Notification 投递意图 (输出必须过 BusinessOperationReceiptSchema.parse) */
-  recordDeliveryIntent(receipt: BusinessOperationReceipt): Promise<BusinessOperationReceipt>;
-  /** 查询指定 identity 的死信 Reminder occurrences (输出必须过 BusinessOperationReceiptSchema.parse) */
-  queryDeadLetters(identityId: string): Promise<BusinessOperationReceipt[]>;
-  /** W7: 按 identity 查询 operation timeline (输出必须过 OperationTimelineEntrySchema.parse) */
-  queryOperationTimeline(identityId: string): Promise<OperationTimelineEntry[]>;
-  /** 人工/运维 重发死信 Reminder occurrence (输出必须过 BusinessOperationReceiptSchema.parse) */
-  replayDeadLetter(input: ReminderReplayDeadLetterInput): Promise<BusinessOperationReceipt>;
-}
-
-/** 2. Notification 模块 Application Port */
+/** Notification 模块 Application Port */
 export const NotificationOutboxDispatchInputSchema = z
   .object({
     operationId: z.string().min(1),

@@ -3,7 +3,6 @@ import { brandedId } from '../../../primitives';
 import type { NotificationListResultDTO } from '../dtos/notification-result.dto';
 import { NotificationType } from '../value-objects/notification-type';
 import { NotificationCategory } from '../value-objects/notification-category';
-import { RelatedEntityType } from '../value-objects/related-entity-type';
 
 export const NotificationQuerySchema = z.object({
   workflowKey: z.string().optional(),
@@ -12,7 +11,7 @@ export const NotificationQuerySchema = z.object({
   category: z.enum(NotificationCategory).optional(),
   isRead: z.boolean().optional(),
   archiveState: z.enum(['active', 'archived', 'all']).default('active').optional(),
-  relatedEntityType: z.enum(RelatedEntityType).optional(),
+  relatedEntityType: z.string().trim().min(1).max(120).optional(),
   relatedEntityId: brandedId<string>().optional(),
   startDate: z.number().int().optional(),
   endDate: z.number().int().optional(),

@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
 export const OperationSourceSchema = z.enum([
-  'reminder',
   'notification',
   'schedule-rebuild',
   'account-closure',

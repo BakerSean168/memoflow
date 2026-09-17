@@ -12,7 +12,6 @@ import { buildIdempotencyKeyString } from '@memoflow/contracts/reliable-messagin
 import {
   NotificationCategory,
   NotificationType,
-  RelatedEntityType,
 } from '@memoflow/contracts/notification';
 import {
   ReminderTimeUnit,
@@ -309,7 +308,7 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
     expect(fact.workflowKey).toBe('task.reminder');
     expect(fact.type).toBe(NotificationType.Reminder);
     expect(fact.category).toBe(NotificationCategory.Task);
-    expect(fact.relatedEntityType).toBe(RelatedEntityType.Task);
+    expect(fact.relatedEntityType).toBe('Task');
     expect(fact.relatedEntityId).toBe(occurrenceId);
     expect(
       await prisma.notification.count({
@@ -395,7 +394,7 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
     expect(fact.workflowKey).toBe('goal.reminder');
     expect(fact.type).toBe(NotificationType.Reminder);
     expect(fact.category).toBe(NotificationCategory.Goal);
-    expect(fact.relatedEntityType).toBe(RelatedEntityType.Goal);
+    expect(fact.relatedEntityType).toBe('Goal');
     expect(fact.relatedEntityId).toBe(goalId);
     expect(
       await prisma.notification.count({

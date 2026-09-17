@@ -7,7 +7,7 @@ model ActivityLedger {
   id             String   @id
   identityId     String   @map("identity_id")
   actorId        String   @map("actor_id")
-  subjectType    String   @map("subject_type") /// goal | task | reminder | schedule | habit | knowledge
+  subjectType    String   @map("subject_type") /// goal | task (Routine projection joins in Phase 5)
   subjectId      String   @map("subject_id")
   action         String   @map("action") /// created | completed | updated | response | executed | ...
   title          String?  /// 归档标题快照（跨 DST/归档实体仍显示准确标题）

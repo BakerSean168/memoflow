@@ -2,7 +2,6 @@ import type {
   NotificationCategory,
   NotificationChannelType,
   NotificationType,
-  RelatedEntityType,
 } from '@memoflow/contracts/notification';
 
 export interface ScheduleNotificationRequest {
@@ -11,7 +10,7 @@ export interface ScheduleNotificationRequest {
   readonly content: string;
   readonly type: NotificationType;
   readonly category: NotificationCategory;
-  readonly relatedEntityType?: RelatedEntityType;
+  readonly relatedEntityType?: string;
   readonly relatedEntityId?: string;
   readonly channels?: readonly NotificationChannelType[];
   readonly expiresAt?: number | null;

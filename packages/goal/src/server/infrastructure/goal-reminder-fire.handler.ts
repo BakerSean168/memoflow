@@ -34,7 +34,6 @@ import {
   NotificationCategory,
   NotificationChannelType,
   NotificationType,
-  RelatedEntityType,
   NotificationRequestedSchema,
   type NotificationRequested,
   type NotificationRequestedOutboxInput,
@@ -172,7 +171,7 @@ function buildNotificationRequested(
     }),
     workflowKey: GOAL_REMINDER_WORKFLOW_KEY,
     topic: GOAL_REMINDER_WORKFLOW_KEY,
-    relatedEntity: { type: RelatedEntityType.Goal, id: goal.id },
+    relatedEntity: { type: 'Goal', id: goal.id },
     content: {
       type: NotificationType.Reminder,
       category: NotificationCategory.Goal,

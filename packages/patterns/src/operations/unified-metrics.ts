@@ -1,7 +1,7 @@
 /**
  * W7 统一指标命名 (B)
  *
- * 把 Reminder、Notification、Knowledge、Schedule rebuild、Account closure
+ * 把 Notification、Knowledge、Schedule rebuild、Account closure
  * 的 outbox/worker telemetry 接入同一命名约定：
  *   memoflow.<module>.outbox.<state>
  *   memoflow.<module>.worker.<outcome>
@@ -10,7 +10,6 @@
 export const OPERATION_METRIC_PREFIX = 'memoflow';
 
 export type OperationMetricModule =
-  | 'reminder'
   | 'notification'
   | 'knowledge'
   | 'schedule-rebuild'

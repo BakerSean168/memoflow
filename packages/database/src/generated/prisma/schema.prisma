@@ -93,7 +93,7 @@ model ActivityLedger {
   id            String   @id
   identityId    String   @map("identity_id")
   actorId       String   @map("actor_id")
-  subjectType   String   @map("subject_type") /// goal | task | reminder | schedule | habit | knowledge
+  subjectType   String   @map("subject_type") /// goal | task (Routine projection joins in Phase 5)
   subjectId     String   @map("subject_id")
   action        String   @map("action") /// created | completed | updated | response | executed | ...
   title         String? /// 归档标题快照（跨 DST/归档实体仍显示准确标题）
@@ -869,13 +869,13 @@ model NotificationDispatchOutbox {
 
 // ==========================================
 // Relation Module (R5)
-// 跨模块 SubjectRef 关系：Note/Goal/Task/Reminder/Habit 双向连接
+// 跨模块 SubjectRef 关系：Note/Goal/Task/Habit/Wallet 双向连接
 // ==========================================
 
 model Relation {
   id           String   @id
   identityId   String   @map("identity_id")
-  subjectType  String   @map("subject_type") /// note | goal | task | reminder | habit
+  subjectType  String   @map("subject_type") /// note | goal | task | habit | wallet
   subjectId    String   @map("subject_id")
   relationType String   @map("relation_type") /// references | related | depends_on | contributes_to
   objectType   String   @map("object_type")
@@ -984,7 +984,7 @@ model AccountClosureOperation {
 }
 
 /// 运维审计日志 (W7)：记录谁何时对哪个 operation 做了什么（query / replay）。
-/// 跨模块共享：Reminder / Notification / Schedule rebuild / Account closure / Knowledge projection
+/// 跨模块共享：Notification / Schedule rebuild / Account closure / Knowledge projection
 /// 的最小权限查询与 replay 操作都必须写审计记录，禁止静默操作。
 model OperationAuditLog {
   id              String   @id @default(uuid())
@@ -1103,7 +1103,7 @@ model RoutineProtocolSession {
 }
 
 /// RoutineOccurrence durable occurrence fence for the ROUTINE-3401 wall-clock lane.
-/// Mirrors the protected ReminderOccurrence lease-claim contract (ADR-059 §10)
+/// Uses the protected Routine lease-claim/fencing contract (ADR-077)
 /// keyed by the canonical occurrenceKey so crash/retry replay is idempotent.
 model RoutineOccurrence {
   id               String    @id

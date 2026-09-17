@@ -8,8 +8,6 @@ import {
 } from '@memoflow/contracts/operations';
 import { buildIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
 // eslint-disable-next-line @nx/enforce-module-boundaries
-import { createReminderPrismaModule } from '@memoflow/reminder/server';
-// eslint-disable-next-line @nx/enforce-module-boundaries
 import { createNotificationPrismaModule } from '@memoflow/notification/server';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import { createSchedulePrismaModule } from '@memoflow/schedule/server';
@@ -22,8 +20,8 @@ import type { IGitHubAppClient } from '@memoflow/repository/server';
 
 /**
  * W7 跨模块回归门禁 (C1)：
- * 统一 OperationTimelineEntry 契约在 Reminder / Notification / Schedule rebuild /
- * Account closure / Knowledge projection 五个模块的真实 DB 数据上一致成立；
+ * 统一 OperationTimelineEntry 契约在 Notification / Schedule rebuild /
+ * Account closure / Knowledge projection 四个 durable operation owner 的真实 DB 数据上一致成立；
  * 故障注入（dead-letter / failed）后 replay 恢复状态，并把审计写入同一张共享审计表。
  */
 describe('W7 cross-module operation gate (real DB)', () => {
@@ -54,69 +52,9 @@ describe('W7 cross-module operation gate (real DB)', () => {
     await prisma.$disconnect();
   });
 
-  it('reminder + notification + schedule-rebuild + account-closure all expose schema-conformant timeline, replay recovers faults, and audit lands in the shared table', async () => {
+  it('notification + schedule-rebuild + account-closure + knowledge expose schema-conformant timeline, replay recover faults, and audit lands in the shared table', async () => {
     // ── Fault injection: seed failed/dead operations across modules ──
     const now = new Date();
-
-    // Reminder dead letter
-    const reminderOp = `reminder-dead-${randomUUID()}`;
-    await prisma.reminderTemplate.create({
-      data: {
-        id: `tpl-${randomUUID()}`,
-        identityId,
-        name: 'W7 Gate Reminder',
-        description: null,
-        type: 'recurring',
-        selfEnabled: true,
-        status: 'enabled',
-        importanceLevel: 'normal',
-        tags: '[]',
-        color: null,
-        icon: null,
-        nextTriggerAt: now,
-        trigger: JSON.stringify({
-          type: 'FixedTime',
-          fixedTime: { time: '10:00', timezone: 'UTC' },
-        }),
-        recurrence: null,
-        activeTime: JSON.stringify({ activatedAt: now.getTime() }),
-        activeHours: null,
-        notificationConfig: JSON.stringify({
-          channels: ['in-app'],
-          title: 'Gate',
-          body: 'gate',
-          sound: { enabled: true, soundName: null },
-          vibration: { enabled: true, pattern: null },
-          actions: null,
-        }),
-        stats: '{}',
-        createdAt: now,
-        updatedAt: now,
-      },
-    });
-    const template = await prisma.reminderTemplate.findFirstOrThrow({ where: { identityId } });
-    const reminderOccurrenceKey = `${template.id}:${now.toISOString()}`;
-    const reminderIdempotencyKey = buildIdempotencyKeyString({
-      identityId,
-      source: 'reminder',
-      occurrenceKey: reminderOccurrenceKey,
-    });
-    await prisma.reminderOccurrence.create({
-      data: {
-        id: reminderOp,
-        identityId,
-        templateId: template.id,
-        source: 'reminder',
-        occurrenceKey: reminderOccurrenceKey,
-        idempotencyKey: reminderIdempotencyKey,
-        status: 'dead_letter',
-        attempt: 3,
-        lastError: 'sink unavailable',
-        deadLetterAt: now,
-        createdAt: now,
-        updatedAt: now,
-      },
-    });
 
     // Notification dead letter
     const notificationOp = `notification-dead-${randomUUID()}`;
@@ -244,13 +182,7 @@ describe('W7 cross-module operation gate (real DB)', () => {
       },
     });
 
-    // ── Wire all five modules ──
-    const reminder = createReminderPrismaModule(prisma, {
-      closureChecker: async () => false,
-      userTimeContextPort: {
-        getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
-      },
-    });
+    // ── Wire the four current durable operation owners ──
     const notifModule = createNotificationPrismaModule(prisma, {
       closureChecker: async () => false,
       userTimeContextPort: {
@@ -290,14 +222,12 @@ describe('W7 cross-module operation gate (real DB)', () => {
     const ctx = { identityId } as never;
 
     // ── Unified timeline: each entry is schema-conformant with W7 fields ──
-    const reminderTimeline = await reminder.api.queryOperationTimeline(ctx);
     const notifTimeline = await notifModule.operations.getOperationTimeline(identityId);
     const scheduleTimeline = await schedule.api.queryRebuildTimeline(ctx);
     const accountTimeline = await account.api.queryClosureTimeline(ctx);
     const knowledgeTimeline = await repository.api.queryKnowledgeTimeline(ctx);
 
     for (const res of [
-      reminderTimeline,
       notifTimeline,
       scheduleTimeline,
       accountTimeline,
@@ -306,13 +236,12 @@ describe('W7 cross-module operation gate (real DB)', () => {
       expect(res.ok).toBe(true);
     }
     const all = [
-      ...(reminderTimeline.ok ? (reminderTimeline.data as any[]) : []),
       ...(notifTimeline.ok ? (notifTimeline.data as any[]) : []),
       ...(scheduleTimeline.ok ? (scheduleTimeline.data as any[]) : []),
       ...(accountTimeline.ok ? (accountTimeline.data as any[]) : []),
       ...(knowledgeTimeline.ok ? (knowledgeTimeline.data as any[]) : []),
     ];
-    expect(all.length).toBe(5);
+    expect(all.length).toBe(4);
     for (const entry of all) {
       expect(OperationTimelineEntrySchema.safeParse(entry).success).toBe(true);
       expect(OperationSourceSchema.safeParse(entry.source).success).toBe(true);
@@ -323,14 +252,12 @@ describe('W7 cross-module operation gate (real DB)', () => {
       'account-closure',
       'knowledge-projection',
       'notification',
-      'reminder',
       'schedule-rebuild',
     ]);
 
     // ── Fault recovery: unauthorized identity rejected for every module ──
     const otherIdentity = randomUUID();
     const otherCtx = { identityId: otherIdentity } as never;
-    expect((await reminder.api.replayOperation(reminderOp, otherCtx)).ok).toBe(false);
     expect((await notifModule.operations.replayDeadLetter(notificationOp, otherIdentity)).ok).toBe(false);
     expect((await schedule.api.replayRebuildOutbox(scheduleOp, otherCtx)).ok).toBe(false);
     expect((await account.api.replayClosure(accountOp, otherCtx)).ok).toBe(false);
@@ -339,10 +266,6 @@ describe('W7 cross-module operation gate (real DB)', () => {
     ).toBe(false);
 
     // ── Fault recovery: authorized replay advances state for every module ──
-    const reminderReplay = await reminder.api.replayOperation(reminderOp, ctx);
-    expect(reminderReplay.ok).toBe(true);
-    expect((reminderReplay.data as any).status).toBe('retryable');
-
     const notifReplay = await notifModule.operations.replayDeadLetter(notificationOp, identityId);
     expect(notifReplay.ok).toBe(true);
     expect((notifReplay.data as any).status).toBe('retryable');
@@ -362,15 +285,15 @@ describe('W7 cross-module operation gate (real DB)', () => {
     expect(knowledgeReplay.ok).toBe(true);
     expect((knowledgeReplay.data as any).status).toBe('Succeeded');
 
-    // ── Audit: all five replay actions landed in the SAME shared table ──
+    // ── Audit: all four replay actions landed in the SAME shared table ──
     const auditRows = await prisma.operationAuditLog.findMany({
       where: { actorIdentityId: identityId, action: 'replay' },
     });
     const auditedOperations = auditRows.map((r) => r.operationId).sort();
     // Knowledge is audit-first: each replay writes an intent record + an outcome
-    // record, so its operation appears twice; the other four write once each.
+    // record, so its operation appears twice; the other three write once each.
     expect(auditedOperations).toEqual(
-      [accountOp, knowledgeOp, knowledgeOp, notificationOp, reminderOp, scheduleOp].sort(),
+      [accountOp, knowledgeOp, knowledgeOp, notificationOp, scheduleOp].sort(),
     );
     const knowledgeAudits = auditRows
       .filter((r) => r.operationId === knowledgeOp)
@@ -384,7 +307,6 @@ describe('W7 cross-module operation gate (real DB)', () => {
       'knowledge-projection',
       'knowledge-projection',
       'notification',
-      'reminder',
       'schedule-rebuild',
     ]);
 
@@ -394,7 +316,6 @@ describe('W7 cross-module operation gate (real DB)', () => {
     expect((otherAudit.data as any[]).some((a) => a.actorIdentityId === identityId)).toBe(false);
 
     // ── Cleanup ──
-    reminder.dispose();
     notifModule.dispose();
     schedule.dispose();
     account.dispose();

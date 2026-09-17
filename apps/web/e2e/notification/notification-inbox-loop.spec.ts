@@ -4,29 +4,37 @@ import { registerAndLogin } from '../helpers/testHelpers';
 
 const testPassword = 'Test123456!';
 
-test.describe('Reminder notification closed loop', () => {
-  test('[P0] triggers in-app notifications and closes single/all-read counts', async ({ page }) => {
+test.describe('Notification inbox closed loop', () => {
+  test('[P0] creates inbox facts and closes single/all-read counts', async ({ page }) => {
     test.setTimeout(90_000);
     const suffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
     await registerAndLogin(page, {
-      email: `e2e-reminder-notification-${suffix}@test.com`,
+      email: `e2e-notification-inbox-${suffix}@test.com`,
       password: testPassword,
       landingPath: '/',
     });
 
     const headers = {};
-    const reminderTitles = [
+    const notificationTitles = [
       `E2E notification first ${suffix}`,
       `E2E notification second ${suffix}`,
     ];
-    const triggerAt = Date.now() + 8_000;
 
-    for (const [index, title] of reminderTitles.entries()) {
+    for (const [index, title] of notificationTitles.entries()) {
       await expectApiData(
-        await page.request.post(`${API_CONFIG.API_PREFIX}/reminders/templates`, {
+        await page.request.post(`${API_CONFIG.API_PREFIX}/notifications`, {
           headers,
-          data: createReminderPayload(title, triggerAt + index * 500),
+          data: {
+            workflowKey: 'system.general',
+            topic: 'e2e.notification-inbox',
+            idempotencyKey: `e2e:notification-inbox:${suffix}:${index}`,
+            title,
+            content: `Inbox fact created from ${title}`,
+            type: 'Info',
+            category: 'System',
+            channels: ['InApp'],
+          },
         }),
       );
     }
@@ -42,11 +50,11 @@ test.describe('Reminder notification closed loop', () => {
             notifications: Array<{ id: string; title: string; isRead: boolean }>;
           }>(response);
           notifications = data.notifications.filter((notification) =>
-            reminderTitles.includes(notification.title),
+            notificationTitles.includes(notification.title),
           );
           return notifications.length;
         },
-        { timeout: 45_000, intervals: [500, 1_000, 2_000] },
+        { timeout: 15_000, intervals: [200, 500, 1_000] },
       )
       .toBe(2);
 
@@ -63,12 +71,10 @@ test.describe('Reminder notification closed loop', () => {
       `[data-testid="notification-item"][data-notification-id="${clickedNotification.id}"]`,
     );
     await firstNotification.click();
-    await expect(page).toHaveURL(/\/reminders$/);
+    await expect(page).toHaveURL(/\/notifications$/);
 
-    // Clicking a Reminder notification owns two behaviors: mark only that Fact as
-    // read, then navigate to the related Reminder surface. Prove the read mutation
-    // independently before returning to Notification Center so navigation cannot
-    // masquerade as an empty unread list.
+    // A Fact without an explicit navigation intent remains in Notification Center.
+    // The click still owns exactly one product mutation: mark the clicked Fact read.
     await expect
       .poll(
         async () => {
@@ -79,7 +85,7 @@ test.describe('Reminder notification closed loop', () => {
             notifications: Array<{ id: string; title: string; isRead: boolean }>;
           }>(response);
           const scoped = data.notifications.filter((notification) =>
-            reminderTitles.includes(notification.title),
+            notificationTitles.includes(notification.title),
           );
           return {
             clickedRead: scoped.find((notification) => notification.id === clickedNotification.id)
@@ -91,7 +97,6 @@ test.describe('Reminder notification closed loop', () => {
       )
       .toEqual({ clickedRead: true, unread: 1 });
 
-    await page.goto('/notifications', { waitUntil: 'domcontentloaded' });
     const remainingUnreadItems = page.locator(
       '[data-testid="notification-item"][data-read-state="unread"]',
     );
@@ -111,33 +116,6 @@ test.describe('Reminder notification closed loop', () => {
     expect(unread.count).toBe(0);
   });
 });
-
-function createReminderPayload(title: string, triggerAt: number) {
-  return {
-    title,
-    description: `Triggered by ${title}`,
-    type: 'Recurring',
-    trigger: {
-      type: 'Interval',
-      fixedTime: null,
-      interval: { minutes: 1, startTime: triggerAt },
-    },
-    // Residual 835: ActiveTimeConfigDTO uses activatedAt (not startDate/endDate).
-    activeTime: {
-      activatedAt: triggerAt,
-    },
-    notificationConfig: {
-      channels: ['InApp'],
-      title,
-      body: `Notification created from ${title}`,
-      sound: null,
-      vibration: null,
-      actions: null,
-    },
-    importanceLevel: 'Moderate',
-    tags: ['e2e', 'notification-closed-loop'],
-  };
-}
 
 async function expectApiData<T = unknown>(response: APIResponse): Promise<T> {
   const body = (await response.json()) as {

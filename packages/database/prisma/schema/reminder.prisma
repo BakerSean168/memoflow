@@ -100,7 +100,7 @@ model RoutineProtocolSession {
 }
 
 /// RoutineOccurrence durable occurrence fence for the ROUTINE-3401 wall-clock lane.
-/// Mirrors the protected ReminderOccurrence lease-claim contract (ADR-059 §10)
+/// Uses the protected Routine lease-claim/fencing contract (ADR-077)
 /// keyed by the canonical occurrenceKey so crash/retry replay is idempotent.
 model RoutineOccurrence {
   id               String    @id

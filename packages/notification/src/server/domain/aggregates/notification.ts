@@ -6,7 +6,6 @@ import type {
   NotificationEventMap,
   NotificationType,
   NotificationCategory,
-  RelatedEntityType,
 } from '@memoflow/contracts/notification';
 import type { IdentityId, NotificationId as NotificationIdBranded } from '@memoflow/contracts/primitives';
 import { ImportanceLevel, UrgencyLevel } from '@memoflow/contracts/shared';
@@ -29,7 +28,7 @@ export interface NotificationState {
   category: NotificationCategory;
   importance: ImportanceLevel;
   urgency: UrgencyLevel;
-  relatedEntityType: RelatedEntityType | null;
+  relatedEntityType: string | null;
   relatedEntityId: string | null;
   navigationIntent: NotificationNavigationIntentDTO | null;
   correlationId: string | null;
@@ -78,7 +77,7 @@ export class Notification extends AggregateRoot<NotificationId> {
   get category(): NotificationCategory { return this._props.category; }
   get importance(): ImportanceLevel { return this._props.importance; }
   get urgency(): UrgencyLevel { return this._props.urgency; }
-  get relatedEntityType(): RelatedEntityType | null { return this._props.relatedEntityType; }
+  get relatedEntityType(): string | null { return this._props.relatedEntityType; }
   get relatedEntityId(): string | null { return this._props.relatedEntityId; }
   get navigationIntent(): NotificationNavigationIntentDTO | null {
     return cloneNavigationIntent(this._props.navigationIntent);
@@ -206,7 +205,7 @@ export class Notification extends AggregateRoot<NotificationId> {
     category: NotificationCategory;
     importance?: ImportanceLevel;
     urgency?: UrgencyLevel;
-    relatedEntityType?: RelatedEntityType | null;
+    relatedEntityType?: string | null;
     relatedEntityId?: string | null;
     actions?: NotificationActionDTO[];
     metadata?: NotificationMetadataDTO;

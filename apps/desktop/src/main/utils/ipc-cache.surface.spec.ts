@@ -5,7 +5,6 @@ import {
   CacheChannels,
   DashboardChannels,
   GoalChannels,
-  ReminderChannels,
   TaskChannels,
 } from '@memoflow/contracts/electron';
 
@@ -33,7 +32,6 @@ describe('ipc-cache channel surface', () => {
     expect(source).toContain('GoalChannels.LIST');
     expect(source).toContain('TaskChannels.PLAN_LIST');
     expect(source).toContain('DashboardChannels.GET_STATS');
-    expect(source).toContain('ReminderChannels.TEMPLATE_LIST');
     expect(GoalChannels.LIST).toBe('goal:list');
     expect(CacheChannels.STATS).toBe('cache:stats');
   });

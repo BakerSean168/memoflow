@@ -3,7 +3,6 @@ import { brandedId, openApiJsonValue } from '../../../primitives';
 import type { NotificationServerDTO } from '../aggregates/notification-server';
 import { NotificationType } from '../value-objects/notification-type';
 import { NotificationCategory } from '../value-objects/notification-category';
-import { RelatedEntityType } from '../value-objects/related-entity-type';
 import { NotificationChannelType } from '../value-objects/notification-channel-type';
 import { ImportanceLevel } from '../../../shared/value-objects/importance';
 import { UrgencyLevel } from '../../../shared/value-objects/urgency';
@@ -19,7 +18,7 @@ export const CreateNotificationSchema = z.object({
   category: z.enum(NotificationCategory),
   importance: z.enum(ImportanceLevel).optional(),
   urgency: z.enum(UrgencyLevel).optional(),
-  relatedEntityType: z.enum(RelatedEntityType).optional(),
+  relatedEntityType: z.string().trim().min(1).max(120).optional(),
   relatedEntityId: brandedId<string>().optional(),
   navigationIntent: z.object({ route: z.string(), params: z.record(z.string(), z.string()).optional() }).optional(),
   correlationId: z.string().optional(),

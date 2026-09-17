@@ -31,7 +31,7 @@ export interface ActivityEntry {
   identityId: string;
   /** Acting principal. 操作主体。 */
   actorId: string;
-  /** Business subject type (goal/task/reminder/schedule). 业务主体类型。 */
+  /** Business subject type (currently goal/task; Routine projection joins in Phase 5). 业务主体类型。 */
   subjectType: string;
   /** Business subject id. 业务主体 id。 */
   subjectId: string;

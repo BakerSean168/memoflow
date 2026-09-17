@@ -20,7 +20,6 @@
     "@memoflow/http-client": "workspace:*",
     "@memoflow/label": "workspace:*",
     "@memoflow/notification": "workspace:*",
-    "@memoflow/reminder": "workspace:*",
     "@memoflow/repository": "workspace:*",
     "@memoflow/schedule": "workspace:*",
     "@memoflow/scheduler": "workspace:*",

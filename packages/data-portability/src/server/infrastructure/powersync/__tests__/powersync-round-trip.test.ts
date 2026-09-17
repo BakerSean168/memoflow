@@ -401,8 +401,6 @@ class FakePowerSyncDb {
         return rows.filter((row) => row.goal_id === firstParameter);
       case 'folders':
         return rows.filter((row) => row.repository_id === firstParameter);
-      case 'reminder_responses':
-        return rows.filter((row) => row.template_id === firstParameter);
       case 'editor_workspace_sessions':
         return rows.filter((row) => row.workspace_id === firstParameter);
       case 'editor_workspace_session_groups':
@@ -531,30 +529,6 @@ function seedProfile(identityUuid: string): SeedTables {
         do_not_disturb: JSON.stringify({ enabled: false }),
         rate_limit: JSON.stringify({ perHour: 20 }),
         version: 1,
-        created_at: now,
-        updated_at: later,
-      },
-    ],
-    user_reminder_preferences: [
-      {
-        id: 'reminder-preference-a',
-        identity_id: identityUuid,
-        global_reminder_enabled: 1,
-        default_snooze_minutes: 10,
-        max_daily_reminders: 10,
-        preferred_hours_start: 9,
-        preferred_hours_end: 18,
-        timezone: 'Asia/Shanghai',
-        enable_weekend_reminders: 1,
-        enable_location_based_reminders: 0,
-        enable_voice_reminders: 0,
-        enable_sound: 1,
-        enable_vibration: 1,
-        enable_notification_badge: 1,
-        best_time_slots: JSON.stringify([{ start: '09:00', end: '11:00' }]),
-        worst_time_slots: JSON.stringify([{ start: '23:00', end: '07:00' }]),
-        adaptive_timing: 1,
-        learning_enabled: 1,
         created_at: now,
         updated_at: later,
       },
@@ -769,48 +743,12 @@ function seedProfile(identityUuid: string): SeedTables {
         deleted_at: null,
       },
     ],
-    reminder_groups: [
-      {
-        id: 'reminder-group-a',
-        identity_id: identityUuid,
-        name: 'Delivery',
-        description: 'Delivery reminders',
-        enabled: 1,
-        status: 'active',
-        order: 0,
-        color: '#3366ff',
-        icon: 'bell',
-        created_at: now,
-        updated_at: later,
-        deleted_at: null,
-      },
-    ],
-    reminder_templates: [
-      {
-        id: 'reminder-template-a',
-        identity_id: identityUuid,
-        name: 'Check import',
-        description: 'Verify imported data',
-        type: 'custom',
-        self_enabled: 1,
-        status: 'active',
-        importance_level: 'normal',
-        trigger: JSON.stringify({ type: 'time', at: later }),
-        active_time: JSON.stringify({ start: '09:00', end: '18:00' }),
-        notification_config: JSON.stringify({ channel: 'desktop' }),
-        tags: JSON.stringify(['portable']),
-        stats: JSON.stringify({ triggered: 1 }),
-        created_at: now,
-        updated_at: later,
-        deleted_at: null,
-      },
-    ],
     routine_profiles: [
       {
-        id: 'reminder-group-a',
+        id: 'routine-profile-a',
         identity_id: identityUuid,
         name: 'Delivery',
-        description: 'Delivery reminders',
+        description: 'Delivery routines',
         enabled: 1,
         active: 1,
         version: 1,
@@ -820,7 +758,7 @@ function seedProfile(identityUuid: string): SeedTables {
     ],
     routine_definitions: [
       {
-        id: 'reminder-template-a',
+        id: 'routine-definition-a',
         identity_id: identityUuid,
         name: 'Check import',
         description: 'Verify imported data',
@@ -834,24 +772,12 @@ function seedProfile(identityUuid: string): SeedTables {
     routine_profile_memberships: [
       {
         identity_id: identityUuid,
-        profile_id: 'reminder-group-a',
-        routine_id: 'reminder-template-a',
+        profile_id: 'routine-profile-a',
+        routine_id: 'routine-definition-a',
         enabled: 0,
         version: 1,
         created_at: now,
         updated_at: later,
-      },
-    ],
-    reminder_responses: [
-      {
-        id: 'reminder-response-a',
-        template_id: 'reminder-template-a',
-        identity_id: identityUuid,
-        action: 'SNOOZED',
-        response_time: 7,
-        snooze_duration_seconds: 900,
-        timestamp: later,
-        created_at: now,
       },
     ],
     schedules: [

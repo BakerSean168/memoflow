@@ -11,7 +11,6 @@ import goal from './goal';
 import task from './task';
 import schedule from './schedule';
 import notification from './notification';
-import reminder from './reminder';
 import repository from './repository';
 import governance from './governance';
 import setting from './setting';
@@ -30,7 +29,6 @@ export default {
   task,
   schedule,
   notification,
-  reminder,
   repository,
   governance,
   setting,

@@ -27,7 +27,6 @@ import {
   GoalRecordReceiptInputSchema,
   KnowledgeCommitProjectionInputSchema,
   NotificationOutboxDispatchInputSchema,
-  ReminderClaimOccurrenceInputSchema,
   ScheduleConditionalUpdateInputSchema,
   ScheduleConflictRebuildInputSchema,
   TaskRecordOutboxInputSchema,
@@ -791,18 +790,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
   });
 
   describe('8. P1-2 Application Port Schemas & Receipt Verification Closed Loop', () => {
-    it('validates port input schemas and enforces required canonical idempotencyKey matching across all 8 ports (P1-2)', () => {
-      const reminderKey = buildIdempotencyKeyString({ identityId: 'usr_1', source: 'reminder', occurrenceKey: 'occ_1' });
-      const reminderInput = ReminderClaimOccurrenceInputSchema.parse({
-        identityId: 'usr_1',
-        templateId: 'tmpl_1',
-        occurrenceKey: 'occ_1',
-        ownerToken: 'worker_1',
-        idempotencyKey: reminderKey,
-      });
-      expect(reminderInput.leaseDurationMs).toBe(30000);
-      expect(reminderInput.idempotencyKey).toBe(reminderKey);
-
+    it('validates port input schemas and enforces required canonical idempotencyKey matching across all 7 live ports (P1-2)', () => {
       const notificationKey = buildIdempotencyKeyString({ identityId: 'usr_1', source: 'notification', occurrenceKey: 'occ_99' });
       const notificationInput = NotificationOutboxDispatchInputSchema.parse({
         operationId: 'op_1',
@@ -880,17 +868,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
     });
 
     it('rejects port inputs missing idempotencyKey across ALL operation input schemas (P1-2 required)', () => {
-      // 1. Reminder
-      expect(() =>
-        ReminderClaimOccurrenceInputSchema.parse({
-          identityId: 'usr_1',
-          templateId: 'tmpl_1',
-          occurrenceKey: 'occ_1',
-          ownerToken: 'worker_1',
-        })
-      ).toThrow();
-
-      // 2. Notification
+      // 1. Notification
       expect(() =>
         NotificationOutboxDispatchInputSchema.parse({
           operationId: 'op_1',
@@ -901,7 +879,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
         })
       ).toThrow();
 
-      // 3. Account
+      // 2. Account
       expect(() =>
         AccountClosureSagaInputSchema.parse({
           identityId: 'usr_1',
@@ -909,7 +887,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
         })
       ).toThrow();
 
-      // 4. Goal
+      // 3. Goal
       expect(() =>
         GoalRecordReceiptInputSchema.parse({
           identityId: 'usr_1',
@@ -918,7 +896,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
         })
       ).toThrow();
 
-      // 5. Task
+      // 4. Task
       expect(() =>
         TaskRecordOutboxInputSchema.parse({
           identityId: 'usr_1',
@@ -927,7 +905,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
         })
       ).toThrow();
 
-      // 6. Schedule update
+      // 5. Schedule update
       expect(() =>
         ScheduleConditionalUpdateInputSchema.parse({
           identityId: 'usr_1',
@@ -938,7 +916,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
         })
       ).toThrow();
 
-      // 7. Schedule rebuild
+      // 6. Schedule rebuild
       expect(() =>
         ScheduleConflictRebuildInputSchema.parse({
           identityId: 'usr_1',
@@ -948,7 +926,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
         })
       ).toThrow();
 
-      // 8. Knowledge
+      // 7. Knowledge
       expect(() =>
         KnowledgeCommitProjectionInputSchema.parse({
           identityId: 'usr_1',

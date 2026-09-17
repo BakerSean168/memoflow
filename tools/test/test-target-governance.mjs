@@ -32,7 +32,8 @@ const boundaryRequiredTargets = new Map([
 const governedRequiredTargets = ['test', 'test:watch', 'test:coverage'];
 const coverageConfigsByProject = new Map([
   ['goal', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
-  ['reminder', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
+  // R4-2201C: legacy Reminder CRUD use-case/mapper slices were physically retired; Routine uses the canonical suite.
+  ['reminder', ['vitest.config.ts']],
   // CLEAN-6304 / S4-2302B: Schedule owns Calendar/Planner and Scheduler now owns only
   // canonical ScheduledInvocation runtime + mapper coverage; the retired ScheduleTask use-case slice is gone.
   ['schedule', ['vitest.config.ts', 'vitest.mappers.config.ts']],

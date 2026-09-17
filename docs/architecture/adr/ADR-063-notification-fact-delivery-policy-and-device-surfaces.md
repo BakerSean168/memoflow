@@ -9,7 +9,7 @@ tags:
   - outbox
 description: 区分 Notification 用户可见事实与各渠道 Delivery Attempt，统一 per-channel preference/DND/rate-limit policy 和桌面设备级覆盖
 created: 2026-08-25T17:49:00+08:00
-updated: 2026-09-08T20:20:00+08:00
+updated: 2026-09-17T22:45:00+08:00
 ---
 
 # ADR-063: Notification Fact、Delivery Policy 与 Device Surface 分离
@@ -29,7 +29,7 @@ ADR-079 进一步明确：legacy `ReminderNotificationConfig` 不应继续成为
 
 ### 2026-09-08 Notification model convergence follow-up
 
-ADR-084~088 继续沿用本 ADR 已实施的 `NotificationRequested -> Fact -> per-channel policy -> durable delivery` 主干，但进一步收敛内部模型：Notification 变成更纯的 `NotificationFact + Inbox lifecycle`；`NotificationChannel` 从 Fact aggregate truth 退出；`NotificationTemplate/History` 退役；workflow registry 成为 canonical semantic catalog；DND 收敛为带 `TimeZoneId/Hm` 的 QuietHours；Product Inbox 与 Delivery Operations/realtime 分离。以上均为**已采纳、待实施**，不得把本文“已实施”误解成第二次模型收敛已经完成。
+ADR-084~088 继续沿用本 ADR 已实施的 `NotificationRequested -> Fact -> per-channel policy -> durable delivery` 主干，但进一步收敛内部模型：Notification 变成更纯的 `NotificationFact + Inbox lifecycle`；`NotificationChannel` 从 Fact aggregate truth 退出；`NotificationTemplate/History` 退役；workflow registry 成为 canonical semantic catalog；DND 收敛为带 `TimeZoneId/Hm` 的 QuietHours；Product Inbox 与 Delivery Operations/realtime 分离。以上 follow-up 已在 Phase 4 实施完成：Template/Channel/History authority 已退休，typed Interaction、QuietHours/SystemDeliveryGuard、Product/Operations ports 与开放 EntityRef 成为当前主线。下文第一代模型描述保留为历史问题背景。
 
 ## 1. 背景
 

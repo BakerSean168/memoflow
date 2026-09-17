@@ -18,7 +18,6 @@ export default defineConfig({
     '@memoflow/database',
     '@memoflow/goal',
     '@memoflow/task',
-    '@memoflow/reminder',
     '@memoflow/repository',
     '@memoflow/schedule',
     '@memoflow/ai',

@@ -290,7 +290,6 @@ export default {
         cancelled: 'Cancelled',
       },
       toolLabels: {
-        createReminder: 'Create Reminder',
         createKnowledgeNote: 'Create Knowledge Note',
         searchExistingGoals: 'Search Existing Goals',
         searchKnowledge: 'Search Knowledge',

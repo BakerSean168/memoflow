@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "description": "数据可迁移性模块 - 用户数据导入导出",
   "type": "module",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -35,7 +37,6 @@
     "@memoflow/utils": "workspace:*",
     "@memoflow/goal": "workspace:*",
     "@memoflow/task": "workspace:*",
-    "@memoflow/reminder": "workspace:*",
     "@memoflow/repository": "workspace:*",
     "@memoflow/schedule": "workspace:*",
     "@memoflow/ai": "workspace:*",

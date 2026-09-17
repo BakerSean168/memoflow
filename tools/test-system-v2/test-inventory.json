@@ -1758,7 +1758,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "apps/web/e2e/notification/reminder-notification-loop.spec.ts",
+      "path": "apps/web/e2e/notification/notification-inbox-loop.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
         "apps/web/playwright.config.ts"
@@ -1767,14 +1767,6 @@
     },
     {
       "path": "apps/web/e2e/performance/dashboard-performance.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.audit.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "apps/web/e2e/reminder.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
         "apps/web/playwright.audit.config.ts"
@@ -5183,6 +5175,14 @@
     },
     {
       "path": "packages/contracts/src/modules/notification/api/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/modules/notification/api/notification-entity-ref.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -10797,20 +10797,6 @@
       "fileCount": 25
     },
     {
-      "id": "packages/reminder/vitest.mappers.config.ts",
-      "type": "measurement",
-      "suite": "coverage",
-      "runner": "vitest",
-      "fileCount": 0
-    },
-    {
-      "id": "packages/reminder/vitest.use-cases.config.ts",
-      "type": "measurement",
-      "suite": "coverage",
-      "runner": "vitest",
-      "fileCount": 0
-    },
-    {
       "id": "packages/schedule/vitest.config.ts",
       "type": "measurement",
       "suite": "coverage",
@@ -10906,7 +10892,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 12
+      "fileCount": 11
     },
     {
       "id": "apps/web/playwright.config.ts",
@@ -11151,7 +11137,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 84
+      "fileCount": 85
     },
     {
       "id": "packages/dashboard/vitest.config.ts",
@@ -11869,12 +11855,12 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1026,
+    "unit": 1027,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 9,
     "boundary-main": 6,
-    "e2e": 59,
+    "e2e": 58,
     "perf": 1,
     "governance": 57
   }
