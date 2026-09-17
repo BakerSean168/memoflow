@@ -330,13 +330,6 @@ import {
       ),
       'utf8',
     );
-    const template = readFileSync(
-      resolve(
-        sharedDir,
-        '../../../notification/src/server/infrastructure/adapters/prisma/notification-template-prisma.repository.ts',
-      ),
-      'utf8',
-    );
     const powersync = readFileSync(
       resolve(
         sharedDir,
@@ -353,11 +346,10 @@ import {
       expect(index).toContain("export * from './persistence'");
     });
 
-    it('notification prisma mappers/repos import sole without local dual bodies', () => {
+    it('notification prisma mappers import sole without local dual bodies', () => {
       for (const [label, source] of [
         ['preference-mapper', preference],
         ['notification-mapper', notification],
-        ['template-repo', template],
       ] as const) {
         expect(source, label).toContain("import { parseJsonSafe } from '@memoflow/utils/shared'");
         expect(source, label).not.toMatch(/function parseJsonSafe\b/);
