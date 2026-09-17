@@ -12,7 +12,7 @@ import { asInstant, createSystemClock, createTimeContext } from '@memoflow/time'
 
 /**
  * W3 real-path integration: closure saga -> account-closed outbox ->
- * worker (lease) -> real Reminder/Notification/Repository consumers cancel pending work.
+ * worker (lease) -> real Routine/Notification/Repository consumers close pending work.
  */
 describe('API host account-closed consumer chain', () => {
   beforeEach(async () => {
@@ -24,7 +24,7 @@ describe('API host account-closed consumer chain', () => {
     await disconnectPrisma();
   });
 
-  it('closure saga publishes account-closed; worker with real consumers cancels reminder/notification/repository pending work', async () => {
+  it('closure saga publishes account-closed; worker with real consumers disables Routine and cancels notification/repository pending work', async () => {
     const identityId = IdentityId.generate().toString();
     const __idempotencyKey = `chain-${Date.now()}`;
 
@@ -51,32 +51,17 @@ describe('API host account-closed consumer chain', () => {
     });
     await module.accountRepository.save(account);
 
-    // Seed pending reminder work
-    const reminderId = crypto.randomUUID();
-    await prisma.reminderTemplate.create({
+    // Seed canonical Routine owner state. Account closure disables future Routine work;
+    // historical occurrence/interaction facts remain owner truth until account cascade deletion.
+    const routineId = crypto.randomUUID();
+    await prisma.routineDefinition.create({
       data: {
-        id: reminderId,
+        id: routineId,
         identityId,
-        name: 'Pending Reminder',
-        status: 'active',
-        type: 'Recurring',
-        selfEnabled: true,
-        importanceLevel: 'Normal',
-        tags: '[]',
-        trigger: 'cron',
-        activeTime: '{}',
-        notificationConfig: '{}',
-        stats: '{}',
-      },
-    });
-    await prisma.reminderOccurrence.create({
-      data: {
-        id: crypto.randomUUID(),
-        occurrenceKey: `notif_${reminderId}:1`,
-        idempotencyKey: `v1:7:${identityId}:notif_${reminderId}:1`,
-        status: 'pending',
-        template: { connect: { id: reminderId } },
-        account: { connect: { id: identityId } },
+        name: 'Pending Routine',
+        enabled: true,
+        triggerJson: JSON.stringify({ kind: 'WallClock', timeZone: 'UTC', time: '10:00' }),
+        version: 1,
       },
     });
 
@@ -168,11 +153,9 @@ describe('API host account-closed consumer chain', () => {
     const processed = await worker.processPendingMessages(50);
     expect(processed).toBeGreaterThanOrEqual(1);
 
-    // Reminder pending work cancelled
-    const template = await prisma.reminderTemplate.findUnique({ where: { id: reminderId } });
-    expect(template?.status).toBe('disabled');
-    const occurrences = await prisma.reminderOccurrence.findMany({ where: { identityId } });
-    expect(occurrences.every((occ) => occ.status === 'cancelled')).toBe(true);
+    // Routine owner is disabled; no legacy Reminder occurrence mutation is involved.
+    const routine = await prisma.routineDefinition.findUnique({ where: { id: routineId } });
+    expect(routine?.enabled).toBe(false);
 
     // Notification pending dispatch cancelled
     const dispatches = await prisma.notificationDispatchOutbox.findMany({ where: { identityId } });
@@ -185,10 +168,10 @@ describe('API host account-closed consumer chain', () => {
     expect(writeReq?.status).toBe('CANCELLED');
 
     // Inbox receipts recorded for all three consumers
-    const reminderReceipt = await prisma.inboxReceipt.findFirst({
-      where: { consumer: 'reminder-account-closed' },
+    const routineReceipt = await prisma.inboxReceipt.findFirst({
+      where: { consumer: 'routine-account-closed' },
     });
-    expect(reminderReceipt).not.toBeNull();
+    expect(routineReceipt).not.toBeNull();
 
     const notificationReceipt = await prisma.inboxReceipt.findFirst({
       where: { consumer: 'notification-account-closed' },
