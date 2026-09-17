@@ -291,7 +291,7 @@ describe('W7 cross-module operation gate (real DB)', () => {
 
     // ── Unified timeline: each entry is schema-conformant with W7 fields ──
     const reminderTimeline = await reminder.api.queryOperationTimeline(ctx);
-    const notifTimeline = await notifModule.api.getOperationTimeline(identityId);
+    const notifTimeline = await notifModule.operations.getOperationTimeline(identityId);
     const scheduleTimeline = await schedule.api.queryRebuildTimeline(ctx);
     const accountTimeline = await account.api.queryClosureTimeline(ctx);
     const knowledgeTimeline = await repository.api.queryKnowledgeTimeline(ctx);
@@ -331,7 +331,7 @@ describe('W7 cross-module operation gate (real DB)', () => {
     const otherIdentity = randomUUID();
     const otherCtx = { identityId: otherIdentity } as never;
     expect((await reminder.api.replayOperation(reminderOp, otherCtx)).ok).toBe(false);
-    expect((await notifModule.api.replayDeadLetter(notificationOp, otherIdentity)).ok).toBe(false);
+    expect((await notifModule.operations.replayDeadLetter(notificationOp, otherIdentity)).ok).toBe(false);
     expect((await schedule.api.replayRebuildOutbox(scheduleOp, otherCtx)).ok).toBe(false);
     expect((await account.api.replayClosure(accountOp, otherCtx)).ok).toBe(false);
     expect(
@@ -343,7 +343,7 @@ describe('W7 cross-module operation gate (real DB)', () => {
     expect(reminderReplay.ok).toBe(true);
     expect((reminderReplay.data as any).status).toBe('retryable');
 
-    const notifReplay = await notifModule.api.replayDeadLetter(notificationOp, identityId);
+    const notifReplay = await notifModule.operations.replayDeadLetter(notificationOp, identityId);
     expect(notifReplay.ok).toBe(true);
     expect((notifReplay.data as any).status).toBe('retryable');
 
@@ -389,7 +389,7 @@ describe('W7 cross-module operation gate (real DB)', () => {
     ]);
 
     // Actor-scoped audit: another identity sees none of our records.
-    const otherAudit = await notifModule.api.getOperationAudit(otherIdentity);
+    const otherAudit = await notifModule.operations.getOperationAudit(otherIdentity);
     expect(otherAudit.ok).toBe(true);
     expect((otherAudit.data as any[]).some((a) => a.actorIdentityId === identityId)).toBe(false);
 
