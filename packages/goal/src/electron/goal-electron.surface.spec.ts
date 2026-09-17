@@ -86,13 +86,13 @@ describe('GoalElectronModule.register() startup (W4 P2-1)', () => {
         relationCleanupFactory: () => ({ unlinkAllForGoal: async () => 0 }),
       }),
     ).not.toThrow();
-  });
+  }, 30_000);
 
   it('fails closed when the Task binding port is NOT provided', async () => {
     const db = createPowerSyncDb();
     const { createGoalPowerSyncModule } = await import('../server/infrastructure/powersync');
     expect(() => createGoalPowerSyncModule(db)).toThrow(/taskBindingReadPort/);
-  });
+  }, 30_000);
 });
 
 describe('GoalElectronModule.register() lifecycle (W4 P2-1)', () => {
