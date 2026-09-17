@@ -9,10 +9,7 @@ import { ScheduleEventApplicationService } from './schedule-event-application-se
 
 class InMemoryScheduleRepository implements IScheduleRepository {
   private readonly schedules = new Map<string, CalendarEntry>();
-  private readonly projections = new Map<
-    string,
-    { hasConflict: boolean; conflictingEntries: string[] | null }
-  >();
+
 
   async save(schedule: CalendarEntry): Promise<void> {
     this.schedules.set(schedule.id, schedule);
@@ -43,20 +40,6 @@ class InMemoryScheduleRepository implements IScheduleRepository {
       const range = schedule.range;
       return range.kind === 'Timed' && range.start < endTime && range.end > startTime;
     });
-  }
-  async updateConflictProjection(
-    identityId: string,
-    id: string,
-    hasConflict: boolean,
-    conflictingEntries: string[] | null,
-  ): Promise<void> {
-    const entry = this.schedules.get(id);
-    if (entry?.identityId === identityId)
-      this.projections.set(id, { hasConflict, conflictingEntries });
-  }
-  async getConflictProjection(identityId: string, id: string) {
-    if ((this.schedules.get(id)?.identityId ?? null) !== identityId) return null;
-    return this.projections.get(id) ?? { hasConflict: false, conflictingEntries: null };
   }
   async createRebuildOutbox(): Promise<void> {}
   async fetchPendingRebuildOutbox(): Promise<never[]> {

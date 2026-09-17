@@ -9397,6 +9397,16 @@
       ]
     },
     {
+      "path": "packages/schedule/src/application-client/planner-conflict-read-model.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/schedule/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/schedule/src/application-client/schedule-client-port-facade-dual.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11746,7 +11756,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 21
+      "fileCount": 22
     },
     {
       "id": "packages/schedule/vitest.mappers.config.ts",
@@ -12208,7 +12218,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 21
+      "fileCount": 22
     },
     {
       "id": "packages/scheduler/vitest.config.ts",
@@ -12728,6 +12738,7 @@
       "packages/schedule/src/api/schedule-event.routes.spec.ts",
       "packages/schedule/src/api/schedule-route-parsers-keep-boundary.surface.spec.ts",
       "packages/schedule/src/api/schedule-void-success-envelope.surface.spec.ts",
+      "packages/schedule/src/application-client/planner-conflict-read-model.spec.ts",
       "packages/schedule/src/application-client/schedule-client-port-facade-dual.surface.spec.ts",
       "packages/schedule/src/electron/index-lifecycle.spec.ts",
       "packages/schedule/src/electron/schedule-electron-delete-contract.spec.ts",
@@ -12879,7 +12890,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1117,
+    "unit": 1118,
     "integration": 38,
     "smoke": 3,
     "boundary-ipc": 9,

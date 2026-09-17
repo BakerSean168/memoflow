@@ -194,59 +194,6 @@ export class SchedulePrismaRepository implements IScheduleRepository {
     await this.deleteById(entry.identityId, entry.id, expectedVersion);
   }
 
-  async updateConflictProjection(
-    identityId: string,
-    id: string,
-    hasConflict: boolean,
-    conflictingEntries: string[] | null,
-    sourceRevision: number,
-  ): Promise<void> {
-    const current = await this.db.schedule.findFirst({
-      where: { id, identityId },
-      select: { version: true, hasConflict: true, conflictingSchedules: true },
-    });
-    if (!current) return;
-    if (current.version > sourceRevision) return;
-
-    const newConflictingStr =
-      conflictingEntries && conflictingEntries.length > 0
-        ? JSON.stringify(conflictingEntries)
-        : null;
-
-    if (current.hasConflict === hasConflict && current.conflictingSchedules === newConflictingStr) {
-      return;
-    }
-
-    await this.db.schedule.updateMany({
-      where: {
-        id,
-        identityId,
-        version: { lte: sourceRevision },
-      },
-      data: {
-        hasConflict,
-        conflictingSchedules: newConflictingStr,
-      },
-    });
-  }
-
-  async getConflictProjection(
-    identityId: string,
-    id: string,
-  ): Promise<{ hasConflict: boolean; conflictingEntries: string[] | null } | null> {
-    const current = await this.db.schedule.findFirst({
-      where: { id, identityId },
-      select: { hasConflict: true, conflictingSchedules: true },
-    });
-    if (!current) return null;
-    return {
-      hasConflict: current.hasConflict,
-      conflictingEntries: current.conflictingSchedules
-        ? (JSON.parse(current.conflictingSchedules) as string[])
-        : null,
-    };
-  }
-
   async createRebuildOutbox(item: {
     identityId: string;
     scheduleId?: string;

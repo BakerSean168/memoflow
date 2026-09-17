@@ -1278,8 +1278,6 @@ exports.Prisma.ScheduleScalarFieldEnum = {
   timedEnd: 'timedEnd',
   allDayStart: 'allDayStart',
   allDayEnd: 'allDayEnd',
-  hasConflict: 'hasConflict',
-  conflictingSchedules: 'conflictingSchedules',
   location: 'location',
   attendees: 'attendees',
   createdAt: 'createdAt',

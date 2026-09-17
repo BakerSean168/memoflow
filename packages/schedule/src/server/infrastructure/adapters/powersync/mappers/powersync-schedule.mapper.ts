@@ -15,9 +15,6 @@ export type PowerSyncScheduleRow = {
   timed_end: string | null;
   all_day_start: string | null;
   all_day_end: string | null;
-  // Transitional projection cache columns are intentionally not mapped into CalendarEntry state.
-  has_conflict?: number | boolean | null;
-  conflicting_schedules?: string | null;
   location: string | null;
   attendees: string | null;
   version: number;

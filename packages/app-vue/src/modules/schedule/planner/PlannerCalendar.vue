@@ -14,7 +14,7 @@
           <span v-if="timeText" class="mr-1 font-medium">{{ timeText }}</span>
           <span class="truncate font-medium">{{ event.title }}</span>
           <span
-            v-if="event.extendedProps.projection.displayMetadata.hasConflict"
+            v-if="hasDerivedConflict(event.extendedProps.projection)"
             class="ml-1"
             aria-hidden="true"
             >⚠</span
@@ -45,7 +45,8 @@ import timeGridPlugin from '@fullcalendar/vue3/timegrid';
 import classicThemePlugin from '@fullcalendar/vue3/themes/classic';
 import zhCnLocale from '@fullcalendar/vue3/locales/zh-cn';
 import type { CalendarApi, CalendarOptions, EventApi, EventInput } from '@fullcalendar/vue3';
-import type { CalendarEventProjection } from '@memoflow/contracts/schedule';
+import type { CalendarEventProjection, PlannerConflictProjection } from '@memoflow/contracts/schedule';
+import { plannerConflictSourceKeys, plannerProjectionKey } from '@memoflow/schedule/client';
 import { Loader2 } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 import { getProductTime, productTimeRevision } from '../../../shared/utils/product-time';
@@ -69,6 +70,7 @@ export interface PlannerVisibleRange {
 const props = withDefaults(
   defineProps<{
     projections: readonly CalendarEventProjection[];
+    conflicts?: readonly PlannerConflictProjection[];
     ownerCommands: PlannerOwnerCommandRouter;
     view: PlannerCalendarView;
     loading?: boolean;
@@ -78,6 +80,7 @@ const props = withDefaults(
   }>(),
   {
     loading: false,
+    conflicts: () => [],
     initialDate: () => Date.now(),
     locale: 'en-US',
     loadingLabel: 'Loading',
@@ -101,6 +104,12 @@ const fullCalendarView: Record<PlannerCalendarView, string> = {
   month: 'dayGridMonth',
 };
 
+const conflictSourceKeys = computed(() => plannerConflictSourceKeys(props.conflicts));
+
+function hasDerivedConflict(projection: CalendarEventProjection): boolean {
+  return conflictSourceKeys.value.has(plannerProjectionKey(projection));
+}
+
 function projectionToEvent(projection: CalendarEventProjection): EventInput {
   return {
     id: `${projection.sourceType}:${projection.sourceId}`,
@@ -113,7 +122,7 @@ function projectionToEvent(projection: CalendarEventProjection): EventInput {
     durationEditable: projection.editableCapabilities.resize,
     classNames: [
       `planner-source-${projection.sourceType}`,
-      projection.displayMetadata.hasConflict ? 'planner-event-conflict' : '',
+      hasDerivedConflict(projection) ? 'planner-event-conflict' : '',
     ].filter(Boolean),
     extendedProps: { projection },
   };
@@ -259,7 +268,7 @@ function showDate(view: PlannerCalendarView, date: Date | number): void {
 defineExpose({ previous, next, today, goToDate, showDate });
 
 function eventToneClass(projection: CalendarEventProjection): string {
-  if (projection.displayMetadata.hasConflict) return 'planner-tone-warning';
+  if (hasDerivedConflict(projection)) return 'planner-tone-warning';
   return `planner-tone-${projection.displayMetadata.tone ?? 'default'}`;
 }
 </script>

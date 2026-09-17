@@ -13,7 +13,7 @@ function fixture() {
       {
         id: 'calendar-2',
         title: 'Lunch',
-        range: { kind: 'Timed', start: 3_000, end: 4_000 },
+        range: { kind: 'Timed', start: 1_500, end: 2_500 },
       },
       {
         id: 'calendar-all-day',
@@ -21,11 +21,6 @@ function fixture() {
         range: { kind: 'AllDay', start: '2026-09-15', end: null },
       },
     ]),
-    getConflictProjection: vi.fn(async (_identityId: string, id: string) =>
-      id === 'calendar-1'
-        ? { hasConflict: true, conflictingEntries: ['calendar-2'] }
-        : { hasConflict: false, conflictingEntries: null },
-    ),
   };
   const taskApplicationPort = {
     getTaskOccurrencesByDateRange: vi.fn(async () =>
@@ -106,13 +101,9 @@ describe('PlannerAIReadAdapter', () => {
     );
     expect(summary.calendar).toHaveLength(2);
     expect(summary.calendar.find((entry) => entry.id === 'calendar-all-day')).toBeUndefined();
-    expect(scheduleRepository.getConflictProjection).toHaveBeenCalledWith(
-      'IdentityId_550e8400-e29b-41d4-a716-446655440000',
-      'calendar-1',
-    );
   });
 
-  it('returns only conflicting Calendar entries and pending upcoming tasks', async () => {
+  it('returns all dynamically conflicting Calendar entries and pending upcoming tasks', async () => {
     const { scheduleRepository, taskApplicationPort } = fixture();
     const adapter = new PlannerAIReadAdapter(
       scheduleRepository as never,
@@ -125,7 +116,10 @@ describe('PlannerAIReadAdapter', () => {
         startTime: 1_000,
         endTime: 5_000,
       }),
-    ).resolves.toMatchObject({ conflictCount: 1, entries: [{ id: 'calendar-1' }] });
+    ).resolves.toMatchObject({
+      conflictCount: 2,
+      entries: [{ id: 'calendar-1' }, { id: 'calendar-2' }],
+    });
     await expect(
       adapter.getUpcomingTasks({
         identityId: 'IdentityId_550e8400-e29b-41d4-a716-446655440000',

@@ -40,28 +40,33 @@ export class DesktopPlannerAIReadAdapter implements IAIPlannerReadPort {
       this.scheduleRepository.findByTimeRange(input.identityId, input.startTime, input.endTime),
       this.taskItems(input.identityId, input.startTime, input.endTime),
     ]);
+    const timedEntries = calendar.filter(
+      (entry): entry is typeof entry & { range: Extract<typeof entry.range, { kind: 'Timed' }> } =>
+        entry.range.kind === 'Timed',
+    );
     const calendarItems: Array<
       Awaited<ReturnType<IAIPlannerReadPort['getWindowSummary']>>['calendar'][number]
-    > = [];
-    for (const entry of calendar) {
-      // P4-2301A: this legacy AI read port is Instant-window based. Never synthesize
-      // an Instant for an AllDay Ymd range; AI-9609 owns the later range-aware port cutover.
-      if (entry.range.kind !== 'Timed') {
-        continue;
-      }
-      const conflict = await this.scheduleRepository.getConflictProjection(
-        input.identityId,
-        entry.id,
-      );
-      calendarItems.push({
+    > = timedEntries.map((entry) => {
+      // P4-2301B: this legacy AI read port derives overlap from current owner facts.
+      // No persisted CalendarEntry conflict cache survives. AI-9609 owns the later
+      // cross-owner range-aware AI Planner port.
+      const conflictingEntryIds = timedEntries
+        .filter(
+          (other) =>
+            other.id !== entry.id &&
+            entry.range.start < other.range.end &&
+            entry.range.end > other.range.start,
+        )
+        .map((other) => String(other.id));
+      return {
         id: String(entry.id),
         title: entry.title,
         startTime: entry.range.start,
         endTime: entry.range.end,
-        hasConflict: conflict?.hasConflict ?? false,
-        conflictingEntryIds: conflict?.conflictingEntries ?? [],
-      });
-    }
+        hasConflict: conflictingEntryIds.length > 0,
+        conflictingEntryIds,
+      };
+    });
 
     return {
       startTime: input.startTime,

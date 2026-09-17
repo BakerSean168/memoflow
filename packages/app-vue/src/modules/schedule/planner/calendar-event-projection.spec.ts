@@ -117,6 +117,7 @@ describe('CalendarEventProjection (PLAN-4302)', () => {
       sourceType: 'schedule',
       sourceId: 'schedule-1',
       allDay: false,
+      occupancy: 'blocking',
       editableCapabilities: { move: true, resize: true },
       ownerCommandTarget: { ownerType: 'schedule.calendar-entry', ownerId: 'schedule-1' },
       revision: 7,
@@ -137,6 +138,7 @@ describe('CalendarEventProjection (PLAN-4302)', () => {
     expect(event).toMatchObject({
       sourceType: 'schedule',
       allDay: true,
+      occupancy: 'non-blocking',
       start: '2026-08-27',
       end: '2026-08-29',
       ownerCommandTarget: { ownerType: 'schedule.calendar-entry', ownerId: 'schedule-1' },
@@ -154,6 +156,7 @@ describe('CalendarEventProjection (PLAN-4302)', () => {
       sourceId: 'task-occurrence-1',
       title: 'Review Core vNext PR',
       allDay: true,
+      occupancy: 'non-blocking',
       start: '2026-08-28',
       editableCapabilities: { move: true, resize: false },
       ownerCommandTarget: { ownerType: 'task.occurrence', ownerId: 'task-occurrence-1' },
@@ -175,6 +178,20 @@ describe('CalendarEventProjection (PLAN-4302)', () => {
     if (timed.allDay) throw new Error('Expected timed task');
     expect(timed.start).toBe(Number(taskDay) + 14 * 60 * 60_000);
     expect(timed.end).toBe(Number(taskDay) + (15 * 60 + 30) * 60_000);
+    expect(timed.occupancy).toBe('blocking');
+
+    const point = projectTaskOccurrence(
+      taskOccurrence({
+        scheduleSnapshot: {
+          date: asYmd('2026-08-28'),
+          timing: { kind: 'At', time: '16:00' },
+        },
+        dueAt: Number(taskDay) + 16 * 60 * 60_000,
+      }),
+      taskPlan,
+      time,
+    )!;
+    expect(point.occupancy).toBe('marker');
   });
 
   it('projects Goal start/target as distinct all-day facts targeting the Goal owner', () => {
@@ -184,6 +201,7 @@ describe('CalendarEventProjection (PLAN-4302)', () => {
     expect(events[1]).toMatchObject({
       allDay: true,
       start: '2026-09-30',
+      occupancy: 'marker',
       displayMetadata: { semantic: 'goal-target' },
       ownerCommandTarget: { ownerType: 'goal.goal', ownerId: 'goal-1' },
       editableCapabilities: { move: true, resize: false },
@@ -234,6 +252,7 @@ describe('CalendarEventProjection (PLAN-4302)', () => {
       allDay: false,
       ownerCommandTarget: { ownerType: 'routine.routine', ownerId: 'routine-1' },
       editableCapabilities: { move: false, resize: false },
+      occupancy: 'marker',
       displayMetadata: { semantic: 'routine-wall-clock' },
     });
     if (event.allDay) throw new Error('Routine wall-clock occurrence must be timed');

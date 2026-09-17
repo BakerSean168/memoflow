@@ -91,6 +91,7 @@
       <PlannerCalendar
         ref="plannerCalendarRef"
         :projections="projections"
+        :conflicts="conflicts"
         :owner-commands="ownerCommands"
         :view="activeView"
         :locale="locale"
@@ -154,7 +155,8 @@ import PlannerCalendar, {
 import { createPlannerOwnerCommandRouter } from '../planner';
 
 const { t, locale } = useI18n();
-const { projections, events, isLoading, fetchForRange, windowStart, windowEnd } = useCalendarView();
+const { projections, conflicts, events, isLoading, fetchForRange, windowStart, windowEnd } =
+  useCalendarView();
 const schedule = useSchedule();
 const task = useTask();
 
