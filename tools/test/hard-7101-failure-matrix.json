@@ -130,7 +130,7 @@
         {
           "runner": "notification-unit",
           "file": "packages/notification/src/server/application/use-cases/commands/__tests__/create-notification.test.ts",
-          "title": "Fixture I: DND keeps the Inbox Fact unread when Desktop delivery is suppressed"
+          "title": "keeps Inbox Fact visible while QuietHours suppresses Desktop delivery"
         }
       ]
     },
@@ -141,7 +141,7 @@
         {
           "runner": "notification-unit",
           "file": "packages/notification/src/server/application/use-cases/commands/__tests__/create-notification.test.ts",
-          "title": "preserves rate-limit suppression without mutating Fact read state"
+          "title": "applies SystemDeliveryGuard independently from user preferences"
         }
       ]
     },
