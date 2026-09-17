@@ -5,7 +5,6 @@ export {
   GOAL_SERVICE_KEY,
   LABEL_SERVICE_KEY,
   NOTIFICATION_SERVICE_KEY,
-  REMINDER_SERVICE_KEY,
   REPOSITORY_SERVICE_KEY,
   RULE_SERVICE_KEY,
   SCHEDULE_SERVICE_KEY,
@@ -56,7 +55,6 @@ export { useAccountStore } from './modules/account';
 export { useGoalStore } from './modules/goal';
 export { useTaskStore } from './modules/task';
 export { useScheduleStore } from './modules/schedule';
-export { useReminderStore } from './modules/reminder';
 export { useNotificationStore } from './modules/notification';
 export { useGovernanceStore } from './modules/governance';
 export { usePresentationPreferenceStore } from './modules/setting';

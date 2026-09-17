@@ -25,7 +25,7 @@ export const SchemaVersionSchema = z
 export const LeaseClaimSchema = z.object({
   /** Schema 版本号 (正整数，锁已知版本 P2-5) */
   schemaVersion: SchemaVersionSchema,
-  /** 受保护资源键 (如 'reminder:template:123', 'schedule:rebuild:usr_1') */
+  /** 受保护资源键 (如 'routine:definition:123', 'schedule:rebuild:usr_1') */
   resourceKey: z.string().min(1),
   /** 唯一 claim/lease 实例 ID */
   claimId: z.string().min(1),

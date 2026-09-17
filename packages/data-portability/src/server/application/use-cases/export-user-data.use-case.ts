@@ -21,7 +21,6 @@ import type { DataPortabilityDependencies } from '../data-portability.dependenci
 import { sanitizeSensitiveFields } from '../sanitize';
 import { projectGoals, projectGoalRecords } from './projections/goal.projection';
 import { projectTaskPlans, projectTaskOccurrences } from './projections/task.projection';
-import { projectReminderGroups, projectReminderTemplates, projectReminderResponses, projectUserReminderPreference } from './projections/reminder.projection';
 import { projectRepositories, projectResourceFolders, projectResources } from './projections/repository.projection';
 import { projectCalendarEntries } from './projections/schedule.projection';
 import { projectAIConversations } from './projections/ai.projection';
@@ -76,15 +75,6 @@ export class ExportUserDataUseCase {
       if (pref) {
         data.notificationPreference = projectNotificationPreference(pref);
         entityCounts.notificationPreference = 1;
-      }
-    }
-
-    // ─── User Reminder Preference (singleton) ───
-    if (modules.includes('reminders')) {
-      const pref = await this.deps.userReminderPreferenceRepository.findByIdentityId(identityId);
-      if (pref) {
-        data.userReminderPreference = projectUserReminderPreference(pref);
-        entityCounts.userReminderPreference = 1;
       }
     }
 
@@ -143,31 +133,6 @@ export class ExportUserDataUseCase {
       };
       entityCounts.taskPlans = data.tasks.templates.length;
       entityCounts.taskOccurrences = data.tasks.instances.length;
-    }
-
-    // ─── Reminders (groups + templates + responses) ───
-    if (modules.includes('reminders')) {
-      const groups = await this.deps.reminderGroupRepository.findByIdentityId(identityId);
-      const templates = await this.deps.reminderTemplateRepository.findByIdentityId(identityId, { includeHistory: false });
-      const memberships = await this.deps.routineProfileMembershipRepository.findByIdentityId(identityId);
-      const routineDefinitions = await this.deps.routineDefinitionRepository.findByIdentityId(identityId);
-
-      const allResponses: unknown[] = [];
-      for (const template of templates as { id: string }[]) {
-        const responses = await this.deps.reminderResponseRepository.findByTemplateId(
-          template.id,
-          identityId,
-        );
-        allResponses.push(...responses);
-      }
-
-      if (!data.reminders) data.reminders = { groups: [], templates: [], responses: [] };
-      data.reminders.groups = projectReminderGroups(groups, ctx);
-      data.reminders.templates = projectReminderTemplates(templates, memberships, routineDefinitions, ctx);
-      data.reminders.responses = projectReminderResponses(allResponses, ctx);
-      entityCounts.reminderGroups = data.reminders.groups.length;
-      entityCounts.reminderTemplates = data.reminders.templates.length;
-      entityCounts.reminderResponses = data.reminders.responses.length;
     }
 
     // ─── Schedules ───

@@ -270,7 +270,6 @@ export default {
         cancelled: '已取消',
       },
       toolLabels: {
-        createReminder: '创建提醒',
         createKnowledgeNote: '创建知识笔记',
         searchExistingGoals: '搜索已有目标',
         searchKnowledge: '搜索知识库',

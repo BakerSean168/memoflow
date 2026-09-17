@@ -63,8 +63,6 @@ export type {
   NotificationDeliveryPlanDTO,
 } from './delivery-plan';
 
-export { RelatedEntityType } from './related-entity-type';
-
 export { NotificationChannelType } from './notification-channel-type';
 
 

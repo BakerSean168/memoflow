@@ -107,15 +107,15 @@ describe('notification semantic controls', () => {
       topic: 'routine:water-break:notification',
       workflowKey: 'routine:water-break',
       category: 'Reminder',
-      relatedEntityType: 'Reminder',
+      relatedEntityType: 'Routine',
       relatedEntityId: 'routine-internal-88',
-      navigationIntent: { route: '/reminders' },
+      navigationIntent: { route: '/notifications' },
     });
 
     expect(wrapper.text()).toContain('Reminders');
     expect(wrapper.text()).toContain('Routine reminder');
-    expect(wrapper.text()).toContain('Reminder');
-    expect(wrapper.text()).toContain('Open related item');
+    expect(wrapper.text()).toContain('Routine');
+    expect(wrapper.text()).not.toContain('Open related item');
     expect(wrapper.text()).not.toContain('routine:water-break');
     expect(wrapper.text()).not.toContain('routine-internal-88');
   });

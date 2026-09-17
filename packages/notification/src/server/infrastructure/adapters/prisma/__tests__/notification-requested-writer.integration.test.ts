@@ -6,7 +6,6 @@ import {
   NotificationCategory,
   NotificationRequestedSchema,
   NotificationType,
-  RelatedEntityType,
   type NotificationRequested,
 } from '@memoflow/contracts/notification';
 import {
@@ -421,7 +420,7 @@ describe('NotificationRequested durable envelope consumer (NOTIF-3301)', () => {
     expect(fact.topic).toBe('task.reminder');
     expect(fact.type).toBe(NotificationType.Reminder);
     expect(fact.category).toBe(NotificationCategory.Task);
-    expect(fact.relatedEntityType).toBe(RelatedEntityType.Task);
+    expect(fact.relatedEntityType).toBe('Task');
     expect(fact.relatedEntityId).toBe(instanceId);
     expect(fact.importance).toBe('Moderate');
     expect(fact.urgency).toBe('Medium');
@@ -509,7 +508,7 @@ describe('NotificationRequested durable envelope consumer (NOTIF-3301)', () => {
     expect(fact.topic).toBe('goal.reminder');
     expect(fact.type).toBe(NotificationType.Reminder);
     expect(fact.category).toBe(NotificationCategory.Goal);
-    expect(fact.relatedEntityType).toBe(RelatedEntityType.Goal);
+    expect(fact.relatedEntityType).toBe('Goal');
     expect(fact.relatedEntityId).toBe(goalId);
     expect(fact.importance).toBe('Moderate');
     expect(fact.urgency).toBe('Medium');

@@ -7,12 +7,14 @@ tags:
   - delivery
 description: Notification vNext North Star：用户可见 Fact、Workflow 语义、Delivery Policy、可靠投递、Interaction 与 Inbox/Operations 边界
 created: 2026-09-08T22:00:00+08:00
-updated: 2026-09-08T22:00:00+08:00
+updated: 2026-09-17T22:45:00+08:00
 ---
 
 # Notification vNext
 
 > **ADR-111 cutover policy (2026-09-09):** 当前没有需要保留的 MemoFlow 旧业务数据，也不要求兼容旧客户端/旧备份。本文历史推演中仅为旧数据保存设计的 migration/backfill/compatibility window 不再执行；目标模型和真实行为不变量继续有效。实施采用 direct canonical cutover + old-surface deletion + reset/reseed。
+
+> **Phase 4 implementation checkpoint (2026-09-17):** ADR-084~088 的 canonical 主链已落地：Notification Fact/Inbox、WorkflowDefinition、DeliveryDecision + DispatchOutbox/Receipt、typed `NotificationInteraction`/ActionIntent、Product-Time QuietHours、独立 SystemDeliveryGuard、InboxPort/OperationsPort split 与开放 `NotificationEntityRef`。下文“当前第一代残差”段落保留为 2026-09-08 的设计背景，不再代表当前代码。
 
 ## 1. 一句话定义
 

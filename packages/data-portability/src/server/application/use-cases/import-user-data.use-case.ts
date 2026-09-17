@@ -14,11 +14,10 @@ import type { DataPortabilityEventMap, ImportUserDataRes } from '@memoflow/contr
 import type { ImportContext, RefMap } from '../portable-runtime';
 import { DataPortabilityEventTopics, parseUserDataExportEnvelope } from '@memoflow/contracts/data-portability';
 import type { DataPortabilityImportStore } from '../import-store/data-portability-import-store';
-import { importSettings, importNotificationPreference, importUserReminderPreference } from './importers/settings.importer';
+import { importSettings, importNotificationPreference } from './importers/settings.importer';
 import { importRepositories } from './importers/repository.importer';
 import { importGoals } from './importers/goal.importer';
 import { importTasks } from './importers/task.importer';
-import { importReminders } from './importers/reminder.importer';
 import { importSchedules } from './importers/schedule.importer';
 import { importAI } from './importers/ai.importer';
 import { throwValidationError } from './importers/import-helpers';
@@ -85,13 +84,11 @@ export class ImportUserDataUseCase {
       // Singletons (upsert — overwrite current user's preferences)
       await importSettings(tx, ctx, data.settings);
       await importNotificationPreference(tx, ctx, data.notificationPreference);
-      await importUserReminderPreference(tx, ctx, data.userReminderPreference);
 
       // Entity collections (append-create — always create new)
       if (data.repositories) await importRepositories(tx, ctx, data.repositories);
       if (data.goals) await importGoals(tx, ctx, data.goals);
       if (data.tasks) await importTasks(tx, ctx, data.tasks);
-      if (data.reminders) await importReminders(tx, ctx, data.reminders);
       if (data.schedules) await importSchedules(tx, ctx, data.schedules);
       if (data.ai) await importAI(tx, ctx, data.ai);
     });

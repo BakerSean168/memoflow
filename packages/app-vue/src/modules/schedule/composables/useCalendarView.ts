@@ -8,7 +8,7 @@
 import { computed, ref } from 'vue';
 import { useSchedule } from './useSchedule';
 import { useTask } from '../../task/composables/useTask';
-import { GOAL_SERVICE_KEY, REMINDER_SERVICE_KEY } from '../../../di/keys';
+import { GOAL_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import type {
   TaskOccurrenceClientDTO,
@@ -17,7 +17,6 @@ import type {
 } from '@memoflow/contracts/task';
 import type { CalendarEventProjection } from '@memoflow/contracts/schedule';
 import { derivePlannerConflicts, plannerConflictSourceKeys, plannerProjectionKey } from '@memoflow/schedule/client';
-import { asInstant } from '@memoflow/time';
 import {
   endOfDayMs,
   getProductTime,
@@ -218,7 +217,6 @@ export function useCalendarView() {
   const schedule = useSchedule();
   const task = useTask();
   const goalService = useStrictInject(GOAL_SERVICE_KEY, 'GoalService');
-  const reminderService = useStrictInject(REMINDER_SERVICE_KEY, 'ReminderService');
   const plannerGoals = ref<Parameters<typeof projectPlannerReadModel>[0]['goals']>([]);
   const plannerRoutineOccurrences = ref<Parameters<typeof projectPlannerReadModel>[0]['routineOccurrences']>([]);
   const plannerOwnerReadsLoading = ref(false);
@@ -269,33 +267,11 @@ export function useCalendarView() {
   async function fetchPlannerOwnerMarkers(startTime: number, endTime: number) {
     plannerOwnerReadsLoading.value = true;
     try {
-      const [goalResult, reminderResult] = await Promise.all([
-        goalService.listGoals({ systemView: 'all', page: 1, pageSize: 500 }),
-        reminderService.getReminderTemplates(),
-      ]);
-
-      plannerGoals.value = goalResult.ok
-        ? goalResult.data.goals.map((goal) => goal.toDTO())
-        : [];
-      plannerRoutineOccurrences.value = reminderResult.ok
-        ? reminderResult.data.templates.flatMap((routine) => {
-            if (!routine.effectiveEnabled || routine.nextTriggerAt == null) return [];
-            if (routine.nextTriggerAt < startTime || routine.nextTriggerAt > endTime) return [];
-            return [
-              {
-                identityId: String(routine.identityId),
-                routineId: String(routine.id),
-                occurrenceKey: `routine:${String(routine.id)}:oc:${routine.nextTriggerAt}`,
-                title: routine.name,
-                subtitle: routine.description,
-                occurrenceAt: asInstant(routine.nextTriggerAt),
-                endAt: null,
-                revision: routine.version,
-                editable: false,
-              },
-            ];
-          })
-        : [];
+      const goalResult = await goalService.listGoals({ systemView: 'all', page: 1, pageSize: 500 });
+      plannerGoals.value = goalResult.ok ? goalResult.data.goals.map((goal) => goal.toDTO()) : [];
+      // R4-2201C: legacy Reminder markers are retired. Phase 5 will
+      // reconnect Planner to the canonical Routine occurrence read model.
+      plannerRoutineOccurrences.value = [];
     } finally {
       plannerOwnerReadsLoading.value = false;
     }

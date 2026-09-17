@@ -6,7 +6,6 @@ import type {
   NotificationNavigationIntentDTO,
   NotificationType,
   NotificationCategory,
-  RelatedEntityType,
   NotificationChannelType,
 } from '@memoflow/contracts/notification';
 import {
@@ -62,7 +61,7 @@ export class CreateNotificationUseCase {
     category?: NotificationCategory;
     importance?: ImportanceLevel;
     urgency?: UrgencyLevel;
-    relatedEntityType?: RelatedEntityType;
+    relatedEntityType?: string;
     relatedEntityId?: string;
     navigationIntent?: NotificationNavigationIntentDTO | null;
     actions?: NotificationActionDTO[];

@@ -23,15 +23,10 @@ export const JSON_FIELDS_BY_TABLE: Record<string, ReadonlySet<string>> = {
 };
 
 export const BOOLEAN_FIELDS_BY_TABLE: Record<string, ReadonlySet<string>> = {
-  reminder_templates: new Set(['self_enabled']),
-  reminder_groups: new Set(['enabled']),
-  reminder_history: new Set(['notification_sent']),
-  user_reminder_preferences: new Set(['global_reminder_enabled']),
   routine_definitions: new Set(['enabled']),
   routine_profiles: new Set(['enabled']),
   routine_profile_memberships: new Set(['enabled']),
   notifications: new Set(['is_read']),
-  notification_preferences: new Set(['enabled']),
   ai_provider_configs: new Set(['is_active', 'is_default']),
   folders: new Set(['is_expanded']),
 };

@@ -1,4 +1,3 @@
-import type { ReminderTemplateClientDTO } from '@memoflow/contracts/reminder';
 import { formatProductDateTime, emptyKind } from './product-time';
 
 // Soft residual 1101: presentation 0-fallback toTimestamp keep-boundary (≠ projection/AI/notification).
@@ -25,40 +24,4 @@ export function formatEntityDateTime(value: number | string | null | undefined):
     return emptyKind('dash');
   }
   return formatProductDateTime(timestamp, emptyKind('dash'));
-}
-
-export function getReminderDisplayTitle(template: Pick<ReminderTemplateClientDTO, 'name'>): string {
-  return template.name;
-}
-
-export function getReminderTriggerText(
-  template: Pick<ReminderTemplateClientDTO, 'trigger'>,
-): string {
-  const parts: string[] = [];
-
-  if (template.trigger.type) {
-    parts.push(template.trigger.type);
-  }
-
-  if (template.trigger.interval?.minutes) {
-    parts.push(`Every ${template.trigger.interval.minutes} min`);
-  }
-
-  if (template.trigger.fixedTime?.time) {
-    parts.push(template.trigger.fixedTime.time);
-  }
-
-  return parts.join(' · ') || 'No trigger configured';
-}
-
-export function getReminderImportanceText(
-  template: Pick<ReminderTemplateClientDTO, 'importanceLevel'>,
-): string {
-  return template.importanceLevel;
-}
-
-export function getReminderNextTriggerText(
-  template: Pick<ReminderTemplateClientDTO, 'nextTriggerAt'>,
-): string {
-  return template.nextTriggerAt ? formatEntityDateTime(template.nextTriggerAt) : 'Not scheduled';
 }

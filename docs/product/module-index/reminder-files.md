@@ -2,127 +2,79 @@
 tags:
   - product
   - module-index
-  - reminder
-description: 提醒模块相关文件索引
+  - routine
+description: Routine vNext 运行时、调度与持久化文件索引
 created: 2026-06-02T00:00:00
-updated: 2026-09-08T09:00:00+08:00
+updated: 2026-09-17T20:10:00+08:00
 ---
 
-# 提醒模块文件索引
+# Routine vNext 文件索引
 
-本索引用于连接提醒模块的业务说明和真实代码。它不是代码注释替代品；做优化前仍需以当前代码、配置和测试为准。
+`@memoflow/reminder` 保留历史包名，但 R4-2201C 后其生产权威只包含 **Routine vNext**。旧 Reminder CRUD、HTTP/IPC client、模板/分组/实例/响应模型与 UI 路由已经破坏式退休；ADR-111 明确不保留旧产品数据和兼容读写路径。
 
-## 前端页面与路由
-
-| 文件 | 说明 |
-| --- | --- |
-| [`packages/app-vue/src/modules/reminder/router/index.ts`](../../../packages/app-vue/src/modules/reminder/router/index.ts) | Vue 提醒模块路由，定义提醒列表入口 |
-| [`packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue`](../../../packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue) | 提醒列表主视图 |
-
-## 前端状态、组合函数与组件
+## 宿主组合入口
 
 | 文件 | 说明 |
 | --- | --- |
-| [`packages/app-vue/src/modules/reminder/stores/reminder-store.ts`](../../../packages/app-vue/src/modules/reminder/stores/reminder-store.ts) | 提醒模块 Pinia store |
-| [`packages/app-vue/src/modules/reminder/composables/useReminder.ts`](../../../packages/app-vue/src/modules/reminder/composables/useReminder.ts) | 提醒编排组合函数 |
-| [`packages/app-vue/src/modules/reminder/composables/useReminderTemplates.ts`](../../../packages/app-vue/src/modules/reminder/composables/useReminderTemplates.ts) | 提醒模板 CRUD 组合函数 |
-| [`packages/app-vue/src/modules/reminder/composables/useReminderGroups.ts`](../../../packages/app-vue/src/modules/reminder/composables/useReminderGroups.ts) | 提醒分组 CRUD 组合函数 |
-| [`packages/app-vue/src/modules/reminder/composables/useReminderPreferences.ts`](../../../packages/app-vue/src/modules/reminder/composables/useReminderPreferences.ts) | 提醒偏好组合函数 |
-| [`packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue`](../../../packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue) | 提醒模板卡片 |
-| [`packages/app-vue/src/modules/reminder/components/TemplateDialog.vue`](../../../packages/app-vue/src/modules/reminder/components/TemplateDialog.vue) | 模板创建/编辑弹窗 |
-| [`packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue`](../../../packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue) | 模板移动弹窗 |
-| [`packages/app-vue/src/modules/reminder/components/GroupDialog.vue`](../../../packages/app-vue/src/modules/reminder/components/GroupDialog.vue) | 提醒分组卡片 |
-| [`packages/app-vue/src/modules/reminder/components/GroupDialog.vue`](../../../packages/app-vue/src/modules/reminder/components/GroupDialog.vue) | 分组创建/编辑弹窗 |
-| [`packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue`](../../../packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue) | 提醒实例侧边栏 |
-| [`packages/app-vue/src/modules/reminder/components/widgets/UpcomingRemindersWidget.vue`](../../../packages/app-vue/src/modules/reminder/components/widgets/UpcomingRemindersWidget.vue) | 调度状态卡片 |
-| [`packages/app-vue/src/modules/reminder/components/widgets/UpcomingRemindersWidget.vue`](../../../packages/app-vue/src/modules/reminder/components/widgets/UpcomingRemindersWidget.vue) | Dashboard 即将提醒小组件 |
-| [`packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts`](../../../packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts) | 生命周期展示辅助函数 |
+| [`apps/api/src/runtime/compose-routine.ts`](../../../apps/api/src/runtime/compose-routine.ts) | API host 的 Routine command composition |
+| [`apps/desktop/src/main/runtime/compose-routine.ts`](../../../apps/desktop/src/main/runtime/compose-routine.ts) | Desktop profile runtime 的 Activity / Elapsed / ActiveUsage / Intervention composition |
+| [`packages/reminder/src/index.ts`](../../../packages/reminder/src/index.ts) | 历史包名下的 canonical Routine root surface |
+| [`packages/reminder/src/server/index.ts`](../../../packages/reminder/src/server/index.ts) | Routine server seam |
 
-## 移动端入口
+## 领域与应用层
 
 | 文件 | 说明 |
 | --- | --- |
-| [`apps/mobile/src/app/explore/reminders.tsx`](../../../apps/mobile/src/app/explore/reminders.tsx) | 移动端提醒列表入口 |
-| [`apps/mobile/src/app/explore/reminder-detail.tsx`](../../../apps/mobile/src/app/explore/reminder-detail.tsx) | 移动端提醒详情入口 |
-| [`apps/mobile/src/app/explore/reminder-editor.tsx`](../../../apps/mobile/src/app/explore/reminder-editor.tsx) | 移动端提醒编辑入口 |
+| [`packages/reminder/src/server/domain/routine/trigger.ts`](../../../packages/reminder/src/server/domain/routine/trigger.ts) | WallClock / Elapsed / ActiveUsage 等 canonical trigger 语义 |
+| [`packages/reminder/src/server/domain/routine/model.ts`](../../../packages/reminder/src/server/domain/routine/model.ts) | RoutineDefinition / RoutineProfile owner aggregates 与 membership 语义 |
+| [`packages/reminder/src/server/domain/routine/protocol.ts`](../../../packages/reminder/src/server/domain/routine/protocol.ts) | ProtocolDefinition / ProtocolSession 语义 |
+| [`packages/reminder/src/server/domain/ports/routine-profile-store.port.ts`](../../../packages/reminder/src/server/domain/ports/routine-profile-store.port.ts) | Routine/Profile/M:N membership persistence port |
+| [`packages/reminder/src/server/domain/ports/routine-occurrence-truth-store.port.ts`](../../../packages/reminder/src/server/domain/ports/routine-occurrence-truth-store.port.ts) | RoutineOccurrence + Interaction durable truth port |
+| [`packages/reminder/src/server/domain/ports/routine-temporary-override-store.port.ts`](../../../packages/reminder/src/server/domain/ports/routine-temporary-override-store.port.ts) | Snooze / temporary override persistence port |
+| [`packages/reminder/src/server/application/services/routine-coach-command.service.ts`](../../../packages/reminder/src/server/application/services/routine-coach-command.service.ts) | Routine owner-domain command seam |
+| [`packages/reminder/src/server/application/services/routine-notification-owner-command.adapter.ts`](../../../packages/reminder/src/server/application/services/routine-notification-owner-command.adapter.ts) | Notification typed owner-command → Routine command adapter |
 
-## API、控制器与适配器
-
-| 文件 | 说明 |
-| --- | --- |
-| [`packages/reminder/src/api/routes/reminder-template.routes.ts`](../../../packages/reminder/src/api/routes/reminder-template.routes.ts) | 提醒模板 HTTP routes |
-| [`packages/reminder/src/api/routes/reminder-group.routes.ts`](../../../packages/reminder/src/api/routes/reminder-group.routes.ts) | 提醒分组 HTTP routes |
-| [`packages/reminder/src/api/routes/reminder-preferences.routes.ts`](../../../packages/reminder/src/api/routes/reminder-preferences.routes.ts) | 提醒偏好 HTTP routes |
-| [`packages/reminder/src/server/transport/reminder.controller.ts`](../../../packages/reminder/src/server/transport/reminder.controller.ts) | 传输层处理器 |
-| [`packages/reminder/src/server/infrastructure/schedule-execution-source.ts`](../../../packages/reminder/src/server/infrastructure/schedule-execution-source.ts) | 提醒 → 日程运行时贡献 |
-| [`packages/reminder/src/server/transport/reminder.controller.ts`](../../../packages/reminder/src/server/transport/reminder.controller.ts) | 提醒控制器 |
-| [`packages/reminder/src/infrastructure-client/adapters/http/reminder-http.adapter.ts`](../../../packages/reminder/src/infrastructure-client/adapters/http/reminder-http.adapter.ts) | 客户端 HTTP 适配器 |
-| [`packages/reminder/src/infrastructure-client/adapters/ipc/reminder-ipc.adapter.ts`](../../../packages/reminder/src/infrastructure-client/adapters/ipc/reminder-ipc.adapter.ts) | 客户端 IPC 适配器 |
-
-## 领域、用例与仓储
+## 持久化与调度
 
 | 文件 | 说明 |
 | --- | --- |
-| [`packages/reminder/src/server/domain/aggregates/reminder-template.ts`](../../../packages/reminder/src/server/domain/aggregates/reminder-template.ts) | ReminderTemplate 聚合根 |
-| [`packages/reminder/src/server/domain/aggregates/reminder-group.ts`](../../../packages/reminder/src/server/domain/aggregates/reminder-group.ts) | ReminderGroup 聚合根 |
-| [`packages/reminder/src/server/domain/aggregates/user-reminder-preferences.ts`](../../../packages/reminder/src/server/domain/aggregates/user-reminder-preferences.ts) | UserReminderPreferences 聚合根 |
-| [`packages/reminder/src/server/domain/entities/reminder-response.ts`](../../../packages/reminder/src/server/domain/entities/reminder-response.ts) | ReminderResponse 实体 |
-| [`packages/reminder/src/server/domain/entities/reminder-history.ts`](../../../packages/reminder/src/server/domain/entities/reminder-history.ts) | ReminderHistory 实体 |
-| [`packages/reminder/src/server/domain/services/reminder-domain-service.ts`](../../../packages/reminder/src/server/domain/services/reminder-domain-service.ts) | 提醒领域服务 |
-| [`packages/reminder/src/server/domain/ports/routine-profile-store.port.ts`](../../../packages/reminder/src/server/domain/ports/routine-profile-store.port.ts) | RoutineDefinition / RoutineProfile / ProfileMembership 规范化持久化端口 |
-| [`packages/reminder/src/server/domain/services/legacy-routine-cutover-service.ts`](../../../packages/reminder/src/server/domain/services/legacy-routine-cutover-service.ts) | legacy Reminder → Routine vNext 临时切换桥，避免普通编辑压缩 M:N membership |
-| [`packages/reminder/src/server/domain/services/reminder-template-control-service.ts`](../../../packages/reminder/src/server/domain/services/reminder-template-control-service.ts) | 模板控制服务（有效启用状态计算） |
-| [`packages/reminder/src/server/domain/services/reminder-trigger-service.ts`](../../../packages/reminder/src/server/domain/services/reminder-trigger-service.ts) | 触发执行服务 |
-| [`packages/reminder/src/server/infrastructure/reminder-template-scheduled-handler.ts`](../../../packages/reminder/src/server/infrastructure/reminder-template-scheduled-handler.ts) | Scannerless Reminder scheduled-handler；由 Scheduler handler registry 驱动 |
-| [`packages/reminder/src/server/application/use-cases/commands/create-reminder-template.use-case.ts`](../../../packages/reminder/src/server/application/use-cases/commands/create-reminder-template.use-case.ts) | 创建模板用例 |
-| [`packages/reminder/src/server/application/use-cases/commands/record-reminder-response.use-case.ts`](../../../packages/reminder/src/server/application/use-cases/commands/record-reminder-response.use-case.ts) | 记录响应用例 |
-| [`packages/reminder/src/server/application/use-cases/commands/adjust-reminder-frequency.use-case.ts`](../../../packages/reminder/src/server/application/use-cases/commands/adjust-reminder-frequency.use-case.ts) | 频率调整用例 |
-| [`packages/reminder/src/server/application/use-cases/queries/analyze-reminder-frequency.use-case.ts`](../../../packages/reminder/src/server/application/use-cases/queries/analyze-reminder-frequency.use-case.ts) | 频率分析查询 |
-| [`packages/reminder/src/server/infrastructure/reminder.module.ts`](../../../packages/reminder/src/server/infrastructure/reminder.module.ts) | 服务端提醒模块组合根 |
-| [`packages/reminder/src/server/infrastructure/adapters/prisma/reminder-template-prisma.repository.ts`](../../../packages/reminder/src/server/infrastructure/adapters/prisma/reminder-template-prisma.repository.ts) | Prisma 模板仓储 |
-| [`packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.prisma.ts`](../../../packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.prisma.ts) | Prisma Routine/Profile/M:N Membership store |
-| [`packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.powersync.ts`](../../../packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.powersync.ts) | PowerSync Routine/Profile/M:N Membership store |
-| [`packages/reminder/src/server/application/services/routine-coach-command.service.ts`](../../../packages/reminder/src/server/application/services/routine-coach-command.service.ts) | Routine Profile / Temporary Override / Protocol owner-domain command seam |
-| [`packages/reminder/src/server/infrastructure/routine-schedule/routine-temporary-override-store.prisma.ts`](../../../packages/reminder/src/server/infrastructure/routine-schedule/routine-temporary-override-store.prisma.ts) | Prisma temporary override store |
-| [`packages/reminder/src/server/infrastructure/routine-schedule/routine-temporary-override-store.powersync.ts`](../../../packages/reminder/src/server/infrastructure/routine-schedule/routine-temporary-override-store.powersync.ts) | PowerSync temporary override parity store |
-| [`packages/reminder/src/method-library/index.ts`](../../../packages/reminder/src/method-library/index.ts) | ROUTINE-5302 six-method curated catalog |
+| [`packages/reminder/src/server/infrastructure/prisma.ts`](../../../packages/reminder/src/server/infrastructure/prisma.ts) | Prisma-backed canonical Routine repository set |
+| [`packages/reminder/src/server/infrastructure/powersync.ts`](../../../packages/reminder/src/server/infrastructure/powersync.ts) | PowerSync-backed canonical Routine repository set |
+| [`packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.prisma.ts`](../../../packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.prisma.ts) | Prisma Routine/Profile store |
+| [`packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.powersync.ts`](../../../packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.powersync.ts) | PowerSync Routine/Profile store |
+| [`packages/reminder/src/server/infrastructure/routine-vnext/routine-occurrence-truth-store.prisma.ts`](../../../packages/reminder/src/server/infrastructure/routine-vnext/routine-occurrence-truth-store.prisma.ts) | Prisma occurrence/interaction truth store |
+| [`packages/reminder/src/server/infrastructure/routine-vnext/routine-occurrence-truth-store.powersync.ts`](../../../packages/reminder/src/server/infrastructure/routine-vnext/routine-occurrence-truth-store.powersync.ts) | PowerSync occurrence/interaction truth store |
+| [`packages/reminder/src/server/infrastructure/routine-schedule/routine-schedule-projection-source.ts`](../../../packages/reminder/src/server/infrastructure/routine-schedule/routine-schedule-projection-source.ts) | WallClock Routine → SchedulingPort desired projection |
+| [`packages/reminder/src/server/infrastructure/routine-schedule/routine-schedule-execution-source.ts`](../../../packages/reminder/src/server/infrastructure/routine-schedule/routine-schedule-execution-source.ts) | ScheduledInvocation → Routine occurrence commit execution |
+| [`packages/reminder/src/server/infrastructure/routine-schedule/routine-wall-clock-scheduled-handler.ts`](../../../packages/reminder/src/server/infrastructure/routine-schedule/routine-wall-clock-scheduled-handler.ts) | Scannerless Routine wall-clock handler |
+| [`packages/schedule-orchestration/src/index.ts`](../../../packages/schedule-orchestration/src/index.ts) | Task / Goal / Routine canonical scheduling public seam |
+| [`packages/database/prisma/schema/reminder.prisma`](../../../packages/database/prisma/schema/reminder.prisma) | 历史文件名下仅保留 Routine vNext Prisma models |
+| [`packages/database/prisma/migrations/retire-legacy-reminder-model.sql`](../../../packages/database/prisma/migrations/retire-legacy-reminder-model.sql) | ADR-111 破坏式删除 legacy Reminder tables |
 
-## Contracts 与数据结构
+## 本地运行时与桌面交互
 
 | 文件 | 说明 |
 | --- | --- |
-| [`packages/contracts/src/modules/reminder/aggregates/reminder-template-server.ts`](../../../packages/contracts/src/modules/reminder/aggregates/reminder-template-server.ts) | ReminderTemplate 服务端 DTO |
-| [`packages/contracts/src/modules/reminder/aggregates/reminder-template-client.ts`](../../../packages/contracts/src/modules/reminder/aggregates/reminder-template-client.ts) | ReminderTemplate 客户端 DTO |
-| [`packages/contracts/src/modules/reminder/aggregates/reminder-group-server.ts`](../../../packages/contracts/src/modules/reminder/aggregates/reminder-group-server.ts) | ReminderGroup 服务端 DTO |
-| [`packages/contracts/src/modules/reminder/aggregates/reminder-group-client.ts`](../../../packages/contracts/src/modules/reminder/aggregates/reminder-group-client.ts) | ReminderGroup 客户端 DTO |
-| [`packages/contracts/src/modules/reminder/api/reminder-template.dto.ts`](../../../packages/contracts/src/modules/reminder/api/reminder-template.dto.ts) | 模板 API DTO |
-| [`packages/contracts/src/modules/reminder/api/reminder-group.dto.ts`](../../../packages/contracts/src/modules/reminder/api/reminder-group.dto.ts) | 分组 API DTO |
-| [`packages/contracts/src/modules/reminder/protocol/reminder-rpc-map.ts`](../../../packages/contracts/src/modules/reminder/protocol/reminder-rpc-map.ts) | 提醒模块 RPC map |
-| [`packages/contracts/src/modules/reminder/protocol/reminder-event-map.ts`](../../../packages/contracts/src/modules/reminder/protocol/reminder-event-map.ts) | 提醒模块事件 map |
-| [`packages/contracts/src/modules/reminder/value-objects/reminder-status.ts`](../../../packages/contracts/src/modules/reminder/value-objects/reminder-status.ts) | 提醒状态枚举 |
-| [`packages/contracts/src/modules/reminder/value-objects/trigger-type.ts`](../../../packages/contracts/src/modules/reminder/value-objects/trigger-type.ts) | 触发类型枚举 |
-| [`packages/database/prisma/schema/reminder.prisma`](../../../packages/database/prisma/schema/reminder.prisma) | 提醒模块 Prisma schema |
+| [`packages/reminder/src/routine-runtime/index.ts`](../../../packages/reminder/src/routine-runtime/index.ts) | Routine runtime public seam |
+| [`packages/reminder/src/server/runtime/routine-activity/routine-activity-sensor.runtime.ts`](../../../packages/reminder/src/server/runtime/routine-activity/routine-activity-sensor.runtime.ts) | Activity truth runtime |
+| [`packages/reminder/src/server/runtime/elapsed/elapsed.runtime.ts`](../../../packages/reminder/src/server/runtime/elapsed/elapsed.runtime.ts) | Elapsed trigger runtime |
+| [`packages/reminder/src/server/runtime/active-usage/active-usage.runtime.ts`](../../../packages/reminder/src/server/runtime/active-usage/active-usage.runtime.ts) | ActiveUsage accumulation/runtime |
+| [`packages/reminder/src/server/runtime/intervention/intervention.runtime.ts`](../../../packages/reminder/src/server/runtime/intervention/intervention.runtime.ts) | Intervention state/runtime |
+| [`apps/desktop/src/main/modules/routine/intervention-window-controller.ts`](../../../apps/desktop/src/main/modules/routine/intervention-window-controller.ts) | Desktop InterventionWindow controller |
 
-## 测试入口
+## 关键测试
 
 | 文件 | 说明 |
 | --- | --- |
-| [`packages/reminder/src/server/domain/aggregates/__tests__/reminder-template.spec.ts`](../../../packages/reminder/src/server/domain/aggregates/__tests__/reminder-template.spec.ts) | ReminderTemplate 聚合测试 |
-| [`packages/reminder/src/server/domain/aggregates/__tests__/reminder-group.spec.ts`](../../../packages/reminder/src/server/domain/aggregates/__tests__/reminder-group.spec.ts) | ReminderGroup 聚合测试 |
-| [`packages/reminder/src/server/domain/services/__tests__/reminder-template-control.service.spec.ts`](../../../packages/reminder/src/server/domain/services/__tests__/reminder-template-control.service.spec.ts) | 模板控制服务测试 |
-| [`packages/reminder/src/server/domain/services/__tests__/reminder-trigger.service.spec.ts`](../../../packages/reminder/src/server/domain/services/__tests__/reminder-trigger.service.spec.ts) | 触发服务测试 |
-| [`packages/reminder/src/server/domain/services/__tests__/legacy-routine-cutover-service.spec.ts`](../../../packages/reminder/src/server/domain/services/__tests__/legacy-routine-cutover-service.spec.ts) | legacy cutover 自愈与 M:N 防塌缩测试 |
-| [`packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.powersync.spec.ts`](../../../packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.powersync.spec.ts) | PowerSync M:N store 真实 SQLite 测试 |
-| [`packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.prisma.integration.test.ts`](../../../packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.prisma.integration.test.ts) | Prisma M:N store PostgreSQL 集成测试 |
-| [`packages/reminder/src/server/application/use-cases/commands/reminder-use-cases.test.ts`](../../../packages/reminder/src/server/application/use-cases/commands/reminder-use-cases.test.ts) | 命令用例测试 |
-| [`packages/reminder/src/server/application/use-cases/queries/analyze-reminder-frequency.spec.ts`](../../../packages/reminder/src/server/application/use-cases/queries/analyze-reminder-frequency.spec.ts) | 频率分析测试 |
-| [`packages/reminder/src/api/routes/reminder-template.routes.spec.ts`](../../../packages/reminder/src/api/routes/reminder-template.routes.spec.ts) | 模板 routes 测试 |
-| [`packages/app-vue/src/modules/reminder/stores/reminderStore.spec.ts`](../../../packages/app-vue/src/modules/reminder/stores/reminderStore.spec.ts) | 提醒 store 测试 |
-| [`apps/web/e2e/reminder/reminder-template-crud.spec.ts`](../../../apps/web/e2e/reminder/reminder-template-crud.spec.ts) | Web 提醒模板 CRUD e2e |
+| [`packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-schedule-execution-source.spec.ts`](../../../packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-schedule-execution-source.spec.ts) | Revision drift、lease/fencing、幂等与 retry 语义 |
+| [`packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-wall-clock-scheduled-handler.spec.ts`](../../../packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-wall-clock-scheduled-handler.spec.ts) | Scheduler handler result mapping |
+| [`packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-prisma-adapters.integration.test.ts`](../../../packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-prisma-adapters.integration.test.ts) | Occurrence + NotificationRequested 事务一致性 |
+| [`packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.prisma.integration.test.ts`](../../../packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.prisma.integration.test.ts) | Routine/Profile Prisma integration |
+| [`packages/reminder/src/__tests__/package-root-owner-surface.spec.ts`](../../../packages/reminder/src/__tests__/package-root-owner-surface.spec.ts) | 防止 legacy Reminder owner authority 重新进入 public surface |
 
-## 需要重点关注的改动风险
+## 当前边界
 
-- Profile 只作为 Gate；不得恢复 ControlMode 或父级接管成员状态。
-- WallClock/temporary override 变更通过 owner-domain projection + SchedulingPort reconcile；不得恢复独立 scanner 或 raw Scheduler mutation。
-- WallClock / ActiveUsage / Protocol 三类 runtime 的能力边界与跨端 parity。
-- HTTP、IPC、Prisma、PowerSync 多运行时适配器的一致性。
+- Routine 是唯一 owner truth；不得重新引入旧 Reminder 模型、旧 `/reminders` 产品入口或旧 Reminder IPC channels。
+- WallClock 统一走 Scheduler `ScheduledInvocation`；Elapsed / ActiveUsage / Protocol 由 Routine runtime 自有状态机负责。
+- Notification 只持有 Fact/Interaction/Delivery truth；Routine 动作通过 typed owner-command 回到 Routine application port。
+- Dashboard / Planner 对 Routine 的新读模型在 Phase 5 接入；R4-2201C 不以保留旧 Reminder read model 的方式过渡。

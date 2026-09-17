@@ -3,7 +3,6 @@ export * from './exportable-module.dto';
 export * from './portable-settings.dto';
 export * from './portable-goals.dto';
 export * from './portable-tasks.dto';
-export * from './portable-reminders.dto';
 export * from './portable-repositories.dto';
 export * from './portable-schedules.dto';
 export * from './portable-ai.dto';

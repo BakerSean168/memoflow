@@ -21,10 +21,6 @@ describe('Product date presentation boundary', () => {
     resolve(dir, '../../modules/task/utils/task-plan-presentation.ts'),
     'utf8',
   );
-  const reminder = readFileSync(
-    resolve(dir, '../../modules/reminder/components/ReminderTemplateCard.vue'),
-    'utf8',
-  );
   const rule = readFileSync(
     resolve(dir, '../../modules/governance/components/RuleCard.vue'),
     'utf8',
@@ -61,9 +57,7 @@ describe('Product date presentation boundary', () => {
     expect(taskDetail).not.toContain('toLocaleDateString');
   });
 
-  it('keeps other date surfaces on Product Time helpers', () => {
-    expect(reminder).toContain('formatProductDateTimeSeconds');
-    expect(reminder).toContain('emptyUnknown');
+  it('keeps governance date surfaces on Product Time helpers', () => {
     expect(rule).toContain('formatProductMonthDay');
   });
 });

@@ -6,7 +6,7 @@ const baseConfig = createPackageVitestConfig({
   projectRoot: __dirname,
   environment: 'node',
   name: 'reminder',
-  governedCoverage: true,
+  governedCoverage: { extraRoots: ['src/server/domain/routine'] },
 });
 
 export default mergeConfig(

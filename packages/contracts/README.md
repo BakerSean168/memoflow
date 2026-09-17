@@ -110,7 +110,6 @@ import { AccountDTO } from '@memoflow/contracts/account';
 | ------------------------------------ | -------------- |
 | `@memoflow/contracts/task`           | 任务模块契约   |
 | `@memoflow/contracts/goal`           | 目标模块契约   |
-| `@memoflow/contracts/reminder`       | 提醒模块契约   |
 | `@memoflow/contracts/repository`     | 仓库模块契约   |
 | `@memoflow/contracts/account`        | 账户模块契约   |
 | `@memoflow/contracts/schedule`       | 调度模块契约   |

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { GoalId, KnowledgeDocumentId, ReminderTemplateId, TaskPlanId } from '../../primitives';
+import type { GoalId, KnowledgeDocumentId, TaskPlanId } from '../../primitives';
 import { brandedId } from '../../primitives/zod-extensions';
 import {
   KnowledgeDocumentIdSchema,
@@ -7,7 +7,7 @@ import {
   type KnowledgeDocumentRef,
 } from '../repository';
 
-export const SubjectTypes = ['note', 'goal', 'task', 'reminder', 'habit', 'wallet'] as const;
+export const SubjectTypes = ['note', 'goal', 'task', 'habit', 'wallet'] as const;
 export type SubjectType = (typeof SubjectTypes)[number];
 
 export const RelationTypes = ['references', 'related', 'depends_on', 'contributes_to'] as const;
@@ -20,7 +20,6 @@ export const SubjectRefSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('note'), id: KnowledgeDocumentIdSchema }).strict(),
   z.object({ type: z.literal('goal'), id: brandedId<GoalId>() }).strict(),
   z.object({ type: z.literal('task'), id: brandedId<TaskPlanId>() }).strict(),
-  z.object({ type: z.literal('reminder'), id: brandedId<ReminderTemplateId>() }).strict(),
   z.object({ type: z.literal('habit'), id: GenericUuidOrPrefixedIdSchema }).strict(),
   z.object({ type: z.literal('wallet'), id: GenericUuidOrPrefixedIdSchema }).strict(),
 ]);

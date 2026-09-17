@@ -6,7 +6,6 @@ export default {
   "settings": "Settings",
   "rename": "Rename",
   "move": "Move",
-  "moveToGroup": "Move to Group",
   "open": "Open",
   "copyLink": "Copy Link",
   "create": "Create",
@@ -16,11 +15,6 @@ export default {
   "editFolder": "Edit Folder",
   "deleteFolder": "Delete Folder",
   "createGoal": "Create Goal",
-  "createReminder": "New Reminder",
-  "editTemplate": "Edit Template",
-  "deleteTemplate": "Delete Template",
-  "editGroup": "Edit Group",
-  "deleteGroup": "Delete Group",
   "addRecord": "Add Record",
   "pause": "Pause",
   "resume": "Resume",
@@ -28,6 +22,4 @@ export default {
   "moveUp": "Move Up",
   "moveDown": "Move Down",
   "markRead": "Mark as Read",
-  "pauseTemplate": "Pause Template",
-  "enableTemplate": "Enable Template"
 } as const;

@@ -14,12 +14,6 @@ import type {
   GoalRecordRepoPort,
   TaskPlanRepoPort,
   TaskOccurrenceRepoPort,
-  ReminderTemplateRepoPort,
-  ReminderGroupRepoPort,
-  ReminderResponseRepoPort,
-  RoutineProfileMembershipRepoPort,
-  RoutineDefinitionRepoPort,
-  UserReminderPreferenceRepoPort,
   RepositoryRepoPort,
   ResourceFolderRepoPort,
   ResourceRepoPort,
@@ -112,74 +106,6 @@ class PowerSyncTaskOccurrenceAdapter implements TaskOccurrenceRepoPort {
   }
 }
 
-class PowerSyncReminderTemplateAdapter implements ReminderTemplateRepoPort {
-  constructor(private readonly db: IElectronDatabase) {}
-  async findByIdentityId(identityId: string): Promise<unknown[]> {
-    const rows = await this.db.getAll<Record<string, unknown>>(
-      `SELECT * FROM reminder_templates WHERE identity_id = ? AND deleted_at IS NULL ORDER BY created_at DESC`,
-      [identityId],
-    );
-    return mapRows(rows);
-  }
-}
-
-class PowerSyncReminderGroupAdapter implements ReminderGroupRepoPort {
-  constructor(private readonly db: IElectronDatabase) {}
-  async findByIdentityId(identityId: string): Promise<unknown[]> {
-    const rows = await this.db.getAll<Record<string, unknown>>(
-      `SELECT * FROM reminder_groups WHERE identity_id = ? AND deleted_at IS NULL ORDER BY "order"`,
-      [identityId],
-    );
-    return mapRows(rows);
-  }
-}
-
-class PowerSyncReminderResponseAdapter implements ReminderResponseRepoPort {
-  constructor(private readonly db: IElectronDatabase) {}
-  async findByTemplateId(
-    templateId: string,
-    identityId: string,
-    limit?: number,
-  ): Promise<unknown[]> {
-    const sql = `SELECT * FROM reminder_responses WHERE template_id = ? AND identity_id = ? ORDER BY timestamp DESC${limit ? ` LIMIT ${limit}` : ''}`;
-    const rows = await this.db.getAll<Record<string, unknown>>(sql, [templateId, identityId]);
-    return mapRows(rows);
-  }
-}
-
-class PowerSyncRoutineDefinitionAdapter implements RoutineDefinitionRepoPort {
-  constructor(private readonly db: IElectronDatabase) {}
-  async findByIdentityId(identityId: string): Promise<unknown[]> {
-    const rows = await this.db.getAll<Record<string, unknown>>(
-      `SELECT * FROM routine_definitions WHERE identity_id = ? ORDER BY created_at`,
-      [identityId],
-    );
-    return mapRows(rows);
-  }
-}
-
-class PowerSyncRoutineProfileMembershipAdapter implements RoutineProfileMembershipRepoPort {
-  constructor(private readonly db: IElectronDatabase) {}
-  async findByIdentityId(identityId: string): Promise<unknown[]> {
-    const rows = await this.db.getAll<Record<string, unknown>>(
-      `SELECT * FROM routine_profile_memberships WHERE identity_id = ? ORDER BY routine_id, profile_id`,
-      [identityId],
-    );
-    return mapRows(rows);
-  }
-}
-
-class PowerSyncUserReminderPreferenceAdapter implements UserReminderPreferenceRepoPort {
-  constructor(private readonly db: IElectronDatabase) {}
-  async findByIdentityId(identityId: string): Promise<unknown | null> {
-    const row = await this.db.getOptional<Record<string, unknown>>(
-      `SELECT * FROM user_reminder_preferences WHERE identity_id = ?`,
-      [identityId],
-    );
-    return row ? mapRow(row) : null;
-  }
-}
-
 class PowerSyncRepositoryAdapter implements RepositoryRepoPort {
   constructor(private readonly db: IElectronDatabase) {}
   async findByIdentityId(identityId: string): Promise<unknown[]> {
@@ -269,12 +195,6 @@ export function createPowerSyncDataPortabilityDependencies(
     goalRecordRepository: new PowerSyncGoalRecordAdapter(db),
     taskPlanRepository: new PowerSyncTaskPlanAdapter(db),
     taskOccurrenceRepository: new PowerSyncTaskOccurrenceAdapter(db),
-    reminderTemplateRepository: new PowerSyncReminderTemplateAdapter(db),
-    reminderGroupRepository: new PowerSyncReminderGroupAdapter(db),
-    reminderResponseRepository: new PowerSyncReminderResponseAdapter(db),
-    routineProfileMembershipRepository: new PowerSyncRoutineProfileMembershipAdapter(db),
-    routineDefinitionRepository: new PowerSyncRoutineDefinitionAdapter(db),
-    userReminderPreferenceRepository: new PowerSyncUserReminderPreferenceAdapter(db),
     repositoryRepository: new PowerSyncRepositoryAdapter(db),
     folderRepository: new PowerSyncFolderAdapter(db),
     resourceRepository: new PowerSyncResourceAdapter(db),

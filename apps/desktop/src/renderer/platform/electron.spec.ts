@@ -48,10 +48,6 @@ vi.mock('@memoflow/app-vue/modules/schedule', () => ({
   useScheduleStore: () => ({ setInitialized: vi.fn() }),
 }));
 
-vi.mock('@memoflow/app-vue/modules/reminder', () => ({
-  useReminderStore: () => ({ setInitialized: vi.fn() }),
-}));
-
 vi.mock('@memoflow/app-vue/modules/setting', () => ({
   useUserSettingStore: () => ({ setInitialized: vi.fn() }),
 }));

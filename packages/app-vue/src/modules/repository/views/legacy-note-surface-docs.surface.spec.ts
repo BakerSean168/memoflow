@@ -83,15 +83,15 @@ describe('legacy note surface docs and menu dual-track retirement', () => {
     expect(goalWorkflowE2e).not.toContain('setItem(legacyGoalWorkflowStorageKey');
   });
 
-  it('menu locales drop repository bookmark dual-track keys and keep live Reminder Template pause/enable keys', () => {
+  it('menu locales drop repository bookmark dual-track keys and retired Reminder Template action keys', () => {
     for (const locale of [enLocale, zhLocale]) {
       // Match legacy `key: '…'` and modular `"key": "…"` forms.
       expect(locale).not.toMatch(/["']?addBookmark["']?\s*:/);
       expect(locale).not.toMatch(/["']?removeBookmark["']?\s*:/);
       expect(locale).not.toMatch(/["']bookmark["']\s*:/);
-      // These are live Reminder Template keys, not plan keys.
-      expect(locale).toMatch(/["']?pauseTemplate["']?\s*:/);
-      expect(locale).toMatch(/["']?enableTemplate["']?\s*:/);
+      // R4-2201C retired the legacy Reminder Template surface; these keys must not return.
+      expect(locale).not.toMatch(/["']?pauseTemplate["']?\s*:/);
+      expect(locale).not.toMatch(/["']?enableTemplate["']?\s*:/);
     }
   });
 

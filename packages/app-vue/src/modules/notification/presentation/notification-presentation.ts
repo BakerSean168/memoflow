@@ -62,13 +62,6 @@ function resolveWorkflowToken(workflowKey: unknown): NotificationWorkflowToken |
   if (workflow === 'routine.reminder' || workflow.startsWith('routine:')) {
     return 'routineReminder';
   }
-  if (
-    workflow === 'reminder.trigger' ||
-    workflow === 'reminder.general' ||
-    workflow === 'reminder.legacy-shared-intent'
-  ) {
-    return 'reminder';
-  }
   if (workflow.startsWith('task.')) return 'taskUpdate';
   if (workflow.startsWith('goal.')) return 'goalUpdate';
   if (workflow.startsWith('system.')) return 'system';

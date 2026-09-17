@@ -4,22 +4,22 @@ tags:
   - module
   - reminder
   - routine
-description: Routine Coach 当前实现、Reminder 兼容聚合与确定性 runtime 边界
+description: Routine Coach canonical owner、确定性 runtime 与 Scheduler/Notification 边界
 created: 2026-06-02T00:00:00
-updated: 2026-09-08T09:00:00+08:00
+updated: 2026-09-17T22:45:00+08:00
 ---
 
 # Routine / Reminder 模块说明
 
 ## 1. 功能定位
 
-`packages/reminder` 是当前物理包名与兼容聚合入口，但产品语义已经收敛到 **Routine Coach**：长期配置由 RoutineDefinition / ProfileMembership 表达，确定性的 WallClock / ActiveUsage / Protocol runtime 执行，Notification 只负责用户触达。
+`packages/reminder` 仅保留历史物理包名；R4-2201C 后产品与持久化真值已经单轨收敛到 **Routine Coach**。长期配置由 `RoutineDefinition / RoutineProfile / ProfileMembership` 表达，确定性的 WallClock / ActiveUsage / Protocol runtime 执行，Notification 只负责用户触达。
 
-当前 `ReminderTemplate` 创建/更新是迁移兼容入口；写入后会投影 canonical `RoutineDefinition` 与 ProfileMembership，而不是维护第二套独立 Routine 真值。
+Legacy `ReminderTemplate / ReminderGroup / ReminderInstance / ReminderResponse`、旧 `/reminders` HTTP/UI、Reminder IPC/client 与可靠运维 owner 已按 ADR-111 破坏式退休，不存在兼容写入口、双写或旧 row converter。
 
 ## 2. 当前产品能力
 
-- Routine/Reminder template 创建、编辑、启停与删除；
+- RoutineDefinition / RoutineProfile owner commands 与确定性 runtime；
 - RoutineProfile + M:N ProfileMembership；Profile 只作为 Gate，不接管成员自身状态；
 - WallClock trigger：由 Scheduler 作为唯一 durable wake-up authority；
 - ActiveUsage trigger：Desktop 本地 activity sensor/runtime 驱动，端能力显式区分；
@@ -45,7 +45,7 @@ Scheduler / Temporal Engine
   owns durable wake-up / lease / retry
 ```
 
-Routine 不直接创建或修改 raw ScheduleTask。temporary override 更新后只发送 owner-domain `routine:override-changed`，由既有 projection 重新 reconcile。
+Routine 不直接创建或修改 raw Scheduler persistence。WallClock 通过 `SchedulingPort.reconcile` 投影为 `ScheduledInvocation`；temporary override 更新后只发送 owner-domain `routine:override-changed`，由 projection 重新 reconcile。
 
 ## 4. Method Library 与 Protocol
 

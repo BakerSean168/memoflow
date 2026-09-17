@@ -5,7 +5,7 @@ tags:
   - notification
 description: Notification Fact、Workflow、DeliveryPolicy、可靠投递与 Notification Center 当前实现及 vNext 收敛边界
 created: 2026-06-02T00:00:00
-updated: 2026-09-10T21:18:00+08:00
+updated: 2026-09-17T22:45:00+08:00
 ---
 
 # Notification 模块说明
@@ -41,7 +41,7 @@ Task / Goal / Routine / other producer
 - durable `NotificationRequested` 跨模块信封；
 - `(identityId,idempotencyKey)` Fact 幂等 fence；
 - WorkflowCatalog、global/workflow channel preference；
-- per-channel DND / rate-limit / capability policy；
+- Product-Time `QuietHours`、workflow capability 与独立 `SystemDeliveryGuard`；
 - `NotificationDeliveryDecisionRecord`；
 - `NotificationDispatchOutbox`；
 - lease / claim / fencing / retry / dead-letter / replay；
@@ -53,7 +53,7 @@ Task / Goal / Routine / other producer
 
 ## 3. 2026-09-08 vNext Model Convergence
 
-ADR-084~088 已冻结下一阶段 North Star，当前只完成了部分边界收敛；Notification 全模型 convergence 尚未完成。
+ADR-084~088 的 Phase 4 convergence 已落地：Fact/Inbox、Workflow、DeliveryDecision/Outbox/Receipt、typed Interaction、QuietHours/SystemDeliveryGuard 与 Product/Operations port split 已成为 canonical 主链。
 
 目标：
 
@@ -81,26 +81,21 @@ DeliveryRealtime / Device Surface
 
 完整设计见 [Notification vNext](../notification-vnext.md)。
 
-## 4. 当前仍存在的模型残差
+## 4. Phase 4 cutover 状态
 
-当前代码仍有：
+已退休的旧权威：
 
 ```text
-Notification.notificationChannels[]
-NotificationChannel entity
+NotificationTemplate aggregate/table
+NotificationChannel aggregate/table
 NotificationHistory generic entity/table
-NotificationTemplate aggregate/repository/service/table
-NotificationType tone+semantics 混合
-NotificationCategory central enum
-RelatedEntityType central enum
-isRead + readAt dual truth
-user delete = deletedAt
-DND host-local Date time
-Preference rateLimit user/system mixed semantics
-Product + Ops one ApplicationPort
+ApiCall / Custom generic action payload
+host-local DND + user-owned system rateLimit
+Product + Operations 单一 ApplicationPort
+closed RelatedEntityType central enum
 ```
 
-这些不能因为 ADR 已冻结就当作已经删除。详见 [Notification Current System Map](../../analysis/2026-09-08-notification-current-system-map.md)。
+当前 subject/action owner 使用开放 `NotificationEntityRef`；Fact 持久化仍以 `relatedEntityType + relatedEntityId` 两列保存该开放引用，不再用中央 enum 限制可引用模块。
 
 ## 5. North Star ownership
 

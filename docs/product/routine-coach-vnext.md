@@ -9,7 +9,7 @@ tags:
   - vnext
 description: MemoFlow Reminder 向 AI-native Routine Coach 演进的产品定义、真实场景推演、领域模型、运行时与桌面交互设计
 created: 2026-08-25T17:13:00+08:00
-updated: 2026-09-08T20:20:00+08:00
+updated: 2026-09-17T20:20:00+08:00
 ---
 
 # Routine Coach vNext：习惯节律、健康干预与专注协议
@@ -18,7 +18,7 @@ updated: 2026-09-08T20:20:00+08:00
 
 > 本文记录 2026-08-25 对现有 Reminder 模块的重新定性与 vNext 设计讨论。
 >
-> **实现状态（2026-09-08）：Core vNext 目标态已经落地。物理包仍名为 `reminder`，`ReminderTemplate` 继续作为兼容写入入口，但写入会投影 canonical RoutineDefinition/ProfileMembership；`ControlMode`、single-group ownership 与独立 cron scanner 已退休。本文中“当前/需要退役”字样若出现在历史推演章节，应按本 checkpoint 理解为 2026-08-25 的迁移背景。**
+> **实现状态（2026-09-17，R4-2201C）：Routine vNext 已成为唯一 owner truth。物理包仍沿用历史名 `reminder`，但 `ReminderTemplate / ReminderGroup / ReminderInstance / ReminderResponse`、旧 `/reminders` transport/UI 与 Reminder operation owner 已按 ADR-111 破坏式退休；不存在兼容写入口、双写或 row converter。本文后续保留的旧模型对比仅作为 2026-08-25~09-08 的迁移背景。**
 
 ## 2026-09-08 Model Convergence Freeze
 
@@ -812,7 +812,7 @@ Profile 是对现有 ReminderGroup 思想的升级，而不是简单重命名。
 
 ### 6.3 ProfileMembership
 
-当前 `ReminderTemplate.groupId` 是一对多：一个 Reminder 只能属于一个 Group。
+迁移前的 `ReminderTemplate.groupId` 是一对多：一个 Reminder 只能属于一个 Group。
 
 真实需求是多对多：
 
@@ -1596,9 +1596,9 @@ vNext 原则：
 | smartFrequency auto adjustment       | 对重要节律过于激进                         | Insight + user-confirmed suggestion   |
 | Reminder 页面作为主要产品入口        | 不符合 AI-native / ambient usage           | 配置中心 + AI + popup/session surface |
 
-### 18.3 当前代码事实（2026-09-08）
+### 18.3 当前代码事实（2026-09-17）
 
-- `packages/reminder` 仍是当前物理包名，`ReminderTemplate` 是现状中的兼容写入入口；ADR-111 要求最终 cutover 时移除该入口，只保留 canonical `RoutineDefinition` 与 M:N `ProfileMembership`；
+- `packages/reminder` 仍是历史物理包名，但旧 Reminder 兼容写入口已由 R4-2201C 删除；canonical `RoutineDefinition`、M:N `ProfileMembership`、RoutineOccurrence/Interaction 是唯一真值；
 - Profile 只作为 Gate；`ControlMode` 与 single-group ownership 已删除；
 - WallClock 由 Scheduler 唯一 durable wake-up authority 驱动，旧 `ReminderSchedulerService` / cron scanner 已删除；
 - ActiveUsage runtime 与 activity sensor 在 Desktop 本地执行，端能力不伪造；

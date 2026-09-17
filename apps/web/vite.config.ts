@@ -23,7 +23,6 @@ const webDevWorkspaceEntries = [
   ['@memoflow/cloud-auth', 'packages/cloud-auth/src/index.ts'],
   ['@memoflow/goal/client', 'packages/goal/src/client/index.ts'],
   ['@memoflow/schedule/client', 'packages/schedule/src/client/index.ts'],
-  ['@memoflow/reminder/client', 'packages/reminder/src/client/index.ts'],
   ['@memoflow/notification/client', 'packages/notification/src/client/index.ts'],
   ['@memoflow/repository/client', 'packages/repository/src/client/index.ts'],
   ['@memoflow/task/client', 'packages/task/src/client/index.ts'],

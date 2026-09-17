@@ -12,7 +12,6 @@ import { useAccountStore } from '@memoflow/app-vue/modules/account';
 import { useGoalStore } from '@memoflow/app-vue/modules/goal';
 import { useTaskStore } from '@memoflow/app-vue/modules/task';
 import { useScheduleStore } from '@memoflow/app-vue/modules/schedule';
-import { useReminderStore } from '@memoflow/app-vue/modules/reminder';
 // Residual 941: host bridge via getElectronBridge sole helper.
 import { getElectronBridge } from './electron-bridge';
 import { getDesktopServerStateRuntime, mapTablesToInvalidationIntents } from './server-state';
@@ -79,14 +78,6 @@ const TABLE_TO_MODULE: Record<string, string> = {
   task_plan_history: 'task',
   // Schedule
   schedules: 'schedule',
-  // Reminder
-  reminder_templates: 'reminder',
-  reminder_groups: 'reminder',
-  reminder_instances: 'reminder',
-  reminder_history: 'reminder',
-  reminder_statistics: 'reminder',
-  reminder_responses: 'reminder',
-  user_reminder_preferences: 'reminder',
   // Notification
   notifications: 'notification',
   notification_interactions: 'notification',
@@ -105,7 +96,6 @@ const MODULE_INVALIDATORS: Record<string, () => void> = {
   goal: () => useGoalStore().setInitialized(false),
   task: () => useTaskStore().setInitialized(false),
   schedule: () => useScheduleStore().setInitialized(false),
-  reminder: () => useReminderStore().setInitialized(false),
 };
 
 /**

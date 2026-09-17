@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { RefAllocator, type ExportContext } from '../../portable-runtime';
 import { projectGoalRecords, projectGoals } from '../projections/goal.projection';
-import {
-  projectReminderResponses,
-  projectReminderTemplates,
-} from '../projections/reminder.projection';
 import { projectTaskPlans } from '../projections/task.projection';
 
 function createExportContext(refs: Record<string, string> = {}): ExportContext {
@@ -192,67 +188,5 @@ describe('projection from PowerSync-shaped rows', () => {
       contribution: null,
     });
   });
-
-  it('exports reminders from PowerSync names, refs, JSON strings, and integer booleans', () => {
-    const ctx = createExportContext({ 'group-db-id': 'reminderGroup:1' });
-    const templates = projectReminderTemplates(
-      [
-        {
-          id: 'template-db-id',
-          name: 'Standup',
-          type: 'once',
-          trigger: '{"kind":"time"}',
-          activeTime: '{"start":"09:00"}',
-          notificationConfig: '{"channel":"system"}',
-          selfEnabled: 1,
-          status: 'active',
-          importanceLevel: 'moderate',
-          tags: '["work"]',
-        },
-      ],
-      [
-        {
-          identityId: 'identity-1',
-          profileId: 'group-db-id',
-          routineId: 'template-db-id',
-          enabled: 0,
-        },
-      ],
-      [
-        {
-          id: 'template-db-id',
-          identityId: 'identity-1',
-          enabled: 1,
-          triggerJson: '{"type":"WallClock"}',
-        },
-      ],
-      ctx,
-    );
-    const responses = projectReminderResponses(
-      [
-        {
-          id: 'response-db-id',
-          templateId: 'template-db-id',
-          action: 'clicked',
-          timestamp: '2026-06-03T00:00:00.000Z',
-        },
-      ],
-      ctx,
-    );
-
-    expect(templates[0]).toMatchObject({
-      title: 'Standup',
-      trigger: { kind: 'time' },
-      selfEnabled: true,
-      routineDefinition: {
-        enabled: true,
-        trigger: { type: 'WallClock' },
-      },
-      profileMemberships: [{ profileRef: 'reminderGroup:1', enabled: false }],
-      tags: ['work'],
-    });
-    expect(responses[0]?.templateRef).toBe('reminderTemplate:1');
-  });
-
 
 });

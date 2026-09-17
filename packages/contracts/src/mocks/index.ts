@@ -11,7 +11,6 @@
  *   createMockGoalList,
  *   createMockTaskPlan,
  *   createMockAccount,
- *   createMockReminderTemplate,
  *   createMockNotification,
  *   createMockRule,
  *   createMockRuleRevision,
@@ -22,6 +21,5 @@
 export * from './goal.mock';
 export * from './task.mock';
 export * from './account.mock';
-export * from './reminder.mock';
 export * from './notification.mock';
 export * from './governance.mock';

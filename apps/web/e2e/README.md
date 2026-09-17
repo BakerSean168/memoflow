@@ -25,20 +25,9 @@ pnpm nx run web:e2e:report
 
 ## 默认回归范围
 
-默认 `web:e2e` 当前只保留这组核心 flow oracle：
+默认 Web Flow 的唯一清单真值是 [`apps/web/web-flow-specs.mjs`](../web-flow-specs.mjs)，分片派生物由 `tools/test-system-v2/generate-web-shards.mjs` 生成。README 不再复制一份容易过期的 spec 列表。
 
-- `authentication/auth-login.spec.ts`
-- `authentication/auth-flow.spec.ts`
-- `ai/goal-workflow.spec.ts`
-- `dashboard/dashboard-overview.spec.ts`
-- `goal/goal-crud.spec.ts`
-- `notification/notification-center.spec.ts`
-- `reminder/reminder-template-crud.spec.ts`
-- `task/task-plan-crud.spec.ts`
-- `user-settings/notifications.spec.ts`
-- `user-settings/persistence.spec.ts`
-
-其他 Web E2E 仍保留在仓库中，但不再自动进入默认 `web:e2e`；需要时通过显式路径或后续专项 target 运行。
+`tools/test-system-v2/__tests__/web-shards.test.mjs` 会同时校验：canonical spec 必须真实存在、shard manifest 与 canonical 清单一致、duration history 不得继续保留已经退休的 spec。
 
 ## 配置入口
 
@@ -55,7 +44,7 @@ pnpm nx run web:e2e:report
 
 ## V2 shell anchors (UI redesign)
 
-- 顶部模块胶囊：`capsule-nav-{goal|task|note|reminder|notification}`
+- 顶部模块胶囊：`capsule-nav-{goal|task|note|schedule|notification}`
 - 胶囊独立预览：`capsule-preview-toggle-{module}` / `capsule-preview-{module}`
 - 右侧面板开关：`shell-right-panel-toggle`
 - 业务面板：`business-panel` / `business-panel-close`

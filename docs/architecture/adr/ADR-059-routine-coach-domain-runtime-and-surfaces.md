@@ -8,12 +8,12 @@ tags:
   - focus
 description: Reminder 向 Routine Coach 演进时的领域边界、Profile Gate、确定性 Runtime、Ambient/Protocol 双运行语义与 Electron Surface 决策
 created: 2026-08-25T17:13:00+08:00
-updated: 2026-09-08T20:20:00+08:00
+updated: 2026-09-17T22:45:00+08:00
 ---
 
 # ADR-059: Routine Coach 领域、Runtime 与交互 Surface
 
-**状态：** 已采纳并实施（Core vNext 基础目标态；ADR-076~079 进一步收敛待实施）
+**状态：** 已采纳并实施（ADR-076~079 Phase 4 收敛已完成）
 **日期：** 2026-08-25  
 **影响范围：** reminder、contracts、database、schedule-orchestration、notification、app-vue、desktop、AI tools/workflows  
 **关联：** ADR-004、ADR-006、ADR-033、ADR-037、ADR-042、ADR-045、ADR-048、ADR-050、ADR-051、ADR-058
@@ -32,6 +32,10 @@ Routine Coach 核心目标态已经落地：RoutineDefinition、M:N ProfileMembe
 - ADR-079：Intervention Policy / Notification / Device Surface。
 
 这些新增决策**尚未实施**；不得把“Core vNext 基础目标态已落地”解释为 legacy Reminder 已经完全删除。
+
+### 2026-09-17 Phase 4 checkpoint
+
+ADR-076~079 已实施完成：`RoutineDefinition / ProfileMembership / RoutineOccurrence / RoutineInteraction / TemporaryOverride` 成为单一 owner truth；legacy `ReminderTemplate / Group / Instance / Response` 与旧 transport/UI/operation owner 已由 R4-2201C 破坏式退休。上面的 2026-09-08 描述保留为迁移时点历史，不再代表当前代码。
 
 ## 1. 背景
 

@@ -5,18 +5,18 @@ tags:
   - schedule
 description: Planner / Calendar 产品模块与 Scheduler 边界说明
 created: 2026-06-02T00:00:00
-updated: 2026-09-08T20:45:00+08:00
+updated: 2026-09-17T22:45:00+08:00
 ---
 
 # 日程模块说明
 
-> **当前边界（2026-09-07）：** CLEAN-6304 已完成物理拆包。`@memoflow/schedule` 是用户可见的 **Planner / Calendar**；后台 `ScheduleTask`、queue、lease、retry、execution 属于独立 `@memoflow/scheduler` **Temporal Engine**。业务模块通过 `ScheduledIntent + SchedulingPort.reconcile` 接入 Scheduler，不直接把 worker job 当成产品对象。详见 [Scheduling / Notification vNext](../scheduling-notification-vnext.md)、[ADR-060](../../architecture/adr/ADR-060-schedule-planner-and-scheduler-boundary.md)、[ADR-061](../../architecture/adr/ADR-061-business-module-scheduling-port-and-handler-registry.md)。
+> **当前边界（2026-09-17）：** `@memoflow/schedule` 是用户可见的 **Planner / Calendar**；`@memoflow/scheduler` 以 `ScheduledInvocation + InvocationAttempt`、queue、lease、retry/recovery 作为 **Temporal Engine** 真值。Legacy `ScheduleTask / ScheduleExecution / ScheduleConfig / SourceModule` 已由 S4-2302B 破坏式退休。业务模块通过 `ScheduledIntent + SchedulingPort.reconcile` 接入 Scheduler，不直接把 invocation persistence 当成产品对象。详见 [Scheduling / Notification vNext](../scheduling-notification-vnext.md)、[ADR-060](../../architecture/adr/ADR-060-schedule-planner-and-scheduler-boundary.md)、[ADR-061](../../architecture/adr/ADR-061-business-module-scheduling-port-and-handler-registry.md)。
 
 ## 1. 功能定位
 
 `@memoflow/schedule` 负责“用户怎么看和安排时间”：CalendarEntry、日/周/月 Planner、冲突检测/解决，以及 Calendar reliability operation。它可以投影 Task / Goal / Routine 的时间事实，但不拥有这些业务实体，也不拥有后台 worker job。
 
-`@memoflow/scheduler` 负责“系统什么时候可靠执行”：ScheduleTask / ScheduleExecution、lease、claim、queue、retry/backoff、source executor、Handler Registry 与只读 worker diagnostics。
+`@memoflow/scheduler` 负责“系统什么时候可靠执行”：ScheduledInvocation / InvocationAttempt、lease、claim、queue、retry/backoff、Handler Registry 与只读 worker diagnostics。
 
 ## 2. 当前功能说明
 
@@ -31,7 +31,7 @@ updated: 2026-09-08T20:45:00+08:00
 
 ### Temporal Engine (`@memoflow/scheduler`)
 
-- ScheduleTask / ScheduleExecution 领域模型与 Prisma / PowerSync repositories；
+- ScheduledInvocation / InvocationAttempt canonical runtime 与 Prisma / PowerSync repositories；
 - ScheduleLease coordinator、queue/runtime、claim/retry/backoff；
 - `SchedulingPort` adapter 与 `ScheduledHandlerRegistry`；
 - HTTP / IPC / client 仅提供 raw worker 的只读 diagnostics；
@@ -41,15 +41,15 @@ updated: 2026-09-08T20:45:00+08:00
 
 - **Planner 路径：** 用户进入日程页，在日/周/月视图查看统一事件；CalendarEntry 可直接编辑，Task / Goal / Routine 事件通过各自 owner command 修改。
 - **Calendar Entry 路径：** 用户创建或编辑时间块，系统执行冲突检测并给出解决路径。
-- **Worker diagnostics：** 仅在需要诊断后台触发状态时读取 Scheduler worker 状态；用户不能直接通过产品 UI 暂停/完成/删除 raw ScheduleTask。
+- **Worker diagnostics：** 仅在需要诊断后台触发状态时读取 Scheduler worker 状态；用户不能直接通过产品 UI 暂停/完成/删除 raw ScheduledInvocation。
 - **移动端：** Calendar/Planner 产品路径继续使用 `ScheduleClientPort`；需要 worker diagnostics 的 React surface 使用独立 `SchedulerClientPort`。
 
 ## 4. 业务与架构规则
 
-- `CalendarEntry` 是 `@memoflow/schedule` 的产品聚合；`ScheduleTask` 是 `@memoflow/scheduler` 的内部 invocation persistence。
+- `CalendarEntry` 是 `@memoflow/schedule` 的产品聚合；`ScheduledInvocation` 是 `@memoflow/scheduler` 的内部 invocation persistence。
 - Planner projection 与 Scheduler invocation 是两条独立 projection；一个 Task/Goal/Routine 可以同时出现在 Planner 并产生 Scheduler invocation，但二者不共享产品所有权。
-- owner domain 通过 `SchedulingPort.reconcile` 写入调度意图；不得直接构造/持久化 raw ScheduleTask。
-- Scheduler 的执行选择由 handler key / registry 驱动；历史 `SourceModule` 仅保留兼容/可观测元数据，不再作为中央行为路由 authority。
+- owner domain 通过 `SchedulingPort.reconcile` 写入调度意图；不得直接构造/持久化 raw ScheduledInvocation。
+- Scheduler 的执行选择由 handler key / registry 驱动；历史 `SourceModule` 行为路由已退休；执行选择由 handler key / registry 驱动。
 - Calendar reliability worker 依赖 `@memoflow/patterns/lease` 抽象；具体 ScheduleLease coordinator/repository 属于 Scheduler。
 - API 与 Desktop 都分别装配 Calendar module 与 Scheduler module；不能重新创建一个混合的“大 Schedule module”。
 
@@ -79,9 +79,9 @@ updated: 2026-09-08T20:45:00+08:00
 
 ## 9. 已确认决策
 
-- CalendarEntry 与 ScheduleTask **不合并**；
+- CalendarEntry 与 ScheduledInvocation **不合并**；
 - Planner/Calendar 与 Scheduler/Temporal Engine 已物理拆包；
-- raw ScheduleTask 不是普通用户产品对象；
+- raw ScheduledInvocation 不是普通用户产品对象；
 - pg-boss 不是既定迁移目标，只有 PoC 证据通过才考虑 Adopt/Hybrid。
 
 ## 10. 相关资料
@@ -92,9 +92,9 @@ updated: 2026-09-08T20:45:00+08:00
 - [任务模块说明](./task.md)
 - [日程 / Scheduler 文件索引](../module-index/schedule-files.md)
 
-## 11. 2026-09-08 vNext Model Freeze
+## 11. 2026-09-17 vNext Model Convergence
 
-在 CLEAN-6304 已完成 package boundary 后，Schedule/Scheduler 进入第二阶段模型收敛。该阶段**尚未实施**，目标由 ADR-080~083 固定：
+ADR-080~083 的 Phase 4 收敛已经实施：
 
 ```text
 CalendarEntry

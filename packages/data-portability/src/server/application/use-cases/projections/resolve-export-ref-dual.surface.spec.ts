@@ -6,7 +6,7 @@ import type { ExportContext } from '../../portable-runtime';
 import { RefAllocator } from '../../portable-runtime';
 
 /**
- * Residual 1003: resolveExportRef dual retired (task/reminder/repository projections).
+ * Residual 1003: resolveExportRef dual retired (task/repository projections).
  * Sole bodies in projection-helpers with entityLabel message domain.
  * Soft residual 1038: tip focused suite numbers track Residual 1038 evidence tip (309/1339).
  * Soft residual 1017: Goal resolveRef dual remains retired onto this sole.
@@ -16,7 +16,6 @@ describe('resolveExportRef dual retired (residual 1003)', () => {
   const dir = __dirname;
   const sole = readFileSync(resolve(dir, 'projection-helpers.ts'), 'utf8');
   const task = readFileSync(resolve(dir, 'task.projection.ts'), 'utf8');
-  const reminder = readFileSync(resolve(dir, 'reminder.projection.ts'), 'utf8');
   const repository = readFileSync(resolve(dir, 'repository.projection.ts'), 'utf8');
   const goal = readFileSync(resolve(dir, 'goal.projection.ts'), 'utf8');
 
@@ -28,10 +27,9 @@ describe('resolveExportRef dual retired (residual 1003)', () => {
     expect(sole).toContain('EXPORT_VALIDATION_ERROR');
   });
 
-  it('task/reminder/repository import sole without local dual bodies', () => {
+  it('task/repository import sole without local dual bodies', () => {
     for (const [label, source, entity] of [
       ['task', task, 'task'],
-      ['reminder', reminder, 'reminder'],
       ['repository', repository, 'repository'],
     ] as const) {
       expect(source, label).toContain('resolveExportRef');
@@ -62,7 +60,7 @@ describe('resolveExportRef dual retired (residual 1003)', () => {
     expect(resolveExportRef('uuid-1', ctx, 'task')).toBe('task:1');
     expect(resolveExportRef('missing', ctx, 'task')).toBeNull();
     expect(ctx.warnings.at(-1)).toContain('Unresolved task reference to missing');
-    expect(resolveExportRefOrThrow('uuid-1', ctx, 'reminder')).toBe('task:1');
+    expect(resolveExportRefOrThrow('uuid-1', ctx, 'goal')).toBe('task:1');
     expect(() => resolveExportRefOrThrow('missing', ctx, 'repository')).toThrow(
       /EXPORT_VALIDATION_ERROR: Unresolved repository reference to missing/,
     );

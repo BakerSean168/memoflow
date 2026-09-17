@@ -10,8 +10,6 @@ import { createLabelHttpClient } from '@memoflow/label/client';
 import { createGoalHttpClient } from '@memoflow/goal/client';
 import type { NotificationClientPort } from '@memoflow/notification/client';
 import { createNotificationHttpClient } from '@memoflow/notification/client';
-import type { ReminderClientPort } from '@memoflow/reminder/client';
-import { createReminderHttpClient } from '@memoflow/reminder/client';
 import type { ScheduleClientPort } from '@memoflow/schedule/client';
 import { createScheduleHttpClient } from '@memoflow/schedule/client';
 import type { SettingClientPort } from '@memoflow/setting/client';
@@ -30,7 +28,6 @@ export type AppClientRegistry = {
   goalService: GoalClientPort;
   labelService: LabelClientPort;
   notificationService: NotificationClientPort;
-  reminderService: ReminderClientPort;
   scheduleService: ScheduleClientPort;
   settingService: SettingClientPort;
   taskService: TaskClientPort;
@@ -47,7 +44,6 @@ export function createAppClientRegistry(httpClient: IResultHttpClient): AppClien
     goalService: createGoalHttpClient(httpClient),
     labelService: createLabelHttpClient(httpClient),
     notificationService: createNotificationHttpClient(httpClient),
-    reminderService: createReminderHttpClient(httpClient),
     scheduleService: createScheduleHttpClient(httpClient),
     settingService: createSettingHttpClient(httpClient),
     taskService: createTaskHttpClient(httpClient),

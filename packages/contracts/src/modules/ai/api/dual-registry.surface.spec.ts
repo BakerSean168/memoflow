@@ -495,8 +495,8 @@ import { describe, expect, it } from 'vitest';
 {
   /**
    * Residual 647: retire zero-consumer Summary dual-track surfaces.
-   * Provider list uses full AIProviderConfigClientDTO; reminder/goal keep
-   * canonical ClientDTO / UpcomingReminderDTO only.
+   * Provider list uses full AIProviderConfigClientDTO; Goal keeps its
+   * canonical ClientDTO surface.
    * Soft residual 811: AIProviderConfigClientDTO dual retired via ClientDTOSchema
    * (see ai-provider-config-client-dto-dual surface; assertion updated below).
    * Soft residual 819: GoalClientDTO dual retired via GoalClientDTOSchema
@@ -533,13 +533,6 @@ import { describe, expect, it } from 'vitest';
       );
       expect(listDto).toMatch(/no Summary dual-track/);
       expect(listDto).not.toMatch(/export interface ListAIProviderConfigsRes\b/);
-    });
-
-    it('retires reminder Summary/Dashboard duals; keeps UpcomingReminderDTO', () => {
-      const reminderDtos = readFileSync(resolve(modules, 'reminder/dtos/index.ts'), 'utf8');
-      expect(reminderDtos).not.toMatch(/export interface ReminderTemplateSummaryDTO\b/);
-      expect(reminderDtos).not.toMatch(/export interface ReminderDashboardDTO\b/);
-      expect(reminderDtos).toContain('export interface UpcomingReminderDTO');
     });
 
     it('retires GoalTimeRangeSummary dual; GoalClientDTO remains as z.infer', () => {

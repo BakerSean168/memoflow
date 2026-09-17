@@ -29,16 +29,6 @@ export interface UpsertNotificationPreferenceInput {
   identityId: string;
   globalChannels: string;
   workflowOverrides: string;
-  doNotDisturb: string | null;
-  rateLimit: string | null;
-}
-
-export interface UpsertUserReminderPreferenceInput {
-  id: string;
-  identityId: string;
-  bestTimeSlots: string;
-  worstTimeSlots: string;
-  globalReminderEnabled: boolean;
 }
 
 // --- Repository ---
@@ -190,53 +180,6 @@ export interface CreateScheduleInput extends TimestampedImportInput {
 }
 
 
-// --- Reminder ---
-
-export interface CreateReminderGroupInput extends TimestampedImportInput {
-  id: string;
-  identityId: string;
-  name: string;
-  description: string | null;
-  color: string | null;
-  icon: string | null;
-  enabled: boolean;
-  status: string;
-  order: number;
-  stats: string;
-}
-
-export interface CreateReminderTemplateInput extends TimestampedImportInput {
-  id: string;
-  identityId: string;
-  name: string;
-  description: string | null;
-  type: string;
-  selfEnabled: boolean;
-  status: string;
-  routineEnabled: boolean;
-  routineTrigger: unknown | null;
-  profileMemberships: Array<{ profileId: string; enabled: boolean }>;
-  importanceLevel: string;
-  tags: string;
-  color: string | null;
-  icon: string | null;
-  trigger: string;
-  activeTime: string;
-  activeHours: string | null;
-  notificationConfig: string;
-  stats: string;
-}
-
-export interface CreateReminderResponseInput extends CreatedImportInput {
-  id: string;
-  identityId: string;
-  templateId: string;
-  action: string;
-  responseTime: number | null;
-  snoozeDurationSeconds: number | null;
-  timestamp: string;
-}
-
 // --- AI ---
 
 export interface CreateAIConversationInput extends TimestampedImportInput {
@@ -261,7 +204,6 @@ export interface DataPortabilityImportTx {
   // Singletons (upsert)
   upsertUserPreferences(input: UpsertUserPreferencesInput): Promise<void>;
   upsertNotificationPreference(input: UpsertNotificationPreferenceInput): Promise<void>;
-  upsertUserReminderPreference(input: UpsertUserReminderPreferenceInput): Promise<void>;
 
   // Repository
   createRepository(input: CreateRepositoryInput): Promise<void>;
@@ -280,11 +222,6 @@ export interface DataPortabilityImportTx {
 
   // Schedule
   createSchedule(input: CreateScheduleInput): Promise<void>;
-
-  // Reminder
-  createReminderGroup(input: CreateReminderGroupInput): Promise<void>;
-  createReminderTemplate(input: CreateReminderTemplateInput): Promise<void>;
-  createReminderResponse(input: CreateReminderResponseInput): Promise<void>;
 
   // AI
   createAIConversation(input: CreateAIConversationInput): Promise<void>;

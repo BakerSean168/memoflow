@@ -9,7 +9,7 @@ tags:
   - idempotency
 description: Reminder/Routine 的 wall-clock 触发统一由 Scheduler 唤醒，Reminder Domain 保留 occurrence/next-trigger 业务真相，退役并行 cron 调度权
 created: 2026-08-25T17:49:00+08:00
-updated: 2026-09-08T20:20:00+08:00
+updated: 2026-09-17T22:45:00+08:00
 ---
 
 # ADR-062: Reminder / Routine 单一调度权与可靠 Occurrence 执行
@@ -26,6 +26,10 @@ Scheduler 已是 Routine/Reminder wall-clock 的唯一 durable wake-up authority
 ### 2026-09-08 Occurrence ownership refinement
 
 本 ADR 的“单一 Scheduler authority”已实施并继续有效。ADR-077 进一步把长期目标拆成：Scheduler execution reliability、Routine business occurrence 与 RoutineInteraction 三层。现有 Reminder/Routine occurrence 中的 lease/fencing 可靠性字段在迁移期继续保护，只有在 Scheduler 覆盖被故障测试证明后才允许瘦身。
+
+### 2026-09-17 Phase 4 checkpoint
+
+Legacy Reminder 调度模型已经删除；WallClock owner intent 通过 `SchedulingPort.reconcile` 进入 `ScheduledInvocation`，业务结果仍回写 canonical `RoutineOccurrence / RoutineInteraction`。下文旧 `ReminderTemplate` 路径只保留为历史问题说明。
 
 ## 1. 背景
 

@@ -22,7 +22,6 @@ export default createTsupConfig({
     'src/modules/task/index.ts',
     'src/modules/goal/index.ts',
     'src/modules/governance/index.ts',
-    'src/modules/reminder/index.ts',
     'src/modules/repository/index.ts',
     'src/modules/account/index.ts',
     'src/modules/schedule/index.ts',

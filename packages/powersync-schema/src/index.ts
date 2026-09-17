@@ -371,101 +371,6 @@ const schedule_domain_event_outbox = new Table(
 );
 
 // ──────────────────────────────────────────────
-// Reminder
-// ──────────────────────────────────────────────
-
-const reminder_templates = new Table({
-  identity_id: column.text,
-  name: column.text,
-  description: column.text,
-  type: column.text,
-  self_enabled: column.integer, // boolean
-  status: column.text,
-  importance_level: column.text,
-  tags: column.text, // JSON
-  color: column.text,
-  icon: column.text,
-  next_trigger_at: column.text,
-  version: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-  deleted_at: column.text,
-  trigger: column.text, // JSON
-  recurrence: column.text, // JSON
-  active_time: column.text, // JSON
-  active_hours: column.text, // JSON
-  notification_config: column.text, // JSON
-  stats: column.text, // JSON
-});
-
-const reminder_groups = new Table({
-  identity_id: column.text,
-  name: column.text,
-  description: column.text,
-  color: column.text,
-  icon: column.text,
-  enabled: column.integer, // boolean
-  status: column.text,
-  order: column.integer,
-  stats: column.text, // JSON
-  version: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-  deleted_at: column.text,
-});
-
-const reminder_instances = new Table({
-  template_id: column.text, // FK
-  identity_id: column.text,
-  trigger_at: column.text,
-  status: column.text,
-  result: column.text,
-  processed_at: column.text,
-  note: column.text,
-  payload: column.text, // JSON
-  created_at: column.text,
-  updated_at: column.text,
-});
-
-const reminder_history = new Table({
-  identity_id: column.text,
-  template_id: column.text, // FK
-  triggered_at: column.text,
-  result: column.text,
-  error: column.text,
-  notification_sent: column.integer, // boolean
-  notification_channel: column.text,
-  created_at: column.text,
-});
-
-const reminder_statistics = new Table({
-  identity_id: column.text,
-  template_stats: column.text, // JSON
-  group_stats: column.text, // JSON
-  trigger_stats: column.text, // JSON
-  calculated_at: column.text,
-});
-
-const reminder_responses = new Table({
-  identity_id: column.text,
-  template_id: column.text, // FK
-  action: column.text,
-  response_time: column.integer,
-  snooze_duration_seconds: column.integer,
-  timestamp: column.text,
-  created_at: column.text,
-});
-
-const user_reminder_preferences = new Table({
-  identity_id: column.text,
-  best_time_slots: column.text, // JSON
-  worst_time_slots: column.text, // JSON
-  global_reminder_enabled: column.integer, // boolean
-  created_at: column.text,
-  updated_at: column.text,
-});
-
-// ──────────────────────────────────────────────
 // Routine Coach vNext
 // ──────────────────────────────────────────────
 
@@ -1039,13 +944,6 @@ export const PowerSyncAppSchema = new Schema({
   invocation_attempts,
   schedule_domain_event_outbox,
   // Reminder
-  reminder_templates,
-  reminder_groups,
-  reminder_instances,
-  reminder_history,
-  reminder_statistics,
-  reminder_responses,
-  user_reminder_preferences,
   routine_definitions,
   routine_profiles,
   routine_profile_memberships,

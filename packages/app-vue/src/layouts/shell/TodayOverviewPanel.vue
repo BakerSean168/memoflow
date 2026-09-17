@@ -4,7 +4,6 @@ import { useI18n } from 'vue-i18n';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import { Plus, Target } from '@lucide/vue';
 import DailyTodoWidget from '../../modules/task/components/widgets/DailyTodoWidget.vue';
-import UpcomingRemindersWidget from '../../modules/reminder/components/widgets/UpcomingRemindersWidget.vue';
 import GoalProgressWidget from '../../modules/goal/components/widgets/GoalProgressWidget.vue';
 import { useDashboard } from '../../modules/dashboard/composables/useDashboard';
 import { getProductTime, productTimeRevision } from '../../shared/utils/product-time';
@@ -12,7 +11,7 @@ import { getProductTime, productTimeRevision } from '../../shared/utils/product-
 const props = defineProps<{ active: boolean }>();
 
 const emit = defineEmits<{
-  (e: 'open-route', module: 'goal' | 'task' | 'reminder', route: string): void;
+  (e: 'open-route', module: 'goal' | 'task', route: string): void;
 }>();
 
 const { t } = useI18n();
@@ -95,11 +94,6 @@ onBeforeUnmount(() => {
         :active="active"
         @view-all="emit('open-route', 'task', '/tasks')"
         @completed="refreshAfterTaskCompletion"
-      />
-      <UpcomingRemindersWidget
-        class="min-h-[9rem]"
-        :refresh-key="0"
-        @view-all="emit('open-route', 'reminder', '/reminders')"
       />
       <GoalProgressWidget
         class="min-h-[9rem]"

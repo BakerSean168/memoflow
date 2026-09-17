@@ -16,7 +16,6 @@ import { goalRoutes } from '../modules/goal/router';
 import { governanceRoutes } from '../modules/governance/router';
 import { taskRoutes } from '../modules/task/router';
 import { scheduleRoutes } from '../modules/schedule/router';
-import { reminderRoutes } from '../modules/reminder/router';
 import { repositoryRoutes } from '../modules/repository/router';
 import { notificationRoutes } from '../modules/notification/router';
 import { settingRoutes } from '../modules/setting/router';
@@ -71,7 +70,6 @@ export function createAppRouter(options?: {
         ...governanceRoutes,
         ...taskRoutes,
         ...scheduleRoutes,
-        ...reminderRoutes,
         ...repositoryRoutes,
         ...notificationRoutes,
         ...aiRoutes,

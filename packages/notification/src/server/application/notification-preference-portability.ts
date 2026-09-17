@@ -6,18 +6,18 @@ import type {
 import {
   NotificationChannelType,
   NotificationDeliveryPreferencePortablePayloadV3Schema,
-  type NotificationChannelType as NotificationChannel,
+  type NotificationChannelType as DeliveryChannel,
   type NotificationDeliveryPreferencePortablePayloadV3,
 } from '@memoflow/contracts/notification';
 import { NotificationPreference } from '../domain/aggregates/notification-preference';
 import type { INotificationPreferenceRepository } from '../domain/repositories';
 
-const CHANNELS = Object.values(NotificationChannelType) as readonly NotificationChannel[];
+const CHANNELS = Object.values(NotificationChannelType) as readonly DeliveryChannel[];
 
 type ChannelFlags = NotificationDeliveryPreferencePortablePayloadV3['globalChannels'];
 
-function orderedChannelFlags(source: ReadonlyMap<NotificationChannel, boolean>): ChannelFlags {
-  const result: Partial<Record<NotificationChannel, boolean>> = {};
+function orderedChannelFlags(source: ReadonlyMap<DeliveryChannel, boolean>): ChannelFlags {
+  const result: Partial<Record<DeliveryChannel, boolean>> = {};
   for (const channel of CHANNELS) {
     const enabled = source.get(channel);
     if (enabled !== undefined) result[channel] = enabled;
@@ -26,7 +26,7 @@ function orderedChannelFlags(source: ReadonlyMap<NotificationChannel, boolean>):
 }
 
 function orderedWorkflowOverrides(
-  source: ReadonlyMap<string, Map<NotificationChannel, boolean>>,
+  source: ReadonlyMap<string, Map<DeliveryChannel, boolean>>,
 ): NotificationDeliveryPreferencePortablePayloadV3['workflowOverrides'] {
   const result: Record<string, ChannelFlags> = {};
   for (const workflowKey of [...source.keys()].sort()) {
@@ -41,15 +41,15 @@ function normalizePayload(
   payload: NotificationDeliveryPreferencePortablePayloadV3,
 ): NotificationDeliveryPreferencePortablePayloadV3 {
   const parsed = NotificationDeliveryPreferencePortablePayloadV3Schema.parse(payload);
-  const globalMap = new Map<NotificationChannel, boolean>();
+  const globalMap = new Map<DeliveryChannel, boolean>();
   for (const [channel, enabled] of Object.entries(parsed.globalChannels)) {
-    if (enabled !== undefined) globalMap.set(channel as NotificationChannel, enabled);
+    if (enabled !== undefined) globalMap.set(channel as DeliveryChannel, enabled);
   }
-  const workflowMap = new Map<string, Map<NotificationChannel, boolean>>();
+  const workflowMap = new Map<string, Map<DeliveryChannel, boolean>>();
   for (const workflowKey of Object.keys(parsed.workflowOverrides).sort()) {
-    const channels = new Map<NotificationChannel, boolean>();
+    const channels = new Map<DeliveryChannel, boolean>();
     for (const [channel, enabled] of Object.entries(parsed.workflowOverrides[workflowKey] ?? {})) {
-      if (enabled !== undefined) channels.set(channel as NotificationChannel, enabled);
+      if (enabled !== undefined) channels.set(channel as DeliveryChannel, enabled);
     }
     workflowMap.set(workflowKey, channels);
   }
@@ -94,13 +94,13 @@ function replaceDeliveryChoices(
 
   for (const [channel, enabled] of Object.entries(target.globalChannels)) {
     if (enabled !== undefined) {
-      preference.setGlobalChannel(channel as NotificationChannel, enabled);
+      preference.setGlobalChannel(channel as DeliveryChannel, enabled);
     }
   }
   for (const [workflowKey, channels] of Object.entries(target.workflowOverrides)) {
     for (const [channel, enabled] of Object.entries(channels)) {
       if (enabled !== undefined) {
-        preference.setWorkflowChannelOverride(workflowKey, channel as NotificationChannel, enabled);
+        preference.setWorkflowChannelOverride(workflowKey, channel as DeliveryChannel, enabled);
       }
     }
   }

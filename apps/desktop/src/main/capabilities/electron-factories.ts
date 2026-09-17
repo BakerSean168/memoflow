@@ -119,8 +119,6 @@ export function createElectronNotificationPort(
     disableDNDSchedule: () => service.disableDNDSchedule(),
     getDNDConfig: () => service.getDNDConfig(),
     show: (config) => service.showCanonicalDelivery(config),
-    showReminder: (config) =>
-      service.showReminderNotification(config) !== null,
     showSchedule: (config) => service.showScheduleNotification(config) !== null,
     showGoalProgress: (config) => service.showGoalProgressNotification(config) !== null,
     showTaskCompleted: (config) => service.showTaskCompletedNotification(config) !== null,

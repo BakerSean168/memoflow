@@ -10,7 +10,5 @@ export function projectNotificationPreference(pref: unknown): PortableNotificati
       string,
       Record<string, boolean>
     >,
-    doNotDisturb: entity.doNotDisturb ? parseJsonField(entity.doNotDisturb) : undefined,
-    rateLimit: entity.rateLimit ? parseJsonField(entity.rateLimit) : undefined,
   };
 }

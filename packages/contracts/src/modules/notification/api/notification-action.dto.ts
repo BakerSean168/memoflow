@@ -4,6 +4,11 @@ import type { NotificationInteractionDTO } from '../entities/notification-intera
 
 const JsonValueSchema = z.json();
 
+export const NotificationEntityRefSchema = z.object({
+  type: z.string().trim().min(1).max(120),
+  id: z.string().trim().min(1).max(500),
+});
+
 const ActionBaseSchema = z.object({
   actionKey: z.string().trim().min(1).max(200),
   labelKey: z.string().trim().min(1).max(200),
@@ -21,10 +26,7 @@ export const NotificationActionIntentSchema = z.discriminatedUnion('kind', [
   }),
   ActionBaseSchema.extend({
     kind: z.literal('owner-command'),
-    owner: z.object({
-      type: z.string().trim().min(1).max(120),
-      id: z.string().trim().min(1).max(500),
-    }),
+    owner: NotificationEntityRefSchema,
     commandKey: z.string().trim().min(1).max(200),
     input: JsonValueSchema.optional(),
   }),

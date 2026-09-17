@@ -6,7 +6,6 @@ export default {
   "settings": "设置",
   "rename": "重命名",
   "move": "移动",
-  "moveToGroup": "移至分组",
   "open": "打开",
   "copyLink": "复制链接",
   "create": "新建",
@@ -16,11 +15,6 @@ export default {
   "editFolder": "编辑文件夹",
   "deleteFolder": "删除文件夹",
   "createGoal": "创建目标",
-  "createReminder": "新建提醒",
-  "editTemplate": "编辑模板",
-  "deleteTemplate": "删除模板",
-  "editGroup": "编辑分组",
-  "deleteGroup": "删除分组",
   "addRecord": "添加记录",
   "pause": "暂停",
   "resume": "恢复",
@@ -28,6 +22,4 @@ export default {
   "moveUp": "上移",
   "moveDown": "下移",
   "markRead": "标记已读",
-  "pauseTemplate": "暂停模板",
-  "enableTemplate": "启用模板"
 } as const;

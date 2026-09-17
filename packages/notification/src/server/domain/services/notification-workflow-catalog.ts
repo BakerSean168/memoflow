@@ -107,14 +107,6 @@ export const BUILTIN_NOTIFICATION_WORKFLOWS: readonly NotificationWorkflowDefini
     category: NotificationCategory.Goal,
   }),
   definition({
-    workflowKey: 'reminder.trigger',
-    topicKey: 'reminder.trigger',
-    groupKey: 'reminder',
-    tone: NotificationTone.Info,
-    type: NotificationType.Reminder,
-    category: NotificationCategory.Reminder,
-  }),
-  definition({
     workflowKey: 'routine.intervention',
     topicKey: 'routine.intervention',
     groupKey: 'routine',

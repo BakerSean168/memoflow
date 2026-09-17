@@ -41,8 +41,8 @@ export interface RoutineMethodRecommendedParameters {
 }
 
 /**
- * A transport-neutral preset that the existing Routine configuration UI can
- * project into CreateReminderTemplateReq.  Protocol methods intentionally do
+ * A transport-neutral preset that Routine configuration surfaces can project
+ * into canonical RoutineDefinition input. Protocol methods intentionally do
  * not expose this preset: they must use ProtocolDefinition/ProtocolSession.
  */
 export interface RoutineMethodTemplatePreset {

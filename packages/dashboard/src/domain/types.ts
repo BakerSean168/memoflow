@@ -49,13 +49,6 @@ export interface DashboardScheduleRecord {
   createdAt: number;
 }
 
-export interface DashboardReminderRecord {
-  deletedAt: number | null;
-  status: string;
-  effectiveEnabled: boolean;
-  nextTriggerAt: number | null;
-}
-
 /**
  * Port interface for dashboard data sources.
  * Implementations wire this to Prisma (API), PowerSync (Desktop), etc.
@@ -65,7 +58,6 @@ export interface DashboardReadSource {
   listTaskPlans(identityId: string): Promise<DashboardTaskPlanRecord[]>;
   listTaskOccurrences(identityId: string): Promise<DashboardTaskOccurrenceRecord[]>;
   listSchedules(identityId: string): Promise<DashboardScheduleRecord[]>;
-  listUpcomingReminders(identityId: string, beforeTime: number): Promise<DashboardReminderRecord[]>;
   countUnreadNotifications(identityId: string): Promise<number>;
   /**
    * R6：Activity Ledger 窗口查询（可选）。提供时 activityTimeline 改从

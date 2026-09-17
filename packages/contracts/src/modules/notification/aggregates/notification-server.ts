@@ -6,7 +6,6 @@ import type { NotificationActionDTO } from '../value-objects/notification-action
 import type { ImportanceLevel } from '../../../shared/value-objects/importance';
 import type { UrgencyLevel } from '../../../shared/value-objects/urgency';
 import type { IdentityId, NotificationId, TransferDate } from '../../../primitives';
-import type { RelatedEntityType } from '../value-objects/related-entity-type';
 
 export interface NotificationNavigationIntentDTO {
   route: string;
@@ -31,7 +30,7 @@ export interface NotificationServerDTO {
   importance: ImportanceLevel;
   urgency: UrgencyLevel;
 
-  relatedEntityType?: RelatedEntityType | null;
+  relatedEntityType?: string | null;
   relatedEntityId?: string | null;
   navigationIntent?: NotificationNavigationIntentDTO | null;
   correlationId?: string | null;

@@ -4,7 +4,7 @@
 
 import { newId } from '@memoflow/utils';
 import type { ImportContext } from '../../portable-runtime';
-import type { PortableSettings, PortableNotificationPreference, PortableUserReminderPreference } from '@memoflow/contracts/data-portability';
+import type { PortableSettings, PortableNotificationPreference } from '@memoflow/contracts/data-portability';
 import type { TxClient } from './import-helpers';
 import { jsonStringify, incSingleton } from './import-helpers';
 
@@ -29,22 +29,6 @@ export async function importNotificationPreference(
     identityId: ctx.identityId,
     globalChannels: jsonStringify(pref.globalChannels ?? {}),
     workflowOverrides: jsonStringify(pref.workflowOverrides ?? {}),
-    doNotDisturb: pref.doNotDisturb ? jsonStringify(pref.doNotDisturb) : null,
-    rateLimit: pref.rateLimit ? jsonStringify(pref.rateLimit) : null,
   });
   incSingleton(ctx, 'notificationPreference');
-}
-
-export async function importUserReminderPreference(
-  tx: TxClient, ctx: ImportContext, pref: PortableUserReminderPreference | undefined,
-): Promise<void> {
-  if (!pref) return;
-  await tx.upsertUserReminderPreference({
-    id: newId(),
-    identityId: ctx.identityId,
-    bestTimeSlots: jsonStringify(pref.bestTimeSlots ?? []),
-    worstTimeSlots: jsonStringify(pref.worstTimeSlots ?? []),
-    globalReminderEnabled: pref.globalReminderEnabled ?? true,
-  });
-  incSingleton(ctx, 'userReminderPreference');
 }

@@ -92,7 +92,7 @@ model AccountClosureOperation {
 }
 
 /// 运维审计日志 (W7)：记录谁何时对哪个 operation 做了什么（query / replay）。
-/// 跨模块共享：Reminder / Notification / Schedule rebuild / Account closure / Knowledge projection
+/// 跨模块共享：Notification / Schedule rebuild / Account closure / Knowledge projection
 /// 的最小权限查询与 replay 操作都必须写审计记录，禁止静默操作。
 model OperationAuditLog {
   id              String    @id @default(uuid())

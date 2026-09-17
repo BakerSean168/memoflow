@@ -5,7 +5,6 @@ export { NotificationPreferenceId } from './notification-preference-id';
 
 export { NotificationType } from './notification-type';
 export { NotificationCategory } from './notification-category';
-export { RelatedEntityType } from './related-entity-type';
 export { NotificationChannelType } from './notification-channel-type';
 export { ContentType } from './content-type';
 

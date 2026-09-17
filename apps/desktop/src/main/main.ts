@@ -60,7 +60,7 @@ import { composeGoal } from './runtime/compose-goal';
 import { composeTask } from './runtime/compose-task';
 import { composeAccount } from './runtime/compose-account';
 import { composeNotification } from './runtime/compose-notification';
-import { composeReminder } from './runtime/compose-reminder';
+import { composeRoutine } from './runtime/compose-routine';
 import { registerRoutineNotificationOwnerCommands } from '@memoflow/reminder';
 import { PowerSyncProtocolSessionStore } from '@memoflow/reminder/server';
 import { createProtocolSessionRuntime } from '@memoflow/reminder/routine-runtime';
@@ -227,39 +227,37 @@ async function registerBusinessModules(
       'Reminder local Routine runtime requires an active or prepared profile identity',
     );
   }
-  const reminderComposed = composeReminder({
+  const routineComposed = composeRoutine({
     db,
     identityId: profileIdentityId,
-    notificationRequestedWriter: notificationComposed.requestedWriter,
-    userTimeContextPort: settingElectronModule.userTimeContextPort,
   });
   registerRoutineNotificationOwnerCommands(
     notificationComposed.ownerCommandRegistry,
-    reminderComposed.routineCommandPort,
+    routineComposed.routineCommandPort,
   );
   // Project the durable vNext Routine snapshot before sensors start so the first
   // activity transition cannot race ahead of registration. ROUTINE-5301 can
   // reuse the same refresh seam after configuration mutations.
-  await reminderComposed.refreshLocalRoutineRegistrations();
+  await routineComposed.refreshLocalRoutineRegistrations();
   // Activity truth is a per-profile runtime. Start the sensor before the
   // accumulator so no idle/resume transition is lost during activation.
-  reminderComposed.activityRuntime.start();
-  reminderComposed.elapsedRuntime.start();
-  reminderComposed.activeUsageRuntime.start();
-  activeReminderActivityRuntime = reminderComposed.activityRuntime;
-  activeReminderElapsedRuntime = reminderComposed.elapsedRuntime;
-  activeReminderUsageRuntime = reminderComposed.activeUsageRuntime;
-  activeReminderOccurrenceFlush = reminderComposed.flushRoutineOccurrencePersistence;
+  routineComposed.activityRuntime.start();
+  routineComposed.elapsedRuntime.start();
+  routineComposed.activeUsageRuntime.start();
+  activeReminderActivityRuntime = routineComposed.activityRuntime;
+  activeReminderElapsedRuntime = routineComposed.elapsedRuntime;
+  activeReminderUsageRuntime = routineComposed.activeUsageRuntime;
+  activeReminderOccurrenceFlush = routineComposed.flushRoutineOccurrencePersistence;
 
   // Routine InterventionWindow is a Main Process projection over the per-profile
   // InterventionRuntime returned by the Reminder composition root. It owns only
   // one low-intrusion BrowserWindow; occurrence truth remains in the runtime.
   const interventionWindowHost = new ElectronInterventionWindowHost();
   const interventionWindowController = createInterventionWindowController({
-    runtime: reminderComposed.interventionRuntime,
+    runtime: routineComposed.interventionRuntime,
     host: interventionWindowHost,
     onCommand: async ({ commandId, snapshot, command, at }) => {
-      const receipt = await reminderComposed.routineCommandPort.respondToOccurrence({
+      const receipt = await routineComposed.routineCommandPort.respondToOccurrence({
         commandId,
         identityId: snapshot.identityId,
         routineId: snapshot.routineId,
@@ -272,13 +270,13 @@ async function registerBusinessModules(
 
       if (command.action === 'complete') {
         if (receipt.occurrence.triggerKind === 'ActiveUsage') {
-          reminderComposed.activeUsageRuntime.markSatisfied({
+          routineComposed.activeUsageRuntime.markSatisfied({
             identityId: snapshot.identityId,
             routineId: snapshot.routineId,
             at,
           });
         } else if (receipt.occurrence.triggerKind === 'Elapsed') {
-          reminderComposed.elapsedRuntime.markSatisfied({
+          routineComposed.elapsedRuntime.markSatisfied({
             identityId: snapshot.identityId,
             routineId: snapshot.routineId,
             at,
@@ -288,7 +286,7 @@ async function registerBusinessModules(
       if (command.action === 'snooze') {
         // Reload the durable override into runtime gates. The composer preserves
         // the current accumulator snapshot across this refresh.
-        await reminderComposed.refreshLocalRoutineRegistrations();
+        await routineComposed.refreshLocalRoutineRegistrations();
       }
     },
   });
@@ -303,7 +301,7 @@ async function registerBusinessModules(
   const protocolSessionStore = new PowerSyncProtocolSessionStore(db);
   const protocolSessionRuntime = createProtocolSessionRuntime({
     store: protocolSessionStore,
-    protocolBreakCreditRuntime: reminderComposed.protocolBreakCreditRuntime,
+    protocolBreakCreditRuntime: routineComposed.protocolBreakCreditRuntime,
   });
   const focusWindowHost = new ElectronFocusWindowHost();
   const focusWindowController = createFocusWindowController({
@@ -338,12 +336,7 @@ async function registerBusinessModules(
         settingElectronModule.userTimeContextPort,
       ),
     },
-    reminderProjection: {
-      source: reminderComposed.scheduleProjectionSource,
-    },
-    execution: {
-      reminderSource: reminderComposed.scheduleExecutionSource,
-    },
+    execution: {},
   });
   scheduleOrchestrationModule.handlerRegistry.register(
     createGoalPowerSyncReminderFireHandler(db, notificationComposed.requestedWriter),
@@ -432,7 +425,6 @@ async function registerBusinessModules(
     taskPlanRepository: taskComposed.repositories.taskPlanRepository,
     taskOccurrenceRepository: taskComposed.repositories.taskOccurrenceRepository,
     scheduleRepository: scheduleComposed.repositories.scheduleRepository,
-    reminderTemplateRepository: reminderComposed.repositories.reminderTemplateRepository,
     notificationRepository: notificationComposed.repositories.notificationRepository,
     userTimeContextPort: settingElectronModule.userTimeContextPort,
   };
@@ -553,7 +545,7 @@ async function registerBusinessModules(
     taskApplicationPort: taskComposed.applicationPort,
     goalKnowledgeService,
     knowledgeDocumentRefResolver: localVaultKnowledgeRefResolver,
-    routineCommandPort: reminderComposed.routineCommandPort,
+    routineCommandPort: routineComposed.routineCommandPort,
     scheduleRepository: scheduleComposed.repositories.scheduleRepository,
     notificationRepository: notificationComposed.repositories.notificationRepository,
     userTimeContextPort: settingElectronModule.userTimeContextPort,
@@ -652,7 +644,6 @@ async function registerBusinessModules(
     .register(taskElectronModule)
     .register(scheduleComposed.calendarModule)
     .register(scheduleComposed.schedulerModule)
-    .register(reminderComposed.module)
     .register(interventionWindowElectronModule)
     .register(focusWindowElectronModule)
     .register(AIElectronModule)

@@ -24,26 +24,8 @@ export type TaskPlanId = string & { readonly __brand: 'TaskPlanId' };
 /** 任务实例 ID */
 export type TaskOccurrenceId = string & { readonly __brand: 'TaskOccurrenceId' };
 
-/** 提醒模板 ID */
-export type ReminderTemplateId = string & { readonly __brand: 'ReminderTemplateId' };
-
-/** 提醒分组 ID */
-export type ReminderGroupId = string & { readonly __brand: 'ReminderGroupId' };
-
 /** Routine Profile ID */
 export type RoutineProfileId = string & { readonly __brand: 'RoutineProfileId' };
-
-/** 提醒实例 ID */
-export type ReminderInstanceId = string & { readonly __brand: 'ReminderInstanceId' };
-
-/** 提醒历史 ID */
-export type ReminderHistoryId = string & { readonly __brand: 'ReminderHistoryId' };
-
-/** 提醒响应 ID */
-export type ReminderResponseId = string & { readonly __brand: 'ReminderResponseId' };
-
-/** 用户提醒偏好 ID */
-export type UserReminderPreferencesId = string & { readonly __brand: 'UserReminderPreferencesId' };
 
 /** 日程 ID */
 export type ScheduleId = string & { readonly __brand: 'ScheduleId' };
@@ -182,13 +164,8 @@ export const ID_PREFIXES = {
   TaskPlanId: 'ITaskPlanId',
   TaskOccurrenceId: 'ITaskOccurrenceId',
 
-  // === Reminder ===
-  ReminderTemplateId: 'IReminderTemplateId',
-  ReminderGroupId: 'IReminderGroupId',
+  // === Routine ===
   RoutineProfileId: 'IRoutineProfileId',
-  ReminderInstanceId: 'IReminderInstanceId',
-  ReminderHistoryId: 'IReminderHistoryId',
-  ReminderResponseId: 'IReminderResponseId',
 
   // === Schedule ===
   ScheduleId: 'IScheduleId',

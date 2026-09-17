@@ -192,11 +192,6 @@ describe('HARD-7102 core vNext architecture lock', () => {
         content: `export { createTaskScheduledHandlerRegistration } from '../server/infrastructure/scheduled-handler';`,
       },
       {
-        relPath:
-          'packages/reminder/src/server/domain/repositories/i-reminder-template-repository.ts',
-        content: `findByNextTriggerBefore(beforeTime: number, identityId?: string): Promise<ReminderTemplate[]>;`,
-      },
-      {
         relPath: 'packages/scheduler/src/server/value/schedule-config.ts',
         content: `function createDefault(timezone: Timezone) { return timezone; }`,
       },

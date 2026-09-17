@@ -5,8 +5,6 @@ import { describe, expect, it } from 'vitest';
 /**
  * Residual 915: DESKTOP_AUTH_API_KEY dual retired.
  * InjectionKey uses DesktopAuthApi sole invoke-api body (not Pick<ElectronBridge, 'invoke'>).
- * Residual 905 (soft): reminder DesktopApi dual retired
- *   (modules/reminder/.../reminder-desktop-api-dual.surface.spec.ts).
  * Residual 903 (soft): DesktopBootstrapApi dual retired
  *   (shared/utils/desktop-bootstrap-api-dual.surface.spec.ts).
  * Residual 913 (soft): host-access cast duals retired

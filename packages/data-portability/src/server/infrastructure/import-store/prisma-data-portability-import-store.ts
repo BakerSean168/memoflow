@@ -15,7 +15,6 @@ import type {
   DataPortabilityImportTx,
   UpsertUserPreferencesInput,
   UpsertNotificationPreferenceInput,
-  UpsertUserReminderPreferenceInput,
   CreateRepositoryInput,
   CreateResourceFolderInput,
   CreateResourceInput,
@@ -26,9 +25,6 @@ import type {
   CreateTaskPlanInput,
   CreateTaskOccurrenceInput,
   CreateScheduleInput,
-  CreateReminderGroupInput,
-  CreateReminderTemplateInput,
-  CreateReminderResponseInput,
   CreateAIConversationInput,
   CreateAIMessageInput,
 } from '../../application/import-store/data-portability-import-store';
@@ -59,32 +55,10 @@ class PrismaDataPortabilityImportTx implements DataPortabilityImportTx {
         identityId: input.identityId,
         globalChannels: input.globalChannels,
         workflowOverrides: input.workflowOverrides,
-        doNotDisturb: input.doNotDisturb,
-        rateLimit: input.rateLimit,
       },
       update: {
         globalChannels: input.globalChannels,
         workflowOverrides: input.workflowOverrides,
-        doNotDisturb: input.doNotDisturb,
-        rateLimit: input.rateLimit,
-      },
-    });
-  }
-
-  async upsertUserReminderPreference(input: UpsertUserReminderPreferenceInput): Promise<void> {
-    await this.tx.userReminderPreference.upsert({
-      where: { identityId: input.identityId },
-      create: {
-        id: input.id,
-        identityId: input.identityId,
-        bestTimeSlots: input.bestTimeSlots,
-        worstTimeSlots: input.worstTimeSlots,
-        globalReminderEnabled: input.globalReminderEnabled,
-      },
-      update: {
-        bestTimeSlots: input.bestTimeSlots,
-        worstTimeSlots: input.worstTimeSlots,
-        globalReminderEnabled: input.globalReminderEnabled,
       },
     });
   }
@@ -187,59 +161,6 @@ class PrismaDataPortabilityImportTx implements DataPortabilityImportTx {
     });
   }
 
-
-  // --- Reminder ---
-
-  async createReminderGroup(input: CreateReminderGroupInput): Promise<void> {
-    await this.tx.reminderGroup.create({ data: input });
-    await this.tx.routineProfile.create({
-      data: {
-        id: input.id,
-        identityId: input.identityId,
-        name: input.name,
-        description: input.description,
-        enabled: input.enabled,
-        active: input.status.toLowerCase() === 'active',
-        createdAt: input.createdAt,
-        updatedAt: input.updatedAt,
-      },
-    });
-  }
-
-  async createReminderTemplate(input: CreateReminderTemplateInput): Promise<void> {
-    const { routineEnabled, routineTrigger, profileMemberships, ...templateInput } = input;
-    await this.tx.reminderTemplate.create({ data: templateInput });
-    await this.tx.routineDefinition.create({
-      data: {
-        id: input.id,
-        identityId: input.identityId,
-        name: input.name,
-        description: input.description,
-        enabled: routineEnabled,
-        triggerJson: routineTrigger == null ? null : JSON.stringify(routineTrigger),
-        createdAt: input.createdAt,
-        updatedAt: input.updatedAt,
-      },
-    });
-    for (const membership of profileMemberships) {
-      await this.tx.routineProfileMembership.create({
-        data: {
-          identityId: input.identityId,
-          profileId: membership.profileId,
-          routineId: input.id,
-          enabled: membership.enabled,
-          createdAt: input.createdAt,
-          updatedAt: input.updatedAt,
-        },
-      });
-    }
-  }
-
-  async createReminderResponse(input: CreateReminderResponseInput): Promise<void> {
-    await this.tx.reminderResponse.create({
-      data: input as Prisma.ReminderResponseUncheckedCreateInput,
-    });
-  }
 
   // --- AI ---
 

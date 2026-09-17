@@ -360,35 +360,6 @@ export class NotificationService {
   }
 
   /**
-   * Helper to show a reminder notification.
-   *
-   * @param {Object} reminder - Reminder details.
-   * @returns {Notification | null} The notification instance.
-   */
-  showReminderNotification(reminder: {
-    id: string;
-    title: string;
-    body?: string;
-    importance?: string;
-  }): Notification | null {
-    const urgency =
-      reminder.importance === 'vital' || reminder.importance === 'important'
-        ? ('critical' as const)
-        : ('normal' as const);
-
-    return this.showNotification({
-      title: `🔔 ${reminder.title}`,
-      body: reminder.body || '',
-      urgency,
-      sound: true,
-      data: {
-        type: 'reminder',
-        id: reminder.id,
-      },
-    });
-  }
-
-  /**
    * Helper to show a schedule notification.
    *
    * @param {Object} task - Schedule task details.

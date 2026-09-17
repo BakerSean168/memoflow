@@ -59,7 +59,6 @@ updated: 2026-07-22T00:00:00
 | 文件 | 说明 |
 | --- | --- |
 | [`packages/app-vue/src/modules/task/components/widgets/DailyTodoWidget.vue`](../../../packages/app-vue/src/modules/task/components/widgets/DailyTodoWidget.vue) | 嵌入的今日待办小组件 |
-| [`packages/app-vue/src/modules/reminder/components/widgets/UpcomingRemindersWidget.vue`](../../../packages/app-vue/src/modules/reminder/components/widgets/UpcomingRemindersWidget.vue) | 嵌入的即将提醒小组件 |
 
 ## 测试入口
 
@@ -71,7 +70,7 @@ updated: 2026-07-22T00:00:00
 
 ## 需要重点关注的改动风险
 
-- 跨模块读模型依赖：上游模块（goal、task、schedule、reminder、notification）数据结构变更直接影响 Dashboard。
+- 跨模块读模型依赖：当前上游模块（goal、task、schedule、notification）数据结构变更直接影响 Dashboard；Routine 的新读模型在 Phase 5 接入。
 - 投影函数的性能：聚合 5 个模块的数据在大数据量下可能较慢。
 - API 和 Desktop 两侧的 DashboardReadSource 实现需要保持一致。
 - 嵌入小组件的兼容性：依赖其他模块的组件，需要确保接口稳定。

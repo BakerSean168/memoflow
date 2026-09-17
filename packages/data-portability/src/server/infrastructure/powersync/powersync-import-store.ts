@@ -13,7 +13,6 @@ import type {
   DataPortabilityImportTx,
   UpsertUserPreferencesInput,
   UpsertNotificationPreferenceInput,
-  UpsertUserReminderPreferenceInput,
   CreateRepositoryInput,
   CreateResourceFolderInput,
   CreateResourceInput,
@@ -24,9 +23,6 @@ import type {
   CreateTaskPlanInput,
   CreateTaskOccurrenceInput,
   CreateScheduleInput,
-  CreateReminderGroupInput,
-  CreateReminderTemplateInput,
-  CreateReminderResponseInput,
   CreateAIConversationInput,
   CreateAIMessageInput,
 } from '../../application/import-store/data-portability-import-store';
@@ -97,59 +93,13 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
     );
     if (existing) {
       await this.tx.execute(
-        `UPDATE notification_preferences SET global_channels = ?, workflow_overrides = ?, do_not_disturb = ?, rate_limit = ?, updated_at = ? WHERE identity_id = ?`,
-        [
-          input.globalChannels,
-          input.workflowOverrides,
-          str(input.doNotDisturb),
-          str(input.rateLimit),
-          new Date().toISOString(),
-          input.identityId,
-        ],
+        `UPDATE notification_preferences SET global_channels = ?, workflow_overrides = ?, updated_at = ? WHERE identity_id = ?`,
+        [input.globalChannels, input.workflowOverrides, new Date().toISOString(), input.identityId],
       );
     } else {
       await this.tx.execute(
-        `INSERT INTO notification_preferences (id, identity_id, global_channels, workflow_overrides, do_not_disturb, rate_limit, version, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)`,
-        [
-          input.id,
-          input.identityId,
-          input.globalChannels,
-          input.workflowOverrides,
-          str(input.doNotDisturb),
-          str(input.rateLimit),
-          ...createdUpdated({}),
-        ],
-      );
-    }
-  }
-
-  async upsertUserReminderPreference(input: UpsertUserReminderPreferenceInput): Promise<void> {
-    const existing = await this.tx.getOptional<{ identity_id: string }>(
-      `SELECT identity_id FROM user_reminder_preferences WHERE identity_id = ?`,
-      [input.identityId],
-    );
-    if (existing) {
-      await this.tx.execute(
-        `UPDATE user_reminder_preferences SET best_time_slots = ?, worst_time_slots = ?, global_reminder_enabled = ?, updated_at = ? WHERE identity_id = ?`,
-        [
-          input.bestTimeSlots,
-          input.worstTimeSlots,
-          bool(input.globalReminderEnabled),
-          new Date().toISOString(),
-          input.identityId,
-        ],
-      );
-    } else {
-      await this.tx.execute(
-        `INSERT INTO user_reminder_preferences (id, identity_id, best_time_slots, worst_time_slots, global_reminder_enabled, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [
-          input.id,
-          input.identityId,
-          input.bestTimeSlots,
-          input.worstTimeSlots,
-          bool(input.globalReminderEnabled),
-          ...createdUpdated({}),
-        ],
+        `INSERT INTO notification_preferences (id, identity_id, global_channels, workflow_overrides, quiet_hours, version, created_at, updated_at) VALUES (?, ?, ?, ?, NULL, 1, ?, ?)`,
+        [input.id, input.identityId, input.globalChannels, input.workflowOverrides, ...createdUpdated({})],
       );
     }
   }
@@ -363,111 +313,6 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
     );
   }
 
-
-  // --- Reminder ---
-
-  async createReminderGroup(input: CreateReminderGroupInput): Promise<void> {
-    const [createdAtValue, updatedAtValue] = createdUpdated(input);
-    await this.tx.execute(
-      `INSERT INTO reminder_groups (id, identity_id, name, description, color, icon, enabled, status, "order", stats, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
-      [
-        input.id,
-        input.identityId,
-        input.name,
-        str(input.description),
-        str(input.color),
-        str(input.icon),
-        bool(input.enabled),
-        input.status,
-        input.order,
-        input.stats,
-        createdAtValue,
-        updatedAtValue,
-      ],
-    );
-    await this.tx.execute(
-      `INSERT INTO routine_profiles (id, identity_id, name, description, enabled, active, version, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)`,
-      [
-        input.id,
-        input.identityId,
-        input.name,
-        str(input.description),
-        bool(input.enabled),
-        bool(input.status.toLowerCase() === 'active'),
-        createdAtValue,
-        updatedAtValue,
-      ],
-    );
-  }
-
-  async createReminderTemplate(input: CreateReminderTemplateInput): Promise<void> {
-    const [createdAtValue, updatedAtValue] = createdUpdated(input);
-    await this.tx.execute(
-      `INSERT INTO reminder_templates (id, identity_id, name, description, type, self_enabled, status, importance_level, tags, color, icon, trigger, active_time, active_hours, notification_config, stats, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
-      [
-        input.id,
-        input.identityId,
-        input.name,
-        str(input.description),
-        input.type,
-        bool(input.selfEnabled),
-        input.status,
-        input.importanceLevel,
-        input.tags,
-        str(input.color),
-        str(input.icon),
-        input.trigger,
-        input.activeTime,
-        str(input.activeHours),
-        input.notificationConfig,
-        input.stats,
-        createdAtValue,
-        updatedAtValue,
-      ],
-    );
-    await this.tx.execute(
-      `INSERT INTO routine_definitions (id, identity_id, name, description, enabled, trigger_json, version, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)`,
-      [
-        input.id,
-        input.identityId,
-        input.name,
-        str(input.description),
-        bool(input.routineEnabled),
-        input.routineTrigger == null ? null : JSON.stringify(input.routineTrigger),
-        createdAtValue,
-        updatedAtValue,
-      ],
-    );
-    for (const membership of input.profileMemberships) {
-      await this.tx.execute(
-        `INSERT INTO routine_profile_memberships (identity_id, profile_id, routine_id, enabled, version, created_at, updated_at) VALUES (?, ?, ?, ?, 1, ?, ?)`,
-        [
-          input.identityId,
-          membership.profileId,
-          input.id,
-          bool(membership.enabled),
-          createdAtValue,
-          updatedAtValue,
-        ],
-      );
-    }
-  }
-
-  async createReminderResponse(input: CreateReminderResponseInput): Promise<void> {
-    await this.tx.execute(
-      `INSERT INTO reminder_responses (id, identity_id, template_id, action, response_time, snooze_duration_seconds, timestamp, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        input.id,
-        input.identityId,
-        input.templateId,
-        input.action,
-        input.responseTime,
-        input.snoozeDurationSeconds,
-        input.timestamp,
-        createdAt(input),
-      ],
-    );
-  }
 
   // --- AI ---
 

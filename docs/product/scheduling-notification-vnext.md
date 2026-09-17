@@ -10,7 +10,7 @@ tags:
   - vnext
 description: MemoFlow Scheduling / Planner / Routine / Notification vNext 的统一产品语义、端到端用户场景与 North Star 架构
 created: 2026-08-25T17:49:00+08:00
-updated: 2026-09-08T20:45:00+08:00
+updated: 2026-09-17T22:45:00+08:00
 ---
 
 # Scheduling / Planner / Routine / Notification vNext
@@ -32,7 +32,7 @@ Scheduler / Temporal Engine
   host lease / claim / retry / recovery
 ```
 
-当前代码仍存在 legacy `ScheduleTask / ScheduleExecution / ScheduleConfig` 实现壳以及 CalendarEntry 的 `duration/conflict/priority` 残差。它们属于**待实施迁移**，不能因为本文已冻结 North Star 就当作代码已完成。详细模型见 [Schedule / Planner + Scheduler / Temporal Engine vNext](./schedule-planner-scheduler-vnext.md) 和 [Current System Map](../analysis/2026-09-08-schedule-scheduler-current-system-map.md)。
+截至 Phase 4，legacy `ScheduleTask / ScheduleExecution / ScheduleConfig / SourceModule` 权威已由 S4-2302B 破坏式退休；Scheduler canonical persistence/runtime 为 `ScheduledInvocation + InvocationAttempt`。Planner range/occupancy/conflict 也已按 P4-2301A/B 收敛。详细模型见 [Schedule / Planner + Scheduler / Temporal Engine vNext](./schedule-planner-scheduler-vnext.md) 和 [Current System Map](../analysis/2026-09-08-schedule-scheduler-current-system-map.md)。
 
 ## 2026-09-08 Notification Model Convergence Freeze
 
@@ -57,7 +57,7 @@ InboxPort / OperationsPort
 InboxRealtime / DeliveryRealtime
 ```
 
-当前代码仍保留 `NotificationChannel[] / NotificationHistory / NotificationTemplate / NotificationCategory / RelatedEntityType / host-local DND` 等第一代或过渡模型；这些属于**待实施迁移**。详细见 [Notification vNext](./notification-vnext.md) 与 [Notification Current System Map](../analysis/2026-09-08-notification-current-system-map.md)。
+截至 Phase 4，`NotificationChannel` aggregate、`NotificationHistory`、`NotificationTemplate`、closed `RelatedEntityType` 与 host-local DND/user-rate-limit 双真值已退休；canonical 主链为 Fact/Inbox + Workflow + DeliveryDecision/Outbox/Receipt + typed Interaction + QuietHours/SystemDeliveryGuard + Product/Operations ports。`NotificationCategory` 仍作为展示语义保留。详细见 [Notification vNext](./notification-vnext.md) 与 [Notification Current System Map](../analysis/2026-09-08-notification-current-system-map.md)。
 
 ## 1. 为什么需要这一份统一设计
 
