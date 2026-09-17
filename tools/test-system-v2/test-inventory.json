@@ -5288,14 +5288,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/notification/aggregates/notification-client-dto-dual.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/contracts/src/modules/notification/api/dual-registry.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11859,7 +11851,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 89
+      "fileCount": 88
     },
     {
       "id": "packages/dashboard/vitest.config.ts",
@@ -12629,7 +12621,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1095,
+    "unit": 1094,
     "integration": 38,
     "smoke": 3,
     "boundary-ipc": 9,

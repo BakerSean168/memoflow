@@ -26,18 +26,6 @@ import { randomUUID } from 'crypto';
 
 const notificationEventPublisher = createTypedEventPublisher<NotificationEventMap>(eventBus);
 
-// ============================================================
-// Include presets
-// ============================================================
-
-const INCLUDE_CHILDREN = {
-  channels: true,
-  history: true,
-};
-
-const INCLUDE_CHANNELS = {
-  channels: true,
-};
 
 /**
  * Notification Prisma Repository
@@ -112,54 +100,7 @@ export class NotificationPrismaRepository implements INotificationRepository {
         },
       });
 
-      // 2. Sync NotificationChannels: delete removed + upsert remaining
-      if (dto.notificationChannels) {
-        const currentChannelIds = dto.notificationChannels.map((c) => String(c.id));
-
-        // Delete channels that no longer exist in the aggregate
-        await tx.notificationChannel.deleteMany({
-          where: {
-            notificationId: String(dto.id),
-            id: { notIn: currentChannelIds },
-          },
-        });
-
-        // Upsert each channel
-        for (const channel of dto.notificationChannels) {
-          await tx.notificationChannel.upsert({
-            where: { id: String(channel.id) },
-            create: {
-              id: String(channel.id),
-              identityId: String(dto.identityId),
-              notificationId: String(dto.id),
-              channelType: channel.channelType,
-              status: channel.status,
-              recipient: channel.recipient,
-              maxRetries: channel.maxRetries,
-              retryCount: channel.sendAttempts,
-              attempts: channel.sendAttempts,
-              sentAt: channel.sentAt ? new Date(channel.sentAt) : null,
-              failedAt: channel.failedAt ? new Date(channel.failedAt) : null,
-              error: channel.error ? JSON.stringify(channel.error) : null,
-              response: channel.response ? JSON.stringify(channel.response) : null,
-            },
-            update: {
-              channelType: channel.channelType,
-              status: channel.status,
-              recipient: channel.recipient,
-              maxRetries: channel.maxRetries,
-              retryCount: channel.sendAttempts,
-              attempts: channel.sendAttempts,
-              sentAt: channel.sentAt ? new Date(channel.sentAt) : null,
-              failedAt: channel.failedAt ? new Date(channel.failedAt) : null,
-              error: channel.error ? JSON.stringify(channel.error) : null,
-              response: channel.response ? JSON.stringify(channel.response) : null,
-            },
-          });
-        }
-      }
-
-      // 3. Save NotificationDispatchOutbox entries in the same transaction
+      // 2. Save NotificationDispatchOutbox entries in the same transaction
       if (outboxDispatches && outboxDispatches.length > 0) {
         let insertedCount = 0;
         const now = new Date();
@@ -245,51 +186,26 @@ export class NotificationPrismaRepository implements INotificationRepository {
   ): Promise<NotificationDeliveryUsage> {
     const hourStart = new Date(now.getTime() - 60 * 60 * 1000);
     const dayStart = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    const baseWhere = {
-      identityId,
-      channelType: channel,
-    };
-
-    const [hourCount, dayCount] = await Promise.all([
-      this.prisma.notificationChannel.count({
-        where: {
-          ...baseWhere,
-          notification: { is: { workflowKey, createdAt: { gte: hourStart } } },
-        },
-      }),
-      this.prisma.notificationChannel.count({
-        where: {
-          ...baseWhere,
-          notification: { is: { workflowKey, createdAt: { gte: dayStart } } },
-        },
-      }),
-    ]);
-
-    return { hourCount, dayCount };
-  }
-
-  async findChannelsByStatus(status: string, limit?: number): Promise<Notification[]> {
-    const rows = await this.prisma.notification.findMany({
+    const plannedOutcomes = ['enqueued', 'deferred'];
+    const count = (since: Date) => this.prisma.notificationDeliveryDecisionRecord.count({
       where: {
-        deletedAt: null,
-        channels: { some: { status } },
+        identityId,
+        channel,
+        outcome: { in: plannedOutcomes },
+        notification: { is: { workflowKey, createdAt: { gte: since } } },
       },
-      include: INCLUDE_CHILDREN,
-      take: limit,
     });
-    return rows.map((row) =>
-      NotificationPrismaMapper.toDomain(row as PrismaNotificationWithRelations),
-    );
+    const [hourCount, dayCount] = await Promise.all([count(hourStart), count(dayStart)]);
+    return { hourCount, dayCount };
   }
 
   async findByIdForIdentity(
     identityId: string,
     id: string,
-    options?: { includeChildren?: boolean },
+    _options?: { includeChildren?: boolean },
   ): Promise<Notification | null> {
     const row = await this.prisma.notification.findFirst({
       where: { id, identityId },
-      include: options?.includeChildren ? INCLUDE_CHILDREN : INCLUDE_CHANNELS,
     });
     if (!row) return null;
     return NotificationPrismaMapper.toDomain(row as PrismaNotificationWithRelations);
@@ -298,7 +214,6 @@ export class NotificationPrismaRepository implements INotificationRepository {
   async findByIdempotencyKey(identityId: string, idempotencyKey: string): Promise<Notification | null> {
     const row = await this.prisma.notification.findUnique({
       where: { identityId_idempotencyKey: { identityId, idempotencyKey } },
-      include: INCLUDE_CHANNELS,
     });
     return row ? NotificationPrismaMapper.toDomain(row as PrismaNotificationWithRelations) : null;
   }
@@ -330,7 +245,6 @@ export class NotificationPrismaRepository implements INotificationRepository {
 
     const rows = await this.prisma.notification.findMany({
       where,
-      include: options?.includeChildren ? INCLUDE_CHILDREN : INCLUDE_CHANNELS,
       orderBy: { createdAt: 'desc' },
       take: options?.limit,
       skip: options?.offset,
@@ -351,7 +265,6 @@ export class NotificationPrismaRepository implements INotificationRepository {
         deletedAt: null,
         ...(options?.archiveState === 'archived' ? { archivedAt: { not: null } } : options?.archiveState === 'all' ? {} : { archivedAt: null }),
       },
-      include: INCLUDE_CHANNELS,
       orderBy: { createdAt: 'desc' },
       take: options?.limit,
       skip: options?.offset,
@@ -368,7 +281,6 @@ export class NotificationPrismaRepository implements INotificationRepository {
         deletedAt: null,
         archivedAt: null,
       },
-      include: INCLUDE_CHANNELS,
       orderBy: { createdAt: 'desc' },
       take: options?.limit,
     });
@@ -390,7 +302,6 @@ export class NotificationPrismaRepository implements INotificationRepository {
         deletedAt: null,
         ...(options?.archiveState === 'archived' ? { archivedAt: { not: null } } : options?.archiveState === 'all' ? {} : { archivedAt: null }),
       },
-      include: INCLUDE_CHANNELS,
       orderBy: { createdAt: 'desc' },
     });
 

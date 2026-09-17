@@ -1,8 +1,5 @@
 import {
   CategoryPreference,
-  ChannelError,
-  ChannelStatus,
-  ChannelResponse,
   ContentType,
   DoNotDisturbConfig,
   NotificationAction,
@@ -120,7 +117,7 @@ describe('notification shared value objects', () => {
     }
   });
 
-  it('serializes metadata, limits, actions, and channel payloads', () => {
+  it('serializes metadata, limits, and actions', () => {
     const metadata = NotificationMetadata.createDefault()
       .setIcon('bell')
       .setColor('#fff')
@@ -147,26 +144,6 @@ describe('notification shared value objects', () => {
       'maxPerHour cannot exceed maxPerDay',
     );
 
-    const error = ChannelError.of('TIMEOUT', 'retry later', { retryAfter: 10 });
-    expect(error.code).toBe('TIMEOUT');
-    expect(error.message).toBe('retry later');
-    expect(error.hasDetails).toBe(true);
-    expect(error.isRetryable).toBe(true);
-    expect(ChannelError.fromDTO(error.toDTO()).toDTO()).toEqual(error.toDTO());
-    expect(() => ChannelError.create({ code: '', message: 'x' })).toThrow('Error code is required');
-    expect(() => ChannelError.create({ code: 'X', message: '' })).toThrow('Error message is required');
-
-    const response = ChannelResponse.success('msg-1', { ok: true });
-    expect(response.messageId).toBe('msg-1');
-    expect(response.statusCode).toBe(200);
-    expect(response.isSuccess).toBe(true);
-    expect(response.hasMessageId).toBe(true);
-    expect(response.hasData).toBe(true);
-    expect(ChannelResponse.fromDTO(response.toDTO()).toDTO()).toEqual(response.toDTO());
-    expect(ChannelResponse.create({ messageId: null, statusCode: null }).isSuccess).toBe(false);
-    expect(ChannelResponse.failed(500).hasMessageId).toBe(false);
-    expect(ChannelResponse.failed(500).hasData).toBe(false);
-
     const action = NotificationAction.of('open', 'Open', NotificationActionType.Navigate, {
       href: '/x',
     });
@@ -192,19 +169,6 @@ describe('notification shared value objects', () => {
   });
 
   it('covers delivery-channel status, content, and routing enum helpers', () => {
-    expect(ChannelStatus.getAll()).toEqual([
-      ChannelStatus.Pending,
-      ChannelStatus.Sent,
-      ChannelStatus.Delivered,
-      ChannelStatus.Failed,
-      ChannelStatus.Cancelled,
-    ]);
-    expect(ChannelStatus.of('Pending')).toBe(ChannelStatus.Pending);
-    expect(ChannelStatus.isSuccessful(ChannelStatus.Delivered)).toBe(true);
-    expect(ChannelStatus.isFailed(ChannelStatus.Failed)).toBe(true);
-    expect(ChannelStatus.isProcessing(ChannelStatus.Sent)).toBe(true);
-    expect(() => ChannelStatus.of('Unknown')).toThrow('Invalid ChannelStatus');
-
     expect(ContentType.getAll()).toContain(ContentType.Article);
     expect(ContentType.of('Video')).toBe(ContentType.Video);
     expect(ContentType.isMedia(ContentType.Video)).toBe(true);

@@ -5,7 +5,6 @@ import type { NotificationMetadataDTO } from '../value-objects/notification-meta
 import type { NotificationActionDTO } from '../value-objects/notification-action';
 import type { ImportanceLevel } from '../../../shared/value-objects/importance';
 import type { UrgencyLevel } from '../../../shared/value-objects/urgency';
-import type { NotificationChannelServerDTO } from '../entities/notification-channel-server';
 import type { IdentityId, NotificationId, TransferDate } from '../../../primitives';
 import type { RelatedEntityType } from '../value-objects/related-entity-type';
 
@@ -49,7 +48,4 @@ export interface NotificationServerDTO {
   updatedAt: TransferDate;
   deletedAt: TransferDate | null;
   archivedAt: TransferDate | null;
-
-  /** Convenience projection of durable delivery attempts, not Fact status. */
-  notificationChannels?: NotificationChannelServerDTO[] | null;
 }

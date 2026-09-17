@@ -5,7 +5,7 @@ tags:
   - notification
 description: 通知模块相关文件索引
 created: 2026-06-02T00:00:00
-updated: 2026-09-17T16:35:00+08:00
+updated: 2026-09-17T17:28:00+08:00
 ---
 
 # 通知模块文件索引
@@ -24,7 +24,7 @@ updated: 2026-09-17T16:35:00+08:00
 | [`ADR-087`](../../architecture/adr/ADR-087-notification-interaction-and-typed-action-intents.md)                              | NotificationInteraction 与 typed actions                                                   |
 | [`ADR-088`](../../architecture/adr/ADR-088-notification-preference-quiet-hours-realtime-and-operations-boundary.md)           | Preference / QuietHours / realtime / ops boundary                                          |
 
-> ADR-084/085 已进入 canonical implementation：Notification Fact/Inbox 与 WorkflowDefinition 已成为当前真值，`NotificationTemplate` 已退役。NotificationChannel / Interaction / QuietHours 的后续收敛由 ADR-086~088 和 Phase 4 后续任务继续实施。
+> ADR-084~086 已进入 canonical implementation：Notification Fact/Inbox、WorkflowDefinition 与 DeliveryDecision + DispatchOutbox/Receipt 已成为当前真值；`NotificationTemplate` 与 `NotificationChannel` aggregate/persistence 已退役。Interaction / QuietHours / product-vs-operations port split 由 ADR-087/088 与 N4-2402B 继续收敛。
 
 ## 前端页面与路由
 
@@ -74,7 +74,6 @@ updated: 2026-09-17T16:35:00+08:00
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
 | [`packages/notification/src/server/domain/aggregates/notification.ts`](../../../packages/notification/src/server/domain/aggregates/notification.ts)                                                                                     | Notification 聚合根                              |
 | [`packages/notification/src/server/domain/aggregates/notification-preference.ts`](../../../packages/notification/src/server/domain/aggregates/notification-preference.ts)                                                               | NotificationPreference 聚合根                    |
-| [`packages/notification/src/server/domain/entities/notification-channel.ts`](../../../packages/notification/src/server/domain/entities/notification-channel.ts)                                                                         | NotificationChannel 实体                         |
 | [`packages/notification/src/server/domain/entities/notification-history.ts`](../../../packages/notification/src/server/domain/entities/notification-history.ts)                                                                         | NotificationHistory 实体                         |
 | [`packages/notification/src/server/domain/services/notification-policy.ts`](../../../packages/notification/src/server/domain/services/notification-policy.ts)                                                                           | 通知策略（偏好、免打扰、频率限制检查）           |
 | [`packages/notification/src/server/domain/services/notification-workflow-catalog.ts`](../../../packages/notification/src/server/domain/services/notification-workflow-catalog.ts)                                                       | Notification workflow capability/default catalog |
@@ -125,5 +124,5 @@ updated: 2026-09-17T16:35:00+08:00
 - 通知策略（偏好、免打扰、频率限制）对实际发送的影响。
 - SSE 连接的稳定性和实时通知的可靠性。
 - 通知模块是所有业务模块的触达出口，其稳定性影响面广。
-- 通知模板渲染与业务事件之间的映射。
+- WorkflowDefinition 与业务 producer 的稳定语义映射。
 - HTTP、IPC、Prisma、PowerSync 多运行时适配器的一致性。

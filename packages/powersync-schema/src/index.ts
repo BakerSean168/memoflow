@@ -614,23 +614,6 @@ const notifications = new Table({
   is_read: column.integer, // boolean
 });
 
-const notification_channels = new Table({
-  identity_id: column.text,
-  notification_id: column.text, // FK
-  channel_type: column.text,
-  status: column.text,
-  recipient: column.text,
-  max_retries: column.integer,
-  error: column.text,
-  response: column.text,
-  retry_count: column.integer,
-  attempts: column.integer,
-  sent_at: column.text,
-  failed_at: column.text,
-  created_at: column.text,
-  updated_at: column.text,
-});
-
 const notification_delivery_decisions = new Table({
   identity_id: column.text,
   notification_id: column.text,
@@ -1070,7 +1053,6 @@ export const PowerSyncAppSchema = new Schema({
   routine_protocol_sessions,
   // Notification
   notifications,
-  notification_channels,
   notification_delivery_decisions,
   notification_dispatch_outbox,
   desktop_delivery_acks,

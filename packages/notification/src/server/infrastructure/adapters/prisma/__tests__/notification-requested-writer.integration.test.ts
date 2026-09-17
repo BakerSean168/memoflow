@@ -163,11 +163,11 @@ describe('NotificationRequested durable envelope consumer (NOTIF-3301)', () => {
       where: { id: dispatchRows[0].id },
     });
     expect(delivered.status).toBe('succeeded');
-    const channel = await prisma.notificationChannel.findFirstOrThrow({
+    const decision = await prisma.notificationDeliveryDecisionRecord.findFirstOrThrow({
       where: { notificationId: fact.id },
     });
-    expect(channel.status).toBe('Delivered');
-    expect(channel.sentAt).not.toBeNull();
+    expect(decision.outcome).toBe('enqueued');
+    expect(fact).not.toHaveProperty('notificationChannels');
   });
 
   it('3. Replay after crash-after-Fact commit keeps exactly one Fact and one dispatch outbox', async () => {

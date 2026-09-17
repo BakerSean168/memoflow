@@ -1,12 +1,9 @@
 import { z } from 'zod';
 import { brandedId } from '../../../primitives';
-import type { NotificationId, NotificationChannelId } from '../../../primitives';
+import type { NotificationId } from '../../../primitives';
 import type { NotificationPreferenceServerDTO } from '../aggregates/notification-preference-server';
 import type { NotificationStatsDTO } from '../dtos/notification-result.dto';
-import type { SendNotificationResultDTO, ListNotificationChannelsResultDTO } from '../dtos/channel-result.dto';
-import type { NotificationChannelServerDTO } from '../entities/notification-channel-server';
 import type { NotificationServerDTO } from '../aggregates/notification-server';
-import { NotificationChannelType } from '../value-objects/notification-channel-type';
 
 const ChannelPreferenceFlagsSchema = z.object({
   InApp: z.boolean().optional(),
@@ -46,16 +43,3 @@ export const ExecuteNotificationActionSchema = z.object({
 });
 export type ExecuteNotificationActionReq = z.infer<typeof ExecuteNotificationActionSchema>;
 export type ExecuteNotificationActionRes = NotificationServerDTO;
-
-export const SendNotificationSchema = z.object({
-  notificationId: brandedId<NotificationId>(),
-  channels: z.array(z.enum(NotificationChannelType)).optional(),
-});
-export type SendNotificationReq = z.infer<typeof SendNotificationSchema>;
-export type SendNotificationRes = SendNotificationResultDTO;
-
-export const RetryChannelSchema = z.object({ channelId: brandedId<NotificationChannelId>() });
-export type RetryChannelReq = z.infer<typeof RetryChannelSchema>;
-export type RetryChannelRes = NotificationChannelServerDTO;
-export type ListNotificationChannelsReq = void;
-export type ListNotificationChannelsRes = ListNotificationChannelsResultDTO;

@@ -122,8 +122,8 @@ export function createNotificationPrismaModule(
   const reliableAdapter = repositories.reliableAdapter;
 
   const defaultDeliverers: Record<string, import('./runtime/notification.runtime').NotificationChannelDeliverer> = {
-    InApp: new RealInAppChannelDeliverer(notificationRepository),
-    'in-app': new RealInAppChannelDeliverer(notificationRepository),
+    InApp: new RealInAppChannelDeliverer(),
+    'in-app': new RealInAppChannelDeliverer(),
     Desktop: new RealDesktopChannelDeliverer(options.desktopTransport),
     desktop: new RealDesktopChannelDeliverer(options.desktopTransport),
     Push: new RealDesktopChannelDeliverer(options.pushTransport),

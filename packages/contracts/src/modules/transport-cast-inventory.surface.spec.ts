@@ -90,8 +90,6 @@ const ALLOWLIST: Record<string, string> = {
     'domain-client branded-id boundary (allowlist)',
   'packages/notification/src/domain-client/aggregates/notification-preference.ts':
     'domain-client branded-id boundary (allowlist)',
-  'packages/notification/src/domain-client/entities/notification-channel.ts':
-    'domain-client branded-id boundary (allowlist)',
   // Notification SSE: stream adapter flush + event id structural probing.
   'packages/notification/src/api/routes.ts': 'SSE stream adapter structural casts (allowlist)',
 };

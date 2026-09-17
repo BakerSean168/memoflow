@@ -3,33 +3,10 @@ import type {
   NotificationClientDTO,
   NotificationPreferenceServerDTO,
   NotificationPreferenceClientDTO,
-  NotificationChannelClientDTO,
 } from '@memoflow/contracts/notification';
 
 export function toNotificationClientDTO(serverDTO: NotificationServerDTO): NotificationClientDTO {
-  const notificationChannels: NotificationChannelClientDTO[] | null =
-    serverDTO.notificationChannels?.map((channel) => ({
-      id: channel.id,
-      notificationId: channel.notificationId,
-      channelType: channel.channelType,
-      status: channel.status,
-      recipient: channel.recipient,
-      sendAttempts: channel.sendAttempts,
-      maxRetries: channel.maxRetries,
-      error: channel.error,
-      response: channel.response,
-      version: 1,
-      createdAt: channel.createdAt,
-      updatedAt: channel.createdAt,
-      deletedAt: null,
-      sentAt: channel.sentAt,
-      failedAt: channel.failedAt,
-    })) ?? null;
-
-  return {
-    ...serverDTO,
-    notificationChannels,
-  };
+  return { ...serverDTO };
 }
 
 export function toNotificationPreferenceClientDTO(
