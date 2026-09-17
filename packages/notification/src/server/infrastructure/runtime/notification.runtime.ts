@@ -650,6 +650,7 @@ export function createNotificationRuntimeContribution(
       relatedEntityType: envelope.relatedEntity?.type as import('@memoflow/contracts/notification').RelatedEntityType | undefined,
       relatedEntityId: envelope.relatedEntity?.id ?? undefined,
       navigationIntent: envelope.navigationIntent ?? null,
+      actions: envelope.actions,
       channels:
         envelope.suggestedChannels && envelope.suggestedChannels.length > 0
           ? [...new Set(envelope.suggestedChannels)]

@@ -1,78 +1,73 @@
-/**
- * NotificationAction 值对象
- * 
- * 通知动作：用户可执行的操作按钮
- * 不可变性（所有修改返回新实例）
- */
-
 import { ValueObject } from '@memoflow/utils/domain';
-import type {
-  NotificationAction as INotificationAction,
-  NotificationActionDTO,
-  NotificationActionType,
-} from '@memoflow/contracts/notification';
+import { isJsonValue } from '@memoflow/contracts/result';
+import type { NotificationActionDTO } from '@memoflow/contracts/notification';
 
-/**
- * NotificationAction 值对象实现
- */
-export class NotificationAction extends ValueObject<NotificationActionDTO> implements INotificationAction {
+function cloneAction(action: NotificationActionDTO): NotificationActionDTO {
+  if (action.kind === 'navigate') {
+    return {
+      ...action,
+      destination: {
+        ...action.destination,
+        params: action.destination.params ? { ...action.destination.params } : undefined,
+      },
+    };
+  }
+  if (action.kind === 'owner-command') {
+    return {
+      ...action,
+      owner: { ...action.owner },
+      input: action.input,
+    };
+  }
+  return { ...action };
+}
 
+/** Typed action intent owned by the Notification surface (ADR-087). */
+export class NotificationAction extends ValueObject<NotificationActionDTO> {
   private constructor(props: NotificationActionDTO) {
-    super(props);
+    super(cloneAction(props));
   }
 
-  // ================= 工厂方法 =================
-  
-  public static create(props: NotificationActionDTO): NotificationAction {
+  static create(props: NotificationActionDTO): NotificationAction {
     this.validate(props);
     return new NotificationAction(props);
   }
 
-  public static of(
-    id: string,
-    label: string,
-    type: NotificationActionType,
-    payload?: unknown,
-  ): NotificationAction {
-    return NotificationAction.create({ id, label, type, payload });
+  static fromDTO(dto: NotificationActionDTO): NotificationAction {
+    return this.create(dto);
   }
 
-  public static fromDTO(dto: NotificationActionDTO): NotificationAction {
-    return new NotificationAction(dto);
-  }
-
-  // ================= 校验 =================
-  
   private static validate(props: NotificationActionDTO): void {
-    if (!props.id || props.id.trim().length === 0) {
-      throw new Error('Action ID is required');
+    if (!props.actionKey?.trim()) throw new Error('Action actionKey is required');
+    if (!props.labelKey?.trim()) throw new Error('Action labelKey is required');
+
+    switch (props.kind) {
+      case 'navigate':
+        if (!props.destination.route?.trim()) throw new Error('Navigate destination.route is required');
+        return;
+      case 'owner-command':
+        if (!props.owner.type?.trim() || !props.owner.id?.trim()) {
+          throw new Error('Owner command owner reference is required');
+        }
+        if (!props.commandKey?.trim()) throw new Error('Owner command commandKey is required');
+        if (props.input !== undefined && !isJsonValue(props.input)) {
+          throw new Error('Owner command input must be a JSON value');
+        }
+        return;
+      case 'archive':
+        return;
+      default: {
+        const exhaustive: never = props;
+        throw new Error(`Unsupported notification action: ${String(exhaustive)}`);
+      }
     }
-    if (!props.label || props.label.trim().length === 0) {
-      throw new Error('Action label is required');
-    }
   }
 
-  // ================= Getters =================
+  get actionKey(): string { return this.props.actionKey; }
+  get labelKey(): string { return this.props.labelKey; }
+  get kind(): NotificationActionDTO['kind'] { return this.props.kind; }
 
-  public get id(): string {
-    return this.props.id;
-  }
-
-  public get label(): string {
-    return this.props.label;
-  }
-
-  public get type(): NotificationActionType {
-    return this.props.type;
-  }
-
-  public get payload(): unknown {
-    return this.props.payload;
-  }
-
-  // ================= 序列化 =================
-
-  public toDTO(): NotificationActionDTO {
-    return { ...this.props };
+  toDTO(): NotificationActionDTO {
+    return cloneAction(this.props);
   }
 }

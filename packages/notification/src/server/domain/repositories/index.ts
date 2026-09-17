@@ -24,3 +24,7 @@ export type {
   NotificationOutboxDispatchPlan,
 } from './i-notification-repository';
 export type { INotificationPreferenceRepository } from './i-notification-preference-repository';
+export type {
+  INotificationInteractionRepository,
+  RecordNotificationInteractionInput,
+} from './i-notification-interaction-repository';

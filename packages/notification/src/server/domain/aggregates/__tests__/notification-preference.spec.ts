@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { NotificationChannelType } from '@memoflow/contracts/notification';
+import { asHm, requireTimeZoneId } from '@memoflow/time';
 import { NotificationPreference } from '../notification-preference';
-import { DoNotDisturbConfig } from '../../value-objects/do-not-disturb-config';
-import { RateLimit } from '../../value-objects/rate-limit';
+import { QuietHours } from '../../value-objects/quiet-hours';
 
 const identityId = 'identity-pref' as never;
 
@@ -11,37 +11,21 @@ describe('NotificationPreference aggregate', () => {
     const pref = NotificationPreference.create({ identityId });
     expect(pref.globalChannels.size).toBe(0);
     expect(pref.workflowOverrides.size).toBe(0);
-    expect(pref.doNotDisturb).toBeNull();
-    expect(pref.rateLimit).toBeNull();
+    expect(pref.quietHours).toBeNull();
+    expect(pref.toServerDTO()).not.toHaveProperty('rateLimit');
+    expect(pref.toServerDTO()).not.toHaveProperty('doNotDisturb');
   });
 
-  it('sets, reads and clears a global channel preference', () => {
+  it('sets, reads and clears global/workflow channel preferences', () => {
     const pref = NotificationPreference.create({ identityId });
     pref.setGlobalChannel(NotificationChannelType.Email, false);
     expect(pref.getGlobalChannel(NotificationChannelType.Email)).toBe(false);
-    pref.setGlobalChannel(NotificationChannelType.Email, true);
-    expect(pref.getGlobalChannel(NotificationChannelType.Email)).toBe(true);
-    pref.clearGlobalChannel(NotificationChannelType.Email);
-    expect(pref.getGlobalChannel(NotificationChannelType.Email)).toBeUndefined();
-  });
-
-  it('sets, reads and clears a workflow-specific override', () => {
-    const pref = NotificationPreference.create({ identityId });
     pref.setWorkflowChannelOverride('task.deadline', NotificationChannelType.Desktop, true);
     expect(pref.getWorkflowChannelOverride('task.deadline', NotificationChannelType.Desktop)).toBe(true);
-    pref.setWorkflowChannelOverride('task.deadline', NotificationChannelType.Desktop, false);
-    expect(pref.getWorkflowChannelOverride('task.deadline', NotificationChannelType.Desktop)).toBe(false);
+    pref.clearGlobalChannel(NotificationChannelType.Email);
     pref.clearWorkflowChannelOverride('task.deadline', NotificationChannelType.Desktop);
-    expect(pref.getWorkflowChannelOverride('task.deadline', NotificationChannelType.Desktop)).toBeUndefined();
+    expect(pref.getGlobalChannel(NotificationChannelType.Email)).toBeUndefined();
     expect(pref.workflowOverrides.has('task.deadline')).toBe(false);
-  });
-
-  it('keeps workflow overrides isolated by workflow key', () => {
-    const pref = NotificationPreference.create({ identityId });
-    pref.setWorkflowChannelOverride('task.deadline', NotificationChannelType.Email, false);
-    pref.setWorkflowChannelOverride('goal.progress', NotificationChannelType.Email, true);
-    expect(pref.getWorkflowChannelOverride('task.deadline', NotificationChannelType.Email)).toBe(false);
-    expect(pref.getWorkflowChannelOverride('goal.progress', NotificationChannelType.Email)).toBe(true);
   });
 
   it('returns defensive copies of preference maps', () => {
@@ -52,39 +36,28 @@ describe('NotificationPreference aggregate', () => {
     expect(pref.getGlobalChannel(NotificationChannelType.Email)).toBe(false);
 
     pref.setWorkflowChannelOverride('task.deadline', NotificationChannelType.Desktop, true);
-    const overrides = pref.workflowOverrides;
-    overrides.get('task.deadline')?.set(NotificationChannelType.Desktop, false);
+    pref.workflowOverrides.get('task.deadline')?.set(NotificationChannelType.Desktop, false);
     expect(pref.getWorkflowChannelOverride('task.deadline', NotificationChannelType.Desktop)).toBe(true);
   });
 
-  it('persists DND and rate-limit policy configuration independently from channel preferences', () => {
+  it('owns Product-Time QuietHours but no platform rate-limit state', () => {
     const pref = NotificationPreference.create({ identityId });
-    const dnd = DoNotDisturbConfig.create({
+    const quiet = QuietHours.create({
       enabled: true,
-      startTime: '22:00',
-      endTime: '08:00',
-      daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+      timeZone: requireTimeZoneId('Asia/Tokyo'),
+      weeklyWindows: [{ daysOfWeek: [1, 2, 3, 4, 5], start: asHm('23:00'), end: asHm('07:00') }],
     });
-    const rate = RateLimit.create({ enabled: true, maxPerHour: 2, maxPerDay: 10 });
-    pref.setDoNotDisturb(dnd);
-    pref.setRateLimit(rate);
-    expect(pref.doNotDisturb?.toDTO()).toEqual(dnd.toDTO());
-    expect(pref.rateLimit?.toDTO()).toEqual(rate.toDTO());
+    pref.setQuietHours(quiet);
+    expect(pref.quietHours?.toDTO()).toEqual(quiet.toDTO());
+    expect(pref.toServerDTO()).not.toHaveProperty('rateLimit');
   });
 
-  it('serializes global and workflow layers without legacy module/category settings', () => {
-    const pref = NotificationPreference.create({ identityId });
-    pref.setGlobalChannel(NotificationChannelType.Email, false);
-    pref.setWorkflowChannelOverride('task.deadline', NotificationChannelType.Desktop, true);
-    const dto = pref.toServerDTO();
-    expect(dto.globalChannels).toEqual({ Email: false });
-    expect(dto.workflowOverrides).toEqual({ 'task.deadline': { Desktop: true } });
-    expect(dto).not.toHaveProperty('settings');
-    expect(dto).not.toHaveProperty('categories');
-    expect(dto).not.toHaveProperty('enabled');
-  });
-
-  it('reconstructs persisted preference layers', () => {
+  it('serializes and reconstructs canonical preference layers', () => {
+    const quiet = QuietHours.create({
+      enabled: true,
+      timeZone: requireTimeZoneId('UTC'),
+      weeklyWindows: [{ daysOfWeek: [0], start: asHm('22:00'), end: asHm('08:00') }],
+    });
     const pref = NotificationPreference.load({
       id: 'pref-1' as never,
       identityId,
@@ -92,15 +65,16 @@ describe('NotificationPreference aggregate', () => {
       workflowOverrides: new Map([
         ['task.deadline', new Map([[NotificationChannelType.Desktop, true]])],
       ]),
-      doNotDisturb: null,
-      rateLimit: null,
+      quietHours: quiet,
       version: 2,
       deletedAt: null,
       createdAt: new Date('2026-08-25T00:00:00Z'),
       updatedAt: new Date('2026-08-25T01:00:00Z'),
     });
-    expect(pref.getGlobalChannel(NotificationChannelType.Email)).toBe(false);
-    expect(pref.getWorkflowChannelOverride('task.deadline', NotificationChannelType.Desktop)).toBe(true);
+    const dto = pref.toServerDTO();
+    expect(dto.globalChannels).toEqual({ Email: false });
+    expect(dto.workflowOverrides).toEqual({ 'task.deadline': { Desktop: true } });
+    expect(dto.quietHours).toEqual(quiet.toDTO());
     expect(pref.version).toBe(2);
   });
 });

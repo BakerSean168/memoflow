@@ -42,6 +42,7 @@ import {
   createNotificationPrismaRepositories,
   type ChannelCapabilitySpec,
   type INotificationRepository,
+  type NotificationOwnerCommandRegistry,
   type NotificationRequestedWriterPort,
 } from '@memoflow/notification';
 import {
@@ -78,6 +79,8 @@ export interface ComposedNotification {
   };
   /** Compatibility alias for Goal reminder composition; points to repositories.requestedWriter. */
   readonly requestedWriter: NotificationRequestedWriterPort;
+  /** Late-bound owner command registry. Hosts register owner application ports after composition. */
+  readonly ownerCommandRegistry: NotificationOwnerCommandRegistry;
 }
 
 /**
@@ -131,6 +134,7 @@ export function composeNotification(
   const instance = createNotificationModule({
     notificationRepository: repositories.notificationRepository,
     preferenceRepository: repositories.notificationPreferenceRepository,
+    interactionRepository: repositories.notificationInteractionRepository,
     closureChecker: dependencies.closureChecker,
     userTimeContextPort: dependencies.userTimeContextPort,
     durableRuntime,
@@ -145,5 +149,6 @@ export function composeNotification(
       requestedWriter: repositories.requestedWriter,
     },
     requestedWriter: repositories.requestedWriter,
+    ownerCommandRegistry: instance.ownerCommandRegistry,
   };
 }

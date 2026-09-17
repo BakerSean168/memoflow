@@ -7,6 +7,9 @@
 export type {
   NotificationAction,
   NotificationActionDTO,
+  NotificationActionIntent,
+  NotificationEntityRef,
+  NotificationNavigationIntent,
 } from './notification-action';
 
 // ============ NotificationMetadata ============
@@ -22,17 +25,13 @@ export type {
   CategoryPreferenceDTO,
 } from './category-preference';
 
-// ============ DoNotDisturbConfig ============
+// ============ QuietHours ============
 export type {
-  DoNotDisturbConfig,
-  DoNotDisturbConfigDTO,
-} from './do-not-disturb-config';
-
-// ============ RateLimit ============
-export type {
-  RateLimit,
-  RateLimitDTO,
-} from './rate-limit';
+  QuietHours,
+  QuietHoursDTO,
+  QuietHoursWindow,
+  NotificationWeekday,
+} from './quiet-hours';
 
 // ============ Enum Value Objects ============
 export { NotificationType } from './notification-type';
@@ -68,7 +67,5 @@ export { RelatedEntityType } from './related-entity-type';
 
 export { NotificationChannelType } from './notification-channel-type';
 
-
-export { NotificationActionType } from './notification-action-type';
 
 export { ContentType } from './content-type';

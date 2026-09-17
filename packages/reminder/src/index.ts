@@ -43,6 +43,10 @@ export {
   loadPowerSyncRoutineLocalRegistrations,
   type RoutineLocalRegistrationsSnapshot,
 } from './server';
+export {
+  registerRoutineNotificationOwnerCommands,
+  type RoutineNotificationOwnerCommandRegistry,
+} from './server/application/services/routine-notification-owner-command.adapter';
 // Schedule orchestration integrations are re-exported through the package root
 // so host composers import only `@memoflow/reminder` (no `/schedule-*` subpath).
 // 通过包根重新导出 schedule 编排集成，使宿主 composer 只导入 `@memoflow/reminder`。

@@ -24,11 +24,11 @@
  * 也不启动任何 runtime adapter。
  *
  * `instance.api` is the HTTP/IPC-shared application seam
- * (`NotificationApplicationPort`). Both the API transport (this module) and the
+ * (`NotificationInboxPort`). Both the API transport (this module) and the
  * Electron IPC transport consume the same port, so behaviour parity across
  * hosts is guaranteed by construction.
  *
- * `instance.api` 是 HTTP/IPC 共用的应用 seam（`NotificationApplicationPort`）。
+ * `instance.api` 是 HTTP/IPC 共用的应用 seam（`NotificationInboxPort`）。
  * API 传输层（本模块）与 Electron IPC 传输层消费同一个 port，
  * 从而从构造上保证跨宿主行为一致。
  *
@@ -142,6 +142,7 @@ export function createNotificationApiModule(
         // a failed start must not leave any route installed on the host router.
         const notificationRoutes = registerNotificationRoutes(
           options.instance.api,
+          options.instance.operations,
           middleware,
           openApiRegistry,
         );

@@ -45,6 +45,36 @@ export function buildRoutineNotificationRequestedOutboxInput(
         category: NotificationCategory.Reminder,
       },
       suggestedChannels: [NotificationChannelType.InApp],
+      actions: [
+        {
+          kind: 'owner-command',
+          actionKey: 'complete',
+          labelKey: 'routine.action.complete',
+          owner: { type: 'routine-occurrence', id: input.occurrenceKey },
+          commandKey: 'routine.complete',
+          input: {
+            routineId: input.routineId,
+            occurrenceKey: input.occurrenceKey,
+          },
+        },
+        {
+          kind: 'owner-command',
+          actionKey: 'snooze-10m',
+          labelKey: 'routine.action.snooze10m',
+          owner: { type: 'routine-occurrence', id: input.occurrenceKey },
+          commandKey: 'routine.snooze',
+          input: {
+            routineId: input.routineId,
+            occurrenceKey: input.occurrenceKey,
+            durationMs: 600000,
+          },
+        },
+        {
+          kind: 'archive',
+          actionKey: 'archive',
+          labelKey: 'notification.action.archive',
+        },
+      ],
       correlationId: operationId,
       causationId: operationId,
     },

@@ -6,8 +6,8 @@ import type {
 import type { Result } from '@memoflow/contracts/result';
 import { error, ok } from '@memoflow/contracts/result';
 import type { INotificationPreferenceRepository } from '../../../domain/repositories';
-import { DoNotDisturbConfig } from '../../../domain/value-objects/do-not-disturb-config';
-import { RateLimit } from '../../../domain/value-objects/rate-limit';
+import { QuietHours } from '../../../domain/value-objects/quiet-hours';
+import { asHm } from '@memoflow/time';
 import { toNotificationPreferenceClientDTO } from './notification-dto-converters';
 
 export class UpdateNotificationPreferenceUseCase {
@@ -36,8 +36,20 @@ export class UpdateNotificationPreferenceUseCase {
         }
       }
     }
-    if (input.doNotDisturb) preference.setDoNotDisturb(DoNotDisturbConfig.create(input.doNotDisturb));
-    if (input.rateLimit) preference.setRateLimit(RateLimit.create(input.rateLimit));
+    if (input.quietHours !== undefined) {
+      preference.setQuietHours(
+        input.quietHours
+          ? QuietHours.create({
+              ...input.quietHours,
+              weeklyWindows: input.quietHours.weeklyWindows.map((window) => ({
+                ...window,
+                start: asHm(window.start),
+                end: asHm(window.end),
+              })),
+            })
+          : null,
+      );
+    }
 
     await this.preferenceRepository.save(preference);
     return ok(toNotificationPreferenceClientDTO(preference.toServerDTO()));

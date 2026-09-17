@@ -18,6 +18,7 @@ import { createNotificationScheduleNotificationPort } from './schedule-notificat
 import {
   NotificationPreferencePrismaRepository,
   NotificationPrismaRepository,
+  NotificationInteractionPrismaRepository,
   NotificationReliableOperationPrismaAdapter,
 } from './adapters/prisma';
 import { NotificationRequestedPrismaWriterAdapter } from './adapters/prisma/notification-requested-writer.prisma.adapter';
@@ -40,7 +41,11 @@ import {
 } from './adapters/deliverers/real-channel-deliverers';
 
 import { PrismaOperationAuditRepository } from '@memoflow/patterns/operations';
-import type { INotificationRepository, INotificationPreferenceRepository } from '../domain/repositories';
+import type {
+  INotificationInteractionRepository,
+  INotificationRepository,
+  INotificationPreferenceRepository,
+} from '../domain/repositories';
 import type { OperationAuditRepository } from '@memoflow/patterns/operations';
 
 export interface CreateNotificationPrismaModuleOptions {
@@ -72,6 +77,7 @@ export interface CreateNotificationPrismaModuleOptions {
 export interface NotificationPrismaRepositorySet {
   readonly notificationRepository: INotificationRepository;
   readonly notificationPreferenceRepository: INotificationPreferenceRepository;
+  readonly notificationInteractionRepository: INotificationInteractionRepository;
   readonly reliableAdapter: NotificationReliableOperationPort;
   readonly requestedWriter: NotificationRequestedWriterPort;
   readonly auditRepository: OperationAuditRepository;
@@ -99,6 +105,7 @@ export function createNotificationPrismaRepositories(
   return {
     notificationRepository: new NotificationPrismaRepository(db, service),
     notificationPreferenceRepository: new NotificationPreferencePrismaRepository(db),
+    notificationInteractionRepository: new NotificationInteractionPrismaRepository(db),
     reliableAdapter: new NotificationReliableOperationPrismaAdapter(db, service),
     requestedWriter: new NotificationRequestedPrismaWriterAdapter(db),
     auditRepository: new PrismaOperationAuditRepository(db),
@@ -148,6 +155,7 @@ export function createNotificationPrismaModule(
   return createNotificationModule({
     notificationRepository,
     preferenceRepository: repositories.notificationPreferenceRepository,
+    interactionRepository: repositories.notificationInteractionRepository,
     closureChecker: options.closureChecker,
     userTimeContextPort: options.userTimeContextPort,
     durableRuntime,

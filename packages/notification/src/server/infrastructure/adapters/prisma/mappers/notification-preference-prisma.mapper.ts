@@ -1,17 +1,14 @@
 import { parseJsonSafe } from '@memoflow/utils/shared';
-import type { NotificationChannelType } from '@memoflow/contracts/notification';
-import type { DoNotDisturbConfigDTO, RateLimitDTO } from '@memoflow/contracts/notification';
+import type { NotificationChannelType, QuietHoursDTO } from '@memoflow/contracts/notification';
 import { NotificationPreference } from '../../../../domain/aggregates/notification-preference';
-import { DoNotDisturbConfig } from '../../../../domain/value-objects/do-not-disturb-config';
-import { RateLimit } from '../../../../domain/value-objects/rate-limit';
+import { QuietHours } from '../../../../domain/value-objects/quiet-hours';
 
 export type PrismaNotificationPreferenceRow = {
   id: string;
   identityId: string;
   globalChannels: string;
   workflowOverrides: string;
-  doNotDisturb: string | null;
-  rateLimit: string | null;
+  quietHours: string | null;
   version: number;
   createdAt: Date;
   updatedAt: Date;
@@ -39,13 +36,9 @@ export class NotificationPreferencePrismaMapper {
           new Map(Object.entries(channels) as [NotificationChannelType, boolean][]),
         ]),
       ),
-      doNotDisturb: (() => {
-        const dto = parseJsonSafe<DoNotDisturbConfigDTO>(row.doNotDisturb);
-        return dto ? DoNotDisturbConfig.fromDTO(dto) : null;
-      })(),
-      rateLimit: (() => {
-        const dto = parseJsonSafe<RateLimitDTO>(row.rateLimit);
-        return dto ? RateLimit.fromDTO(dto) : null;
+      quietHours: (() => {
+        const dto = parseJsonSafe<QuietHoursDTO>(row.quietHours);
+        return dto ? QuietHours.fromDTO(dto) : null;
       })(),
       version: row.version,
       deletedAt: row.deletedAt,
@@ -60,8 +53,7 @@ export class NotificationPreferencePrismaMapper {
       dto,
       globalChannels: JSON.stringify(dto.globalChannels),
       workflowOverrides: JSON.stringify(dto.workflowOverrides),
-      doNotDisturb: dto.doNotDisturb ? JSON.stringify(dto.doNotDisturb) : null,
-      rateLimit: dto.rateLimit ? JSON.stringify(dto.rateLimit) : null,
+      quietHours: dto.quietHours ? JSON.stringify(dto.quietHours) : null,
     };
   }
 }

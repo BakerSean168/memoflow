@@ -1,9 +1,7 @@
 import { z } from 'zod';
-import { brandedId } from '../../../primitives';
-import type { NotificationId } from '../../../primitives';
 import type { NotificationPreferenceServerDTO } from '../aggregates/notification-preference-server';
 import type { NotificationStatsDTO } from '../dtos/notification-result.dto';
-import type { NotificationServerDTO } from '../aggregates/notification-server';
+import { TimeZoneIdSchema } from '../../../primitives';
 
 const ChannelPreferenceFlagsSchema = z.object({
   InApp: z.boolean().optional(),
@@ -14,32 +12,41 @@ const ChannelPreferenceFlagsSchema = z.object({
   Webhook: z.boolean().optional(),
 });
 
-/** User-owned layers only: global channel choice and workflow-specific overrides. */
+const HmSchema = z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/);
+const WeekdaySchema = z.union([
+  z.literal(0),
+  z.literal(1),
+  z.literal(2),
+  z.literal(3),
+  z.literal(4),
+  z.literal(5),
+  z.literal(6),
+]);
+
+export const QuietHoursSchema = z.object({
+  enabled: z.boolean(),
+  timeZone: TimeZoneIdSchema,
+  weeklyWindows: z.array(
+    z.object({
+      daysOfWeek: z.array(WeekdaySchema).min(1),
+      start: HmSchema,
+      end: HmSchema,
+    }).refine((value) => value.start !== value.end, {
+      message: 'QuietHours window start and end must differ',
+    }),
+  ),
+});
+
+/** User-owned layers only. System rate/burst guards are deliberately absent. */
 export const UpdateNotificationPreferenceSchema = z.object({
   globalChannels: ChannelPreferenceFlagsSchema.optional(),
   workflowOverrides: z.record(z.string(), ChannelPreferenceFlagsSchema).optional(),
-  doNotDisturb: z.object({
-    enabled: z.boolean(),
-    startTime: z.string(),
-    endTime: z.string(),
-    daysOfWeek: z.array(z.number().int().min(0).max(6)),
-  }).optional(),
-  rateLimit: z.object({
-    enabled: z.boolean(),
-    maxPerHour: z.number().int().min(1),
-    maxPerDay: z.number().int().min(1),
-  }).optional(),
+  quietHours: QuietHoursSchema.nullable().optional(),
 });
+
 export type UpdateNotificationPreferenceReq = z.infer<typeof UpdateNotificationPreferenceSchema>;
 export type UpdateNotificationPreferenceRes = NotificationPreferenceServerDTO;
 export type GetNotificationPreferenceReq = void;
 export type GetNotificationPreferenceRes = NotificationPreferenceServerDTO;
 export type GetNotificationStatsReq = void;
 export type GetNotificationStatsRes = NotificationStatsDTO;
-
-export const ExecuteNotificationActionSchema = z.object({
-  notificationId: brandedId<NotificationId>(),
-  actionId: z.string(),
-});
-export type ExecuteNotificationActionReq = z.infer<typeof ExecuteNotificationActionSchema>;
-export type ExecuteNotificationActionRes = NotificationServerDTO;

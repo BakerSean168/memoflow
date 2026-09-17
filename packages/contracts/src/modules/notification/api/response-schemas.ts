@@ -17,6 +17,7 @@ import { NotificationChannelType } from '../value-objects/notification-channel-t
 import { ImportanceLevel } from '../../../shared/value-objects/importance';
 import { UrgencyLevel } from '../../../shared/value-objects/urgency';
 import { RelatedEntityType } from '../value-objects/related-entity-type';
+import { QuietHoursSchema } from './notification-preference.dto';
 
 /**
  * Notification Fact response schema. Delivery status is intentionally absent.
@@ -96,17 +97,7 @@ export const NotificationPreferenceResponseSchema = z.object({
     z.string(),
     z.partialRecord(z.enum(NotificationChannelType), z.boolean()),
   ),
-  doNotDisturb: z.object({
-    enabled: z.boolean(),
-    startTime: z.string(),
-    endTime: z.string(),
-    daysOfWeek: z.array(z.number()),
-  }).nullable(),
-  rateLimit: z.object({
-    enabled: z.boolean(),
-    maxPerHour: z.number(),
-    maxPerDay: z.number(),
-  }).nullable(),
+  quietHours: QuietHoursSchema.nullable(),
   version: z.number(),
   createdAt: z.number(),
   updatedAt: z.number(),

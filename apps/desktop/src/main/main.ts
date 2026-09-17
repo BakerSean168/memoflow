@@ -61,6 +61,7 @@ import { composeTask } from './runtime/compose-task';
 import { composeAccount } from './runtime/compose-account';
 import { composeNotification } from './runtime/compose-notification';
 import { composeReminder } from './runtime/compose-reminder';
+import { registerRoutineNotificationOwnerCommands } from '@memoflow/reminder';
 import { PowerSyncProtocolSessionStore } from '@memoflow/reminder/server';
 import { createProtocolSessionRuntime } from '@memoflow/reminder/routine-runtime';
 import {
@@ -232,6 +233,10 @@ async function registerBusinessModules(
     notificationRequestedWriter: notificationComposed.requestedWriter,
     userTimeContextPort: settingElectronModule.userTimeContextPort,
   });
+  registerRoutineNotificationOwnerCommands(
+    notificationComposed.ownerCommandRegistry,
+    reminderComposed.routineCommandPort,
+  );
   // Project the durable vNext Routine snapshot before sensors start so the first
   // activity transition cannot race ahead of registration. ROUTINE-5301 can
   // reuse the same refresh seam after configuration mutations.

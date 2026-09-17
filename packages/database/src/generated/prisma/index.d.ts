@@ -169,10 +169,10 @@ export type TaskLabel = $Result.DefaultSelection<Prisma.$TaskLabelPayload>
  */
 export type Notification = $Result.DefaultSelection<Prisma.$NotificationPayload>
 /**
- * Model NotificationHistory
+ * Model NotificationInteraction
  *
  */
-export type NotificationHistory = $Result.DefaultSelection<Prisma.$NotificationHistoryPayload>
+export type NotificationInteraction = $Result.DefaultSelection<Prisma.$NotificationInteractionPayload>
 /**
  * Model NotificationDeliveryDecisionRecord
  *
@@ -944,14 +944,14 @@ export class PrismaClient<
   get notification(): Prisma.NotificationDelegate<ExtArgs, ClientOptions>;
 
   /**
-   * `prisma.notificationHistory`: Exposes CRUD operations for the **NotificationHistory** model.
+   * `prisma.notificationInteraction`: Exposes CRUD operations for the **NotificationInteraction** model.
     * Example usage:
     * ```ts
-    * // Fetch zero or more NotificationHistories
-    * const notificationHistories = await prisma.notificationHistory.findMany()
+    * // Fetch zero or more NotificationInteractions
+    * const notificationInteractions = await prisma.notificationInteraction.findMany()
     * ```
     */
-  get notificationHistory(): Prisma.NotificationHistoryDelegate<ExtArgs, ClientOptions>;
+  get notificationInteraction(): Prisma.NotificationInteractionDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.notificationDeliveryDecisionRecord`: Exposes CRUD operations for the **NotificationDeliveryDecisionRecord** model.
@@ -2037,7 +2037,7 @@ export namespace Prisma {
     GoalLabel: 'GoalLabel',
     TaskLabel: 'TaskLabel',
     Notification: 'Notification',
-    NotificationHistory: 'NotificationHistory',
+    NotificationInteraction: 'NotificationInteraction',
     NotificationDeliveryDecisionRecord: 'NotificationDeliveryDecisionRecord',
     NotificationPreference: 'NotificationPreference',
     NotificationDispatchOutbox: 'NotificationDispatchOutbox',
@@ -2115,7 +2115,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "account" | "activityLedger" | "aiConversation" | "aiMessage" | "aiGenerationTask" | "aiUsageQuota" | "aiProviderConfig" | "aiProviderOnboardingSession" | "knowledgeGenerationTask" | "aiKnowledgeIndexEntry" | "dashboardConfig" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "rule" | "ruleRevision" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationHistory" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "reminderTemplate" | "reminderGroup" | "reminderInstance" | "reminderHistory" | "reminderStatistic" | "reminderResponse" | "userReminderPreference" | "reminderOccurrence" | "routineDefinition" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "repository" | "folder" | "resource" | "repositoryResource" | "linkedContent" | "resourceReference" | "repositoryExplorer" | "repositoryStatistic" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
+      modelProps: "account" | "activityLedger" | "aiConversation" | "aiMessage" | "aiGenerationTask" | "aiUsageQuota" | "aiProviderConfig" | "aiProviderOnboardingSession" | "knowledgeGenerationTask" | "aiKnowledgeIndexEntry" | "dashboardConfig" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "rule" | "ruleRevision" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "reminderTemplate" | "reminderGroup" | "reminderInstance" | "reminderHistory" | "reminderStatistic" | "reminderResponse" | "userReminderPreference" | "reminderOccurrence" | "routineDefinition" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "repository" | "folder" | "resource" | "repositoryResource" | "linkedContent" | "resourceReference" | "repositoryExplorer" | "repositoryStatistic" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -4413,77 +4413,77 @@ export namespace Prisma {
           }
         }
       }
-      NotificationHistory: {
-        payload: Prisma.$NotificationHistoryPayload<ExtArgs>
-        fields: Prisma.NotificationHistoryFieldRefs
+      NotificationInteraction: {
+        payload: Prisma.$NotificationInteractionPayload<ExtArgs>
+        fields: Prisma.NotificationInteractionFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.NotificationHistoryFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NotificationHistoryPayload> | null
+            args: Prisma.NotificationInteractionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationInteractionPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.NotificationHistoryFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NotificationHistoryPayload>
+            args: Prisma.NotificationInteractionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationInteractionPayload>
           }
           findFirst: {
-            args: Prisma.NotificationHistoryFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NotificationHistoryPayload> | null
+            args: Prisma.NotificationInteractionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationInteractionPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.NotificationHistoryFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NotificationHistoryPayload>
+            args: Prisma.NotificationInteractionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationInteractionPayload>
           }
           findMany: {
-            args: Prisma.NotificationHistoryFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NotificationHistoryPayload>[]
+            args: Prisma.NotificationInteractionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationInteractionPayload>[]
           }
           create: {
-            args: Prisma.NotificationHistoryCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NotificationHistoryPayload>
+            args: Prisma.NotificationInteractionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationInteractionPayload>
           }
           createMany: {
-            args: Prisma.NotificationHistoryCreateManyArgs<ExtArgs>
+            args: Prisma.NotificationInteractionCreateManyArgs<ExtArgs>
             result: BatchPayload
           }
           createManyAndReturn: {
-            args: Prisma.NotificationHistoryCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NotificationHistoryPayload>[]
+            args: Prisma.NotificationInteractionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationInteractionPayload>[]
           }
           delete: {
-            args: Prisma.NotificationHistoryDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NotificationHistoryPayload>
+            args: Prisma.NotificationInteractionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationInteractionPayload>
           }
           update: {
-            args: Prisma.NotificationHistoryUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NotificationHistoryPayload>
+            args: Prisma.NotificationInteractionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationInteractionPayload>
           }
           deleteMany: {
-            args: Prisma.NotificationHistoryDeleteManyArgs<ExtArgs>
+            args: Prisma.NotificationInteractionDeleteManyArgs<ExtArgs>
             result: BatchPayload
           }
           updateMany: {
-            args: Prisma.NotificationHistoryUpdateManyArgs<ExtArgs>
+            args: Prisma.NotificationInteractionUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
           updateManyAndReturn: {
-            args: Prisma.NotificationHistoryUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NotificationHistoryPayload>[]
+            args: Prisma.NotificationInteractionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationInteractionPayload>[]
           }
           upsert: {
-            args: Prisma.NotificationHistoryUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$NotificationHistoryPayload>
+            args: Prisma.NotificationInteractionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationInteractionPayload>
           }
           aggregate: {
-            args: Prisma.NotificationHistoryAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateNotificationHistory>
+            args: Prisma.NotificationInteractionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateNotificationInteraction>
           }
           groupBy: {
-            args: Prisma.NotificationHistoryGroupByArgs<ExtArgs>
-            result: $Utils.Optional<NotificationHistoryGroupByOutputType>[]
+            args: Prisma.NotificationInteractionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<NotificationInteractionGroupByOutputType>[]
           }
           count: {
-            args: Prisma.NotificationHistoryCountArgs<ExtArgs>
-            result: $Utils.Optional<NotificationHistoryCountAggregateOutputType> | number
+            args: Prisma.NotificationInteractionCountArgs<ExtArgs>
+            result: $Utils.Optional<NotificationInteractionCountAggregateOutputType> | number
           }
         }
       }
@@ -9214,7 +9214,7 @@ export namespace Prisma {
     goalLabel?: GoalLabelOmit
     taskLabel?: TaskLabelOmit
     notification?: NotificationOmit
-    notificationHistory?: NotificationHistoryOmit
+    notificationInteraction?: NotificationInteractionOmit
     notificationDeliveryDecisionRecord?: NotificationDeliveryDecisionRecordOmit
     notificationPreference?: NotificationPreferenceOmit
     notificationDispatchOutbox?: NotificationDispatchOutboxOmit
@@ -9396,7 +9396,7 @@ export namespace Prisma {
     reminderOccurrences: number
     routineOccurrences: number
     routineInteractions: number
-    notificationHistory: number
+    notificationInteractions: number
     notificationDispatchOutboxes: number
     aiMessages: number
     folders: number
@@ -9447,7 +9447,7 @@ export namespace Prisma {
     reminderOccurrences?: boolean | AccountCountOutputTypeCountReminderOccurrencesArgs
     routineOccurrences?: boolean | AccountCountOutputTypeCountRoutineOccurrencesArgs
     routineInteractions?: boolean | AccountCountOutputTypeCountRoutineInteractionsArgs
-    notificationHistory?: boolean | AccountCountOutputTypeCountNotificationHistoryArgs
+    notificationInteractions?: boolean | AccountCountOutputTypeCountNotificationInteractionsArgs
     notificationDispatchOutboxes?: boolean | AccountCountOutputTypeCountNotificationDispatchOutboxesArgs
     aiMessages?: boolean | AccountCountOutputTypeCountAiMessagesArgs
     folders?: boolean | AccountCountOutputTypeCountFoldersArgs
@@ -9745,8 +9745,8 @@ export namespace Prisma {
   /**
    * AccountCountOutputType without action
    */
-  export type AccountCountOutputTypeCountNotificationHistoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: NotificationHistoryWhereInput
+  export type AccountCountOutputTypeCountNotificationInteractionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NotificationInteractionWhereInput
   }
 
   /**
@@ -10131,13 +10131,13 @@ export namespace Prisma {
    */
 
   export type NotificationCountOutputType = {
-    history: number
+    interactions: number
     dispatchOutboxes: number
     deliveryDecisions: number
   }
 
   export type NotificationCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    history?: boolean | NotificationCountOutputTypeCountHistoryArgs
+    interactions?: boolean | NotificationCountOutputTypeCountInteractionsArgs
     dispatchOutboxes?: boolean | NotificationCountOutputTypeCountDispatchOutboxesArgs
     deliveryDecisions?: boolean | NotificationCountOutputTypeCountDeliveryDecisionsArgs
   }
@@ -10156,8 +10156,8 @@ export namespace Prisma {
   /**
    * NotificationCountOutputType without action
    */
-  export type NotificationCountOutputTypeCountHistoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: NotificationHistoryWhereInput
+  export type NotificationCountOutputTypeCountInteractionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NotificationInteractionWhereInput
   }
 
   /**
@@ -10948,7 +10948,7 @@ export namespace Prisma {
     reminderOccurrences?: boolean | Account$reminderOccurrencesArgs<ExtArgs>
     routineOccurrences?: boolean | Account$routineOccurrencesArgs<ExtArgs>
     routineInteractions?: boolean | Account$routineInteractionsArgs<ExtArgs>
-    notificationHistory?: boolean | Account$notificationHistoryArgs<ExtArgs>
+    notificationInteractions?: boolean | Account$notificationInteractionsArgs<ExtArgs>
     notificationDispatchOutboxes?: boolean | Account$notificationDispatchOutboxesArgs<ExtArgs>
     aiMessages?: boolean | Account$aiMessagesArgs<ExtArgs>
     folders?: boolean | Account$foldersArgs<ExtArgs>
@@ -11036,7 +11036,7 @@ export namespace Prisma {
     reminderOccurrences?: boolean | Account$reminderOccurrencesArgs<ExtArgs>
     routineOccurrences?: boolean | Account$routineOccurrencesArgs<ExtArgs>
     routineInteractions?: boolean | Account$routineInteractionsArgs<ExtArgs>
-    notificationHistory?: boolean | Account$notificationHistoryArgs<ExtArgs>
+    notificationInteractions?: boolean | Account$notificationInteractionsArgs<ExtArgs>
     notificationDispatchOutboxes?: boolean | Account$notificationDispatchOutboxesArgs<ExtArgs>
     aiMessages?: boolean | Account$aiMessagesArgs<ExtArgs>
     folders?: boolean | Account$foldersArgs<ExtArgs>
@@ -11102,7 +11102,7 @@ export namespace Prisma {
       reminderOccurrences: Prisma.$ReminderOccurrencePayload<ExtArgs>[]
       routineOccurrences: Prisma.$RoutineOccurrencePayload<ExtArgs>[]
       routineInteractions: Prisma.$RoutineInteractionPayload<ExtArgs>[]
-      notificationHistory: Prisma.$NotificationHistoryPayload<ExtArgs>[]
+      notificationInteractions: Prisma.$NotificationInteractionPayload<ExtArgs>[]
       notificationDispatchOutboxes: Prisma.$NotificationDispatchOutboxPayload<ExtArgs>[]
       aiMessages: Prisma.$AiMessagePayload<ExtArgs>[]
       folders: Prisma.$FolderPayload<ExtArgs>[]
@@ -11558,7 +11558,7 @@ export namespace Prisma {
     reminderOccurrences<T extends Account$reminderOccurrencesArgs<ExtArgs> = {}>(args?: Subset<T, Account$reminderOccurrencesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReminderOccurrencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     routineOccurrences<T extends Account$routineOccurrencesArgs<ExtArgs> = {}>(args?: Subset<T, Account$routineOccurrencesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoutineOccurrencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     routineInteractions<T extends Account$routineInteractionsArgs<ExtArgs> = {}>(args?: Subset<T, Account$routineInteractionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoutineInteractionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    notificationHistory<T extends Account$notificationHistoryArgs<ExtArgs> = {}>(args?: Subset<T, Account$notificationHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    notificationInteractions<T extends Account$notificationInteractionsArgs<ExtArgs> = {}>(args?: Subset<T, Account$notificationInteractionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationInteractionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     notificationDispatchOutboxes<T extends Account$notificationDispatchOutboxesArgs<ExtArgs> = {}>(args?: Subset<T, Account$notificationDispatchOutboxesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationDispatchOutboxPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     aiMessages<T extends Account$aiMessagesArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiMessagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiMessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     folders<T extends Account$foldersArgs<ExtArgs> = {}>(args?: Subset<T, Account$foldersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FolderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -13034,27 +13034,27 @@ export namespace Prisma {
   }
 
   /**
-   * Account.notificationHistory
+   * Account.notificationInteractions
    */
-  export type Account$notificationHistoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type Account$notificationInteractionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NotificationHistory
+     * Select specific fields to fetch from the NotificationInteraction
      */
-    select?: NotificationHistorySelect<ExtArgs> | null
+    select?: NotificationInteractionSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NotificationHistory
+     * Omit specific fields from the NotificationInteraction
      */
-    omit?: NotificationHistoryOmit<ExtArgs> | null
+    omit?: NotificationInteractionOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NotificationHistoryInclude<ExtArgs> | null
-    where?: NotificationHistoryWhereInput
-    orderBy?: NotificationHistoryOrderByWithRelationInput | NotificationHistoryOrderByWithRelationInput[]
-    cursor?: NotificationHistoryWhereUniqueInput
+    include?: NotificationInteractionInclude<ExtArgs> | null
+    where?: NotificationInteractionWhereInput
+    orderBy?: NotificationInteractionOrderByWithRelationInput | NotificationInteractionOrderByWithRelationInput[]
+    cursor?: NotificationInteractionWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: NotificationHistoryScalarFieldEnum | NotificationHistoryScalarFieldEnum[]
+    distinct?: NotificationInteractionScalarFieldEnum | NotificationInteractionScalarFieldEnum[]
   }
 
   /**
@@ -47440,7 +47440,7 @@ export namespace Prisma {
     deletedAt?: boolean
     archivedAt?: boolean
     isRead?: boolean
-    history?: boolean | Notification$historyArgs<ExtArgs>
+    interactions?: boolean | Notification$interactionsArgs<ExtArgs>
     dispatchOutboxes?: boolean | Notification$dispatchOutboxesArgs<ExtArgs>
     deliveryDecisions?: boolean | Notification$deliveryDecisionsArgs<ExtArgs>
     account?: boolean | AccountDefaultArgs<ExtArgs>
@@ -47538,7 +47538,7 @@ export namespace Prisma {
 
   export type NotificationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "type" | "category" | "workflowKey" | "topic" | "idempotencyKey" | "title" | "content" | "importance" | "urgency" | "relatedEntityType" | "relatedEntityId" | "metadata" | "actions" | "navigationIntent" | "correlationId" | "causationId" | "readAt" | "expiresAt" | "version" | "createdAt" | "updatedAt" | "deletedAt" | "archivedAt" | "isRead", ExtArgs["result"]["notification"]>
   export type NotificationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    history?: boolean | Notification$historyArgs<ExtArgs>
+    interactions?: boolean | Notification$interactionsArgs<ExtArgs>
     dispatchOutboxes?: boolean | Notification$dispatchOutboxesArgs<ExtArgs>
     deliveryDecisions?: boolean | Notification$deliveryDecisionsArgs<ExtArgs>
     account?: boolean | AccountDefaultArgs<ExtArgs>
@@ -47554,7 +47554,7 @@ export namespace Prisma {
   export type $NotificationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Notification"
     objects: {
-      history: Prisma.$NotificationHistoryPayload<ExtArgs>[]
+      interactions: Prisma.$NotificationInteractionPayload<ExtArgs>[]
       dispatchOutboxes: Prisma.$NotificationDispatchOutboxPayload<ExtArgs>[]
       deliveryDecisions: Prisma.$NotificationDeliveryDecisionRecordPayload<ExtArgs>[]
       account: Prisma.$AccountPayload<ExtArgs>
@@ -47980,7 +47980,7 @@ export namespace Prisma {
    */
   export interface Prisma__NotificationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    history<T extends Notification$historyArgs<ExtArgs> = {}>(args?: Subset<T, Notification$historyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    interactions<T extends Notification$interactionsArgs<ExtArgs> = {}>(args?: Subset<T, Notification$interactionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationInteractionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     dispatchOutboxes<T extends Notification$dispatchOutboxesArgs<ExtArgs> = {}>(args?: Subset<T, Notification$dispatchOutboxesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationDispatchOutboxPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     deliveryDecisions<T extends Notification$deliveryDecisionsArgs<ExtArgs> = {}>(args?: Subset<T, Notification$deliveryDecisionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationDeliveryDecisionRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
@@ -48440,27 +48440,27 @@ export namespace Prisma {
   }
 
   /**
-   * Notification.history
+   * Notification.interactions
    */
-  export type Notification$historyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type Notification$interactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NotificationHistory
+     * Select specific fields to fetch from the NotificationInteraction
      */
-    select?: NotificationHistorySelect<ExtArgs> | null
+    select?: NotificationInteractionSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NotificationHistory
+     * Omit specific fields from the NotificationInteraction
      */
-    omit?: NotificationHistoryOmit<ExtArgs> | null
+    omit?: NotificationInteractionOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NotificationHistoryInclude<ExtArgs> | null
-    where?: NotificationHistoryWhereInput
-    orderBy?: NotificationHistoryOrderByWithRelationInput | NotificationHistoryOrderByWithRelationInput[]
-    cursor?: NotificationHistoryWhereUniqueInput
+    include?: NotificationInteractionInclude<ExtArgs> | null
+    where?: NotificationInteractionWhereInput
+    orderBy?: NotificationInteractionOrderByWithRelationInput | NotificationInteractionOrderByWithRelationInput[]
+    cursor?: NotificationInteractionWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: NotificationHistoryScalarFieldEnum | NotificationHistoryScalarFieldEnum[]
+    distinct?: NotificationInteractionScalarFieldEnum | NotificationInteractionScalarFieldEnum[]
   }
 
   /**
@@ -48531,381 +48531,429 @@ export namespace Prisma {
 
 
   /**
-   * Model NotificationHistory
+   * Model NotificationInteraction
    */
 
-  export type AggregateNotificationHistory = {
-    _count: NotificationHistoryCountAggregateOutputType | null
-    _min: NotificationHistoryMinAggregateOutputType | null
-    _max: NotificationHistoryMaxAggregateOutputType | null
+  export type AggregateNotificationInteraction = {
+    _count: NotificationInteractionCountAggregateOutputType | null
+    _min: NotificationInteractionMinAggregateOutputType | null
+    _max: NotificationInteractionMaxAggregateOutputType | null
   }
 
-  export type NotificationHistoryMinAggregateOutputType = {
+  export type NotificationInteractionMinAggregateOutputType = {
     id: string | null
+    idempotencyKey: string | null
     identityId: string | null
     notificationId: string | null
-    action: string | null
-    details: string | null
-    actorId: string | null
-    createdAt: Date | null
+    actionKey: string | null
+    actionKind: string | null
+    occurredAt: Date | null
+    commandReceiptId: string | null
+    outcome: string | null
+    correlationId: string | null
+    causationId: string | null
   }
 
-  export type NotificationHistoryMaxAggregateOutputType = {
+  export type NotificationInteractionMaxAggregateOutputType = {
     id: string | null
+    idempotencyKey: string | null
     identityId: string | null
     notificationId: string | null
-    action: string | null
-    details: string | null
-    actorId: string | null
-    createdAt: Date | null
+    actionKey: string | null
+    actionKind: string | null
+    occurredAt: Date | null
+    commandReceiptId: string | null
+    outcome: string | null
+    correlationId: string | null
+    causationId: string | null
   }
 
-  export type NotificationHistoryCountAggregateOutputType = {
+  export type NotificationInteractionCountAggregateOutputType = {
     id: number
+    idempotencyKey: number
     identityId: number
     notificationId: number
-    action: number
-    details: number
-    actorId: number
-    createdAt: number
+    actionKey: number
+    actionKind: number
+    occurredAt: number
+    commandReceiptId: number
+    outcome: number
+    correlationId: number
+    causationId: number
     _all: number
   }
 
 
-  export type NotificationHistoryMinAggregateInputType = {
+  export type NotificationInteractionMinAggregateInputType = {
     id?: true
+    idempotencyKey?: true
     identityId?: true
     notificationId?: true
-    action?: true
-    details?: true
-    actorId?: true
-    createdAt?: true
+    actionKey?: true
+    actionKind?: true
+    occurredAt?: true
+    commandReceiptId?: true
+    outcome?: true
+    correlationId?: true
+    causationId?: true
   }
 
-  export type NotificationHistoryMaxAggregateInputType = {
+  export type NotificationInteractionMaxAggregateInputType = {
     id?: true
+    idempotencyKey?: true
     identityId?: true
     notificationId?: true
-    action?: true
-    details?: true
-    actorId?: true
-    createdAt?: true
+    actionKey?: true
+    actionKind?: true
+    occurredAt?: true
+    commandReceiptId?: true
+    outcome?: true
+    correlationId?: true
+    causationId?: true
   }
 
-  export type NotificationHistoryCountAggregateInputType = {
+  export type NotificationInteractionCountAggregateInputType = {
     id?: true
+    idempotencyKey?: true
     identityId?: true
     notificationId?: true
-    action?: true
-    details?: true
-    actorId?: true
-    createdAt?: true
+    actionKey?: true
+    actionKind?: true
+    occurredAt?: true
+    commandReceiptId?: true
+    outcome?: true
+    correlationId?: true
+    causationId?: true
     _all?: true
   }
 
-  export type NotificationHistoryAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NotificationInteractionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Filter which NotificationHistory to aggregate.
+     * Filter which NotificationInteraction to aggregate.
      */
-    where?: NotificationHistoryWhereInput
+    where?: NotificationInteractionWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
-     * Determine the order of NotificationHistories to fetch.
+     * Determine the order of NotificationInteractions to fetch.
      */
-    orderBy?: NotificationHistoryOrderByWithRelationInput | NotificationHistoryOrderByWithRelationInput[]
+    orderBy?: NotificationInteractionOrderByWithRelationInput | NotificationInteractionOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      *
      * Sets the start position
      */
-    cursor?: NotificationHistoryWhereUniqueInput
+    cursor?: NotificationInteractionWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
-     * Take `±n` NotificationHistories from the position of the cursor.
+     * Take `±n` NotificationInteractions from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
-     * Skip the first `n` NotificationHistories.
+     * Skip the first `n` NotificationInteractions.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      *
-     * Count returned NotificationHistories
+     * Count returned NotificationInteractions
     **/
-    _count?: true | NotificationHistoryCountAggregateInputType
+    _count?: true | NotificationInteractionCountAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      *
      * Select which fields to find the minimum value
     **/
-    _min?: NotificationHistoryMinAggregateInputType
+    _min?: NotificationInteractionMinAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      *
      * Select which fields to find the maximum value
     **/
-    _max?: NotificationHistoryMaxAggregateInputType
+    _max?: NotificationInteractionMaxAggregateInputType
   }
 
-  export type GetNotificationHistoryAggregateType<T extends NotificationHistoryAggregateArgs> = {
-        [P in keyof T & keyof AggregateNotificationHistory]: P extends '_count' | 'count'
+  export type GetNotificationInteractionAggregateType<T extends NotificationInteractionAggregateArgs> = {
+        [P in keyof T & keyof AggregateNotificationInteraction]: P extends '_count' | 'count'
       ? T[P] extends true
         ? number
-        : GetScalarType<T[P], AggregateNotificationHistory[P]>
-      : GetScalarType<T[P], AggregateNotificationHistory[P]>
+        : GetScalarType<T[P], AggregateNotificationInteraction[P]>
+      : GetScalarType<T[P], AggregateNotificationInteraction[P]>
   }
 
 
 
 
-  export type NotificationHistoryGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: NotificationHistoryWhereInput
-    orderBy?: NotificationHistoryOrderByWithAggregationInput | NotificationHistoryOrderByWithAggregationInput[]
-    by: NotificationHistoryScalarFieldEnum[] | NotificationHistoryScalarFieldEnum
-    having?: NotificationHistoryScalarWhereWithAggregatesInput
+  export type NotificationInteractionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NotificationInteractionWhereInput
+    orderBy?: NotificationInteractionOrderByWithAggregationInput | NotificationInteractionOrderByWithAggregationInput[]
+    by: NotificationInteractionScalarFieldEnum[] | NotificationInteractionScalarFieldEnum
+    having?: NotificationInteractionScalarWhereWithAggregatesInput
     take?: number
     skip?: number
-    _count?: NotificationHistoryCountAggregateInputType | true
-    _min?: NotificationHistoryMinAggregateInputType
-    _max?: NotificationHistoryMaxAggregateInputType
+    _count?: NotificationInteractionCountAggregateInputType | true
+    _min?: NotificationInteractionMinAggregateInputType
+    _max?: NotificationInteractionMaxAggregateInputType
   }
 
-  export type NotificationHistoryGroupByOutputType = {
+  export type NotificationInteractionGroupByOutputType = {
     id: string
+    idempotencyKey: string
     identityId: string
     notificationId: string
-    action: string
-    details: string | null
-    actorId: string | null
-    createdAt: Date
-    _count: NotificationHistoryCountAggregateOutputType | null
-    _min: NotificationHistoryMinAggregateOutputType | null
-    _max: NotificationHistoryMaxAggregateOutputType | null
+    actionKey: string
+    actionKind: string
+    occurredAt: Date
+    commandReceiptId: string | null
+    outcome: string
+    correlationId: string | null
+    causationId: string | null
+    _count: NotificationInteractionCountAggregateOutputType | null
+    _min: NotificationInteractionMinAggregateOutputType | null
+    _max: NotificationInteractionMaxAggregateOutputType | null
   }
 
-  type GetNotificationHistoryGroupByPayload<T extends NotificationHistoryGroupByArgs> = Prisma.PrismaPromise<
+  type GetNotificationInteractionGroupByPayload<T extends NotificationInteractionGroupByArgs> = Prisma.PrismaPromise<
     Array<
-      PickEnumerable<NotificationHistoryGroupByOutputType, T['by']> &
+      PickEnumerable<NotificationInteractionGroupByOutputType, T['by']> &
         {
-          [P in ((keyof T) & (keyof NotificationHistoryGroupByOutputType))]: P extends '_count'
+          [P in ((keyof T) & (keyof NotificationInteractionGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
-              : GetScalarType<T[P], NotificationHistoryGroupByOutputType[P]>
-            : GetScalarType<T[P], NotificationHistoryGroupByOutputType[P]>
+              : GetScalarType<T[P], NotificationInteractionGroupByOutputType[P]>
+            : GetScalarType<T[P], NotificationInteractionGroupByOutputType[P]>
         }
       >
     >
 
 
-  export type NotificationHistorySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type NotificationInteractionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    idempotencyKey?: boolean
     identityId?: boolean
     notificationId?: boolean
-    action?: boolean
-    details?: boolean
-    actorId?: boolean
-    createdAt?: boolean
+    actionKey?: boolean
+    actionKind?: boolean
+    occurredAt?: boolean
+    commandReceiptId?: boolean
+    outcome?: boolean
+    correlationId?: boolean
+    causationId?: boolean
     identity?: boolean | AccountDefaultArgs<ExtArgs>
     notification?: boolean | NotificationDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["notificationHistory"]>
+  }, ExtArgs["result"]["notificationInteraction"]>
 
-  export type NotificationHistorySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type NotificationInteractionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    idempotencyKey?: boolean
     identityId?: boolean
     notificationId?: boolean
-    action?: boolean
-    details?: boolean
-    actorId?: boolean
-    createdAt?: boolean
+    actionKey?: boolean
+    actionKind?: boolean
+    occurredAt?: boolean
+    commandReceiptId?: boolean
+    outcome?: boolean
+    correlationId?: boolean
+    causationId?: boolean
     identity?: boolean | AccountDefaultArgs<ExtArgs>
     notification?: boolean | NotificationDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["notificationHistory"]>
+  }, ExtArgs["result"]["notificationInteraction"]>
 
-  export type NotificationHistorySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type NotificationInteractionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    idempotencyKey?: boolean
     identityId?: boolean
     notificationId?: boolean
-    action?: boolean
-    details?: boolean
-    actorId?: boolean
-    createdAt?: boolean
+    actionKey?: boolean
+    actionKind?: boolean
+    occurredAt?: boolean
+    commandReceiptId?: boolean
+    outcome?: boolean
+    correlationId?: boolean
+    causationId?: boolean
     identity?: boolean | AccountDefaultArgs<ExtArgs>
     notification?: boolean | NotificationDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["notificationHistory"]>
+  }, ExtArgs["result"]["notificationInteraction"]>
 
-  export type NotificationHistorySelectScalar = {
+  export type NotificationInteractionSelectScalar = {
     id?: boolean
+    idempotencyKey?: boolean
     identityId?: boolean
     notificationId?: boolean
-    action?: boolean
-    details?: boolean
-    actorId?: boolean
-    createdAt?: boolean
+    actionKey?: boolean
+    actionKind?: boolean
+    occurredAt?: boolean
+    commandReceiptId?: boolean
+    outcome?: boolean
+    correlationId?: boolean
+    causationId?: boolean
   }
 
-  export type NotificationHistoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "notificationId" | "action" | "details" | "actorId" | "createdAt", ExtArgs["result"]["notificationHistory"]>
-  export type NotificationHistoryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NotificationInteractionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "idempotencyKey" | "identityId" | "notificationId" | "actionKey" | "actionKind" | "occurredAt" | "commandReceiptId" | "outcome" | "correlationId" | "causationId", ExtArgs["result"]["notificationInteraction"]>
+  export type NotificationInteractionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     identity?: boolean | AccountDefaultArgs<ExtArgs>
     notification?: boolean | NotificationDefaultArgs<ExtArgs>
   }
-  export type NotificationHistoryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NotificationInteractionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     identity?: boolean | AccountDefaultArgs<ExtArgs>
     notification?: boolean | NotificationDefaultArgs<ExtArgs>
   }
-  export type NotificationHistoryIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NotificationInteractionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     identity?: boolean | AccountDefaultArgs<ExtArgs>
     notification?: boolean | NotificationDefaultArgs<ExtArgs>
   }
 
-  export type $NotificationHistoryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "NotificationHistory"
+  export type $NotificationInteractionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "NotificationInteraction"
     objects: {
       identity: Prisma.$AccountPayload<ExtArgs>
       notification: Prisma.$NotificationPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
+      idempotencyKey: string
       identityId: string
       notificationId: string
-      action: string
-      details: string | null
-      actorId: string | null
-      createdAt: Date
-    }, ExtArgs["result"]["notificationHistory"]>
+      actionKey: string
+      actionKind: string
+      occurredAt: Date
+      commandReceiptId: string | null
+      outcome: string
+      correlationId: string | null
+      causationId: string | null
+    }, ExtArgs["result"]["notificationInteraction"]>
     composites: {}
   }
 
-  type NotificationHistoryGetPayload<S extends boolean | null | undefined | NotificationHistoryDefaultArgs> = $Result.GetResult<Prisma.$NotificationHistoryPayload, S>
+  type NotificationInteractionGetPayload<S extends boolean | null | undefined | NotificationInteractionDefaultArgs> = $Result.GetResult<Prisma.$NotificationInteractionPayload, S>
 
-  type NotificationHistoryCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<NotificationHistoryFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: NotificationHistoryCountAggregateInputType | true
+  type NotificationInteractionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<NotificationInteractionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: NotificationInteractionCountAggregateInputType | true
     }
 
-  export interface NotificationHistoryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['NotificationHistory'], meta: { name: 'NotificationHistory' } }
+  export interface NotificationInteractionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['NotificationInteraction'], meta: { name: 'NotificationInteraction' } }
     /**
-     * Find zero or one NotificationHistory that matches the filter.
-     * @param {NotificationHistoryFindUniqueArgs} args - Arguments to find a NotificationHistory
+     * Find zero or one NotificationInteraction that matches the filter.
+     * @param {NotificationInteractionFindUniqueArgs} args - Arguments to find a NotificationInteraction
      * @example
-     * // Get one NotificationHistory
-     * const notificationHistory = await prisma.notificationHistory.findUnique({
+     * // Get one NotificationInteraction
+     * const notificationInteraction = await prisma.notificationInteraction.findUnique({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findUnique<T extends NotificationHistoryFindUniqueArgs>(args: SelectSubset<T, NotificationHistoryFindUniqueArgs<ExtArgs>>): Prisma__NotificationHistoryClient<$Result.GetResult<Prisma.$NotificationHistoryPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends NotificationInteractionFindUniqueArgs>(args: SelectSubset<T, NotificationInteractionFindUniqueArgs<ExtArgs>>): Prisma__NotificationInteractionClient<$Result.GetResult<Prisma.$NotificationInteractionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one NotificationHistory that matches the filter or throw an error with `error.code='P2025'`
+     * Find one NotificationInteraction that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
-     * @param {NotificationHistoryFindUniqueOrThrowArgs} args - Arguments to find a NotificationHistory
+     * @param {NotificationInteractionFindUniqueOrThrowArgs} args - Arguments to find a NotificationInteraction
      * @example
-     * // Get one NotificationHistory
-     * const notificationHistory = await prisma.notificationHistory.findUniqueOrThrow({
+     * // Get one NotificationInteraction
+     * const notificationInteraction = await prisma.notificationInteraction.findUniqueOrThrow({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findUniqueOrThrow<T extends NotificationHistoryFindUniqueOrThrowArgs>(args: SelectSubset<T, NotificationHistoryFindUniqueOrThrowArgs<ExtArgs>>): Prisma__NotificationHistoryClient<$Result.GetResult<Prisma.$NotificationHistoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends NotificationInteractionFindUniqueOrThrowArgs>(args: SelectSubset<T, NotificationInteractionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__NotificationInteractionClient<$Result.GetResult<Prisma.$NotificationInteractionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find the first NotificationHistory that matches the filter.
+     * Find the first NotificationInteraction that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NotificationHistoryFindFirstArgs} args - Arguments to find a NotificationHistory
+     * @param {NotificationInteractionFindFirstArgs} args - Arguments to find a NotificationInteraction
      * @example
-     * // Get one NotificationHistory
-     * const notificationHistory = await prisma.notificationHistory.findFirst({
+     * // Get one NotificationInteraction
+     * const notificationInteraction = await prisma.notificationInteraction.findFirst({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findFirst<T extends NotificationHistoryFindFirstArgs>(args?: SelectSubset<T, NotificationHistoryFindFirstArgs<ExtArgs>>): Prisma__NotificationHistoryClient<$Result.GetResult<Prisma.$NotificationHistoryPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends NotificationInteractionFindFirstArgs>(args?: SelectSubset<T, NotificationInteractionFindFirstArgs<ExtArgs>>): Prisma__NotificationInteractionClient<$Result.GetResult<Prisma.$NotificationInteractionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find the first NotificationHistory that matches the filter or
+     * Find the first NotificationInteraction that matches the filter or
      * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NotificationHistoryFindFirstOrThrowArgs} args - Arguments to find a NotificationHistory
+     * @param {NotificationInteractionFindFirstOrThrowArgs} args - Arguments to find a NotificationInteraction
      * @example
-     * // Get one NotificationHistory
-     * const notificationHistory = await prisma.notificationHistory.findFirstOrThrow({
+     * // Get one NotificationInteraction
+     * const notificationInteraction = await prisma.notificationInteraction.findFirstOrThrow({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findFirstOrThrow<T extends NotificationHistoryFindFirstOrThrowArgs>(args?: SelectSubset<T, NotificationHistoryFindFirstOrThrowArgs<ExtArgs>>): Prisma__NotificationHistoryClient<$Result.GetResult<Prisma.$NotificationHistoryPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends NotificationInteractionFindFirstOrThrowArgs>(args?: SelectSubset<T, NotificationInteractionFindFirstOrThrowArgs<ExtArgs>>): Prisma__NotificationInteractionClient<$Result.GetResult<Prisma.$NotificationInteractionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find zero or more NotificationHistories that matches the filter.
+     * Find zero or more NotificationInteractions that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NotificationHistoryFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @param {NotificationInteractionFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
-     * // Get all NotificationHistories
-     * const notificationHistories = await prisma.notificationHistory.findMany()
+     * // Get all NotificationInteractions
+     * const notificationInteractions = await prisma.notificationInteraction.findMany()
      *
-     * // Get first 10 NotificationHistories
-     * const notificationHistories = await prisma.notificationHistory.findMany({ take: 10 })
+     * // Get first 10 NotificationInteractions
+     * const notificationInteractions = await prisma.notificationInteraction.findMany({ take: 10 })
      *
      * // Only select the `id`
-     * const notificationHistoryWithIdOnly = await prisma.notificationHistory.findMany({ select: { id: true } })
+     * const notificationInteractionWithIdOnly = await prisma.notificationInteraction.findMany({ select: { id: true } })
      *
      */
-    findMany<T extends NotificationHistoryFindManyArgs>(args?: SelectSubset<T, NotificationHistoryFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends NotificationInteractionFindManyArgs>(args?: SelectSubset<T, NotificationInteractionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationInteractionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
-     * Create a NotificationHistory.
-     * @param {NotificationHistoryCreateArgs} args - Arguments to create a NotificationHistory.
+     * Create a NotificationInteraction.
+     * @param {NotificationInteractionCreateArgs} args - Arguments to create a NotificationInteraction.
      * @example
-     * // Create one NotificationHistory
-     * const NotificationHistory = await prisma.notificationHistory.create({
+     * // Create one NotificationInteraction
+     * const NotificationInteraction = await prisma.notificationInteraction.create({
      *   data: {
-     *     // ... data to create a NotificationHistory
+     *     // ... data to create a NotificationInteraction
      *   }
      * })
      *
      */
-    create<T extends NotificationHistoryCreateArgs>(args: SelectSubset<T, NotificationHistoryCreateArgs<ExtArgs>>): Prisma__NotificationHistoryClient<$Result.GetResult<Prisma.$NotificationHistoryPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends NotificationInteractionCreateArgs>(args: SelectSubset<T, NotificationInteractionCreateArgs<ExtArgs>>): Prisma__NotificationInteractionClient<$Result.GetResult<Prisma.$NotificationInteractionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Create many NotificationHistories.
-     * @param {NotificationHistoryCreateManyArgs} args - Arguments to create many NotificationHistories.
+     * Create many NotificationInteractions.
+     * @param {NotificationInteractionCreateManyArgs} args - Arguments to create many NotificationInteractions.
      * @example
-     * // Create many NotificationHistories
-     * const notificationHistory = await prisma.notificationHistory.createMany({
+     * // Create many NotificationInteractions
+     * const notificationInteraction = await prisma.notificationInteraction.createMany({
      *   data: [
      *     // ... provide data here
      *   ]
      * })
      *
      */
-    createMany<T extends NotificationHistoryCreateManyArgs>(args?: SelectSubset<T, NotificationHistoryCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    createMany<T extends NotificationInteractionCreateManyArgs>(args?: SelectSubset<T, NotificationInteractionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Create many NotificationHistories and returns the data saved in the database.
-     * @param {NotificationHistoryCreateManyAndReturnArgs} args - Arguments to create many NotificationHistories.
+     * Create many NotificationInteractions and returns the data saved in the database.
+     * @param {NotificationInteractionCreateManyAndReturnArgs} args - Arguments to create many NotificationInteractions.
      * @example
-     * // Create many NotificationHistories
-     * const notificationHistory = await prisma.notificationHistory.createManyAndReturn({
+     * // Create many NotificationInteractions
+     * const notificationInteraction = await prisma.notificationInteraction.createManyAndReturn({
      *   data: [
      *     // ... provide data here
      *   ]
      * })
      *
-     * // Create many NotificationHistories and only return the `id`
-     * const notificationHistoryWithIdOnly = await prisma.notificationHistory.createManyAndReturn({
+     * // Create many NotificationInteractions and only return the `id`
+     * const notificationInteractionWithIdOnly = await prisma.notificationInteraction.createManyAndReturn({
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -48915,28 +48963,28 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      *
      */
-    createManyAndReturn<T extends NotificationHistoryCreateManyAndReturnArgs>(args?: SelectSubset<T, NotificationHistoryCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationHistoryPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+    createManyAndReturn<T extends NotificationInteractionCreateManyAndReturnArgs>(args?: SelectSubset<T, NotificationInteractionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationInteractionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
-     * Delete a NotificationHistory.
-     * @param {NotificationHistoryDeleteArgs} args - Arguments to delete one NotificationHistory.
+     * Delete a NotificationInteraction.
+     * @param {NotificationInteractionDeleteArgs} args - Arguments to delete one NotificationInteraction.
      * @example
-     * // Delete one NotificationHistory
-     * const NotificationHistory = await prisma.notificationHistory.delete({
+     * // Delete one NotificationInteraction
+     * const NotificationInteraction = await prisma.notificationInteraction.delete({
      *   where: {
-     *     // ... filter to delete one NotificationHistory
+     *     // ... filter to delete one NotificationInteraction
      *   }
      * })
      *
      */
-    delete<T extends NotificationHistoryDeleteArgs>(args: SelectSubset<T, NotificationHistoryDeleteArgs<ExtArgs>>): Prisma__NotificationHistoryClient<$Result.GetResult<Prisma.$NotificationHistoryPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends NotificationInteractionDeleteArgs>(args: SelectSubset<T, NotificationInteractionDeleteArgs<ExtArgs>>): Prisma__NotificationInteractionClient<$Result.GetResult<Prisma.$NotificationInteractionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Update one NotificationHistory.
-     * @param {NotificationHistoryUpdateArgs} args - Arguments to update one NotificationHistory.
+     * Update one NotificationInteraction.
+     * @param {NotificationInteractionUpdateArgs} args - Arguments to update one NotificationInteraction.
      * @example
-     * // Update one NotificationHistory
-     * const notificationHistory = await prisma.notificationHistory.update({
+     * // Update one NotificationInteraction
+     * const notificationInteraction = await prisma.notificationInteraction.update({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -48946,30 +48994,30 @@ export namespace Prisma {
      * })
      *
      */
-    update<T extends NotificationHistoryUpdateArgs>(args: SelectSubset<T, NotificationHistoryUpdateArgs<ExtArgs>>): Prisma__NotificationHistoryClient<$Result.GetResult<Prisma.$NotificationHistoryPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends NotificationInteractionUpdateArgs>(args: SelectSubset<T, NotificationInteractionUpdateArgs<ExtArgs>>): Prisma__NotificationInteractionClient<$Result.GetResult<Prisma.$NotificationInteractionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Delete zero or more NotificationHistories.
-     * @param {NotificationHistoryDeleteManyArgs} args - Arguments to filter NotificationHistories to delete.
+     * Delete zero or more NotificationInteractions.
+     * @param {NotificationInteractionDeleteManyArgs} args - Arguments to filter NotificationInteractions to delete.
      * @example
-     * // Delete a few NotificationHistories
-     * const { count } = await prisma.notificationHistory.deleteMany({
+     * // Delete a few NotificationInteractions
+     * const { count } = await prisma.notificationInteraction.deleteMany({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      *
      */
-    deleteMany<T extends NotificationHistoryDeleteManyArgs>(args?: SelectSubset<T, NotificationHistoryDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    deleteMany<T extends NotificationInteractionDeleteManyArgs>(args?: SelectSubset<T, NotificationInteractionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more NotificationHistories.
+     * Update zero or more NotificationInteractions.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NotificationHistoryUpdateManyArgs} args - Arguments to update one or more rows.
+     * @param {NotificationInteractionUpdateManyArgs} args - Arguments to update one or more rows.
      * @example
-     * // Update many NotificationHistories
-     * const notificationHistory = await prisma.notificationHistory.updateMany({
+     * // Update many NotificationInteractions
+     * const notificationInteraction = await prisma.notificationInteraction.updateMany({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -48979,14 +49027,14 @@ export namespace Prisma {
      * })
      *
      */
-    updateMany<T extends NotificationHistoryUpdateManyArgs>(args: SelectSubset<T, NotificationHistoryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    updateMany<T extends NotificationInteractionUpdateManyArgs>(args: SelectSubset<T, NotificationInteractionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more NotificationHistories and returns the data updated in the database.
-     * @param {NotificationHistoryUpdateManyAndReturnArgs} args - Arguments to update many NotificationHistories.
+     * Update zero or more NotificationInteractions and returns the data updated in the database.
+     * @param {NotificationInteractionUpdateManyAndReturnArgs} args - Arguments to update many NotificationInteractions.
      * @example
-     * // Update many NotificationHistories
-     * const notificationHistory = await prisma.notificationHistory.updateManyAndReturn({
+     * // Update many NotificationInteractions
+     * const notificationInteraction = await prisma.notificationInteraction.updateManyAndReturn({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -48995,8 +49043,8 @@ export namespace Prisma {
      *   ]
      * })
      *
-     * // Update zero or more NotificationHistories and only return the `id`
-     * const notificationHistoryWithIdOnly = await prisma.notificationHistory.updateManyAndReturn({
+     * // Update zero or more NotificationInteractions and only return the `id`
+     * const notificationInteractionWithIdOnly = await prisma.notificationInteraction.updateManyAndReturn({
      *   select: { id: true },
      *   where: {
      *     // ... provide filter here
@@ -49009,56 +49057,56 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      *
      */
-    updateManyAndReturn<T extends NotificationHistoryUpdateManyAndReturnArgs>(args: SelectSubset<T, NotificationHistoryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationHistoryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+    updateManyAndReturn<T extends NotificationInteractionUpdateManyAndReturnArgs>(args: SelectSubset<T, NotificationInteractionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationInteractionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
-     * Create or update one NotificationHistory.
-     * @param {NotificationHistoryUpsertArgs} args - Arguments to update or create a NotificationHistory.
+     * Create or update one NotificationInteraction.
+     * @param {NotificationInteractionUpsertArgs} args - Arguments to update or create a NotificationInteraction.
      * @example
-     * // Update or create a NotificationHistory
-     * const notificationHistory = await prisma.notificationHistory.upsert({
+     * // Update or create a NotificationInteraction
+     * const notificationInteraction = await prisma.notificationInteraction.upsert({
      *   create: {
-     *     // ... data to create a NotificationHistory
+     *     // ... data to create a NotificationInteraction
      *   },
      *   update: {
      *     // ... in case it already exists, update
      *   },
      *   where: {
-     *     // ... the filter for the NotificationHistory we want to update
+     *     // ... the filter for the NotificationInteraction we want to update
      *   }
      * })
      */
-    upsert<T extends NotificationHistoryUpsertArgs>(args: SelectSubset<T, NotificationHistoryUpsertArgs<ExtArgs>>): Prisma__NotificationHistoryClient<$Result.GetResult<Prisma.$NotificationHistoryPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends NotificationInteractionUpsertArgs>(args: SelectSubset<T, NotificationInteractionUpsertArgs<ExtArgs>>): Prisma__NotificationInteractionClient<$Result.GetResult<Prisma.$NotificationInteractionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
-     * Count the number of NotificationHistories.
+     * Count the number of NotificationInteractions.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NotificationHistoryCountArgs} args - Arguments to filter NotificationHistories to count.
+     * @param {NotificationInteractionCountArgs} args - Arguments to filter NotificationInteractions to count.
      * @example
-     * // Count the number of NotificationHistories
-     * const count = await prisma.notificationHistory.count({
+     * // Count the number of NotificationInteractions
+     * const count = await prisma.notificationInteraction.count({
      *   where: {
-     *     // ... the filter for the NotificationHistories we want to count
+     *     // ... the filter for the NotificationInteractions we want to count
      *   }
      * })
     **/
-    count<T extends NotificationHistoryCountArgs>(
-      args?: Subset<T, NotificationHistoryCountArgs>,
+    count<T extends NotificationInteractionCountArgs>(
+      args?: Subset<T, NotificationInteractionCountArgs>,
     ): Prisma.PrismaPromise<
       T extends $Utils.Record<'select', any>
         ? T['select'] extends true
           ? number
-          : GetScalarType<T['select'], NotificationHistoryCountAggregateOutputType>
+          : GetScalarType<T['select'], NotificationInteractionCountAggregateOutputType>
         : number
     >
 
     /**
-     * Allows you to perform aggregations operations on a NotificationHistory.
+     * Allows you to perform aggregations operations on a NotificationInteraction.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NotificationHistoryAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @param {NotificationInteractionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
      * @example
      * // Ordered by age ascending
      * // Where email contains prisma.io
@@ -49078,13 +49126,13 @@ export namespace Prisma {
      *   take: 10,
      * })
     **/
-    aggregate<T extends NotificationHistoryAggregateArgs>(args: Subset<T, NotificationHistoryAggregateArgs>): Prisma.PrismaPromise<GetNotificationHistoryAggregateType<T>>
+    aggregate<T extends NotificationInteractionAggregateArgs>(args: Subset<T, NotificationInteractionAggregateArgs>): Prisma.PrismaPromise<GetNotificationInteractionAggregateType<T>>
 
     /**
-     * Group by NotificationHistory.
+     * Group by NotificationInteraction.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {NotificationHistoryGroupByArgs} args - Group by arguments.
+     * @param {NotificationInteractionGroupByArgs} args - Group by arguments.
      * @example
      * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
@@ -49099,14 +49147,14 @@ export namespace Prisma {
      *
     **/
     groupBy<
-      T extends NotificationHistoryGroupByArgs,
+      T extends NotificationInteractionGroupByArgs,
       HasSelectOrTake extends Or<
         Extends<'skip', Keys<T>>,
         Extends<'take', Keys<T>>
       >,
       OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: NotificationHistoryGroupByArgs['orderBy'] }
-        : { orderBy?: NotificationHistoryGroupByArgs['orderBy'] },
+        ? { orderBy: NotificationInteractionGroupByArgs['orderBy'] }
+        : { orderBy?: NotificationInteractionGroupByArgs['orderBy'] },
       OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
       ByFields extends MaybeTupleToUnion<T['by']>,
       ByValid extends Has<ByFields, OrderFields>,
@@ -49155,20 +49203,20 @@ export namespace Prisma {
             ? never
             : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
         }[OrderFields]
-    >(args: SubsetIntersection<T, NotificationHistoryGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetNotificationHistoryGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+    >(args: SubsetIntersection<T, NotificationInteractionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetNotificationInteractionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
   /**
-   * Fields of the NotificationHistory model
+   * Fields of the NotificationInteraction model
    */
-  readonly fields: NotificationHistoryFieldRefs;
+  readonly fields: NotificationInteractionFieldRefs;
   }
 
   /**
-   * The delegate class that acts as a "Promise-like" for NotificationHistory.
+   * The delegate class that acts as a "Promise-like" for NotificationInteraction.
    * Why is this prefixed with `Prisma__`?
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__NotificationHistoryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__NotificationInteractionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     identity<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     notification<T extends NotificationDefaultArgs<ExtArgs> = {}>(args?: Subset<T, NotificationDefaultArgs<ExtArgs>>): Prisma__NotificationClient<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
@@ -49198,432 +49246,436 @@ export namespace Prisma {
 
 
   /**
-   * Fields of the NotificationHistory model
+   * Fields of the NotificationInteraction model
    */
-  interface NotificationHistoryFieldRefs {
-    readonly id: FieldRef<"NotificationHistory", 'String'>
-    readonly identityId: FieldRef<"NotificationHistory", 'String'>
-    readonly notificationId: FieldRef<"NotificationHistory", 'String'>
-    readonly action: FieldRef<"NotificationHistory", 'String'>
-    readonly details: FieldRef<"NotificationHistory", 'String'>
-    readonly actorId: FieldRef<"NotificationHistory", 'String'>
-    readonly createdAt: FieldRef<"NotificationHistory", 'DateTime'>
+  interface NotificationInteractionFieldRefs {
+    readonly id: FieldRef<"NotificationInteraction", 'String'>
+    readonly idempotencyKey: FieldRef<"NotificationInteraction", 'String'>
+    readonly identityId: FieldRef<"NotificationInteraction", 'String'>
+    readonly notificationId: FieldRef<"NotificationInteraction", 'String'>
+    readonly actionKey: FieldRef<"NotificationInteraction", 'String'>
+    readonly actionKind: FieldRef<"NotificationInteraction", 'String'>
+    readonly occurredAt: FieldRef<"NotificationInteraction", 'DateTime'>
+    readonly commandReceiptId: FieldRef<"NotificationInteraction", 'String'>
+    readonly outcome: FieldRef<"NotificationInteraction", 'String'>
+    readonly correlationId: FieldRef<"NotificationInteraction", 'String'>
+    readonly causationId: FieldRef<"NotificationInteraction", 'String'>
   }
 
 
   // Custom InputTypes
   /**
-   * NotificationHistory findUnique
+   * NotificationInteraction findUnique
    */
-  export type NotificationHistoryFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NotificationInteractionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NotificationHistory
+     * Select specific fields to fetch from the NotificationInteraction
      */
-    select?: NotificationHistorySelect<ExtArgs> | null
+    select?: NotificationInteractionSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NotificationHistory
+     * Omit specific fields from the NotificationInteraction
      */
-    omit?: NotificationHistoryOmit<ExtArgs> | null
+    omit?: NotificationInteractionOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NotificationHistoryInclude<ExtArgs> | null
+    include?: NotificationInteractionInclude<ExtArgs> | null
     /**
-     * Filter, which NotificationHistory to fetch.
+     * Filter, which NotificationInteraction to fetch.
      */
-    where: NotificationHistoryWhereUniqueInput
+    where: NotificationInteractionWhereUniqueInput
   }
 
   /**
-   * NotificationHistory findUniqueOrThrow
+   * NotificationInteraction findUniqueOrThrow
    */
-  export type NotificationHistoryFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NotificationInteractionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NotificationHistory
+     * Select specific fields to fetch from the NotificationInteraction
      */
-    select?: NotificationHistorySelect<ExtArgs> | null
+    select?: NotificationInteractionSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NotificationHistory
+     * Omit specific fields from the NotificationInteraction
      */
-    omit?: NotificationHistoryOmit<ExtArgs> | null
+    omit?: NotificationInteractionOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NotificationHistoryInclude<ExtArgs> | null
+    include?: NotificationInteractionInclude<ExtArgs> | null
     /**
-     * Filter, which NotificationHistory to fetch.
+     * Filter, which NotificationInteraction to fetch.
      */
-    where: NotificationHistoryWhereUniqueInput
+    where: NotificationInteractionWhereUniqueInput
   }
 
   /**
-   * NotificationHistory findFirst
+   * NotificationInteraction findFirst
    */
-  export type NotificationHistoryFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NotificationInteractionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NotificationHistory
+     * Select specific fields to fetch from the NotificationInteraction
      */
-    select?: NotificationHistorySelect<ExtArgs> | null
+    select?: NotificationInteractionSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NotificationHistory
+     * Omit specific fields from the NotificationInteraction
      */
-    omit?: NotificationHistoryOmit<ExtArgs> | null
+    omit?: NotificationInteractionOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NotificationHistoryInclude<ExtArgs> | null
+    include?: NotificationInteractionInclude<ExtArgs> | null
     /**
-     * Filter, which NotificationHistory to fetch.
+     * Filter, which NotificationInteraction to fetch.
      */
-    where?: NotificationHistoryWhereInput
+    where?: NotificationInteractionWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
-     * Determine the order of NotificationHistories to fetch.
+     * Determine the order of NotificationInteractions to fetch.
      */
-    orderBy?: NotificationHistoryOrderByWithRelationInput | NotificationHistoryOrderByWithRelationInput[]
+    orderBy?: NotificationInteractionOrderByWithRelationInput | NotificationInteractionOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      *
-     * Sets the position for searching for NotificationHistories.
+     * Sets the position for searching for NotificationInteractions.
      */
-    cursor?: NotificationHistoryWhereUniqueInput
+    cursor?: NotificationInteractionWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
-     * Take `±n` NotificationHistories from the position of the cursor.
+     * Take `±n` NotificationInteractions from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
-     * Skip the first `n` NotificationHistories.
+     * Skip the first `n` NotificationInteractions.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      *
-     * Filter by unique combinations of NotificationHistories.
+     * Filter by unique combinations of NotificationInteractions.
      */
-    distinct?: NotificationHistoryScalarFieldEnum | NotificationHistoryScalarFieldEnum[]
+    distinct?: NotificationInteractionScalarFieldEnum | NotificationInteractionScalarFieldEnum[]
   }
 
   /**
-   * NotificationHistory findFirstOrThrow
+   * NotificationInteraction findFirstOrThrow
    */
-  export type NotificationHistoryFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NotificationInteractionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NotificationHistory
+     * Select specific fields to fetch from the NotificationInteraction
      */
-    select?: NotificationHistorySelect<ExtArgs> | null
+    select?: NotificationInteractionSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NotificationHistory
+     * Omit specific fields from the NotificationInteraction
      */
-    omit?: NotificationHistoryOmit<ExtArgs> | null
+    omit?: NotificationInteractionOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NotificationHistoryInclude<ExtArgs> | null
+    include?: NotificationInteractionInclude<ExtArgs> | null
     /**
-     * Filter, which NotificationHistory to fetch.
+     * Filter, which NotificationInteraction to fetch.
      */
-    where?: NotificationHistoryWhereInput
+    where?: NotificationInteractionWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
-     * Determine the order of NotificationHistories to fetch.
+     * Determine the order of NotificationInteractions to fetch.
      */
-    orderBy?: NotificationHistoryOrderByWithRelationInput | NotificationHistoryOrderByWithRelationInput[]
+    orderBy?: NotificationInteractionOrderByWithRelationInput | NotificationInteractionOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      *
-     * Sets the position for searching for NotificationHistories.
+     * Sets the position for searching for NotificationInteractions.
      */
-    cursor?: NotificationHistoryWhereUniqueInput
+    cursor?: NotificationInteractionWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
-     * Take `±n` NotificationHistories from the position of the cursor.
+     * Take `±n` NotificationInteractions from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
-     * Skip the first `n` NotificationHistories.
+     * Skip the first `n` NotificationInteractions.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      *
-     * Filter by unique combinations of NotificationHistories.
+     * Filter by unique combinations of NotificationInteractions.
      */
-    distinct?: NotificationHistoryScalarFieldEnum | NotificationHistoryScalarFieldEnum[]
+    distinct?: NotificationInteractionScalarFieldEnum | NotificationInteractionScalarFieldEnum[]
   }
 
   /**
-   * NotificationHistory findMany
+   * NotificationInteraction findMany
    */
-  export type NotificationHistoryFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NotificationInteractionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NotificationHistory
+     * Select specific fields to fetch from the NotificationInteraction
      */
-    select?: NotificationHistorySelect<ExtArgs> | null
+    select?: NotificationInteractionSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NotificationHistory
+     * Omit specific fields from the NotificationInteraction
      */
-    omit?: NotificationHistoryOmit<ExtArgs> | null
+    omit?: NotificationInteractionOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NotificationHistoryInclude<ExtArgs> | null
+    include?: NotificationInteractionInclude<ExtArgs> | null
     /**
-     * Filter, which NotificationHistories to fetch.
+     * Filter, which NotificationInteractions to fetch.
      */
-    where?: NotificationHistoryWhereInput
+    where?: NotificationInteractionWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
-     * Determine the order of NotificationHistories to fetch.
+     * Determine the order of NotificationInteractions to fetch.
      */
-    orderBy?: NotificationHistoryOrderByWithRelationInput | NotificationHistoryOrderByWithRelationInput[]
+    orderBy?: NotificationInteractionOrderByWithRelationInput | NotificationInteractionOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      *
-     * Sets the position for listing NotificationHistories.
+     * Sets the position for listing NotificationInteractions.
      */
-    cursor?: NotificationHistoryWhereUniqueInput
+    cursor?: NotificationInteractionWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
-     * Take `±n` NotificationHistories from the position of the cursor.
+     * Take `±n` NotificationInteractions from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
-     * Skip the first `n` NotificationHistories.
+     * Skip the first `n` NotificationInteractions.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      *
-     * Filter by unique combinations of NotificationHistories.
+     * Filter by unique combinations of NotificationInteractions.
      */
-    distinct?: NotificationHistoryScalarFieldEnum | NotificationHistoryScalarFieldEnum[]
+    distinct?: NotificationInteractionScalarFieldEnum | NotificationInteractionScalarFieldEnum[]
   }
 
   /**
-   * NotificationHistory create
+   * NotificationInteraction create
    */
-  export type NotificationHistoryCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NotificationInteractionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NotificationHistory
+     * Select specific fields to fetch from the NotificationInteraction
      */
-    select?: NotificationHistorySelect<ExtArgs> | null
+    select?: NotificationInteractionSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NotificationHistory
+     * Omit specific fields from the NotificationInteraction
      */
-    omit?: NotificationHistoryOmit<ExtArgs> | null
+    omit?: NotificationInteractionOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NotificationHistoryInclude<ExtArgs> | null
+    include?: NotificationInteractionInclude<ExtArgs> | null
     /**
-     * The data needed to create a NotificationHistory.
+     * The data needed to create a NotificationInteraction.
      */
-    data: XOR<NotificationHistoryCreateInput, NotificationHistoryUncheckedCreateInput>
+    data: XOR<NotificationInteractionCreateInput, NotificationInteractionUncheckedCreateInput>
   }
 
   /**
-   * NotificationHistory createMany
+   * NotificationInteraction createMany
    */
-  export type NotificationHistoryCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NotificationInteractionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * The data used to create many NotificationHistories.
+     * The data used to create many NotificationInteractions.
      */
-    data: NotificationHistoryCreateManyInput | NotificationHistoryCreateManyInput[]
+    data: NotificationInteractionCreateManyInput | NotificationInteractionCreateManyInput[]
     skipDuplicates?: boolean
   }
 
   /**
-   * NotificationHistory createManyAndReturn
+   * NotificationInteraction createManyAndReturn
    */
-  export type NotificationHistoryCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NotificationInteractionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NotificationHistory
+     * Select specific fields to fetch from the NotificationInteraction
      */
-    select?: NotificationHistorySelectCreateManyAndReturn<ExtArgs> | null
+    select?: NotificationInteractionSelectCreateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the NotificationHistory
+     * Omit specific fields from the NotificationInteraction
      */
-    omit?: NotificationHistoryOmit<ExtArgs> | null
+    omit?: NotificationInteractionOmit<ExtArgs> | null
     /**
-     * The data used to create many NotificationHistories.
+     * The data used to create many NotificationInteractions.
      */
-    data: NotificationHistoryCreateManyInput | NotificationHistoryCreateManyInput[]
+    data: NotificationInteractionCreateManyInput | NotificationInteractionCreateManyInput[]
     skipDuplicates?: boolean
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NotificationHistoryIncludeCreateManyAndReturn<ExtArgs> | null
+    include?: NotificationInteractionIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
-   * NotificationHistory update
+   * NotificationInteraction update
    */
-  export type NotificationHistoryUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NotificationInteractionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NotificationHistory
+     * Select specific fields to fetch from the NotificationInteraction
      */
-    select?: NotificationHistorySelect<ExtArgs> | null
+    select?: NotificationInteractionSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NotificationHistory
+     * Omit specific fields from the NotificationInteraction
      */
-    omit?: NotificationHistoryOmit<ExtArgs> | null
+    omit?: NotificationInteractionOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NotificationHistoryInclude<ExtArgs> | null
+    include?: NotificationInteractionInclude<ExtArgs> | null
     /**
-     * The data needed to update a NotificationHistory.
+     * The data needed to update a NotificationInteraction.
      */
-    data: XOR<NotificationHistoryUpdateInput, NotificationHistoryUncheckedUpdateInput>
+    data: XOR<NotificationInteractionUpdateInput, NotificationInteractionUncheckedUpdateInput>
     /**
-     * Choose, which NotificationHistory to update.
+     * Choose, which NotificationInteraction to update.
      */
-    where: NotificationHistoryWhereUniqueInput
+    where: NotificationInteractionWhereUniqueInput
   }
 
   /**
-   * NotificationHistory updateMany
+   * NotificationInteraction updateMany
    */
-  export type NotificationHistoryUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NotificationInteractionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * The data used to update NotificationHistories.
+     * The data used to update NotificationInteractions.
      */
-    data: XOR<NotificationHistoryUpdateManyMutationInput, NotificationHistoryUncheckedUpdateManyInput>
+    data: XOR<NotificationInteractionUpdateManyMutationInput, NotificationInteractionUncheckedUpdateManyInput>
     /**
-     * Filter which NotificationHistories to update
+     * Filter which NotificationInteractions to update
      */
-    where?: NotificationHistoryWhereInput
+    where?: NotificationInteractionWhereInput
     /**
-     * Limit how many NotificationHistories to update.
+     * Limit how many NotificationInteractions to update.
      */
     limit?: number
   }
 
   /**
-   * NotificationHistory updateManyAndReturn
+   * NotificationInteraction updateManyAndReturn
    */
-  export type NotificationHistoryUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NotificationInteractionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NotificationHistory
+     * Select specific fields to fetch from the NotificationInteraction
      */
-    select?: NotificationHistorySelectUpdateManyAndReturn<ExtArgs> | null
+    select?: NotificationInteractionSelectUpdateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the NotificationHistory
+     * Omit specific fields from the NotificationInteraction
      */
-    omit?: NotificationHistoryOmit<ExtArgs> | null
+    omit?: NotificationInteractionOmit<ExtArgs> | null
     /**
-     * The data used to update NotificationHistories.
+     * The data used to update NotificationInteractions.
      */
-    data: XOR<NotificationHistoryUpdateManyMutationInput, NotificationHistoryUncheckedUpdateManyInput>
+    data: XOR<NotificationInteractionUpdateManyMutationInput, NotificationInteractionUncheckedUpdateManyInput>
     /**
-     * Filter which NotificationHistories to update
+     * Filter which NotificationInteractions to update
      */
-    where?: NotificationHistoryWhereInput
+    where?: NotificationInteractionWhereInput
     /**
-     * Limit how many NotificationHistories to update.
+     * Limit how many NotificationInteractions to update.
      */
     limit?: number
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NotificationHistoryIncludeUpdateManyAndReturn<ExtArgs> | null
+    include?: NotificationInteractionIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
-   * NotificationHistory upsert
+   * NotificationInteraction upsert
    */
-  export type NotificationHistoryUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NotificationInteractionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NotificationHistory
+     * Select specific fields to fetch from the NotificationInteraction
      */
-    select?: NotificationHistorySelect<ExtArgs> | null
+    select?: NotificationInteractionSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NotificationHistory
+     * Omit specific fields from the NotificationInteraction
      */
-    omit?: NotificationHistoryOmit<ExtArgs> | null
+    omit?: NotificationInteractionOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NotificationHistoryInclude<ExtArgs> | null
+    include?: NotificationInteractionInclude<ExtArgs> | null
     /**
-     * The filter to search for the NotificationHistory to update in case it exists.
+     * The filter to search for the NotificationInteraction to update in case it exists.
      */
-    where: NotificationHistoryWhereUniqueInput
+    where: NotificationInteractionWhereUniqueInput
     /**
-     * In case the NotificationHistory found by the `where` argument doesn't exist, create a new NotificationHistory with this data.
+     * In case the NotificationInteraction found by the `where` argument doesn't exist, create a new NotificationInteraction with this data.
      */
-    create: XOR<NotificationHistoryCreateInput, NotificationHistoryUncheckedCreateInput>
+    create: XOR<NotificationInteractionCreateInput, NotificationInteractionUncheckedCreateInput>
     /**
-     * In case the NotificationHistory was found with the provided `where` argument, update it with this data.
+     * In case the NotificationInteraction was found with the provided `where` argument, update it with this data.
      */
-    update: XOR<NotificationHistoryUpdateInput, NotificationHistoryUncheckedUpdateInput>
+    update: XOR<NotificationInteractionUpdateInput, NotificationInteractionUncheckedUpdateInput>
   }
 
   /**
-   * NotificationHistory delete
+   * NotificationInteraction delete
    */
-  export type NotificationHistoryDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NotificationInteractionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NotificationHistory
+     * Select specific fields to fetch from the NotificationInteraction
      */
-    select?: NotificationHistorySelect<ExtArgs> | null
+    select?: NotificationInteractionSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NotificationHistory
+     * Omit specific fields from the NotificationInteraction
      */
-    omit?: NotificationHistoryOmit<ExtArgs> | null
+    omit?: NotificationInteractionOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NotificationHistoryInclude<ExtArgs> | null
+    include?: NotificationInteractionInclude<ExtArgs> | null
     /**
-     * Filter which NotificationHistory to delete.
+     * Filter which NotificationInteraction to delete.
      */
-    where: NotificationHistoryWhereUniqueInput
+    where: NotificationInteractionWhereUniqueInput
   }
 
   /**
-   * NotificationHistory deleteMany
+   * NotificationInteraction deleteMany
    */
-  export type NotificationHistoryDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NotificationInteractionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Filter which NotificationHistories to delete
+     * Filter which NotificationInteractions to delete
      */
-    where?: NotificationHistoryWhereInput
+    where?: NotificationInteractionWhereInput
     /**
-     * Limit how many NotificationHistories to delete.
+     * Limit how many NotificationInteractions to delete.
      */
     limit?: number
   }
 
   /**
-   * NotificationHistory without action
+   * NotificationInteraction without action
    */
-  export type NotificationHistoryDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type NotificationInteractionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the NotificationHistory
+     * Select specific fields to fetch from the NotificationInteraction
      */
-    select?: NotificationHistorySelect<ExtArgs> | null
+    select?: NotificationInteractionSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the NotificationHistory
+     * Omit specific fields from the NotificationInteraction
      */
-    omit?: NotificationHistoryOmit<ExtArgs> | null
+    omit?: NotificationInteractionOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: NotificationHistoryInclude<ExtArgs> | null
+    include?: NotificationInteractionInclude<ExtArgs> | null
   }
 
 
@@ -50780,8 +50832,7 @@ export namespace Prisma {
     identityId: string | null
     globalChannels: string | null
     workflowOverrides: string | null
-    doNotDisturb: string | null
-    rateLimit: string | null
+    quietHours: string | null
     version: number | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -50793,8 +50844,7 @@ export namespace Prisma {
     identityId: string | null
     globalChannels: string | null
     workflowOverrides: string | null
-    doNotDisturb: string | null
-    rateLimit: string | null
+    quietHours: string | null
     version: number | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -50806,8 +50856,7 @@ export namespace Prisma {
     identityId: number
     globalChannels: number
     workflowOverrides: number
-    doNotDisturb: number
-    rateLimit: number
+    quietHours: number
     version: number
     createdAt: number
     updatedAt: number
@@ -50829,8 +50878,7 @@ export namespace Prisma {
     identityId?: true
     globalChannels?: true
     workflowOverrides?: true
-    doNotDisturb?: true
-    rateLimit?: true
+    quietHours?: true
     version?: true
     createdAt?: true
     updatedAt?: true
@@ -50842,8 +50890,7 @@ export namespace Prisma {
     identityId?: true
     globalChannels?: true
     workflowOverrides?: true
-    doNotDisturb?: true
-    rateLimit?: true
+    quietHours?: true
     version?: true
     createdAt?: true
     updatedAt?: true
@@ -50855,8 +50902,7 @@ export namespace Prisma {
     identityId?: true
     globalChannels?: true
     workflowOverrides?: true
-    doNotDisturb?: true
-    rateLimit?: true
+    quietHours?: true
     version?: true
     createdAt?: true
     updatedAt?: true
@@ -50955,8 +51001,7 @@ export namespace Prisma {
     identityId: string
     globalChannels: string
     workflowOverrides: string
-    doNotDisturb: string | null
-    rateLimit: string | null
+    quietHours: string | null
     version: number
     createdAt: Date
     updatedAt: Date
@@ -50987,8 +51032,7 @@ export namespace Prisma {
     identityId?: boolean
     globalChannels?: boolean
     workflowOverrides?: boolean
-    doNotDisturb?: boolean
-    rateLimit?: boolean
+    quietHours?: boolean
     version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -51000,8 +51044,7 @@ export namespace Prisma {
     identityId?: boolean
     globalChannels?: boolean
     workflowOverrides?: boolean
-    doNotDisturb?: boolean
-    rateLimit?: boolean
+    quietHours?: boolean
     version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -51013,8 +51056,7 @@ export namespace Prisma {
     identityId?: boolean
     globalChannels?: boolean
     workflowOverrides?: boolean
-    doNotDisturb?: boolean
-    rateLimit?: boolean
+    quietHours?: boolean
     version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -51026,15 +51068,14 @@ export namespace Prisma {
     identityId?: boolean
     globalChannels?: boolean
     workflowOverrides?: boolean
-    doNotDisturb?: boolean
-    rateLimit?: boolean
+    quietHours?: boolean
     version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
   }
 
-  export type NotificationPreferenceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "globalChannels" | "workflowOverrides" | "doNotDisturb" | "rateLimit" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["notificationPreference"]>
+  export type NotificationPreferenceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "globalChannels" | "workflowOverrides" | "quietHours" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["notificationPreference"]>
 
   export type $NotificationPreferencePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "NotificationPreference"
@@ -51044,8 +51085,7 @@ export namespace Prisma {
       identityId: string
       globalChannels: string
       workflowOverrides: string
-      doNotDisturb: string | null
-      rateLimit: string | null
+      quietHours: string | null
       version: number
       createdAt: Date
       updatedAt: Date
@@ -51477,8 +51517,7 @@ export namespace Prisma {
     readonly identityId: FieldRef<"NotificationPreference", 'String'>
     readonly globalChannels: FieldRef<"NotificationPreference", 'String'>
     readonly workflowOverrides: FieldRef<"NotificationPreference", 'String'>
-    readonly doNotDisturb: FieldRef<"NotificationPreference", 'String'>
-    readonly rateLimit: FieldRef<"NotificationPreference", 'String'>
+    readonly quietHours: FieldRef<"NotificationPreference", 'String'>
     readonly version: FieldRef<"NotificationPreference", 'Int'>
     readonly createdAt: FieldRef<"NotificationPreference", 'DateTime'>
     readonly updatedAt: FieldRef<"NotificationPreference", 'DateTime'>
@@ -123601,17 +123640,21 @@ export namespace Prisma {
   export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
 
 
-  export const NotificationHistoryScalarFieldEnum: {
+  export const NotificationInteractionScalarFieldEnum: {
     id: 'id',
+    idempotencyKey: 'idempotencyKey',
     identityId: 'identityId',
     notificationId: 'notificationId',
-    action: 'action',
-    details: 'details',
-    actorId: 'actorId',
-    createdAt: 'createdAt'
+    actionKey: 'actionKey',
+    actionKind: 'actionKind',
+    occurredAt: 'occurredAt',
+    commandReceiptId: 'commandReceiptId',
+    outcome: 'outcome',
+    correlationId: 'correlationId',
+    causationId: 'causationId'
   };
 
-  export type NotificationHistoryScalarFieldEnum = (typeof NotificationHistoryScalarFieldEnum)[keyof typeof NotificationHistoryScalarFieldEnum]
+  export type NotificationInteractionScalarFieldEnum = (typeof NotificationInteractionScalarFieldEnum)[keyof typeof NotificationInteractionScalarFieldEnum]
 
 
   export const NotificationDeliveryDecisionRecordScalarFieldEnum: {
@@ -123635,8 +123678,7 @@ export namespace Prisma {
     identityId: 'identityId',
     globalChannels: 'globalChannels',
     workflowOverrides: 'workflowOverrides',
-    doNotDisturb: 'doNotDisturb',
-    rateLimit: 'rateLimit',
+    quietHours: 'quietHours',
     version: 'version',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
@@ -124962,7 +125004,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceListRelationFilter
     routineOccurrences?: RoutineOccurrenceListRelationFilter
     routineInteractions?: RoutineInteractionListRelationFilter
-    notificationHistory?: NotificationHistoryListRelationFilter
+    notificationInteractions?: NotificationInteractionListRelationFilter
     notificationDispatchOutboxes?: NotificationDispatchOutboxListRelationFilter
     aiMessages?: AiMessageListRelationFilter
     folders?: FolderListRelationFilter
@@ -125025,7 +125067,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceOrderByRelationAggregateInput
     routineOccurrences?: RoutineOccurrenceOrderByRelationAggregateInput
     routineInteractions?: RoutineInteractionOrderByRelationAggregateInput
-    notificationHistory?: NotificationHistoryOrderByRelationAggregateInput
+    notificationInteractions?: NotificationInteractionOrderByRelationAggregateInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxOrderByRelationAggregateInput
     aiMessages?: AiMessageOrderByRelationAggregateInput
     folders?: FolderOrderByRelationAggregateInput
@@ -125091,7 +125133,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceListRelationFilter
     routineOccurrences?: RoutineOccurrenceListRelationFilter
     routineInteractions?: RoutineInteractionListRelationFilter
-    notificationHistory?: NotificationHistoryListRelationFilter
+    notificationInteractions?: NotificationInteractionListRelationFilter
     notificationDispatchOutboxes?: NotificationDispatchOutboxListRelationFilter
     aiMessages?: AiMessageListRelationFilter
     folders?: FolderListRelationFilter
@@ -127639,7 +127681,7 @@ export namespace Prisma {
     deletedAt?: DateTimeNullableFilter<"Notification"> | Date | string | null
     archivedAt?: DateTimeNullableFilter<"Notification"> | Date | string | null
     isRead?: BoolFilter<"Notification"> | boolean
-    history?: NotificationHistoryListRelationFilter
+    interactions?: NotificationInteractionListRelationFilter
     dispatchOutboxes?: NotificationDispatchOutboxListRelationFilter
     deliveryDecisions?: NotificationDeliveryDecisionRecordListRelationFilter
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
@@ -127672,7 +127714,7 @@ export namespace Prisma {
     deletedAt?: SortOrderInput | SortOrder
     archivedAt?: SortOrderInput | SortOrder
     isRead?: SortOrder
-    history?: NotificationHistoryOrderByRelationAggregateInput
+    interactions?: NotificationInteractionOrderByRelationAggregateInput
     dispatchOutboxes?: NotificationDispatchOutboxOrderByRelationAggregateInput
     deliveryDecisions?: NotificationDeliveryDecisionRecordOrderByRelationAggregateInput
     account?: AccountOrderByWithRelationInput
@@ -127709,7 +127751,7 @@ export namespace Prisma {
     deletedAt?: DateTimeNullableFilter<"Notification"> | Date | string | null
     archivedAt?: DateTimeNullableFilter<"Notification"> | Date | string | null
     isRead?: BoolFilter<"Notification"> | boolean
-    history?: NotificationHistoryListRelationFilter
+    interactions?: NotificationInteractionListRelationFilter
     dispatchOutboxes?: NotificationDispatchOutboxListRelationFilter
     deliveryDecisions?: NotificationDeliveryDecisionRecordListRelationFilter
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
@@ -127781,72 +127823,92 @@ export namespace Prisma {
     isRead?: BoolWithAggregatesFilter<"Notification"> | boolean
   }
 
-  export type NotificationHistoryWhereInput = {
-    AND?: NotificationHistoryWhereInput | NotificationHistoryWhereInput[]
-    OR?: NotificationHistoryWhereInput[]
-    NOT?: NotificationHistoryWhereInput | NotificationHistoryWhereInput[]
-    id?: StringFilter<"NotificationHistory"> | string
-    identityId?: StringFilter<"NotificationHistory"> | string
-    notificationId?: StringFilter<"NotificationHistory"> | string
-    action?: StringFilter<"NotificationHistory"> | string
-    details?: StringNullableFilter<"NotificationHistory"> | string | null
-    actorId?: StringNullableFilter<"NotificationHistory"> | string | null
-    createdAt?: DateTimeFilter<"NotificationHistory"> | Date | string
+  export type NotificationInteractionWhereInput = {
+    AND?: NotificationInteractionWhereInput | NotificationInteractionWhereInput[]
+    OR?: NotificationInteractionWhereInput[]
+    NOT?: NotificationInteractionWhereInput | NotificationInteractionWhereInput[]
+    id?: StringFilter<"NotificationInteraction"> | string
+    idempotencyKey?: StringFilter<"NotificationInteraction"> | string
+    identityId?: StringFilter<"NotificationInteraction"> | string
+    notificationId?: StringFilter<"NotificationInteraction"> | string
+    actionKey?: StringFilter<"NotificationInteraction"> | string
+    actionKind?: StringFilter<"NotificationInteraction"> | string
+    occurredAt?: DateTimeFilter<"NotificationInteraction"> | Date | string
+    commandReceiptId?: StringNullableFilter<"NotificationInteraction"> | string | null
+    outcome?: StringFilter<"NotificationInteraction"> | string
+    correlationId?: StringNullableFilter<"NotificationInteraction"> | string | null
+    causationId?: StringNullableFilter<"NotificationInteraction"> | string | null
     identity?: XOR<AccountScalarRelationFilter, AccountWhereInput>
     notification?: XOR<NotificationScalarRelationFilter, NotificationWhereInput>
   }
 
-  export type NotificationHistoryOrderByWithRelationInput = {
+  export type NotificationInteractionOrderByWithRelationInput = {
     id?: SortOrder
+    idempotencyKey?: SortOrder
     identityId?: SortOrder
     notificationId?: SortOrder
-    action?: SortOrder
-    details?: SortOrderInput | SortOrder
-    actorId?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
+    actionKey?: SortOrder
+    actionKind?: SortOrder
+    occurredAt?: SortOrder
+    commandReceiptId?: SortOrderInput | SortOrder
+    outcome?: SortOrder
+    correlationId?: SortOrderInput | SortOrder
+    causationId?: SortOrderInput | SortOrder
     identity?: AccountOrderByWithRelationInput
     notification?: NotificationOrderByWithRelationInput
   }
 
-  export type NotificationHistoryWhereUniqueInput = Prisma.AtLeast<{
+  export type NotificationInteractionWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    AND?: NotificationHistoryWhereInput | NotificationHistoryWhereInput[]
-    OR?: NotificationHistoryWhereInput[]
-    NOT?: NotificationHistoryWhereInput | NotificationHistoryWhereInput[]
-    identityId?: StringFilter<"NotificationHistory"> | string
-    notificationId?: StringFilter<"NotificationHistory"> | string
-    action?: StringFilter<"NotificationHistory"> | string
-    details?: StringNullableFilter<"NotificationHistory"> | string | null
-    actorId?: StringNullableFilter<"NotificationHistory"> | string | null
-    createdAt?: DateTimeFilter<"NotificationHistory"> | Date | string
+    idempotencyKey?: string
+    AND?: NotificationInteractionWhereInput | NotificationInteractionWhereInput[]
+    OR?: NotificationInteractionWhereInput[]
+    NOT?: NotificationInteractionWhereInput | NotificationInteractionWhereInput[]
+    identityId?: StringFilter<"NotificationInteraction"> | string
+    notificationId?: StringFilter<"NotificationInteraction"> | string
+    actionKey?: StringFilter<"NotificationInteraction"> | string
+    actionKind?: StringFilter<"NotificationInteraction"> | string
+    occurredAt?: DateTimeFilter<"NotificationInteraction"> | Date | string
+    commandReceiptId?: StringNullableFilter<"NotificationInteraction"> | string | null
+    outcome?: StringFilter<"NotificationInteraction"> | string
+    correlationId?: StringNullableFilter<"NotificationInteraction"> | string | null
+    causationId?: StringNullableFilter<"NotificationInteraction"> | string | null
     identity?: XOR<AccountScalarRelationFilter, AccountWhereInput>
     notification?: XOR<NotificationScalarRelationFilter, NotificationWhereInput>
-  }, "id">
+  }, "id" | "idempotencyKey">
 
-  export type NotificationHistoryOrderByWithAggregationInput = {
+  export type NotificationInteractionOrderByWithAggregationInput = {
     id?: SortOrder
+    idempotencyKey?: SortOrder
     identityId?: SortOrder
     notificationId?: SortOrder
-    action?: SortOrder
-    details?: SortOrderInput | SortOrder
-    actorId?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
-    _count?: NotificationHistoryCountOrderByAggregateInput
-    _max?: NotificationHistoryMaxOrderByAggregateInput
-    _min?: NotificationHistoryMinOrderByAggregateInput
+    actionKey?: SortOrder
+    actionKind?: SortOrder
+    occurredAt?: SortOrder
+    commandReceiptId?: SortOrderInput | SortOrder
+    outcome?: SortOrder
+    correlationId?: SortOrderInput | SortOrder
+    causationId?: SortOrderInput | SortOrder
+    _count?: NotificationInteractionCountOrderByAggregateInput
+    _max?: NotificationInteractionMaxOrderByAggregateInput
+    _min?: NotificationInteractionMinOrderByAggregateInput
   }
 
-  export type NotificationHistoryScalarWhereWithAggregatesInput = {
-    AND?: NotificationHistoryScalarWhereWithAggregatesInput | NotificationHistoryScalarWhereWithAggregatesInput[]
-    OR?: NotificationHistoryScalarWhereWithAggregatesInput[]
-    NOT?: NotificationHistoryScalarWhereWithAggregatesInput | NotificationHistoryScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"NotificationHistory"> | string
-    identityId?: StringWithAggregatesFilter<"NotificationHistory"> | string
-    notificationId?: StringWithAggregatesFilter<"NotificationHistory"> | string
-    action?: StringWithAggregatesFilter<"NotificationHistory"> | string
-    details?: StringNullableWithAggregatesFilter<"NotificationHistory"> | string | null
-    actorId?: StringNullableWithAggregatesFilter<"NotificationHistory"> | string | null
-    createdAt?: DateTimeWithAggregatesFilter<"NotificationHistory"> | Date | string
+  export type NotificationInteractionScalarWhereWithAggregatesInput = {
+    AND?: NotificationInteractionScalarWhereWithAggregatesInput | NotificationInteractionScalarWhereWithAggregatesInput[]
+    OR?: NotificationInteractionScalarWhereWithAggregatesInput[]
+    NOT?: NotificationInteractionScalarWhereWithAggregatesInput | NotificationInteractionScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"NotificationInteraction"> | string
+    idempotencyKey?: StringWithAggregatesFilter<"NotificationInteraction"> | string
+    identityId?: StringWithAggregatesFilter<"NotificationInteraction"> | string
+    notificationId?: StringWithAggregatesFilter<"NotificationInteraction"> | string
+    actionKey?: StringWithAggregatesFilter<"NotificationInteraction"> | string
+    actionKind?: StringWithAggregatesFilter<"NotificationInteraction"> | string
+    occurredAt?: DateTimeWithAggregatesFilter<"NotificationInteraction"> | Date | string
+    commandReceiptId?: StringNullableWithAggregatesFilter<"NotificationInteraction"> | string | null
+    outcome?: StringWithAggregatesFilter<"NotificationInteraction"> | string
+    correlationId?: StringNullableWithAggregatesFilter<"NotificationInteraction"> | string | null
+    causationId?: StringNullableWithAggregatesFilter<"NotificationInteraction"> | string | null
   }
 
   export type NotificationDeliveryDecisionRecordWhereInput = {
@@ -127938,8 +128000,7 @@ export namespace Prisma {
     identityId?: StringFilter<"NotificationPreference"> | string
     globalChannels?: StringFilter<"NotificationPreference"> | string
     workflowOverrides?: StringFilter<"NotificationPreference"> | string
-    doNotDisturb?: StringNullableFilter<"NotificationPreference"> | string | null
-    rateLimit?: StringNullableFilter<"NotificationPreference"> | string | null
+    quietHours?: StringNullableFilter<"NotificationPreference"> | string | null
     version?: IntFilter<"NotificationPreference"> | number
     createdAt?: DateTimeFilter<"NotificationPreference"> | Date | string
     updatedAt?: DateTimeFilter<"NotificationPreference"> | Date | string
@@ -127951,8 +128012,7 @@ export namespace Prisma {
     identityId?: SortOrder
     globalChannels?: SortOrder
     workflowOverrides?: SortOrder
-    doNotDisturb?: SortOrderInput | SortOrder
-    rateLimit?: SortOrderInput | SortOrder
+    quietHours?: SortOrderInput | SortOrder
     version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -127967,8 +128027,7 @@ export namespace Prisma {
     NOT?: NotificationPreferenceWhereInput | NotificationPreferenceWhereInput[]
     globalChannels?: StringFilter<"NotificationPreference"> | string
     workflowOverrides?: StringFilter<"NotificationPreference"> | string
-    doNotDisturb?: StringNullableFilter<"NotificationPreference"> | string | null
-    rateLimit?: StringNullableFilter<"NotificationPreference"> | string | null
+    quietHours?: StringNullableFilter<"NotificationPreference"> | string | null
     version?: IntFilter<"NotificationPreference"> | number
     createdAt?: DateTimeFilter<"NotificationPreference"> | Date | string
     updatedAt?: DateTimeFilter<"NotificationPreference"> | Date | string
@@ -127980,8 +128039,7 @@ export namespace Prisma {
     identityId?: SortOrder
     globalChannels?: SortOrder
     workflowOverrides?: SortOrder
-    doNotDisturb?: SortOrderInput | SortOrder
-    rateLimit?: SortOrderInput | SortOrder
+    quietHours?: SortOrderInput | SortOrder
     version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -128001,8 +128059,7 @@ export namespace Prisma {
     identityId?: StringWithAggregatesFilter<"NotificationPreference"> | string
     globalChannels?: StringWithAggregatesFilter<"NotificationPreference"> | string
     workflowOverrides?: StringWithAggregatesFilter<"NotificationPreference"> | string
-    doNotDisturb?: StringNullableWithAggregatesFilter<"NotificationPreference"> | string | null
-    rateLimit?: StringNullableWithAggregatesFilter<"NotificationPreference"> | string | null
+    quietHours?: StringNullableWithAggregatesFilter<"NotificationPreference"> | string | null
     version?: IntWithAggregatesFilter<"NotificationPreference"> | number
     createdAt?: DateTimeWithAggregatesFilter<"NotificationPreference"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"NotificationPreference"> | Date | string
@@ -133732,7 +133789,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -133794,7 +133851,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -133856,7 +133913,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -133918,7 +133975,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -136739,7 +136796,7 @@ export namespace Prisma {
     deletedAt?: Date | string | null
     archivedAt?: Date | string | null
     isRead?: boolean
-    history?: NotificationHistoryCreateNestedManyWithoutNotificationInput
+    interactions?: NotificationInteractionCreateNestedManyWithoutNotificationInput
     dispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutNotificationInput
     deliveryDecisions?: NotificationDeliveryDecisionRecordCreateNestedManyWithoutNotificationInput
     account: AccountCreateNestedOneWithoutNotificationsInput
@@ -136772,7 +136829,7 @@ export namespace Prisma {
     deletedAt?: Date | string | null
     archivedAt?: Date | string | null
     isRead?: boolean
-    history?: NotificationHistoryUncheckedCreateNestedManyWithoutNotificationInput
+    interactions?: NotificationInteractionUncheckedCreateNestedManyWithoutNotificationInput
     dispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutNotificationInput
     deliveryDecisions?: NotificationDeliveryDecisionRecordUncheckedCreateNestedManyWithoutNotificationInput
   }
@@ -136803,7 +136860,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
-    history?: NotificationHistoryUpdateManyWithoutNotificationNestedInput
+    interactions?: NotificationInteractionUpdateManyWithoutNotificationNestedInput
     dispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutNotificationNestedInput
     deliveryDecisions?: NotificationDeliveryDecisionRecordUpdateManyWithoutNotificationNestedInput
     account?: AccountUpdateOneRequiredWithoutNotificationsNestedInput
@@ -136836,7 +136893,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
-    history?: NotificationHistoryUncheckedUpdateManyWithoutNotificationNestedInput
+    interactions?: NotificationInteractionUncheckedUpdateManyWithoutNotificationNestedInput
     dispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutNotificationNestedInput
     deliveryDecisions?: NotificationDeliveryDecisionRecordUncheckedUpdateManyWithoutNotificationNestedInput
   }
@@ -136927,72 +136984,100 @@ export namespace Prisma {
     isRead?: BoolFieldUpdateOperationsInput | boolean
   }
 
-  export type NotificationHistoryCreateInput = {
+  export type NotificationInteractionCreateInput = {
     id: string
-    action: string
-    details?: string | null
-    actorId?: string | null
-    createdAt?: Date | string
-    identity: AccountCreateNestedOneWithoutNotificationHistoryInput
-    notification: NotificationCreateNestedOneWithoutHistoryInput
+    idempotencyKey: string
+    actionKey: string
+    actionKind: string
+    occurredAt: Date | string
+    commandReceiptId?: string | null
+    outcome: string
+    correlationId?: string | null
+    causationId?: string | null
+    identity: AccountCreateNestedOneWithoutNotificationInteractionsInput
+    notification: NotificationCreateNestedOneWithoutInteractionsInput
   }
 
-  export type NotificationHistoryUncheckedCreateInput = {
+  export type NotificationInteractionUncheckedCreateInput = {
     id: string
+    idempotencyKey: string
     identityId: string
     notificationId: string
-    action: string
-    details?: string | null
-    actorId?: string | null
-    createdAt?: Date | string
+    actionKey: string
+    actionKind: string
+    occurredAt: Date | string
+    commandReceiptId?: string | null
+    outcome: string
+    correlationId?: string | null
+    causationId?: string | null
   }
 
-  export type NotificationHistoryUpdateInput = {
+  export type NotificationInteractionUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    action?: StringFieldUpdateOperationsInput | string
-    details?: NullableStringFieldUpdateOperationsInput | string | null
-    actorId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    identity?: AccountUpdateOneRequiredWithoutNotificationHistoryNestedInput
-    notification?: NotificationUpdateOneRequiredWithoutHistoryNestedInput
+    idempotencyKey?: StringFieldUpdateOperationsInput | string
+    actionKey?: StringFieldUpdateOperationsInput | string
+    actionKind?: StringFieldUpdateOperationsInput | string
+    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    commandReceiptId?: NullableStringFieldUpdateOperationsInput | string | null
+    outcome?: StringFieldUpdateOperationsInput | string
+    correlationId?: NullableStringFieldUpdateOperationsInput | string | null
+    causationId?: NullableStringFieldUpdateOperationsInput | string | null
+    identity?: AccountUpdateOneRequiredWithoutNotificationInteractionsNestedInput
+    notification?: NotificationUpdateOneRequiredWithoutInteractionsNestedInput
   }
 
-  export type NotificationHistoryUncheckedUpdateInput = {
+  export type NotificationInteractionUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    idempotencyKey?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
     notificationId?: StringFieldUpdateOperationsInput | string
-    action?: StringFieldUpdateOperationsInput | string
-    details?: NullableStringFieldUpdateOperationsInput | string | null
-    actorId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    actionKey?: StringFieldUpdateOperationsInput | string
+    actionKind?: StringFieldUpdateOperationsInput | string
+    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    commandReceiptId?: NullableStringFieldUpdateOperationsInput | string | null
+    outcome?: StringFieldUpdateOperationsInput | string
+    correlationId?: NullableStringFieldUpdateOperationsInput | string | null
+    causationId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
-  export type NotificationHistoryCreateManyInput = {
+  export type NotificationInteractionCreateManyInput = {
     id: string
+    idempotencyKey: string
     identityId: string
     notificationId: string
-    action: string
-    details?: string | null
-    actorId?: string | null
-    createdAt?: Date | string
+    actionKey: string
+    actionKind: string
+    occurredAt: Date | string
+    commandReceiptId?: string | null
+    outcome: string
+    correlationId?: string | null
+    causationId?: string | null
   }
 
-  export type NotificationHistoryUpdateManyMutationInput = {
+  export type NotificationInteractionUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    action?: StringFieldUpdateOperationsInput | string
-    details?: NullableStringFieldUpdateOperationsInput | string | null
-    actorId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    idempotencyKey?: StringFieldUpdateOperationsInput | string
+    actionKey?: StringFieldUpdateOperationsInput | string
+    actionKind?: StringFieldUpdateOperationsInput | string
+    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    commandReceiptId?: NullableStringFieldUpdateOperationsInput | string | null
+    outcome?: StringFieldUpdateOperationsInput | string
+    correlationId?: NullableStringFieldUpdateOperationsInput | string | null
+    causationId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
-  export type NotificationHistoryUncheckedUpdateManyInput = {
+  export type NotificationInteractionUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
+    idempotencyKey?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
     notificationId?: StringFieldUpdateOperationsInput | string
-    action?: StringFieldUpdateOperationsInput | string
-    details?: NullableStringFieldUpdateOperationsInput | string | null
-    actorId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    actionKey?: StringFieldUpdateOperationsInput | string
+    actionKind?: StringFieldUpdateOperationsInput | string
+    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    commandReceiptId?: NullableStringFieldUpdateOperationsInput | string | null
+    outcome?: StringFieldUpdateOperationsInput | string
+    correlationId?: NullableStringFieldUpdateOperationsInput | string | null
+    causationId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type NotificationDeliveryDecisionRecordCreateInput = {
@@ -137090,8 +137175,7 @@ export namespace Prisma {
     identityId: string
     globalChannels?: string
     workflowOverrides?: string
-    doNotDisturb?: string | null
-    rateLimit?: string | null
+    quietHours?: string | null
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -137103,8 +137187,7 @@ export namespace Prisma {
     identityId: string
     globalChannels?: string
     workflowOverrides?: string
-    doNotDisturb?: string | null
-    rateLimit?: string | null
+    quietHours?: string | null
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -137116,8 +137199,7 @@ export namespace Prisma {
     identityId?: StringFieldUpdateOperationsInput | string
     globalChannels?: StringFieldUpdateOperationsInput | string
     workflowOverrides?: StringFieldUpdateOperationsInput | string
-    doNotDisturb?: NullableStringFieldUpdateOperationsInput | string | null
-    rateLimit?: NullableStringFieldUpdateOperationsInput | string | null
+    quietHours?: NullableStringFieldUpdateOperationsInput | string | null
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -137129,8 +137211,7 @@ export namespace Prisma {
     identityId?: StringFieldUpdateOperationsInput | string
     globalChannels?: StringFieldUpdateOperationsInput | string
     workflowOverrides?: StringFieldUpdateOperationsInput | string
-    doNotDisturb?: NullableStringFieldUpdateOperationsInput | string | null
-    rateLimit?: NullableStringFieldUpdateOperationsInput | string | null
+    quietHours?: NullableStringFieldUpdateOperationsInput | string | null
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -137142,8 +137223,7 @@ export namespace Prisma {
     identityId: string
     globalChannels?: string
     workflowOverrides?: string
-    doNotDisturb?: string | null
-    rateLimit?: string | null
+    quietHours?: string | null
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -137155,8 +137235,7 @@ export namespace Prisma {
     identityId?: StringFieldUpdateOperationsInput | string
     globalChannels?: StringFieldUpdateOperationsInput | string
     workflowOverrides?: StringFieldUpdateOperationsInput | string
-    doNotDisturb?: NullableStringFieldUpdateOperationsInput | string | null
-    rateLimit?: NullableStringFieldUpdateOperationsInput | string | null
+    quietHours?: NullableStringFieldUpdateOperationsInput | string | null
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -137168,8 +137247,7 @@ export namespace Prisma {
     identityId?: StringFieldUpdateOperationsInput | string
     globalChannels?: StringFieldUpdateOperationsInput | string
     workflowOverrides?: StringFieldUpdateOperationsInput | string
-    doNotDisturb?: NullableStringFieldUpdateOperationsInput | string | null
-    rateLimit?: NullableStringFieldUpdateOperationsInput | string | null
+    quietHours?: NullableStringFieldUpdateOperationsInput | string | null
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -143900,10 +143978,10 @@ export namespace Prisma {
     none?: RoutineInteractionWhereInput
   }
 
-  export type NotificationHistoryListRelationFilter = {
-    every?: NotificationHistoryWhereInput
-    some?: NotificationHistoryWhereInput
-    none?: NotificationHistoryWhereInput
+  export type NotificationInteractionListRelationFilter = {
+    every?: NotificationInteractionWhereInput
+    some?: NotificationInteractionWhereInput
+    none?: NotificationInteractionWhereInput
   }
 
   export type NotificationDispatchOutboxListRelationFilter = {
@@ -144115,7 +144193,7 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
-  export type NotificationHistoryOrderByRelationAggregateInput = {
+  export type NotificationInteractionOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -146094,34 +146172,46 @@ export namespace Prisma {
     isNot?: NotificationWhereInput
   }
 
-  export type NotificationHistoryCountOrderByAggregateInput = {
+  export type NotificationInteractionCountOrderByAggregateInput = {
     id?: SortOrder
+    idempotencyKey?: SortOrder
     identityId?: SortOrder
     notificationId?: SortOrder
-    action?: SortOrder
-    details?: SortOrder
-    actorId?: SortOrder
-    createdAt?: SortOrder
+    actionKey?: SortOrder
+    actionKind?: SortOrder
+    occurredAt?: SortOrder
+    commandReceiptId?: SortOrder
+    outcome?: SortOrder
+    correlationId?: SortOrder
+    causationId?: SortOrder
   }
 
-  export type NotificationHistoryMaxOrderByAggregateInput = {
+  export type NotificationInteractionMaxOrderByAggregateInput = {
     id?: SortOrder
+    idempotencyKey?: SortOrder
     identityId?: SortOrder
     notificationId?: SortOrder
-    action?: SortOrder
-    details?: SortOrder
-    actorId?: SortOrder
-    createdAt?: SortOrder
+    actionKey?: SortOrder
+    actionKind?: SortOrder
+    occurredAt?: SortOrder
+    commandReceiptId?: SortOrder
+    outcome?: SortOrder
+    correlationId?: SortOrder
+    causationId?: SortOrder
   }
 
-  export type NotificationHistoryMinOrderByAggregateInput = {
+  export type NotificationInteractionMinOrderByAggregateInput = {
     id?: SortOrder
+    idempotencyKey?: SortOrder
     identityId?: SortOrder
     notificationId?: SortOrder
-    action?: SortOrder
-    details?: SortOrder
-    actorId?: SortOrder
-    createdAt?: SortOrder
+    actionKey?: SortOrder
+    actionKind?: SortOrder
+    occurredAt?: SortOrder
+    commandReceiptId?: SortOrder
+    outcome?: SortOrder
+    correlationId?: SortOrder
+    causationId?: SortOrder
   }
 
   export type NotificationDeliveryDecisionRecordNotificationIdChannelCompoundUniqueInput = {
@@ -146173,8 +146263,7 @@ export namespace Prisma {
     identityId?: SortOrder
     globalChannels?: SortOrder
     workflowOverrides?: SortOrder
-    doNotDisturb?: SortOrder
-    rateLimit?: SortOrder
+    quietHours?: SortOrder
     version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -146190,8 +146279,7 @@ export namespace Prisma {
     identityId?: SortOrder
     globalChannels?: SortOrder
     workflowOverrides?: SortOrder
-    doNotDisturb?: SortOrder
-    rateLimit?: SortOrder
+    quietHours?: SortOrder
     version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -146203,8 +146291,7 @@ export namespace Prisma {
     identityId?: SortOrder
     globalChannels?: SortOrder
     workflowOverrides?: SortOrder
-    doNotDisturb?: SortOrder
-    rateLimit?: SortOrder
+    quietHours?: SortOrder
     version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -149987,11 +150074,11 @@ export namespace Prisma {
     connect?: RoutineInteractionWhereUniqueInput | RoutineInteractionWhereUniqueInput[]
   }
 
-  export type NotificationHistoryCreateNestedManyWithoutIdentityInput = {
-    create?: XOR<NotificationHistoryCreateWithoutIdentityInput, NotificationHistoryUncheckedCreateWithoutIdentityInput> | NotificationHistoryCreateWithoutIdentityInput[] | NotificationHistoryUncheckedCreateWithoutIdentityInput[]
-    connectOrCreate?: NotificationHistoryCreateOrConnectWithoutIdentityInput | NotificationHistoryCreateOrConnectWithoutIdentityInput[]
-    createMany?: NotificationHistoryCreateManyIdentityInputEnvelope
-    connect?: NotificationHistoryWhereUniqueInput | NotificationHistoryWhereUniqueInput[]
+  export type NotificationInteractionCreateNestedManyWithoutIdentityInput = {
+    create?: XOR<NotificationInteractionCreateWithoutIdentityInput, NotificationInteractionUncheckedCreateWithoutIdentityInput> | NotificationInteractionCreateWithoutIdentityInput[] | NotificationInteractionUncheckedCreateWithoutIdentityInput[]
+    connectOrCreate?: NotificationInteractionCreateOrConnectWithoutIdentityInput | NotificationInteractionCreateOrConnectWithoutIdentityInput[]
+    createMany?: NotificationInteractionCreateManyIdentityInputEnvelope
+    connect?: NotificationInteractionWhereUniqueInput | NotificationInteractionWhereUniqueInput[]
   }
 
   export type NotificationDispatchOutboxCreateNestedManyWithoutAccountInput = {
@@ -150353,11 +150440,11 @@ export namespace Prisma {
     connect?: RoutineInteractionWhereUniqueInput | RoutineInteractionWhereUniqueInput[]
   }
 
-  export type NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput = {
-    create?: XOR<NotificationHistoryCreateWithoutIdentityInput, NotificationHistoryUncheckedCreateWithoutIdentityInput> | NotificationHistoryCreateWithoutIdentityInput[] | NotificationHistoryUncheckedCreateWithoutIdentityInput[]
-    connectOrCreate?: NotificationHistoryCreateOrConnectWithoutIdentityInput | NotificationHistoryCreateOrConnectWithoutIdentityInput[]
-    createMany?: NotificationHistoryCreateManyIdentityInputEnvelope
-    connect?: NotificationHistoryWhereUniqueInput | NotificationHistoryWhereUniqueInput[]
+  export type NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput = {
+    create?: XOR<NotificationInteractionCreateWithoutIdentityInput, NotificationInteractionUncheckedCreateWithoutIdentityInput> | NotificationInteractionCreateWithoutIdentityInput[] | NotificationInteractionUncheckedCreateWithoutIdentityInput[]
+    connectOrCreate?: NotificationInteractionCreateOrConnectWithoutIdentityInput | NotificationInteractionCreateOrConnectWithoutIdentityInput[]
+    createMany?: NotificationInteractionCreateManyIdentityInputEnvelope
+    connect?: NotificationInteractionWhereUniqueInput | NotificationInteractionWhereUniqueInput[]
   }
 
   export type NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput = {
@@ -151032,18 +151119,18 @@ export namespace Prisma {
     deleteMany?: RoutineInteractionScalarWhereInput | RoutineInteractionScalarWhereInput[]
   }
 
-  export type NotificationHistoryUpdateManyWithoutIdentityNestedInput = {
-    create?: XOR<NotificationHistoryCreateWithoutIdentityInput, NotificationHistoryUncheckedCreateWithoutIdentityInput> | NotificationHistoryCreateWithoutIdentityInput[] | NotificationHistoryUncheckedCreateWithoutIdentityInput[]
-    connectOrCreate?: NotificationHistoryCreateOrConnectWithoutIdentityInput | NotificationHistoryCreateOrConnectWithoutIdentityInput[]
-    upsert?: NotificationHistoryUpsertWithWhereUniqueWithoutIdentityInput | NotificationHistoryUpsertWithWhereUniqueWithoutIdentityInput[]
-    createMany?: NotificationHistoryCreateManyIdentityInputEnvelope
-    set?: NotificationHistoryWhereUniqueInput | NotificationHistoryWhereUniqueInput[]
-    disconnect?: NotificationHistoryWhereUniqueInput | NotificationHistoryWhereUniqueInput[]
-    delete?: NotificationHistoryWhereUniqueInput | NotificationHistoryWhereUniqueInput[]
-    connect?: NotificationHistoryWhereUniqueInput | NotificationHistoryWhereUniqueInput[]
-    update?: NotificationHistoryUpdateWithWhereUniqueWithoutIdentityInput | NotificationHistoryUpdateWithWhereUniqueWithoutIdentityInput[]
-    updateMany?: NotificationHistoryUpdateManyWithWhereWithoutIdentityInput | NotificationHistoryUpdateManyWithWhereWithoutIdentityInput[]
-    deleteMany?: NotificationHistoryScalarWhereInput | NotificationHistoryScalarWhereInput[]
+  export type NotificationInteractionUpdateManyWithoutIdentityNestedInput = {
+    create?: XOR<NotificationInteractionCreateWithoutIdentityInput, NotificationInteractionUncheckedCreateWithoutIdentityInput> | NotificationInteractionCreateWithoutIdentityInput[] | NotificationInteractionUncheckedCreateWithoutIdentityInput[]
+    connectOrCreate?: NotificationInteractionCreateOrConnectWithoutIdentityInput | NotificationInteractionCreateOrConnectWithoutIdentityInput[]
+    upsert?: NotificationInteractionUpsertWithWhereUniqueWithoutIdentityInput | NotificationInteractionUpsertWithWhereUniqueWithoutIdentityInput[]
+    createMany?: NotificationInteractionCreateManyIdentityInputEnvelope
+    set?: NotificationInteractionWhereUniqueInput | NotificationInteractionWhereUniqueInput[]
+    disconnect?: NotificationInteractionWhereUniqueInput | NotificationInteractionWhereUniqueInput[]
+    delete?: NotificationInteractionWhereUniqueInput | NotificationInteractionWhereUniqueInput[]
+    connect?: NotificationInteractionWhereUniqueInput | NotificationInteractionWhereUniqueInput[]
+    update?: NotificationInteractionUpdateWithWhereUniqueWithoutIdentityInput | NotificationInteractionUpdateWithWhereUniqueWithoutIdentityInput[]
+    updateMany?: NotificationInteractionUpdateManyWithWhereWithoutIdentityInput | NotificationInteractionUpdateManyWithWhereWithoutIdentityInput[]
+    deleteMany?: NotificationInteractionScalarWhereInput | NotificationInteractionScalarWhereInput[]
   }
 
   export type NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput = {
@@ -151754,18 +151841,18 @@ export namespace Prisma {
     deleteMany?: RoutineInteractionScalarWhereInput | RoutineInteractionScalarWhereInput[]
   }
 
-  export type NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput = {
-    create?: XOR<NotificationHistoryCreateWithoutIdentityInput, NotificationHistoryUncheckedCreateWithoutIdentityInput> | NotificationHistoryCreateWithoutIdentityInput[] | NotificationHistoryUncheckedCreateWithoutIdentityInput[]
-    connectOrCreate?: NotificationHistoryCreateOrConnectWithoutIdentityInput | NotificationHistoryCreateOrConnectWithoutIdentityInput[]
-    upsert?: NotificationHistoryUpsertWithWhereUniqueWithoutIdentityInput | NotificationHistoryUpsertWithWhereUniqueWithoutIdentityInput[]
-    createMany?: NotificationHistoryCreateManyIdentityInputEnvelope
-    set?: NotificationHistoryWhereUniqueInput | NotificationHistoryWhereUniqueInput[]
-    disconnect?: NotificationHistoryWhereUniqueInput | NotificationHistoryWhereUniqueInput[]
-    delete?: NotificationHistoryWhereUniqueInput | NotificationHistoryWhereUniqueInput[]
-    connect?: NotificationHistoryWhereUniqueInput | NotificationHistoryWhereUniqueInput[]
-    update?: NotificationHistoryUpdateWithWhereUniqueWithoutIdentityInput | NotificationHistoryUpdateWithWhereUniqueWithoutIdentityInput[]
-    updateMany?: NotificationHistoryUpdateManyWithWhereWithoutIdentityInput | NotificationHistoryUpdateManyWithWhereWithoutIdentityInput[]
-    deleteMany?: NotificationHistoryScalarWhereInput | NotificationHistoryScalarWhereInput[]
+  export type NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput = {
+    create?: XOR<NotificationInteractionCreateWithoutIdentityInput, NotificationInteractionUncheckedCreateWithoutIdentityInput> | NotificationInteractionCreateWithoutIdentityInput[] | NotificationInteractionUncheckedCreateWithoutIdentityInput[]
+    connectOrCreate?: NotificationInteractionCreateOrConnectWithoutIdentityInput | NotificationInteractionCreateOrConnectWithoutIdentityInput[]
+    upsert?: NotificationInteractionUpsertWithWhereUniqueWithoutIdentityInput | NotificationInteractionUpsertWithWhereUniqueWithoutIdentityInput[]
+    createMany?: NotificationInteractionCreateManyIdentityInputEnvelope
+    set?: NotificationInteractionWhereUniqueInput | NotificationInteractionWhereUniqueInput[]
+    disconnect?: NotificationInteractionWhereUniqueInput | NotificationInteractionWhereUniqueInput[]
+    delete?: NotificationInteractionWhereUniqueInput | NotificationInteractionWhereUniqueInput[]
+    connect?: NotificationInteractionWhereUniqueInput | NotificationInteractionWhereUniqueInput[]
+    update?: NotificationInteractionUpdateWithWhereUniqueWithoutIdentityInput | NotificationInteractionUpdateWithWhereUniqueWithoutIdentityInput[]
+    updateMany?: NotificationInteractionUpdateManyWithWhereWithoutIdentityInput | NotificationInteractionUpdateManyWithWhereWithoutIdentityInput[]
+    deleteMany?: NotificationInteractionScalarWhereInput | NotificationInteractionScalarWhereInput[]
   }
 
   export type NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput = {
@@ -153101,11 +153188,11 @@ export namespace Prisma {
     update?: XOR<XOR<LabelUpdateToOneWithWhereWithoutTaskLinksInput, LabelUpdateWithoutTaskLinksInput>, LabelUncheckedUpdateWithoutTaskLinksInput>
   }
 
-  export type NotificationHistoryCreateNestedManyWithoutNotificationInput = {
-    create?: XOR<NotificationHistoryCreateWithoutNotificationInput, NotificationHistoryUncheckedCreateWithoutNotificationInput> | NotificationHistoryCreateWithoutNotificationInput[] | NotificationHistoryUncheckedCreateWithoutNotificationInput[]
-    connectOrCreate?: NotificationHistoryCreateOrConnectWithoutNotificationInput | NotificationHistoryCreateOrConnectWithoutNotificationInput[]
-    createMany?: NotificationHistoryCreateManyNotificationInputEnvelope
-    connect?: NotificationHistoryWhereUniqueInput | NotificationHistoryWhereUniqueInput[]
+  export type NotificationInteractionCreateNestedManyWithoutNotificationInput = {
+    create?: XOR<NotificationInteractionCreateWithoutNotificationInput, NotificationInteractionUncheckedCreateWithoutNotificationInput> | NotificationInteractionCreateWithoutNotificationInput[] | NotificationInteractionUncheckedCreateWithoutNotificationInput[]
+    connectOrCreate?: NotificationInteractionCreateOrConnectWithoutNotificationInput | NotificationInteractionCreateOrConnectWithoutNotificationInput[]
+    createMany?: NotificationInteractionCreateManyNotificationInputEnvelope
+    connect?: NotificationInteractionWhereUniqueInput | NotificationInteractionWhereUniqueInput[]
   }
 
   export type NotificationDispatchOutboxCreateNestedManyWithoutNotificationInput = {
@@ -153128,11 +153215,11 @@ export namespace Prisma {
     connect?: AccountWhereUniqueInput
   }
 
-  export type NotificationHistoryUncheckedCreateNestedManyWithoutNotificationInput = {
-    create?: XOR<NotificationHistoryCreateWithoutNotificationInput, NotificationHistoryUncheckedCreateWithoutNotificationInput> | NotificationHistoryCreateWithoutNotificationInput[] | NotificationHistoryUncheckedCreateWithoutNotificationInput[]
-    connectOrCreate?: NotificationHistoryCreateOrConnectWithoutNotificationInput | NotificationHistoryCreateOrConnectWithoutNotificationInput[]
-    createMany?: NotificationHistoryCreateManyNotificationInputEnvelope
-    connect?: NotificationHistoryWhereUniqueInput | NotificationHistoryWhereUniqueInput[]
+  export type NotificationInteractionUncheckedCreateNestedManyWithoutNotificationInput = {
+    create?: XOR<NotificationInteractionCreateWithoutNotificationInput, NotificationInteractionUncheckedCreateWithoutNotificationInput> | NotificationInteractionCreateWithoutNotificationInput[] | NotificationInteractionUncheckedCreateWithoutNotificationInput[]
+    connectOrCreate?: NotificationInteractionCreateOrConnectWithoutNotificationInput | NotificationInteractionCreateOrConnectWithoutNotificationInput[]
+    createMany?: NotificationInteractionCreateManyNotificationInputEnvelope
+    connect?: NotificationInteractionWhereUniqueInput | NotificationInteractionWhereUniqueInput[]
   }
 
   export type NotificationDispatchOutboxUncheckedCreateNestedManyWithoutNotificationInput = {
@@ -153149,18 +153236,18 @@ export namespace Prisma {
     connect?: NotificationDeliveryDecisionRecordWhereUniqueInput | NotificationDeliveryDecisionRecordWhereUniqueInput[]
   }
 
-  export type NotificationHistoryUpdateManyWithoutNotificationNestedInput = {
-    create?: XOR<NotificationHistoryCreateWithoutNotificationInput, NotificationHistoryUncheckedCreateWithoutNotificationInput> | NotificationHistoryCreateWithoutNotificationInput[] | NotificationHistoryUncheckedCreateWithoutNotificationInput[]
-    connectOrCreate?: NotificationHistoryCreateOrConnectWithoutNotificationInput | NotificationHistoryCreateOrConnectWithoutNotificationInput[]
-    upsert?: NotificationHistoryUpsertWithWhereUniqueWithoutNotificationInput | NotificationHistoryUpsertWithWhereUniqueWithoutNotificationInput[]
-    createMany?: NotificationHistoryCreateManyNotificationInputEnvelope
-    set?: NotificationHistoryWhereUniqueInput | NotificationHistoryWhereUniqueInput[]
-    disconnect?: NotificationHistoryWhereUniqueInput | NotificationHistoryWhereUniqueInput[]
-    delete?: NotificationHistoryWhereUniqueInput | NotificationHistoryWhereUniqueInput[]
-    connect?: NotificationHistoryWhereUniqueInput | NotificationHistoryWhereUniqueInput[]
-    update?: NotificationHistoryUpdateWithWhereUniqueWithoutNotificationInput | NotificationHistoryUpdateWithWhereUniqueWithoutNotificationInput[]
-    updateMany?: NotificationHistoryUpdateManyWithWhereWithoutNotificationInput | NotificationHistoryUpdateManyWithWhereWithoutNotificationInput[]
-    deleteMany?: NotificationHistoryScalarWhereInput | NotificationHistoryScalarWhereInput[]
+  export type NotificationInteractionUpdateManyWithoutNotificationNestedInput = {
+    create?: XOR<NotificationInteractionCreateWithoutNotificationInput, NotificationInteractionUncheckedCreateWithoutNotificationInput> | NotificationInteractionCreateWithoutNotificationInput[] | NotificationInteractionUncheckedCreateWithoutNotificationInput[]
+    connectOrCreate?: NotificationInteractionCreateOrConnectWithoutNotificationInput | NotificationInteractionCreateOrConnectWithoutNotificationInput[]
+    upsert?: NotificationInteractionUpsertWithWhereUniqueWithoutNotificationInput | NotificationInteractionUpsertWithWhereUniqueWithoutNotificationInput[]
+    createMany?: NotificationInteractionCreateManyNotificationInputEnvelope
+    set?: NotificationInteractionWhereUniqueInput | NotificationInteractionWhereUniqueInput[]
+    disconnect?: NotificationInteractionWhereUniqueInput | NotificationInteractionWhereUniqueInput[]
+    delete?: NotificationInteractionWhereUniqueInput | NotificationInteractionWhereUniqueInput[]
+    connect?: NotificationInteractionWhereUniqueInput | NotificationInteractionWhereUniqueInput[]
+    update?: NotificationInteractionUpdateWithWhereUniqueWithoutNotificationInput | NotificationInteractionUpdateWithWhereUniqueWithoutNotificationInput[]
+    updateMany?: NotificationInteractionUpdateManyWithWhereWithoutNotificationInput | NotificationInteractionUpdateManyWithWhereWithoutNotificationInput[]
+    deleteMany?: NotificationInteractionScalarWhereInput | NotificationInteractionScalarWhereInput[]
   }
 
   export type NotificationDispatchOutboxUpdateManyWithoutNotificationNestedInput = {
@@ -153199,18 +153286,18 @@ export namespace Prisma {
     update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutNotificationsInput, AccountUpdateWithoutNotificationsInput>, AccountUncheckedUpdateWithoutNotificationsInput>
   }
 
-  export type NotificationHistoryUncheckedUpdateManyWithoutNotificationNestedInput = {
-    create?: XOR<NotificationHistoryCreateWithoutNotificationInput, NotificationHistoryUncheckedCreateWithoutNotificationInput> | NotificationHistoryCreateWithoutNotificationInput[] | NotificationHistoryUncheckedCreateWithoutNotificationInput[]
-    connectOrCreate?: NotificationHistoryCreateOrConnectWithoutNotificationInput | NotificationHistoryCreateOrConnectWithoutNotificationInput[]
-    upsert?: NotificationHistoryUpsertWithWhereUniqueWithoutNotificationInput | NotificationHistoryUpsertWithWhereUniqueWithoutNotificationInput[]
-    createMany?: NotificationHistoryCreateManyNotificationInputEnvelope
-    set?: NotificationHistoryWhereUniqueInput | NotificationHistoryWhereUniqueInput[]
-    disconnect?: NotificationHistoryWhereUniqueInput | NotificationHistoryWhereUniqueInput[]
-    delete?: NotificationHistoryWhereUniqueInput | NotificationHistoryWhereUniqueInput[]
-    connect?: NotificationHistoryWhereUniqueInput | NotificationHistoryWhereUniqueInput[]
-    update?: NotificationHistoryUpdateWithWhereUniqueWithoutNotificationInput | NotificationHistoryUpdateWithWhereUniqueWithoutNotificationInput[]
-    updateMany?: NotificationHistoryUpdateManyWithWhereWithoutNotificationInput | NotificationHistoryUpdateManyWithWhereWithoutNotificationInput[]
-    deleteMany?: NotificationHistoryScalarWhereInput | NotificationHistoryScalarWhereInput[]
+  export type NotificationInteractionUncheckedUpdateManyWithoutNotificationNestedInput = {
+    create?: XOR<NotificationInteractionCreateWithoutNotificationInput, NotificationInteractionUncheckedCreateWithoutNotificationInput> | NotificationInteractionCreateWithoutNotificationInput[] | NotificationInteractionUncheckedCreateWithoutNotificationInput[]
+    connectOrCreate?: NotificationInteractionCreateOrConnectWithoutNotificationInput | NotificationInteractionCreateOrConnectWithoutNotificationInput[]
+    upsert?: NotificationInteractionUpsertWithWhereUniqueWithoutNotificationInput | NotificationInteractionUpsertWithWhereUniqueWithoutNotificationInput[]
+    createMany?: NotificationInteractionCreateManyNotificationInputEnvelope
+    set?: NotificationInteractionWhereUniqueInput | NotificationInteractionWhereUniqueInput[]
+    disconnect?: NotificationInteractionWhereUniqueInput | NotificationInteractionWhereUniqueInput[]
+    delete?: NotificationInteractionWhereUniqueInput | NotificationInteractionWhereUniqueInput[]
+    connect?: NotificationInteractionWhereUniqueInput | NotificationInteractionWhereUniqueInput[]
+    update?: NotificationInteractionUpdateWithWhereUniqueWithoutNotificationInput | NotificationInteractionUpdateWithWhereUniqueWithoutNotificationInput[]
+    updateMany?: NotificationInteractionUpdateManyWithWhereWithoutNotificationInput | NotificationInteractionUpdateManyWithWhereWithoutNotificationInput[]
+    deleteMany?: NotificationInteractionScalarWhereInput | NotificationInteractionScalarWhereInput[]
   }
 
   export type NotificationDispatchOutboxUncheckedUpdateManyWithoutNotificationNestedInput = {
@@ -153241,32 +153328,32 @@ export namespace Prisma {
     deleteMany?: NotificationDeliveryDecisionRecordScalarWhereInput | NotificationDeliveryDecisionRecordScalarWhereInput[]
   }
 
-  export type AccountCreateNestedOneWithoutNotificationHistoryInput = {
-    create?: XOR<AccountCreateWithoutNotificationHistoryInput, AccountUncheckedCreateWithoutNotificationHistoryInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutNotificationHistoryInput
+  export type AccountCreateNestedOneWithoutNotificationInteractionsInput = {
+    create?: XOR<AccountCreateWithoutNotificationInteractionsInput, AccountUncheckedCreateWithoutNotificationInteractionsInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutNotificationInteractionsInput
     connect?: AccountWhereUniqueInput
   }
 
-  export type NotificationCreateNestedOneWithoutHistoryInput = {
-    create?: XOR<NotificationCreateWithoutHistoryInput, NotificationUncheckedCreateWithoutHistoryInput>
-    connectOrCreate?: NotificationCreateOrConnectWithoutHistoryInput
+  export type NotificationCreateNestedOneWithoutInteractionsInput = {
+    create?: XOR<NotificationCreateWithoutInteractionsInput, NotificationUncheckedCreateWithoutInteractionsInput>
+    connectOrCreate?: NotificationCreateOrConnectWithoutInteractionsInput
     connect?: NotificationWhereUniqueInput
   }
 
-  export type AccountUpdateOneRequiredWithoutNotificationHistoryNestedInput = {
-    create?: XOR<AccountCreateWithoutNotificationHistoryInput, AccountUncheckedCreateWithoutNotificationHistoryInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutNotificationHistoryInput
-    upsert?: AccountUpsertWithoutNotificationHistoryInput
+  export type AccountUpdateOneRequiredWithoutNotificationInteractionsNestedInput = {
+    create?: XOR<AccountCreateWithoutNotificationInteractionsInput, AccountUncheckedCreateWithoutNotificationInteractionsInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutNotificationInteractionsInput
+    upsert?: AccountUpsertWithoutNotificationInteractionsInput
     connect?: AccountWhereUniqueInput
-    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutNotificationHistoryInput, AccountUpdateWithoutNotificationHistoryInput>, AccountUncheckedUpdateWithoutNotificationHistoryInput>
+    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutNotificationInteractionsInput, AccountUpdateWithoutNotificationInteractionsInput>, AccountUncheckedUpdateWithoutNotificationInteractionsInput>
   }
 
-  export type NotificationUpdateOneRequiredWithoutHistoryNestedInput = {
-    create?: XOR<NotificationCreateWithoutHistoryInput, NotificationUncheckedCreateWithoutHistoryInput>
-    connectOrCreate?: NotificationCreateOrConnectWithoutHistoryInput
-    upsert?: NotificationUpsertWithoutHistoryInput
+  export type NotificationUpdateOneRequiredWithoutInteractionsNestedInput = {
+    create?: XOR<NotificationCreateWithoutInteractionsInput, NotificationUncheckedCreateWithoutInteractionsInput>
+    connectOrCreate?: NotificationCreateOrConnectWithoutInteractionsInput
+    upsert?: NotificationUpsertWithoutInteractionsInput
     connect?: NotificationWhereUniqueInput
-    update?: XOR<XOR<NotificationUpdateToOneWithWhereWithoutHistoryInput, NotificationUpdateWithoutHistoryInput>, NotificationUncheckedUpdateWithoutHistoryInput>
+    update?: XOR<XOR<NotificationUpdateToOneWithWhereWithoutInteractionsInput, NotificationUpdateWithoutInteractionsInput>, NotificationUncheckedUpdateWithoutInteractionsInput>
   }
 
   export type NotificationCreateNestedOneWithoutDeliveryDecisionsInput = {
@@ -157282,7 +157369,7 @@ export namespace Prisma {
     deletedAt?: Date | string | null
     archivedAt?: Date | string | null
     isRead?: boolean
-    history?: NotificationHistoryCreateNestedManyWithoutNotificationInput
+    interactions?: NotificationInteractionCreateNestedManyWithoutNotificationInput
     dispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutNotificationInput
     deliveryDecisions?: NotificationDeliveryDecisionRecordCreateNestedManyWithoutNotificationInput
   }
@@ -157313,7 +157400,7 @@ export namespace Prisma {
     deletedAt?: Date | string | null
     archivedAt?: Date | string | null
     isRead?: boolean
-    history?: NotificationHistoryUncheckedCreateNestedManyWithoutNotificationInput
+    interactions?: NotificationInteractionUncheckedCreateNestedManyWithoutNotificationInput
     dispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutNotificationInput
     deliveryDecisions?: NotificationDeliveryDecisionRecordUncheckedCreateNestedManyWithoutNotificationInput
   }
@@ -157871,31 +157958,39 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type NotificationHistoryCreateWithoutIdentityInput = {
+  export type NotificationInteractionCreateWithoutIdentityInput = {
     id: string
-    action: string
-    details?: string | null
-    actorId?: string | null
-    createdAt?: Date | string
-    notification: NotificationCreateNestedOneWithoutHistoryInput
+    idempotencyKey: string
+    actionKey: string
+    actionKind: string
+    occurredAt: Date | string
+    commandReceiptId?: string | null
+    outcome: string
+    correlationId?: string | null
+    causationId?: string | null
+    notification: NotificationCreateNestedOneWithoutInteractionsInput
   }
 
-  export type NotificationHistoryUncheckedCreateWithoutIdentityInput = {
+  export type NotificationInteractionUncheckedCreateWithoutIdentityInput = {
     id: string
+    idempotencyKey: string
     notificationId: string
-    action: string
-    details?: string | null
-    actorId?: string | null
-    createdAt?: Date | string
+    actionKey: string
+    actionKind: string
+    occurredAt: Date | string
+    commandReceiptId?: string | null
+    outcome: string
+    correlationId?: string | null
+    causationId?: string | null
   }
 
-  export type NotificationHistoryCreateOrConnectWithoutIdentityInput = {
-    where: NotificationHistoryWhereUniqueInput
-    create: XOR<NotificationHistoryCreateWithoutIdentityInput, NotificationHistoryUncheckedCreateWithoutIdentityInput>
+  export type NotificationInteractionCreateOrConnectWithoutIdentityInput = {
+    where: NotificationInteractionWhereUniqueInput
+    create: XOR<NotificationInteractionCreateWithoutIdentityInput, NotificationInteractionUncheckedCreateWithoutIdentityInput>
   }
 
-  export type NotificationHistoryCreateManyIdentityInputEnvelope = {
-    data: NotificationHistoryCreateManyIdentityInput | NotificationHistoryCreateManyIdentityInput[]
+  export type NotificationInteractionCreateManyIdentityInputEnvelope = {
+    data: NotificationInteractionCreateManyIdentityInput | NotificationInteractionCreateManyIdentityInput[]
     skipDuplicates?: boolean
   }
 
@@ -159862,33 +159957,37 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"RoutineInteraction"> | Date | string
   }
 
-  export type NotificationHistoryUpsertWithWhereUniqueWithoutIdentityInput = {
-    where: NotificationHistoryWhereUniqueInput
-    update: XOR<NotificationHistoryUpdateWithoutIdentityInput, NotificationHistoryUncheckedUpdateWithoutIdentityInput>
-    create: XOR<NotificationHistoryCreateWithoutIdentityInput, NotificationHistoryUncheckedCreateWithoutIdentityInput>
+  export type NotificationInteractionUpsertWithWhereUniqueWithoutIdentityInput = {
+    where: NotificationInteractionWhereUniqueInput
+    update: XOR<NotificationInteractionUpdateWithoutIdentityInput, NotificationInteractionUncheckedUpdateWithoutIdentityInput>
+    create: XOR<NotificationInteractionCreateWithoutIdentityInput, NotificationInteractionUncheckedCreateWithoutIdentityInput>
   }
 
-  export type NotificationHistoryUpdateWithWhereUniqueWithoutIdentityInput = {
-    where: NotificationHistoryWhereUniqueInput
-    data: XOR<NotificationHistoryUpdateWithoutIdentityInput, NotificationHistoryUncheckedUpdateWithoutIdentityInput>
+  export type NotificationInteractionUpdateWithWhereUniqueWithoutIdentityInput = {
+    where: NotificationInteractionWhereUniqueInput
+    data: XOR<NotificationInteractionUpdateWithoutIdentityInput, NotificationInteractionUncheckedUpdateWithoutIdentityInput>
   }
 
-  export type NotificationHistoryUpdateManyWithWhereWithoutIdentityInput = {
-    where: NotificationHistoryScalarWhereInput
-    data: XOR<NotificationHistoryUpdateManyMutationInput, NotificationHistoryUncheckedUpdateManyWithoutIdentityInput>
+  export type NotificationInteractionUpdateManyWithWhereWithoutIdentityInput = {
+    where: NotificationInteractionScalarWhereInput
+    data: XOR<NotificationInteractionUpdateManyMutationInput, NotificationInteractionUncheckedUpdateManyWithoutIdentityInput>
   }
 
-  export type NotificationHistoryScalarWhereInput = {
-    AND?: NotificationHistoryScalarWhereInput | NotificationHistoryScalarWhereInput[]
-    OR?: NotificationHistoryScalarWhereInput[]
-    NOT?: NotificationHistoryScalarWhereInput | NotificationHistoryScalarWhereInput[]
-    id?: StringFilter<"NotificationHistory"> | string
-    identityId?: StringFilter<"NotificationHistory"> | string
-    notificationId?: StringFilter<"NotificationHistory"> | string
-    action?: StringFilter<"NotificationHistory"> | string
-    details?: StringNullableFilter<"NotificationHistory"> | string | null
-    actorId?: StringNullableFilter<"NotificationHistory"> | string | null
-    createdAt?: DateTimeFilter<"NotificationHistory"> | Date | string
+  export type NotificationInteractionScalarWhereInput = {
+    AND?: NotificationInteractionScalarWhereInput | NotificationInteractionScalarWhereInput[]
+    OR?: NotificationInteractionScalarWhereInput[]
+    NOT?: NotificationInteractionScalarWhereInput | NotificationInteractionScalarWhereInput[]
+    id?: StringFilter<"NotificationInteraction"> | string
+    idempotencyKey?: StringFilter<"NotificationInteraction"> | string
+    identityId?: StringFilter<"NotificationInteraction"> | string
+    notificationId?: StringFilter<"NotificationInteraction"> | string
+    actionKey?: StringFilter<"NotificationInteraction"> | string
+    actionKind?: StringFilter<"NotificationInteraction"> | string
+    occurredAt?: DateTimeFilter<"NotificationInteraction"> | Date | string
+    commandReceiptId?: StringNullableFilter<"NotificationInteraction"> | string | null
+    outcome?: StringFilter<"NotificationInteraction"> | string
+    correlationId?: StringNullableFilter<"NotificationInteraction"> | string | null
+    causationId?: StringNullableFilter<"NotificationInteraction"> | string | null
   }
 
   export type NotificationDispatchOutboxUpsertWithWhereUniqueWithoutAccountInput = {
@@ -160245,7 +160344,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -160306,7 +160405,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -160383,7 +160482,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -160444,7 +160543,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -160505,7 +160604,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -160566,7 +160665,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -160671,7 +160770,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -160732,7 +160831,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -160810,7 +160909,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
@@ -160871,7 +160970,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -160979,7 +161078,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
@@ -161040,7 +161139,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -161137,7 +161236,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -161198,7 +161297,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -161275,7 +161374,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -161336,7 +161435,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -161397,7 +161496,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -161458,7 +161557,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -161535,7 +161634,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -161596,7 +161695,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -161657,7 +161756,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -161718,7 +161817,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -161795,7 +161894,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -161856,7 +161955,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -161917,7 +162016,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -161978,7 +162077,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -162055,7 +162154,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -162116,7 +162215,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -162177,7 +162276,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -162238,7 +162337,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -162315,7 +162414,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -162376,7 +162475,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -162437,7 +162536,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -162498,7 +162597,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -162575,7 +162674,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -162636,7 +162735,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -162801,7 +162900,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -162862,7 +162961,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -163036,7 +163135,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -163097,7 +163196,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -163374,7 +163473,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -163435,7 +163534,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -163651,7 +163750,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -163712,7 +163811,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -164753,7 +164852,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -164814,7 +164913,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -164940,7 +165039,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -165001,7 +165100,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -165364,7 +165463,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -165425,7 +165524,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -165540,7 +165639,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -165601,7 +165700,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -165694,7 +165793,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -165755,7 +165854,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -165908,7 +166007,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -165969,7 +166068,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -166118,7 +166217,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -166179,7 +166278,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -166341,7 +166440,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -166402,7 +166501,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -166510,31 +166609,39 @@ export namespace Prisma {
     goalLinks?: GoalLabelUncheckedUpdateManyWithoutLabelNestedInput
   }
 
-  export type NotificationHistoryCreateWithoutNotificationInput = {
+  export type NotificationInteractionCreateWithoutNotificationInput = {
     id: string
-    action: string
-    details?: string | null
-    actorId?: string | null
-    createdAt?: Date | string
-    identity: AccountCreateNestedOneWithoutNotificationHistoryInput
+    idempotencyKey: string
+    actionKey: string
+    actionKind: string
+    occurredAt: Date | string
+    commandReceiptId?: string | null
+    outcome: string
+    correlationId?: string | null
+    causationId?: string | null
+    identity: AccountCreateNestedOneWithoutNotificationInteractionsInput
   }
 
-  export type NotificationHistoryUncheckedCreateWithoutNotificationInput = {
+  export type NotificationInteractionUncheckedCreateWithoutNotificationInput = {
     id: string
+    idempotencyKey: string
     identityId: string
-    action: string
-    details?: string | null
-    actorId?: string | null
-    createdAt?: Date | string
+    actionKey: string
+    actionKind: string
+    occurredAt: Date | string
+    commandReceiptId?: string | null
+    outcome: string
+    correlationId?: string | null
+    causationId?: string | null
   }
 
-  export type NotificationHistoryCreateOrConnectWithoutNotificationInput = {
-    where: NotificationHistoryWhereUniqueInput
-    create: XOR<NotificationHistoryCreateWithoutNotificationInput, NotificationHistoryUncheckedCreateWithoutNotificationInput>
+  export type NotificationInteractionCreateOrConnectWithoutNotificationInput = {
+    where: NotificationInteractionWhereUniqueInput
+    create: XOR<NotificationInteractionCreateWithoutNotificationInput, NotificationInteractionUncheckedCreateWithoutNotificationInput>
   }
 
-  export type NotificationHistoryCreateManyNotificationInputEnvelope = {
-    data: NotificationHistoryCreateManyNotificationInput | NotificationHistoryCreateManyNotificationInput[]
+  export type NotificationInteractionCreateManyNotificationInputEnvelope = {
+    data: NotificationInteractionCreateManyNotificationInput | NotificationInteractionCreateManyNotificationInput[]
     skipDuplicates?: boolean
   }
 
@@ -166686,7 +166793,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -166747,7 +166854,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -166763,20 +166870,20 @@ export namespace Prisma {
     create: XOR<AccountCreateWithoutNotificationsInput, AccountUncheckedCreateWithoutNotificationsInput>
   }
 
-  export type NotificationHistoryUpsertWithWhereUniqueWithoutNotificationInput = {
-    where: NotificationHistoryWhereUniqueInput
-    update: XOR<NotificationHistoryUpdateWithoutNotificationInput, NotificationHistoryUncheckedUpdateWithoutNotificationInput>
-    create: XOR<NotificationHistoryCreateWithoutNotificationInput, NotificationHistoryUncheckedCreateWithoutNotificationInput>
+  export type NotificationInteractionUpsertWithWhereUniqueWithoutNotificationInput = {
+    where: NotificationInteractionWhereUniqueInput
+    update: XOR<NotificationInteractionUpdateWithoutNotificationInput, NotificationInteractionUncheckedUpdateWithoutNotificationInput>
+    create: XOR<NotificationInteractionCreateWithoutNotificationInput, NotificationInteractionUncheckedCreateWithoutNotificationInput>
   }
 
-  export type NotificationHistoryUpdateWithWhereUniqueWithoutNotificationInput = {
-    where: NotificationHistoryWhereUniqueInput
-    data: XOR<NotificationHistoryUpdateWithoutNotificationInput, NotificationHistoryUncheckedUpdateWithoutNotificationInput>
+  export type NotificationInteractionUpdateWithWhereUniqueWithoutNotificationInput = {
+    where: NotificationInteractionWhereUniqueInput
+    data: XOR<NotificationInteractionUpdateWithoutNotificationInput, NotificationInteractionUncheckedUpdateWithoutNotificationInput>
   }
 
-  export type NotificationHistoryUpdateManyWithWhereWithoutNotificationInput = {
-    where: NotificationHistoryScalarWhereInput
-    data: XOR<NotificationHistoryUpdateManyMutationInput, NotificationHistoryUncheckedUpdateManyWithoutNotificationInput>
+  export type NotificationInteractionUpdateManyWithWhereWithoutNotificationInput = {
+    where: NotificationInteractionScalarWhereInput
+    data: XOR<NotificationInteractionUpdateManyMutationInput, NotificationInteractionUncheckedUpdateManyWithoutNotificationInput>
   }
 
   export type NotificationDispatchOutboxUpsertWithWhereUniqueWithoutNotificationInput = {
@@ -166888,7 +166995,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -166949,7 +167056,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -166960,7 +167067,7 @@ export namespace Prisma {
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
 
-  export type AccountCreateWithoutNotificationHistoryInput = {
+  export type AccountCreateWithoutNotificationInteractionsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
@@ -167021,7 +167128,7 @@ export namespace Prisma {
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
 
-  export type AccountUncheckedCreateWithoutNotificationHistoryInput = {
+  export type AccountUncheckedCreateWithoutNotificationInteractionsInput = {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
@@ -167082,12 +167189,12 @@ export namespace Prisma {
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
 
-  export type AccountCreateOrConnectWithoutNotificationHistoryInput = {
+  export type AccountCreateOrConnectWithoutNotificationInteractionsInput = {
     where: AccountWhereUniqueInput
-    create: XOR<AccountCreateWithoutNotificationHistoryInput, AccountUncheckedCreateWithoutNotificationHistoryInput>
+    create: XOR<AccountCreateWithoutNotificationInteractionsInput, AccountUncheckedCreateWithoutNotificationInteractionsInput>
   }
 
-  export type NotificationCreateWithoutHistoryInput = {
+  export type NotificationCreateWithoutInteractionsInput = {
     id: string
     type: string
     category: string
@@ -167118,7 +167225,7 @@ export namespace Prisma {
     account: AccountCreateNestedOneWithoutNotificationsInput
   }
 
-  export type NotificationUncheckedCreateWithoutHistoryInput = {
+  export type NotificationUncheckedCreateWithoutInteractionsInput = {
     id: string
     identityId: string
     type: string
@@ -167149,23 +167256,23 @@ export namespace Prisma {
     deliveryDecisions?: NotificationDeliveryDecisionRecordUncheckedCreateNestedManyWithoutNotificationInput
   }
 
-  export type NotificationCreateOrConnectWithoutHistoryInput = {
+  export type NotificationCreateOrConnectWithoutInteractionsInput = {
     where: NotificationWhereUniqueInput
-    create: XOR<NotificationCreateWithoutHistoryInput, NotificationUncheckedCreateWithoutHistoryInput>
+    create: XOR<NotificationCreateWithoutInteractionsInput, NotificationUncheckedCreateWithoutInteractionsInput>
   }
 
-  export type AccountUpsertWithoutNotificationHistoryInput = {
-    update: XOR<AccountUpdateWithoutNotificationHistoryInput, AccountUncheckedUpdateWithoutNotificationHistoryInput>
-    create: XOR<AccountCreateWithoutNotificationHistoryInput, AccountUncheckedCreateWithoutNotificationHistoryInput>
+  export type AccountUpsertWithoutNotificationInteractionsInput = {
+    update: XOR<AccountUpdateWithoutNotificationInteractionsInput, AccountUncheckedUpdateWithoutNotificationInteractionsInput>
+    create: XOR<AccountCreateWithoutNotificationInteractionsInput, AccountUncheckedCreateWithoutNotificationInteractionsInput>
     where?: AccountWhereInput
   }
 
-  export type AccountUpdateToOneWithWhereWithoutNotificationHistoryInput = {
+  export type AccountUpdateToOneWithWhereWithoutNotificationInteractionsInput = {
     where?: AccountWhereInput
-    data: XOR<AccountUpdateWithoutNotificationHistoryInput, AccountUncheckedUpdateWithoutNotificationHistoryInput>
+    data: XOR<AccountUpdateWithoutNotificationInteractionsInput, AccountUncheckedUpdateWithoutNotificationInteractionsInput>
   }
 
-  export type AccountUpdateWithoutNotificationHistoryInput = {
+  export type AccountUpdateWithoutNotificationInteractionsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -167226,7 +167333,7 @@ export namespace Prisma {
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
 
-  export type AccountUncheckedUpdateWithoutNotificationHistoryInput = {
+  export type AccountUncheckedUpdateWithoutNotificationInteractionsInput = {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
@@ -167287,18 +167394,18 @@ export namespace Prisma {
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
 
-  export type NotificationUpsertWithoutHistoryInput = {
-    update: XOR<NotificationUpdateWithoutHistoryInput, NotificationUncheckedUpdateWithoutHistoryInput>
-    create: XOR<NotificationCreateWithoutHistoryInput, NotificationUncheckedCreateWithoutHistoryInput>
+  export type NotificationUpsertWithoutInteractionsInput = {
+    update: XOR<NotificationUpdateWithoutInteractionsInput, NotificationUncheckedUpdateWithoutInteractionsInput>
+    create: XOR<NotificationCreateWithoutInteractionsInput, NotificationUncheckedCreateWithoutInteractionsInput>
     where?: NotificationWhereInput
   }
 
-  export type NotificationUpdateToOneWithWhereWithoutHistoryInput = {
+  export type NotificationUpdateToOneWithWhereWithoutInteractionsInput = {
     where?: NotificationWhereInput
-    data: XOR<NotificationUpdateWithoutHistoryInput, NotificationUncheckedUpdateWithoutHistoryInput>
+    data: XOR<NotificationUpdateWithoutInteractionsInput, NotificationUncheckedUpdateWithoutInteractionsInput>
   }
 
-  export type NotificationUpdateWithoutHistoryInput = {
+  export type NotificationUpdateWithoutInteractionsInput = {
     id?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     category?: StringFieldUpdateOperationsInput | string
@@ -167329,7 +167436,7 @@ export namespace Prisma {
     account?: AccountUpdateOneRequiredWithoutNotificationsNestedInput
   }
 
-  export type NotificationUncheckedUpdateWithoutHistoryInput = {
+  export type NotificationUncheckedUpdateWithoutInteractionsInput = {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
@@ -167386,7 +167493,7 @@ export namespace Prisma {
     deletedAt?: Date | string | null
     archivedAt?: Date | string | null
     isRead?: boolean
-    history?: NotificationHistoryCreateNestedManyWithoutNotificationInput
+    interactions?: NotificationInteractionCreateNestedManyWithoutNotificationInput
     dispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutNotificationInput
     account: AccountCreateNestedOneWithoutNotificationsInput
   }
@@ -167418,7 +167525,7 @@ export namespace Prisma {
     deletedAt?: Date | string | null
     archivedAt?: Date | string | null
     isRead?: boolean
-    history?: NotificationHistoryUncheckedCreateNestedManyWithoutNotificationInput
+    interactions?: NotificationInteractionUncheckedCreateNestedManyWithoutNotificationInput
     dispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutNotificationInput
   }
 
@@ -167464,7 +167571,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
-    history?: NotificationHistoryUpdateManyWithoutNotificationNestedInput
+    interactions?: NotificationInteractionUpdateManyWithoutNotificationNestedInput
     dispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutNotificationNestedInput
     account?: AccountUpdateOneRequiredWithoutNotificationsNestedInput
   }
@@ -167496,7 +167603,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
-    history?: NotificationHistoryUncheckedUpdateManyWithoutNotificationNestedInput
+    interactions?: NotificationInteractionUncheckedUpdateManyWithoutNotificationNestedInput
     dispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutNotificationNestedInput
   }
 
@@ -167526,7 +167633,7 @@ export namespace Prisma {
     deletedAt?: Date | string | null
     archivedAt?: Date | string | null
     isRead?: boolean
-    history?: NotificationHistoryCreateNestedManyWithoutNotificationInput
+    interactions?: NotificationInteractionCreateNestedManyWithoutNotificationInput
     deliveryDecisions?: NotificationDeliveryDecisionRecordCreateNestedManyWithoutNotificationInput
     account: AccountCreateNestedOneWithoutNotificationsInput
   }
@@ -167558,7 +167665,7 @@ export namespace Prisma {
     deletedAt?: Date | string | null
     archivedAt?: Date | string | null
     isRead?: boolean
-    history?: NotificationHistoryUncheckedCreateNestedManyWithoutNotificationInput
+    interactions?: NotificationInteractionUncheckedCreateNestedManyWithoutNotificationInput
     deliveryDecisions?: NotificationDeliveryDecisionRecordUncheckedCreateNestedManyWithoutNotificationInput
   }
 
@@ -167618,7 +167725,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
@@ -167679,7 +167786,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -167731,7 +167838,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
-    history?: NotificationHistoryUpdateManyWithoutNotificationNestedInput
+    interactions?: NotificationInteractionUpdateManyWithoutNotificationNestedInput
     deliveryDecisions?: NotificationDeliveryDecisionRecordUpdateManyWithoutNotificationNestedInput
     account?: AccountUpdateOneRequiredWithoutNotificationsNestedInput
   }
@@ -167763,7 +167870,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
-    history?: NotificationHistoryUncheckedUpdateManyWithoutNotificationNestedInput
+    interactions?: NotificationInteractionUncheckedUpdateManyWithoutNotificationNestedInput
     deliveryDecisions?: NotificationDeliveryDecisionRecordUncheckedUpdateManyWithoutNotificationNestedInput
   }
 
@@ -167829,7 +167936,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
@@ -167890,7 +167997,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -167950,7 +168057,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -168011,7 +168118,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -168088,7 +168195,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -168149,7 +168256,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -168368,7 +168475,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -168429,7 +168536,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -168570,7 +168677,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -168631,7 +168738,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -168692,7 +168799,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -168753,7 +168860,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -168830,7 +168937,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -168891,7 +168998,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -168952,7 +169059,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -169013,7 +169120,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -169151,7 +169258,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -169212,7 +169319,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -169340,7 +169447,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -169401,7 +169508,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -169539,7 +169646,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -169600,7 +169707,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -169728,7 +169835,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -169789,7 +169896,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -169866,7 +169973,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -169927,7 +170034,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -169988,7 +170095,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -170049,7 +170156,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -170187,7 +170294,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -170248,7 +170355,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -170376,7 +170483,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -170437,7 +170544,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -170514,7 +170621,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -170575,7 +170682,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -170697,7 +170804,7 @@ export namespace Prisma {
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -170758,7 +170865,7 @@ export namespace Prisma {
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -170902,7 +171009,7 @@ export namespace Prisma {
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -170963,7 +171070,7 @@ export namespace Prisma {
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -171024,7 +171131,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -171085,7 +171192,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -171319,7 +171426,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -171380,7 +171487,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -171515,7 +171622,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -171576,7 +171683,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -171680,7 +171787,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -171741,7 +171848,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -171818,7 +171925,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -171879,7 +171986,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -172018,7 +172125,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -172079,7 +172186,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -172214,7 +172321,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -172275,7 +172382,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -172387,7 +172494,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -172448,7 +172555,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -172525,7 +172632,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -172586,7 +172693,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -172688,7 +172795,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -172749,7 +172856,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -172876,7 +172983,7 @@ export namespace Prisma {
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -172937,7 +173044,7 @@ export namespace Prisma {
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -173089,7 +173196,7 @@ export namespace Prisma {
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -173150,7 +173257,7 @@ export namespace Prisma {
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -173227,7 +173334,7 @@ export namespace Prisma {
     reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -173288,7 +173395,7 @@ export namespace Prisma {
     reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -173471,7 +173578,7 @@ export namespace Prisma {
     reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -173532,7 +173639,7 @@ export namespace Prisma {
     reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -173746,7 +173853,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -173807,7 +173914,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -173925,7 +174032,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -173986,7 +174093,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -174047,7 +174154,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -174108,7 +174215,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -174373,7 +174480,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -174434,7 +174541,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -174560,7 +174667,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
@@ -174621,7 +174728,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -174820,7 +174927,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
@@ -174881,7 +174988,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -175054,7 +175161,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -175115,7 +175222,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -175243,7 +175350,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -175304,7 +175411,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -175464,7 +175571,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -175525,7 +175632,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -175749,7 +175856,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -175810,7 +175917,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -176285,7 +176392,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -176346,7 +176453,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -176474,7 +176581,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -176535,7 +176642,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -176653,7 +176760,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -176714,7 +176821,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -176791,7 +176898,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -176852,7 +176959,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -176914,7 +177021,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -176975,7 +177082,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -177052,7 +177159,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -177113,7 +177220,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -177360,7 +177467,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -177421,7 +177528,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -177790,7 +177897,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -177851,7 +177958,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -178821,7 +178928,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -178882,7 +178989,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -179004,7 +179111,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -179065,7 +179172,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -179176,7 +179283,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -179237,7 +179344,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -179314,7 +179421,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -179375,7 +179482,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -179436,7 +179543,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -179497,7 +179604,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -179618,7 +179725,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -179679,7 +179786,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -179756,7 +179863,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -179817,7 +179924,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -179959,7 +180066,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -180020,7 +180127,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -180152,7 +180259,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -180213,7 +180320,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -180290,7 +180397,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -180351,7 +180458,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -180412,7 +180519,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -180473,7 +180580,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -180550,7 +180657,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -180611,7 +180718,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -180672,7 +180779,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -180733,7 +180840,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -180947,7 +181054,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -181008,7 +181115,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -181171,7 +181278,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -181232,7 +181339,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -181367,7 +181474,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -181428,7 +181535,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -181553,7 +181660,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -181614,7 +181721,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -181749,7 +181856,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -181810,7 +181917,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -181935,7 +182042,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -181996,7 +182103,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -182107,7 +182214,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -182168,7 +182275,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -182270,7 +182377,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
@@ -182331,7 +182438,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
@@ -182439,7 +182546,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
@@ -182500,7 +182607,7 @@ export namespace Prisma {
     reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
@@ -183102,13 +183209,17 @@ export namespace Prisma {
     createdAt?: Date | string
   }
 
-  export type NotificationHistoryCreateManyIdentityInput = {
+  export type NotificationInteractionCreateManyIdentityInput = {
     id: string
+    idempotencyKey: string
     notificationId: string
-    action: string
-    details?: string | null
-    actorId?: string | null
-    createdAt?: Date | string
+    actionKey: string
+    actionKind: string
+    occurredAt: Date | string
+    commandReceiptId?: string | null
+    outcome: string
+    correlationId?: string | null
+    causationId?: string | null
   }
 
   export type NotificationDispatchOutboxCreateManyAccountInput = {
@@ -184453,7 +184564,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
-    history?: NotificationHistoryUpdateManyWithoutNotificationNestedInput
+    interactions?: NotificationInteractionUpdateManyWithoutNotificationNestedInput
     dispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutNotificationNestedInput
     deliveryDecisions?: NotificationDeliveryDecisionRecordUpdateManyWithoutNotificationNestedInput
   }
@@ -184484,7 +184595,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isRead?: BoolFieldUpdateOperationsInput | boolean
-    history?: NotificationHistoryUncheckedUpdateManyWithoutNotificationNestedInput
+    interactions?: NotificationInteractionUncheckedUpdateManyWithoutNotificationNestedInput
     dispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutNotificationNestedInput
     deliveryDecisions?: NotificationDeliveryDecisionRecordUncheckedUpdateManyWithoutNotificationNestedInput
   }
@@ -185091,31 +185202,43 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type NotificationHistoryUpdateWithoutIdentityInput = {
+  export type NotificationInteractionUpdateWithoutIdentityInput = {
     id?: StringFieldUpdateOperationsInput | string
-    action?: StringFieldUpdateOperationsInput | string
-    details?: NullableStringFieldUpdateOperationsInput | string | null
-    actorId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    notification?: NotificationUpdateOneRequiredWithoutHistoryNestedInput
+    idempotencyKey?: StringFieldUpdateOperationsInput | string
+    actionKey?: StringFieldUpdateOperationsInput | string
+    actionKind?: StringFieldUpdateOperationsInput | string
+    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    commandReceiptId?: NullableStringFieldUpdateOperationsInput | string | null
+    outcome?: StringFieldUpdateOperationsInput | string
+    correlationId?: NullableStringFieldUpdateOperationsInput | string | null
+    causationId?: NullableStringFieldUpdateOperationsInput | string | null
+    notification?: NotificationUpdateOneRequiredWithoutInteractionsNestedInput
   }
 
-  export type NotificationHistoryUncheckedUpdateWithoutIdentityInput = {
+  export type NotificationInteractionUncheckedUpdateWithoutIdentityInput = {
     id?: StringFieldUpdateOperationsInput | string
+    idempotencyKey?: StringFieldUpdateOperationsInput | string
     notificationId?: StringFieldUpdateOperationsInput | string
-    action?: StringFieldUpdateOperationsInput | string
-    details?: NullableStringFieldUpdateOperationsInput | string | null
-    actorId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    actionKey?: StringFieldUpdateOperationsInput | string
+    actionKind?: StringFieldUpdateOperationsInput | string
+    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    commandReceiptId?: NullableStringFieldUpdateOperationsInput | string | null
+    outcome?: StringFieldUpdateOperationsInput | string
+    correlationId?: NullableStringFieldUpdateOperationsInput | string | null
+    causationId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
-  export type NotificationHistoryUncheckedUpdateManyWithoutIdentityInput = {
+  export type NotificationInteractionUncheckedUpdateManyWithoutIdentityInput = {
     id?: StringFieldUpdateOperationsInput | string
+    idempotencyKey?: StringFieldUpdateOperationsInput | string
     notificationId?: StringFieldUpdateOperationsInput | string
-    action?: StringFieldUpdateOperationsInput | string
-    details?: NullableStringFieldUpdateOperationsInput | string | null
-    actorId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    actionKey?: StringFieldUpdateOperationsInput | string
+    actionKind?: StringFieldUpdateOperationsInput | string
+    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    commandReceiptId?: NullableStringFieldUpdateOperationsInput | string | null
+    outcome?: StringFieldUpdateOperationsInput | string
+    correlationId?: NullableStringFieldUpdateOperationsInput | string | null
+    causationId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type NotificationDispatchOutboxUpdateWithoutAccountInput = {
@@ -186277,13 +186400,17 @@ export namespace Prisma {
     taskPlanId?: StringFieldUpdateOperationsInput | string
   }
 
-  export type NotificationHistoryCreateManyNotificationInput = {
+  export type NotificationInteractionCreateManyNotificationInput = {
     id: string
+    idempotencyKey: string
     identityId: string
-    action: string
-    details?: string | null
-    actorId?: string | null
-    createdAt?: Date | string
+    actionKey: string
+    actionKind: string
+    occurredAt: Date | string
+    commandReceiptId?: string | null
+    outcome: string
+    correlationId?: string | null
+    causationId?: string | null
   }
 
   export type NotificationDispatchOutboxCreateManyNotificationInput = {
@@ -186325,31 +186452,43 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
-  export type NotificationHistoryUpdateWithoutNotificationInput = {
+  export type NotificationInteractionUpdateWithoutNotificationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    action?: StringFieldUpdateOperationsInput | string
-    details?: NullableStringFieldUpdateOperationsInput | string | null
-    actorId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    identity?: AccountUpdateOneRequiredWithoutNotificationHistoryNestedInput
+    idempotencyKey?: StringFieldUpdateOperationsInput | string
+    actionKey?: StringFieldUpdateOperationsInput | string
+    actionKind?: StringFieldUpdateOperationsInput | string
+    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    commandReceiptId?: NullableStringFieldUpdateOperationsInput | string | null
+    outcome?: StringFieldUpdateOperationsInput | string
+    correlationId?: NullableStringFieldUpdateOperationsInput | string | null
+    causationId?: NullableStringFieldUpdateOperationsInput | string | null
+    identity?: AccountUpdateOneRequiredWithoutNotificationInteractionsNestedInput
   }
 
-  export type NotificationHistoryUncheckedUpdateWithoutNotificationInput = {
+  export type NotificationInteractionUncheckedUpdateWithoutNotificationInput = {
     id?: StringFieldUpdateOperationsInput | string
+    idempotencyKey?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
-    action?: StringFieldUpdateOperationsInput | string
-    details?: NullableStringFieldUpdateOperationsInput | string | null
-    actorId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    actionKey?: StringFieldUpdateOperationsInput | string
+    actionKind?: StringFieldUpdateOperationsInput | string
+    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    commandReceiptId?: NullableStringFieldUpdateOperationsInput | string | null
+    outcome?: StringFieldUpdateOperationsInput | string
+    correlationId?: NullableStringFieldUpdateOperationsInput | string | null
+    causationId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
-  export type NotificationHistoryUncheckedUpdateManyWithoutNotificationInput = {
+  export type NotificationInteractionUncheckedUpdateManyWithoutNotificationInput = {
     id?: StringFieldUpdateOperationsInput | string
+    idempotencyKey?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
-    action?: StringFieldUpdateOperationsInput | string
-    details?: NullableStringFieldUpdateOperationsInput | string | null
-    actorId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    actionKey?: StringFieldUpdateOperationsInput | string
+    actionKind?: StringFieldUpdateOperationsInput | string
+    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    commandReceiptId?: NullableStringFieldUpdateOperationsInput | string | null
+    outcome?: StringFieldUpdateOperationsInput | string
+    correlationId?: NullableStringFieldUpdateOperationsInput | string | null
+    causationId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type NotificationDispatchOutboxUpdateWithoutNotificationInput = {
