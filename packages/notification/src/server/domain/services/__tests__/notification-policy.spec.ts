@@ -126,6 +126,47 @@ describe('Notification user/workflow policy', () => {
   });
 });
 
+describe('NotificationWorkflowCatalog boundaries', () => {
+  it('registers trimmed custom workflows, resolves unknown workflows fail-safe, and lists deterministically', () => {
+    const customCatalog = new NotificationWorkflowCatalog();
+    const base = customCatalog.resolve('system.general');
+    customCatalog.register({
+      ...base,
+      workflowKey: '  custom.workflow  ',
+      topicKey: 'custom.topic',
+    });
+
+    expect(customCatalog.has('custom.workflow')).toBe(true);
+    expect(customCatalog.resolve('custom.workflow').workflowKey).toBe('custom.workflow');
+    expect(customCatalog.list().map((item) => item.workflowKey)).toEqual(
+      [...customCatalog.list().map((item) => item.workflowKey)].sort(),
+    );
+
+    const unknown = customCatalog.resolve('unregistered.workflow', '  custom.unknown.topic  ');
+    expect(unknown.workflowKey).toBe('unregistered.workflow');
+    expect(unknown.topicKey).toBe('custom.unknown.topic');
+    expect(Object.keys(unknown.channels)).toEqual([NotificationChannelType.InApp]);
+  });
+
+  it('rejects malformed workflow registrations and blank resolution keys', () => {
+    const customCatalog = new NotificationWorkflowCatalog();
+    const base = customCatalog.resolve('system.general');
+
+    expect(() => customCatalog.register({ ...base, workflowKey: ' ' })).toThrow('workflowKey is required');
+    expect(() => customCatalog.register({
+      ...base,
+      workflowKey: 'missing.presentation',
+      presentationDefaults: null as never,
+    })).toThrow('workflow presentationDefaults are required');
+    expect(() => customCatalog.register({
+      ...base,
+      workflowKey: 'missing.legacy',
+      legacyProjection: null as never,
+    })).toThrow('workflow legacyProjection is required');
+    expect(() => customCatalog.resolve(' ')).toThrow('workflowKey is required');
+  });
+});
+
 describe('QuietHours and SystemDeliveryGuard boundaries', () => {
   const activeAt = new Date('2026-08-25T23:30:00.000Z');
 
@@ -176,5 +217,26 @@ describe('QuietHours and SystemDeliveryGuard boundaries', () => {
       channel: NotificationChannelType.InApp,
       usage,
     })).toEqual({ outcome: NotificationDeliveryPlanOutcome.RateLimited, reason });
+  });
+
+  it('allows usage below limits and validates platform guard configuration', () => {
+    const guard = new SystemDeliveryGuard(() => ({ maxPerHour: 2, maxPerDay: 5 }));
+    expect(guard.evaluate({
+      workflowKey: 'system.general',
+      channel: NotificationChannelType.InApp,
+      usage: { hourCount: 1, dayCount: 4 },
+    })).toBeNull();
+
+    expect(() => new SystemDeliveryGuard(() => ({ maxPerHour: 0, maxPerDay: 5 })).evaluate({
+      workflowKey: 'system.general',
+      channel: NotificationChannelType.InApp,
+      usage: { hourCount: 0, dayCount: 0 },
+    })).toThrow('maxPerHour must be a positive integer');
+
+    expect(() => new SystemDeliveryGuard(() => ({ maxPerHour: 5, maxPerDay: 4 })).evaluate({
+      workflowKey: 'system.general',
+      channel: NotificationChannelType.InApp,
+      usage: { hourCount: 0, dayCount: 0 },
+    })).toThrow('maxPerDay must be an integer >= maxPerHour');
   });
 });

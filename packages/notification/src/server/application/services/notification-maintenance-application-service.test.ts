@@ -39,6 +39,9 @@ function createNotificationRecord(overrides: Partial<{
 
   return {
     id: dto.id,
+    markAsUnread: vi.fn(),
+    archive: vi.fn(),
+    restore: vi.fn(),
     softDelete: vi.fn(),
     toServerDTO: vi.fn().mockReturnValue(dto),
   };
@@ -59,6 +62,31 @@ describe('NotificationMaintenanceApplicationService', () => {
     service = new NotificationMaintenanceApplicationService(notificationRepository);
   });
 
+  it.each([
+    ['markAsUnread', 'markAsUnread'],
+    ['archive', 'archive'],
+    ['restore', 'restore'],
+  ] as const)('%s mutates and saves the identity-owned notification', async (method, mutation) => {
+    const notification = createNotificationRecord();
+    (notificationRepository.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(notification);
+
+    const result = await service[method](notification.id, IDENTITY_ID);
+
+    expect(notification[mutation]).toHaveBeenCalledTimes(1);
+    expect(notificationRepository.save).toHaveBeenCalledWith(notification);
+    expect(result.ok).toBe(true);
+  });
+
+  it.each(['markAsUnread', 'archive', 'restore'] as const)('%s fails closed when the notification is not identity-owned', async (method) => {
+    const result = await service[method]('missing', IDENTITY_ID);
+
+    expect(result).toEqual({
+      ok: false,
+      error: { code: 'NOT_FOUND', message: 'notification not found' },
+    });
+    expect(notificationRepository.save).not.toHaveBeenCalled();
+  });
+
   it('soft deletes a single notification through the application service', async () => {
     const notification = createNotificationRecord();
     (notificationRepository.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(notification);
@@ -68,6 +96,16 @@ describe('NotificationMaintenanceApplicationService', () => {
     expect(notification.softDelete).toHaveBeenCalledTimes(1);
     expect(notificationRepository.save).toHaveBeenCalledWith(notification);
     expect(result).toEqual({ ok: true, data: undefined });
+  });
+
+  it('fails closed when deleting a missing notification', async () => {
+    const result = await service.deleteNotification('missing', IDENTITY_ID);
+
+    expect(result).toEqual({
+      ok: false,
+      error: { code: 'NOT_FOUND', message: 'notification not found' },
+    });
+    expect(notificationRepository.save).not.toHaveBeenCalled();
   });
 
   it('soft deletes found notifications in a batch and returns deletedCount', async () => {
@@ -89,6 +127,22 @@ describe('NotificationMaintenanceApplicationService', () => {
       ok: true,
       data: { deletedCount: 2 },
     });
+  });
+
+  it('batch deletion ignores missing ids while preserving the found count', async () => {
+    const found = createNotificationRecord();
+    (notificationRepository.findByIdForIdentity as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce(found)
+      .mockResolvedValueOnce(null);
+
+    const result = await service.batchDelete({
+      notificationIds: [found.id, 'missing'],
+      identityId: IDENTITY_ID,
+    });
+
+    expect(found.softDelete).toHaveBeenCalledTimes(1);
+    expect(notificationRepository.saveMany).toHaveBeenCalledWith([found]);
+    expect(result).toEqual({ ok: true, data: { deletedCount: 1 } });
   });
 
   it('cleans up only matching expired notifications for the identity and category', async () => {
@@ -137,5 +191,49 @@ describe('NotificationMaintenanceApplicationService', () => {
       data: { deletedCount: 1 },
     });
     vi.useRealTimers();
+  });
+
+  it('cleans up expired notifications across categories when no category filter is supplied', async () => {
+    const now = Date.now();
+    vi.useFakeTimers();
+    vi.setSystemTime(now);
+    (notificationRepository.findByIdentityId as ReturnType<typeof vi.fn>).mockResolvedValue([
+      createNotificationRecord({
+        id: 'INotificationId_550e8400-e29b-41d4-a716-446655440020',
+        category: NotificationCategory.Task,
+        expiresAt: now - 40 * 24 * 60 * 60 * 1000,
+      }),
+      createNotificationRecord({
+        id: 'INotificationId_550e8400-e29b-41d4-a716-446655440021',
+        category: NotificationCategory.System,
+        expiresAt: null,
+      }),
+    ]);
+
+    const result = await service.cleanupOldNotifications({
+      identityId: IDENTITY_ID,
+      beforeDays: 30,
+    });
+
+    expect(notificationRepository.deleteMany).toHaveBeenCalledWith(
+      IDENTITY_ID,
+      ['INotificationId_550e8400-e29b-41d4-a716-446655440020'],
+    );
+    expect(result).toEqual({ ok: true, data: { deletedCount: 1 } });
+    vi.useRealTimers();
+  });
+
+  it('does not call deleteMany when no notification is expired', async () => {
+    (notificationRepository.findByIdentityId as ReturnType<typeof vi.fn>).mockResolvedValue([
+      createNotificationRecord({ expiresAt: null }),
+    ]);
+
+    const result = await service.cleanupOldNotifications({
+      identityId: IDENTITY_ID,
+      beforeDays: 30,
+    });
+
+    expect(notificationRepository.deleteMany).not.toHaveBeenCalled();
+    expect(result).toEqual({ ok: true, data: { deletedCount: 0 } });
   });
 });
