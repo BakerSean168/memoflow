@@ -76,7 +76,7 @@ export interface IScheduleRepository {
     identityId: string,
     startTime: number,
     endTime: number,
-    excludeId?: string
+    excludeId?: string,
   ): Promise<CalendarEntry[]>;
 
   /**
@@ -87,8 +87,14 @@ export interface IScheduleRepository {
     id: string,
     hasConflict: boolean,
     conflictingEntries: string[] | null,
-    sourceRevision: number
+    sourceRevision: number,
   ): Promise<void>;
+
+  /** Transitional P4-2301B read of the legacy conflict projection cache. */
+  getConflictProjection(
+    identityId: string,
+    id: string,
+  ): Promise<{ hasConflict: boolean; conflictingEntries: string[] | null } | null>;
 
   /**
    * Create a versioned rebuild outbox entry for background conflict recalculation
@@ -119,9 +125,10 @@ export interface IScheduleRepository {
    * W7: Replay a failed rebuild outbox entry back to pending so the worker reclaims it.
    * Identity-scoped; throws if the entry does not belong to identityId or is not failed.
    */
-  replayRebuildOutbox(
-    input: { identityId: string; operationId: string },
-  ): Promise<ScheduleRebuildOutboxDTO>;
+  replayRebuildOutbox(input: {
+    identityId: string;
+    operationId: string;
+  }): Promise<ScheduleRebuildOutboxDTO>;
 
   /**
    * P1-4: Replay + audit in a single transaction (state advancement and audit fact

@@ -1,4 +1,7 @@
-import type { IScheduleRepository, ScheduleRebuildOutboxDTO } from '../../../domain/repositories/i-schedule-repository';
+import type {
+  IScheduleRepository,
+  ScheduleRebuildOutboxDTO,
+} from '../../../domain/repositories/i-schedule-repository';
 import type { CalendarEntry } from '../../../domain/aggregates/calendar-entry';
 import { LeaseLostError } from '@memoflow/patterns/lease';
 import {
@@ -48,7 +51,9 @@ type ScheduleDomainEventOutboxRow = {
 
 export class PowerSyncScheduleRepository implements IScheduleRepository {
   constructor(
-    private readonly db: Queryable & { writeTransaction?<T>(cb: (tx: IElectronDatabaseTransaction) => Promise<T>): Promise<T> },
+    private readonly db: Queryable & {
+      writeTransaction?<T>(cb: (tx: IElectronDatabaseTransaction) => Promise<T>): Promise<T>;
+    },
   ) {}
 
   private async ensureOutboxTable(): Promise<void> {
@@ -130,121 +135,82 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
     );
 
     if (existing) {
-      if (expectedVersion !== undefined) {
-        const res = await this.db.execute(
-          `UPDATE schedules
-           SET title = ?,
-               description = ?,
-               start_time = ?,
-               end_time = ?,
-               duration = ?,
-               has_conflict = ?,
-               conflicting_schedules = ?,
-               priority = ?,
-               location = ?,
-               attendees = ?,
-               version = ?,
-               updated_at = ?
-           WHERE id = ? AND identity_id = ? AND version = ?`,
-          [
-            data.title,
-            data.description,
-            data.startTime,
-            data.endTime,
-            data.duration,
-            data.hasConflict,
-            data.conflictingSchedules,
-            data.priority,
-            data.location,
-            data.attendees,
-            expectedVersion + 1,
-            data.updatedAt,
-            data.id,
-            data.identityId,
-            expectedVersion,
-          ],
-        );
-
-        if (res.rowsAffected === 0) {
-          const current = await this.db.getOptional<{ version: number }>(
-            'SELECT version FROM schedules WHERE id = ? AND identity_id = ? LIMIT 1',
-            [data.id, data.identityId],
-          );
-          if (!current) {
-            throw toResultErrorException(
-              { code: 'NOT_FOUND', message: `Schedule event ${data.id} not found` },
-              404,
-            );
-          }
-          throw toResultErrorException(
-            {
-              code: 'CONFLICT',
-              message: `Schedule event ${data.id} version conflict (expected ${expectedVersion}, current version is ${current.version})`,
-              context: { currentVersion: current.version, expectedVersion },
-            },
-            409,
-          );
-        }
-        return;
-      }
-
-      await this.db.execute(
-        `UPDATE schedules
+      const sql = `UPDATE schedules
          SET title = ?,
              description = ?,
-             start_time = ?,
-             end_time = ?,
-             duration = ?,
-             has_conflict = ?,
-             conflicting_schedules = ?,
-             priority = ?,
+             range_kind = ?,
+             timed_start = ?,
+             timed_end = ?,
+             all_day_start = ?,
+             all_day_end = ?,
              location = ?,
              attendees = ?,
              version = ?,
              updated_at = ?
-         WHERE id = ? AND identity_id = ?`,
-        [
-          data.title,
-          data.description,
-          data.startTime,
-          data.endTime,
-          data.duration,
-          data.hasConflict,
-          data.conflictingSchedules,
-          data.priority,
-          data.location,
-          data.attendees,
-          data.version,
-          data.updatedAt,
-          data.id,
-          data.identityId,
-        ],
-      );
-    } else {
-      await this.db.execute(
-        `INSERT INTO schedules (
-          id, identity_id, title, description, start_time, end_time, duration,
-          has_conflict, conflicting_schedules, priority, location, attendees, version, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          data.id,
-          data.identityId,
-          data.title,
-          data.description,
-          data.startTime,
-          data.endTime,
-          data.duration,
-          data.hasConflict,
-          data.conflictingSchedules,
-          data.priority,
-          data.location,
-          data.attendees,
-      data.version,
-      data.createdAt,
-      data.updatedAt,
-    ],
-      );
+         WHERE id = ? AND identity_id = ?${expectedVersion !== undefined ? ' AND version = ?' : ''}`;
+      const args: unknown[] = [
+        data.title,
+        data.description,
+        data.rangeKind,
+        data.timedStart,
+        data.timedEnd,
+        data.allDayStart,
+        data.allDayEnd,
+        data.location,
+        data.attendees,
+        expectedVersion !== undefined ? expectedVersion + 1 : data.version,
+        data.updatedAt,
+        data.id,
+        data.identityId,
+      ];
+      if (expectedVersion !== undefined) args.push(expectedVersion);
+      const res = await this.db.execute(sql, args);
+
+      if (expectedVersion !== undefined && res.rowsAffected === 0) {
+        const current = await this.db.getOptional<{ version: number }>(
+          'SELECT version FROM schedules WHERE id = ? AND identity_id = ? LIMIT 1',
+          [data.id, data.identityId],
+        );
+        if (!current) {
+          throw toResultErrorException(
+            { code: 'NOT_FOUND', message: `Schedule event ${data.id} not found` },
+            404,
+          );
+        }
+        throw toResultErrorException(
+          {
+            code: 'CONFLICT',
+            message: `Schedule event ${data.id} version conflict (expected ${expectedVersion}, current version is ${current.version})`,
+            context: { currentVersion: current.version, expectedVersion },
+          },
+          409,
+        );
+      }
+      return;
     }
+
+    await this.db.execute(
+      `INSERT INTO schedules (
+        id, identity_id, title, description, range_kind, timed_start, timed_end,
+        all_day_start, all_day_end, location, attendees, version, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        data.id,
+        data.identityId,
+        data.title,
+        data.description,
+        data.rangeKind,
+        data.timedStart,
+        data.timedEnd,
+        data.allDayStart,
+        data.allDayEnd,
+        data.location,
+        data.attendees,
+        data.version,
+        data.createdAt,
+        data.updatedAt,
+      ],
+    );
   }
 
   async findByIdForIdentity(identityId: string, id: string): Promise<CalendarEntry | null> {
@@ -257,7 +223,7 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
 
   async findByIdentityId(identityId: string): Promise<CalendarEntry[]> {
     const rows = await this.db.getAll<PowerSyncScheduleRow>(
-      'SELECT * FROM schedules WHERE identity_id = ? ORDER BY start_time ASC',
+      'SELECT * FROM schedules WHERE identity_id = ? ORDER BY created_at ASC',
       [identityId],
     );
     return rows.map((row) => PowerSyncScheduleMapper.toDomain(row));
@@ -304,10 +270,11 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
     const rows = await this.db.getAll<PowerSyncScheduleRow>(
       `SELECT * FROM schedules
        WHERE identity_id = ?
-         AND start_time < ?
-         AND end_time > ?
+         AND range_kind = 'Timed'
+         AND timed_start < ?
+         AND timed_end > ?
          ${excludeId ? 'AND id != ?' : ''}
-       ORDER BY start_time ASC`,
+       ORDER BY timed_start ASC`,
       excludeId
         ? [
             identityId,
@@ -327,16 +294,21 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
     conflictingEntries: string[] | null,
     sourceRevision: number,
   ): Promise<void> {
-    const current = await this.db.getOptional<{ version: number; has_conflict: number | boolean | string; conflicting_schedules: string | null }>(
+    const current = await this.db.getOptional<{
+      version: number;
+      has_conflict: number | boolean | string;
+      conflicting_schedules: string | null;
+    }>(
       'SELECT version, has_conflict, conflicting_schedules FROM schedules WHERE id = ? AND identity_id = ? LIMIT 1',
       [id, identityId],
     );
     if (!current) return;
     if (current.version > sourceRevision) return;
 
-    const newConflictingStr = conflictingEntries && conflictingEntries.length > 0
-      ? JSON.stringify(conflictingEntries)
-      : null;
+    const newConflictingStr =
+      conflictingEntries && conflictingEntries.length > 0
+        ? JSON.stringify(conflictingEntries)
+        : null;
     const currentHasConflict = Number(current.has_conflict) === 1;
 
     if (currentHasConflict === hasConflict && current.conflicting_schedules === newConflictingStr) {
@@ -349,6 +321,26 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
        WHERE id = ? AND identity_id = ? AND version <= ?`,
       [hasConflict ? 1 : 0, newConflictingStr, id, identityId, sourceRevision],
     );
+  }
+
+  async getConflictProjection(
+    identityId: string,
+    id: string,
+  ): Promise<{ hasConflict: boolean; conflictingEntries: string[] | null } | null> {
+    const current = await this.db.getOptional<{
+      has_conflict: number | boolean | string;
+      conflicting_schedules: string | null;
+    }>(
+      'SELECT has_conflict, conflicting_schedules FROM schedules WHERE id = ? AND identity_id = ? LIMIT 1',
+      [id, identityId],
+    );
+    if (!current) return null;
+    return {
+      hasConflict: Number(current.has_conflict) === 1,
+      conflictingEntries: current.conflicting_schedules
+        ? (JSON.parse(current.conflicting_schedules) as string[])
+        : null,
+    };
   }
 
   async createRebuildOutbox(item: {
@@ -416,10 +408,7 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
     return rows.map(mapRebuildOutboxRowToDTO);
   }
 
-  async fetchRebuildTimeline(
-    identityId: string,
-    limit = 100,
-  ): Promise<ScheduleRebuildOutboxDTO[]> {
+  async fetchRebuildTimeline(identityId: string, limit = 100): Promise<ScheduleRebuildOutboxDTO[]> {
     await this.ensureOutboxTable();
     if (!identityId) {
       throw new Error('identityId is required for rebuild timeline query');
@@ -543,7 +532,9 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
       [id, claimToken, 'processing'],
     );
     if (!existing) {
-      throw new LeaseLostError(`Rebuild outbox item ${id} is not owned by this claim token (lease lost)`);
+      throw new LeaseLostError(
+        `Rebuild outbox item ${id} is not owned by this claim token (lease lost)`,
+      );
     }
 
     if (!error) {
@@ -554,7 +545,9 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
         [nowIso, nowIso, id, claimToken],
       );
       if (res.rowsAffected === 0) {
-        throw new LeaseLostError(`Rebuild outbox item ${id} is no longer owned by this claim token (lease lost)`);
+        throw new LeaseLostError(
+          `Rebuild outbox item ${id} is no longer owned by this claim token (lease lost)`,
+        );
       }
       return;
     }
@@ -568,7 +561,9 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
         [nextAttempts, error, nowIso, id, claimToken],
       );
       if (res.rowsAffected === 0) {
-        throw new LeaseLostError(`Rebuild outbox item ${id} is no longer owned by this claim token (lease lost)`);
+        throw new LeaseLostError(
+          `Rebuild outbox item ${id} is no longer owned by this claim token (lease lost)`,
+        );
       }
     } else {
       const backoffMs = Math.pow(2, nextAttempts) * 1000;
@@ -580,7 +575,9 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
         [nextAttempts, nextAttemptIso, error, nowIso, id, claimToken],
       );
       if (res.rowsAffected === 0) {
-        throw new LeaseLostError(`Rebuild outbox item ${id} is no longer owned by this claim token (lease lost)`);
+        throw new LeaseLostError(
+          `Rebuild outbox item ${id} is no longer owned by this claim token (lease lost)`,
+        );
       }
     }
   }
@@ -620,7 +617,9 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
   async fetchPendingDomainEventOutbox(
     identityId?: string,
     limit = 50,
-  ): Promise<import('../../../domain/repositories/i-schedule-repository').ScheduleDomainEventOutboxDTO[]> {
+  ): Promise<
+    import('../../../domain/repositories/i-schedule-repository').ScheduleDomainEventOutboxDTO[]
+  > {
     await this.ensureOutboxTable();
     const sql = identityId
       ? 'SELECT * FROM schedule_domain_event_outbox WHERE status = ? AND identity_id = ? ORDER BY created_at ASC LIMIT ?'
@@ -650,7 +649,9 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
     claimToken: string,
     limit = 50,
     timeoutMs = 30000,
-  ): Promise<import('../../../domain/repositories/i-schedule-repository').ScheduleDomainEventOutboxDTO[]> {
+  ): Promise<
+    import('../../../domain/repositories/i-schedule-repository').ScheduleDomainEventOutboxDTO[]
+  > {
     await this.ensureOutboxTable();
     const nowIso = new Date().toISOString();
     const thresholdIso = new Date(Date.now() - timeoutMs).toISOString();
@@ -715,7 +716,9 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
       [id, claimToken, 'processing'],
     );
     if (!existing) {
-      throw new LeaseLostError(`Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`);
+      throw new LeaseLostError(
+        `Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`,
+      );
     }
 
     if (!error) {
@@ -726,7 +729,9 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
         [nowIso, nowIso, id, claimToken],
       );
       if (res.rowsAffected === 0) {
-        throw new LeaseLostError(`Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`);
+        throw new LeaseLostError(
+          `Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`,
+        );
       }
       return;
     }
@@ -740,7 +745,9 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
         [nextAttempts, error, nowIso, id, claimToken],
       );
       if (res.rowsAffected === 0) {
-        throw new LeaseLostError(`Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`);
+        throw new LeaseLostError(
+          `Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`,
+        );
       }
     } else {
       const backoffMs = Math.pow(2, nextAttempts) * 1000;
@@ -752,14 +759,18 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
         [nextAttempts, nextAttemptIso, error, nowIso, id, claimToken],
       );
       if (res.rowsAffected === 0) {
-        throw new LeaseLostError(`Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`);
+        throw new LeaseLostError(
+          `Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`,
+        );
       }
     }
   }
 
   async withTransaction<T>(fn: (repo: IScheduleRepository) => Promise<T>): Promise<T> {
     if (!this.db.writeTransaction) {
-      throw new Error('PowerSync repository requires transaction support (writeTransaction missing)');
+      throw new Error(
+        'PowerSync repository requires transaction support (writeTransaction missing)',
+      );
     }
     return this.db.writeTransaction(async (tx) => {
       const txRepo = new PowerSyncScheduleRepository(tx);

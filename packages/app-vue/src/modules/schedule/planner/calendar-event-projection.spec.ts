@@ -26,21 +26,22 @@ const time: PlannerProductTimePort = {
   },
 };
 
-function calendarEntry(): CalendarEntryClientDTO {
+function calendarEntry(overrides: Partial<CalendarEntryClientDTO> = {}): CalendarEntryClientDTO {
   return {
-    id: 'schedule-1',
-    identityId: 'identity-1',
+    id: 'schedule-1' as CalendarEntryClientDTO['id'],
+    identityId: 'identity-1' as CalendarEntryClientDTO['identityId'],
     title: 'Deep work',
     description: 'Protected focus block',
-    startTime: Number(dayStart) + 9 * 60 * 60_000,
-    endTime: Number(dayStart) + 10 * 60 * 60_000,
-    duration: 60,
-    hasConflict: true,
-    conflictingEntries: ['schedule-2'],
+    range: {
+      kind: 'Timed',
+      start: Number(dayStart) + 9 * 60 * 60_000,
+      end: Number(dayStart) + 10 * 60 * 60_000,
+    },
     version: 7,
     createdAt: Number(dayStart),
     updatedAt: Number(dayStart),
-  } as CalendarEntryClientDTO;
+    ...overrides,
+  };
 }
 
 function taskOccurrence(overrides: Partial<TaskOccurrenceClientDTO> = {}): TaskOccurrenceClientDTO {
@@ -119,11 +120,31 @@ describe('CalendarEventProjection (PLAN-4302)', () => {
       editableCapabilities: { move: true, resize: true },
       ownerCommandTarget: { ownerType: 'schedule.calendar-entry', ownerId: 'schedule-1' },
       revision: 7,
-      displayMetadata: { semantic: 'calendar-entry', hasConflict: true },
+      displayMetadata: { semantic: 'calendar-entry' },
     });
     if (event.allDay) throw new Error('CalendarEntry must be timed');
     expectTypeOf(event.start).toEqualTypeOf<Instant>();
     expectTypeOf(event.end).toEqualTypeOf<Instant | null>();
+  });
+
+  it('projects an AllDay CalendarEntry as Ymd truth without midnight Instant coercion', () => {
+    const event = projectCalendarEntry(
+      calendarEntry({
+        range: { kind: 'AllDay', start: asYmd('2026-08-27'), end: asYmd('2026-08-29') },
+      }),
+    );
+
+    expect(event).toMatchObject({
+      sourceType: 'schedule',
+      allDay: true,
+      start: '2026-08-27',
+      end: '2026-08-29',
+      ownerCommandTarget: { ownerType: 'schedule.calendar-entry', ownerId: 'schedule-1' },
+      revision: 7,
+    });
+    if (!event.allDay) throw new Error('CalendarEntry must remain all-day');
+    expectTypeOf(event.start).toEqualTypeOf<Ymd>();
+    expectTypeOf(event.end).toEqualTypeOf<Ymd | null>();
   });
 
   it('projects TaskOccurrence time semantics without leaking Date or Scheduler types', () => {

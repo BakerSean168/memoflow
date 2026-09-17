@@ -45,17 +45,31 @@ function formatTimeRange(startTime: number, endTime: number) {
 }
 
 function mapAgendaEntry(entry: CalendarEntryClientDTO): AgendaEntrySummary {
+  const time = getProductTime();
+  const startTime =
+    entry.range.kind === 'Timed'
+      ? entry.range.start
+      : Number(time.codec.startOfYmd(entry.range.start));
+  const endTime =
+    entry.range.kind === 'Timed'
+      ? entry.range.end
+      : Number(
+          time.calendar.endOfDay(
+            Number(time.codec.startOfYmd(entry.range.end ?? entry.range.start)),
+          ),
+        );
+
   return {
     id: String(entry.id),
     title: entry.title,
     description: entry.description ?? null,
-    startTime: entry.startTime,
-    endTime: entry.endTime,
-    dayKey: formatDayKey(entry.startTime),
-    dayLabel: formatDayLabel(entry.startTime),
-    timeRange: formatTimeRange(entry.startTime, entry.endTime),
-    durationMinutes: Math.max(1, Math.round((entry.endTime - entry.startTime) / 60000)),
-    hasConflict: entry.hasConflict,
+    startTime,
+    endTime,
+    dayKey: entry.range.kind === 'AllDay' ? entry.range.start : formatDayKey(startTime),
+    dayLabel: formatDayLabel(startTime),
+    timeRange: entry.range.kind === 'AllDay' ? 'All day' : formatTimeRange(startTime, endTime),
+    durationMinutes: Math.max(1, Math.round((endTime - startTime) / 60000)),
+    hasConflict: false,
     location: entry.location ?? null,
     attendeesCount: entry.attendees?.length ?? 0,
   };
@@ -107,10 +121,7 @@ export function useScheduleAgenda(options: ScheduleAgendaOptions = {}) {
     setIsLoading(true);
     setError(null);
 
-    const result = await service.getSchedulesByTimeRange({
-      startTime: range.startTime,
-      endTime: range.endTime,
-    });
+    const result = await service.getSchedulesByAccount();
 
     if (!result.ok) {
       setEntries([]);
@@ -119,7 +130,12 @@ export function useScheduleAgenda(options: ScheduleAgendaOptions = {}) {
       return;
     }
 
-    setEntries(result.data.map((entry) => mapAgendaEntry(entry)).sort((left, right) => left.startTime - right.startTime));
+    setEntries(
+      result.data
+        .map((entry) => mapAgendaEntry(entry))
+        .filter((entry) => entry.startTime < range.endTime && entry.endTime > range.startTime)
+        .sort((left, right) => left.startTime - right.startTime),
+    );
     setIsLoading(false);
   }
 

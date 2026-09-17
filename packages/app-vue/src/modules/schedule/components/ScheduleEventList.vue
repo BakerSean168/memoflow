@@ -46,10 +46,7 @@
             @click="emit('schedule-click', schedule)"
           >
             <div class="flex-shrink-0">
-              <div
-                class="w-10 h-10 rounded-full flex items-center justify-center"
-                :class="getPriorityColorClass(schedule.priority)"
-              >
+              <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
                 <Calendar class="h-5 w-5 text-white" />
               </div>
             </div>
@@ -57,21 +54,21 @@
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2">
                 <h4 class="font-semibold">{{ schedule.title }}</h4>
-                <Badge v-if="schedule.hasConflict" variant="destructive" class="gap-1">
-                  <AlertCircle class="h-3 w-3" />
-                  {{ t('schedule.eventList.conflict') }}
-                </Badge>
               </div>
 
               <div class="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
                 <Clock class="h-4 w-4" />
-                <span
-                  >{{ formatProductDateTime(schedule.startTime) }} -
-                  {{ formatProductDateTime(schedule.endTime) }}</span
-                >
-                <span class="ml-2"
-                  >({{ t('schedule.eventList.durationMinutes', { n: schedule.duration }) }})</span
-                >
+                <span>{{ formatCalendarEntryRange(schedule) }}</span>
+                <span v-if="schedule.range.kind === 'Timed'" class="ml-2">
+                  ({{
+                    t('schedule.eventList.durationMinutes', {
+                      n: Math.max(
+                        1,
+                        Math.round((schedule.range.end - schedule.range.start) / 60000),
+                      ),
+                    })
+                  }})
+                </span>
               </div>
 
               <div
@@ -99,7 +96,6 @@
 <script setup lang="ts">
 import { Card, CardContent, CardHeader, CardTitle } from '@memoflow/ui-vue-shadcn';
 import { Button } from '@memoflow/ui-vue-shadcn';
-import { Badge } from '@memoflow/ui-vue-shadcn';
 import { Alert, AlertDescription, AlertTitle } from '@memoflow/ui-vue-shadcn';
 import {
   Plus,
@@ -138,6 +134,15 @@ const emit = defineEmits<Emits>();
 
 const { t } = useI18n();
 
+function formatCalendarEntryRange(schedule: CalendarEntryClientDTO): string {
+  if (schedule.range.kind === 'AllDay') {
+    return schedule.range.end && schedule.range.end !== schedule.range.start
+      ? `${schedule.range.start} - ${schedule.range.end}`
+      : `${schedule.range.start} · ${t('schedule.calendar.allDay')}`;
+  }
+  return `${formatProductDateTime(schedule.range.start)} - ${formatProductDateTime(schedule.range.end)}`;
+}
+
 function getScheduleActions(schedule: CalendarEntryClientDTO): MenuAction[] {
   return [
     {
@@ -148,13 +153,5 @@ function getScheduleActions(schedule: CalendarEntryClientDTO): MenuAction[] {
       handler: () => emit('delete', schedule.id),
     },
   ];
-}
-
-function getPriorityColorClass(priority: number | null | undefined): string {
-  if (!priority) return 'bg-muted-foreground';
-  if (priority >= 5) return 'bg-destructive';
-  if (priority >= 4) return 'bg-warning';
-  if (priority >= 3) return 'bg-info';
-  return 'bg-success';
 }
 </script>

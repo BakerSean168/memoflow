@@ -58,31 +58,14 @@
         {{ t('schedule.formDemo.durationLabel', { duration: formatDuration(form.duration) }) }}
       </Badge>
 
-      <!-- 优先级和地点 -->
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <Label for="priority">{{ t('schedule.formDemo.fieldPriority') }}</Label>
-          <Select v-model="form.priority">
-            <SelectTrigger>
-              <SelectValue :placeholder="t('schedule.formDemo.fieldPriorityPlaceholder')" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="5">{{ t('schedule.formDemo.priorityHighest') }}</SelectItem>
-              <SelectItem value="4">{{ t('schedule.formDemo.priorityHigh') }}</SelectItem>
-              <SelectItem value="3">{{ t('schedule.formDemo.priorityMedium') }}</SelectItem>
-              <SelectItem value="2">{{ t('schedule.formDemo.priorityLow') }}</SelectItem>
-              <SelectItem value="1">{{ t('schedule.formDemo.priorityLowest') }}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label for="location">{{ t('schedule.formDemo.fieldLocation') }}</Label>
-          <Input
-            id="location"
-            v-model="form.location"
-            :placeholder="t('schedule.formDemo.fieldLocationPlaceholder')"
-          />
-        </div>
+      <!-- 地点 -->
+      <div>
+        <Label for="location">{{ t('schedule.formDemo.fieldLocation') }}</Label>
+        <Input
+          id="location"
+          v-model="form.location"
+          :placeholder="t('schedule.formDemo.fieldLocationPlaceholder')"
+        />
       </div>
 
       <!-- Conflict Alert Component Slot -->
@@ -110,13 +93,6 @@ import { Input } from '@memoflow/ui-vue-shadcn';
 import { Textarea } from '@memoflow/ui-vue-shadcn';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import { Label } from '@memoflow/ui-vue-shadcn';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@memoflow/ui-vue-shadcn';
 import { Badge } from '@memoflow/ui-vue-shadcn';
 import { CalendarPlus, Clock, Check, Loader2 } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
@@ -165,7 +141,6 @@ const form = reactive({
   startTime: now as number | null,
   endTime: oneHourLater as number | null,
   duration: 60,
-  priority: '3',
   location: '',
 });
 
@@ -183,7 +158,8 @@ function formatDuration(minutes: number): string {
 
 function handleStartTimeChange(event: Event) {
   const target = event.target as HTMLInputElement;
-  form.startTime = new Date(target.value).getTime();
+  const [date, hm] = target.value.split('T');
+  form.startTime = date && hm ? getProductTime().input.combine(date, hm) : null;
   calculateDuration();
   if (form.startTime && form.endTime) {
     emit('detect-conflicts', form.startTime, form.endTime);
@@ -192,7 +168,8 @@ function handleStartTimeChange(event: Event) {
 
 function handleEndTimeChange(event: Event) {
   const target = event.target as HTMLInputElement;
-  form.endTime = new Date(target.value).getTime();
+  const [date, hm] = target.value.split('T');
+  form.endTime = date && hm ? getProductTime().input.combine(date, hm) : null;
   calculateDuration();
   if (form.startTime && form.endTime) {
     emit('detect-conflicts', form.startTime, form.endTime);
@@ -212,10 +189,7 @@ function handleSubmit() {
   emit('submit', {
     name: form.title,
     description: form.description || undefined,
-    startTime: form.startTime,
-    endTime: form.endTime,
-    duration: form.duration,
-    priority: form.priority ? Number(form.priority) : undefined,
+    range: { kind: 'Timed', start: form.startTime, end: form.endTime },
     location: form.location || undefined,
   });
 }
@@ -229,7 +203,6 @@ function handleReset() {
     startTime: resetNow,
     endTime: resetOneHourLater,
     duration: 60,
-    priority: '3',
     location: '',
   });
   startTimeFormatted.value = formatDateTimeToInput(resetNow);

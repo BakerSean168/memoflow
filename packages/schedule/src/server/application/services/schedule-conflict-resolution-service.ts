@@ -1,5 +1,6 @@
 import { toResultErrorException } from '@memoflow/contracts/result';
 import type {
+  CalendarEntryClientDTO,
   ConflictDetectionResult,
   CreateScheduleRequest,
   CreateScheduleResponseDTO,
@@ -10,10 +11,21 @@ import type {
 import { ScheduleConflictDetectionService } from './schedule-conflict-detection-service';
 import { ScheduleEventApplicationService } from './schedule-event-application-service';
 
-/**
- * Schedule Conflict Resolution Service
- * 调度冲突解决应用服务
- */
+type TimedRange = Extract<CalendarEntryClientDTO['range'], { kind: 'Timed' }>;
+
+function requireTimedRange(entry: CalendarEntryClientDTO): TimedRange {
+  if (entry.range.kind !== 'Timed') {
+    throw toResultErrorException(
+      {
+        code: 'VALIDATION_ERROR',
+        message: 'Conflict resolution only applies to Timed CalendarEntry ranges',
+      },
+      422,
+    );
+  }
+  return entry.range;
+}
+
 export class ScheduleConflictResolutionService {
   constructor(
     private readonly scheduleEventService: ScheduleEventApplicationService,
@@ -24,9 +36,7 @@ export class ScheduleConflictResolutionService {
     return this.conflictDetectionService.getScheduleConflicts(scheduleId, identityId);
   }
 
-  async detectConflicts(
-    query: DetectConflictsInternalQuery,
-  ): Promise<ConflictDetectionResult> {
+  async detectConflicts(query: DetectConflictsInternalQuery): Promise<ConflictDetectionResult> {
     return this.conflictDetectionService.detectConflictsForTimeRange({
       identityId: query.identityId,
       startTime: query.startTime,
@@ -42,18 +52,15 @@ export class ScheduleConflictResolutionService {
     const schedule = await this.scheduleEventService.createSchedule({
       identityId,
       title: request.name,
-      startTime: request.startTime,
-      endTime: request.endTime,
+      range: request.range,
       description: request.description,
       location: request.location,
-      priority: request.priority,
       attendees: request.attendees,
     });
     const conflicts = await this.conflictDetectionService.getScheduleConflicts(
       schedule.id,
       identityId,
     );
-
     return { schedule, conflicts };
   }
 
@@ -70,22 +77,15 @@ export class ScheduleConflictResolutionService {
     switch (request.resolution) {
       case 'REJECT':
         throw toResultErrorException(
-          {
-            code: 'CONFLICT_REJECTED',
-            message: 'Schedule conflict was rejected by the user',
-          },
+          { code: 'CONFLICT_REJECTED', message: 'Schedule conflict was rejected by the user' },
           409,
         );
-
       case 'AUTO':
         return this.resolveAutomatically(scheduleId, currentEvent, identityId);
-
       case 'ADJUST_START_TIME':
         return this.adjustStartTime(scheduleId, currentEvent, identityId, request.newStartTime);
-
       case 'ADJUST_END_TIME':
         return this.adjustEndTime(scheduleId, currentEvent, identityId, request.newEndTime);
-
       case 'ADJUST_DURATION':
         return this.adjustDuration(scheduleId, currentEvent, identityId, request.newDuration);
     }
@@ -103,21 +103,19 @@ export class ScheduleConflictResolutionService {
     if (!conflicts.hasConflict || conflicts.suggestions.length === 0) {
       return this.noConflictResponse(currentEvent, conflicts, 'AUTO');
     }
-
+    const currentRange = requireTimedRange(currentEvent);
     const suggestion = conflicts.suggestions[0];
     const schedule = await this.scheduleEventService.updateSchedule(scheduleId, identityId, {
-      startTime: suggestion.newStartTime,
-      endTime: suggestion.newEndTime,
+      range: { kind: 'Timed', start: suggestion.newStartTime, end: suggestion.newEndTime },
       expectedVersion: currentEvent.version,
     });
-
     return {
       schedule,
       conflicts,
       applied: {
         strategy: 'AUTO',
-        previousStartTime: currentEvent.startTime,
-        previousEndTime: currentEvent.endTime,
+        previousStartTime: currentRange.start,
+        previousEndTime: currentRange.end,
         changes: [
           `Auto-resolved using ${suggestion.type}: moved to ${suggestion.newStartTime}-${suggestion.newEndTime}`,
         ],
@@ -135,28 +133,27 @@ export class ScheduleConflictResolutionService {
       scheduleId,
       identityId,
     );
-    if (!conflicts.hasConflict) {
+    if (!conflicts.hasConflict)
       return this.noConflictResponse(currentEvent, conflicts, 'ADJUST_START_TIME');
-    }
-
-    const latestOverlapEnd = Math.max(...conflicts.conflicts.map((conflict) => conflict.overlapEnd));
-    const duration = currentEvent.endTime - currentEvent.startTime;
+    const currentRange = requireTimedRange(currentEvent);
+    const latestOverlapEnd = Math.max(
+      ...conflicts.conflicts.map((conflict) => conflict.overlapEnd),
+    );
+    const duration = currentRange.end - currentRange.start;
     const adjustedStartTime = newStartTime ?? latestOverlapEnd;
     const adjustedEndTime = adjustedStartTime + duration;
     const schedule = await this.scheduleEventService.updateSchedule(scheduleId, identityId, {
-      startTime: adjustedStartTime,
-      endTime: adjustedEndTime,
+      range: { kind: 'Timed', start: adjustedStartTime, end: adjustedEndTime },
       expectedVersion: currentEvent.version,
     });
-
     return {
       schedule,
       conflicts,
       applied: {
         strategy: 'ADJUST_START_TIME',
-        previousStartTime: currentEvent.startTime,
-        previousEndTime: currentEvent.endTime,
-        changes: [`Adjusted start time from ${currentEvent.startTime} to ${adjustedStartTime}`],
+        previousStartTime: currentRange.start,
+        previousEndTime: currentRange.end,
+        changes: [`Adjusted start time from ${currentRange.start} to ${adjustedStartTime}`],
       },
     };
   }
@@ -171,15 +168,14 @@ export class ScheduleConflictResolutionService {
       scheduleId,
       identityId,
     );
-    if (!conflicts.hasConflict) {
+    if (!conflicts.hasConflict)
       return this.noConflictResponse(currentEvent, conflicts, 'ADJUST_END_TIME');
-    }
-
+    const currentRange = requireTimedRange(currentEvent);
     const earliestOverlapStart = Math.min(
       ...conflicts.conflicts.map((conflict) => conflict.overlapStart),
     );
     const adjustedEndTime = newEndTime ?? earliestOverlapStart;
-    if (adjustedEndTime <= currentEvent.startTime) {
+    if (adjustedEndTime <= currentRange.start) {
       throw toResultErrorException(
         {
           code: 'VALIDATION_ERROR',
@@ -188,20 +184,18 @@ export class ScheduleConflictResolutionService {
         422,
       );
     }
-
     const schedule = await this.scheduleEventService.updateSchedule(scheduleId, identityId, {
-      endTime: adjustedEndTime,
+      range: { kind: 'Timed', start: currentRange.start, end: adjustedEndTime },
       expectedVersion: currentEvent.version,
     });
-
     return {
       schedule,
       conflicts,
       applied: {
         strategy: 'ADJUST_END_TIME',
-        previousStartTime: currentEvent.startTime,
-        previousEndTime: currentEvent.endTime,
-        changes: [`Adjusted end time from ${currentEvent.endTime} to ${adjustedEndTime}`],
+        previousStartTime: currentRange.start,
+        previousEndTime: currentRange.end,
+        changes: [`Adjusted end time from ${currentRange.end} to ${adjustedEndTime}`],
       },
     };
   }
@@ -216,17 +210,16 @@ export class ScheduleConflictResolutionService {
       scheduleId,
       identityId,
     );
-    if (!conflicts.hasConflict) {
+    if (!conflicts.hasConflict)
       return this.noConflictResponse(currentEvent, conflicts, 'ADJUST_DURATION');
-    }
-
+    const currentRange = requireTimedRange(currentEvent);
     const earliestOverlapStart = Math.min(
       ...conflicts.conflicts.map((conflict) => conflict.overlapStart),
     );
     const adjustedEndTime = newDuration
-      ? currentEvent.startTime + newDuration * 60000
+      ? currentRange.start + newDuration * 60000
       : earliestOverlapStart;
-    if (adjustedEndTime <= currentEvent.startTime) {
+    if (adjustedEndTime <= currentRange.start) {
       throw toResultErrorException(
         {
           code: 'VALIDATION_ERROR',
@@ -235,21 +228,19 @@ export class ScheduleConflictResolutionService {
         422,
       );
     }
-
     const schedule = await this.scheduleEventService.updateSchedule(scheduleId, identityId, {
-      endTime: adjustedEndTime,
+      range: { kind: 'Timed', start: currentRange.start, end: adjustedEndTime },
       expectedVersion: currentEvent.version,
     });
-
     return {
       schedule,
       conflicts,
       applied: {
         strategy: 'ADJUST_DURATION',
-        previousStartTime: currentEvent.startTime,
-        previousEndTime: currentEvent.endTime,
+        previousStartTime: currentRange.start,
+        previousEndTime: currentRange.end,
         changes: [
-          `Adjusted duration: end time changed from ${currentEvent.endTime} to ${adjustedEndTime}`,
+          `Adjusted duration: end time changed from ${currentRange.end} to ${adjustedEndTime}`,
         ],
       },
     };
@@ -260,13 +251,6 @@ export class ScheduleConflictResolutionService {
     conflicts: ConflictDetectionResult,
     strategy: ResolveConflictResponseDTO['applied']['strategy'],
   ): ResolveConflictResponseDTO {
-    return {
-      schedule,
-      conflicts,
-      applied: {
-        strategy,
-        changes: ['No conflicts to resolve'],
-      },
-    };
+    return { schedule, conflicts, applied: { strategy, changes: ['No conflicts to resolve'] } };
   }
 }

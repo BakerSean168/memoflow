@@ -15,10 +15,9 @@ export interface CacheIntegrityReport {
 }
 
 /**
- * ScheduleConflictIntegrityService
- *
- * Compares cached conflict projections against base event time-overlap calculations
- * to verify 100% integrity between cache and ground-truth domain events.
+ * Transitional P4-2301B integrity checker for the legacy conflict projection cache.
+ * The cache is deliberately read through the repository and never re-enters
+ * CalendarEntry aggregate state.
  */
 export class ScheduleConflictIntegrityService {
   constructor(private readonly scheduleRepository: IScheduleRepository) {}
@@ -28,43 +27,40 @@ export class ScheduleConflictIntegrityService {
     startTime: number,
     endTime: number,
   ): Promise<CacheIntegrityReport> {
-    const schedules = await this.scheduleRepository.findByTimeRange(
-      identityId,
-      startTime,
-      endTime,
-    );
-
+    const schedules = await this.scheduleRepository.findByTimeRange(identityId, startTime, endTime);
     const mismatches: CacheIntegrityReport['mismatches'] = [];
     let conflictingCount = 0;
 
     for (const schedule of schedules) {
-      const overlappingOtherEntries = schedules.filter(
-        (other) =>
-          other.id !== schedule.id &&
-          schedule.startTime < other.endTime &&
-          schedule.endTime > other.startTime,
-      );
+      const range = schedule.range;
+      if (range.kind !== 'Timed') continue;
+      const overlappingOtherEntries = schedules.filter((other) => {
+        if (other.id === schedule.id) return false;
+        const otherRange = other.range;
+        return (
+          otherRange.kind === 'Timed' &&
+          range.start < otherRange.end &&
+          range.end > otherRange.start
+        );
+      });
 
       const expectedHasConflict = overlappingOtherEntries.length > 0;
-      const expectedConflictingEntries = overlappingOtherEntries
-        .map((e) => e.id)
-        .sort();
+      const expectedConflictingEntries = overlappingOtherEntries.map((entry) => entry.id).sort();
+      if (expectedHasConflict) conflictingCount += 1;
 
-      if (expectedHasConflict) {
-        conflictingCount++;
-      }
-
-      const actualHasConflict = schedule.hasConflict;
-      const actualConflictingEntries = schedule.conflictingEntries
-        ? [...schedule.conflictingEntries].sort()
+      const projection = await this.scheduleRepository.getConflictProjection(
+        identityId,
+        schedule.id,
+      );
+      const actualHasConflict = projection?.hasConflict ?? false;
+      const actualConflictingEntries = projection?.conflictingEntries
+        ? [...projection.conflictingEntries].sort()
         : null;
-
-      const hasConflictMatches = actualHasConflict === expectedHasConflict;
       const entriesMatch =
         JSON.stringify(actualConflictingEntries ?? []) ===
         JSON.stringify(expectedConflictingEntries);
 
-      if (!hasConflictMatches || !entriesMatch) {
+      if (actualHasConflict !== expectedHasConflict || !entriesMatch) {
         mismatches.push({
           id: schedule.id,
           expectedHasConflict,

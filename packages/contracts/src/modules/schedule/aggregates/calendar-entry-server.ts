@@ -1,25 +1,22 @@
 /**
  * CalendarEntry Aggregate Server DTO
  *
- * Represents a user-facing calendar entry with conflict detection capability.
- * This model is for visualization/time-occupancy and is separate from ScheduleTask.
+ * ADR-080: CalendarEntry owns content + canonical Timed/AllDay range only.
+ * Conflict state is a derived Planner read concern and duration/priority are not
+ * persisted product truth.
  *
  * @module Schedule
  */
 
 import type { ScheduleId, IdentityId, TransferDate } from '../../../primitives';
+import type { CalendarEntryRange } from '../calendar-entry-range';
 
 export interface CalendarEntryServerDTO {
   id: ScheduleId;
   identityId: IdentityId;
   title: string;
   description?: string;
-  startTime: TransferDate;
-  endTime: TransferDate;
-  duration: number;
-  hasConflict: boolean;
-  conflictingEntries?: string[];
-  priority?: number;
+  range: CalendarEntryRange;
   location?: string;
   attendees?: string[];
   version: number;

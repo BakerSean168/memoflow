@@ -8,20 +8,24 @@ function fixture() {
       {
         id: 'calendar-1',
         title: 'Deep work',
-        startTime: 1_000,
-        endTime: 2_000,
-        hasConflict: true,
-        conflictingEntries: ['calendar-2'],
+        range: { kind: 'Timed', start: 1_000, end: 2_000 },
       },
       {
         id: 'calendar-2',
         title: 'Lunch',
-        startTime: 3_000,
-        endTime: 4_000,
-        hasConflict: false,
-        conflictingEntries: [],
+        range: { kind: 'Timed', start: 3_000, end: 4_000 },
+      },
+      {
+        id: 'calendar-all-day',
+        title: 'Offsite',
+        range: { kind: 'AllDay', start: '2026-09-15', end: null },
       },
     ]),
+    getConflictProjection: vi.fn(async (_identityId: string, id: string) =>
+      id === 'calendar-1'
+        ? { hasConflict: true, conflictingEntries: ['calendar-2'] }
+        : { hasConflict: false, conflictingEntries: null },
+    ),
   };
   const taskApplicationPort = {
     getTaskOccurrencesByDateRange: vi.fn(async () =>
@@ -99,6 +103,12 @@ describe('PlannerAIReadAdapter', () => {
       'IdentityId_550e8400-e29b-41d4-a716-446655440000',
       1_000,
       5_000,
+    );
+    expect(summary.calendar).toHaveLength(2);
+    expect(summary.calendar.find((entry) => entry.id === 'calendar-all-day')).toBeUndefined();
+    expect(scheduleRepository.getConflictProjection).toHaveBeenCalledWith(
+      'IdentityId_550e8400-e29b-41d4-a716-446655440000',
+      'calendar-1',
     );
   });
 

@@ -154,13 +154,23 @@ export function createPlannerOwnerCommandRouter(
           if (!dependencies.schedule) {
             return { status: 'unsupported', message: 'Schedule owner command is unavailable' };
           }
-          if (request.nextRange.allDay || request.nextRange.end == null) {
-            return { status: 'invalid', message: 'CalendarEntry requires a timed start/end range' };
+          if (!request.nextRange.allDay && request.nextRange.end == null) {
+            return { status: 'invalid', message: 'Timed CalendarEntry requires a start/end range' };
           }
+          const range = request.nextRange.allDay
+            ? {
+                kind: 'AllDay' as const,
+                start: request.nextRange.start,
+                end: request.nextRange.end,
+              }
+            : {
+                kind: 'Timed' as const,
+                start: request.nextRange.start,
+                end: request.nextRange.end!,
+              };
           return resultOutcome(
             await dependencies.schedule.updateSchedule(owner.ownerId, {
-              startTime: Number(request.nextRange.start),
-              endTime: Number(request.nextRange.end),
+              range,
               expectedVersion: projection.revision,
             }),
             owner.ownerType,

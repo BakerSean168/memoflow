@@ -5,9 +5,14 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { presentErrorMessage } from '@memoflow/http-client';
 
-import type { ConflictDetectionResult, CreateScheduleRequest, UpdateScheduleRequest } from '@memoflow/contracts/schedule';
+import type {
+  ConflictDetectionResult,
+  CreateScheduleRequest,
+  UpdateScheduleRequest,
+} from '@memoflow/contracts/schedule';
 
 import { useScheduleService } from '../hooks/useScheduleService';
+import { getProductTime } from '../utils/product-time';
 
 import {
   PageShell,
@@ -19,50 +24,19 @@ import {
   ThemedText,
 } from '@memoflow/ui-react-native';
 
-/**
- * Soft residual 1228: app-react schedule toDateInput — null|undefined → ''; UTC ISO YMD.
- * Accepts undefined (broader than GoalEditor number|null); same empty+UTC body (no force-extract).
- */
 function toDateInput(timestamp: number | null | undefined) {
-  if (!timestamp) {
-    return '';
-  }
-  return new Date(timestamp).toISOString().slice(0, 10);
+  return timestamp == null ? '' : getProductTime().input.dateValue(timestamp);
 }
 
-/**
- * Residual 1231 keep-boundary: app-react schedule toTimeInput — epoch → UTC HH:mm ISO slice.
- * Schedule event editor; falsy → ''; toISOString().slice(11, 16) (UTC clock, not local getHours).
- * Soft residual 1231: task local padStart + '09:00' default differs (no force-merge).
- */
 function toTimeInput(timestamp: number | null | undefined) {
-  if (!timestamp) {
-    return '';
-  }
-  return new Date(timestamp).toISOString().slice(11, 16);
+  return timestamp == null ? '' : getProductTime().input.timeValue(timestamp);
 }
 
-/**
- * Residual 1234 keep-boundary: app-react schedule parseTimestamp — YMD+HH:mm → epoch|null.
- * trim; empty either → null; Date.parse(`${date}T${time}:00`); isNaN → null (not local Date ctor).
- * Soft residual 1234: task combineDateAndTime always-number local path differs (no force-merge).
- */
 function parseTimestamp(dateValue: string, timeValue: string) {
-  const date = dateValue.trim();
-  const time = timeValue.trim();
-  if (date.length === 0 || time.length === 0) {
-    return null;
-  }
-  const parsed = Date.parse(`${date}T${time}:00`);
-  return Number.isNaN(parsed) ? null : parsed;
-}
-
-/**
- * Soft residual 1243: app-react buildDuration — start/end epoch → minutes (compute only, no display i18n).
- * Not a formatDuration presentation helper; min 1 minute (no force-merge).
- */
-function buildDuration(startTime: number, endTime: number) {
-  return Math.max(1, Math.round((endTime - startTime) / 60000));
+  const time = getProductTime();
+  const date = time.input.parseDateValue(dateValue.trim());
+  const hm = time.input.parseTimeValue(timeValue.trim());
+  return date == null || hm == null ? null : time.input.combine(date, hm);
 }
 
 /**
@@ -80,8 +54,14 @@ function describeConflict(conflicts: ConflictDetectionResult | null) {
 export function ScheduleEventEditorScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ id?: string | string[]; date?: string | string[] }>();
-  const scheduleId = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : null;
-  const defaultDate = typeof params.date === 'string' ? params.date : Array.isArray(params.date) ? params.date[0] : toDateInput(Date.now());
+  const scheduleId =
+    typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : null;
+  const defaultDate =
+    typeof params.date === 'string'
+      ? params.date
+      : Array.isArray(params.date)
+        ? params.date[0]
+        : toDateInput(getProductTime().now());
   const service = useScheduleService();
 
   const [name, setName] = useState('');
@@ -91,7 +71,7 @@ export function ScheduleEventEditorScreen() {
   const [endClock, setEndClock] = useState('10:00');
   const [location, setLocation] = useState('');
   const [attendees, setAttendees] = useState('');
-  const [priority, setPriority] = useState('5');
+  const [isAllDay, setIsAllDay] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -101,6 +81,14 @@ export function ScheduleEventEditorScreen() {
   const [conflictError, setConflictError] = useState<string | null>(null);
 
   const parsedRange = useMemo(() => {
+    const time = getProductTime();
+    if (isAllDay) {
+      const day = time.input.parseDateValue(date);
+      if (day == null) return { startTime: null, endTime: null, isValid: false };
+      const startTime = Number(time.codec.startOfYmd(day));
+      const endTime = Number(time.calendar.endOfDay(startTime));
+      return { startTime, endTime, isValid: true };
+    }
     const startTime = parseTimestamp(date, startClock);
     const endTime = parseTimestamp(date, endClock);
     return {
@@ -108,7 +96,7 @@ export function ScheduleEventEditorScreen() {
       endTime,
       isValid: startTime !== null && endTime !== null && endTime > startTime,
     };
-  }, [date, endClock, startClock]);
+  }, [date, endClock, isAllDay, startClock]);
 
   useEffect(() => {
     async function loadSchedule() {
@@ -129,12 +117,17 @@ export function ScheduleEventEditorScreen() {
       const item = result.data;
       setName(item.title);
       setDescription(item.description ?? '');
-      setDate(toDateInput(item.startTime));
-      setStartClock(toTimeInput(item.startTime));
-      setEndClock(toTimeInput(item.endTime));
+      if (item.range.kind === 'AllDay') {
+        setIsAllDay(true);
+        setDate(item.range.start);
+      } else {
+        setIsAllDay(false);
+        setDate(toDateInput(item.range.start));
+        setStartClock(toTimeInput(item.range.start));
+        setEndClock(toTimeInput(item.range.end));
+      }
       setLocation(item.location ?? '');
       setAttendees(item.attendees?.join(', ') ?? '');
-      setPriority(String(item.priority ?? 5));
       setCurrentVersion(item.version);
 
       const conflictResult = await service.getScheduleConflicts(scheduleId);
@@ -149,7 +142,12 @@ export function ScheduleEventEditorScreen() {
   }, [scheduleId, service]);
 
   useEffect(() => {
-    if (!parsedRange.isValid || parsedRange.startTime === null || parsedRange.endTime === null) {
+    if (
+      isAllDay ||
+      !parsedRange.isValid ||
+      parsedRange.startTime === null ||
+      parsedRange.endTime === null
+    ) {
       setConflicts(null);
       setConflictError(null);
       return;
@@ -174,9 +172,21 @@ export function ScheduleEventEditorScreen() {
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [parsedRange.endTime, parsedRange.isValid, parsedRange.startTime, scheduleId, service]);
+  }, [
+    isAllDay,
+    parsedRange.endTime,
+    parsedRange.isValid,
+    parsedRange.startTime,
+    scheduleId,
+    service,
+  ]);
 
   async function handleDetectConflicts() {
+    if (isAllDay) {
+      setConflicts({ hasConflict: false, conflicts: [], suggestions: [] });
+      setConflictError(null);
+      return;
+    }
     if (!parsedRange.isValid || parsedRange.startTime === null || parsedRange.endTime === null) {
       setConflictError('Use a valid date and time range first.');
       return;
@@ -217,15 +227,16 @@ export function ScheduleEventEditorScreen() {
       .map((item) => item.trim())
       .filter((item) => item.length > 0);
 
-    const priorityNumber = Number(priority);
+    const time = getProductTime();
+    const allDayDate = time.input.parseDateValue(date);
+    const range: CreateScheduleRequest['range'] = isAllDay
+      ? { kind: 'AllDay', start: allDayDate!, end: null }
+      : { kind: 'Timed', start: parsedRange.startTime, end: parsedRange.endTime };
 
     const payload = {
       name: name.trim(),
       description: description.trim().length > 0 ? description.trim() : undefined,
-      startTime: parsedRange.startTime,
-      endTime: parsedRange.endTime,
-      duration: buildDuration(parsedRange.startTime, parsedRange.endTime),
-      priority: Number.isFinite(priorityNumber) ? priorityNumber : 5,
+      range,
       location: location.trim().length > 0 ? location.trim() : undefined,
       attendees: attendeeList.length > 0 ? attendeeList : undefined,
     };
@@ -237,7 +248,7 @@ export function ScheduleEventEditorScreen() {
         } satisfies UpdateScheduleRequest)
       : await service.createScheduleWithConflictDetection({
           ...payload,
-          autoDetectConflicts: true,
+          autoDetectConflicts: !isAllDay,
         } satisfies CreateScheduleRequest);
 
     setIsSubmitting(false);
@@ -277,11 +288,16 @@ export function ScheduleEventEditorScreen() {
     <PageShell
       eyebrow="Schedule"
       title={scheduleId ? 'Edit event' : 'Create event'}
-      subtitle="事件编辑页支持自动冲突检测，冲突只做提示，不阻止保存。">
+      subtitle="事件编辑页支持自动冲突检测，冲突只做提示，不阻止保存。"
+    >
       <SectionCard title="Navigation" description="保存后返回周视图继续检查时间流。">
         <View style={styles.actionRow}>
           <PrimaryButton label="Back" onPress={() => router.back()} variant="secondary" />
-          <PrimaryButton label="Week view" onPress={() => router.replace('./week')} variant="ghost" />
+          <PrimaryButton
+            label="Week view"
+            onPress={() => router.replace('./week')}
+            variant="ghost"
+          />
           <PrimaryButton
             label={
               isSubmitting
@@ -302,40 +318,113 @@ export function ScheduleEventEditorScreen() {
 
       {error ? (
         <SectionCard title="Schedule save failed" description="保存失败时先直接展示错误。">
-          <ThemedText type="small" themeColor="warning">{error}</ThemedText>
+          <ThemedText type="small" themeColor="warning">
+            {error}
+          </ThemedText>
         </SectionCard>
       ) : null}
 
       <ScrollView contentContainerStyle={styles.formColumn}>
         <SectionCard title="Basics" description="时间和标题是移动端最关键的输入。">
-          <PrimaryTextField label="Title" value={name} onChangeText={setName} placeholder="Deep work block" />
-          <PrimaryTextField label="Description" value={description} onChangeText={setDescription} placeholder="Optional notes" multiline numberOfLines={4} textAlignVertical="top" style={styles.multilineField} />
-          <PrimaryTextField label="Date" value={date} onChangeText={setDate} placeholder="2026-04-01" hint="Use YYYY-MM-DD." />
-          <View style={styles.inlineRow}>
-            <PrimaryTextField label="Start" value={startClock} onChangeText={setStartClock} placeholder="09:00" style={styles.inlineField} />
-            <PrimaryTextField label="End" value={endClock} onChangeText={setEndClock} placeholder="10:00" style={styles.inlineField} />
-          </View>
-          <PrimaryTextField label="Location" value={location} onChangeText={setLocation} placeholder="Meeting room / Zoom" />
-          <PrimaryTextField label="Attendees" value={attendees} onChangeText={setAttendees} placeholder="a@x.com, b@y.com" hint="Comma-separated emails." />
-          <PrimaryTextField label="Priority" value={priority} onChangeText={setPriority} placeholder="5" />
+          <PrimaryTextField
+            label="Title"
+            value={name}
+            onChangeText={setName}
+            placeholder="Deep work block"
+          />
+          <PrimaryTextField
+            label="Description"
+            value={description}
+            onChangeText={setDescription}
+            placeholder="Optional notes"
+            multiline
+            numberOfLines={4}
+            textAlignVertical="top"
+            style={styles.multilineField}
+          />
+          <PrimaryTextField
+            label="Date"
+            value={date}
+            onChangeText={setDate}
+            placeholder="2026-04-01"
+            hint="Use YYYY-MM-DD."
+          />
+          <PrimaryButton
+            label={isAllDay ? 'All day ✓' : 'All day'}
+            onPress={() => setIsAllDay((value) => !value)}
+            variant="secondary"
+          />
+          {!isAllDay ? (
+            <View style={styles.inlineRow}>
+              <PrimaryTextField
+                label="Start"
+                value={startClock}
+                onChangeText={setStartClock}
+                placeholder="09:00"
+                style={styles.inlineField}
+              />
+              <PrimaryTextField
+                label="End"
+                value={endClock}
+                onChangeText={setEndClock}
+                placeholder="10:00"
+                style={styles.inlineField}
+              />
+            </View>
+          ) : null}
+          <PrimaryTextField
+            label="Location"
+            value={location}
+            onChangeText={setLocation}
+            placeholder="Meeting room / Zoom"
+          />
+          <PrimaryTextField
+            label="Attendees"
+            value={attendees}
+            onChangeText={setAttendees}
+            placeholder="a@x.com, b@y.com"
+            hint="Comma-separated emails."
+          />
         </SectionCard>
 
         <SectionCard title="Conflict detection" description="创建和编辑前都可以先跑一次冲突检查。">
           <View style={styles.actionRow}>
-            <PrimaryButton label="Detect conflicts" onPress={handleDetectConflicts} variant="secondary" />
-            {scheduleId ? <PrimaryButton label={isDeleting ? 'Deleting…' : 'Delete event'} onPress={handleDelete} disabled={isDeleting} variant="ghost" /> : null}
+            <PrimaryButton
+              label="Detect conflicts"
+              onPress={handleDetectConflicts}
+              variant="secondary"
+            />
+            {scheduleId ? (
+              <PrimaryButton
+                label={isDeleting ? 'Deleting…' : 'Delete event'}
+                onPress={handleDelete}
+                disabled={isDeleting}
+                variant="ghost"
+              />
+            ) : null}
           </View>
-          <StatusPill label={describeConflict(conflicts)} tone={conflicts?.hasConflict ? 'warning' : 'success'} />
+          <StatusPill
+            label={describeConflict(conflicts)}
+            tone={conflicts?.hasConflict ? 'warning' : 'success'}
+          />
           {conflicts?.hasConflict ? (
             <ThemedText type="small" themeColor="warning">
               Conflicts are warnings only. Saving will keep the event and refresh conflict badges.
             </ThemedText>
           ) : null}
-          {conflictError ? <ThemedText type="small" themeColor="warning">{conflictError}</ThemedText> : null}
+          {conflictError ? (
+            <ThemedText type="small" themeColor="warning">
+              {conflictError}
+            </ThemedText>
+          ) : null}
           {conflicts?.conflicts?.length ? (
             <View style={styles.conflictColumn}>
               {conflicts.conflicts.map((item) => (
-                <ThemedText key={`${item.scheduleId}-${item.overlapStart}`} type="small" themeColor="textSecondary">
+                <ThemedText
+                  key={`${item.scheduleId}-${item.overlapStart}`}
+                  type="small"
+                  themeColor="textSecondary"
+                >
                   {item.scheduleTitle}: overlap {item.overlapDuration} min
                 </ThemedText>
               ))}

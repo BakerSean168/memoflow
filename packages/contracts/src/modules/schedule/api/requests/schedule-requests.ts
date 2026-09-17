@@ -6,6 +6,7 @@
 import { z } from 'zod';
 import { brandedId } from '../../../../primitives';
 import type { IdentityId, ScheduleId } from '../../../../primitives';
+import { CalendarEntryRangeSchema } from '../../calendar-entry-range';
 import {
   AppliedResolutionSchema,
   CreateScheduleResponseSchema,
@@ -27,10 +28,7 @@ export type ResolutionStrategy = z.infer<typeof ResolutionStrategySchema>;
 export const CreateScheduleRequestSchema = z.object({
   name: z.string().min(1).max(200),
   description: z.string().max(2000).optional(),
-  startTime: z.number().positive(),
-  endTime: z.number().positive(),
-  duration: z.number().positive(),
-  priority: z.number().int().min(1).max(5).optional(),
+  range: CalendarEntryRangeSchema,
   location: z.string().max(500).optional(),
   attendees: z.array(z.string().email()).optional(),
   autoDetectConflicts: z.boolean().optional(),
@@ -39,10 +37,7 @@ export const CreateScheduleRequestSchema = z.object({
 export const UpdateScheduleRequestSchema = z.object({
   name: z.string().min(1).max(200).optional(),
   description: z.string().max(2000).optional(),
-  startTime: z.number().positive().optional(),
-  endTime: z.number().positive().optional(),
-  duration: z.number().positive().optional(),
-  priority: z.number().int().min(1).max(5).optional(),
+  range: CalendarEntryRangeSchema.optional(),
   location: z.string().max(500).optional(),
   attendees: z.array(z.string().email()).optional(),
   expectedVersion: z.number().int().positive(),
@@ -79,9 +74,7 @@ export type UpdateScheduleRequest = z.infer<typeof UpdateScheduleRequestSchema>;
 export type DetectConflictsRequest = z.infer<typeof DetectConflictsRequestSchema>;
 
 /** Request DTO for getting schedules within a time range */
-export type GetSchedulesByTimeRangeRequest = z.infer<
-  typeof GetSchedulesByTimeRangeRequestSchema
->;
+export type GetSchedulesByTimeRangeRequest = z.infer<typeof GetSchedulesByTimeRangeRequestSchema>;
 
 /** Request DTO for resolving a schedule conflict */
 export type ResolveConflictRequest = z.infer<typeof ResolveConflictRequestSchema>;
@@ -122,7 +115,6 @@ export type AppliedResolution = z.infer<typeof AppliedResolutionSchema>;
 
 /** Response DTO for resolving a schedule conflict */
 export type ResolveConflictResponseDTO = z.infer<typeof ResolveConflictResponseSchema>;
-
 
 export const DeleteScheduleRequestSchema = z.object({
   expectedVersion: z.number().int().positive(),

@@ -270,12 +270,14 @@ const schedules = new Table({
   identity_id: column.text,
   title: column.text,
   description: column.text,
-  start_time: column.text,
-  end_time: column.text,
-  duration: column.integer,
+  range_kind: column.text,
+  timed_start: column.text,
+  timed_end: column.text,
+  all_day_start: column.text,
+  all_day_end: column.text,
+  // Transitional P4-2301B projection cache only; not CalendarEntry aggregate truth.
   has_conflict: column.integer, // boolean
   conflicting_schedules: column.text, // JSON
-  priority: column.integer,
   location: column.text,
   attendees: column.text, // JSON
   version: column.integer,
@@ -341,9 +343,51 @@ const scheduling_reconcile_operations = new Table({
   created_at: column.text,
 });
 
-const scheduled_invocations = new Table({ identity_id: column.text, owner_type: column.text, owner_id: column.text, scheduling_key: column.text, handler_key: column.text, payload_version: column.integer, payload: column.text, run_at: column.text, source_revision: column.text, retry_enabled: column.integer, max_retries: column.integer, initial_delay_ms: column.integer, max_delay_ms: column.integer, backoff_multiplier: column.real, priority: column.text, timeout_ms: column.integer, status: column.text, attempt_count: column.integer, next_attempt_at: column.text, claim_token: column.text, claim_expires_at: column.text, fencing_token: column.integer, name: column.text, tags: column.text, created_at: column.text, updated_at: column.text });
+const scheduled_invocations = new Table({
+  identity_id: column.text,
+  owner_type: column.text,
+  owner_id: column.text,
+  scheduling_key: column.text,
+  handler_key: column.text,
+  payload_version: column.integer,
+  payload: column.text,
+  run_at: column.text,
+  source_revision: column.text,
+  retry_enabled: column.integer,
+  max_retries: column.integer,
+  initial_delay_ms: column.integer,
+  max_delay_ms: column.integer,
+  backoff_multiplier: column.real,
+  priority: column.text,
+  timeout_ms: column.integer,
+  status: column.text,
+  attempt_count: column.integer,
+  next_attempt_at: column.text,
+  claim_token: column.text,
+  claim_expires_at: column.text,
+  fencing_token: column.integer,
+  name: column.text,
+  tags: column.text,
+  created_at: column.text,
+  updated_at: column.text,
+});
 
-const invocation_attempts = new Table({ identity_id: column.text, invocation_id: column.text, attempt_number: column.integer, started_at: column.text, finished_at: column.text, outcome: column.text, result: column.text, failure_code: column.text, failure_message: column.text, failure_retryable: column.integer, worker_id: column.text, claim_token: column.text, fencing_token: column.integer, created_at: column.text });
+const invocation_attempts = new Table({
+  identity_id: column.text,
+  invocation_id: column.text,
+  attempt_number: column.integer,
+  started_at: column.text,
+  finished_at: column.text,
+  outcome: column.text,
+  result: column.text,
+  failure_code: column.text,
+  failure_message: column.text,
+  failure_retryable: column.integer,
+  worker_id: column.text,
+  claim_token: column.text,
+  fencing_token: column.integer,
+  created_at: column.text,
+});
 
 const schedule_executions = new Table({
   identity_id: column.text,

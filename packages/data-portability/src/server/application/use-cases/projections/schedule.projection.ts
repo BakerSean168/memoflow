@@ -11,14 +11,27 @@ export function projectCalendarEntries(entries: unknown[], ctx: ExportContext): 
     const entity = e as Record<string, unknown>;
     const ref = ctx.refAllocator.allocate('calendarEntry');
     ctx.refToIdMap.set(entity.id as string, ref);
+    if (entity.rangeKind !== 'Timed') {
+      throw new Error(
+        `Portable Schedule V3 cannot represent ${String(entity.rangeKind)} CalendarEntry '${String(entity.id)}' without losing Ymd semantics`,
+      );
+    }
+    const startTime = toDateString(entity.timedStart);
+    const endTime = toDateString(entity.timedEnd);
+    if (startTime == null || endTime == null) {
+      throw new Error(
+        `Timed CalendarEntry '${String(entity.id)}' is missing canonical timed range columns`,
+      );
+    }
+    const startMs = Date.parse(startTime);
+    const endMs = Date.parse(endTime);
     return {
       _ref: ref,
       title: entity.title as string,
       description: entity.description as string | null | undefined,
-      startTime: toDateString(entity.startTime) ?? new Date().toISOString(),
-      endTime: toDateString(entity.endTime) ?? new Date().toISOString(),
-      duration: entity.duration as number,
-      priority: entity.priority as number | null | undefined,
+      startTime,
+      endTime,
+      duration: Math.max(0, Math.round((endMs - startMs) / 60000)),
       location: entity.location as string | null | undefined,
       attendees: entity.attendees == null ? undefined : toStringArray(entity.attendees),
       createdAt: toDateString(entity.createdAt),
@@ -33,9 +46,11 @@ export function projectScheduleTasks(tasks: unknown[], ctx: ExportContext): Port
     const ref = ctx.refAllocator.allocate('scheduleTask');
     ctx.refToIdMap.set(entity.id as string, ref);
     const sourceId = entity.sourceEntityId as string | undefined;
-    const sourceRef = sourceId ? ctx.refToIdMap.get(sourceId) ?? null : null;
+    const sourceRef = sourceId ? (ctx.refToIdMap.get(sourceId) ?? null) : null;
     if (sourceId && !sourceRef) {
-      ctx.warnings.push(`ScheduleTask "${entity.name}" references source entity "${sourceId}" not in export — exported as detached`);
+      ctx.warnings.push(
+        `ScheduleTask "${entity.name}" references source entity "${sourceId}" not in export — exported as detached`,
+      );
     }
 
     return {
@@ -46,32 +61,29 @@ export function projectScheduleTasks(tasks: unknown[], ctx: ExportContext): Port
       sourceRef,
       status: entity.status as string,
       enabled: toBoolean(entity.enabled, true),
-      schedule:
-        parseJsonField(entity.schedule) ?? {
-          cronExpression: entity.cronExpression ?? null,
-          timezone: entity.timezone ?? null,
-          startDate: toDateString(entity.startDate) ?? null,
-          endDate: toDateString(entity.endDate) ?? null,
-        },
-      execution:
-        parseJsonField(entity.execution) ?? {
-          maxExecutions: entity.maxExecutions ?? null,
-          nextRunAt: toDateString(entity.nextRunAt) ?? null,
-          lastRunAt: toDateString(entity.lastRunAt) ?? null,
-          executionCount: entity.executionCount ?? 0,
-          lastExecutionStatus: entity.lastExecutionStatus ?? null,
-          lastExecutionDuration: entity.lastExecutionDuration ?? null,
-          consecutiveFailures: entity.consecutiveFailures ?? 0,
-        },
-      retryPolicy:
-        parseJsonField(entity.retryPolicy) ?? {
-          maxRetries: entity.maxRetries ?? 3,
-          initialDelayMs: entity.initialDelayMs ?? 1000,
-          maxDelayMs: entity.maxDelayMs ?? 30000,
-          backoffMultiplier: entity.backoffMultiplier ?? 2,
-          retryableStatuses: parseJsonField(entity.retryableStatuses, []),
-          timeout: entity.timeout ?? null,
-        },
+      schedule: parseJsonField(entity.schedule) ?? {
+        cronExpression: entity.cronExpression ?? null,
+        timezone: entity.timezone ?? null,
+        startDate: toDateString(entity.startDate) ?? null,
+        endDate: toDateString(entity.endDate) ?? null,
+      },
+      execution: parseJsonField(entity.execution) ?? {
+        maxExecutions: entity.maxExecutions ?? null,
+        nextRunAt: toDateString(entity.nextRunAt) ?? null,
+        lastRunAt: toDateString(entity.lastRunAt) ?? null,
+        executionCount: entity.executionCount ?? 0,
+        lastExecutionStatus: entity.lastExecutionStatus ?? null,
+        lastExecutionDuration: entity.lastExecutionDuration ?? null,
+        consecutiveFailures: entity.consecutiveFailures ?? 0,
+      },
+      retryPolicy: parseJsonField(entity.retryPolicy) ?? {
+        maxRetries: entity.maxRetries ?? 3,
+        initialDelayMs: entity.initialDelayMs ?? 1000,
+        maxDelayMs: entity.maxDelayMs ?? 30000,
+        backoffMultiplier: entity.backoffMultiplier ?? 2,
+        retryableStatuses: parseJsonField(entity.retryableStatuses, []),
+        timeout: entity.timeout ?? null,
+      },
       metadata: parseJsonField(entity.metadata) ?? parseJsonField(entity.payload),
       createdAt: toDateString(entity.createdAt),
       updatedAt: toDateString(entity.updatedAt),

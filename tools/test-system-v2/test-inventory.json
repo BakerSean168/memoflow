@@ -5440,6 +5440,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/schedule/calendar-entry-range.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/schedule/value-objects/map-importance-to-task-priority-dual.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -9509,6 +9517,16 @@
       ]
     },
     {
+      "path": "packages/schedule/src/server/infrastructure/adapters/powersync/mappers/powersync-schedule.mapper.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/schedule/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/schedule/src/server/infrastructure/adapters/prisma/__tests__/schedule-event-ownership.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11728,7 +11746,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 20
+      "fileCount": 21
     },
     {
       "id": "packages/schedule/vitest.mappers.config.ts",
@@ -12071,7 +12089,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 90
+      "fileCount": 91
     },
     {
       "id": "packages/dashboard/vitest.config.ts",
@@ -12190,7 +12208,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 20
+      "fileCount": 21
     },
     {
       "id": "packages/scheduler/vitest.config.ts",
@@ -12722,6 +12740,7 @@
       "packages/schedule/src/server/domain/aggregates/__tests__/calendar-entry.spec.ts",
       "packages/schedule/src/server/domain/value-objects/conflict-value-objects.spec.ts",
       "packages/schedule/src/server/infrastructure/__tests__/schedule-repositories.surface.spec.ts",
+      "packages/schedule/src/server/infrastructure/adapters/powersync/mappers/powersync-schedule.mapper.spec.ts",
       "packages/schedule/src/server/infrastructure/adapters/prisma/__tests__/schedule-event-ownership.surface.spec.ts",
       "packages/schedule/src/server/infrastructure/adapters/prisma/mappers/prisma-schedule-mapper.spec.ts",
       "packages/scheduler/src/api/routes.spec.ts",
@@ -12860,7 +12879,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1115,
+    "unit": 1117,
     "integration": 38,
     "smoke": 3,
     "boundary-ipc": 9,

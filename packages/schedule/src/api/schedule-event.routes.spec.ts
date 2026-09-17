@@ -42,7 +42,9 @@ function getRegisteredRoute(
   method: string,
   path: string,
 ): RegisteredRoute {
-  const route = registry.paths.find((candidate) => candidate.method === method && candidate.path === path);
+  const route = registry.paths.find(
+    (candidate) => candidate.method === method && candidate.path === path,
+  );
 
   expect(route).toBeDefined();
   return route!;
@@ -51,9 +53,12 @@ function getRegisteredRoute(
 function getJsonBodySchema(route: RegisteredRoute): {
   safeParse: (value: unknown) => { success: boolean };
 } {
-  return (((route.request?.body as Record<string, unknown> | undefined)?.content as
-    | Record<string, unknown>
-    | undefined)?.['application/json'] as Record<string, unknown> | undefined)?.schema as {
+  return (
+    (
+      (route.request?.body as Record<string, unknown> | undefined)?.content as
+        Record<string, unknown> | undefined
+    )?.['application/json'] as Record<string, unknown> | undefined
+  )?.schema as {
     safeParse: (value: unknown) => { success: boolean };
   };
 }
@@ -65,12 +70,23 @@ function getResponseSchema(
   safeParse: (value: unknown) => { success: boolean };
   _def?: { typeName?: string; innerType?: unknown };
 } {
-  const responses = route.responses as Record<string, { content?: Record<string, unknown> }> | undefined;
+  const responses = route.responses as
+    Record<string, { content?: Record<string, unknown> }> | undefined;
   const response = responses?.[String(status)];
   const schema = (response?.content as Record<string, unknown> | undefined)?.[
     'application/json'
-  ] as { schema?: { safeParse: (value: unknown) => { success: boolean }; _def?: { typeName?: string; innerType?: unknown } } } | undefined;
-  return schema?.schema ?? (response as unknown as { safeParse: (value: unknown) => { success: boolean } });
+  ] as
+    | {
+        schema?: {
+          safeParse: (value: unknown) => { success: boolean };
+          _def?: { typeName?: string; innerType?: unknown };
+        };
+      }
+    | undefined;
+  return (
+    schema?.schema ??
+    (response as unknown as { safeParse: (value: unknown) => { success: boolean } })
+  );
 }
 
 function getParamsSchema(route: RegisteredRoute): {
@@ -209,7 +225,7 @@ describe('schedule event route contracts', () => {
     expect(updateResponse).toBeDefined();
   });
 
-  it('query schema requires startTime and endTime', () => {
+  it('query schema supports either all events or an explicit Timed range', () => {
     const registry = new TestOpenApiRegistry();
 
     registerScheduleEventRoutes(
@@ -224,8 +240,8 @@ describe('schedule event route contracts', () => {
     };
 
     expect(querySchema.safeParse({ startTime: '1000', endTime: '2000' }).success).toBe(true);
-    expect(querySchema.safeParse({ startTime: '1000' }).success).toBe(false);
-    expect(querySchema.safeParse({}).success).toBe(false);
+    expect(querySchema.safeParse({ startTime: '1000' }).success).toBe(true);
+    expect(querySchema.safeParse({}).success).toBe(true);
   });
 
   it('delete endpoint body schema requires expectedVersion (rejects missing)', () => {

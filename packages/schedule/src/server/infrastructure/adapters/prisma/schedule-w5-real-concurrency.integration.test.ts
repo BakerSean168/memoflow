@@ -25,7 +25,11 @@ import { createSchedulerPrismaRepositories } from '@memoflow/scheduler';
 
 function createRealSqlitePowerSyncDb(): IElectronDatabase {
   const sqlite = new (require('better-sqlite3'))(':memory:') as {
-    prepare(sql: string): { run(...p: unknown[]): { changes: number }; all(...p: unknown[]): unknown[]; get(...p: unknown[]): unknown };
+    prepare(sql: string): {
+      run(...p: unknown[]): { changes: number };
+      all(...p: unknown[]): unknown[];
+      get(...p: unknown[]): unknown;
+    };
     exec(sql: string): void;
     close(): void;
   };
@@ -35,12 +39,13 @@ function createRealSqlitePowerSyncDb(): IElectronDatabase {
       identity_id TEXT NOT NULL,
       title TEXT NOT NULL,
       description TEXT,
-      start_time TEXT NOT NULL,
-      end_time TEXT NOT NULL,
-      duration INTEGER NOT NULL,
-      has_conflict INTEGER,
+      range_kind TEXT NOT NULL,
+      timed_start TEXT,
+      timed_end TEXT,
+      all_day_start TEXT,
+      all_day_end TEXT,
+      has_conflict INTEGER DEFAULT 0,
       conflicting_schedules TEXT,
-      priority INTEGER,
       location TEXT,
       attendees TEXT,
       version INTEGER NOT NULL DEFAULT 1,
@@ -69,7 +74,9 @@ function createRealSqlitePowerSyncDb(): IElectronDatabase {
       if (!row) throw new Error(`Query returned no rows: ${sql}`);
       return row as T;
     },
-    async writeTransaction<T>(callback: (tx: IElectronDatabaseTransaction) => Promise<T>): Promise<T> {
+    async writeTransaction<T>(
+      callback: (tx: IElectronDatabaseTransaction) => Promise<T>,
+    ): Promise<T> {
       sqlite.exec('BEGIN');
       try {
         const result = await callback(wrapper as IElectronDatabaseTransaction);
@@ -92,7 +99,11 @@ function createRecordingEventBus(): {
   const events: { eventType: string; aggregateId: string; idempotencyKey?: string }[] = [];
   const bus: IEventBus = {
     async publish(event) {
-      events.push({ eventType: event.eventType, aggregateId: event.aggregateId, idempotencyKey: event.idempotencyKey });
+      events.push({
+        eventType: event.eventType,
+        aggregateId: event.aggregateId,
+        idempotencyKey: event.idempotencyKey,
+      });
     },
   };
   return { bus, events };
@@ -125,50 +136,49 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
       adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }),
     });
     try {
-    const repo1 = new SchedulePrismaRepository(prisma1);
-    const repo2 = new SchedulePrismaRepository(prisma2);
-    const service1 = new ScheduleEventApplicationService(repo1);
-    const service2 = new ScheduleEventApplicationService(repo2);
+      const repo1 = new SchedulePrismaRepository(prisma1);
+      const repo2 = new SchedulePrismaRepository(prisma2);
+      const service1 = new ScheduleEventApplicationService(repo1);
+      const service2 = new ScheduleEventApplicationService(repo2);
 
-    const created = await service1.createSchedule({
-      identityId,
-      title: 'Race Event',
-      startTime: 1000,
-      endTime: 2000,
-    });
-    expect(created.version).toBe(1);
+      const created = await service1.createSchedule({
+        identityId,
+        title: 'Race Event',
+        range: { kind: 'Timed', start: 1000, end: 2000 },
+      });
+      expect(created.version).toBe(1);
 
-    // Connection A and Connection B race to update with expectedVersion: 1
-    const p1 = service1.updateSchedule(created.id, identityId, {
-      title: 'Winner A',
-      expectedVersion: 1,
-    });
-    const p2 = service2.updateSchedule(created.id, identityId, {
-      title: 'Winner B',
-      expectedVersion: 1,
-    });
-
-    const results = await Promise.allSettled([p1, p2]);
-    const fulfilled = results.filter((r) => r.status === 'fulfilled');
-    const rejected = results.filter((r) => r.status === 'rejected');
-
-    expect(fulfilled).toHaveLength(1);
-    expect(rejected).toHaveLength(1);
-
-    const winner = (fulfilled[0] as PromiseFulfilledResult<any>).value;
-    expect(winner.version).toBe(2);
-
-    const loserErr = (rejected[0] as PromiseRejectedResult).reason;
-    expect(loserErr).toMatchObject({
-      code: 'CONFLICT',
-      context: {
-        currentVersion: 2,
+      // Connection A and Connection B race to update with expectedVersion: 1
+      const p1 = service1.updateSchedule(created.id, identityId, {
+        title: 'Winner A',
         expectedVersion: 1,
-      },
-    });
+      });
+      const p2 = service2.updateSchedule(created.id, identityId, {
+        title: 'Winner B',
+        expectedVersion: 1,
+      });
 
-    const finalRow = await prisma1.schedule.findUnique({ where: { id: created.id } });
-    expect(finalRow?.version).toBe(2);
+      const results = await Promise.allSettled([p1, p2]);
+      const fulfilled = results.filter((r) => r.status === 'fulfilled');
+      const rejected = results.filter((r) => r.status === 'rejected');
+
+      expect(fulfilled).toHaveLength(1);
+      expect(rejected).toHaveLength(1);
+
+      const winner = (fulfilled[0] as PromiseFulfilledResult<any>).value;
+      expect(winner.version).toBe(2);
+
+      const loserErr = (rejected[0] as PromiseRejectedResult).reason;
+      expect(loserErr).toMatchObject({
+        code: 'CONFLICT',
+        context: {
+          currentVersion: 2,
+          expectedVersion: 1,
+        },
+      });
+
+      const finalRow = await prisma1.schedule.findUnique({ where: { id: created.id } });
+      expect(finalRow?.version).toBe(2);
     } finally {
       await prisma2.$disconnect();
     }
@@ -182,8 +192,7 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
     const created = await service.createSchedule({
       identityId,
       title: 'Transactional Event',
-      startTime: 1000,
-      endTime: 2000,
+      range: { kind: 'Timed', start: 1000, end: 2000 },
     });
 
     // Same-transaction durable outbox write: the delete domain event is present
@@ -198,13 +207,15 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
 
     try {
       // Fault injection: force rebuild outbox creation to fail inside delete transaction
-      vi.spyOn(SchedulePrismaRepository.prototype, 'createRebuildOutbox').mockImplementationOnce(async () => {
-        throw new Error('Transaction failure injected during delete aggregate');
-      });
+      vi.spyOn(SchedulePrismaRepository.prototype, 'createRebuildOutbox').mockImplementationOnce(
+        async () => {
+          throw new Error('Transaction failure injected during delete aggregate');
+        },
+      );
 
-      await expect(
-        service.deleteSchedule(created.id, identityId, 1),
-      ).rejects.toThrow('Transaction failure injected');
+      await expect(service.deleteSchedule(created.id, identityId, 1)).rejects.toThrow(
+        'Transaction failure injected',
+      );
 
       // Assert row STILL exists in PostgreSQL database (transaction rolled back)
       const dbRow = await prisma.schedule.findUnique({ where: { id: created.id } });
@@ -233,8 +244,7 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
     const created = await service.createSchedule({
       identityId,
       title: 'PowerSync Event',
-      startTime: 1000,
-      endTime: 2000,
+      range: { kind: 'Timed', start: 1000, end: 2000 },
     });
 
     expect(created.version).toBe(1);
@@ -259,9 +269,11 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
     });
 
     // PowerSync transaction rollback test
-    vi.spyOn(PowerSyncScheduleRepository.prototype, 'createRebuildOutbox').mockImplementationOnce(async () => {
-      throw new Error('PowerSync outbox write fault injected');
-    });
+    vi.spyOn(PowerSyncScheduleRepository.prototype, 'createRebuildOutbox').mockImplementationOnce(
+      async () => {
+        throw new Error('PowerSync outbox write fault injected');
+      },
+    );
 
     await expect(
       service.updateSchedule(created.id, identityId, {
@@ -281,7 +293,9 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
       'SELECT event_type, idempotency_key FROM schedule_domain_event_outbox WHERE identity_id = ?',
       [identityId],
     );
-    const updatedKeys = updatedOutboxRows.filter((r) => r.event_type === 'schedule:calendar-entry-updated');
+    const updatedKeys = updatedOutboxRows.filter(
+      (r) => r.event_type === 'schedule:calendar-entry-updated',
+    );
     expect(updatedKeys).toHaveLength(1);
     expect(updatedKeys[0].idempotency_key).toBe(
       `domain:${identityId}:${created.id}:2:schedule:calendar-entry-updated`,
@@ -294,13 +308,23 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
     const service = new ScheduleEventApplicationService(repo);
 
     // Create 2 overlapping events → conflict projections + rebuild outbox entries
-    const e1 = await service.createSchedule({ identityId, title: 'Event A', startTime: 1000, endTime: 2000 });
-    const e2 = await service.createSchedule({ identityId, title: 'Event B', startTime: 1500, endTime: 2500 });
+    const e1 = await service.createSchedule({
+      identityId,
+      title: 'Event A',
+      range: { kind: 'Timed', start: 1000, end: 2000 },
+    });
+    const e2 = await service.createSchedule({
+      identityId,
+      title: 'Event B',
+      range: { kind: 'Timed', start: 1500, end: 2500 },
+    });
 
-    const s1 = await service.getSchedule(e1.id, identityId);
-    const s2 = await service.getSchedule(e2.id, identityId);
-    expect(s1?.hasConflict).toBe(true);
-    expect(s2?.hasConflict).toBe(true);
+    expect(await repo.getConflictProjection(identityId, e1.id)).toMatchObject({
+      hasConflict: true,
+    });
+    expect(await repo.getConflictProjection(identityId, e2.id)).toMatchObject({
+      hasConflict: true,
+    });
 
     // Delete Event B → enqueues a durable rebuild outbox row
     await service.deleteSchedule(e2.id, identityId, e2.version);
@@ -331,8 +355,10 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
     expect(row?.claimToken).toBeNull();
 
     // Event A conflict should now be cleared
-    const afterDeleteS1 = await service.getSchedule(e1.id, identityId);
-    expect(afterDeleteS1?.hasConflict).toBe(false);
+    expect(await repo.getConflictProjection(identityId, e1.id)).toEqual({
+      hasConflict: false,
+      conflictingEntries: null,
+    });
   });
 
   it('Requirement 5: Stale source revision rejection in conflict projection', async () => {
@@ -342,8 +368,7 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
     const entry = CalendarEntry.create({
       identityId,
       title: 'Projection Test Event',
-      startTime: 1000,
-      endTime: 2000,
+      range: { kind: 'Timed', start: 1000, end: 2000 },
     });
     await repo.save(entry); // version = 1
 
@@ -367,8 +392,16 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
     const service = new ScheduleEventApplicationService(repo);
 
     // Create overlapping events to generate a rebuild outbox entry
-    const _e1 = await service.createSchedule({ identityId, title: 'Race A', startTime: 1000, endTime: 2000 });
-    const e2 = await service.createSchedule({ identityId, title: 'Race B', startTime: 1500, endTime: 2500 });
+    const _e1 = await service.createSchedule({
+      identityId,
+      title: 'Race A',
+      range: { kind: 'Timed', start: 1000, end: 2000 },
+    });
+    const e2 = await service.createSchedule({
+      identityId,
+      title: 'Race B',
+      range: { kind: 'Timed', start: 1500, end: 2500 },
+    });
 
     // Delete to enqueue a rebuild outbox row (durable, same tx)
     await service.deleteSchedule(e2.id, identityId, e2.version);
@@ -392,9 +425,7 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
 
     // Old worker tries to ack with its (now stale) token A — must be rejected (0 affected)
     const firstId = claimedA[0].id;
-    await expect(
-      repo.markRebuildOutboxProcessed(firstId, tokenA),
-    ).rejects.toThrow();
+    await expect(repo.markRebuildOutboxProcessed(firstId, tokenA)).rejects.toThrow();
 
     // The record remains owned by token B (status processing + claim_token B)
     const row = await prisma.scheduleRebuildOutbox.findUnique({ where: { id: firstId } });
@@ -407,8 +438,16 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
     const service = new ScheduleEventApplicationService(psRepo);
 
     // Create overlapping events to enqueue a rebuild outbox row
-    const _e1 = await service.createSchedule({ identityId, title: 'PS Race A', startTime: 1000, endTime: 2000 });
-    const e2 = await service.createSchedule({ identityId, title: 'PS Race B', startTime: 1500, endTime: 2500 });
+    const _e1 = await service.createSchedule({
+      identityId,
+      title: 'PS Race A',
+      range: { kind: 'Timed', start: 1000, end: 2000 },
+    });
+    const e2 = await service.createSchedule({
+      identityId,
+      title: 'PS Race B',
+      range: { kind: 'Timed', start: 1500, end: 2500 },
+    });
     await service.deleteSchedule(e2.id, identityId, e2.version);
 
     // Old worker claims with token A
@@ -429,9 +468,7 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
 
     // Old worker ack with stale token A must be rejected (lease lost)
     const firstId = claimedA[0].id;
-    await expect(
-      psRepo.markRebuildOutboxProcessed(firstId, tokenA),
-    ).rejects.toThrow(/lease lost/);
+    await expect(psRepo.markRebuildOutboxProcessed(firstId, tokenA)).rejects.toThrow(/lease lost/);
 
     // Record remains owned by token B (status processing + claim_token B)
     const row = await db.getOptional<{ claim_token: string; status: string }>(
@@ -450,8 +487,7 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
     const created = await service.createSchedule({
       identityId,
       title: 'Outbox Event',
-      startTime: 1000,
-      endTime: 2000,
+      range: { kind: 'Timed', start: 1000, end: 2000 },
     });
 
     // create flushed 'schedule:calendar-entry-created' into the durable outbox
@@ -505,12 +541,13 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
     const e2 = await service.createSchedule({
       identityId,
       title: 'Rollback Target',
-      startTime: 3000,
-      endTime: 4000,
+      range: { kind: 'Timed', start: 3000, end: 4000 },
     });
-    vi.spyOn(SchedulePrismaRepository.prototype, 'flushDomainEvents').mockImplementationOnce(async () => {
-      throw new Error('domain outbox write fault injected');
-    });
+    vi.spyOn(SchedulePrismaRepository.prototype, 'flushDomainEvents').mockImplementationOnce(
+      async () => {
+        throw new Error('domain outbox write fault injected');
+      },
+    );
     await expect(
       service.updateSchedule(e2.id, identityId, { title: 'Must Not Persist', expectedVersion: 1 }),
     ).rejects.toThrow('domain outbox write fault injected');
@@ -526,7 +563,11 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
 
     // Crash point A: "crash before dequeue" — a publisher never claimed the row;
     // a restarted publisher processes it once and acks.
-    const a = await service.createSchedule({ identityId, title: 'Crash A', startTime: 1000, endTime: 2000 });
+    const a = await service.createSchedule({
+      identityId,
+      title: 'Crash A',
+      range: { kind: 'Timed', start: 1000, end: 2000 },
+    });
     const { bus: busA, events: eventsA } = createRecordingEventBus();
     const publisherA = new ScheduleDomainEventPublisherService(repo, passThroughLease, busA);
     const resA = await publisherA.processOutbox();
@@ -539,7 +580,11 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
     // Crash point B: "crash after publish, before ack" — the item is claimed and
     // published, but never acked. After the claim times out, a restarted publisher
     // reclaims it and converges to a stable completed state.
-    const b = await service.createSchedule({ identityId, title: 'Crash B', startTime: 2000, endTime: 3000 });
+    const b = await service.createSchedule({
+      identityId,
+      title: 'Crash B',
+      range: { kind: 'Timed', start: 2000, end: 3000 },
+    });
     const crashToken = 'publisher-crashed-token';
     const claimedB = await repo.claimDomainEventOutboxItems(crashToken, 10, 30000);
     expect(claimedB.length).toBeGreaterThan(0);
@@ -581,7 +626,11 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
     const repo = new SchedulePrismaRepository(prisma);
     const service = new ScheduleEventApplicationService(repo);
 
-    const created = await service.createSchedule({ identityId, title: 'Idempotent', startTime: 1000, endTime: 2000 });
+    const created = await service.createSchedule({
+      identityId,
+      title: 'Idempotent',
+      range: { kind: 'Timed', start: 1000, end: 2000 },
+    });
 
     // ----- First publisher: fresh bus/adapter/consumer; deterministic publish-before-ack crash -----
     const busA = new CrossPlatformEventBus();
@@ -596,7 +645,9 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
     // The publisher crashes AFTER publish (consumer received + recorded receipt) but BEFORE ack.
     await expect(publisherA.processOutbox()).rejects.toThrow('after publish before ack');
 
-    const crashRow = await prisma.scheduleDomainEventOutbox.findFirst({ where: { scheduleId: created.id } });
+    const crashRow = await prisma.scheduleDomainEventOutbox.findFirst({
+      where: { scheduleId: created.id },
+    });
     expect(crashRow?.status).toBe('processing'); // real persisted processing + claimToken
     expect(crashRow?.claimToken).toBeTruthy();
     // The consumer already recorded its durable receipt + effect in its own transaction.
@@ -617,7 +668,9 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
     // ----- Fully rebuilt chain: NEW client, NEW repo, NEW bus/adapter/consumer, NEW lease -----
     // The crashed process's in-process objects are discarded: stop consumerA, then rebuild everything fresh.
     consumerA.stop();
-    const rebuiltClient = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }) });
+    const rebuiltClient = new PrismaClient({
+      adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }),
+    });
     try {
       const rebuiltRepo = new SchedulePrismaRepository(rebuiltClient);
       const busB = new CrossPlatformEventBus();
@@ -626,7 +679,11 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
       consumerB.start();
       const realLeaseB = createSchedulerPrismaRepositories(rebuiltClient).leaseCoordinator;
 
-      const restartedPublisher = new ScheduleDomainEventPublisherService(rebuiltRepo, realLeaseB, adapterB);
+      const restartedPublisher = new ScheduleDomainEventPublisherService(
+        rebuiltRepo,
+        realLeaseB,
+        adapterB,
+      );
 
       // The leftover crash lease is UNEXPIRED -> the rebuilt publisher cannot acquire it yet.
       const blocked = await restartedPublisher.processOutbox();
@@ -651,7 +708,9 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
       // ----- Convergence: only DB state; the rebuilt consumer's durable receipt dedupes the same key -----
       expect(await rebuiltClient.scheduleEventConsumerReceipt.count()).toBe(1);
       expect(await rebuiltClient.scheduleEventDeliveryLog.count()).toBe(1); // independent effect happened exactly once
-      const rowAfter = await rebuiltClient.scheduleDomainEventOutbox.findFirst({ where: { scheduleId: created.id } });
+      const rowAfter = await rebuiltClient.scheduleDomainEventOutbox.findFirst({
+        where: { scheduleId: created.id },
+      });
       expect(rowAfter?.status).toBe('completed');
     } finally {
       await rebuiltClient.$disconnect();
@@ -665,8 +724,15 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
     const service = new ScheduleEventApplicationService(psRepo);
 
     // create + update write domain events into the same sqlite transaction
-    const created = await service.createSchedule({ identityId, title: 'PS Outbox', startTime: 1000, endTime: 2000 });
-    await service.updateSchedule(created.id, identityId, { title: 'PS Outbox v2', expectedVersion: 1 });
+    const created = await service.createSchedule({
+      identityId,
+      title: 'PS Outbox',
+      range: { kind: 'Timed', start: 1000, end: 2000 },
+    });
+    await service.updateSchedule(created.id, identityId, {
+      title: 'PS Outbox v2',
+      expectedVersion: 1,
+    });
 
     const rows = await db.getAll<{ event_type: string; status: string; idempotency_key: string }>(
       'SELECT event_type, status, idempotency_key FROM schedule_domain_event_outbox WHERE identity_id = ? ORDER BY created_at ASC',
@@ -697,9 +763,19 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
     const repo = new SchedulePrismaRepository(prisma);
     const service = new ScheduleEventApplicationService(repo);
 
-    const e1 = await service.createSchedule({ identityId, title: 'Ordering A', startTime: 1000, endTime: 2000 });
-    const e2 = await service.createSchedule({ identityId, title: 'Ordering B', startTime: 1500, endTime: 2500 });
-    expect((await service.getSchedule(e1.id, identityId))?.hasConflict).toBe(true);
+    const e1 = await service.createSchedule({
+      identityId,
+      title: 'Ordering A',
+      range: { kind: 'Timed', start: 1000, end: 2000 },
+    });
+    const e2 = await service.createSchedule({
+      identityId,
+      title: 'Ordering B',
+      range: { kind: 'Timed', start: 1500, end: 2500 },
+    });
+    expect(await repo.getConflictProjection(identityId, e1.id)).toMatchObject({
+      hasConflict: true,
+    });
 
     // Delete B enqueues a rebuild item whose sourceRevision is e1's version at that time (1).
     await service.deleteSchedule(e2.id, identityId, e2.version);
@@ -760,7 +836,9 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
     // The loser is explicitly recognized as consumed success — NOT a swallowed error.
     expect(settled.map((s) => s.status)).toEqual(['fulfilled', 'fulfilled']);
 
-    const receipts = await prisma.scheduleEventConsumerReceipt.findMany({ where: { idempotencyKey: key } });
+    const receipts = await prisma.scheduleEventConsumerReceipt.findMany({
+      where: { idempotencyKey: key },
+    });
     expect(receipts).toHaveLength(1); // unique constraint: exactly one receipt row
     const logs = await prisma.scheduleEventDeliveryLog.findMany({ where: { idempotencyKey: key } });
     expect(logs).toHaveLength(1); // exactly one independent effect committed
@@ -778,14 +856,12 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
     const e1 = await service.createSchedule({
       identityId,
       title: 'Metrics Worker A',
-      startTime: 1000,
-      endTime: 2000,
+      range: { kind: 'Timed', start: 1000, end: 2000 },
     });
     const e2 = await service.createSchedule({
       identityId,
       title: 'Metrics Worker B',
-      startTime: 1500,
-      endTime: 2500,
+      range: { kind: 'Timed', start: 1500, end: 2500 },
     });
     await service.deleteSchedule(e2.id, identityId, e2.version);
 
@@ -812,14 +888,12 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
     await service.createSchedule({
       identityId,
       title: 'Metrics Retry A',
-      startTime: 1000,
-      endTime: 2000,
+      range: { kind: 'Timed', start: 1000, end: 2000 },
     });
     const e2 = await service.createSchedule({
       identityId,
       title: 'Metrics Retry B',
-      startTime: 1500,
-      endTime: 2500,
+      range: { kind: 'Timed', start: 1500, end: 2500 },
     });
     await service.deleteSchedule(e2.id, identityId, e2.version);
 
@@ -906,9 +980,9 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
 
     // Timeline after replay reflects state advancement
     const timelineAfter = await moduleInstance.api.queryRebuildTimeline(ctx);
-    const entryAfter = (
-      timelineAfter.ok ? (timelineAfter.data as any[]) : []
-    ).find((e) => e.operationId === opId);
+    const entryAfter = (timelineAfter.ok ? (timelineAfter.data as any[]) : []).find(
+      (e) => e.operationId === opId,
+    );
     expect(entryAfter.status).toBe('pending');
     expect(entryAfter.replayable).toBe(false);
 
@@ -996,5 +1070,4 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
 
     await moduleInstance.dispose();
   });
-
 });

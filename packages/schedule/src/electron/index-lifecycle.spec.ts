@@ -66,6 +66,7 @@ function createFakeInstance() {
   const eventApi = {
     createEvent: vi.fn(() => ok(null as never)),
     getEvent: vi.fn(() => ok(null as never)),
+    listAllEvents: vi.fn(() => ok([] as never)),
     listEvents: vi.fn(() => ok([] as never)),
     updateEvent: vi.fn(() => ok(null as never)),
     deleteEvent: vi.fn(() => ok(null as never)),
@@ -178,12 +179,12 @@ describe('createScheduleElectronModule lifecycle', () => {
   });
 
   it('routes IPC calls through the controllers to the same instance ports', async () => {
-    fake.eventApi.listEvents.mockResolvedValue(ok([] as never));
+    fake.eventApi.listAllEvents.mockResolvedValue(ok([] as never));
     moduleDef.register(context);
 
     const listResult = await registered(ScheduleChannels.LIST)(undefined, undefined);
     expect(listResult).toMatchObject({ ok: true });
-    expect(fake.eventApi.listEvents).toHaveBeenCalledTimes(1);
+    expect(fake.eventApi.listAllEvents).toHaveBeenCalledTimes(1);
   });
 
   it('removes the channels installed before ipcMain.handle() throws mid-registration', () => {

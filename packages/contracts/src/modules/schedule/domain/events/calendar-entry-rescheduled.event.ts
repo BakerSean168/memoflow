@@ -1,14 +1,9 @@
 import type { ScheduleId } from '../../../../primitives';
+import type { CalendarEntryRange } from '../../calendar-entry-range';
 
-/**
- * Calendar Entry Rescheduled Event
- *
- * Triggered when a calendar entry's time window is moved to a new period.
- */
+/** Emitted when a CalendarEntry moves between canonical Timed/AllDay ranges. */
 export interface CalendarEntryRescheduledEvent {
   entryId: ScheduleId;
-  oldStartTime: number;
-  oldEndTime: number;
-  newStartTime: number;
-  newEndTime: number;
+  oldRange: CalendarEntryRange;
+  newRange: CalendarEntryRange;
 }

@@ -40,8 +40,7 @@ export interface ScheduleModuleRuntimeContribution {
 }
 
 export type ScheduleRuntimeContributionsInput =
-  | ScheduleModuleRuntimeContribution
-  | readonly ScheduleModuleRuntimeContribution[];
+  ScheduleModuleRuntimeContribution | readonly ScheduleModuleRuntimeContribution[];
 
 export interface ScheduleModuleDependencies {
   readonly scheduleRepository: IScheduleRepository;
@@ -76,11 +75,9 @@ function toCreateSchedulePayload(data: CreateScheduleRequest, identityId: string
   return {
     identityId,
     title: data.name,
-    startTime: data.startTime,
-    endTime: data.endTime,
+    range: data.range,
     description: data.description,
     location: data.location,
-    priority: data.priority,
     attendees: data.attendees,
   };
 }
@@ -88,11 +85,9 @@ function toCreateSchedulePayload(data: CreateScheduleRequest, identityId: string
 function toUpdateSchedulePayload(data: UpdateScheduleRequest) {
   return {
     title: data.name,
-    startTime: data.startTime,
-    endTime: data.endTime,
+    range: data.range,
     description: data.description,
     location: data.location,
-    priority: data.priority,
     attendees: data.attendees,
     expectedVersion: data.expectedVersion,
   };
@@ -102,7 +97,9 @@ export function createScheduleUseCases(
   dependencies: ScheduleModuleDependencies,
 ): ScheduleModuleUseCases {
   const scheduleEventService = new ScheduleEventApplicationService(dependencies.scheduleRepository);
-  const conflictDetectionService = new ScheduleConflictDetectionService(dependencies.scheduleRepository);
+  const conflictDetectionService = new ScheduleConflictDetectionService(
+    dependencies.scheduleRepository,
+  );
   return {
     scheduleEventService,
     conflictDetectionService,
@@ -218,7 +215,10 @@ export function createScheduleModule(
   const eventApi: ScheduleEventApplicationPort = {
     createEvent: async (data, ctx) =>
       resultify(
-        () => useCases.scheduleEventService.createSchedule(toCreateSchedulePayload(data, ctx.identityId)),
+        () =>
+          useCases.scheduleEventService.createSchedule(
+            toCreateSchedulePayload(data, ctx.identityId),
+          ),
         'Failed to create schedule event',
       ),
     getEvent: async (id, ctx) =>
@@ -229,6 +229,11 @@ export function createScheduleModule(
         }
         return event;
       }, 'Failed to get schedule event'),
+    listAllEvents: async (ctx) =>
+      resultify(
+        () => useCases.scheduleEventService.getSchedulesByAccount(ctx.identityId),
+        'Failed to list schedule events',
+      ),
     listEvents: async (query, _ctx) =>
       resultify(
         () =>
@@ -321,7 +326,15 @@ function mapRebuildOutboxToTimelineEntry(item: ScheduleRebuildOutboxDTO): Operat
 
 function normalizeRebuildStatus(
   status: string,
-): 'pending' | 'running' | 'succeeded' | 'skipped' | 'failed' | 'retryable' | 'dead_letter' | 'cancelled' {
+):
+  | 'pending'
+  | 'running'
+  | 'succeeded'
+  | 'skipped'
+  | 'failed'
+  | 'retryable'
+  | 'dead_letter'
+  | 'cancelled' {
   switch (status) {
     case 'processing':
       return 'running';

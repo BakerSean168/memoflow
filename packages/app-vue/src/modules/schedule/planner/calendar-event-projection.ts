@@ -8,7 +8,7 @@ import type {
   TaskCalendarEventProjection,
 } from '@memoflow/contracts/schedule';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
-import { asInstant, type Instant, type Ymd } from '@memoflow/time';
+import type { Instant, Ymd } from '@memoflow/time';
 import { getProductTime } from '../../../shared/utils/product-time';
 
 export interface PlannerProductTimePort {
@@ -44,27 +44,28 @@ export interface PlannerReadProjectionInput {
 export function projectCalendarEntry(
   entry: CalendarEntryClientDTO,
 ): ScheduleCalendarEventProjection {
-  return {
+  const range = entry.range;
+  const shared = {
     identityId: String(entry.identityId),
-    sourceType: 'schedule',
+    sourceType: 'schedule' as const,
     sourceId: String(entry.id),
-    start: asInstant(Number(entry.startTime)),
-    end: asInstant(Number(entry.endTime)),
-    allDay: false,
     title: entry.title,
     displayMetadata: {
-      semantic: 'calendar-entry',
+      semantic: 'calendar-entry' as const,
       subtitle: entry.location ?? null,
-      tone: entry.hasConflict ? 'warning' : 'accent',
-      hasConflict: entry.hasConflict,
+      tone: 'accent' as const,
     },
     editableCapabilities: { move: true, resize: true },
     ownerCommandTarget: {
-      ownerType: 'schedule.calendar-entry',
+      ownerType: 'schedule.calendar-entry' as const,
       ownerId: String(entry.id),
     },
     revision: entry.version,
   };
+
+  return range.kind === 'Timed'
+    ? { ...shared, allDay: false, start: range.start, end: range.end }
+    : { ...shared, allDay: true, start: range.start, end: range.end };
 }
 
 function taskResultSubtitle(result: TaskOccurrenceClientDTO['result']): string | null {

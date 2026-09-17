@@ -227,6 +227,35 @@ describe('PowerSync desktop data portability round trip', () => {
     expect(targetDb.committedStatements).toHaveLength(0);
   });
 
+  it('fails closed when Portable Schedule V3 would lose an AllDay CalendarEntry Ymd range', async () => {
+    const seeded = seedProfile(identityA);
+    seeded.schedules = [
+      {
+        id: 'schedule-all-day',
+        identity_id: identityA,
+        title: 'Conference',
+        description: null,
+        range_kind: 'AllDay',
+        timed_start: null,
+        timed_end: null,
+        all_day_start: '2026-06-04',
+        all_day_end: '2026-06-06',
+        location: 'Osaka',
+        attendees: null,
+        created_at: now,
+        updated_at: later,
+      },
+    ];
+    const sourceDb = new FakePowerSyncDb(seeded);
+    const exportUseCase = new ExportUserDataUseCase(
+      createPowerSyncDataPortabilityDependencies(sourceDb.asElectronDatabase()),
+    );
+
+    await expect(exportUseCase.execute(identityA)).rejects.toThrow(
+      "Portable Schedule V3 cannot represent AllDay CalendarEntry 'schedule-all-day' without losing Ymd semantics",
+    );
+  });
+
   it('emits dry-run validated event without writing import rows', async () => {
     const eventSpy = vi.spyOn(eventBus, 'send');
     const exported = await exportProfile(identityA);
@@ -877,9 +906,11 @@ function seedProfile(identityUuid: string): SeedTables {
         identity_id: identityUuid,
         title: 'Design review',
         description: 'Review portability',
-        start_time: now,
-        end_time: later,
-        duration: 60,
+        range_kind: 'Timed',
+        timed_start: now,
+        timed_end: later,
+        all_day_start: null,
+        all_day_end: null,
         location: 'Online',
         attendees: JSON.stringify(['teammate']),
         created_at: now,

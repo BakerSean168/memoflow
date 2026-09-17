@@ -1925,25 +1925,29 @@ model KnowledgeRepositoryLease {
 // ==========================================
 
 model Schedule {
-  id                   String   @id
-  identityId           String   @map("identity_id")
+  id                   String    @id
+  identityId           String    @map("identity_id")
   title                String
   description          String?
-  startTime            DateTime @map("start_time")
-  endTime              DateTime @map("end_time")
-  duration             Int
-  hasConflict          Boolean  @default(false) @map("has_conflict")
-  conflictingSchedules String?  @map("conflicting_schedules")
-  priority             Int?
+  // ADR-080 canonical CalendarEntry range truth. Timed and AllDay are mutually exclusive by domain invariant.
+  rangeKind            String    @map("range_kind")
+  timedStart           DateTime? @map("timed_start")
+  timedEnd             DateTime? @map("timed_end")
+  allDayStart          String?   @map("all_day_start")
+  allDayEnd            String?   @map("all_day_end")
+  // Transitional P4-2301B projection cache only; never CalendarEntry aggregate truth.
+  hasConflict          Boolean   @default(false) @map("has_conflict")
+  conflictingSchedules String?   @map("conflicting_schedules")
   location             String?
   attendees            String?
-  createdAt            DateTime @default(now()) @map("created_at")
-  version              Int      @default(1)
-  updatedAt            DateTime @updatedAt @map("updated_at")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  version              Int       @default(1)
+  updatedAt            DateTime  @updatedAt @map("updated_at")
 
   account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
 
-  @@index([startTime, endTime])
+  @@index([identityId, rangeKind, timedStart, timedEnd], map: "schedules_timed_range_idx")
+  @@index([identityId, rangeKind, allDayStart, allDayEnd], map: "schedules_all_day_range_idx")
   @@map("schedules")
 }
 

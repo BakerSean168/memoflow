@@ -23,6 +23,9 @@ export * from './protocol';
 // ============ API ============
 export * from './api';
 
+// ============ CalendarEntry canonical range (ADR-080) ============
+export * from './calendar-entry-range';
+
 // ============ Planner read projection (ADR-060) ============
 export * from './planner';
 
