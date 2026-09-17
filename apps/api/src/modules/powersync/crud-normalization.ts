@@ -32,7 +32,6 @@ export const BOOLEAN_FIELDS_BY_TABLE: Record<string, ReadonlySet<string>> = {
   routine_profile_memberships: new Set(['enabled']),
   notifications: new Set(['is_read']),
   notification_preferences: new Set(['enabled']),
-  notification_templates: new Set(['is_system', 'is_active']),
   ai_provider_configs: new Set(['is_active', 'is_default']),
   folders: new Set(['is_expanded']),
 };

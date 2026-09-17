@@ -5,7 +5,6 @@
 export { NotificationId } from './notification-id';
 export { NotificationChannelId } from './notification-channel-id';
 export { NotificationPreferenceId } from './notification-preference-id';
-export { NotificationTemplateId } from './notification-template-id';
 export { NotificationHistoryId } from './notification-history-id';
 
 export { NotificationType } from './notification-type';
@@ -23,7 +22,3 @@ export { DoNotDisturbConfig } from './do-not-disturb-config';
 export { RateLimit } from './rate-limit';
 export { ChannelError } from './channel-error';
 export { ChannelResponse } from './channel-response';
-export {
-  NotificationTemplateConfig,
-  type NotificationTemplateConfigServer,
-} from './notification-template-config';

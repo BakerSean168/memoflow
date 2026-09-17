@@ -98,9 +98,6 @@ export type NotificationChannelId = string & { readonly __brand: 'NotificationCh
 /** 通知偏好 ID */
 export type NotificationPreferenceId = string & { readonly __brand: 'NotificationPreferenceId' };
 
-/** 通知模板 ID */
-export type NotificationTemplateId = string & { readonly __brand: 'NotificationTemplateId' };
-
 /** 通知历史 ID */
 export type NotificationHistoryId = string & { readonly __brand: 'NotificationHistoryId' };
 
@@ -216,7 +213,6 @@ export const ID_PREFIXES = {
   NotificationId: 'INotificationId',
   NotificationChannelId: 'INotificationChannelId',
   NotificationPreferenceId: 'INotificationPreferenceId',
-  NotificationTemplateId: 'INotificationTemplateId',
   NotificationHistoryId: 'NotificationHistoryId',
 
   // === AI ===

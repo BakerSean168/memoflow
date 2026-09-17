@@ -600,23 +600,6 @@ exports.Prisma.NotificationPreferenceScalarFieldEnum = {
   deletedAt: 'deletedAt'
 };
 
-exports.Prisma.NotificationTemplateScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  displayName: 'displayName',
-  description: 'description',
-  type: 'type',
-  category: 'category',
-  titleTemplate: 'titleTemplate',
-  contentTemplate: 'contentTemplate',
-  variables: 'variables',
-  defaultActions: 'defaultActions',
-  isSystem: 'isSystem',
-  isActive: 'isActive',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
 exports.Prisma.NotificationDispatchOutboxScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
@@ -1590,7 +1573,6 @@ exports.Prisma.ModelName = {
   NotificationHistory: 'NotificationHistory',
   NotificationDeliveryDecisionRecord: 'NotificationDeliveryDecisionRecord',
   NotificationPreference: 'NotificationPreference',
-  NotificationTemplate: 'NotificationTemplate',
   NotificationDispatchOutbox: 'NotificationDispatchOutbox',
   Relation: 'Relation',
   OutboxMessage: 'OutboxMessage',

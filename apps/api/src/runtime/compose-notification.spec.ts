@@ -114,7 +114,6 @@ describe('composeNotification assembly order', () => {
     expect(moduleCall).toMatchObject({
       notificationRepository: repoSet.notificationRepository,
       preferenceRepository: repoSet.notificationPreferenceRepository,
-      templateRepository: repoSet.notificationTemplateRepository,
       closureChecker,
       userTimeContextPort,
       durableRuntime: createNotificationDurableRuntime.mock.results[0].value,

@@ -723,21 +723,7 @@ const notification_preferences = new Table({
   deleted_at: column.text,
 });
 
-const notification_templates = new Table({
-  name: column.text,
-  display_name: column.text,
-  description: column.text,
-  type: column.text,
-  category: column.text,
-  title_template: column.text,
-  content_template: column.text,
-  variables: column.text, // JSON
-  default_actions: column.text, // JSON
-  is_system: column.integer, // boolean
-  is_active: column.integer, // boolean
-  created_at: column.text,
-  updated_at: column.text,
-});
+
 
 // ──────────────────────────────────────────────
 // AI
@@ -1090,7 +1076,6 @@ export const PowerSyncAppSchema = new Schema({
   desktop_delivery_acks,
   notification_history,
   notification_preferences,
-  notification_templates,
   // Editor
   // AI
   ai_conversations,

@@ -5,7 +5,7 @@ tags:
   - notification
 description: 通知模块相关文件索引
 created: 2026-06-02T00:00:00
-updated: 2026-09-10T21:18:00+08:00
+updated: 2026-09-17T16:35:00+08:00
 ---
 
 # 通知模块文件索引
@@ -24,7 +24,7 @@ updated: 2026-09-10T21:18:00+08:00
 | [`ADR-087`](../../architecture/adr/ADR-087-notification-interaction-and-typed-action-intents.md)                              | NotificationInteraction 与 typed actions                                                   |
 | [`ADR-088`](../../architecture/adr/ADR-088-notification-preference-quiet-hours-realtime-and-operations-boundary.md)           | Preference / QuietHours / realtime / ops boundary                                          |
 
-> 以上 ADR 已采纳但尚未实施。当前 `NotificationChannel / NotificationHistory / NotificationTemplate` 等文件仍是代码真值的一部分，不能从索引删除直到实际迁移完成。
+> ADR-084/085 已进入 canonical implementation：Notification Fact/Inbox 与 WorkflowDefinition 已成为当前真值，`NotificationTemplate` 已退役。NotificationChannel / Interaction / QuietHours 的后续收敛由 ADR-086~088 和 Phase 4 后续任务继续实施。
 
 ## 前端页面与路由
 
@@ -74,7 +74,6 @@ updated: 2026-09-10T21:18:00+08:00
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
 | [`packages/notification/src/server/domain/aggregates/notification.ts`](../../../packages/notification/src/server/domain/aggregates/notification.ts)                                                                                     | Notification 聚合根                              |
 | [`packages/notification/src/server/domain/aggregates/notification-preference.ts`](../../../packages/notification/src/server/domain/aggregates/notification-preference.ts)                                                               | NotificationPreference 聚合根                    |
-| [`packages/notification/src/server/domain/aggregates/notification-template.ts`](../../../packages/notification/src/server/domain/aggregates/notification-template.ts)                                                                   | NotificationTemplate 聚合根                      |
 | [`packages/notification/src/server/domain/entities/notification-channel.ts`](../../../packages/notification/src/server/domain/entities/notification-channel.ts)                                                                         | NotificationChannel 实体                         |
 | [`packages/notification/src/server/domain/entities/notification-history.ts`](../../../packages/notification/src/server/domain/entities/notification-history.ts)                                                                         | NotificationHistory 实体                         |
 | [`packages/notification/src/server/domain/services/notification-policy.ts`](../../../packages/notification/src/server/domain/services/notification-policy.ts)                                                                           | 通知策略（偏好、免打扰、频率限制检查）           |

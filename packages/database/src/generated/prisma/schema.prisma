@@ -860,26 +860,6 @@ model NotificationPreference {
   @@map("notification_preferences")
 }
 
-model NotificationTemplate {
-  id              String   @id
-  name            String   @unique
-  displayName     String   @map("display_name")
-  description     String?
-  type            String
-  category        String
-  titleTemplate   String   @map("title_template")
-  contentTemplate String   @map("content_template")
-  variables       String?
-  defaultActions  String?  @map("default_actions")
-  isSystem        Boolean  @default(false) @map("is_system")
-  isActive        Boolean  @default(true) @map("is_active")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
-
-  @@index([name])
-  @@map("notification_templates")
-}
-
 /// NotificationDispatchOutbox 投递意图/Outbox（W2: LeaseClaim 与 durable receipt）
 model NotificationDispatchOutbox {
   id                  String    @id

@@ -11,7 +11,6 @@ import { ReminderType } from '@memoflow/contracts/reminder';
 import { NotificationReliableOperationPrismaAdapter } from '../notification-reliable-operation-prisma.adapter';
 import { NotificationPrismaRepository } from '../notification-prisma.repository';
 import { NotificationPreferencePrismaRepository } from '../notification-preference-prisma.repository';
-import { NotificationTemplatePrismaRepository } from '../notification-template-prisma.repository';
 import { CreateNotificationUseCase } from '../../../../application/use-cases/commands/create-notification.use-case';
 import { createNotificationRuntimeContribution } from '../../../runtime/notification.runtime';
 import { RealInAppChannelDeliverer } from '../../deliverers/real-channel-deliverers';
@@ -34,7 +33,6 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
   let reliableAdapter: NotificationReliableOperationPrismaAdapter;
   let notificationRepo: NotificationPrismaRepository;
   let preferenceRepo: NotificationPreferencePrismaRepository;
-  let templateRepo: NotificationTemplatePrismaRepository;
   let identityId: string;
 
   beforeEach(async () => {
@@ -46,7 +44,6 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     reliableAdapter = new NotificationReliableOperationPrismaAdapter(prisma);
     notificationRepo = new NotificationPrismaRepository(prisma);
     preferenceRepo = new NotificationPreferencePrismaRepository(prisma);
-    templateRepo = new NotificationTemplatePrismaRepository(prisma);
   });
 
   async function seedNotification(id: string) {
@@ -326,6 +323,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
 
     const res = await useCase.execute({
       identityId,
+      workflowKey: 'system.general',
       title: 'Tx Test',
       content: 'Testing atomic transaction',
       type: NotificationType.Info,
@@ -780,7 +778,6 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     const moduleInstance = createNotificationModule({
       notificationRepository: notificationRepo,
       preferenceRepository: preferenceRepo,
-      templateRepository: templateRepo,
       closureChecker: async () => false,
       durableRuntime: createNotificationRuntimeContribution({
         userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
@@ -815,7 +812,6 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     const moduleInstance = createNotificationModule({
       notificationRepository: notificationRepo,
       preferenceRepository: preferenceRepo,
-      templateRepository: templateRepo,
       closureChecker: async () => false,
       durableRuntime: createNotificationRuntimeContribution({
         userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,

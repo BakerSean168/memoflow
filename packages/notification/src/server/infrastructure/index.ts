@@ -26,7 +26,6 @@ export type { NotificationApplicationPort } from '../application';
 export type {
   INotificationRepository,
   INotificationPreferenceRepository,
-  INotificationTemplateRepository,
 } from '../domain/repositories';
 
 export { createNotificationPowerSyncModule } from './powersync';

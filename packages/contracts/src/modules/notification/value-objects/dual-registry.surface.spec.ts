@@ -2,46 +2,11 @@
  * Dual registry suite (elegance E3b tax cut).
  * Merged 4 dual-retired surface locks from this directory.
  * Behavior/assertions preserved; individual *-dual.surface.spec.ts removed.
- * Sources: channel-config-preference-dual.surface.spec.ts, notification-channel-vo-dto-dual.surface.spec.ts, notification-preference-vo-dto-dual.surface.spec.ts, notification-template-vo-dual.surface.spec.ts
+ * Sources: notification-channel-vo-dto-dual.surface.spec.ts, notification-preference-vo-dto-dual.surface.spec.ts
  */
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-
-// --- merged from channel-config-preference-dual.surface.spec.ts ---
-{
-  /**
-   * Residual 877: ChannelConfig dual retired.
-   * Exact boolean channel flags shape of ChannelPreference — type alias only.
-   */
-  describe('notification ChannelConfig dual retired (residual 877)', () => {
-    const dir = __dirname;
-    const preference = readFileSync(resolve(dir, 'category-preference.ts'), 'utf8');
-    const templateConfig = readFileSync(resolve(dir, 'notification-template-config.ts'), 'utf8');
-
-    it('owns ChannelPreference sole interface body', () => {
-      expect(preference).toContain('Residual 877');
-      expect(preference).toMatch(/export interface ChannelPreference\b/);
-      expect(preference).toContain('inApp: boolean');
-      expect(preference).toContain('email: boolean');
-      expect(preference).toContain('push: boolean');
-      expect(preference).toContain('sms: boolean');
-    });
-
-    it('owns ChannelConfig as type alias of ChannelPreference', () => {
-      expect(templateConfig).toContain('Residual 877');
-      expect(templateConfig).toContain('export type ChannelConfig = ChannelPreference');
-      expect(templateConfig).not.toMatch(/export interface ChannelConfig\b/);
-      expect(templateConfig).toContain("from './category-preference'");
-    });
-
-    it('template config still uses ChannelConfig name for channels field', () => {
-      expect(templateConfig).toContain('channels: ChannelConfig');
-      expect(templateConfig).toMatch(/export interface NotificationTemplateConfigServerDTO\b/);
-      expect(preference).toContain('channels: ChannelPreference');
-    });
-  });
-}
 
 // --- merged from notification-channel-vo-dto-dual.surface.spec.ts ---
 {
@@ -137,50 +102,6 @@ import { describe, expect, it } from 'vitest';
       ]) {
         expect(index).toContain(name);
       }
-    });
-  });
-}
-
-// --- merged from notification-template-vo-dual.surface.spec.ts ---
-{
-  /**
-   * Residual 659: retire dead notification template VO dual and snooze dual.
-   * Live template contracts: NotificationTemplateConfigServerDTO + aggregate DTOs.
-   * Soft residual 839: NotificationTemplateClientDTO dual retired via NotificationTemplateResponseSchema.
-   * Soft residual 845: NotificationTemplateServerDTO also z.infer of same schema (client+server single-track).
-   */
-  describe('notification template VO dual single-track surface (residual 659)', () => {
-    const vos = __dirname;
-    const aggregates = resolve(vos, '../aggregates');
-
-    it('drops notification-template VO dual and snooze-session dual files', () => {
-      const index = readFileSync(resolve(vos, 'index.ts'), 'utf8');
-      expect(existsSync(resolve(vos, 'notification-template.ts'))).toBe(false);
-      expect(existsSync(resolve(vos, 'snooze-session.ts'))).toBe(false);
-      expect(index).toMatch(/Residual 659/);
-      expect(index).not.toMatch(/from '\.\/notification-template'/);
-      expect(index).not.toMatch(/from '\.\/snooze-session'/);
-      expect(index).not.toMatch(/export type \{[^}]*NotificationTemplateDTO/);
-      expect(index).not.toMatch(/export type \{[^}]*SnoozeSessionDTO/);
-    });
-
-    it('keeps template config VO and aggregate client/server DTOs', () => {
-      const index = readFileSync(resolve(vos, 'index.ts'), 'utf8');
-      const config = readFileSync(resolve(vos, 'notification-template-config.ts'), 'utf8');
-      const client = readFileSync(resolve(aggregates, 'notification-template-client.ts'), 'utf8');
-      const server = readFileSync(resolve(aggregates, 'notification-template-server.ts'), 'utf8');
-      expect(index).toContain('NotificationTemplateConfigServerDTO');
-      expect(config).toContain('export interface NotificationTemplateConfigServerDTO');
-      // Soft residual 839: ClientDTO is z.infer alias (no interface dual body).
-      expect(client).toContain(
-        'export type NotificationTemplateClientDTO = z.infer<typeof NotificationTemplateResponseSchema>',
-      );
-      expect(client).not.toMatch(/export interface NotificationTemplateClientDTO\b/);
-      // Soft residual 845: ServerDTO is z.infer alias (no interface dual body).
-      expect(server).toContain(
-        'export type NotificationTemplateServerDTO = z.infer<typeof NotificationTemplateResponseSchema>',
-      );
-      expect(server).not.toMatch(/export interface NotificationTemplateServerDTO\b/);
     });
   });
 }

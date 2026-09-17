@@ -127,24 +127,6 @@ function createTestSqliteDatabase(): IElectronDatabase {
       deleted_at TEXT
     );
 
-    CREATE TABLE IF NOT EXISTS notification_templates (
-      id TEXT PRIMARY KEY,
-      code TEXT NOT NULL,
-      name TEXT NOT NULL,
-      description TEXT,
-      title_template TEXT NOT NULL,
-      content_template TEXT NOT NULL,
-      type TEXT NOT NULL,
-      category TEXT NOT NULL,
-      default_channels TEXT NOT NULL,
-      variables TEXT,
-      is_active INTEGER DEFAULT 1,
-      version INTEGER DEFAULT 1,
-      created_at TEXT NOT NULL,
-      updated_at TEXT NOT NULL,
-      deleted_at TEXT
-    );
-
     CREATE TABLE IF NOT EXISTS notification_dispatch_outbox (
       id TEXT PRIMARY KEY,
       identity_id TEXT NOT NULL,
@@ -302,24 +284,6 @@ function createFileSqliteDatabase(dbPath: string): { db: IElectronDatabase; clos
       workflow_overrides TEXT NOT NULL DEFAULT '{}',
       do_not_disturb TEXT,
       rate_limit TEXT,
-      version INTEGER DEFAULT 1,
-      created_at TEXT NOT NULL,
-      updated_at TEXT NOT NULL,
-      deleted_at TEXT
-    );
-
-    CREATE TABLE IF NOT EXISTS notification_templates (
-      id TEXT PRIMARY KEY,
-      code TEXT NOT NULL,
-      name TEXT NOT NULL,
-      description TEXT,
-      title_template TEXT NOT NULL,
-      content_template TEXT NOT NULL,
-      type TEXT NOT NULL,
-      category TEXT NOT NULL,
-      default_channels TEXT NOT NULL,
-      variables TEXT,
-      is_active INTEGER DEFAULT 1,
       version INTEGER DEFAULT 1,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
@@ -488,6 +452,7 @@ describe('PowerSync Notification Durable Worker & Composition Root', () => {
 
     const createResult = await useCase.execute({
       identityId: 'user-456',
+      workflowKey: 'system.general',
       title: 'Desktop Alert',
       content: 'Important message for desktop',
       type: 'Info',
@@ -743,6 +708,7 @@ describe('PowerSync Notification Durable Worker & Composition Root', () => {
 
       const createRes = await useCase1.execute({
         identityId: 'user-crash-a',
+        workflowKey: 'system.general',
         title: 'Crash A Test',
         content: 'Testing crash before receipt write',
         type: 'Info',
@@ -881,6 +847,7 @@ describe('PowerSync Notification Durable Worker & Composition Root', () => {
 
       const createRes = await useCase1.execute({
         identityId: 'user-crash-b',
+        workflowKey: 'system.general',
         title: 'Crash B Test',
         content: 'Testing crash before channel save',
         type: 'Info',

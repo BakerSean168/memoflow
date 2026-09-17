@@ -96,7 +96,6 @@ function createFakeInstance() {
     notificationRepository: {} as never,
     preferenceRepository: {} as never,
     portableCapability,
-    templateRepository: {} as never,
     useCases: {} as never,
     api,
     durableRuntime: {} as never,

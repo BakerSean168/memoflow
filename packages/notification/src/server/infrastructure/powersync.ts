@@ -24,14 +24,13 @@ import {
 import {
   PowerSyncNotificationRepository,
   PowerSyncNotificationPreferenceRepository,
-  PowerSyncNotificationTemplateRepository,
   PowerSyncNotificationReliableAdapter,
   NotificationRequestedPowerSyncWriterAdapter,
 } from './adapters/powersync';
 import type { NotificationMetricsService } from '../domain/services/notification-metrics-service';
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import type { UserTimeContextPort } from '@memoflow/time';
-import type { INotificationRepository, INotificationPreferenceRepository, INotificationTemplateRepository } from '../domain/repositories';
+import type { INotificationRepository, INotificationPreferenceRepository } from '../domain/repositories';
 import type { NotificationRequestedWriterPort } from '@memoflow/contracts/notification';
 
 export interface CreateNotificationPowerSyncModuleOptions {
@@ -59,7 +58,6 @@ export interface CreateNotificationPowerSyncModuleOptions {
 export interface NotificationPowerSyncRepositorySet {
   readonly notificationRepository: INotificationRepository;
   readonly notificationPreferenceRepository: INotificationPreferenceRepository;
-  readonly notificationTemplateRepository: INotificationTemplateRepository;
   readonly reliableAdapter: NotificationReliableOperationPort;
   /**
    * Durable NotificationRequested writer for business handlers (NOTIF-3301).
@@ -91,7 +89,6 @@ export function createNotificationPowerSyncRepositories(
   return {
     notificationRepository: new PowerSyncNotificationRepository(db, metricsService),
     notificationPreferenceRepository: new PowerSyncNotificationPreferenceRepository(db),
-    notificationTemplateRepository: new PowerSyncNotificationTemplateRepository(db),
     reliableAdapter: new PowerSyncNotificationReliableAdapter(db, metricsService),
     requestedWriter: new NotificationRequestedPowerSyncWriterAdapter(db),
   };
@@ -462,7 +459,6 @@ export function createNotificationPowerSyncModule(
   return createNotificationModule({
     notificationRepository,
     preferenceRepository: repositories.notificationPreferenceRepository,
-    templateRepository: repositories.notificationTemplateRepository,
     durableRuntime,
     runtimeContributions: runtimeContributions ?? [durableRuntime],
     closureChecker,
@@ -474,7 +470,6 @@ export function createNotificationPowerSyncModule(
 export {
   PowerSyncNotificationRepository,
   PowerSyncNotificationPreferenceRepository,
-  PowerSyncNotificationTemplateRepository,
   PowerSyncNotificationReliableAdapter,
   NotificationRequestedPowerSyncWriterAdapter,
 };

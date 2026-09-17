@@ -98,7 +98,7 @@ describe('createRoutineWallClockExecutionSource (ROUTINE-3401)', () => {
 
     // Exactly one durable notification envelope, keyed idempotently.
     expect(deps.writer.rows).toHaveLength(1);
-    expect(deps.writer.rows[0].envelope.workflowKey).toBe(`routine:${FIXTURE_F.routineId}`);
+    expect(deps.writer.rows[0].envelope.workflowKey).toBe('routine.intervention');
     expect(deps.writer.rows[0].envelope.idempotencyKey).toContain(fixtureOccurrenceKey());
     expect(deps.writer.rows[0].envelope.source).toBe('routine');
 
