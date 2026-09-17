@@ -24,7 +24,7 @@ updated: 2026-09-17T17:28:00+08:00
 | [`ADR-087`](../../architecture/adr/ADR-087-notification-interaction-and-typed-action-intents.md)                              | NotificationInteraction 与 typed actions                                                   |
 | [`ADR-088`](../../architecture/adr/ADR-088-notification-preference-quiet-hours-realtime-and-operations-boundary.md)           | Preference / QuietHours / realtime / ops boundary                                          |
 
-> ADR-084~086 已进入 canonical implementation：Notification Fact/Inbox、WorkflowDefinition 与 DeliveryDecision + DispatchOutbox/Receipt 已成为当前真值；`NotificationTemplate` 与 `NotificationChannel` aggregate/persistence 已退役。Interaction / QuietHours / product-vs-operations port split 由 ADR-087/088 与 N4-2402B 继续收敛。
+> ADR-084~088 已进入 canonical implementation：Notification Fact/Inbox、WorkflowDefinition、DeliveryDecision + DispatchOutbox/Receipt、typed Interaction、QuietHours 与 Product/Operations port split 已成为当前真值；`NotificationTemplate`、`NotificationChannel` 与 `NotificationHistory` legacy authority 已退役。
 
 ## 前端页面与路由
 
@@ -74,7 +74,7 @@ updated: 2026-09-17T17:28:00+08:00
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
 | [`packages/notification/src/server/domain/aggregates/notification.ts`](../../../packages/notification/src/server/domain/aggregates/notification.ts)                                                                                     | Notification 聚合根                              |
 | [`packages/notification/src/server/domain/aggregates/notification-preference.ts`](../../../packages/notification/src/server/domain/aggregates/notification-preference.ts)                                                               | NotificationPreference 聚合根                    |
-| [`packages/notification/src/server/domain/entities/notification-history.ts`](../../../packages/notification/src/server/domain/entities/notification-history.ts)                                                                         | NotificationHistory 实体                         |
+| [`packages/notification/src/server/domain/repositories/i-notification-interaction-repository.ts`](../../../packages/notification/src/server/domain/repositories/i-notification-interaction-repository.ts)                               | NotificationInteraction durable fact 仓储契约    |
 | [`packages/notification/src/server/domain/services/notification-policy.ts`](../../../packages/notification/src/server/domain/services/notification-policy.ts)                                                                           | 通知策略（偏好、免打扰、频率限制检查）           |
 | [`packages/notification/src/server/domain/services/notification-workflow-catalog.ts`](../../../packages/notification/src/server/domain/services/notification-workflow-catalog.ts)                                                       | Notification workflow capability/default catalog |
 | [`packages/notification/src/server/application/use-cases/commands/create-notification.use-case.ts`](../../../packages/notification/src/server/application/use-cases/commands/create-notification.use-case.ts)                           | 创建通知用例                                     |
