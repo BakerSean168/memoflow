@@ -78034,6 +78034,12 @@ export namespace Prisma {
     sourceRevision: string | null
     idempotencyKey: string | null
     status: string | null
+    triggerKind: string | null
+    becameDueAt: Date | null
+    resolutionState: string | null
+    resolvedAt: Date | null
+    resolutionKind: string | null
+    resolutionReason: string | null
     attempt: number | null
     ownerToken: string | null
     claimId: string | null
@@ -78061,6 +78067,12 @@ export namespace Prisma {
     sourceRevision: string | null
     idempotencyKey: string | null
     status: string | null
+    triggerKind: string | null
+    becameDueAt: Date | null
+    resolutionState: string | null
+    resolvedAt: Date | null
+    resolutionKind: string | null
+    resolutionReason: string | null
     attempt: number | null
     ownerToken: string | null
     claimId: string | null
@@ -78088,6 +78100,12 @@ export namespace Prisma {
     sourceRevision: number
     idempotencyKey: number
     status: number
+    triggerKind: number
+    becameDueAt: number
+    resolutionState: number
+    resolvedAt: number
+    resolutionKind: number
+    resolutionReason: number
     attempt: number
     ownerToken: number
     claimId: number
@@ -78127,6 +78145,12 @@ export namespace Prisma {
     sourceRevision?: true
     idempotencyKey?: true
     status?: true
+    triggerKind?: true
+    becameDueAt?: true
+    resolutionState?: true
+    resolvedAt?: true
+    resolutionKind?: true
+    resolutionReason?: true
     attempt?: true
     ownerToken?: true
     claimId?: true
@@ -78154,6 +78178,12 @@ export namespace Prisma {
     sourceRevision?: true
     idempotencyKey?: true
     status?: true
+    triggerKind?: true
+    becameDueAt?: true
+    resolutionState?: true
+    resolvedAt?: true
+    resolutionKind?: true
+    resolutionReason?: true
     attempt?: true
     ownerToken?: true
     claimId?: true
@@ -78181,6 +78211,12 @@ export namespace Prisma {
     sourceRevision?: true
     idempotencyKey?: true
     status?: true
+    triggerKind?: true
+    becameDueAt?: true
+    resolutionState?: true
+    resolvedAt?: true
+    resolutionKind?: true
+    resolutionReason?: true
     attempt?: true
     ownerToken?: true
     claimId?: true
@@ -78291,10 +78327,16 @@ export namespace Prisma {
     routineId: string
     source: string
     occurrenceKey: string
-    scheduledFor: Date
+    scheduledFor: Date | null
     sourceRevision: string | null
     idempotencyKey: string
     status: string
+    triggerKind: string
+    becameDueAt: Date
+    resolutionState: string
+    resolvedAt: Date | null
+    resolutionKind: string | null
+    resolutionReason: string | null
     attempt: number
     ownerToken: string | null
     claimId: string | null
@@ -78341,6 +78383,12 @@ export namespace Prisma {
     sourceRevision?: boolean
     idempotencyKey?: boolean
     status?: boolean
+    triggerKind?: boolean
+    becameDueAt?: boolean
+    resolutionState?: boolean
+    resolvedAt?: boolean
+    resolutionKind?: boolean
+    resolutionReason?: boolean
     attempt?: boolean
     ownerToken?: boolean
     claimId?: boolean
@@ -78372,6 +78420,12 @@ export namespace Prisma {
     sourceRevision?: boolean
     idempotencyKey?: boolean
     status?: boolean
+    triggerKind?: boolean
+    becameDueAt?: boolean
+    resolutionState?: boolean
+    resolvedAt?: boolean
+    resolutionKind?: boolean
+    resolutionReason?: boolean
     attempt?: boolean
     ownerToken?: boolean
     claimId?: boolean
@@ -78401,6 +78455,12 @@ export namespace Prisma {
     sourceRevision?: boolean
     idempotencyKey?: boolean
     status?: boolean
+    triggerKind?: boolean
+    becameDueAt?: boolean
+    resolutionState?: boolean
+    resolvedAt?: boolean
+    resolutionKind?: boolean
+    resolutionReason?: boolean
     attempt?: boolean
     ownerToken?: boolean
     claimId?: boolean
@@ -78430,6 +78490,12 @@ export namespace Prisma {
     sourceRevision?: boolean
     idempotencyKey?: boolean
     status?: boolean
+    triggerKind?: boolean
+    becameDueAt?: boolean
+    resolutionState?: boolean
+    resolvedAt?: boolean
+    resolutionKind?: boolean
+    resolutionReason?: boolean
     attempt?: boolean
     ownerToken?: boolean
     claimId?: boolean
@@ -78447,7 +78513,7 @@ export namespace Prisma {
     finishedAt?: boolean
   }
 
-  export type RoutineOccurrenceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "routineId" | "source" | "occurrenceKey" | "scheduledFor" | "sourceRevision" | "idempotencyKey" | "status" | "attempt" | "ownerToken" | "claimId" | "fencingToken" | "leaseExpiresAt" | "lastError" | "nextRetryAt" | "deadLetterAt" | "correlationId" | "causationId" | "historyJson" | "nextOccurrenceAt" | "createdAt" | "updatedAt" | "finishedAt", ExtArgs["result"]["routineOccurrence"]>
+  export type RoutineOccurrenceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "routineId" | "source" | "occurrenceKey" | "scheduledFor" | "sourceRevision" | "idempotencyKey" | "status" | "triggerKind" | "becameDueAt" | "resolutionState" | "resolvedAt" | "resolutionKind" | "resolutionReason" | "attempt" | "ownerToken" | "claimId" | "fencingToken" | "leaseExpiresAt" | "lastError" | "nextRetryAt" | "deadLetterAt" | "correlationId" | "causationId" | "historyJson" | "nextOccurrenceAt" | "createdAt" | "updatedAt" | "finishedAt", ExtArgs["result"]["routineOccurrence"]>
   export type RoutineOccurrenceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     routine?: boolean | RoutineDefinitionDefaultArgs<ExtArgs>
     account?: boolean | AccountDefaultArgs<ExtArgs>
@@ -78476,10 +78542,22 @@ export namespace Prisma {
       routineId: string
       source: string
       occurrenceKey: string
-      scheduledFor: Date
+      scheduledFor: Date | null
       sourceRevision: string | null
       idempotencyKey: string
+      /**
+       * Infrastructure execution status retained during the ADR-077 reliability cutover.
+       */
       status: string
+      /**
+       * Routine-owned business truth. Scheduler success must not imply satisfaction.
+       */
+      triggerKind: string
+      becameDueAt: Date
+      resolutionState: string
+      resolvedAt: Date | null
+      resolutionKind: string | null
+      resolutionReason: string | null
       attempt: number
       ownerToken: string | null
       claimId: string | null
@@ -78930,6 +79008,12 @@ export namespace Prisma {
     readonly sourceRevision: FieldRef<"RoutineOccurrence", 'String'>
     readonly idempotencyKey: FieldRef<"RoutineOccurrence", 'String'>
     readonly status: FieldRef<"RoutineOccurrence", 'String'>
+    readonly triggerKind: FieldRef<"RoutineOccurrence", 'String'>
+    readonly becameDueAt: FieldRef<"RoutineOccurrence", 'DateTime'>
+    readonly resolutionState: FieldRef<"RoutineOccurrence", 'String'>
+    readonly resolvedAt: FieldRef<"RoutineOccurrence", 'DateTime'>
+    readonly resolutionKind: FieldRef<"RoutineOccurrence", 'String'>
+    readonly resolutionReason: FieldRef<"RoutineOccurrence", 'String'>
     readonly attempt: FieldRef<"RoutineOccurrence", 'Int'>
     readonly ownerToken: FieldRef<"RoutineOccurrence", 'String'>
     readonly claimId: FieldRef<"RoutineOccurrence", 'String'>
@@ -79412,6 +79496,7 @@ export namespace Prisma {
 
   export type RoutineInteractionMinAggregateOutputType = {
     id: string | null
+    idempotencyKey: string | null
     identityId: string | null
     routineId: string | null
     occurrenceKey: string | null
@@ -79425,6 +79510,7 @@ export namespace Prisma {
 
   export type RoutineInteractionMaxAggregateOutputType = {
     id: string | null
+    idempotencyKey: string | null
     identityId: string | null
     routineId: string | null
     occurrenceKey: string | null
@@ -79438,6 +79524,7 @@ export namespace Prisma {
 
   export type RoutineInteractionCountAggregateOutputType = {
     id: number
+    idempotencyKey: number
     identityId: number
     routineId: number
     occurrenceKey: number
@@ -79463,6 +79550,7 @@ export namespace Prisma {
 
   export type RoutineInteractionMinAggregateInputType = {
     id?: true
+    idempotencyKey?: true
     identityId?: true
     routineId?: true
     occurrenceKey?: true
@@ -79476,6 +79564,7 @@ export namespace Prisma {
 
   export type RoutineInteractionMaxAggregateInputType = {
     id?: true
+    idempotencyKey?: true
     identityId?: true
     routineId?: true
     occurrenceKey?: true
@@ -79489,6 +79578,7 @@ export namespace Prisma {
 
   export type RoutineInteractionCountAggregateInputType = {
     id?: true
+    idempotencyKey?: true
     identityId?: true
     routineId?: true
     occurrenceKey?: true
@@ -79589,6 +79679,7 @@ export namespace Prisma {
 
   export type RoutineInteractionGroupByOutputType = {
     id: string
+    idempotencyKey: string
     identityId: string
     routineId: string
     occurrenceKey: string
@@ -79621,6 +79712,7 @@ export namespace Prisma {
 
   export type RoutineInteractionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    idempotencyKey?: boolean
     identityId?: boolean
     routineId?: boolean
     occurrenceKey?: boolean
@@ -79637,6 +79729,7 @@ export namespace Prisma {
 
   export type RoutineInteractionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    idempotencyKey?: boolean
     identityId?: boolean
     routineId?: boolean
     occurrenceKey?: boolean
@@ -79653,6 +79746,7 @@ export namespace Prisma {
 
   export type RoutineInteractionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    idempotencyKey?: boolean
     identityId?: boolean
     routineId?: boolean
     occurrenceKey?: boolean
@@ -79669,6 +79763,7 @@ export namespace Prisma {
 
   export type RoutineInteractionSelectScalar = {
     id?: boolean
+    idempotencyKey?: boolean
     identityId?: boolean
     routineId?: boolean
     occurrenceKey?: boolean
@@ -79680,7 +79775,7 @@ export namespace Prisma {
     createdAt?: boolean
   }
 
-  export type RoutineInteractionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "routineId" | "occurrenceKey" | "action" | "actedAt" | "responseLatencyMs" | "snoozeDurationMs" | "metadataJson" | "createdAt", ExtArgs["result"]["routineInteraction"]>
+  export type RoutineInteractionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "idempotencyKey" | "identityId" | "routineId" | "occurrenceKey" | "action" | "actedAt" | "responseLatencyMs" | "snoozeDurationMs" | "metadataJson" | "createdAt", ExtArgs["result"]["routineInteraction"]>
   export type RoutineInteractionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
     routine?: boolean | RoutineDefinitionDefaultArgs<ExtArgs>
@@ -79706,6 +79801,7 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
+      idempotencyKey: string
       identityId: string
       routineId: string
       occurrenceKey: string
@@ -80142,6 +80238,7 @@ export namespace Prisma {
    */
   interface RoutineInteractionFieldRefs {
     readonly id: FieldRef<"RoutineInteraction", 'String'>
+    readonly idempotencyKey: FieldRef<"RoutineInteraction", 'String'>
     readonly identityId: FieldRef<"RoutineInteraction", 'String'>
     readonly routineId: FieldRef<"RoutineInteraction", 'String'>
     readonly occurrenceKey: FieldRef<"RoutineInteraction", 'String'>
@@ -126544,6 +126641,12 @@ export namespace Prisma {
     sourceRevision: 'sourceRevision',
     idempotencyKey: 'idempotencyKey',
     status: 'status',
+    triggerKind: 'triggerKind',
+    becameDueAt: 'becameDueAt',
+    resolutionState: 'resolutionState',
+    resolvedAt: 'resolvedAt',
+    resolutionKind: 'resolutionKind',
+    resolutionReason: 'resolutionReason',
     attempt: 'attempt',
     ownerToken: 'ownerToken',
     claimId: 'claimId',
@@ -126566,6 +126669,7 @@ export namespace Prisma {
 
   export const RoutineInteractionScalarFieldEnum: {
     id: 'id',
+    idempotencyKey: 'idempotencyKey',
     identityId: 'identityId',
     routineId: 'routineId',
     occurrenceKey: 'occurrenceKey',
@@ -132600,10 +132704,16 @@ export namespace Prisma {
     routineId?: StringFilter<"RoutineOccurrence"> | string
     source?: StringFilter<"RoutineOccurrence"> | string
     occurrenceKey?: StringFilter<"RoutineOccurrence"> | string
-    scheduledFor?: DateTimeFilter<"RoutineOccurrence"> | Date | string
+    scheduledFor?: DateTimeNullableFilter<"RoutineOccurrence"> | Date | string | null
     sourceRevision?: StringNullableFilter<"RoutineOccurrence"> | string | null
     idempotencyKey?: StringFilter<"RoutineOccurrence"> | string
     status?: StringFilter<"RoutineOccurrence"> | string
+    triggerKind?: StringFilter<"RoutineOccurrence"> | string
+    becameDueAt?: DateTimeFilter<"RoutineOccurrence"> | Date | string
+    resolutionState?: StringFilter<"RoutineOccurrence"> | string
+    resolvedAt?: DateTimeNullableFilter<"RoutineOccurrence"> | Date | string | null
+    resolutionKind?: StringNullableFilter<"RoutineOccurrence"> | string | null
+    resolutionReason?: StringNullableFilter<"RoutineOccurrence"> | string | null
     attempt?: IntFilter<"RoutineOccurrence"> | number
     ownerToken?: StringNullableFilter<"RoutineOccurrence"> | string | null
     claimId?: StringNullableFilter<"RoutineOccurrence"> | string | null
@@ -132630,10 +132740,16 @@ export namespace Prisma {
     routineId?: SortOrder
     source?: SortOrder
     occurrenceKey?: SortOrder
-    scheduledFor?: SortOrder
+    scheduledFor?: SortOrderInput | SortOrder
     sourceRevision?: SortOrderInput | SortOrder
     idempotencyKey?: SortOrder
     status?: SortOrder
+    triggerKind?: SortOrder
+    becameDueAt?: SortOrder
+    resolutionState?: SortOrder
+    resolvedAt?: SortOrderInput | SortOrder
+    resolutionKind?: SortOrderInput | SortOrder
+    resolutionReason?: SortOrderInput | SortOrder
     attempt?: SortOrder
     ownerToken?: SortOrderInput | SortOrder
     claimId?: SortOrderInput | SortOrder
@@ -132665,9 +132781,15 @@ export namespace Prisma {
     routineId?: StringFilter<"RoutineOccurrence"> | string
     source?: StringFilter<"RoutineOccurrence"> | string
     occurrenceKey?: StringFilter<"RoutineOccurrence"> | string
-    scheduledFor?: DateTimeFilter<"RoutineOccurrence"> | Date | string
+    scheduledFor?: DateTimeNullableFilter<"RoutineOccurrence"> | Date | string | null
     sourceRevision?: StringNullableFilter<"RoutineOccurrence"> | string | null
     status?: StringFilter<"RoutineOccurrence"> | string
+    triggerKind?: StringFilter<"RoutineOccurrence"> | string
+    becameDueAt?: DateTimeFilter<"RoutineOccurrence"> | Date | string
+    resolutionState?: StringFilter<"RoutineOccurrence"> | string
+    resolvedAt?: DateTimeNullableFilter<"RoutineOccurrence"> | Date | string | null
+    resolutionKind?: StringNullableFilter<"RoutineOccurrence"> | string | null
+    resolutionReason?: StringNullableFilter<"RoutineOccurrence"> | string | null
     attempt?: IntFilter<"RoutineOccurrence"> | number
     ownerToken?: StringNullableFilter<"RoutineOccurrence"> | string | null
     claimId?: StringNullableFilter<"RoutineOccurrence"> | string | null
@@ -132694,10 +132816,16 @@ export namespace Prisma {
     routineId?: SortOrder
     source?: SortOrder
     occurrenceKey?: SortOrder
-    scheduledFor?: SortOrder
+    scheduledFor?: SortOrderInput | SortOrder
     sourceRevision?: SortOrderInput | SortOrder
     idempotencyKey?: SortOrder
     status?: SortOrder
+    triggerKind?: SortOrder
+    becameDueAt?: SortOrder
+    resolutionState?: SortOrder
+    resolvedAt?: SortOrderInput | SortOrder
+    resolutionKind?: SortOrderInput | SortOrder
+    resolutionReason?: SortOrderInput | SortOrder
     attempt?: SortOrder
     ownerToken?: SortOrderInput | SortOrder
     claimId?: SortOrderInput | SortOrder
@@ -132729,10 +132857,16 @@ export namespace Prisma {
     routineId?: StringWithAggregatesFilter<"RoutineOccurrence"> | string
     source?: StringWithAggregatesFilter<"RoutineOccurrence"> | string
     occurrenceKey?: StringWithAggregatesFilter<"RoutineOccurrence"> | string
-    scheduledFor?: DateTimeWithAggregatesFilter<"RoutineOccurrence"> | Date | string
+    scheduledFor?: DateTimeNullableWithAggregatesFilter<"RoutineOccurrence"> | Date | string | null
     sourceRevision?: StringNullableWithAggregatesFilter<"RoutineOccurrence"> | string | null
     idempotencyKey?: StringWithAggregatesFilter<"RoutineOccurrence"> | string
     status?: StringWithAggregatesFilter<"RoutineOccurrence"> | string
+    triggerKind?: StringWithAggregatesFilter<"RoutineOccurrence"> | string
+    becameDueAt?: DateTimeWithAggregatesFilter<"RoutineOccurrence"> | Date | string
+    resolutionState?: StringWithAggregatesFilter<"RoutineOccurrence"> | string
+    resolvedAt?: DateTimeNullableWithAggregatesFilter<"RoutineOccurrence"> | Date | string | null
+    resolutionKind?: StringNullableWithAggregatesFilter<"RoutineOccurrence"> | string | null
+    resolutionReason?: StringNullableWithAggregatesFilter<"RoutineOccurrence"> | string | null
     attempt?: IntWithAggregatesFilter<"RoutineOccurrence"> | number
     ownerToken?: StringNullableWithAggregatesFilter<"RoutineOccurrence"> | string | null
     claimId?: StringNullableWithAggregatesFilter<"RoutineOccurrence"> | string | null
@@ -132755,6 +132889,7 @@ export namespace Prisma {
     OR?: RoutineInteractionWhereInput[]
     NOT?: RoutineInteractionWhereInput | RoutineInteractionWhereInput[]
     id?: StringFilter<"RoutineInteraction"> | string
+    idempotencyKey?: StringFilter<"RoutineInteraction"> | string
     identityId?: StringFilter<"RoutineInteraction"> | string
     routineId?: StringFilter<"RoutineInteraction"> | string
     occurrenceKey?: StringFilter<"RoutineInteraction"> | string
@@ -132771,6 +132906,7 @@ export namespace Prisma {
 
   export type RoutineInteractionOrderByWithRelationInput = {
     id?: SortOrder
+    idempotencyKey?: SortOrder
     identityId?: SortOrder
     routineId?: SortOrder
     occurrenceKey?: SortOrder
@@ -132787,6 +132923,7 @@ export namespace Prisma {
 
   export type RoutineInteractionWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    idempotencyKey?: string
     AND?: RoutineInteractionWhereInput | RoutineInteractionWhereInput[]
     OR?: RoutineInteractionWhereInput[]
     NOT?: RoutineInteractionWhereInput | RoutineInteractionWhereInput[]
@@ -132802,10 +132939,11 @@ export namespace Prisma {
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
     routine?: XOR<RoutineDefinitionScalarRelationFilter, RoutineDefinitionWhereInput>
     occurrence?: XOR<RoutineOccurrenceNullableScalarRelationFilter, RoutineOccurrenceWhereInput> | null
-  }, "id">
+  }, "id" | "idempotencyKey">
 
   export type RoutineInteractionOrderByWithAggregationInput = {
     id?: SortOrder
+    idempotencyKey?: SortOrder
     identityId?: SortOrder
     routineId?: SortOrder
     occurrenceKey?: SortOrder
@@ -132827,6 +132965,7 @@ export namespace Prisma {
     OR?: RoutineInteractionScalarWhereWithAggregatesInput[]
     NOT?: RoutineInteractionScalarWhereWithAggregatesInput | RoutineInteractionScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"RoutineInteraction"> | string
+    idempotencyKey?: StringWithAggregatesFilter<"RoutineInteraction"> | string
     identityId?: StringWithAggregatesFilter<"RoutineInteraction"> | string
     routineId?: StringWithAggregatesFilter<"RoutineInteraction"> | string
     occurrenceKey?: StringWithAggregatesFilter<"RoutineInteraction"> | string
@@ -142199,10 +142338,16 @@ export namespace Prisma {
     id: string
     source?: string
     occurrenceKey: string
-    scheduledFor: Date | string
+    scheduledFor?: Date | string | null
     sourceRevision?: string | null
     idempotencyKey: string
     status: string
+    triggerKind?: string
+    becameDueAt?: Date | string
+    resolutionState?: string
+    resolvedAt?: Date | string | null
+    resolutionKind?: string | null
+    resolutionReason?: string | null
     attempt?: number
     ownerToken?: string | null
     claimId?: string | null
@@ -142229,10 +142374,16 @@ export namespace Prisma {
     routineId: string
     source?: string
     occurrenceKey: string
-    scheduledFor: Date | string
+    scheduledFor?: Date | string | null
     sourceRevision?: string | null
     idempotencyKey: string
     status: string
+    triggerKind?: string
+    becameDueAt?: Date | string
+    resolutionState?: string
+    resolvedAt?: Date | string | null
+    resolutionKind?: string | null
+    resolutionReason?: string | null
     attempt?: number
     ownerToken?: string | null
     claimId?: string | null
@@ -142255,10 +142406,16 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
     occurrenceKey?: StringFieldUpdateOperationsInput | string
-    scheduledFor?: DateTimeFieldUpdateOperationsInput | Date | string
+    scheduledFor?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sourceRevision?: NullableStringFieldUpdateOperationsInput | string | null
     idempotencyKey?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    triggerKind?: StringFieldUpdateOperationsInput | string
+    becameDueAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    resolutionState?: StringFieldUpdateOperationsInput | string
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolutionKind?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionReason?: NullableStringFieldUpdateOperationsInput | string | null
     attempt?: IntFieldUpdateOperationsInput | number
     ownerToken?: NullableStringFieldUpdateOperationsInput | string | null
     claimId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -142285,10 +142442,16 @@ export namespace Prisma {
     routineId?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
     occurrenceKey?: StringFieldUpdateOperationsInput | string
-    scheduledFor?: DateTimeFieldUpdateOperationsInput | Date | string
+    scheduledFor?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sourceRevision?: NullableStringFieldUpdateOperationsInput | string | null
     idempotencyKey?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    triggerKind?: StringFieldUpdateOperationsInput | string
+    becameDueAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    resolutionState?: StringFieldUpdateOperationsInput | string
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolutionKind?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionReason?: NullableStringFieldUpdateOperationsInput | string | null
     attempt?: IntFieldUpdateOperationsInput | number
     ownerToken?: NullableStringFieldUpdateOperationsInput | string | null
     claimId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -142313,10 +142476,16 @@ export namespace Prisma {
     routineId: string
     source?: string
     occurrenceKey: string
-    scheduledFor: Date | string
+    scheduledFor?: Date | string | null
     sourceRevision?: string | null
     idempotencyKey: string
     status: string
+    triggerKind?: string
+    becameDueAt?: Date | string
+    resolutionState?: string
+    resolvedAt?: Date | string | null
+    resolutionKind?: string | null
+    resolutionReason?: string | null
     attempt?: number
     ownerToken?: string | null
     claimId?: string | null
@@ -142338,10 +142507,16 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
     occurrenceKey?: StringFieldUpdateOperationsInput | string
-    scheduledFor?: DateTimeFieldUpdateOperationsInput | Date | string
+    scheduledFor?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sourceRevision?: NullableStringFieldUpdateOperationsInput | string | null
     idempotencyKey?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    triggerKind?: StringFieldUpdateOperationsInput | string
+    becameDueAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    resolutionState?: StringFieldUpdateOperationsInput | string
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolutionKind?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionReason?: NullableStringFieldUpdateOperationsInput | string | null
     attempt?: IntFieldUpdateOperationsInput | number
     ownerToken?: NullableStringFieldUpdateOperationsInput | string | null
     claimId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -142365,10 +142540,16 @@ export namespace Prisma {
     routineId?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
     occurrenceKey?: StringFieldUpdateOperationsInput | string
-    scheduledFor?: DateTimeFieldUpdateOperationsInput | Date | string
+    scheduledFor?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sourceRevision?: NullableStringFieldUpdateOperationsInput | string | null
     idempotencyKey?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    triggerKind?: StringFieldUpdateOperationsInput | string
+    becameDueAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    resolutionState?: StringFieldUpdateOperationsInput | string
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolutionKind?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionReason?: NullableStringFieldUpdateOperationsInput | string | null
     attempt?: IntFieldUpdateOperationsInput | number
     ownerToken?: NullableStringFieldUpdateOperationsInput | string | null
     claimId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -142388,6 +142569,7 @@ export namespace Prisma {
 
   export type RoutineInteractionCreateInput = {
     id: string
+    idempotencyKey: string
     action: string
     actedAt: Date | string
     responseLatencyMs?: number | null
@@ -142401,6 +142583,7 @@ export namespace Prisma {
 
   export type RoutineInteractionUncheckedCreateInput = {
     id: string
+    idempotencyKey: string
     identityId: string
     routineId: string
     occurrenceKey: string
@@ -142414,6 +142597,7 @@ export namespace Prisma {
 
   export type RoutineInteractionUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    idempotencyKey?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
     actedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     responseLatencyMs?: NullableIntFieldUpdateOperationsInput | number | null
@@ -142427,6 +142611,7 @@ export namespace Prisma {
 
   export type RoutineInteractionUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    idempotencyKey?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
     routineId?: StringFieldUpdateOperationsInput | string
     occurrenceKey?: StringFieldUpdateOperationsInput | string
@@ -142440,6 +142625,7 @@ export namespace Prisma {
 
   export type RoutineInteractionCreateManyInput = {
     id: string
+    idempotencyKey: string
     identityId: string
     routineId: string
     occurrenceKey: string
@@ -142453,6 +142639,7 @@ export namespace Prisma {
 
   export type RoutineInteractionUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
+    idempotencyKey?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
     actedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     responseLatencyMs?: NullableIntFieldUpdateOperationsInput | number | null
@@ -142463,6 +142650,7 @@ export namespace Prisma {
 
   export type RoutineInteractionUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
+    idempotencyKey?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
     routineId?: StringFieldUpdateOperationsInput | string
     occurrenceKey?: StringFieldUpdateOperationsInput | string
@@ -150322,6 +150510,12 @@ export namespace Prisma {
     sourceRevision?: SortOrder
     idempotencyKey?: SortOrder
     status?: SortOrder
+    triggerKind?: SortOrder
+    becameDueAt?: SortOrder
+    resolutionState?: SortOrder
+    resolvedAt?: SortOrder
+    resolutionKind?: SortOrder
+    resolutionReason?: SortOrder
     attempt?: SortOrder
     ownerToken?: SortOrder
     claimId?: SortOrder
@@ -150354,6 +150548,12 @@ export namespace Prisma {
     sourceRevision?: SortOrder
     idempotencyKey?: SortOrder
     status?: SortOrder
+    triggerKind?: SortOrder
+    becameDueAt?: SortOrder
+    resolutionState?: SortOrder
+    resolvedAt?: SortOrder
+    resolutionKind?: SortOrder
+    resolutionReason?: SortOrder
     attempt?: SortOrder
     ownerToken?: SortOrder
     claimId?: SortOrder
@@ -150381,6 +150581,12 @@ export namespace Prisma {
     sourceRevision?: SortOrder
     idempotencyKey?: SortOrder
     status?: SortOrder
+    triggerKind?: SortOrder
+    becameDueAt?: SortOrder
+    resolutionState?: SortOrder
+    resolvedAt?: SortOrder
+    resolutionKind?: SortOrder
+    resolutionReason?: SortOrder
     attempt?: SortOrder
     ownerToken?: SortOrder
     claimId?: SortOrder
@@ -150410,6 +150616,7 @@ export namespace Prisma {
 
   export type RoutineInteractionCountOrderByAggregateInput = {
     id?: SortOrder
+    idempotencyKey?: SortOrder
     identityId?: SortOrder
     routineId?: SortOrder
     occurrenceKey?: SortOrder
@@ -150428,6 +150635,7 @@ export namespace Prisma {
 
   export type RoutineInteractionMaxOrderByAggregateInput = {
     id?: SortOrder
+    idempotencyKey?: SortOrder
     identityId?: SortOrder
     routineId?: SortOrder
     occurrenceKey?: SortOrder
@@ -150441,6 +150649,7 @@ export namespace Prisma {
 
   export type RoutineInteractionMinOrderByAggregateInput = {
     id?: SortOrder
+    idempotencyKey?: SortOrder
     identityId?: SortOrder
     routineId?: SortOrder
     occurrenceKey?: SortOrder
@@ -160858,10 +161067,16 @@ export namespace Prisma {
     id: string
     source?: string
     occurrenceKey: string
-    scheduledFor: Date | string
+    scheduledFor?: Date | string | null
     sourceRevision?: string | null
     idempotencyKey: string
     status: string
+    triggerKind?: string
+    becameDueAt?: Date | string
+    resolutionState?: string
+    resolvedAt?: Date | string | null
+    resolutionKind?: string | null
+    resolutionReason?: string | null
     attempt?: number
     ownerToken?: string | null
     claimId?: string | null
@@ -160886,10 +161101,16 @@ export namespace Prisma {
     routineId: string
     source?: string
     occurrenceKey: string
-    scheduledFor: Date | string
+    scheduledFor?: Date | string | null
     sourceRevision?: string | null
     idempotencyKey: string
     status: string
+    triggerKind?: string
+    becameDueAt?: Date | string
+    resolutionState?: string
+    resolvedAt?: Date | string | null
+    resolutionKind?: string | null
+    resolutionReason?: string | null
     attempt?: number
     ownerToken?: string | null
     claimId?: string | null
@@ -160920,6 +161141,7 @@ export namespace Prisma {
 
   export type RoutineInteractionCreateWithoutAccountInput = {
     id: string
+    idempotencyKey: string
     action: string
     actedAt: Date | string
     responseLatencyMs?: number | null
@@ -160932,6 +161154,7 @@ export namespace Prisma {
 
   export type RoutineInteractionUncheckedCreateWithoutAccountInput = {
     id: string
+    idempotencyKey: string
     routineId: string
     occurrenceKey: string
     action: string
@@ -162923,10 +163146,16 @@ export namespace Prisma {
     routineId?: StringFilter<"RoutineOccurrence"> | string
     source?: StringFilter<"RoutineOccurrence"> | string
     occurrenceKey?: StringFilter<"RoutineOccurrence"> | string
-    scheduledFor?: DateTimeFilter<"RoutineOccurrence"> | Date | string
+    scheduledFor?: DateTimeNullableFilter<"RoutineOccurrence"> | Date | string | null
     sourceRevision?: StringNullableFilter<"RoutineOccurrence"> | string | null
     idempotencyKey?: StringFilter<"RoutineOccurrence"> | string
     status?: StringFilter<"RoutineOccurrence"> | string
+    triggerKind?: StringFilter<"RoutineOccurrence"> | string
+    becameDueAt?: DateTimeFilter<"RoutineOccurrence"> | Date | string
+    resolutionState?: StringFilter<"RoutineOccurrence"> | string
+    resolvedAt?: DateTimeNullableFilter<"RoutineOccurrence"> | Date | string | null
+    resolutionKind?: StringNullableFilter<"RoutineOccurrence"> | string | null
+    resolutionReason?: StringNullableFilter<"RoutineOccurrence"> | string | null
     attempt?: IntFilter<"RoutineOccurrence"> | number
     ownerToken?: StringNullableFilter<"RoutineOccurrence"> | string | null
     claimId?: StringNullableFilter<"RoutineOccurrence"> | string | null
@@ -162965,6 +163194,7 @@ export namespace Prisma {
     OR?: RoutineInteractionScalarWhereInput[]
     NOT?: RoutineInteractionScalarWhereInput | RoutineInteractionScalarWhereInput[]
     id?: StringFilter<"RoutineInteraction"> | string
+    idempotencyKey?: StringFilter<"RoutineInteraction"> | string
     identityId?: StringFilter<"RoutineInteraction"> | string
     routineId?: StringFilter<"RoutineInteraction"> | string
     occurrenceKey?: StringFilter<"RoutineInteraction"> | string
@@ -174867,10 +175097,16 @@ export namespace Prisma {
     id: string
     source?: string
     occurrenceKey: string
-    scheduledFor: Date | string
+    scheduledFor?: Date | string | null
     sourceRevision?: string | null
     idempotencyKey: string
     status: string
+    triggerKind?: string
+    becameDueAt?: Date | string
+    resolutionState?: string
+    resolvedAt?: Date | string | null
+    resolutionKind?: string | null
+    resolutionReason?: string | null
     attempt?: number
     ownerToken?: string | null
     claimId?: string | null
@@ -174894,10 +175130,16 @@ export namespace Prisma {
     id: string
     source?: string
     occurrenceKey: string
-    scheduledFor: Date | string
+    scheduledFor?: Date | string | null
     sourceRevision?: string | null
     idempotencyKey: string
     status: string
+    triggerKind?: string
+    becameDueAt?: Date | string
+    resolutionState?: string
+    resolvedAt?: Date | string | null
+    resolutionKind?: string | null
+    resolutionReason?: string | null
     attempt?: number
     ownerToken?: string | null
     claimId?: string | null
@@ -174928,6 +175170,7 @@ export namespace Prisma {
 
   export type RoutineInteractionCreateWithoutRoutineInput = {
     id: string
+    idempotencyKey: string
     action: string
     actedAt: Date | string
     responseLatencyMs?: number | null
@@ -174940,6 +175183,7 @@ export namespace Prisma {
 
   export type RoutineInteractionUncheckedCreateWithoutRoutineInput = {
     id: string
+    idempotencyKey: string
     occurrenceKey: string
     action: string
     actedAt: Date | string
@@ -176696,6 +176940,7 @@ export namespace Prisma {
 
   export type RoutineInteractionCreateWithoutOccurrenceInput = {
     id: string
+    idempotencyKey: string
     action: string
     actedAt: Date | string
     responseLatencyMs?: number | null
@@ -176708,6 +176953,7 @@ export namespace Prisma {
 
   export type RoutineInteractionUncheckedCreateWithoutOccurrenceInput = {
     id: string
+    idempotencyKey: string
     action: string
     actedAt: Date | string
     responseLatencyMs?: number | null
@@ -177086,10 +177332,16 @@ export namespace Prisma {
     id: string
     source?: string
     occurrenceKey: string
-    scheduledFor: Date | string
+    scheduledFor?: Date | string | null
     sourceRevision?: string | null
     idempotencyKey: string
     status: string
+    triggerKind?: string
+    becameDueAt?: Date | string
+    resolutionState?: string
+    resolvedAt?: Date | string | null
+    resolutionKind?: string | null
+    resolutionReason?: string | null
     attempt?: number
     ownerToken?: string | null
     claimId?: string | null
@@ -177115,10 +177367,16 @@ export namespace Prisma {
     routineId: string
     source?: string
     occurrenceKey: string
-    scheduledFor: Date | string
+    scheduledFor?: Date | string | null
     sourceRevision?: string | null
     idempotencyKey: string
     status: string
+    triggerKind?: string
+    becameDueAt?: Date | string
+    resolutionState?: string
+    resolvedAt?: Date | string | null
+    resolutionKind?: string | null
+    resolutionReason?: string | null
     attempt?: number
     ownerToken?: string | null
     claimId?: string | null
@@ -177332,10 +177590,16 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
     occurrenceKey?: StringFieldUpdateOperationsInput | string
-    scheduledFor?: DateTimeFieldUpdateOperationsInput | Date | string
+    scheduledFor?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sourceRevision?: NullableStringFieldUpdateOperationsInput | string | null
     idempotencyKey?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    triggerKind?: StringFieldUpdateOperationsInput | string
+    becameDueAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    resolutionState?: StringFieldUpdateOperationsInput | string
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolutionKind?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionReason?: NullableStringFieldUpdateOperationsInput | string | null
     attempt?: IntFieldUpdateOperationsInput | number
     ownerToken?: NullableStringFieldUpdateOperationsInput | string | null
     claimId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -177361,10 +177625,16 @@ export namespace Prisma {
     routineId?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
     occurrenceKey?: StringFieldUpdateOperationsInput | string
-    scheduledFor?: DateTimeFieldUpdateOperationsInput | Date | string
+    scheduledFor?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sourceRevision?: NullableStringFieldUpdateOperationsInput | string | null
     idempotencyKey?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    triggerKind?: StringFieldUpdateOperationsInput | string
+    becameDueAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    resolutionState?: StringFieldUpdateOperationsInput | string
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolutionKind?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionReason?: NullableStringFieldUpdateOperationsInput | string | null
     attempt?: IntFieldUpdateOperationsInput | number
     ownerToken?: NullableStringFieldUpdateOperationsInput | string | null
     claimId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -186863,10 +187133,16 @@ export namespace Prisma {
     routineId: string
     source?: string
     occurrenceKey: string
-    scheduledFor: Date | string
+    scheduledFor?: Date | string | null
     sourceRevision?: string | null
     idempotencyKey: string
     status: string
+    triggerKind?: string
+    becameDueAt?: Date | string
+    resolutionState?: string
+    resolvedAt?: Date | string | null
+    resolutionKind?: string | null
+    resolutionReason?: string | null
     attempt?: number
     ownerToken?: string | null
     claimId?: string | null
@@ -186886,6 +187162,7 @@ export namespace Prisma {
 
   export type RoutineInteractionCreateManyAccountInput = {
     id: string
+    idempotencyKey: string
     routineId: string
     occurrenceKey: string
     action: string
@@ -188769,10 +189046,16 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
     occurrenceKey?: StringFieldUpdateOperationsInput | string
-    scheduledFor?: DateTimeFieldUpdateOperationsInput | Date | string
+    scheduledFor?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sourceRevision?: NullableStringFieldUpdateOperationsInput | string | null
     idempotencyKey?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    triggerKind?: StringFieldUpdateOperationsInput | string
+    becameDueAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    resolutionState?: StringFieldUpdateOperationsInput | string
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolutionKind?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionReason?: NullableStringFieldUpdateOperationsInput | string | null
     attempt?: IntFieldUpdateOperationsInput | number
     ownerToken?: NullableStringFieldUpdateOperationsInput | string | null
     claimId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -188797,10 +189080,16 @@ export namespace Prisma {
     routineId?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
     occurrenceKey?: StringFieldUpdateOperationsInput | string
-    scheduledFor?: DateTimeFieldUpdateOperationsInput | Date | string
+    scheduledFor?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sourceRevision?: NullableStringFieldUpdateOperationsInput | string | null
     idempotencyKey?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    triggerKind?: StringFieldUpdateOperationsInput | string
+    becameDueAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    resolutionState?: StringFieldUpdateOperationsInput | string
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolutionKind?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionReason?: NullableStringFieldUpdateOperationsInput | string | null
     attempt?: IntFieldUpdateOperationsInput | number
     ownerToken?: NullableStringFieldUpdateOperationsInput | string | null
     claimId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -188824,10 +189113,16 @@ export namespace Prisma {
     routineId?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
     occurrenceKey?: StringFieldUpdateOperationsInput | string
-    scheduledFor?: DateTimeFieldUpdateOperationsInput | Date | string
+    scheduledFor?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sourceRevision?: NullableStringFieldUpdateOperationsInput | string | null
     idempotencyKey?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    triggerKind?: StringFieldUpdateOperationsInput | string
+    becameDueAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    resolutionState?: StringFieldUpdateOperationsInput | string
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolutionKind?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionReason?: NullableStringFieldUpdateOperationsInput | string | null
     attempt?: IntFieldUpdateOperationsInput | number
     ownerToken?: NullableStringFieldUpdateOperationsInput | string | null
     claimId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -188847,6 +189142,7 @@ export namespace Prisma {
 
   export type RoutineInteractionUpdateWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
+    idempotencyKey?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
     actedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     responseLatencyMs?: NullableIntFieldUpdateOperationsInput | number | null
@@ -188859,6 +189155,7 @@ export namespace Prisma {
 
   export type RoutineInteractionUncheckedUpdateWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
+    idempotencyKey?: StringFieldUpdateOperationsInput | string
     routineId?: StringFieldUpdateOperationsInput | string
     occurrenceKey?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
@@ -188871,6 +189168,7 @@ export namespace Prisma {
 
   export type RoutineInteractionUncheckedUpdateManyWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
+    idempotencyKey?: StringFieldUpdateOperationsInput | string
     routineId?: StringFieldUpdateOperationsInput | string
     occurrenceKey?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
@@ -190612,10 +190910,16 @@ export namespace Prisma {
     id: string
     source?: string
     occurrenceKey: string
-    scheduledFor: Date | string
+    scheduledFor?: Date | string | null
     sourceRevision?: string | null
     idempotencyKey: string
     status: string
+    triggerKind?: string
+    becameDueAt?: Date | string
+    resolutionState?: string
+    resolvedAt?: Date | string | null
+    resolutionKind?: string | null
+    resolutionReason?: string | null
     attempt?: number
     ownerToken?: string | null
     claimId?: string | null
@@ -190635,6 +190939,7 @@ export namespace Prisma {
 
   export type RoutineInteractionCreateManyRoutineInput = {
     id: string
+    idempotencyKey: string
     occurrenceKey: string
     action: string
     actedAt: Date | string
@@ -190673,10 +190978,16 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
     occurrenceKey?: StringFieldUpdateOperationsInput | string
-    scheduledFor?: DateTimeFieldUpdateOperationsInput | Date | string
+    scheduledFor?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sourceRevision?: NullableStringFieldUpdateOperationsInput | string | null
     idempotencyKey?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    triggerKind?: StringFieldUpdateOperationsInput | string
+    becameDueAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    resolutionState?: StringFieldUpdateOperationsInput | string
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolutionKind?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionReason?: NullableStringFieldUpdateOperationsInput | string | null
     attempt?: IntFieldUpdateOperationsInput | number
     ownerToken?: NullableStringFieldUpdateOperationsInput | string | null
     claimId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -190700,10 +191011,16 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
     occurrenceKey?: StringFieldUpdateOperationsInput | string
-    scheduledFor?: DateTimeFieldUpdateOperationsInput | Date | string
+    scheduledFor?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sourceRevision?: NullableStringFieldUpdateOperationsInput | string | null
     idempotencyKey?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    triggerKind?: StringFieldUpdateOperationsInput | string
+    becameDueAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    resolutionState?: StringFieldUpdateOperationsInput | string
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolutionKind?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionReason?: NullableStringFieldUpdateOperationsInput | string | null
     attempt?: IntFieldUpdateOperationsInput | number
     ownerToken?: NullableStringFieldUpdateOperationsInput | string | null
     claimId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -190726,10 +191043,16 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
     occurrenceKey?: StringFieldUpdateOperationsInput | string
-    scheduledFor?: DateTimeFieldUpdateOperationsInput | Date | string
+    scheduledFor?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sourceRevision?: NullableStringFieldUpdateOperationsInput | string | null
     idempotencyKey?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    triggerKind?: StringFieldUpdateOperationsInput | string
+    becameDueAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    resolutionState?: StringFieldUpdateOperationsInput | string
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolutionKind?: NullableStringFieldUpdateOperationsInput | string | null
+    resolutionReason?: NullableStringFieldUpdateOperationsInput | string | null
     attempt?: IntFieldUpdateOperationsInput | number
     ownerToken?: NullableStringFieldUpdateOperationsInput | string | null
     claimId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -190749,6 +191072,7 @@ export namespace Prisma {
 
   export type RoutineInteractionUpdateWithoutRoutineInput = {
     id?: StringFieldUpdateOperationsInput | string
+    idempotencyKey?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
     actedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     responseLatencyMs?: NullableIntFieldUpdateOperationsInput | number | null
@@ -190761,6 +191085,7 @@ export namespace Prisma {
 
   export type RoutineInteractionUncheckedUpdateWithoutRoutineInput = {
     id?: StringFieldUpdateOperationsInput | string
+    idempotencyKey?: StringFieldUpdateOperationsInput | string
     occurrenceKey?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
     actedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -190772,6 +191097,7 @@ export namespace Prisma {
 
   export type RoutineInteractionUncheckedUpdateManyWithoutRoutineInput = {
     id?: StringFieldUpdateOperationsInput | string
+    idempotencyKey?: StringFieldUpdateOperationsInput | string
     occurrenceKey?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
     actedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -190865,6 +191191,7 @@ export namespace Prisma {
 
   export type RoutineInteractionCreateManyOccurrenceInput = {
     id: string
+    idempotencyKey: string
     action: string
     actedAt: Date | string
     responseLatencyMs?: number | null
@@ -190875,6 +191202,7 @@ export namespace Prisma {
 
   export type RoutineInteractionUpdateWithoutOccurrenceInput = {
     id?: StringFieldUpdateOperationsInput | string
+    idempotencyKey?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
     actedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     responseLatencyMs?: NullableIntFieldUpdateOperationsInput | number | null
@@ -190887,6 +191215,7 @@ export namespace Prisma {
 
   export type RoutineInteractionUncheckedUpdateWithoutOccurrenceInput = {
     id?: StringFieldUpdateOperationsInput | string
+    idempotencyKey?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
     actedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     responseLatencyMs?: NullableIntFieldUpdateOperationsInput | number | null
@@ -190897,6 +191226,7 @@ export namespace Prisma {
 
   export type RoutineInteractionUncheckedUpdateManyWithoutOccurrenceInput = {
     id?: StringFieldUpdateOperationsInput | string
+    idempotencyKey?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
     actedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     responseLatencyMs?: NullableIntFieldUpdateOperationsInput | number | null

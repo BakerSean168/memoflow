@@ -162,6 +162,23 @@ describe('DesktopProfileRuntimeManager', () => {
     );
   });
 
+  it('keeps the active Profile intact when the deactivation durability hook fails', async () => {
+    const beforeDeactivation = vi.fn(async () => {
+      throw new Error('routine occurrence flush failed');
+    });
+    runtime.setBeforeDeactivation(beforeDeactivation);
+
+    const prepared = await runtime.prepareGuestProfile();
+    await runtime.activatePreparedProfile();
+
+    await expect(runtime.deactivateProfile()).rejects.toThrow('routine occurrence flush failed');
+
+    expect(runtime.getActiveProfileId()).toBe(prepared.descriptor.profileId);
+    expect(mocks.bootstrapDestroy).not.toHaveBeenCalled();
+    expect(mocks.shutdownPowerSync).not.toHaveBeenCalled();
+    expect(await registry.getActiveProfileId()).toBe(prepared.descriptor.profileId);
+  });
+
   it('fires the deactivation hook when activation fails so stale repositories are cleared', async () => {
     const beforeDeactivation = vi.fn();
     runtime.setBeforeDeactivation(beforeDeactivation);

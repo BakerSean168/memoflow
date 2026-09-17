@@ -29,7 +29,7 @@ export function createInterventionWindowElectronModule(
             );
           }
           try {
-            return ok(controller.execute(parsed.data));
+            return ok(await controller.execute(parsed.data));
           } catch {
             return error(
               'ROUTINE_INTERVENTION_WINDOW_COMMAND_FAILED',

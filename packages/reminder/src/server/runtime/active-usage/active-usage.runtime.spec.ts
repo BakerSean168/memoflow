@@ -214,4 +214,34 @@ describe('ActiveUsage local runtime (ROUTINE-4102)', () => {
     });
     restarted.stop();
   });
+  it('re-arms the same generation when durable occurrence persistence fails', () => {
+    const sensor = new FakeActivitySensor({ state: 'active', observedAt: asInstant(0), idleDurationMs: 0 });
+    const due = vi.fn();
+    const runtime = createActiveUsageRuntime({
+      activitySensor: sensor,
+      onOccurrenceDue: due,
+      now: () => 0,
+      tickIntervalMs: 1_000,
+      setInterval: (() => ({ unref() {} })) as unknown as typeof globalThis.setInterval,
+      clearInterval: vi.fn() as unknown as typeof globalThis.clearInterval,
+    });
+    runtime.registerRoutine({
+      identityId: 'i-1',
+      routineId: 'r-1',
+      trigger: createActiveUsageTrigger({ requiredActiveMs: 1_000 }),
+      gates: { routineEnabled: true },
+    });
+    runtime.advance(asInstant(0));
+    runtime.advance(asInstant(1_000));
+    expect(due).toHaveBeenCalledTimes(1);
+
+    runtime.rearmOccurrence('i-1', 'r-1');
+    runtime.advance(asInstant(1_001));
+    expect(due).toHaveBeenCalledTimes(2);
+    expect(due.mock.calls[1]?.[0]).toMatchObject({
+      occurrenceKey: 'routine:r-1:active-usage:1',
+      generation: 1,
+    });
+  });
+
 });

@@ -24,13 +24,20 @@ export interface InterventionWindowController {
   present(occurrenceKey: string): InterventionWindowProjection | null;
   restoreIdentity(identityId: string): InterventionWindowProjection | null;
   getProjection(): InterventionWindowProjection | null;
-  execute(command: InterventionWindowCommand): InterventionWindowProjection | null;
+  execute(command: InterventionWindowCommand): Promise<InterventionWindowProjection | null>;
   destroy(): void;
 }
 
 export interface CreateInterventionWindowControllerOptions {
   readonly runtime: InterventionRuntime;
   readonly host: InterventionWindowHost;
+  /** Persist the owner-domain interaction before the presentation runtime advances. */
+  readonly onCommand?: (input: {
+    readonly commandId: string;
+    readonly snapshot: InterventionSnapshot;
+    readonly command: InterventionWindowCommand;
+    readonly at: number;
+  }) => Promise<void>;
   readonly now?: () => number;
   readonly setTimeout?: typeof globalThis.setTimeout;
   readonly clearTimeout?: typeof globalThis.clearTimeout;
@@ -67,6 +74,14 @@ function compareCandidates(a: InterventionSnapshot, b: InterventionSnapshot): nu
   const dueDelta = Number(a.dueAt) - Number(b.dueAt);
   if (dueDelta !== 0) return dueDelta;
   return a.occurrenceKey.localeCompare(b.occurrenceKey);
+}
+
+function commandIdFor(
+  snapshot: InterventionSnapshot,
+  command: InterventionWindowCommand,
+): string {
+  const suffix = command.action === 'snooze' ? `:${command.durationMs}` : '';
+  return `${snapshot.occurrenceKey}:v${snapshot.version}:${command.action}${suffix}`;
 }
 
 export function createInterventionWindowController(
@@ -107,6 +122,9 @@ export function createInterventionWindowController(
     const nextBoundary = activeForIdentity()
       .map((snapshot) => {
         if (snapshot.state === 'Due') return Number(snapshot.dueAt);
+        if (snapshot.state === 'Snoozed' && snapshot.snoozeUntil != null) {
+          return Number(snapshot.snoozeUntil);
+        }
         if (snapshot.phaseDeadline != null) return Number(snapshot.phaseDeadline);
         return null;
       })
@@ -176,12 +194,23 @@ export function createInterventionWindowController(
       return projection ? { ...projection } : null;
     },
 
-    execute(command) {
+    async execute(command) {
       if (destroyed) throw new Error('InterventionWindowController is destroyed');
       if (!projection) throw new Error('InterventionWindow has no active occurrence');
+      const snapshot = options.runtime.getSnapshot(projection.occurrenceKey);
+      if (!snapshot) throw new Error(`Intervention '${projection.occurrenceKey}' is not available`);
+      const at = now();
+      const commandId = commandIdFor(snapshot, command);
+
+      // Presentation is fail-closed: owner-domain persistence must succeed before
+      // the in-memory InterventionRuntime can make the action look accepted.
+      // Keeping the snapshot/version unchanged also makes a transport retry use
+      // the same stable command id.
+      await options.onCommand?.({ commandId, snapshot, command, at });
+
       applyingCommand = true;
       try {
-        options.runtime.execute(projection.occurrenceKey, { ...command, at: now() });
+        options.runtime.execute(snapshot.occurrenceKey, { ...command, at });
       } finally {
         applyingCommand = false;
       }
@@ -206,7 +235,9 @@ export function createInterventionWindowController(
   });
   const unsubscribeClose = options.host.onCloseRequested(() => {
     if (destroyed || !projection) return;
-    controller.execute({ action: 'dismiss' });
+    // Electron host prevents native close. If persistence fails, leave the
+    // surface visible and the runtime unchanged so the user can retry.
+    void controller.execute({ action: 'dismiss' }).catch(() => undefined);
   });
 
   return controller;

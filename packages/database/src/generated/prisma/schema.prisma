@@ -1356,10 +1356,18 @@ model RoutineOccurrence {
   routineId        String    @map("routine_id")
   source           String    @default("routine")
   occurrenceKey    String    @map("occurrence_key")
-  scheduledFor     DateTime  @map("scheduled_for")
+  scheduledFor     DateTime? @map("scheduled_for")
   sourceRevision   String?   @map("source_revision")
   idempotencyKey   String    @unique @map("idempotency_key")
+  /// Infrastructure execution status retained during the ADR-077 reliability cutover.
   status           String
+  /// Routine-owned business truth. Scheduler success must not imply satisfaction.
+  triggerKind      String    @default("WallClock") @map("trigger_kind")
+  becameDueAt      DateTime  @default(now()) @map("became_due_at")
+  resolutionState  String    @default("Open") @map("resolution_state")
+  resolvedAt       DateTime? @map("resolved_at")
+  resolutionKind   String?   @map("resolution_kind")
+  resolutionReason String?   @map("resolution_reason")
   attempt          Int       @default(0)
   ownerToken       String?   @map("owner_token")
   claimId          String?   @map("claim_id")
@@ -1393,6 +1401,7 @@ model RoutineOccurrence {
 /// routine; the decoded payload uses the W2 trigger-parity codec.
 model RoutineInteraction {
   id                String   @id
+  idempotencyKey    String   @unique @map("idempotency_key")
   identityId        String   @map("identity_id")
   routineId         String   @map("routine_id")
   occurrenceKey     String   @map("occurrence_key")

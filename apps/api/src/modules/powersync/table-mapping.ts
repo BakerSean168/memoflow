@@ -85,6 +85,7 @@ const TABLE_TO_MODEL: Record<string, string> = {
   reminder_responses: 'reminderResponse',
   routine_definitions: 'routineDefinition',
   routine_profiles: 'routineProfile',
+  routine_occurrences: 'routineOccurrence',
   routine_interactions: 'routineInteraction',
   notifications: 'notification',
   notification_preferences: 'notificationPreference',

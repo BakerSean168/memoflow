@@ -10,6 +10,7 @@ import {
   ProtocolDefinition,
   ProtocolSession,
   createTemporaryOverride,
+  createSnoozeOverride,
   type ProtocolSessionState,
   type RoutineTemporaryOverride,
 } from '../../domain/routine';
@@ -18,6 +19,8 @@ import type {
   RoutineProfileStore,
   RoutineRuntimeContextStore,
   RoutineTemporaryOverrideStore,
+  RoutineOccurrenceTruthStore,
+  RoutineInteractionApplyReceipt,
 } from '../../domain/ports';
 import {
   createProtocolSessionRuntime,
@@ -170,6 +173,18 @@ export interface RoutineCoachCommandPort {
     readonly expectedVersion?: number;
   }): Promise<RoutineTemporaryOverrideReceipt>;
 
+  respondToOccurrence(input: {
+    readonly commandId: string;
+    readonly identityId: string;
+    readonly routineId: string;
+    readonly occurrenceKey: string;
+    readonly action: 'acknowledge' | 'complete' | 'snooze' | 'dismiss' | 'skip';
+    readonly snoozeDurationMs?: number;
+    readonly responseLatencyMs?: number | null;
+    readonly metadata?: Readonly<Record<string, unknown>> | null;
+    readonly at?: number;
+  }): Promise<RoutineInteractionApplyReceipt>;
+
   startPresetProtocol(input: {
     readonly identityId: string;
     readonly methodId: RoutineProtocolMethodId;
@@ -193,6 +208,7 @@ export interface CreateRoutineCoachCommandServiceOptions {
   readonly routineProfileStore: RoutineProfileStore;
   readonly runtimeContextStore: RoutineRuntimeContextStore;
   readonly temporaryOverrideStore: RoutineTemporaryOverrideStore;
+  readonly occurrenceTruthStore: RoutineOccurrenceTruthStore;
   readonly protocolSessionStore: ProtocolSessionStore;
   readonly onOverrideChanged?: (input: {
     readonly identityId: string;
@@ -547,6 +563,66 @@ export function createRoutineCoachCommandService(
       await options.temporaryOverrideStore.clearRoutineTemporaryOverride(input);
       if (existing != null) await notifyOverrideChanged(input.identityId, input.routineId);
       return { identityId: input.identityId, routineId: input.routineId, override: null };
+    },
+
+    async respondToOccurrence(input) {
+      const commandId = input.commandId.trim();
+      if (!commandId) throw new TypeError('Routine occurrence commandId must not be empty');
+      const occurrence = await options.occurrenceTruthStore.findOccurrence({
+        identityId: input.identityId,
+        routineId: input.routineId,
+        occurrenceKey: input.occurrenceKey,
+      });
+      if (!occurrence) {
+        throw new Error(`Routine occurrence '${input.occurrenceKey}' was not found`);
+      }
+      const actedAt = input.at ?? now();
+      const action =
+        input.action === 'acknowledge'
+          ? 'Acknowledged'
+          : input.action === 'complete'
+            ? 'Completed'
+            : input.action === 'snooze'
+              ? 'Snoozed'
+              : input.action === 'dismiss'
+                ? 'Dismissed'
+                : 'Skipped';
+      const responseLatencyMs =
+        input.responseLatencyMs ?? Math.max(0, actedAt - Number(occurrence.becameDueAt));
+
+      const snoozeDurationMs =
+        input.action === 'snooze'
+          ? positiveInteger(input.snoozeDurationMs ?? 0, 'snoozeDurationMs')
+          : null;
+      const temporaryOverride =
+        snoozeDurationMs == null
+          ? null
+          : createSnoozeOverride({
+              now: actedAt,
+              durationMs: snoozeDurationMs,
+              reason: 'Routine occurrence snoozed',
+              source: 'user',
+            });
+
+      // Interaction + snooze product state are one owner-domain commit. This is
+      // the replay fence: a failed transaction leaves neither side visible, and
+      // the same commandId returns the original fact without extending snooze.
+      const receipt = await options.occurrenceTruthStore.applyInteraction({
+        idempotencyKey: commandId,
+        identityId: input.identityId,
+        routineId: input.routineId,
+        occurrenceKey: input.occurrenceKey,
+        action,
+        actedAt,
+        responseLatencyMs,
+        snoozeDurationMs,
+        temporaryOverride,
+        metadata: input.metadata,
+      });
+      if (input.action === 'snooze') {
+        await notifyOverrideChanged(input.identityId, input.routineId);
+      }
+      return receipt;
     },
 
     async startPresetProtocol(input) {

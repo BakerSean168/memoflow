@@ -56,6 +56,7 @@ type ProfileModuleRegistration = (
 ) => Promise<void>;
 
 type ProfileActivationHook = (profile: ProfileDescriptor) => Promise<void>;
+type ProfileDeactivationHook = () => void | Promise<void>;
 
 /** Owns local Profile lifecycle. Cloud authentication is deliberately absent. */
 export class DesktopProfileRuntimeManager {
@@ -65,7 +66,7 @@ export class DesktopProfileRuntimeManager {
   private activationLock: Promise<void> | null = null;
   private registerModules: ProfileModuleRegistration | null = null;
   private afterActivation: ProfileActivationHook | null = null;
-  private beforeDeactivation: (() => void) | null = null;
+  private beforeDeactivation: ProfileDeactivationHook | null = null;
   private scheduleRuntimeController: ScheduleRuntimeController | null = null;
   private readonly keyStore: ElectronProfileKeyStore;
   private readonly pinStore: ProfilePinStore;
@@ -92,7 +93,7 @@ export class DesktopProfileRuntimeManager {
     this.afterActivation = fn;
   }
 
-  setBeforeDeactivation(fn: () => void): void {
+  setBeforeDeactivation(fn: ProfileDeactivationHook): void {
     this.beforeDeactivation = fn;
   }
 
@@ -349,7 +350,11 @@ export class DesktopProfileRuntimeManager {
       // A failed activation may still have composed business modules (and so
       // published their repositories to the shell bridge); clear those
       // references here so the failed attempt never leaves stale repos.
-      this.beforeDeactivation?.();
+      try {
+        await this.beforeDeactivation?.();
+      } catch (cleanupError) {
+        logger.warn('Failed to run profile activation cleanup hook', { error: cleanupError });
+      }
       await this.profileRegistry.markError(preparedProfileId).catch(() => undefined);
       await this.disposePreparedRuntime();
       throw error;
@@ -361,6 +366,14 @@ export class DesktopProfileRuntimeManager {
   async deactivateProfile(options: { preserveSelection?: boolean } = {}): Promise<void> {
     if (!this.activeRuntime) return;
     const profileId = this.activeRuntime.descriptor.profileId;
+    // Flush profile-local owner truth before any other runtime is torn down.
+    // This hook is allowed to veto deactivation: losing a due Routine occurrence
+    // is worse than keeping the current Profile active for a retry.
+    //
+    // The activation-failure cleanup path remains best-effort above because that
+    // path never exposes a successfully active Profile.
+    await this.beforeDeactivation?.();
+
     // Stop the bound schedule runtime controller (idempotent; the SAME instance
     // the profile's module handle owns), then clear the reference BEFORE the
     // modules are torn down so no stale controller outlives its instance.
@@ -373,12 +386,8 @@ export class DesktopProfileRuntimeManager {
     } catch (error) {
       logger.warn('Failed to stop schedule runtime', { error });
     }
-    // Clear any shell-held references to the active module instances (e.g. the
-    // dashboard repository view) BEFORE tearing the modules down: a concurrent
-    // IPC request that resolves the lazy getter during destruction then sees
-    // null (the auth gate already guards it), never a half-destroyed
-    // repository. Once the modules are gone there is nothing left to null out.
-    this.beforeDeactivation?.();
+    // Shell-held references were cleared by beforeDeactivation before module
+    // teardown, so concurrent IPC cannot resolve a half-destroyed repository.
     await this.activeRuntime.bootstrapper
       .destroy()
       .catch((error) => logger.error('Failed to destroy profile modules', { error }));

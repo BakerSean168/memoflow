@@ -60,6 +60,7 @@ import {
 } from '@memoflow/reminder/electron';
 import {
   createInterventionRuntime,
+  createElapsedRuntime,
   createActiveUsageRuntime,
   createRoutineActivitySensorRuntime,
   createProtocolBreakCreditRuntime,
@@ -67,6 +68,7 @@ import {
   type InterventionPolicy,
   type InterventionRuntime,
   type AmbientBreakCreditRegistration,
+  type ElapsedRuntime,
   type ActiveUsageRuntime,
   type ActiveUsageRoutineRegistration,
   type RoutineActivitySensorRuntime,
@@ -128,8 +130,9 @@ export interface ComposedReminderDesktop {
   /** Per-profile local Routine intervention truth shared by occurrence coordinators and InterventionWindow. */
   readonly interventionRuntime: InterventionRuntime;
   readonly protocolBreakCreditRuntime: ProtocolBreakCreditRuntime;
-  /** Per-profile activity sensor runtime and active-usage truth. */
+  /** Per-profile local timing/runtime truth. */
   readonly activityRuntime: RoutineActivitySensorRuntime;
+  readonly elapsedRuntime: ElapsedRuntime;
   readonly activeUsageRuntime: ActiveUsageRuntime;
   /** Register one ActiveUsage routine and optional explicit protocol-break compatibility. */
   readonly registerActiveUsageRoutine: (input: {
@@ -143,6 +146,8 @@ export interface ComposedReminderDesktop {
   }) => void;
   /** Reload durable vNext RoutineDefinition/Profile/Membership state for this profile. */
   readonly refreshLocalRoutineRegistrations: () => Promise<void>;
+  /** Wait until queued local occurrence/interaction persistence has settled. */
+  readonly flushRoutineOccurrencePersistence: () => Promise<void>;
 }
 
 /**
@@ -189,11 +194,33 @@ export function composeReminder(
   const repositories = createReminderPowerSyncRepositories(dependencies.db);
   const runtimeContextStore = createInMemoryRoutineRuntimeContextStore();
   let refreshLocalRoutineRegistrations: () => Promise<void> = async () => {};
+  let occurrencePersistenceTail: Promise<void> = Promise.resolve();
+  let occurrencePersistenceFailure: unknown = null;
+  const enqueueOccurrencePersistence = (
+    work: () => Promise<void>,
+    onFailure?: () => void,
+  ): void => {
+    occurrencePersistenceTail = occurrencePersistenceTail
+      .then(work)
+      .catch((error) => {
+        occurrencePersistenceFailure = error;
+        onFailure?.();
+      });
+  };
+  const flushRoutineOccurrencePersistence = async (): Promise<void> => {
+    await occurrencePersistenceTail;
+    if (occurrencePersistenceFailure != null) {
+      const error = occurrencePersistenceFailure;
+      occurrencePersistenceFailure = null;
+      throw error;
+    }
+  };
 
   const routineCommandPort = createRoutineCoachCommandService({
     routineProfileStore: repositories.routineProfileStore,
     runtimeContextStore,
     temporaryOverrideStore: repositories.routineTemporaryOverrideStore,
+    occurrenceTruthStore: repositories.routineOccurrenceTruthStore,
     protocolSessionStore: repositories.protocolSessionStore,
     onOverrideChanged: createRoutineOverrideChangedNotifier(),
     onProfileActiveChanged: async ({ identityId }) => {
@@ -246,16 +273,74 @@ export function composeReminder(
   const activeUsageRuntime = createActiveUsageRuntime({
     activitySensor: activityRuntime,
     onOccurrenceDue: (event) => {
-      interventionRuntime.createDue({
-        identityId: event.identityId,
-        routineId: event.routineId,
-        occurrenceKey: event.occurrenceKey,
-        dueAt: event.dueAt,
-        policy: interventionPolicy,
-      });
+      enqueueOccurrencePersistence(
+        async () => {
+          const occurrence = await repositories.routineOccurrenceTruthStore.ensureOpenOccurrence({
+            identityId: event.identityId,
+            routineId: event.routineId,
+            occurrenceKey: event.occurrenceKey,
+            triggerKind: 'ActiveUsage',
+            becameDueAt: event.dueAt,
+            sourceRevision: event.generation,
+          });
+          if (occurrence.resolutionState !== 'Open') return;
+          interventionRuntime.createDue({
+            identityId: event.identityId,
+            routineId: event.routineId,
+            occurrenceKey: event.occurrenceKey,
+            dueAt: occurrence.becameDueAt,
+            policy: interventionPolicy,
+          });
+        },
+        () => activeUsageRuntime.rearmOccurrence(event.identityId, event.routineId),
+      );
     },
     onNaturalBreakSatisfied: (event) => {
-      completeInterventionNaturally(event.occurrenceKey, Number(event.satisfiedAt));
+      enqueueOccurrencePersistence(async () => {
+        await repositories.routineOccurrenceTruthStore.ensureOpenOccurrence({
+          identityId: event.identityId,
+          routineId: event.routineId,
+          occurrenceKey: event.occurrenceKey,
+          triggerKind: 'ActiveUsage',
+          becameDueAt: event.satisfiedAt,
+          sourceRevision: event.generation,
+        });
+        await repositories.routineOccurrenceTruthStore.resolveOccurrence({
+          identityId: event.identityId,
+          routineId: event.routineId,
+          occurrenceKey: event.occurrenceKey,
+          state: 'Satisfied',
+          resolutionKind: 'NaturalBreakCredit',
+          resolvedAt: event.satisfiedAt,
+          reason: `Natural idle break ${event.idleDurationMs}ms`,
+        });
+        completeInterventionNaturally(event.occurrenceKey, Number(event.satisfiedAt));
+      });
+    },
+  });
+  const elapsedRuntime = createElapsedRuntime({
+    onOccurrenceDue: (event) => {
+      enqueueOccurrencePersistence(
+        async () => {
+          const occurrence = await repositories.routineOccurrenceTruthStore.ensureOpenOccurrence({
+            identityId: event.identityId,
+            routineId: event.routineId,
+            occurrenceKey: event.occurrenceKey,
+            triggerKind: 'Elapsed',
+            becameDueAt: event.dueAt,
+            sourceRevision: event.anchorRevision,
+          });
+          if (occurrence.resolutionState !== 'Open') return;
+          interventionRuntime.createDue({
+            identityId: event.identityId,
+            routineId: event.routineId,
+            occurrenceKey: event.occurrenceKey,
+            dueAt: occurrence.becameDueAt,
+            policy: interventionPolicy,
+          });
+        },
+        () => elapsedRuntime.rearmOccurrence(event.identityId, event.routineId),
+      );
     },
   });
   const protocolBreakCreditRuntime =
@@ -264,10 +349,30 @@ export function composeReminder(
       activeUsage: activeUsageRuntime,
       registrations: dependencies.protocolBreakRegistrations ?? [],
       onRoutineSatisfied: (entry) => {
-        completeInterventionNaturally(entry.activeUsage.occurrenceKey, Number(entry.satisfiedAt));
+        enqueueOccurrencePersistence(async () => {
+          await repositories.routineOccurrenceTruthStore.ensureOpenOccurrence({
+            identityId: entry.identityId,
+            routineId: entry.routineId,
+            occurrenceKey: entry.activeUsage.occurrenceKey,
+            triggerKind: 'ActiveUsage',
+            becameDueAt: entry.satisfiedAt,
+            sourceRevision: entry.activeUsage.completedGeneration,
+          });
+          await repositories.routineOccurrenceTruthStore.resolveOccurrence({
+            identityId: entry.identityId,
+            routineId: entry.routineId,
+            occurrenceKey: entry.activeUsage.occurrenceKey,
+            state: 'Satisfied',
+            resolutionKind: 'ProtocolBreakCredit',
+            resolvedAt: entry.satisfiedAt,
+            reason: `Protocol break ${entry.breakFactId}`,
+          });
+          completeInterventionNaturally(entry.activeUsage.occurrenceKey, Number(entry.satisfiedAt));
+        });
       },
     });
-  const locallyRegisteredRoutineIds = new Set<string>();
+  const locallyRegisteredElapsedRoutineIds = new Set<string>();
+  const locallyRegisteredActiveUsageRoutineIds = new Set<string>();
   const registerActiveUsageRoutine = (input: {
     readonly activeUsage: ActiveUsageRoutineRegistration;
     readonly credit?: AmbientBreakCreditRegistration | null;
@@ -297,20 +402,51 @@ export function composeReminder(
       dependencies.identityId,
       runtimeContextStore.get({ identityId: dependencies.identityId }),
     );
-    for (const routineId of locallyRegisteredRoutineIds) {
+    const restoredElapsedSnapshots = new Map(
+      [...locallyRegisteredElapsedRoutineIds].flatMap((routineId) => {
+        const restored = elapsedRuntime.getSnapshot(dependencies.identityId, routineId);
+        return restored ? [[routineId, restored] as const] : [];
+      }),
+    );
+    const restoredActiveUsageSnapshots = new Map(
+      [...locallyRegisteredActiveUsageRoutineIds].flatMap((routineId) => {
+        const restored = activeUsageRuntime.getSnapshot(dependencies.identityId, routineId);
+        return restored ? [[routineId, restored] as const] : [];
+      }),
+    );
+    for (const routineId of locallyRegisteredElapsedRoutineIds) {
+      elapsedRuntime.unregisterRoutine(dependencies.identityId, routineId);
+    }
+    for (const routineId of locallyRegisteredActiveUsageRoutineIds) {
       activeUsageRuntime.unregisterRoutine(dependencies.identityId, routineId);
       protocolBreakCreditRuntime.unregister?.(dependencies.identityId, routineId);
     }
-    locallyRegisteredRoutineIds.clear();
+    locallyRegisteredElapsedRoutineIds.clear();
+    locallyRegisteredActiveUsageRoutineIds.clear();
+
+    for (const elapsed of snapshot.elapsed) {
+      elapsedRuntime.registerRoutine({
+        ...elapsed,
+        restoredSnapshot:
+          restoredElapsedSnapshots.get(elapsed.routineId) ?? elapsed.restoredSnapshot,
+      });
+      locallyRegisteredElapsedRoutineIds.add(elapsed.routineId);
+    }
+
     const credits = new Map(
       snapshot.protocolBreakCredits.map((credit) => [credit.routineId, credit] as const),
     );
     for (const activeUsage of snapshot.activeUsage) {
       registerActiveUsageRoutine({
-        activeUsage,
+        activeUsage: {
+          ...activeUsage,
+          restoredSnapshot:
+            restoredActiveUsageSnapshots.get(activeUsage.routineId) ??
+            activeUsage.restoredSnapshot,
+        },
         credit: credits.get(activeUsage.routineId) ?? null,
       });
-      locallyRegisteredRoutineIds.add(activeUsage.routineId);
+      locallyRegisteredActiveUsageRoutineIds.add(activeUsage.routineId);
     }
   };
 
@@ -324,9 +460,11 @@ export function composeReminder(
     interventionRuntime,
     protocolBreakCreditRuntime,
     activityRuntime,
+    elapsedRuntime,
     activeUsageRuntime,
     registerActiveUsageRoutine,
     registerProtocolBreakRoutine,
     refreshLocalRoutineRegistrations,
+    flushRoutineOccurrencePersistence,
   };
 }
