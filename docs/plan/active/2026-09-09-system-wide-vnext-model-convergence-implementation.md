@@ -2,7 +2,7 @@
 tags: [plan, active, vnext, system-wide, convergence]
 description: MemoFlow 全模块模型收敛唯一执行顺序、destructive cutover、验证与最终删除计划
 created: 2026-09-09T00:31:00+08:00
-updated: 2026-09-14T11:10:04+08:00
+updated: 2026-09-18T00:13:00+08:00
 ---
 
 # MemoFlow System-wide vNext Model Convergence — Implementation Plan
@@ -561,6 +561,27 @@ Implement ADR-086~088:
 - QuietHours with Product Time;
 - product vs operations port split.
 
+## Phase 4 closure checkpoint — 2026-09-18
+
+**Status: owner convergence complete; Phase 5 dependency gate opened after P4-CLOSE.**
+
+The integrated Phase 4 implementation now has one owner for every surviving product fact:
+
+- Routine owns Definition/Profile/Trigger/RuntimeContext/TemporaryOverride plus durable Occurrence/Interaction truth; legacy ReminderTemplate/Group/Instance/Response persistence and product surfaces are physically retired.
+- Planner owns CalendarEntry Timed/AllDay range plus derived occupancy/conflict reads; Scheduler owns ScheduledInvocation/InvocationAttempt reliability and no longer exposes ScheduleTask business truth.
+- Notification owns Fact/Inbox lifecycle and typed Interaction facts; delivery remains Decision -> Outbox -> Receipt execution truth, QuietHours uses Product Time, and product Inbox capabilities are separated from operations/audit capabilities.
+- Prisma and PowerSync canonical schemas contain no legacy Reminder, ScheduleTask, NotificationTemplate/History/Channel aggregate models. Production-only residue scans for the retired owner vocabulary are zero-hit.
+
+**Integrated delivery evidence:**
+
+- PR #355 (`b1ca4d88ee2`) integrated R4-2201A, S4-2302A, N4-2401A and PORT-1610A with the full required CI surface green.
+- PRs #356/#357 closed P4-2301A/B; #358 closed S4-2302B; #359 closed R4-2201B; #360 closed N4-2401B; #361/#362 closed N4-2402A/B.
+- PR #363 exact head `d3910482ae913d3e1543626e3c15e29e3cdcf39f` passed CI run `35246292551` end to end: Scope, Governance, Static Analysis, Typecheck, Unit, Build, Verification Children, all four Web Flow shards, Delivery Observation, and Governance/Validate/Web Flow/Boundary/Integration/Coverage/Performance Oracles all SUCCESS. It merged as `fe5b50dbdcee6f57f073efbdefbf9d8508f7d6fa`.
+- The pre-merge systematic closure reran the four Web Flow shards locally from one frozen worktree (73/73), affected Boundary/Integration/Coverage/Performance, 42-project lint, 38-project typecheck, 37-project unit tests, 32-project builds, fresh Prisma push/reset-dry, docs/governance/Nx sync, and the 1195-file test inventory.
+- P4-CLOSE removed the last non-authoritative test fake that still named retired `scheduleTask` / `reminderResponse`; no production owner semantics were reopened.
+
+Phase 5 may consume these owner contracts directly. Any future appearance of the retired Phase 4 models is a regression, not a compatibility path.
+
 ---
 
 # Phase 5 — Home/Dashboard retirement and AI alignment
@@ -690,9 +711,12 @@ Plus affected integration/E2E, PowerSync parity, fresh Prisma bootstrap/reset ch
 
 ## 7. Immediate next tickets
 
-TIME-1201..1206, LABEL-1301..1305, Knowledge `KNOW-2001..2003`, Governance `GOV-1901..1904`, Setting `SETTING-9202..9210`, Goal `GOAL-7202..7211`, and Task `TASK-7301..7310` are complete. Setting, Goal, Task, and Time+Label all have both exact-head delivery gates green; Time+Label first exact head `40f0b0a1efaa` / run `34809651084` and archive head `95721d3a256` / run `34811284555` are both green. Current dependency-ready implementation work is:
+Phases 0-4 are now owner-converged. Time/Label, Account/Setting, Knowledge/Editor retirement, Governance, Goal/Task, Routine, Planner/Scheduler and Notification have all crossed their destructive cutover gates. The current dependency-ready frontier is Phase 5 plus the Phase 4-owner V3 portability completion:
 
-1. `ROUTINE-2201` — converge the already-landed Routine vNext foundation into the sole public/write model and destructively retire legacy ReminderTemplate/Group tracks.
-2. `PORT-1601/1602` — continue owner capability registration as surviving owner models stabilize; execute final V2 deletion only when V3 preserves all required product coverage.
+1. `HOME-1801` -> `HOME-1802` — add the narrow Goal-owned Home progress summary, then remove Home/Goal-capsule `useDashboard()` consumption.
+2. `AI-9602`, `AI-9604`, `AI-9606` — in independent AI boundaries, characterize Mastra conversation authority, establish ProviderDefinition/Connection/SecretVault, and establish AIContextAssembler with Product Time/trust/token budget.
+3. `PORT-1610B` — register complete owner-driven V3 capabilities for surviving Routine, Planner/Schedule and Notification facts.
+4. After `AI-9606`, continue `AI-9607/9608/9609`; `HOME-1803` joins the explicit owner-read AI analytics cutover. Then resolve ActivityLedger (`HOME-1804`) and hard-delete Dashboard (`HOME-1805`).
+5. `PORT-1611` starts only after PORT-1610B + HOME-1805 + AI-9612 prove every surviving owner is V3-covered; `CLEAN-2601` and SYS-3001..3004 remain the final destructive sweep and whole-system closure.
 
-`SETTING-9209` deliberately kept the current V2 full-backup envelope's `settings` singleton as a strict canonical UserPreferenceProfile adapter while deleting all legacy Setting persistence/protocol/client code. Therefore PORT-1603 remains independent cross-module work rather than a reason to retain `user_settings`.
+`SETTING-9209` deliberately kept the current V2 full-backup envelope's `settings` singleton as a strict canonical UserPreferenceProfile adapter while deleting all legacy Setting persistence/protocol/client code. That temporary V2 transport remains non-authoritative and is deleted by PORT-1611, not by reintroducing `user_settings`.

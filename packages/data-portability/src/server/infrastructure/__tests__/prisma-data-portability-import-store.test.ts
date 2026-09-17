@@ -20,8 +20,6 @@ describe('PrismaDataPortabilityImportStore', () => {
       repository: { create: vi.fn(async () => undefined) },
       goal: { create: vi.fn(async () => undefined) },
       taskPlan: { create: vi.fn(async () => undefined) },
-      scheduleTask: { create: vi.fn(async () => undefined) },
-      reminderResponse: { create: vi.fn(async () => undefined) },
       aiConversation: { create: vi.fn(async () => undefined) },
       aiMessage: { create: vi.fn(async () => undefined) },
     };
