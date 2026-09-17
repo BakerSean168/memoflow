@@ -9,7 +9,7 @@ import { toBoolean } from './projection-helpers';
  * accepting numbers and case-insensitive "true"/"false"/"1"/"0".
  * Intentionally not force-merged into query parseBoolean family:
  * - utils parseBoolean: string via parseString → boolean|undefined (no fallback/numbers)
- * - scheduler parseBoolean: empty short-circuit + boolean literals → boolean|undefined
+ * - Scheduler diagnostics: typed Zod query schema; no legacy enabled boolean parser
  * - goal parseBoolean (985): "true"/"false" only → boolean|undefined
  * Soft residual 1021/1073/985: query parser duals/keep-boundaries remain.
  * Soft residual 1117: optionalString/toNonEmptyString keep-boundary remains.
@@ -42,7 +42,7 @@ describe('data-portability toBoolean keep-boundary (residual 1113)', () => {
     expect(helpers).not.toMatch(/export function toBoolean[\s\S]{0,350}return undefined/);
   });
 
-  it('differs from utils/scheduler/goal parseBoolean query shapes (no force-merge)', () => {
+  it('differs from query parsing boundaries without reviving legacy Scheduler task filters', () => {
     expect(utilsParse).toMatch(/export function parseBoolean\b/);
     expect(utilsParse).toContain('boolean | undefined');
     expect(utilsParse).toContain('return undefined');
@@ -50,9 +50,9 @@ describe('data-portability toBoolean keep-boundary (residual 1113)', () => {
     expect(utilsParse).not.toMatch(/export function toBoolean\b/);
     expect(utilsParse).not.toContain('fallback = false');
 
-    expect(schedulerRoutes).toMatch(/function parseBoolean\b/);
-    expect(schedulerRoutes).toContain('boolean | undefined');
-    expect(schedulerRoutes).toContain("value === ''");
+    expect(schedulerRoutes).not.toMatch(/function parseBoolean\b/);
+    expect(schedulerRoutes).toContain('ScheduledInvocationDiagnosticQuerySchema.parse');
+    expect(schedulerRoutes).not.toContain('enabled');
     expect(schedulerRoutes).not.toMatch(/function toBoolean\b/);
 
     expect(goalParseBoolean).toContain('Residual 985');

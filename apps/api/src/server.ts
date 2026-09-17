@@ -104,7 +104,6 @@ import {
 import { RepositoryKnowledgeCloudDataPurgerAdapter } from './modules/ai/repository-knowledge-cloud-data-purger.adapter';
 import { createCronScheduler } from './shared/infrastructure/cron/index.js';
 import type { CronSchedulerManager } from './shared/infrastructure/cron/index.js';
-import { PrismaOutboxWriter } from './outbox/prisma-outbox-writer';
 
 const logger = createLogger('API');
 
@@ -239,20 +238,20 @@ async function bootstrap(): Promise<void> {
     clock: createSystemClock(),
   });
   // CLEAN-6304: Calendar and Temporal Engine own separate repository sets.
-  // Orchestration shares the ONE Scheduler task repository; Calendar receives
-  // the Scheduler lease coordinator only through the shared lease port.
+  // Orchestration shares canonical ScheduledInvocation persistence through the neutral
+  // SchedulingPort; Calendar receives only the Scheduler lease coordinator.
   const calendarRepositorySet = createSchedulePrismaRepositories(prisma);
-  const schedulerRepositorySet = createSchedulerPrismaRepositories(prisma, {
-    outboxWriter: new PrismaOutboxWriter(prisma),
-  });
+  const schedulerRepositorySet = createSchedulerPrismaRepositories(prisma);
   const routineExecutionDeps = createRoutinePrismaScheduleExecutionDeps(prisma);
   const scheduleOrchestrationModule = createScheduleOrchestrationModule({
+    scheduler: {
+      invocationRepository: schedulerRepositorySet.scheduledInvocationRepository,
+    },
     taskProjection: {
       source: createTaskPrismaScheduleProjectionSource(
         prisma,
         settingApiModule.userTimeContextPort,
       ),
-      scheduleTaskRepository: schedulerRepositorySet.scheduleTaskRepository,
     },
     goalProjection: {
       source: createGoalPrismaScheduleProjectionSource(
@@ -278,7 +277,7 @@ async function bootstrap(): Promise<void> {
   const scheduleApiModule = composeSchedule({
     calendarRepositories: calendarRepositorySet,
     schedulerRepositories: schedulerRepositorySet,
-    sourceExecutor: scheduleOrchestrationModule.sourceExecutor,
+    handlerRegistry: scheduleOrchestrationModule.handlerRegistry,
   });
   const taskComposed = composeTask({
     db: prisma,
@@ -288,7 +287,7 @@ async function bootstrap(): Promise<void> {
   });
   // Register the Task reminder fire handler so scheduled `task.reminder` work
   // (e.g. a one-time task + relative reminder) is executed by the registry-based
-  // source executor instead of the legacy router fallback.
+  // canonical handler registry owned by schedule orchestration.
   scheduleOrchestrationModule.handlerRegistry.register(
     createTaskReminderScheduledHandlerRegistration({
       taskOccurrenceRepository: taskComposed.taskOccurrenceRepository,

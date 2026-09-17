@@ -22,7 +22,8 @@ const requiredTables = [
   'task_occurrences',
   'task_goal_outbox',
   'schedules',
-  'schedule_tasks',
+  'scheduled_invocations',
+  'invocation_attempts',
   'scheduling_reconcile_operations',
   'schedule_leases',
   'reminder_templates',
@@ -80,13 +81,13 @@ try {
       SELECT 1
       FROM pg_indexes
       WHERE schemaname = 'public'
-        AND tablename = 'schedule_tasks'
+        AND tablename = 'scheduled_invocations'
         AND indexdef ILIKE '%UNIQUE%'
         AND indexdef ILIKE '%scheduling_key%'
       LIMIT 1
     `);
     if (uniqueSchedulingKey.rowCount !== 1) {
-      throw new Error('schedule_tasks has no unique scheduling_key index after boot');
+      throw new Error('scheduled_invocations has no unique scheduling_key index after boot');
     }
 
     const routineMembershipUnique = await db.query(`
@@ -115,17 +116,17 @@ try {
     const taskGoalBindingDefinition = String(taskGoalBindingRow?.definition ?? '');
     if (
       taskGoalBinding.rowCount !== 1 ||
-      taskGoalBindingRow?.comment !== 'memoflow.task-goal-binding/v2' ||
+      taskGoalBindingRow?.comment !== 'memoflow.task-goal-binding/v3' ||
       !taskGoalBindingDefinition.includes('EachCompletion') ||
       !taskGoalBindingDefinition.includes('PlanCompletion') ||
       taskGoalBindingDefinition.includes('PER_INSTANCE') ||
       taskGoalBindingDefinition.includes('ALL_INSTANCES_COMPLETED')
     ) {
-      throw new Error('task_plans has no canonical v2 Goal-binding constraint after boot');
+      throw new Error('task_plans has no canonical v3 Goal-binding constraint after boot');
     }
 
     console.log(
-      `[hard-7103-schema-boot] passed: fresh database booted through database:prisma-push; ${tables.rowCount} public tables; ${requiredTables.length} core tables + pgvector + vNext uniqueness fences + Task Goal-binding v2 fence verified.`,
+      `[hard-7103-schema-boot] passed: fresh database booted through database:prisma-push; ${tables.rowCount} public tables; ${requiredTables.length} core tables + pgvector + vNext uniqueness fences + Task Goal-binding v3 fence verified.`,
     );
   } finally {
     await db.end();

@@ -1,74 +1,60 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import type { PrismaClient } from '@memoflow/database';
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import {
-  createSchedulerPrismaRepositories,
-  createSchedulerPowerSyncRepositories,
-  createSchedulerPrismaModule,
   createSchedulerPowerSyncModule,
-  createSchedulerRuntimeContribution,
-  type IScheduleExecutionRepository,
-  type IScheduleTaskRepository,
-  type ScheduleTaskSourceExecutor,
-} from '../../../../src';
+  createSchedulerPowerSyncRepositories,
+} from '../powersync';
+import { createScheduledInvocationRuntimeContribution } from '../runtime';
 
-describe('Scheduler Temporal Engine repository factories', () => {
-  const fakePrisma = {} as unknown as PrismaClient;
+describe('Scheduler canonical Temporal Engine repository factories', () => {
   const fakeElectronDb = {} as unknown as IElectronDatabase;
+  const prismaSource = readFileSync(resolve(__dirname, '../prisma.ts'), 'utf8');
 
-  it('owns task/execution repositories and the concrete lease coordinator', () => {
-    const prisma = createSchedulerPrismaRepositories(fakePrisma);
+  it('owns invocation/attempt repositories and lease infrastructure only', () => {
     const powersync = createSchedulerPowerSyncRepositories(fakeElectronDb);
 
-    for (const set of [prisma, powersync]) {
-      expect(set).toHaveProperty('scheduleTaskRepository');
-      expect(set).toHaveProperty('scheduleExecutionRepository');
-      expect(set).toHaveProperty('leaseCoordinator');
-      expect(typeof set.leaseCoordinator.execute).toBe('function');
-      expect(set).not.toHaveProperty('scheduleRepository');
-      expect(set).not.toHaveProperty('auditRepository');
-    }
+    expect(powersync).toHaveProperty('scheduledInvocationRepository');
+    expect(powersync).toHaveProperty('invocationAttemptRepository');
+    expect(powersync).toHaveProperty('leaseCoordinator');
     expect(powersync).toHaveProperty('leaseRepository');
+    expect(powersync).not.toHaveProperty('scheduleTaskRepository');
+    expect(powersync).not.toHaveProperty('scheduleExecutionRepository');
+    expect(powersync).not.toHaveProperty('scheduleRepository');
+
+    expect(prismaSource).toContain('scheduledInvocationRepository');
+    expect(prismaSource).toContain('invocationAttemptRepository');
+    expect(prismaSource).toContain('leaseCoordinator');
+    expect(prismaSource).not.toContain('scheduleTaskRepository');
+    expect(prismaSource).not.toContain('scheduleExecutionRepository');
   });
 
-  it('module factories expose read-only diagnostics and runtime lifecycle', () => {
-    const prisma = createSchedulerPrismaModule(fakePrisma);
-    const powersync = createSchedulerPowerSyncModule(fakeElectronDb);
-    for (const instance of [prisma, powersync]) {
-      expect(typeof instance.api.listTasks).toBe('function');
-      expect(typeof instance.api.getTask).toBe('function');
-      expect(typeof instance.api.getDueTasks).toBe('function');
-      expect(typeof instance.start).toBe('function');
-      expect(typeof instance.dispose).toBe('function');
-      expect(instance).not.toHaveProperty('scheduleRepository');
-      expect(instance).not.toHaveProperty('eventApi');
-    }
+  it('PowerSync module factory exposes invocation diagnostics and runtime lifecycle', () => {
+    const instance = createSchedulerPowerSyncModule(fakeElectronDb);
+    expect(typeof instance.api.listInvocations).toBe('function');
+    expect(typeof instance.api.getInvocation).toBe('function');
+    expect(typeof instance.api.listDueInvocations).toBe('function');
+    expect(typeof instance.start).toBe('function');
+    expect(typeof instance.dispose).toBe('function');
+    expect(instance).not.toHaveProperty('eventApi');
   });
 
-  it('runtime contribution consumes Scheduler task ownership and source executor', () => {
+  it('canonical runtime consumes invocation persistence plus handler registry', () => {
     const set = createSchedulerPowerSyncRepositories(fakeElectronDb);
-    const sourceExecutor: ScheduleTaskSourceExecutor = {
-      execute: async () => ({ nextRunAt: null }),
-    };
-    const runtime = createSchedulerRuntimeContribution({
-      scheduleTaskRepository: set.scheduleTaskRepository,
-      sourceExecutor,
+    const runtime = createScheduledInvocationRuntimeContribution({
+      repository: set.scheduledInvocationRepository,
+      handlerRegistry: { execute: async () => ({ status: 'succeeded' as const }) },
       leaseCoordinator: set.leaseCoordinator,
     });
     expect(typeof runtime.start).toBe('function');
     expect(typeof runtime.stop).toBe('function');
   });
 
-  it('root type seam owns task/execution repositories and no Calendar repository', () => {
-    const task = (_t: IScheduleTaskRepository) => undefined;
-    const execution = (_t: IScheduleExecutionRepository) => undefined;
-    expect(typeof task).toBe('function');
-    expect(typeof execution).toBe('function');
-
+  it('root seam cannot export the retired ScheduleTask tree', () => {
     const root = readFileSync(resolve(__dirname, '../../../index.ts'), 'utf8');
-    expect(root).not.toContain('CalendarEntry');
+    expect(root).not.toContain('ScheduleTask');
+    expect(root).not.toContain('ScheduleExecution');
     expect(root).not.toContain('IScheduleRepository');
   });
 });

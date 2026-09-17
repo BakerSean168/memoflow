@@ -1,12 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { NotificationRequestedWriterPort } from '@memoflow/contracts/notification';
-import { buildSchedulingKey, SourceModule } from '@memoflow/contracts/schedule';
-import {
-  createHandlerRegistryScheduleTaskSourceExecutor,
-  ScheduledHandlerRegistry,
-  ScheduleTask,
-  type ScheduleTaskExecutionResult,
-} from '@memoflow/scheduler';
+import { buildSchedulingKey, type ScheduledInvocationContext } from '@memoflow/contracts/schedule';
+import { ScheduledHandlerRegistry } from '@memoflow/scheduler';
 import {
   TASK_REMINDER_PAYLOAD_VERSION,
   TASK_SCHEDULING_OWNER_TYPE,
@@ -41,45 +36,18 @@ function payload(): TaskReminderScheduledPayload {
   };
 }
 
-/**
- * Fixture D: one-time Task at 14:00 with a relative −30m reminder. The
- * projection persists a single neutral scheduling envelope (TASK-3101); this
- * test drives the exact persisted document shape through the
- * registry -> ScheduleTaskSourceExecutor -> task.reminder.fire handler.
- */
-function fixtureTask(): ScheduleTask {
-  return ScheduleTask.create({
+/** Canonical Fixture D invocation: one-time Task at 14:00, relative -30m reminder. */
+function fixtureInvocation(): ScheduledInvocationContext<TaskReminderScheduledPayload> {
+  return {
     identityId: IDENTITY,
-    name: 'Exercise 30 minutes · 提前 30Minutes 提醒',
-    sourceModule: SourceModule.Task,
-    sourceEntityId: INSTANCE_ID,
-    schedule: {
-      cronExpression: null,
-      timezone: 'UTC',
-      startDate: new Date(REMINDER_AT).toISOString(),
-      endDate: null,
-      maxExecutions: null,
-    },
-    metadata: {
-      payload: {
-        __memoflowScheduling: {
-          schemaVersion: 1,
-          ownerType: TASK_SCHEDULING_OWNER_TYPE,
-          ownerId: TEMPLATE_ID,
-          schedulingKey: SINGLE_REMINDER_KEY,
-          handlerKey: 'task.reminder.fire',
-          originalRunAt: REMINDER_AT,
-          payloadVersion: TASK_REMINDER_PAYLOAD_VERSION,
-          sourceRevision: '1:1',
-          fingerprint: 'fixture-d:1',
-        },
-        payload: payload(),
-      },
-      tags: ['scheduling:v1', 'task'],
-      priority: 'Normal',
-      timeout: null,
-    },
-  });
+    owner: { identityId: IDENTITY, type: TASK_SCHEDULING_OWNER_TYPE, id: TEMPLATE_ID },
+    schedulingKey: SINGLE_REMINDER_KEY,
+    handlerKey: 'task.reminder.fire',
+    runAt: REMINDER_AT,
+    payloadVersion: TASK_REMINDER_PAYLOAD_VERSION,
+    payload: payload(),
+    sourceRevision: '1:1',
+  };
 }
 
 function createInstance(overrides: Record<string, unknown> = {}) {
@@ -164,31 +132,19 @@ async function harnessFor(instance: unknown, template: unknown) {
   const writer = createDurableWriterHarness();
   const registry = new ScheduledHandlerRegistry();
   registry.register(createHandler(writer, instance, template));
-  const executor = createHandlerRegistryScheduleTaskSourceExecutor({ registry });
-  return { writer, registry, executor, task: fixtureTask() };
+  return { writer, registry, invocation: fixtureInvocation() };
 }
 
-/**
- * The executor contract allows a `void` return; the registry-backed executor
- * always returns a result for a neutral envelope, so narrow it for assertions.
- */
-function executionResult(result: ScheduleTaskExecutionResult | void): ScheduleTaskExecutionResult {
-  if (!result) throw new Error('Source executor returned void; expected an execution result.');
-  return result;
-}
-
-describe('task.reminder.fire through the neutral registry executor', () => {
+describe('task.reminder.fire through the canonical handler registry', () => {
   it('fires exactly one durable NotificationRequested for Fixture D', async () => {
-    const { writer, executor, task } = await harnessFor(createInstance(), createPlan());
+    const { writer, registry, invocation } = await harnessFor(createInstance(), createPlan());
 
-    const first = executionResult(await executor.execute(task));
-    expect(first.disposition).toBe('succeeded');
+    const first = await registry.execute(invocation);
+    expect(first.status).toBe('succeeded');
     expect(first.result).toMatchObject({
       occurrenceId: INSTANCE_ID,
       planId: TEMPLATE_ID,
       schedulingKey: SINGLE_REMINDER_KEY,
-      handlerKey: 'task.reminder.fire',
-      schedulingDisposition: 'succeeded',
     });
 
     expect(writer.enqueueNotificationRequested).toHaveBeenCalledTimes(1);
@@ -203,58 +159,61 @@ describe('task.reminder.fire through the neutral registry executor', () => {
   });
 
   it('re-execution after a no-op reconcile collapses onto the same durable envelope', async () => {
-    const { writer, executor, task } = await harnessFor(createInstance(), createPlan());
+    const { writer, registry, invocation } = await harnessFor(createInstance(), createPlan());
 
-    await executor.execute(task);
-    const replay = executionResult(await executor.execute(task));
+    await registry.execute(invocation);
+    const replay = await registry.execute(invocation);
 
-    expect(replay.disposition).toBe('succeeded');
+    expect(replay.status).toBe('succeeded');
     expect(writer.enqueueNotificationRequested).toHaveBeenCalledTimes(2);
     expect(writer.rows).toHaveLength(1);
     expect(replay.result).toMatchObject({ notificationStatus: 'succeeded' });
   });
 
   it('returns a skipped receipt for a completed instance without any durable envelope', async () => {
-    const { writer, executor, task } = await harnessFor(
+    const { writer, registry, invocation } = await harnessFor(
       createInstance({ status: 'Completed' }),
       createPlan(),
     );
 
-    const result = executionResult(await executor.execute(task));
-    expect(result.disposition).toBe('skipped');
-    expect(result.result).toMatchObject({ schedulingDisposition: 'skipped' });
+    const result = await registry.execute(invocation);
+    expect(result.status).toBe('skipped');
+    expect(result.result).toMatchObject({ occurrenceId: INSTANCE_ID, status: 'Completed' });
     expect(writer.enqueueNotificationRequested).not.toHaveBeenCalled();
     expect(writer.rows).toHaveLength(0);
   });
 
   it('returns a skipped receipt for a deleted instance without any durable envelope', async () => {
-    const { writer, executor, task } = await harnessFor(
+    const { writer, registry, invocation } = await harnessFor(
       createInstance({ deletedAt: '2030-01-10T15:00:00.000Z' }),
       createPlan(),
     );
 
-    const result = executionResult(await executor.execute(task));
-    expect(result.disposition).toBe('skipped');
+    const result = await registry.execute(invocation);
+    expect(result.status).toBe('skipped');
     expect(writer.enqueueNotificationRequested).not.toHaveBeenCalled();
     expect(writer.rows).toHaveLength(0);
   });
 
   it('rejects retryably when the shared outbox writer fails technically', async () => {
-    const { writer, executor, task } = await harnessFor(createInstance(), createPlan());
+    const { writer, registry, invocation } = await harnessFor(createInstance(), createPlan());
     writer.enqueueNotificationRequested.mockRejectedValueOnce(new Error('outbox unavailable'));
 
-    await expect(executor.execute(task)).rejects.toThrow('outbox unavailable');
+    const result = await registry.execute(invocation);
+    expect(result).toMatchObject({
+      status: 'retryable',
+      failure: { code: 'HANDLER_EXECUTION_FAILED', retryable: true },
+    });
     expect(writer.rows).toHaveLength(0);
   });
 
   it('dead-letters unregistered task.reminder.fire invocations before any handler side effect', async () => {
     const writer = createDurableWriterHarness();
     const registry = new ScheduledHandlerRegistry();
-    const executor = createHandlerRegistryScheduleTaskSourceExecutor({ registry });
 
-    const result = executionResult(await executor.execute(fixtureTask()));
-    expect(result.disposition).toBe('dead_letter');
-    expect(result.result).toMatchObject({ schedulingFailureCode: 'UNKNOWN_HANDLER' });
+    const result = await registry.execute(fixtureInvocation());
+    expect(result.status).toBe('dead_letter');
+    expect(result).toMatchObject({ failure: { code: 'UNKNOWN_HANDLER', retryable: false } });
     expect(writer.enqueueNotificationRequested).not.toHaveBeenCalled();
   });
 });

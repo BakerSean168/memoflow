@@ -3,6 +3,7 @@ import type { PrismaClient } from '@memoflow/database';
 import type {
   InvocationAttempt as InvocationAttemptContract,
   ScheduledInvocation,
+  ScheduledInvocationStatus,
   SchedulingOwner,
   SchedulingReconcileReceipt,
 } from '@memoflow/contracts/schedule';
@@ -37,6 +38,61 @@ export class ScheduledInvocationPrismaRepository implements IScheduledInvocation
     const rows = await this.db.scheduledInvocation.findMany({
       where: { identityId: owner.identityId, ownerType: owner.type, ownerId: owner.id },
       orderBy: [{ runAt: 'asc' }, { schedulingKey: 'asc' }],
+    });
+    return rows.map(PrismaScheduledInvocationMapper.toDomain);
+  }
+
+  async listForIdentity(
+    identityId: string,
+    options: {
+      readonly ownerType?: string;
+      readonly ownerId?: string;
+      readonly status?: ScheduledInvocationStatus;
+      readonly dueBefore?: number;
+      readonly limit?: number;
+    } = {},
+  ): Promise<ScheduledInvocation[]> {
+    const dueBefore = options.dueBefore === undefined ? undefined : new Date(options.dueBefore);
+    const rows = await this.db.scheduledInvocation.findMany({
+      where: {
+        identityId,
+        ...(options.ownerType === undefined ? {} : { ownerType: options.ownerType }),
+        ...(options.ownerId === undefined ? {} : { ownerId: options.ownerId }),
+        ...(options.status === undefined ? {} : { status: options.status }),
+        ...(dueBefore === undefined
+          ? {}
+          : {
+              OR: [
+                { status: "pending", runAt: { lte: dueBefore } },
+                { status: "retry_wait", nextAttemptAt: { lte: dueBefore } },
+              ],
+            }),
+      },
+      orderBy: [{ runAt: "asc" }, { nextAttemptAt: "asc" }, { id: "asc" }],
+      take: Math.max(1, Math.min(200, options.limit ?? 100)),
+    });
+    return rows.map(PrismaScheduledInvocationMapper.toDomain);
+  }
+
+  async listOwnersByType(ownerType: string): Promise<SchedulingOwner[]> {
+    const rows = await this.db.scheduledInvocation.findMany({
+      where: { ownerType, status: { not: 'superseded' } },
+      select: { identityId: true, ownerType: true, ownerId: true },
+      distinct: ['identityId', 'ownerType', 'ownerId'],
+      orderBy: [{ identityId: 'asc' }, { ownerId: 'asc' }],
+    });
+    return rows.map((row) => ({
+      identityId: row.identityId,
+      type: row.ownerType,
+      id: row.ownerId,
+    }));
+  }
+
+  async findRunnable(limit?: number): Promise<ScheduledInvocation[]> {
+    const rows = await this.db.scheduledInvocation.findMany({
+      where: { status: { in: ['pending', 'retry_wait'] } },
+      orderBy: [{ runAt: 'asc' }, { nextAttemptAt: 'asc' }, { id: 'asc' }],
+      ...(limit === undefined ? {} : { take: limit }),
     });
     return rows.map(PrismaScheduledInvocationMapper.toDomain);
   }

@@ -88,7 +88,7 @@ export type RoutineCalendarEventProjection = CalendarEventProjectionFor<
 /**
  * Canonical Planner read contract (ADR-060 / PLAN-4302).
  *
- * This is deliberately a projection of owner-domain facts. ScheduleTask,
+ * This is deliberately a projection of owner-domain facts. raw Scheduler worker state,
  * ScheduledInvocationContext, retry/lease/dead-letter state and handler keys are
  * not valid inputs or fields of this contract.
  */

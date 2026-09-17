@@ -2,8 +2,8 @@
  * Planner/Calendar + Temporal Engine host composition.
  *
  * The host creates both repository sets once. Orchestration consumes the
- * Scheduler task repository; Calendar consumes only its own repository and a
- * shared lease port supplied by the Scheduler infrastructure set.
+ * canonical Scheduler invocation repositories; Calendar consumes only its own
+ * repository and the shared lease port supplied by Scheduler infrastructure.
  */
 import {
   createScheduleModule,
@@ -15,9 +15,8 @@ import {
 } from '@memoflow/schedule/api';
 import {
   createSchedulerModule,
-  createSchedulerRuntimeContribution,
-  type ScheduleTask,
-  type ScheduleTaskSourceExecutor,
+  createScheduledInvocationRuntimeContribution,
+  type ScheduledInvocationHandlerRegistry,
   type SchedulerModuleRuntimeContribution,
   type SchedulerRepositorySet,
   type SchedulerRuntimeContributionsInput,
@@ -30,9 +29,8 @@ import {
 export interface ComposeScheduleDependencies {
   readonly calendarRepositories: ScheduleRepositorySet;
   readonly schedulerRepositories: SchedulerRepositorySet;
-  readonly sourceExecutor: ScheduleTaskSourceExecutor;
+  readonly handlerRegistry: ScheduledInvocationHandlerRegistry;
   readonly schedulerRuntimeContributions?: SchedulerRuntimeContributionsInput;
-  readonly shouldScheduleTask?: (task: ScheduleTask) => boolean | Promise<boolean>;
 }
 
 export interface ComposedSchedule {
@@ -40,7 +38,6 @@ export interface ComposedSchedule {
   readonly schedulerModule: SchedulerApiModuleDef;
   readonly repositories: {
     readonly scheduleRepository: ScheduleRepositorySet['scheduleRepository'];
-    readonly scheduleTaskRepository: SchedulerRepositorySet['scheduleTaskRepository'];
   };
 }
 
@@ -56,16 +53,15 @@ function normalizeRuntimeContributions(
 export function composeSchedule(
   dependencies: ComposeScheduleDependencies,
 ): ComposedSchedule {
-  const queueRuntime = createSchedulerRuntimeContribution({
-    scheduleTaskRepository: dependencies.schedulerRepositories.scheduleTaskRepository,
-    sourceExecutor: dependencies.sourceExecutor,
+  const queueRuntime = createScheduledInvocationRuntimeContribution({
+    repository: dependencies.schedulerRepositories.scheduledInvocationRepository,
+    handlerRegistry: dependencies.handlerRegistry,
     leaseCoordinator: dependencies.schedulerRepositories.leaseCoordinator,
-    shouldScheduleTask: dependencies.shouldScheduleTask,
   });
 
   const schedulerInstance = createSchedulerModule({
-    scheduleTaskRepository: dependencies.schedulerRepositories.scheduleTaskRepository,
-    scheduleExecutionRepository: dependencies.schedulerRepositories.scheduleExecutionRepository,
+    scheduledInvocationRepository: dependencies.schedulerRepositories.scheduledInvocationRepository,
+    invocationAttemptRepository: dependencies.schedulerRepositories.invocationAttemptRepository,
     runtimeContributions: [
       queueRuntime,
       ...normalizeRuntimeContributions(dependencies.schedulerRuntimeContributions),
@@ -84,7 +80,6 @@ export function composeSchedule(
     schedulerModule: createSchedulerApiModule({ instance: schedulerInstance }),
     repositories: {
       scheduleRepository: dependencies.calendarRepositories.scheduleRepository,
-      scheduleTaskRepository: dependencies.schedulerRepositories.scheduleTaskRepository,
     },
   };
 }

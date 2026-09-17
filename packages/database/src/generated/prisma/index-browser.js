@@ -1285,47 +1285,6 @@ exports.Prisma.ScheduleScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.ScheduleTaskScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  name: 'name',
-  description: 'description',
-  sourceModule: 'sourceModule',
-  sourceEntityId: 'sourceEntityId',
-  schedulingKey: 'schedulingKey',
-  ownerType: 'ownerType',
-  ownerId: 'ownerId',
-  handlerKey: 'handlerKey',
-  payloadVersion: 'payloadVersion',
-  sourceRevision: 'sourceRevision',
-  status: 'status',
-  enabled: 'enabled',
-  cronExpression: 'cronExpression',
-  timezone: 'timezone',
-  startDate: 'startDate',
-  endDate: 'endDate',
-  maxExecutions: 'maxExecutions',
-  nextRunAt: 'nextRunAt',
-  lastRunAt: 'lastRunAt',
-  executionCount: 'executionCount',
-  lastExecutionStatus: 'lastExecutionStatus',
-  lastExecutionDuration: 'lastExecutionDuration',
-  consecutiveFailures: 'consecutiveFailures',
-  maxRetries: 'maxRetries',
-  initialDelayMs: 'initialDelayMs',
-  maxDelayMs: 'maxDelayMs',
-  backoffMultiplier: 'backoffMultiplier',
-  retryableStatuses: 'retryableStatuses',
-  payload: 'payload',
-  tags: 'tags',
-  priority: 'priority',
-  timeout: 'timeout',
-  version: 'version',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
-};
-
 exports.Prisma.ScheduledInvocationScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
@@ -1390,41 +1349,6 @@ exports.Prisma.SchedulingReconcileOperationScalarFieldEnum = {
   failureRetryable: 'failureRetryable',
   startedAt: 'startedAt',
   finishedAt: 'finishedAt',
-  createdAt: 'createdAt'
-};
-
-exports.Prisma.ScheduleExecutionScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  taskId: 'taskId',
-  executionTime: 'executionTime',
-  status: 'status',
-  duration: 'duration',
-  result: 'result',
-  error: 'error',
-  retryCount: 'retryCount',
-  createdAt: 'createdAt'
-};
-
-exports.Prisma.ScheduleStatisticScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  totalTasks: 'totalTasks',
-  activeTasks: 'activeTasks',
-  pausedTasks: 'pausedTasks',
-  completedTasks: 'completedTasks',
-  cancelledTasks: 'cancelledTasks',
-  failedTasks: 'failedTasks',
-  totalExecutions: 'totalExecutions',
-  successfulExecutions: 'successfulExecutions',
-  failedExecutions: 'failedExecutions',
-  skippedExecutions: 'skippedExecutions',
-  timeoutExecutions: 'timeoutExecutions',
-  avgExecutionDuration: 'avgExecutionDuration',
-  minExecutionDuration: 'minExecutionDuration',
-  maxExecutionDuration: 'maxExecutionDuration',
-  moduleStatistics: 'moduleStatistics',
-  lastUpdatedAt: 'lastUpdatedAt',
   createdAt: 'createdAt'
 };
 
@@ -1705,12 +1629,9 @@ exports.Prisma.ModelName = {
   KnowledgeWriteRequest: 'KnowledgeWriteRequest',
   KnowledgeRepositoryLease: 'KnowledgeRepositoryLease',
   Schedule: 'Schedule',
-  ScheduleTask: 'ScheduleTask',
   ScheduledInvocation: 'ScheduledInvocation',
   InvocationAttempt: 'InvocationAttempt',
   SchedulingReconcileOperation: 'SchedulingReconcileOperation',
-  ScheduleExecution: 'ScheduleExecution',
-  ScheduleStatistic: 'ScheduleStatistic',
   ScheduleLease: 'ScheduleLease',
   ScheduleRebuildOutbox: 'ScheduleRebuildOutbox',
   ScheduleDomainEventOutbox: 'ScheduleDomainEventOutbox',

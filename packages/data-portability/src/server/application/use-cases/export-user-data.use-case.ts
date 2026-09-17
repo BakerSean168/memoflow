@@ -23,7 +23,7 @@ import { projectGoals, projectGoalRecords } from './projections/goal.projection'
 import { projectTaskPlans, projectTaskOccurrences } from './projections/task.projection';
 import { projectReminderGroups, projectReminderTemplates, projectReminderResponses, projectUserReminderPreference } from './projections/reminder.projection';
 import { projectRepositories, projectResourceFolders, projectResources } from './projections/repository.projection';
-import { projectCalendarEntries, projectScheduleTasks } from './projections/schedule.projection';
+import { projectCalendarEntries } from './projections/schedule.projection';
 import { projectAIConversations } from './projections/ai.projection';
 import { projectNotificationPreference } from './projections/notification.projection';
 import { projectSettings } from './projections/setting.projection';
@@ -173,14 +173,8 @@ export class ExportUserDataUseCase {
     // ─── Schedules ───
     if (modules.includes('schedule')) {
       const entries = await this.deps.scheduleRepository.findByIdentityId(identityId);
-      const scheduleTasks = await this.deps.scheduleTaskRepository.findByIdentityId(identityId);
-
-      data.schedules = {
-        entries: projectCalendarEntries(entries, ctx),
-        tasks: projectScheduleTasks(scheduleTasks, ctx),
-      };
+      data.schedules = { entries: projectCalendarEntries(entries, ctx) };
       entityCounts.calendarEntries = data.schedules.entries.length;
-      entityCounts.scheduleTasks = data.schedules.tasks.length;
     }
 
     // ─── AI ───

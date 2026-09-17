@@ -26,7 +26,6 @@ import type {
   CreateTaskPlanInput,
   CreateTaskOccurrenceInput,
   CreateScheduleInput,
-  CreateScheduleTaskInput,
   CreateReminderGroupInput,
   CreateReminderTemplateInput,
   CreateReminderResponseInput,
@@ -188,9 +187,6 @@ class PrismaDataPortabilityImportTx implements DataPortabilityImportTx {
     });
   }
 
-  async createScheduleTask(input: CreateScheduleTaskInput): Promise<void> {
-    await this.tx.scheduleTask.create({ data: input as Prisma.ScheduleTaskUncheckedCreateInput });
-  }
 
   // --- Reminder ---
 

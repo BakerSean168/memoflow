@@ -24,7 +24,6 @@ import type {
   ResourceFolderRepoPort,
   ResourceRepoPort,
   ScheduleRepoPort,
-  ScheduleTaskRepoPort,
   AIConversationRepoPort,
   NotificationPreferenceRepoPort,
 } from '../../application/data-portability.dependencies';
@@ -225,16 +224,6 @@ class PowerSyncScheduleAdapter implements ScheduleRepoPort {
   }
 }
 
-class PowerSyncScheduleTaskAdapter implements ScheduleTaskRepoPort {
-  constructor(private readonly db: IElectronDatabase) {}
-  async findByIdentityId(identityId: string): Promise<unknown[]> {
-    const rows = await this.db.getAll<Record<string, unknown>>(
-      `SELECT * FROM schedule_tasks WHERE identity_id = ? AND deleted_at IS NULL ORDER BY created_at DESC`,
-      [identityId],
-    );
-    return mapRows(rows);
-  }
-}
 
 
 class PowerSyncAIConversationAdapter implements AIConversationRepoPort {
@@ -290,7 +279,6 @@ export function createPowerSyncDataPortabilityDependencies(
     folderRepository: new PowerSyncFolderAdapter(db),
     resourceRepository: new PowerSyncResourceAdapter(db),
     scheduleRepository: new PowerSyncScheduleAdapter(db),
-    scheduleTaskRepository: new PowerSyncScheduleTaskAdapter(db),
     aiConversationRepository: new PowerSyncAIConversationAdapter(db),
     notificationPreferenceRepository: new PowerSyncNotificationPreferenceAdapter(db),
     userPreferenceRepository: settingRepos.userPreferenceRepository,

@@ -159,63 +159,6 @@ describe('PowerSyncDataPortabilityImportStore', () => {
     );
   });
 
-  it('writes schedule task scheduler fields and imported timestamps', async () => {
-    const { db, statements } = createFakeDb();
-    const store = new PowerSyncDataPortabilityImportStore(db);
-
-    await store.transaction((tx) =>
-      tx.createScheduleTask({
-        id: 'schedule-task-1',
-        identityId: 'identity-1',
-        name: 'Daily sync',
-        description: null,
-        sourceModule: 'task',
-        sourceEntityId: 'task-1',
-        status: 'Active',
-        outcome: 'Open',
-        completionPolicy: 'AllowCorrection',
-        closedAt: null,
-        archivedAt: null,
-        abandonedReason: null,
-        enabled: true,
-        cronExpression: '0 8 * * *',
-        timezone: 'Asia/Shanghai',
-        startDate: '2024-02-01T00:00:00.000Z',
-        endDate: null,
-        maxExecutions: 10,
-        nextRunAt: '2024-02-02T00:00:00.000Z',
-        lastRunAt: '2024-02-01T00:00:00.000Z',
-        executionCount: 3,
-        lastExecutionStatus: 'success',
-        lastExecutionDuration: 120,
-        consecutiveFailures: 0,
-        maxRetries: 5,
-        initialDelayMs: 500,
-        maxDelayMs: 60_000,
-        backoffMultiplier: 2.5,
-        retryableStatuses: JSON.stringify(['timeout']),
-        payload: JSON.stringify({ source: 'import' }),
-        tags: JSON.stringify(['sync']),
-        priority: 'high',
-        timeout: 30_000,
-        createdAt: '2024-02-01T00:00:00.000Z',
-        updatedAt: '2024-02-01T01:00:00.000Z',
-      }),
-    );
-
-    const insert = statements.find((statement) =>
-      statement.sql.includes('INSERT INTO schedule_tasks'),
-    );
-    expect(insert?.sql).toContain('cron_expression');
-    expect(insert?.sql).toContain('retryable_statuses');
-    expect(insert?.sql).toContain('timeout');
-    expect(insert?.parameters).toContain('0 8 * * *');
-    expect(insert?.parameters).toContain('Asia/Shanghai');
-    expect(insert?.parameters).toContain(JSON.stringify(['timeout']));
-    expect(insert?.parameters).toContain('2024-02-01T00:00:00.000Z');
-    expect(insert?.parameters).toContain('2024-02-01T01:00:00.000Z');
-  });
-
   it('uses the imported generated id for reminder responses', async () => {
     const { db, statements } = createFakeDb();
     const store = new PowerSyncDataPortabilityImportStore(db);

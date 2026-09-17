@@ -14,7 +14,6 @@ export type {
   CreateTaskPlanInput,
   CreateTaskOccurrenceInput,
   CreateScheduleInput,
-  CreateScheduleTaskInput,
   CreateReminderGroupInput,
   CreateReminderTemplateInput,
   CreateReminderResponseInput,

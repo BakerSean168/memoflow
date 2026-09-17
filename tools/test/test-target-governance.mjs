@@ -33,9 +33,10 @@ const governedRequiredTargets = ['test', 'test:watch', 'test:coverage'];
 const coverageConfigsByProject = new Map([
   ['goal', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
   ['reminder', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
-  // CLEAN-6304: Schedule owns Calendar/Planner; Temporal Engine use-case coverage belongs to Scheduler.
+  // CLEAN-6304 / S4-2302B: Schedule owns Calendar/Planner and Scheduler now owns only
+  // canonical ScheduledInvocation runtime + mapper coverage; the retired ScheduleTask use-case slice is gone.
   ['schedule', ['vitest.config.ts', 'vitest.mappers.config.ts']],
-  ['scheduler', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
+  ['scheduler', ['vitest.config.ts', 'vitest.mappers.config.ts']],
   ['task', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
 ]);
 

@@ -1,26 +1,13 @@
-import type { IScheduleExecutionRepository, IScheduleTaskRepository } from '../domain';
-import {
-  BatchDeleteScheduleTasksUseCase,
-  BatchOperateScheduleTasksUseCase,
-  CancelScheduleTaskUseCase,
-  CompleteScheduleTaskUseCase,
-  CreateScheduleTaskUseCase,
-  DeleteScheduleTaskUseCase,
-  GetDueScheduleTasksUseCase,
-  ListScheduleTasksBySourceUseCase,
-  PauseScheduleTaskUseCase,
-  ResumeScheduleTaskUseCase,
-  GetScheduleTaskUseCase,
-  ListScheduleTasksByAccountUseCase,
-  ListScheduleTasksByStatusUseCase,
-  TriggerScheduleTaskUseCase,
-  UpdateScheduleTaskUseCase,
-  UpdateScheduleTaskMetadataUseCase,
-} from '../application/use-cases';
+import { ok } from '@memoflow/contracts/result';
+import type {
+  ScheduledInvocation,
+  ScheduledInvocationDiagnostic,
+  ScheduledInvocationDiagnosticQuery,
+} from '@memoflow/contracts/schedule';
 import type { SchedulerApplicationPort } from '../application';
-import { ScheduleTaskStatus, SourceModule } from '@memoflow/contracts/schedule';
-import type { IScheduledInvocationRepository } from '../domain/repositories/i-scheduled-invocation-repository';
+import { toScheduledInvocationDiagnostic } from '../application';
 import type { IInvocationAttemptRepository } from '../domain/repositories/i-invocation-attempt-repository';
+import type { IScheduledInvocationRepository } from '../domain/repositories/i-scheduled-invocation-repository';
 
 export interface SchedulerModuleRuntimeContribution {
   start(): Promise<void> | void;
@@ -32,76 +19,18 @@ export type SchedulerRuntimeContributionsInput =
   | readonly SchedulerModuleRuntimeContribution[];
 
 export interface SchedulerModuleDependencies {
-  readonly scheduleTaskRepository: IScheduleTaskRepository;
-  readonly scheduleExecutionRepository: IScheduleExecutionRepository;
-  readonly scheduledInvocationRepository?: IScheduledInvocationRepository;
-  readonly invocationAttemptRepository?: IInvocationAttemptRepository;
+  readonly scheduledInvocationRepository: IScheduledInvocationRepository;
+  readonly invocationAttemptRepository: IInvocationAttemptRepository;
   readonly runtimeContributions?: SchedulerRuntimeContributionsInput;
-}
-
-export interface SchedulerModuleUseCases {
-  readonly createScheduleTask: CreateScheduleTaskUseCase;
-  readonly updateScheduleTask: UpdateScheduleTaskUseCase;
-  readonly deleteScheduleTask: DeleteScheduleTaskUseCase;
-  readonly pauseScheduleTask: PauseScheduleTaskUseCase;
-  readonly resumeScheduleTask: ResumeScheduleTaskUseCase;
-  readonly triggerScheduleTask: TriggerScheduleTaskUseCase;
-  readonly completeScheduleTask: CompleteScheduleTaskUseCase;
-  readonly cancelScheduleTask: CancelScheduleTaskUseCase;
-  readonly getScheduleTask: GetScheduleTaskUseCase;
-  readonly getDueScheduleTasks: GetDueScheduleTasksUseCase;
-  readonly listScheduleTasksByAccount: ListScheduleTasksByAccountUseCase;
-  readonly listScheduleTasksBySource: ListScheduleTasksBySourceUseCase;
-  readonly listScheduleTasksByStatus: ListScheduleTasksByStatusUseCase;
-  readonly batchDeleteScheduleTasks: BatchDeleteScheduleTasksUseCase;
-  readonly batchOperateScheduleTasks: BatchOperateScheduleTasksUseCase;
-  readonly updateScheduleTaskMetadata: UpdateScheduleTaskMetadataUseCase;
+  readonly now?: () => number;
 }
 
 export interface SchedulerModuleInstance {
-  readonly scheduleTaskRepository: IScheduleTaskRepository;
-  readonly scheduleExecutionRepository: IScheduleExecutionRepository;
-  readonly scheduledInvocationRepository?: IScheduledInvocationRepository;
-  readonly invocationAttemptRepository?: IInvocationAttemptRepository;
-  readonly useCases: SchedulerModuleUseCases;
+  readonly scheduledInvocationRepository: IScheduledInvocationRepository;
+  readonly invocationAttemptRepository: IInvocationAttemptRepository;
   readonly api: SchedulerApplicationPort;
   start(): Promise<void>;
   dispose(): Promise<void>;
-}
-
-export function createSchedulerUseCases(
-  dependencies: SchedulerModuleDependencies,
-): SchedulerModuleUseCases {
-  const { scheduleTaskRepository } = dependencies;
-  const deleteScheduleTask = new DeleteScheduleTaskUseCase(scheduleTaskRepository);
-  const pauseScheduleTask = new PauseScheduleTaskUseCase(scheduleTaskRepository);
-  const resumeScheduleTask = new ResumeScheduleTaskUseCase(scheduleTaskRepository);
-  const cancelScheduleTask = new CancelScheduleTaskUseCase(scheduleTaskRepository);
-  const updateScheduleTask = new UpdateScheduleTaskUseCase(scheduleTaskRepository);
-
-  return {
-    createScheduleTask: new CreateScheduleTaskUseCase(scheduleTaskRepository),
-    updateScheduleTask,
-    deleteScheduleTask,
-    pauseScheduleTask,
-    resumeScheduleTask,
-    triggerScheduleTask: new TriggerScheduleTaskUseCase(scheduleTaskRepository),
-    completeScheduleTask: new CompleteScheduleTaskUseCase(scheduleTaskRepository),
-    cancelScheduleTask,
-    getScheduleTask: new GetScheduleTaskUseCase(scheduleTaskRepository),
-    getDueScheduleTasks: new GetDueScheduleTasksUseCase(scheduleTaskRepository),
-    listScheduleTasksByAccount: new ListScheduleTasksByAccountUseCase(scheduleTaskRepository),
-    listScheduleTasksBySource: new ListScheduleTasksBySourceUseCase(scheduleTaskRepository),
-    listScheduleTasksByStatus: new ListScheduleTasksByStatusUseCase(scheduleTaskRepository),
-    batchDeleteScheduleTasks: new BatchDeleteScheduleTasksUseCase(deleteScheduleTask),
-    batchOperateScheduleTasks: new BatchOperateScheduleTasksUseCase({
-      pauseScheduleTask,
-      resumeScheduleTask,
-      cancelScheduleTask,
-      updateScheduleTask,
-    }),
-    updateScheduleTaskMetadata: new UpdateScheduleTaskMetadataUseCase(scheduleTaskRepository),
-  };
 }
 
 function normalizeRuntimeContributions(
@@ -111,41 +40,63 @@ function normalizeRuntimeContributions(
   return Array.isArray(input) ? Array.from(input) : [input as SchedulerModuleRuntimeContribution];
 }
 
+async function projectInvocation(
+  invocation: ScheduledInvocation,
+  attempts: IInvocationAttemptRepository,
+): Promise<ScheduledInvocationDiagnostic> {
+  const lastAttempt = await attempts.findLatestForInvocation(
+    invocation.identityId,
+    invocation.id,
+  );
+  return toScheduledInvocationDiagnostic(invocation, lastAttempt);
+}
+
 export function createSchedulerModule(
   dependencies: SchedulerModuleDependencies,
 ): SchedulerModuleInstance {
-  const useCases = createSchedulerUseCases(dependencies);
   const runtimeContributions = normalizeRuntimeContributions(dependencies.runtimeContributions);
+  const now = dependencies.now ?? Date.now;
   let started = false;
   const startedRuntimes: SchedulerModuleRuntimeContribution[] = [];
 
+  const list = async (
+    identityId: string,
+    query: ScheduledInvocationDiagnosticQuery,
+  ): Promise<ScheduledInvocationDiagnostic[]> => {
+    const invocations = await dependencies.scheduledInvocationRepository.listForIdentity(identityId, {
+      ...(query.ownerType === undefined ? {} : { ownerType: query.ownerType }),
+      ...(query.ownerId === undefined ? {} : { ownerId: query.ownerId }),
+      ...(query.status === undefined ? {} : { status: query.status }),
+      ...(query.dueOnly ? { dueBefore: now() } : {}),
+      limit: query.limit ?? 100,
+    });
+    return Promise.all(
+      invocations.map((invocation) =>
+        projectInvocation(invocation, dependencies.invocationAttemptRepository),
+      ),
+    );
+  };
+
   const api: SchedulerApplicationPort = {
-    listTasks: async (query, ctx) => {
-      if (query.status) {
-        return useCases.listScheduleTasksByStatus.execute(
-          query.status as ScheduleTaskStatus,
-          ctx.identityId,
-        );
-      }
-      if (query.sourceModule && query.sourceEntityId) {
-        return useCases.listScheduleTasksBySource.execute(
-          query.sourceModule as SourceModule,
-          query.sourceEntityId as string,
-          ctx.identityId,
-        );
-      }
-      return useCases.listScheduleTasksByAccount.execute(ctx.identityId);
+    listInvocations: async (query, ctx) => ok(await list(ctx.identityId, query)),
+    getInvocation: async (id, ctx) => {
+      const invocation = await dependencies.scheduledInvocationRepository.findByIdForIdentity(
+        ctx.identityId,
+        id,
+      );
+      return ok(
+        invocation
+          ? await projectInvocation(invocation, dependencies.invocationAttemptRepository)
+          : null,
+      );
     },
-    getTask: async (id, ctx) => useCases.getScheduleTask.execute(id, ctx.identityId),
-    getDueTasks: async () => useCases.getDueScheduleTasks.execute(),
+    listDueInvocations: async (ctx) =>
+      ok(await list(ctx.identityId, { dueOnly: true, limit: 100 })),
   };
 
   return {
-    scheduleTaskRepository: dependencies.scheduleTaskRepository,
-    scheduleExecutionRepository: dependencies.scheduleExecutionRepository,
     scheduledInvocationRepository: dependencies.scheduledInvocationRepository,
     invocationAttemptRepository: dependencies.invocationAttemptRepository,
-    useCases,
     api,
     async start() {
       if (started) return;

@@ -392,7 +392,7 @@ import {
    * Soft residual 1038: tip focused suite numbers track Residual 1038 evidence tip (309/1339).
    * Soft residual 989: parseString/parseNumber already sole for notification + reminder.
    * Soft residual 985: goal parseBoolean remains true/false-only keep-boundary.
-   * Soft residual: scheduler parseBoolean remains keep-boundary (boolean literal + empty shapes).
+   * S4-2302B: Scheduler diagnostics query validation is contract-owned by Zod; no local parseBoolean body remains.
    * Does not flip §13.2 checkboxes.
    */
   describe('parseQueryBoolean dual retired (residual 1021)', () => {
@@ -430,11 +430,10 @@ import {
       expect(notification).toContain('parseBoolean(req.query?.isRead)');
     });
 
-    it('scheduler + goal remain keep-boundary vs this query boolean sole', () => {
-      expect(schedule).toMatch(/function parseBoolean\b/);
-      expect(schedule).toContain('value === true');
-      expect(schedule).toContain("value === ''");
-      expect(schedule).not.toContain('@memoflow/utils/shared');
+    it('scheduler uses contract-owned diagnostics query validation while goal keeps its local boolean boundary', () => {
+      expect(schedule).toContain('ScheduledInvocationDiagnosticQuerySchema');
+      expect(schedule).toContain('ScheduledInvocationDiagnosticQuerySchema.parse(req.query ?? {})');
+      expect(schedule).not.toMatch(/function parseBoolean\b/);
       expect(goalSole).toContain('Residual 985');
       expect(goalSole).toMatch(/export function parseBoolean\b/);
       expect(goalSole).not.toContain("'1'");
@@ -520,11 +519,12 @@ import {
       expect(reminder).toContain('parseNumber(');
     });
 
-    it('scheduler route parsers remain keep-boundary (not this sole dual body)', () => {
-      expect(schedule).toMatch(/function parseString\b/);
-      expect(schedule).toMatch(/function parseNumber\b/);
-      expect(schedule).toContain("value === ''");
-      expect(schedule).not.toContain('@memoflow/utils/shared');
+    it('scheduler diagnostics routes use contract-owned query parsing without local parser bodies', () => {
+      expect(schedule).toContain('ScheduledInvocationDiagnosticQuerySchema');
+      expect(schedule).toContain('ScheduledInvocationDiagnosticQuerySchema.parse(req.query ?? {})');
+      expect(schedule).not.toMatch(/function parseString\b/);
+      expect(schedule).not.toMatch(/function parseNumber\b/);
+      expect(schedule).not.toMatch(/function parseBoolean\b/);
     });
 
     it('parses first query string entry and finite numbers', () => {
@@ -559,7 +559,7 @@ import {
    * governance-route-shared re-exports utils sole; parseStringArray remains package-local.
    * Soft residual 1069: governance parseStringArray keep-boundary surface (no force-merge).
    * Soft residual 1038: tip focused suite numbers track Residual 1038 evidence tip (309/1339).
-   * Soft residual: scheduler route parsers remain keep-boundary (empty-string shapes).
+   * S4-2302B: Scheduler diagnostics query parsing is contract-owned; local route parser bodies are retired.
    * Soft residual 1021: notification parseBoolean sole family.
    * Does not flip §13.2 checkboxes.
    */
@@ -613,10 +613,10 @@ import {
       expect(revisions).not.toMatch(/function parseNumber\b/);
     });
 
-    it('scheduler remains keep-boundary; sole still parses arrays and finite numbers', () => {
-      expect(schedule).toMatch(/function parseString\b/);
-      expect(schedule).toContain("value === ''");
-      expect(schedule).not.toContain('@memoflow/utils/shared');
+    it('scheduler uses contract-owned diagnostics parsing; sole still parses arrays and finite numbers', () => {
+      expect(schedule).toContain('ScheduledInvocationDiagnosticQuerySchema');
+      expect(schedule).not.toMatch(/function parseString\b/);
+      expect(schedule).not.toMatch(/function parseNumber\b/);
       expect(parseString(['a', 'b'])).toBe('a');
       expect(parseNumber('12')).toBe(12);
       expect(parseNumber('nope')).toBeUndefined();

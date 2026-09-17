@@ -3,23 +3,14 @@
  *
  * Paths match the actual HTTP adapters:
  *   - ScheduleEventHttpAdapter: /schedules/events
- *   - Scheduler diagnostics:    /schedules/tasks (read-only)
  */
 
 import { http, HttpResponse } from 'msw';
-import {
-  createMockScheduleTask,
-  createMockScheduleTaskList,
-} from '@memoflow/contracts/mocks';
-import type { ScheduleTaskClientDTO } from '@memoflow/contracts/schedule';
 import { faker } from '@faker-js/faker';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 const EVENTS = `${API_BASE}/schedules/events`;
-const TASKS = `${API_BASE}/schedules/tasks`;
 
-const toScheduleTaskId = (p: string | readonly string[] | undefined) =>
-  (Array.isArray(p) ? p[0] : (p ?? '')) as ScheduleTaskClientDTO['id'];
 
 function createMockCalendarEntry(overrides: Record<string, unknown> = {}) {
   const now = Date.now();
@@ -155,40 +146,6 @@ export const scheduleHandlers = [
       code: 200,
       message: 'Deleted',
       data: { id: params.id },
-      timestamp: Date.now(),
-    });
-  }),
-
-  // ============ Schedule Tasks ============
-
-  http.get(`${TASKS}/due`, () => {
-    return HttpResponse.json({
-      ok: true,
-      code: 200,
-      message: 'Success',
-      data: createMockScheduleTaskList(3),
-      timestamp: Date.now(),
-    });
-  }),
-
-  http.get(TASKS, () => {
-    const tasks = createMockScheduleTaskList(10);
-    return HttpResponse.json({
-      ok: true,
-      code: 200,
-      message: 'Success',
-      data: { tasks, total: tasks.length },
-      timestamp: Date.now(),
-    });
-  }),
-
-
-  http.get(`${TASKS}/:taskId`, ({ params }) => {
-    return HttpResponse.json({
-      ok: true,
-      code: 200,
-      message: 'Success',
-      data: createMockScheduleTask({ id: toScheduleTaskId(params['taskId']) }),
       timestamp: Date.now(),
     });
   }),

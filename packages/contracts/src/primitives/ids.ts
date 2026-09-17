@@ -48,15 +48,6 @@ export type UserReminderPreferencesId = string & { readonly __brand: 'UserRemind
 /** 日程 ID */
 export type ScheduleId = string & { readonly __brand: 'ScheduleId' };
 
-/** 日程任务 ID */
-export type ScheduleTaskId = string & { readonly __brand: 'ScheduleTaskId' };
-
-/** 日程执行 ID */
-export type ScheduleExecutionId = string & { readonly __brand: 'ScheduleExecutionId' };
-
-/** 日程统计 ID */
-export type ScheduleStatisticId = string & { readonly __brand: 'ScheduleStatisticId' };
-
 /** Stable managed knowledge document ID carried by Markdown frontmatter. */
 export type KnowledgeDocumentId = string & { readonly __brand: 'KnowledgeDocumentId' };
 
@@ -206,9 +197,6 @@ export const ID_PREFIXES = {
 
   // === Schedule ===
   ScheduleId: 'IScheduleId',
-  ScheduleTaskId: 'IScheduleTaskId',
-  ScheduleExecutionId: 'IScheduleExecutionId',
-  ScheduleStatisticId: 'IScheduleStatisticId',
 
   // === Knowledge / Repository ===
   KnowledgeDocumentId: 'kdoc',

@@ -98,7 +98,6 @@ function createFakeDependencies(): DashboardReadDependencies {
     taskPlanRepository: taskPlanRepository as never,
     taskOccurrenceRepository: taskOccurrenceRepository as never,
     scheduleRepository: scheduleRepository as never,
-    scheduleTaskRepository: {} as never,
     reminderTemplateRepository: reminderTemplateRepository as never,
     notificationRepository: notificationRepository as never,
     userTimeContextPort: {

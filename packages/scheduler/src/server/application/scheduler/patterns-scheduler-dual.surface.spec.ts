@@ -16,7 +16,7 @@ describe('patterns scheduler dual retired (residual 1039)', () => {
   const soleMonitor = readFileSync(resolve(patternsRoot, 'schedule-monitor.ts'), 'utf8');
   const soleHeap = readFileSync(resolve(patternsRoot, 'priority-queue/min-heap.ts'), 'utf8');
   const scheduleIndex = readFileSync(resolve(scheduleDir, 'index.ts'), 'utf8');
-  const taskQueue = readFileSync(resolve(scheduleDir, 'schedule-task-queue.ts'), 'utf8');
+  const invocationQueue = readFileSync(resolve(scheduleDir, 'scheduled-invocation-queue.ts'), 'utf8');
 
   it('owns sole timer/monitor/min-heap bodies in patterns', () => {
     expect(soleTimer).toContain('Residual 1039');
@@ -48,10 +48,10 @@ describe('patterns scheduler dual retired (residual 1039)', () => {
     expect(scheduleIndex).not.toContain("from './i-schedule-timer'");
     expect(scheduleIndex).not.toContain("from './i-schedule-monitor'");
     expect(scheduleIndex).not.toContain("from './min-heap'");
-    expect(taskQueue).toContain("from '@memoflow/patterns/scheduler'");
-    expect(taskQueue).not.toContain("from './i-schedule-timer'");
-    expect(taskQueue).not.toContain("from './i-schedule-monitor'");
-    expect(taskQueue).not.toContain("from './min-heap'");
+    expect(invocationQueue).toContain("from '@memoflow/patterns/scheduler'");
+    expect(invocationQueue).not.toContain("from './i-schedule-timer'");
+    expect(invocationQueue).not.toContain("from './i-schedule-monitor'");
+    expect(invocationQueue).not.toContain("from './min-heap'");
   });
 
   it('patterns sole timer/heap/monitor remain importable', () => {

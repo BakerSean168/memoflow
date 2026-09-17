@@ -89,12 +89,13 @@ export const ScheduleChannels = {
   DETECT_CONFLICTS: 'schedule:detect-conflicts',
   CREATE_WITH_CONFLICT_DETECTION: 'schedule:create-with-conflict-detection',
   RESOLVE_CONFLICT: 'schedule:resolve-conflict',
-  // Raw ScheduleTask worker jobs are Scheduler-owned persistence. IPC exposes
-  // diagnostics only; product mutations flow through owner-domain commands.
-  TASK_LIST: 'schedule:task:list',
-  TASK_GET_BY_ID: 'schedule:task:get-by-id',
-  TASK_GET_DUE: 'schedule:task:get-due',
-  TASK_GET_BY_SOURCE: 'schedule:task:get-by-source',
+} as const;
+
+/** Read-only internal/dev/ops transport for canonical Scheduler diagnostics. */
+export const SchedulerChannels = {
+  INVOCATION_LIST: 'scheduler:invocation:list',
+  INVOCATION_GET_BY_ID: 'scheduler:invocation:get-by-id',
+  INVOCATION_GET_DUE: 'scheduler:invocation:get-due',
 } as const;
 
 export const ReminderChannels = {

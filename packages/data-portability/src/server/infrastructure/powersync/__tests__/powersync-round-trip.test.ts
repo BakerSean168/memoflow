@@ -95,7 +95,6 @@ describe('PowerSync desktop data portability round trip', () => {
     const goalRecord = insertedRow(firstStatements, 'goal_records');
     const taskPlan = insertedRow(firstStatements, 'task_plans');
     const taskOccurrence = insertedRow(firstStatements, 'task_occurrences');
-    const scheduleTask = insertedRow(firstStatements, 'schedule_tasks');
     const reminderGroup = insertedRow(firstStatements, 'reminder_groups');
     const reminderTemplate = insertedRow(firstStatements, 'reminder_templates');
     const routineProfile = insertedRow(firstStatements, 'routine_profiles');
@@ -143,7 +142,6 @@ describe('PowerSync desktop data portability round trip', () => {
     expect(importedOccurrenceChecklist).toHaveLength(1);
     expect(importedOccurrenceChecklist[0]?.definitionId).toBe(importedPlanChecklist[0]?.id);
     expect(importedPlanChecklist[0]?.id).not.toBe('check-a');
-    expect(scheduleTask.source_entity_id).toBe(taskPlan.id);
     expect(reminderTemplate).not.toHaveProperty('reminder_group_id');
     expect(routineProfile.id).toBe(reminderGroup.id);
     expect(routineDefinition.id).toBe(reminderTemplate.id);
@@ -915,37 +913,6 @@ function seedProfile(identityUuid: string): SeedTables {
         attendees: JSON.stringify(['teammate']),
         created_at: now,
         updated_at: later,
-      },
-    ],
-    schedule_tasks: [
-      {
-        id: 'schedule-task-a',
-        identity_id: identityUuid,
-        name: 'Daily test run',
-        description: 'Run portability tests',
-        source_module: 'task',
-        source_entity_id: 'task-plan-a',
-        status: 'active',
-        enabled: 1,
-        cron_expression: '0 8 * * *',
-        timezone: 'Asia/Shanghai',
-        start_date: now,
-        end_date: null,
-        next_run_at: later,
-        last_run_at: null,
-        execution_count: 1,
-        max_retries: 3,
-        initial_delay_ms: 1000,
-        max_delay_ms: 30000,
-        backoff_multiplier: 2,
-        consecutive_failures: 0,
-        retryable_statuses: JSON.stringify(['timeout']),
-        payload: JSON.stringify({ source: 'round-trip' }),
-        tags: JSON.stringify(['portable']),
-        timeout: 30000,
-        created_at: now,
-        updated_at: later,
-        deleted_at: null,
       },
     ],
     editor_workspaces: [

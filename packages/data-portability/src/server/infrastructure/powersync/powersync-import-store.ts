@@ -24,7 +24,6 @@ import type {
   CreateTaskPlanInput,
   CreateTaskOccurrenceInput,
   CreateScheduleInput,
-  CreateScheduleTaskInput,
   CreateReminderGroupInput,
   CreateReminderTemplateInput,
   CreateReminderResponseInput,
@@ -364,42 +363,6 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
     );
   }
 
-  async createScheduleTask(input: CreateScheduleTaskInput): Promise<void> {
-    await this.tx.execute(
-      `INSERT INTO schedule_tasks (id, identity_id, name, description, source_module, source_entity_id, status, enabled, cron_expression, timezone, start_date, end_date, max_executions, next_run_at, last_run_at, execution_count, last_execution_status, last_execution_duration, consecutive_failures, max_retries, initial_delay_ms, max_delay_ms, backoff_multiplier, retryable_statuses, payload, tags, priority, timeout, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
-      [
-        input.id,
-        input.identityId,
-        input.name,
-        str(input.description),
-        input.sourceModule,
-        input.sourceEntityId,
-        input.status,
-        bool(input.enabled),
-        str(input.cronExpression),
-        input.timezone,
-        str(input.startDate),
-        str(input.endDate),
-        input.maxExecutions,
-        str(input.nextRunAt),
-        str(input.lastRunAt),
-        input.executionCount,
-        str(input.lastExecutionStatus),
-        input.lastExecutionDuration,
-        input.consecutiveFailures,
-        input.maxRetries,
-        input.initialDelayMs,
-        input.maxDelayMs,
-        input.backoffMultiplier,
-        input.retryableStatuses,
-        str(input.payload),
-        input.tags,
-        input.priority,
-        input.timeout,
-        ...createdUpdated(input),
-      ],
-    );
-  }
 
   // --- Reminder ---
 

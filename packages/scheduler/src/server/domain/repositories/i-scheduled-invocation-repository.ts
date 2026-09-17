@@ -32,6 +32,18 @@ export interface IScheduledInvocationRepository {
   findById(id: string): Promise<ScheduledInvocation | null>;
   findByIdForIdentity(identityId: string, id: string): Promise<ScheduledInvocation | null>;
   findByOwner(owner: SchedulingOwner): Promise<ScheduledInvocation[]>;
+  listForIdentity(
+    identityId: string,
+    options?: {
+      readonly ownerType?: string;
+      readonly ownerId?: string;
+      readonly status?: ScheduledInvocationStatus;
+      readonly dueBefore?: number;
+      readonly limit?: number;
+    },
+  ): Promise<ScheduledInvocation[]>;
+  listOwnersByType(ownerType: string): Promise<SchedulingOwner[]>;
+  findRunnable(limit?: number): Promise<ScheduledInvocation[]>;
   findDue(now: number, limit?: number): Promise<ScheduledInvocation[]>;
   save(invocation: ScheduledInvocation): Promise<void>;
   supersedeStale(owner: SchedulingOwner, keepSchedulingKeys: readonly string[]): Promise<number>;

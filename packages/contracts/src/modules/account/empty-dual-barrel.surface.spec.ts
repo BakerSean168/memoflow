@@ -18,24 +18,22 @@ describe('empty dual barrel re-export single-track surface (residual 661)', () =
     expect(index).toContain("export * from './api'");
   });
 
-  it('schedule keeps its residual empty DTO barrel while Setting deletes the DTO barrel entirely', () => {
+  it('schedule and Setting both delete retired DTO barrels from their public surface', () => {
     const schedule = readFileSync(resolve(modules, 'schedule/index.ts'), 'utf8');
     const setting = readFileSync(resolve(modules, 'setting/index.ts'), 'utf8');
-    expect(schedule).toMatch(/Residual 661/);
     expect(schedule).not.toContain("export * from './dtos'");
     expect(setting).not.toContain("export * from './dtos'");
     expect(schedule).toContain("export * from './api'");
     expect(setting).toContain("export * from './api'");
     expect(setting).toContain("export * from './preferences'");
+    expect(existsSync(resolve(modules, 'schedule/dtos'))).toBe(false);
     expect(existsSync(resolve(modules, 'setting/dtos'))).toBe(false);
   });
 
   it('keeps residual-empty dual barrels as note-only files', () => {
     const accountDtos = readFileSync(resolve(modules, 'account/dtos/index.ts'), 'utf8');
-    const scheduleDtos = readFileSync(resolve(modules, 'schedule/dtos/index.ts'), 'utf8');
     const accountEntities = readFileSync(resolve(modules, 'account/entities/index.ts'), 'utf8');
     expect(accountDtos).toContain('export {}');
-    expect(scheduleDtos).toMatch(/Residual 653/);
     expect(accountEntities).toMatch(/Residual 655/);
   });
 });
