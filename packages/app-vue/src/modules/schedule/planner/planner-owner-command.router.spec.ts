@@ -115,9 +115,41 @@ describe('PlannerOwnerCommandRouter (PLAN-4303)', () => {
     });
 
     expect(updateSchedule).toHaveBeenCalledWith('schedule-1', {
-      startTime: Number(at14),
-      endTime: Number(at17),
+      range: { kind: 'Timed', start: at14, end: at17 },
       expectedVersion: 8,
+    });
+    expect(outcome.status).toBe('applied');
+  });
+
+  it('routes an AllDay CalendarEntry move as canonical Ymd range truth', async () => {
+    const updateSchedule = vi.fn().mockResolvedValue(ok({}));
+    const router = createPlannerOwnerCommandRouter({ schedule: { updateSchedule }, time });
+    const projection: Extract<CalendarEventProjection, { sourceType: 'schedule' }> = {
+      identityId: 'identity-1',
+      sourceType: 'schedule',
+      sourceId: 'schedule-all-day',
+      title: 'Conference',
+      start: asYmd('2026-08-27'),
+      end: asYmd('2026-08-29'),
+      allDay: true,
+      displayMetadata: { semantic: 'calendar-entry' },
+      editableCapabilities: { move: true, resize: true },
+      ownerCommandTarget: {
+        ownerType: 'schedule.calendar-entry',
+        ownerId: 'schedule-all-day',
+      },
+      revision: 4,
+    };
+
+    const outcome = await router.route({
+      kind: 'move',
+      projection,
+      nextRange: { allDay: true, start: asYmd('2026-09-01'), end: asYmd('2026-09-03') },
+    });
+
+    expect(updateSchedule).toHaveBeenCalledWith('schedule-all-day', {
+      range: { kind: 'AllDay', start: asYmd('2026-09-01'), end: asYmd('2026-09-03') },
+      expectedVersion: 4,
     });
     expect(outcome.status).toBe('applied');
   });

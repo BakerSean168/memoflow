@@ -11,10 +11,7 @@ const asScheduleTaskId = (value: string) => value as ScheduleTaskClientDTO['id']
 const asTaskIdentityId = (value: string) => value as ScheduleTaskClientDTO['identityId'];
 const toIso = (value: number | null) => (value == null ? null : new Date(value).toISOString());
 
-type ScheduleEventStoryOverrides = Omit<
-  Partial<CalendarEntryClientDTO>,
-  'id' | 'identityId'
-> & {
+type ScheduleEventStoryOverrides = Omit<Partial<CalendarEntryClientDTO>, 'id' | 'identityId'> & {
   id?: string;
   identityId?: string;
 };
@@ -43,12 +40,7 @@ export function createScheduleStoryEvent(
     identityId: asIdentityId(identityId ?? 'user-1'),
     title: 'Schedule event',
     description: undefined,
-    startTime: now,
-    endTime: now + 60 * 60 * 1000,
-    duration: 60 * 60,
-    hasConflict: false,
-    conflictingEntries: undefined,
-    priority: 2,
+    range: { kind: 'Timed', start: now, end: now + 60 * 60 * 1000 },
     location: undefined,
     attendees: undefined,
     version: 1,

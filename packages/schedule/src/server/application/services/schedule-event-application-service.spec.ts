@@ -1,42 +1,78 @@
 import { describe, expect, it } from 'vitest';
+import { requireYmd } from '@memoflow/contracts/primitives';
 import { IdentityId } from '@memoflow/domain-shared';
-import type { IScheduleRepository } from '../../domain/repositories/i-schedule-repository';
+import type {
+  IScheduleRepository,
+  ScheduleRebuildOutboxDTO,
+} from '../../domain/repositories/i-schedule-repository';
 import { CalendarEntry } from '../../domain/aggregates/calendar-entry';
 import { ScheduleConflictDetectionService } from './schedule-conflict-detection-service';
 import { ScheduleEventApplicationService } from './schedule-event-application-service';
 
+function cloneEntry(entry: CalendarEntry): CalendarEntry {
+  return CalendarEntry.load({
+    id: entry.id,
+    identityId: entry.identityId,
+    title: entry.title,
+    description: entry.description,
+    range: entry.range,
+    location: entry.location,
+    attendees: entry.attendees,
+    version: entry.version,
+    createdAt: entry.createdAt,
+    updatedAt: entry.updatedAt,
+  });
+}
+
 class InMemoryScheduleRepository implements IScheduleRepository {
-  private readonly schedules = new Map<string, CalendarEntry>();
+  private schedules = new Map<string, CalendarEntry>();
+  private conflictProjections = new Map<
+    string,
+    { hasConflict: boolean; conflictingEntries: string[] | null }
+  >();
+  public outbox: ScheduleRebuildOutboxDTO[] = [];
   public saveCalls = 0;
 
-  async save(schedule: CalendarEntry): Promise<void> {
+  async save(schedule: CalendarEntry, expectedVersion?: number): Promise<void> {
+    const existing = this.schedules.get(schedule.id);
+    if (expectedVersion !== undefined && (!existing || existing.version !== expectedVersion)) {
+      const error = Object.assign(new Error('version conflict'), {
+        code: existing ? 'CONFLICT' : 'NOT_FOUND',
+        context: existing ? { currentVersion: existing.version, expectedVersion } : undefined,
+      });
+      throw error;
+    }
     this.saveCalls += 1;
-    this.schedules.set(schedule.id, schedule);
+    this.schedules.set(schedule.id, cloneEntry(schedule));
   }
 
-
   async findByIdForIdentity(identityId: string, id: string): Promise<CalendarEntry | null> {
-    const schedule = this.schedules.get(id) ?? null;
-    if (!schedule || schedule.identityId !== identityId) {
-      return null;
-    }
-    return schedule;
+    const entry = this.schedules.get(id);
+    return entry && entry.identityId === identityId ? cloneEntry(entry) : null;
   }
 
   async findByIdentityId(identityId: string): Promise<CalendarEntry[]> {
-    return Array.from(this.schedules.values()).filter((schedule) => schedule.identityId === identityId);
+    return Array.from(this.schedules.values())
+      .filter((entry) => entry.identityId === identityId)
+      .map(cloneEntry);
   }
 
-  async deleteById(identityId: string, id: string): Promise<void> {
-    const schedule = await this.findByIdForIdentity(identityId, id);
-    if (!schedule) {
-      throw new Error('Schedule event not found for the current identity.');
+  async deleteById(identityId: string, id: string, expectedVersion: number): Promise<void> {
+    const entry = this.schedules.get(id);
+    if (!entry || entry.identityId !== identityId)
+      throw Object.assign(new Error('not found'), { code: 'NOT_FOUND' });
+    if (entry.version !== expectedVersion) {
+      throw Object.assign(new Error('version conflict'), {
+        code: 'CONFLICT',
+        context: { currentVersion: entry.version, expectedVersion },
+      });
     }
     this.schedules.delete(id);
+    this.conflictProjections.delete(id);
   }
 
-  async deleteAggregate(entry: CalendarEntry): Promise<void> {
-    this.schedules.delete(entry.id);
+  async deleteAggregate(entry: CalendarEntry, expectedVersion: number): Promise<void> {
+    await this.deleteById(entry.identityId, entry.id, expectedVersion);
   }
 
   async findByTimeRange(
@@ -46,52 +82,52 @@ class InMemoryScheduleRepository implements IScheduleRepository {
     excludeId?: string,
   ): Promise<CalendarEntry[]> {
     return Array.from(this.schedules.values())
-      .filter((schedule) => {
-        if (schedule.identityId !== identityId) return false;
-        if (excludeId && schedule.id === excludeId) return false;
-        return schedule.startTime < endTime && schedule.endTime > startTime;
+      .filter((entry) => {
+        if (entry.identityId !== identityId || entry.id === excludeId) return false;
+        const range = entry.range;
+        return range.kind === 'Timed' && range.start < endTime && range.end > startTime;
       })
-      .sort((left, right) => left.startTime - right.startTime);
+      .map(cloneEntry)
+      .sort((left, right) => {
+        const a = left.range;
+        const b = right.range;
+        return a.kind === 'Timed' && b.kind === 'Timed' ? a.start - b.start : 0;
+      });
   }
-  private readonly conflictProjections = new Map<
-    string,
-    { hasConflict: boolean; conflictingEntries: string[] | null }
-  >();
 
   async updateConflictProjection(
     identityId: string,
     id: string,
     hasConflict: boolean,
     conflictingEntries: string[] | null,
-    _sourceRevision: number,
+    sourceRevision: number,
   ): Promise<void> {
-    const s = this.schedules.get(id);
-    if (s && s.identityId === identityId) {
-      this.conflictProjections.set(id, { hasConflict, conflictingEntries });
-      this.schedules.set(
-        id,
-        CalendarEntry.load({
-          id: s.id,
-          identityId: s.identityId,
-          title: s.title,
-          description: s.description,
-          startTime: s.startTime,
-          endTime: s.endTime,
-          duration: s.duration,
-          hasConflict,
-          conflictingEntries,
-          priority: s.priority,
-          location: s.location,
-          attendees: s.attendees,
-          version: s.version,
-          createdAt: s.createdAt,
-          updatedAt: s.updatedAt,
-        }),
-      );
-    }
+    const entry = this.schedules.get(id);
+    if (!entry || entry.identityId !== identityId || entry.version > sourceRevision) return;
+    this.conflictProjections.set(id, {
+      hasConflict,
+      conflictingEntries: conflictingEntries ? [...conflictingEntries] : null,
+    });
   }
 
-  async createRebuildOutbox(_item: {
+  async getConflictProjection(
+    identityId: string,
+    id: string,
+  ): Promise<{ hasConflict: boolean; conflictingEntries: string[] | null } | null> {
+    const entry = this.schedules.get(id);
+    if (!entry || entry.identityId !== identityId) return null;
+    const projection = this.conflictProjections.get(id);
+    return projection
+      ? {
+          hasConflict: projection.hasConflict,
+          conflictingEntries: projection.conflictingEntries
+            ? [...projection.conflictingEntries]
+            : null,
+        }
+      : { hasConflict: false, conflictingEntries: null };
+  }
+
+  async createRebuildOutbox(item: {
     identityId: string;
     scheduleId?: string;
     startTime: number;
@@ -99,44 +135,86 @@ class InMemoryScheduleRepository implements IScheduleRepository {
     sourceRevision: number;
     idempotencyKey?: string;
   }): Promise<void> {
-    return undefined;
+    this.outbox.push({
+      id: `outbox-${this.outbox.length + 1}`,
+      identityId: item.identityId,
+      scheduleId: item.scheduleId ?? null,
+      startTime: new Date(item.startTime),
+      endTime: new Date(item.endTime),
+      sourceRevision: item.sourceRevision,
+      idempotencyKey: item.idempotencyKey ?? null,
+      status: 'pending',
+      attempts: 0,
+      lastError: null,
+      processedAt: null,
+      createdAt: new Date(),
+    });
   }
 
-  async fetchPendingRebuildOutbox(): Promise<unknown[]> {
+  async fetchPendingRebuildOutbox(): Promise<ScheduleRebuildOutboxDTO[]> {
+    return this.outbox;
+  }
+  async fetchRebuildTimeline(): Promise<ScheduleRebuildOutboxDTO[]> {
+    return this.outbox;
+  }
+  async replayRebuildOutbox(): Promise<ScheduleRebuildOutboxDTO> {
+    throw new Error('unused');
+  }
+  async claimRebuildOutboxItems(): Promise<ScheduleRebuildOutboxDTO[]> {
     return [];
   }
-
-  async claimRebuildOutboxItems(): Promise<unknown[]> {
+  async markRebuildOutboxProcessed(): Promise<void> {}
+  async createDomainEventOutbox(): Promise<void> {}
+  async fetchPendingDomainEventOutbox(): Promise<never[]> {
     return [];
   }
-
-  async markRebuildOutboxProcessed(_id: string): Promise<void> {
-    return undefined;
+  async claimDomainEventOutboxItems(): Promise<never[]> {
+    return [];
   }
+  async markDomainEventOutboxProcessed(): Promise<void> {}
 
   async withTransaction<T>(fn: (repo: IScheduleRepository) => Promise<T>): Promise<T> {
-    return fn(this);
+    const schedules = new Map(
+      Array.from(this.schedules.entries(), ([id, entry]) => [id, cloneEntry(entry)]),
+    );
+    const projections = new Map(
+      Array.from(this.conflictProjections.entries(), ([id, projection]) => [
+        id,
+        {
+          ...projection,
+          conflictingEntries: projection.conflictingEntries
+            ? [...projection.conflictingEntries]
+            : null,
+        },
+      ]),
+    );
+    const outbox = this.outbox.map((item) => ({ ...item }));
+    try {
+      return await fn(this);
+    } catch (error) {
+      this.schedules = schedules;
+      this.conflictProjections = projections;
+      this.outbox = outbox;
+      throw error;
+    }
   }
 }
 
-const hour = (h: number): number => {
-  return new Date('2026-05-02T00:00:00.000Z').getTime() + h * 60 * 60 * 1000;
-};
+const base = Date.parse('2026-05-02T00:00:00.000Z');
+const hour = (h: number) => base + h * 60 * 60 * 1000;
+const timed = (start: number, end: number) => ({ kind: 'Timed' as const, start, end });
 
-describe('Schedule services', () => {
+describe('Schedule services ADR-080', () => {
   it('detectConflictsForTimeRange is analysis-only and does not save', async () => {
     const repository = new InMemoryScheduleRepository();
     const identityId = IdentityId.generate();
-    const existing = CalendarEntry.create({
-      identityId,
-      title: 'Existing',
-      startTime: hour(9),
-      endTime: hour(10),
-    });
-    await repository.save(existing);
+    await repository.save(
+      CalendarEntry.create({ identityId, title: 'Existing', range: timed(hour(9), hour(10)) }),
+    );
 
-    const service = new ScheduleConflictDetectionService(repository);
-    const result = await service.detectConflictsForTimeRange({
+    const result = await new ScheduleConflictDetectionService(
+      repository,
+    ).detectConflictsForTimeRange({
       identityId,
       startTime: hour(9.5),
       endTime: hour(10.5),
@@ -147,98 +225,129 @@ describe('Schedule services', () => {
     expect(repository.saveCalls).toBe(1);
   });
 
-  it('createSchedule refreshes conflict state for the new and existing events', async () => {
+  it('creates Timed entries while keeping conflict state in the projection cache only', async () => {
     const repository = new InMemoryScheduleRepository();
     const identityId = IdentityId.generate();
-    const existing = CalendarEntry.create({
-      identityId,
-      title: 'Existing',
-      startTime: hour(9),
-      endTime: hour(10),
-    });
-    await repository.save(existing);
-
     const service = new ScheduleEventApplicationService(repository);
-    const created = await service.createSchedule({
-      identityId,
-      title: 'Created',
-      startTime: hour(9.5),
-      endTime: hour(10.5),
-    });
-
-    const refreshedExisting = await repository.findByIdForIdentity(identityId, existing.id);
-
-    expect(created.hasConflict).toBe(true);
-    expect(created.conflictingEntries).toContain(existing.id);
-    expect(refreshedExisting?.hasConflict).toBe(true);
-    expect(refreshedExisting?.conflictingEntries).toContain(created.id);
-  });
-
-  it('updateSchedule persists metadata changes and clears stale conflicts after moving the event', async () => {
-    const repository = new InMemoryScheduleRepository();
-    const service = new ScheduleEventApplicationService(repository);
-    const identityId = IdentityId.generate();
-
     const first = await service.createSchedule({
       identityId,
       title: 'First',
-      startTime: hour(9),
-      endTime: hour(10),
+      range: timed(hour(9), hour(10)),
     });
     const second = await service.createSchedule({
       identityId,
       title: 'Second',
-      startTime: hour(9.5),
-      endTime: hour(10.5),
+      range: timed(hour(9.5), hour(10.5)),
+    });
+
+    expect(first).not.toHaveProperty('hasConflict');
+    expect(second).not.toHaveProperty('conflictingEntries');
+    await expect(repository.getConflictProjection(identityId, first.id)).resolves.toMatchObject({
+      hasConflict: true,
+    });
+    await expect(repository.getConflictProjection(identityId, second.id)).resolves.toMatchObject({
+      hasConflict: true,
+    });
+    expect(repository.outbox).toHaveLength(2);
+  });
+
+  it('creates AllDay entries as Ymd truth without conflict rebuild work', async () => {
+    const repository = new InMemoryScheduleRepository();
+    const identityId = IdentityId.generate();
+    const service = new ScheduleEventApplicationService(repository);
+    const created = await service.createSchedule({
+      identityId,
+      title: 'Holiday',
+      range: { kind: 'AllDay', start: requireYmd('2026-05-02'), end: null },
+    });
+
+    expect(created.range).toEqual({ kind: 'AllDay', start: '2026-05-02', end: null });
+    expect(repository.outbox).toHaveLength(0);
+    expect(await service.getSchedulesByAccount(identityId)).toHaveLength(1);
+  });
+
+  it('updates metadata and Timed range while refreshing derived conflict cache', async () => {
+    const repository = new InMemoryScheduleRepository();
+    const identityId = IdentityId.generate();
+    const service = new ScheduleEventApplicationService(repository);
+    const first = await service.createSchedule({
+      identityId,
+      title: 'First',
+      range: timed(hour(9), hour(10)),
+    });
+    const second = await service.createSchedule({
+      identityId,
+      title: 'Second',
+      range: timed(hour(9.5), hour(10.5)),
     });
 
     const updated = await service.updateSchedule(first.id, identityId, {
-      startTime: hour(12),
-      endTime: hour(13),
+      range: timed(hour(12), hour(13)),
       description: 'Updated notes',
       location: 'Room B',
-      priority: 4,
       attendees: ['a@example.com', 'b@example.com'],
       expectedVersion: first.version,
     });
 
-    const refreshedSecond = await repository.findByIdForIdentity(identityId, second.id);
-
-    expect(updated.hasConflict).toBe(false);
-    expect(updated.description).toBe('Updated notes');
-    expect(updated.location).toBe('Room B');
-    expect(updated.priority).toBe(4);
-    expect(updated.attendees).toEqual(['a@example.com', 'b@example.com']);
-    expect(refreshedSecond?.hasConflict).toBe(false);
-    expect(refreshedSecond?.conflictingEntries).toBeNull();
+    expect(updated).toMatchObject({ description: 'Updated notes', location: 'Room B', version: 2 });
+    expect(updated.range).toEqual(timed(hour(12), hour(13)));
+    await expect(repository.getConflictProjection(identityId, second.id)).resolves.toEqual({
+      hasConflict: false,
+      conflictingEntries: null,
+    });
   });
 
-  it('deleteSchedule refreshes remaining events in the old conflict window', async () => {
+  it('clears stale compatibility conflict cache when Timed becomes AllDay', async () => {
     const repository = new InMemoryScheduleRepository();
-    const service = new ScheduleEventApplicationService(repository);
     const identityId = IdentityId.generate();
-
+    const service = new ScheduleEventApplicationService(repository);
     const first = await service.createSchedule({
       identityId,
       title: 'First',
-      startTime: hour(9),
-      endTime: hour(10),
+      range: timed(hour(9), hour(10)),
+    });
+    await service.createSchedule({
+      identityId,
+      title: 'Second',
+      range: timed(hour(9.5), hour(10.5)),
+    });
+    await expect(repository.getConflictProjection(identityId, first.id)).resolves.toMatchObject({
+      hasConflict: true,
+    });
+
+    const updated = await service.updateSchedule(first.id, identityId, {
+      range: { kind: 'AllDay', start: requireYmd('2026-05-03'), end: null },
+      expectedVersion: first.version,
+    });
+
+    expect(updated.range.kind).toBe('AllDay');
+    await expect(repository.getConflictProjection(identityId, first.id)).resolves.toEqual({
+      hasConflict: false,
+      conflictingEntries: null,
+    });
+  });
+
+  it('delete refreshes remaining Timed projection cache', async () => {
+    const repository = new InMemoryScheduleRepository();
+    const identityId = IdentityId.generate();
+    const service = new ScheduleEventApplicationService(repository);
+    const first = await service.createSchedule({
+      identityId,
+      title: 'First',
+      range: timed(hour(9), hour(10)),
     });
     const second = await service.createSchedule({
       identityId,
       title: 'Second',
-      startTime: hour(9.5),
-      endTime: hour(10.5),
+      range: timed(hour(9.5), hour(10.5)),
     });
 
     await service.deleteSchedule(first.id, identityId, first.version);
-
-    const deleted = await repository.findByIdForIdentity(identityId, first.id);
-    const refreshedSecond = await repository.findByIdForIdentity(identityId, second.id);
-
-    expect(deleted).toBeNull();
-    expect(refreshedSecond?.hasConflict).toBe(false);
-    expect(refreshedSecond?.conflictingEntries).toBeNull();
+    expect(await service.getSchedule(first.id, identityId)).toBeNull();
+    await expect(repository.getConflictProjection(identityId, second.id)).resolves.toEqual({
+      hasConflict: false,
+      conflictingEntries: null,
+    });
   });
 
   it('rejects cross-identity update/get/delete with NOT_FOUND', async () => {
@@ -246,12 +355,10 @@ describe('Schedule services', () => {
     const service = new ScheduleEventApplicationService(repository);
     const ownerId = IdentityId.generate();
     const otherId = IdentityId.generate();
-
     const created = await service.createSchedule({
       identityId: ownerId,
       title: 'Owned',
-      startTime: hour(9),
-      endTime: hour(10),
+      range: timed(hour(9), hour(10)),
     });
 
     await expect(service.getSchedule(created.id, otherId)).resolves.toBeNull();
@@ -261,9 +368,6 @@ describe('Schedule services', () => {
     await expect(service.deleteSchedule(created.id, otherId, 1)).rejects.toMatchObject({
       code: 'NOT_FOUND',
     });
-
-    const stillThere = await repository.findByIdForIdentity(ownerId, created.id);
-    expect(stillThere).not.toBeNull();
-    expect(stillThere?.title).toBe('Owned');
+    expect((await service.getSchedule(created.id, ownerId))?.title).toBe('Owned');
   });
 });

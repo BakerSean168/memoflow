@@ -1,30 +1,49 @@
-/**
- * Prisma Schedule (CalendarEntry) Mapper
- *
- * Maps between CalendarEntry domain aggregate and Prisma Schedule model.
- * Handles timestamp/Date conversions and JSON serialization.
- */
+/** Prisma Schedule (CalendarEntry) Mapper — ADR-080 range truth. */
 
 import type { Schedule as PrismaSchedule } from '@memoflow/database';
+import type { CalendarEntryRange } from '@memoflow/contracts/schedule';
+import { CalendarEntryRangeSchema } from '@memoflow/contracts/schedule';
 import { CalendarEntry } from '../../../../domain/aggregates/calendar-entry';
 import type { CalendarEntryState } from '../../../../domain/aggregates/calendar-entry';
 import { ScheduleId } from '../../../../domain/value-objects/schedule-id';
 import type { IdentityId } from '@memoflow/domain-shared';
 
 export class PrismaScheduleMapper {
-  /** Converts a Prisma Schedule to a Domain CalendarEntry aggregate. */
+  private static toRange(data: PrismaSchedule): CalendarEntryRange {
+    if (data.rangeKind === 'Timed') {
+      if (data.timedStart == null || data.timedEnd == null) {
+        throw new TypeError(`Timed CalendarEntry '${data.id}' is missing timed range columns`);
+      }
+      return CalendarEntryRangeSchema.parse({
+        kind: 'Timed',
+        start: data.timedStart.getTime(),
+        end: data.timedEnd.getTime(),
+      });
+    }
+
+    if (data.rangeKind === 'AllDay') {
+      if (data.allDayStart == null) {
+        throw new TypeError(`AllDay CalendarEntry '${data.id}' is missing all_day_start`);
+      }
+      return CalendarEntryRangeSchema.parse({
+        kind: 'AllDay',
+        start: data.allDayStart,
+        end: data.allDayEnd,
+      });
+    }
+
+    throw new TypeError(
+      `CalendarEntry '${data.id}' has unsupported range kind '${data.rangeKind}'`,
+    );
+  }
+
   static toDomain(data: PrismaSchedule): CalendarEntry {
     const state: CalendarEntryState = {
       id: ScheduleId.of(data.id),
       identityId: data.identityId as IdentityId,
       title: data.title,
       description: data.description,
-      startTime: data.startTime.getTime(),
-      endTime: data.endTime.getTime(),
-      duration: data.duration,
-      hasConflict: data.hasConflict,
-      conflictingEntries: data.conflictingSchedules ? JSON.parse(data.conflictingSchedules) : null,
-      priority: data.priority,
+      range: PrismaScheduleMapper.toRange(data),
       location: data.location,
       attendees: data.attendees ? JSON.parse(data.attendees) : null,
       version: data.version ?? 1,
@@ -34,22 +53,18 @@ export class PrismaScheduleMapper {
     return CalendarEntry.load(state);
   }
 
-  /** Converts a Domain CalendarEntry to Prisma write data. */
   static toPersistence(schedule: CalendarEntry) {
+    const range = schedule.range;
     return {
       id: schedule.id,
       identityId: schedule.identityId,
       title: schedule.title,
       description: schedule.description ?? null,
-      startTime: new Date(schedule.startTime),
-      endTime: new Date(schedule.endTime),
-      duration: schedule.duration,
-      hasConflict: schedule.hasConflict,
-      conflictingSchedules:
-        schedule.conflictingEntries && schedule.conflictingEntries.length > 0
-          ? JSON.stringify(schedule.conflictingEntries)
-          : null,
-      priority: schedule.priority ?? null,
+      rangeKind: range.kind,
+      timedStart: range.kind === 'Timed' ? new Date(range.start) : null,
+      timedEnd: range.kind === 'Timed' ? new Date(range.end) : null,
+      allDayStart: range.kind === 'AllDay' ? range.start : null,
+      allDayEnd: range.kind === 'AllDay' ? range.end : null,
       location: schedule.location ?? null,
       attendees: schedule.attendees ? JSON.stringify(schedule.attendees) : null,
       version: schedule.version,
@@ -58,7 +73,6 @@ export class PrismaScheduleMapper {
     };
   }
 
-  /** Batch converts Prisma records to Domain aggregates. */
   static toDomainList(rows: PrismaSchedule[]): CalendarEntry[] {
     return rows.map((row) => PrismaScheduleMapper.toDomain(row));
   }

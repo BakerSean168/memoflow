@@ -1,13 +1,16 @@
 import { toResultErrorException } from '@memoflow/contracts/result';
-import type {
-  CalendarEntryServerDTO,
-  ConflictDetectionResult,
-} from '@memoflow/contracts/schedule';
+import type { CalendarEntryServerDTO, ConflictDetectionResult } from '@memoflow/contracts/schedule';
 import type { CalendarEntryState } from '../../domain/aggregates/calendar-entry';
 import { CalendarEntry as DomainCalendarEntry } from '../../domain/aggregates/calendar-entry';
 import type { IScheduleRepository } from '../../domain/repositories/i-schedule-repository';
 import { ScheduleId } from '../../domain/value-objects/schedule-id';
 import type { IdentityId } from '@memoflow/domain-shared';
+
+const NO_CONFLICTS: ConflictDetectionResult = {
+  hasConflict: false,
+  conflicts: [],
+  suggestions: [],
+};
 
 export class ScheduleConflictDetectionService {
   constructor(private readonly scheduleRepository: IScheduleRepository) {}
@@ -32,20 +35,21 @@ export class ScheduleConflictDetectionService {
     schedule: DomainCalendarEntry,
     excludeId: string | undefined = schedule.id,
   ): Promise<ConflictDetectionResult> {
-    if (schedule.startTime >= schedule.endTime) {
+    const range = schedule.range;
+    if (range.kind === 'AllDay') return NO_CONFLICTS;
+    if (range.start >= range.end) {
       throw toResultErrorException(
-        { code: 'VALIDATION_ERROR', message: 'Invalid time range: startTime must be before endTime' },
+        { code: 'VALIDATION_ERROR', message: 'Invalid timed CalendarEntry range' },
         422,
       );
     }
 
     const overlappingSchedules = await this.scheduleRepository.findByTimeRange(
       schedule.identityId,
-      schedule.startTime,
-      schedule.endTime,
+      range.start,
+      range.end,
       excludeId,
     );
-
     return schedule.detectConflicts(overlappingSchedules);
   }
 
@@ -53,19 +57,14 @@ export class ScheduleConflictDetectionService {
     scheduleId: string,
     identityId: string,
   ): Promise<ConflictDetectionResult> {
-    const scheduleAggregate = await this.scheduleRepository.findByIdForIdentity(
-      identityId,
-      scheduleId,
-    );
-
-    if (!scheduleAggregate) {
+    const schedule = await this.scheduleRepository.findByIdForIdentity(identityId, scheduleId);
+    if (!schedule) {
       throw toResultErrorException(
         { code: 'NOT_FOUND', message: `Schedule not found: ${scheduleId}` },
         404,
       );
     }
-
-    return this.detectConflictsForEntry(scheduleAggregate);
+    return this.detectConflictsForEntry(schedule);
   }
 
   private toAggregate(scheduleDto: CalendarEntryServerDTO): DomainCalendarEntry {
@@ -74,14 +73,7 @@ export class ScheduleConflictDetectionService {
       identityId: scheduleDto.identityId as IdentityId,
       title: scheduleDto.title,
       description: scheduleDto.description ?? null,
-      startTime: Number(scheduleDto.startTime),
-      endTime: Number(scheduleDto.endTime),
-      duration:
-        scheduleDto.duration ??
-        Math.round((Number(scheduleDto.endTime) - Number(scheduleDto.startTime)) / 60000),
-      hasConflict: scheduleDto.hasConflict ?? false,
-      conflictingEntries: scheduleDto.conflictingEntries ? [...scheduleDto.conflictingEntries] : null,
-      priority: scheduleDto.priority ?? null,
+      range: scheduleDto.range,
       location: scheduleDto.location ?? null,
       attendees: scheduleDto.attendees ? [...scheduleDto.attendees] : null,
       version: scheduleDto.version ?? 0,
@@ -94,7 +86,6 @@ export class ScheduleConflictDetectionService {
     identityId: string;
     startTime: number;
     endTime: number;
-    excludeId?: string;
   }): CalendarEntryState {
     const now = new Date();
     return {
@@ -102,12 +93,7 @@ export class ScheduleConflictDetectionService {
       identityId: params.identityId as IdentityId,
       title: 'Conflict check',
       description: null,
-      startTime: params.startTime,
-      endTime: params.endTime,
-      duration: Math.max(Math.round((params.endTime - params.startTime) / 60000), 0),
-      hasConflict: false,
-      conflictingEntries: null,
-      priority: null,
+      range: { kind: 'Timed', start: params.startTime, end: params.endTime },
       location: null,
       attendees: null,
       version: 0,

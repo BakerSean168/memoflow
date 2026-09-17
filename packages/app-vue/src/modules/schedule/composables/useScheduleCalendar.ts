@@ -1,4 +1,5 @@
 import { sanitizeForIpc } from '../../../shared/utils/ipc';
+import { getProductTime } from '../../../shared/utils/product-time';
 import type {
   CalendarEntryClientDTO,
   CreateScheduleRequest,
@@ -7,6 +8,22 @@ import type {
 import type { Result } from '@memoflow/contracts/result';
 import { fail } from '@memoflow/contracts/result';
 import type { ScheduleContext } from './useScheduleContext';
+
+function overlapsPlannerWindow(
+  entry: CalendarEntryClientDTO,
+  startTime: number,
+  endTime: number,
+): boolean {
+  if (entry.range.kind === 'Timed') {
+    return entry.range.start < endTime && entry.range.end > startTime;
+  }
+
+  const time = getProductTime();
+  const startDate = String(time.calendar.toYmd(startTime));
+  const endDate = String(time.calendar.toYmd(Math.max(startTime, endTime - 1)));
+  const entryEnd = entry.range.end ?? entry.range.start;
+  return entry.range.start <= endDate && entryEnd >= startDate;
+}
 
 export function useScheduleCalendar(ctx: ScheduleContext) {
   const { store, service, handleError } = ctx;
@@ -18,10 +35,15 @@ export function useScheduleCalendar(ctx: ScheduleContext) {
     store.setLoading(true);
     store.setError(null);
     try {
-      const result = await service.getSchedulesByTimeRange(sanitizeForIpc({ startTime, endTime }));
+      // P4-2301A: fetch owner facts without coercing AllDay Ymd values into host-local instants.
+      // P4-2301B will replace this compatibility filter with the canonical Planner read model.
+      const result = await service.getSchedulesByAccount();
       if (result.ok) {
-        store.setCalendarEntries(result.data);
-        return result.data;
+        const entries = result.data.filter((entry) =>
+          overlapsPlannerWindow(entry, startTime, endTime),
+        );
+        store.setCalendarEntries(entries);
+        return entries;
       }
       handleError(result.error, 'schedule.error.loadCalendarEntriesFailed');
       return [];
@@ -30,17 +52,7 @@ export function useScheduleCalendar(ctx: ScheduleContext) {
     }
   }
 
-  async function createCalendarEntry(data: {
-    name: string;
-    startTime: number;
-    endTime: number;
-    duration: number;
-    description?: string;
-    priority?: number;
-    location?: string;
-    attendees?: string[];
-    autoDetectConflicts?: boolean;
-  }) {
+  async function createCalendarEntry(data: CreateScheduleRequest) {
     store.setError(null);
     try {
       const request = sanitizeForIpc(data) as unknown as CreateScheduleRequest;

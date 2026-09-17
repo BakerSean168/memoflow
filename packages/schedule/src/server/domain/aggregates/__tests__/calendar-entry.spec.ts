@@ -1,717 +1,217 @@
-/**
- * CalendarEntry Aggregate - Unit Tests
- *
- * Tests for conflict detection domain logic
- * Story 9.1 (EPIC-SCHEDULE-001)
- */
-
-import { CalendarEntry } from '../calendar-entry';
+import { describe, expect, it } from 'vitest';
+import { requireYmd } from '@memoflow/contracts/primitives';
 import { IdentityId } from '@memoflow/domain-shared';
+import { CalendarEntry } from '../calendar-entry';
 import { ScheduleId } from '../../value-objects/schedule-id';
 
-describe('CalendarEntry Aggregate', () => {
-  // ===== Test Data Fixtures =====
+const identityId = IdentityId.generate();
+const base = Date.parse('2026-05-02T00:00:00.000Z');
+const hour = (value: number) => base + value * 60 * 60 * 1000;
 
-  const createTestSchedule = (params: {
-    id?: string;
-    identityId?: IdentityId;
-    title?: string;
-    startTime: number;
-    endTime: number;
-  }): CalendarEntry => {
-    return CalendarEntry.create({
-      identityId: params.identityId ?? IdentityId.generate(),
-      title: params.title || 'Test Meeting',
-      startTime: params.startTime,
-      endTime: params.endTime,
-    });
-  };
+function timed(title = 'Timed', start = hour(9), end = hour(10)): CalendarEntry {
+  return CalendarEntry.create({
+    identityId,
+    title,
+    range: { kind: 'Timed', start, end },
+  });
+}
 
-  // Helper: Create timestamp from hour (e.g., 14 -> 2:00 PM on Oct 21, 2025)
-  const hour = (h: number): number => {
-    return new Date('2025-10-21').getTime() + h * 60 * 60 * 1000;
-  };
+function allDay(title = 'All day', start = '2026-05-02', end: string | null = null): CalendarEntry {
+  return CalendarEntry.create({
+    identityId,
+    title,
+    range: { kind: 'AllDay', start: requireYmd(start), end: end ? requireYmd(end) : null },
+  });
+}
 
-  // ===== Factory Method Tests =====
-
-  describe('create()', () => {
-    it('should create a schedule with valid parameters', () => {
-      const identityId = IdentityId.generate();
-      const schedule = CalendarEntry.create({
-        identityId,
-        title: 'Team Meeting',
-        description: 'Weekly sync',
-        startTime: hour(14), // 2:00 PM
-        endTime: hour(15), // 3:00 PM
-        priority: 5,
-        location: 'Conf Room A',
-        attendees: ['user1', 'user2'],
-      });
-
-      expect(schedule).toBeDefined();
-      expect(schedule.id).toBeDefined();
-      expect(schedule.identityId).toBe(identityId);
-      expect(schedule.title).toBe('Team Meeting');
-      expect(schedule.description).toBe('Weekly sync');
-      expect(schedule.duration).toBe(60); // 1 hour in minutes
-      expect(schedule.hasConflict).toBe(false);
-      expect(schedule.conflictingEntries).toBeNull();
+describe('CalendarEntry ADR-080 aggregate', () => {
+  it('creates canonical Timed range truth', () => {
+    const entry = CalendarEntry.create({
+      identityId,
+      title: 'Meeting',
+      description: 'Notes',
+      range: { kind: 'Timed', start: hour(9), end: hour(10) },
+      location: 'Room A',
+      attendees: ['a@example.com'],
     });
 
-    it('should throw error if startTime >= endTime', () => {
-      expect(() => {
-        CalendarEntry.create({
-          identityId: IdentityId.generate(),
-          title: 'Invalid Schedule',
-          startTime: hour(15),
-          endTime: hour(14), // endTime before startTime
-        });
-      }).toThrow('CalendarEntry startTime must be before endTime');
-    });
-
-    it('should throw error if startTime === endTime', () => {
-      expect(() => {
-        CalendarEntry.create({
-          identityId: IdentityId.generate(),
-          title: 'Zero Duration',
-          startTime: hour(14),
-          endTime: hour(14), // Same time
-        });
-      }).toThrow('CalendarEntry startTime must be before endTime');
-    });
-
-    it('should throw error if priority is outside the supported range', () => {
-      expect(() => {
-        CalendarEntry.create({
-          identityId: IdentityId.generate(),
-          title: 'Invalid Priority',
-          startTime: hour(14),
-          endTime: hour(15),
-          priority: 0,
-        });
-      }).toThrow('Priority must be between 1 and 5');
-
-      expect(() => {
-        CalendarEntry.create({
-          identityId: IdentityId.generate(),
-          title: 'Invalid Priority',
-          startTime: hour(14),
-          endTime: hour(15),
-          priority: 6,
-        });
-      }).toThrow('Priority must be between 1 and 5');
-    });
-
-    it('should calculate duration correctly', () => {
-      const schedule = CalendarEntry.create({
-        identityId: IdentityId.generate(),
-        title: 'Long Meeting',
-        startTime: hour(9), // 9:00 AM
-        endTime: hour(12), // 12:00 PM
-      });
-
-      expect(schedule.duration).toBe(180); // 3 hours = 180 minutes
+    expect(entry.range).toEqual({ kind: 'Timed', start: hour(9), end: hour(10) });
+    expect(entry.version).toBe(1);
+    expect(entry.domainEvents[0]).toMatchObject({
+      eventType: 'schedule:calendar-entry-created',
+      payload: { title: 'Meeting', range: { kind: 'Timed', start: hour(9), end: hour(10) } },
     });
   });
 
-  describe('load()', () => {
-    it('should load schedule from state', () => {
-      const scheduleId = ScheduleId.generate();
-      const identityId = IdentityId.generate();
-      const dto = {
-        id: scheduleId,
-        identityId,
-        title: 'Client Meeting',
-        description: 'Discuss project',
-        startTime: hour(10),
-        endTime: hour(11),
-        duration: 60,
-        hasConflict: true,
-        conflictingEntries: ['sched-111', 'sched-222'],
-        priority: 4,
-        location: 'Zoom',
-        attendees: ['client@example.com'],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+  it('creates single-day AllDay truth without synthesizing an Instant', () => {
+    const entry = allDay();
+    expect(entry.range).toEqual({ kind: 'AllDay', start: '2026-05-02', end: null });
+  });
 
-      const schedule = CalendarEntry.load(dto);
+  it('creates multi-day AllDay truth', () => {
+    const entry = allDay('Conference', '2026-05-02', '2026-05-04');
+    expect(entry.range).toEqual({ kind: 'AllDay', start: '2026-05-02', end: '2026-05-04' });
+  });
 
-      expect(schedule.id).toBe(scheduleId);
-      expect(schedule.identityId).toBe(identityId);
-      expect(schedule.title).toBe('Client Meeting');
-      expect(schedule.hasConflict).toBe(true);
-      expect(schedule.conflictingEntries).toEqual(['sched-111', 'sched-222']);
+  it('rejects zero or negative Timed ranges', () => {
+    expect(() => timed('zero', hour(9), hour(9))).toThrow();
+    expect(() => timed('negative', hour(10), hour(9))).toThrow();
+  });
+
+  it('rejects backwards AllDay ranges', () => {
+    expect(() => allDay('bad', '2026-05-03', '2026-05-02')).toThrow();
+  });
+
+  it('rejects empty titles', () => {
+    expect(() =>
+      CalendarEntry.create({ identityId, title: ' ', range: { kind: 'Timed', start: 1, end: 2 } }),
+    ).toThrow('Title cannot be empty');
+  });
+
+  it('loads canonical state without emitting events', () => {
+    const entry = CalendarEntry.load({
+      id: ScheduleId.generate(),
+      identityId,
+      title: 'Loaded',
+      description: null,
+      range: { kind: 'AllDay', start: requireYmd('2026-05-02'), end: null },
+      location: null,
+      attendees: null,
+      version: 7,
+      createdAt: new Date(base),
+      updatedAt: new Date(base + 1000),
+    });
+    expect(entry.version).toBe(7);
+    expect(entry.range.kind).toBe('AllDay');
+    expect(entry.domainEvents).toHaveLength(0);
+  });
+
+  it('returns cloned range and attendees values', () => {
+    const entry = CalendarEntry.create({
+      identityId,
+      title: 'Clone',
+      range: { kind: 'Timed', start: hour(9), end: hour(10) },
+      attendees: ['a@example.com'],
+    });
+    const range = entry.range;
+    const attendees = entry.attendees!;
+    if (range.kind === 'Timed') range.start = hour(8);
+    attendees.push('b@example.com');
+    expect(entry.range).toEqual({ kind: 'Timed', start: hour(9), end: hour(10) });
+    expect(entry.attendees).toEqual(['a@example.com']);
+  });
+
+  it('derives Timed conflicts without storing conflict state', () => {
+    const subject = timed('Subject', hour(9), hour(10));
+    const overlap = timed('Overlap', hour(9.5), hour(10.5));
+    const adjacent = timed('Adjacent', hour(10), hour(11));
+    const result = subject.detectConflicts([overlap, adjacent]);
+
+    expect(result.hasConflict).toBe(true);
+    expect(result.conflicts).toHaveLength(1);
+    expect(result.conflicts[0]).toMatchObject({
+      scheduleId: overlap.id,
+      overlapStart: hour(9.5),
+      overlapEnd: hour(10),
+      overlapDuration: 30,
+    });
+    expect(subject.toClientDTO()).not.toHaveProperty('hasConflict');
+    expect(subject.toClientDTO()).not.toHaveProperty('conflictingEntries');
+  });
+
+  it('does not treat AllDay CalendarEntry as blocking in the temporary conflict seam', () => {
+    expect(allDay().detectConflicts([timed()])).toEqual({
+      hasConflict: false,
+      conflicts: [],
+      suggestions: [],
+    });
+    expect(timed().detectConflicts([allDay()])).toEqual({
+      hasConflict: false,
+      conflicts: [],
+      suggestions: [],
     });
   });
 
-  // ===== Conflict Detection Tests =====
+  it('classifies conflict severity and generates move/shorten suggestions', () => {
+    const subject = timed('Subject', hour(9), hour(11));
+    const overlap = timed('Overlap', hour(9.5), hour(10.75));
+    const result = subject.detectConflicts([overlap]);
+    expect(result.conflicts[0]?.severity).toBe('Severe');
+    expect(result.suggestions.map((item) => item.type)).toEqual([
+      'MoveEarlier',
+      'MoveLater',
+      'Shorten',
+    ]);
+  });
 
-  describe('detectConflicts()', () => {
-    it('should return no conflicts when schedules do not overlap', () => {
-      const schedule1 = createTestSchedule({
-        title: 'Morning Meeting',
-        startTime: hour(9), // 9:00 AM
-        endTime: hour(10), // 10:00 AM
-      });
+  it('reschedules Timed to AllDay with canonical old/new range event', () => {
+    const entry = timed();
+    entry.clearDomainEvents();
+    entry.reschedule({ kind: 'AllDay', start: requireYmd('2026-05-03'), end: null });
 
-      const schedule2 = createTestSchedule({
-        title: 'Afternoon Meeting',
-        startTime: hour(14), // 2:00 PM
-        endTime: hour(15), // 3:00 PM
-      });
+    expect(entry.version).toBe(2);
+    expect(entry.range).toEqual({ kind: 'AllDay', start: '2026-05-03', end: null });
+    expect(entry.domainEvents).toEqual([
+      expect.objectContaining({
+        eventType: 'schedule:calendar-entry-rescheduled',
+        payload: {
+          entryId: entry.id,
+          oldRange: { kind: 'Timed', start: hour(9), end: hour(10) },
+          newRange: { kind: 'AllDay', start: '2026-05-03', end: null },
+        },
+      }),
+    ]);
+  });
 
-      const result = schedule1.detectConflicts([schedule2]);
-
-      expect(result.hasConflict).toBe(false);
-      expect(result.conflicts).toHaveLength(0);
-      expect(result.suggestions).toHaveLength(0);
+  it('updates content/context and emits changed fields separately from range', () => {
+    const entry = timed();
+    entry.clearDomainEvents();
+    entry.update({
+      title: 'Updated',
+      description: 'Notes',
+      location: 'Room B',
+      attendees: ['a@example.com', 'b@example.com'],
     });
-
-    it('should return no conflicts when passed empty array', () => {
-      const schedule = createTestSchedule({
-        startTime: hour(10),
-        endTime: hour(11),
-      });
-
-      const result = schedule.detectConflicts([]);
-
-      expect(result.hasConflict).toBe(false);
-      expect(result.conflicts).toHaveLength(0);
-      expect(result.suggestions).toHaveLength(0);
+    expect(entry.version).toBe(2);
+    expect(entry.toClientDTO()).toMatchObject({
+      title: 'Updated',
+      description: 'Notes',
+      location: 'Room B',
+      attendees: ['a@example.com', 'b@example.com'],
     });
-
-    it('should detect single conflict with correct details', () => {
-      const schedule1 = createTestSchedule({
-        title: 'Meeting A',
-        startTime: hour(14), // 2:00 PM
-        endTime: hour(15.5), // 3:30 PM
-      });
-
-      const schedule2 = createTestSchedule({
-        title: 'Meeting B',
-        startTime: hour(15), // 3:00 PM
-        endTime: hour(16), // 4:00 PM
-      });
-
-      const result = schedule1.detectConflicts([schedule2]);
-
-      expect(result.hasConflict).toBe(true);
-      expect(result.conflicts).toHaveLength(1);
-
-      const conflict = result.conflicts[0];
-      expect(conflict.scheduleId).toBe(schedule2.id);
-      expect(conflict.scheduleTitle).toBe('Meeting B');
-      expect(conflict.overlapStart).toBe(hour(15)); // Overlap starts at 3:00 PM
-      expect(conflict.overlapEnd).toBe(hour(15.5)); // Overlap ends at 3:30 PM
-      expect(conflict.overlapDuration).toBe(30); // 30 minutes overlap
-    });
-
-    it('should detect multiple conflicts', () => {
-      const targetSchedule = createTestSchedule({
-        title: 'Long Meeting',
-        startTime: hour(14), // 2:00 PM
-        endTime: hour(17), // 5:00 PM
-      });
-
-      const conflict1 = createTestSchedule({
-        title: 'Meeting 1',
-        startTime: hour(13),
-        endTime: hour(14.5), // Overlaps 2:00-2:30 PM
-      });
-
-      const conflict2 = createTestSchedule({
-        title: 'Meeting 2',
-        startTime: hour(15),
-        endTime: hour(16), // Overlaps 3:00-4:00 PM
-      });
-
-      const conflict3 = createTestSchedule({
-        title: 'Meeting 3',
-        startTime: hour(16.5),
-        endTime: hour(18), // Overlaps 4:30-5:00 PM
-      });
-
-      const result = targetSchedule.detectConflicts([conflict1, conflict2, conflict3]);
-
-      expect(result.hasConflict).toBe(true);
-      expect(result.conflicts).toHaveLength(3);
-      expect(result.conflicts[0].scheduleTitle).toBe('Meeting 1');
-      expect(result.conflicts[1].scheduleTitle).toBe('Meeting 2');
-      expect(result.conflicts[2].scheduleTitle).toBe('Meeting 3');
-    });
-
-    it('should filter out non-overlapping schedules', () => {
-      const targetSchedule = createTestSchedule({
-        startTime: hour(14),
-        endTime: hour(15),
-      });
-
-      const beforeSchedule = createTestSchedule({
-        title: 'Before',
-        startTime: hour(10),
-        endTime: hour(11),
-      });
-
-      const overlapSchedule = createTestSchedule({
-        title: 'Overlap',
-        startTime: hour(14.5),
-        endTime: hour(15.5),
-      });
-
-      const afterSchedule = createTestSchedule({
-        title: 'After',
-        startTime: hour(16),
-        endTime: hour(17),
-      });
-
-      const result = targetSchedule.detectConflicts([
-        beforeSchedule,
-        overlapSchedule,
-        afterSchedule,
-      ]);
-
-      expect(result.hasConflict).toBe(true);
-      expect(result.conflicts).toHaveLength(1);
-      expect(result.conflicts[0].scheduleTitle).toBe('Overlap');
+    expect(entry.domainEvents[0]).toMatchObject({
+      eventType: 'schedule:calendar-entry-updated',
+      payload: { changedFields: ['title', 'description', 'location', 'attendees'] },
     });
   });
 
-  // ===== isOverlapping Tests (via detectConflicts behavior) =====
-
-  describe('isOverlapping() edge cases', () => {
-    it('should NOT overlap when schedules are adjacent (A ends when B starts)', () => {
-      const scheduleA = createTestSchedule({
-        title: 'Meeting A',
-        startTime: hour(14), // 2:00 PM
-        endTime: hour(15), // 3:00 PM
-      });
-
-      const scheduleB = createTestSchedule({
-        title: 'Meeting B',
-        startTime: hour(15), // 3:00 PM (exactly when A ends)
-        endTime: hour(16), // 4:00 PM
-      });
-
-      const result = scheduleA.detectConflicts([scheduleB]);
-
-      expect(result.hasConflict).toBe(false);
-      expect(result.conflicts).toHaveLength(0);
-    });
-
-    it('should overlap when partial overlap at start', () => {
-      const scheduleA = createTestSchedule({
-        startTime: hour(14), // 2:00 PM
-        endTime: hour(15.5), // 3:30 PM
-      });
-
-      const scheduleB = createTestSchedule({
-        startTime: hour(15), // 3:00 PM (starts during A)
-        endTime: hour(16), // 4:00 PM
-      });
-
-      const result = scheduleA.detectConflicts([scheduleB]);
-
-      expect(result.hasConflict).toBe(true);
-      expect(result.conflicts[0].overlapDuration).toBe(30); // 30 min overlap
-    });
-
-    it('should overlap when partial overlap at end', () => {
-      const scheduleA = createTestSchedule({
-        startTime: hour(15), // 3:00 PM
-        endTime: hour(16), // 4:00 PM
-      });
-
-      const scheduleB = createTestSchedule({
-        startTime: hour(14), // 2:00 PM
-        endTime: hour(15.5), // 3:30 PM (ends during A)
-      });
-
-      const result = scheduleA.detectConflicts([scheduleB]);
-
-      expect(result.hasConflict).toBe(true);
-      expect(result.conflicts[0].overlapDuration).toBe(30); // 30 min overlap
-    });
-
-    it('should overlap when schedule A completely contains schedule B', () => {
-      const scheduleA = createTestSchedule({
-        title: 'Long Meeting',
-        startTime: hour(14), // 2:00 PM
-        endTime: hour(17), // 5:00 PM
-      });
-
-      const scheduleB = createTestSchedule({
-        title: 'Short Meeting',
-        startTime: hour(15), // 3:00 PM (inside A)
-        endTime: hour(16), // 4:00 PM (inside A)
-      });
-
-      const result = scheduleA.detectConflicts([scheduleB]);
-
-      expect(result.hasConflict).toBe(true);
-      expect(result.conflicts[0].overlapDuration).toBe(60); // Full 1 hour of B
-    });
-
-    it('should overlap when schedule B completely contains schedule A', () => {
-      const scheduleA = createTestSchedule({
-        title: 'Short Meeting',
-        startTime: hour(15), // 3:00 PM
-        endTime: hour(16), // 4:00 PM
-      });
-
-      const scheduleB = createTestSchedule({
-        title: 'Long Meeting',
-        startTime: hour(14), // 2:00 PM (contains A)
-        endTime: hour(17), // 5:00 PM (contains A)
-      });
-
-      const result = scheduleA.detectConflicts([scheduleB]);
-
-      expect(result.hasConflict).toBe(true);
-      expect(result.conflicts[0].overlapDuration).toBe(60); // Full 1 hour of A
-    });
-
-    it('should NOT overlap when schedule A is completely before B', () => {
-      const scheduleA = createTestSchedule({
-        startTime: hour(10),
-        endTime: hour(11),
-      });
-
-      const scheduleB = createTestSchedule({
-        startTime: hour(14),
-        endTime: hour(15),
-      });
-
-      const result = scheduleA.detectConflicts([scheduleB]);
-
-      expect(result.hasConflict).toBe(false);
-    });
-
-    it('should NOT overlap when schedule A is completely after B', () => {
-      const scheduleA = createTestSchedule({
-        startTime: hour(16),
-        endTime: hour(17),
-      });
-
-      const scheduleB = createTestSchedule({
-        startTime: hour(14),
-        endTime: hour(15),
-      });
-
-      const result = scheduleA.detectConflicts([scheduleB]);
-
-      expect(result.hasConflict).toBe(false);
-    });
-
-    it('should overlap when schedules have exact same time', () => {
-      const scheduleA = createTestSchedule({
-        startTime: hour(14),
-        endTime: hour(15),
-      });
-
-      const scheduleB = createTestSchedule({
-        startTime: hour(14), // Same start
-        endTime: hour(15), // Same end
-      });
-
-      const result = scheduleA.detectConflicts([scheduleB]);
-
-      expect(result.hasConflict).toBe(true);
-      expect(result.conflicts[0].overlapDuration).toBe(60); // Full overlap
-    });
+  it('does not bump version for an identical range update', () => {
+    const entry = timed();
+    entry.clearDomainEvents();
+    entry.update({ range: { kind: 'Timed', start: hour(9), end: hour(10) } });
+    expect(entry.version).toBe(1);
+    expect(entry.domainEvents).toHaveLength(0);
   });
 
-  // ===== calculateOverlap Tests =====
-
-  describe('calculateOverlap()', () => {
-    it('should calculate correct overlap duration', () => {
-      const scheduleA = createTestSchedule({
-        startTime: hour(14), // 2:00 PM
-        endTime: hour(15.5), // 3:30 PM
-      });
-
-      const scheduleB = createTestSchedule({
-        startTime: hour(15), // 3:00 PM
-        endTime: hour(16), // 4:00 PM
-      });
-
-      const result = scheduleA.detectConflicts([scheduleB]);
-
-      expect(result.conflicts[0].overlapDuration).toBe(30); // 30 minutes
-    });
-
-    it('should calculate overlap for complete containment', () => {
-      const scheduleA = createTestSchedule({
-        startTime: hour(14),
-        endTime: hour(17),
-      });
-
-      const scheduleB = createTestSchedule({
-        startTime: hour(15),
-        endTime: hour(16),
-      });
-
-      const result = scheduleA.detectConflicts([scheduleB]);
-
-      expect(result.conflicts[0].overlapDuration).toBe(60); // 1 hour
-    });
-
-    it('should handle 1-minute overlap', () => {
-      const scheduleA = createTestSchedule({
-        startTime: hour(14),
-        endTime: hour(15) + 60000, // 3:01 PM
-      });
-
-      const scheduleB = createTestSchedule({
-        startTime: hour(15), // 3:00 PM
-        endTime: hour(16),
-      });
-
-      const result = scheduleA.detectConflicts([scheduleB]);
-
-      expect(result.conflicts[0].overlapDuration).toBe(1); // 1 minute
-    });
+  it('serializes only canonical range truth and derives no duration/priority/cache fields', () => {
+    const dto = timed().toClientDTO();
+    expect(dto.range).toEqual({ kind: 'Timed', start: hour(9), end: hour(10) });
+    expect(dto).not.toHaveProperty('startTime');
+    expect(dto).not.toHaveProperty('endTime');
+    expect(dto).not.toHaveProperty('duration');
+    expect(dto).not.toHaveProperty('priority');
+    expect(dto).not.toHaveProperty('hasConflict');
+    expect(dto).not.toHaveProperty('conflictingEntries');
   });
 
-  // ===== generateSuggestions Tests =====
-
-  describe('generateSuggestions()', () => {
-    it('should suggest moving earlier (before conflict)', () => {
-      const targetSchedule = createTestSchedule({
-        startTime: hour(14), // 2:00 PM
-        endTime: hour(15), // 3:00 PM (60 min duration)
-      });
-
-      const conflictSchedule = createTestSchedule({
-        startTime: hour(14.5), // 2:30 PM
-        endTime: hour(16),
-      });
-
-      const result = targetSchedule.detectConflicts([conflictSchedule]);
-
-      const moveEarlierSuggestion = result.suggestions.find((s) => s.type === 'MoveEarlier');
-      expect(moveEarlierSuggestion).toBeDefined();
-      expect(moveEarlierSuggestion!.newEndTime).toBe(hour(14.5)); // End at 2:30 PM
-      expect(moveEarlierSuggestion!.newStartTime).toBe(hour(13.5)); // Start at 1:30 PM (60 min before)
-    });
-
-    it('should suggest moving later (after conflict)', () => {
-      const targetSchedule = createTestSchedule({
-        startTime: hour(14), // 2:00 PM
-        endTime: hour(15), // 3:00 PM (60 min duration)
-      });
-
-      const conflictSchedule = createTestSchedule({
-        startTime: hour(14.5), // 2:30 PM
-        endTime: hour(16), // 4:00 PM
-      });
-
-      const result = targetSchedule.detectConflicts([conflictSchedule]);
-
-      const moveLaterSuggestion = result.suggestions.find((s) => s.type === 'MoveLater');
-      expect(moveLaterSuggestion).toBeDefined();
-      expect(moveLaterSuggestion!.newStartTime).toBe(hour(16)); // Start at 4:00 PM
-      expect(moveLaterSuggestion!.newEndTime).toBe(hour(17)); // End at 5:00 PM (60 min later)
-    });
-
-    it('should suggest shortening when target starts before conflict', () => {
-      const targetSchedule = createTestSchedule({
-        startTime: hour(14), // 2:00 PM
-        endTime: hour(16), // 4:00 PM
-      });
-
-      const conflictSchedule = createTestSchedule({
-        startTime: hour(15), // 3:00 PM
-        endTime: hour(17),
-      });
-
-      const result = targetSchedule.detectConflicts([conflictSchedule]);
-
-      const shortenSuggestion = result.suggestions.find((s) => s.type === 'Shorten');
-      expect(shortenSuggestion).toBeDefined();
-      expect(shortenSuggestion!.newStartTime).toBe(hour(14)); // Keep start at 2:00 PM
-      expect(shortenSuggestion!.newEndTime).toBe(hour(15)); // Shorten to end at 3:00 PM
-    });
-
-    it('should handle multiple conflicts with earliest and latest', () => {
-      const targetSchedule = createTestSchedule({
-        startTime: hour(14),
-        endTime: hour(17),
-      });
-
-      const conflict1 = createTestSchedule({
-        startTime: hour(13), // Earliest
-        endTime: hour(14.5),
-      });
-
-      const conflict2 = createTestSchedule({
-        startTime: hour(16),
-        endTime: hour(18), // Latest
-      });
-
-      const result = targetSchedule.detectConflicts([conflict1, conflict2]);
-
-      const moveEarlier = result.suggestions.find((s) => s.type === 'MoveEarlier');
-      const moveLater = result.suggestions.find((s) => s.type === 'MoveLater');
-
-      // Should suggest before earliest (13:00)
-      expect(moveEarlier!.newEndTime).toBe(hour(13));
-
-      // Should suggest after latest (18:00)
-      expect(moveLater!.newStartTime).toBe(hour(18));
-    });
-
-    it('should always return at least 2 suggestions (move_earlier and move_later)', () => {
-      const targetSchedule = createTestSchedule({
-        startTime: hour(14),
-        endTime: hour(15),
-      });
-
-      const conflictSchedule = createTestSchedule({
-        startTime: hour(14.5),
-        endTime: hour(16),
-      });
-
-      const result = targetSchedule.detectConflicts([conflictSchedule]);
-
-      expect(result.suggestions.length).toBeGreaterThanOrEqual(2);
-      expect(result.suggestions.some((s) => s.type === 'MoveEarlier')).toBe(true);
-      expect(result.suggestions.some((s) => s.type === 'MoveLater')).toBe(true);
-    });
-  });
-
-  // ===== DTO Conversion Tests =====
-
-  describe('toServerDTO()', () => {
-    it('should convert to ServerDTO correctly', () => {
-      const schedule = CalendarEntry.create({
-        identityId: IdentityId.generate(),
-        title: 'Team Standup',
-        description: 'Daily sync',
-        startTime: hour(9),
-        endTime: hour(9.25), // 15 minutes
-        priority: 3,
-        location: 'Slack',
-        attendees: ['team@example.com'],
-      });
-
-      const dto = schedule.toServerDTO();
-
-      expect(dto.id).toBe(schedule.id);
-      expect(dto.identityId).toBe(schedule.identityId);
-      expect(dto.title).toBe('Team Standup');
-      expect(dto.description).toBe('Daily sync');
-      expect(dto.duration).toBe(15);
-      expect(dto.hasConflict).toBe(false);
-      expect(dto.conflictingEntries).toBeUndefined();
-      expect(dto.priority).toBe(3);
-      expect(dto.location).toBe('Slack');
-      expect(dto.attendees).toEqual(['team@example.com']);
-    });
-
-    it('should handle nullable fields correctly', () => {
-      const schedule = CalendarEntry.create({
-        identityId: IdentityId.generate(),
-        title: 'Simple Meeting',
-        startTime: hour(10),
-        endTime: hour(11),
-      });
-
-      const dto = schedule.toServerDTO();
-
-      expect(dto.description).toBeUndefined();
-      expect(dto.priority).toBeUndefined();
-      expect(dto.location).toBeUndefined();
-      expect(dto.attendees).toBeUndefined();
-      expect(dto.conflictingEntries).toBeUndefined();
-    });
-  });
-
-  describe('state updates', () => {
-    it('marks and clears conflicts while refreshing updatedAt', () => {
-      const schedule = createTestSchedule({
-        startTime: hour(9),
-        endTime: hour(10),
-      });
-
-      const before = schedule.updatedAt.getTime();
-      schedule.markAsConflicting(['sched-1', 'sched-2']);
-
-      expect(schedule.hasConflict).toBe(true);
-      expect(schedule.conflictingEntries).toEqual(['sched-1', 'sched-2']);
-      expect(schedule.updatedAt.getTime()).toBeGreaterThanOrEqual(before);
-
-      schedule.clearConflicts();
-      expect(schedule.hasConflict).toBe(false);
-      expect(schedule.conflictingEntries).toBeNull();
-    });
-
-    it('reschedules with a valid time range and recalculates duration', () => {
-      const schedule = createTestSchedule({
-        startTime: hour(9),
-        endTime: hour(10),
-      });
-
-      schedule.reschedule(hour(11), hour(12.5));
-
-      expect(schedule.startTime).toBe(hour(11));
-      expect(schedule.endTime).toBe(hour(12.5));
-      expect(schedule.duration).toBe(90);
-    });
-
-    it('rejects invalid reschedule ranges', () => {
-      const schedule = createTestSchedule({
-        startTime: hour(9),
-        endTime: hour(10),
-      });
-
-      expect(() => schedule.reschedule(hour(12), hour(12))).toThrow(
-        'Invalid time range: startTime must be before endTime',
-      );
-    });
-
-    it('updates title, description, priority, location, and attendees', () => {
-      const schedule = createTestSchedule({
-        startTime: hour(9),
-        endTime: hour(10),
-      });
-
-      schedule.updateTitle('Updated');
-      schedule.updateDescription('Notes');
-      schedule.updatePriority(4);
-      schedule.updateLocation('Room B');
-      schedule.updateAttendees(['a@example.com', 'b@example.com']);
-
-      expect(schedule.title).toBe('Updated');
-      expect(schedule.description).toBe('Notes');
-      expect(schedule.priority).toBe(4);
-      expect(schedule.location).toBe('Room B');
-      expect(schedule.attendees).toEqual(['a@example.com', 'b@example.com']);
-    });
-
-    it('rejects empty titles and invalid priorities', () => {
-      const schedule = createTestSchedule({
-        startTime: hour(9),
-        endTime: hour(10),
-      });
-
-      expect(() => schedule.updateTitle('   ')).toThrow('Title cannot be empty');
-      expect(() => schedule.updatePriority(0)).toThrow('Priority must be between 1 and 5');
-      expect(() => schedule.updatePriority(6)).toThrow('Priority must be between 1 and 5');
-    });
-
-    it('emits a calendar-entry-deleted event', () => {
-      const schedule = createTestSchedule({
-        startTime: hour(9),
-        endTime: hour(10),
-      });
-
-      schedule.pullDomainEvents();
-      schedule.delete();
-
-      const [event] = schedule.pullDomainEvents();
-      expect(event?.eventType).toBe('schedule:calendar-entry-deleted');
-      expect(event?.payload).toEqual({ entryId: schedule.id });
+  it('emits delete after advancing the aggregate revision', () => {
+    const entry = timed();
+    entry.clearDomainEvents();
+    entry.delete();
+    expect(entry.version).toBe(2);
+    expect(entry.domainEvents[0]).toMatchObject({
+      eventType: 'schedule:calendar-entry-deleted',
+      payload: { entryId: entry.id },
     });
   });
 });

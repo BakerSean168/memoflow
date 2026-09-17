@@ -44,6 +44,10 @@ export class ScheduleEventController {
     return this.api.getEvent(id, ctx);
   }
 
+  async getAll(ctx: Context): Promise<Result<unknown>> {
+    return this.api.listAllEvents(ctx);
+  }
+
   async getByTimeRange(query: Record<string, unknown>, ctx: Context): Promise<Result<unknown>> {
     const startTime = Number(query.startTime);
     const endTime = Number(query.endTime);

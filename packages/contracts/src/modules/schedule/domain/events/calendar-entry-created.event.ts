@@ -1,13 +1,9 @@
 import type { IdentityId } from '../../../../primitives';
+import type { CalendarEntryRange } from '../../calendar-entry-range';
 
-/**
- * Calendar Entry Created Event
- *
- * Triggered when a new calendar entry is added to a schedule.
- */
+/** Emitted after a CalendarEntry with canonical ADR-080 range truth is created. */
 export interface CalendarEntryCreatedEvent {
   identityId: IdentityId;
   title: string;
-  startTime: number;
-  endTime: number;
+  range: CalendarEntryRange;
 }

@@ -166,7 +166,26 @@ class PrismaDataPortabilityImportTx implements DataPortabilityImportTx {
   // --- Schedule ---
 
   async createSchedule(input: CreateScheduleInput): Promise<void> {
-    await this.tx.schedule.create({ data: input });
+    // P4-2301A compatibility boundary: current portable Schedule V3 still carries a
+    // legacy timed start/end shape. Import it as canonical Timed range truth without
+    // resurrecting duration/priority persistence. PORT-1611 owns the portable range cutover.
+    await this.tx.schedule.create({
+      data: {
+        id: input.id,
+        identityId: input.identityId,
+        title: input.title,
+        description: input.description,
+        rangeKind: 'Timed',
+        timedStart: new Date(input.startTime),
+        timedEnd: new Date(input.endTime),
+        allDayStart: null,
+        allDayEnd: null,
+        location: input.location,
+        attendees: input.attendees,
+        createdAt: input.createdAt ? new Date(input.createdAt) : undefined,
+        updatedAt: input.updatedAt ? new Date(input.updatedAt) : undefined,
+      },
+    });
   }
 
   async createScheduleTask(input: CreateScheduleTaskInput): Promise<void> {

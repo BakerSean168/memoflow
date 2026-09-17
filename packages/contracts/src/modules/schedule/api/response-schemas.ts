@@ -6,7 +6,12 @@
 
 import { z } from 'zod';
 import { brandedId } from '../../../primitives';
-import type { ScheduleTaskId, ScheduleId, ScheduleExecutionId, IdentityId } from '../../../primitives';
+import type {
+  ScheduleTaskId,
+  ScheduleId,
+  ScheduleExecutionId,
+  IdentityId,
+} from '../../../primitives';
 import { ScheduleTaskStatus } from '../value-objects/schedule-task-status';
 import { SourceModule } from '../value-objects/source-module';
 import { ExecutionStatus } from '../value-objects/execution-status';
@@ -18,27 +23,18 @@ import {
 
 // Residual 725: conflict detection schemas owned by conflict-detection-result.ts
 // (re-exported for OpenAPI route consumers).
-export {
-  ConflictDetectionResultSchema,
-  ConflictDetailSchema,
-  ConflictSuggestionSchema,
-};
+export { ConflictDetectionResultSchema, ConflictDetailSchema, ConflictSuggestionSchema };
 
 import { ScheduleConfigSchema } from '../value-objects/schedule-config';
 import { ExecutionInfoSchema } from '../value-objects/execution-info';
 import { RetryPolicySchema } from '../value-objects/retry-policy';
 import { TaskMetadataSchema } from '../value-objects/task-metadata';
+import { CalendarEntryRangeSchema } from '../calendar-entry-range';
 
 // Residual 749: schedule nested VO response schemas owned by value-objects
 // (semantic DTOs are z.infer aliases). Request modules keep local partial schemas
 // with different validation/shapes.
-export {
-  ScheduleConfigSchema,
-  ExecutionInfoSchema,
-  RetryPolicySchema,
-  TaskMetadataSchema,
-};
-
+export { ScheduleConfigSchema, ExecutionInfoSchema, RetryPolicySchema, TaskMetadataSchema };
 
 // Residual 833: ScheduleExecutionClientDTO dual retired — sole ScheduleExecutionResponseSchema + z.infer
 // (semantic type is z.infer alias in entities/schedule-execution-client.ts).
@@ -94,12 +90,7 @@ export const CalendarEntryResponseSchema = z.object({
   identityId: brandedId<IdentityId>(),
   title: z.string(),
   description: z.string().optional(),
-  startTime: z.number(),
-  endTime: z.number(),
-  duration: z.number(),
-  hasConflict: z.boolean(),
-  conflictingEntries: z.array(z.string()).optional(),
-  priority: z.number().optional(),
+  range: CalendarEntryRangeSchema,
   location: z.string().optional(),
   attendees: z.array(z.string()).optional(),
   version: z.number(),

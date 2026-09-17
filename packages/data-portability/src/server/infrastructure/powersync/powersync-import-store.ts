@@ -346,7 +346,10 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
 
   async createSchedule(input: CreateScheduleInput): Promise<void> {
     await this.tx.execute(
-      `INSERT INTO schedules (id, identity_id, title, description, start_time, end_time, duration, priority, location, attendees, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO schedules (
+        id, identity_id, title, description, range_kind, timed_start, timed_end,
+        all_day_start, all_day_end, location, attendees, version, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, 'Timed', ?, ?, NULL, NULL, ?, ?, 1, ?, ?)`,
       [
         input.id,
         input.identityId,
@@ -354,8 +357,6 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
         str(input.description),
         input.startTime,
         input.endTime,
-        input.duration,
-        input.priority,
         str(input.location),
         str(input.attendees),
         ...createdUpdated(input),

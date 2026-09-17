@@ -40,17 +40,33 @@ export class DesktopPlannerAIReadAdapter implements IAIPlannerReadPort {
       this.scheduleRepository.findByTimeRange(input.identityId, input.startTime, input.endTime),
       this.taskItems(input.identityId, input.startTime, input.endTime),
     ]);
+    const calendarItems: Array<
+      Awaited<ReturnType<IAIPlannerReadPort['getWindowSummary']>>['calendar'][number]
+    > = [];
+    for (const entry of calendar) {
+      // P4-2301A: this legacy AI read port is Instant-window based. Never synthesize
+      // an Instant for an AllDay Ymd range; AI-9609 owns the later range-aware port cutover.
+      if (entry.range.kind !== 'Timed') {
+        continue;
+      }
+      const conflict = await this.scheduleRepository.getConflictProjection(
+        input.identityId,
+        entry.id,
+      );
+      calendarItems.push({
+        id: String(entry.id),
+        title: entry.title,
+        startTime: entry.range.start,
+        endTime: entry.range.end,
+        hasConflict: conflict?.hasConflict ?? false,
+        conflictingEntryIds: conflict?.conflictingEntries ?? [],
+      });
+    }
+
     return {
       startTime: input.startTime,
       endTime: input.endTime,
-      calendar: calendar.map((entry) => ({
-        id: String(entry.id),
-        title: entry.title,
-        startTime: entry.startTime,
-        endTime: entry.endTime,
-        hasConflict: entry.hasConflict,
-        conflictingEntryIds: entry.conflictingEntries ?? [],
-      })),
+      calendar: calendarItems,
       tasks,
     };
   }
