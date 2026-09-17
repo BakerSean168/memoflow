@@ -9,17 +9,15 @@
  * - 无决类状态：整个业务逻辑执行后才保存
  * - 注入仓储：很有给提供仓储侟可培议
  * 
- * 【NotificationTemplateDomainService】
- * - 模板捕隔：模板变量、预览
+ * 【 * - 模板捕隔：模板变量、预览
  * 
  * 【NotificationPreferenceDomainService】
  * - 用户偏好业冡：检查用户偏好、日时途樛
  */
 
 export { NotificationPolicy } from './notification-policy';
-export { NotificationTemplateDomainService } from './notification-template-domain-service';
 export { NotificationPreferenceDomainService } from './notification-preference-domain-service';
 export { NotificationMetricsService } from './notification-metrics-service';
 
 
-export { NotificationWorkflowCatalog, defaultNotificationWorkflowKey } from './notification-workflow-catalog';
+export { NotificationWorkflowCatalog, BUILTIN_NOTIFICATION_WORKFLOWS } from './notification-workflow-catalog';

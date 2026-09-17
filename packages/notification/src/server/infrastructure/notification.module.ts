@@ -18,7 +18,6 @@
 import type {
   INotificationRepository,
   INotificationPreferenceRepository,
-  INotificationTemplateRepository,
 } from '../domain/repositories';
 import {
   CreateNotificationUseCase,
@@ -56,7 +55,6 @@ export type NotificationRuntimeContributionsInput =
 export interface NotificationModuleDependencies {
   readonly notificationRepository: INotificationRepository;
   readonly preferenceRepository: INotificationPreferenceRepository;
-  readonly templateRepository: INotificationTemplateRepository;
   readonly closureChecker: (identityId: string) => Promise<boolean>;
   readonly userTimeContextPort: UserTimeContextPort;
   readonly runtimeContributions?: NotificationRuntimeContributionsInput;
@@ -77,7 +75,6 @@ export interface NotificationModuleInstance {
   readonly notificationRepository: INotificationRepository;
   readonly preferenceRepository: INotificationPreferenceRepository;
   readonly portableCapability: NotificationDeliveryPreferencePortableCapability;
-  readonly templateRepository: INotificationTemplateRepository;
   readonly useCases: NotificationModuleUseCases;
   readonly api: NotificationApplicationPort;
   readonly durableRuntime: NotificationDurableRuntimePort;
@@ -127,8 +124,7 @@ function normalizeRuntimeContributions(
 export function createNotificationModule(
   dependencies: NotificationModuleDependencies,
 ): NotificationModuleInstance {
-  const { notificationRepository, preferenceRepository, templateRepository, durableRuntime } =
-    dependencies;
+  const { notificationRepository, preferenceRepository, durableRuntime } = dependencies;
   const auditRepository = dependencies.auditRepository;
   const runtimeContributions = normalizeRuntimeContributions(dependencies.runtimeContributions);
 
@@ -314,7 +310,6 @@ export function createNotificationModule(
     notificationRepository,
     preferenceRepository,
     portableCapability,
-    templateRepository,
     useCases,
     api,
     durableRuntime,

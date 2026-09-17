@@ -92,7 +92,6 @@ const TABLE_TO_MODULE: Record<string, string> = {
   notification_channels: 'notification',
   notification_history: 'notification',
   notification_preferences: 'notification',
-  notification_templates: 'notification',
 };
 
 /**

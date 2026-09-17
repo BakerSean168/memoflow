@@ -147,7 +147,6 @@ export function composeNotification(
   const instance = createNotificationModule({
     notificationRepository: repositories.notificationRepository,
     preferenceRepository: repositories.notificationPreferenceRepository,
-    templateRepository: repositories.notificationTemplateRepository,
     closureChecker,
     userTimeContextPort: dependencies.userTimeContextPort,
     durableRuntime,

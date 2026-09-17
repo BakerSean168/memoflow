@@ -2,7 +2,7 @@
  * Dual registry suite (elegance E3b tax cut).
  * Merged 6 dual-retired surface locks from this directory.
  * Behavior/assertions preserved; individual *-dual.surface.spec.ts removed.
- * Sources: notification-batch-result-dual.surface.spec.ts, notification-ids-batch-dual.surface.spec.ts, notification-preference-calendar-prefs-client-dto-dual.surface.spec.ts, notification-template-client-dto-dual.surface.spec.ts, notification-template-server-dto-dual.surface.spec.ts, unread-count-res-dual.surface.spec.ts
+ * Sources: notification-batch-result-dual.surface.spec.ts, notification-ids-batch-dual.surface.spec.ts, notification-preference-calendar-prefs-client-dto-dual.surface.spec.ts, unread-count-res-dual.surface.spec.ts
  */
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -184,100 +184,6 @@ import { describe, expect, it } from 'vitest';
       expect(routes).toContain(
         "successResponse(UserReminderPreferencesResponseSchema, '获取成功')",
       );
-    });
-  });
-}
-
-// --- merged from notification-template-client-dto-dual.surface.spec.ts ---
-{
-  /**
-   * Residual 839: NotificationTemplateClientDTO dual body retired.
-   * Sole NotificationTemplateResponseSchema + z.infer.
-   * Soft residual 845: ServerDTO also z.infer of same schema (see notification-template-server-dto-dual).
-   */
-  describe('notification template client dto dual retired (residual 839)', () => {
-    const apiDir = __dirname;
-    const client = readFileSync(
-      resolve(apiDir, '../aggregates/notification-template-client.ts'),
-      'utf8',
-    );
-    const server = readFileSync(
-      resolve(apiDir, '../aggregates/notification-template-server.ts'),
-      'utf8',
-    );
-    const schemas = readFileSync(resolve(apiDir, 'response-schemas.ts'), 'utf8');
-
-    it('owns NotificationTemplateClientDTO as z.infer of NotificationTemplateResponseSchema', () => {
-      expect(client).toContain('Residual 839');
-      expect(client).toContain(
-        'export type NotificationTemplateClientDTO = z.infer<typeof NotificationTemplateResponseSchema>',
-      );
-      expect(client).not.toMatch(/export interface NotificationTemplateClientDTO\b/);
-      expect(schemas).toContain('Residual 839');
-      expect(schemas).toContain('export const NotificationTemplateResponseSchema = z.object({');
-      expect(schemas).toContain('isSystemTemplate: z.boolean()');
-      expect(schemas).toContain('export const NotificationTemplateConfigSchema = z.object({');
-    });
-
-    it('keeps NotificationTemplateServerDTO as z.infer of same schema (soft residual 845)', () => {
-      // Soft residual 845: Server is z.infer of same schema (no interface dual body).
-      expect(server).toContain(
-        'export type NotificationTemplateServerDTO = z.infer<typeof NotificationTemplateResponseSchema>',
-      );
-      expect(server).not.toMatch(/export interface NotificationTemplateServerDTO\b/);
-      expect(server).toContain('Residual 845');
-      expect(server).not.toMatch(/export interface NotificationTemplateClientDTO\b/);
-    });
-
-    it('client imports response-schemas only (no manual field dual)', () => {
-      expect(client).toContain("from '../api/response-schemas'");
-      expect(client).not.toContain('NotificationTemplateConfigServerDTO');
-      expect(client).not.toContain('createdAt: number');
-    });
-  });
-}
-
-// --- merged from notification-template-server-dto-dual.surface.spec.ts ---
-{
-  /**
-   * Residual 845: NotificationTemplateServerDTO dual body retired.
-   * Same NotificationTemplateResponseSchema + z.infer as Client (residual 839).
-   * Full client+server single-track.
-   */
-  describe('notification template server dto dual retired (residual 845)', () => {
-    const apiDir = __dirname;
-    const server = readFileSync(
-      resolve(apiDir, '../aggregates/notification-template-server.ts'),
-      'utf8',
-    );
-    const client = readFileSync(
-      resolve(apiDir, '../aggregates/notification-template-client.ts'),
-      'utf8',
-    );
-    const schemas = readFileSync(resolve(apiDir, 'response-schemas.ts'), 'utf8');
-
-    it('owns NotificationTemplateServerDTO as z.infer of NotificationTemplateResponseSchema', () => {
-      expect(server).toContain('Residual 845');
-      expect(server).toContain(
-        'export type NotificationTemplateServerDTO = z.infer<typeof NotificationTemplateResponseSchema>',
-      );
-      expect(server).not.toMatch(/export interface NotificationTemplateServerDTO\b/);
-      expect(schemas).toContain('Residual 845');
-      expect(schemas).toContain('export const NotificationTemplateResponseSchema = z.object({');
-    });
-
-    it('client and server share the same ResponseSchema single-track', () => {
-      expect(client).toContain(
-        'export type NotificationTemplateClientDTO = z.infer<typeof NotificationTemplateResponseSchema>',
-      );
-      expect(server).toContain("from '../api/response-schemas'");
-      expect(client).toContain("from '../api/response-schemas'");
-    });
-
-    it('server has no manual field dual body', () => {
-      expect(server).not.toContain('TransferDate');
-      expect(server).not.toContain('NotificationTemplateConfigServerDTO');
-      expect(server).not.toContain('createdAt: TransferDate');
     });
   });
 }

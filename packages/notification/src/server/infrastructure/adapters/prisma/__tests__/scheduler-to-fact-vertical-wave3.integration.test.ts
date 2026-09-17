@@ -453,7 +453,7 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
     const fact = await prisma.notification.findFirstOrThrow({
       where: { identityId, idempotencyKey: shared.idempotencyKey! },
     });
-    expect(fact.workflowKey).toBe(`routine:${routineId}`);
+    expect(fact.workflowKey).toBe('routine.intervention');
     expect(fact.type).toBe(NotificationType.Reminder);
     expect(fact.category).toBe(NotificationCategory.Reminder);
     // The routine envelope authors the related entity as the 'routine' source

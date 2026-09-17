@@ -67,6 +67,53 @@ describe('NOTIF-2401 CreateNotificationUseCase Fact / DeliveryPlan', () => {
     expect(result.data).not.toHaveProperty('status');
   });
 
+  it('requires an explicit workflow key instead of inferring semantics from category', async () => {
+    const result = await useCase.execute({
+      identityId: anIdentityId(),
+      title: 'No inferred workflow',
+      content: 'Category is compatibility projection only',
+      type: NotificationType.Warning,
+      category: NotificationCategory.Task,
+    });
+    expect(result).toMatchObject({ ok: false, error: { code: 'VALIDATION_ERROR' } });
+    expect(notificationRepo.save).not.toHaveBeenCalled();
+  });
+
+  it('derives compatibility type/category from WorkflowDefinition, not producer input', async () => {
+    const result = await useCase.execute({
+      identityId: anIdentityId(),
+      workflowKey: 'task.reminder',
+      title: 'Task reminder',
+      content: 'Workflow semantics win',
+      type: NotificationType.Error,
+      category: NotificationCategory.Account,
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error('expected ok');
+    expect(result.data).toMatchObject({
+      workflowKey: 'task.reminder',
+      type: NotificationType.Reminder,
+      category: NotificationCategory.Task,
+    });
+  });
+
+  it('fail-safes unknown workflows to Inbox-only delivery capability', async () => {
+    const result = await useCase.execute({
+      identityId: anIdentityId(),
+      workflowKey: 'extension.unknown',
+      title: 'Extension fact',
+      content: 'No external delivery without registration',
+      channels: [NotificationChannelType.InApp, NotificationChannelType.Email],
+    });
+    expect(result.ok).toBe(true);
+    const [, outbox, decisions] = vi.mocked(notificationRepo.save).mock.calls[0];
+    expect(outbox?.map((entry) => entry.channel)).toEqual([NotificationChannelType.InApp]);
+    expect(decisions).toContainEqual(expect.objectContaining({
+      channel: NotificationChannelType.Email,
+      outcome: NotificationDeliveryPlanOutcome.Unsupported,
+    }));
+  });
+
   it('protects Wave 1 mixed-channel behavior: Email disabled never enqueues when InApp is allowed', async () => {
     const identityId = anIdentityId();
     const preference = NotificationPreference.create({ identityId });
@@ -274,6 +321,7 @@ describe('NOTIF-2401 CreateNotificationUseCase Fact / DeliveryPlan', () => {
   it('deduplicates repeated requested channels before building the DeliveryPlan', async () => {
     const result = await useCase.execute({
       identityId: anIdentityId(),
+      workflowKey: 'system.general',
       title: 'Duplicate channels',
       content: 'One channel plan per channel',
       type: NotificationType.Info,

@@ -17,14 +17,11 @@
  * - 用户的通知偏好管理：不同通知类種的接收偏好
  * - 性质控制：不需要特定类制的通知、灚时接收等
  * 
- * 【NotificationTemplate 聚合根】
- * - 通知模板管理：可重用的通知内容配置
+ * 【 * - 通知模板管理：可重用的通知内容配置
  * - 模板変量：模板参数化，支持输入变量控制
  */
 
 export { Notification } from './notification';
 export type { NotificationState } from './notification';
-export { NotificationTemplate } from './notification-template';
-export type { NotificationTemplateState } from './notification-template';
 export { NotificationPreference } from './notification-preference';
 export type { NotificationPreferenceState } from './notification-preference';

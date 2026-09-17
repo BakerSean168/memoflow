@@ -26,10 +26,7 @@ import type {
 import { Notification } from '../../../domain/aggregates/notification';
 import { NotificationChannel } from '../../../domain/entities/notification-channel';
 import { NotificationPolicy, type NotificationDeliveryDecision } from '../../../domain/services/notification-policy';
-import {
-  NotificationWorkflowCatalog,
-  defaultNotificationWorkflowKey,
-} from '../../../domain/services/notification-workflow-catalog';
+import { NotificationWorkflowCatalog } from '../../../domain/services/notification-workflow-catalog';
 import { toNotificationClientDTO } from './notification-dto-converters';
 import type { UserTimeContextPort } from '@memoflow/time';
 
@@ -56,8 +53,9 @@ export class CreateNotificationUseCase {
     idempotencyKey?: string;
     title: string;
     content: string;
-    type: NotificationType;
-    category: NotificationCategory;
+    /** Deprecated compatibility inputs. WorkflowDefinition owns their projection. */
+    type?: NotificationType;
+    category?: NotificationCategory;
     importance?: ImportanceLevel;
     urgency?: UrgencyLevel;
     relatedEntityType?: RelatedEntityType;
@@ -74,7 +72,10 @@ export class CreateNotificationUseCase {
       return error('FORBIDDEN', 'Account is closed or closure in progress');
     }
 
-    const workflowKey = params.workflowKey?.trim() || defaultNotificationWorkflowKey(params.category);
+    const workflowKey = params.workflowKey?.trim();
+    if (!workflowKey) {
+      return error('VALIDATION_ERROR', 'workflowKey is required; category-based workflow inference is retired');
+    }
     const workflow = this.workflowCatalog.resolve(workflowKey, params.topic);
     const idempotencyKey = params.idempotencyKey?.trim() || `notification:${randomUUID()}`;
 
@@ -93,14 +94,14 @@ export class CreateNotificationUseCase {
     const notification = Notification.create({
       identityId: params.identityId as IdentityId,
       workflowKey: workflow.workflowKey,
-      topic: workflow.topic,
+      topic: workflow.topicKey ?? workflow.workflowKey,
       idempotencyKey,
       title: params.title,
       content: params.content,
-      type: params.type,
-      category: params.category,
-      importance: params.importance,
-      urgency: params.urgency,
+      type: workflow.legacyProjection.type,
+      category: workflow.legacyProjection.category,
+      importance: params.importance ?? workflow.presentationDefaults.importance,
+      urgency: params.urgency ?? workflow.presentationDefaults.urgency,
       relatedEntityType: params.relatedEntityType ?? null,
       relatedEntityId: params.relatedEntityId ?? null,
       navigationIntent: params.navigationIntent ?? null,
@@ -169,11 +170,11 @@ export class CreateNotificationUseCase {
         payloadJson: JSON.stringify({
           notificationId: String(notification.id),
           workflowKey: workflow.workflowKey,
-          topic: workflow.topic,
+          topic: workflow.topicKey ?? workflow.workflowKey,
           title: params.title,
           content: params.content,
-          type: params.type,
-          category: params.category,
+          type: workflow.legacyProjection.type,
+          category: workflow.legacyProjection.category,
           channelType,
           navigationIntent: params.navigationIntent ?? null,
         }),

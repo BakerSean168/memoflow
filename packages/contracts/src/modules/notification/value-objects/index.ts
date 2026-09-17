@@ -54,9 +54,12 @@ export { NotificationCategory } from './notification-category';
 export {
   NotificationPreferenceControl,
   NotificationDndBehavior,
+  NotificationTone,
 } from './notification-workflow';
 export type {
   NotificationWorkflowChannelCapabilityDTO,
+  NotificationWorkflowPresentationDefaultsDTO,
+  NotificationWorkflowLegacyProjectionDTO,
   NotificationWorkflowDefinitionDTO,
   NotificationGlobalChannelPreferencesDTO,
   NotificationWorkflowChannelOverrideDTO,
@@ -82,15 +85,3 @@ export { ChannelStatus } from './channel-status';
 export { NotificationActionType } from './notification-action-type';
 
 export { ContentType } from './content-type';
-
-
-// Residual 659: dead template/snooze VO duals retired.
-// Live template shape is template-config VO + aggregate Client/Server DTOs.
-
-export type {
-  TemplateContent,
-  EmailTemplateContent,
-  PushTemplateContent,
-  ChannelConfig,
-  NotificationTemplateConfigServerDTO,
-} from './notification-template-config';

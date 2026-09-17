@@ -42,7 +42,6 @@ export {
   type NotificationDurableRuntimePort,
   type INotificationRepository,
   type INotificationPreferenceRepository,
-  type INotificationTemplateRepository,
 } from './server';
 // Host composers import only `@memoflow/notification`; the command / schedule
 // seams are re-exported through the root so no `/commands` or

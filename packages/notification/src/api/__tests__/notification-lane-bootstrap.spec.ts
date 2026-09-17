@@ -36,7 +36,6 @@ describe('Notification Module Lane Ownership Bootstrap (P0-1)', () => {
     return {
       notificationRepository: {} as never,
       preferenceRepository: {} as never,
-      templateRepository: {} as never,
       useCases: {} as never,
       api,
       durableRuntime: {} as never,

@@ -15,7 +15,6 @@ import {
   type NotificationModuleInstance,
   type INotificationRepository,
   type INotificationPreferenceRepository,
-  type INotificationTemplateRepository,
   type ChannelCapabilitySpec,
 } from '../../../../src';
 
@@ -28,15 +27,15 @@ const TEST_USER_TIME_CONTEXT_PORT = {
  * Notification repository seam surface.
  * 通知仓储 seam 的表面契约。
  *
- * The Prisma set returns the three domain repositories plus the
+ * The Prisma set returns the two domain repositories plus the
  * reliable-operation adapter and audit repository; the PowerSync set returns
- * the three domain repositories plus the reliable-operation adapter.
+ * the two domain repositories plus the reliable-operation adapter.
  * Convenience module factories keep the api/start/dispose surface and the
  * fail-closed closure checker requirement, and concrete adapter classes must
  * never leak through the root barrel.
  *
- * Prisma 集合返回三个领域仓储加可靠操作适配器与审计仓储；PowerSync 集合返回
- * 三个领域仓储加可靠操作适配器。便捷模块工厂保留 api/start/dispose 表面与
+ * Prisma 集合返回两个领域仓储加可靠操作适配器与审计仓储；PowerSync 集合返回
+ * 两个领域仓储加可靠操作适配器。便捷模块工厂保留 api/start/dispose 表面与
  * fail-closed closure checker 要求，具体适配器类绝不通过根 barrel 泄漏。
  */
 describe('notification repository factories surface', () => {
@@ -49,7 +48,6 @@ describe('notification repository factories surface', () => {
     const set = createNotificationPrismaRepositories(fakePrisma);
     expect(set).toHaveProperty('notificationRepository');
     expect(set).toHaveProperty('notificationPreferenceRepository');
-    expect(set).toHaveProperty('notificationTemplateRepository');
     expect(set).toHaveProperty('reliableAdapter');
     expect(set).toHaveProperty('auditRepository');
     const typed: NotificationPrismaRepositorySet = set;
@@ -60,7 +58,6 @@ describe('notification repository factories surface', () => {
     const set = createNotificationPowerSyncRepositories(fakeElectronDb);
     expect(set).toHaveProperty('notificationRepository');
     expect(set).toHaveProperty('notificationPreferenceRepository');
-    expect(set).toHaveProperty('notificationTemplateRepository');
     expect(set).toHaveProperty('reliableAdapter');
     expect(set).not.toHaveProperty('auditRepository');
     const typed: NotificationPowerSyncRepositorySet = set;
@@ -128,10 +125,8 @@ describe('notification repository factories surface', () => {
     const forbidden = [
       'NotificationPrismaRepository',
       'NotificationPreferencePrismaRepository',
-      'NotificationTemplatePrismaRepository',
       'PowerSyncNotificationRepository',
       'PowerSyncNotificationPreferenceRepository',
-      'PowerSyncNotificationTemplateRepository',
       'PowerSyncNotificationReliableAdapter',
     ];
 
@@ -155,10 +150,8 @@ describe('notification repository factories surface', () => {
   it('root barrel type-exports every set field type (compile-time lock)', () => {
     const repo = (_t: INotificationRepository) => undefined;
     const pref = (_t: INotificationPreferenceRepository) => undefined;
-    const template = (_t: INotificationTemplateRepository) => undefined;
 
     expect(typeof repo).toBe('function');
     expect(typeof pref).toBe('function');
-    expect(typeof template).toBe('function');
   });
 });

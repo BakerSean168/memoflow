@@ -7715,16 +7715,6 @@
       ]
     },
     {
-      "path": "packages/notification/src/server/domain/aggregates/__tests__/notification-template.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/notification/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/notification/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/notification/src/server/domain/aggregates/__tests__/notification.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -7755,16 +7745,6 @@
       ]
     },
     {
-      "path": "packages/notification/src/server/domain/services/__tests__/notification-template-domain.service.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/notification/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/notification/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/notification/src/server/domain/services/notification-metrics-unified.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -7786,16 +7766,6 @@
     },
     {
       "path": "packages/notification/src/server/domain/value-objects/__tests__/notification-server-value-objects.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/notification/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/notification/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/notification/src/server/domain/value-objects/__tests__/notification-template-config.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/notification/vitest.config.ts"
@@ -7919,16 +7889,6 @@
         "packages/notification/vitest.integration.config.ts"
       ],
       "measurementCollectors": []
-    },
-    {
-      "path": "packages/notification/src/server/infrastructure/adapters/prisma/__tests__/notification-template-ownership.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/notification/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/notification/vitest.config.ts"
-      ]
     },
     {
       "path": "packages/notification/src/server/infrastructure/adapters/prisma/__tests__/scheduler-to-fact-vertical-wave3.integration.test.ts",
@@ -11535,7 +11495,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 45
+      "fileCount": 41
     },
     {
       "id": "packages/reminder/vitest.config.ts",
@@ -11969,7 +11929,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 45
+      "fileCount": 41
     },
     {
       "id": "packages/patterns/vitest.config.ts",
@@ -12431,15 +12391,12 @@
       "packages/notification/src/server/application/use-cases/queries/__tests__/get-user-notifications.test.ts",
       "packages/notification/src/server/domain/aggregates/__tests__/notification-fact-wave2.characterization.spec.ts",
       "packages/notification/src/server/domain/aggregates/__tests__/notification-preference.spec.ts",
-      "packages/notification/src/server/domain/aggregates/__tests__/notification-template.spec.ts",
       "packages/notification/src/server/domain/aggregates/__tests__/notification.spec.ts",
       "packages/notification/src/server/domain/services/__tests__/notification-policy.spec.ts",
       "packages/notification/src/server/domain/services/__tests__/notification-preference-domain.service.spec.ts",
-      "packages/notification/src/server/domain/services/__tests__/notification-template-domain.service.spec.ts",
       "packages/notification/src/server/domain/services/notification-metrics-unified.surface.spec.ts",
       "packages/notification/src/server/domain/value-objects/__tests__/notification-id.spec.ts",
       "packages/notification/src/server/domain/value-objects/__tests__/notification-server-value-objects.spec.ts",
-      "packages/notification/src/server/domain/value-objects/__tests__/notification-template-config.spec.ts",
       "packages/notification/src/server/domain/value-objects/__tests__/notification-value-objects.spec.ts",
       "packages/notification/src/server/infrastructure/__tests__/notification-module-partial-start.spec.ts",
       "packages/notification/src/server/infrastructure/__tests__/notification-repositories.surface.spec.ts",
@@ -12450,7 +12407,6 @@
       "packages/notification/src/server/infrastructure/adapters/prisma/__tests__/notification-ownership.surface.spec.ts",
       "packages/notification/src/server/infrastructure/adapters/prisma/__tests__/notification-preference-ownership.surface.spec.ts",
       "packages/notification/src/server/infrastructure/adapters/prisma/__tests__/notification-preference-schema-migration.surface.spec.ts",
-      "packages/notification/src/server/infrastructure/adapters/prisma/__tests__/notification-template-ownership.surface.spec.ts",
       "packages/notification/src/server/infrastructure/adapters/prisma/mappers/__tests__/notification-preference-prisma.mapper.spec.ts",
       "packages/notification/src/server/infrastructure/adapters/prisma/mappers/notification-prisma.mapper.spec.ts",
       "packages/notification/src/server/infrastructure/runtime/__tests__/notification-durable-dispatch.spec.ts",
@@ -12673,7 +12629,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1099,
+    "unit": 1095,
     "integration": 38,
     "smoke": 3,
     "boundary-ipc": 9,

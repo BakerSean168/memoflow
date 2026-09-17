@@ -36,7 +36,7 @@ export function buildRoutineNotificationRequestedOutboxInput(
       source: ROUTINE_NOTIFICATION_SOURCE,
       occurrenceKey: input.occurrenceKey,
       idempotencyKey,
-      workflowKey: `routine:${input.routineId}`,
+      workflowKey: 'routine.intervention',
       relatedEntity: { type: 'routine', id: input.routineId },
       content: {
         title: input.title,
