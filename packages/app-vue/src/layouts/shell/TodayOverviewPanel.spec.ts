@@ -37,17 +37,6 @@ const DailyTodoWidgetStub = defineComponent({
   },
 });
 
-const UpcomingRemindersWidgetStub = defineComponent({
-  name: 'UpcomingRemindersWidget',
-  emits: ['view-all'],
-  setup(_, { emit }) {
-    return () =>
-      h('div', { 'data-testid': 'upcoming-reminders-widget' }, [
-        h('button', { onClick: () => emit('view-all') }, 'reminders'),
-      ]);
-  },
-});
-
 const GoalProgressWidgetStub = defineComponent({
   name: 'GoalProgressWidget',
   emits: ['view-all', 'select'],
@@ -84,7 +73,6 @@ function mountPanel(active: boolean) {
       plugins: [i18n],
       stubs: {
         DailyTodoWidget: DailyTodoWidgetStub,
-        UpcomingRemindersWidget: UpcomingRemindersWidgetStub,
         GoalProgressWidget: GoalProgressWidgetStub,
       },
     },
@@ -117,7 +105,6 @@ describe('TodayOverviewPanel', () => {
     await wrapper.get('[data-testid="today-overview-create-goal"]').trigger('click');
     await wrapper.get('[data-testid="today-overview-create-task"]').trigger('click');
     await wrapper.get('[data-testid="daily-todo-widget"] button').trigger('click');
-    await wrapper.get('[data-testid="upcoming-reminders-widget"] button').trigger('click');
     await wrapper.get('[data-testid="goal-progress-widget"] button:nth-child(1)').trigger('click');
     await wrapper.get('[data-testid="goal-progress-widget"] button:nth-child(2)').trigger('click');
 
@@ -125,7 +112,6 @@ describe('TodayOverviewPanel', () => {
       ['goal', '/goals?dialog=goal'],
       ['task', '/tasks?dialog=quick-task'],
       ['task', '/tasks'],
-      ['reminder', '/reminders'],
       ['goal', '/goals'],
       ['goal', '/goals/goal-1'],
     ]);

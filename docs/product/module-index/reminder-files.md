@@ -26,8 +26,7 @@ updated: 2026-09-17T20:10:00+08:00
 | 文件 | 说明 |
 | --- | --- |
 | [`packages/reminder/src/server/domain/routine/trigger.ts`](../../../packages/reminder/src/server/domain/routine/trigger.ts) | WallClock / Elapsed / ActiveUsage 等 canonical trigger 语义 |
-| [`packages/reminder/src/server/domain/routine/routine-definition.ts`](../../../packages/reminder/src/server/domain/routine/routine-definition.ts) | RoutineDefinition owner aggregate |
-| [`packages/reminder/src/server/domain/routine/routine-profile.ts`](../../../packages/reminder/src/server/domain/routine/routine-profile.ts) | RoutineProfile 与 membership 语义 |
+| [`packages/reminder/src/server/domain/routine/model.ts`](../../../packages/reminder/src/server/domain/routine/model.ts) | RoutineDefinition / RoutineProfile owner aggregates 与 membership 语义 |
 | [`packages/reminder/src/server/domain/routine/protocol.ts`](../../../packages/reminder/src/server/domain/routine/protocol.ts) | ProtocolDefinition / ProtocolSession 语义 |
 | [`packages/reminder/src/server/domain/ports/routine-profile-store.port.ts`](../../../packages/reminder/src/server/domain/ports/routine-profile-store.port.ts) | Routine/Profile/M:N membership persistence port |
 | [`packages/reminder/src/server/domain/ports/routine-occurrence-truth-store.port.ts`](../../../packages/reminder/src/server/domain/ports/routine-occurrence-truth-store.port.ts) | RoutineOccurrence + Interaction durable truth port |
@@ -48,7 +47,7 @@ updated: 2026-09-17T20:10:00+08:00
 | [`packages/reminder/src/server/infrastructure/routine-schedule/routine-schedule-projection-source.ts`](../../../packages/reminder/src/server/infrastructure/routine-schedule/routine-schedule-projection-source.ts) | WallClock Routine → SchedulingPort desired projection |
 | [`packages/reminder/src/server/infrastructure/routine-schedule/routine-schedule-execution-source.ts`](../../../packages/reminder/src/server/infrastructure/routine-schedule/routine-schedule-execution-source.ts) | ScheduledInvocation → Routine occurrence commit execution |
 | [`packages/reminder/src/server/infrastructure/routine-schedule/routine-wall-clock-scheduled-handler.ts`](../../../packages/reminder/src/server/infrastructure/routine-schedule/routine-wall-clock-scheduled-handler.ts) | Scannerless Routine wall-clock handler |
-| [`packages/schedule-orchestration/src/infrastructure-server/schedule-orchestration.module.ts`](../../../packages/schedule-orchestration/src/infrastructure-server/schedule-orchestration.module.ts) | Task / Goal / Routine canonical scheduling composition |
+| [`packages/schedule-orchestration/src/index.ts`](../../../packages/schedule-orchestration/src/index.ts) | Task / Goal / Routine canonical scheduling public seam |
 | [`packages/database/prisma/schema/reminder.prisma`](../../../packages/database/prisma/schema/reminder.prisma) | 历史文件名下仅保留 Routine vNext Prisma models |
 | [`packages/database/prisma/migrations/retire-legacy-reminder-model.sql`](../../../packages/database/prisma/migrations/retire-legacy-reminder-model.sql) | ADR-111 破坏式删除 legacy Reminder tables |
 

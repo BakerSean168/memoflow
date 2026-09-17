@@ -30,11 +30,12 @@ const FEATURE_API_MODULES = [
   'ai',
   'data-portability',
   'notification',
-  'reminder',
   'repository',
   'schedule',
   'setting',
 ].map((pkg) => resolve(REPO_ROOT, `packages/${pkg}/src/api/module.ts`));
+
+const ROUTINE_TRANSPORT_MARKER = resolve(REPO_ROOT, 'packages/reminder/src/api/module.ts');
 
 const APP_LOCAL_MODULES = [
   resolve(REPO_ROOT, 'apps/api/src/modules/powersync/module.ts'),
@@ -66,6 +67,15 @@ describe('feature api modules shared-handle contract (Phase 6)', () => {
       expect(source).not.toMatch(/new Prisma[A-Za-z]+\(/);
     });
   }
+
+  it('Routine keeps the audited package marker without resurrecting legacy Reminder HTTP transport', () => {
+    const source = stripComments(readFileSync(ROUTINE_TRANSPORT_MARKER, 'utf8'));
+    expect(source).toContain('export {}');
+    expect(source).not.toMatch(/extends ServerModuleHandle</);
+    expect(source).not.toMatch(/register\s*\(/);
+    expect(source).not.toMatch(/router\./);
+    expect(source).not.toMatch(/context\.db|ctx\.db|\bPrismaClient\b/);
+  });
 
   for (const modulePath of APP_LOCAL_MODULES) {
     const fileName = modulePath.slice(REPO_ROOT.length + 1);

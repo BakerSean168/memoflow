@@ -16,7 +16,6 @@ function makeRouter() {
       { path: '/goals', component: EmptyRoute },
       { path: '/goals/:id', component: EmptyRoute },
       { path: '/notifications', component: EmptyRoute },
-      { path: '/reminders', component: EmptyRoute },
       { path: '/schedule', component: EmptyRoute },
       { path: '/tasks', component: EmptyRoute },
       { path: '/tasks/:id', component: EmptyRoute },
@@ -71,14 +70,13 @@ describe('shared Notification click destination policy', () => {
     [' task ', '/tasks'],
     ['GOAL', '/goals'],
     ['Schedule', '/schedule'],
-    ['reminder', '/reminders'],
   ])('normalizes category %s to %s', (category, path) => {
     expect(resolveNotificationDestination({ category })).toEqual({ path });
     expect(hasNotificationExternalDestination({ category })).toBe(true);
   });
 
-  it('keeps unknown, Account, and System notifications in Notification Center', () => {
-    for (const category of [undefined, 'Unknown', 'Account', 'System']) {
+  it('keeps unknown, retired Reminder, Account, and System notifications in Notification Center', () => {
+    for (const category of [undefined, 'Unknown', 'Reminder', 'Account', 'System']) {
       expect(resolveNotificationDestination({ category })).toEqual({ path: '/notifications' });
       expect(hasNotificationExternalDestination({ category })).toBe(false);
     }

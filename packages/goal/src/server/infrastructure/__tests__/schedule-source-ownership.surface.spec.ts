@@ -12,17 +12,17 @@ describe('schedule source ownership surface', () => {
     resolve(__dirname, '../schedule-projection-source.ts'),
     'utf8',
   );
-  const reminderProjection = readFileSync(
+  const routineProjection = readFileSync(
     resolve(
       __dirname,
-      '../../../../../reminder/src/server/infrastructure/schedule-projection-source.ts',
+      '../../../../../reminder/src/server/infrastructure/routine-schedule/routine-schedule-projection-source.ts',
     ),
     'utf8',
   );
-  const reminderExecution = readFileSync(
+  const routineExecution = readFileSync(
     resolve(
       __dirname,
-      '../../../../../reminder/src/server/infrastructure/schedule-execution-source.ts',
+      '../../../../../reminder/src/server/infrastructure/routine-schedule/routine-schedule-execution-source.ts',
     ),
     'utf8',
   );
@@ -51,23 +51,24 @@ describe('schedule source ownership surface', () => {
     expect(goalProjection).not.toContain('@memoflow/scheduler');
   });
 
-  it('reminder projection requires identityId and never bare findById (residual 168)', () => {
-    expect(reminderProjection).toContain(
-      'identityId: string,\n  ): Promise<ReminderScheduleProjectionPlan>;',
+  it('Routine projection is identity-scoped and reads only through the canonical state reader', () => {
+    expect(routineProjection).toContain(
+      'routineId: string,\n    identityId: string,\n  ): Promise<RoutineScheduleProjectionPlan>;',
     );
-    expect(reminderProjection).toContain('readonly owner: SchedulingOwner;');
-    expect(reminderProjection).toContain('return { identityId, type: REMINDER_SCHEDULING_OWNER_TYPE, id: templateId };');
-    expect(reminderProjection).toContain(
-      'findByIdForIdentity(\n        identityId,\n        templateId,',
-    );
-    expect(reminderProjection).not.toContain('findById(templateId, {');
+    expect(routineProjection).toContain('readonly owner: SchedulingOwner;');
+    expect(routineProjection).toContain('readRoutineScheduleSnapshot(routineId, identityId)');
+    expect(routineProjection).toContain('buildRoutineWallClockOwner(routineId, identityId)');
+    expect(routineProjection).not.toContain('ReminderTemplate');
+    expect(routineProjection).not.toContain('reminderTemplateRepository');
   });
 
-  it('reminder execution loads via findByIdForIdentity(task.identityId)', () => {
-    expect(reminderExecution).toContain('findByIdForIdentity(');
-    expect(reminderExecution).toContain('String(task.identityId)');
-    expect(reminderExecution).not.toContain(
-      'const reminder = await deps.reminderTemplateRepository.findById(task.sourceEntityId',
+  it('Routine execution resolves the same identity-bound snapshot and never reintroduces Reminder repositories', () => {
+    expect(routineExecution).toContain(
+      'readRoutineScheduleSnapshot(\n        input.routineId,\n        input.identityId,',
     );
+    expect(routineExecution).toContain('readonly routineId: string;');
+    expect(routineExecution).toContain('readonly identityId: string;');
+    expect(routineExecution).not.toContain('ReminderTemplate');
+    expect(routineExecution).not.toContain('reminderTemplateRepository');
   });
 });

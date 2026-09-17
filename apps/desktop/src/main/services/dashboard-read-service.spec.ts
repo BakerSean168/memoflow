@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
  * dashboard 读取服务聚合行为。
  *
  * Locks the instance-bound injection: getDesktopDashboardData(identityId,
- * dependencies) reads ALL seven repositories from the injected view and must
+ * dependencies) reads the five injected repositories plus UserTimeContext and must
  * never fall back to package-level accessors. The @memoflow/dashboard
  * getDashboardData is mocked so the test asserts the wiring (loader closures →
  * injected repositories) rather than the projection math (which is owned by the
@@ -84,11 +84,6 @@ function createFakeDependencies(): DashboardReadDependencies {
       },
     ]),
   };
-  const reminderTemplateRepository = {
-    findByNextTriggerBefore: vi.fn().mockResolvedValue([
-      { deletedAt: null, status: 'Active', effectiveEnabled: true, nextTriggerAt: Date.now() + 3600_000 },
-    ]),
-  };
   const notificationRepository = {
     countUnread: vi.fn().mockResolvedValue(3),
   };
@@ -98,7 +93,6 @@ function createFakeDependencies(): DashboardReadDependencies {
     taskPlanRepository: taskPlanRepository as never,
     taskOccurrenceRepository: taskOccurrenceRepository as never,
     scheduleRepository: scheduleRepository as never,
-    reminderTemplateRepository: reminderTemplateRepository as never,
     notificationRepository: notificationRepository as never,
     userTimeContextPort: {
       getUserTimeContext: vi.fn(async () => ({ timeZone: 'UTC', weekStartsOn: 1 })),
@@ -113,7 +107,6 @@ function captureDashboardSource(_deps: DashboardReadDependencies) {
       await source.listTaskPlans(id);
       await source.listTaskOccurrences(id);
       await source.listSchedules(id);
-      await source.listUpcomingReminders(id, Date.now());
       await source.countUnreadNotifications(id);
       return { stats: { activeGoals: 1 } } as unknown as DashboardData;
     },
@@ -135,10 +128,6 @@ describe('getDesktopDashboardData instance-bound aggregation', () => {
     expect(deps.taskPlanRepository.findByIdentityId).toHaveBeenCalledWith(identityId);
     expect(deps.taskOccurrenceRepository.findByIdentityId).toHaveBeenCalledWith(identityId);
     expect(deps.scheduleRepository.findByIdentityId).toHaveBeenCalledWith(identityId);
-    expect(deps.reminderTemplateRepository.findByNextTriggerBefore).toHaveBeenCalledWith(
-      expect.any(Number),
-      identityId,
-    );
     expect(deps.notificationRepository.countUnread).toHaveBeenCalledWith(identityId);
   });
 
@@ -156,7 +145,6 @@ describe('getDesktopDashboardData instance-bound aggregation', () => {
       expect.objectContaining({
         listGoals: expect.any(Function),
         listSchedules: expect.any(Function),
-        listUpcomingReminders: expect.any(Function),
         countUnreadNotifications: expect.any(Function),
       }),
       { timeZone: 'UTC', weekStartsOn: 1 },

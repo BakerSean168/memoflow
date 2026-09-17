@@ -22,7 +22,6 @@ const MODULE_ROUTES: Record<string, string> = {
   goal: '/goals',
   task: '/tasks',
   note: '/repository',
-  reminder: '/reminders',
   notification: '/notifications',
 };
 

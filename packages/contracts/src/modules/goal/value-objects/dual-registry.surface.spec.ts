@@ -14,7 +14,6 @@ import { describe, expect, it } from 'vitest';
    * Residual 859 (P8): isomorphic Instant duals may type-alias (GoalTimeRangeDTO); shape-mismatch duals stay separate.
    * DomainDate type retired (ADR-037 T10); duals are Instant (domain) vs TransferDate (DTO) names,
    * not Date-vs-number. Exact VO duals (FrequencyAdjustment/ResponseMetrics, residual 857) remain aliases.
-   * Residual 861 (soft): ReminderResponse/NotificationChannel subset duals retired via Omit.
    * Cloud authentication contracts now live in the dedicated cloud-auth surface.
    * Does not flip §13.2 checkboxes; OAuth / multi-engine Agent / full PR gate remain open.
    */
@@ -22,7 +21,6 @@ import { describe, expect, it } from 'vitest';
     const goalVo = __dirname;
     const accountVo = resolve(goalVo, '../../account/value-objects');
     const taskVo = resolve(goalVo, '../../task/value-objects');
-    const reminderVo = resolve(goalVo, '../../reminder/value-objects');
     const primitives = resolve(goalVo, '../../../primitives');
     const taskPlanSchedule = readFileSync(resolve(taskVo, 'task-plan-schedule.ts'), 'utf8');
     const taskOccurrenceResult = readFileSync(resolve(taskVo, 'task-occurrence-result.ts'), 'utf8');
@@ -74,11 +72,7 @@ import { describe, expect, it } from 'vitest';
       );
     });
 
-    it('keeps transient ResponseMetrics as the residual 857 alias; residual 859 marker present', () => {
-      const metrics = readFileSync(resolve(reminderVo, 'response-metrics.ts'), 'utf8');
-      expect(metrics).toContain('Residual 857');
-      expect(metrics).toContain('export type ResponseMetricsDTO = ResponseMetrics');
-      expect(metrics).not.toMatch(/export interface ResponseMetricsDTO\b/);
+    it('keeps the residual 859 boundary marker present after retired Reminder value objects are removed', () => {
       expect(readFileSync(__filename, 'utf8')).toContain('Residual 859');
     });
   });
@@ -89,7 +83,6 @@ import { describe, expect, it } from 'vitest';
   /**
    * Residual 853: exact-match VO/DTO duals retired (Instant/TransferDate duals left as separate interfaces).
    * ChecklistItemDefinitionDTO = sole interface + type alias.
-   * Residual 857 (soft): FrequencyAdjustmentDTO / ResponseMetricsDTO exact duals also retired.
    * Residual 859 (soft): Instant/TransferDate dual keep-boundary owned above (this block keeps Residual 853 only).
    */
   describe('exact vo dto duals retired (residual 853)', () => {

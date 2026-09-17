@@ -447,7 +447,7 @@ import {
 // --- merged from parse-query-value-dual.surface.spec.ts ---
 {
   /**
-   * Residual 989: parseString + parseNumber dual retired (notification + reminder API routes).
+   * Residual 989: parseString + parseNumber dual retired onto the shared query-value helper.
    * Residual 1021: parseBoolean dual retired for notification query filters.
    * Sole body in @memoflow/utils/shared/parse-query-value.
    * Soft residual 1038: tip focused suite numbers track Residual 1038 evidence tip (309/1339).
@@ -467,10 +467,6 @@ import {
       resolve(sharedDir, '../../../notification/src/api/routes.ts'),
       'utf8',
     );
-    const reminder = readFileSync(
-      resolve(sharedDir, '../../../reminder/src/api/routes/reminder-template.routes.ts'),
-      'utf8',
-    );
     const schedule = readFileSync(
       resolve(sharedDir, '../../../scheduler/src/api/routes.ts'),
       'utf8',
@@ -488,7 +484,7 @@ import {
       expect(index).toContain("export * from './parse-query-value'");
     });
 
-    it('notification + reminder routes import sole without local dual bodies', () => {
+    it('notification routes import sole without local dual bodies', () => {
       expect(notification).toContain('Residual 989');
       expect(notification).toContain('Residual 1021');
       expect(notification).toContain(
@@ -500,15 +496,6 @@ import {
       expect(notification).toContain('parseString(');
       expect(notification).toContain('parseNumber(');
       expect(notification).toContain('parseBoolean(');
-
-      expect(reminder).toContain('Residual 989');
-      expect(reminder).toContain(
-        "import { parseNumber, parseString } from '@memoflow/utils/shared'",
-      );
-      expect(reminder).not.toMatch(/function parseString\b/);
-      expect(reminder).not.toMatch(/function parseNumber\b/);
-      expect(reminder).toContain('parseString(');
-      expect(reminder).toContain('parseNumber(');
     });
 
     it('scheduler diagnostics routes use contract-owned query parsing without local parser bodies', () => {

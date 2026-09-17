@@ -7,7 +7,6 @@ import {
   PortableAIDataSchema,
   PortableGoalDataSchema,
   PortableRefSchema,
-  PortableReminderDataSchema,
   PortableRepositoryDataSchema,
   PortableScheduleDataSchema,
   PortableSettingsSchema,
@@ -353,10 +352,12 @@ describe('module schemas', () => {
     );
   });
 
-  it('accepts canonical Reminder data', () => {
+  it('rejects the retired Reminder V2 module at the strict user-data boundary', () => {
     expect(
-      PortableReminderDataSchema.safeParse({ groups: [], templates: [], responses: [] }).success,
-    ).toBe(true);
+      PortableUserDataV2Schema.safeParse({
+        reminders: { groups: [], templates: [], responses: [] },
+      }).success,
+    ).toBe(false);
   });
 
   it('accepts repository, schedule, AI, and settings empty shapes', () => {
