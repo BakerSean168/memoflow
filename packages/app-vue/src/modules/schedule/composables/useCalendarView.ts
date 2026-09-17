@@ -8,12 +8,16 @@
 import { computed, ref } from 'vue';
 import { useSchedule } from './useSchedule';
 import { useTask } from '../../task/composables/useTask';
+import { GOAL_SERVICE_KEY, REMINDER_SERVICE_KEY } from '../../../di/keys';
+import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import type {
   TaskOccurrenceClientDTO,
   TaskOccurrenceStatus,
   TaskPlanClientDTO,
 } from '@memoflow/contracts/task';
 import type { CalendarEventProjection } from '@memoflow/contracts/schedule';
+import { derivePlannerConflicts, plannerConflictSourceKeys, plannerProjectionKey } from '@memoflow/schedule/client';
+import { asInstant } from '@memoflow/time';
 import {
   endOfDayMs,
   getProductTime,
@@ -165,6 +169,7 @@ function plannerProductTimePort(): PlannerProductTimePort {
  */
 function projectionToLegacyCalendarEvent(
   projection: Extract<CalendarEventProjection, { sourceType: 'schedule' | 'task' }>,
+  conflictingSourceKeys: ReadonlySet<string> = new Set(),
 ): CalendarEventItem {
   const time = getProductTime();
   const startTime = projection.allDay
@@ -181,7 +186,7 @@ function projectionToLegacyCalendarEvent(
     endTime,
     displayMode: projection.allDay ? 'all-day' : 'timed',
     source: projection.sourceType,
-    hasConflict: projection.displayMetadata.hasConflict ?? false,
+    hasConflict: conflictingSourceKeys.has(plannerProjectionKey(projection)),
     originalId: projection.ownerCommandTarget.ownerId,
     instanceStatus:
       projection.sourceType === 'task'
@@ -212,16 +217,21 @@ export function taskOccurrencesToEvents(
 export function useCalendarView() {
   const schedule = useSchedule();
   const task = useTask();
+  const goalService = useStrictInject(GOAL_SERVICE_KEY, 'GoalService');
+  const reminderService = useStrictInject(REMINDER_SERVICE_KEY, 'ReminderService');
+  const plannerGoals = ref<Parameters<typeof projectPlannerReadModel>[0]['goals']>([]);
+  const plannerRoutineOccurrences = ref<Parameters<typeof projectPlannerReadModel>[0]['routineOccurrences']>([]);
+  const plannerOwnerReadsLoading = ref(false);
 
   /** Currently displayed time window (set when calendar navigation changes) */
   const windowStart = ref<number>(0);
   const windowEnd = ref<number>(0);
 
   /**
-   * Canonical owner-aware read model. Goal/Routine adapters are already part of
-   * PLAN-4302, while their live client feeds are wired in the later Planner
-   * source-integration slice. Raw worker-invocation persistence rows never
-   * enter this computed value.
+   * Canonical owner-aware Planner read model. CalendarEntry, TaskOccurrence,
+   * Goal dates and the current Routine occurrence marker feed are composed here;
+   * raw Scheduler invocation persistence never enters this value. R4-2201B may
+   * later replace the Routine marker source without changing Planner semantics.
    */
   const projections = computed<CalendarEventProjection[]>(() => {
     const entriesRaw = schedule.calendarEntries.value;
@@ -231,11 +241,15 @@ export function useCalendarView() {
       calendarEntries: Array.isArray(entriesRaw) ? entriesRaw : [],
       taskOccurrences: Array.isArray(instancesRaw) ? instancesRaw : [],
       taskPlans: Array.isArray(templatesRaw) ? templatesRaw : [],
-      goals: [],
-      routineOccurrences: [],
+      goals: plannerGoals.value,
+      routineOccurrences: plannerRoutineOccurrences.value,
       time: plannerProductTimePort(),
     });
   });
+
+  /** Pure cross-owner conflict read model. No owner projection stores conflict truth. */
+  const conflicts = computed(() => derivePlannerConflicts(projections.value));
+  const conflictingSourceKeys = computed(() => plannerConflictSourceKeys(conflicts.value));
 
   /** Legacy custom-calendar view model, derived from canonical Schedule/Task projections. */
   const events = computed<CalendarEventItem[]>(() =>
@@ -244,13 +258,50 @@ export function useCalendarView() {
         (event): event is Extract<CalendarEventProjection, { sourceType: 'schedule' | 'task' }> =>
           event.sourceType === 'schedule' || event.sourceType === 'task',
       )
-      .map(projectionToLegacyCalendarEvent)
+      .map((projection) => projectionToLegacyCalendarEvent(projection, conflictingSourceKeys.value))
       .sort((a, b) => a.startTime - b.startTime),
   );
 
-  const isLoading = computed(() => schedule.isLoading.value || task.isLoading.value);
+  const isLoading = computed(
+    () => schedule.isLoading.value || task.isLoading.value || plannerOwnerReadsLoading.value,
+  );
 
-  /** Fetch all data for the given time window (ms timestamps) */
+  async function fetchPlannerOwnerMarkers(startTime: number, endTime: number) {
+    plannerOwnerReadsLoading.value = true;
+    try {
+      const [goalResult, reminderResult] = await Promise.all([
+        goalService.listGoals({ systemView: 'all', page: 1, pageSize: 500 }),
+        reminderService.getReminderTemplates(),
+      ]);
+
+      plannerGoals.value = goalResult.ok
+        ? goalResult.data.goals.map((goal) => goal.toDTO())
+        : [];
+      plannerRoutineOccurrences.value = reminderResult.ok
+        ? reminderResult.data.templates.flatMap((routine) => {
+            if (!routine.effectiveEnabled || routine.nextTriggerAt == null) return [];
+            if (routine.nextTriggerAt < startTime || routine.nextTriggerAt > endTime) return [];
+            return [
+              {
+                identityId: String(routine.identityId),
+                routineId: String(routine.id),
+                occurrenceKey: `routine:${String(routine.id)}:oc:${routine.nextTriggerAt}`,
+                title: routine.name,
+                subtitle: routine.description,
+                occurrenceAt: asInstant(routine.nextTriggerAt),
+                endAt: null,
+                revision: routine.version,
+                editable: false,
+              },
+            ];
+          })
+        : [];
+    } finally {
+      plannerOwnerReadsLoading.value = false;
+    }
+  }
+
+  /** Fetch all owner facts for the given Planner time window. */
   async function fetchForRange(startTime: number, endTime: number) {
     windowStart.value = startTime;
     windowEnd.value = endTime;
@@ -259,6 +310,7 @@ export function useCalendarView() {
       schedule.fetchCalendarEntries(startTime, endTime),
       task.fetchInstancesByDateRange(startTime, endTime),
       task.fetchTemplates(),
+      fetchPlannerOwnerMarkers(startTime, endTime),
     ]);
   }
 
@@ -279,6 +331,7 @@ export function useCalendarView() {
 
   return {
     projections,
+    conflicts,
     events,
     isLoading,
     windowStart,

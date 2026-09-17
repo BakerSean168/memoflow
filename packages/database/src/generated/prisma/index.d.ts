@@ -107082,8 +107082,6 @@ export namespace Prisma {
     timedEnd: Date | null
     allDayStart: string | null
     allDayEnd: string | null
-    hasConflict: boolean | null
-    conflictingSchedules: string | null
     location: string | null
     attendees: string | null
     createdAt: Date | null
@@ -107101,8 +107099,6 @@ export namespace Prisma {
     timedEnd: Date | null
     allDayStart: string | null
     allDayEnd: string | null
-    hasConflict: boolean | null
-    conflictingSchedules: string | null
     location: string | null
     attendees: string | null
     createdAt: Date | null
@@ -107120,8 +107116,6 @@ export namespace Prisma {
     timedEnd: number
     allDayStart: number
     allDayEnd: number
-    hasConflict: number
-    conflictingSchedules: number
     location: number
     attendees: number
     createdAt: number
@@ -107149,8 +107143,6 @@ export namespace Prisma {
     timedEnd?: true
     allDayStart?: true
     allDayEnd?: true
-    hasConflict?: true
-    conflictingSchedules?: true
     location?: true
     attendees?: true
     createdAt?: true
@@ -107168,8 +107160,6 @@ export namespace Prisma {
     timedEnd?: true
     allDayStart?: true
     allDayEnd?: true
-    hasConflict?: true
-    conflictingSchedules?: true
     location?: true
     attendees?: true
     createdAt?: true
@@ -107187,8 +107177,6 @@ export namespace Prisma {
     timedEnd?: true
     allDayStart?: true
     allDayEnd?: true
-    hasConflict?: true
-    conflictingSchedules?: true
     location?: true
     attendees?: true
     createdAt?: true
@@ -107293,8 +107281,6 @@ export namespace Prisma {
     timedEnd: Date | null
     allDayStart: string | null
     allDayEnd: string | null
-    hasConflict: boolean
-    conflictingSchedules: string | null
     location: string | null
     attendees: string | null
     createdAt: Date
@@ -107331,8 +107317,6 @@ export namespace Prisma {
     timedEnd?: boolean
     allDayStart?: boolean
     allDayEnd?: boolean
-    hasConflict?: boolean
-    conflictingSchedules?: boolean
     location?: boolean
     attendees?: boolean
     createdAt?: boolean
@@ -107351,8 +107335,6 @@ export namespace Prisma {
     timedEnd?: boolean
     allDayStart?: boolean
     allDayEnd?: boolean
-    hasConflict?: boolean
-    conflictingSchedules?: boolean
     location?: boolean
     attendees?: boolean
     createdAt?: boolean
@@ -107371,8 +107353,6 @@ export namespace Prisma {
     timedEnd?: boolean
     allDayStart?: boolean
     allDayEnd?: boolean
-    hasConflict?: boolean
-    conflictingSchedules?: boolean
     location?: boolean
     attendees?: boolean
     createdAt?: boolean
@@ -107391,8 +107371,6 @@ export namespace Prisma {
     timedEnd?: boolean
     allDayStart?: boolean
     allDayEnd?: boolean
-    hasConflict?: boolean
-    conflictingSchedules?: boolean
     location?: boolean
     attendees?: boolean
     createdAt?: boolean
@@ -107400,7 +107378,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type ScheduleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "title" | "description" | "rangeKind" | "timedStart" | "timedEnd" | "allDayStart" | "allDayEnd" | "hasConflict" | "conflictingSchedules" | "location" | "attendees" | "createdAt" | "version" | "updatedAt", ExtArgs["result"]["schedule"]>
+  export type ScheduleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "title" | "description" | "rangeKind" | "timedStart" | "timedEnd" | "allDayStart" | "allDayEnd" | "location" | "attendees" | "createdAt" | "version" | "updatedAt", ExtArgs["result"]["schedule"]>
   export type ScheduleInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
   }
@@ -107426,8 +107404,6 @@ export namespace Prisma {
       timedEnd: Date | null
       allDayStart: string | null
       allDayEnd: string | null
-      hasConflict: boolean
-      conflictingSchedules: string | null
       location: string | null
       attendees: string | null
       createdAt: Date
@@ -107866,8 +107842,6 @@ export namespace Prisma {
     readonly timedEnd: FieldRef<"Schedule", 'DateTime'>
     readonly allDayStart: FieldRef<"Schedule", 'String'>
     readonly allDayEnd: FieldRef<"Schedule", 'String'>
-    readonly hasConflict: FieldRef<"Schedule", 'Boolean'>
-    readonly conflictingSchedules: FieldRef<"Schedule", 'String'>
     readonly location: FieldRef<"Schedule", 'String'>
     readonly attendees: FieldRef<"Schedule", 'String'>
     readonly createdAt: FieldRef<"Schedule", 'DateTime'>
@@ -131503,8 +131477,6 @@ export namespace Prisma {
     timedEnd: 'timedEnd',
     allDayStart: 'allDayStart',
     allDayEnd: 'allDayEnd',
-    hasConflict: 'hasConflict',
-    conflictingSchedules: 'conflictingSchedules',
     location: 'location',
     attendees: 'attendees',
     createdAt: 'createdAt',
@@ -139492,8 +139464,6 @@ export namespace Prisma {
     timedEnd?: DateTimeNullableFilter<"Schedule"> | Date | string | null
     allDayStart?: StringNullableFilter<"Schedule"> | string | null
     allDayEnd?: StringNullableFilter<"Schedule"> | string | null
-    hasConflict?: BoolFilter<"Schedule"> | boolean
-    conflictingSchedules?: StringNullableFilter<"Schedule"> | string | null
     location?: StringNullableFilter<"Schedule"> | string | null
     attendees?: StringNullableFilter<"Schedule"> | string | null
     createdAt?: DateTimeFilter<"Schedule"> | Date | string
@@ -139512,8 +139482,6 @@ export namespace Prisma {
     timedEnd?: SortOrderInput | SortOrder
     allDayStart?: SortOrderInput | SortOrder
     allDayEnd?: SortOrderInput | SortOrder
-    hasConflict?: SortOrder
-    conflictingSchedules?: SortOrderInput | SortOrder
     location?: SortOrderInput | SortOrder
     attendees?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -139535,8 +139503,6 @@ export namespace Prisma {
     timedEnd?: DateTimeNullableFilter<"Schedule"> | Date | string | null
     allDayStart?: StringNullableFilter<"Schedule"> | string | null
     allDayEnd?: StringNullableFilter<"Schedule"> | string | null
-    hasConflict?: BoolFilter<"Schedule"> | boolean
-    conflictingSchedules?: StringNullableFilter<"Schedule"> | string | null
     location?: StringNullableFilter<"Schedule"> | string | null
     attendees?: StringNullableFilter<"Schedule"> | string | null
     createdAt?: DateTimeFilter<"Schedule"> | Date | string
@@ -139555,8 +139521,6 @@ export namespace Prisma {
     timedEnd?: SortOrderInput | SortOrder
     allDayStart?: SortOrderInput | SortOrder
     allDayEnd?: SortOrderInput | SortOrder
-    hasConflict?: SortOrder
-    conflictingSchedules?: SortOrderInput | SortOrder
     location?: SortOrderInput | SortOrder
     attendees?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -139582,8 +139546,6 @@ export namespace Prisma {
     timedEnd?: DateTimeNullableWithAggregatesFilter<"Schedule"> | Date | string | null
     allDayStart?: StringNullableWithAggregatesFilter<"Schedule"> | string | null
     allDayEnd?: StringNullableWithAggregatesFilter<"Schedule"> | string | null
-    hasConflict?: BoolWithAggregatesFilter<"Schedule"> | boolean
-    conflictingSchedules?: StringNullableWithAggregatesFilter<"Schedule"> | string | null
     location?: StringNullableWithAggregatesFilter<"Schedule"> | string | null
     attendees?: StringNullableWithAggregatesFilter<"Schedule"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Schedule"> | Date | string
@@ -149816,8 +149778,6 @@ export namespace Prisma {
     timedEnd?: Date | string | null
     allDayStart?: string | null
     allDayEnd?: string | null
-    hasConflict?: boolean
-    conflictingSchedules?: string | null
     location?: string | null
     attendees?: string | null
     createdAt?: Date | string
@@ -149836,8 +149796,6 @@ export namespace Prisma {
     timedEnd?: Date | string | null
     allDayStart?: string | null
     allDayEnd?: string | null
-    hasConflict?: boolean
-    conflictingSchedules?: string | null
     location?: string | null
     attendees?: string | null
     createdAt?: Date | string
@@ -149854,8 +149812,6 @@ export namespace Prisma {
     timedEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     allDayStart?: NullableStringFieldUpdateOperationsInput | string | null
     allDayEnd?: NullableStringFieldUpdateOperationsInput | string | null
-    hasConflict?: BoolFieldUpdateOperationsInput | boolean
-    conflictingSchedules?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     attendees?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -149874,8 +149830,6 @@ export namespace Prisma {
     timedEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     allDayStart?: NullableStringFieldUpdateOperationsInput | string | null
     allDayEnd?: NullableStringFieldUpdateOperationsInput | string | null
-    hasConflict?: BoolFieldUpdateOperationsInput | boolean
-    conflictingSchedules?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     attendees?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -149893,8 +149847,6 @@ export namespace Prisma {
     timedEnd?: Date | string | null
     allDayStart?: string | null
     allDayEnd?: string | null
-    hasConflict?: boolean
-    conflictingSchedules?: string | null
     location?: string | null
     attendees?: string | null
     createdAt?: Date | string
@@ -149911,8 +149863,6 @@ export namespace Prisma {
     timedEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     allDayStart?: NullableStringFieldUpdateOperationsInput | string | null
     allDayEnd?: NullableStringFieldUpdateOperationsInput | string | null
-    hasConflict?: BoolFieldUpdateOperationsInput | boolean
-    conflictingSchedules?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     attendees?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -149930,8 +149880,6 @@ export namespace Prisma {
     timedEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     allDayStart?: NullableStringFieldUpdateOperationsInput | string | null
     allDayEnd?: NullableStringFieldUpdateOperationsInput | string | null
-    hasConflict?: BoolFieldUpdateOperationsInput | boolean
-    conflictingSchedules?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     attendees?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -157379,8 +157327,6 @@ export namespace Prisma {
     timedEnd?: SortOrder
     allDayStart?: SortOrder
     allDayEnd?: SortOrder
-    hasConflict?: SortOrder
-    conflictingSchedules?: SortOrder
     location?: SortOrder
     attendees?: SortOrder
     createdAt?: SortOrder
@@ -157402,8 +157348,6 @@ export namespace Prisma {
     timedEnd?: SortOrder
     allDayStart?: SortOrder
     allDayEnd?: SortOrder
-    hasConflict?: SortOrder
-    conflictingSchedules?: SortOrder
     location?: SortOrder
     attendees?: SortOrder
     createdAt?: SortOrder
@@ -157421,8 +157365,6 @@ export namespace Prisma {
     timedEnd?: SortOrder
     allDayStart?: SortOrder
     allDayEnd?: SortOrder
-    hasConflict?: SortOrder
-    conflictingSchedules?: SortOrder
     location?: SortOrder
     attendees?: SortOrder
     createdAt?: SortOrder
@@ -166037,8 +165979,6 @@ export namespace Prisma {
     timedEnd?: Date | string | null
     allDayStart?: string | null
     allDayEnd?: string | null
-    hasConflict?: boolean
-    conflictingSchedules?: string | null
     location?: string | null
     attendees?: string | null
     createdAt?: Date | string
@@ -166055,8 +165995,6 @@ export namespace Prisma {
     timedEnd?: Date | string | null
     allDayStart?: string | null
     allDayEnd?: string | null
-    hasConflict?: boolean
-    conflictingSchedules?: string | null
     location?: string | null
     attendees?: string | null
     createdAt?: Date | string
@@ -168430,8 +168368,6 @@ export namespace Prisma {
     timedEnd?: DateTimeNullableFilter<"Schedule"> | Date | string | null
     allDayStart?: StringNullableFilter<"Schedule"> | string | null
     allDayEnd?: StringNullableFilter<"Schedule"> | string | null
-    hasConflict?: BoolFilter<"Schedule"> | boolean
-    conflictingSchedules?: StringNullableFilter<"Schedule"> | string | null
     location?: StringNullableFilter<"Schedule"> | string | null
     attendees?: StringNullableFilter<"Schedule"> | string | null
     createdAt?: DateTimeFilter<"Schedule"> | Date | string
@@ -194735,8 +194671,6 @@ export namespace Prisma {
     timedEnd?: Date | string | null
     allDayStart?: string | null
     allDayEnd?: string | null
-    hasConflict?: boolean
-    conflictingSchedules?: string | null
     location?: string | null
     attendees?: string | null
     createdAt?: Date | string
@@ -195949,8 +195883,6 @@ export namespace Prisma {
     timedEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     allDayStart?: NullableStringFieldUpdateOperationsInput | string | null
     allDayEnd?: NullableStringFieldUpdateOperationsInput | string | null
-    hasConflict?: BoolFieldUpdateOperationsInput | boolean
-    conflictingSchedules?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     attendees?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -195967,8 +195899,6 @@ export namespace Prisma {
     timedEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     allDayStart?: NullableStringFieldUpdateOperationsInput | string | null
     allDayEnd?: NullableStringFieldUpdateOperationsInput | string | null
-    hasConflict?: BoolFieldUpdateOperationsInput | boolean
-    conflictingSchedules?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     attendees?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -195985,8 +195915,6 @@ export namespace Prisma {
     timedEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     allDayStart?: NullableStringFieldUpdateOperationsInput | string | null
     allDayEnd?: NullableStringFieldUpdateOperationsInput | string | null
-    hasConflict?: BoolFieldUpdateOperationsInput | boolean
-    conflictingSchedules?: NullableStringFieldUpdateOperationsInput | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     attendees?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string

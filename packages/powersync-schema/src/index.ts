@@ -276,8 +276,6 @@ const schedules = new Table({
   all_day_start: column.text,
   all_day_end: column.text,
   // Transitional P4-2301B projection cache only; not CalendarEntry aggregate truth.
-  has_conflict: column.integer, // boolean
-  conflicting_schedules: column.text, // JSON
   location: column.text,
   attendees: column.text, // JSON
   version: column.integer,

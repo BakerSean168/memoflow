@@ -28,7 +28,6 @@ class InMemoryDomainEventOutboxRepository implements IScheduleRepository {
   async findByTimeRange(): Promise<CalendarEntry[]> {
     return [];
   }
-  async updateConflictProjection(): Promise<void> {}
   async createRebuildOutbox(): Promise<void> {}
   async fetchPendingRebuildOutbox(): Promise<ScheduleRebuildOutboxDTO[]> {
     return [];

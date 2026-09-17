@@ -80,23 +80,6 @@ export interface IScheduleRepository {
   ): Promise<CalendarEntry[]>;
 
   /**
-   * Update conflict projection columns only without mutating business revision or fields.
-   */
-  updateConflictProjection(
-    identityId: string,
-    id: string,
-    hasConflict: boolean,
-    conflictingEntries: string[] | null,
-    sourceRevision: number,
-  ): Promise<void>;
-
-  /** Transitional P4-2301B read of the legacy conflict projection cache. */
-  getConflictProjection(
-    identityId: string,
-    id: string,
-  ): Promise<{ hasConflict: boolean; conflictingEntries: string[] | null } | null>;
-
-  /**
    * Create a versioned rebuild outbox entry for background conflict recalculation
    */
   createRebuildOutbox(item: {

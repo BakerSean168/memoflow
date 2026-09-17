@@ -50,6 +50,7 @@ export function projectCalendarEntry(
     sourceType: 'schedule' as const,
     sourceId: String(entry.id),
     title: entry.title,
+    occupancy: range.kind === 'Timed' ? ('blocking' as const) : ('non-blocking' as const),
     displayMetadata: {
       semantic: 'calendar-entry' as const,
       subtitle: entry.location ?? null,
@@ -101,6 +102,12 @@ export function projectTaskOccurrence(
     sourceType: 'task' as const,
     sourceId: String(occurrence.id),
     title: template?.name ?? String(occurrence.id),
+    occupancy:
+      timing.kind === 'Window'
+        ? ('blocking' as const)
+        : timing.kind === 'AllDay'
+          ? ('non-blocking' as const)
+          : ('marker' as const),
     displayMetadata: {
       semantic: 'task-occurrence' as const,
       subtitle: taskResultSubtitle(occurrence.result),
@@ -153,6 +160,7 @@ export function projectGoalDates(
     identityId: String(goal.identityId),
     sourceType: 'goal' as const,
     title: goal.name,
+    occupancy: 'marker' as const,
     editableCapabilities: { move: editable, resize: false },
     ownerCommandTarget: { ownerType: 'goal.goal' as const, ownerId: String(goal.id) },
     revision: goal.version,
@@ -207,6 +215,7 @@ export function projectRoutineWallClockOccurrence(
     end: occurrence.endAt ?? null,
     allDay: false,
     title: occurrence.title,
+    occupancy: 'marker',
     displayMetadata: {
       semantic: 'routine-wall-clock',
       subtitle: occurrence.subtitle ?? null,

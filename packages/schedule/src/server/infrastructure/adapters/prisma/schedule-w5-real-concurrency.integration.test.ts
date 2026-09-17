@@ -7,6 +7,7 @@ import {
 } from '../../../../__tests__/integration-helpers';
 import { SchedulePrismaRepository } from './schedule-prisma.repository';
 import { ScheduleEventApplicationService } from '../../../application/services/schedule-event-application-service';
+import { ScheduleConflictDetectionService } from '../../../application/services/schedule-conflict-detection-service';
 import { ScheduleRebuildWorkerService } from '../../../application/services/schedule-rebuild-worker-service';
 import { ScheduleDomainEventPublisherService } from '../../../application/services/schedule-domain-event-publisher';
 import { CalendarEntry } from '../../../domain/aggregates/calendar-entry';
@@ -44,8 +45,6 @@ function createRealSqlitePowerSyncDb(): IElectronDatabase {
       timed_end TEXT,
       all_day_start TEXT,
       all_day_end TEXT,
-      has_conflict INTEGER DEFAULT 0,
-      conflicting_schedules TEXT,
       location TEXT,
       attendees TEXT,
       version INTEGER NOT NULL DEFAULT 1,
@@ -319,12 +318,10 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
       range: { kind: 'Timed', start: 1500, end: 2500 },
     });
 
-    expect(await repo.getConflictProjection(identityId, e1.id)).toMatchObject({
-      hasConflict: true,
-    });
-    expect(await repo.getConflictProjection(identityId, e2.id)).toMatchObject({
-      hasConflict: true,
-    });
+    const before = await new ScheduleConflictDetectionService(repo).detectConflictsForEntry(
+      (await repo.findByIdForIdentity(identityId, e1.id))!,
+    );
+    expect(before.hasConflict).toBe(true);
 
     // Delete Event B → enqueues a durable rebuild outbox row
     await service.deleteSchedule(e2.id, identityId, e2.version);
@@ -354,36 +351,36 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
     expect(row?.status).toBe('completed');
     expect(row?.claimToken).toBeNull();
 
-    // Event A conflict should now be cleared
-    expect(await repo.getConflictProjection(identityId, e1.id)).toEqual({
-      hasConflict: false,
-      conflictingEntries: null,
-    });
+    // Event A now derives no hard conflict from the remaining owner facts.
+    const remaining = await repo.findByIdForIdentity(identityId, e1.id);
+    expect(remaining).not.toBeNull();
+    expect(
+      (await new ScheduleConflictDetectionService(repo).detectConflictsForEntry(remaining!)).hasConflict,
+    ).toBe(false);
   });
 
-  it('Requirement 5: Stale source revision rejection in conflict projection', async () => {
+  it('Requirement 5: derived conflict analysis never mutates a newer owner revision', async () => {
     const prisma = await getPrisma();
     const repo = new SchedulePrismaRepository(prisma);
 
     const entry = CalendarEntry.create({
       identityId,
-      title: 'Projection Test Event',
+      title: 'Derived Read Test Event',
       range: { kind: 'Timed', start: 1000, end: 2000 },
     });
-    await repo.save(entry); // version = 1
-
-    // Update business aggregate to version = 2
+    await repo.save(entry);
     entry.updateTitle('New Title');
-    await repo.save(entry, 1); // version = 2
+    await repo.save(entry, 1);
 
-    // Attempt to apply a stale conflict projection with sourceRevision = 1
-    await repo.updateConflictProjection(identityId, entry.id, true, ['other-event'], 1);
+    const loaded = await repo.findByIdForIdentity(identityId, entry.id);
+    expect(loaded).not.toBeNull();
+    await new ScheduleConflictDetectionService(repo).detectConflictsForEntry(loaded!);
 
-    // Verify DB record: hasConflict remains false, version remains 2, title remains 'New Title'
     const dbRow = await prisma.schedule.findUnique({ where: { id: entry.id } });
-    expect(dbRow?.hasConflict).toBe(false);
     expect(dbRow?.version).toBe(2);
     expect(dbRow?.title).toBe('New Title');
+    expect(dbRow).not.toHaveProperty('hasConflict');
+    expect(dbRow).not.toHaveProperty('conflictingSchedules');
   });
 
   it('Requirement 6: Timeout reclaim — old worker claim token ack is rejected after reclaim', async () => {
@@ -758,7 +755,7 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
     expect(completed?.published_at).not.toBeNull();
   });
 
-  it('Requirement 12: out-of-order source revision — stale rebuild outbox processed after a newer state is rejected by the projection', async () => {
+  it('Requirement 12: out-of-order stale rebuild validates read truth without regressing newer owner state', async () => {
     const prisma = await getPrisma();
     const repo = new SchedulePrismaRepository(prisma);
     const service = new ScheduleEventApplicationService(repo);
@@ -773,17 +770,9 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
       title: 'Ordering B',
       range: { kind: 'Timed', start: 1500, end: 2500 },
     });
-    expect(await repo.getConflictProjection(identityId, e1.id)).toMatchObject({
-      hasConflict: true,
-    });
-
-    // Delete B enqueues a rebuild item whose sourceRevision is e1's version at that time (1).
     await service.deleteSchedule(e2.id, identityId, e2.version);
-
-    // A newer business update bumps e1 to version 2 BEFORE the worker drains the outbox.
     await service.updateSchedule(e1.id, identityId, { title: 'Ordering A v2', expectedVersion: 1 });
 
-    // Manually enqueue a STALE rebuild item (old revision 1, out-of-order redelivery).
     await repo.createRebuildOutbox({
       identityId,
       scheduleId: e1.id,
@@ -793,28 +782,21 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
       idempotencyKey: 'rebuild:ordering-stale-redelivery',
     });
 
-    const projectionCalls: { id: string; sourceRevision: number }[] = [];
-    const originalUpdateProjection = repo.updateConflictProjection.bind(repo);
-    vi.spyOn(repo, 'updateConflictProjection').mockImplementation(async (...args) => {
-      projectionCalls.push({ id: String(args[1]), sourceRevision: args[4] });
-      return originalUpdateProjection(...args);
-    });
-
-    // Worker processes the whole outbox including the stale item last.
     const worker = new ScheduleRebuildWorkerService(repo, passThroughLease);
     const res = await worker.processOutbox(identityId);
     expect(res.failedCount).toBe(0);
 
-    // The worker threaded the outbox sourceRevision through to the projection.
-    expect(projectionCalls.some((c) => c.id === e1.id && c.sourceRevision === 1)).toBe(true);
-
-    // The stale projection (sourceRevision 1) must not regress the newer state:
-    // e1 remains version 2 with the updated title and the post-delete projection.
+    const stale = await prisma.scheduleRebuildOutbox.findFirst({
+      where: { idempotencyKey: 'rebuild:ordering-stale-redelivery' },
+    });
+    expect(stale?.status).toBe('completed');
     const dbRow = await prisma.schedule.findUnique({ where: { id: e1.id } });
     expect(dbRow?.version).toBe(2);
     expect(dbRow?.title).toBe('Ordering A v2');
-    expect(dbRow?.hasConflict).toBe(false);
+    expect(dbRow).not.toHaveProperty('hasConflict');
+    expect(dbRow).not.toHaveProperty('conflictingSchedules');
   });
+
   it('Requirement 13: Consumer concurrent duplicate delivery — unique-constrained receipt + independent effect make exactly one side effect win; loser is explicit idempotent success', async () => {
     const prisma = await getPrisma();
     const key = 'concurrent-dedup-key';
@@ -853,7 +835,7 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
     const repo = new SchedulePrismaRepository(prisma, undefined, recorder);
     const service = new ScheduleEventApplicationService(repo);
 
-    const e1 = await service.createSchedule({
+    await service.createSchedule({
       identityId,
       title: 'Metrics Worker A',
       range: { kind: 'Timed', start: 1000, end: 2000 },

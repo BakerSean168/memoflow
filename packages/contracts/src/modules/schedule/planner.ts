@@ -2,6 +2,9 @@ import type { Instant, Ymd } from '../../primitives';
 
 export type PlannerSourceType = 'schedule' | 'task' | 'goal' | 'routine';
 
+/** Whether a Planner projection actually consumes time for conflict purposes. */
+export type PlannerOccupancy = 'blocking' | 'non-blocking' | 'marker';
+
 export type PlannerDisplaySemantic =
   'calendar-entry' | 'task-occurrence' | 'goal-start' | 'goal-target' | 'routine-wall-clock';
 
@@ -12,7 +15,6 @@ export interface PlannerDisplayMetadata {
   readonly subtitle?: string | null;
   readonly tone?: PlannerDisplayTone;
   readonly status?: string | null;
-  readonly hasConflict?: boolean;
 }
 
 export interface PlannerEditableCapabilities {
@@ -50,6 +52,8 @@ interface CalendarEventProjectionBase<
   /** Stable identity of the projected fact, not of any Scheduler invocation. */
   readonly sourceId: string;
   readonly title: string;
+  /** Derived Planner occupancy policy; never persisted back into the owner domain. */
+  readonly occupancy: PlannerOccupancy;
   readonly displayMetadata: PlannerDisplayMetadata;
   readonly editableCapabilities: PlannerEditableCapabilities;
   readonly ownerCommandTarget: TTarget;
@@ -93,3 +97,31 @@ export type CalendarEventProjection =
   | TaskCalendarEventProjection
   | GoalCalendarEventProjection
   | RoutineCalendarEventProjection;
+
+
+export interface PlannerProjectionRef {
+  readonly sourceType: PlannerSourceType;
+  readonly sourceId: string;
+}
+
+export interface PlannerConflictSuggestion {
+  /** Owner fact that would be changed if a future product flow accepts this suggestion. */
+  readonly target: PlannerProjectionRef;
+  readonly kind: 'move-earlier' | 'move-later';
+  readonly range: { readonly kind: 'Timed'; readonly start: Instant; readonly end: Instant };
+}
+
+/**
+ * Pure Planner read-model conflict. It is recomputed from owner projections and
+ * is never persisted as CalendarEntry/Task/Goal/Routine truth.
+ */
+export interface PlannerConflictProjection {
+  readonly id: string;
+  readonly identityId: string;
+  readonly left: PlannerProjectionRef;
+  readonly right: PlannerProjectionRef;
+  readonly overlapRange: { readonly kind: 'Timed'; readonly start: Instant; readonly end: Instant };
+  readonly overlapDurationMs: number;
+  readonly severity: 'Minor' | 'Moderate' | 'Severe';
+  readonly suggestions: readonly PlannerConflictSuggestion[];
+}

@@ -287,62 +287,6 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
     return rows.map((row) => PowerSyncScheduleMapper.toDomain(row));
   }
 
-  async updateConflictProjection(
-    identityId: string,
-    id: string,
-    hasConflict: boolean,
-    conflictingEntries: string[] | null,
-    sourceRevision: number,
-  ): Promise<void> {
-    const current = await this.db.getOptional<{
-      version: number;
-      has_conflict: number | boolean | string;
-      conflicting_schedules: string | null;
-    }>(
-      'SELECT version, has_conflict, conflicting_schedules FROM schedules WHERE id = ? AND identity_id = ? LIMIT 1',
-      [id, identityId],
-    );
-    if (!current) return;
-    if (current.version > sourceRevision) return;
-
-    const newConflictingStr =
-      conflictingEntries && conflictingEntries.length > 0
-        ? JSON.stringify(conflictingEntries)
-        : null;
-    const currentHasConflict = Number(current.has_conflict) === 1;
-
-    if (currentHasConflict === hasConflict && current.conflicting_schedules === newConflictingStr) {
-      return;
-    }
-
-    await this.db.execute(
-      `UPDATE schedules
-       SET has_conflict = ?, conflicting_schedules = ?
-       WHERE id = ? AND identity_id = ? AND version <= ?`,
-      [hasConflict ? 1 : 0, newConflictingStr, id, identityId, sourceRevision],
-    );
-  }
-
-  async getConflictProjection(
-    identityId: string,
-    id: string,
-  ): Promise<{ hasConflict: boolean; conflictingEntries: string[] | null } | null> {
-    const current = await this.db.getOptional<{
-      has_conflict: number | boolean | string;
-      conflicting_schedules: string | null;
-    }>(
-      'SELECT has_conflict, conflicting_schedules FROM schedules WHERE id = ? AND identity_id = ? LIMIT 1',
-      [id, identityId],
-    );
-    if (!current) return null;
-    return {
-      hasConflict: Number(current.has_conflict) === 1,
-      conflictingEntries: current.conflicting_schedules
-        ? (JSON.parse(current.conflicting_schedules) as string[])
-        : null,
-    };
-  }
-
   async createRebuildOutbox(item: {
     identityId: string;
     scheduleId?: string;

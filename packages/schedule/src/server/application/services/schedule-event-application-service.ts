@@ -3,7 +3,6 @@ import type { CalendarEntryClientDTO, CalendarEntryRange } from '@memoflow/contr
 import type { IdentityId } from '@memoflow/domain-shared';
 import { CalendarEntry } from '../../domain/aggregates/calendar-entry';
 import type { IScheduleRepository } from '../../domain/repositories/i-schedule-repository';
-import { ScheduleConflictCacheService } from './schedule-conflict-cache-service';
 
 type TimedRange = Extract<CalendarEntryRange, { kind: 'Timed' }>;
 
@@ -50,7 +49,7 @@ export class ScheduleEventApplicationService {
       });
 
       await scheduleRepository.save(schedule);
-      await this.refreshTimedConflictProjection(scheduleRepository, schedule, 'create');
+      await this.enqueueTimedReadRebuild(scheduleRepository, schedule, 'create');
       return schedule.toClientDTO();
     });
   }
@@ -95,7 +94,7 @@ export class ScheduleEventApplicationService {
         range: params.range,
       });
       await scheduleRepository.save(schedule, params.expectedVersion);
-      await this.refreshChangedTimedConflictProjection(scheduleRepository, schedule, previousRange);
+      await this.enqueueChangedTimedReadRebuild(scheduleRepository, schedule, previousRange);
       return schedule.toClientDTO();
     });
   }
@@ -124,8 +123,6 @@ export class ScheduleEventApplicationService {
       await scheduleRepository.deleteAggregate(schedule, expectedVersion);
       const timed = timedRange(deletedRange);
       if (timed) {
-        const cache = new ScheduleConflictCacheService(scheduleRepository);
-        await cache.refreshForTimeRange(schedule.identityId, timed.start, timed.end);
         await scheduleRepository.createRebuildOutbox({
           identityId: schedule.identityId,
           scheduleId: schedule.id,
@@ -159,15 +156,18 @@ export class ScheduleEventApplicationService {
     return schedules.map((schedule) => schedule.toClientDTO());
   }
 
-  private async refreshTimedConflictProjection(
+  /**
+   * Preserve the versioned rebuild operation as a reliability/invalidation signal while
+   * P4-2301B removes persisted conflict truth. The rebuild worker now validates the
+   * derived read model only; it never writes conflict columns back into CalendarEntry.
+   */
+  private async enqueueTimedReadRebuild(
     repository: IScheduleRepository,
     schedule: CalendarEntry,
     operation: 'create' | 'update',
   ): Promise<void> {
     const range = timedRange(schedule.range);
     if (!range) return;
-    const cache = new ScheduleConflictCacheService(repository);
-    await cache.refreshForTimeRange(schedule.identityId, range.start, range.end);
     await repository.createRebuildOutbox({
       identityId: schedule.identityId,
       scheduleId: schedule.id,
@@ -178,7 +178,7 @@ export class ScheduleEventApplicationService {
     });
   }
 
-  private async refreshChangedTimedConflictProjection(
+  private async enqueueChangedTimedReadRebuild(
     repository: IScheduleRepository,
     schedule: CalendarEntry,
     previousRange: CalendarEntryRange,
@@ -187,40 +187,13 @@ export class ScheduleEventApplicationService {
     const after = timedRange(schedule.range);
     if (!before && !after) return;
 
-    const cache = new ScheduleConflictCacheService(repository);
-    if (before && !after) {
-      // The compatibility conflict cache is not aggregate truth. Once an entry
-      // becomes AllDay it must not retain a stale blocking-conflict projection.
-      await repository.updateConflictProjection(
-        schedule.identityId,
-        schedule.id,
-        false,
-        null,
-        schedule.version,
-      );
-    }
-    if (before && after) {
-      const start = Math.min(before.start, after.start);
-      const end = Math.max(before.end, after.end);
-      await cache.refreshForTimeRange(schedule.identityId, start, end);
-      await repository.createRebuildOutbox({
-        identityId: schedule.identityId,
-        scheduleId: schedule.id,
-        startTime: start,
-        endTime: end,
-        sourceRevision: schedule.version,
-        idempotencyKey: `rebuild:${schedule.identityId}:${schedule.id}:${schedule.version}:update`,
-      });
-      return;
-    }
-
-    const affected = before ?? after!;
-    await cache.refreshForTimeRange(schedule.identityId, affected.start, affected.end);
+    const start = before && after ? Math.min(before.start, after.start) : (before ?? after!).start;
+    const end = before && after ? Math.max(before.end, after.end) : (before ?? after!).end;
     await repository.createRebuildOutbox({
       identityId: schedule.identityId,
       scheduleId: schedule.id,
-      startTime: affected.start,
-      endTime: affected.end,
+      startTime: start,
+      endTime: end,
       sourceRevision: schedule.version,
       idempotencyKey: `rebuild:${schedule.identityId}:${schedule.id}:${schedule.version}:update`,
     });

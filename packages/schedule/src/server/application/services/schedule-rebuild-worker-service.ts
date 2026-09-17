@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { IScheduleRepository } from '../../domain/repositories/i-schedule-repository';
 import { LeaseLostError, type LeaseCoordinatorPort } from '@memoflow/patterns/lease';
-import { ScheduleConflictCacheService } from './schedule-conflict-cache-service';
+import { ScheduleConflictDetectionService } from './schedule-conflict-detection-service';
 import type { UnifiedOperationMetricsRecorder } from '@memoflow/patterns/operations';
 
 export interface ProcessOutboxResult {
@@ -41,7 +41,7 @@ export class ScheduleRebuildWorkerService {
 
       this.metrics?.recordOutbox('schedule-rebuild', 'claimed', items.length);
 
-      const conflictCacheService = new ScheduleConflictCacheService(this.scheduleRepository);
+      const conflictReadService = new ScheduleConflictDetectionService(this.scheduleRepository);
       let processedCount = 0;
       let failedCount = 0;
 
@@ -49,13 +49,18 @@ export class ScheduleRebuildWorkerService {
         if (identityId && item.identityId !== identityId) continue;
         await guard.ensureHeld();
         try {
-          await conflictCacheService.refreshForTimeRange(
+          // P4-2301B: rebuild operations are now durable invalidation/validation work.
+          // Recompute current Schedule-owned overlap reads, but never persist derived
+          // conflict state into CalendarEntry rows. Cross-owner Planner conflicts are
+          // composed by the Planner read model.
+          const entries = await this.scheduleRepository.findByTimeRange(
             item.identityId,
             item.startTime.getTime(),
             item.endTime.getTime(),
-            item.scheduleId ?? undefined,
-            item.sourceRevision,
           );
+          for (const entry of entries) {
+            await conflictReadService.detectConflictsForEntry(entry);
+          }
 
           await guard.ensureHeld();
           await this.scheduleRepository.markRebuildOutboxProcessed(

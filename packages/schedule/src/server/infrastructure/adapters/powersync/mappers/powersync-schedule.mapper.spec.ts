@@ -20,8 +20,6 @@ function timedRow(overrides: Partial<PowerSyncScheduleRow> = {}): PowerSyncSched
     timed_end: new Date(start + 60 * 60 * 1000).toISOString(),
     all_day_start: null,
     all_day_end: null,
-    has_conflict: 1,
-    conflicting_schedules: JSON.stringify(['projection-only']),
     location: null,
     attendees: null,
     version: 2,
@@ -65,7 +63,7 @@ describe('PowerSyncScheduleMapper ADR-080', () => {
     });
   });
 
-  it('does not import the transitional conflict projection cache into aggregate DTOs', () => {
+  it('keeps conflict truth out of aggregate DTOs', () => {
     const dto = PowerSyncScheduleMapper.toDomain(timedRow()).toClientDTO();
     expect(dto).not.toHaveProperty('hasConflict');
     expect(dto).not.toHaveProperty('conflictingEntries');
