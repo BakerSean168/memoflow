@@ -914,6 +914,11 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       identityId: input.identityId,
       providerId: input.providerId,
       modelId: input.modelId,
+      executionRequirement: {
+        chat: 'required',
+        streaming: 'required',
+        toolCalling: 'required',
+      },
     });
     const requestContext = new RequestContext();
     requestContext.setRaw('identityId', input.identityId);

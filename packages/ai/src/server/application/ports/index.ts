@@ -34,6 +34,12 @@ export type {
   ProviderModelCatalogInput,
 } from './provider-model-catalog.port';
 export type {
+  AIModelCapabilitySnapshotInput,
+  AIModelCatalogSnapshotInput,
+  IAIModelCapabilitySnapshotPort,
+  IAIModelCatalogPort,
+} from './ai-model-resolution.port';
+export type {
   IAIProviderSecretVault,
   ResolvedAIProviderCredential,
   StoreAIProviderCredentialInput,
