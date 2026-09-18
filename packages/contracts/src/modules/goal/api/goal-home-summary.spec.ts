@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { GoalHomeProgressSummarySchema, GoalStatus } from '@memoflow/contracts/goal';
+import { GoalStatus } from '../value-objects/goal-status';
+import { GoalHomeProgressSummarySchema } from './response-schemas';
 
 const item = {
   id: 'GoalId_00000000-0000-4000-8000-000000000001',
