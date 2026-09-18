@@ -12,6 +12,20 @@ const i18n = createI18n({
       aiAssistant: {
         errors: { workflowExecutionFailed: 'Execution failed' },
         chatPage: { workflow: { taskAwaitingApprovalHint: 'Review task' } },
+        goalDraft: {
+          allDay: 'All day',
+          importance: 'Importance',
+          importanceLevels: {
+            important: 'Important',
+            minor: 'Minor',
+            moderate: 'Moderate',
+            trivial: 'Trivial',
+            vital: 'Vital',
+          },
+          schedule: 'Schedule',
+          taskDescription: 'Description',
+          taskName: 'Task name',
+        },
         dialogs: {
           agent: { warnings: 'Warnings', retry: 'Retry' },
           automation: { confirm: 'Confirm', recoveryRetryReady: 'Fix the issue and retry.' },
@@ -26,6 +40,21 @@ describe('AITaskWorkflowPanel', () => {
       global: { plugins: [i18n] },
       props: {
         toolMode: 'task-create',
+        showTaskDraftEditor: true,
+        editableTask: {
+          draftRef: 'task:ship-it',
+          title: 'Ship it',
+          description: '',
+          importance: 'Moderate',
+          schedule: {
+            kind: 'OneTime',
+            date: '2026-09-18',
+            timing: { kind: 'At', time: '09:00' },
+          },
+          reminderConfig: null,
+          goalBinding: null,
+          labels: [],
+        },
         taskWorkflowRun: {
           runId: 'run-1',
           conversationId: 'conv-1',
@@ -38,18 +67,18 @@ describe('AITaskWorkflowPanel', () => {
             draft: {
               revision: 2,
               task: {
+                draftRef: 'task:ship-it',
                 title: 'Ship it',
                 description: '',
                 importance: 'Moderate',
-                cadence: 'once',
-                startDate: null,
-                timeOfDay: '09:00',
-                daysOfWeek: [],
-                occurrences: null,
-                goalId: null,
-                keyResultId: null,
-                contributionValue: null,
-                tags: [],
+                schedule: {
+                  kind: 'OneTime',
+                  date: '2026-09-18',
+                  timing: { kind: 'At', time: '09:00' },
+                },
+                reminderConfig: null,
+                goalBinding: null,
+                labels: [],
               },
               rationale: 'Do it',
               warnings: [],
@@ -63,12 +92,15 @@ describe('AITaskWorkflowPanel', () => {
     expect(wrapper.find('[data-testid="task-workflow-panel"]').exists()).toBe(true);
     expect(wrapper.text()).toContain('Ship it');
     expect(wrapper.find('[data-testid="task-workflow-revision"]').text()).toContain('2');
+    expect(wrapper.find('[data-testid="task-workflow-draft-editor"]').exists()).toBe(true);
   });
   it('redacts raw task execution failure messages', () => {
     const wrapper = mount(AITaskWorkflowPanel, {
       global: { plugins: [i18n] },
       props: {
         toolMode: 'task-create',
+        showTaskDraftEditor: false,
+        editableTask: null,
         taskWorkflowRun: {
           runId: 'run-recovery',
           conversationId: 'conv-1',
@@ -82,7 +114,8 @@ describe('AITaskWorkflowPanel', () => {
             retryable: true,
             failures: [
               {
-                operation: 'task_template',
+                operation: 'task_plan',
+                draftRef: 'task:ship-it',
                 code: 'SERVICE_UNAVAILABLE',
                 message: 'postgres://secret-internal-host failed',
                 retryable: true,

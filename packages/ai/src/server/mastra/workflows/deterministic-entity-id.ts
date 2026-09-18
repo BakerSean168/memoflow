@@ -39,10 +39,13 @@ export function goalWorkflowEntityId(input: {
   revision: number;
   kind: GoalWorkflowEntityKind;
   draftRef: GoalPlanDraftRef;
+  operation?: string;
 }): string {
   assertWorkflowIdentity(input);
   if (!input.draftRef.trim()) throw new Error('draftRef is required');
-  const seed = `memoflow:goal.create:v2:${input.workflowRunId}:${input.revision}:${input.draftRef}:${input.kind}`;
+  const operation = input.operation?.trim() || `${input.kind}_create`;
+  if (!operation) throw new Error('operation is required');
+  const seed = `memoflow:goal.create:v2:${input.workflowRunId}:${input.revision}:${input.draftRef}:${operation}`;
   return `${prefixByKind[input.kind]}_${deterministicUuidV8(seed)}`;
 }
 
@@ -62,26 +65,19 @@ export function goalWorkflowMutationRequestId(input: {
   );
 }
 
-export type TaskWorkflowEntityKind = 'task_plan';
-
-const taskPrefixByKind: Readonly<Record<TaskWorkflowEntityKind, string>> = {
-  task_plan: ID_PREFIXES.TaskPlanId,
-};
-
-/** Deterministic identity for the standalone `task.create` Workflow. */
+/** Deterministic owner identity for the standalone `task.create` Workflow. */
 export function taskWorkflowEntityId(input: {
   workflowRunId: string;
   revision: number;
-  kind: TaskWorkflowEntityKind;
-  index?: number;
+  draftRef: string;
+  operation?: string;
 }): string {
-  const index = input.index ?? 0;
   assertWorkflowIdentity(input);
-  if (!Number.isInteger(index) || index < 0)
-    throw new Error('index must be a non-negative integer');
-
-  const seed = `memoflow:task.create:v1:${input.workflowRunId}:${input.revision}:${input.kind}:${index}`;
-  return `${taskPrefixByKind[input.kind]}_${deterministicUuidV8(seed)}`;
+  if (!input.draftRef.trim()) throw new Error('draftRef is required');
+  const operation = input.operation?.trim() || 'task_plan_create';
+  if (!operation) throw new Error('operation is required');
+  const seed = `memoflow:task.create:v2:${input.workflowRunId}:${input.revision}:${input.draftRef}:${operation}`;
+  return `${ID_PREFIXES.TaskPlanId}_${deterministicUuidV8(seed)}`;
 }
 
 /** Deterministic idempotency request id for the standalone `knowledge.capture` Workflow. */

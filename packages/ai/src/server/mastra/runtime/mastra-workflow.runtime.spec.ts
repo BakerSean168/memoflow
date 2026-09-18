@@ -61,10 +61,19 @@ const draft = GoalPlanDraftContentSchema.parse({
 
 const taskDraft = TaskPlanDraftContentSchema.parse({
   task: {
+    draftRef: 'task:weekly-report',
     title: 'Prepare weekly report',
-    cadence: 'weekly',
-    daysOfWeek: [1],
-    startDate: Date.UTC(2026, 8, 1),
+    schedule: {
+      kind: 'Recurring',
+      startDate: '2026-09-01',
+      timing: { kind: 'AllDay' },
+      recurrence: {
+        frequency: 'Weekly',
+        interval: 1,
+        byWeekday: [1],
+        end: { kind: 'Never' },
+      },
+    },
     labels: ['Reporting'],
   },
   rationale: 'A concrete recurring task.',
