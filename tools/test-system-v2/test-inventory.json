@@ -3248,16 +3248,6 @@
       ]
     },
     {
-      "path": "packages/ai/src/server/mastra/workflows/task-plan-schedule.mapper.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/ai/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/ai/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/ai/src/server/shared/__tests__/assemble-capabilities.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10900,7 +10890,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 86
+      "fileCount": 85
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -11278,7 +11268,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 86
+      "fileCount": 85
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -11663,7 +11653,6 @@
       "packages/ai/src/server/mastra/workflows/goal-create.workflow.spec.ts",
       "packages/ai/src/server/mastra/workflows/knowledge-capture-persistence.adapter.spec.ts",
       "packages/ai/src/server/mastra/workflows/task-create.workflow.spec.ts",
-      "packages/ai/src/server/mastra/workflows/task-plan-schedule.mapper.spec.ts",
       "packages/ai/src/server/shared/__tests__/assemble-capabilities.spec.ts",
       "packages/ai/src/server/transport/ai-provider-config.controller.onboarding-v2.spec.ts",
       "packages/app-vue/src/modules/account/stores/accountStore.spec.ts",
@@ -12036,7 +12025,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1045,
+    "unit": 1044,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 9,
