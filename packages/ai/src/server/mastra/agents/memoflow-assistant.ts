@@ -51,6 +51,11 @@ export function createMemoFlowAssistant(input: {
         identityId,
         providerId: stringContext(requestContext, 'providerId'),
         modelId: stringContext(requestContext, 'modelId'),
+        executionRequirement: {
+          chat: 'required',
+          streaming: 'required',
+          toolCalling: 'required',
+        },
       });
       return resolved.model;
     },
