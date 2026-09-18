@@ -65,7 +65,6 @@ model Account {
   aiProviderConfigs             AiProviderConfig[]
   aiProviderOnboardingSessions  AiProviderOnboardingSession[]
   aiProviderSecrets             AiProviderSecret[]
-  dashboardConfigs              DashboardConfig?
 
   // PowerSync: denormalized identity relations
   taskPlanHistory                        TaskPlanHistory[]                       @relation("AccountTaskPlanHistory")
@@ -305,19 +304,6 @@ model AiKnowledgeIndexEntry {
   @@index([status])
   @@index([lastRequestedAt])
   @@map("ai_knowledge_index_entries")
-}
-
-model DashboardConfig {
-  id           Int      @id @default(autoincrement())
-  identityId   String   @unique @map("identity_id")
-  widgetConfig Json     @map("widget_config")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-
-  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@map("dashboard_configs")
 }
 
 // Better Auth cloud identity source.

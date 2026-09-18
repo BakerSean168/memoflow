@@ -331,17 +331,6 @@
       "suite_describes": 1
     },
     {
-      "id": "r268",
-      "path": "packages/app-vue/src/modules/dashboard/adapters/dashboard-transport-dual.surface.spec.ts",
-      "package": "packages/app-vue",
-      "class": "retired",
-      "sole": "dashboard-http.adapter.ts",
-      "blast": "surface lock (retired)",
-      "next": "none",
-      "residual": "268",
-      "suite_describes": 1
-    },
-    {
       "id": "r1065",
       "path": "packages/app-vue/src/modules/goal/composables/goal-operations-keep-boundary.surface.spec.ts",
       "package": "packages/app-vue",
@@ -890,28 +879,6 @@
       "next": "none",
       "residual": "645",
       "suite_describes": 2
-    },
-    {
-      "id": "r1165",
-      "path": "packages/dashboard/src/start-of-day-keep-boundary.surface.spec.ts",
-      "package": "packages/dashboard",
-      "class": "keep_boundary",
-      "sole": "domain/projection.ts",
-      "blast": "surface lock (keep_boundary)",
-      "next": "none",
-      "residual": "1165",
-      "suite_describes": 1
-    },
-    {
-      "id": "r1156",
-      "path": "packages/dashboard/src/to-dashboard-task-occurrence-record-dual.surface.spec.ts",
-      "package": "packages/dashboard",
-      "class": "retired",
-      "sole": "domain/to-dashboard-task-occurrence-record.ts",
-      "blast": "surface lock (retired)",
-      "next": "none",
-      "residual": "1156",
-      "suite_describes": 1
     },
     {
       "id": "r278",

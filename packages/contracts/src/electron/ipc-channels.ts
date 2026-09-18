@@ -99,10 +99,6 @@ export const SchedulerChannels = {
   INVOCATION_GET_DUE: 'scheduler:invocation:get-due',
 } as const;
 
-export const DashboardChannels = {
-  GET_STATS: 'dashboard:get-stats',
-} as const;
-
 export const AccountChannels = {
   GET_ME: 'account:get-me',
   UPDATE_PROFILE: 'account:update-profile',

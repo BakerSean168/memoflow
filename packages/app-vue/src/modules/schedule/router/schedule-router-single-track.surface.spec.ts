@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 /**
  * Residual 230/232/233: schedule router has a single calendar entry.
- * No week/dashboard dual-track redirect routes; docs/E2E match code.
+ * No week/legacy dual-track redirect routes; docs/E2E match code.
  */
 describe('schedule router single-track surface', () => {
   const router = readFileSync(resolve(__dirname, 'index.ts'), 'utf8');
@@ -19,7 +19,7 @@ describe('schedule router single-track surface', () => {
   const v2 = readFileSync(resolve(repoRoot, 'docs/UI_REDESIGN_V2_PLAN.md'), 'utf8');
   const page = readFileSync(resolve(repoRoot, 'docs/UI_PAGE_REDESIGN_PLAN.md'), 'utf8');
 
-  it('registers only calendar child route (no week/dashboard dual redirects)', () => {
+  it('registers only calendar child route (no week/legacy dual redirects)', () => {
     expect(router).toContain("path: 'calendar'");
     expect(router).toContain("name: 'ScheduleCalendar'");
     expect(router).not.toContain("path: 'week'");
@@ -39,12 +39,12 @@ describe('schedule router single-track surface', () => {
     expect(scheduleFilesIndex).not.toContain('重定向到主视图');
   });
 
-  it('active redesign docs name ScheduleCalendarView (no week/dashboard dual claims)', () => {
+  it('active redesign docs name ScheduleCalendarView (no week/legacy dual claims)', () => {
     expect(brief).toContain('ScheduleCalendarView.vue');
     expect(brief).not.toContain('`week`、`dashboard` 为兼容重定向');
     expect(brief).not.toContain('schedule/views/ScheduleDashboardView.vue');
     expect(v2).toContain('ScheduleCalendarView');
-    expect(v2).not.toContain('schedule `week/dashboard` redirect');
+    expect(v2).not.toContain('schedule `week/legacy` redirect');
     expect(page).toContain('## 7. 日程 `/schedule/calendar`（`ScheduleCalendarView.vue`）');
   });
 });

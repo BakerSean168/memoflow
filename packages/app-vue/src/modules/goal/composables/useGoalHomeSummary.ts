@@ -10,7 +10,7 @@ const emptySummary: GoalHomeProgressSummary = {
   goals: [],
 };
 
-/** Goal-owned Home progress read model. No Dashboard aggregate or cache truth. */
+/** Goal-owned Home progress read model. No cross-domain aggregate or cache truth. */
 export function useGoalHomeSummary() {
   const service = useStrictInject(GOAL_SERVICE_KEY, 'GoalService');
   const { t } = useI18n();

@@ -48,7 +48,6 @@ model Account {
   aiProviderConfigs               AiProviderConfig[]
   aiProviderOnboardingSessions     AiProviderOnboardingSession[]
   aiProviderSecrets                AiProviderSecret[]
-  dashboardConfigs                DashboardConfig?
 
   // PowerSync: denormalized identity relations
   taskPlanHistory            TaskPlanHistory[]           @relation("AccountTaskPlanHistory")

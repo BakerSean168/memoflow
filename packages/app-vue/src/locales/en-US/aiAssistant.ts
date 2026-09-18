@@ -465,7 +465,7 @@ export default {
     },
     analytics: {
       title: 'Ask Analytics',
-      placeholder: 'Ask about goals, tasks, reminders, or dashboard trends...',
+      placeholder: 'Ask about goals, tasks, reminders, or goal and task trends...',
       analyzing: 'Analyzing...',
       ask: 'Ask Analytics',
       answer: 'Answer',

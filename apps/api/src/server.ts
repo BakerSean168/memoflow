@@ -82,7 +82,6 @@ import { composeTask } from './runtime/compose-task';
 import { composeTaskWorkspaceApiModule } from './modules/task/task-workspace.module.js';
 // 基础设施模块（直接在 API 内部定义）
 import { composePowerSyncApiModule } from './modules/powersync/module.js';
-import { composeDashboardApiModule } from './modules/dashboard/module.js';
 import { composeLabelApiModule } from './modules/label/module.js';
 import {
   LabelService,
@@ -98,7 +97,6 @@ import {
 import { composeGoalKnowledgeApiModule } from './modules/relation/module.js';
 import { composeGoalWorkspaceApiModule } from './modules/goal/goal-workspace.module.js';
 import { createSystemClock } from '@memoflow/time';
-import { PrismaDashboardReadPort } from './modules/dashboard/dashboard-read-port.js';
 import { RepositoryKnowledgeCloudDataPurgerAdapter } from './modules/ai/repository-knowledge-cloud-data-purger.adapter';
 import { createCronScheduler } from './shared/infrastructure/cron/index.js';
 import type { CronSchedulerManager } from './shared/infrastructure/cron/index.js';
@@ -361,9 +359,6 @@ async function bootstrap(): Promise<void> {
     knowledgeContextReadPort: repositoryApiModule.knowledgeDocumentWorkspaceResolver,
   });
   const taskWorkspaceApiModule = composeTaskWorkspaceApiModule(taskWorkspaceService);
-  const dashboardApiModule = composeDashboardApiModule({
-    dashboardReadPort: new PrismaDashboardReadPort(prisma, settingApiModule.userTimeContextPort),
-  });
   const app = await bootstrapper
     // === 核心：白名单注册 ===
     .register(governanceApiModule) // ✅ 治理模块 (runtime composer)
@@ -382,7 +377,6 @@ async function bootstrap(): Promise<void> {
     .register(goalKnowledgeApiModule) // ✅ Shared Relation / Goal Knowledge
     .register(dataPortabilityApiModule.module) // ✅ 数据导入导出模块 (runtime composer)
     .register(powerSyncApiModule) // ✅ PowerSync 同步模块
-    .register(dashboardApiModule) // ✅ 仪表盘聚合模块
     .init();
 
   // 3. 启动监听

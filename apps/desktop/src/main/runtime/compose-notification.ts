@@ -77,7 +77,7 @@ export interface ComposeNotificationDesktopDependencies {
 export interface ComposedNotificationDesktop {
   /** Already-bound IElectronModule-compatible handle. 已绑定的 IElectronModule 兼容 handle。 */
   readonly module: NotificationElectronModuleDef;
-  /** Repository view exposed to sibling modules (dashboard). 暴露给兄弟模块（dashboard）的仓储视图。 */
+  /** Repository view exposed to sibling modules. 暴露给兄弟模块的仓储视图。 */
   readonly repositories: {
     readonly notificationRepository: INotificationRepository;
     /** Durable NotificationRequested writer (NOTIF-3301) for business handlers. */

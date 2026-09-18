@@ -1,6 +1,7 @@
 # UI 重构 V2 方案：AI 优先的 ChatGPT 桌面式壳（Desktop-first）
 
 > 状态：实施方案。**取代** `UI_PAGE_REDESIGN_PLAN.md`（下称 V1）的壳/导航/响应式/实施顺序体系；V1 各页面章节的**内容级结论**（主/次操作、信息删减清单、拆分退役清单）仍然有效，由本文 §6 引用为面板内容设计输入。
+> **2026-09-18 Dashboard retirement:** HOME-1805 is implemented. The standalone Dashboard package, route, redirect, DTO/config, and persistence surfaces are deleted. Any remaining Dashboard wording in this historical design plan is context only; current Home and AI behavior uses owner read models and must not recreate `/dashboard`.
 > 2026-07-14 修订：Electron 实机诊断后的 Settings 独立场景、Schedule 统一分栏入口、动态面板、Global Composer 与胶囊预览方案，见 [`docs/plan/active/2026-07-14-ui-shell-diagnostic-followup.md`](plan/active/2026-07-14-ui-shell-diagnostic-followup.md)。冲突部分以该修订为准。
 > 上游分析仍见 `UI_REDESIGN_BRIEF.md`（下称 Brief）——其 §1–8（现状/问题/契约）与 §11–13（保留资产/风险/vault 专项）继续有效，但 **知识/笔记现状以 Brief 顶部 2026-07-21 supersede 与 ADR-034 为准**（`/note/:id` 与 Resource DTO 已退役）；§9/§10 的信息架构建议被本文取代。
 > **2026-07-21**：文中 `openRecentKnowledgeNote→/note/:id` 深链描述已过时；当前着陆为 `/repository` 工作区 / Local Vault 投影。
@@ -111,7 +112,7 @@ AppShell
 
 ### 2.2 胶囊预览浮层
 
-沿用原型 `WindowHeader.vue` 的交互：点击胶囊先出 264px 预览浮层（不直接开面板），浮层内容为该模块的 3–4 条摘要 + 「进入」按钮。数据源全部用现有 composable（dashboard stats、goals 进度、通知未读等），不新增接口。再次点击胶囊或点外部关闭浮层。
+沿用原型 `WindowHeader.vue` 的交互：点击胶囊先出 264px 预览浮层（不直接开面板），浮层内容为该模块的 3–4 条摘要 + 「进入」按钮。数据源全部用现有 owner composable（Goal/Task/Notification summaries 等），不新增接口。再次点击胶囊或点外部关闭浮层。
 
 ### 2.3 业务面板多 Tab（2026-07-12 补充拍板）
 
@@ -153,7 +154,7 @@ AppShell
 | Notification 通知 | 胶囊 5（未读角标） | `NotificationListPage`（预览浮层承担 V1 的"铃铛弹层"职责） | `/notifications` 不变 |
 | Schedule 日程 | 当前时段胶囊 | `ScheduleCalendarView`（日/周/月日历） | `/schedule` → `/schedule/calendar` 单入口 |
 | Settings 设置 | 侧栏底部头像 | `UserSettingsView`（含账户中心迁入，沿 V1 §13 分组方案）——**默认以 STATE C 打开**（配置页不需要与 AI 并排） | `/settings` 不变 |
-| Dashboard 仪表盘 | **退役** | 今日概览职责由 AI 欢迎态/空闲态承接（§6.0）；趋势图/活动时间线随页退役（数据层保留，后续按需加回） | `/dashboard` → `redirect: '/'` |
+| Dashboard 仪表盘 | **退役** | 今日概览职责由 Home/AI owner read models 承接（§6.0）；趋势图/活动时间线随页退役 | 无 `/dashboard` 路由或兼容 redirect |
 | Account 账户 | 并入 Settings | — | `/account/center` → `redirect: '/settings?tab=account'` |
 | AI 对话 | 就是地面本身 | — | `/ai/chat` → `redirect: '/'` |
 | Auth 登录 | 壳外 | `AuthLayout` 不变（V1 §14：流程勿动） | `/auth` 不变 |
@@ -265,7 +266,7 @@ V1 §0.4 的 xl/lg/md/sm 页面断点作废。V2 的宽度适配对象是**面�
 | 步骤 | 内容 | 说明 |
 |---|---|---|
 | S0 准备 | 桌面宿主无边框窗口 + 窗口控制 IPC（§9）；壳组件在独立分支开发（WindowHeader / ConversationSidebar / BusinessPanel / GlobalComposer / 三态布局容器）；AIChatView → 常驻层拆解设计 | 不影响主干 |
-| S1 **切换 PR** | 一次合入：新 AppShell 替换 MainLayout；router-view 移入 BusinessPanel；AI 常驻层接线；redirect（/dashboard、/ai/chat、/account/center）；导航 DI 接口重定义；模块视图**原样**进面板（允许窄档难看）；E2E 全量修复 | 单个大 PR，合入后中间态即可用：所有模块可达、深链全通 |
+| S1 **切换 PR** | 一次合入：新 AppShell 替换 MainLayout；router-view 移入 BusinessPanel；AI 常驻层接线；redirect（/ai/chat、/account/center）；导航 DI 接口重定义；模块视图**原样**进面板（允许窄档难看）；E2E 全量修复 | 单个大 PR，合入后中间态即可用：所有当前模块可达、深链全通 |
 | S2 面板内容改造 | 按 §6.1–6.7 逐模块执行（每模块一个独立 PR），含 V1 的删减/退役/更名清单 | 顺序建议：Goal → Task → Schedule → Reminder → Notification → Settings |
 | S3 AI 工作区精修 | §6.0：欢迎态 + 今日概览 + 工作流按钮内嵌消息卡 + 产物自动开面板 + 孤儿视图/legacy 分支删除 | 状态机回归重点 |
 | S4 Note 阶段 0 | V1 §9/§10 收缩 + Governance 并入，与 Brief §13 vault 专项并行不阻塞 | — |
@@ -283,7 +284,7 @@ V1 §0.4 的 xl/lg/md/sm 页面断点作废。V2 的宽度适配对象是**面�
 
 ## 11. 待细化（不阻塞 S0/S1）
 
-- 胶囊计数的数据源统一（复用 dashboard stats 端口还是各模块 composable 各自供数）——S1 可先只做通知未读角标。
+- 胶囊计数的数据源统一（复用 owner read models 还是各模块 composable 各自供数）——S1 可先只做通知未读角标。
 - 会话列表分组的"今天/近 7 天/更早"边界与时区处理。
 - 面板 layout 偏好（split/focus、宽度）与 **Tab 集合的会话恢复**（重启后是否还原上次打开的 Tabs）的持久化位置（localStorage vs 用户设置）。
 - 日程胶囊的刷新策略（每分钟 tick vs 事件边界定时器）。

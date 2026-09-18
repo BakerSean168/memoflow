@@ -13,11 +13,6 @@
       "@memoflow/http-client": ["packages/http-client/src/index.ts"],
       "@memoflow/utils": ["packages/utils/src/index.ts"],
       "@memoflow/utils/*": ["packages/utils/src/*/index.ts", "packages/utils/src/*.ts"],
-      "@memoflow/dashboard": ["packages/dashboard/src/index.ts"],
-      "@memoflow/dashboard/*": [
-        "packages/dashboard/src/*/index.ts",
-        "packages/dashboard/src/*.ts"
-      ],
       "@memoflow/task": ["packages/task/dist/index.d.ts"],
       "@memoflow/task/schedule-execution": ["packages/task/dist/schedule-execution/index.d.ts"],
       "@memoflow/task/schedule-projection": ["packages/task/dist/schedule-projection/index.d.ts"],

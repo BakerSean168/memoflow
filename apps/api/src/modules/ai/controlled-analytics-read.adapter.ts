@@ -2,8 +2,8 @@
  * App-local AI host adapter (API lane).
  *
  * Analytics is a read-only composition surface. It consumes explicit owner
- * capabilities and emits an AI context projection; it does not import the
- * Dashboard package or recreate its cross-owner compatibility projection.
+ * capabilities and emits an AI context projection; it does not import a
+ * retired cross-owner package or recreate its compatibility projection.
  */
 import type {
   IAIActivityReadPort,

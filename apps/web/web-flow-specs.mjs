@@ -7,7 +7,6 @@ export const WEB_FLOW_SPECS = Object.freeze([
   'authentication/auth-register.spec.ts',
   'authentication/auth-oauth.spec.ts',
   'authentication/auth-page-contract.spec.ts',
-  'dashboard/dashboard-overview.spec.ts',
   'goal/goal-crud.spec.ts',
   'note/legacy-note-mutation-boundary.spec.ts',
   'note/note-workspace.spec.ts',

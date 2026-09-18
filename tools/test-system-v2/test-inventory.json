@@ -168,16 +168,6 @@
       ]
     },
     {
-      "path": "apps/api/src/modules/dashboard/module.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "apps/api/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "apps/api/vitest.config.ts"
-      ]
-    },
-    {
       "path": "apps/api/src/modules/goal/goal-workspace.module.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -884,14 +874,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "apps/desktop/src/main/ipc/dashboard-handler.surface.spec.ts",
-      "primarySuite": "boundary-ipc",
-      "collectors": [
-        "apps/desktop/vitest.ipc.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "apps/desktop/src/main/ipc/system-handlers.surface.spec.ts",
       "primarySuite": "boundary-ipc",
       "collectors": [
@@ -1332,14 +1314,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "apps/desktop/src/main/services/dashboard-read-service.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "apps/desktop/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "apps/desktop/src/main/services/desktop-notification-preference-wiring.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -1601,14 +1575,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "apps/web/e2e/dashboard/dashboard-overview.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "apps/web/e2e/debug-login.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
@@ -1794,7 +1760,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "apps/web/e2e/performance/dashboard-performance.spec.ts",
+      "path": "apps/web/e2e/performance/ai-workspace-performance.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
         "apps/web/playwright.audit.config.ts"
@@ -3730,22 +3696,6 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/dashboard/adapters/dashboard-transport-dual.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/dashboard/dashboard-types-export.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/app-vue/src/modules/goal/components/GoalPageToolbar.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5650,46 +5600,6 @@
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/dashboard/src/__tests__/dashboard-projection.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/dashboard/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/dashboard/src/__tests__/dashboard-retirement-characterization.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/dashboard/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/dashboard/src/dashboard-contracts-export.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/dashboard/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/dashboard/src/product-time-boundary.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/dashboard/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/dashboard/src/to-dashboard-task-occurrence-record-dual.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/dashboard/vitest.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -10886,7 +10796,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 73
+      "fileCount": 72
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -11026,7 +10936,7 @@
       "type": "primary",
       "suite": "boundary-ipc",
       "runner": "vitest",
-      "fileCount": 9
+      "fileCount": 8
     },
     {
       "id": "apps/desktop/vitest.main.config.ts",
@@ -11068,7 +10978,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 21
+      "fileCount": 20
     },
     {
       "id": "apps/web/playwright.debug.config.ts",
@@ -11243,14 +11153,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 73
+      "fileCount": 72
     },
     {
       "id": "apps/desktop/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 70
+      "fileCount": 69
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -11285,7 +11195,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 200
+      "fileCount": 198
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -11307,13 +11217,6 @@
       "suite": "unit",
       "runner": "vitest",
       "fileCount": 87
-    },
-    {
-      "id": "packages/dashboard/vitest.config.ts",
-      "type": "primary",
-      "suite": "unit",
-      "runner": "vitest",
-      "fileCount": 5
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -11490,7 +11393,6 @@
       "apps/api/src/modules/ai/repository-knowledge-note-persistence.adapter.test.ts",
       "apps/api/src/modules/ai/repository-knowledge-source.adapter.test.ts",
       "apps/api/src/modules/ai/routine-command.adapter.spec.ts",
-      "apps/api/src/modules/dashboard/module.spec.ts",
       "apps/api/src/modules/goal/goal-workspace.module.spec.ts",
       "apps/api/src/modules/label/module.spec.ts",
       "apps/api/src/modules/powersync/crud-normalization.spec.ts",
@@ -12036,12 +11938,12 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1045,
+    "unit": 1036,
     "integration": 34,
     "smoke": 3,
-    "boundary-ipc": 9,
+    "boundary-ipc": 8,
     "boundary-main": 6,
-    "e2e": 58,
+    "e2e": 57,
     "perf": 1,
     "governance": 57
   }

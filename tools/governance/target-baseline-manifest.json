@@ -79,7 +79,6 @@
     "ui-react-native": "ui-lib",
     "ui-core": "ui-lib",
     "app-react": "ui-lib",
-    "dashboard": "ui-lib",
     "assets": "ui-lib",
     "@memoflow/test-utils": "tooling-lib",
     "nx-test-system": "tooling-lib",

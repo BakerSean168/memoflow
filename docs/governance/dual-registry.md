@@ -18,11 +18,11 @@ updated: 2026-09-11T11:05:00+08:00
 | 项 | 值 |
 |----|----|
 | 基线 dual-surface 文件 | 237 |
-| 当前 dual-surface 文件 | 71 |
-| E3b 降幅 | 70.0%（目标 ≥25%） |
-| Registry suites | 120 |
-| keep-boundary 文件 | 49 |
-| 登记条目总数 | 120 |
+| 当前 dual-surface 文件 | 68 |
+| E3b 降幅 | 71.3%（目标 ≥25%） |
+| Registry suites | 117 |
+| keep-boundary 文件 | 48 |
+| 登记条目总数 | 117 |
 | 未分类 | 0（覆盖率 100%） |
 
 ### 按 class
@@ -30,7 +30,7 @@ updated: 2026-09-11T11:05:00+08:00
 | class | count |
 |-------|------:|
 | `keep_boundary` | 49 |
-| `retired` | 71 |
+| `retired` | 69 |
 
 ## 分类规则（摘要）
 
@@ -53,10 +53,9 @@ updated: 2026-09-11T11:05:00+08:00
 | `apps/web` | 2 | 1 | 0 |
 | `packages/account` | 1 | 1 | 0 |
 | `packages/ai` | 4 | 7 | 0 |
-| `packages/app-vue` | 7 | 20 | 0 |
+| `packages/app-vue` | 6 | 20 | 0 |
 | `packages/authentication` | 3 | 2 | 0 |
 | `packages/contracts` | 28 | 2 | 0 |
-| `packages/dashboard` | 1 | 1 | 0 |
 | `packages/data-portability` | 3 | 4 | 0 |
 | `packages/goal` | 3 | 3 | 0 |
 | `packages/governance` | 3 | 1 | 0 |
@@ -117,7 +116,6 @@ updated: 2026-09-11T11:05:00+08:00
 | `keep_boundary` | `packages/app-vue/src/modules/authentication/composables/password-toast-only-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `packages/app-vue/src/modules/authentication/composables/remove-remembered-toast-only-keep-boundary.surface.spec.ts` |
 | `retired` | `packages/app-vue/src/modules/authentication/composables/reportAuthOperationFailure-dual.surface.spec.ts` |
-| `retired` | `packages/app-vue/src/modules/dashboard/adapters/dashboard-transport-dual.surface.spec.ts` |
 | `keep_boundary` | `packages/app-vue/src/modules/goal/composables/goal-operations-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `packages/app-vue/src/modules/goal/utils/clamp-percentage-keep-boundary.surface.spec.ts` |
 | `retired` | `packages/app-vue/src/modules/reminder/composables/reminder-desktop-api-dual.surface.spec.ts` |
@@ -181,8 +179,6 @@ updated: 2026-09-11T11:05:00+08:00
 | `keep_boundary` | `packages/contracts/src/result/is-record-keep-boundary.surface.spec.ts` |
 | `retired` | `packages/contracts/src/shared/dtos/shared-dtos-dual.surface.spec.ts` |
 | `retired` | `packages/contracts/src/shared/dual-registry.surface.spec.ts` |
-| `keep_boundary` | `packages/dashboard/src/start-of-day-keep-boundary.surface.spec.ts` |
-| `retired` | `packages/dashboard/src/to-dashboard-task-instance-record-dual.surface.spec.ts` |
 | `retired` | `packages/data-portability/src/application-client/data-portability-client-port-dual.surface.spec.ts` |
 | `retired` | `packages/data-portability/src/server/application/use-cases/projections/goal-editor-resolve-ref-dual.surface.spec.ts` |
 | `keep_boundary` | `packages/data-portability/src/server/application/use-cases/projections/parse-json-field-keep-boundary.surface.spec.ts` |
@@ -222,4 +218,3 @@ updated: 2026-09-11T11:05:00+08:00
 | `keep_boundary` | `packages/utils/src/shared/format-date-to-input-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `packages/utils/src/shared/generate-uuid-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `packages/utils/src/shared/new-id-keep-boundary.surface.spec.ts` |
-
