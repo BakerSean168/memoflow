@@ -208,7 +208,6 @@ const conversations = computed<ConversationSummary[]>(
 
 function conversationTimestamp(item: ConversationSummary): number {
   const raw =
-    (item as { lastMessageAt?: unknown }).lastMessageAt ??
     (item as { updatedAt?: unknown }).updatedAt ??
     (item as { createdAt?: unknown }).createdAt ??
     0;

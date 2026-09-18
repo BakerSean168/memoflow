@@ -551,6 +551,7 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     canResumeGoalAgentClarification,
     canContinueGoalAgentExecution,
     canRetryGoalAgentExecution,
+    projectRun,
     resetGoalArtifacts,
     generateGoalDraftFromConversation,
     startGoalAgentRun,

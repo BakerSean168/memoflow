@@ -226,10 +226,22 @@ class StubAnalyticsReadPort implements IAnalyticsReadPort {
     (identityId: string, question: string) => Promise<AnalyticsQueryContext>
   >(async () => ({
     timeContext: { timeZone: 'UTC' as never, weekStartsOn: 1 },
-    dashboard: { stats: { activeGoals: 4 } },
-    taskDashboard: { summary: { overdue: 2 } },
+    taskDashboard: {
+      todayTasks: [],
+      overdueTasks: [],
+      upcomingTasks: [],
+      highPriorityTasks: [],
+      summary: { totalTasks: 0, completedToday: 0, overdue: 2, upcoming: 0, highPriority: 0 },
+    },
     goals: [],
     goalSearchResults: [],
+    ownerReads: {
+      goal: { progress: { activeCount: 4, goals: [] } },
+      task: { board: { todo: 0, inProgress: 0, done: 0, overdue: 2 } },
+      schedule: { upcoming: [], conflictCount: 0 },
+      notification: { unreadCount: 0 },
+      activity: { recent: [] },
+    },
     extra: {},
   }));
 }
@@ -874,5 +886,4 @@ describe('AI knowledge auto-index runtime', () => {
       }),
     );
   });
-
 });

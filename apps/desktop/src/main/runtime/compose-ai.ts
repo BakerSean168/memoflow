@@ -26,6 +26,7 @@ import type { GoalKnowledgeService, KnowledgeDocumentRefResolver } from '@memofl
 import type { UserTimeContextPort } from '@memoflow/time';
 import {
   AIEvaluationReportFileAdapter,
+  AIContextAssembler,
   createAIModule,
   createAIPowerSyncRepositories,
   createMastraStorage,
@@ -74,6 +75,7 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): AIElectr
     providerOnboardingSessionRepository,
     providerOnboardingCommitPort,
   } = createAIPowerSyncRepositories(dependencies.db);
+  const contextAssembler = new AIContextAssembler(dependencies.userTimeContextPort);
   const goalPlanMutationPort = new DesktopGoalPlanMutationAdapter(
     dependencies.goalApplicationPort,
     dependencies.taskApplicationPort,
@@ -106,8 +108,8 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): AIElectr
       dependencies.scheduleRepository,
       dependencies.taskApplicationPort,
     ),
-    userTimeContextPort: dependencies.userTimeContextPort,
     notificationReadPort: new DesktopNotificationAIReadAdapter(dependencies.notificationRepository),
+    contextAssembler,
   });
 
   const instance = createAIModule({

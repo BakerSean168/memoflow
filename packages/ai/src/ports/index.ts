@@ -1,5 +1,13 @@
 export type {
+  AnalyticsOwnerReads,
+  AnalyticsScheduleItem,
+  AnalyticsTaskBoard,
+  AnalyticsTaskDashboard,
+  AnalyticsQueryContext,
+  IAITaskDashboardReadPort,
   IAnalyticsReadPort,
+  IAIActivityReadPort,
+  AIActivityItem,
   IKnowledgeSourcePort,
   IKnowledgeNotePersistencePort,
   KnowledgeSourceNote,

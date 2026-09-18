@@ -19,6 +19,7 @@
 import type { PrismaClient } from '@memoflow/database';
 import {
   AIEvaluationReportFileAdapter,
+  AIContextAssembler,
   createAIModule,
   createAIPrismaRepositories,
   createMastraStorage,
@@ -26,6 +27,8 @@ import {
   KnowledgeCapturePersistenceAdapter,
   MastraAIRuntime,
   MastraModelResolver,
+  type IAIActivityReadPort,
+  type IAITaskDashboardReadPort,
   type MastraStorageConfig,
 } from '@memoflow/ai';
 import { createAIApiModule, type AIApiModuleDef } from '@memoflow/ai/api';
@@ -47,6 +50,7 @@ import { RepositoryKnowledgeSourceAdapter } from '../modules/ai/repository-knowl
 import { RoutineAICommandAdapter } from '../modules/ai/routine-command.adapter';
 import { PlannerAIReadAdapter } from '../modules/ai/planner-read.adapter';
 import { NotificationAIReadAdapter } from '../modules/ai/notification-read.adapter';
+import { ActivityLedgerAIReadAdapter } from '../modules/ai/activity-ledger-read.adapter';
 
 export interface ComposeAIDependencies {
   /** Shared API-lane Prisma client owned by apps/api. */
@@ -59,6 +63,8 @@ export interface ComposeAIDependencies {
   readonly goalApplicationPort: GoalApplicationPort;
   /** The shared Task application port composed once by the API runtime. */
   readonly taskApplicationPort: TaskApplicationPort;
+  /** Task-owned bounded read projection used by AI analytics. */
+  readonly taskDashboardReadPort: IAITaskDashboardReadPort;
   /** Existing Shared Relation facade reused by GoalPlan V2. */
   readonly goalKnowledgeService: Pick<GoalKnowledgeService, 'link'>;
   /** Repository-owned stable KnowledgeDocumentRef resolver. */
@@ -87,6 +93,13 @@ export interface ComposeAIDependencies {
  */
 export function composeAI(dependencies: ComposeAIDependencies): AIApiModuleDef {
   const repositorySet = createAIPrismaRepositories(dependencies.db);
+  const contextAssembler = new AIContextAssembler(dependencies.userTimeContextPort);
+  const plannerReadPort = new PlannerAIReadAdapter(
+    dependencies.scheduleRepository,
+    dependencies.taskApplicationPort,
+  );
+  const notificationReadPort = new NotificationAIReadAdapter(dependencies.notificationRepository);
+  const activityReadPort: IAIActivityReadPort = new ActivityLedgerAIReadAdapter(dependencies.db);
   const knowledgeSourcePort = new RepositoryKnowledgeSourceAdapter(
     dependencies.db,
     dependencies.repositoryStorageBaseDir,
@@ -122,20 +135,21 @@ export function composeAI(dependencies: ComposeAIDependencies): AIApiModuleDef {
       dependencies.routineCommandPort,
       dependencies.userTimeContextPort,
     ),
-    plannerReadPort: new PlannerAIReadAdapter(
-      dependencies.scheduleRepository,
-      dependencies.taskApplicationPort,
-    ),
-    notificationReadPort: new NotificationAIReadAdapter(dependencies.notificationRepository),
-    userTimeContextPort: dependencies.userTimeContextPort,
+    plannerReadPort,
+    notificationReadPort,
+    contextAssembler,
   });
   const knowledgeIndexStatusPort = new RepositoryKnowledgeIndexStatusAdapter(
     dependencies.repositoryApiPort,
   );
-  const analyticsReadPort = new ControlledAnalyticsReadAdapter(
-    dependencies.db,
-    dependencies.userTimeContextPort,
-  );
+  const analyticsReadPort = new ControlledAnalyticsReadAdapter({
+    goalApplicationPort: dependencies.goalApplicationPort,
+    taskDashboardReadPort: dependencies.taskDashboardReadPort,
+    plannerReadPort,
+    notificationReadPort,
+    activityReadPort,
+    userTimeContextPort: dependencies.userTimeContextPort,
+  });
   const evaluationReportPort = new AIEvaluationReportFileAdapter();
 
   const instance = createAIModule({

@@ -233,6 +233,43 @@ describe('useAIChatSession Mastra-native open chat', () => {
     expect(service.deleteConversation).toHaveBeenCalledWith('conv-1');
   });
 
+  it('keeps a shell-visible selection after a failed delete and retries Mastra first', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    const order: string[] = [];
+    runtime.deleteConversation.mockImplementation(async () => {
+      order.push('mastra');
+      return true;
+    });
+    service.deleteConversation
+      .mockImplementationOnce(async () => {
+        order.push('shell');
+        throw new Error('shell unavailable');
+      })
+      .mockImplementationOnce(async () => {
+        order.push('shell');
+        return ok(null);
+      });
+    const clearWorkflow = vi.fn();
+    const clearModel = vi.fn();
+    const composable = mountComposable(service, runtime);
+    composable.chatConversationId.value = 'conv-1';
+
+    await composable.deleteConversation('conv-1', service as never, clearWorkflow, clearModel);
+
+    expect(order).toEqual(['mastra', 'shell']);
+    expect(composable.chatConversationId.value).toBe('conv-1');
+    expect(clearWorkflow).not.toHaveBeenCalled();
+    expect(clearModel).not.toHaveBeenCalled();
+
+    await composable.deleteConversation('conv-1', service as never, clearWorkflow, clearModel);
+
+    expect(order).toEqual(['mastra', 'shell', 'mastra', 'shell']);
+    expect(clearWorkflow).toHaveBeenCalledWith('conv-1');
+    expect(clearModel).toHaveBeenCalledWith('conv-1');
+    expect(composable.chatConversationId.value).toBe('');
+  });
+
   it('uses Desktop surface without exposing identity or legacy execution-profile controls', async () => {
     const service = createServiceStub();
     const runtime = createRuntimeStub();

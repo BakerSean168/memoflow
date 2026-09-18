@@ -22,7 +22,6 @@ import {
   type AssistantRuntimeHistoryView,
 } from '@memoflow/contracts/ai';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
-import type { UserTimeContextPort } from '@memoflow/time';
 import type {
   AIUsageSummary,
   IAIExecutionLogPort,
@@ -39,6 +38,7 @@ import {
 } from '../agents';
 import { createMemoFlowProductTools } from '../tools/product-tools';
 import type { MastraModelResolver } from '../models';
+import { setAIContextRequestContext, type AIContextAssemblerPort } from '../context';
 import {
   ApplyGoalPlanService,
   GOAL_CREATE_LIFECYCLE_STEP_ID,
@@ -123,8 +123,8 @@ export interface MastraAIRuntimeDependencies {
   readonly routineCommandPort: IAIRoutineCommandPort;
   readonly plannerReadPort: IAIPlannerReadPort;
   readonly notificationReadPort: IAINotificationReadPort;
-  /** Identity-scoped Product Time context injected into every model-facing request. */
-  readonly userTimeContextPort: UserTimeContextPort;
+  /** Invocation-scoped context projection; resolves canonical Product Time and budgets inputs. */
+  readonly contextAssembler: AIContextAssemblerPort;
 }
 
 type ActiveRun = {
@@ -168,12 +168,17 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       deps.modelResolver,
       deps.knowledgeSourcePort,
       deps.executionLogPort,
+      deps.contextAssembler,
     );
     this.goalCreateWorkflow = createGoalCreateWorkflow({
       planner: this.goalPlanner,
       applyService: new ApplyGoalPlanService(deps.goalPlanMutationPort),
     });
-    this.taskPlanner = new TaskPlannerWorker(deps.modelResolver, deps.executionLogPort);
+    this.taskPlanner = new TaskPlannerWorker(
+      deps.modelResolver,
+      deps.executionLogPort,
+      deps.contextAssembler,
+    );
     this.taskCreateWorkflow = createTaskCreateWorkflow({
       planner: this.taskPlanner,
       applyService: new ApplyTaskPlanService(deps.taskPlanMutationPort),
@@ -181,6 +186,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     this.knowledgeCapturePlanner = new KnowledgeCapturePlannerWorker(
       deps.modelResolver,
       deps.executionLogPort,
+      deps.contextAssembler,
     );
     this.knowledgeCaptureWorkflow = createKnowledgeCaptureWorkflow({
       planner: this.knowledgeCapturePlanner,
@@ -260,10 +266,8 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     },
   ): Promise<RequestContext> {
     const requestContext = new RequestContext();
-    const timeContext = await this.deps.userTimeContextPort.getUserTimeContext(context.identityId);
     requestContext.setRaw('identityId', context.identityId);
     requestContext.setRaw('locale', input.locale ?? 'zh-CN');
-    requestContext.setRaw('timeContext', timeContext);
     if (input.providerId) requestContext.setRaw('providerId', input.providerId);
     if (input.modelId) requestContext.setRaw('modelId', input.modelId);
     // The current entry context is supplied on every start/resume. Credentials
@@ -912,15 +916,30 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       modelId: input.modelId,
     });
     const requestContext = new RequestContext();
-    const timeContext = await this.deps.userTimeContextPort.getUserTimeContext(input.identityId);
     requestContext.setRaw('identityId', input.identityId);
-    requestContext.setRaw('timeContext', timeContext);
     requestContext.setRaw('providerId', resolvedModel.providerId);
     requestContext.setRaw('modelId', resolvedModel.modelId);
     requestContext.setRaw('locale', input.locale ?? 'zh-CN');
     if (input.context) requestContext.setRaw('executionContext', input.context);
     requestContext.setRaw(MASTRA_RESOURCE_ID_KEY, input.identityId);
     requestContext.setRaw(MASTRA_THREAD_ID_KEY, input.conversationId);
+    const contextEnvelope = await this.deps.contextAssembler.assemble({
+      invocation: {
+        identityId: input.identityId,
+        conversationId: input.conversationId,
+        surface: 'assistant',
+        locale: input.locale ?? 'zh-CN',
+      },
+      userInput: { content: input.content },
+      selectedEntities: [
+        {
+          entityType: 'conversation',
+          id: input.conversationId,
+          source: 'assistant.session',
+        },
+      ],
+    });
+    setAIContextRequestContext(requestContext, contextEnvelope);
 
     const session = await this.controller.createSession({
       id: `conversation:${input.conversationId}`,

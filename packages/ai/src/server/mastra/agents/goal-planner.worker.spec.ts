@@ -1,7 +1,16 @@
 import { RequestContext } from '@mastra/core/request-context';
 import { describe, expect, it, vi } from 'vitest';
 import type { IKnowledgeSourcePort } from '../../application/ports';
+import {
+  AIContextAssembler,
+  AI_CONTEXT_ENVELOPE_KEY,
+  AI_CONTEXT_TIME_CONTEXT_KEY,
+} from '../context';
 import { GoalPlannerWorker, type GoalPlannerRequest } from './goal-planner.worker';
+
+const contextAssembler = new AIContextAssembler({
+  getUserTimeContext: vi.fn(async () => ({ timeZone: 'Asia/Tokyo', weekStartsOn: 1 })),
+});
 
 function request(): GoalPlannerRequest {
   return {
@@ -58,12 +67,13 @@ describe('GoalPlannerWorker GoalPlanDraft V2 knowledge evidence', () => {
       listIndexableNotes: vi.fn(async () => []),
       getNoteById: vi.fn(async () => null),
     };
-    const worker = new GoalPlannerWorker({} as never, knowledge);
+    const worker = new GoalPlannerWorker({} as never, knowledge, undefined, contextAssembler);
     const generate = vi
       .spyOn(worker.agent, 'generate')
       .mockResolvedValue({ object: decision() } as never);
 
-    await worker.plan(request(), new RequestContext());
+    const requestContext = new RequestContext();
+    await worker.plan(request(), requestContext);
 
     expect(knowledge.listRelevantNotes).toHaveBeenCalledWith(
       'identity-1',
@@ -78,6 +88,14 @@ describe('GoalPlannerWorker GoalPlanDraft V2 knowledge evidence', () => {
     expect(prompt).toContain('"title":"Unmanaged"');
     expect(prompt).toContain('"linkable":false');
     expect(prompt).toContain('"knowledgeDocument":null');
+    expect(requestContext.getRaw(AI_CONTEXT_ENVELOPE_KEY)).toMatchObject({
+      invocation: { surface: 'goal.create', identityId: 'identity-1' },
+      userTimeContext: { timeZone: 'Asia/Tokyo', weekStartsOn: 1 },
+    });
+    expect(requestContext.getRaw(AI_CONTEXT_TIME_CONTEXT_KEY)).toEqual({
+      timeZone: 'Asia/Tokyo',
+      weekStartsOn: 1,
+    });
   });
 
   it('degrades retrieval failure to empty advisory evidence instead of failing planning', async () => {
@@ -88,14 +106,15 @@ describe('GoalPlannerWorker GoalPlanDraft V2 knowledge evidence', () => {
       listIndexableNotes: vi.fn(async () => []),
       getNoteById: vi.fn(async () => null),
     };
-    const worker = new GoalPlannerWorker({} as never, knowledge);
+    const worker = new GoalPlannerWorker({} as never, knowledge, undefined, contextAssembler);
     const generate = vi
       .spyOn(worker.agent, 'generate')
       .mockResolvedValue({ object: decision() } as never);
 
     await expect(worker.plan(request(), new RequestContext())).resolves.toEqual(decision());
-    expect(String(generate.mock.calls[0]?.[0] ?? '')).toContain(
-      'Knowledge evidence JSON (retrieved_untrusted; use only entries with linkable=true for linkExisting):\n\n[]',
-    );
+    const prompt = String(generate.mock.calls[0]?.[0] ?? '');
+    expect(prompt).toContain('Canonical MemoFlow context envelope');
+    expect(prompt).toContain('"sections"');
+    expect(prompt).not.toContain('Knowledge evidence JSON');
   });
 });

@@ -92,6 +92,7 @@ vi.mock('../modules/ai/notification-read.adapter', () => ({
 
 import {
   AIEvaluationReportFileAdapter,
+  AIContextAssembler,
   createAIModule,
   createAIPrismaRepositories,
   createMastraStorage,
@@ -116,6 +117,7 @@ const fakeDb = { tag: 'fake-db' } as unknown as PrismaClient;
 const repositoryApiPort = { tag: 'repository-port' } as unknown as RepositoryApplicationPort;
 const goalApplicationPort = { tag: 'goal-port' } as unknown as GoalApplicationPort;
 const taskApplicationPort = { tag: 'task-port' } as unknown as TaskApplicationPort;
+const taskDashboardReadPort = { tag: 'task-dashboard-read-port' } as never;
 const routineCommandPort = { tag: 'routine-command-port' } as never;
 const scheduleRepository = { tag: 'schedule-repository' } as never;
 const notificationRepository = { tag: 'notification-repository' } as never;
@@ -134,6 +136,7 @@ const dependencies = {
   repositoryStorageBaseDir,
   goalApplicationPort,
   taskApplicationPort,
+  taskDashboardReadPort,
   routineCommandPort,
   scheduleRepository,
   notificationRepository,
@@ -210,7 +213,7 @@ describe('API composeAI Mastra-only ownership', () => {
       routineCommandPort: vi.mocked(RoutineAICommandAdapter).mock.results[0].value,
       plannerReadPort: vi.mocked(PlannerAIReadAdapter).mock.results[0].value,
       notificationReadPort: vi.mocked(NotificationAIReadAdapter).mock.results[0].value,
-      userTimeContextPort,
+      contextAssembler: expect.any(AIContextAssembler),
     });
   });
 
@@ -220,7 +223,14 @@ describe('API composeAI Mastra-only ownership', () => {
     expect(RepositoryKnowledgeNotePersistenceAdapter).toHaveBeenCalledWith(repositoryApiPort);
     expect(RepositoryKnowledgeSourceAdapter).toHaveBeenCalledWith(fakeDb, repositoryStorageBaseDir);
     expect(RepositoryKnowledgeIndexStatusAdapter).toHaveBeenCalledWith(repositoryApiPort);
-    expect(ControlledAnalyticsReadAdapter).toHaveBeenCalledWith(fakeDb, userTimeContextPort);
+    expect(ControlledAnalyticsReadAdapter).toHaveBeenCalledWith({
+      goalApplicationPort,
+      taskDashboardReadPort,
+      plannerReadPort: vi.mocked(PlannerAIReadAdapter).mock.results[0].value,
+      notificationReadPort: vi.mocked(NotificationAIReadAdapter).mock.results[0].value,
+      activityReadPort: expect.objectContaining({}),
+      userTimeContextPort,
+    });
     expect(AIEvaluationReportFileAdapter).toHaveBeenCalledTimes(1);
 
     const moduleInput = vi.mocked(createAIModule).mock.calls[0][0];

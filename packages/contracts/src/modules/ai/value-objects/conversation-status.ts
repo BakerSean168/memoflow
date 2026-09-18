@@ -3,7 +3,6 @@
  */
 export const ConversationStatus = {
   Active: 'Active',
-  Closed: 'Closed',
   Archived: 'Archived',
 } as const;
 

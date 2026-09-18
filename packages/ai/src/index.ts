@@ -37,11 +37,35 @@ export {
   type TaskPlanMutationPort,
   type KnowledgeCaptureMutationPort,
 } from './server';
+export {
+  AIContextAssembler,
+  aiContextInstruction,
+  estimateAIContextTokens,
+  readAIContextEnvelope,
+  renderAIContextEnvelope,
+  requireAIContextEnvelope,
+  sanitizeAIContextValue,
+  setAIContextRequestContext,
+  type AIContextAssemblerOptions,
+  type AIContextAssemblerPort,
+  type AIContextAssemblyInput,
+  type AIContextEntityInput,
+  type AIContextSectionInput,
+  type AIKnowledgeEvidenceInput,
+} from './server/mastra/context';
 export { AIEvaluationReportFileAdapter } from './server/infrastructure';
 // Host capability ports are re-exported through the package root so desktop
 // composers import only `@memoflow/ai` (no `/ports` subpath).
 export type {
+  AnalyticsOwnerReads,
+  AnalyticsScheduleItem,
+  AnalyticsTaskBoard,
+  AnalyticsTaskDashboard,
+  AnalyticsQueryContext,
+  IAITaskDashboardReadPort,
   IAnalyticsReadPort,
+  IAIActivityReadPort,
+  AIActivityItem,
   IKnowledgeSourcePort,
   IKnowledgeNotePersistencePort,
   IAIRoutineCommandPort,

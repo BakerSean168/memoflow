@@ -26,3 +26,6 @@ export * from './api';
 
 // ============ DTOs ============
 export * from './dtos';
+
+// ============ Invocation Context ============
+export * from './context';

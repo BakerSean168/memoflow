@@ -36,7 +36,6 @@ export const ConversationStatus = {
   // ================= 常量定义 =================
   
   Active: 'Active' as ConversationStatus,
-  Closed: 'Closed' as ConversationStatus,
   Archived: 'Archived' as ConversationStatus,
 
   // ================= 工厂方法 =================
@@ -78,13 +77,6 @@ export const ConversationStatus = {
    */
   isActive(status: ConversationStatus): boolean {
     return status === this.Active;
-  },
-
-  /**
-   * 是否为已关闭状态
-   */
-  isClosed(status: ConversationStatus): boolean {
-    return status === this.Closed;
   },
 
   /**

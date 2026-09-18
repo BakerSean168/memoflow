@@ -19,6 +19,8 @@ import {
   bindChatViewLifecycle,
   getWorkflowStatusText,
   initializeChatView,
+  AIWorkflowRestoreError,
+  loadAuthoritativeWorkflowRun,
   maybeRenameConversation,
 } from './chatViewHelpers';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
@@ -202,7 +204,6 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     goalWorkflowRun: goalWorkflow.goalWorkflowRun,
     taskWorkflowRun: taskWorkflow.taskWorkflowRun,
     knowledgeCaptureRun: knowledgeCaptureWorkflow.knowledgeCaptureRun,
-    knowledgeAnswer: knowledgeQaWorkflow.knowledgeAnswer,
     clarificationAnswers: goalWorkflow.clarificationAnswers,
     editableGoal: goalWorkflow.editableGoal,
     editableKeyResults: goalWorkflow.editableKeyResults,
@@ -212,19 +213,44 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     resetWorkflowArtifacts,
   });
 
-  async function refreshRestoredWorkflowRuns() {
-    const goalRunId = goalWorkflow.goalWorkflowRun.value?.runId;
-    if (goalRunId) await goalWorkflow.syncGoalWorkflowRun(goalRunId);
-    const taskRunId = taskWorkflow.taskWorkflowRun.value?.runId;
-    if (taskRunId) await taskWorkflow.syncTaskWorkflowRun(taskRunId);
-    const captureRunId = knowledgeCaptureWorkflow.knowledgeCaptureRun.value?.runId;
-    if (captureRunId) await knowledgeCaptureWorkflow.syncKnowledgeCaptureRun(captureRunId);
-  }
-
   async function restoreWorkflowState(conversationId: string) {
-    persistence.restoreWorkflowState(conversationId);
-    await refreshRestoredWorkflowRuns();
-    persistence.persistWorkflowState(conversationId);
+    const persisted = persistence.restoreWorkflowState(conversationId);
+    if (!persisted) return;
+
+    try {
+      const run = await loadAuthoritativeWorkflowRun(
+        workflowRuntime,
+        conversationId,
+        persisted.activeRunId,
+      );
+      switch (run.kind) {
+        case 'goal.create':
+          toolMode.value = 'goal-create';
+          goalWorkflow.projectRun(run);
+          break;
+        case 'task.create':
+          toolMode.value = 'task-create';
+          taskWorkflow.projectRun(run);
+          break;
+        case 'knowledge.capture':
+          toolMode.value = 'knowledge-capture';
+          knowledgeCaptureWorkflow.projectRun(run);
+          break;
+      }
+      persistence.applyEditorOverlay(persisted.editorOverlay, run);
+      // Rebase or discard any stale overlay against the runtime revision.
+      persistence.persistWorkflowState(conversationId);
+    } catch (error) {
+      // Runtime failure is an explicit empty/blocked restore. The reset above
+      // ensures no stale local run or draft remains visible as authority.
+      if (
+        !(error instanceof AIWorkflowRestoreError) ||
+        error.code !== 'AI_WORKFLOW_RUNTIME_UNAVAILABLE'
+      ) {
+        persistence.clearWorkflowState(conversationId);
+      }
+      toast.error(t('aiAssistant.errors.workflowExecutionFailed'));
+    }
   }
 
   async function loadWorkspaceLists() {

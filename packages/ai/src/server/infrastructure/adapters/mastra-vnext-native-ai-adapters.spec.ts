@@ -23,7 +23,8 @@ describe('Mastra vNext native AI adapters', () => {
         resourcePath: '知识/架构.md',
         title: 'AI 架构设计',
         mimeType: 'text/markdown',
-        content: '# 架构\n\nMemoFlow 使用 Mastra 作为唯一 Agent runtime。\n\n## 约束\n\n业务写入必须经过 application port。',
+        content:
+          '# 架构\n\nMemoFlow 使用 Mastra 作为唯一 Agent runtime。\n\n## 约束\n\n业务写入必须经过 application port。',
       },
     });
     expect(indexed.contentHash).toMatch(/^[a-f0-9]{64}$/);
@@ -37,7 +38,9 @@ describe('Mastra vNext native AI adapters', () => {
       content: 'Mastra is the single runtime.',
       usage: { promptTokens: 10, completionTokens: 6, totalTokens: 16 },
     }));
-    const adapter = new OpenAICompatibleKnowledgeQueryAdapter({ complete } as unknown as OpenAICompatibleGateway);
+    const adapter = new OpenAICompatibleKnowledgeQueryAdapter({
+      complete,
+    } as unknown as OpenAICompatibleGateway);
     const result = await adapter.query({
       identityId: 'identity-1',
       providerConfig: provider,
@@ -84,7 +87,9 @@ describe('Mastra vNext native AI adapters', () => {
       content: JSON.stringify({ answer: 'Three tasks remain.', highlights: ['3 open tasks'] }),
       usage: { promptTokens: 8, completionTokens: 5, totalTokens: 13 },
     }));
-    const adapter = new OpenAICompatibleAnalyticsQueryAdapter({ complete } as unknown as OpenAICompatibleGateway);
+    const adapter = new OpenAICompatibleAnalyticsQueryAdapter({
+      complete,
+    } as unknown as OpenAICompatibleGateway);
     const result = await adapter.query({
       identityId: 'identity-1',
       providerConfig: provider,
@@ -94,7 +99,20 @@ describe('Mastra vNext native AI adapters', () => {
         goals: [],
         goalSearchResults: [],
         extra: {},
-        taskDashboard: { open: 3 },
+        taskDashboard: {
+          todayTasks: [],
+          overdueTasks: [],
+          upcomingTasks: [],
+          highPriorityTasks: [],
+          summary: { totalTasks: 3, completedToday: 0, overdue: 0, upcoming: 0, highPriority: 0 },
+        },
+        ownerReads: {
+          goal: { progress: { activeCount: 0, goals: [] } },
+          task: { board: { todo: 3, inProgress: 0, done: 0, overdue: 0 } },
+          schedule: { upcoming: [], conflictCount: 0 },
+          notification: { unreadCount: 0 },
+          activity: { recent: [] },
+        },
       },
     });
     expect(result.answer).toBe('Three tasks remain.');

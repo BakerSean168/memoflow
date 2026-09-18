@@ -74,6 +74,7 @@ import { createSchedulerPrismaRepositories } from '@memoflow/scheduler';
 import { createScheduleOrchestrationModule } from '@memoflow/schedule-orchestration';
 import { createTaskReminderScheduledHandlerRegistration } from '@memoflow/task/schedule-execution';
 import { TaskWorkspaceQueryService } from '@memoflow/task';
+import { GetTaskDashboardUseCase } from '@memoflow/task/analytics';
 import { createTaskPrismaScheduleProjectionSource } from '@memoflow/task/schedule-projection';
 import { createRoutinePrismaScheduleExecutionDeps } from '@memoflow/reminder/schedule-execution';
 import { createRoutinePrismaScheduleProjectionSource } from '@memoflow/reminder/schedule-projection';
@@ -272,6 +273,17 @@ async function bootstrap(): Promise<void> {
     goalProgressHandler: createGoalTaskProgressPrismaHandler(prisma),
     userTimeContextPort: settingApiModule.userTimeContextPort,
   });
+  const taskDashboardUseCase = new GetTaskDashboardUseCase(
+    taskComposed.taskPlanRepository,
+    taskComposed.taskOccurrenceRepository,
+    settingApiModule.userTimeContextPort,
+  );
+  const taskDashboardReadPort = {
+    getDashboard: async (identityId: string) => {
+      const result = await taskDashboardUseCase.execute(identityId);
+      return result.ok ? result.data : undefined;
+    },
+  };
   // Register the Task reminder fire handler so scheduled `task.reminder` work
   // (e.g. a one-time task + relative reminder) is executed by the registry-based
   // canonical handler registry owned by schedule orchestration.
@@ -323,6 +335,7 @@ async function bootstrap(): Promise<void> {
     repositoryStorageBaseDir,
     goalApplicationPort: goalComposed.applicationPort,
     taskApplicationPort: taskComposed.applicationPort,
+    taskDashboardReadPort,
     goalKnowledgeService,
     knowledgeDocumentRefResolver: repositoryApiModule.knowledgeDocumentRefResolver,
     routineCommandPort: routineComposed.routineCommandPort,

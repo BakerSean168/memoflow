@@ -45,12 +45,16 @@ async function seedAiLocalState(
       conversationWorkflowStorageKey,
       lastModelStorageKey,
       conversationModelStorageKey,
+      retiredConversationWorkflowStorageKey,
       legacyGoalWorkflowStorageKey,
       seededConversationId,
       seededModelKey,
       seededWorkflowEntry,
     }) => {
       window.localStorage.removeItem(lastModelStorageKey);
+      // AI-9603: durable WorkflowRun snapshots are retired. Only the v3 active-run
+      // pointer may survive a reload; the authoritative run is reloaded from Mastra.
+      window.localStorage.removeItem(retiredConversationWorkflowStorageKey);
       // Residual 211: legacy goal-workflow debug dual-track is retired; clear any stale key.
       window.localStorage.removeItem(legacyGoalWorkflowStorageKey);
 
@@ -81,7 +85,8 @@ async function seedAiLocalState(
     },
     {
       lastConversationStorageKey: 'ai:last-conversation-id',
-      conversationWorkflowStorageKey: 'ai:conversation-workflow-map:v2',
+      conversationWorkflowStorageKey: 'ai:conversation-workflow-map:v3',
+      retiredConversationWorkflowStorageKey: 'ai:conversation-workflow-map:v2',
       lastModelStorageKey: 'ai:last-model-key',
       conversationModelStorageKey: 'ai:conversation-model-map',
       legacyGoalWorkflowStorageKey: 'ai:debug:legacy-goal-workflow',
@@ -791,69 +796,11 @@ function createRestoredGoalWorkflowDraft(): GoalPlanDraft {
 }
 
 function createPendingApprovalWorkflowEntry() {
-  const now = Date.now();
-  const draft = createRestoredGoalWorkflowDraft();
-
-  return {
-    mode: 'goal-create',
-    goalWorkflowStage: 'confirm',
-    goalWorkflowRun: {
-      runId: 'workflow-e2e-restored-approval',
-      kind: 'goal.create',
-      conversationId: e2eConversationId,
-      status: 'suspended',
-      suspension: {
-        type: 'goal_draft_review',
-        draft,
-        warnings: draft.warnings,
-        revision: draft.revision,
-      },
-      createdAt: now,
-      updatedAt: now,
-    },
-    knowledgeAnswer: null,
-    clarificationAnswers: [],
-    editableGoal: {
-      name: draft.goal.name,
-      summary: draft.goal.summary ?? '',
-      status: draft.goal.status,
-      startDate: draft.goal.startDate ?? null,
-      target: draft.goal.target ?? null,
-    },
-    editableKeyResults: [],
-    editableTasks: [],
-    editableKnowledge: [],
-    showGoalDraftEditor: false,
-  };
+  return { activeRunId: 'workflow-e2e-restored-approval' };
 }
 
 function createPendingTaskApprovalWorkflowEntry() {
-  const now = Date.now();
-  const mockRun: TaskWorkflowMockRun = {
-    runId: 'workflow-e2e-restored-task-approval',
-    conversationId: e2eConversationId,
-    createdAt: now,
-    draft: createTaskWorkflowDraft('Restored Mastra task workflow'),
-  };
-  return {
-    mode: 'task-create',
-    taskWorkflowRun: createTaskReviewRun(mockRun),
-    goalWorkflowRun: null,
-    knowledgeCaptureRun: null,
-    knowledgeAnswer: null,
-    clarificationAnswers: [],
-    editableGoal: {
-      name: '',
-      summary: '',
-      status: 'Planned',
-      startDate: null,
-      target: null,
-    },
-    editableKeyResults: [],
-    editableTasks: [],
-    editableKnowledge: [],
-    showGoalDraftEditor: false,
-  };
+  return { activeRunId: 'workflow-e2e-restored-task-approval' };
 }
 
 function createGoalAgentWorkflowDraft(): GoalPlanDraft {

@@ -10,11 +10,15 @@ import {
 import type { IAIExecutionLogPort } from '../../application/ports';
 import type { MastraModelResolver } from '../models/model-resolver';
 import {
+  aiContextInstruction,
+  setAIContextRequestContext,
+  type AIContextAssemblerPort,
+} from '../context';
+import {
   normalizeMastraGenerateUsage,
   recordPlannerExecution,
   rememberResolvedPlannerModel,
 } from './planner-observability';
-import { userTimeContextInstruction } from './user-time-context';
 
 function stringContext(requestContext: RequestContext, key: string): string | undefined {
   const value = requestContext.getRaw(key);
@@ -46,7 +50,8 @@ export class TaskPlannerWorker implements TaskPlannerPort {
 
   constructor(
     modelResolver: MastraModelResolver,
-    private readonly executionLogPort?: IAIExecutionLogPort,
+    private readonly executionLogPort: IAIExecutionLogPort | undefined,
+    private readonly contextAssembler: AIContextAssemblerPort,
   ) {
     this.agent = new Agent({
       id: 'task-planner-worker',
@@ -55,7 +60,6 @@ export class TaskPlannerWorker implements TaskPlannerPort {
       instructions: ({ requestContext }) => {
         const locale = stringContext(requestContext, 'locale') === 'en-US' ? 'en-US' : 'zh-CN';
         const language = locale === 'en-US' ? 'English' : 'Simplified Chinese';
-        const timeInstruction = userTimeContextInstruction(requestContext, locale);
         return [
           'You are an internal MemoFlow planning worker. You are not a user-facing assistant.',
           'Return only the requested structured planning decision. Never claim that any Task has been created.',
@@ -63,7 +67,7 @@ export class TaskPlannerWorker implements TaskPlannerPort {
           'Ask clarification only when missing information materially blocks a safe, useful plan. Ask at most 3 concise questions.',
           'Prefer a concrete draft over cosmetic clarification. The workflow enforces a maximum of 3 clarification rounds.',
           'Use epoch milliseconds for date anchors and always emit the matching IANA timezone field. Preserve an explicit schedule timezone; otherwise use the canonical user timezone below.',
-          timeInstruction,
+          'The canonical Product Time context is supplied in the validated AI context envelope. Do not infer semantic time from the server host or an ambient timezone.',
           'Weekly tasks must provide daysOfWeek using 0=Sunday through 6=Saturday.',
           'Use only current Task semantics: never propose folders, dependency graphs, critical paths or other retired project-management fields.',
           'A Task may link to a Goal without a Key Result. keyResultId requires goalId; automatic contributionValue additionally requires keyResultId.',
@@ -90,25 +94,56 @@ export class TaskPlannerWorker implements TaskPlannerPort {
     request: TaskPlannerRequest,
     requestContext: RequestContext,
   ): Promise<TaskPlanningDecision> {
+    const contextEnvelope = await this.contextAssembler.assemble({
+      invocation: {
+        identityId: request.input.identityId,
+        conversationId: request.input.conversationId,
+        surface: 'task.create',
+        locale: request.input.locale,
+      },
+      userInput: {
+        idea: request.input.idea,
+        goalId: request.input.goalId,
+        surfaceContext: request.input.surfaceContext,
+        clarification: request.clarification,
+      },
+      selectedEntities: request.input.goalId
+        ? [
+            {
+              entityType: 'goal',
+              id: request.input.goalId,
+              source: 'workflow.task.create.input',
+            },
+          ]
+        : undefined,
+      workflowInstructions: [
+        {
+          id: 'task.create.control',
+          source: 'workflow.task.create',
+          content: {
+            mode: request.mode,
+            forceDraft: request.forceDraft ?? false,
+            instruction: request.instruction,
+          },
+          sensitivity: 'private',
+        },
+      ],
+      domainFacts: request.currentDraft
+        ? [
+            {
+              id: 'task.create.current-draft',
+              source: 'workflow.task.create.state',
+              content: request.currentDraft,
+              sensitivity: 'private',
+            },
+          ]
+        : undefined,
+    });
+    setAIContextRequestContext(requestContext, contextEnvelope);
     const prompt = [
       'Produce the next task.create planning decision from this trusted workflow state.',
-      request.forceDraft
-        ? 'Clarification budget is exhausted. You MUST return status=draft_ready using the best safe assumptions and record assumptions in warnings.'
-        : 'Return needs_clarification only for a material blocker; otherwise return draft_ready.',
-      `Mode: ${request.mode}`,
-      request.instruction ? `Revision instruction: ${request.instruction}` : '',
-      'Workflow input JSON:',
-      JSON.stringify(request.input),
-      'Clarification history JSON:',
-      JSON.stringify(request.clarification),
-      'Current draft JSON:',
-      JSON.stringify(request.currentDraft ?? null),
-      request.mode === 'regenerate'
-        ? 'Regenerate the plan substantively rather than making only cosmetic edits.'
-        : '',
-      request.mode === 'revise'
-        ? 'Preserve valid parts of the current draft and apply the revision instruction precisely.'
-        : '',
+      'Follow the mode, forceDraft, revision instruction and clarification controls in the workflow section of the canonical context envelope. Ask only material blockers; when forceDraft is true, return draft_ready using safe assumptions and record them in warnings. Regenerate substantively and revise precisely while preserving valid draft parts.',
+      aiContextInstruction(contextEnvelope),
     ]
       .filter(Boolean)
       .join('\n\n');
