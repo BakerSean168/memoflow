@@ -83,6 +83,10 @@ export class TaskPlannerWorker implements TaskPlannerPort {
           identityId,
           providerId: stringContext(requestContext, 'providerId'),
           modelId: stringContext(requestContext, 'modelId'),
+          executionRequirement: {
+            chat: 'required',
+            structuredOutput: 'required',
+          },
         });
         rememberResolvedPlannerModel(requestContext, resolved);
         return resolved.model;

@@ -369,6 +369,12 @@ function providerOnboardingFailure<T>(cause: unknown): Result<T> {
       return error('VALIDATION_ERROR', cause.message);
     case 'model_not_available':
       return error('MODEL_NOT_AVAILABLE', 'AI model is not available');
+    case 'configuration_required':
+      return error('AI_CONFIGURATION_REQUIRED', 'AI provider and model configuration is required');
+    case 'capability_unsupported':
+      return error('AI_CAPABILITY_UNSUPPORTED', 'AI model capability is unsupported');
+    case 'capability_unverified':
+      return error('AI_CAPABILITY_UNVERIFIED', 'AI model capability is not verified');
     case 'not_found':
       return error('NOT_FOUND', cause.message);
     case 'conflict':

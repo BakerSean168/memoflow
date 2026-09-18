@@ -32,6 +32,12 @@ function mapAIExecutionCategory(
       return 'PROVIDER_AUTH_FAILED';
     case 'model_not_available':
       return 'MODEL_NOT_AVAILABLE';
+    case 'configuration_required':
+      return 'AI_CONFIGURATION_REQUIRED';
+    case 'capability_unsupported':
+      return 'AI_CAPABILITY_UNSUPPORTED';
+    case 'capability_unverified':
+      return 'AI_CAPABILITY_UNVERIFIED';
     case 'timeout':
       return 'TIMEOUT';
     case 'validation':
@@ -70,6 +76,12 @@ function safeAIControllerMessage(code: string): string {
       return 'AI request was canceled';
     case 'SERVICE_UNAVAILABLE':
       return 'AI service is unavailable';
+    case 'AI_CONFIGURATION_REQUIRED':
+      return 'AI provider and model configuration is required';
+    case 'AI_CAPABILITY_UNSUPPORTED':
+      return 'The selected AI model does not support the required capability';
+    case 'AI_CAPABILITY_UNVERIFIED':
+      return 'The selected AI model capability has not been verified';
     case 'CONFLICT':
       return 'AI operation conflicts with current state';
     default:
