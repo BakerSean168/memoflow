@@ -60,9 +60,9 @@ vi.mock('../modules/ai/planner-read.adapter', () => ({
 }));
 vi.mock('../modules/ai/notification-read.adapter', () => ({
   DesktopNotificationAIReadAdapter: vi.fn(function DesktopNotificationAIReadAdapterMock(
-    repository: unknown,
+    inbox: unknown,
   ) {
-    return { tag: 'desktop-notification-read', repository };
+    return { tag: 'desktop-notification-read', inbox };
   }),
 }));
 
@@ -92,8 +92,8 @@ const analyticsReadPort = { tag: 'analytics-read' } as never;
 const goalApplicationPort = { tag: 'goal-application' } as never;
 const taskApplicationPort = { tag: 'task-application' } as never;
 const routineCommandPort = { tag: 'routine-command-port' } as never;
-const scheduleRepository = { tag: 'schedule-repository' } as never;
-const notificationRepository = { tag: 'notification-repository' } as never;
+const scheduleEventApi = { tag: 'schedule-event-api' } as never;
+const notificationInbox = { tag: 'notification-inbox' } as never;
 const userTimeContextPort = { tag: 'user-time-context-port' } as never;
 const labelService = { tag: 'label-service' } as never;
 const goalKnowledgeService = { tag: 'goal-knowledge-service' } as never;
@@ -119,8 +119,8 @@ const dependencies = {
   goalApplicationPort,
   taskApplicationPort,
   routineCommandPort,
-  scheduleRepository,
-  notificationRepository,
+  scheduleEventApi,
+  notificationInbox,
   userTimeContextPort,
   labelService,
   goalKnowledgeService,
@@ -167,15 +167,13 @@ describe('Desktop composeAI Mastra-only ownership', () => {
       goalKnowledgeService,
     );
     expect(DesktopTaskPlanMutationAdapter).toHaveBeenCalledWith(taskApplicationPort, labelService);
-    expect(DesktopRoutineAICommandAdapter).toHaveBeenCalledWith(
-      routineCommandPort,
+    expect(DesktopRoutineAICommandAdapter).toHaveBeenCalledWith(routineCommandPort);
+    expect(DesktopPlannerAIReadAdapter).toHaveBeenCalledWith(
+      scheduleEventApi,
+      taskApplicationPort,
       userTimeContextPort,
     );
-    expect(DesktopPlannerAIReadAdapter).toHaveBeenCalledWith(
-      scheduleRepository,
-      taskApplicationPort,
-    );
-    expect(DesktopNotificationAIReadAdapter).toHaveBeenCalledWith(notificationRepository);
+    expect(DesktopNotificationAIReadAdapter).toHaveBeenCalledWith(notificationInbox);
     expect(KnowledgeCapturePersistenceAdapter).toHaveBeenCalledWith(knowledgeNotePersistence);
 
     expect(MastraAIRuntime).toHaveBeenCalledTimes(1);
