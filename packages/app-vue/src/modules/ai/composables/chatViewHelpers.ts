@@ -5,8 +5,59 @@
  */
 
 import type { AIChatService, WorkflowMode, GoalWorkflowStage } from './types';
+import type { AIWorkflowRunView } from '@memoflow/contracts/ai';
+import type { IWorkflowRuntimeService } from '../../../di/types';
 import { unwrap } from '@memoflow/contracts/result';
 import { translateResultError } from '../../../shared/utils/translate-result-error';
+
+export type AIWorkflowRestoreErrorCode =
+  | 'AI_WORKFLOW_RUNTIME_UNAVAILABLE'
+  | 'AI_WORKFLOW_RUN_NOT_FOUND'
+  | 'AI_WORKFLOW_CONVERSATION_MISMATCH';
+
+/** A restore failure is explicit so callers cannot accidentally use a stale snapshot. */
+export class AIWorkflowRestoreError extends Error {
+  constructor(
+    readonly code: AIWorkflowRestoreErrorCode,
+    message: string,
+  ) {
+    super(message);
+    this.name = 'AIWorkflowRestoreError';
+  }
+}
+
+/**
+ * Resolve a persisted run pointer through the authoritative runtime. The
+ * local pointer is never treated as a workflow snapshot or fallback source.
+ */
+export async function loadAuthoritativeWorkflowRun(
+  workflowRuntime: IWorkflowRuntimeService,
+  conversationId: string,
+  runId: string,
+): Promise<AIWorkflowRunView> {
+  let run: AIWorkflowRunView | null;
+  try {
+    run = await workflowRuntime.get({ runId });
+  } catch {
+    throw new AIWorkflowRestoreError(
+      'AI_WORKFLOW_RUNTIME_UNAVAILABLE',
+      `Workflow runtime unavailable while restoring ${runId}`,
+    );
+  }
+  if (!run) {
+    throw new AIWorkflowRestoreError(
+      'AI_WORKFLOW_RUN_NOT_FOUND',
+      `Workflow run ${runId} is not available for restore`,
+    );
+  }
+  if (run.conversationId !== conversationId) {
+    throw new AIWorkflowRestoreError(
+      'AI_WORKFLOW_CONVERSATION_MISMATCH',
+      `Workflow run ${runId} does not belong to conversation ${conversationId}`,
+    );
+  }
+  return run;
+}
 
 /** Parameters for workflowStatusText computation. */
 export interface WorkflowStatusParams {

@@ -30,8 +30,8 @@ updated: 2026-09-18T00:00:00+08:00
 
 Runtime recovery/HITL/idempotency/security tests remain protected because they are behavioral invariants, not legacy-data compatibility.
 
-**状态：ACTIVE / design frozen, implementation not started**
-**实施分支：** 尚未创建；本轮提交只冻结 docs/design，不开始 AI production code 重构
+**状态：ACTIVE / AI-9602 accepted locally; AI-9603 implemented locally, review pending**
+**实施分支：** `chatgpt/ai-9603-conversation-shell`；本轮已完成 conversation shell/runtime boundary cutover，等待 ChatGPT Web review/acceptance
 **当前源码 truth：** `packages/ai` + `packages/contracts/ai` + Mastra runtime + Prisma/PowerSync + Vue AI workspace 现状
 **目标 ADR：** ADR-096～099
 **继续有效：** ADR-050、051、052、070
@@ -142,7 +142,7 @@ AIExecutionRecord != Workflow state != Accounting ledger
 1. 2026-08 Mastra-native 大重构已完成并归档，Mastra 是唯一核心 Agent/Workflow runtime；
 2. `AIConversation` 仍包含 `messages[] / messageCount / lastMessageAt / Closed` 等 legacy aggregate shape；
 3. `AiMessage` 仍保留，但当前 authoritative transcript 已经是 Mastra thread/memory；
-4. Vue `useAIWorkflowPersistence` 仍把完整 WorkflowRun/draft shadow 写入 localStorage；
+4. AI-9603 已将 Vue `useAIWorkflowPersistence` 收敛为 run pointer + revision-bound unsaved editor overlay；Mastra runtime 是 restore truth；
 5. `AIProviderConfig` repository 解密 secret 后把 plaintext API key 放回 server DTO；
 6. Provider Onboarding V2 已经有正确的 opaque one-time session / credential protection；
 7. model resolver 仍存在缺省 `gpt-4o-mini` fallback，且没有 workflow capability requirement；
@@ -307,7 +307,7 @@ delete legacy persistence, add a backfill, or make a compatibility promise under
 | Conversation identity, title, archive/delete metadata                                      | `AIConversation` / `ai_conversations`; `AIConversationPrismaRepository`, `PowerSyncAIConversationRepository`, and `DeleteConversationUseCase` | `packages/ai/src/server/domain/aggregates/ai-conversation.ts::AIConversation`; `packages/ai/src/server/application/use-cases/commands/delete-conversation.use-case.ts::DeleteConversationUseCase`                      | Authoritative product shell only; `messages[]`, `messageCount`, and `lastMessageAt` remain legacy projections.             |
 | Assistant transcript                                                                       | Mastra `Memory` thread in the configured Mastra store; `conversationId` is the thread id and `identityId` is the resource id                  | `packages/ai/src/server/mastra/runtime/assistant-history.service.ts::AssistantHistoryService`; `packages/ai/src/server/mastra/runtime/storage.ts::createMastraStorage`; `MastraAIRuntime.listMessages/dispatchMessage` | Authoritative and durable. After the version marker, reads use `memory.recall`; the legacy source is not consulted.        |
 | Goal/Task/Knowledge workflow state, suspension, resume cursor, result, and terminal status | Mastra `workflows` store, keyed by `runId` and filtered by `resourceId`                                                                       | `packages/ai/src/server/mastra/runtime/mastra-ai.runtime.ts::MastraAIRuntime.workflowStore`, `get`, `list`, `resume`, `cancel`                                                                                         | Authoritative and durable; in-memory `activeRuns` is only a live cancellation handle.                                      |
-| Client workflow snapshot                                                                   | `localStorage` key `ai:conversation-workflow-map:v2`                                                                                          | `packages/app-vue/src/modules/ai/composables/useAIWorkflowPersistence.ts`; `useAIChatView.ts::refreshRestoredWorkflowRuns` calls `workflowRuntime.get`                                                                 | Derived/recoverable shadow, not authority and not a safe fallback when Mastra is unavailable. Retirement is AI-9603 scope. |
+| Client workflow pointer/overlay                                                             | `localStorage` key `ai:conversation-workflow-map:v3`                                                                                          | `packages/app-vue/src/modules/ai/composables/useAIWorkflowPersistence.ts`; `useAIChatView.ts::restoreWorkflowState` calls `workflowRuntime.get` through `loadAuthoritativeWorkflowRun` | Derived/recoverable UI state only; runtime status/suspension/result/draft are never persisted or used as fallback.           |
 | AI execution/usage observation                                                             | `ai_generation_tasks` through the execution-log adapters                                                                                      | `packages/ai/src/server/infrastructure/adapters/prisma/ai-execution-log-prisma.adapter.ts`; `ai-execution-log-powersync.adapter.ts`                                                                                    | Adjacent derived observability, not transcript or workflow authority; later `AIExecutionRecord` work owns its convergence. |
 
 The host boundary is also characterized: authenticated HTTP routes and Electron IPC derive
@@ -352,28 +352,27 @@ repository persistence and data-portability import.
 | Database/PowerSync schema and API table mapping | Prisma `AiMessage` model, PowerSync `ai_messages` table, API sync table/name mapping                                                             | Derived/recoverable storage/sync plumbing, not a semantic authority or independent reader. Remove only in the later coordinated schema cutover. (`packages/database/prisma/schema/ai.prisma`, `packages/powersync-schema/src/index.ts`, `apps/api/src/modules/powersync/table-mapping.ts`)                                                                                                                                                                                                                                                                                                         |
 | Tests, fixtures, and generated Prisma client    | Characterization/round-trip fixtures and generated `AiMessage` types/delegates                                                                   | Dead as production consumers; evidence/generated support only. Keep behavior tests that protect Mastra recovery; regenerate/delete generated artifacts only with the schema change.                                                                                                                                                                                                                                                                                                                                                                                                                |
 
-`ConversationStatus.Closed` is also fully inventoried: it is defined in the AI contract/server
-value object and covered by value-object tests, but has no current runtime/application consumer;
-the aggregate creates `Active` and soft-deletes to `Archived`. It is a dead legacy status
-candidate for AI-9603, not changed by AI-9602.
+`ConversationStatus.Closed` was also fully inventoried: it had no current runtime/application
+consumer; the aggregate creates `Active` and soft-deletes to `Archived`. AI-9603 retires the
+contract/server value and helper while keeping archive semantics explicit.
 
 ##### Retirement gate handed to later tickets
 
-AI-9602 proves the authority boundary but does not open the destructive gate yet. Before
-AI-9603/AI-9610 remove `AiMessage`, the later work must explicitly show that:
+AI-9602 and AI-9603 prove the authority boundary but do not open the physical `AiMessage`
+destructive gate. Before a later coordinated schema/portability cut removes `AiMessage`, the
+later work must explicitly show that:
 
 1. transcript export has a deliberate Mastra-authoritative source or is removed under the
    ADR-111 portability decision;
 2. no importer/store creates `AiMessage` rows;
 3. conversation repositories and aggregate/DTO surfaces no longer read or write message
    children;
-4. the `Message` contract/domain and `Closed` status surfaces have no remaining product
-   consumer; and
+4. the `Message` contract/domain has no remaining product consumer; and
 5. Prisma, PowerSync, API sync mapping, and generated clients are cut in one coordinated
    schema change.
 
-No migration, backfill, legacy-row preservation, runtime rewrite, or compatibility reader was
-added for this ticket.
+No migration, backfill, legacy-row preservation, runtime rewrite, permanent compatibility reader,
+or `AiMessage` fallback/dual write was added for this ticket.
 
 #### Dependencies
 
@@ -381,7 +380,7 @@ added for this ticket.
 
 ### AI-9603 — Converge AssistantConversationShell + remove UI durable workflow shadow
 
-**状态：PLANNED**
+**状态：IMPLEMENTED LOCALLY / REVIEW PENDING**
 
 #### Goal
 
@@ -398,25 +397,28 @@ AssistantConversationShell
 
 迁移：
 
-- remove aggregate `messages[]` ownership；
-- `messageCount/lastMessageAt` 改 read projection/cache；
-- 若 AI-9602 证明无产品语义，retire `Closed`；
-- conversation list compose Mastra summary；
-- preserve existing conversation ids/thread mapping。
+- `AIConversation` remains product shell metadata; aggregate `messages[]`, `messageCount`, and
+  `lastMessageAt` remain legacy repository/portability consumers and are explicitly deferred;
+- Vue conversation grouping no longer treats `lastMessageAt` as shell recency authority;
+- AI-9602 evidence showed no `Closed` product semantic, so the contract/server status is retired;
+- existing conversation ids/thread mapping and workspace deep links remain stable。
 
 UI：
 
-- `useAIWorkflowPersistence.ts` 不再 persist full `goalWorkflowRun/taskWorkflowRun/knowledgeCaptureRun`；
-- persist only active run pointer + truly unsaved editor overlay；
-- restore always calls `workflowRuntime.get`；
-- runtime unavailable -> explicit unavailable, no local snapshot truth fallback。
+- `useAIWorkflowPersistence.ts` no longer persists full `goalWorkflowRun/taskWorkflowRun/knowledgeCaptureRun`;
+- `ai:conversation-workflow-map:v3` persists only an active run pointer plus a goal clarification/draft
+  editor overlay when it is actually unsaved and bound to the runtime revision;
+- restore always calls `workflowRuntime.get`, verifies conversation ownership, and projects the returned
+  Mastra view;
+- runtime unavailable/unknown/mismatched run produces an explicit fail-closed restore; no local snapshot
+  becomes workflow truth. The retired v2 key is removed and never parsed.
 
 Persistence：
 
-- bounded compatibility migration；
-- `AiMessage` actual deletion only after AI-9602 gate passes；
-- Prisma/PowerSync parity；
-- portability migration。
+- no old-data compatibility migration or backfill is added under ADR-111;
+- physical `AiMessage`/Prisma/PowerSync/generated-client deletion remains deferred until the portability
+  and legacy repository consumer gate passes;
+- no permanent `AiMessage` fallback or dual write is introduced。
 
 #### Protected contracts
 
@@ -428,28 +430,59 @@ Persistence：
 
 #### Tests
 
-- conversation shell unit/repository；
-- Mastra history integration；
-- UI restore from runtime；
-- stale local editor revision；
-- runtime unavailable behavior；
-- Prisma/PowerSync schema parity；
-- portability fixture；
-- anti-resurrection surface lock for full WorkflowRun localStorage persistence。
+- Mastra history/workflow recovery evidence from AI-9602；
+- UI restore from runtime, suspended HITL overlay, stale local editor revision, runtime unavailable and
+  unknown-run behavior；
+- delete retry ordering/visibility；
+- anti-resurrection lock for full WorkflowRun localStorage persistence；
+- legacy Prisma/PowerSync/portability deletion remains an explicit later-ticket gate。
 
 #### Acceptance
 
-Production state 中不存在：
+AI-9603 boundary result：
 
 ```text
-AIConversation.messages aggregate ownership
 full WorkflowRun durable localStorage snapshot
-permanent AiMessage transcript read/write
+runtime-unavailable local snapshot fallback
 ```
+
+The legacy `AIConversation.messages`/`AiMessage` repository and portability surfaces remain
+physically present and are not claimed as deleted by AI-9603. They are derived legacy consumers
+with an explicit deletion blocker recorded above.
 
 #### Dependencies
 
 `AI-9602`
+
+#### AI-9603 local implementation evidence (2026-09-18)
+
+- Authority before: Vue restored full `AIWorkflowRunView`/draft snapshots from
+  `ai:conversation-workflow-map:v2`, then attempted a runtime refresh while stale local status,
+  suspension, result, and draft state could already be visible. Authority after: the UI stores only
+  `activeRunId` plus an optional unsaved goal editor overlay; every restore calls
+  `workflowRuntime.get({ runId })` and verifies `conversationId` before projection.
+- Exact durable UI state remaining: `ai:conversation-workflow-map:v3` maps a conversation id to
+  `{ activeRunId, editorOverlay? }`. The overlay is limited to unsaved goal clarification answers or
+  structured draft editor values and carries the runtime/draft revision. Runtime status, suspension,
+  result, usage, and authoritative draft are not persisted. `ai:last-conversation-id` remains only a
+  selection/deep-link pointer, not workflow truth.
+- Runtime unavailable leaves the pointer for a later retry but clears all projected workflow UI;
+  unknown or owner-mismatched runs clear the pointer. Neither path reads `v2` or uses a stale local
+  snapshot. Successful runtime revision projection rebases/removes the overlay.
+- Conversation ids, `conversationId -> threadId` mapping, workspace selection/deep links, stream
+  ordering, interrupt/resume/cancel/retry behavior, and Mastra-first then shell delete ordering are
+  preserved. Delete failure leaves the selected shell visible for retry.
+- `ConversationStatus.Closed` is retired because the AI-9602 consumer audit found no current runtime
+  or product consumer; `Active` and explicit `Archived` remain.
+- Explicitly deferred blocker: `AiMessage`/`ai_messages` still has active aggregate repository,
+  Prisma/PowerSync mapper, data-portability export/import, legacy DTO/domain, schema, and generated
+  client consumers. AI-9603 does not delete those tables/clients, migrate/backfill old rows, or add a
+  compatibility reader; a later coordinated portability/consumer cutover must remove or deliberately
+  replace those consumers before physical deletion.
+- Executable coverage: `useAIWorkflowPersistence.spec.ts`, `chatViewHelpers.spec.ts`,
+  `useAIChatSession.spec.ts`, existing AI-9602 Mastra restart/HITL tests, and the existing goal/task/
+  knowledge runtime projection tests. Local acceptance remains review-pending until the required
+  repository validation matrix completes.
 
 ### AI-9604 — Establish ProviderDefinition/Connection/SecretVault domain seam
 
@@ -1113,8 +1146,8 @@ AI-9609 Routine/Planner/Notification tools
 
 ```text
 AI-9601  DONE — docs/design package only
-AI-9602  PLANNED
-AI-9603  PLANNED
+AI-9602  ACCEPTED LOCALLY — runtime authority characterization and AiMessage consumer ledger
+AI-9603  IMPLEMENTED LOCALLY / REVIEW PENDING — shell/runtime cutover; physical AiMessage deletion deferred
 AI-9604  PLANNED
 AI-9605  PLANNED
 AI-9606  PLANNED
@@ -1128,7 +1161,8 @@ AI-9612  PLANNED
 
 本状态明确表示：
 
-> **AI production code convergence 尚未开始。**
+> **AI-9603 已开始并完成 conversation shell/runtime boundary 的本地实现；后续 provider、context、owner
+> vocabulary、execution-record 与 legacy schema deletion 仍未开始。**
 
 2026-08 的 Mastra-native runtime implementation 已经完成；本计划只针对 2026-09 新冻结的 product model alignment。
 

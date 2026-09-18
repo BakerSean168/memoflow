@@ -21,7 +21,8 @@ export type {
   GoalClarificationView,
   KnowledgeAnswer,
   MessageStatus,
-  PersistedWorkflowEntry,
+  PersistedWorkflowEditorOverlay,
+  PersistedWorkflowState,
   ProviderListItem,
   WorkflowMode,
 } from './types';

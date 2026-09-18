@@ -53,14 +53,12 @@ describe('ai value objects', () => {
   it('covers conversation and message status helpers', () => {
     expect(ConversationStatus.getAll()).toEqual([
       ConversationStatus.Active,
-      ConversationStatus.Closed,
       ConversationStatus.Archived,
     ]);
     expect(ConversationStatus.of('Active')).toBe(ConversationStatus.Active);
-    expect(ConversationStatus.isValid('Closed')).toBe(true);
+    expect(ConversationStatus.isValid('Closed')).toBe(false);
     expect(ConversationStatus.isValid('Paused')).toBe(false);
     expect(ConversationStatus.isActive(ConversationStatus.Active)).toBe(true);
-    expect(ConversationStatus.isClosed(ConversationStatus.Closed)).toBe(true);
     expect(ConversationStatus.isArchived(ConversationStatus.Archived)).toBe(true);
     expect(() => ConversationStatus.of('Paused')).toThrow('Invalid ConversationStatus');
 

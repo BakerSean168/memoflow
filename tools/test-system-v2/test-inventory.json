@@ -3528,6 +3528,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/ai/composables/chatViewHelpers.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/ai/composables/use-ai-chat-host-dispatch.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3585,6 +3593,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useAITaskWorkflow.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/ai/composables/useAIWorkflowPersistence.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -11143,7 +11159,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 198
+      "fileCount": 200
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -11883,7 +11899,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1030,
+    "unit": 1032,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 9,

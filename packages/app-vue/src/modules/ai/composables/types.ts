@@ -171,22 +171,38 @@ export type EditableGoalTask = GoalPlanTask;
 /** UI projection of canonical GoalPlanDraft V2 Knowledge create/linkExisting entry. */
 export type EditableGoalKnowledge = GoalPlanKnowledge;
 
-export type PersistedWorkflowEntry = {
-  /** Canonical WorkflowMode; unknown/legacy values are normalized on read. */
-  mode: string;
-  goalWorkflowStage?: GoalWorkflowStage;
-  /** Canonical durable Workflow projection for goal.create. */
-  goalWorkflowRun?: import('@memoflow/contracts/ai').AIWorkflowRunView | null;
-  taskWorkflowRun?: import('@memoflow/contracts/ai').AIWorkflowRunView | null;
-  /** Canonical durable Workflow projection for knowledge.capture. */
-  knowledgeCaptureRun?: import('@memoflow/contracts/ai').AIWorkflowRunView | null;
-  knowledgeAnswer?: KnowledgeAnswer | null;
-  clarificationAnswers: string[];
-  editableGoal: EditableGoal;
-  editableKeyResults: EditableKeyResult[];
-  editableTasks?: EditableGoalTask[];
-  editableKnowledge?: EditableGoalKnowledge[];
-  showGoalDraftEditor: boolean;
+/**
+ * The only workflow state the Vue shell may retain across a reload.
+ *
+ * `activeRunId` is a recoverable pointer, not a workflow projection. The
+ * optional overlay contains only edits the user has made locally and not yet
+ * accepted by the authoritative Mastra Workflow. Runtime status, suspension,
+ * result, and draft state deliberately do not belong here.
+ */
+export type PersistedWorkflowEditorOverlay =
+  | {
+      kind: 'goal.create';
+      phase: 'clarification';
+      runId: string;
+      /** Mastra run updatedAt for a clarification suspension. */
+      revision: number;
+      answers: string[];
+    }
+  | {
+      kind: 'goal.create';
+      phase: 'draft-review';
+      runId: string;
+      /** GoalPlanDraft.revision for the authoritative draft being edited. */
+      revision: number;
+      editableGoal: EditableGoal;
+      editableKeyResults: EditableKeyResult[];
+      editableTasks: EditableGoalTask[];
+      editableKnowledge: EditableGoalKnowledge[];
+    };
+
+export type PersistedWorkflowState = {
+  activeRunId: string;
+  editorOverlay?: PersistedWorkflowEditorOverlay;
 };
 
 export type PersistedConversationModelMap = Record<string, string>;
