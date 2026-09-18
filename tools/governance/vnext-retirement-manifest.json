@@ -13,12 +13,20 @@
       ]
     },
     {
+      "id": "cross-domain-activity-ledger",
+      "status": "active",
+      "decision": "ADR-108 / HOME-1804",
+      "forbiddenPaths": [
+        "apps/api/src/modules/dashboard/activity-ledger.ts",
+        "apps/api/src/modules/ai/activity-ledger-read.adapter.ts",
+        "packages/database/prisma/schema/activity.prisma"
+      ]
+    },
+    {
       "id": "editor-runtime-package",
       "status": "active",
       "decision": "ADR-107",
-      "forbiddenPaths": [
-        "packages/editor"
-      ]
+      "forbiddenPaths": ["packages/editor"]
     },
     {
       "id": "standalone-dashboard-bounded-context",
@@ -34,9 +42,7 @@
       "id": "legacy-editor-persistence",
       "status": "staged",
       "decision": "ADR-107 / EDITOR-1702",
-      "forbiddenPaths": [
-        "packages/database/prisma/schema/editor.prisma"
-      ]
+      "forbiddenPaths": ["packages/database/prisma/schema/editor.prisma"]
     },
     {
       "id": "account-settings-legacy",
@@ -51,9 +57,7 @@
       "id": "legacy-reminder-model",
       "status": "staged",
       "decision": "ADR-076..079 / ROUTINE-2201",
-      "forbiddenPaths": [
-        "packages/reminder/src/server/domain/aggregates/reminder-template.ts"
-      ]
+      "forbiddenPaths": ["packages/reminder/src/server/domain/aggregates/reminder-template.ts"]
     },
     {
       "id": "legacy-schedule-task-model",

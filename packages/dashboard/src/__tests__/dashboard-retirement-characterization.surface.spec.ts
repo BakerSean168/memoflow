@@ -22,11 +22,20 @@ describe('Dashboard retirement characterization (SYS-0001 / ADR-108)', () => {
     'utf8',
   );
   const apiActivityRead = readFileSync(
-    resolve(repoRoot, 'apps/api/src/modules/ai/activity-ledger-read.adapter.ts'),
+    resolve(repoRoot, 'apps/api/src/modules/ai/owner-activity-read.adapter.ts'),
+    'utf8',
+  );
+  const desktopActivityRead = readFileSync(
+    resolve(repoRoot, 'apps/desktop/src/main/modules/ai/desktop-activity-read.adapter.ts'),
     'utf8',
   );
   const apiCompose = readFileSync(resolve(repoRoot, 'apps/api/src/runtime/compose-ai.ts'), 'utf8');
+  const apiServer = readFileSync(resolve(repoRoot, 'apps/api/src/server.ts'), 'utf8');
   const desktopMain = readFileSync(resolve(repoRoot, 'apps/desktop/src/main/main.ts'), 'utf8');
+  const accountSchema = readFileSync(
+    resolve(repoRoot, 'packages/database/prisma/schema/account.prisma'),
+    'utf8',
+  );
   const desktopAnalyticsComposition = desktopMain.slice(
     desktopMain.indexOf('const analyticsReadAdapter = new DesktopAnalyticsReadAdapter({'),
     desktopMain.indexOf('const AIElectronModule = composeAI({'),
@@ -46,7 +55,7 @@ describe('Dashboard retirement characterization (SYS-0001 / ADR-108)', () => {
     expect(goalCapsule).toContain('useGoalHomeSummary');
   });
 
-  it('records AI owner-read cutover and the transitional ActivityLedger dependency', () => {
+  it('keeps AI analytics on explicit owner reads after the durable activity ledger is retired', () => {
     for (const source of [
       apiAnalytics,
       desktopAnalytics,
@@ -63,9 +72,34 @@ describe('Dashboard retirement characterization (SYS-0001 / ADR-108)', () => {
       expect(source).toContain('plannerReadPort');
       expect(source).toContain('activityReadPort');
     }
-    expect(apiActivityRead).toContain('ActivityLedger');
-    expect(apiActivityRead).toContain('HOME-1804');
-    expect(apiActivityRead).toContain('listRecent');
+
+    for (const ownerRead of [
+      'goalRepository',
+      'taskPlanRepository',
+      'taskOccurrenceRepository',
+      'scheduleRepository',
+    ]) {
+      expect(apiActivityRead).toContain(ownerRead);
+      expect(desktopActivityRead).toContain(ownerRead);
+    }
+    expect(apiActivityRead).toContain('projectAIOwnerActivity');
+    expect(desktopActivityRead).toContain('projectAIOwnerActivity');
+    expect(apiCompose).toContain('OwnerActivityAIReadAdapter');
+  });
+
+  it('physically removes the cross-domain activity ledger authority', () => {
+    expect(existsSync(resolve(repoRoot, 'apps/api/src/modules/dashboard/activity-ledger.ts'))).toBe(
+      false,
+    );
+    expect(
+      existsSync(resolve(repoRoot, 'apps/api/src/modules/ai/activity-ledger-read.adapter.ts')),
+    ).toBe(false);
+    expect(existsSync(resolve(repoRoot, 'packages/database/prisma/schema/activity.prisma'))).toBe(
+      false,
+    );
+    expect(accountSchema).not.toContain('activityLedger');
+    expect(apiServer).not.toContain('PrismaActivityLedgerWriter');
+    expect(apiServer).not.toContain('createActivityLedgerRecorder');
   });
 
   it('keeps the already-retired page-only components physically absent', () => {
