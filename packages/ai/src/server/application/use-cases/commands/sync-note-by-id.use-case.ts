@@ -3,7 +3,6 @@ import type {
   IAIExecutionRecordPort,
   IKnowledgeIndexRepository,
   IKnowledgeIngestionPort,
-  IKnowledgeIndexStatusPort,
   IKnowledgeSourcePort,
 } from '../../ports';
 import { SyncKnowledgeNotesUseCase } from './sync-knowledge-notes.use-case';
@@ -23,22 +22,20 @@ export class SyncNoteByIdUseCase {
     knowledgeIndexRepository: IKnowledgeIndexRepository,
     knowledgeIngestionPort: IKnowledgeIngestionPort,
     executionRecordPort?: IAIExecutionRecordPort,
-    knowledgeIndexStatusPort?: IKnowledgeIndexStatusPort,
   ) {
     this.syncNotes = new SyncKnowledgeNotesUseCase(
       knowledgeIndexRepository,
       knowledgeIngestionPort,
       executionRecordPort,
-      knowledgeIndexStatusPort,
     );
   }
 
   async execute(
-    resourceId: string,
+    knowledgeDocumentId: string,
     cx: ExecutionContext,
     options?: SyncKnowledgeNotesOptions,
   ): Promise<SyncKnowledgeNoteByIdResult> {
-    const resource = await this.knowledgeSourcePort.getNoteById(cx.identityId, resourceId);
+    const resource = await this.knowledgeSourcePort.getNoteById(cx.identityId, knowledgeDocumentId);
     if (!resource) {
       return {
         note: null,

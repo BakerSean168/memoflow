@@ -78,8 +78,10 @@ describe('DesktopKnowledgeSourceAdapter', () => {
     expect(resources[0]).toMatchObject({
       identityId: 'identity-1',
       repositoryId: BINDING_ID,
-      resourceId: DOCUMENT_ID,
-      resourcePath: 'Architecture/Runtime.md',
+      knowledgeSpaceId: SPACE_ID,
+      knowledgeDocumentId: DOCUMENT_ID,
+      sourcePath: 'Architecture/Runtime.md',
+      sourceContentHash: expect.any(String),
       title: 'Runtime architecture',
       content: '# Runtime architecture\n\nCapability resolution is explicit.',
     });
@@ -89,6 +91,28 @@ describe('DesktopKnowledgeSourceAdapter', () => {
       knowledgeDocumentId: DOCUMENT_ID,
       knowledgeSpaceId: SPACE_ID,
     });
+  });
+
+  it('does not derive a durable AI identity from an unmanaged path', async () => {
+    const localVault = createLocalVaultPort();
+    localVault.scanVault.mockResolvedValueOnce({
+      ...(await localVault.scanVault()),
+      notes: [{ ...summary, knowledgeDocumentId: null }],
+    });
+    const adapter = new DesktopKnowledgeSourceAdapter(localVault);
+
+    await expect(adapter.listIndexableNotes('identity-1', 20)).resolves.toEqual([]);
+  });
+
+  it('does not hydrate a document from a different KnowledgeSpace', async () => {
+    const localVault = createLocalVaultPort();
+    const adapter = new DesktopKnowledgeSourceAdapter(localVault);
+
+    await expect(
+      adapter.getNoteById('identity-1', DOCUMENT_ID, 'KnowledgeSpaceId_other'),
+    ).resolves.toBeNull();
+    expect(localVault.scanVault).not.toHaveBeenCalled();
+    expect(localVault.readNote).not.toHaveBeenCalled();
   });
 
   it('returns no knowledge and performs no scan when the profile has no Vault binding', async () => {

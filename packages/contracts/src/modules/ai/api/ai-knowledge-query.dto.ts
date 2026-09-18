@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { brandedId } from '../../../primitives';
 import type { AiProviderConfigId } from '../../../primitives';
+import { KnowledgeDocumentIdSchema } from '../../repository/aggregates/knowledge-document-identity';
 import {
   KnowledgeCitationSchema,
   QueryKnowledgeResSchema,
@@ -23,14 +24,14 @@ export type QueryKnowledgeRes = z.infer<typeof QueryKnowledgeResSchema>;
 export const ReindexKnowledgeSchema = z.object({
   limit: z.number().int().min(1).max(500).default(200).optional(),
   force: z.boolean().default(false).optional(),
-  resourceIds: z.array(z.string().min(1)).min(1).max(100).optional(),
+  knowledgeDocumentIds: z.array(KnowledgeDocumentIdSchema).min(1).max(100).optional(),
 });
 
 export type ReindexKnowledgeReq = z.infer<typeof ReindexKnowledgeSchema>;
 
 export const ReindexKnowledgeResultItemSchema = z.object({
-  resourceId: z.string().min(1),
-  resourcePath: z.string().min(1),
+  knowledgeDocumentId: KnowledgeDocumentIdSchema,
+  sourcePath: z.string().min(1),
   status: z.enum(['indexed', 'reused', 'failed']),
   error: z.string().optional(),
 });

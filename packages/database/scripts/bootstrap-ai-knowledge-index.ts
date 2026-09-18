@@ -16,7 +16,6 @@ type BootstrapReport = {
   warnings: string[];
 };
 
-
 function parseArgs(argv: string[]) {
   const flags = new Set(argv);
   return {
@@ -40,10 +39,18 @@ function printReport(report: BootstrapReport, asJson: boolean): void {
     return;
   }
 
-  console.log(`Knowledge index table: ${report.tableCreated ? 'created' : report.tableAlreadyPresent ? 'already present' : 'not created'}`);
-  console.log(`pgvector extension: ${report.pgvectorExtensionInstalled ? 'installed' : 'unavailable'}`);
-  console.log(`retrieval_vector column: ${report.retrievalVectorColumnPresent ? 'present' : 'missing'}`);
-  console.log(`retrieval_vector index: ${report.retrievalVectorIndexPresent ? 'present' : 'missing'}`);
+  console.log(
+    `Knowledge index table: ${report.tableCreated ? 'created' : report.tableAlreadyPresent ? 'already present' : 'not created'}`,
+  );
+  console.log(
+    `pgvector extension: ${report.pgvectorExtensionInstalled ? 'installed' : 'unavailable'}`,
+  );
+  console.log(
+    `retrieval_vector column: ${report.retrievalVectorColumnPresent ? 'present' : 'missing'}`,
+  );
+  console.log(
+    `retrieval_vector index: ${report.retrievalVectorIndexPresent ? 'present' : 'missing'}`,
+  );
 
   if (report.warnings.length > 0) {
     console.log('Warnings:');
@@ -91,11 +98,13 @@ async function main(): Promise<void> {
         "id" TEXT NOT NULL,
         "identity_id" TEXT NOT NULL,
         "repository_id" TEXT NOT NULL,
-        "resource_id" TEXT NOT NULL,
-        "resource_path" TEXT NOT NULL,
+        "knowledge_space_id" TEXT NOT NULL,
+        "knowledge_document_id" TEXT NOT NULL,
+        "source_path" TEXT NOT NULL,
         "title" TEXT,
         "mime_type" TEXT NOT NULL,
-        "content_hash" TEXT NOT NULL,
+        "source_content_hash" TEXT NOT NULL,
+        "source_version" TEXT,
         "status" TEXT NOT NULL,
         "summary" TEXT,
         "keywords" JSONB NOT NULL DEFAULT '[]'::jsonb,
@@ -109,7 +118,8 @@ async function main(): Promise<void> {
         "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
         "deleted_at" TIMESTAMP(3),
         CONSTRAINT "ai_knowledge_index_entries_pkey" PRIMARY KEY ("id"),
-        CONSTRAINT "ai_knowledge_index_entries_resource_id_key" UNIQUE ("resource_id"),
+        CONSTRAINT "ai_knowledge_index_entries_knowledge_space_id_knowledge_document_id_key"
+          UNIQUE ("knowledge_space_id", "knowledge_document_id"),
         CONSTRAINT "ai_knowledge_index_entries_identity_id_fkey"
           FOREIGN KEY ("identity_id") REFERENCES "accounts"("id") ON DELETE CASCADE ON UPDATE CASCADE
       )
@@ -120,6 +130,9 @@ async function main(): Promise<void> {
     );
     await client.query(
       'CREATE INDEX IF NOT EXISTS "ai_knowledge_index_entries_repository_id_idx" ON "ai_knowledge_index_entries"("repository_id")',
+    );
+    await client.query(
+      'CREATE INDEX IF NOT EXISTS "ai_knowledge_index_entries_knowledge_space_id_knowledge_document_id_idx" ON "ai_knowledge_index_entries"("knowledge_space_id", "knowledge_document_id")',
     );
     await client.query(
       'CREATE INDEX IF NOT EXISTS "ai_knowledge_index_entries_status_idx" ON "ai_knowledge_index_entries"("status")',

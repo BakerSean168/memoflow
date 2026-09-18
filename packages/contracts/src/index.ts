@@ -28,7 +28,6 @@
  * - @memoflow/contracts/setting    - 设置模块
  * - @memoflow/contracts/notification - 通知模块
  * - @memoflow/contracts/ai         - AI模块
- * - @memoflow/contracts/dashboard  - 仪表盘模块
  * - @memoflow/contracts/result     - Result Pattern (新，推荐)
  * - @memoflow/contracts/shared     - 共享类型
  */

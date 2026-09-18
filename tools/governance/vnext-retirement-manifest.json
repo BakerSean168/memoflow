@@ -30,12 +30,15 @@
     },
     {
       "id": "standalone-dashboard-bounded-context",
-      "status": "staged",
+      "status": "active",
       "decision": "ADR-108 / HOME-1805",
       "forbiddenPaths": [
         "packages/dashboard",
         "packages/contracts/src/modules/dashboard",
-        "packages/app-vue/src/modules/dashboard"
+        "packages/app-vue/src/modules/dashboard",
+        "apps/api/src/modules/dashboard",
+        "apps/desktop/src/main/ipc/dashboard-handler.ts",
+        "apps/desktop/src/main/services/dashboard-read-service.ts"
       ]
     },
     {

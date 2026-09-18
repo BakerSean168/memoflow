@@ -4,6 +4,7 @@ import {
   type QueryAnalyticsReq,
   type QueryKnowledgeReq,
 } from '@memoflow/contracts/ai';
+import { KnowledgeDocumentRefSchema } from '@memoflow/contracts/repository';
 
 import type { IAIProviderConfigRepository } from '../../../../domain/repositories/i-ai-provider-config-repository';
 import type {
@@ -15,7 +16,6 @@ import type {
   IAnalyticsQueryPort,
   IAnalyticsReadPort,
   IKnowledgeIndexRepository,
-  IKnowledgeIndexStatusPort,
   IKnowledgeIngestionPort,
   IKnowledgeQueryPort,
   IKnowledgeSourcePort,
@@ -28,6 +28,13 @@ import type {
   KnowledgeQueryResult,
   KnowledgeSourceNote,
 } from '../../../ports';
+
+const SPACE_ID = 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440011';
+const DOC_ID = 'kdoc_550e8400-e29b-41d4-a716-446655440012';
+const DOCUMENT_REF = KnowledgeDocumentRefSchema.parse({
+  knowledgeSpaceId: SPACE_ID,
+  documentId: DOC_ID,
+});
 import { QueryAIAnalyticsUseCase } from '../query-ai-analytics.use-case';
 import { SyncRelevantKnowledgeUseCase } from '../sync-relevant-knowledge.use-case';
 import { SyncKnowledgeNotesUseCase } from '../sync-knowledge-notes.use-case';
@@ -68,7 +75,8 @@ class StubProviderConfigRepository {
   }
 
   async findDefaultByIdentityId(identityId: string) {
-    const provider = this.providers.find((item) => item.identityId === identityId && item.isDefault) ?? null;
+    const provider =
+      this.providers.find((item) => item.identityId === identityId && item.isDefault) ?? null;
     return provider ? { ...provider, credentialRef: 'credential_test' } : null;
   }
 
@@ -81,13 +89,17 @@ class StubProviderConfigRepository {
 
 class StubKnowledgeSourcePort implements IKnowledgeSourcePort {
   public readonly getNoteById = vi.fn<
-    (identityId: string, resourceId: string) => Promise<KnowledgeSourceNote | null>
-  >(async (identityId, resourceId) => ({
+    (identityId: string, knowledgeDocumentId: string) => Promise<KnowledgeSourceNote | null>
+  >(async (identityId, knowledgeDocumentId) => ({
     identityId,
     repositoryId: 'repo-1',
-    resourceId,
-    resourcePath: resourceId === 'resource-1' ? 'notes/python-ai.md' : `notes/${resourceId}.md`,
-    title: resourceId === 'resource-1' ? 'Python AI' : resourceId,
+    knowledgeSpaceId: SPACE_ID,
+    knowledgeDocumentId,
+    sourcePath:
+      knowledgeDocumentId === DOC_ID ? 'notes/python-ai.md' : `notes/${knowledgeDocumentId}.md`,
+    sourceContentHash: 'hash-1',
+    sourceVersion: 'commit-1',
+    title: knowledgeDocumentId === DOC_ID ? 'Python AI' : knowledgeDocumentId,
     mimeType: 'text/markdown',
     content: 'Repository-backed answers are enabled.',
     metadata: {},
@@ -99,8 +111,11 @@ class StubKnowledgeSourcePort implements IKnowledgeSourcePort {
     {
       identityId: 'identity-1',
       repositoryId: 'repo-1',
-      resourceId: 'resource-1',
-      resourcePath: 'notes/python-ai.md',
+      knowledgeSpaceId: SPACE_ID,
+      knowledgeDocumentId: DOC_ID,
+      sourcePath: 'notes/python-ai.md',
+      sourceContentHash: 'hash-1',
+      sourceVersion: 'commit-1',
       title: 'Python AI',
       mimeType: 'text/markdown',
       content: 'Repository-backed answers are enabled.',
@@ -119,11 +134,13 @@ class StubKnowledgeIngestionPort implements IKnowledgeIngestionPort {
   >(async (input) => ({
     identityId: input.note.identityId,
     repositoryId: input.note.repositoryId,
-    resourceId: input.note.resourceId,
-    resourcePath: input.note.resourcePath,
+    knowledgeSpaceId: input.note.knowledgeSpaceId,
+    knowledgeDocumentId: input.note.knowledgeDocumentId ?? DOC_ID,
+    sourcePath: input.note.sourcePath,
+    sourceContentHash: input.note.sourceContentHash,
+    sourceVersion: input.note.sourceVersion,
     title: input.note.title,
     mimeType: input.note.mimeType,
-    contentHash: 'hash-1',
     summary: 'Repository-backed answers are enabled.',
     keywords: ['repository', 'answers'],
     embedding: [0.2, 0.8],
@@ -150,8 +167,8 @@ class StubKnowledgeQueryPort implements IKnowledgeQueryPort {
     expandedContent: '# Expanded Note\n\nGrounded answers should cite knowledge notes.',
     citations: [
       {
-        resourceId: 'resource-1',
-        resourcePath: 'notes/python-ai.md',
+        documentRef: DOCUMENT_REF,
+        sourcePath: 'notes/python-ai.md',
         title: 'Python AI',
         chunkIndex: 0,
         excerpt: 'Repository-backed answers are enabled.',
@@ -170,8 +187,8 @@ class StubKnowledgeQueryPort implements IKnowledgeQueryPort {
       answer: 'The repository notes confirm that grounded answers are enabled.',
       citations: [
         {
-          resourceId: 'resource-1',
-          resourcePath: 'notes/python-ai.md',
+          documentRef: DOCUMENT_REF,
+          sourcePath: 'notes/python-ai.md',
           title: 'Python AI',
           chunkIndex: 0,
           excerpt: 'Repository-backed answers are enabled.',
@@ -196,8 +213,11 @@ class StubKnowledgeIndexRepository implements IKnowledgeIndexRepository {
     vectorRecallReason: 'Vector availability has not been probed in this test stub.',
   }));
 
-  public readonly findByNoteIds = vi.fn<
-    (identityId: string, resourceIds: string[]) => Promise<KnowledgeIndexedNote[]>
+  public readonly findByDocumentRefs = vi.fn<
+    (
+      identityId: string,
+      documentRefs: Array<{ knowledgeSpaceId: string; knowledgeDocumentId: string }>,
+    ) => Promise<KnowledgeIndexedNote[]>
   >(async () => []);
 
   public readonly findRelevantNotes = vi.fn<
@@ -207,15 +227,15 @@ class StubKnowledgeIndexRepository implements IKnowledgeIndexRepository {
   public readonly upsert = vi.fn<(resource: KnowledgeIndexedNote) => Promise<void>>(async () => {});
 
   public readonly markRequested = vi.fn<
-    (identityId: string, resourceIds: string[], requestedAt: number) => Promise<void>
+    (
+      identityId: string,
+      documentRefs: Array<{ knowledgeSpaceId: string; knowledgeDocumentId: string }>,
+      requestedAt: number,
+    ) => Promise<void>
   >(async () => {});
 
   public readonly markFailed = vi.fn(async () => {});
-  public readonly removeByNoteId = vi.fn(async () => {});
-}
-
-class StubKnowledgeIndexStatusPort implements IKnowledgeIndexStatusPort {
-  public readonly updateIndexStatus = vi.fn(async () => {});
+  public readonly removeByDocumentRef = vi.fn(async () => {});
 }
 
 class StubExecutionLogPort implements IAIExecutionRecordPort {
@@ -262,17 +282,15 @@ class StubAnalyticsQueryPort implements IAnalyticsQueryPort {
 }
 
 describe('SyncKnowledgeNotesUseCase', () => {
-  it('records an indexing failure without conflating it with the persisted source note', async () => {
+  it('records an indexing failure in the AI index without writing Repository projection status', async () => {
     const resource = (await new StubKnowledgeSourcePort().listIndexableNotes('identity-1', 1))[0]!;
     const knowledgeIndexRepository = new StubKnowledgeIndexRepository();
     const ingestionPort = new StubKnowledgeIngestionPort();
     ingestionPort.indexNote.mockRejectedValueOnce(new Error('embedding provider unavailable'));
-    const indexStatusPort = new StubKnowledgeIndexStatusPort();
     const service = new SyncKnowledgeNotesUseCase(
       knowledgeIndexRepository,
       ingestionPort,
       new StubExecutionLogPort(),
-      indexStatusPort,
     );
 
     const result = await service.execute([resource], { identityId: 'identity-1' });
@@ -283,7 +301,7 @@ describe('SyncKnowledgeNotesUseCase', () => {
         failedCount: 1,
         results: [
           expect.objectContaining({
-            resourceId: resource.resourceId,
+            knowledgeDocumentId: resource.knowledgeDocumentId,
             status: 'failed',
             error: 'embedding provider unavailable',
           }),
@@ -293,42 +311,53 @@ describe('SyncKnowledgeNotesUseCase', () => {
     expect(knowledgeIndexRepository.upsert).not.toHaveBeenCalled();
     expect(knowledgeIndexRepository.markFailed).toHaveBeenCalledWith(
       expect.objectContaining({
-        resourceId: resource.resourceId,
+        knowledgeDocumentId: resource.knowledgeDocumentId,
         error: 'embedding provider unavailable',
       }),
     );
-    expect(indexStatusPort.updateIndexStatus).toHaveBeenCalledWith(
+    expect(knowledgeIndexRepository.markRequested).toHaveBeenCalledWith(
       'identity-1',
-      expect.objectContaining({
-        resourceId: resource.resourceId,
-        contentHash: expect.any(String),
-        status: 'failed',
-      }),
+      [{ knowledgeSpaceId: SPACE_ID, knowledgeDocumentId: DOC_ID }],
+      expect.any(Number),
     );
   });
 
-  it('reports a successful index without making status projection failures fatal', async () => {
+  it('refreshes the indexed source path on content-hash reuse', async () => {
     const resource = (await new StubKnowledgeSourcePort().listIndexableNotes('identity-1', 1))[0]!;
     const knowledgeIndexRepository = new StubKnowledgeIndexRepository();
-    const indexStatusPort = new StubKnowledgeIndexStatusPort();
-    indexStatusPort.updateIndexStatus.mockRejectedValueOnce(new Error('projection unavailable'));
+    knowledgeIndexRepository.findByDocumentRefs.mockResolvedValueOnce([
+      {
+        identityId: 'identity-1',
+        repositoryId: 'repo-1',
+        knowledgeSpaceId: SPACE_ID,
+        knowledgeDocumentId: DOC_ID,
+        sourcePath: 'notes/old-name.md',
+        sourceContentHash: 'hash-1',
+        sourceVersion: 'commit-0',
+        title: 'Python AI',
+        mimeType: 'text/markdown',
+        summary: 'cached',
+        keywords: [],
+        embedding: [],
+        chunks: [],
+        metadata: {},
+      },
+    ]);
     const service = new SyncKnowledgeNotesUseCase(
       knowledgeIndexRepository,
       new StubKnowledgeIngestionPort(),
       new StubExecutionLogPort(),
-      indexStatusPort,
     );
 
+    resource.sourcePath = 'notes/new-name.md';
     const result = await service.execute([resource], { identityId: 'identity-1' });
 
-    expect(result).toMatchObject({ indexedCount: 1, failedCount: 0 });
-    expect(knowledgeIndexRepository.upsert).toHaveBeenCalledOnce();
-    expect(indexStatusPort.updateIndexStatus).toHaveBeenCalledWith(
-      'identity-1',
+    expect(result).toMatchObject({ indexedCount: 0, reusedCount: 1, failedCount: 0 });
+    expect(knowledgeIndexRepository.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
-        resourceId: resource.resourceId,
-        contentHash: expect.any(String),
-        status: 'indexed',
+        knowledgeSpaceId: SPACE_ID,
+        knowledgeDocumentId: DOC_ID,
+        sourcePath: 'notes/new-name.md',
       }),
     );
   });
@@ -421,7 +450,7 @@ describe('AIKnowledgeQueryService', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) throw new Error('expected ok');
     expect(result.data.answer).toContain('grounded');
-    expect(result.data.citations[0]?.resourcePath).toBe('notes/python-ai.md');
+    expect(result.data.citations[0]?.sourcePath).toBe('notes/python-ai.md');
     expect(result.data.providerId).toBe('provider-1');
     expect(result.data.matchedResourceCount).toBe(1);
   });
@@ -433,8 +462,11 @@ describe('AIKnowledgeQueryService', () => {
       {
         identityId: 'identity-1',
         repositoryId: 'repo-1',
-        resourceId: 'resource-1',
-        resourcePath: 'notes/repository-grounding.md',
+        knowledgeSpaceId: SPACE_ID,
+        knowledgeDocumentId: DOC_ID,
+        sourcePath: 'notes/repository-grounding.md',
+        sourceContentHash: 'hash-1',
+        sourceVersion: 'commit-1',
         title: 'Repository Grounding',
         mimeType: 'text/markdown',
         content: 'Grounded answers cite knowledge notes after retrieval.',
@@ -502,11 +534,12 @@ describe('AIKnowledgeQueryService', () => {
       Array.from({ length: 6 }, (_, index) => ({
         identityId: 'identity-1',
         repositoryId: 'repo-1',
-        resourceId: `resource-${index + 1}`,
-        resourcePath: `notes/resource-${index + 1}.md`,
+        knowledgeSpaceId: SPACE_ID,
+        knowledgeDocumentId: `kdoc_550e8400-e29b-41d4-a716-4466554400${index + 20}`,
+        sourcePath: `notes/resource-${index + 1}.md`,
         title: `Indexed Resource ${index + 1}`,
         mimeType: 'text/markdown',
-        contentHash: `hash-${index + 1}`,
+        sourceContentHash: `hash-${index + 1}`,
         summary: 'Indexed repository grounding guidance.',
         keywords: ['grounding', 'citation'],
         embedding: [0.2, 0.8],
@@ -561,6 +594,11 @@ describe('AIKnowledgeQueryService', () => {
       32,
     );
     expect(sourcePort.getNoteById).toHaveBeenCalledTimes(6);
+    expect(sourcePort.getNoteById).toHaveBeenCalledWith(
+      'identity-1',
+      expect.any(String),
+      SPACE_ID,
+    );
     expect(sourcePort.listRelevantNotes).not.toHaveBeenCalled();
     expect(sourcePort.listIndexableNotes).not.toHaveBeenCalled();
   });
@@ -630,7 +668,7 @@ describe('AIKnowledgeQueryService', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) throw new Error('expected ok');
     expect(result.data.expandedContent).toContain('Grounded answers');
-    expect(result.data.citations[0]?.resourcePath).toBe('notes/python-ai.md');
+    expect(result.data.citations[0]?.sourcePath).toBe('notes/python-ai.md');
     expect(result.data.providerId).toBe('provider-1');
     expect(result.data.matchedResourceCount).toBe(1);
   });
@@ -728,7 +766,7 @@ describe('AIKnowledgeQueryService', () => {
     );
 
     const result = await service.execute(
-      { resourceIds: ['resource-42'], force: false },
+      { knowledgeDocumentIds: [DOC_ID], force: false },
       {
         requestId: 'req-knowledge-1',
         traceId: 'req-knowledge-1',
@@ -738,12 +776,12 @@ describe('AIKnowledgeQueryService', () => {
       },
     );
 
-    expect(sourcePort.getNoteById).toHaveBeenCalledWith('identity-1', 'resource-42');
+    expect(sourcePort.getNoteById).toHaveBeenCalledWith('identity-1', DOC_ID);
     expect(sourcePort.listIndexableNotes).not.toHaveBeenCalled();
     expect(result.ok).toBe(true);
     if (!result.ok) throw new Error('expected ok');
     expect(result.data.results).toEqual([
-      expect.objectContaining({ resourceId: 'resource-42', status: 'indexed' }),
+      expect.objectContaining({ knowledgeDocumentId: DOC_ID, status: 'indexed' }),
     ]);
   });
 
@@ -769,7 +807,7 @@ describe('AIKnowledgeQueryService', () => {
     );
 
     const result = await service.execute(
-      { resourceIds: ['resource-1'] },
+      { knowledgeDocumentIds: [DOC_ID] },
       {
         requestId: 'req-knowledge-1',
         traceId: 'req-knowledge-1',

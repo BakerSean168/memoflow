@@ -209,11 +209,13 @@ exports.Prisma.AiKnowledgeIndexEntryScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
   repositoryId: 'repositoryId',
-  resourceId: 'resourceId',
-  resourcePath: 'resourcePath',
+  knowledgeSpaceId: 'knowledgeSpaceId',
+  knowledgeDocumentId: 'knowledgeDocumentId',
+  sourcePath: 'sourcePath',
   title: 'title',
   mimeType: 'mimeType',
-  contentHash: 'contentHash',
+  sourceContentHash: 'sourceContentHash',
+  sourceVersion: 'sourceVersion',
   status: 'status',
   summary: 'summary',
   keywords: 'keywords',
@@ -226,14 +228,6 @@ exports.Prisma.AiKnowledgeIndexEntryScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
-};
-
-exports.Prisma.DashboardConfigScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  widgetConfig: 'widgetConfig',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.CloudAuthUserScalarFieldEnum = {
@@ -1008,7 +1002,6 @@ exports.Prisma.KnowledgeNoteProjectionScalarFieldEnum = {
   contentHash: 'contentHash',
   frontmatter: 'frontmatter',
   markdownContent: 'markdownContent',
-  indexStatus: 'indexStatus',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -1356,7 +1349,6 @@ exports.Prisma.ModelName = {
   AiProviderOnboardingSession: 'AiProviderOnboardingSession',
   AiProviderSecret: 'AiProviderSecret',
   AiKnowledgeIndexEntry: 'AiKnowledgeIndexEntry',
-  DashboardConfig: 'DashboardConfig',
   CloudAuthUser: 'CloudAuthUser',
   CloudAuthSession: 'CloudAuthSession',
   CloudAuthProviderAccount: 'CloudAuthProviderAccount',

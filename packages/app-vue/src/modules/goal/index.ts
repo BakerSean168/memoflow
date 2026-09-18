@@ -21,7 +21,6 @@ export type { GoalState, GoalStoreType } from './stores/goal-store';
 export { goalRoutes } from './router';
 
 // ===== Widgets =====
-// export { registerGoalWidgets } from './widgets/register-goal-widgets';
 
 // ===== Components =====
 export * from './components';

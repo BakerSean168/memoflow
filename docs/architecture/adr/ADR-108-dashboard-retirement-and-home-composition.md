@@ -7,14 +7,14 @@ updated: 2026-09-18T13:20:00+08:00
 
 # ADR-108: Dashboard Retirement and Home Composition
 
-**状态：** 已采纳，实施中（HOME-1804 evidence decision 已闭合）
+**状态：** 已采纳，实施完成（HOME-1804/HOME-1805 destructive cutover 已闭合）
 **日期：** 2026-09-09
 
 ## Decision
 
 ### 1. Dashboard product module retires
 
-`/dashboard` 已经没有独立页面，因此不再维护 `Dashboard` bounded context、万能 DTO 或 widget-config product model。
+`/dashboard` 没有独立页面或兼容入口，因此不再维护 `Dashboard` bounded context、万能 DTO 或 widget-config product model。
 
 ### 2. Home is a composition surface, not a domain
 
@@ -32,15 +32,15 @@ Home 不拥有数据，不创建 `HomeAggregate`，也不创建新的跨域 God 
 
 ### 3. Goal progress returns to Goal owner
 
-当前 Home/Goal capsule 为了 `goalProgress` 拉完整 DashboardData。迁移为 Goal-owned summary/read port，复用 Goal vNext lifecycle/target semantics。
+HOME-1805 已完成迁移：Home/Goal capsule 通过 Goal-owned summary/read port 读取进度，复用 Goal vNext lifecycle/target semantics，不再读取 DashboardData。
 
 ### 4. AI analytics stops consuming DashboardData
 
-`IAnalyticsReadPort` 的 host adapter直接组合 Goal/Task/Knowledge/Activity 等明确 read ports。禁止再把 DashboardData cast 成 `Record<string, unknown>` 作为 AI context。
+`IAnalyticsReadPort` 的 host adapter 直接组合 Goal/Task/Knowledge/owner-derived activity 等明确 read ports。禁止再把 DashboardData cast 成 `Record<string, unknown>` 作为 AI context；保留的 Task dashboard read model 只属于 Task owner。
 
 ### 5. Delete dead Dashboard UI/config
 
-无 production consumer 的 StatsStrip/TrendPanel/ActivityTimeline 可在 characterization 后删除。`DashboardConfig` 无当前产品 consumer，直接进入 retirement migration。
+无 production consumer 的 StatsStrip/TrendPanel/ActivityTimeline 已删除。`DashboardConfig` 无当前产品 consumer，已从 Prisma、PowerSync 和生成客户端中删除。
 
 ### 6. HOME-1804 resolution: no durable ActivityFeed authority
 
@@ -61,4 +61,4 @@ Dashboard Vue module
 DashboardConfig
 ```
 
-保留 `/dashboard -> /` compatibility redirect 可作为短期 route shim，随后删除测试/文案。
+不保留 `/dashboard` compatibility redirect、旧客户端入口或 legacy data migration；新鲜 schema/reset/bootstrap 直接从 canonical owner models 开始。

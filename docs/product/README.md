@@ -27,8 +27,6 @@ updated: 2026-08-25T17:13:00+08:00
 - [提醒模块文件索引](./module-index/reminder-files.md)：提醒模块相关页面、接口、领域代码、数据结构和测试入口。
 - [通知模块说明](./modules/notification.md)：通知模块当前功能、用户路径、业务规则和风险点。
 - [通知模块文件索引](./module-index/notification-files.md)：通知模块相关页面、接口、领域代码、数据结构和测试入口。
-- [Dashboard 模块说明](./modules/dashboard.md)：Dashboard 模块当前功能、用户路径、业务规则和风险点。
-- [Dashboard 模块文件索引](./module-index/dashboard-files.md)：Dashboard 模块相关页面、接口、领域代码、数据结构和测试入口。
 - [AI 模块说明](./modules/ai.md)：AI 模块当前功能、用户路径、业务规则和风险点。
 - [AI 模块文件索引](./module-index/ai-files.md)：AI 模块相关页面、接口、领域代码、数据结构和测试入口。
 - [桌面工作区与 UI 说明](./workspace-ui.md)：单导航、分栏几何、窄态、缩放与 UI primitive 规则。

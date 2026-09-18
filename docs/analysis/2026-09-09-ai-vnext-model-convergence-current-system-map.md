@@ -116,8 +116,11 @@ AiProviderConfig
 AiProviderOnboardingSession
 KnowledgeGenerationTask
 AiKnowledgeIndexEntry
-DashboardConfig
 ```
+
+`DashboardConfig` was the standalone Dashboard persistence model. HOME-1805
+retired it destructively; it is intentionally absent from the current Prisma,
+PowerSync, and AI persistence surfaces.
 
 它们并不都属于同一种“AI Domain Entity”。
 

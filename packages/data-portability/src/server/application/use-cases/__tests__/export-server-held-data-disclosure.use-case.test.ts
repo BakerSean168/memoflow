@@ -52,7 +52,6 @@ describe('ExportServerHeldDataDisclosureUseCase', () => {
             contentHash: 'hash-1',
             frontmatter: { tags: ['private'] },
             markdownContent: '# Private note',
-            indexStatus: 'INDEXED',
             createdAt: '2026-07-18T00:00:00.000Z',
             updatedAt: '2026-07-18T00:00:00.000Z',
             deletedAt: null,

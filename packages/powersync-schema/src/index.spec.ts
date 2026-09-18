@@ -74,8 +74,10 @@ describe('PowerSyncAppSchema', () => {
     expect(table.localOnly).toBe(true);
     expect(getColumnType('ai_knowledge_index_entries_local', 'identity_id')).toBe('TEXT');
     expect(getColumnType('ai_knowledge_index_entries_local', 'repository_id')).toBe('TEXT');
-    expect(getColumnType('ai_knowledge_index_entries_local', 'resource_id')).toBe('TEXT');
-    expect(getColumnType('ai_knowledge_index_entries_local', 'resource_path')).toBe('TEXT');
+    expect(getColumnType('ai_knowledge_index_entries_local', 'knowledge_space_id')).toBe('TEXT');
+    expect(getColumnType('ai_knowledge_index_entries_local', 'knowledge_document_id')).toBe('TEXT');
+    expect(getColumnType('ai_knowledge_index_entries_local', 'source_path')).toBe('TEXT');
+    expect(getColumnType('ai_knowledge_index_entries_local', 'source_content_hash')).toBe('TEXT');
     expect(getColumnType('ai_knowledge_index_entries_local', 'metadata_json')).toBe('TEXT');
   });
 

@@ -19,7 +19,6 @@ export const JSON_FIELDS_BY_TABLE: Record<string, ReadonlySet<string>> = {
   folders: new Set(['metadata']),
   resources: new Set(['metadata', 'stats']),
   ai_knowledge_index_entries: new Set(['keywords', 'embedding', 'chunks', 'metadata']),
-  dashboard_configs: new Set(['widget_config']),
 };
 
 export const BOOLEAN_FIELDS_BY_TABLE: Record<string, ReadonlySet<string>> = {

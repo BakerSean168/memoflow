@@ -35,8 +35,6 @@ export type {
   IKnowledgeIndexRepository,
   KnowledgeIndexDiagnostics,
   KnowledgeIndexFailureRecord,
-  IKnowledgeIndexStatusPort,
-  KnowledgeIndexStatusUpdate,
   IKnowledgeQueryPort,
   KnowledgeExpansionInput,
   KnowledgeExpansionResult,

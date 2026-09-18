@@ -343,8 +343,11 @@ describe('AIGoalWorkflowPanel — ADR-052 goal.create projection', () => {
         answer: 'Use grounded repository evidence.',
         citations: [
           {
-            resourceId: 'resource-1',
-            resourcePath: 'notes/grounded.md',
+            documentRef: {
+              knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440001',
+              documentId: 'kdoc_550e8400-e29b-41d4-a716-446655440000',
+            },
+            sourcePath: 'notes/grounded.md',
             title: 'Grounded Note',
             chunkIndex: 0,
             excerpt: 'Repository evidence.',

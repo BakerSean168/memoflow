@@ -44,10 +44,6 @@ export function createAppVueSourceAliasEntries(workspaceRoot: string): Alias[] {
       replacement: `${appVueRoot}/router/index.ts`,
     },
     {
-      find: /^@memoflow\/app-vue\/modules\/dashboard\/adapters$/,
-      replacement: `${appVueRoot}/modules/dashboard/adapters/index.ts`,
-    },
-    {
       find: /^@memoflow\/app-vue\/modules\/(.+)$/,
       replacement: `${appVueRoot}/modules/$1/index.ts`,
     },
@@ -85,10 +81,6 @@ export function createContractsAliasEntries(workspaceRoot: string): Alias[] {
     {
       find: /^@memoflow\/contracts\/electron$/,
       replacement: `${contractsRoot}/electron/index.ts`,
-    },
-    {
-      find: /^@memoflow\/contracts\/dashboard$/,
-      replacement: `${contractsRoot}/dashboard/index.ts`,
     },
     {
       find: /^@memoflow\/contracts\/mocks$/,

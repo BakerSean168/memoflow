@@ -722,11 +722,13 @@ const ai_knowledge_index_entries_local = new Table(
   {
     identity_id: column.text,
     repository_id: column.text,
-    resource_id: column.text,
-    resource_path: column.text,
+    knowledge_space_id: column.text,
+    knowledge_document_id: column.text,
+    source_path: column.text,
     title: column.text,
     mime_type: column.text,
-    content_hash: column.text,
+    source_content_hash: column.text,
+    source_version: column.text,
     status: column.text,
     summary: column.text,
     keywords_json: column.text,
@@ -752,13 +754,6 @@ const task_goal_outbox = new Table({
   available_at: column.text,
   last_error: column.text,
   dispatched_at: column.text,
-  created_at: column.text,
-  updated_at: column.text,
-});
-
-const dashboard_configs = new Table({
-  identity_id: column.text,
-  widget_config: column.text, // JSON
   created_at: column.text,
   updated_at: column.text,
 });
@@ -962,7 +957,6 @@ export const PowerSyncAppSchema = new Schema({
   ai_provider_secrets,
   ai_knowledge_index_entries_local,
   task_goal_outbox,
-  dashboard_configs,
   // Repository
   repositories,
   repository_explorers,

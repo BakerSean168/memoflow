@@ -128,4 +128,4 @@ updated: 2026-09-12T10:14:00+08:00
 - 目标复盘与目标完成、归档、历史记录之间的关系。
 - HTTP、IPC、Prisma、PowerSync 多运行时适配器的一致性。
 - AI Goal workflow 写入真实目标前的用户确认边界。
-- Dashboard、任务、日程对目标数据的跨模块依赖。
+- Home、任务、日程对目标数据的 owner-read 依赖。

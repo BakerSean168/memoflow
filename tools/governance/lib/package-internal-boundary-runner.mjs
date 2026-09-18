@@ -57,7 +57,6 @@ const rules = [
 ];
 const exceptions = new Set([
   'powersync-schema',
-  'dashboard',
   'domain-shared',
   'contracts',
   'patterns',

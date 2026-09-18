@@ -1,6 +1,5 @@
 export default {
   "home": "首页",
-  "dashboard": "仪表盘",
   "aiChat": "AI 对话",
   "goals": "目标",
   "tasks": "任务",

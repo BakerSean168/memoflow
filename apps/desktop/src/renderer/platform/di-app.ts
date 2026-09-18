@@ -38,7 +38,6 @@ import {
   AI_RUNTIME_USAGE_KEY,
   AI_WORKFLOW_RUNTIME_KEY,
   RULE_SERVICE_KEY,
-  DASHBOARD_SERVICE_KEY,
   DATA_PORTABILITY_SERVICE_KEY,
   DESKTOP_AUTH_API_KEY,
   DESKTOP_BRIDGE_KEY,
@@ -50,7 +49,6 @@ import {
   ASSISTANT_SURFACE_KEY,
   defaultModuleCapsules,
 } from '@memoflow/app-vue/di';
-import { createDashboardIpcAdapter } from '@memoflow/app-vue/modules/dashboard/adapters';
 import { useAuthenticationStore } from '@memoflow/app-vue/modules/authentication';
 import { useAccountStore } from '@memoflow/app-vue/modules/account';
 import { readDesktopAccessSnapshot } from '@memoflow/app-vue/desktop';
@@ -110,7 +108,6 @@ export function installDesktopAppServices(app: App): void {
 
   app.provide(DATA_PORTABILITY_SERVICE_KEY, createDataPortabilityIpcClient(resultIpcClient));
 
-  app.provide(DASHBOARD_SERVICE_KEY, createDashboardIpcAdapter(resultIpcClient));
   // V2 shell capsule navigation (UI_REDESIGN_V2_PLAN §2.2 / Brief §12-4)
   app.provide(MODULE_CAPSULES_KEY, defaultModuleCapsules);
   // Residual 349: Desktop renderer advertises the 'desktop' assistant surface.

@@ -7,6 +7,7 @@ import type {
   GoalPlanTask,
   QueryKnowledgeRes,
 } from '@memoflow/contracts/ai';
+import type { KnowledgeDocumentRef } from '@memoflow/contracts/repository';
 import type { IAIClient, IWorkflowRuntimeService } from '../../../di/types';
 
 /** Options for useAIGoalWorkflow composable. */
@@ -64,7 +65,7 @@ export interface UseAIKnowledgeQaWorkflowOptions {
   chatTimeline: Ref<ChatItem[]>;
   hasWorkflowUserMessages: Ref<boolean>;
   scrollMessagesToBottom: () => void;
-  requestOpenKnowledgeNote: (id: string) => Promise<unknown>;
+  requestOpenKnowledgeNote: (documentRef: KnowledgeDocumentRef) => Promise<unknown>;
 }
 
 export type WorkflowMode =
@@ -124,8 +125,8 @@ export type AIWorkspaceRecentKnowledgeNote = {
   updatedAt: number;
 };
 export type KnowledgeRelatedNote = {
-  resourceId: string;
-  resourcePath: string;
+  documentRef: KnowledgeDocumentRef;
+  sourcePath: string;
   title?: string;
   excerpt?: string;
   score?: number;

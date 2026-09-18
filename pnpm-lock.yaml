@@ -321,9 +321,6 @@ importers:
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
-      '@memoflow/dashboard':
-        specifier: workspace:*
-        version: link:../../packages/dashboard
       '@memoflow/data-portability':
         specifier: workspace:*
         version: link:../../packages/data-portability
@@ -529,9 +526,6 @@ importers:
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
-      '@memoflow/dashboard':
-        specifier: workspace:*
-        version: link:../../packages/dashboard
       '@memoflow/data-portability':
         specifier: workspace:*
         version: link:../../packages/data-portability
@@ -1451,28 +1445,6 @@ importers:
       rimraf:
         specifier: ^6.0.1
         version: 6.1.2
-      tsup:
-        specifier: ^8.3.5
-        version: 8.5.1(@swc/core@1.15.43(@swc/helpers@0.5.17))(jiti@2.4.2)(postcss@8.5.19)(supports-color@10.2.2)(tsx@4.23.1)(typescript@6.0.3)(yaml@2.9.0)
-      typescript:
-        specifier: ~6.0.3
-        version: 6.0.3
-
-  packages/dashboard:
-    dependencies:
-      '@asteasolutions/zod-to-openapi':
-        specifier: ^8.5.0
-        version: 8.5.0(zod@4.4.3)
-      '@memoflow/contracts':
-        specifier: workspace:*
-        version: link:../contracts
-      '@memoflow/time':
-        specifier: workspace:*
-        version: link:../time
-      zod:
-        specifier: ^4.4.3
-        version: 4.4.3
-    devDependencies:
       tsup:
         specifier: ^8.3.5
         version: 8.5.1(@swc/core@1.15.43(@swc/helpers@0.5.17))(jiti@2.4.2)(postcss@8.5.19)(supports-color@10.2.2)(tsx@4.23.1)(typescript@6.0.3)(yaml@2.9.0)

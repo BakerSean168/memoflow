@@ -162,7 +162,6 @@ class MemoryProjectionRepository implements IKnowledgeNoteProjectionRepository {
       notes.forEach((note) => this.rows.set(note.id, note));
     },
   );
-  readonly updateIndexStatusForIdentity = vi.fn(async () => true);
 
   async applySnapshot(
     _connectionId: string,
@@ -591,7 +590,6 @@ describe('KnowledgeNoteCommitService', () => {
       [
         expect.objectContaining({
           relativePath: 'notes/new-note.md',
-          indexStatus: 'pending',
           knowledgeDocumentId: DOCUMENT_ID,
           frontmatter: { tags: ['decision'], title: 'New note', memoflow_id: DOCUMENT_ID },
         }),
@@ -621,7 +619,6 @@ describe('KnowledgeNoteCommitService', () => {
       frontmatter: { title: 'Existing', tags: ['kept'] },
       markdownContent:
         '---\ntitle: Existing\ntags:\n  - kept\n---\n# Existing\n\nBody stays the same.\n',
-      indexStatus: 'indexed',
     });
     const updateFileCommit = vi.fn(async () => ({
       commitSha: '4'.repeat(40),
@@ -674,7 +671,6 @@ describe('KnowledgeNoteCommitService', () => {
     expect(projectionRepository.rows.get('projection-existing')).toMatchObject({
       knowledgeDocumentId: input.knowledgeDocumentId,
       blobSha: '5'.repeat(40),
-      indexStatus: 'pending',
     });
     expect([...documentIdentityRepository.rows.values()][0]).toMatchObject({
       origin: 'Adopted',
@@ -701,7 +697,6 @@ describe('KnowledgeNoteCommitService', () => {
       contentHash: '3'.repeat(64),
       frontmatter: {},
       markdownContent: '# Existing',
-      indexStatus: 'indexed',
     });
     const github = githubClient();
     const { service } = createService(github, { projectionRepository });

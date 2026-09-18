@@ -9,6 +9,11 @@ export default {
     "reviewDetail": "Goal Review Record",
     "krDetail": "Key Result Detail"
   },
+  "homeProgress": {
+    "title": "Goal Progress",
+    "viewAll": "View all",
+    "empty": "No active goals"
+  },
   "error": {
     "loadListFailed": "Failed to load goal list",
     "loadListException": "An error occurred while loading the goal list",

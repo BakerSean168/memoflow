@@ -60,11 +60,6 @@ export default {
     "noteContent": "Markdown 正文",
     "noteReason": "写入原因",
     "invalidDraft": "请补齐标题、.md 路径、正文和写入原因。",
-    "indexStatus": {
-      "pending": "待索引",
-      "indexed": "可检索",
-      "failed": "索引失败"
-    },
     "providerStatus": {
       "Ready": "Provider 可用",
       "Blocked": "Provider 受阻",

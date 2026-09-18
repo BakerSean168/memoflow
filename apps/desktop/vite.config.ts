@@ -49,7 +49,6 @@ const workspacePkgs = [
   '@memoflow/utils',
   '@memoflow/contracts',
   '@memoflow/app-vue',
-  '@memoflow/dashboard',
   '@memoflow/ui-vue-shadcn',
   '@memoflow/ipc-client',
   '@memoflow/assets',

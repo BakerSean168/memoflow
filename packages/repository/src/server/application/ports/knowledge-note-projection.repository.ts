@@ -1,7 +1,6 @@
 import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import type {
   KnowledgeNoteProjectionClientDTO,
-  KnowledgeNoteProjectionIndexStatus,
 } from '@memoflow/contracts/repository';
 
 export type GithubWebhookDeliveryStatus =
@@ -43,7 +42,6 @@ export interface KnowledgeNoteProjectionUpsert {
   contentHash: string;
   frontmatter: Record<string, unknown>;
   markdownContent: string;
-  indexStatus: KnowledgeNoteProjectionIndexStatus;
 }
 
 export interface KnowledgeNoteProjectionDeletion {
@@ -91,12 +89,6 @@ export interface IKnowledgeNoteProjectionRepository {
     centerProjectionId: string,
     limit: number,
   ): Promise<KnowledgeNoteLinkGraphSourceSet | null>;
-  updateIndexStatusForIdentity(
-    identityId: string,
-    projectionId: string,
-    expectedContentHash: string,
-    status: KnowledgeNoteProjectionIndexStatus,
-  ): Promise<boolean>;
 }
 
 export type KnowledgeWriteRequestStatus = 'Pending' | 'Committed' | 'Failed';

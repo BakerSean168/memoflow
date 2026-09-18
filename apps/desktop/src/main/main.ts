@@ -20,7 +20,6 @@ import { powerMonitor } from 'electron';
 import { initMemoryMonitorForDev, registerCacheIpcHandlers } from './utils';
 import { registerAppLifecycleHandlers } from './lifecycle';
 import { ElectronBootstrapper } from './bootstrap';
-import { registerDashboardIpcHandler } from './ipc/dashboard-handler';
 
 // ── Module Electron Entry Points ─────────────────────────────────────
 import { PowerSyncTaskBindingReadPort, TaskWorkspaceQueryService } from '@memoflow/task';
@@ -87,7 +86,6 @@ import { DesktopPlannerAIReadAdapter } from './modules/ai/planner-read.adapter';
 import { DesktopNotificationAIReadAdapter } from './modules/ai/notification-read.adapter';
 import { DesktopKnowledgeNotePersistenceAdapter } from './modules/ai/desktop-knowledge-note-persistence.adapter';
 import { DesktopKnowledgeSourceAdapter } from './modules/ai/desktop-knowledge-source.adapter';
-import { type DashboardReadDependencies } from './services/dashboard-read-service';
 import { configureDesktopShellIdentity } from './utils/app-icon';
 import { getApiBaseUrl } from './utils/api-config';
 import { createLogger } from '@memoflow/utils/logger';
@@ -125,14 +123,6 @@ let activeReminderActivityRuntime: StartStopRuntime | null = null;
 let activeReminderElapsedRuntime: StartStopRuntime | null = null;
 let activeReminderUsageRuntime: StartStopRuntime | null = null;
 let activeReminderOccurrenceFlush: (() => Promise<void>) | null = null;
-
-// Composed Goal/Task repository view for the active profile. The dashboard IPC
-// handler is registered once at shell init, but the repositories only exist
-// after a profile activates (registerBusinessModules); bridge them here.
-// 当前激活 profile 的组合 Goal/Task repository view。dashboard IPC handler 在
-// shell 初始化时只注册一次，而仓储要等 profile 激活（registerBusinessModules）
-// 之后才存在，因此在这里做桥接。
-let activeProfileDashboardRepositories: DashboardReadDependencies | null = null;
 
 /**
  * Register all business modules on a bootstrapper for the active profile.
@@ -352,10 +342,7 @@ async function registerBusinessModules(
     },
   });
 
-  // 4. Goal/task composers (existing reference), then the expanded dashboard
-  //    repository view (schedule/reminder/notification ports included).
-  //    goal/task composer（既有参考），随后是扩展后的 dashboard 仓储视图（含
-  //    schedule/reminder/notification ports）。
+  // 4. Goal/task composers provide the owner-bound reads consumed by AI.
   const taskComposed = composeTask({
     db,
     runtimeContributions: scheduleOrchestrationModule.projectionRuntime,
@@ -420,16 +407,6 @@ async function registerBusinessModules(
   const taskWorkspaceElectronModule = createTaskWorkspaceElectronModule({
     port: taskWorkspaceService,
   });
-
-  const dashboardRepositories: DashboardReadDependencies = {
-    goalRepository: goalComposed.repositories.goalRepository,
-    taskPlanRepository: taskComposed.repositories.taskPlanRepository,
-    taskOccurrenceRepository: taskComposed.repositories.taskOccurrenceRepository,
-    scheduleRepository: scheduleComposed.repositories.scheduleRepository,
-    notificationRepository: notificationComposed.repositories.notificationRepository,
-    userTimeContextPort: settingElectronModule.userTimeContextPort,
-  };
-  activeProfileDashboardRepositories = dashboardRepositories;
 
   const taskDashboardUseCase = new GetTaskDashboardUseCase(
     taskComposed.repositories.taskPlanRepository,
@@ -793,7 +770,6 @@ async function initializeShellRuntime(): Promise<void> {
     activeReminderElapsedRuntime = null;
     activeReminderActivityRuntime = null;
     activeReminderOccurrenceFlush = null;
-    activeProfileDashboardRepositories = null;
     activeInterventionWindowController = null;
     activeFocusWindowController = null;
     // Clear the WindowManager's bound schedule runtime controller BEFORE the
@@ -811,16 +787,6 @@ async function initializeShellRuntime(): Promise<void> {
   // Ancillary
   initMemoryMonitorForDev();
   registerCacheIpcHandlers();
-  registerDashboardIpcHandler(
-    () => mainRuntime?.profileRuntimeManager.getActiveProfileAccessContext() ?? null,
-    () => {
-      const repositories = activeProfileDashboardRepositories;
-      if (!repositories) {
-        throw new Error('Dashboard IPC invoked before profile business modules were composed');
-      }
-      return repositories;
-    },
-  );
 
   const initTime = performance.now() - startTime;
   console.log(`[Shell] Shell runtime initialized in ${initTime.toFixed(2)}ms`);

@@ -1,13 +1,19 @@
 /**
  * Dual registry suite (elegance E3b tax cut).
- * Merged 3 dual-retired surface locks from this directory.
+ * Merged 2 dual-retired surface locks from this directory.
  * Behavior/assertions preserved; individual *-dual.surface.spec.ts removed.
  * Sources: knowledge-index-value-helpers-dual.surface.spec.ts, score-indexed-resource-dual.surface.spec.ts
  */
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { toChunkArray, toNumberArray, toStringArray, tokenize, scoreIndexedResource } from './knowledge-index-value-helpers';
+import {
+  toChunkArray,
+  toNumberArray,
+  toStringArray,
+  tokenize,
+  scoreIndexedResource,
+} from './knowledge-index-value-helpers';
 import type { KnowledgeIndexedNote } from '../../application/ports';
 
 // --- merged from knowledge-index-value-helpers-dual.surface.spec.ts ---
@@ -49,9 +55,7 @@ import type { KnowledgeIndexedNote } from '../../application/ports';
         ['prisma', prisma],
       ] as const) {
         expect(source, label).toContain('Residual 969');
-        expect(source, label).toContain(
-          "from '../knowledge-index-value-helpers'",
-        );
+        expect(source, label).toContain("from '../knowledge-index-value-helpers'");
         expect(source, label).not.toMatch(/function toStringArray\b/);
         expect(source, label).not.toMatch(/function toNumberArray\b/);
         expect(source, label).not.toMatch(/function tokenize\b/);
@@ -122,11 +126,13 @@ import type { KnowledgeIndexedNote } from '../../application/ports';
     const sample: KnowledgeIndexedNote = {
       identityId: 'i1',
       repositoryId: 'r1',
-      resourceId: 'res1',
-      resourcePath: 'docs/readme.md',
+      knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440011',
+      knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440012',
+      sourcePath: 'docs/readme.md',
+      sourceContentHash: 'h',
+      sourceVersion: 'commit-1',
       title: 'Hello World',
       mimeType: 'text/markdown',
-      contentHash: 'h',
       summary: 'Intro to scoring',
       keywords: ['hello', 'world'],
       embedding: [],

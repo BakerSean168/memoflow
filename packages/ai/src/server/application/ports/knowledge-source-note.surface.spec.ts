@@ -4,15 +4,18 @@ import { describe, expect, it } from 'vitest';
 
 /**
  * Residual 213: AI knowledge source port drops Resource dual-track method/type names
- * after database Resource CRUD retirement. Protocol fields resourceId/resourcePath and
- * wire key related_resources stay stable.
+ * after database Resource CRUD retirement. Stable KnowledgeDocumentId and the
+ * current source path are separate fields.
  */
 describe('AI knowledge source note port surface', () => {
   const dir = __dirname;
   const sourcePort = readFileSync(resolve(dir, 'knowledge-source.port.ts'), 'utf8');
   const ingestion = readFileSync(resolve(dir, 'knowledge-ingestion.port.ts'), 'utf8');
   const apiAdapter = readFileSync(
-    resolve(dir, '../../../../../../apps/api/src/modules/ai/repository-knowledge-source.adapter.ts'),
+    resolve(
+      dir,
+      '../../../../../../apps/api/src/modules/ai/repository-knowledge-source.adapter.ts',
+    ),
     'utf8',
   );
   const desktopAdapter = readFileSync(
@@ -47,8 +50,12 @@ describe('AI knowledge source note port surface', () => {
     }
   });
 
-  it('protocol resourceId fields remain on knowledge source note shape', () => {
-    expect(ingestion).toContain('resourceId: string');
-    expect(ingestion).toContain('resourcePath: string');
+  it('protocol stable document identity and source snapshot fields are explicit', () => {
+    expect(ingestion).toContain('knowledgeSpaceId: string');
+    expect(ingestion).toContain('knowledgeDocumentId: string | null');
+    expect(ingestion).toContain('sourcePath: string');
+    expect(ingestion).toContain('sourceContentHash: string');
+    expect(ingestion).not.toContain('resourceId: string');
+    expect(ingestion).not.toContain('resourcePath: string');
   });
 });

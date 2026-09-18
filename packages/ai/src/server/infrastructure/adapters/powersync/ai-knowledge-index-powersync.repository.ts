@@ -5,6 +5,7 @@ import type {
   KnowledgeIndexDiagnostics,
   KnowledgeIndexFailureRecord,
   KnowledgeIndexedNote,
+  KnowledgeDocumentIndexRef,
 } from '../../../application/ports';
 import {
   scoreIndexedResource,
@@ -21,11 +22,13 @@ interface LocalKnowledgeIndexRow {
   id: string;
   identity_id: string;
   repository_id: string;
-  resource_id: string;
-  resource_path: string;
+  knowledge_space_id: string;
+  knowledge_document_id: string;
+  source_path: string;
   title: string | null;
   mime_type: string;
-  content_hash: string;
+  source_content_hash: string;
+  source_version: string | null;
   status: 'indexed' | 'failed';
   summary: string | null;
   keywords_json: string | null;
@@ -58,11 +61,13 @@ function mapIndexed(row: LocalKnowledgeIndexRow): KnowledgeIndexedNote | null {
   return {
     identityId: row.identity_id,
     repositoryId: row.repository_id,
-    resourceId: row.resource_id,
-    resourcePath: row.resource_path,
+    knowledgeSpaceId: row.knowledge_space_id,
+    knowledgeDocumentId: row.knowledge_document_id,
+    sourcePath: row.source_path,
+    sourceContentHash: row.source_content_hash,
+    sourceVersion: row.source_version,
     title: row.title ?? undefined,
     mimeType: row.mime_type,
-    contentHash: row.content_hash,
     summary: row.summary ?? '',
     keywords: toStringArray(parseJson(row.keywords_json)),
     embedding: toNumberArray(parseJson(row.embedding_json)),
@@ -71,9 +76,13 @@ function mapIndexed(row: LocalKnowledgeIndexRow): KnowledgeIndexedNote | null {
   };
 }
 
-function localIndexId(identityId: string, repositoryId: string, resourceId: string): string {
+function localIndexId(
+  identityId: string,
+  knowledgeSpaceId: string,
+  knowledgeDocumentId: string,
+): string {
   const digest = createHash('sha256')
-    .update(`${identityId}\0${repositoryId}\0${resourceId}`, 'utf8')
+    .update(`${identityId}\0${knowledgeSpaceId}\0${knowledgeDocumentId}`, 'utf8')
     .digest('hex');
   return `ai-kindex-${digest}`;
 }
@@ -84,7 +93,7 @@ function localIndexId(identityId: string, repositoryId: string, resourceId: stri
  * The source of truth is the Local Vault, never the legacy Resource aggregate.
  * This local-only PowerSync table is intentionally outside the upload queue and
  * can be discarded/rebuilt at any time. Managed notes use KnowledgeDocumentId
- * as resourceId, so path changes update resourcePath without changing identity.
+ * as knowledgeDocumentId, so path changes update sourcePath without changing identity.
  */
 export class AIKnowledgeIndexPowerSyncRepository implements IKnowledgeIndexRepository {
   constructor(private readonly db: IElectronDatabase) {}
@@ -126,13 +135,21 @@ export class AIKnowledgeIndexPowerSyncRepository implements IKnowledgeIndexRepos
       .map(({ resource }) => resource);
   }
 
-  async findByNoteIds(identityId: string, resourceIds: string[]): Promise<KnowledgeIndexedNote[]> {
-    if (resourceIds.length === 0) return [];
-    const placeholders = resourceIds.map(() => '?').join(', ');
+  async findByDocumentRefs(
+    identityId: string,
+    documentRefs: KnowledgeDocumentIndexRef[],
+  ): Promise<KnowledgeIndexedNote[]> {
+    if (documentRefs.length === 0) return [];
+    const clauses = documentRefs.map(
+      () => '(knowledge_space_id = ? AND knowledge_document_id = ?)',
+    );
     const rows = await this.db.getAll<LocalKnowledgeIndexRow>(
       `SELECT * FROM ${LOCAL_INDEX_TABLE}
-       WHERE identity_id = ? AND resource_id IN (${placeholders})`,
-      [identityId, ...resourceIds],
+       WHERE identity_id = ? AND (${clauses.join(' OR ')})`,
+      [
+        identityId,
+        ...documentRefs.flatMap((ref) => [ref.knowledgeSpaceId, ref.knowledgeDocumentId]),
+      ],
     );
     return rows.map(mapIndexed).filter((note): note is KnowledgeIndexedNote => note !== null);
   }
@@ -141,19 +158,21 @@ export class AIKnowledgeIndexPowerSyncRepository implements IKnowledgeIndexRepos
     const now = Date.now();
     await this.db.execute(
       `INSERT OR REPLACE INTO ${LOCAL_INDEX_TABLE} (
-         id, identity_id, repository_id, resource_id, resource_path, title,
-         mime_type, content_hash, status, summary, keywords_json, embedding_json,
+         id, identity_id, repository_id, knowledge_space_id, knowledge_document_id, source_path, title,
+         mime_type, source_content_hash, source_version, status, summary, keywords_json, embedding_json,
          chunks_json, metadata_json, error, indexed_at, last_requested_at
-       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'indexed', ?, ?, ?, ?, ?, NULL, ?, ?)`,
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'indexed', ?, ?, ?, ?, NULL, ?, ?)`,
       [
-        localIndexId(resource.identityId, resource.repositoryId, resource.resourceId),
+        localIndexId(resource.identityId, resource.knowledgeSpaceId, resource.knowledgeDocumentId),
         resource.identityId,
         resource.repositoryId,
-        resource.resourceId,
-        resource.resourcePath,
+        resource.knowledgeSpaceId,
+        resource.knowledgeDocumentId,
+        resource.sourcePath,
         resource.title ?? null,
         resource.mimeType,
-        resource.contentHash,
+        resource.sourceContentHash,
+        resource.sourceVersion ?? null,
         resource.summary,
         JSON.stringify(resource.keywords),
         JSON.stringify(resource.embedding),
@@ -167,16 +186,22 @@ export class AIKnowledgeIndexPowerSyncRepository implements IKnowledgeIndexRepos
 
   async markRequested(
     identityId: string,
-    resourceIds: string[],
+    documentRefs: KnowledgeDocumentIndexRef[],
     requestedAt: number,
   ): Promise<void> {
-    if (resourceIds.length === 0) return;
-    const placeholders = resourceIds.map(() => '?').join(', ');
+    if (documentRefs.length === 0) return;
+    const clauses = documentRefs.map(
+      () => '(knowledge_space_id = ? AND knowledge_document_id = ?)',
+    );
     await this.db.execute(
       `UPDATE ${LOCAL_INDEX_TABLE}
        SET last_requested_at = ?
-       WHERE identity_id = ? AND resource_id IN (${placeholders})`,
-      [requestedAt, identityId, ...resourceIds],
+       WHERE identity_id = ? AND (${clauses.join(' OR ')})`,
+      [
+        requestedAt,
+        identityId,
+        ...documentRefs.flatMap((ref) => [ref.knowledgeSpaceId, ref.knowledgeDocumentId]),
+      ],
     );
   }
 
@@ -184,19 +209,21 @@ export class AIKnowledgeIndexPowerSyncRepository implements IKnowledgeIndexRepos
     const now = Date.now();
     await this.db.execute(
       `INSERT OR REPLACE INTO ${LOCAL_INDEX_TABLE} (
-         id, identity_id, repository_id, resource_id, resource_path, title,
-         mime_type, content_hash, status, summary, keywords_json, embedding_json,
+         id, identity_id, repository_id, knowledge_space_id, knowledge_document_id, source_path, title,
+         mime_type, source_content_hash, source_version, status, summary, keywords_json, embedding_json,
          chunks_json, metadata_json, error, indexed_at, last_requested_at
-       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'failed', NULL, '[]', '[]', '[]', ?, ?, ?, ?)`,
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'failed', NULL, '[]', '[]', '[]', ?, ?, ?, ?)`,
       [
-        localIndexId(record.identityId, record.repositoryId, record.resourceId),
+        localIndexId(record.identityId, record.knowledgeSpaceId, record.knowledgeDocumentId),
         record.identityId,
         record.repositoryId,
-        record.resourceId,
-        record.resourcePath,
+        record.knowledgeSpaceId,
+        record.knowledgeDocumentId,
+        record.sourcePath,
         record.title ?? null,
         record.mimeType,
-        record.contentHash,
+        record.sourceContentHash,
+        record.sourceVersion ?? null,
         JSON.stringify(record.metadata),
         record.error,
         now,
@@ -205,10 +232,14 @@ export class AIKnowledgeIndexPowerSyncRepository implements IKnowledgeIndexRepos
     );
   }
 
-  async removeByNoteId(identityId: string, resourceId: string): Promise<void> {
+  async removeByDocumentRef(
+    identityId: string,
+    documentRef: KnowledgeDocumentIndexRef,
+  ): Promise<void> {
     await this.db.execute(
-      `DELETE FROM ${LOCAL_INDEX_TABLE} WHERE identity_id = ? AND resource_id = ?`,
-      [identityId, resourceId],
+      `DELETE FROM ${LOCAL_INDEX_TABLE}
+       WHERE identity_id = ? AND knowledge_space_id = ? AND knowledge_document_id = ?`,
+      [identityId, documentRef.knowledgeSpaceId, documentRef.knowledgeDocumentId],
     );
   }
 }

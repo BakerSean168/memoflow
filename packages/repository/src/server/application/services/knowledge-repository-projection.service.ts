@@ -20,7 +20,6 @@ import type {
   KnowledgeProjectionCheckpoint,
   RemoteRepositoryBlockReason,
 } from '@memoflow/contracts/repository';
-import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import { createLogger } from '@memoflow/utils/logger';
 import type { KnowledgeRemoteBindingServerDTO } from '@memoflow/contracts/repository';
 import { GitHubAppClientFailureError } from '../ports/github-app-client.port';
@@ -525,39 +524,6 @@ export class KnowledgeRepositoryProjectionService {
       return fail({ code: 'NOT_FOUND', message: 'Knowledge note projection was not found' });
     }
     return ok(buildKnowledgeNoteLinkGraph(projectionId, sources.notes, request, sources.truncated));
-  }
-
-  async updateIndexStatus(
-    identityId: string,
-    request: {
-      connectionId: string;
-      resourceId: string;
-      contentHash: string;
-      status: KnowledgeNoteProjectionClientDTO['indexStatus'];
-    },
-  ): Promise<Result<{ updated: boolean }>> {
-    const ownedBinding = await this.options.connectionRepository.findByIdForIdentity(
-      identityId,
-      request.connectionId,
-    );
-    if (!ownedBinding || ownedBinding.disconnectedAt !== null) return ok({ updated: false });
-
-    let projectionId = request.resourceId;
-    if (request.resourceId.startsWith('kdoc_')) {
-      const matches = await this.options.projectionRepository.findLiveByDocumentId(
-        ownedBinding.id,
-        request.resourceId as KnowledgeDocumentId,
-      );
-      if (matches.length !== 1) return ok({ updated: false });
-      projectionId = matches[0]!.id;
-    }
-    const updated = await this.options.projectionRepository.updateIndexStatusForIdentity(
-      identityId,
-      projectionId,
-      request.contentHash,
-      request.status,
-    );
-    return ok({ updated });
   }
 
   async reconcileNow(): Promise<void> {

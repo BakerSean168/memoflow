@@ -2,7 +2,6 @@ import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type {
   IAIExecutionRecordPort,
   IKnowledgeIndexRepository,
-  IKnowledgeIndexStatusPort,
   IKnowledgeIngestionPort,
   KnowledgeSourceNote,
   KnowledgeIndexedNote,
@@ -25,7 +24,6 @@ export class SyncKnowledgeNotesUseCase {
     private readonly knowledgeIndexRepository: IKnowledgeIndexRepository,
     private readonly knowledgeIngestionPort: IKnowledgeIngestionPort,
     private readonly executionRecordPort?: IAIExecutionRecordPort,
-    private readonly knowledgeIndexStatusPort?: IKnowledgeIndexStatusPort,
   ) {}
 
   async execute(
@@ -33,7 +31,14 @@ export class SyncKnowledgeNotesUseCase {
     cx: ExecutionContext,
     options?: SyncKnowledgeNotesOptions,
   ): Promise<SyncKnowledgeNotesResult> {
-    if (resources.length === 0) {
+    const stableResources = resources.filter(
+      (
+        resource,
+      ): resource is KnowledgeSourceNote & {
+        knowledgeDocumentId: NonNullable<KnowledgeSourceNote['knowledgeDocumentId']>;
+      } => resource.knowledgeDocumentId !== null,
+    );
+    if (stableResources.length === 0) {
       return {
         indexedNotes: [],
         indexedCount: 0,
@@ -44,12 +49,19 @@ export class SyncKnowledgeNotesUseCase {
     }
 
     const requestedAt = Date.now();
-    const cachedResources = await this.knowledgeIndexRepository.findByNoteIds(
+    const documentRefs = stableResources.map((resource) => ({
+      knowledgeSpaceId: resource.knowledgeSpaceId,
+      knowledgeDocumentId: resource.knowledgeDocumentId,
+    }));
+    const cachedResources = await this.knowledgeIndexRepository.findByDocumentRefs(
       cx.identityId,
-      resources.map((resource) => resource.resourceId),
+      documentRefs,
     );
-    const cachedByResourceId = new Map(
-      cachedResources.map((resource) => [resource.resourceId, resource] as const),
+    const cachedByDocumentRef = new Map<string, KnowledgeIndexedNote>(
+      cachedResources.map(
+        (resource) =>
+          [`${resource.knowledgeSpaceId}\0${resource.knowledgeDocumentId}`, resource] as const,
+      ),
     );
 
     const indexedNotes: KnowledgeIndexedNote[] = [];
@@ -58,20 +70,32 @@ export class SyncKnowledgeNotesUseCase {
     let reusedCount = 0;
     let failedCount = 0;
 
-    for (const resource of resources) {
-      const cached = cachedByResourceId.get(resource.resourceId);
+    for (const resource of stableResources) {
+      const cacheKey = `${resource.knowledgeSpaceId}\0${resource.knowledgeDocumentId}`;
+      const cached = cachedByDocumentRef.get(cacheKey);
       const sourceContentHash = resolveSourceContentHash(resource);
-      const canReuse = !options?.force && cached && cached.contentHash === sourceContentHash;
+      const canReuse = !options?.force && cached && cached.sourceContentHash === sourceContentHash;
 
       if (canReuse && cached) {
-        indexedNotes.push(cached);
+        const refreshed = {
+          ...cached,
+          repositoryId: resource.repositoryId,
+          knowledgeSpaceId: resource.knowledgeSpaceId,
+          sourcePath: resource.sourcePath,
+          sourceContentHash,
+          sourceVersion: resource.sourceVersion,
+          title: resource.title,
+          mimeType: resource.mimeType,
+          metadata: { ...cached.metadata, ...(resource.metadata ?? {}) },
+        } satisfies KnowledgeIndexedNote;
+        await this.knowledgeIndexRepository.upsert(refreshed);
+        indexedNotes.push(refreshed);
         results.push({
-          resourceId: resource.resourceId,
-          resourcePath: resource.resourcePath,
+          knowledgeDocumentId: resource.knowledgeDocumentId,
+          sourcePath: resource.sourcePath,
           status: 'reused',
         });
         reusedCount += 1;
-        await this.reportIndexStatus(cx.identityId, resource, sourceContentHash, 'indexed');
         continue;
       }
 
@@ -83,40 +107,40 @@ export class SyncKnowledgeNotesUseCase {
         await this.knowledgeIndexRepository.upsert(indexed);
         indexedNotes.push(indexed);
         results.push({
-          resourceId: resource.resourceId,
-          resourcePath: resource.resourcePath,
+          knowledgeDocumentId: resource.knowledgeDocumentId,
+          sourcePath: resource.sourcePath,
           status: 'indexed',
         });
         indexedCount += 1;
-        await this.reportIndexStatus(cx.identityId, resource, sourceContentHash, 'indexed');
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Failed to index knowledge note';
         failedCount += 1;
         results.push({
-          resourceId: resource.resourceId,
-          resourcePath: resource.resourcePath,
+          knowledgeDocumentId: resource.knowledgeDocumentId,
+          sourcePath: resource.sourcePath,
           status: 'failed',
           error: message,
         });
         logger.error('Knowledge indexing failed', {
           error,
           identityId: cx.identityId,
-          resourceId: resource.resourceId,
-          resourcePath: resource.resourcePath,
+          knowledgeDocumentId: resource.knowledgeDocumentId,
+          sourcePath: resource.sourcePath,
         });
 
         await this.knowledgeIndexRepository.markFailed({
           identityId: cx.identityId,
           repositoryId: resource.repositoryId,
-          resourceId: resource.resourceId,
-          resourcePath: resource.resourcePath,
+          knowledgeSpaceId: resource.knowledgeSpaceId,
+          knowledgeDocumentId: resource.knowledgeDocumentId,
+          sourcePath: resource.sourcePath,
+          sourceContentHash,
+          sourceVersion: resource.sourceVersion,
           title: resource.title,
           mimeType: resource.mimeType,
-          contentHash: sourceContentHash,
           metadata: resource.metadata ?? {},
           error: message,
         });
-        await this.reportIndexStatus(cx.identityId, resource, sourceContentHash, 'failed');
 
         if (cached) {
           indexedNotes.push(cached);
@@ -124,11 +148,7 @@ export class SyncKnowledgeNotesUseCase {
       }
     }
 
-    await this.knowledgeIndexRepository.markRequested(
-      cx.identityId,
-      resources.map((resource) => resource.resourceId),
-      requestedAt,
-    );
+    await this.knowledgeIndexRepository.markRequested(cx.identityId, documentRefs, requestedAt);
 
     await recordExecution(this.executionRecordPort, {
       identityId: cx.identityId,
@@ -148,29 +168,5 @@ export class SyncKnowledgeNotesUseCase {
       failedCount,
       results,
     };
-  }
-
-  private async reportIndexStatus(
-    identityId: string,
-    resource: KnowledgeSourceNote,
-    contentHash: string,
-    status: 'indexed' | 'failed',
-  ): Promise<void> {
-    if (!this.knowledgeIndexStatusPort) return;
-    try {
-      await this.knowledgeIndexStatusPort.updateIndexStatus(identityId, {
-        repositoryId: resource.repositoryId,
-        resourceId: resource.resourceId,
-        contentHash,
-        status,
-      });
-    } catch (error) {
-      logger.warn('Failed to report knowledge index status to source projection', {
-        error,
-        identityId,
-        resourceId: resource.resourceId,
-        status,
-      });
-    }
   }
 }

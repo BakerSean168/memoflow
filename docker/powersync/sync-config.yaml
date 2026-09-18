@@ -36,7 +36,6 @@ streams:
       - SELECT * FROM notification_history WHERE identity_id = auth.user_id()
       - SELECT * FROM ai_conversations WHERE identity_id = auth.user_id()
       - SELECT * FROM ai_execution_records WHERE identity_id = auth.user_id()
-      - SELECT * FROM dashboard_configs WHERE identity_id = auth.user_id()
       - SELECT * FROM repositories WHERE identity_id = auth.user_id()
       - SELECT * FROM repository_explorers WHERE identity_id = auth.user_id()
       - SELECT * FROM repository_statistics WHERE identity_id = auth.user_id()

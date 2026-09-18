@@ -38,7 +38,6 @@ const SERVER_SEMANTIC_CORE_DIRS = new Map([
 
 const EXCEPTIONS = new Set([
   'powersync-schema',
-  'dashboard',
   'domain-shared',
   'contracts',
   'patterns',

@@ -64,7 +64,6 @@ model Account {
   aiProviderConfigs             AiProviderConfig[]
   aiProviderOnboardingSessions  AiProviderOnboardingSession[]
   aiProviderSecrets             AiProviderSecret[]
-  dashboardConfigs              DashboardConfig?
 
   // PowerSync: denormalized identity relations
   taskPlanHistory                        TaskPlanHistory[]                       @relation("AccountTaskPlanHistory")
@@ -207,48 +206,39 @@ model AiProviderSecret {
 }
 
 model AiKnowledgeIndexEntry {
-  id              String                     @id
-  identityId      String                     @map("identity_id")
-  repositoryId    String                     @map("repository_id")
-  resourceId      String                     @unique @map("resource_id")
-  resourcePath    String                     @map("resource_path")
-  title           String?
-  mimeType        String                     @map("mime_type")
-  contentHash     String                     @map("content_hash")
-  status          String
-  summary         String?                    @db.Text
-  keywords        Json                       @default("[]")
-  embedding       Json?
-  retrievalVector Unsupported("vector(48)")? @map("retrieval_vector")
-  chunks          Json?
-  metadata        Json                       @default("{}")
-  error           String?                    @db.Text
-  indexedAt       DateTime                   @map("indexed_at")
-  lastRequestedAt DateTime?                  @map("last_requested_at")
-  createdAt       DateTime                   @default(now()) @map("created_at")
-  updatedAt       DateTime                   @updatedAt @map("updated_at")
-  deletedAt       DateTime?                  @map("deleted_at")
+  id                  String                     @id
+  identityId          String                     @map("identity_id")
+  repositoryId        String                     @map("repository_id")
+  knowledgeSpaceId    String                     @map("knowledge_space_id")
+  knowledgeDocumentId String                     @map("knowledge_document_id")
+  sourcePath          String                     @map("source_path")
+  title               String?
+  mimeType            String                     @map("mime_type")
+  sourceContentHash   String                     @map("source_content_hash")
+  sourceVersion       String?                    @map("source_version")
+  status              String
+  summary             String?                    @db.Text
+  keywords            Json                       @default("[]")
+  embedding           Json?
+  retrievalVector     Unsupported("vector(48)")? @map("retrieval_vector")
+  chunks              Json?
+  metadata            Json                       @default("{}")
+  error               String?                    @db.Text
+  indexedAt           DateTime                   @map("indexed_at")
+  lastRequestedAt     DateTime?                  @map("last_requested_at")
+  createdAt           DateTime                   @default(now()) @map("created_at")
+  updatedAt           DateTime                   @updatedAt @map("updated_at")
+  deletedAt           DateTime?                  @map("deleted_at")
 
   account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
 
+  @@unique([knowledgeSpaceId, knowledgeDocumentId])
   @@index([identityId])
+  @@index([knowledgeSpaceId, knowledgeDocumentId])
   @@index([repositoryId])
   @@index([status])
   @@index([lastRequestedAt])
   @@map("ai_knowledge_index_entries")
-}
-
-model DashboardConfig {
-  id           Int      @id @default(autoincrement())
-  identityId   String   @unique @map("identity_id")
-  widgetConfig Json     @map("widget_config")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-
-  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@map("dashboard_configs")
 }
 
 // Better Auth cloud identity source.
@@ -1503,7 +1493,6 @@ model KnowledgeNoteProjection {
   contentHash         String    @map("content_hash")
   frontmatter         Json      @default("{}")
   markdownContent     String    @map("markdown_content") @db.Text
-  indexStatus         String    @default("PENDING") @map("index_status")
   createdAt           DateTime  @default(now()) @map("created_at")
   updatedAt           DateTime  @updatedAt @map("updated_at")
   deletedAt           DateTime? @map("deleted_at")
@@ -1514,7 +1503,6 @@ model KnowledgeNoteProjection {
   @@index([bindingId, commitSha])
   @@index([knowledgeDocumentId])
   @@index([contentHash])
-  @@index([indexStatus])
   @@map("knowledge_note_projections")
 }
 

@@ -138,7 +138,7 @@ describe('i18n key completeness (production locales)', () => {
       'setting.groups.appearance',
       'schedule.calendar.today',
       'schedule.calendar.weekRange',
-      'dashboard.goalProgress.title',
+      'goal.homeProgress.title',
       'shell.auth.unverifiedBanner',
       'shell.auth.unverifiedAction',
       'errors.EMAIL_VERIFICATION_REQUIRED',
