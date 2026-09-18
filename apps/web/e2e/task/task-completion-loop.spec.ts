@@ -8,7 +8,7 @@ const testPassword = 'Test123456!';
 test.use({ timezoneId: 'UTC' });
 
 test.describe('Task completion closed loop', () => {
-  test('[P0][Fixture B] EachCompletion updates task, stats, and Goal progress through the Web product loop', async ({
+  test('[P0][Fixture B] EachCompletion updates task and Goal progress through the Web product loop', async ({
     page,
   }) => {
     const suffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -133,20 +133,20 @@ test.describe('Task completion closed loop', () => {
     await expect
       .poll(
         async () => {
-          const dashboard = await expectApiData<{
-            stats: { completedToday: number };
-            goalProgress: Array<{ id: string; progress: number }>;
-          }>(await page.request.get(`${API_CONFIG.API_PREFIX}/dashboard/stats`, { headers }));
+          const homeSummary = await expectApiData<{
+            activeCount: number;
+            goals: Array<{ id: string; progress: number }>;
+          }>(await page.request.get(`${API_CONFIG.API_PREFIX}/goals/home-summary`, { headers }));
           return {
-            completedToday: dashboard.stats.completedToday,
+            activeGoalCount: homeSummary.activeCount,
             linkedGoalProgress:
-              dashboard.goalProgress.find((item) => item.id === goalReceipt.goalId)?.progress ??
+              homeSummary.goals.find((item) => item.id === goalReceipt.goalId)?.progress ??
               null,
           };
         },
         { timeout: TIMEOUT_CONFIG.ELEMENT_WAIT },
       )
-      .toEqual({ completedToday: 1, linkedGoalProgress: 10 });
+      .toEqual({ activeGoalCount: 1, linkedGoalProgress: 10 });
     await expect(goalItem.getByTestId('goal-progress-value')).toHaveText('10%');
   });
 });

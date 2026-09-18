@@ -4,7 +4,7 @@
  * IPC 处理器分为两类：
  * 
  * 1. 业务模块 IPC 处理器（已迁移到 modules/ 目录）
- *    - Goal, Task, Schedule, Reminder, Notification, Dashboard, AI, Account, Auth, Repository, Setting
+ *    - Goal, Task, Schedule, Reminder, Notification, AI, Account, Auth, Repository, Setting
  *    - 由 modules/index.ts 统一管理
  * 
  * 2. 系统级 IPC 处理器（在本目录）

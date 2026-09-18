@@ -137,13 +137,6 @@
         "packages/ui-vue-shadcn/dist/*",
         "packages/ui-vue-shadcn/dist/*/index.d.ts"
       ],
-      "@memoflow/dashboard": [
-        "packages/dashboard/dist/index.d.ts"
-      ],
-      "@memoflow/dashboard/*": [
-        "packages/dashboard/dist/*/index.d.ts",
-        "packages/dashboard/dist/*.d.ts"
-      ],
       "@memoflow/test-utils": [
         "packages/test-utils/src/index.ts"
       ],

@@ -70,10 +70,6 @@
       "types": "./dist/modules/governance/index.d.ts",
       "import": "./dist/modules/governance/index.js"
     },
-    "./modules/dashboard/adapters": {
-      "types": "./dist/modules/dashboard/adapters/index.d.ts",
-      "import": "./dist/modules/dashboard/adapters/index.js"
-    },
     "./modules/ai": {
       "types": "./dist/modules/ai/index.d.ts",
       "import": "./dist/modules/ai/index.js"

@@ -1,9 +1,8 @@
 /**
  * AI workspace performance regressions.
  *
- * The standalone Dashboard was retired; `/` now owns the AI workspace. These
- * checks deliberately target the current workspace surfaces and contain no
- * assertions for the removed widget/settings controls.
+ * The standalone cross-domain overview was retired; `/` now owns the AI
+ * workspace. These checks target only current workspace surfaces.
  */
 
 import { expect, test } from '@playwright/test';

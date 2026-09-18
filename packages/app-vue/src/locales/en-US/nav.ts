@@ -1,6 +1,5 @@
 export default {
   "home": "Home",
-  "dashboard": "Dashboard",
   "aiChat": "AI Chat",
   "goals": "Goals",
   "tasks": "Tasks",

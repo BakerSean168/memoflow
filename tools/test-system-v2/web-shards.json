@@ -40,7 +40,6 @@
       "shard": 4,
       "estimatedDurationMs": 290456,
       "specs": [
-        "dashboard/dashboard-overview.spec.ts",
         "task/task-plan-crud.spec.ts",
         "user-settings/notifications.spec.ts",
         "authentication/auth-login.spec.ts",

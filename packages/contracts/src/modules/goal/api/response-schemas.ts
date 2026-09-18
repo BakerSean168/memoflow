@@ -201,7 +201,7 @@ export const GoalHomeProgressItemSchema = z.object({
 });
 export type GoalHomeProgressItem = z.infer<typeof GoalHomeProgressItemSchema>;
 
-/** Home gets only Goal-owned progress truth, never a Dashboard aggregate. */
+/** Home gets only Goal-owned progress truth, never a cross-domain aggregate. */
 export const GoalHomeProgressSummarySchema = z.object({
   activeCount: z.number().int().min(0),
   goals: z.array(GoalHomeProgressItemSchema).max(5),

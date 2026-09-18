@@ -783,13 +783,6 @@ const task_goal_outbox = new Table({
   updated_at: column.text,
 });
 
-const dashboard_configs = new Table({
-  identity_id: column.text,
-  widget_config: column.text, // JSON
-  created_at: column.text,
-  updated_at: column.text,
-});
-
 // ──────────────────────────────────────────────
 // Repository
 // ──────────────────────────────────────────────
@@ -991,7 +984,6 @@ export const PowerSyncAppSchema = new Schema({
   ai_provider_secrets,
   ai_knowledge_index_entries_local,
   task_goal_outbox,
-  dashboard_configs,
   // Repository
   repositories,
   repository_explorers,

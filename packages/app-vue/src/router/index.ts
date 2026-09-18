@@ -58,12 +58,6 @@ export function createAppRouter(options?: {
           component: ShellHomeRoute,
           meta: { title: 'aiAssistant.chatPage.title' },
         },
-        {
-          // Dashboard 退役：今日概览由 AI 空闲态承接（V2 §3）。
-          path: 'dashboard',
-          name: 'dashboard',
-          redirect: '/',
-        },
         // Module routes
         ...accountRoutes,
         ...goalRoutes,

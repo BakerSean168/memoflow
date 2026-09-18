@@ -2,8 +2,8 @@
  * Desktop host composition for AI analytics.
  *
  * The adapter receives the same explicit owner capabilities as the API lane.
- * Dashboard IPC composition remains in the desktop runtime for HOME-1805, but
- * it is not an input to AI context construction.
+ * The AI adapter is composed from explicit owner reads and has no cross-domain
+ * aggregation transport dependency.
  */
 import type {
   IAIActivityReadPort,

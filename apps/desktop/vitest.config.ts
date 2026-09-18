@@ -35,7 +35,6 @@ const desktopTestWorkspaceEntries = [
   ['@memoflow/data-portability/electron', 'packages/data-portability/src/electron/index.ts'],
   ['@memoflow/ai/client', 'packages/ai/src/client/index.ts'],
   ['@memoflow/ai/electron', 'packages/ai/src/electron/index.ts'],
-  ['@memoflow/dashboard', 'packages/dashboard/src/index.ts'],
   ['@memoflow/ipc-client', 'packages/ipc-client/src/index.ts'],
   ['@memoflow/powersync-schema', 'packages/powersync-schema/src/index.ts'],
   ['@memoflow/cloud-auth', 'packages/cloud-auth/src/index.ts'],

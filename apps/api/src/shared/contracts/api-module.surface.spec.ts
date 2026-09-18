@@ -2,14 +2,14 @@
  * API module shared-handle contract surface (RefArch Phase 6).
  * API 模块共享 handle 契约表面（RefArch 阶段 6）。
  *
- * Scans every audited feature api module plus the app-local PowerSync/Dashboard
+ * Scans every audited feature api module plus the app-local PowerSync
  * modules: each `*ApiModuleDef` binds the shared `ServerModuleHandle`, and no
  * module reads `context.db`, imports Prisma, or constructs repositories / module
  * instances inside `register()`. The registration context is transport-only, so
  * deleting an `extends ServerModuleHandle` or reintroducing `context.db` turns
  * this suite red.
  *
- * 扫描所有被审计的 feature api 模块及 app-local PowerSync/Dashboard 模块：
+ * 扫描所有被审计的 feature api 模块及 app-local PowerSync 模块：
  * 每个 `*ApiModuleDef` 绑定共享 `ServerModuleHandle`，且任何模块都不读取
  * `context.db`、不 import Prisma、不在 `register()` 内构造 repository/模块实例。
  * 注册上下文仅含 transport，因此删除 `extends ServerModuleHandle` 或重新引入
@@ -39,7 +39,6 @@ const ROUTINE_TRANSPORT_MARKER = resolve(REPO_ROOT, 'packages/reminder/src/api/m
 
 const APP_LOCAL_MODULES = [
   resolve(REPO_ROOT, 'apps/api/src/modules/powersync/module.ts'),
-  resolve(REPO_ROOT, 'apps/api/src/modules/dashboard/module.ts'),
 ];
 
 /** Strips comments so prose about `context.db` never trips the code assertions.

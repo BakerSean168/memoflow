@@ -14,7 +14,6 @@ export {
   AI_RUNTIME_USAGE_KEY,
   AI_WORKFLOW_RUNTIME_KEY,
   TASK_SERVICE_KEY,
-  DASHBOARD_SERVICE_KEY,
   DESKTOP_AUTH_API_KEY,
   DESKTOP_BRIDGE_KEY,
   PROFILE_LOCK_HANDLER_KEY,
@@ -42,12 +41,6 @@ export { useDesktopWindowControls } from './shared/composables/useDesktopWindowC
 
 // ── Router ──
 export { createAppRouter } from './router';
-
-// ── Dashboard adapters ──
-export {
-  createDashboardIpcAdapter,
-  createDashboardHttpAdapter,
-} from './modules/dashboard/adapters';
 
 // ── Stores (consumed by app containers for DI/provide) ──
 export { useAuthenticationStore } from './modules/authentication';

@@ -117,12 +117,6 @@ export type GoalReviewId = string & { readonly __brand: 'GoalReviewId' };
 /** 关键结果权重快照 ID */
 export type KeyResultWeightSnapshotId = string & { readonly __brand: 'KeyResultWeightSnapshotId' };
 
-/** 仪表盘 ID */
-export type DashboardId = string & { readonly __brand: 'DashboardId' };
-
-/** 仪表盘小部件 ID */
-export type WidgetId = string & { readonly __brand: 'WidgetId' };
-
 /** AI Provider 配置 ID */
 export type AiProviderConfigId = string & { readonly __brand: 'AiProviderConfigId' };
 

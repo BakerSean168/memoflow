@@ -23,9 +23,6 @@
   "authentication/auth-register.spec.ts": {
     "durationMs": 8453
   },
-  "dashboard/dashboard-overview.spec.ts": {
-    "durationMs": 97139
-  },
   "goal/goal-crud.spec.ts": {
     "durationMs": 71527
   },

@@ -3,7 +3,7 @@ export const WEB_AUDIT_SPECS = Object.freeze([
   'account/account-profile.spec.ts',
   'goal/goal-edit.spec.ts',
   'goal/goal-keyresult.spec.ts',
-  'performance/dashboard-performance.spec.ts',
+  'performance/ai-workspace-performance.spec.ts',
   'reminder.spec.ts',
   'schedule/schedule-crud.spec.ts',
   'setting/setting-appearance.spec.ts',

@@ -4,7 +4,7 @@
       "startServerCommand": "pnpm preview",
       "startServerReadyPattern": "Local:.*http://localhost:4173",
       "startServerReadyTimeout": 30000,
-      "url": ["http://localhost:4173/", "http://localhost:4173/dashboard"],
+      "url": ["http://localhost:4173/"],
       "numberOfRuns": 3,
       "settings": {
         "preset": "desktop",

@@ -22,16 +22,6 @@ vi.mock('../../modules/notification/composables/useNotificationUnreadQuery', asy
   };
 });
 
-vi.mock('../../modules/dashboard/composables/useDashboard', async () => {
-  const { ref: vueRef } = await import('vue');
-  return {
-    useDashboard: () => ({
-      stats: vueRef({ activeGoals: 0, activeTasks: 0, upcomingReminders: 0 }),
-      fetchDashboard: vi.fn(async () => undefined),
-    }),
-  };
-});
-
 vi.mock('../../modules/schedule/composables/useCalendarView', () => ({
   formatScheduleCapsuleLabel: () => '',
   useCalendarView: () => ({

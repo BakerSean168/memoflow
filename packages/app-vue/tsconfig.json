@@ -28,9 +28,6 @@
       "@memoflow/contracts/ai": [
         "../../packages/contracts/src/modules/ai/index.ts"
       ],
-      "@memoflow/contracts/dashboard": [
-        "../../packages/contracts/src/dashboard/index.ts"
-      ],
       "@memoflow/contracts/goal": [
         "../../packages/contracts/src/modules/goal/index.ts"
       ],

@@ -77,4 +77,4 @@ updated: 2026-09-17T20:10:00+08:00
 - Routine 是唯一 owner truth；不得重新引入旧 Reminder 模型、旧 `/reminders` 产品入口或旧 Reminder IPC channels。
 - WallClock 统一走 Scheduler `ScheduledInvocation`；Elapsed / ActiveUsage / Protocol 由 Routine runtime 自有状态机负责。
 - Notification 只持有 Fact/Interaction/Delivery truth；Routine 动作通过 typed owner-command 回到 Routine application port。
-- Dashboard / Planner 对 Routine 的新读模型在 Phase 5 接入；R4-2201C 不以保留旧 Reminder read model 的方式过渡。
+- Home / Planner 对 Routine 的新读模型在 Phase 5 接入；R4-2201C 不以保留旧 Reminder read model 的方式过渡。
