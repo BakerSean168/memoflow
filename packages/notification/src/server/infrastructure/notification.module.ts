@@ -16,7 +16,9 @@ import {
   NotificationQueryApplicationService,
   UpdateNotificationPreferenceUseCase,
   createNotificationDeliveryPreferencePortableCapability,
+  createNotificationPortableCapability,
   type NotificationDeliveryPreferencePortableCapability,
+  type NotificationPortableCapability,
   type NotificationInboxPort,
   type NotificationOperationsPort,
   type NotificationSseDeliveryEvent,
@@ -68,6 +70,8 @@ export interface NotificationModuleInstance {
   readonly preferenceRepository: INotificationPreferenceRepository;
   readonly interactionRepository: INotificationInteractionRepository;
   readonly portableCapability: NotificationDeliveryPreferencePortableCapability;
+  /** Notification Fact/Inbox and typed Interaction capability. */
+  readonly portableFactCapability: NotificationPortableCapability;
   readonly ownerCommandRegistry: NotificationOwnerCommandRegistry;
   readonly useCases: NotificationModuleUseCases;
   /** Product/Inbox capability only. */
@@ -145,6 +149,10 @@ export function createNotificationModule(
   const useCases = createNotificationUseCases(dependencies, ownerCommandRegistry);
   const portableCapability =
     createNotificationDeliveryPreferencePortableCapability(preferenceRepository);
+  const portableFactCapability = createNotificationPortableCapability(
+    notificationRepository,
+    interactionRepository,
+  );
   const notificationQueryApplicationService = new NotificationQueryApplicationService(
     notificationRepository,
   );
@@ -273,6 +281,7 @@ export function createNotificationModule(
     preferenceRepository,
     interactionRepository,
     portableCapability,
+    portableFactCapability,
     ownerCommandRegistry,
     useCases,
     api,

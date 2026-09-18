@@ -4,3 +4,8 @@ export type {
   ScheduleEventApplicationPort,
 } from './schedule.application.port';
 export * from './services';
+export {
+  SchedulePortableCapability,
+  createSchedulePortableCapability,
+} from './schedule-portability';
+export type { SchedulePortablePayloadV3 } from '@memoflow/contracts/schedule';

@@ -582,6 +582,27 @@ The integrated Phase 4 implementation now has one owner for every surviving prod
 
 Phase 5 may consume these owner contracts directly. Any future appearance of the retired Phase 4 models is a regression, not a compatibility path.
 
+### PORT-1610B implementation evidence
+
+PORT-1610B completes the owner-driven V3 frontier for the surviving Phase-4
+product facts. The owner payloads and capabilities are registered by both API
+and Desktop with identical semantic keys, empty dependency sets, and stable
+operation-local reference ordering:
+
+| Owner capability | Portable product truth | Explicitly non-portable |
+| --- | --- | --- |
+| `routines@3` | Definition/Profile/Membership, Trigger, TemporaryOverride, durable Occurrence resolution facts, and typed Interaction action/timing facts | RuntimeContext, scheduler reliability/source revision, and arbitrary interaction metadata |
+| `schedules@3` | canonical CalendarEntry Timed/AllDay range, title/description/location/attendees | occupancy/conflict projections, ScheduledInvocation/InvocationAttempt, rebuild/outbox/audit operations |
+| `notifications@3` | Notification Fact/Inbox lifecycle, typed Interaction, and safe presentation hints (`icon`/`image`/`color`) | delivery outbox/decision/receipt/dead-letter/audit state, sound/badge/data, and device-only state |
+
+The capabilities validate owner schemas, bind `PortableCapabilityExecutionContext`
+references, use owner/application read seams, and provide deterministic dry-run
+and apply behavior with fail-closed internal reference checks. API and Desktop
+registration parity is covered by composition surface tests; owner round-trip
+and invalid-reference coverage lives with the Routine, Schedule, Notification,
+and contract modules. V2/V1 surfaces and downstream dependency ordering remain
+unchanged; PORT-1611 still owns their later deletion.
+
 ---
 
 # Phase 5 — Home/Dashboard retirement and AI alignment

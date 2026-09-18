@@ -21,6 +21,8 @@ export interface RoutineProfileStore {
     readonly identityId: string;
     readonly routineId: string;
   }): Promise<RoutineDefinition | null>;
+  /** Owner read seam used by Routine portability; rows never cross this boundary. */
+  listDefinitions(input: { readonly identityId: string }): Promise<RoutineDefinition[]>;
   deleteDefinition(input: {
     readonly identityId: string;
     readonly routineId: string;

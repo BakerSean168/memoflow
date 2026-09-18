@@ -124,11 +124,17 @@ export interface RoutineOccurrenceTruthStore {
     readonly routineId: string;
     readonly occurrenceKey: string;
   }): Promise<RoutineOccurrenceFact | null>;
+  /** Durable business occurrence facts, excluding scheduler reliability columns. */
+  listOccurrences(input: { readonly identityId: string }): Promise<RoutineOccurrenceFact[]>;
   resolveOccurrence(input: ResolveRoutineOccurrenceInput): Promise<RoutineOccurrenceFact>;
   applyInteraction(input: ApplyRoutineInteractionInput): Promise<RoutineInteractionApplyReceipt>;
   listInteractions(input: {
     readonly identityId: string;
     readonly routineId: string;
     readonly occurrenceKey: string;
+  }): Promise<RoutineInteractionFact[]>;
+  /** All durable typed interactions for one owner identity. */
+  listInteractionsForIdentity(input: {
+    readonly identityId: string;
   }): Promise<RoutineInteractionFact[]>;
 }

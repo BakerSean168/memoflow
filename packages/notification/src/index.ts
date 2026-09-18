@@ -39,6 +39,7 @@ export {
   type NotificationPowerSyncRepositorySet,
   type NotificationReliableOperationPort,
   type NotificationRequestedWriterPort,
+  type NotificationPortableCapability,
   type ChannelCapabilitySpec,
   type NotificationChannelDeliverer,
   type NotificationDurableRuntimePort,

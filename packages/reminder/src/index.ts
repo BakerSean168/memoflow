@@ -29,4 +29,9 @@ export {
   type RoutineRuntimeContextReceipt,
   type RoutineTemporaryOverrideReceipt,
 } from './server/application';
+export {
+  RoutinePortableCapability,
+  createRoutinePortableCapability,
+  type RoutinePortablePayloadV3,
+} from './server/application';
 export * from './server/domain/routine';

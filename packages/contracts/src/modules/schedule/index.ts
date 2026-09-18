@@ -7,3 +7,4 @@ export * from './api';
 export * from './calendar-entry-range';
 export * from './planner';
 export * from './scheduling';
+export * from './portable-v3';

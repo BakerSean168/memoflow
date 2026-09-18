@@ -208,6 +208,8 @@ export interface NotificationElectronModuleDef {
   readonly name: string;
   /** Notification-owned stable delivery preference portability capability. */
   readonly portableCapability: NotificationModuleInstance['portableCapability'];
+  /** Notification-owned Fact/Inbox and typed Interaction portability capability. */
+  readonly portableFactCapability: NotificationModuleInstance['portableFactCapability'];
   register(context: IElectronModuleContext): void;
   destroy?(): void;
 }
@@ -249,6 +251,7 @@ export function createNotificationElectronModule(
   return {
     name: 'Notification',
     portableCapability: options.instance.portableCapability,
+    portableFactCapability: options.instance.portableFactCapability,
 
     register(ctx: IElectronModuleContext): void {
       if (state !== 'created') {

@@ -5354,6 +5354,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/schedule/portable-v3.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/setting/legacy-deletion.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -7530,6 +7538,16 @@
       ]
     },
     {
+      "path": "packages/notification/src/server/application/notification-portability.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/notification/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/notification/src/server/application/notification-preference-portability.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -8017,6 +8035,16 @@
     },
     {
       "path": "packages/reminder/src/method-library/method-library.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/reminder/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/reminder/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/reminder/src/server/application/routine-portability.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/reminder/vitest.config.ts"
@@ -8775,6 +8803,16 @@
     },
     {
       "path": "packages/schedule/src/infrastructure-client/adapters/ipc/schedule-ipc.adapter.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/schedule/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/schedule/src/server/application/schedule-portability.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/schedule/vitest.config.ts"
@@ -10858,21 +10896,21 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 42
+      "fileCount": 43
     },
     {
       "id": "packages/reminder/vitest.config.ts",
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 25
+      "fileCount": 26
     },
     {
       "id": "packages/schedule/vitest.config.ts",
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 22
+      "fileCount": 23
     },
     {
       "id": "packages/schedule/vitest.mappers.config.ts",
@@ -11208,7 +11246,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 86
+      "fileCount": 87
     },
     {
       "id": "packages/dashboard/vitest.config.ts",
@@ -11278,7 +11316,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 42
+      "fileCount": 43
     },
     {
       "id": "packages/patterns/vitest.config.ts",
@@ -11306,7 +11344,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 25
+      "fileCount": 26
     },
     {
       "id": "packages/repository/vitest.config.ts",
@@ -11327,7 +11365,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 22
+      "fileCount": 23
     },
     {
       "id": "packages/scheduler/vitest.config.ts",
@@ -11731,6 +11769,7 @@
       "packages/notification/src/electron/index-lifecycle.spec.ts",
       "packages/notification/src/electron/notification-electron.surface.spec.ts",
       "packages/notification/src/infrastructure-client/adapters/ipc/notification-ipc.adapter.surface.spec.ts",
+      "packages/notification/src/server/application/notification-portability.spec.ts",
       "packages/notification/src/server/application/notification-preference-portability.spec.ts",
       "packages/notification/src/server/application/services/notification-maintenance-application-service.test.ts",
       "packages/notification/src/server/application/services/notification-query-application-service.test.ts",
@@ -11767,6 +11806,7 @@
       "packages/notification/src/server/transport/notification-usecases-export.surface.spec.ts",
       "packages/reminder/src/__tests__/package-root-owner-surface.spec.ts",
       "packages/reminder/src/method-library/method-library.spec.ts",
+      "packages/reminder/src/server/application/routine-portability.spec.ts",
       "packages/reminder/src/server/application/services/routine-coach-command.service.spec.ts",
       "packages/reminder/src/server/domain/routine/__tests__/next-eligible-occurrence.spec.ts",
       "packages/reminder/src/server/domain/routine/__tests__/protocol.spec.ts",
@@ -11802,6 +11842,7 @@
       "packages/schedule/src/electron/schedule-electron-delete-contract.spec.ts",
       "packages/schedule/src/electron/schedule-electron.surface.spec.ts",
       "packages/schedule/src/infrastructure-client/adapters/ipc/schedule-ipc.adapter.surface.spec.ts",
+      "packages/schedule/src/server/application/schedule-portability.spec.ts",
       "packages/schedule/src/server/application/services/__tests__/schedule-domain-event-publisher.spec.ts",
       "packages/schedule/src/server/application/services/__tests__/schedule-w5-concurrency-projection.spec.ts",
       "packages/schedule/src/server/application/services/schedule-conflict-resolution-service.spec.ts",
@@ -11929,7 +11970,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1035,
+    "unit": 1039,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 9,
