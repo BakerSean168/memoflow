@@ -3,6 +3,7 @@ import {
   goalWorkflowEntityId,
   goalWorkflowMutationRequestId,
   knowledgeCaptureDocumentId,
+  taskWorkflowEntityId,
 } from './deterministic-entity-id';
 
 describe('goalWorkflowEntityId V2', () => {
@@ -48,6 +49,23 @@ describe('goalWorkflowEntityId V2', () => {
     expect(
       goalWorkflowEntityId({ ...base, kind: 'knowledge_document', draftRef: 'note:goal-brief' }),
     ).toMatch(/^kdoc_[0-9a-f-]{36}$/i);
+    const taskBeforeReorder = taskWorkflowEntityId({
+      ...base,
+      draftRef: 'task:daily-search',
+      operation: 'task_plan_create',
+    });
+    const taskAfterReorder = taskWorkflowEntityId({
+      ...base,
+      draftRef: 'task:daily-search',
+      operation: 'task_plan_create',
+    });
+    const taskOtherOperation = taskWorkflowEntityId({
+      ...base,
+      draftRef: 'task:daily-search',
+      operation: 'task_plan_retry',
+    });
+    expect(taskBeforeReorder).toBe(taskAfterReorder);
+    expect(taskBeforeReorder).not.toBe(taskOtherOperation);
 
     const requestA = goalWorkflowMutationRequestId({
       ...base,

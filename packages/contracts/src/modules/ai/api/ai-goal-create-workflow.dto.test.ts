@@ -105,6 +105,7 @@ describe('GOAL-7208 goal.create Workflow V2 contracts', () => {
     for (const retired of [
       { goal: { ...draft.goal, dueDate: Date.now() } },
       { goal: { ...draft.goal, motivation: 'legacy' } },
+      { goal: { ...draft.goal, feasibilityAnalysis: 'legacy' } },
       { keyResults: [{ ...draft.keyResults[0], startingValue: 0 }] },
       { taskPlans: draft.tasks },
       { reminders: [] },

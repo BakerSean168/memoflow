@@ -254,9 +254,12 @@
         <AITaskWorkflowPanel
           :tool-mode="toolMode"
           :task-workflow-run="taskWorkflowRun"
+          :editable-task="editableTask"
+          :show-task-draft-editor="showTaskDraftEditor"
           @confirm="confirmTaskAgentRun"
           @cancel="cancelTaskAgentRun"
           @retry="retryTaskAgentExecution"
+          @update-task="updateStandaloneTaskDraft"
           @edit-started="showTaskDraftEditor = true"
         />
         <AIKnowledgeCapturePanel
@@ -415,12 +418,14 @@ const {
   taskAgentLoading,
   taskWorkflowRun,
   showTaskDraftEditor,
+  editableTask,
   canRunTaskAgent,
   linkedGoalId,
   setLinkedGoalId,
   startTaskAgentRun,
   cancelTaskAgentRun,
   confirmTaskAgentRun,
+  updateTaskDraft: updateStandaloneTaskDraft,
   retryTaskAgentExecution,
 } = taskWorkflow;
 
