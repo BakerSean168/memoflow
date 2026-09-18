@@ -54,6 +54,14 @@ export {
   type AIKnowledgeEvidenceInput,
 } from './server/mastra/context';
 export { AIEvaluationReportFileAdapter } from './server/infrastructure';
+export {
+  projectAIOwnerActivity,
+  type AIOwnerActivityGoalFact,
+  type AIOwnerActivityTaskPlanFact,
+  type AIOwnerActivityTaskOccurrenceFact,
+  type AIOwnerActivityScheduleFact,
+  type ProjectAIOwnerActivityInput,
+} from './server/application/services/owner-activity-projection';
 // Host capability ports are re-exported through the package root so desktop
 // composers import only `@memoflow/ai` (no `/ports` subpath).
 export type {

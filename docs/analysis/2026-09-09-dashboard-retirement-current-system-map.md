@@ -2,7 +2,7 @@
 tags: [analysis, dashboard, home, read-model, retirement]
 description: Dashboard 页面退役后残余 read-model/package/route/config 与 Home composition 证据地图
 created: 2026-09-09T00:31:00+08:00
-updated: 2026-09-18T00:00:00Z
+updated: 2026-09-18T13:20:00+08:00
 ---
 
 # Dashboard Retirement Current-System Map
@@ -20,9 +20,9 @@ updated: 2026-09-18T00:00:00Z
 - task completion E2E 等仍触发 dashboard stats reconciliation。
 
 AI analytics now composes Goal, Task, Planner, Notification and activity reads
-directly. API activity still has a narrow transitional ActivityLedger reader;
-Desktop derives the same bounded recent-activity projection from local owner
-facts. This is an explicit HOME-1804 input, not a Dashboard replacement.
+directly. HOME-1804 confirmed that the API did not need a second durable
+cross-domain activity store: API and Desktop both derive the bounded recent
+activity projection from Goal/Task/Schedule owner facts.
 
 `DashboardStatsStrip`, `DashboardTrendPanel`, `DashboardActivityTimeline` 当前没有 production page consumer。
 
@@ -44,14 +44,18 @@ Dashboard contracts/projector仍依赖：
 
 它是高置信 retirement candidate。
 
-## 5. ActivityLedger
+## 5. HOME-1804 evidence decision: delete the durable activity ledger
 
-ActivityLedger recorder 是从旧 Dashboard R6 演化出的 durable cross-domain activity feed。HOME-1803 后，API 的 Dashboard read path 与 AI 的 narrow activity capability 都读取它；Desktop AI 没有本地 ledger，而是从 Goal/Task/Schedule owner facts 派生相同窗口的 bounded projection。
+HOME-1803 left one narrow API AI reader plus the legacy Dashboard reader on the old durable ledger. Desktop had no such table and already produced the same bounded recent-activity view from Goal/Task/Schedule owner facts. No independent product page, command, retention requirement, or owner domain consumed the ledger.
 
-它不应该因为 Dashboard package 退役而自动删除，但也不应该继续由 Dashboard 命名空间拥有。实施时需要独立决定：
+Therefore HOME-1804 chooses the destructive path:
 
-- 若 AI/其他当前产品路径确有“近期活动”用户价值，迁为 `ActivityFeedReadPort` / activity projection；
-- 若 characterization 证明无真实用户消费，则删除 recorder/table。
+- delete the API event-bus recorder and durable table;
+- remove the optional Dashboard `listActivities` source override so its temporary compatibility projection uses owner facts;
+- make API AI recent activity use the same owner-derived semantics as Desktop;
+- do **not** create `ActivityFeed`, analytics event sourcing, or another cross-domain authority.
+
+This leaves recent activity as a bounded consumer projection. HOME-1805 can now remove the remaining Dashboard package/contracts/routes without carrying a hidden data owner forward.
 
 ## 6. Target
 

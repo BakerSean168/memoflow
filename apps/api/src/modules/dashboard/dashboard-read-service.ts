@@ -87,39 +87,26 @@ export async function getApiDashboardData(
   const notificationRepos = createNotificationPrismaRepositories(db);
   const timeContext = await userTimeContextPort.getUserTimeContext(identityId);
 
-  return getDashboardData(identityId, {
-    listGoals: async (id) =>
-      (
-        await goalRepos.goalRepository.findByIdentityId(id, {
-          includeChildren: true,
-          systemView: 'active',
-        })
-      ).map((goal) => toDashboardGoalRecord(goal.toClientDTO(true))),
-    listTaskPlans: async (id) =>
-      (await taskRepos.taskPlanRepository.findByIdentityId(id)).map(toTaskPlanRecord),
-    listTaskOccurrences: async (id) =>
-      (await taskRepos.taskOccurrenceRepository.findByIdentityId(id)).map((instance) =>
-        toDashboardTaskOccurrenceRecord(instance.toClientDTOAt(timeContext)),
-      ),
-    listSchedules: async (id) =>
-      (await scheduleRepository.findByIdentityId(id)).map(toScheduleRecord),
-    countUnreadNotifications: (id) => notificationRepos.notificationRepository.countUnread(id),
-    // R6：Activity Ledger 窗口查询（避免全量加载后内存拼接）。
-    listActivities: async (id, opts = {}) => {
-      const limit = opts.limit ?? 10;
-      const windowMs = opts.windowMs ?? 14 * 24 * 60 * 60 * 1000;
-      const since = new Date(Date.now() - windowMs);
-      const rows = await db.activityLedger.findMany({
-        where: { identityId: id, occurredAt: { gte: since } },
-        orderBy: { occurredAt: 'desc' },
-        take: limit,
-      });
-      return rows.map((row) => ({
-        id: row.id,
-        type: row.action,
-        description: row.title ?? `${row.subjectType}:${row.subjectId}`,
-        timestamp: row.occurredAt.getTime(),
-      }));
+  return getDashboardData(
+    identityId,
+    {
+      listGoals: async (id) =>
+        (
+          await goalRepos.goalRepository.findByIdentityId(id, {
+            includeChildren: true,
+            systemView: 'active',
+          })
+        ).map((goal) => toDashboardGoalRecord(goal.toClientDTO(true))),
+      listTaskPlans: async (id) =>
+        (await taskRepos.taskPlanRepository.findByIdentityId(id)).map(toTaskPlanRecord),
+      listTaskOccurrences: async (id) =>
+        (await taskRepos.taskOccurrenceRepository.findByIdentityId(id)).map((instance) =>
+          toDashboardTaskOccurrenceRecord(instance.toClientDTOAt(timeContext)),
+        ),
+      listSchedules: async (id) =>
+        (await scheduleRepository.findByIdentityId(id)).map(toScheduleRecord),
+      countUnreadNotifications: (id) => notificationRepos.notificationRepository.countUnread(id),
     },
-  }, timeContext);
+    timeContext,
+  );
 }

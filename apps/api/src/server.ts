@@ -99,10 +99,6 @@ import { composeGoalKnowledgeApiModule } from './modules/relation/module.js';
 import { composeGoalWorkspaceApiModule } from './modules/goal/goal-workspace.module.js';
 import { createSystemClock } from '@memoflow/time';
 import { PrismaDashboardReadPort } from './modules/dashboard/dashboard-read-port.js';
-import {
-  PrismaActivityLedgerWriter,
-  createActivityLedgerRecorder,
-} from './modules/dashboard/activity-ledger.js';
 import { RepositoryKnowledgeCloudDataPurgerAdapter } from './modules/ai/repository-knowledge-cloud-data-purger.adapter';
 import { createCronScheduler } from './shared/infrastructure/cron/index.js';
 import type { CronSchedulerManager } from './shared/infrastructure/cron/index.js';
@@ -367,7 +363,6 @@ async function bootstrap(): Promise<void> {
   const taskWorkspaceApiModule = composeTaskWorkspaceApiModule(taskWorkspaceService);
   const dashboardApiModule = composeDashboardApiModule({
     dashboardReadPort: new PrismaDashboardReadPort(prisma, settingApiModule.userTimeContextPort),
-    activityLedgerRuntime: createActivityLedgerRecorder(new PrismaActivityLedgerWriter(prisma)),
   });
   const app = await bootstrapper
     // === 核心：白名单注册 ===

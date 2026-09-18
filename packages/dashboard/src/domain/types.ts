@@ -59,12 +59,4 @@ export interface DashboardReadSource {
   listTaskOccurrences(identityId: string): Promise<DashboardTaskOccurrenceRecord[]>;
   listSchedules(identityId: string): Promise<DashboardScheduleRecord[]>;
   countUnreadNotifications(identityId: string): Promise<number>;
-  /**
-   * R6：Activity Ledger 窗口查询（可选）。提供时 activityTimeline 改从
-   * ledger 读，不再全量加载实体后内存拼接；未提供则回退旧派生逻辑。
-   */
-  listActivities?(
-    identityId: string,
-    opts?: { limit?: number; windowMs?: number },
-  ): Promise<import('@memoflow/contracts/dashboard').ActivityItem[]>;
 }

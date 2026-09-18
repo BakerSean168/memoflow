@@ -43,14 +43,13 @@ export async function getDashboardData(
   const todayStart = Number(time.calendar.startOfDay(now));
   const todayEnd = Number(time.calendar.endOfDay(now));
 
-  const [goals, taskPlans, taskOccurrences, schedules, unreadNotifications] =
-    await Promise.all([
-      source.listGoals(identityId),
-      source.listTaskPlans(identityId),
-      source.listTaskOccurrences(identityId),
-      source.listSchedules(identityId),
-      source.countUnreadNotifications(identityId),
-    ]);
+  const [goals, taskPlans, taskOccurrences, schedules, unreadNotifications] = await Promise.all([
+    source.listGoals(identityId),
+    source.listTaskPlans(identityId),
+    source.listTaskOccurrences(identityId),
+    source.listSchedules(identityId),
+    source.countUnreadNotifications(identityId),
+  ]);
 
   const activeGoals = goals.filter(
     (goal) =>
@@ -124,18 +123,13 @@ export async function getDashboardData(
       unreadNotifications,
       scheduleConflicts: activeSchedules.filter((schedule) => schedule.hasConflict).length,
     },
-    activityTimeline: source.listActivities
-      ? await source.listActivities(identityId, {
-          limit: ACTIVITY_LIMIT,
-          windowMs: ACTIVITY_WINDOW_MS,
-        })
-      : buildActivityTimeline({
-          goals: activeGoals,
-          taskPlans: activeTemplates,
-          taskOccurrences: liveTaskOccurrences,
-          schedules,
-          now,
-        }),
+    activityTimeline: buildActivityTimeline({
+      goals: activeGoals,
+      taskPlans: activeTemplates,
+      taskOccurrences: liveTaskOccurrences,
+      schedules,
+      now,
+    }),
     trendDays: buildTrendDays(now, activeTemplates, liveTaskOccurrences, time.calendar),
     goalProgress,
     taskBoard,
