@@ -113,7 +113,7 @@ export function AIScreen() {
                         <ThemedText type="smallBold">{provider.name}</ThemedText>
                         <View style={styles.pillRow}>
                           {provider.isDefault ? <StatusPill label="Default" tone="success" /> : null}
-                          <StatusPill label={provider.providerType} tone="textSecondary" />
+                          <StatusPill label={provider.providerDefinitionId} tone="textSecondary" />
                         </View>
                       </View>
                       <ThemedText type="small" themeColor="textSecondary">

@@ -1,9 +1,9 @@
 import { AIExecutionError } from '../../../../shared/ai-execution-error';
 import { normalizeOpenAICompatibleModelId } from '../../../shared/openai-compatible-normalize';
-import { AIProviderType, type AIProviderConfigServerDTO } from '@memoflow/contracts/ai';
+import type { AIProviderConfigServerDTO } from '@memoflow/contracts/ai';
 
 import type { IAIProviderConfigRepository } from '../../../domain/repositories/i-ai-provider-config-repository';
-import type { ChatExecutionProviderConfig } from '../../ports';
+import type { ChatExecutionProviderConfig, IAIProviderSecretVault } from '../../ports';
 
 /**
  * Resolve the provider config that should be used for an AI operation.
@@ -51,11 +51,10 @@ export async function resolveActiveProviderConfig(
  */
 export function toChatExecutionProviderConfig(
   providerConfig: {
-    providerType?: string;
     defaultModel: string | null;
-    apiKey: string;
     baseUrl: string;
   },
+  credential: string,
   options?: {
     modelOverride?: string;
     temperature?: number;
@@ -63,21 +62,27 @@ export function toChatExecutionProviderConfig(
   },
 ): ChatExecutionProviderConfig {
   return {
-    provider: toExecutionProviderName(providerConfig.providerType),
+    // ProviderDefinition currently exposes the single supported protocol:
+    // openai_compatible. AI-9605 owns capability-aware protocol/model routing.
+    provider: 'openai',
     model: normalizeOpenAICompatibleModelId(
       options?.modelOverride ?? providerConfig.defaultModel ?? 'gpt-4o-mini',
     ),
-    apiKey: providerConfig.apiKey,
+    apiKey: credential,
     baseUrl: providerConfig.baseUrl,
     temperature: options?.temperature ?? 0.7,
     maxTokens: options?.maxTokens,
   };
 }
 
-function toExecutionProviderName(providerType?: string): string {
-  switch (providerType) {
-    case AIProviderType.OpenAICompatible:
-    default:
-      return 'openai';
-  }
+export async function resolveProviderCredential(
+  secretVault: IAIProviderSecretVault,
+  identityId: string,
+  providerConfig: { credentialRef: Parameters<IAIProviderSecretVault['resolve']>[0]['credentialRef'] },
+): Promise<string> {
+  const credential = await secretVault.resolve({
+    identityId,
+    credentialRef: providerConfig.credentialRef,
+  });
+  return credential.value;
 }

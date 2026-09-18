@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { AIProviderConfigServerDTO } from '@memoflow/contracts/ai';
-import { AIProviderType } from '@memoflow/contracts/ai';
 import type { IAIProviderConfigRepository } from '../../../../domain/repositories/i-ai-provider-config-repository';
 import { UpdateAIProviderUseCase } from '../update-ai-provider.use-case';
 
@@ -10,11 +9,10 @@ describe('UpdateAIProviderUseCase default invariant', () => {
       id: 'provider-1' as AIProviderConfigServerDTO['id'],
       identityId: 'identity-1' as AIProviderConfigServerDTO['identityId'],
       name: 'Primary',
-      providerType: AIProviderType.OpenAICompatible,
+      providerDefinitionId: 'openai',
       baseUrl: 'https://example.com/v1',
-      apiKey: 'secret',
       defaultModel: 'model-1',
-        isActive: true,
+      isActive: true,
       isDefault: true,
       priority: 100,
       version: 1,

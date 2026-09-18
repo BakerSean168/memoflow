@@ -4,8 +4,6 @@ import type {
   AIProviderReplacementCommitOutcome,
   IAIProviderOnboardingCommitPort,
 } from '../../../application/ports/provider-onboarding-commit.port';
-import type { IAIProviderSecretVault } from '../../../application/ports/provider-secret-vault.port';
-import { AISecretCipher } from '../../security/ai-secret-cipher';
 
 class ReplacementRollback extends Error {
   constructor(readonly outcome: AIProviderReplacementCommitOutcome) {
@@ -14,18 +12,7 @@ class ReplacementRollback extends Error {
 }
 
 export class AIProviderOnboardingCommitPrismaAdapter implements IAIProviderOnboardingCommitPort {
-  private cipher: IAIProviderSecretVault | null;
-
-  constructor(
-    private readonly db: PrismaClient,
-    secretVault?: IAIProviderSecretVault,
-  ) {
-    this.cipher = secretVault ?? null;
-  }
-
-  private get secretVault(): IAIProviderSecretVault {
-    return (this.cipher ??= AISecretCipher.fromEnv());
-  }
+  constructor(private readonly db: PrismaClient) {}
 
   async commit(
     input: Parameters<IAIProviderOnboardingCommitPort['commit']>[0],
@@ -55,14 +42,20 @@ export class AIProviderOnboardingCommitPrismaAdapter implements IAIProviderOnboa
           });
         }
 
+        const credential = await tx.aiProviderSecret.updateMany({
+          where: { id: input.provider.credentialRef, identityId: input.identityId, revokedAt: null },
+          data: { expiresAt: null, updatedAt: new Date(input.now) },
+        });
+        if (credential.count !== 1) throw new Error('AI provider credential is unavailable');
+
         await tx.aiProviderConfig.create({
           data: {
             id: String(input.provider.id),
             identityId: input.identityId,
             name: input.provider.name,
-            providerType: input.provider.providerType,
+            providerDefinitionId: input.provider.providerDefinitionId,
             baseUrl: input.provider.baseUrl,
-            apiKeyEncrypted: this.secretVault.encrypt(input.provider.apiKey),
+            credentialRef: input.provider.credentialRef,
             defaultModel: input.provider.defaultModel,
             isActive: input.provider.isActive,
             isDefault: input.provider.isDefault,
@@ -99,7 +92,7 @@ export class AIProviderOnboardingCommitPrismaAdapter implements IAIProviderOnboa
             identityId: input.identityId,
             deletedAt: null,
           },
-          select: { version: true },
+          select: { version: true, credentialRef: true },
         });
         if (!current) return 'PROVIDER_NOT_FOUND' as const;
         if (current.version !== input.expectedVersion) return 'CONFLICT' as const;
@@ -125,7 +118,7 @@ export class AIProviderOnboardingCommitPrismaAdapter implements IAIProviderOnboa
           },
           data: {
             baseUrl: input.replacement.baseUrl,
-            apiKeyEncrypted: this.secretVault.encrypt(input.replacement.apiKey),
+            credentialRef: input.replacement.credentialRef,
             defaultModel: input.replacement.defaultModel,
             version: input.replacement.version,
             updatedAt: new Date(input.replacement.updatedAt),
@@ -135,6 +128,21 @@ export class AIProviderOnboardingCommitPrismaAdapter implements IAIProviderOnboa
           // Throw rather than return: the session consume above must roll back too.
           throw new ReplacementRollback('CONFLICT');
         }
+        const credential = await tx.aiProviderSecret.updateMany({
+          where: { id: input.replacement.credentialRef, identityId: input.identityId, revokedAt: null },
+          data: { expiresAt: null, updatedAt: new Date(input.now) },
+        });
+        if (credential.count !== 1) throw new Error('AI provider credential is unavailable');
+
+        const revoked = await tx.aiProviderSecret.updateMany({
+          where: {
+            id: input.previousCredentialRef,
+            identityId: input.identityId,
+            revokedAt: null,
+          },
+          data: { revokedAt: new Date(input.now), updatedAt: new Date(input.now) },
+        });
+        if (revoked.count !== 1) throw new Error('AI provider credential is unavailable');
         return 'REPLACED' as const;
       });
     } catch (error) {

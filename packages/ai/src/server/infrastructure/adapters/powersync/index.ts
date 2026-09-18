@@ -5,3 +5,4 @@ export { AIExecutionLogPowerSyncAdapter } from './ai-execution-log-powersync.ada
 export * from './mappers';
 export { PowerSyncAIProviderOnboardingSessionRepository } from './ai-provider-onboarding-session-powersync.repository';
 export { PowerSyncAIProviderOnboardingCommitAdapter } from './ai-provider-onboarding-commit-powersync.adapter';
+export { PowerSyncAIProviderSecretVault } from './ai-provider-secret-powersync.vault';

@@ -4,29 +4,31 @@
  */
 
 import type {
-  AiProviderConfigId,
+  AiProviderConnectionId,
+  AIProviderCredentialRef,
   IdentityId,
   TransferDate,
 } from '../../../primitives';
-import type { AIProviderType } from '../value-objects/ai-provider-type';
+import type { AIProviderDefinitionId } from '../configs/ai-provider-catalog';
 
 /**
- * AI Provider 配置 - 服务端 DTO
- * 包含完整的 API Key（加密存储）
+ * AI Provider connection - server/domain DTO.
+ *
+ * Secret material is owned by SecretVault and is never part of this DTO.
  */
 export interface AIProviderConfigServerDTO {
   /** 唯一标识符 */
-  id: AiProviderConfigId;
+  id: AiProviderConnectionId;
   /** 所属账户 ID */
   identityId: IdentityId;
   /** 配置名称 */
   name: string;
-  /** 提供商类型 */
-  providerType: AIProviderType;
+  /** ProviderDefinition/catalog identity. */
+  providerDefinitionId: AIProviderDefinitionId;
   /** API 基础地址 */
   baseUrl: string;
-  /** API Key（服务端完整存储，加密） */
-  apiKey: string;
+  /** Opaque reference into the host-owned SecretVault. */
+  credentialRef: AIProviderCredentialRef;
   /** 默认使用的模型 ID */
   defaultModel: string | null;
   /** 是否启用 */
@@ -44,3 +46,6 @@ export interface AIProviderConfigServerDTO {
   /** 软删除时间戳 */
   deletedAt: TransferDate | null;
 }
+
+/** Canonical name for the persisted provider connection state. */
+export type AIProviderConnectionServerDTO = AIProviderConfigServerDTO;

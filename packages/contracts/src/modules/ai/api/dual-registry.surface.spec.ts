@@ -167,7 +167,7 @@ import { describe, expect, it } from 'vitest';
         'export type AIProviderConfigClientDTO = z.infer<typeof AIProviderConfigClientDTOSchema>',
       );
       expect(aggregate).toContain('identityId: brandedId<IdentityId>()');
-      expect(aggregate).toContain('apiKeyMasked: z.string()');
+      expect(aggregate).toContain('credentialRef:');
       expect(aggregate).not.toMatch(/export interface AIProviderConfigClientDTO\b/);
       expect(aggregate).not.toMatch(/apiKey:\s/);
     });

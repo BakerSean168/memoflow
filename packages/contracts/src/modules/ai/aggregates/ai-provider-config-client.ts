@@ -4,13 +4,18 @@
  *
  * Residual 751: AIModelInfo dual body retired — sole AIModelInfoSchema + z.infer.
  * Residual 811: AIProviderConfigClientDTO dual retired — sole ClientDTOSchema + z.infer
- * (identityId branded; apiKey only masked).
+ * (identityId and connection identity are branded; credentials are represented
+ * only by an opaque SecretVault reference).
  */
 
 import { z } from 'zod';
 import { brandedId } from '../../../primitives';
-import type { AiProviderConfigId, IdentityId } from '../../../primitives';
-import { AIProviderType } from '../value-objects/ai-provider-type';
+import type {
+  AiProviderConnectionId,
+  AIProviderCredentialRef,
+  IdentityId,
+} from '../../../primitives';
+import { AI_PROVIDER_CATALOG_IDS } from '../configs/ai-provider-catalog';
 
 // Residual 751: AIModelInfo dual body retired — OpenAPI + transport use
 // AIModelInfoSchema (semantic type is a z.infer alias).
@@ -26,15 +31,24 @@ export const AIModelInfoSchema = z.object({
 
 export type AIModelInfo = z.infer<typeof AIModelInfoSchema>;
 
-// Residual 811: AIProviderConfigClientDTO dual retired — sole ClientDTOSchema + z.infer.
-// Note: apiKey is masked only on the client view.
+/** Runtime validation for the opaque host-owned SecretVault handle. */
+export const AIProviderCredentialRefSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(200)
+  .transform((value) => value as AIProviderCredentialRef);
+
+// The saved provider surface is a connection projection. It deliberately has
+// no plaintext or masked credential value; the opaque ref is useful only to
+// host-owned execution adapters.
 export const AIProviderConfigClientDTOSchema = z.object({
-  id: brandedId<AiProviderConfigId>(),
+  id: brandedId<AiProviderConnectionId>(),
   identityId: brandedId<IdentityId>(),
   name: z.string(),
-  providerType: z.enum(Object.values(AIProviderType)),
+  providerDefinitionId: z.enum(AI_PROVIDER_CATALOG_IDS),
   baseUrl: z.string(),
-  apiKeyMasked: z.string(),
+  credentialRef: AIProviderCredentialRefSchema,
   defaultModel: z.string().nullable(),
   isActive: z.boolean(),
   isDefault: z.boolean(),
@@ -46,3 +60,6 @@ export const AIProviderConfigClientDTOSchema = z.object({
 });
 
 export type AIProviderConfigClientDTO = z.infer<typeof AIProviderConfigClientDTOSchema>;
+
+/** Canonical name for the user-owned, non-secret provider connection view. */
+export type AIProviderConnectionClientDTO = AIProviderConfigClientDTO;

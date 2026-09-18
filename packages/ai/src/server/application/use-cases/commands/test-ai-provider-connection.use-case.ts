@@ -6,13 +6,14 @@ import type {
   TestAIProviderRes,
 } from '@memoflow/contracts/ai';
 import type { IAIProviderConfigRepository } from '../../../domain/repositories/i-ai-provider-config-repository';
-import type { IAIChatExecutionPort } from '../../ports';
+import type { IAIChatExecutionPort, IAIProviderSecretVault } from '../../ports';
 import { resolveProviderConfigForConnectionTest } from './ai-provider-config-helpers';
 
 export class TestAIProviderConnectionUseCase {
   constructor(
     private readonly providerConfigRepository: IAIProviderConfigRepository,
     private readonly chatExecutionPort: IAIChatExecutionPort,
+    private readonly secretVault: IAIProviderSecretVault,
   ) {}
 
   async execute(
@@ -24,6 +25,7 @@ export class TestAIProviderConnectionUseCase {
     try {
       const providerConfig = await resolveProviderConfigForConnectionTest(
         this.providerConfigRepository,
+        this.secretVault,
         cx.identityId,
         request,
       );

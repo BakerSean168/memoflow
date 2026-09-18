@@ -211,9 +211,9 @@ exports.Prisma.AiProviderConfigScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
   name: 'name',
-  providerType: 'providerType',
+  providerDefinitionId: 'providerDefinitionId',
   baseUrl: 'baseUrl',
-  apiKeyEncrypted: 'apiKeyEncrypted',
+  credentialRef: 'credentialRef',
   defaultModel: 'defaultModel',
   availableModels: 'availableModels',
   isActive: 'isActive',
@@ -231,13 +231,23 @@ exports.Prisma.AiProviderOnboardingSessionScalarFieldEnum = {
   catalogId: 'catalogId',
   baseUrl: 'baseUrl',
   targetProviderId: 'targetProviderId',
-  credentialEncrypted: 'credentialEncrypted',
+  credentialRef: 'credentialRef',
   credentialStatus: 'credentialStatus',
   discoveryStatus: 'discoveryStatus',
   modelsJson: 'modelsJson',
   verifiedModelIds: 'verifiedModelIds',
   expiresAt: 'expiresAt',
   consumedAt: 'consumedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AiProviderSecretScalarFieldEnum = {
+  id: 'id',
+  identityId: 'identityId',
+  encryptedValue: 'encryptedValue',
+  expiresAt: 'expiresAt',
+  revokedAt: 'revokedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -1409,6 +1419,7 @@ exports.Prisma.ModelName = {
   AiUsageQuota: 'AiUsageQuota',
   AiProviderConfig: 'AiProviderConfig',
   AiProviderOnboardingSession: 'AiProviderOnboardingSession',
+  AiProviderSecret: 'AiProviderSecret',
   KnowledgeGenerationTask: 'KnowledgeGenerationTask',
   AiKnowledgeIndexEntry: 'AiKnowledgeIndexEntry',
   DashboardConfig: 'DashboardConfig',

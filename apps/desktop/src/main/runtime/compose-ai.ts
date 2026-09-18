@@ -70,6 +70,7 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): AIElectr
   const {
     conversationRepository,
     providerConfigRepository,
+    providerSecretVault,
     knowledgeIndexRepository,
     executionLogPort,
     providerOnboardingSessionRepository,
@@ -90,7 +91,7 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): AIElectr
   );
   const mastraRuntime = new MastraAIRuntime({
     storage: createMastraStorage(dependencies.mastraStorage),
-    modelResolver: new MastraModelResolver(providerConfigRepository),
+    modelResolver: new MastraModelResolver(providerConfigRepository, providerSecretVault),
     transcriptBootstrapSource: new ConversationTranscriptBootstrapSource(conversationRepository),
     goalPlanMutationPort,
     taskPlanMutationPort: taskPlanMutationAdapter,
@@ -115,6 +116,7 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): AIElectr
   const instance = createAIModule({
     conversationRepository,
     providerConfigRepository,
+    providerSecretVault,
     providerOnboardingSessionRepository,
     providerOnboardingCommitPort,
     mastraRuntime,

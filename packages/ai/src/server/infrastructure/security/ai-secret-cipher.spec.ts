@@ -1,16 +1,6 @@
-import { createCipheriv, createHash, randomBytes } from 'node:crypto';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { AISecretCipher } from './ai-secret-cipher';
-
-function encryptLegacyV2(secret: string, value: string): string {
-  const key = createHash('sha256').update(secret).digest();
-  const iv = randomBytes(12);
-  const cipher = createCipheriv('aes-256-gcm', key, iv);
-  const ciphertext = Buffer.concat([cipher.update(value, 'utf8'), cipher.final()]);
-  const authTag = cipher.getAuthTag();
-  return `enc_v2:${Buffer.concat([iv, authTag, ciphertext]).toString('base64')}`;
-}
 
 describe('AISecretCipher', () => {
   const managedEnvKeys = [
@@ -71,16 +61,9 @@ describe('AISecretCipher', () => {
     expect(rotated.rewrap(encrypted)).toMatch(/^enc_v3:2026-08:/);
   });
 
-  it('reads legacy enc_v2 with any key in the rotation keyring', () => {
-    const encrypted = encryptLegacyV2('old-secret', 'plain-secret');
-    const rotated = new AISecretCipher('new-secret', {
-      keyId: '2026-08',
-      previousKeys: { '2026-07': 'old-secret' },
-    });
-
-    expect(rotated.decrypt(encrypted)).toBe('plain-secret');
-    expect(rotated.needsRewrap(encrypted)).toBe(true);
-    expect(rotated.rewrap(encrypted)).toMatch(/^enc_v3:2026-08:/);
+  it('rejects legacy ciphertext without a migration reader', () => {
+    const cipher = new AISecretCipher('new-secret');
+    expect(() => cipher.decrypt('enc_v2:legacy')).toThrow(/unsupported ciphertext format/);
   });
 
   it('fails when an enc_v3 key id is not in the keyring', () => {
@@ -90,22 +73,14 @@ describe('AISecretCipher', () => {
     );
   });
 
-  it('fails when legacy enc_v2 cannot authenticate with the keyring', () => {
-    const encrypted = encryptLegacyV2('old-secret', 'plain-secret');
-    expect(() => new AISecretCipher('wrong-secret').decrypt(encrypted)).toThrow(
-      /unable to decrypt legacy enc_v2/,
-    );
-  });
-
-  it('passes through plaintext seed values and marks them for rewrap', () => {
+  it('rejects plaintext seeds without a migration reader', () => {
     const cipher = new AISecretCipher('a-strong-test-secret');
-    expect(cipher.decrypt('not-encrypted')).toBe('not-encrypted');
-    expect(cipher.needsRewrap('not-encrypted')).toBe(true);
+    expect(() => cipher.decrypt('not-encrypted')).toThrow(/unsupported ciphertext format/);
   });
 
   it('rejects legacy enc_v1 XOR ciphertext', () => {
     const cipher = new AISecretCipher('a-strong-test-secret');
-    expect(() => cipher.decrypt('enc_v1:c29tZS1sZWdhY3ktdmFsdWU=')).toThrow(/legacy enc_v1/);
+    expect(() => cipher.decrypt('enc_v1:c29tZS1sZWdhY3ktdmFsdWU=')).toThrow(/unsupported ciphertext format/);
   });
 
   it('round-trips Unicode values', () => {

@@ -283,7 +283,6 @@ const schedules = new Table({
   updated_at: column.text,
 });
 
-
 const scheduling_reconcile_operations = new Table({
   identity_id: column.text,
   owner_type: column.text,
@@ -347,8 +346,6 @@ const invocation_attempts = new Table({
   fencing_token: column.integer,
   created_at: column.text,
 });
-
-
 
 const schedule_domain_event_outbox = new Table(
   {
@@ -614,8 +611,6 @@ const notification_preferences = new Table({
   deleted_at: column.text,
 });
 
-
-
 // ──────────────────────────────────────────────
 // AI
 // ──────────────────────────────────────────────
@@ -681,9 +676,9 @@ const ai_usage_quotas = new Table({
 const ai_provider_configs = new Table({
   identity_id: column.text,
   name: column.text,
-  provider_type: column.text,
+  provider_definition_id: column.text,
   base_url: column.text,
-  api_key_encrypted: column.text,
+  credential_ref: column.text,
   default_model: column.text,
   available_models: column.text, // JSON
   is_active: column.integer, // boolean
@@ -696,9 +691,10 @@ const ai_provider_configs = new Table({
 });
 
 /**
- * Desktop-only Provider onboarding state. Credentials are encrypted with the
- * same local provider vault and never enter the PowerSync upload queue.
- * The final Provider write consumes this row in the same SQLite transaction.
+ * Desktop-only Provider onboarding state. The session carries only an opaque
+ * credential reference; encrypted material lives in the separate local-only
+ * SecretVault table and never enters the PowerSync upload queue. The final
+ * Provider write consumes this row in the same SQLite transaction.
  */
 const ai_provider_onboarding_sessions = new Table(
   {
@@ -706,13 +702,29 @@ const ai_provider_onboarding_sessions = new Table(
     catalog_id: column.text,
     base_url: column.text,
     target_provider_id: column.text,
-    credential_encrypted: column.text,
+    credential_ref: column.text,
     credential_status: column.text,
     discovery_status: column.text,
     models_json: column.text,
     verified_model_ids_json: column.text,
     expires_at: column.integer,
     consumed_at: column.integer,
+    created_at: column.integer,
+    updated_at: column.integer,
+  },
+  { localOnly: true },
+);
+
+/**
+ * Desktop SecretVault storage. The table is localOnly by construction: its
+ * encrypted values never enter the PowerSync upload queue or sync rules.
+ */
+const ai_provider_secrets = new Table(
+  {
+    identity_id: column.text,
+    encrypted_value: column.text,
+    expires_at: column.integer,
+    revoked_at: column.integer,
     created_at: column.integer,
     updated_at: column.integer,
   },
@@ -967,6 +979,7 @@ export const PowerSyncAppSchema = new Schema({
   ai_usage_quotas,
   ai_provider_configs,
   ai_provider_onboarding_sessions,
+  ai_provider_secrets,
   ai_knowledge_index_entries_local,
   task_goal_outbox,
   dashboard_configs,

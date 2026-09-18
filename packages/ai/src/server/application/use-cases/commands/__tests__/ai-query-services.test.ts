@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
-  AIProviderType,
   type ExpandKnowledgeReq,
   type QueryAnalyticsReq,
   type QueryKnowledgeReq,
@@ -41,16 +40,18 @@ import {
   createAIModuleForTests,
   createAIProviderConfigRepositoryStub,
   createAIProviderConfigServerDTO,
+  createAIProviderSecretVaultStub,
 } from '../../../../../testing';
+
+const secretVault = createAIProviderSecretVaultStub();
 
 class StubProviderConfigRepository {
   constructor(
     private readonly providers: Array<{
       id: string;
       identityId: string;
-      providerType: string;
+      providerDefinitionId: string;
       baseUrl: string;
-      apiKey: string;
       defaultModel: string | null;
       isActive: boolean;
       isDefault?: boolean;
@@ -63,18 +64,18 @@ class StubProviderConfigRepository {
     if (!provider || provider.identityId !== identityId) {
       return null;
     }
-    return provider;
+    return { ...provider, credentialRef: 'credential_test' };
   }
 
   async findDefaultByIdentityId(identityId: string) {
-    return (
-      this.providers.find((provider) => provider.identityId === identityId && provider.isDefault) ??
-      null
-    );
+    const provider = this.providers.find((item) => item.identityId === identityId && item.isDefault) ?? null;
+    return provider ? { ...provider, credentialRef: 'credential_test' } : null;
   }
 
   async findByIdentityId(identityId: string) {
-    return this.providers.filter((provider) => provider.identityId === identityId);
+    return this.providers
+      .filter((provider) => provider.identityId === identityId)
+      .map((provider) => ({ ...provider, credentialRef: 'credential_test' }));
   }
 }
 
@@ -351,9 +352,8 @@ describe('AIKnowledgeQueryService', () => {
         {
           id: 'provider-1',
           identityId: 'identity-1',
-          providerType: AIProviderType.OpenAICompatible,
+          providerDefinitionId: 'openai',
           baseUrl: 'https://api.openai.com/v1',
-          apiKey: 'plain-secret',
           defaultModel: 'gpt-4o-mini',
           isActive: true,
           isDefault: true,
@@ -363,6 +363,7 @@ describe('AIKnowledgeQueryService', () => {
       syncRelevant,
       queryPort,
       executionLogPort,
+      secretVault,
     );
 
     const result = await service.execute(
@@ -455,9 +456,8 @@ describe('AIKnowledgeQueryService', () => {
         {
           id: 'provider-1',
           identityId: 'identity-1',
-          providerType: AIProviderType.OpenAICompatible,
+          providerDefinitionId: 'openai',
           baseUrl: 'https://api.openai.com/v1',
-          apiKey: 'plain-secret',
           defaultModel: 'gpt-4o-mini',
           isActive: true,
           isDefault: true,
@@ -467,6 +467,7 @@ describe('AIKnowledgeQueryService', () => {
       syncRelevant,
       queryPort,
       executionLogPort,
+      secretVault,
     );
 
     const result = await service.execute(
@@ -527,9 +528,8 @@ describe('AIKnowledgeQueryService', () => {
         {
           id: 'provider-1',
           identityId: 'identity-1',
-          providerType: AIProviderType.OpenAICompatible,
+          providerDefinitionId: 'openai',
           baseUrl: 'https://api.openai.com/v1',
-          apiKey: 'plain-secret',
           defaultModel: 'gpt-4o-mini',
           isActive: true,
           isDefault: true,
@@ -539,6 +539,7 @@ describe('AIKnowledgeQueryService', () => {
       syncRelevant,
       queryPort,
       executionLogPort,
+      secretVault,
     );
 
     await service.execute(
@@ -581,9 +582,8 @@ describe('AIKnowledgeQueryService', () => {
         {
           id: 'provider-1',
           identityId: 'identity-1',
-          providerType: AIProviderType.OpenAICompatible,
+          providerDefinitionId: 'openai',
           baseUrl: 'https://api.openai.com/v1',
-          apiKey: 'plain-secret',
           defaultModel: 'gpt-4o-mini',
           isActive: true,
           isDefault: true,
@@ -593,6 +593,7 @@ describe('AIKnowledgeQueryService', () => {
       syncRelevant,
       queryPort,
       executionLogPort,
+      secretVault,
     );
 
     const result = await service.execute(
@@ -650,9 +651,8 @@ describe('AIKnowledgeQueryService', () => {
         {
           id: 'provider-1',
           identityId: 'identity-1',
-          providerType: AIProviderType.OpenAICompatible,
+          providerDefinitionId: 'openai',
           baseUrl: 'https://api.openai.com/v1',
-          apiKey: 'plain-secret',
           defaultModel: 'gpt-4o-mini',
           isActive: true,
           isDefault: true,
@@ -666,6 +666,7 @@ describe('AIKnowledgeQueryService', () => {
         ingestionPort,
         executionLogPort,
       ),
+      secretVault,
     );
 
     await service.execute(
@@ -713,9 +714,8 @@ describe('AIKnowledgeQueryService', () => {
         {
           id: 'provider-1',
           identityId: 'identity-1',
-          providerType: AIProviderType.OpenAICompatible,
+          providerDefinitionId: 'openai',
           baseUrl: 'https://api.openai.com/v1',
-          apiKey: 'plain-secret',
           defaultModel: 'gpt-4o-mini',
           isActive: true,
           isDefault: true,
@@ -724,6 +724,7 @@ describe('AIKnowledgeQueryService', () => {
       ]) as unknown as IAIProviderConfigRepository,
       reindexAll,
       syncById,
+      secretVault,
     );
 
     const result = await service.execute(
@@ -795,9 +796,8 @@ describe('AIAnalyticsQueryService', () => {
         {
           id: 'provider-1',
           identityId: 'identity-1',
-          providerType: AIProviderType.OpenAICompatible,
+          providerDefinitionId: 'openai',
           baseUrl: 'https://api.openai.com/v1',
-          apiKey: 'plain-secret',
           defaultModel: 'gpt-4o-mini',
           isActive: true,
           isDefault: true,
@@ -807,6 +807,7 @@ describe('AIAnalyticsQueryService', () => {
       readPort,
       queryPort,
       executionLogPort,
+      secretVault,
     );
 
     const result = await service.queryAnalytics(

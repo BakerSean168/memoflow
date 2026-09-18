@@ -7,8 +7,6 @@ import type {
   CreateAIProviderOnboardingSessionInput,
   IAIProviderOnboardingSessionRepository,
 } from '../../../application/ports/provider-onboarding-session.repository';
-import type { IAIProviderSecretVault } from '../../../application/ports/provider-secret-vault.port';
-import { AISecretCipher } from '../../security/ai-secret-cipher';
 
 interface PowerSyncProviderOnboardingRow {
   id: string;
@@ -16,7 +14,7 @@ interface PowerSyncProviderOnboardingRow {
   catalog_id: string;
   base_url: string;
   target_provider_id: string | null;
-  credential_encrypted: string;
+  credential_ref: string;
   credential_status: string;
   discovery_status: string;
   models_json: string | null;
@@ -30,23 +28,12 @@ interface PowerSyncProviderOnboardingRow {
 export class PowerSyncAIProviderOnboardingSessionRepository
   implements IAIProviderOnboardingSessionRepository
 {
-  private cipher: IAIProviderSecretVault | null;
-
-  constructor(
-    private readonly db: IElectronDatabase,
-    secretCipher?: IAIProviderSecretVault,
-  ) {
-    this.cipher = secretCipher ?? null;
-  }
-
-  private get secretCipher(): IAIProviderSecretVault {
-    return (this.cipher ??= AISecretCipher.fromEnv());
-  }
+  constructor(private readonly db: IElectronDatabase) {}
 
   async create(input: CreateAIProviderOnboardingSessionInput): Promise<void> {
     await this.db.execute(
       `INSERT INTO ai_provider_onboarding_sessions (
-        id, identity_id, catalog_id, base_url, target_provider_id, credential_encrypted,
+        id, identity_id, catalog_id, base_url, target_provider_id, credential_ref,
         credential_status, discovery_status, models_json,
         verified_model_ids_json, expires_at, consumed_at, created_at, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)`,
@@ -56,7 +43,7 @@ export class PowerSyncAIProviderOnboardingSessionRepository
         input.catalogId,
         input.baseUrl,
         input.targetProviderId ?? null,
-        this.secretCipher.encrypt(input.apiKey),
+        input.credentialRef,
         input.credentialStatus,
         input.discoveryStatus,
         JSON.stringify(input.models),
@@ -135,7 +122,7 @@ export class PowerSyncAIProviderOnboardingSessionRepository
       catalogId: row.catalog_id as AIProviderCatalogId,
       baseUrl: row.base_url,
       targetProviderId: row.target_provider_id,
-      apiKey: this.secretCipher.decrypt(row.credential_encrypted),
+      credentialRef: row.credential_ref as AIProviderOnboardingSessionRecord['credentialRef'],
       credentialStatus: row.credential_status as AIProviderOnboardingCredentialStatus,
       discoveryStatus: row.discovery_status as AIProviderOnboardingDiscoveryStatus,
       models: parseModels(row.models_json),

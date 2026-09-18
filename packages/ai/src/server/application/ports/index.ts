@@ -33,7 +33,13 @@ export type {
   IAIProviderModelCatalogPort,
   ProviderModelCatalogInput,
 } from './provider-model-catalog.port';
-export type { IAIProviderSecretVault } from './provider-secret-vault.port';
+export type {
+  IAIProviderSecretVault,
+  ResolvedAIProviderCredential,
+  StoreAIProviderCredentialInput,
+  ResolveAIProviderCredentialInput,
+  ReplaceAIProviderCredentialInput,
+} from './provider-secret-vault.port';
 export type {
   ChatExecutionCompleteInput,
   ChatExecutionCompleteResult,

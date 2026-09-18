@@ -150,6 +150,7 @@ const dependencies = {
 const repositories = {
   conversationRepository: { tag: 'conversation' },
   providerConfigRepository: { tag: 'provider-config' },
+  providerSecretVault: { tag: 'provider-secret-vault' },
   knowledgeIndexRepository: { tag: 'knowledge-index' },
   executionLogPort: { tag: 'execution-log' },
 };
@@ -177,7 +178,10 @@ describe('API composeAI Mastra-only ownership', () => {
 
     expect(createAIPrismaRepositories).toHaveBeenCalledWith(fakeDb);
     expect(createMastraStorage).toHaveBeenCalledWith(mastraStorage);
-    expect(MastraModelResolver).toHaveBeenCalledWith(repositories.providerConfigRepository);
+    expect(MastraModelResolver).toHaveBeenCalledWith(
+      repositories.providerConfigRepository,
+      repositories.providerSecretVault,
+    );
     expect(ConversationTranscriptBootstrapSource).toHaveBeenCalledWith(
       repositories.conversationRepository,
     );
@@ -236,6 +240,7 @@ describe('API composeAI Mastra-only ownership', () => {
     const moduleInput = vi.mocked(createAIModule).mock.calls[0][0];
     expect(moduleInput.conversationRepository).toBe(repositories.conversationRepository);
     expect(moduleInput.providerConfigRepository).toBe(repositories.providerConfigRepository);
+    expect(moduleInput.providerSecretVault).toBe(repositories.providerSecretVault);
     expect(moduleInput.knowledgeIndexRepository).toBe(repositories.knowledgeIndexRepository);
     expect(moduleInput.executionLogPort).toBe(repositories.executionLogPort);
     expect(moduleInput.knowledgeNotePersistence).toBe(

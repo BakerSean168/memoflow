@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   createAIProviderConfigRepositoryStub,
   createAIProviderConfigServerDTO,
+  createAIProviderSecretVaultStub,
 } from '../../../testing/ai-test-support';
 import { MastraModelResolver } from './model-resolver';
 
@@ -13,11 +14,10 @@ describe('MastraModelResolver', () => {
       id: 'provider-selected' as never,
       identityId: 'identity-1' as never,
       defaultModel: 'model-default',
-      apiKey: 'server-secret',
     });
     const findByIdForIdentity = vi.fn(async () => provider);
     const repository = createAIProviderConfigRepositoryStub({ findByIdForIdentity });
-    const resolver = new MastraModelResolver(repository, inertFetch);
+    const resolver = new MastraModelResolver(repository, createAIProviderSecretVaultStub(), inertFetch);
 
     const resolved = await resolver.resolve({
       identityId: 'identity-1',
@@ -55,7 +55,7 @@ describe('MastraModelResolver', () => {
       findByIdForIdentity,
       findDefaultByIdentityId,
     });
-    const resolver = new MastraModelResolver(repository, inertFetch);
+    const resolver = new MastraModelResolver(repository, createAIProviderSecretVaultStub(), inertFetch);
 
     const resolved = await resolver.resolve({
       identityId: 'identity-1',
@@ -72,7 +72,7 @@ describe('MastraModelResolver', () => {
       findDefaultByIdentityId: async () => null,
       findByIdentityId: async () => [],
     });
-    const resolver = new MastraModelResolver(repository, inertFetch);
+    const resolver = new MastraModelResolver(repository, createAIProviderSecretVaultStub(), inertFetch);
 
     await expect(resolver.resolve({ identityId: 'identity-1' })).rejects.toMatchObject({
       category: 'provider_unavailable',
@@ -84,7 +84,7 @@ describe('MastraModelResolver', () => {
     const repository = createAIProviderConfigRepositoryStub({
       findDefaultByIdentityId: async () => provider,
     });
-    const resolver = new MastraModelResolver(repository, inertFetch);
+    const resolver = new MastraModelResolver(repository, createAIProviderSecretVaultStub(), inertFetch);
 
     await expect(resolver.resolve({ identityId: String(provider.identityId) })).rejects.toThrow(
       /has no selected model/,

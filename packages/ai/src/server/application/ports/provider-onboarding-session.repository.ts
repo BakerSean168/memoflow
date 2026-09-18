@@ -1,8 +1,9 @@
 import type {
   AIModelInfo,
-  AIProviderCatalogId,
+  AIProviderDefinitionId,
   ProbeAIProviderConnectionRes,
 } from '@memoflow/contracts/ai';
+import type { AIProviderCredentialRef } from '@memoflow/contracts/primitives';
 
 export type AIProviderOnboardingCredentialStatus = ProbeAIProviderConnectionRes['credential']['status'];
 export type AIProviderOnboardingDiscoveryStatus = ProbeAIProviderConnectionRes['discovery']['status'];
@@ -10,12 +11,12 @@ export type AIProviderOnboardingDiscoveryStatus = ProbeAIProviderConnectionRes['
 export interface AIProviderOnboardingSessionRecord {
   readonly id: string;
   readonly identityId: string;
-  readonly catalogId: AIProviderCatalogId;
+  readonly catalogId: AIProviderDefinitionId;
   readonly baseUrl: string;
   /** Null for create onboarding; set for credential/endpoint replacement. */
   readonly targetProviderId: string | null;
-  /** Server-only plaintext after repository decryption. Never expose to transport DTOs. */
-  readonly apiKey: string;
+  /** Opaque reference into the host-owned SecretVault. */
+  readonly credentialRef: AIProviderCredentialRef;
   readonly credentialStatus: AIProviderOnboardingCredentialStatus;
   readonly discoveryStatus: AIProviderOnboardingDiscoveryStatus;
   readonly models: readonly AIModelInfo[];
@@ -29,10 +30,10 @@ export interface AIProviderOnboardingSessionRecord {
 export interface CreateAIProviderOnboardingSessionInput {
   readonly id: string;
   readonly identityId: string;
-  readonly catalogId: AIProviderCatalogId;
+  readonly catalogId: AIProviderDefinitionId;
   readonly baseUrl: string;
   readonly targetProviderId?: string | null;
-  readonly apiKey: string;
+  readonly credentialRef: AIProviderCredentialRef;
   readonly credentialStatus: AIProviderOnboardingCredentialStatus;
   readonly discoveryStatus: AIProviderOnboardingDiscoveryStatus;
   readonly models: readonly AIModelInfo[];

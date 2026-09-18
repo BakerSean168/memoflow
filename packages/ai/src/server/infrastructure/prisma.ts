@@ -14,6 +14,7 @@ import type {
   IKnowledgeIndexRepository,
   IAIProviderOnboardingCommitPort,
   IAIProviderOnboardingSessionRepository,
+  IAIProviderSecretVault,
 } from '../application/ports';
 import {
   AIConversationPrismaRepository,
@@ -22,6 +23,7 @@ import {
   AIProviderConfigPrismaRepository,
   AIProviderOnboardingCommitPrismaAdapter,
   AIProviderOnboardingSessionPrismaRepository,
+  AIProviderSecretPrismaVault,
 } from './adapters/prisma';
 
 export interface AIPrismaRepositorySet {
@@ -31,6 +33,7 @@ export interface AIPrismaRepositorySet {
   readonly executionLogPort: IAIExecutionLogPort & IAIUsageReadPort;
   readonly providerOnboardingSessionRepository: IAIProviderOnboardingSessionRepository;
   readonly providerOnboardingCommitPort: IAIProviderOnboardingCommitPort;
+  readonly providerSecretVault: IAIProviderSecretVault;
 }
 
 export function createAIPrismaRepositories(db: PrismaClient): AIPrismaRepositorySet {
@@ -41,5 +44,6 @@ export function createAIPrismaRepositories(db: PrismaClient): AIPrismaRepository
     executionLogPort: new AIExecutionLogPrismaAdapter(db),
     providerOnboardingSessionRepository: new AIProviderOnboardingSessionPrismaRepository(db),
     providerOnboardingCommitPort: new AIProviderOnboardingCommitPrismaAdapter(db),
+    providerSecretVault: new AIProviderSecretPrismaVault(db),
   };
 }

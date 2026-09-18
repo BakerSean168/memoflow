@@ -10,10 +10,14 @@ export type {
 
 export type {
   AIProviderConfigClientDTO,
+  AIProviderConnectionClientDTO,
   AIModelInfo,
 } from './ai-provider-config-client';
-export { AIModelInfoSchema } from './ai-provider-config-client';
+export { AIModelInfoSchema, AIProviderCredentialRefSchema } from './ai-provider-config-client';
 
 export type {
   AIProviderConfigServerDTO,
+  AIProviderConnectionServerDTO,
 } from './ai-provider-config-server';
+
+export type { AIProviderConnection, AIProviderCredentialRef } from './ai-provider-connection';

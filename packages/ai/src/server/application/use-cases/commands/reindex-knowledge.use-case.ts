@@ -5,12 +5,14 @@ import type { ReindexKnowledgeReq, ReindexKnowledgeRes } from '@memoflow/contrac
 import { createLogger } from '@memoflow/utils/logger';
 
 import type { IAIProviderConfigRepository } from '../../../domain/repositories/i-ai-provider-config-repository';
+import type { IAIProviderSecretVault } from '../../ports';
 import type { ReindexAllKnowledgeUseCase } from './reindex-all-knowledge.use-case';
 import type { SyncNoteByIdUseCase } from './sync-note-by-id.use-case';
 import type { SyncKnowledgeNotesResult } from './ai-knowledge-index-helpers';
 import { attachRequestIdToError } from './ai-observability';
 import {
   resolveActiveProviderConfig,
+  resolveProviderCredential,
   toChatExecutionProviderConfig,
 } from './ai-provider-resolution';
 
@@ -24,6 +26,7 @@ export class ReindexKnowledgeUseCase {
     private readonly providerConfigRepository: IAIProviderConfigRepository,
     private readonly knowledgeIndexService: ReindexAllKnowledgeUseCase,
     private readonly syncNoteById?: SyncNoteByIdUseCase,
+    private readonly secretVault?: IAIProviderSecretVault,
   ) {}
 
   async execute(
@@ -39,7 +42,9 @@ export class ReindexKnowledgeUseCase {
           this.providerConfigRepository,
           cx.identityId,
         );
-        executionProviderConfig = toChatExecutionProviderConfig(provider, {
+        if (!this.secretVault) throw new Error('AI provider SecretVault is unavailable');
+        const credential = await resolveProviderCredential(this.secretVault, cx.identityId, provider);
+        executionProviderConfig = toChatExecutionProviderConfig(provider, credential, {
           temperature: 0.2,
         });
       } catch (providerError) {

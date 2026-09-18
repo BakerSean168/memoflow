@@ -11,6 +11,7 @@ import type {
   IAIProviderEndpointPolicyPort,
   IAIProviderModelCatalogPort,
   IAIProviderOnboardingSessionRepository,
+  IAIProviderSecretVault,
 } from '../../ports';
 
 const ONBOARDING_TTL_MS = 10 * 60 * 1000;
@@ -22,6 +23,7 @@ export class ProbeAIProviderConnectionUseCase {
       modelCatalog: IAIProviderModelCatalogPort;
       credentialProbe: IAIProviderCredentialProbePort;
       endpointPolicy: IAIProviderEndpointPolicyPort;
+      secretVault: IAIProviderSecretVault;
       now?: () => number;
       generateId?: () => string;
     },
@@ -67,13 +69,18 @@ export class ProbeAIProviderConnectionUseCase {
     const now = this.dependencies.now?.() ?? Date.now();
     const onboardingId = `onboarding_${this.dependencies.generateId?.() ?? randomUUID()}`;
     const expiresAt = now + ONBOARDING_TTL_MS;
+    const credentialRef = await this.dependencies.secretVault.store({
+      identityId: cx.identityId,
+      value: request.apiKey,
+      expiresAt,
+    });
     await this.dependencies.sessionRepository.create({
       id: onboardingId,
       identityId: cx.identityId,
       catalogId: catalog.id,
       baseUrl,
       targetProviderId: options.targetProviderId ?? null,
-      apiKey: request.apiKey,
+      credentialRef,
       credentialStatus,
       discoveryStatus,
       models,

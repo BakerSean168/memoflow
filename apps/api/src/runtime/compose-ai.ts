@@ -121,7 +121,10 @@ export function composeAI(dependencies: ComposeAIDependencies): AIApiModuleDef {
   );
   const mastraRuntime = new MastraAIRuntime({
     storage: createMastraStorage(dependencies.mastraStorage),
-    modelResolver: new MastraModelResolver(repositorySet.providerConfigRepository),
+    modelResolver: new MastraModelResolver(
+      repositorySet.providerConfigRepository,
+      repositorySet.providerSecretVault,
+    ),
     transcriptBootstrapSource: new ConversationTranscriptBootstrapSource(
       repositorySet.conversationRepository,
     ),
@@ -155,6 +158,7 @@ export function composeAI(dependencies: ComposeAIDependencies): AIApiModuleDef {
   const instance = createAIModule({
     conversationRepository: repositorySet.conversationRepository,
     providerConfigRepository: repositorySet.providerConfigRepository,
+    providerSecretVault: repositorySet.providerSecretVault,
     providerOnboardingSessionRepository: repositorySet.providerOnboardingSessionRepository,
     providerOnboardingCommitPort: repositorySet.providerOnboardingCommitPort,
     mastraRuntime,
