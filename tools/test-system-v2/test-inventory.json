@@ -3706,6 +3706,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/goal/composables/useGoalHomeSummary.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/goal/goal-vnext-ui-convergence.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5071,6 +5079,14 @@
     },
     {
       "path": "packages/contracts/src/modules/goal/api/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/modules/goal/api/goal-home-summary.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -6483,6 +6499,17 @@
     },
     {
       "path": "packages/goal/src/server/application/use-cases/queries/__tests__/get-goal-aggregate.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts",
+        "packages/goal/vitest.use-cases.config.ts"
+      ]
+    },
+    {
+      "path": "packages/goal/src/server/application/use-cases/queries/__tests__/get-goal-home-summary.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/goal/vitest.config.ts"
@@ -10759,7 +10786,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 85
+      "fileCount": 86
     },
     {
       "id": "packages/goal/vitest.mappers.config.ts",
@@ -10773,7 +10800,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 30
+      "fileCount": 31
     },
     {
       "id": "packages/governance/vitest.config.ts",
@@ -11116,7 +11143,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 197
+      "fileCount": 198
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -11137,7 +11164,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 85
+      "fileCount": 86
     },
     {
       "id": "packages/dashboard/vitest.config.ts",
@@ -11172,7 +11199,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 85
+      "fileCount": 86
     },
     {
       "id": "packages/governance/vitest.config.ts",
@@ -11577,6 +11604,7 @@
       "packages/goal/src/server/application/use-cases/commands/__tests__/update-goal.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/wallet.use-cases.spec.ts",
       "packages/goal/src/server/application/use-cases/queries/__tests__/get-goal-aggregate.test.ts",
+      "packages/goal/src/server/application/use-cases/queries/__tests__/get-goal-home-summary.test.ts",
       "packages/goal/src/server/application/use-cases/queries/__tests__/get-goal-review-context.test.ts",
       "packages/goal/src/server/application/use-cases/queries/__tests__/get-goal.test.ts",
       "packages/goal/src/server/application/use-cases/queries/__tests__/goal-cross-module-query-service.test.ts",
@@ -11855,7 +11883,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1027,
+    "unit": 1030,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 9,

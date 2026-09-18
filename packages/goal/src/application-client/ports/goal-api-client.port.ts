@@ -18,6 +18,7 @@ import type {
   DeleteGoalReq,
   CloneGoalReq,
   QueryGoalsRes,
+  GoalHomeProgressSummary,
   AddKeyResultReq,
   UpdateKeyResultReq,
   DeleteKeyResultReq,
@@ -54,6 +55,7 @@ export interface IGoalApiClient {
     targetEnd?: import('@memoflow/contracts/primitives').Ymd;
     includeChildren?: boolean;
   }): Promise<Result<QueryGoalsRes>>;
+  getHomeSummary(): Promise<Result<GoalHomeProgressSummary>>;
   getGoalById(id: string, includeChildren?: boolean): Promise<Result<GoalClientDTO>>;
   updateGoal(id: string, request: UpdateGoalReq): Promise<Result<GoalMutationReceipt>>;
   deleteGoal(id: string, request: DeleteGoalReq): Promise<Result<GoalMutationReceipt>>;

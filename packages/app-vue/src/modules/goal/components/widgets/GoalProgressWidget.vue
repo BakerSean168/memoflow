@@ -17,11 +17,11 @@ import {
   Button,
 } from '@memoflow/ui-vue-shadcn';
 import { Target, ArrowRight } from '@lucide/vue';
-import type { GoalProgressItem } from '@memoflow/contracts/dashboard';
+import type { GoalHomeProgressItem } from '@memoflow/contracts/goal';
 
 withDefaults(
   defineProps<{
-    goals: GoalProgressItem[];
+    goals: GoalHomeProgressItem[];
     loading?: boolean;
   }>(),
   { loading: false },

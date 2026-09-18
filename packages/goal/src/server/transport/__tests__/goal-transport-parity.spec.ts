@@ -118,6 +118,19 @@ function createPortStub(): GoalApplicationPort {
     deleteRecord: fn(okReceipt()),
     getGoal: vi.fn(),
     listGoals: vi.fn(),
+    getHomeSummary: fn({
+      activeCount: 2,
+      goals: [
+        {
+          id: GOAL_ID,
+          name: 'Ship architecture fixes',
+          progress: 45,
+          status: 'InProgress',
+          target: null,
+          keyResultCount: 3,
+        },
+      ],
+    }),
     searchGoals: vi.fn(),
     getGoalAggregate: vi.fn(),
     permanentlyDeleteGoal: vi.fn(),
@@ -351,6 +364,30 @@ describe('goal transport parity (Phase 4) — production registrations', () => {
       expect(badIpcResult.error?.details).toEqual(badHttpRes.body.error.details);
     }
   }
+
+  it('home summary: HTTP and IPC expose the same Goal-owned read model', async () => {
+    const port = createPortStub();
+    const http = buildHttp(port);
+    const ipc = buildIpc(port);
+    const httpHandler = http.get('goal GET /home-summary');
+    expect(httpHandler).toBeDefined();
+
+    const httpRes = createRes();
+    await httpHandler!(makeReq({}), httpRes);
+    expect(httpRes.statusCode).toBe(200);
+    expect(httpRes.body.ok).toBe(true);
+
+    const ipcHandler = ipc.get(GoalChannels.HOME_SUMMARY);
+    expect(ipcHandler).toBeDefined();
+    const ipcResult = await ipcHandler!({ sender: {}, senderFrame: {} });
+    expect(ipcResult.ok).toBe(true);
+    expect(httpRes.body.data).toEqual((ipcResult as { data: unknown }).data);
+
+    const mock = port.getHomeSummary as ReturnType<typeof vi.fn>;
+    expect(mock).toHaveBeenCalledTimes(2);
+    expect(mock.mock.calls[0]?.[0]).toBe('identity-1');
+    expect(mock.mock.calls[1]?.[0]).toBe('identity-1');
+  });
 
   it.each<[string, RowSpec]>([
     [

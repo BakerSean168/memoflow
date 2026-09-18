@@ -16,6 +16,7 @@ import type {
 import type { GetKeyResultsReq, GetKeyResultsRes } from '../api/key-result.dto';
 import type {
   GoalMutationReceipt,
+  GoalHomeProgressSummary,
   GoalReviewSystemContext,
   QueryGoalsRes,
 } from '../api/response-schemas';
@@ -66,6 +67,7 @@ export type GoalRpcMap = {
   'goal:clone': [CloneGoalInvocation, GoalMutationReceipt];
   'goal:get': [GetGoalReq, GetGoalRes];
   'goal:list': [ListGoalFilters, QueryGoalsRes];
+  'goal:home-summary': [undefined, GoalHomeProgressSummary];
 
   // Key Result Operations
   'key-result:add': [AddKeyResultInvocation, GoalMutationReceipt];

@@ -29,9 +29,13 @@ describe('Dashboard retirement characterization (SYS-0001 / ADR-108)', () => {
     expect(router).not.toMatch(/path:\s*'dashboard'[\s\S]{0,220}component:/);
   });
 
-  it('records the remaining live Home/Goal consumers that must migrate before package deletion', () => {
-    expect(todayOverview).toContain("from '../../modules/dashboard/composables/useDashboard'");
-    expect(goalCapsule).toContain("from '../../../modules/dashboard/composables/useDashboard'");
+  it('confirms Home/Goal consumers have completed the owner-read cutover', () => {
+    expect(todayOverview).not.toContain("from '../../modules/dashboard/composables/useDashboard'");
+    expect(todayOverview).toContain('useGoalHomeSummary');
+    expect(goalCapsule).not.toContain(
+      "from '../../../modules/dashboard/composables/useDashboard'",
+    );
+    expect(goalCapsule).toContain('useGoalHomeSummary');
   });
 
   it('records the remaining AI analytics dependency on DashboardData', () => {

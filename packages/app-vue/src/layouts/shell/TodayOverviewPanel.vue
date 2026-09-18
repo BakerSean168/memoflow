@@ -5,7 +5,7 @@ import { Button } from '@memoflow/ui-vue-shadcn';
 import { Plus, Target } from '@lucide/vue';
 import DailyTodoWidget from '../../modules/task/components/widgets/DailyTodoWidget.vue';
 import GoalProgressWidget from '../../modules/goal/components/widgets/GoalProgressWidget.vue';
-import { useDashboard } from '../../modules/dashboard/composables/useDashboard';
+import { useGoalHomeSummary } from '../../modules/goal/composables/useGoalHomeSummary';
 import { getProductTime, productTimeRevision } from '../../shared/utils/product-time';
 
 const props = defineProps<{ active: boolean }>();
@@ -15,9 +15,9 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const { goalProgress, isLoading, fetchDashboard } = useDashboard();
-const dashboardReconciliationDelays = [0, 250, 500, 1_000, 2_000] as const;
-let dashboardRefreshGeneration = 0;
+const { goals: goalProgress, isLoading, refresh: refreshGoalSummary } = useGoalHomeSummary();
+const goalReconciliationDelays = [0, 250, 500, 1_000, 2_000] as const;
+let goalRefreshGeneration = 0;
 
 const todayLabel = computed(() => {
   void productTimeRevision.value;
@@ -27,24 +27,24 @@ const todayLabel = computed(() => {
 watch(
   () => props.active,
   (active) => {
-    if (active) void fetchDashboard();
+    if (active) void refreshGoalSummary();
   },
   { immediate: true },
 );
 
 async function refreshAfterTaskCompletion() {
-  const generation = ++dashboardRefreshGeneration;
-  for (const delay of dashboardReconciliationDelays) {
+  const generation = ++goalRefreshGeneration;
+  for (const delay of goalReconciliationDelays) {
     if (delay > 0) {
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
-    if (generation !== dashboardRefreshGeneration) return;
-    await fetchDashboard();
+    if (generation !== goalRefreshGeneration) return;
+    await refreshGoalSummary();
   }
 }
 
 onBeforeUnmount(() => {
-  dashboardRefreshGeneration++;
+  goalRefreshGeneration++;
 });
 </script>
 

@@ -16,6 +16,7 @@ import type {
   DeleteGoalReq,
   CloneGoalReq,
   QueryGoalsRes,
+  GoalHomeProgressSummary,
   AddKeyResultReq,
   UpdateKeyResultReq,
   DeleteKeyResultReq,
@@ -65,6 +66,10 @@ export class GoalHttpAdapter implements IGoalApiClient {
       includeChildren: params?.includeChildren !== false,
     };
     return this.httpClient.get(this.baseUrl, { params: requestParams });
+  }
+
+  async getHomeSummary(): Promise<Result<GoalHomeProgressSummary>> {
+    return this.httpClient.get(`${this.baseUrl}/home-summary`);
   }
 
   async getGoalById(id: string, includeChildren = true): Promise<Result<GoalClientDTO>> {

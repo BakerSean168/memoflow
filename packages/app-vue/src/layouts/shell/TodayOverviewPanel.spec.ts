@@ -6,17 +6,17 @@ import { defineComponent, h, nextTick } from 'vue';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import TodayOverviewPanel from './TodayOverviewPanel.vue';
 
-const dashboardMocks = vi.hoisted(() => ({
-  fetchDashboard: vi.fn(async () => undefined),
+const goalHomeMocks = vi.hoisted(() => ({
+  refresh: vi.fn(async () => undefined),
 }));
 
-vi.mock('../../modules/dashboard/composables/useDashboard', async () => {
+vi.mock('../../modules/goal/composables/useGoalHomeSummary', async () => {
   const { ref } = await import('vue');
   return {
-    useDashboard: () => ({
-      goalProgress: ref([]),
+    useGoalHomeSummary: () => ({
+      goals: ref([]),
       isLoading: ref(false),
-      fetchDashboard: dashboardMocks.fetchDashboard,
+      refresh: goalHomeMocks.refresh,
     }),
   };
 });
@@ -88,14 +88,14 @@ describe('TodayOverviewPanel', () => {
     vi.useRealTimers();
   });
 
-  it('loads dashboard data only when the Home surface becomes active', async () => {
+  it('loads Goal-owned Home progress only when the Home surface becomes active', async () => {
     const wrapper = mountPanel(false);
-    expect(dashboardMocks.fetchDashboard).not.toHaveBeenCalled();
+    expect(goalHomeMocks.refresh).not.toHaveBeenCalled();
 
     await wrapper.setProps({ active: true });
     await nextTick();
 
-    expect(dashboardMocks.fetchDashboard).toHaveBeenCalledOnce();
+    expect(goalHomeMocks.refresh).toHaveBeenCalledOnce();
     expect(wrapper.get('[data-testid="today-overview-widgets"]').exists()).toBe(true);
   });
 
@@ -117,15 +117,15 @@ describe('TodayOverviewPanel', () => {
     ]);
   });
 
-  it('reconciles the dashboard projection after task completion', async () => {
+  it('reconciles the Goal owner projection after task completion', async () => {
     vi.useFakeTimers();
     const wrapper = mountPanel(true);
     await nextTick();
-    dashboardMocks.fetchDashboard.mockClear();
+    goalHomeMocks.refresh.mockClear();
 
     await wrapper.get('[data-testid="daily-todo-complete"]').trigger('click');
     await vi.runAllTimersAsync();
 
-    expect(dashboardMocks.fetchDashboard).toHaveBeenCalledTimes(5);
+    expect(goalHomeMocks.refresh).toHaveBeenCalledTimes(5);
   });
 });

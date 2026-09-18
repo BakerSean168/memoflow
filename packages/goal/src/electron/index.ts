@@ -224,6 +224,12 @@ export function createGoalElectronModule(
           ),
         );
         installed.push(GoalChannels.LIST);
+        ipcMain.handle(GoalChannels.HOME_SUMMARY, async () =>
+          withAuthenticatedValue(ctx, async (requestContext: ExecutionContext) =>
+            goalController.homeSummary(requestContext),
+          ),
+        );
+        installed.push(GoalChannels.HOME_SUMMARY);
         ipcMain.handle(GoalChannels.GET, async (_event, id, includeChildren = true) =>
           withAuthenticatedValue(ctx, async (requestContext: ExecutionContext) =>
             goalController.get(id, requestContext, includeChildren),
