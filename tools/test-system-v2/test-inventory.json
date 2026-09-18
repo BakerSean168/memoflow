@@ -2534,6 +2534,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/application/ai-conversation-portability.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/application/ports/knowledge-source-note.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5101,6 +5111,14 @@
     },
     {
       "path": "packages/contracts/src/modules/ai/api/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/modules/ai/portable-v3.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -10802,7 +10820,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 87
+      "fileCount": 88
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -11180,7 +11198,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 87
+      "fileCount": 88
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -11208,7 +11226,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 86
+      "fileCount": 87
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -11489,6 +11507,7 @@
       "packages/ai/src/infrastructure-client/adapters/read-string-keep-boundary.surface.spec.ts",
       "packages/ai/src/infrastructure-client/adapters/result-client-error.test.ts",
       "packages/ai/src/server/application/ai-application-capabilities.surface.spec.ts",
+      "packages/ai/src/server/application/ai-conversation-portability.spec.ts",
       "packages/ai/src/server/application/ports/knowledge-source-note.surface.spec.ts",
       "packages/ai/src/server/application/services/owner-activity-projection.spec.ts",
       "packages/ai/src/server/application/use-cases/commands/__tests__/ai-provider-config-service.test.ts",
@@ -11930,7 +11949,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1035,
+    "unit": 1037,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

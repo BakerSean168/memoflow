@@ -38,6 +38,7 @@ import {
   type IAnalyticsReadPort,
   type IKnowledgeNotePersistencePort,
   type IKnowledgeSourcePort,
+  type AIModuleInstance,
 } from '@memoflow/ai';
 import { createAIElectronModule, type AIElectronModuleDef } from '@memoflow/ai/electron';
 import { DesktopGoalPlanMutationAdapter } from '../modules/ai/goal-plan-mutation.adapter';
@@ -68,7 +69,15 @@ export interface ComposeAIElectronDependencies {
 /**
  * Composes the AI Electron module handle from the desktop runtime's database.
  */
-export function composeAI(dependencies: ComposeAIElectronDependencies): AIElectronModuleDef {
+export interface ComposedAIElectron {
+  readonly module: AIElectronModuleDef;
+  /** AI-owned Conversation shell portability capability for host registration. */
+  readonly portableCapability: AIModuleInstance['portableCapability'];
+}
+
+export function composeAI(
+  dependencies: ComposeAIElectronDependencies,
+): ComposedAIElectron {
   const {
     conversationRepository,
     providerConfigRepository,
@@ -129,5 +138,8 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): AIElectr
     analyticsReadPort: dependencies.analyticsReadPort,
   });
 
-  return createAIElectronModule({ instance });
+  return {
+    module: createAIElectronModule({ instance }),
+    portableCapability: instance.portableCapability,
+  };
 }

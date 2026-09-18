@@ -61,9 +61,9 @@ describe('AI application capability boundaries', () => {
       expect(moduleSource).toContain(`readonly ${capability}:`);
     }
     expect(apiComposition).toContain('const instance = createAIModule({');
-    expect(apiComposition).toContain('return createAIApiModule({ instance });');
+    expect(apiComposition).toContain('module: createAIApiModule({ instance }),');
     expect(desktopComposition).toContain('const instance = createAIModule({');
-    expect(desktopComposition).toContain('return createAIElectronModule({ instance });');
+    expect(desktopComposition).toContain('module: createAIElectronModule({ instance }),');
   });
 
   it('locks each API consumer to its own capability and excludes unrelated authority', () => {

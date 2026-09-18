@@ -7,6 +7,10 @@
 // Use Cases
 export * from './use-cases';
 export * from './ports';
+export {
+  AIConversationPortableCapability,
+  createAIConversationPortableCapability,
+} from './ai-conversation-portability';
 export type {
   AIEvaluationOperationsPort,
   AIKnowledgePort,

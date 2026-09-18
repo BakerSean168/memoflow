@@ -48,12 +48,17 @@ Data Portability 的定位正确：它没有自己的业务 Domain，而是跨 o
 
 仍完整导出/导入已经退休的 EditorWorkspace/Session/Group/Tab。它是阻碍旧 editor tables 最终删除的主要兼容边界。
 
-### AI（AI-9612 as-built）
+### AI（Stage A prerequisite closure）
 
-AI portability now exports/imports Conversation shell metadata only. Mastra thread history remains
-runtime-owned; there is no `AiMessage`/`ai_messages` portability path. Provider credentials,
-`AIExecutionRecord` operations projections, capability evidence, and AI index cache/vectors are
-not ordinary user backup truth.
+AI Conversation shell now has owner-driven V3 coverage through the canonical
+`ai-conversations@3` capability. Its strict payload contains only capability-scoped `ref`, shell
+`name`, and canonical `status`; import creates fresh host-owned shell IDs under the execution
+identity and never restores source identity, persistence metadata, timestamps, or deleted state.
+Mastra thread history remains runtime-owned; there is no `AiMessage`/`ai_messages` V3 portability
+path. Provider credentials, `AIExecutionRecord` operations projections, capability evidence, and AI
+index cache/vectors are not ordinary user backup truth. The V2 full-backup path still exports and
+imports the same shell metadata temporarily, solely until PORT-1611 cuts the product surface;
+PORT-1611 remains pending and V2 is not deleted by this prerequisite closure.
 
 ### Settings
 

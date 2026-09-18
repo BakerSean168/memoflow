@@ -31,6 +31,8 @@ describe('data-portability API runtime composer surface', () => {
     expect(server).toContain('notificationApiModule.portableFactCapability');
     expect(server).toContain('createLabelPortableCapability(labelService)');
     expect(server).toContain('goalComposed.portableCapability');
+    expect(server).toContain('aiComposed.portableCapability');
+    expect(server.match(/aiComposed\.portableCapability/g)).toHaveLength(1);
     expect(server).toContain('.register(dataPortabilityApiModule.module)');
   });
 
@@ -49,6 +51,7 @@ describe('data-portability API runtime composer surface', () => {
       'createLabelPortableCapability(labelService)',
       'goalComposed.portableCapability',
       'taskComposed.portableCapability',
+      'aiComposed.portableCapability',
     ];
     const desktopOrder = [
       'accountComposed.portableCapability',
@@ -60,6 +63,7 @@ describe('data-portability API runtime composer surface', () => {
       'createLabelPortableCapability(labelService)',
       'goalComposed.portableCapability',
       'taskComposed.portableCapability',
+      'aiComposed.portableCapability',
     ];
     const registrationBody = (source: string, first: string) =>
       source.slice(source.indexOf(first));
@@ -71,6 +75,7 @@ describe('data-portability API runtime composer surface', () => {
     expect(orderedIndexes(registrationBody(desktop, desktopOrder[0]!), desktopOrder)).toEqual(
       [...orderedIndexes(registrationBody(desktop, desktopOrder[0]!), desktopOrder)].sort((a, b) => a - b),
     );
+    expect(desktop.match(/aiComposed\.portableCapability/g)).toHaveLength(1);
   });
 
   it('server.ts no longer references DataPortabilityApiModule or the data-portability/api seam', () => {
