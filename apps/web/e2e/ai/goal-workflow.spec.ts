@@ -446,7 +446,9 @@ test.describe('AI Goal Workflow', () => {
     await expect(page.getByTestId('knowledge-citation-open')).toBeVisible();
 
     await page.getByTestId('knowledge-citation-open').click();
-    await expect(page).toHaveURL(/\/repository$/);
+    await expect(page).toHaveURL(
+      /\/repository\?note=kdoc_550e8400-e29b-41d4-a716-446655440090$/,
+    );
     expect(telemetry.legacyEndpointCallCount).toBe(0);
   });
 
