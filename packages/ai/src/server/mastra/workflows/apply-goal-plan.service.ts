@@ -82,6 +82,7 @@ function expectedReferenceMap(workflowRunId: string, draft: GoalPlanDraft): Reco
       revision: draft.revision,
       kind: 'goal',
       draftRef: 'goal',
+      operation: 'goal_create',
     }),
   };
   for (const keyResult of draft.keyResults) {
@@ -90,6 +91,7 @@ function expectedReferenceMap(workflowRunId: string, draft: GoalPlanDraft): Reco
       revision: draft.revision,
       kind: 'key_result',
       draftRef: keyResult.draftRef,
+      operation: 'key_result_create',
     });
   }
   for (const task of draft.tasks) {
@@ -98,6 +100,7 @@ function expectedReferenceMap(workflowRunId: string, draft: GoalPlanDraft): Reco
       revision: draft.revision,
       kind: 'task_plan',
       draftRef: task.draftRef,
+      operation: 'task_create',
     });
   }
   for (const knowledge of draft.knowledge) {
@@ -108,6 +111,7 @@ function expectedReferenceMap(workflowRunId: string, draft: GoalPlanDraft): Reco
             revision: draft.revision,
             kind: 'knowledge_document',
             draftRef: knowledge.draftRef,
+            operation: 'knowledge_create',
           })
         : knowledge.knowledgeDocument.documentId;
   }
