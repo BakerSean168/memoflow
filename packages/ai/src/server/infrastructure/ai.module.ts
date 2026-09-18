@@ -33,7 +33,12 @@
 import { ok, error } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { IAIConversationRepository, IAIProviderConfigRepository } from '../domain';
-import type { AIApplicationPort } from '../application';
+import type {
+  AIEvaluationOperationsPort,
+  AIKnowledgePort,
+  AIProviderManagementPort,
+  AssistantConversationPort,
+} from '../application';
 import type {
   IAIExecutionRecordPort,
   IAIEvaluationReportPort,
@@ -293,8 +298,8 @@ export interface AIModuleServices {
  * Primary AI composition root return type.
  * AI 模块主组合根返回类型。
  *
- * `api` is the transport-facing surface.
- * `services` exposes higher-level orchestrators.
+ * The four capability properties are the transport-facing application seams.
+ * `services` exposes higher-level orchestrators for module-internal use.
  * `start` / `dispose` own runtime side effects.
  *
  * AI-VNEXT-07: `turnEngine`, `readonlyTurnEngine`, `workflowAdapter`,
@@ -305,7 +310,10 @@ export interface AIModuleInstance {
   readonly conversationRepository: IAIConversationRepository;
   readonly providerConfigRepository: IAIProviderConfigRepository;
   readonly services: AIModuleServices;
-  readonly api: AIApplicationPort;
+  readonly providerManagement: AIProviderManagementPort;
+  readonly assistantConversation: AssistantConversationPort;
+  readonly knowledge: AIKnowledgePort;
+  readonly evaluationOperations: AIEvaluationOperationsPort;
   /** Mastra-native Assistant execution surface. */
   readonly mastraRuntime: MastraAIRuntime | null;
   /** Canonical Workflow execution surface; null until a Mastra workflow runtime is composed. */
@@ -313,6 +321,19 @@ export interface AIModuleInstance {
   start(): Promise<void> | void;
   dispose(): Promise<void> | void;
 }
+
+/** Narrow instance view shared by the API and Desktop transport composers. */
+export type AITransportModuleInstance = Pick<
+  AIModuleInstance,
+  | 'providerManagement'
+  | 'assistantConversation'
+  | 'knowledge'
+  | 'evaluationOperations'
+  | 'mastraRuntime'
+  | 'workflowRuntime'
+  | 'start'
+  | 'dispose'
+>;
 
 async function getKnowledgeIndexDiagnostics(
   dependencies: AIModuleDependencies,
@@ -502,7 +523,8 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
   const knowledgeIngestionPort =
     dependencies.knowledgeIngestionPort ?? new DeterministicKnowledgeIngestionAdapter();
   const knowledgeQueryPort =
-    dependencies.knowledgeQueryPort ?? new OpenAICompatibleKnowledgeQueryAdapter(openAICompatibleGateway);
+    dependencies.knowledgeQueryPort ??
+    new OpenAICompatibleKnowledgeQueryAdapter(openAICompatibleGateway);
   const hasKnowledgeIndexStack = Boolean(
     dependencies.knowledgeIndexRepository && dependencies.knowledgeSourcePort,
   );
@@ -541,55 +563,55 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
         }
       : null;
 
-  const knowledgeQueryServices: AIKnowledgeQueryServices =
-    hasKnowledgeIndexStack
-      ? {
-          isAvailable: true,
-          query: new QueryKnowledgeUseCase(
-            providerConfigRepository,
-            new SyncRelevantKnowledgeUseCase(
-              dependencies.knowledgeSourcePort!,
-              dependencies.knowledgeIndexRepository!,
-              knowledgeIngestionPort,
-              dependencies.executionRecordPort,
-            ),
-            knowledgeQueryPort,
+  const knowledgeQueryServices: AIKnowledgeQueryServices = hasKnowledgeIndexStack
+    ? {
+        isAvailable: true,
+        query: new QueryKnowledgeUseCase(
+          providerConfigRepository,
+          new SyncRelevantKnowledgeUseCase(
+            dependencies.knowledgeSourcePort!,
+            dependencies.knowledgeIndexRepository!,
+            knowledgeIngestionPort,
             dependencies.executionRecordPort,
-            dependencies.providerSecretVault,
           ),
-          expand: new ExpandKnowledgeUseCase(
-            providerConfigRepository,
-            new SyncRelevantKnowledgeUseCase(
-              dependencies.knowledgeSourcePort!,
-              dependencies.knowledgeIndexRepository!,
-              knowledgeIngestionPort,
-              dependencies.executionRecordPort,
-            ),
-            knowledgeQueryPort,
+          knowledgeQueryPort,
+          dependencies.executionRecordPort,
+          dependencies.providerSecretVault,
+        ),
+        expand: new ExpandKnowledgeUseCase(
+          providerConfigRepository,
+          new SyncRelevantKnowledgeUseCase(
+            dependencies.knowledgeSourcePort!,
+            dependencies.knowledgeIndexRepository!,
+            knowledgeIngestionPort,
             dependencies.executionRecordPort,
-            dependencies.providerSecretVault,
           ),
-          reindex: new ReindexKnowledgeUseCase(
-            providerConfigRepository,
-            new ReindexAllKnowledgeUseCase(
-              dependencies.knowledgeSourcePort!,
-              dependencies.knowledgeIndexRepository!,
-              knowledgeIngestionPort,
-              dependencies.executionRecordPort,
-            ),
-            undefined,
-            dependencies.providerSecretVault,
+          knowledgeQueryPort,
+          dependencies.executionRecordPort,
+          dependencies.providerSecretVault,
+        ),
+        reindex: new ReindexKnowledgeUseCase(
+          providerConfigRepository,
+          new ReindexAllKnowledgeUseCase(
+            dependencies.knowledgeSourcePort!,
+            dependencies.knowledgeIndexRepository!,
+            knowledgeIngestionPort,
+            dependencies.executionRecordPort,
           ),
-        }
-      : {
-          isAvailable: false,
-          query: { execute: () => unavailable<QueryKnowledgeRes>() },
-          expand: { execute: () => unavailable<ExpandKnowledgeRes>() },
-          reindex: { execute: () => unavailable<ReindexKnowledgeRes>() },
-        };
+          undefined,
+          dependencies.providerSecretVault,
+        ),
+      }
+    : {
+        isAvailable: false,
+        query: { execute: () => unavailable<QueryKnowledgeRes>() },
+        expand: { execute: () => unavailable<ExpandKnowledgeRes>() },
+        reindex: { execute: () => unavailable<ReindexKnowledgeRes>() },
+      };
 
   const analyticsQueryPort =
-    dependencies.analyticsQueryPort ?? new OpenAICompatibleAnalyticsQueryAdapter(openAICompatibleGateway);
+    dependencies.analyticsQueryPort ??
+    new OpenAICompatibleAnalyticsQueryAdapter(openAICompatibleGateway);
   const analyticsQueryService: AIAnalyticsQueryService = dependencies.analyticsReadPort
     ? {
         isAvailable: true,
@@ -603,9 +625,9 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
           ).queryAnalytics(req, cx),
       }
     : {
-          isAvailable: false,
-          queryAnalytics: () => unavailable<QueryAnalyticsRes>(),
-        };
+        isAvailable: false,
+        queryAnalytics: () => unavailable<QueryAnalyticsRes>(),
+      };
 
   const evaluationReportService: AIEvaluationReportService = dependencies.evaluationReportPort
     ? {
@@ -627,7 +649,7 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
     evaluationReportService,
   };
 
-  // --- API facade: assembled services only (no legacy dual runtime) ---
+  // --- Application capabilities: one projection per proven consumer boundary ---
 
   let started = false;
 
@@ -643,7 +665,7 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
     supportsEvaluationReports: Boolean(dependencies.evaluationReportPort),
   });
 
-  const api: AIApplicationPort = {
+  const providerManagement: AIProviderManagementPort = {
     getCapabilities: async () =>
       ok({
         ...capabilities,
@@ -682,7 +704,8 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
       }
     },
     probeProviderReplacement: async (providerId, req, cx) => {
-      if (!services.providerServices.probeReplacement) return unavailable<ProbeAIProviderConnectionRes>();
+      if (!services.providerServices.probeReplacement)
+        return unavailable<ProbeAIProviderConnectionRes>();
       try {
         return ok(await services.providerServices.probeReplacement.execute(providerId, req, cx));
       } catch (cause) {
@@ -708,8 +731,9 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
     setDefaultProvider: (id, cx) => services.providerServices.setDefault.execute(id, cx),
     refreshProviderModels: (providerId, cx) =>
       services.providerServices.refreshModels.execute(providerId, cx),
+  };
 
-    // -- Conversations --
+  const assistantConversation: AssistantConversationPort = {
     createConversation: (cx, name) =>
       services.conversationServices.createConversation.execute(cx, name),
     updateConversation: (id, req, cx) =>
@@ -717,10 +741,7 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
     listConversations: (cx, page, pageSize) =>
       services.conversationServices.listConversations.execute(cx, page, pageSize),
     getConversation: async (id, cx) => {
-      const result = await services.conversationServices.getConversation.execute(
-        cx.identityId,
-        id,
-      );
+      const result = await services.conversationServices.getConversation.execute(cx.identityId, id);
       if (!result.ok) return result;
       if (result.data === null) {
         return error('NOT_FOUND', 'Conversation not found');
@@ -729,11 +750,15 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
     },
     deleteConversation: (id, cx) =>
       services.conversationServices.deleteConversation.execute(cx.identityId, id),
+  };
 
-    // -- Knowledge Notes --
+  const knowledge: AIKnowledgePort = {
     expandKnowledge: (req, cx) => services.knowledgeQueryServices.expand.execute(req, cx),
     queryKnowledge: (req, cx) => services.knowledgeQueryServices.query.execute(req, cx),
     reindexKnowledge: (req, cx) => services.knowledgeQueryServices.reindex.execute(req, cx),
+  };
+
+  const evaluationOperations: AIEvaluationOperationsPort = {
     queryAnalytics: (req, cx) => services.analyticsQueryService.queryAnalytics(req, cx),
     getEvaluationOverview: (req = {}) => services.evaluationReportService.getOverview(req),
   };
@@ -742,7 +767,10 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
     conversationRepository,
     providerConfigRepository,
     services,
-    api,
+    providerManagement,
+    assistantConversation,
+    knowledge,
+    evaluationOperations,
     mastraRuntime: dependencies.mastraRuntime ?? null,
     workflowRuntime: dependencies.workflowRuntime ?? null,
     start(): Promise<void> | void {
@@ -793,7 +821,10 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
           logger.error('AIModule: Mastra dispose failed during init rollback', disposeError);
         }
         await providerSafeFetch.close().catch((closeError) => {
-          logger.error('AIModule: provider egress transport close failed during init rollback', closeError);
+          logger.error(
+            'AIModule: provider egress transport close failed during init rollback',
+            closeError,
+          );
         });
         throw error;
       });

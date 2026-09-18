@@ -27,7 +27,7 @@
  * open chat (Mastra 托管)、knowledge 与 analytics。
  *
  * Registration and lifecycle follow the governance reference pattern:
- * 1. Controllers wired to `instance.api` (single ApplicationPort track).
+ * 1. Controllers wired to their proven application capability port.
  * 2. `instance.start()` once, then mount route groups; a partial route set is
  *    rolled back on any mount failure.
  * 3. `destroy()` for cleanup, idempotent and a no-op after `failed`.
@@ -35,7 +35,7 @@
 
 import type { ServerModuleHandle, ServerTransportModuleContext } from '@memoflow/contracts/shared';
 import { createLogger } from '@memoflow/utils/logger';
-import type { AIModuleInstance } from '../server/infrastructure';
+import type { AITransportModuleInstance } from '../server/infrastructure';
 import {
   registerAICapabilitiesRoutes,
   registerAIAnalyticsQueryRoutes,
@@ -78,7 +78,7 @@ export interface AIApiModuleDef extends ServerModuleHandle<AIApiModuleContext> {
  * AI API 模块创建选项，仅携带已经由宿主完整装配好的 AI 模块实例。
  */
 export interface AIApiModuleOptions {
-  readonly instance: AIModuleInstance;
+  readonly instance: AITransportModuleInstance;
 }
 
 type ModuleHandleState = 'created' | 'registered' | 'disposed' | 'failed';
@@ -101,8 +101,6 @@ export function createAIApiModule(options: AIApiModuleOptions): AIApiModuleDef {
     throw new Error('[FAIL-CLOSED] createAIApiModule requires options.instance');
   }
 
-  const handlers = options.instance.api;
-
   let state: ModuleHandleState = 'created';
 
   return {
@@ -119,52 +117,26 @@ export function createAIApiModule(options: AIApiModuleOptions): AIApiModuleDef {
 
       try {
         // ---------------------------------------------------------------
-        // 1. Controllers — wired to the module's ApplicationPort (instance.api)
-        //    控制器 — 通过模块的 ApplicationPort (instance.api) 门面接线
-        //
-        //    All controller wiring goes through `instance.api.*` to maintain
-        //    a single transport-facing surface. This ensures business rules
-        //    enforced in the api facade are never accidentally bypassed.
+        // 1. Controllers — each receives only the proven capability it consumes.
+        //    控制器 — 每个控制器只接收其实际消费的 capability。
         // ---------------------------------------------------------------
         const capabilitiesController = new AICapabilitiesController({
-          getCapabilities: handlers.getCapabilities,
+          getCapabilities: options.instance.providerManagement.getCapabilities,
         });
-        const providerController = new AIProviderConfigController({
-          getProviderCatalog: handlers.getProviderCatalog,
-          probeProviderConnection: handlers.probeProviderConnection,
-          testProviderOnboardingModel: handlers.testProviderOnboardingModel,
-          commitProviderOnboarding: handlers.commitProviderOnboarding,
-          probeProviderReplacement: handlers.probeProviderReplacement,
-          commitProviderReplacement: handlers.commitProviderReplacement,
-          updateProvider: handlers.updateProvider,
-          listProviders: handlers.listProviders,
-          getProvider: handlers.getProvider,
-          deleteProvider: handlers.deleteProvider,
-          testConnection: handlers.testConnection,
-          setDefaultProvider: handlers.setDefaultProvider,
-          refreshProviderModels: handlers.refreshProviderModels,
-        });
-        const chatController = new AIChatController({
-          createConversation: handlers.createConversation,
-          listConversations: handlers.listConversations,
-          getConversation: handlers.getConversation,
-          updateConversation: handlers.updateConversation,
-          deleteConversation: handlers.deleteConversation,
-        });
+        const providerController = new AIProviderConfigController(
+          options.instance.providerManagement,
+        );
+        const chatController = new AIChatController(options.instance.assistantConversation);
 
         // Routes always register — unavailable capabilities return SERVICE_UNAVAILABLE
         // from the runtime service surface.
-        const knowledgeQueryController = new AIKnowledgeQueryController({
-          expandKnowledge: handlers.expandKnowledge,
-          queryKnowledge: handlers.queryKnowledge,
-          reindexKnowledge: handlers.reindexKnowledge,
-        });
-        const analyticsQueryController = new AIAnalyticsQueryController({
-          queryAnalytics: handlers.queryAnalytics,
-        });
-        const evaluationReportController = new AIEvaluationReportController({
-          getEvaluationOverview: handlers.getEvaluationOverview,
-        });
+        const knowledgeQueryController = new AIKnowledgeQueryController(options.instance.knowledge);
+        const analyticsQueryController = new AIAnalyticsQueryController(
+          options.instance.evaluationOperations,
+        );
+        const evaluationReportController = new AIEvaluationReportController(
+          options.instance.evaluationOperations,
+        );
 
         // ---------------------------------------------------------------
         // 2. 创建路由（注入平台中间件）并挂载到主路由

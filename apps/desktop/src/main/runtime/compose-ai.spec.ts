@@ -10,11 +10,9 @@ vi.mock('@memoflow/ai', async (importOriginal) => {
     createAIModule: vi.fn(),
     createAIPowerSyncRepositories: vi.fn(),
     createMastraStorage: vi.fn(() => ({ tag: 'desktop-mastra-storage' })),
-    ConversationShellSource: vi.fn(
-      function ConversationShellSourceMock() {
-        return { tag: 'desktop-conversation-shell-source' };
-      },
-    ),
+    ConversationShellSource: vi.fn(function ConversationShellSourceMock() {
+      return { tag: 'desktop-conversation-shell-source' };
+    }),
     KnowledgeCapturePersistenceAdapter: vi.fn(function KnowledgeCapturePersistenceAdapterMock(
       persistence: unknown,
     ) {
@@ -134,7 +132,12 @@ beforeEach(() => {
     repositorySet as ReturnType<typeof createAIPowerSyncRepositories>,
   );
   vi.mocked(createAIModule).mockReturnValue({
-    api: {},
+    providerManagement: {},
+    assistantConversation: {},
+    knowledge: {},
+    evaluationOperations: {},
+    mastraRuntime: null,
+    workflowRuntime: null,
     start: vi.fn(),
     dispose: vi.fn(),
   } as ReturnType<typeof createAIModule>);
@@ -155,9 +158,7 @@ describe('Desktop composeAI Mastra-only ownership', () => {
       repositorySet.providerConfigRepository,
       repositorySet.providerSecretVault,
     );
-    expect(ConversationShellSource).toHaveBeenCalledWith(
-      repositorySet.conversationRepository,
-    );
+    expect(ConversationShellSource).toHaveBeenCalledWith(repositorySet.conversationRepository);
     expect(DesktopGoalPlanMutationAdapter).toHaveBeenCalledWith(
       goalApplicationPort,
       taskApplicationPort,
@@ -180,8 +181,7 @@ describe('Desktop composeAI Mastra-only ownership', () => {
     expect(MastraAIRuntime).toHaveBeenCalledWith({
       storage: vi.mocked(createMastraStorage).mock.results[0].value,
       modelResolver: vi.mocked(MastraModelResolver).mock.results[0].value,
-      conversationShellSource: vi.mocked(ConversationShellSource).mock.results[0]
-        .value,
+      conversationShellSource: vi.mocked(ConversationShellSource).mock.results[0].value,
       goalPlanMutationPort: vi.mocked(DesktopGoalPlanMutationAdapter).mock.results[0].value,
       taskPlanMutationPort: vi.mocked(DesktopTaskPlanMutationAdapter).mock.results[0].value,
       knowledgeCaptureMutationPort: vi.mocked(KnowledgeCapturePersistenceAdapter).mock.results[0]

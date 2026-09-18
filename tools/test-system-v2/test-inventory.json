@@ -2524,6 +2524,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/application/ai-application-capabilities.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/application/ports/knowledge-source-note.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10790,7 +10800,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 85
+      "fileCount": 86
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -11168,7 +11178,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 85
+      "fileCount": 86
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -11476,6 +11486,7 @@
       "packages/ai/src/infrastructure-client/adapters/__tests__/ai-transport-types.surface.spec.ts",
       "packages/ai/src/infrastructure-client/adapters/read-string-keep-boundary.surface.spec.ts",
       "packages/ai/src/infrastructure-client/adapters/result-client-error.test.ts",
+      "packages/ai/src/server/application/ai-application-capabilities.surface.spec.ts",
       "packages/ai/src/server/application/ports/knowledge-source-note.surface.spec.ts",
       "packages/ai/src/server/application/services/owner-activity-projection.spec.ts",
       "packages/ai/src/server/application/use-cases/commands/__tests__/ai-provider-config-service.test.ts",
@@ -11916,7 +11927,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1034,
+    "unit": 1035,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

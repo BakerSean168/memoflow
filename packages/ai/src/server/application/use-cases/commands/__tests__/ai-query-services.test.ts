@@ -594,11 +594,7 @@ describe('AIKnowledgeQueryService', () => {
       32,
     );
     expect(sourcePort.getNoteById).toHaveBeenCalledTimes(6);
-    expect(sourcePort.getNoteById).toHaveBeenCalledWith(
-      'identity-1',
-      expect.any(String),
-      SPACE_ID,
-    );
+    expect(sourcePort.getNoteById).toHaveBeenCalledWith('identity-1', expect.any(String), SPACE_ID);
     expect(sourcePort.listRelevantNotes).not.toHaveBeenCalled();
     expect(sourcePort.listIndexableNotes).not.toHaveBeenCalled();
   });
@@ -909,7 +905,7 @@ describe('AI knowledge auto-index runtime', () => {
       knowledgeQueryPort: new StubKnowledgeQueryPort(),
     });
 
-    const capabilities = await aiModule.api.getCapabilities();
+    const capabilities = await aiModule.providerManagement.getCapabilities();
     expect(capabilities.ok).toBe(true);
     if (!capabilities.ok) throw new Error('expected ok');
     expect(capabilities.data).toEqual(

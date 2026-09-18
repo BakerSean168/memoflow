@@ -14,11 +14,9 @@ vi.mock('@memoflow/ai', async (importOriginal) => {
     createAIModule: vi.fn(),
     createAIPrismaRepositories: vi.fn(),
     createMastraStorage: vi.fn(() => ({ tag: 'mastra-storage' })),
-    ConversationShellSource: vi.fn(
-      function ConversationShellSourceMock() {
-        return { tag: 'conversation-shell-source' };
-      },
-    ),
+    ConversationShellSource: vi.fn(function ConversationShellSourceMock() {
+      return { tag: 'conversation-shell-source' };
+    }),
     KnowledgeCapturePersistenceAdapter: vi.fn(function KnowledgeCapturePersistenceAdapterMock(
       persistence: unknown,
     ) {
@@ -155,7 +153,12 @@ beforeEach(() => {
     repositories as ReturnType<typeof createAIPrismaRepositories>,
   );
   vi.mocked(createAIModule).mockReturnValue({
-    api: {},
+    providerManagement: {},
+    assistantConversation: {},
+    knowledge: {},
+    evaluationOperations: {},
+    mastraRuntime: null,
+    workflowRuntime: null,
     start: vi.fn(),
     dispose: vi.fn(),
   } as ReturnType<typeof createAIModule>);
@@ -176,9 +179,7 @@ describe('API composeAI Mastra-only ownership', () => {
       repositories.providerConfigRepository,
       repositories.providerSecretVault,
     );
-    expect(ConversationShellSource).toHaveBeenCalledWith(
-      repositories.conversationRepository,
-    );
+    expect(ConversationShellSource).toHaveBeenCalledWith(repositories.conversationRepository);
     const persistence = vi.mocked(RepositoryKnowledgeNotePersistenceAdapter).mock.results[0].value;
     expect(GoalPlanMutationAdapter).toHaveBeenCalledWith(
       goalApplicationPort,
@@ -203,8 +204,7 @@ describe('API composeAI Mastra-only ownership', () => {
     expect(MastraAIRuntime).toHaveBeenCalledWith({
       storage: vi.mocked(createMastraStorage).mock.results[0].value,
       modelResolver: vi.mocked(MastraModelResolver).mock.results[0].value,
-      conversationShellSource: vi.mocked(ConversationShellSource).mock.results[0]
-        .value,
+      conversationShellSource: vi.mocked(ConversationShellSource).mock.results[0].value,
       goalPlanMutationPort: vi.mocked(GoalPlanMutationAdapter).mock.results[0].value,
       taskPlanMutationPort: vi.mocked(TaskPlanMutationAdapter).mock.results[0].value,
       knowledgeCaptureMutationPort: vi.mocked(KnowledgeCapturePersistenceAdapter).mock.results[0]

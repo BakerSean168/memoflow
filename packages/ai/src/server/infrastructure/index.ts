@@ -18,20 +18,23 @@ export {
   createAIModule,
   type AIModuleDependencies,
   type AIModuleInstance,
+  type AITransportModuleInstance,
   type AIModuleServices,
   type AIModuleRuntimeContribution,
   type AIRuntimeContributionsInput,
 } from './ai.module';
-export type { AIApplicationPort } from '../application';
+export type {
+  AIEvaluationOperationsPort,
+  AIKnowledgePort,
+  AIProviderManagementPort,
+  AssistantConversationPort,
+} from '../application';
 
 // ---------------------------------------------------------------------------
 // PowerSync convenience factory
 // PowerSync 便捷工厂
 // ---------------------------------------------------------------------------
-export {
-  createAIPowerSyncRepositories,
-  type AIPowerSyncRepositorySet,
-} from './powersync';
+export { createAIPowerSyncRepositories, type AIPowerSyncRepositorySet } from './powersync';
 
 // ---------------------------------------------------------------------------
 // Prisma convenience factory
