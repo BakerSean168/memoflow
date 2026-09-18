@@ -7,7 +7,12 @@
  */
 
 import type { IScheduleRepository } from '../domain';
-import type { ScheduleApplicationPort, ScheduleEventApplicationPort } from '../application';
+import {
+  createSchedulePortableCapability,
+  type ScheduleApplicationPort,
+  type ScheduleEventApplicationPort,
+  type SchedulePortableCapability,
+} from '../application';
 import { ScheduleEventApplicationService } from '../application/services/schedule-event-application-service';
 import { ScheduleConflictDetectionService } from '../application/services/schedule-conflict-detection-service';
 import { ScheduleConflictResolutionService } from '../application/services/schedule-conflict-resolution-service';
@@ -63,6 +68,7 @@ export interface ScheduleModuleUseCases {
 
 export interface ScheduleModuleInstance {
   readonly scheduleRepository: IScheduleRepository;
+  readonly portableCapability: SchedulePortableCapability;
   readonly useCases: ScheduleModuleUseCases;
   readonly api: ScheduleApplicationPort;
   readonly eventApi: ScheduleEventApplicationPort;
@@ -283,6 +289,7 @@ export function createScheduleModule(
 
   return {
     scheduleRepository,
+    portableCapability: createSchedulePortableCapability(scheduleRepository),
     useCases,
     api,
     eventApi,

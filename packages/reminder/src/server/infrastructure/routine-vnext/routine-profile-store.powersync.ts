@@ -76,6 +76,15 @@ export class PowerSyncRoutineProfileStore implements RoutineProfileStore {
     return row ? mapDefinition(row) : null;
   }
 
+  async listDefinitions(input: { readonly identityId: string }): Promise<RoutineDefinition[]> {
+    const rows = await this.db.getAll<RoutineDefinitionPowerSyncRecord>(
+      `SELECT id, identity_id, name, description, enabled, trigger_json, version, created_at, updated_at
+       FROM routine_definitions WHERE identity_id = ? ORDER BY created_at ASC, id ASC`,
+      [input.identityId],
+    );
+    return rows.map(mapDefinition);
+  }
+
   async updateDefinition(input: {
     readonly definition: RoutineDefinition;
     readonly expectedVersion: number;

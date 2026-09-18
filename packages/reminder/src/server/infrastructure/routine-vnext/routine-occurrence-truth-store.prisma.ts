@@ -266,6 +266,14 @@ export class PrismaRoutineOccurrenceTruthStore implements RoutineOccurrenceTruth
     return row ? mapOccurrence(row) : null;
   }
 
+  async listOccurrences(input: { readonly identityId: string }): Promise<RoutineOccurrenceFact[]> {
+    const rows = await this.prisma.routineOccurrence.findMany({
+      where: { identityId: input.identityId },
+      orderBy: [{ becameDueAt: 'asc' }, { id: 'asc' }],
+    });
+    return rows.map(mapOccurrence);
+  }
+
   async resolveOccurrence(input: ResolveRoutineOccurrenceInput): Promise<RoutineOccurrenceFact> {
     return mapOccurrence(await resolveOnDb(this.prisma, input));
   }
@@ -364,6 +372,16 @@ export class PrismaRoutineOccurrenceTruthStore implements RoutineOccurrenceTruth
   }): Promise<RoutineInteractionFact[]> {
     const rows = await this.prisma.routineInteraction.findMany({
       where: input,
+      orderBy: [{ actedAt: 'asc' }, { id: 'asc' }],
+    });
+    return rows.map(mapInteraction);
+  }
+
+  async listInteractionsForIdentity(input: {
+    readonly identityId: string;
+  }): Promise<RoutineInteractionFact[]> {
+    const rows = await this.prisma.routineInteraction.findMany({
+      where: { identityId: input.identityId },
       orderBy: [{ actedAt: 'asc' }, { id: 'asc' }],
     });
     return rows.map(mapInteraction);

@@ -46,6 +46,7 @@ import {
   type ChannelCapabilitySpec,
   type INotificationRepository,
   type NotificationOwnerCommandRegistry,
+  type NotificationPortableCapability,
   type NotificationRequestedWriterPort,
 } from '@memoflow/notification';
 import {
@@ -86,6 +87,7 @@ export interface ComposedNotificationDesktop {
   readonly requestedWriter: NotificationRequestedWriterPort;
   /** Late-bound owner command registry. */
   readonly ownerCommandRegistry: NotificationOwnerCommandRegistry;
+  readonly portableFactCapability: NotificationPortableCapability;
 }
 
 /**
@@ -165,5 +167,6 @@ export function composeNotification(
     },
     requestedWriter: repositories.requestedWriter,
     ownerCommandRegistry: instance.ownerCommandRegistry,
+    portableFactCapability: instance.portableFactCapability,
   };
 }

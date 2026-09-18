@@ -2,6 +2,7 @@
 import type { PrismaClient } from '@memoflow/database';
 import {
   createRoutinePrismaRepositories,
+  createRoutinePortableCapability,
   type RoutineCoachCommandPort,
 } from '@memoflow/reminder';
 import {
@@ -16,6 +17,7 @@ export interface ComposeRoutineDependencies {
 
 export interface ComposedRoutine {
   readonly routineCommandPort: RoutineCoachCommandPort;
+  readonly portableCapability: ReturnType<typeof createRoutinePortableCapability>;
 }
 
 export function composeRoutine(dependencies: ComposeRoutineDependencies): ComposedRoutine {
@@ -29,5 +31,8 @@ export function composeRoutine(dependencies: ComposeRoutineDependencies): Compos
     protocolSessionStore: repositories.protocolSessionStore,
     onOverrideChanged: createRoutineOverrideChangedNotifier(),
   });
-  return { routineCommandPort };
+  return {
+    routineCommandPort,
+    portableCapability: createRoutinePortableCapability(repositories),
+  };
 }

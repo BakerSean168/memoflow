@@ -99,19 +99,15 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
     const row = await this.prisma.routineDefinition.findUnique({
       where: { identityId_id: { identityId: input.identityId, id: input.routineId } },
     });
-    return row
-      ? RoutineDefinition.load({
-          id: row.id,
-          identityId: row.identityId,
-          name: row.name,
-          description: row.description,
-          enabled: row.enabled,
-          trigger: deserializeRoutineTrigger(row.triggerJson),
-          version: row.version,
-          createdAt: row.createdAt,
-          updatedAt: row.updatedAt,
-        })
-      : null;
+    return row ? mapDefinition(row) : null;
+  }
+
+  async listDefinitions(input: { readonly identityId: string }): Promise<RoutineDefinition[]> {
+    const rows = await this.prisma.routineDefinition.findMany({
+      where: { identityId: input.identityId },
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+    });
+    return rows.map(mapDefinition);
   }
 
   async deleteDefinition(input: {
@@ -358,6 +354,30 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
       }
     });
   }
+}
+
+function mapDefinition(row: {
+  id: string;
+  identityId: string;
+  name: string;
+  description: string | null;
+  enabled: boolean;
+  triggerJson: string | null;
+  version: number;
+  createdAt: Date;
+  updatedAt: Date;
+}): RoutineDefinition {
+  return RoutineDefinition.load({
+    id: row.id,
+    identityId: row.identityId,
+    name: row.name,
+    description: row.description,
+    enabled: row.enabled,
+    trigger: deserializeRoutineTrigger(row.triggerJson),
+    version: row.version,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  });
 }
 
 function mapMembership(row: {

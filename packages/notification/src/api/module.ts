@@ -92,6 +92,8 @@ export type NotificationApiModuleContext = ServerTransportModuleContext;
 export interface NotificationApiModuleDef extends ServerModuleHandle<NotificationApiModuleContext> {
   /** Notification-owned stable delivery preference portability capability. */
   readonly portableCapability: NotificationModuleInstance['portableCapability'];
+  /** Notification-owned Fact/Inbox and typed Interaction portability capability. */
+  readonly portableFactCapability: NotificationModuleInstance['portableFactCapability'];
 }
 
 /**
@@ -127,6 +129,7 @@ export function createNotificationApiModule(
   return {
     name: 'Notification',
     portableCapability: options.instance.portableCapability,
+    portableFactCapability: options.instance.portableFactCapability,
 
     register(context) {
       if (state !== 'created') {
