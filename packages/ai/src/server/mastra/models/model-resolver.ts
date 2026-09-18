@@ -4,6 +4,7 @@ import {
   AI_MODEL_CAPABILITIES,
   AIModelCapabilitySnapshotSchema,
   AIModelCatalogSnapshotSchema,
+  getAIProviderModelCapabilityDefinition,
   getAIProviderCatalogEntry,
   type AIExecutionRequirement,
   type AIModelCapabilityMap,
@@ -42,9 +43,32 @@ function createDefaultProviderFetch(): ProviderFetch {
 }
 
 const DEFAULT_CATALOG_TTL_MS = 5 * 60 * 1000;
+const DEFAULT_CAPABILITY_EVIDENCE_TTL_MS = 24 * 60 * 60 * 1000;
 
-const EMPTY_CAPABILITY_SNAPSHOT_PORT: IAIModelCapabilitySnapshotPort = {
-  getSnapshot: async () => null,
+/**
+ * Production default evidence for the exact known models in the product-owned
+ * ProviderDefinition catalog. It deliberately returns no evidence for custom
+ * or unknown ids; those models need an injected provider/runtime verification
+ * port before capabilities beyond chat can be used.
+ */
+const DEFAULT_CAPABILITY_SNAPSHOT_PORT: IAIModelCapabilitySnapshotPort = {
+  getSnapshot: async (input) => {
+    const definition = getAIProviderModelCapabilityDefinition(
+      input.providerDefinitionId,
+      input.modelId,
+    );
+    if (!definition) return null;
+
+    return {
+      providerConnectionId:
+        input.providerConnectionId as AIModelCapabilitySnapshot['providerConnectionId'],
+      modelId: input.modelId,
+      verifiedAt: input.now,
+      expiresAt: input.now + DEFAULT_CAPABILITY_EVIDENCE_TTL_MS,
+      provenance: ['provider_catalog'],
+      capabilities: definition.capabilities,
+    };
+  },
 };
 
 function createDefaultModelCatalog(providerFetch: ProviderFetch): IAIModelCatalogPort {
@@ -156,7 +180,7 @@ export class MastraModelResolver {
     } = {},
   ) {
     this.modelCatalog = options.modelCatalog ?? createDefaultModelCatalog(providerFetch);
-    this.capabilitySnapshots = options.capabilitySnapshots ?? EMPTY_CAPABILITY_SNAPSHOT_PORT;
+    this.capabilitySnapshots = options.capabilitySnapshots ?? DEFAULT_CAPABILITY_SNAPSHOT_PORT;
     this.now = options.now ?? Date.now;
     this.catalogTtlMs = options.catalogTtlMs ?? DEFAULT_CATALOG_TTL_MS;
   }
@@ -202,6 +226,7 @@ export class MastraModelResolver {
     const now = this.now();
     const capabilitySnapshot = await this.readCapabilitySnapshot({
       providerConnectionId: String(provider.id),
+      providerDefinitionId: provider.providerDefinitionId,
       modelId,
       now,
     });
@@ -300,6 +325,7 @@ export class MastraModelResolver {
 
   private async readCapabilitySnapshot(input: {
     providerConnectionId: string;
+    providerDefinitionId: string;
     modelId: string;
     now: number;
   }): Promise<AIModelCapabilitySnapshot | null> {

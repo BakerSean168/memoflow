@@ -197,6 +197,53 @@ describe('MastraModelResolver', () => {
     expect(resolved.modelId).toBe('conversation-model');
   });
 
+  it('uses fresh ProviderDefinition evidence for a supported production model without an injected port', async () => {
+    const modelCatalog = catalogPort(['gpt-4o-mini']);
+    const provider = createAIProviderConfigServerDTO({ defaultModel: 'gpt-4o-mini' });
+    const resolver = new MastraModelResolver(
+      createAIProviderConfigRepositoryStub({ findDefaultByIdentityId: async () => provider }),
+      createAIProviderSecretVaultStub(),
+      inertFetch,
+      { modelCatalog, now: () => 1_000 },
+    );
+
+    const resolved = await resolver.resolve({
+      identityId: 'identity-1',
+      executionRequirement: {
+        chat: 'required',
+        streaming: 'required',
+        structuredOutput: 'required',
+        toolCalling: 'required',
+      },
+    });
+
+    expect(resolved.modelId).toBe('gpt-4o-mini');
+    expect(resolved.capabilities).toEqual({
+      chat: 'verified',
+      streaming: 'verified',
+      structuredOutput: 'verified',
+      toolCalling: 'verified',
+      vision: 'verified',
+    });
+  });
+
+  it('keeps an unknown custom model fail-closed without injected verification evidence', async () => {
+    const { resolver } = createResolver({
+      provider: createAIProviderConfigServerDTO({
+        providerDefinitionId: 'custom',
+        defaultModel: 'custom-model',
+      }),
+      modelIds: ['custom-model'],
+    });
+
+    await expect(
+      resolver.resolve({
+        identityId: 'identity-1',
+        executionRequirement: { chat: 'required', streaming: 'required' },
+      }),
+    ).rejects.toMatchObject({ category: 'capability_unverified' });
+  });
+
   it('rejects structured output when Goal planner evidence marks it unsupported', async () => {
     const { resolver } = createResolver({
       capabilities: capabilitySnapshot({

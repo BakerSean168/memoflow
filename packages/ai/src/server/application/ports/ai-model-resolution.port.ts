@@ -16,6 +16,7 @@ export interface IAIModelCatalogPort {
 
 export interface AIModelCapabilitySnapshotInput {
   readonly providerConnectionId: string;
+  readonly providerDefinitionId: string;
   readonly modelId: string;
   readonly now: number;
 }
