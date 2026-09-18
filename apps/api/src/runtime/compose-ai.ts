@@ -33,8 +33,8 @@ import {
 } from '@memoflow/ai';
 import { createAIApiModule, type AIApiModuleDef } from '@memoflow/ai/api';
 import type { RepositoryApplicationPort } from '@memoflow/repository';
-import type { GoalApplicationPort } from '@memoflow/goal';
-import type { TaskApplicationPort } from '@memoflow/task';
+import { createGoalPrismaRepositories, type GoalApplicationPort } from '@memoflow/goal';
+import { createTaskPrismaRepositories, type TaskApplicationPort } from '@memoflow/task';
 import type { RoutineCoachCommandPort } from '@memoflow/reminder/routine-runtime';
 import type { IScheduleRepository } from '@memoflow/schedule';
 import type { INotificationRepository } from '@memoflow/notification';
@@ -50,7 +50,7 @@ import { RepositoryKnowledgeSourceAdapter } from '../modules/ai/repository-knowl
 import { RoutineAICommandAdapter } from '../modules/ai/routine-command.adapter';
 import { PlannerAIReadAdapter } from '../modules/ai/planner-read.adapter';
 import { NotificationAIReadAdapter } from '../modules/ai/notification-read.adapter';
-import { ActivityLedgerAIReadAdapter } from '../modules/ai/activity-ledger-read.adapter';
+import { OwnerActivityAIReadAdapter } from '../modules/ai/owner-activity-read.adapter';
 
 export interface ComposeAIDependencies {
   /** Shared API-lane Prisma client owned by apps/api. */
@@ -93,13 +93,20 @@ export interface ComposeAIDependencies {
  */
 export function composeAI(dependencies: ComposeAIDependencies): AIApiModuleDef {
   const repositorySet = createAIPrismaRepositories(dependencies.db);
+  const goalRepositories = createGoalPrismaRepositories(dependencies.db);
+  const taskRepositories = createTaskPrismaRepositories(dependencies.db);
   const contextAssembler = new AIContextAssembler(dependencies.userTimeContextPort);
   const plannerReadPort = new PlannerAIReadAdapter(
     dependencies.scheduleRepository,
     dependencies.taskApplicationPort,
   );
   const notificationReadPort = new NotificationAIReadAdapter(dependencies.notificationRepository);
-  const activityReadPort: IAIActivityReadPort = new ActivityLedgerAIReadAdapter(dependencies.db);
+  const activityReadPort: IAIActivityReadPort = new OwnerActivityAIReadAdapter({
+    goalRepository: goalRepositories.goalRepository,
+    taskPlanRepository: taskRepositories.taskPlanRepository,
+    taskOccurrenceRepository: taskRepositories.taskOccurrenceRepository,
+    scheduleRepository: dependencies.scheduleRepository,
+  });
   const knowledgeSourcePort = new RepositoryKnowledgeSourceAdapter(
     dependencies.db,
     dependencies.repositoryStorageBaseDir,

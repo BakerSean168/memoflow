@@ -5,29 +5,31 @@ import type { IGoalRepository } from '@memoflow/goal';
 import type { IScheduleRepository } from '@memoflow/schedule';
 import type { ITaskOccurrenceRepository, ITaskPlanRepository } from '@memoflow/task';
 
+export interface OwnerActivityAIReadDependencies {
+  readonly goalRepository: IGoalRepository;
+  readonly taskPlanRepository: ITaskPlanRepository;
+  readonly taskOccurrenceRepository: ITaskOccurrenceRepository;
+  readonly scheduleRepository: IScheduleRepository;
+}
+
 /**
- * Desktop recent-activity adapter over canonical owner reads.
+ * API-side recent-activity projection derived directly from owner truth.
  *
- * HOME-1804 keeps this host adapter thin: it reads owner facts and delegates
- * projection semantics to the shared AI application helper.
+ * HOME-1804 retired the cross-domain activity ledger: recent activity is a
+ * bounded AI consumer projection, not a second durable product authority.
  */
-export class DesktopActivityAIReadAdapter implements IAIActivityReadPort {
-  constructor(
-    private readonly goalRepository: IGoalRepository,
-    private readonly taskPlanRepository: ITaskPlanRepository,
-    private readonly taskOccurrenceRepository: ITaskOccurrenceRepository,
-    private readonly scheduleRepository: IScheduleRepository,
-  ) {}
+export class OwnerActivityAIReadAdapter implements IAIActivityReadPort {
+  constructor(private readonly dependencies: OwnerActivityAIReadDependencies) {}
 
   async listRecent(input: Parameters<IAIActivityReadPort['listRecent']>[0]) {
     const [goals, taskPlans, taskOccurrences, schedules] = await Promise.all([
-      this.goalRepository.findByIdentityId(input.identityId, {
+      this.dependencies.goalRepository.findByIdentityId(input.identityId, {
         includeChildren: false,
         systemView: 'active',
       }),
-      this.taskPlanRepository.findByIdentityId(input.identityId),
-      this.taskOccurrenceRepository.findByIdentityId(input.identityId),
-      this.scheduleRepository.findByIdentityId(input.identityId),
+      this.dependencies.taskPlanRepository.findByIdentityId(input.identityId),
+      this.dependencies.taskOccurrenceRepository.findByIdentityId(input.identityId),
+      this.dependencies.scheduleRepository.findByIdentityId(input.identityId),
     ]);
 
     return projectAIOwnerActivity({

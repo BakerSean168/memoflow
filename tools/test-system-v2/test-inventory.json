@@ -98,6 +98,16 @@
       ]
     },
     {
+      "path": "apps/api/src/modules/ai/owner-activity-read.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/modules/ai/planner-read.adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -2559,6 +2569,16 @@
     },
     {
       "path": "packages/ai/src/server/application/ports/knowledge-source-note.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/application/services/owner-activity-projection.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -10866,7 +10886,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 72
+      "fileCount": 73
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -10880,7 +10900,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 85
+      "fileCount": 86
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -11223,7 +11243,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 72
+      "fileCount": 73
     },
     {
       "id": "apps/desktop/vitest.config.ts",
@@ -11258,7 +11278,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 85
+      "fileCount": 86
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -11463,6 +11483,7 @@
       "apps/api/src/bootstrap.spec.ts",
       "apps/api/src/modules/ai/controlled-analytics-read.adapter.spec.ts",
       "apps/api/src/modules/ai/notification-read.adapter.spec.ts",
+      "apps/api/src/modules/ai/owner-activity-read.adapter.spec.ts",
       "apps/api/src/modules/ai/planner-read.adapter.spec.ts",
       "apps/api/src/modules/ai/repository-knowledge-cloud-data-purger.adapter.test.ts",
       "apps/api/src/modules/ai/repository-knowledge-index-status.adapter.test.ts",
@@ -11575,6 +11596,7 @@
       "packages/ai/src/infrastructure-client/adapters/read-string-keep-boundary.surface.spec.ts",
       "packages/ai/src/infrastructure-client/adapters/result-client-error.test.ts",
       "packages/ai/src/server/application/ports/knowledge-source-note.surface.spec.ts",
+      "packages/ai/src/server/application/services/owner-activity-projection.spec.ts",
       "packages/ai/src/server/application/use-cases/commands/__tests__/ai-provider-config-service.test.ts",
       "packages/ai/src/server/application/use-cases/commands/__tests__/ai-query-services.test.ts",
       "packages/ai/src/server/application/use-cases/commands/__tests__/set-default-ai-provider.test.ts",
@@ -12014,7 +12036,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1039,
+    "unit": 1045,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 9,

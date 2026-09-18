@@ -2,12 +2,12 @@
 tags: [adr, dashboard, home, read-model, retirement]
 description: 退休 Dashboard bounded context，将首页收敛为 owner-read-model UI composition
 created: 2026-09-09T00:31:00+08:00
-updated: 2026-09-09T00:31:00+08:00
+updated: 2026-09-18T13:20:00+08:00
 ---
 
 # ADR-108: Dashboard Retirement and Home Composition
 
-**状态：** 已采纳，待实施
+**状态：** 已采纳，实施中（HOME-1804 evidence decision 已闭合）
 **日期：** 2026-09-09
 
 ## Decision
@@ -42,14 +42,11 @@ Home 不拥有数据，不创建 `HomeAggregate`，也不创建新的跨域 God 
 
 无 production consumer 的 StatsStrip/TrendPanel/ActivityTimeline 可在 characterization 后删除。`DashboardConfig` 无当前产品 consumer，直接进入 retirement migration。
 
-### 6. ActivityLedger is a separate decision surface
+### 6. HOME-1804 resolution: no durable ActivityFeed authority
 
-ActivityLedger 不自动等于 Dashboard。第一实施批次统计真实 consumer：
+HOME-1804 的当前产品证据表明：Desktop 从未需要独立 durable activity table，API AI 所需的 recent activity 也可以从 Goal/Task/Schedule owner facts 生成相同 bounded projection。旧 ledger 的其余 consumer 都属于待退役 Dashboard。
 
-- 若 Home/AI确实需要，重命名/迁移为独立 Activity feed projection；
-- 若只有退休 Dashboard 间接读取，则删除 recorder/table。
-
-不得为保留一个旧技术资产而创造新 product module。
+因此决定直接删除 recorder/table，并让 API 与 Desktop 都走 owner-derived recent activity。**不创建 `ActivityFeed` bounded context、通用 analytics domain 或 event-sourcing authority。**
 
 ## Final deletion set
 

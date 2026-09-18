@@ -129,22 +129,6 @@ exports.Prisma.AccountScalarFieldEnum = {
   closedAt: 'closedAt'
 };
 
-exports.Prisma.ActivityLedgerScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  actorId: 'actorId',
-  subjectType: 'subjectType',
-  subjectId: 'subjectId',
-  action: 'action',
-  title: 'title',
-  correlationId: 'correlationId',
-  beforeSummary: 'beforeSummary',
-  afterSummary: 'afterSummary',
-  sourceEvent: 'sourceEvent',
-  occurredAt: 'occurredAt',
-  createdAt: 'createdAt'
-};
-
 exports.Prisma.AiConversationScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
@@ -1412,7 +1396,6 @@ exports.Prisma.NullsOrder = {
 
 exports.Prisma.ModelName = {
   Account: 'Account',
-  ActivityLedger: 'ActivityLedger',
   AiConversation: 'AiConversation',
   AiMessage: 'AiMessage',
   AiGenerationTask: 'AiGenerationTask',

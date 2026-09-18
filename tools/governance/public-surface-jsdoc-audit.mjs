@@ -55,7 +55,6 @@ const DEFAULT_PATHS = [
   'apps/api/src/modules/powersync/module.ts',
   'apps/api/src/modules/dashboard/module.ts',
   'apps/api/src/modules/dashboard/dashboard-read-port.ts',
-  'apps/api/src/modules/dashboard/activity-ledger.ts',
   'tools/governance/lib/architecture-surface.mjs',
   ...FEATURE_MODULES,
 ];

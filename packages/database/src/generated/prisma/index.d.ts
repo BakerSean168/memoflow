@@ -19,11 +19,6 @@ export type PrismaPromise<T> = $Public.PrismaPromise<T>
  */
 export type Account = $Result.DefaultSelection<Prisma.$AccountPayload>
 /**
- * Model ActivityLedger
- *
- */
-export type ActivityLedger = $Result.DefaultSelection<Prisma.$ActivityLedgerPayload>
-/**
  * Model AiConversation
  *
  */
@@ -608,16 +603,6 @@ export class PrismaClient<
     * ```
     */
   get account(): Prisma.AccountDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.activityLedger`: Exposes CRUD operations for the **ActivityLedger** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more ActivityLedgers
-    * const activityLedgers = await prisma.activityLedger.findMany()
-    * ```
-    */
-  get activityLedger(): Prisma.ActivityLedgerDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.aiConversation`: Exposes CRUD operations for the **AiConversation** model.
@@ -1903,7 +1888,6 @@ export namespace Prisma {
 
   export const ModelName: {
     Account: 'Account',
-    ActivityLedger: 'ActivityLedger',
     AiConversation: 'AiConversation',
     AiMessage: 'AiMessage',
     AiGenerationTask: 'AiGenerationTask',
@@ -2004,7 +1988,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "account" | "activityLedger" | "aiConversation" | "aiMessage" | "aiGenerationTask" | "aiUsageQuota" | "aiProviderConfig" | "aiProviderOnboardingSession" | "aiProviderSecret" | "knowledgeGenerationTask" | "aiKnowledgeIndexEntry" | "dashboardConfig" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "rule" | "ruleRevision" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "routineDefinition" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "repository" | "folder" | "resource" | "repositoryResource" | "linkedContent" | "resourceReference" | "repositoryExplorer" | "repositoryStatistic" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
+      modelProps: "account" | "aiConversation" | "aiMessage" | "aiGenerationTask" | "aiUsageQuota" | "aiProviderConfig" | "aiProviderOnboardingSession" | "aiProviderSecret" | "knowledgeGenerationTask" | "aiKnowledgeIndexEntry" | "dashboardConfig" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "rule" | "ruleRevision" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "routineDefinition" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "repository" | "folder" | "resource" | "repositoryResource" | "linkedContent" | "resourceReference" | "repositoryExplorer" | "repositoryStatistic" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2079,80 +2063,6 @@ export namespace Prisma {
           count: {
             args: Prisma.AccountCountArgs<ExtArgs>
             result: $Utils.Optional<AccountCountAggregateOutputType> | number
-          }
-        }
-      }
-      ActivityLedger: {
-        payload: Prisma.$ActivityLedgerPayload<ExtArgs>
-        fields: Prisma.ActivityLedgerFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.ActivityLedgerFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ActivityLedgerPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.ActivityLedgerFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ActivityLedgerPayload>
-          }
-          findFirst: {
-            args: Prisma.ActivityLedgerFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ActivityLedgerPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.ActivityLedgerFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ActivityLedgerPayload>
-          }
-          findMany: {
-            args: Prisma.ActivityLedgerFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ActivityLedgerPayload>[]
-          }
-          create: {
-            args: Prisma.ActivityLedgerCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ActivityLedgerPayload>
-          }
-          createMany: {
-            args: Prisma.ActivityLedgerCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.ActivityLedgerCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ActivityLedgerPayload>[]
-          }
-          delete: {
-            args: Prisma.ActivityLedgerDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ActivityLedgerPayload>
-          }
-          update: {
-            args: Prisma.ActivityLedgerUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ActivityLedgerPayload>
-          }
-          deleteMany: {
-            args: Prisma.ActivityLedgerDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.ActivityLedgerUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.ActivityLedgerUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ActivityLedgerPayload>[]
-          }
-          upsert: {
-            args: Prisma.ActivityLedgerUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ActivityLedgerPayload>
-          }
-          aggregate: {
-            args: Prisma.ActivityLedgerAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateActivityLedger>
-          }
-          groupBy: {
-            args: Prisma.ActivityLedgerGroupByArgs<ExtArgs>
-            result: $Utils.Optional<ActivityLedgerGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.ActivityLedgerCountArgs<ExtArgs>
-            result: $Utils.Optional<ActivityLedgerCountAggregateOutputType> | number
           }
         }
       }
@@ -8555,7 +8465,6 @@ export namespace Prisma {
   }
   export type GlobalOmitConfig = {
     account?: AccountOmit
-    activityLedger?: ActivityLedgerOmit
     aiConversation?: AiConversationOmit
     aiMessage?: AiMessageOmit
     aiGenerationTask?: AiGenerationTaskOmit
@@ -8741,7 +8650,6 @@ export namespace Prisma {
     relations: number
     walletAccounts: number
     walletTransactions: number
-    activityLedger: number
     taskPlans: number
     taskOccurrences: number
     userPreferenceRecords: number
@@ -8787,7 +8695,6 @@ export namespace Prisma {
     relations?: boolean | AccountCountOutputTypeCountRelationsArgs
     walletAccounts?: boolean | AccountCountOutputTypeCountWalletAccountsArgs
     walletTransactions?: boolean | AccountCountOutputTypeCountWalletTransactionsArgs
-    activityLedger?: boolean | AccountCountOutputTypeCountActivityLedgerArgs
     taskPlans?: boolean | AccountCountOutputTypeCountTaskPlansArgs
     taskOccurrences?: boolean | AccountCountOutputTypeCountTaskOccurrencesArgs
     userPreferenceRecords?: boolean | AccountCountOutputTypeCountUserPreferenceRecordsArgs
@@ -8961,13 +8868,6 @@ export namespace Prisma {
    */
   export type AccountCountOutputTypeCountWalletTransactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: WalletTransactionWhereInput
-  }
-
-  /**
-   * AccountCountOutputType without action
-   */
-  export type AccountCountOutputTypeCountActivityLedgerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ActivityLedgerWhereInput
   }
 
   /**
@@ -10186,7 +10086,6 @@ export namespace Prisma {
     relations?: boolean | Account$relationsArgs<ExtArgs>
     walletAccounts?: boolean | Account$walletAccountsArgs<ExtArgs>
     walletTransactions?: boolean | Account$walletTransactionsArgs<ExtArgs>
-    activityLedger?: boolean | Account$activityLedgerArgs<ExtArgs>
     taskPlans?: boolean | Account$taskPlansArgs<ExtArgs>
     taskOccurrences?: boolean | Account$taskOccurrencesArgs<ExtArgs>
     userPreferenceRecords?: boolean | Account$userPreferenceRecordsArgs<ExtArgs>
@@ -10267,7 +10166,6 @@ export namespace Prisma {
     relations?: boolean | Account$relationsArgs<ExtArgs>
     walletAccounts?: boolean | Account$walletAccountsArgs<ExtArgs>
     walletTransactions?: boolean | Account$walletTransactionsArgs<ExtArgs>
-    activityLedger?: boolean | Account$activityLedgerArgs<ExtArgs>
     taskPlans?: boolean | Account$taskPlansArgs<ExtArgs>
     taskOccurrences?: boolean | Account$taskOccurrencesArgs<ExtArgs>
     userPreferenceRecords?: boolean | Account$userPreferenceRecordsArgs<ExtArgs>
@@ -10326,7 +10224,6 @@ export namespace Prisma {
       relations: Prisma.$RelationPayload<ExtArgs>[]
       walletAccounts: Prisma.$WalletAccountPayload<ExtArgs>[]
       walletTransactions: Prisma.$WalletTransactionPayload<ExtArgs>[]
-      activityLedger: Prisma.$ActivityLedgerPayload<ExtArgs>[]
       taskPlans: Prisma.$TaskPlanPayload<ExtArgs>[]
       taskOccurrences: Prisma.$TaskOccurrencePayload<ExtArgs>[]
       userPreferenceRecords: Prisma.$UserPreferenceRecordPayload<ExtArgs>[]
@@ -10775,7 +10672,6 @@ export namespace Prisma {
     relations<T extends Account$relationsArgs<ExtArgs> = {}>(args?: Subset<T, Account$relationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RelationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     walletAccounts<T extends Account$walletAccountsArgs<ExtArgs> = {}>(args?: Subset<T, Account$walletAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WalletAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     walletTransactions<T extends Account$walletTransactionsArgs<ExtArgs> = {}>(args?: Subset<T, Account$walletTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WalletTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    activityLedger<T extends Account$activityLedgerArgs<ExtArgs> = {}>(args?: Subset<T, Account$activityLedgerArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ActivityLedgerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     taskPlans<T extends Account$taskPlansArgs<ExtArgs> = {}>(args?: Subset<T, Account$taskPlansArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskPlanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     taskOccurrences<T extends Account$taskOccurrencesArgs<ExtArgs> = {}>(args?: Subset<T, Account$taskOccurrencesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskOccurrencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     userPreferenceRecords<T extends Account$userPreferenceRecordsArgs<ExtArgs> = {}>(args?: Subset<T, Account$userPreferenceRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPreferenceRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -11735,30 +11631,6 @@ export namespace Prisma {
   }
 
   /**
-   * Account.activityLedger
-   */
-  export type Account$activityLedgerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ActivityLedger
-     */
-    select?: ActivityLedgerSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ActivityLedger
-     */
-    omit?: ActivityLedgerOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ActivityLedgerInclude<ExtArgs> | null
-    where?: ActivityLedgerWhereInput
-    orderBy?: ActivityLedgerOrderByWithRelationInput | ActivityLedgerOrderByWithRelationInput[]
-    cursor?: ActivityLedgerWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: ActivityLedgerScalarFieldEnum | ActivityLedgerScalarFieldEnum[]
-  }
-
-  /**
    * Account.taskPlans
    */
   export type Account$taskPlansArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -12340,1182 +12212,6 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: AccountInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model ActivityLedger
-   */
-
-  export type AggregateActivityLedger = {
-    _count: ActivityLedgerCountAggregateOutputType | null
-    _min: ActivityLedgerMinAggregateOutputType | null
-    _max: ActivityLedgerMaxAggregateOutputType | null
-  }
-
-  export type ActivityLedgerMinAggregateOutputType = {
-    id: string | null
-    identityId: string | null
-    actorId: string | null
-    subjectType: string | null
-    subjectId: string | null
-    action: string | null
-    title: string | null
-    correlationId: string | null
-    beforeSummary: string | null
-    afterSummary: string | null
-    sourceEvent: string | null
-    occurredAt: Date | null
-    createdAt: Date | null
-  }
-
-  export type ActivityLedgerMaxAggregateOutputType = {
-    id: string | null
-    identityId: string | null
-    actorId: string | null
-    subjectType: string | null
-    subjectId: string | null
-    action: string | null
-    title: string | null
-    correlationId: string | null
-    beforeSummary: string | null
-    afterSummary: string | null
-    sourceEvent: string | null
-    occurredAt: Date | null
-    createdAt: Date | null
-  }
-
-  export type ActivityLedgerCountAggregateOutputType = {
-    id: number
-    identityId: number
-    actorId: number
-    subjectType: number
-    subjectId: number
-    action: number
-    title: number
-    correlationId: number
-    beforeSummary: number
-    afterSummary: number
-    sourceEvent: number
-    occurredAt: number
-    createdAt: number
-    _all: number
-  }
-
-
-  export type ActivityLedgerMinAggregateInputType = {
-    id?: true
-    identityId?: true
-    actorId?: true
-    subjectType?: true
-    subjectId?: true
-    action?: true
-    title?: true
-    correlationId?: true
-    beforeSummary?: true
-    afterSummary?: true
-    sourceEvent?: true
-    occurredAt?: true
-    createdAt?: true
-  }
-
-  export type ActivityLedgerMaxAggregateInputType = {
-    id?: true
-    identityId?: true
-    actorId?: true
-    subjectType?: true
-    subjectId?: true
-    action?: true
-    title?: true
-    correlationId?: true
-    beforeSummary?: true
-    afterSummary?: true
-    sourceEvent?: true
-    occurredAt?: true
-    createdAt?: true
-  }
-
-  export type ActivityLedgerCountAggregateInputType = {
-    id?: true
-    identityId?: true
-    actorId?: true
-    subjectType?: true
-    subjectId?: true
-    action?: true
-    title?: true
-    correlationId?: true
-    beforeSummary?: true
-    afterSummary?: true
-    sourceEvent?: true
-    occurredAt?: true
-    createdAt?: true
-    _all?: true
-  }
-
-  export type ActivityLedgerAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which ActivityLedger to aggregate.
-     */
-    where?: ActivityLedgerWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of ActivityLedgers to fetch.
-     */
-    orderBy?: ActivityLedgerOrderByWithRelationInput | ActivityLedgerOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the start position
-     */
-    cursor?: ActivityLedgerWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` ActivityLedgers from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` ActivityLedgers.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Count returned ActivityLedgers
-    **/
-    _count?: true | ActivityLedgerCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the minimum value
-    **/
-    _min?: ActivityLedgerMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the maximum value
-    **/
-    _max?: ActivityLedgerMaxAggregateInputType
-  }
-
-  export type GetActivityLedgerAggregateType<T extends ActivityLedgerAggregateArgs> = {
-        [P in keyof T & keyof AggregateActivityLedger]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateActivityLedger[P]>
-      : GetScalarType<T[P], AggregateActivityLedger[P]>
-  }
-
-
-
-
-  export type ActivityLedgerGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ActivityLedgerWhereInput
-    orderBy?: ActivityLedgerOrderByWithAggregationInput | ActivityLedgerOrderByWithAggregationInput[]
-    by: ActivityLedgerScalarFieldEnum[] | ActivityLedgerScalarFieldEnum
-    having?: ActivityLedgerScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: ActivityLedgerCountAggregateInputType | true
-    _min?: ActivityLedgerMinAggregateInputType
-    _max?: ActivityLedgerMaxAggregateInputType
-  }
-
-  export type ActivityLedgerGroupByOutputType = {
-    id: string
-    identityId: string
-    actorId: string
-    subjectType: string
-    subjectId: string
-    action: string
-    title: string | null
-    correlationId: string | null
-    beforeSummary: string | null
-    afterSummary: string | null
-    sourceEvent: string
-    occurredAt: Date
-    createdAt: Date
-    _count: ActivityLedgerCountAggregateOutputType | null
-    _min: ActivityLedgerMinAggregateOutputType | null
-    _max: ActivityLedgerMaxAggregateOutputType | null
-  }
-
-  type GetActivityLedgerGroupByPayload<T extends ActivityLedgerGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<ActivityLedgerGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof ActivityLedgerGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], ActivityLedgerGroupByOutputType[P]>
-            : GetScalarType<T[P], ActivityLedgerGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type ActivityLedgerSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    actorId?: boolean
-    subjectType?: boolean
-    subjectId?: boolean
-    action?: boolean
-    title?: boolean
-    correlationId?: boolean
-    beforeSummary?: boolean
-    afterSummary?: boolean
-    sourceEvent?: boolean
-    occurredAt?: boolean
-    createdAt?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["activityLedger"]>
-
-  export type ActivityLedgerSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    actorId?: boolean
-    subjectType?: boolean
-    subjectId?: boolean
-    action?: boolean
-    title?: boolean
-    correlationId?: boolean
-    beforeSummary?: boolean
-    afterSummary?: boolean
-    sourceEvent?: boolean
-    occurredAt?: boolean
-    createdAt?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["activityLedger"]>
-
-  export type ActivityLedgerSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    actorId?: boolean
-    subjectType?: boolean
-    subjectId?: boolean
-    action?: boolean
-    title?: boolean
-    correlationId?: boolean
-    beforeSummary?: boolean
-    afterSummary?: boolean
-    sourceEvent?: boolean
-    occurredAt?: boolean
-    createdAt?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["activityLedger"]>
-
-  export type ActivityLedgerSelectScalar = {
-    id?: boolean
-    identityId?: boolean
-    actorId?: boolean
-    subjectType?: boolean
-    subjectId?: boolean
-    action?: boolean
-    title?: boolean
-    correlationId?: boolean
-    beforeSummary?: boolean
-    afterSummary?: boolean
-    sourceEvent?: boolean
-    occurredAt?: boolean
-    createdAt?: boolean
-  }
-
-  export type ActivityLedgerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "actorId" | "subjectType" | "subjectId" | "action" | "title" | "correlationId" | "beforeSummary" | "afterSummary" | "sourceEvent" | "occurredAt" | "createdAt", ExtArgs["result"]["activityLedger"]>
-  export type ActivityLedgerInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }
-  export type ActivityLedgerIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }
-  export type ActivityLedgerIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }
-
-  export type $ActivityLedgerPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "ActivityLedger"
-    objects: {
-      account: Prisma.$AccountPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      identityId: string
-      actorId: string
-      /**
-       * goal | task (Routine projection joins in Phase 5)
-       */
-      subjectType: string
-      subjectId: string
-      /**
-       * created | completed | updated | response | executed | ...
-       */
-      action: string
-      /**
-       * 归档标题快照（跨 DST/归档实体仍显示准确标题）
-       */
-      title: string | null
-      correlationId: string | null
-      beforeSummary: string | null
-      afterSummary: string | null
-      sourceEvent: string
-      occurredAt: Date
-      createdAt: Date
-    }, ExtArgs["result"]["activityLedger"]>
-    composites: {}
-  }
-
-  type ActivityLedgerGetPayload<S extends boolean | null | undefined | ActivityLedgerDefaultArgs> = $Result.GetResult<Prisma.$ActivityLedgerPayload, S>
-
-  type ActivityLedgerCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<ActivityLedgerFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: ActivityLedgerCountAggregateInputType | true
-    }
-
-  export interface ActivityLedgerDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ActivityLedger'], meta: { name: 'ActivityLedger' } }
-    /**
-     * Find zero or one ActivityLedger that matches the filter.
-     * @param {ActivityLedgerFindUniqueArgs} args - Arguments to find a ActivityLedger
-     * @example
-     * // Get one ActivityLedger
-     * const activityLedger = await prisma.activityLedger.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends ActivityLedgerFindUniqueArgs>(args: SelectSubset<T, ActivityLedgerFindUniqueArgs<ExtArgs>>): Prisma__ActivityLedgerClient<$Result.GetResult<Prisma.$ActivityLedgerPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one ActivityLedger that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {ActivityLedgerFindUniqueOrThrowArgs} args - Arguments to find a ActivityLedger
-     * @example
-     * // Get one ActivityLedger
-     * const activityLedger = await prisma.activityLedger.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends ActivityLedgerFindUniqueOrThrowArgs>(args: SelectSubset<T, ActivityLedgerFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ActivityLedgerClient<$Result.GetResult<Prisma.$ActivityLedgerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first ActivityLedger that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ActivityLedgerFindFirstArgs} args - Arguments to find a ActivityLedger
-     * @example
-     * // Get one ActivityLedger
-     * const activityLedger = await prisma.activityLedger.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends ActivityLedgerFindFirstArgs>(args?: SelectSubset<T, ActivityLedgerFindFirstArgs<ExtArgs>>): Prisma__ActivityLedgerClient<$Result.GetResult<Prisma.$ActivityLedgerPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first ActivityLedger that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ActivityLedgerFindFirstOrThrowArgs} args - Arguments to find a ActivityLedger
-     * @example
-     * // Get one ActivityLedger
-     * const activityLedger = await prisma.activityLedger.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends ActivityLedgerFindFirstOrThrowArgs>(args?: SelectSubset<T, ActivityLedgerFindFirstOrThrowArgs<ExtArgs>>): Prisma__ActivityLedgerClient<$Result.GetResult<Prisma.$ActivityLedgerPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more ActivityLedgers that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ActivityLedgerFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all ActivityLedgers
-     * const activityLedgers = await prisma.activityLedger.findMany()
-     *
-     * // Get first 10 ActivityLedgers
-     * const activityLedgers = await prisma.activityLedger.findMany({ take: 10 })
-     *
-     * // Only select the `id`
-     * const activityLedgerWithIdOnly = await prisma.activityLedger.findMany({ select: { id: true } })
-     *
-     */
-    findMany<T extends ActivityLedgerFindManyArgs>(args?: SelectSubset<T, ActivityLedgerFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ActivityLedgerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a ActivityLedger.
-     * @param {ActivityLedgerCreateArgs} args - Arguments to create a ActivityLedger.
-     * @example
-     * // Create one ActivityLedger
-     * const ActivityLedger = await prisma.activityLedger.create({
-     *   data: {
-     *     // ... data to create a ActivityLedger
-     *   }
-     * })
-     *
-     */
-    create<T extends ActivityLedgerCreateArgs>(args: SelectSubset<T, ActivityLedgerCreateArgs<ExtArgs>>): Prisma__ActivityLedgerClient<$Result.GetResult<Prisma.$ActivityLedgerPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many ActivityLedgers.
-     * @param {ActivityLedgerCreateManyArgs} args - Arguments to create many ActivityLedgers.
-     * @example
-     * // Create many ActivityLedgers
-     * const activityLedger = await prisma.activityLedger.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     */
-    createMany<T extends ActivityLedgerCreateManyArgs>(args?: SelectSubset<T, ActivityLedgerCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many ActivityLedgers and returns the data saved in the database.
-     * @param {ActivityLedgerCreateManyAndReturnArgs} args - Arguments to create many ActivityLedgers.
-     * @example
-     * // Create many ActivityLedgers
-     * const activityLedger = await prisma.activityLedger.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Create many ActivityLedgers and only return the `id`
-     * const activityLedgerWithIdOnly = await prisma.activityLedger.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    createManyAndReturn<T extends ActivityLedgerCreateManyAndReturnArgs>(args?: SelectSubset<T, ActivityLedgerCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ActivityLedgerPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a ActivityLedger.
-     * @param {ActivityLedgerDeleteArgs} args - Arguments to delete one ActivityLedger.
-     * @example
-     * // Delete one ActivityLedger
-     * const ActivityLedger = await prisma.activityLedger.delete({
-     *   where: {
-     *     // ... filter to delete one ActivityLedger
-     *   }
-     * })
-     *
-     */
-    delete<T extends ActivityLedgerDeleteArgs>(args: SelectSubset<T, ActivityLedgerDeleteArgs<ExtArgs>>): Prisma__ActivityLedgerClient<$Result.GetResult<Prisma.$ActivityLedgerPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one ActivityLedger.
-     * @param {ActivityLedgerUpdateArgs} args - Arguments to update one ActivityLedger.
-     * @example
-     * // Update one ActivityLedger
-     * const activityLedger = await prisma.activityLedger.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    update<T extends ActivityLedgerUpdateArgs>(args: SelectSubset<T, ActivityLedgerUpdateArgs<ExtArgs>>): Prisma__ActivityLedgerClient<$Result.GetResult<Prisma.$ActivityLedgerPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more ActivityLedgers.
-     * @param {ActivityLedgerDeleteManyArgs} args - Arguments to filter ActivityLedgers to delete.
-     * @example
-     * // Delete a few ActivityLedgers
-     * const { count } = await prisma.activityLedger.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     *
-     */
-    deleteMany<T extends ActivityLedgerDeleteManyArgs>(args?: SelectSubset<T, ActivityLedgerDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more ActivityLedgers.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ActivityLedgerUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many ActivityLedgers
-     * const activityLedger = await prisma.activityLedger.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    updateMany<T extends ActivityLedgerUpdateManyArgs>(args: SelectSubset<T, ActivityLedgerUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more ActivityLedgers and returns the data updated in the database.
-     * @param {ActivityLedgerUpdateManyAndReturnArgs} args - Arguments to update many ActivityLedgers.
-     * @example
-     * // Update many ActivityLedgers
-     * const activityLedger = await prisma.activityLedger.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Update zero or more ActivityLedgers and only return the `id`
-     * const activityLedgerWithIdOnly = await prisma.activityLedger.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    updateManyAndReturn<T extends ActivityLedgerUpdateManyAndReturnArgs>(args: SelectSubset<T, ActivityLedgerUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ActivityLedgerPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one ActivityLedger.
-     * @param {ActivityLedgerUpsertArgs} args - Arguments to update or create a ActivityLedger.
-     * @example
-     * // Update or create a ActivityLedger
-     * const activityLedger = await prisma.activityLedger.upsert({
-     *   create: {
-     *     // ... data to create a ActivityLedger
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the ActivityLedger we want to update
-     *   }
-     * })
-     */
-    upsert<T extends ActivityLedgerUpsertArgs>(args: SelectSubset<T, ActivityLedgerUpsertArgs<ExtArgs>>): Prisma__ActivityLedgerClient<$Result.GetResult<Prisma.$ActivityLedgerPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of ActivityLedgers.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ActivityLedgerCountArgs} args - Arguments to filter ActivityLedgers to count.
-     * @example
-     * // Count the number of ActivityLedgers
-     * const count = await prisma.activityLedger.count({
-     *   where: {
-     *     // ... the filter for the ActivityLedgers we want to count
-     *   }
-     * })
-    **/
-    count<T extends ActivityLedgerCountArgs>(
-      args?: Subset<T, ActivityLedgerCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], ActivityLedgerCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a ActivityLedger.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ActivityLedgerAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends ActivityLedgerAggregateArgs>(args: Subset<T, ActivityLedgerAggregateArgs>): Prisma.PrismaPromise<GetActivityLedgerAggregateType<T>>
-
-    /**
-     * Group by ActivityLedger.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {ActivityLedgerGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     *
-    **/
-    groupBy<
-      T extends ActivityLedgerGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: ActivityLedgerGroupByArgs['orderBy'] }
-        : { orderBy?: ActivityLedgerGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, ActivityLedgerGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetActivityLedgerGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the ActivityLedger model
-   */
-  readonly fields: ActivityLedgerFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for ActivityLedger.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__ActivityLedgerClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the ActivityLedger model
-   */
-  interface ActivityLedgerFieldRefs {
-    readonly id: FieldRef<"ActivityLedger", 'String'>
-    readonly identityId: FieldRef<"ActivityLedger", 'String'>
-    readonly actorId: FieldRef<"ActivityLedger", 'String'>
-    readonly subjectType: FieldRef<"ActivityLedger", 'String'>
-    readonly subjectId: FieldRef<"ActivityLedger", 'String'>
-    readonly action: FieldRef<"ActivityLedger", 'String'>
-    readonly title: FieldRef<"ActivityLedger", 'String'>
-    readonly correlationId: FieldRef<"ActivityLedger", 'String'>
-    readonly beforeSummary: FieldRef<"ActivityLedger", 'String'>
-    readonly afterSummary: FieldRef<"ActivityLedger", 'String'>
-    readonly sourceEvent: FieldRef<"ActivityLedger", 'String'>
-    readonly occurredAt: FieldRef<"ActivityLedger", 'DateTime'>
-    readonly createdAt: FieldRef<"ActivityLedger", 'DateTime'>
-  }
-
-
-  // Custom InputTypes
-  /**
-   * ActivityLedger findUnique
-   */
-  export type ActivityLedgerFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ActivityLedger
-     */
-    select?: ActivityLedgerSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ActivityLedger
-     */
-    omit?: ActivityLedgerOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ActivityLedgerInclude<ExtArgs> | null
-    /**
-     * Filter, which ActivityLedger to fetch.
-     */
-    where: ActivityLedgerWhereUniqueInput
-  }
-
-  /**
-   * ActivityLedger findUniqueOrThrow
-   */
-  export type ActivityLedgerFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ActivityLedger
-     */
-    select?: ActivityLedgerSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ActivityLedger
-     */
-    omit?: ActivityLedgerOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ActivityLedgerInclude<ExtArgs> | null
-    /**
-     * Filter, which ActivityLedger to fetch.
-     */
-    where: ActivityLedgerWhereUniqueInput
-  }
-
-  /**
-   * ActivityLedger findFirst
-   */
-  export type ActivityLedgerFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ActivityLedger
-     */
-    select?: ActivityLedgerSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ActivityLedger
-     */
-    omit?: ActivityLedgerOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ActivityLedgerInclude<ExtArgs> | null
-    /**
-     * Filter, which ActivityLedger to fetch.
-     */
-    where?: ActivityLedgerWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of ActivityLedgers to fetch.
-     */
-    orderBy?: ActivityLedgerOrderByWithRelationInput | ActivityLedgerOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for ActivityLedgers.
-     */
-    cursor?: ActivityLedgerWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` ActivityLedgers from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` ActivityLedgers.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of ActivityLedgers.
-     */
-    distinct?: ActivityLedgerScalarFieldEnum | ActivityLedgerScalarFieldEnum[]
-  }
-
-  /**
-   * ActivityLedger findFirstOrThrow
-   */
-  export type ActivityLedgerFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ActivityLedger
-     */
-    select?: ActivityLedgerSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ActivityLedger
-     */
-    omit?: ActivityLedgerOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ActivityLedgerInclude<ExtArgs> | null
-    /**
-     * Filter, which ActivityLedger to fetch.
-     */
-    where?: ActivityLedgerWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of ActivityLedgers to fetch.
-     */
-    orderBy?: ActivityLedgerOrderByWithRelationInput | ActivityLedgerOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for ActivityLedgers.
-     */
-    cursor?: ActivityLedgerWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` ActivityLedgers from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` ActivityLedgers.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of ActivityLedgers.
-     */
-    distinct?: ActivityLedgerScalarFieldEnum | ActivityLedgerScalarFieldEnum[]
-  }
-
-  /**
-   * ActivityLedger findMany
-   */
-  export type ActivityLedgerFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ActivityLedger
-     */
-    select?: ActivityLedgerSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ActivityLedger
-     */
-    omit?: ActivityLedgerOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ActivityLedgerInclude<ExtArgs> | null
-    /**
-     * Filter, which ActivityLedgers to fetch.
-     */
-    where?: ActivityLedgerWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of ActivityLedgers to fetch.
-     */
-    orderBy?: ActivityLedgerOrderByWithRelationInput | ActivityLedgerOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for listing ActivityLedgers.
-     */
-    cursor?: ActivityLedgerWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` ActivityLedgers from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` ActivityLedgers.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of ActivityLedgers.
-     */
-    distinct?: ActivityLedgerScalarFieldEnum | ActivityLedgerScalarFieldEnum[]
-  }
-
-  /**
-   * ActivityLedger create
-   */
-  export type ActivityLedgerCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ActivityLedger
-     */
-    select?: ActivityLedgerSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ActivityLedger
-     */
-    omit?: ActivityLedgerOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ActivityLedgerInclude<ExtArgs> | null
-    /**
-     * The data needed to create a ActivityLedger.
-     */
-    data: XOR<ActivityLedgerCreateInput, ActivityLedgerUncheckedCreateInput>
-  }
-
-  /**
-   * ActivityLedger createMany
-   */
-  export type ActivityLedgerCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many ActivityLedgers.
-     */
-    data: ActivityLedgerCreateManyInput | ActivityLedgerCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * ActivityLedger createManyAndReturn
-   */
-  export type ActivityLedgerCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ActivityLedger
-     */
-    select?: ActivityLedgerSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the ActivityLedger
-     */
-    omit?: ActivityLedgerOmit<ExtArgs> | null
-    /**
-     * The data used to create many ActivityLedgers.
-     */
-    data: ActivityLedgerCreateManyInput | ActivityLedgerCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ActivityLedgerIncludeCreateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * ActivityLedger update
-   */
-  export type ActivityLedgerUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ActivityLedger
-     */
-    select?: ActivityLedgerSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ActivityLedger
-     */
-    omit?: ActivityLedgerOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ActivityLedgerInclude<ExtArgs> | null
-    /**
-     * The data needed to update a ActivityLedger.
-     */
-    data: XOR<ActivityLedgerUpdateInput, ActivityLedgerUncheckedUpdateInput>
-    /**
-     * Choose, which ActivityLedger to update.
-     */
-    where: ActivityLedgerWhereUniqueInput
-  }
-
-  /**
-   * ActivityLedger updateMany
-   */
-  export type ActivityLedgerUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update ActivityLedgers.
-     */
-    data: XOR<ActivityLedgerUpdateManyMutationInput, ActivityLedgerUncheckedUpdateManyInput>
-    /**
-     * Filter which ActivityLedgers to update
-     */
-    where?: ActivityLedgerWhereInput
-    /**
-     * Limit how many ActivityLedgers to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * ActivityLedger updateManyAndReturn
-   */
-  export type ActivityLedgerUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ActivityLedger
-     */
-    select?: ActivityLedgerSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the ActivityLedger
-     */
-    omit?: ActivityLedgerOmit<ExtArgs> | null
-    /**
-     * The data used to update ActivityLedgers.
-     */
-    data: XOR<ActivityLedgerUpdateManyMutationInput, ActivityLedgerUncheckedUpdateManyInput>
-    /**
-     * Filter which ActivityLedgers to update
-     */
-    where?: ActivityLedgerWhereInput
-    /**
-     * Limit how many ActivityLedgers to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ActivityLedgerIncludeUpdateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * ActivityLedger upsert
-   */
-  export type ActivityLedgerUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ActivityLedger
-     */
-    select?: ActivityLedgerSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ActivityLedger
-     */
-    omit?: ActivityLedgerOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ActivityLedgerInclude<ExtArgs> | null
-    /**
-     * The filter to search for the ActivityLedger to update in case it exists.
-     */
-    where: ActivityLedgerWhereUniqueInput
-    /**
-     * In case the ActivityLedger found by the `where` argument doesn't exist, create a new ActivityLedger with this data.
-     */
-    create: XOR<ActivityLedgerCreateInput, ActivityLedgerUncheckedCreateInput>
-    /**
-     * In case the ActivityLedger was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<ActivityLedgerUpdateInput, ActivityLedgerUncheckedUpdateInput>
-  }
-
-  /**
-   * ActivityLedger delete
-   */
-  export type ActivityLedgerDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ActivityLedger
-     */
-    select?: ActivityLedgerSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ActivityLedger
-     */
-    omit?: ActivityLedgerOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ActivityLedgerInclude<ExtArgs> | null
-    /**
-     * Filter which ActivityLedger to delete.
-     */
-    where: ActivityLedgerWhereUniqueInput
-  }
-
-  /**
-   * ActivityLedger deleteMany
-   */
-  export type ActivityLedgerDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which ActivityLedgers to delete
-     */
-    where?: ActivityLedgerWhereInput
-    /**
-     * Limit how many ActivityLedgers to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * ActivityLedger without action
-   */
-  export type ActivityLedgerDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ActivityLedger
-     */
-    select?: ActivityLedgerSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ActivityLedger
-     */
-    omit?: ActivityLedgerOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ActivityLedgerInclude<ExtArgs> | null
   }
 
 
@@ -113707,25 +112403,6 @@ export namespace Prisma {
   export type AccountScalarFieldEnum = (typeof AccountScalarFieldEnum)[keyof typeof AccountScalarFieldEnum]
 
 
-  export const ActivityLedgerScalarFieldEnum: {
-    id: 'id',
-    identityId: 'identityId',
-    actorId: 'actorId',
-    subjectType: 'subjectType',
-    subjectId: 'subjectId',
-    action: 'action',
-    title: 'title',
-    correlationId: 'correlationId',
-    beforeSummary: 'beforeSummary',
-    afterSummary: 'afterSummary',
-    sourceEvent: 'sourceEvent',
-    occurredAt: 'occurredAt',
-    createdAt: 'createdAt'
-  };
-
-  export type ActivityLedgerScalarFieldEnum = (typeof ActivityLedgerScalarFieldEnum)[keyof typeof ActivityLedgerScalarFieldEnum]
-
-
   export const AiConversationScalarFieldEnum: {
     id: 'id',
     identityId: 'identityId',
@@ -115422,7 +114099,6 @@ export namespace Prisma {
     relations?: RelationListRelationFilter
     walletAccounts?: WalletAccountListRelationFilter
     walletTransactions?: WalletTransactionListRelationFilter
-    activityLedger?: ActivityLedgerListRelationFilter
     taskPlans?: TaskPlanListRelationFilter
     taskOccurrences?: TaskOccurrenceListRelationFilter
     userPreferenceRecords?: UserPreferenceRecordListRelationFilter
@@ -115478,7 +114154,6 @@ export namespace Prisma {
     relations?: RelationOrderByRelationAggregateInput
     walletAccounts?: WalletAccountOrderByRelationAggregateInput
     walletTransactions?: WalletTransactionOrderByRelationAggregateInput
-    activityLedger?: ActivityLedgerOrderByRelationAggregateInput
     taskPlans?: TaskPlanOrderByRelationAggregateInput
     taskOccurrences?: TaskOccurrenceOrderByRelationAggregateInput
     userPreferenceRecords?: UserPreferenceRecordOrderByRelationAggregateInput
@@ -115537,7 +114212,6 @@ export namespace Prisma {
     relations?: RelationListRelationFilter
     walletAccounts?: WalletAccountListRelationFilter
     walletTransactions?: WalletTransactionListRelationFilter
-    activityLedger?: ActivityLedgerListRelationFilter
     taskPlans?: TaskPlanListRelationFilter
     taskOccurrences?: TaskOccurrenceListRelationFilter
     userPreferenceRecords?: UserPreferenceRecordListRelationFilter
@@ -115586,101 +114260,6 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"Account"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Account"> | Date | string
     closedAt?: DateTimeNullableWithAggregatesFilter<"Account"> | Date | string | null
-  }
-
-  export type ActivityLedgerWhereInput = {
-    AND?: ActivityLedgerWhereInput | ActivityLedgerWhereInput[]
-    OR?: ActivityLedgerWhereInput[]
-    NOT?: ActivityLedgerWhereInput | ActivityLedgerWhereInput[]
-    id?: StringFilter<"ActivityLedger"> | string
-    identityId?: StringFilter<"ActivityLedger"> | string
-    actorId?: StringFilter<"ActivityLedger"> | string
-    subjectType?: StringFilter<"ActivityLedger"> | string
-    subjectId?: StringFilter<"ActivityLedger"> | string
-    action?: StringFilter<"ActivityLedger"> | string
-    title?: StringNullableFilter<"ActivityLedger"> | string | null
-    correlationId?: StringNullableFilter<"ActivityLedger"> | string | null
-    beforeSummary?: StringNullableFilter<"ActivityLedger"> | string | null
-    afterSummary?: StringNullableFilter<"ActivityLedger"> | string | null
-    sourceEvent?: StringFilter<"ActivityLedger"> | string
-    occurredAt?: DateTimeFilter<"ActivityLedger"> | Date | string
-    createdAt?: DateTimeFilter<"ActivityLedger"> | Date | string
-    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-  }
-
-  export type ActivityLedgerOrderByWithRelationInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    actorId?: SortOrder
-    subjectType?: SortOrder
-    subjectId?: SortOrder
-    action?: SortOrder
-    title?: SortOrderInput | SortOrder
-    correlationId?: SortOrderInput | SortOrder
-    beforeSummary?: SortOrderInput | SortOrder
-    afterSummary?: SortOrderInput | SortOrder
-    sourceEvent?: SortOrder
-    occurredAt?: SortOrder
-    createdAt?: SortOrder
-    account?: AccountOrderByWithRelationInput
-  }
-
-  export type ActivityLedgerWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    AND?: ActivityLedgerWhereInput | ActivityLedgerWhereInput[]
-    OR?: ActivityLedgerWhereInput[]
-    NOT?: ActivityLedgerWhereInput | ActivityLedgerWhereInput[]
-    identityId?: StringFilter<"ActivityLedger"> | string
-    actorId?: StringFilter<"ActivityLedger"> | string
-    subjectType?: StringFilter<"ActivityLedger"> | string
-    subjectId?: StringFilter<"ActivityLedger"> | string
-    action?: StringFilter<"ActivityLedger"> | string
-    title?: StringNullableFilter<"ActivityLedger"> | string | null
-    correlationId?: StringNullableFilter<"ActivityLedger"> | string | null
-    beforeSummary?: StringNullableFilter<"ActivityLedger"> | string | null
-    afterSummary?: StringNullableFilter<"ActivityLedger"> | string | null
-    sourceEvent?: StringFilter<"ActivityLedger"> | string
-    occurredAt?: DateTimeFilter<"ActivityLedger"> | Date | string
-    createdAt?: DateTimeFilter<"ActivityLedger"> | Date | string
-    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-  }, "id">
-
-  export type ActivityLedgerOrderByWithAggregationInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    actorId?: SortOrder
-    subjectType?: SortOrder
-    subjectId?: SortOrder
-    action?: SortOrder
-    title?: SortOrderInput | SortOrder
-    correlationId?: SortOrderInput | SortOrder
-    beforeSummary?: SortOrderInput | SortOrder
-    afterSummary?: SortOrderInput | SortOrder
-    sourceEvent?: SortOrder
-    occurredAt?: SortOrder
-    createdAt?: SortOrder
-    _count?: ActivityLedgerCountOrderByAggregateInput
-    _max?: ActivityLedgerMaxOrderByAggregateInput
-    _min?: ActivityLedgerMinOrderByAggregateInput
-  }
-
-  export type ActivityLedgerScalarWhereWithAggregatesInput = {
-    AND?: ActivityLedgerScalarWhereWithAggregatesInput | ActivityLedgerScalarWhereWithAggregatesInput[]
-    OR?: ActivityLedgerScalarWhereWithAggregatesInput[]
-    NOT?: ActivityLedgerScalarWhereWithAggregatesInput | ActivityLedgerScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"ActivityLedger"> | string
-    identityId?: StringWithAggregatesFilter<"ActivityLedger"> | string
-    actorId?: StringWithAggregatesFilter<"ActivityLedger"> | string
-    subjectType?: StringWithAggregatesFilter<"ActivityLedger"> | string
-    subjectId?: StringWithAggregatesFilter<"ActivityLedger"> | string
-    action?: StringWithAggregatesFilter<"ActivityLedger"> | string
-    title?: StringNullableWithAggregatesFilter<"ActivityLedger"> | string | null
-    correlationId?: StringNullableWithAggregatesFilter<"ActivityLedger"> | string | null
-    beforeSummary?: StringNullableWithAggregatesFilter<"ActivityLedger"> | string | null
-    afterSummary?: StringNullableWithAggregatesFilter<"ActivityLedger"> | string | null
-    sourceEvent?: StringWithAggregatesFilter<"ActivityLedger"> | string
-    occurredAt?: DateTimeWithAggregatesFilter<"ActivityLedger"> | Date | string
-    createdAt?: DateTimeWithAggregatesFilter<"ActivityLedger"> | Date | string
   }
 
   export type AiConversationWhereInput = {
@@ -123478,7 +122057,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -123533,7 +122111,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -123588,7 +122165,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -123643,7 +122219,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -123694,117 +122269,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type ActivityLedgerCreateInput = {
-    id: string
-    actorId: string
-    subjectType: string
-    subjectId: string
-    action: string
-    title?: string | null
-    correlationId?: string | null
-    beforeSummary?: string | null
-    afterSummary?: string | null
-    sourceEvent: string
-    occurredAt: Date | string
-    createdAt?: Date | string
-    account: AccountCreateNestedOneWithoutActivityLedgerInput
-  }
-
-  export type ActivityLedgerUncheckedCreateInput = {
-    id: string
-    identityId: string
-    actorId: string
-    subjectType: string
-    subjectId: string
-    action: string
-    title?: string | null
-    correlationId?: string | null
-    beforeSummary?: string | null
-    afterSummary?: string | null
-    sourceEvent: string
-    occurredAt: Date | string
-    createdAt?: Date | string
-  }
-
-  export type ActivityLedgerUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    actorId?: StringFieldUpdateOperationsInput | string
-    subjectType?: StringFieldUpdateOperationsInput | string
-    subjectId?: StringFieldUpdateOperationsInput | string
-    action?: StringFieldUpdateOperationsInput | string
-    title?: NullableStringFieldUpdateOperationsInput | string | null
-    correlationId?: NullableStringFieldUpdateOperationsInput | string | null
-    beforeSummary?: NullableStringFieldUpdateOperationsInput | string | null
-    afterSummary?: NullableStringFieldUpdateOperationsInput | string | null
-    sourceEvent?: StringFieldUpdateOperationsInput | string
-    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    account?: AccountUpdateOneRequiredWithoutActivityLedgerNestedInput
-  }
-
-  export type ActivityLedgerUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    actorId?: StringFieldUpdateOperationsInput | string
-    subjectType?: StringFieldUpdateOperationsInput | string
-    subjectId?: StringFieldUpdateOperationsInput | string
-    action?: StringFieldUpdateOperationsInput | string
-    title?: NullableStringFieldUpdateOperationsInput | string | null
-    correlationId?: NullableStringFieldUpdateOperationsInput | string | null
-    beforeSummary?: NullableStringFieldUpdateOperationsInput | string | null
-    afterSummary?: NullableStringFieldUpdateOperationsInput | string | null
-    sourceEvent?: StringFieldUpdateOperationsInput | string
-    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ActivityLedgerCreateManyInput = {
-    id: string
-    identityId: string
-    actorId: string
-    subjectType: string
-    subjectId: string
-    action: string
-    title?: string | null
-    correlationId?: string | null
-    beforeSummary?: string | null
-    afterSummary?: string | null
-    sourceEvent: string
-    occurredAt: Date | string
-    createdAt?: Date | string
-  }
-
-  export type ActivityLedgerUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    actorId?: StringFieldUpdateOperationsInput | string
-    subjectType?: StringFieldUpdateOperationsInput | string
-    subjectId?: StringFieldUpdateOperationsInput | string
-    action?: StringFieldUpdateOperationsInput | string
-    title?: NullableStringFieldUpdateOperationsInput | string | null
-    correlationId?: NullableStringFieldUpdateOperationsInput | string | null
-    beforeSummary?: NullableStringFieldUpdateOperationsInput | string | null
-    afterSummary?: NullableStringFieldUpdateOperationsInput | string | null
-    sourceEvent?: StringFieldUpdateOperationsInput | string
-    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ActivityLedgerUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    actorId?: StringFieldUpdateOperationsInput | string
-    subjectType?: StringFieldUpdateOperationsInput | string
-    subjectId?: StringFieldUpdateOperationsInput | string
-    action?: StringFieldUpdateOperationsInput | string
-    title?: NullableStringFieldUpdateOperationsInput | string | null
-    correlationId?: NullableStringFieldUpdateOperationsInput | string | null
-    beforeSummary?: NullableStringFieldUpdateOperationsInput | string | null
-    afterSummary?: NullableStringFieldUpdateOperationsInput | string | null
-    sourceEvent?: StringFieldUpdateOperationsInput | string
-    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type AiConversationCreateInput = {
@@ -132725,12 +131189,6 @@ export namespace Prisma {
     none?: WalletTransactionWhereInput
   }
 
-  export type ActivityLedgerListRelationFilter = {
-    every?: ActivityLedgerWhereInput
-    some?: ActivityLedgerWhereInput
-    none?: ActivityLedgerWhereInput
-  }
-
   export type TaskPlanListRelationFilter = {
     every?: TaskPlanWhereInput
     some?: TaskPlanWhereInput
@@ -132958,10 +131416,6 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
-  export type ActivityLedgerOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
   export type TaskPlanOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -133147,92 +131601,6 @@ export namespace Prisma {
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
-  export type StringNullableFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    mode?: QueryMode
-    not?: NestedStringNullableFilter<$PrismaModel> | string | null
-  }
-
-  export type AccountScalarRelationFilter = {
-    is?: AccountWhereInput
-    isNot?: AccountWhereInput
-  }
-
-  export type ActivityLedgerCountOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    actorId?: SortOrder
-    subjectType?: SortOrder
-    subjectId?: SortOrder
-    action?: SortOrder
-    title?: SortOrder
-    correlationId?: SortOrder
-    beforeSummary?: SortOrder
-    afterSummary?: SortOrder
-    sourceEvent?: SortOrder
-    occurredAt?: SortOrder
-    createdAt?: SortOrder
-  }
-
-  export type ActivityLedgerMaxOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    actorId?: SortOrder
-    subjectType?: SortOrder
-    subjectId?: SortOrder
-    action?: SortOrder
-    title?: SortOrder
-    correlationId?: SortOrder
-    beforeSummary?: SortOrder
-    afterSummary?: SortOrder
-    sourceEvent?: SortOrder
-    occurredAt?: SortOrder
-    createdAt?: SortOrder
-  }
-
-  export type ActivityLedgerMinOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    actorId?: SortOrder
-    subjectType?: SortOrder
-    subjectId?: SortOrder
-    action?: SortOrder
-    title?: SortOrder
-    correlationId?: SortOrder
-    beforeSummary?: SortOrder
-    afterSummary?: SortOrder
-    sourceEvent?: SortOrder
-    occurredAt?: SortOrder
-    createdAt?: SortOrder
-  }
-
-  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    mode?: QueryMode
-    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedStringNullableFilter<$PrismaModel>
-    _max?: NestedStringNullableFilter<$PrismaModel>
-  }
-
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -133242,6 +131610,11 @@ export namespace Prisma {
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntFilter<$PrismaModel> | number
+  }
+
+  export type AccountScalarRelationFilter = {
+    is?: AccountWhereInput
+    isNot?: AccountWhereInput
   }
 
   export type AiConversationCountOrderByAggregateInput = {
@@ -133309,6 +131682,21 @@ export namespace Prisma {
     _max?: NestedIntFilter<$PrismaModel>
   }
 
+  export type StringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
   export type AiConversationScalarRelationFilter = {
     is?: AiConversationWhereInput
     isNot?: AiConversationWhereInput
@@ -133342,6 +131730,24 @@ export namespace Prisma {
     content?: SortOrder
     tokenUsage?: SortOrder
     createdAt?: SortOrder
+  }
+
+  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
   export type FloatNullableFilter<$PrismaModel = never> = {
@@ -138346,13 +136752,6 @@ export namespace Prisma {
     connect?: WalletTransactionWhereUniqueInput | WalletTransactionWhereUniqueInput[]
   }
 
-  export type ActivityLedgerCreateNestedManyWithoutAccountInput = {
-    create?: XOR<ActivityLedgerCreateWithoutAccountInput, ActivityLedgerUncheckedCreateWithoutAccountInput> | ActivityLedgerCreateWithoutAccountInput[] | ActivityLedgerUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: ActivityLedgerCreateOrConnectWithoutAccountInput | ActivityLedgerCreateOrConnectWithoutAccountInput[]
-    createMany?: ActivityLedgerCreateManyAccountInputEnvelope
-    connect?: ActivityLedgerWhereUniqueInput | ActivityLedgerWhereUniqueInput[]
-  }
-
   export type TaskPlanCreateNestedManyWithoutAccountInput = {
     create?: XOR<TaskPlanCreateWithoutAccountInput, TaskPlanUncheckedCreateWithoutAccountInput> | TaskPlanCreateWithoutAccountInput[] | TaskPlanUncheckedCreateWithoutAccountInput[]
     connectOrCreate?: TaskPlanCreateOrConnectWithoutAccountInput | TaskPlanCreateOrConnectWithoutAccountInput[]
@@ -138663,13 +137062,6 @@ export namespace Prisma {
     connectOrCreate?: WalletTransactionCreateOrConnectWithoutAccount_identityInput | WalletTransactionCreateOrConnectWithoutAccount_identityInput[]
     createMany?: WalletTransactionCreateManyAccount_identityInputEnvelope
     connect?: WalletTransactionWhereUniqueInput | WalletTransactionWhereUniqueInput[]
-  }
-
-  export type ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput = {
-    create?: XOR<ActivityLedgerCreateWithoutAccountInput, ActivityLedgerUncheckedCreateWithoutAccountInput> | ActivityLedgerCreateWithoutAccountInput[] | ActivityLedgerUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: ActivityLedgerCreateOrConnectWithoutAccountInput | ActivityLedgerCreateOrConnectWithoutAccountInput[]
-    createMany?: ActivityLedgerCreateManyAccountInputEnvelope
-    connect?: ActivityLedgerWhereUniqueInput | ActivityLedgerWhereUniqueInput[]
   }
 
   export type TaskPlanUncheckedCreateNestedManyWithoutAccountInput = {
@@ -139146,20 +137538,6 @@ export namespace Prisma {
     update?: WalletTransactionUpdateWithWhereUniqueWithoutAccount_identityInput | WalletTransactionUpdateWithWhereUniqueWithoutAccount_identityInput[]
     updateMany?: WalletTransactionUpdateManyWithWhereWithoutAccount_identityInput | WalletTransactionUpdateManyWithWhereWithoutAccount_identityInput[]
     deleteMany?: WalletTransactionScalarWhereInput | WalletTransactionScalarWhereInput[]
-  }
-
-  export type ActivityLedgerUpdateManyWithoutAccountNestedInput = {
-    create?: XOR<ActivityLedgerCreateWithoutAccountInput, ActivityLedgerUncheckedCreateWithoutAccountInput> | ActivityLedgerCreateWithoutAccountInput[] | ActivityLedgerUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: ActivityLedgerCreateOrConnectWithoutAccountInput | ActivityLedgerCreateOrConnectWithoutAccountInput[]
-    upsert?: ActivityLedgerUpsertWithWhereUniqueWithoutAccountInput | ActivityLedgerUpsertWithWhereUniqueWithoutAccountInput[]
-    createMany?: ActivityLedgerCreateManyAccountInputEnvelope
-    set?: ActivityLedgerWhereUniqueInput | ActivityLedgerWhereUniqueInput[]
-    disconnect?: ActivityLedgerWhereUniqueInput | ActivityLedgerWhereUniqueInput[]
-    delete?: ActivityLedgerWhereUniqueInput | ActivityLedgerWhereUniqueInput[]
-    connect?: ActivityLedgerWhereUniqueInput | ActivityLedgerWhereUniqueInput[]
-    update?: ActivityLedgerUpdateWithWhereUniqueWithoutAccountInput | ActivityLedgerUpdateWithWhereUniqueWithoutAccountInput[]
-    updateMany?: ActivityLedgerUpdateManyWithWhereWithoutAccountInput | ActivityLedgerUpdateManyWithWhereWithoutAccountInput[]
-    deleteMany?: ActivityLedgerScalarWhereInput | ActivityLedgerScalarWhereInput[]
   }
 
   export type TaskPlanUpdateManyWithoutAccountNestedInput = {
@@ -139780,20 +138158,6 @@ export namespace Prisma {
     deleteMany?: WalletTransactionScalarWhereInput | WalletTransactionScalarWhereInput[]
   }
 
-  export type ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput = {
-    create?: XOR<ActivityLedgerCreateWithoutAccountInput, ActivityLedgerUncheckedCreateWithoutAccountInput> | ActivityLedgerCreateWithoutAccountInput[] | ActivityLedgerUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: ActivityLedgerCreateOrConnectWithoutAccountInput | ActivityLedgerCreateOrConnectWithoutAccountInput[]
-    upsert?: ActivityLedgerUpsertWithWhereUniqueWithoutAccountInput | ActivityLedgerUpsertWithWhereUniqueWithoutAccountInput[]
-    createMany?: ActivityLedgerCreateManyAccountInputEnvelope
-    set?: ActivityLedgerWhereUniqueInput | ActivityLedgerWhereUniqueInput[]
-    disconnect?: ActivityLedgerWhereUniqueInput | ActivityLedgerWhereUniqueInput[]
-    delete?: ActivityLedgerWhereUniqueInput | ActivityLedgerWhereUniqueInput[]
-    connect?: ActivityLedgerWhereUniqueInput | ActivityLedgerWhereUniqueInput[]
-    update?: ActivityLedgerUpdateWithWhereUniqueWithoutAccountInput | ActivityLedgerUpdateWithWhereUniqueWithoutAccountInput[]
-    updateMany?: ActivityLedgerUpdateManyWithWhereWithoutAccountInput | ActivityLedgerUpdateManyWithWhereWithoutAccountInput[]
-    deleteMany?: ActivityLedgerScalarWhereInput | ActivityLedgerScalarWhereInput[]
-  }
-
   export type TaskPlanUncheckedUpdateManyWithoutAccountNestedInput = {
     create?: XOR<TaskPlanCreateWithoutAccountInput, TaskPlanUncheckedCreateWithoutAccountInput> | TaskPlanCreateWithoutAccountInput[] | TaskPlanUncheckedCreateWithoutAccountInput[]
     connectOrCreate?: TaskPlanCreateOrConnectWithoutAccountInput | TaskPlanCreateOrConnectWithoutAccountInput[]
@@ -140122,24 +138486,6 @@ export namespace Prisma {
     deleteMany?: KnowledgeWriteRequestScalarWhereInput | KnowledgeWriteRequestScalarWhereInput[]
   }
 
-  export type AccountCreateNestedOneWithoutActivityLedgerInput = {
-    create?: XOR<AccountCreateWithoutActivityLedgerInput, AccountUncheckedCreateWithoutActivityLedgerInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutActivityLedgerInput
-    connect?: AccountWhereUniqueInput
-  }
-
-  export type NullableStringFieldUpdateOperationsInput = {
-    set?: string | null
-  }
-
-  export type AccountUpdateOneRequiredWithoutActivityLedgerNestedInput = {
-    create?: XOR<AccountCreateWithoutActivityLedgerInput, AccountUncheckedCreateWithoutActivityLedgerInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutActivityLedgerInput
-    upsert?: AccountUpsertWithoutActivityLedgerInput
-    connect?: AccountWhereUniqueInput
-    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutActivityLedgerInput, AccountUpdateWithoutActivityLedgerInput>, AccountUncheckedUpdateWithoutActivityLedgerInput>
-  }
-
   export type AccountCreateNestedOneWithoutAiConversationsInput = {
     create?: XOR<AccountCreateWithoutAiConversationsInput, AccountUncheckedCreateWithoutAiConversationsInput>
     connectOrCreate?: AccountCreateOrConnectWithoutAiConversationsInput
@@ -140214,6 +138560,10 @@ export namespace Prisma {
     create?: XOR<AiConversationCreateWithoutMessagesInput, AiConversationUncheckedCreateWithoutMessagesInput>
     connectOrCreate?: AiConversationCreateOrConnectWithoutMessagesInput
     connect?: AiConversationWhereUniqueInput
+  }
+
+  export type NullableStringFieldUpdateOperationsInput = {
+    set?: string | null
   }
 
   export type AccountUpdateOneRequiredWithoutAiMessagesNestedInput = {
@@ -143755,6 +142105,33 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
+  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type NestedFloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
   export type NestedStringNullableFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -143784,33 +142161,6 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
-  }
-
-  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
-  }
-
-  export type NestedFloatFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatFilter<$PrismaModel> | number
   }
 
   export type NestedFloatNullableFilter<$PrismaModel = never> = {
@@ -144810,46 +143160,6 @@ export namespace Prisma {
 
   export type WalletTransactionCreateManyAccount_identityInputEnvelope = {
     data: WalletTransactionCreateManyAccount_identityInput | WalletTransactionCreateManyAccount_identityInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type ActivityLedgerCreateWithoutAccountInput = {
-    id: string
-    actorId: string
-    subjectType: string
-    subjectId: string
-    action: string
-    title?: string | null
-    correlationId?: string | null
-    beforeSummary?: string | null
-    afterSummary?: string | null
-    sourceEvent: string
-    occurredAt: Date | string
-    createdAt?: Date | string
-  }
-
-  export type ActivityLedgerUncheckedCreateWithoutAccountInput = {
-    id: string
-    actorId: string
-    subjectType: string
-    subjectId: string
-    action: string
-    title?: string | null
-    correlationId?: string | null
-    beforeSummary?: string | null
-    afterSummary?: string | null
-    sourceEvent: string
-    occurredAt: Date | string
-    createdAt?: Date | string
-  }
-
-  export type ActivityLedgerCreateOrConnectWithoutAccountInput = {
-    where: ActivityLedgerWhereUniqueInput
-    create: XOR<ActivityLedgerCreateWithoutAccountInput, ActivityLedgerUncheckedCreateWithoutAccountInput>
-  }
-
-  export type ActivityLedgerCreateManyAccountInputEnvelope = {
-    data: ActivityLedgerCreateManyAccountInput | ActivityLedgerCreateManyAccountInput[]
     skipDuplicates?: boolean
   }
 
@@ -146675,41 +144985,6 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"WalletTransaction"> | Date | string
   }
 
-  export type ActivityLedgerUpsertWithWhereUniqueWithoutAccountInput = {
-    where: ActivityLedgerWhereUniqueInput
-    update: XOR<ActivityLedgerUpdateWithoutAccountInput, ActivityLedgerUncheckedUpdateWithoutAccountInput>
-    create: XOR<ActivityLedgerCreateWithoutAccountInput, ActivityLedgerUncheckedCreateWithoutAccountInput>
-  }
-
-  export type ActivityLedgerUpdateWithWhereUniqueWithoutAccountInput = {
-    where: ActivityLedgerWhereUniqueInput
-    data: XOR<ActivityLedgerUpdateWithoutAccountInput, ActivityLedgerUncheckedUpdateWithoutAccountInput>
-  }
-
-  export type ActivityLedgerUpdateManyWithWhereWithoutAccountInput = {
-    where: ActivityLedgerScalarWhereInput
-    data: XOR<ActivityLedgerUpdateManyMutationInput, ActivityLedgerUncheckedUpdateManyWithoutAccountInput>
-  }
-
-  export type ActivityLedgerScalarWhereInput = {
-    AND?: ActivityLedgerScalarWhereInput | ActivityLedgerScalarWhereInput[]
-    OR?: ActivityLedgerScalarWhereInput[]
-    NOT?: ActivityLedgerScalarWhereInput | ActivityLedgerScalarWhereInput[]
-    id?: StringFilter<"ActivityLedger"> | string
-    identityId?: StringFilter<"ActivityLedger"> | string
-    actorId?: StringFilter<"ActivityLedger"> | string
-    subjectType?: StringFilter<"ActivityLedger"> | string
-    subjectId?: StringFilter<"ActivityLedger"> | string
-    action?: StringFilter<"ActivityLedger"> | string
-    title?: StringNullableFilter<"ActivityLedger"> | string | null
-    correlationId?: StringNullableFilter<"ActivityLedger"> | string | null
-    beforeSummary?: StringNullableFilter<"ActivityLedger"> | string | null
-    afterSummary?: StringNullableFilter<"ActivityLedger"> | string | null
-    sourceEvent?: StringFilter<"ActivityLedger"> | string
-    occurredAt?: DateTimeFilter<"ActivityLedger"> | Date | string
-    createdAt?: DateTimeFilter<"ActivityLedger"> | Date | string
-  }
-
   export type TaskPlanUpsertWithWhereUniqueWithoutAccountInput = {
     where: TaskPlanWhereUniqueInput
     update: XOR<TaskPlanUpdateWithoutAccountInput, TaskPlanUncheckedUpdateWithoutAccountInput>
@@ -147599,238 +145874,6 @@ export namespace Prisma {
     completedAt?: DateTimeNullableFilter<"KnowledgeWriteRequest"> | Date | string | null
   }
 
-  export type AccountCreateWithoutActivityLedgerInput = {
-    status?: string
-    profile: JsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    closedAt?: Date | string | null
-    cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    goals?: GoalCreateNestedManyWithoutAccountInput
-    labels?: LabelCreateNestedManyWithoutAccountInput
-    goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
-    taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
-    routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
-    routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
-    routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
-    routineProtocolSessions?: RoutineProtocolSessionCreateNestedManyWithoutAccountInput
-    repositories?: RepositoryCreateNestedManyWithoutAccountInput
-    repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
-    repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
-    schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
-    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
-    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    habits?: HabitCreateNestedManyWithoutAccountInput
-    relations?: RelationCreateNestedManyWithoutAccountInput
-    walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
-    walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
-    taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
-    notifications?: NotificationCreateNestedManyWithoutAccountInput
-    aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
-    aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
-    aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
-    dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
-    taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
-    routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
-    folders?: FolderCreateNestedManyWithoutIdentityInput
-    resources?: ResourceCreateNestedManyWithoutIdentityInput
-    repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
-  }
-
-  export type AccountUncheckedCreateWithoutActivityLedgerInput = {
-    id: string
-    status?: string
-    profile: JsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    closedAt?: Date | string | null
-    goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
-    labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
-    goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
-    taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
-    routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
-    routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
-    routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
-    routineProtocolSessions?: RoutineProtocolSessionUncheckedCreateNestedManyWithoutAccountInput
-    repositories?: RepositoryUncheckedCreateNestedManyWithoutAccountInput
-    repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
-    repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
-    schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
-    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
-    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
-    relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
-    walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
-    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
-    taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
-    notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
-    aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
-    aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
-    aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
-    dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
-    taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
-    folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
-    repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
-  }
-
-  export type AccountCreateOrConnectWithoutActivityLedgerInput = {
-    where: AccountWhereUniqueInput
-    create: XOR<AccountCreateWithoutActivityLedgerInput, AccountUncheckedCreateWithoutActivityLedgerInput>
-  }
-
-  export type AccountUpsertWithoutActivityLedgerInput = {
-    update: XOR<AccountUpdateWithoutActivityLedgerInput, AccountUncheckedUpdateWithoutActivityLedgerInput>
-    create: XOR<AccountCreateWithoutActivityLedgerInput, AccountUncheckedCreateWithoutActivityLedgerInput>
-    where?: AccountWhereInput
-  }
-
-  export type AccountUpdateToOneWithWhereWithoutActivityLedgerInput = {
-    where?: AccountWhereInput
-    data: XOR<AccountUpdateWithoutActivityLedgerInput, AccountUncheckedUpdateWithoutActivityLedgerInput>
-  }
-
-  export type AccountUpdateWithoutActivityLedgerInput = {
-    status?: StringFieldUpdateOperationsInput | string
-    profile?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    goals?: GoalUpdateManyWithoutAccountNestedInput
-    labels?: LabelUpdateManyWithoutAccountNestedInput
-    goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
-    taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
-    routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
-    routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
-    routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
-    routineProtocolSessions?: RoutineProtocolSessionUpdateManyWithoutAccountNestedInput
-    repositories?: RepositoryUpdateManyWithoutAccountNestedInput
-    repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
-    repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
-    schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
-    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
-    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    habits?: HabitUpdateManyWithoutAccountNestedInput
-    relations?: RelationUpdateManyWithoutAccountNestedInput
-    walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
-    walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
-    taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
-    notifications?: NotificationUpdateManyWithoutAccountNestedInput
-    aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
-    aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
-    aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
-    dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
-    taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
-    routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
-    folders?: FolderUpdateManyWithoutIdentityNestedInput
-    resources?: ResourceUpdateManyWithoutIdentityNestedInput
-    repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
-  }
-
-  export type AccountUncheckedUpdateWithoutActivityLedgerInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    profile?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
-    labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
-    goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
-    taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
-    routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
-    routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
-    routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
-    routineProtocolSessions?: RoutineProtocolSessionUncheckedUpdateManyWithoutAccountNestedInput
-    repositories?: RepositoryUncheckedUpdateManyWithoutAccountNestedInput
-    repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
-    repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
-    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
-    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
-    relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
-    walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
-    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
-    taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
-    notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
-    aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
-    aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
-    aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
-    dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
-    taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
-    folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
-  }
-
   export type AccountCreateWithoutAiConversationsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
@@ -147859,7 +145902,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -147913,7 +145955,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -148011,7 +146052,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -148065,7 +146105,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -148135,7 +146174,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -148189,7 +146227,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -148290,7 +146327,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -148344,7 +146380,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -148435,7 +146470,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -148489,7 +146523,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -148559,7 +146592,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -148613,7 +146645,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -148667,7 +146698,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -148721,7 +146751,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -148791,7 +146820,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -148845,7 +146873,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -148899,7 +146926,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -148953,7 +146979,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -149023,7 +147048,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -149077,7 +147101,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -149131,7 +147154,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -149185,7 +147207,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -149255,7 +147276,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -149309,7 +147329,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -149363,7 +147382,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -149417,7 +147435,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -149487,7 +147504,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -149541,7 +147557,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -149595,7 +147610,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -149649,7 +147663,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -149719,7 +147732,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -149773,7 +147785,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -149827,7 +147838,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -149881,7 +147891,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -149951,7 +147960,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -150005,7 +148013,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -150162,7 +148169,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -150216,7 +148222,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -150383,7 +148388,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -150437,7 +148441,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -150707,7 +148710,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -150761,7 +148763,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -150970,7 +148971,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -151024,7 +149024,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -152058,7 +150057,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -152112,7 +150110,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -152231,7 +150228,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -152285,7 +150281,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -152641,7 +150636,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -152695,7 +150689,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -152803,7 +150796,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -152857,7 +150849,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -152943,7 +150934,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -152997,7 +150987,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -153143,7 +151132,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -153197,7 +151185,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -153339,7 +151326,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -153393,7 +151379,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -153548,7 +151533,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -153602,7 +151586,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -153888,7 +151871,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -153942,7 +151924,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -154076,7 +152057,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -154130,7 +152110,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -154184,7 +152163,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -154238,7 +152216,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -154375,7 +152352,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -154429,7 +152405,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -154763,7 +152738,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -154817,7 +152791,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -154960,7 +152933,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -155014,7 +152986,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -155067,7 +153038,6 @@ export namespace Prisma {
     habits?: HabitCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -155121,7 +153091,6 @@ export namespace Prisma {
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -155191,7 +153160,6 @@ export namespace Prisma {
     habits?: HabitUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -155245,7 +153213,6 @@ export namespace Prisma {
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -155299,7 +153266,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -155353,7 +153319,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -155580,7 +153545,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -155634,7 +153598,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -155762,7 +153725,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -155816,7 +153778,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -155913,7 +153874,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -155967,7 +153927,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -156037,7 +153996,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -156091,7 +154049,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -156223,7 +154180,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -156277,7 +154233,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -156405,7 +154360,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -156459,7 +154413,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -156564,7 +154517,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -156618,7 +154570,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -156688,7 +154639,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -156742,7 +154692,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -156837,7 +154786,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -156891,7 +154839,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -157012,7 +154959,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -157066,7 +155012,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -157211,7 +155156,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -157265,7 +155209,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -157335,7 +155278,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -157389,7 +155331,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -157565,7 +155506,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -157619,7 +155559,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -157825,7 +155764,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -157879,7 +155817,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -157990,7 +155927,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -158044,7 +155980,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -158098,7 +156033,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -158152,7 +156086,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -158410,7 +156343,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -158464,7 +156396,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -158583,7 +156514,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -158637,7 +156567,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -158829,7 +156758,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -158883,7 +156811,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -159049,7 +156976,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -159103,7 +157029,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -159224,7 +157149,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -159278,7 +157202,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -159431,7 +157354,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -159485,7 +157407,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -159702,7 +157623,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -159756,7 +157676,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -160224,7 +158143,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -160278,7 +158196,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -160399,7 +158316,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -160453,7 +158369,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -160564,7 +158479,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -160618,7 +158532,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -160688,7 +158601,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -160742,7 +158654,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -160797,7 +158708,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -160851,7 +158761,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -160921,7 +158830,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -160975,7 +158883,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -161215,7 +159122,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -161269,7 +159175,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -161631,7 +159536,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -161685,7 +159589,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -162648,7 +160551,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -162702,7 +160604,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -162817,7 +160718,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -162871,7 +160771,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -162975,7 +160874,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -163029,7 +160927,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -163099,7 +160996,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -163153,7 +161049,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -163207,7 +161102,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -163261,7 +161155,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -163375,7 +161268,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -163429,7 +161321,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -163499,7 +161390,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -163553,7 +161443,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -163688,7 +161577,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -163742,7 +161630,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -163867,7 +161754,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -163921,7 +161807,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -163991,7 +161876,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -164045,7 +161929,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -164100,7 +161983,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
@@ -164154,7 +162036,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
@@ -164224,7 +162105,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
@@ -164278,7 +162158,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
@@ -164332,7 +162211,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
@@ -164386,7 +162264,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
@@ -164593,7 +162470,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
@@ -164647,7 +162523,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
@@ -164803,7 +162678,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
@@ -164857,7 +162731,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
@@ -164985,7 +162858,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
@@ -165039,7 +162911,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
@@ -165157,7 +163028,6 @@ export namespace Prisma {
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -165211,7 +163081,6 @@ export namespace Prisma {
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -165339,7 +163208,6 @@ export namespace Prisma {
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -165393,7 +163261,6 @@ export namespace Prisma {
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -165510,7 +163377,6 @@ export namespace Prisma {
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -165564,7 +163430,6 @@ export namespace Prisma {
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -165668,7 +163533,6 @@ export namespace Prisma {
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -165722,7 +163586,6 @@ export namespace Prisma {
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -165817,7 +163680,6 @@ export namespace Prisma {
     habits?: HabitCreateNestedManyWithoutAccountInput
     relations?: RelationCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
@@ -165871,7 +163733,6 @@ export namespace Prisma {
     habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
     relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
     walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
@@ -165972,7 +163833,6 @@ export namespace Prisma {
     habits?: HabitUpdateManyWithoutAccountNestedInput
     relations?: RelationUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
@@ -166026,7 +163886,6 @@ export namespace Prisma {
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
@@ -166304,21 +164163,6 @@ export namespace Prisma {
     category?: string | null
     note?: string | null
     goalId?: string | null
-    occurredAt: Date | string
-    createdAt?: Date | string
-  }
-
-  export type ActivityLedgerCreateManyAccountInput = {
-    id: string
-    actorId: string
-    subjectType: string
-    subjectId: string
-    action: string
-    title?: string | null
-    correlationId?: string | null
-    beforeSummary?: string | null
-    afterSummary?: string | null
-    sourceEvent: string
     occurredAt: Date | string
     createdAt?: Date | string
   }
@@ -167512,51 +165356,6 @@ export namespace Prisma {
     category?: NullableStringFieldUpdateOperationsInput | string | null
     note?: NullableStringFieldUpdateOperationsInput | string | null
     goalId?: NullableStringFieldUpdateOperationsInput | string | null
-    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ActivityLedgerUpdateWithoutAccountInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    actorId?: StringFieldUpdateOperationsInput | string
-    subjectType?: StringFieldUpdateOperationsInput | string
-    subjectId?: StringFieldUpdateOperationsInput | string
-    action?: StringFieldUpdateOperationsInput | string
-    title?: NullableStringFieldUpdateOperationsInput | string | null
-    correlationId?: NullableStringFieldUpdateOperationsInput | string | null
-    beforeSummary?: NullableStringFieldUpdateOperationsInput | string | null
-    afterSummary?: NullableStringFieldUpdateOperationsInput | string | null
-    sourceEvent?: StringFieldUpdateOperationsInput | string
-    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ActivityLedgerUncheckedUpdateWithoutAccountInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    actorId?: StringFieldUpdateOperationsInput | string
-    subjectType?: StringFieldUpdateOperationsInput | string
-    subjectId?: StringFieldUpdateOperationsInput | string
-    action?: StringFieldUpdateOperationsInput | string
-    title?: NullableStringFieldUpdateOperationsInput | string | null
-    correlationId?: NullableStringFieldUpdateOperationsInput | string | null
-    beforeSummary?: NullableStringFieldUpdateOperationsInput | string | null
-    afterSummary?: NullableStringFieldUpdateOperationsInput | string | null
-    sourceEvent?: StringFieldUpdateOperationsInput | string
-    occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ActivityLedgerUncheckedUpdateManyWithoutAccountInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    actorId?: StringFieldUpdateOperationsInput | string
-    subjectType?: StringFieldUpdateOperationsInput | string
-    subjectId?: StringFieldUpdateOperationsInput | string
-    action?: StringFieldUpdateOperationsInput | string
-    title?: NullableStringFieldUpdateOperationsInput | string | null
-    correlationId?: NullableStringFieldUpdateOperationsInput | string | null
-    beforeSummary?: NullableStringFieldUpdateOperationsInput | string | null
-    afterSummary?: NullableStringFieldUpdateOperationsInput | string | null
-    sourceEvent?: StringFieldUpdateOperationsInput | string
     occurredAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

@@ -80,24 +80,24 @@ Codex must begin by reviewing this checkpoint, not by deleting/reimplementing it
 
 ### 3.1 Ownership map
 
-| Product fact / capability | Sole owner after Phase 5 | Composition/read consumers |
-| --- | --- | --- |
-| Goal lifecycle/progress/target/KR summary | Goal | Home, AI workflows |
-| Task plan/occurrence/progress | Task | Home, AI workflows |
-| Knowledge document identity/content | Repository/Knowledge | AI context/index/workflows |
-| Routine definition/occurrence/interaction | Routine | AI tools, Portable V3 |
-| Calendar/planner occupancy/conflicts | Schedule/Planner | AI tools, Portable V3 |
-| Notification Fact/Inbox/action | Notification | Home shell where needed, AI tools, Portable V3 |
-| Conversation/workflow durable state | Mastra/runtime boundary proven by AI-9602 | AI shell |
-| Provider metadata | ProviderDefinition | AI model resolution/onboarding |
-| User/provider connection configuration | Connection | AI model resolution/runtime |
-| Provider credentials/secrets | SecretVault | Host adapters only |
-| Product Time | Time | AIContextAssembler and all temporal consumers |
-| AI context envelope | AIContextAssembler | AI workflows/tools |
-| AI model selection | ModelCatalog + capability-aware resolver | AI runtime/workflows |
-| AI execution observability | AIExecutionRecord | operations/eval/audit |
-| Home | No domain ownership | Pure composition surface |
-| Dashboard | **Deleted** | None |
+| Product fact / capability                 | Sole owner after Phase 5                  | Composition/read consumers                     |
+| ----------------------------------------- | ----------------------------------------- | ---------------------------------------------- |
+| Goal lifecycle/progress/target/KR summary | Goal                                      | Home, AI workflows                             |
+| Task plan/occurrence/progress             | Task                                      | Home, AI workflows                             |
+| Knowledge document identity/content       | Repository/Knowledge                      | AI context/index/workflows                     |
+| Routine definition/occurrence/interaction | Routine                                   | AI tools, Portable V3                          |
+| Calendar/planner occupancy/conflicts      | Schedule/Planner                          | AI tools, Portable V3                          |
+| Notification Fact/Inbox/action            | Notification                              | Home shell where needed, AI tools, Portable V3 |
+| Conversation/workflow durable state       | Mastra/runtime boundary proven by AI-9602 | AI shell                                       |
+| Provider metadata                         | ProviderDefinition                        | AI model resolution/onboarding                 |
+| User/provider connection configuration    | Connection                                | AI model resolution/runtime                    |
+| Provider credentials/secrets              | SecretVault                               | Host adapters only                             |
+| Product Time                              | Time                                      | AIContextAssembler and all temporal consumers  |
+| AI context envelope                       | AIContextAssembler                        | AI workflows/tools                             |
+| AI model selection                        | ModelCatalog + capability-aware resolver  | AI runtime/workflows                           |
+| AI execution observability                | AIExecutionRecord                         | operations/eval/audit                          |
+| Home                                      | No domain ownership                       | Pure composition surface                       |
+| Dashboard                                 | **Deleted**                               | None                                           |
 
 ### 3.2 North-star data flow
 
@@ -356,17 +356,16 @@ Align Routine/Planner/Notification tools to canonical owner contracts. AI may re
 
 Tickets: `HOME-1804` -> `HOME-1805`.
 
-#### HOME-1804 evidence decision
+#### HOME-1804 evidence decision — resolved: destructive deletion
 
-After Home and AI have detached from Dashboard:
+Evidence after HOME-1803:
 
-1. Inventory every remaining `ActivityLedger` writer and reader.
-2. Classify actual current product value.
-3. If no live product value exists: delete the recorder/table directly.
-4. If live product value exists: move only the proven behavior to a narrow `ActivityFeed` capability with explicit owner/retention/query semantics.
-5. Do not invent a replacement generic analytics domain.
+1. the durable ledger is written only by the legacy API recorder;
+2. its remaining reads are the retiring Dashboard path and one transitional API AI adapter;
+3. Desktop AI already derives the same bounded recent-activity projection from Goal/Task/Schedule owner facts;
+4. no independent product surface, owner command, retention policy, or portable user truth requires a durable activity feed.
 
-The decision and evidence must be recorded in the PR/plan update.
+Decision: delete the recorder/table and make API recent activity owner-derived like Desktop. Do **not** create `ActivityFeed`, generic analytics infrastructure, or another durable cross-domain authority. HOME-1805 then hard-deletes the remaining Dashboard surface.
 
 #### HOME-1805 hard delete
 
@@ -433,25 +432,25 @@ Repair all P0/P1/P2 and re-review adjacent paths. Run `ai:eval:replay` on the ac
 
 ## 7. Ticket verification matrix
 
-| Ticket | Required local verification |
-| --- | --- |
-| HOME-1801 | `pnpm nx run goal:test`; `pnpm nx run app-vue:test`; `pnpm nx run app-vue:typecheck` |
-| HOME-1802 | `pnpm nx run app-vue:test`; `pnpm nx run app-vue:typecheck`; `pnpm nx run web:typecheck` |
-| HOME-1803 | `pnpm nx run ai:test`; `pnpm nx run api:typecheck`; `pnpm nx run desktop:typecheck`; relevant Dashboard characterization while it still exists |
-| HOME-1804 | Dashboard/AppVue/AI focused tests + `pnpm governance:check` + evidence scan |
-| HOME-1805 | AppVue + AI tests; `pnpm typecheck`; `pnpm test:inventory`; `pnpm governance:check`; fresh DB reset/bootstrap; residue scan |
-| AI-9602 | AI tests/typecheck; API/Desktop typecheck; restart/reconnect/HITL characterization |
-| AI-9603 | AI + AppVue tests; API/Desktop typecheck; reconnect/restart/interrupt-resume integration |
-| AI-9604 | AI tests/typecheck; API/Desktop typecheck; secret-leak negative tests |
-| AI-9605 | AI tests/typecheck; `pnpm nx run ai:eval:replay` |
-| AI-9606 | AI tests/typecheck; API/Desktop typecheck; Product Time/trust/budget tests |
-| AI-9607 | AI tests/typecheck; Repository tests; stable-id rename/move fixtures |
-| AI-9608 | AI + Goal + Task tests; API/Desktop typecheck; resumability fixtures |
-| AI-9609 | AI + Routine(`reminder` package) + Schedule + Notification tests; eval replay |
-| AI-9610 | AI tests + eval replay; API/Desktop typecheck; governance; Prisma/PowerSync parity/reset |
-| AI-9611 | AI tests/typecheck; API/Desktop typecheck; governance |
-| AI-9612 | AI tests/typecheck/build; eval replay; docs/governance; five-layer review ledger |
-| PORT-1610B | data-portability test/typecheck; Routine/Schedule/Notification tests; API/Desktop capability parity |
+| Ticket     | Required local verification                                                                                                                    |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| HOME-1801  | `pnpm nx run goal:test`; `pnpm nx run app-vue:test`; `pnpm nx run app-vue:typecheck`                                                           |
+| HOME-1802  | `pnpm nx run app-vue:test`; `pnpm nx run app-vue:typecheck`; `pnpm nx run web:typecheck`                                                       |
+| HOME-1803  | `pnpm nx run ai:test`; `pnpm nx run api:typecheck`; `pnpm nx run desktop:typecheck`; relevant Dashboard characterization while it still exists |
+| HOME-1804  | Dashboard/AppVue/AI focused tests + `pnpm governance:check` + evidence scan                                                                    |
+| HOME-1805  | AppVue + AI tests; `pnpm typecheck`; `pnpm test:inventory`; `pnpm governance:check`; fresh DB reset/bootstrap; residue scan                    |
+| AI-9602    | AI tests/typecheck; API/Desktop typecheck; restart/reconnect/HITL characterization                                                             |
+| AI-9603    | AI + AppVue tests; API/Desktop typecheck; reconnect/restart/interrupt-resume integration                                                       |
+| AI-9604    | AI tests/typecheck; API/Desktop typecheck; secret-leak negative tests                                                                          |
+| AI-9605    | AI tests/typecheck; `pnpm nx run ai:eval:replay`                                                                                               |
+| AI-9606    | AI tests/typecheck; API/Desktop typecheck; Product Time/trust/budget tests                                                                     |
+| AI-9607    | AI tests/typecheck; Repository tests; stable-id rename/move fixtures                                                                           |
+| AI-9608    | AI + Goal + Task tests; API/Desktop typecheck; resumability fixtures                                                                           |
+| AI-9609    | AI + Routine(`reminder` package) + Schedule + Notification tests; eval replay                                                                  |
+| AI-9610    | AI tests + eval replay; API/Desktop typecheck; governance; Prisma/PowerSync parity/reset                                                       |
+| AI-9611    | AI tests/typecheck; API/Desktop typecheck; governance                                                                                          |
+| AI-9612    | AI tests/typecheck/build; eval replay; docs/governance; five-layer review ledger                                                               |
+| PORT-1610B | data-portability test/typecheck; Routine/Schedule/Notification tests; API/Desktop capability parity                                            |
 
 Every coherent wave additionally runs:
 

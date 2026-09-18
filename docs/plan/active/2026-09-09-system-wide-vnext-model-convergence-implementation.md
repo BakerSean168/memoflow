@@ -619,9 +619,9 @@ TodayOverview widgets consume owner services directly. Remove `useDashboard()` f
 
 `ControlledAnalyticsReadAdapter` and Desktop equivalent compose explicit Goal/Task/Knowledge/activity read ports. Remove DashboardData cast.
 
-## HOME-1804 — Decide ActivityLedger by evidence
+## HOME-1804 — Retire the durable cross-domain activity ledger by evidence
 
-If direct current product value exists, move to a narrow ActivityFeed capability; otherwise delete recorder/table. No generic analytics domain is invented.
+Evidence after HOME-1803: Desktop already derives bounded recent activity from Goal/Task/Schedule owner facts; API had only a transitional AI reader plus the retiring Dashboard path. Delete the recorder/table and make API recent activity owner-derived. Do not introduce ActivityFeed or a generic analytics domain.
 
 ## HOME-1805 — Hard-delete Dashboard
 

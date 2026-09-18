@@ -37,7 +37,6 @@ model Account {
   relations                       Relation[]
   walletAccounts                  WalletAccount[]
   walletTransactions              WalletTransaction[] @relation("AccountWalletTransactions")
-  activityLedger                  ActivityLedger[]
   taskPlans                   TaskPlan[]
   taskOccurrences                   TaskOccurrence[]
   userPreferenceRecords           UserPreferenceRecord[]
