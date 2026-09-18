@@ -1,51 +1,37 @@
-export interface AIPlannerCalendarItem {
-  readonly id: string;
-  readonly title: string;
-  readonly startTime: number;
-  readonly endTime: number;
-  readonly hasConflict: boolean;
-  readonly conflictingEntryIds: readonly string[];
-}
+import type {
+  CalendarEventProjection,
+  PlannerConflictProjection,
+} from '@memoflow/contracts/schedule';
 
-export interface AIPlannerTaskItem {
-  readonly id: string;
-  readonly planId: string;
-  readonly title: string;
-  readonly scheduleDate: string;
-  readonly dueAt: number;
-  readonly status: string;
+export interface AIPlannerRange {
+  readonly start: number;
+  readonly end: number;
 }
 
 export interface AIPlannerWindowSummary {
-  readonly startTime: number;
-  readonly endTime: number;
-  readonly calendar: readonly AIPlannerCalendarItem[];
-  readonly tasks: readonly AIPlannerTaskItem[];
+  readonly range: AIPlannerRange;
+  readonly projections: readonly CalendarEventProjection[];
+  readonly conflicts: readonly PlannerConflictProjection[];
 }
 
 export interface AIPlannerConflictSummary {
-  readonly startTime: number;
-  readonly endTime: number;
-  readonly entries: readonly AIPlannerCalendarItem[];
-  readonly conflictCount: number;
+  readonly range: AIPlannerRange;
+  readonly conflicts: readonly PlannerConflictProjection[];
 }
 
-/** Read-only Planner/Task projection for the assistant. Never exposes Scheduler worker state. */
+/** Read-only Planner owner projection for the assistant. */
 export interface IAIPlannerReadPort {
   getWindowSummary(input: {
     readonly identityId: string;
-    readonly startTime: number;
-    readonly endTime: number;
+    readonly range: AIPlannerRange;
   }): Promise<AIPlannerWindowSummary>;
   getConflicts(input: {
     readonly identityId: string;
-    readonly startTime: number;
-    readonly endTime: number;
+    readonly range: AIPlannerRange;
   }): Promise<AIPlannerConflictSummary>;
   getUpcomingTasks(input: {
     readonly identityId: string;
-    readonly startTime: number;
-    readonly endTime: number;
+    readonly range: AIPlannerRange;
     readonly limit?: number;
-  }): Promise<readonly AIPlannerTaskItem[]>;
+  }): Promise<readonly Extract<CalendarEventProjection, { sourceType: 'task' }>[]>;
 }

@@ -100,21 +100,24 @@ export type {
   AIProviderOnboardingCommitOutcome,
 } from './provider-onboarding-commit.port';
 export type {
-  AIRoutineMethodId,
   AIProtocolMethodId,
+  AIWallClockTriggerInput,
+  AIElapsedTriggerInput,
+  AIActiveUsageTriggerInput,
+  AIRoutineTriggerInput,
   AIRoutineCreateInput,
   AIRoutineCommandReceipt,
   IAIRoutineCommandPort,
 } from './routine-command.port';
 export type {
-  AIPlannerCalendarItem,
-  AIPlannerTaskItem,
+  AIPlannerRange,
   AIPlannerWindowSummary,
   AIPlannerConflictSummary,
   IAIPlannerReadPort,
 } from './planner-read.port';
 export type {
-  AIUnreadNotificationItem,
+  AINotificationFactProjection,
+  AINotificationActionReceipt,
   AIUnreadNotificationSummary,
   IAINotificationReadPort,
 } from './notification-read.port';

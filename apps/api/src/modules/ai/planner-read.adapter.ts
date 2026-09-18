@@ -1,101 +1,96 @@
+import type { Context } from '@memoflow/contracts/shared';
+import { CalendarEntryResponseSchema } from '@memoflow/contracts/schedule';
 import { unwrap } from '@memoflow/contracts/result';
-import type { IAIPlannerReadPort, AIPlannerTaskItem } from '@memoflow/ai';
+import {
+  projectPlannerCalendarEntry,
+  projectPlannerTaskOccurrence,
+  type IAIPlannerReadPort,
+  type PlannerProductTimePort,
+} from '@memoflow/ai';
 import { IdentityId } from '@memoflow/domain-shared/shared';
-import type { IScheduleRepository } from '@memoflow/schedule';
+import type { ScheduleEventApplicationPort } from '@memoflow/schedule';
+import { derivePlannerConflicts } from '@memoflow/schedule/client';
 import type { TaskApplicationPort } from '@memoflow/task';
+import { createTimeFacade, type UserTimeContextPort } from '@memoflow/time';
 
-/** Read-only Planner projection. Scheduler worker repositories are deliberately absent. */
+function ownerContext(identityId: string, startedAt: number): Context {
+  const requestId = `ai-planner:${identityId}:${startedAt}`;
+  return { identityId, requestId, traceId: requestId, startedAt, source: 'system' };
+}
+
+/** Planner adapter over Schedule/Task owner application reads only. */
 export class PlannerAIReadAdapter implements IAIPlannerReadPort {
   constructor(
-    private readonly scheduleRepository: IScheduleRepository,
+    private readonly scheduleEventApi: ScheduleEventApplicationPort,
     private readonly taskApplicationPort: TaskApplicationPort,
+    private readonly userTimeContextPort: UserTimeContextPort,
   ) {}
 
-  private async taskItems(
+  private async readProjections(
     identityId: string,
-    startTime: number,
-    endTime: number,
-  ): Promise<AIPlannerTaskItem[]> {
-    const [instances, plans] = await Promise.all([
-      this.taskApplicationPort.getTaskOccurrencesByDateRange(identityId, startTime, endTime),
+    range: { readonly start: number; readonly end: number },
+  ) {
+    const [scheduleResult, occurrenceResult, planResult, userTimeContext] = await Promise.all([
+      this.scheduleEventApi.listEvents(
+        {
+          identityId: IdentityId.of(identityId),
+          startTime: range.start,
+          endTime: range.end,
+        },
+        ownerContext(identityId, range.start),
+      ),
+      this.taskApplicationPort.getTaskOccurrencesByDateRange(identityId, range.start, range.end),
       this.taskApplicationPort.listTaskPlans({ identityId: IdentityId.of(identityId) }),
+      this.userTimeContextPort.getUserTimeContext(identityId),
     ]);
-    const instanceData = unwrap(instances).data;
-    const planData = unwrap(plans).plans;
-    const titles = new Map(
-      planData.map((plan) => [String(plan.id), plan.name] as const),
-    );
-    return instanceData.map((instance) => ({
-      id: String(instance.id),
-      planId: String(instance.planId),
-      title: titles.get(String(instance.planId)) ?? 'Untitled task',
-      scheduleDate: instance.scheduleSnapshot.date,
-      dueAt: instance.dueAt,
-      status: String(instance.status),
-    }));
+
+    const scheduleEntries = CalendarEntryResponseSchema.array().parse(unwrap(scheduleResult));
+    const occurrences = unwrap(occurrenceResult).data;
+    const plans = unwrap(planResult).plans;
+    const planById = new Map(plans.map((plan) => [String(plan.id), plan] as const));
+    const time = createTimeFacade({ context: userTimeContext });
+    const productTime: PlannerProductTimePort = {
+      combine: (date, hm) => time.input.combine(date, hm),
+    };
+    return [
+      ...scheduleEntries.map(projectPlannerCalendarEntry),
+      ...occurrences.flatMap((occurrence) => {
+        const projection = projectPlannerTaskOccurrence(
+          occurrence,
+          planById.get(String(occurrence.planId)),
+          productTime,
+        );
+        return projection ? [projection] : [];
+      }),
+    ];
   }
 
   async getWindowSummary(input: Parameters<IAIPlannerReadPort['getWindowSummary']>[0]) {
-    const [calendar, tasks] = await Promise.all([
-      this.scheduleRepository.findByTimeRange(input.identityId, input.startTime, input.endTime),
-      this.taskItems(input.identityId, input.startTime, input.endTime),
-    ]);
-    const timedEntries = calendar.filter(
-      (entry): entry is typeof entry & { range: Extract<typeof entry.range, { kind: 'Timed' }> } =>
-        entry.range.kind === 'Timed',
-    );
-    const calendarItems: Array<
-      Awaited<ReturnType<IAIPlannerReadPort['getWindowSummary']>>['calendar'][number]
-    > = timedEntries.map((entry) => {
-      // P4-2301B: this legacy AI read port derives overlap from current owner facts.
-      // No persisted CalendarEntry conflict cache survives. AI-9609 owns the later
-      // cross-owner range-aware AI Planner port.
-      const conflictingEntryIds = timedEntries
-        .filter(
-          (other) =>
-            other.id !== entry.id &&
-            entry.range.start < other.range.end &&
-            entry.range.end > other.range.start,
-        )
-        .map((other) => String(other.id));
-      return {
-        id: String(entry.id),
-        title: entry.title,
-        startTime: entry.range.start,
-        endTime: entry.range.end,
-        hasConflict: conflictingEntryIds.length > 0,
-        conflictingEntryIds,
-      };
-    });
-
+    const projections = await this.readProjections(input.identityId, input.range);
     return {
-      startTime: input.startTime,
-      endTime: input.endTime,
-      calendar: calendarItems,
-      tasks,
+      range: input.range,
+      projections,
+      conflicts: derivePlannerConflicts(projections),
     };
   }
 
   async getConflicts(input: Parameters<IAIPlannerReadPort['getConflicts']>[0]) {
-    const entries = (await this.getWindowSummary(input)).calendar.filter(
-      (entry) => entry.hasConflict,
-    );
-    return {
-      startTime: input.startTime,
-      endTime: input.endTime,
-      entries,
-      conflictCount: entries.length,
-    };
+    const summary = await this.getWindowSummary(input);
+    return { range: input.range, conflicts: summary.conflicts };
   }
 
   async getUpcomingTasks(input: Parameters<IAIPlannerReadPort['getUpcomingTasks']>[0]) {
-    const items = await this.taskItems(input.identityId, input.startTime, input.endTime);
-    return items
+    const summary = await this.getWindowSummary(input);
+    return summary.projections
       .filter(
-        (item) =>
-          item.status !== 'Completed' && item.status !== 'Skipped' && item.status !== 'Missed',
+        (projection): projection is Extract<typeof projection, { sourceType: 'task' }> =>
+          projection.sourceType === 'task' &&
+          !['Completed', 'Skipped', 'Missed'].includes(projection.displayMetadata.status ?? ''),
       )
-      .sort((a, b) => a.dueAt - b.dueAt)
+      .sort((left, right) => {
+        if (left.allDay !== right.allDay) return left.allDay ? -1 : 1;
+        return String(left.start).localeCompare(String(right.start));
+      })
       .slice(0, input.limit ?? 20);
   }
 }

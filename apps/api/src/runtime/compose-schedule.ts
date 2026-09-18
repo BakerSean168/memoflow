@@ -9,11 +9,9 @@ import {
   createScheduleModule,
   type SchedulePortableCapability,
   type ScheduleRepositorySet,
+  type ScheduleEventApplicationPort,
 } from '@memoflow/schedule';
-import {
-  createScheduleApiModule,
-  type ScheduleApiModuleDef,
-} from '@memoflow/schedule/api';
+import { createScheduleApiModule, type ScheduleApiModuleDef } from '@memoflow/schedule/api';
 import {
   createSchedulerModule,
   createScheduledInvocationRuntimeContribution,
@@ -22,10 +20,7 @@ import {
   type SchedulerRepositorySet,
   type SchedulerRuntimeContributionsInput,
 } from '@memoflow/scheduler';
-import {
-  createSchedulerApiModule,
-  type SchedulerApiModuleDef,
-} from '@memoflow/scheduler/api';
+import { createSchedulerApiModule, type SchedulerApiModuleDef } from '@memoflow/scheduler/api';
 
 export interface ComposeScheduleDependencies {
   readonly calendarRepositories: ScheduleRepositorySet;
@@ -38,6 +33,8 @@ export interface ComposedSchedule {
   readonly calendarModule: ScheduleApiModuleDef;
   readonly schedulerModule: SchedulerApiModuleDef;
   readonly portableCapability: SchedulePortableCapability;
+  /** Schedule-owned Calendar Event read/command seam shared by transports. */
+  readonly eventApi: ScheduleEventApplicationPort;
   readonly repositories: {
     readonly scheduleRepository: ScheduleRepositorySet['scheduleRepository'];
   };
@@ -47,14 +44,10 @@ function normalizeRuntimeContributions(
   input?: SchedulerRuntimeContributionsInput,
 ): readonly SchedulerModuleRuntimeContribution[] {
   if (!input) return [];
-  return Array.isArray(input)
-    ? Array.from(input)
-    : [input as SchedulerModuleRuntimeContribution];
+  return Array.isArray(input) ? Array.from(input) : [input as SchedulerModuleRuntimeContribution];
 }
 
-export function composeSchedule(
-  dependencies: ComposeScheduleDependencies,
-): ComposedSchedule {
+export function composeSchedule(dependencies: ComposeScheduleDependencies): ComposedSchedule {
   const queueRuntime = createScheduledInvocationRuntimeContribution({
     repository: dependencies.schedulerRepositories.scheduledInvocationRepository,
     handlerRegistry: dependencies.handlerRegistry,
@@ -81,6 +74,7 @@ export function composeSchedule(
     calendarModule: createScheduleApiModule({ instance: calendarInstance }),
     schedulerModule: createSchedulerApiModule({ instance: schedulerInstance }),
     portableCapability: calendarInstance.portableCapability,
+    eventApi: calendarInstance.eventApi,
     repositories: {
       scheduleRepository: dependencies.calendarRepositories.scheduleRepository,
     },
