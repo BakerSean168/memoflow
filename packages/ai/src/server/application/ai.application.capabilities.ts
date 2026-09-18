@@ -33,17 +33,15 @@ import type {
 } from '@memoflow/contracts/ai';
 
 /**
- * Transport-neutral product surface that remains outside Mastra execution.
+ * Settings and provider onboarding/configuration capability.
  *
- * AI-VNEXT-07 deliberately excludes open-chat execution, AgentRun/Proposal,
- * goal-generation and LangGraph checkpoint methods. Assistant and durable
- * workflow execution cross the host boundary only through the canonical
- * Mastra runtime transports.
+ * `getCapabilities` stays here because the current Settings/provider
+ * consumer loads the public runtime capability summary alongside provider
+ * catalog and configuration state.
  */
-export interface AIApplicationPort {
+export interface AIProviderManagementPort {
   getCapabilities(): Promise<Result<AICapabilities>>;
 
-  // Provider onboarding V2
   getProviderCatalog(): Promise<Result<ListAIProviderCatalogRes>>;
   probeProviderConnection(
     req: ProbeAIProviderConnectionReq,
@@ -68,7 +66,7 @@ export interface AIApplicationPort {
     cx: ExecutionContext,
   ): Promise<Result<AIProviderConfigClientDTO>>;
 
-  // Saved provider operations. Secrets/endpoints are changed only through V2 flows.
+  /** Secrets/endpoints are changed only through the provider onboarding flows. */
   updateProvider(
     id: string,
     req: UpdateAIProviderConfigReq,
@@ -83,8 +81,10 @@ export interface AIApplicationPort {
     providerId: string,
     cx: ExecutionContext,
   ): Promise<Result<AIProviderModelCatalogSnapshot>>;
+}
 
-  // Conversation product shell. Message history/execution is Mastra-owned.
+/** Assistant conversation shell capability; Mastra remains runtime authority. */
+export interface AssistantConversationPort {
   createConversation(cx: ExecutionContext, name?: string): Promise<Result<AIConversationClientDTO>>;
   updateConversation(
     id: string,
@@ -101,8 +101,10 @@ export interface AIApplicationPort {
     cx: ExecutionContext,
   ): Promise<Result<AIConversationClientDTO | null>>;
   deleteConversation(id: string, cx: ExecutionContext): Promise<Result<void>>;
+}
 
-  // Deterministic/product knowledge services that are not Agent runtime state.
+/** Knowledge QA, expansion, and index administration capability. */
+export interface AIKnowledgePort {
   expandKnowledge(
     req: ExpandKnowledgeReq,
     cx: ExecutionContext,
@@ -112,6 +114,10 @@ export interface AIApplicationPort {
     req: ReindexKnowledgeReq,
     cx: ExecutionContext,
   ): Promise<Result<ReindexKnowledgeRes>>;
+}
+
+/** Evaluation and operational overview read capability. */
+export interface AIEvaluationOperationsPort {
   queryAnalytics(req: QueryAnalyticsReq, cx: ExecutionContext): Promise<Result<QueryAnalyticsRes>>;
   getEvaluationOverview(
     req?: GetAIEvaluationOverviewReq,

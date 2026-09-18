@@ -26,13 +26,12 @@
  * `AIElectronModuleOptions` 传入。本工厂不读取 `ctx.db`，不创建
  * repository/adapter，也不启动任何 runtime adapter。
  *
- * `instance.api` is the HTTP/IPC-shared application seam
- * (`AIApplicationPort`). Stream/session handling stays in this transport file
- * because it is Electron-specific (sender-scoped cancellation and push).
+ * The four application capability ports are shared by the HTTP/IPC product
+ * surfaces. Stream/session handling stays in this transport file because it is
+ * Electron-specific (sender-scoped cancellation and push).
  *
- * `instance.api` 是 HTTP/IPC 共用的应用 seam（`AIApplicationPort`）。
- * 流/会话处理保留在本传输文件中，因为它是 Electron 特有的（按发送方取消与
- * 推送）。
+ * 四个 application capability port 由 HTTP/IPC product surface 共用。流/会话处理
+ * 保留在本传输文件中，因为它是 Electron 特有的（按发送方取消与推送）。
  *
  * Per-handle state machine (`created -> registered | failed`, then any state
  * -> `disposed`):
@@ -87,7 +86,7 @@ import {
 import { fail, ok } from '@memoflow/contracts/result';
 import { formatZodErrors } from '@memoflow/utils/result';
 import { createLogger } from '@memoflow/utils/logger';
-import type { AIModuleInstance } from '../server/infrastructure';
+import type { AITransportModuleInstance } from '../server/infrastructure';
 import { withAuthenticatedValue } from './authenticated-ipc';
 
 const logger = createLogger('AIElectron');
@@ -128,14 +127,14 @@ export interface AIElectronModuleDef {
  * 携带已装配 AI 实例的选项。
  */
 export interface AIElectronModuleOptions {
-  readonly instance: AIModuleInstance;
+  readonly instance: AITransportModuleInstance;
 }
 
 /**
  * Creates the AI Electron transport module handle.
  * 创建 AI Electron 传输模块 handle。
  *
- * Turns an already-assembled `AIModuleInstance` into an `IElectronModule`-
+ * Turns an already-assembled transport capability view into an `IElectronModule`-
  * compatible handle. The handle is a transport adapter, not a composition root:
  * it only registers IPC channels, owns start/dispose lifecycle and manages
  * stream sessions. IPC channel names, payload schemas, controller methods and
@@ -171,37 +170,39 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
 
       try {
         const aiModule = options.instance;
+        const { providerManagement, assistantConversation, knowledge, evaluationOperations } =
+          aiModule;
 
         // -- Provider Config --
         ipcMain.handle(AIChannels.CAPABILITIES_GET, async () =>
-          withAuthenticatedValue(ctx, async () => aiModule.api.getCapabilities()),
+          withAuthenticatedValue(ctx, async () => providerManagement.getCapabilities()),
         );
         installed.push(AIChannels.CAPABILITIES_GET);
         ipcMain.handle(AIChannels.PROVIDER_CATALOG_GET, async () =>
-          withAuthenticatedValue(ctx, async () => aiModule.api.getProviderCatalog()),
+          withAuthenticatedValue(ctx, async () => providerManagement.getProviderCatalog()),
         );
         installed.push(AIChannels.PROVIDER_CATALOG_GET);
         ipcMain.handle(AIChannels.PROVIDER_ONBOARDING_PROBE, async (_, dto) =>
           withAuthenticatedValue(ctx, async (requestContext) =>
-            aiModule.api.probeProviderConnection(dto, requestContext),
+            providerManagement.probeProviderConnection(dto, requestContext),
           ),
         );
         installed.push(AIChannels.PROVIDER_ONBOARDING_PROBE);
         ipcMain.handle(AIChannels.PROVIDER_ONBOARDING_TEST_MODEL, async (_, dto) =>
           withAuthenticatedValue(ctx, async (requestContext) =>
-            aiModule.api.testProviderOnboardingModel(dto, requestContext),
+            providerManagement.testProviderOnboardingModel(dto, requestContext),
           ),
         );
         installed.push(AIChannels.PROVIDER_ONBOARDING_TEST_MODEL);
         ipcMain.handle(AIChannels.PROVIDER_ONBOARDING_COMMIT, async (_, dto) =>
           withAuthenticatedValue(ctx, async (requestContext) =>
-            aiModule.api.commitProviderOnboarding(dto, requestContext),
+            providerManagement.commitProviderOnboarding(dto, requestContext),
           ),
         );
         installed.push(AIChannels.PROVIDER_ONBOARDING_COMMIT);
         ipcMain.handle(AIChannels.PROVIDER_REPLACEMENT_PROBE, async (_, payload) =>
           withAuthenticatedValue(ctx, async (requestContext) =>
-            aiModule.api.probeProviderReplacement(
+            providerManagement.probeProviderReplacement(
               String(payload.providerId),
               payload.request,
               requestContext,
@@ -211,7 +212,7 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
         installed.push(AIChannels.PROVIDER_REPLACEMENT_PROBE);
         ipcMain.handle(AIChannels.PROVIDER_REPLACEMENT_COMMIT, async (_, payload) =>
           withAuthenticatedValue(ctx, async (requestContext) =>
-            aiModule.api.commitProviderReplacement(
+            providerManagement.commitProviderReplacement(
               String(payload.providerId),
               payload.request,
               requestContext,
@@ -221,7 +222,7 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
         installed.push(AIChannels.PROVIDER_REPLACEMENT_COMMIT);
         ipcMain.handle(AIChannels.PROVIDER_LIST, async () =>
           withAuthenticatedValue(ctx, async (requestContext) => {
-            const result = await aiModule.api.listProviders(requestContext);
+            const result = await providerManagement.listProviders(requestContext);
             if (!result.ok) {
               return result;
             }
@@ -232,19 +233,19 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
         installed.push(AIChannels.PROVIDER_LIST);
         ipcMain.handle(AIChannels.PROVIDER_GET, async (_, id) =>
           withAuthenticatedValue(ctx, async (requestContext) =>
-            aiModule.api.getProvider(id, requestContext),
+            providerManagement.getProvider(id, requestContext),
           ),
         );
         installed.push(AIChannels.PROVIDER_GET);
         ipcMain.handle(AIChannels.PROVIDER_UPDATE, async (_, payload) =>
           withAuthenticatedValue(ctx, async (requestContext) =>
-            aiModule.api.updateProvider(String(payload.id), payload, requestContext),
+            providerManagement.updateProvider(String(payload.id), payload, requestContext),
           ),
         );
         installed.push(AIChannels.PROVIDER_UPDATE);
         ipcMain.handle(AIChannels.PROVIDER_DELETE, async (_, id) =>
           withAuthenticatedValue(ctx, async (requestContext) => {
-            const result = await aiModule.api.deleteProvider(id, requestContext);
+            const result = await providerManagement.deleteProvider(id, requestContext);
             if (!result.ok) return result;
             // Align with HTTP void success: data:null (no undefined dual-track).
             return ok(null);
@@ -253,13 +254,16 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
         installed.push(AIChannels.PROVIDER_DELETE);
         ipcMain.handle(AIChannels.PROVIDER_TEST, async (_, dto) =>
           withAuthenticatedValue(ctx, async (requestContext) =>
-            aiModule.api.testConnection(dto, requestContext),
+            providerManagement.testConnection(dto, requestContext),
           ),
         );
         installed.push(AIChannels.PROVIDER_TEST);
         ipcMain.handle(AIChannels.PROVIDER_SET_DEFAULT, async (_, dto) =>
           withAuthenticatedValue(ctx, async (requestContext) => {
-            const result = await aiModule.api.setDefaultProvider(dto.providerId, requestContext);
+            const result = await providerManagement.setDefaultProvider(
+              dto.providerId,
+              requestContext,
+            );
             if (!result.ok) return result;
             return ok(null);
           }),
@@ -267,22 +271,21 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
         installed.push(AIChannels.PROVIDER_SET_DEFAULT);
         ipcMain.handle(AIChannels.PROVIDER_REFRESH_MODELS, async (_, id) =>
           withAuthenticatedValue(ctx, async (requestContext) =>
-            aiModule.api.refreshProviderModels(String(id), requestContext),
+            providerManagement.refreshProviderModels(String(id), requestContext),
           ),
         );
         installed.push(AIChannels.PROVIDER_REFRESH_MODELS);
 
-
         // -- Conversations --
         ipcMain.handle(AIChannels.CONVERSATION_CREATE, async (_, dto) =>
           withAuthenticatedValue(ctx, async (requestContext) =>
-            aiModule.api.createConversation(requestContext, dto.name),
+            assistantConversation.createConversation(requestContext, dto.name),
           ),
         );
         installed.push(AIChannels.CONVERSATION_CREATE);
         ipcMain.handle(AIChannels.CONVERSATION_UPDATE, async (_, dto) =>
           withAuthenticatedValue(ctx, async (requestContext) =>
-            aiModule.api.updateConversation(
+            assistantConversation.updateConversation(
               String(dto.id),
               {
                 name: String(dto.name),
@@ -294,7 +297,7 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
         installed.push(AIChannels.CONVERSATION_UPDATE);
         ipcMain.handle(AIChannels.CONVERSATION_LIST, async (_, dto) =>
           withAuthenticatedValue(ctx, async (requestContext) =>
-            aiModule.api.listConversations(
+            assistantConversation.listConversations(
               requestContext,
               Number(dto?.page ?? 1),
               Number(dto?.pageSize ?? 20),
@@ -304,7 +307,7 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
         installed.push(AIChannels.CONVERSATION_LIST);
         ipcMain.handle(AIChannels.CONVERSATION_GET, async (_, id) =>
           withAuthenticatedValue(ctx, async (requestContext) => {
-            const result = await aiModule.api.getConversation(String(id), requestContext);
+            const result = await assistantConversation.getConversation(String(id), requestContext);
             if (!result.ok) return result;
             return result.data ?? null;
           }),
@@ -312,13 +315,15 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
         installed.push(AIChannels.CONVERSATION_GET);
         ipcMain.handle(AIChannels.CONVERSATION_DELETE, async (_, id) =>
           withAuthenticatedValue(ctx, async (requestContext) => {
-            const result = await aiModule.api.deleteConversation(String(id), requestContext);
+            const result = await assistantConversation.deleteConversation(
+              String(id),
+              requestContext,
+            );
             if (!result.ok) return result;
             return ok(null);
           }),
         );
         installed.push(AIChannels.CONVERSATION_DELETE);
-
 
         // AI vNext canonical Mastra Assistant transport. The renderer sends only
         // a typed client command; authenticated identity is injected here. All
@@ -665,34 +670,37 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
         );
         installed.push(AIChannels.RUNTIME_WORKFLOW_CANCEL);
 
-
         // -- Knowledge Notes --
         ipcMain.handle(AIChannels.KNOWLEDGE_QUERY, async (_, dto) =>
           withAuthenticatedValue(ctx, async (requestContext) =>
-            aiModule.api.queryKnowledge(dto, requestContext),
+            knowledge.queryKnowledge(dto, requestContext),
           ),
         );
         installed.push(AIChannels.KNOWLEDGE_QUERY);
         ipcMain.handle(AIChannels.KNOWLEDGE_EXPAND, async (_, dto) =>
           withAuthenticatedValue(ctx, async (requestContext) =>
-            aiModule.api.expandKnowledge(dto, requestContext),
+            knowledge.expandKnowledge(dto, requestContext),
           ),
         );
         installed.push(AIChannels.KNOWLEDGE_EXPAND);
         ipcMain.handle(AIChannels.KNOWLEDGE_REINDEX, async (_, dto) =>
           withAuthenticatedValue(ctx, async (requestContext) =>
-            aiModule.api.reindexKnowledge(dto ?? {}, requestContext),
+            knowledge.reindexKnowledge(dto ?? {}, requestContext),
           ),
         );
         installed.push(AIChannels.KNOWLEDGE_REINDEX);
+
+        // -- Evaluation & Operations --
         ipcMain.handle(AIChannels.ANALYTICS_QUERY, async (_, dto) =>
           withAuthenticatedValue(ctx, async (requestContext) =>
-            aiModule.api.queryAnalytics(dto, requestContext),
+            evaluationOperations.queryAnalytics(dto, requestContext),
           ),
         );
         installed.push(AIChannels.ANALYTICS_QUERY);
         ipcMain.handle(AIChannels.EVALUATION_OVERVIEW_GET, async (_, dto) =>
-          withAuthenticatedValue(ctx, async () => aiModule.api.getEvaluationOverview(dto ?? {})),
+          withAuthenticatedValue(ctx, async () =>
+            evaluationOperations.getEvaluationOverview(dto ?? {}),
+          ),
         );
         installed.push(AIChannels.EVALUATION_OVERVIEW_GET);
 
