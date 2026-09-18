@@ -6,7 +6,7 @@ import type { OpenAICompatibleGateway } from '../gateways/openai-compatible.gate
 
 const provider = {
   providerId: 'provider-1',
-  providerType: 'openai_compatible' as const,
+  providerDefinitionId: 'openai' as const,
   baseUrl: 'https://example.test/v1',
   apiKey: 'secret',
   model: 'test-model',

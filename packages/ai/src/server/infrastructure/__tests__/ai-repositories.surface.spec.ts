@@ -24,6 +24,7 @@ describe('ai repository factories surface', () => {
     'providerConfigRepository',
     'providerOnboardingCommitPort',
     'providerOnboardingSessionRepository',
+    'providerSecretVault',
   ];
 
   it('PowerSync returns the six product persistence ports', () => {
@@ -65,6 +66,7 @@ describe('ai repository factories surface', () => {
     const instance = createAIModule({
       conversationRepository: repositories.conversationRepository,
       providerConfigRepository: repositories.providerConfigRepository,
+      providerSecretVault: repositories.providerSecretVault,
       providerOnboardingSessionRepository: repositories.providerOnboardingSessionRepository,
       providerOnboardingCommitPort: repositories.providerOnboardingCommitPort,
       knowledgeIndexRepository: repositories.knowledgeIndexRepository,

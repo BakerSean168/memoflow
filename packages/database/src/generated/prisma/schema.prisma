@@ -64,6 +64,7 @@ model Account {
   aiUsageQuotas                 AiUsageQuota?
   aiProviderConfigs             AiProviderConfig[]
   aiProviderOnboardingSessions  AiProviderOnboardingSession[]
+  aiProviderSecrets             AiProviderSecret[]
   dashboardConfigs              DashboardConfig?
 
   // PowerSync: denormalized identity relations
@@ -184,21 +185,21 @@ model AiUsageQuota {
 }
 
 model AiProviderConfig {
-  id              String    @id
-  identityId      String    @map("identity_id")
-  name            String // 配置名称
-  providerType    String    @map("provider_type") // OPENAI, QINIU, ANTHROPIC, CUSTOM_OPENAI_COMPATIBLE
-  baseUrl         String    @map("base_url") // API 基础地址
-  apiKeyEncrypted String    @map("api_key_encrypted") // AES-256-GCM 加密的 API Key
-  defaultModel    String?   @map("default_model")
-  availableModels String    @default("[]") @map("available_models") // 可用模型列表 JSON
-  isActive        Boolean   @default(true) @map("is_active")
-  isDefault       Boolean   @default(false) @map("is_default")
-  priority        Int       @default(100) // 优先级
-  version         Int       @default(1)
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
-  deletedAt       DateTime? @map("deleted_at")
+  id                   String    @id
+  identityId           String    @map("identity_id")
+  name                 String // 配置名称
+  providerDefinitionId String    @map("provider_definition_id")
+  baseUrl              String    @map("base_url") // API 基础地址
+  credentialRef        String    @map("credential_ref") // Opaque SecretVault reference
+  defaultModel         String?   @map("default_model")
+  availableModels      String    @default("[]") @map("available_models") // 可用模型列表 JSON
+  isActive             Boolean   @default(true) @map("is_active")
+  isDefault            Boolean   @default(false) @map("is_default")
+  priority             Int       @default(100) // 优先级
+  version              Int       @default(1)
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+  deletedAt            DateTime? @map("deleted_at")
 
   account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
 
@@ -211,20 +212,20 @@ model AiProviderConfig {
 }
 
 model AiProviderOnboardingSession {
-  id                  String    @id
-  identityId          String    @map("identity_id")
-  catalogId           String    @map("catalog_id")
-  baseUrl             String    @map("base_url")
-  targetProviderId    String?   @map("target_provider_id")
-  credentialEncrypted String    @map("credential_encrypted")
-  credentialStatus    String    @map("credential_status")
-  discoveryStatus     String    @map("discovery_status")
-  modelsJson          String    @default("[]") @map("models_json")
-  verifiedModelIds    String    @default("[]") @map("verified_model_ids")
-  expiresAt           DateTime  @map("expires_at")
-  consumedAt          DateTime? @map("consumed_at")
-  createdAt           DateTime  @default(now()) @map("created_at")
-  updatedAt           DateTime  @updatedAt @map("updated_at")
+  id               String    @id
+  identityId       String    @map("identity_id")
+  catalogId        String    @map("catalog_id")
+  baseUrl          String    @map("base_url")
+  targetProviderId String?   @map("target_provider_id")
+  credentialRef    String    @map("credential_ref")
+  credentialStatus String    @map("credential_status")
+  discoveryStatus  String    @map("discovery_status")
+  modelsJson       String    @default("[]") @map("models_json")
+  verifiedModelIds String    @default("[]") @map("verified_model_ids")
+  expiresAt        DateTime  @map("expires_at")
+  consumedAt       DateTime? @map("consumed_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
 
   account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
 
@@ -232,6 +233,26 @@ model AiProviderOnboardingSession {
   @@index([identityId, targetProviderId, expiresAt])
   @@index([expiresAt])
   @@map("ai_provider_onboarding_sessions")
+}
+
+/**
+ * Host-owned provider SecretVault storage. This table is deliberately not a
+ * PowerSync table and has no relation to portable provider connection state.
+ */
+model AiProviderSecret {
+  id             String    @id // opaque credential ref
+  identityId     String    @map("identity_id")
+  encryptedValue String    @map("encrypted_value")
+  expiresAt      DateTime? @map("expires_at")
+  revokedAt      DateTime? @map("revoked_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
+
+  @@index([identityId])
+  @@index([identityId, expiresAt])
+  @@map("ai_provider_secrets")
 }
 
 model KnowledgeGenerationTask {

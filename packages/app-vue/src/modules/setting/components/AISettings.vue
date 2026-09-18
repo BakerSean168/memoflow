@@ -62,8 +62,8 @@
                 <span class="text-muted-foreground">{{ t('setting.ai.defaultModelLabel') }}:</span>
                 {{ provider.defaultModel || '—' }}
               </p>
-              <p v-if="provider.apiKeyMasked" class="text-xs text-muted-foreground">
-                API Key: {{ provider.apiKeyMasked }}
+              <p v-if="provider.credentialRef" class="text-xs text-muted-foreground">
+                Provider credential configured
               </p>
               <p
                 v-if="providerStatusMap[String(provider.id)]"

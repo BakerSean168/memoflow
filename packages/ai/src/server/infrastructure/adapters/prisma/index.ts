@@ -6,3 +6,4 @@ export { AIExecutionLogPrismaAdapter } from './ai-execution-log-prisma.adapter';
 export { AIProviderOnboardingSessionPrismaRepository } from './ai-provider-onboarding-session-prisma.repository';
 
 export { AIProviderOnboardingCommitPrismaAdapter } from './ai-provider-onboarding-commit-prisma.adapter';
+export { AIProviderSecretPrismaVault } from './ai-provider-secret-prisma.vault';

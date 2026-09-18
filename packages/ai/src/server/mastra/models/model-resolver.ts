@@ -1,8 +1,15 @@
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible-v6';
 import type { MastraModelConfig } from '@mastra/core/llm';
 import type { IAIProviderConfigRepository } from '../../domain/repositories/i-ai-provider-config-repository';
-import { resolveActiveProviderConfig } from '../../application/use-cases/commands/ai-provider-resolution';
-import { ProviderSafeFetch, type ProviderFetch } from '../../infrastructure/security/provider-safe-fetch';
+import {
+  resolveActiveProviderConfig,
+  resolveProviderCredential,
+} from '../../application/use-cases/commands/ai-provider-resolution';
+import type { IAIProviderSecretVault } from '../../application/ports';
+import {
+  ProviderSafeFetch,
+  type ProviderFetch,
+} from '../../infrastructure/security/provider-safe-fetch';
 
 export interface ResolvedAIModel {
   readonly providerId: string;
@@ -27,6 +34,7 @@ function createDefaultProviderFetch(): ProviderFetch {
 export class MastraModelResolver {
   constructor(
     private readonly providers: IAIProviderConfigRepository,
+    private readonly secretVault: IAIProviderSecretVault,
     private readonly providerFetch: ProviderFetch = createDefaultProviderFetch(),
   ) {}
 
@@ -44,11 +52,16 @@ export class MastraModelResolver {
     if (!modelId) {
       throw new Error(`AI provider ${provider.id} has no selected model`);
     }
+    const credential = await resolveProviderCredential(
+      this.secretVault,
+      input.identityId,
+      provider,
+    );
 
     const sdkProvider = createOpenAICompatible({
       name: 'memoflow-byok',
       baseURL: provider.baseUrl,
-      apiKey: provider.apiKey,
+      apiKey: credential,
       fetch: this.providerFetch,
       supportsStructuredOutputs: true,
     });

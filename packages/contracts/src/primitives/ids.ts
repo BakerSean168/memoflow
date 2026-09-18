@@ -126,6 +126,12 @@ export type WidgetId = string & { readonly __brand: 'WidgetId' };
 /** AI Provider 配置 ID */
 export type AiProviderConfigId = string & { readonly __brand: 'AiProviderConfigId' };
 
+/** AI Provider connection ID (the persisted user-owned provider connection). */
+export type AiProviderConnectionId = AiProviderConfigId;
+
+/** Opaque reference into the host-owned provider SecretVault. */
+export type AIProviderCredentialRef = string & { readonly __brand: 'AIProviderCredentialRef' };
+
 /** AI 使用配额 ID */
 export type AiUsageQuotaId = string & { readonly __brand: 'AiUsageQuotaId' };
 

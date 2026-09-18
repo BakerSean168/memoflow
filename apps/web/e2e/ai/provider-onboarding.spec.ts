@@ -52,7 +52,8 @@ test('[P0] Custom Provider add → atomic save → verified replacement uses the
   const list = page.getByTestId('ai-provider-list');
   await expect(list.getByText(providerName, { exact: true })).toBeVisible();
   await expect(list).toContainText('e2e-model-alpha');
-  await expect(list).toContainText('e2e****1111');
+  await expect(list).toContainText('Provider credential configured');
+  await expect(list).not.toContainText('e2e****1111');
   expect(await providerCount(page)).toBe(1);
 
   // Replacement probe must accept V2 while V1 remains valid until atomic commit.
@@ -67,7 +68,8 @@ test('[P0] Custom Provider add → atomic save → verified replacement uses the
   await page.getByTestId('ai-provider-commit').click();
 
   await expect(list).toContainText('e2e-model-beta');
-  await expect(list).toContainText('e2e****2222');
+  await expect(list).toContainText('Provider credential configured');
+  await expect(list).not.toContainText('e2e****2222');
   expect(await providerCount(page)).toBe(1);
 
   // Upstream now revokes V1. Refresh and connection test can pass only if the

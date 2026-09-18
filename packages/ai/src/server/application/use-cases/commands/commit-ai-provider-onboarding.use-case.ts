@@ -1,6 +1,5 @@
 import { error, ok, type Result } from '@memoflow/contracts/result';
 import {
-  AIProviderType,
   type AIProviderConfigClientDTO,
   type AIProviderConfigServerDTO,
   type CommitAIProviderOnboardingReq,
@@ -46,11 +45,11 @@ export class CommitAIProviderOnboardingUseCase {
       id: AiProviderConfigId.generate(),
       identityId: cx.identityId as AIProviderConfigServerDTO['identityId'],
       name: request.name.trim(),
-      providerType: AIProviderType.OpenAICompatible,
+      providerDefinitionId: session.catalogId,
       baseUrl: session.baseUrl,
-      apiKey: session.apiKey,
+      credentialRef: session.credentialRef,
       defaultModel: defaultModelId,
-        isActive: true,
+      isActive: true,
       isDefault: request.isDefault ?? false,
       priority: 100,
       version: 1,

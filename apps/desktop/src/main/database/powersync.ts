@@ -40,12 +40,14 @@ export interface CloudCredentialProvider {
   getAccessToken(): Promise<string | null>;
 }
 
-const NON_SYNCABLE_LOCAL_TABLES = ['accounts'] as const;
-
-const PRE_HYDRATION_BOOTSTRAP_SYNC_TABLES = [
-  'user_preference_records',
-  'repositories',
+const NON_SYNCABLE_LOCAL_TABLES = [
+  'accounts',
+  'ai_provider_configs',
+  'ai_provider_onboarding_sessions',
+  'ai_provider_secrets',
 ] as const;
+
+const PRE_HYDRATION_BOOTSTRAP_SYNC_TABLES = ['user_preference_records', 'repositories'] as const;
 
 // ──────────────────────────────────────────────
 // Module state

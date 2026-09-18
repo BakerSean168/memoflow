@@ -105,6 +105,7 @@ const mastraStorage = {
 const repositorySet = {
   conversationRepository: { tag: 'conversation-repository' },
   providerConfigRepository: { tag: 'provider-repository' },
+  providerSecretVault: { tag: 'provider-secret-vault' },
   knowledgeIndexRepository: { tag: 'knowledge-index-repository' },
   executionLogPort: { tag: 'execution-log' },
   providerOnboardingSessionRepository: { tag: 'provider-onboarding-session' },
@@ -150,7 +151,10 @@ describe('Desktop composeAI Mastra-only ownership', () => {
 
     expect(createAIPowerSyncRepositories).toHaveBeenCalledWith(db);
     expect(createMastraStorage).toHaveBeenCalledWith(mastraStorage);
-    expect(MastraModelResolver).toHaveBeenCalledWith(repositorySet.providerConfigRepository);
+    expect(MastraModelResolver).toHaveBeenCalledWith(
+      repositorySet.providerConfigRepository,
+      repositorySet.providerSecretVault,
+    );
     expect(ConversationTranscriptBootstrapSource).toHaveBeenCalledWith(
       repositorySet.conversationRepository,
     );
@@ -200,6 +204,7 @@ describe('Desktop composeAI Mastra-only ownership', () => {
     const moduleInput = vi.mocked(createAIModule).mock.calls[0][0];
     expect(moduleInput.conversationRepository).toBe(repositorySet.conversationRepository);
     expect(moduleInput.providerConfigRepository).toBe(repositorySet.providerConfigRepository);
+    expect(moduleInput.providerSecretVault).toBe(repositorySet.providerSecretVault);
     expect(moduleInput.providerOnboardingSessionRepository).toBe(
       repositorySet.providerOnboardingSessionRepository,
     );

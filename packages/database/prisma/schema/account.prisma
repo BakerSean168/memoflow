@@ -47,6 +47,7 @@ model Account {
   aiUsageQuotas                   AiUsageQuota?
   aiProviderConfigs               AiProviderConfig[]
   aiProviderOnboardingSessions     AiProviderOnboardingSession[]
+  aiProviderSecrets                AiProviderSecret[]
   dashboardConfigs                DashboardConfig?
 
   // PowerSync: denormalized identity relations

@@ -5,7 +5,7 @@ import type { QueryKnowledgeReq, QueryKnowledgeRes } from '@memoflow/contracts/a
 import { createLogger } from '@memoflow/utils/logger';
 
 import type { IAIProviderConfigRepository } from '../../../domain/repositories/i-ai-provider-config-repository';
-import type { IAIExecutionLogPort, IKnowledgeQueryPort } from '../../ports';
+import type { IAIExecutionLogPort, IAIProviderSecretVault, IKnowledgeQueryPort } from '../../ports';
 import type { SyncRelevantKnowledgeUseCase } from './sync-relevant-knowledge.use-case';
 import {
   attachRequestIdToError,
@@ -14,6 +14,7 @@ import {
 } from './ai-observability';
 import {
   resolveActiveProviderConfig,
+  resolveProviderCredential,
   toChatExecutionProviderConfig,
 } from './ai-provider-resolution';
 
@@ -28,6 +29,7 @@ export class QueryKnowledgeUseCase {
     private readonly knowledgeIndexService: SyncRelevantKnowledgeUseCase,
     private readonly knowledgeQueryPort: IKnowledgeQueryPort,
     private readonly executionLogPort?: IAIExecutionLogPort,
+    private readonly secretVault?: IAIProviderSecretVault,
   ) {}
 
   async execute(
@@ -48,7 +50,8 @@ export class QueryKnowledgeUseCase {
         cx.identityId,
         request.providerId,
       );
-      const executionProviderConfig = toChatExecutionProviderConfig(provider, {
+      const credential = await resolveProviderCredential(this.requireSecretVault(), cx.identityId, provider);
+      const executionProviderConfig = toChatExecutionProviderConfig(provider, credential, {
         temperature: 0.2,
       });
       providerMetadata = {
@@ -181,5 +184,10 @@ export class QueryKnowledgeUseCase {
         identityId: input.identityId,
       });
     }
+  }
+
+  private requireSecretVault(): IAIProviderSecretVault {
+    if (!this.secretVault) throw new Error('AI provider SecretVault is unavailable');
+    return this.secretVault;
   }
 }

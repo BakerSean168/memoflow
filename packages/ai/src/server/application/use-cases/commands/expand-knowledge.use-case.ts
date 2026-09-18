@@ -8,6 +8,7 @@ import type { IAIProviderConfigRepository } from '../../../domain/repositories/i
 import type {
   KnowledgeExpansionResult,
   IAIExecutionLogPort,
+  IAIProviderSecretVault,
   IKnowledgeQueryPort,
 } from '../../ports';
 import type { SyncRelevantKnowledgeUseCase } from './sync-relevant-knowledge.use-case';
@@ -18,6 +19,7 @@ import {
 } from './ai-observability';
 import {
   resolveActiveProviderConfig,
+  resolveProviderCredential,
   toChatExecutionProviderConfig,
 } from './ai-provider-resolution';
 
@@ -32,6 +34,7 @@ export class ExpandKnowledgeUseCase {
     private readonly knowledgeIndexService: SyncRelevantKnowledgeUseCase,
     private readonly knowledgeQueryPort: IKnowledgeQueryPort,
     private readonly executionLogPort?: IAIExecutionLogPort,
+    private readonly secretVault?: IAIProviderSecretVault,
   ) {}
 
   async execute(
@@ -52,7 +55,8 @@ export class ExpandKnowledgeUseCase {
         cx.identityId,
         request.providerId,
       );
-      const executionProviderConfig = toChatExecutionProviderConfig(provider, {
+      const credential = await resolveProviderCredential(this.requireSecretVault(), cx.identityId, provider);
+      const executionProviderConfig = toChatExecutionProviderConfig(provider, credential, {
         temperature: 0.2,
       });
       providerMetadata = {
@@ -157,5 +161,10 @@ export class ExpandKnowledgeUseCase {
         identityId: input.identityId,
       });
     }
+  }
+
+  private requireSecretVault(): IAIProviderSecretVault {
+    if (!this.secretVault) throw new Error('AI provider SecretVault is unavailable');
+    return this.secretVault;
   }
 }

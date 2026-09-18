@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { AIProviderType, type TestAIProviderReq } from '@memoflow/contracts/ai';
+import type { TestAIProviderReq } from '@memoflow/contracts/ai';
 
 import type {
   ChatExecutionCompleteInput,
@@ -9,6 +9,7 @@ import type {
 } from '../../../ports';
 import type { IAIProviderConfigRepository } from '../../../../domain/repositories/i-ai-provider-config-repository';
 import { TestAIProviderConnectionUseCase } from '../test-ai-provider-connection.use-case';
+import { createAIProviderSecretVaultStub } from '../../../../../testing';
 
 class StubProviderConfigRepository {
   constructor(
@@ -16,9 +17,8 @@ class StubProviderConfigRepository {
       id: string;
       identityId: string;
       name: string;
-      providerType: string;
+      providerDefinitionId: string;
       baseUrl: string;
-      apiKey: string;
       defaultModel: string | null;
       isActive: boolean;
       isDefault: boolean;
@@ -34,7 +34,7 @@ class StubProviderConfigRepository {
     if (this.provider.id !== id || this.provider.identityId !== identityId) {
       return null;
     }
-    return this.provider;
+    return { ...this.provider, credentialRef: 'credential_test' };
   }
 
   async findByIdentityId() {
@@ -76,9 +76,8 @@ describe('TestAIProviderConnectionUseCase', () => {
         id: 'provider-1',
         identityId: 'identity-1',
         name: 'Main provider',
-        providerType: AIProviderType.OpenAICompatible,
+        providerDefinitionId: 'openai',
         baseUrl: 'https://api.openai.com/v1',
-        apiKey: 'plain-secret',
         defaultModel: 'gpt-4o-mini',
         isActive: true,
         isDefault: true,
@@ -89,6 +88,7 @@ describe('TestAIProviderConnectionUseCase', () => {
         deletedAt: null,
       }) as unknown as IAIProviderConfigRepository,
       executionPort,
+      createAIProviderSecretVaultStub(),
     );
 
     const result = await useCase.execute({
@@ -125,9 +125,8 @@ describe('TestAIProviderConnectionUseCase', () => {
         id: 'provider-1',
         identityId: 'someone-else',
         name: 'Foreign provider',
-        providerType: AIProviderType.OpenAICompatible,
+        providerDefinitionId: 'openai',
         baseUrl: 'https://api.openai.com/v1',
-        apiKey: 'plain-secret',
         defaultModel: 'gpt-4o-mini',
         isActive: true,
         isDefault: true,
@@ -138,6 +137,7 @@ describe('TestAIProviderConnectionUseCase', () => {
         deletedAt: null,
       }) as unknown as IAIProviderConfigRepository,
       new StubChatExecutionPort(),
+      createAIProviderSecretVaultStub(),
     );
 
     const result = await useCase.execute({

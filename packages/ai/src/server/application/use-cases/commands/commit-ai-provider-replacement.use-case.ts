@@ -49,7 +49,7 @@ export class CommitAIProviderReplacementUseCase {
     const replacement: AIProviderConfigServerDTO = {
       ...current,
       baseUrl: session.baseUrl,
-      apiKey: session.apiKey,
+      credentialRef: session.credentialRef,
       defaultModel: defaultModelId,
       version: current.version + 1,
       updatedAt: now,
@@ -60,6 +60,7 @@ export class CommitAIProviderReplacementUseCase {
       onboardingId: request.onboardingId,
       targetProviderId: providerId,
       expectedVersion: current.version,
+      previousCredentialRef: current.credentialRef,
       replacement,
       now,
     });

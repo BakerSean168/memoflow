@@ -3,13 +3,13 @@
  */
 
 import { AggregateRoot } from '@memoflow/utils/domain';
-import { AIProviderType } from '@memoflow/contracts/ai';
+import type { AIProviderDefinitionId } from '@memoflow/contracts/ai';
 import type {
   AIEventMap,
   AIProviderConfigClientDTO,
   AIProviderConfigServerDTO,
 } from '@memoflow/contracts/ai';
-import type { IdentityId as IIdentityId } from '@memoflow/contracts/primitives';
+import type { AIProviderCredentialRef, IdentityId as IIdentityId } from '@memoflow/contracts/primitives';
 import { AiProviderConfigId } from '../../domain/value-objects/ai-provider-config-id';
 import { IdentityId } from '@memoflow/domain-shared/shared';
 
@@ -17,9 +17,9 @@ export interface AIProviderConfigState {
   id: AiProviderConfigId;
   identityId: IIdentityId;
   name: string;
-  providerType: AIProviderType;
+  providerDefinitionId: AIProviderDefinitionId;
   baseUrl: string;
-  apiKey: string;
+  credentialRef: AIProviderCredentialRef;
   defaultModel: string | null;
   isActive: boolean;
   isDefault: boolean;
@@ -50,16 +50,16 @@ export class AIProviderConfig extends AggregateRoot<AiProviderConfigId> {
     return this._props.name;
   }
 
-  public get providerType(): AIProviderType {
-    return this._props.providerType;
+  public get providerDefinitionId(): AIProviderDefinitionId {
+    return this._props.providerDefinitionId;
   }
 
   public get baseUrl(): string {
     return this._props.baseUrl;
   }
 
-  public get apiKey(): string {
-    return this._props.apiKey;
+  public get credentialRef(): AIProviderCredentialRef {
+    return this._props.credentialRef;
   }
 
   public get defaultModel(): string | null {
@@ -100,9 +100,9 @@ export class AIProviderConfig extends AggregateRoot<AiProviderConfigId> {
   public static create(params: {
     identityId: string;
     name: string;
-    providerType: AIProviderType;
+    providerDefinitionId: AIProviderDefinitionId;
     baseUrl: string;
-    apiKey: string;
+    credentialRef: AIProviderCredentialRef;
     defaultModel?: string;
     isDefault?: boolean;
     priority?: number;
@@ -113,9 +113,9 @@ export class AIProviderConfig extends AggregateRoot<AiProviderConfigId> {
       id: AiProviderConfigId.generate(),
       identityId,
       name: params.name.trim(),
-      providerType: params.providerType,
+      providerDefinitionId: params.providerDefinitionId,
       baseUrl: AIProviderConfig.normalizeBaseUrl(params.baseUrl),
-      apiKey: params.apiKey,
+      credentialRef: params.credentialRef,
       defaultModel: params.defaultModel ?? null,
       isActive: true,
       isDefault: params.isDefault ?? false,
@@ -128,7 +128,7 @@ export class AIProviderConfig extends AggregateRoot<AiProviderConfigId> {
 
     instance.addDomainEvent<AIEventMap['ai:provider-config-created']>('ai:provider-config-created', {
       identityId,
-      providerConfig: instance.toServerDTO(),
+      providerConnection: instance.toServerDTO(),
     });
 
     return instance;
@@ -154,11 +154,11 @@ export class AIProviderConfig extends AggregateRoot<AiProviderConfigId> {
     this._props.updatedAt = new Date();
   }
 
-  public updateApiKey(apiKey: string): void {
-    if (!apiKey || apiKey.trim().length === 0) {
-      throw new Error('API Key cannot be empty');
+  public updateCredentialRef(credentialRef: AIProviderCredentialRef): void {
+    if (!credentialRef || credentialRef.trim().length === 0) {
+      throw new Error('Credential reference cannot be empty');
     }
-    this._props.apiKey = apiKey;
+    this._props.credentialRef = credentialRef;
     this._props.updatedAt = new Date();
   }
 
@@ -191,7 +191,7 @@ export class AIProviderConfig extends AggregateRoot<AiProviderConfigId> {
       'ai:provider-config-set-default',
       {
         identityId: this._props.identityId,
-        providerConfig: this.toServerDTO(),
+        providerConnection: this.toServerDTO(),
       },
     );
   }
@@ -216,9 +216,9 @@ export class AIProviderConfig extends AggregateRoot<AiProviderConfigId> {
       id: this.id,
       identityId: this._props.identityId,
       name: this._props.name,
-      providerType: this._props.providerType,
+      providerDefinitionId: this._props.providerDefinitionId,
       baseUrl: this._props.baseUrl,
-      apiKey: this._props.apiKey,
+      credentialRef: this._props.credentialRef,
       defaultModel: this._props.defaultModel,
       isActive: this._props.isActive,
       isDefault: this._props.isDefault,
@@ -235,9 +235,9 @@ export class AIProviderConfig extends AggregateRoot<AiProviderConfigId> {
       id: String(this.id) as AIProviderConfigClientDTO['id'],
       identityId: String(this._props.identityId) as AIProviderConfigClientDTO['identityId'],
       name: this._props.name,
-      providerType: this._props.providerType,
+      providerDefinitionId: this._props.providerDefinitionId,
       baseUrl: this._props.baseUrl,
-      apiKeyMasked: AIProviderConfig.maskApiKey(this._props.apiKey),
+      credentialRef: this._props.credentialRef,
       defaultModel: this._props.defaultModel,
       isActive: this._props.isActive,
       isDefault: this._props.isDefault,
@@ -250,15 +250,6 @@ export class AIProviderConfig extends AggregateRoot<AiProviderConfigId> {
   }
 
   // ===== Static Helpers =====
-
-  public static maskApiKey(apiKey: string): string {
-    if (!apiKey || apiKey.length < 8) {
-      return '****';
-    }
-    const prefix = apiKey.slice(0, 3);
-    const suffix = apiKey.slice(-4);
-    return `${prefix}****${suffix}`;
-  }
 
   public static normalizeBaseUrl(url: string): string {
     let normalized = url.trim();

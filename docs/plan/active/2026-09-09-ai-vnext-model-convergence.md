@@ -486,7 +486,7 @@ with an explicit deletion blocker recorded above.
 
 ### AI-9604 — Establish ProviderDefinition/Connection/SecretVault domain seam
 
-**状态：PLANNED**
+**状态：ACCEPTED LOCALLY — implementation + P1 host-local repair + verification matrix passed**
 
 #### Goal
 
@@ -529,11 +529,20 @@ AIProviderSecretVault
 - serialization leak tests；
 - HTTP/IPC client DTO secret absence；
 - PowerSync upload queue secret policy；
+- Desktop Provider Connection 与 SecretVault 同为 host-local，避免同步不可解析的 `credentialRef`；跨设备 provider/credential 同步留待独立安全策略；
 - provider deletion/retry。
 
 #### Acceptance
 
 Production code 中普通 Provider DTO 不含 `apiKey`；plaintext secret 只在 execution edge resolve。
+
+#### Local acceptance evidence (2026-09-18)
+
+- ProviderDefinition metadata、saved Connection state 与 plaintext SecretVault 已拆成独立 ownership seam；
+- API 使用 Prisma-backed host vault，Desktop 使用 local-only PowerSync/SQLite vault；
+- review 发现的 P1 已修复：Desktop Provider Connection 与 credential ref 不再进入跨设备 sync，避免另一设备收到无法 resolve 的 host-local reference；
+- public/client DTO、portable provider surface 与 sync configuration 均有 secret-leak / host-local negative coverage；
+- `pnpm nx run ai:test`、`ai:typecheck`、`api:typecheck`、`desktop:typecheck` 全部通过。
 
 #### Dependencies
 
@@ -1146,23 +1155,22 @@ AI-9609 Routine/Planner/Notification tools
 
 ```text
 AI-9601  DONE — docs/design package only
-AI-9602  ACCEPTED LOCALLY — runtime authority characterization and AiMessage consumer ledger
-AI-9603  IMPLEMENTED LOCALLY / REVIEW PENDING — shell/runtime cutover; physical AiMessage deletion deferred
-AI-9604  PLANNED
-AI-9605  PLANNED
-AI-9606  PLANNED
-AI-9607  PLANNED
-AI-9608  PLANNED
-AI-9609  PLANNED
-AI-9610  PLANNED
-AI-9611  PLANNED
-AI-9612  PLANNED
+AI-9602  ACCEPTED — runtime authority characterization and AiMessage consumer ledger
+AI-9603  ACCEPTED — shell/runtime cutover; physical AiMessage deletion deferred to AI-9610
+AI-9604  ACCEPTED LOCALLY — ProviderDefinition/Connection/SecretVault seam; PR integration pending
+AI-9605  READY AFTER AI-9604 INTEGRATION
+AI-9606  ACCEPTED — AIContextAssembler + Product Time/trust/token-budget foundation
+AI-9607  READY — depends on accepted AI-9606
+AI-9608  READY — depends on accepted AI-9606
+AI-9609  READY — depends on accepted AI-9606
+AI-9610  BLOCKED — waits for AI-9605/9608/9609
+AI-9611  BLOCKED — waits for AI-9603/9604/9607/9610
+AI-9612  BLOCKED — final AI closure
 ```
 
 本状态明确表示：
 
-> **AI-9603 已开始并完成 conversation shell/runtime boundary 的本地实现；后续 provider、context、owner
-> vocabulary、execution-record 与 legacy schema deletion 仍未开始。**
+> **runtime authority、conversation shell、AIContextAssembler 已进入 canonical convergence；AI-9604 provider/secret ownership 已本地验收，下一前沿是 AI-9605 与已经解锁的 AI-9607/9608/9609。**
 
 2026-08 的 Mastra-native runtime implementation 已经完成；本计划只针对 2026-09 新冻结的 product model alignment。
 

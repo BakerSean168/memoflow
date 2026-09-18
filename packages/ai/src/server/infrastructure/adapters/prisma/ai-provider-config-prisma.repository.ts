@@ -12,9 +12,6 @@ import type {
 } from '@memoflow/database';
 import type { IAIProviderConfigRepository } from '../../../domain';
 import type { AIProviderConfigServerDTO } from '@memoflow/contracts/ai';
-import type { AIProviderType } from '@memoflow/contracts/ai';
-import type { IAIProviderSecretVault } from '../../../application/ports/provider-secret-vault.port';
-import { AISecretCipher } from '../../security/ai-secret-cipher';
 
 /**
  * AIProviderConfig Prisma Repository
@@ -22,24 +19,7 @@ import { AISecretCipher } from '../../security/ai-secret-cipher';
  * Prisma implementation of IAIProviderConfigRepository.
  */
 export class AIProviderConfigPrismaRepository implements IAIProviderConfigRepository {
-  private cipher: IAIProviderSecretVault | null;
-
-  constructor(
-    private readonly prisma: PrismaClient,
-    secretCipher?: IAIProviderSecretVault,
-  ) {
-    this.cipher = secretCipher ?? null;
-  }
-
-  /**
-   * 惰性解析加密器：只有真正加解密 provider 密钥时才读取 env 并 fail-fast，
-   * 而不是在模块注册/构造时。这样未使用 AI provider 加密的路径（e2e 起服务、
-   * 本地 dev、CI）无需配置 AI_PROVIDER_ENCRYPTION_KEY 即可启动，
-   * 同时保证真正落库/读取密钥时缺 key 决不静默降级。
-   */
-  private get secretCipher(): IAIProviderSecretVault {
-    return (this.cipher ??= AISecretCipher.fromEnv());
-  }
+  constructor(private readonly prisma: PrismaClient) {}
 
   async save(config: AIProviderConfigServerDTO) {
     return this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
@@ -74,9 +54,9 @@ export class AIProviderConfigPrismaRepository implements IAIProviderConfigReposi
           id: String(config.id),
           identityId: String(config.identityId),
           name: config.name,
-          providerType: config.providerType,
+          providerDefinitionId: config.providerDefinitionId,
           baseUrl: config.baseUrl,
-          apiKeyEncrypted: this.secretCipher.encrypt(this.secretCipher.decrypt(config.apiKey)),
+          credentialRef: String(config.credentialRef),
           defaultModel: config.defaultModel,
           isActive: config.isActive,
           isDefault: config.isDefault,
@@ -88,9 +68,9 @@ export class AIProviderConfigPrismaRepository implements IAIProviderConfigReposi
         },
         update: {
           name: config.name,
-          providerType: config.providerType,
+          providerDefinitionId: config.providerDefinitionId,
           baseUrl: config.baseUrl,
-          apiKeyEncrypted: this.secretCipher.encrypt(this.secretCipher.decrypt(config.apiKey)),
+          credentialRef: String(config.credentialRef),
           defaultModel: config.defaultModel,
           isActive: config.isActive,
           isDefault: config.isDefault,
@@ -174,9 +154,9 @@ export class AIProviderConfigPrismaRepository implements IAIProviderConfigReposi
       id: row.id as AIProviderConfigServerDTO['id'],
       identityId: row.identityId as AIProviderConfigServerDTO['identityId'],
       name: row.name,
-      providerType: row.providerType as AIProviderType,
+      providerDefinitionId: row.providerDefinitionId as AIProviderConfigServerDTO['providerDefinitionId'],
       baseUrl: row.baseUrl,
-      apiKey: this.secretCipher.decrypt(row.apiKeyEncrypted),
+      credentialRef: row.credentialRef as AIProviderConfigServerDTO['credentialRef'],
       defaultModel: row.defaultModel,
       isActive: row.isActive,
       isDefault: row.isDefault,

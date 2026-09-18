@@ -14,6 +14,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createTimeContext } from '@memoflow/time';
 import { AIContextAssembler } from '../context';
 import { MastraModelResolver } from '../models';
+import { createAIProviderSecretVaultStub } from '../../../testing/ai-test-support';
 import type { GoalPlanMutationPort } from '../workflows';
 import { MastraAIRuntime } from './mastra-ai.runtime';
 
@@ -135,7 +136,11 @@ async function createRuntime(file = join(tmpdir(), `memoflow-mastra-runtime-${ra
   }));
   const runtime = new MastraAIRuntime({
     storage,
-    modelResolver: new MastraModelResolver({} as never, vi.fn() as unknown as typeof fetch),
+    modelResolver: new MastraModelResolver(
+      {} as never,
+      createAIProviderSecretVaultStub(),
+      vi.fn() as unknown as typeof fetch,
+    ),
     transcriptBootstrapSource: { load: vi.fn(async () => null) },
     goalPlanMutationPort: mutations,
     taskPlanMutationPort: {

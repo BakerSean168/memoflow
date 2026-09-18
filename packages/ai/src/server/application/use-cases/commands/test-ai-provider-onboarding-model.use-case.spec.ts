@@ -10,7 +10,7 @@ describe('TestAIProviderOnboardingModelUseCase', () => {
     const sessions = new AIProviderOnboardingSessionMemoryRepository();
     await sessions.create({
       id: 'onboarding_0123456789abcdef', identityId: 'identity-1', catalogId: 'custom',
-      baseUrl: 'https://llm.example/v1', apiKey: 'secret', credentialStatus: 'requires_model_test',
+      baseUrl: 'https://llm.example/v1', credentialRef: 'credential-test', credentialStatus: 'requires_model_test',
       discoveryStatus: 'unsupported', models: [], expiresAt: 10_000, now: 1_000,
     });
     const complete = vi.fn(async () => ({
@@ -20,6 +20,7 @@ describe('TestAIProviderOnboardingModelUseCase', () => {
     const useCase = new TestAIProviderOnboardingModelUseCase(
       sessions,
       { complete, stream: vi.fn() as never },
+      { resolve: vi.fn(async () => ({ value: 'secret' })) } as never,
       () => now++,
     );
 

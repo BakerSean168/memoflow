@@ -1,5 +1,4 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
-import type { IAIProviderSecretVault } from '../../application/ports/provider-secret-vault.port';
 
 interface AISecretCipherOptions {
   /** Stable non-secret identifier embedded in enc_v3 ciphertext. */
@@ -16,17 +15,12 @@ interface AISecretCipherOptions {
  * ciphertext. A random 96-bit IV is generated for every encryption.
  *
  * Rotation is explicit: one active key encrypts, while zero or more previous
- * keys are decrypt-only. Existing `enc_v2:` AES-GCM rows contain no key id, so
- * decryption safely tries the active/previous keyring until GCM authentication
- * succeeds. Any subsequent save rewrites the value as active `enc_v3`.
- *
- * `enc_v1:` XOR ciphertext remains rejected. Unprefixed values are treated as
- * plaintext seeds for existing local/test fixtures and are rewrapped on save.
+ * `enc_v3` key ids are decrypt-only. There is intentionally no legacy plaintext
+ * or old ciphertext reader; ADR-111 requires a direct cutover with no secret
+ * migration/backfill compatibility path.
  */
-export class AISecretCipher implements IAIProviderSecretVault {
+export class AISecretCipher {
   private static readonly PREFIX = 'enc_v3:';
-  private static readonly LEGACY_GCM_PREFIX = 'enc_v2:';
-  private static readonly LEGACY_XOR_PREFIX = 'enc_v1:';
   private static readonly ALGORITHM = 'aes-256-gcm';
   private static readonly IV_LENGTH = 12;
   private static readonly AUTH_TAG_LENGTH = 16;
@@ -100,12 +94,6 @@ export class AISecretCipher implements IAIProviderSecretVault {
   }
 
   decrypt(value: string): string {
-    if (value.startsWith(AISecretCipher.LEGACY_XOR_PREFIX)) {
-      throw new Error(
-        'AISecretCipher: encountered legacy enc_v1 (XOR) ciphertext, which is no longer supported',
-      );
-    }
-
     if (value.startsWith(AISecretCipher.PREFIX)) {
       const remainder = value.slice(AISecretCipher.PREFIX.length);
       const separator = remainder.indexOf(':');
@@ -120,23 +108,7 @@ export class AISecretCipher implements IAIProviderSecretVault {
       }
       return this.decryptPayload(remainder.slice(separator + 1), key, this.aad(keyId));
     }
-
-    if (value.startsWith(AISecretCipher.LEGACY_GCM_PREFIX)) {
-      const payload = value.slice(AISecretCipher.LEGACY_GCM_PREFIX.length);
-      let lastError: unknown;
-      for (const key of this.keys.values()) {
-        try {
-          return this.decryptPayload(payload, key);
-        } catch (error) {
-          lastError = error;
-        }
-      }
-      const error = new Error('AISecretCipher: unable to decrypt legacy enc_v2 ciphertext');
-      (error as Error & { cause?: unknown }).cause = lastError;
-      throw error;
-    }
-
-    return value;
+    throw new Error('AISecretCipher: unsupported ciphertext format');
   }
 
   needsRewrap(value: string): boolean {

@@ -47,6 +47,7 @@ import type {
   IKnowledgeIngestionPort,
   IAIProviderOnboardingCommitPort,
   IAIProviderOnboardingSessionRepository,
+  IAIProviderSecretVault,
 } from '../application/ports';
 
 import { createLogger } from '@memoflow/utils/logger';
@@ -139,6 +140,7 @@ const logger = createLogger('AIModule');
 export interface AIModuleDependencies {
   readonly conversationRepository: IAIConversationRepository;
   readonly providerConfigRepository: IAIProviderConfigRepository;
+  readonly providerSecretVault: IAIProviderSecretVault;
   readonly knowledgeIndexRepository?: IKnowledgeIndexRepository;
   readonly knowledgeIndexStatusPort?: IKnowledgeIndexStatusPort;
   readonly knowledgeIngestionPort?: IKnowledgeIngestionPort;
@@ -440,17 +442,26 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
           modelCatalog: modelCatalogGateway,
           credentialProbe: new OpenAICompatibleCredentialProbeGateway(providerSafeFetch.fetch),
           endpointPolicy: providerEndpointPolicy,
+          secretVault: dependencies.providerSecretVault,
         })
       : null;
 
   const providerServices: AIProviderServices = {
     update: new UpdateAIProviderUseCase(providerConfigRepository),
-    delete: new DeleteAIProviderUseCase(providerConfigRepository),
+    delete: new DeleteAIProviderUseCase(providerConfigRepository, dependencies.providerSecretVault),
     get: new GetAIProviderUseCase(providerConfigRepository),
     list: new ListAIProvidersUseCase(providerConfigRepository),
-    testConnection: new TestAIProviderConnectionUseCase(providerConfigRepository, chatExecutionAdapter),
+    testConnection: new TestAIProviderConnectionUseCase(
+      providerConfigRepository,
+      chatExecutionAdapter,
+      dependencies.providerSecretVault,
+    ),
     setDefault: new SetDefaultAIProviderUseCase(providerConfigRepository),
-    refreshModels: new RefreshAIProviderModelsUseCase(providerConfigRepository, modelCatalogGateway),
+    refreshModels: new RefreshAIProviderModelsUseCase(
+      providerConfigRepository,
+      modelCatalogGateway,
+      dependencies.providerSecretVault,
+    ),
     ...(onboardingAvailable && onboardingSessionRepository && onboardingCommitPort
       ? {
           probe: probeProviderConnection!,
@@ -461,6 +472,7 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
           testOnboardingModel: new TestAIProviderOnboardingModelUseCase(
             onboardingSessionRepository,
             chatExecutionAdapter,
+            dependencies.providerSecretVault,
           ),
           commitOnboarding: new CommitAIProviderOnboardingUseCase(
             onboardingSessionRepository,
@@ -544,6 +556,7 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
             ),
             knowledgeQueryPort,
             dependencies.executionLogPort,
+            dependencies.providerSecretVault,
           ),
           expand: new ExpandKnowledgeUseCase(
             providerConfigRepository,
@@ -556,6 +569,7 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
             ),
             knowledgeQueryPort,
             dependencies.executionLogPort,
+            dependencies.providerSecretVault,
           ),
           reindex: new ReindexKnowledgeUseCase(
             providerConfigRepository,
@@ -566,6 +580,8 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
               dependencies.executionLogPort,
               dependencies.knowledgeIndexStatusPort,
             ),
+            undefined,
+            dependencies.providerSecretVault,
           ),
         }
       : {
@@ -586,6 +602,7 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
             dependencies.analyticsReadPort!,
             analyticsQueryPort,
             dependencies.executionLogPort,
+            dependencies.providerSecretVault,
           ).queryAnalytics(req, cx),
       }
     : {
