@@ -3,14 +3,6 @@ import type { IKnowledgeSourcePort, KnowledgeSourceNote } from '@memoflow/ai/por
 import type { LocalVaultNoteDTO, LocalVaultNoteSummaryDTO } from '@memoflow/contracts/repository';
 import type { LocalVaultElectronPort } from '@memoflow/repository/electron';
 
-/**
- * Ephemeral AI identity for unmanaged notes only. It must never escape into
- * durable relations; adoption replaces it with the Markdown-carried kdoc id.
- */
-function temporaryUnmanagedResourceIdForPath(relativePath: string): string {
-  return `local-vault-${createHash('sha256').update(relativePath).digest('hex').slice(0, 24)}`;
-}
-
 /** Local Vault is the only Desktop knowledge source; disconnected Vaults return no cloud fallback. */
 export class DesktopKnowledgeSourceAdapter implements IKnowledgeSourcePort {
   constructor(private readonly localVault: LocalVaultElectronPort) {}
@@ -30,7 +22,7 @@ export class DesktopKnowledgeSourceAdapter implements IKnowledgeSourcePort {
       identityId,
       snapshot.binding.id,
       snapshot.binding.knowledgeSpaceId,
-      summaries.slice(0, limit),
+      summaries.filter((summary) => summary.knowledgeDocumentId !== null).slice(0, limit),
     );
   }
 
@@ -42,19 +34,20 @@ export class DesktopKnowledgeSourceAdapter implements IKnowledgeSourcePort {
       identityId,
       snapshot.binding.id,
       snapshot.binding.knowledgeSpaceId,
-      scanned.notes.slice(0, limit),
+      scanned.notes.filter((note) => note.knowledgeDocumentId !== null).slice(0, limit),
     );
   }
 
-  async getNoteById(identityId: string, resourceId: string): Promise<KnowledgeSourceNote | null> {
+  async getNoteById(
+    identityId: string,
+    knowledgeDocumentId: string,
+    knowledgeSpaceId?: string,
+  ): Promise<KnowledgeSourceNote | null> {
     const snapshot = await this.localVault.getBinding();
     if (!snapshot || snapshot.health.state !== 'Available') return null;
+    if (knowledgeSpaceId && snapshot.binding.knowledgeSpaceId !== knowledgeSpaceId) return null;
     const scanned = await this.localVault.scanVault();
-    const summary = scanned.notes.find(
-      (note) =>
-        note.knowledgeDocumentId === resourceId ||
-        temporaryUnmanagedResourceIdForPath(note.relativePath) === resourceId,
-    );
+    const summary = scanned.notes.find((note) => note.knowledgeDocumentId === knowledgeDocumentId);
     if (!summary) return null;
     const note = await this.localVault.readNote({
       relativePath: summary.relativePath,
@@ -96,9 +89,11 @@ export class DesktopKnowledgeSourceAdapter implements IKnowledgeSourcePort {
     return {
       identityId,
       repositoryId,
-      resourceId:
-        note.knowledgeDocumentId ?? temporaryUnmanagedResourceIdForPath(note.relativePath),
-      resourcePath: note.relativePath,
+      knowledgeSpaceId,
+      knowledgeDocumentId: note.knowledgeDocumentId,
+      sourcePath: note.relativePath,
+      sourceContentHash: createHash('sha256').update(note.contentMarkdown).digest('hex'),
+      sourceVersion: String(note.updatedAt),
       title: note.title,
       mimeType: 'text/markdown',
       content: note.contentMarkdown,

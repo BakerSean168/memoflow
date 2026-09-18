@@ -73,7 +73,6 @@ describe('PrismaServerHeldDataDisclosureSource', () => {
             contentHash: 'hash-note-1',
             frontmatter: {},
             markdownContent: '# Unmanaged',
-            indexStatus: 'INDEXED',
             createdAt: timestamp,
             updatedAt: timestamp,
             deletedAt: null,
@@ -138,6 +137,16 @@ describe('PrismaServerHeldDataDisclosureSource', () => {
     expect(bindingQuery.select.noteProjections.select.knowledgeDocumentId).toBe(true);
     expect(bindingQuery.select.writeRequests.select.knowledgeDocumentId).toBe(true);
     expect(indexFindMany.mock.calls[0]?.[0].select).not.toHaveProperty('retrievalVector');
+    expect(indexFindMany.mock.calls[0]?.[0].select).toMatchObject({
+      knowledgeSpaceId: true,
+      knowledgeDocumentId: true,
+      sourcePath: true,
+      sourceContentHash: true,
+      sourceVersion: true,
+    });
+    expect(indexFindMany.mock.calls[0]?.[0].select).not.toHaveProperty('resourceId');
+    expect(indexFindMany.mock.calls[0]?.[0].select).not.toHaveProperty('resourcePath');
+    expect(indexFindMany.mock.calls[0]?.[0].select).not.toHaveProperty('contentHash');
     expect(result.knowledgeSpaces).toEqual([
       {
         id: 'space-1',

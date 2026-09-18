@@ -371,16 +371,16 @@
         <div class="mt-2 grid gap-2 @sm/ai:grid-cols-2">
           <div
             v-for="note in getKnowledgeRelatedNotes(knowledgeAnswer)"
-            :key="note.resourceId"
+            :key="`${note.documentRef.knowledgeSpaceId}:${note.documentRef.documentId}`"
             class="rounded-2xl border bg-muted/20 p-4"
           >
             <div class="flex h-full flex-col gap-3">
               <div class="min-w-0 flex-1">
                 <p class="text-sm font-medium text-foreground">
-                  {{ note.title || note.resourcePath }}
+                  {{ note.title || note.sourcePath }}
                 </p>
                 <p class="mt-1 break-words text-xs text-muted-foreground">
-                  {{ note.resourcePath }}
+                  {{ note.sourcePath }}
                 </p>
                 <p
                   v-if="note.excerpt"
@@ -393,7 +393,7 @@
                 variant="outline"
                 class="self-start"
                 data-testid="knowledge-related-note-open"
-                @click="$emit('open-knowledge-citation', note.resourceId)"
+                @click="$emit('open-knowledge-citation', note.documentRef)"
               >
                 {{ t('aiAssistant.dialogs.knowledge.openCitation') }}
               </Button>
@@ -409,23 +409,23 @@
         <div class="mt-2 space-y-2">
           <div
             v-for="citation in knowledgeAnswer.citations"
-            :key="`${citation.resourceId}-${citation.chunkIndex}`"
+            :key="`${citation.documentRef.knowledgeSpaceId}:${citation.documentRef.documentId}-${citation.chunkIndex}`"
             class="rounded-2xl border bg-muted/20 p-4"
           >
             <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div class="min-w-0">
                 <p class="text-sm font-medium text-foreground">
-                  {{ citation.title || citation.resourcePath }}
+                  {{ citation.title || citation.sourcePath }}
                 </p>
                 <p class="mt-1 break-words text-xs text-muted-foreground">
-                  {{ citation.resourcePath }}
+                  {{ citation.sourcePath }}
                 </p>
               </div>
               <Button
                 variant="outline"
                 class="sm:shrink-0"
                 data-testid="knowledge-citation-open"
-                @click="$emit('open-knowledge-citation', citation.resourceId)"
+                @click="$emit('open-knowledge-citation', citation.documentRef)"
               >
                 {{ t('aiAssistant.dialogs.knowledge.openCitation') }}
               </Button>
@@ -492,7 +492,7 @@ const emit = defineEmits<{
   'update-task': [payload: { index: number; value: EditableGoalTask }];
   'remove-knowledge': [index: number];
   'update-knowledge': [payload: { index: number; value: EditableGoalKnowledge }];
-  'open-knowledge-citation': [resourceId: string];
+  'open-knowledge-citation': [documentRef: KnowledgeRelatedNote['documentRef']];
 }>();
 
 const { t } = useI18n();
@@ -561,17 +561,18 @@ function appliedMutationCount(
 function getKnowledgeRelatedNotes(answer: KnowledgeAnswer | null): KnowledgeRelatedNote[] {
   if (!answer) return [];
   if (answer.relatedNotes?.length) return answer.relatedNotes;
-  const notesByResourceId = new Map<string, KnowledgeRelatedNote>();
+  const notesByDocumentRef = new Map<string, KnowledgeRelatedNote>();
   for (const citation of answer.citations) {
-    if (notesByResourceId.has(citation.resourceId)) continue;
-    notesByResourceId.set(citation.resourceId, {
-      resourceId: citation.resourceId,
-      resourcePath: citation.resourcePath,
+    const key = `${citation.documentRef.knowledgeSpaceId}\0${citation.documentRef.documentId}`;
+    if (notesByDocumentRef.has(key)) continue;
+    notesByDocumentRef.set(key, {
+      documentRef: citation.documentRef,
+      sourcePath: citation.sourcePath,
       title: citation.title,
       excerpt: citation.excerpt,
       score: citation.score,
     });
   }
-  return [...notesByResourceId.values()];
+  return [...notesByDocumentRef.values()];
 }
 </script>

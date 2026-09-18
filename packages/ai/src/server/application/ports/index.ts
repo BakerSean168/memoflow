@@ -61,11 +61,8 @@ export type {
   IKnowledgeIndexRepository,
   KnowledgeIndexDiagnostics,
   KnowledgeIndexFailureRecord,
+  KnowledgeDocumentIndexRef,
 } from './knowledge-index.port';
-export type {
-  IKnowledgeIndexStatusPort,
-  KnowledgeIndexStatusUpdate,
-} from './knowledge-index-status.port';
 export type {
   CreateKnowledgeNotePersistenceInput,
   CreateKnowledgeNotePersistenceResult,

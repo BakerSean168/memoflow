@@ -1,9 +1,5 @@
 import { createHash } from 'node:crypto';
-import type {
-  IAIExecutionLogPort,
-  KnowledgeSourceNote,
-  KnowledgeIndexedNote,
-} from '../../ports';
+import type { IAIExecutionLogPort, KnowledgeSourceNote, KnowledgeIndexedNote } from '../../ports';
 import { createLogger } from '@memoflow/utils/logger';
 
 const logger = createLogger('AIKnowledgeIndexHelpers');
@@ -20,8 +16,8 @@ export interface SyncKnowledgeNotesResult {
   reusedCount: number;
   failedCount: number;
   results: Array<{
-    resourceId: string;
-    resourcePath: string;
+    knowledgeDocumentId: string;
+    sourcePath: string;
     status: 'indexed' | 'reused' | 'failed';
     error?: string;
   }>;
@@ -32,17 +28,19 @@ export interface SyncKnowledgeNoteByIdResult {
   sync: SyncKnowledgeNotesResult | null;
 }
 
-export function mergeUniqueNotes(
-  resources: KnowledgeSourceNote[],
-): KnowledgeSourceNote[] {
+export function mergeUniqueNotes(resources: KnowledgeSourceNote[]): KnowledgeSourceNote[] {
   const seen = new Set<string>();
   const merged: KnowledgeSourceNote[] = [];
 
   for (const resource of resources) {
-    if (seen.has(resource.resourceId)) {
+    if (!resource.knowledgeDocumentId) {
       continue;
     }
-    seen.add(resource.resourceId);
+    const key = `${resource.knowledgeSpaceId}\0${resource.knowledgeDocumentId}`;
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
     merged.push(resource);
   }
 
@@ -50,6 +48,9 @@ export function mergeUniqueNotes(
 }
 
 export function resolveSourceContentHash(resource: KnowledgeSourceNote): string {
+  if (resource.sourceContentHash.length > 0) {
+    return resource.sourceContentHash;
+  }
   const metadataHash = resource.metadata?.['contentDigest'];
   if (typeof metadataHash === 'string' && metadataHash.length > 0) {
     return metadataHash;

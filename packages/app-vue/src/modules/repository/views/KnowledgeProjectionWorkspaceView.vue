@@ -165,9 +165,7 @@
               <span class="mt-1 block truncate text-xs text-muted-foreground">{{
                 note.relativePath
               }}</span>
-              <span class="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
-                <span>{{ indexStatusLabel(note.indexStatus) }}</span>
-                <span aria-hidden="true">·</span>
+              <span class="mt-1 block text-[11px] text-muted-foreground">
                 <span>{{ note.commitSha.slice(0, 8) }}</span>
               </span>
             </button>
@@ -197,7 +195,6 @@
                   {{ selectedNote.relativePath }}
                 </p>
                 <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                  <Badge variant="outline">{{ indexStatusLabel(selectedNote.indexStatus) }}</Badge>
                   <span>{{
                     t('repository.projection.commit', { sha: selectedNote.commitSha.slice(0, 8) })
                   }}</span>
@@ -536,7 +533,10 @@ async function applyNoteQuerySelection(): Promise<void> {
   if (!requested) return;
   if (selectedNoteId.value === requested) return;
   const listed = notes.value.find(
-    (note) => note.id === requested || note.relativePath === requested,
+    (note) =>
+      note.id === requested ||
+      note.knowledgeDocumentId === requested ||
+      note.relativePath === requested,
   );
   if (listed) {
     selectedNoteId.value = listed.id;
@@ -640,10 +640,6 @@ function providerStateLabel(binding: KnowledgeRemoteBindingClientDTO): string {
   );
 }
 
-function indexStatusLabel(status: KnowledgeNoteProjectionClientDTO['indexStatus']): string {
-  return t(`repository.projection.indexStatus.${status}`);
-}
-
 async function loadConnections(): Promise<void> {
   loadingConnections.value = true;
   errorMessage.value = '';
@@ -697,7 +693,10 @@ async function loadNotes(): Promise<void> {
   const requested = noteQueryId();
   if (requested) {
     const matched = notes.value.find(
-      (note) => note.id === requested || note.relativePath === requested,
+      (note) =>
+        note.id === requested ||
+        note.knowledgeDocumentId === requested ||
+        note.relativePath === requested,
     );
     if (matched) {
       selectedNoteId.value = matched.id;

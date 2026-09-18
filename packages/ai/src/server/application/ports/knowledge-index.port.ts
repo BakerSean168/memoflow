@@ -12,25 +12,39 @@ export interface KnowledgeIndexDiagnostics {
 export interface KnowledgeIndexFailureRecord {
   identityId: string;
   repositoryId: string;
-  resourceId: string;
-  resourcePath: string;
+  knowledgeSpaceId: string;
+  knowledgeDocumentId: string;
+  sourcePath: string;
+  sourceContentHash: string;
+  sourceVersion?: string | null;
   title?: string;
   mimeType: string;
-  contentHash: string;
   metadata: Record<string, unknown>;
   error: string;
 }
 
+export interface KnowledgeDocumentIndexRef {
+  knowledgeSpaceId: string;
+  knowledgeDocumentId: string;
+}
+
 export interface IKnowledgeIndexRepository {
   getDiagnostics(): Promise<KnowledgeIndexDiagnostics>;
-  findByNoteIds(identityId: string, resourceIds: string[]): Promise<KnowledgeIndexedNote[]>;
+  findByDocumentRefs(
+    identityId: string,
+    documentRefs: KnowledgeDocumentIndexRef[],
+  ): Promise<KnowledgeIndexedNote[]>;
   findRelevantNotes(
     identityId: string,
     query: string,
     limit: number,
   ): Promise<KnowledgeIndexedNote[]>;
   upsert(resource: KnowledgeIndexedNote): Promise<void>;
-  markRequested(identityId: string, resourceIds: string[], requestedAt: number): Promise<void>;
+  markRequested(
+    identityId: string,
+    documentRefs: KnowledgeDocumentIndexRef[],
+    requestedAt: number,
+  ): Promise<void>;
   markFailed(record: KnowledgeIndexFailureRecord): Promise<void>;
-  removeByNoteId(identityId: string, resourceId: string): Promise<void>;
+  removeByDocumentRef(identityId: string, documentRef: KnowledgeDocumentIndexRef): Promise<void>;
 }

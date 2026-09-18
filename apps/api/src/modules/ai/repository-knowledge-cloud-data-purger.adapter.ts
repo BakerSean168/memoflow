@@ -16,12 +16,12 @@ export class RepositoryKnowledgeCloudDataPurgerAdapter {
     return this.db.$transaction(async (tx: Prisma.TransactionClient) => {
       const binding = await tx.knowledgeRemoteBinding.findFirst({
         where: { id: connectionId, identityId, disconnectedAt: null },
-        select: { id: true },
+        select: { id: true, knowledgeSpaceId: true },
       });
       if (!binding) return false;
 
       await tx.aiKnowledgeIndexEntry.deleteMany({
-        where: { identityId, repositoryId: binding.id },
+        where: { identityId, knowledgeSpaceId: binding.knowledgeSpaceId },
       });
       await tx.knowledgeRemoteBinding.deleteMany({
         where: { id: binding.id, identityId },

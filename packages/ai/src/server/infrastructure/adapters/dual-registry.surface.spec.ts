@@ -7,7 +7,13 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { toChunkArray, toNumberArray, toStringArray, tokenize, scoreIndexedResource } from './knowledge-index-value-helpers';
+import {
+  toChunkArray,
+  toNumberArray,
+  toStringArray,
+  tokenize,
+  scoreIndexedResource,
+} from './knowledge-index-value-helpers';
 import { withObservabilityPayload } from './with-observability-payload';
 import type { KnowledgeIndexedNote, AIExecutionLogInput } from '../../application/ports';
 
@@ -51,9 +57,7 @@ import type { KnowledgeIndexedNote, AIExecutionLogInput } from '../../applicatio
         ['prisma', prisma],
       ] as const) {
         expect(source, label).toContain('Residual 969');
-        expect(source, label).toContain(
-          "from '../knowledge-index-value-helpers'",
-        );
+        expect(source, label).toContain("from '../knowledge-index-value-helpers'");
         expect(source, label).not.toMatch(/function toStringArray\b/);
         expect(source, label).not.toMatch(/function toNumberArray\b/);
         expect(source, label).not.toMatch(/function tokenize\b/);
@@ -124,11 +128,13 @@ import type { KnowledgeIndexedNote, AIExecutionLogInput } from '../../applicatio
     const sample: KnowledgeIndexedNote = {
       identityId: 'i1',
       repositoryId: 'r1',
-      resourceId: 'res1',
-      resourcePath: 'docs/readme.md',
+      knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440011',
+      knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440012',
+      sourcePath: 'docs/readme.md',
+      sourceContentHash: 'h',
+      sourceVersion: 'commit-1',
       title: 'Hello World',
       mimeType: 'text/markdown',
-      contentHash: 'h',
       summary: 'Intro to scoring',
       keywords: ['hello', 'world'],
       embedding: [],

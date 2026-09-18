@@ -44,7 +44,6 @@ import type { UserTimeContextPort } from '@memoflow/time';
 import { GoalPlanMutationAdapter } from '../modules/ai/goal-plan-mutation.adapter';
 import { TaskPlanMutationAdapter } from '../modules/ai/task-plan-mutation.adapter';
 import { ControlledAnalyticsReadAdapter } from '../modules/ai/controlled-analytics-read.adapter';
-import { RepositoryKnowledgeIndexStatusAdapter } from '../modules/ai/repository-knowledge-index-status.adapter';
 import { RepositoryKnowledgeNotePersistenceAdapter } from '../modules/ai/repository-knowledge-note-persistence.adapter';
 import { RepositoryKnowledgeSourceAdapter } from '../modules/ai/repository-knowledge-source.adapter';
 import { RoutineAICommandAdapter } from '../modules/ai/routine-command.adapter';
@@ -149,9 +148,6 @@ export function composeAI(dependencies: ComposeAIDependencies): AIApiModuleDef {
     notificationReadPort,
     contextAssembler,
   });
-  const knowledgeIndexStatusPort = new RepositoryKnowledgeIndexStatusAdapter(
-    dependencies.repositoryApiPort,
-  );
   const analyticsReadPort = new ControlledAnalyticsReadAdapter({
     goalApplicationPort: dependencies.goalApplicationPort,
     taskDashboardReadPort: dependencies.taskDashboardReadPort,
@@ -175,7 +171,6 @@ export function composeAI(dependencies: ComposeAIDependencies): AIApiModuleDef {
     evaluationReportPort,
     knowledgeNotePersistence,
     knowledgeSourcePort,
-    knowledgeIndexStatusPort,
     analyticsReadPort,
   });
 

@@ -80,11 +80,6 @@ const messages = {
         Blocked: 'Provider blocked',
         Unchecked: 'Not checked',
       },
-      indexStatus: {
-        pending: 'Pending index',
-        indexed: 'Indexed',
-        failed: 'Index failed',
-      },
     },
   },
 };
@@ -237,7 +232,6 @@ function projection(
     contentHash: 'd'.repeat(64),
     frontmatter: {},
     markdownContent: '# Safe\n\n<script>alert(1)</script> **content**',
-    indexStatus: 'indexed',
     createdAt: 1,
     updatedAt: 1,
     deletedAt: null,

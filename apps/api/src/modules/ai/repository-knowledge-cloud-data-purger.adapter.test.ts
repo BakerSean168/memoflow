@@ -6,7 +6,7 @@ describe('RepositoryKnowledgeCloudDataPurgerAdapter', () => {
   it('revalidates ownership and deletes the AI index before the cascading remote binding row', async () => {
     const tx = {
       knowledgeRemoteBinding: {
-        findFirst: vi.fn(async () => ({ id: 'connection-1' })),
+        findFirst: vi.fn(async () => ({ id: 'connection-1', knowledgeSpaceId: 'space-1' })),
         deleteMany: vi.fn(async () => ({ count: 1 })),
       },
       aiKnowledgeIndexEntry: {
@@ -21,10 +21,10 @@ describe('RepositoryKnowledgeCloudDataPurgerAdapter', () => {
     await expect(adapter.purge('identity-1', 'connection-1')).resolves.toBe(true);
     expect(tx.knowledgeRemoteBinding.findFirst).toHaveBeenCalledWith({
       where: { id: 'connection-1', identityId: 'identity-1', disconnectedAt: null },
-      select: { id: true },
+      select: { id: true, knowledgeSpaceId: true },
     });
     expect(tx.aiKnowledgeIndexEntry.deleteMany).toHaveBeenCalledWith({
-      where: { identityId: 'identity-1', repositoryId: 'connection-1' },
+      where: { identityId: 'identity-1', knowledgeSpaceId: 'space-1' },
     });
     expect(tx.knowledgeRemoteBinding.deleteMany).toHaveBeenCalledWith({
       where: { id: 'connection-1', identityId: 'identity-1' },

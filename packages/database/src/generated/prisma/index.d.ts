@@ -21660,11 +21660,13 @@ export namespace Prisma {
     id: string | null
     identityId: string | null
     repositoryId: string | null
-    resourceId: string | null
-    resourcePath: string | null
+    knowledgeSpaceId: string | null
+    knowledgeDocumentId: string | null
+    sourcePath: string | null
     title: string | null
     mimeType: string | null
-    contentHash: string | null
+    sourceContentHash: string | null
+    sourceVersion: string | null
     status: string | null
     summary: string | null
     error: string | null
@@ -21679,11 +21681,13 @@ export namespace Prisma {
     id: string | null
     identityId: string | null
     repositoryId: string | null
-    resourceId: string | null
-    resourcePath: string | null
+    knowledgeSpaceId: string | null
+    knowledgeDocumentId: string | null
+    sourcePath: string | null
     title: string | null
     mimeType: string | null
-    contentHash: string | null
+    sourceContentHash: string | null
+    sourceVersion: string | null
     status: string | null
     summary: string | null
     error: string | null
@@ -21698,11 +21702,13 @@ export namespace Prisma {
     id: number
     identityId: number
     repositoryId: number
-    resourceId: number
-    resourcePath: number
+    knowledgeSpaceId: number
+    knowledgeDocumentId: number
+    sourcePath: number
     title: number
     mimeType: number
-    contentHash: number
+    sourceContentHash: number
+    sourceVersion: number
     status: number
     summary: number
     keywords: number
@@ -21723,11 +21729,13 @@ export namespace Prisma {
     id?: true
     identityId?: true
     repositoryId?: true
-    resourceId?: true
-    resourcePath?: true
+    knowledgeSpaceId?: true
+    knowledgeDocumentId?: true
+    sourcePath?: true
     title?: true
     mimeType?: true
-    contentHash?: true
+    sourceContentHash?: true
+    sourceVersion?: true
     status?: true
     summary?: true
     error?: true
@@ -21742,11 +21750,13 @@ export namespace Prisma {
     id?: true
     identityId?: true
     repositoryId?: true
-    resourceId?: true
-    resourcePath?: true
+    knowledgeSpaceId?: true
+    knowledgeDocumentId?: true
+    sourcePath?: true
     title?: true
     mimeType?: true
-    contentHash?: true
+    sourceContentHash?: true
+    sourceVersion?: true
     status?: true
     summary?: true
     error?: true
@@ -21761,11 +21771,13 @@ export namespace Prisma {
     id?: true
     identityId?: true
     repositoryId?: true
-    resourceId?: true
-    resourcePath?: true
+    knowledgeSpaceId?: true
+    knowledgeDocumentId?: true
+    sourcePath?: true
     title?: true
     mimeType?: true
-    contentHash?: true
+    sourceContentHash?: true
+    sourceVersion?: true
     status?: true
     summary?: true
     keywords?: true
@@ -21857,11 +21869,13 @@ export namespace Prisma {
     id: string
     identityId: string
     repositoryId: string
-    resourceId: string
-    resourcePath: string
+    knowledgeSpaceId: string
+    knowledgeDocumentId: string
+    sourcePath: string
     title: string | null
     mimeType: string
-    contentHash: string
+    sourceContentHash: string
+    sourceVersion: string | null
     status: string
     summary: string | null
     keywords: JsonValue
@@ -21897,11 +21911,13 @@ export namespace Prisma {
     id?: boolean
     identityId?: boolean
     repositoryId?: boolean
-    resourceId?: boolean
-    resourcePath?: boolean
+    knowledgeSpaceId?: boolean
+    knowledgeDocumentId?: boolean
+    sourcePath?: boolean
     title?: boolean
     mimeType?: boolean
-    contentHash?: boolean
+    sourceContentHash?: boolean
+    sourceVersion?: boolean
     status?: boolean
     summary?: boolean
     keywords?: boolean
@@ -21921,11 +21937,13 @@ export namespace Prisma {
     id?: boolean
     identityId?: boolean
     repositoryId?: boolean
-    resourceId?: boolean
-    resourcePath?: boolean
+    knowledgeSpaceId?: boolean
+    knowledgeDocumentId?: boolean
+    sourcePath?: boolean
     title?: boolean
     mimeType?: boolean
-    contentHash?: boolean
+    sourceContentHash?: boolean
+    sourceVersion?: boolean
     status?: boolean
     summary?: boolean
     keywords?: boolean
@@ -21945,11 +21963,13 @@ export namespace Prisma {
     id?: boolean
     identityId?: boolean
     repositoryId?: boolean
-    resourceId?: boolean
-    resourcePath?: boolean
+    knowledgeSpaceId?: boolean
+    knowledgeDocumentId?: boolean
+    sourcePath?: boolean
     title?: boolean
     mimeType?: boolean
-    contentHash?: boolean
+    sourceContentHash?: boolean
+    sourceVersion?: boolean
     status?: boolean
     summary?: boolean
     keywords?: boolean
@@ -21969,11 +21989,13 @@ export namespace Prisma {
     id?: boolean
     identityId?: boolean
     repositoryId?: boolean
-    resourceId?: boolean
-    resourcePath?: boolean
+    knowledgeSpaceId?: boolean
+    knowledgeDocumentId?: boolean
+    sourcePath?: boolean
     title?: boolean
     mimeType?: boolean
-    contentHash?: boolean
+    sourceContentHash?: boolean
+    sourceVersion?: boolean
     status?: boolean
     summary?: boolean
     keywords?: boolean
@@ -21988,7 +22010,7 @@ export namespace Prisma {
     deletedAt?: boolean
   }
 
-  export type AiKnowledgeIndexEntryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "repositoryId" | "resourceId" | "resourcePath" | "title" | "mimeType" | "contentHash" | "status" | "summary" | "keywords" | "embedding" | "chunks" | "metadata" | "error" | "indexedAt" | "lastRequestedAt" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["aiKnowledgeIndexEntry"]>
+  export type AiKnowledgeIndexEntryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "repositoryId" | "knowledgeSpaceId" | "knowledgeDocumentId" | "sourcePath" | "title" | "mimeType" | "sourceContentHash" | "sourceVersion" | "status" | "summary" | "keywords" | "embedding" | "chunks" | "metadata" | "error" | "indexedAt" | "lastRequestedAt" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["aiKnowledgeIndexEntry"]>
   export type AiKnowledgeIndexEntryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
   }
@@ -22008,11 +22030,13 @@ export namespace Prisma {
       id: string
       identityId: string
       repositoryId: string
-      resourceId: string
-      resourcePath: string
+      knowledgeSpaceId: string
+      knowledgeDocumentId: string
+      sourcePath: string
       title: string | null
       mimeType: string
-      contentHash: string
+      sourceContentHash: string
+      sourceVersion: string | null
       status: string
       summary: string | null
       keywords: Prisma.JsonValue
@@ -22452,11 +22476,13 @@ export namespace Prisma {
     readonly id: FieldRef<"AiKnowledgeIndexEntry", 'String'>
     readonly identityId: FieldRef<"AiKnowledgeIndexEntry", 'String'>
     readonly repositoryId: FieldRef<"AiKnowledgeIndexEntry", 'String'>
-    readonly resourceId: FieldRef<"AiKnowledgeIndexEntry", 'String'>
-    readonly resourcePath: FieldRef<"AiKnowledgeIndexEntry", 'String'>
+    readonly knowledgeSpaceId: FieldRef<"AiKnowledgeIndexEntry", 'String'>
+    readonly knowledgeDocumentId: FieldRef<"AiKnowledgeIndexEntry", 'String'>
+    readonly sourcePath: FieldRef<"AiKnowledgeIndexEntry", 'String'>
     readonly title: FieldRef<"AiKnowledgeIndexEntry", 'String'>
     readonly mimeType: FieldRef<"AiKnowledgeIndexEntry", 'String'>
-    readonly contentHash: FieldRef<"AiKnowledgeIndexEntry", 'String'>
+    readonly sourceContentHash: FieldRef<"AiKnowledgeIndexEntry", 'String'>
+    readonly sourceVersion: FieldRef<"AiKnowledgeIndexEntry", 'String'>
     readonly status: FieldRef<"AiKnowledgeIndexEntry", 'String'>
     readonly summary: FieldRef<"AiKnowledgeIndexEntry", 'String'>
     readonly keywords: FieldRef<"AiKnowledgeIndexEntry", 'Json'>
@@ -87727,7 +87753,6 @@ export namespace Prisma {
     blobSha: string | null
     contentHash: string | null
     markdownContent: string | null
-    indexStatus: string | null
     createdAt: Date | null
     updatedAt: Date | null
     deletedAt: Date | null
@@ -87742,7 +87767,6 @@ export namespace Prisma {
     blobSha: string | null
     contentHash: string | null
     markdownContent: string | null
-    indexStatus: string | null
     createdAt: Date | null
     updatedAt: Date | null
     deletedAt: Date | null
@@ -87758,7 +87782,6 @@ export namespace Prisma {
     contentHash: number
     frontmatter: number
     markdownContent: number
-    indexStatus: number
     createdAt: number
     updatedAt: number
     deletedAt: number
@@ -87775,7 +87798,6 @@ export namespace Prisma {
     blobSha?: true
     contentHash?: true
     markdownContent?: true
-    indexStatus?: true
     createdAt?: true
     updatedAt?: true
     deletedAt?: true
@@ -87790,7 +87812,6 @@ export namespace Prisma {
     blobSha?: true
     contentHash?: true
     markdownContent?: true
-    indexStatus?: true
     createdAt?: true
     updatedAt?: true
     deletedAt?: true
@@ -87806,7 +87827,6 @@ export namespace Prisma {
     contentHash?: true
     frontmatter?: true
     markdownContent?: true
-    indexStatus?: true
     createdAt?: true
     updatedAt?: true
     deletedAt?: true
@@ -87895,7 +87915,6 @@ export namespace Prisma {
     contentHash: string
     frontmatter: JsonValue
     markdownContent: string
-    indexStatus: string
     createdAt: Date
     updatedAt: Date
     deletedAt: Date | null
@@ -87928,7 +87947,6 @@ export namespace Prisma {
     contentHash?: boolean
     frontmatter?: boolean
     markdownContent?: boolean
-    indexStatus?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
@@ -87945,7 +87963,6 @@ export namespace Prisma {
     contentHash?: boolean
     frontmatter?: boolean
     markdownContent?: boolean
-    indexStatus?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
@@ -87962,7 +87979,6 @@ export namespace Prisma {
     contentHash?: boolean
     frontmatter?: boolean
     markdownContent?: boolean
-    indexStatus?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
@@ -87979,13 +87995,12 @@ export namespace Prisma {
     contentHash?: boolean
     frontmatter?: boolean
     markdownContent?: boolean
-    indexStatus?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
   }
 
-  export type KnowledgeNoteProjectionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "bindingId" | "knowledgeDocumentId" | "relativePath" | "commitSha" | "blobSha" | "contentHash" | "frontmatter" | "markdownContent" | "indexStatus" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["knowledgeNoteProjection"]>
+  export type KnowledgeNoteProjectionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "bindingId" | "knowledgeDocumentId" | "relativePath" | "commitSha" | "blobSha" | "contentHash" | "frontmatter" | "markdownContent" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["knowledgeNoteProjection"]>
   export type KnowledgeNoteProjectionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }
@@ -88011,7 +88026,6 @@ export namespace Prisma {
       contentHash: string
       frontmatter: Prisma.JsonValue
       markdownContent: string
-      indexStatus: string
       createdAt: Date
       updatedAt: Date
       deletedAt: Date | null
@@ -88448,7 +88462,6 @@ export namespace Prisma {
     readonly contentHash: FieldRef<"KnowledgeNoteProjection", 'String'>
     readonly frontmatter: FieldRef<"KnowledgeNoteProjection", 'Json'>
     readonly markdownContent: FieldRef<"KnowledgeNoteProjection", 'String'>
-    readonly indexStatus: FieldRef<"KnowledgeNoteProjection", 'String'>
     readonly createdAt: FieldRef<"KnowledgeNoteProjection", 'DateTime'>
     readonly updatedAt: FieldRef<"KnowledgeNoteProjection", 'DateTime'>
     readonly deletedAt: FieldRef<"KnowledgeNoteProjection", 'DateTime'>
@@ -112553,11 +112566,13 @@ export namespace Prisma {
     id: 'id',
     identityId: 'identityId',
     repositoryId: 'repositoryId',
-    resourceId: 'resourceId',
-    resourcePath: 'resourcePath',
+    knowledgeSpaceId: 'knowledgeSpaceId',
+    knowledgeDocumentId: 'knowledgeDocumentId',
+    sourcePath: 'sourcePath',
     title: 'title',
     mimeType: 'mimeType',
-    contentHash: 'contentHash',
+    sourceContentHash: 'sourceContentHash',
+    sourceVersion: 'sourceVersion',
     status: 'status',
     summary: 'summary',
     keywords: 'keywords',
@@ -113520,7 +113535,6 @@ export namespace Prisma {
     contentHash: 'contentHash',
     frontmatter: 'frontmatter',
     markdownContent: 'markdownContent',
-    indexStatus: 'indexStatus',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     deletedAt: 'deletedAt'
@@ -115013,11 +115027,13 @@ export namespace Prisma {
     id?: StringFilter<"AiKnowledgeIndexEntry"> | string
     identityId?: StringFilter<"AiKnowledgeIndexEntry"> | string
     repositoryId?: StringFilter<"AiKnowledgeIndexEntry"> | string
-    resourceId?: StringFilter<"AiKnowledgeIndexEntry"> | string
-    resourcePath?: StringFilter<"AiKnowledgeIndexEntry"> | string
+    knowledgeSpaceId?: StringFilter<"AiKnowledgeIndexEntry"> | string
+    knowledgeDocumentId?: StringFilter<"AiKnowledgeIndexEntry"> | string
+    sourcePath?: StringFilter<"AiKnowledgeIndexEntry"> | string
     title?: StringNullableFilter<"AiKnowledgeIndexEntry"> | string | null
     mimeType?: StringFilter<"AiKnowledgeIndexEntry"> | string
-    contentHash?: StringFilter<"AiKnowledgeIndexEntry"> | string
+    sourceContentHash?: StringFilter<"AiKnowledgeIndexEntry"> | string
+    sourceVersion?: StringNullableFilter<"AiKnowledgeIndexEntry"> | string | null
     status?: StringFilter<"AiKnowledgeIndexEntry"> | string
     summary?: StringNullableFilter<"AiKnowledgeIndexEntry"> | string | null
     keywords?: JsonFilter<"AiKnowledgeIndexEntry">
@@ -115037,11 +115053,13 @@ export namespace Prisma {
     id?: SortOrder
     identityId?: SortOrder
     repositoryId?: SortOrder
-    resourceId?: SortOrder
-    resourcePath?: SortOrder
+    knowledgeSpaceId?: SortOrder
+    knowledgeDocumentId?: SortOrder
+    sourcePath?: SortOrder
     title?: SortOrderInput | SortOrder
     mimeType?: SortOrder
-    contentHash?: SortOrder
+    sourceContentHash?: SortOrder
+    sourceVersion?: SortOrderInput | SortOrder
     status?: SortOrder
     summary?: SortOrderInput | SortOrder
     keywords?: SortOrder
@@ -115059,16 +115077,19 @@ export namespace Prisma {
 
   export type AiKnowledgeIndexEntryWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    resourceId?: string
+    knowledgeSpaceId_knowledgeDocumentId?: AiKnowledgeIndexEntryKnowledgeSpaceIdKnowledgeDocumentIdCompoundUniqueInput
     AND?: AiKnowledgeIndexEntryWhereInput | AiKnowledgeIndexEntryWhereInput[]
     OR?: AiKnowledgeIndexEntryWhereInput[]
     NOT?: AiKnowledgeIndexEntryWhereInput | AiKnowledgeIndexEntryWhereInput[]
     identityId?: StringFilter<"AiKnowledgeIndexEntry"> | string
     repositoryId?: StringFilter<"AiKnowledgeIndexEntry"> | string
-    resourcePath?: StringFilter<"AiKnowledgeIndexEntry"> | string
+    knowledgeSpaceId?: StringFilter<"AiKnowledgeIndexEntry"> | string
+    knowledgeDocumentId?: StringFilter<"AiKnowledgeIndexEntry"> | string
+    sourcePath?: StringFilter<"AiKnowledgeIndexEntry"> | string
     title?: StringNullableFilter<"AiKnowledgeIndexEntry"> | string | null
     mimeType?: StringFilter<"AiKnowledgeIndexEntry"> | string
-    contentHash?: StringFilter<"AiKnowledgeIndexEntry"> | string
+    sourceContentHash?: StringFilter<"AiKnowledgeIndexEntry"> | string
+    sourceVersion?: StringNullableFilter<"AiKnowledgeIndexEntry"> | string | null
     status?: StringFilter<"AiKnowledgeIndexEntry"> | string
     summary?: StringNullableFilter<"AiKnowledgeIndexEntry"> | string | null
     keywords?: JsonFilter<"AiKnowledgeIndexEntry">
@@ -115082,17 +115103,19 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"AiKnowledgeIndexEntry"> | Date | string
     deletedAt?: DateTimeNullableFilter<"AiKnowledgeIndexEntry"> | Date | string | null
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-  }, "id" | "resourceId">
+  }, "id" | "knowledgeSpaceId_knowledgeDocumentId">
 
   export type AiKnowledgeIndexEntryOrderByWithAggregationInput = {
     id?: SortOrder
     identityId?: SortOrder
     repositoryId?: SortOrder
-    resourceId?: SortOrder
-    resourcePath?: SortOrder
+    knowledgeSpaceId?: SortOrder
+    knowledgeDocumentId?: SortOrder
+    sourcePath?: SortOrder
     title?: SortOrderInput | SortOrder
     mimeType?: SortOrder
-    contentHash?: SortOrder
+    sourceContentHash?: SortOrder
+    sourceVersion?: SortOrderInput | SortOrder
     status?: SortOrder
     summary?: SortOrderInput | SortOrder
     keywords?: SortOrder
@@ -115117,11 +115140,13 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"AiKnowledgeIndexEntry"> | string
     identityId?: StringWithAggregatesFilter<"AiKnowledgeIndexEntry"> | string
     repositoryId?: StringWithAggregatesFilter<"AiKnowledgeIndexEntry"> | string
-    resourceId?: StringWithAggregatesFilter<"AiKnowledgeIndexEntry"> | string
-    resourcePath?: StringWithAggregatesFilter<"AiKnowledgeIndexEntry"> | string
+    knowledgeSpaceId?: StringWithAggregatesFilter<"AiKnowledgeIndexEntry"> | string
+    knowledgeDocumentId?: StringWithAggregatesFilter<"AiKnowledgeIndexEntry"> | string
+    sourcePath?: StringWithAggregatesFilter<"AiKnowledgeIndexEntry"> | string
     title?: StringNullableWithAggregatesFilter<"AiKnowledgeIndexEntry"> | string | null
     mimeType?: StringWithAggregatesFilter<"AiKnowledgeIndexEntry"> | string
-    contentHash?: StringWithAggregatesFilter<"AiKnowledgeIndexEntry"> | string
+    sourceContentHash?: StringWithAggregatesFilter<"AiKnowledgeIndexEntry"> | string
+    sourceVersion?: StringNullableWithAggregatesFilter<"AiKnowledgeIndexEntry"> | string | null
     status?: StringWithAggregatesFilter<"AiKnowledgeIndexEntry"> | string
     summary?: StringNullableWithAggregatesFilter<"AiKnowledgeIndexEntry"> | string | null
     keywords?: JsonWithAggregatesFilter<"AiKnowledgeIndexEntry">
@@ -120079,7 +120104,6 @@ export namespace Prisma {
     contentHash?: StringFilter<"KnowledgeNoteProjection"> | string
     frontmatter?: JsonFilter<"KnowledgeNoteProjection">
     markdownContent?: StringFilter<"KnowledgeNoteProjection"> | string
-    indexStatus?: StringFilter<"KnowledgeNoteProjection"> | string
     createdAt?: DateTimeFilter<"KnowledgeNoteProjection"> | Date | string
     updatedAt?: DateTimeFilter<"KnowledgeNoteProjection"> | Date | string
     deletedAt?: DateTimeNullableFilter<"KnowledgeNoteProjection"> | Date | string | null
@@ -120096,7 +120120,6 @@ export namespace Prisma {
     contentHash?: SortOrder
     frontmatter?: SortOrder
     markdownContent?: SortOrder
-    indexStatus?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
@@ -120117,7 +120140,6 @@ export namespace Prisma {
     contentHash?: StringFilter<"KnowledgeNoteProjection"> | string
     frontmatter?: JsonFilter<"KnowledgeNoteProjection">
     markdownContent?: StringFilter<"KnowledgeNoteProjection"> | string
-    indexStatus?: StringFilter<"KnowledgeNoteProjection"> | string
     createdAt?: DateTimeFilter<"KnowledgeNoteProjection"> | Date | string
     updatedAt?: DateTimeFilter<"KnowledgeNoteProjection"> | Date | string
     deletedAt?: DateTimeNullableFilter<"KnowledgeNoteProjection"> | Date | string | null
@@ -120134,7 +120156,6 @@ export namespace Prisma {
     contentHash?: SortOrder
     frontmatter?: SortOrder
     markdownContent?: SortOrder
-    indexStatus?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
@@ -120156,7 +120177,6 @@ export namespace Prisma {
     contentHash?: StringWithAggregatesFilter<"KnowledgeNoteProjection"> | string
     frontmatter?: JsonWithAggregatesFilter<"KnowledgeNoteProjection">
     markdownContent?: StringWithAggregatesFilter<"KnowledgeNoteProjection"> | string
-    indexStatus?: StringWithAggregatesFilter<"KnowledgeNoteProjection"> | string
     createdAt?: DateTimeWithAggregatesFilter<"KnowledgeNoteProjection"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"KnowledgeNoteProjection"> | Date | string
     deletedAt?: DateTimeNullableWithAggregatesFilter<"KnowledgeNoteProjection"> | Date | string | null
@@ -123124,11 +123144,13 @@ export namespace Prisma {
   export type AiKnowledgeIndexEntryCreateInput = {
     id: string
     repositoryId: string
-    resourceId: string
-    resourcePath: string
+    knowledgeSpaceId: string
+    knowledgeDocumentId: string
+    sourcePath: string
     title?: string | null
     mimeType: string
-    contentHash: string
+    sourceContentHash: string
+    sourceVersion?: string | null
     status: string
     summary?: string | null
     keywords?: JsonNullValueInput | InputJsonValue
@@ -123148,11 +123170,13 @@ export namespace Prisma {
     id: string
     identityId: string
     repositoryId: string
-    resourceId: string
-    resourcePath: string
+    knowledgeSpaceId: string
+    knowledgeDocumentId: string
+    sourcePath: string
     title?: string | null
     mimeType: string
-    contentHash: string
+    sourceContentHash: string
+    sourceVersion?: string | null
     status: string
     summary?: string | null
     keywords?: JsonNullValueInput | InputJsonValue
@@ -123170,11 +123194,13 @@ export namespace Prisma {
   export type AiKnowledgeIndexEntryUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     repositoryId?: StringFieldUpdateOperationsInput | string
-    resourceId?: StringFieldUpdateOperationsInput | string
-    resourcePath?: StringFieldUpdateOperationsInput | string
+    knowledgeSpaceId?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: StringFieldUpdateOperationsInput | string
+    sourcePath?: StringFieldUpdateOperationsInput | string
     title?: NullableStringFieldUpdateOperationsInput | string | null
     mimeType?: StringFieldUpdateOperationsInput | string
-    contentHash?: StringFieldUpdateOperationsInput | string
+    sourceContentHash?: StringFieldUpdateOperationsInput | string
+    sourceVersion?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     keywords?: JsonNullValueInput | InputJsonValue
@@ -123194,11 +123220,13 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
     repositoryId?: StringFieldUpdateOperationsInput | string
-    resourceId?: StringFieldUpdateOperationsInput | string
-    resourcePath?: StringFieldUpdateOperationsInput | string
+    knowledgeSpaceId?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: StringFieldUpdateOperationsInput | string
+    sourcePath?: StringFieldUpdateOperationsInput | string
     title?: NullableStringFieldUpdateOperationsInput | string | null
     mimeType?: StringFieldUpdateOperationsInput | string
-    contentHash?: StringFieldUpdateOperationsInput | string
+    sourceContentHash?: StringFieldUpdateOperationsInput | string
+    sourceVersion?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     keywords?: JsonNullValueInput | InputJsonValue
@@ -123217,11 +123245,13 @@ export namespace Prisma {
     id: string
     identityId: string
     repositoryId: string
-    resourceId: string
-    resourcePath: string
+    knowledgeSpaceId: string
+    knowledgeDocumentId: string
+    sourcePath: string
     title?: string | null
     mimeType: string
-    contentHash: string
+    sourceContentHash: string
+    sourceVersion?: string | null
     status: string
     summary?: string | null
     keywords?: JsonNullValueInput | InputJsonValue
@@ -123239,11 +123269,13 @@ export namespace Prisma {
   export type AiKnowledgeIndexEntryUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     repositoryId?: StringFieldUpdateOperationsInput | string
-    resourceId?: StringFieldUpdateOperationsInput | string
-    resourcePath?: StringFieldUpdateOperationsInput | string
+    knowledgeSpaceId?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: StringFieldUpdateOperationsInput | string
+    sourcePath?: StringFieldUpdateOperationsInput | string
     title?: NullableStringFieldUpdateOperationsInput | string | null
     mimeType?: StringFieldUpdateOperationsInput | string
-    contentHash?: StringFieldUpdateOperationsInput | string
+    sourceContentHash?: StringFieldUpdateOperationsInput | string
+    sourceVersion?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     keywords?: JsonNullValueInput | InputJsonValue
@@ -123262,11 +123294,13 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
     repositoryId?: StringFieldUpdateOperationsInput | string
-    resourceId?: StringFieldUpdateOperationsInput | string
-    resourcePath?: StringFieldUpdateOperationsInput | string
+    knowledgeSpaceId?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: StringFieldUpdateOperationsInput | string
+    sourcePath?: StringFieldUpdateOperationsInput | string
     title?: NullableStringFieldUpdateOperationsInput | string | null
     mimeType?: StringFieldUpdateOperationsInput | string
-    contentHash?: StringFieldUpdateOperationsInput | string
+    sourceContentHash?: StringFieldUpdateOperationsInput | string
+    sourceVersion?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     keywords?: JsonNullValueInput | InputJsonValue
@@ -128778,7 +128812,6 @@ export namespace Prisma {
     contentHash: string
     frontmatter?: JsonNullValueInput | InputJsonValue
     markdownContent: string
-    indexStatus?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -128795,7 +128828,6 @@ export namespace Prisma {
     contentHash: string
     frontmatter?: JsonNullValueInput | InputJsonValue
     markdownContent: string
-    indexStatus?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -128810,7 +128842,6 @@ export namespace Prisma {
     contentHash?: StringFieldUpdateOperationsInput | string
     frontmatter?: JsonNullValueInput | InputJsonValue
     markdownContent?: StringFieldUpdateOperationsInput | string
-    indexStatus?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -128827,7 +128858,6 @@ export namespace Prisma {
     contentHash?: StringFieldUpdateOperationsInput | string
     frontmatter?: JsonNullValueInput | InputJsonValue
     markdownContent?: StringFieldUpdateOperationsInput | string
-    indexStatus?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -128843,7 +128873,6 @@ export namespace Prisma {
     contentHash: string
     frontmatter?: JsonNullValueInput | InputJsonValue
     markdownContent: string
-    indexStatus?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -128858,7 +128887,6 @@ export namespace Prisma {
     contentHash?: StringFieldUpdateOperationsInput | string
     frontmatter?: JsonNullValueInput | InputJsonValue
     markdownContent?: StringFieldUpdateOperationsInput | string
-    indexStatus?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -128874,7 +128902,6 @@ export namespace Prisma {
     contentHash?: StringFieldUpdateOperationsInput | string
     frontmatter?: JsonNullValueInput | InputJsonValue
     markdownContent?: StringFieldUpdateOperationsInput | string
-    indexStatus?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -132194,15 +132221,22 @@ export namespace Prisma {
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
+  export type AiKnowledgeIndexEntryKnowledgeSpaceIdKnowledgeDocumentIdCompoundUniqueInput = {
+    knowledgeSpaceId: string
+    knowledgeDocumentId: string
+  }
+
   export type AiKnowledgeIndexEntryCountOrderByAggregateInput = {
     id?: SortOrder
     identityId?: SortOrder
     repositoryId?: SortOrder
-    resourceId?: SortOrder
-    resourcePath?: SortOrder
+    knowledgeSpaceId?: SortOrder
+    knowledgeDocumentId?: SortOrder
+    sourcePath?: SortOrder
     title?: SortOrder
     mimeType?: SortOrder
-    contentHash?: SortOrder
+    sourceContentHash?: SortOrder
+    sourceVersion?: SortOrder
     status?: SortOrder
     summary?: SortOrder
     keywords?: SortOrder
@@ -132221,11 +132255,13 @@ export namespace Prisma {
     id?: SortOrder
     identityId?: SortOrder
     repositoryId?: SortOrder
-    resourceId?: SortOrder
-    resourcePath?: SortOrder
+    knowledgeSpaceId?: SortOrder
+    knowledgeDocumentId?: SortOrder
+    sourcePath?: SortOrder
     title?: SortOrder
     mimeType?: SortOrder
-    contentHash?: SortOrder
+    sourceContentHash?: SortOrder
+    sourceVersion?: SortOrder
     status?: SortOrder
     summary?: SortOrder
     error?: SortOrder
@@ -132240,11 +132276,13 @@ export namespace Prisma {
     id?: SortOrder
     identityId?: SortOrder
     repositoryId?: SortOrder
-    resourceId?: SortOrder
-    resourcePath?: SortOrder
+    knowledgeSpaceId?: SortOrder
+    knowledgeDocumentId?: SortOrder
+    sourcePath?: SortOrder
     title?: SortOrder
     mimeType?: SortOrder
-    contentHash?: SortOrder
+    sourceContentHash?: SortOrder
+    sourceVersion?: SortOrder
     status?: SortOrder
     summary?: SortOrder
     error?: SortOrder
@@ -135397,7 +135435,6 @@ export namespace Prisma {
     contentHash?: SortOrder
     frontmatter?: SortOrder
     markdownContent?: SortOrder
-    indexStatus?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrder
@@ -135412,7 +135449,6 @@ export namespace Prisma {
     blobSha?: SortOrder
     contentHash?: SortOrder
     markdownContent?: SortOrder
-    indexStatus?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrder
@@ -135427,7 +135463,6 @@ export namespace Prisma {
     blobSha?: SortOrder
     contentHash?: SortOrder
     markdownContent?: SortOrder
-    indexStatus?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrder
@@ -143467,11 +143502,13 @@ export namespace Prisma {
   export type AiKnowledgeIndexEntryCreateWithoutAccountInput = {
     id: string
     repositoryId: string
-    resourceId: string
-    resourcePath: string
+    knowledgeSpaceId: string
+    knowledgeDocumentId: string
+    sourcePath: string
     title?: string | null
     mimeType: string
-    contentHash: string
+    sourceContentHash: string
+    sourceVersion?: string | null
     status: string
     summary?: string | null
     keywords?: JsonNullValueInput | InputJsonValue
@@ -143489,11 +143526,13 @@ export namespace Prisma {
   export type AiKnowledgeIndexEntryUncheckedCreateWithoutAccountInput = {
     id: string
     repositoryId: string
-    resourceId: string
-    resourcePath: string
+    knowledgeSpaceId: string
+    knowledgeDocumentId: string
+    sourcePath: string
     title?: string | null
     mimeType: string
-    contentHash: string
+    sourceContentHash: string
+    sourceVersion?: string | null
     status: string
     summary?: string | null
     keywords?: JsonNullValueInput | InputJsonValue
@@ -145242,11 +145281,13 @@ export namespace Prisma {
     id?: StringFilter<"AiKnowledgeIndexEntry"> | string
     identityId?: StringFilter<"AiKnowledgeIndexEntry"> | string
     repositoryId?: StringFilter<"AiKnowledgeIndexEntry"> | string
-    resourceId?: StringFilter<"AiKnowledgeIndexEntry"> | string
-    resourcePath?: StringFilter<"AiKnowledgeIndexEntry"> | string
+    knowledgeSpaceId?: StringFilter<"AiKnowledgeIndexEntry"> | string
+    knowledgeDocumentId?: StringFilter<"AiKnowledgeIndexEntry"> | string
+    sourcePath?: StringFilter<"AiKnowledgeIndexEntry"> | string
     title?: StringNullableFilter<"AiKnowledgeIndexEntry"> | string | null
     mimeType?: StringFilter<"AiKnowledgeIndexEntry"> | string
-    contentHash?: StringFilter<"AiKnowledgeIndexEntry"> | string
+    sourceContentHash?: StringFilter<"AiKnowledgeIndexEntry"> | string
+    sourceVersion?: StringNullableFilter<"AiKnowledgeIndexEntry"> | string | null
     status?: StringFilter<"AiKnowledgeIndexEntry"> | string
     summary?: StringNullableFilter<"AiKnowledgeIndexEntry"> | string | null
     keywords?: JsonFilter<"AiKnowledgeIndexEntry">
@@ -159325,7 +159366,6 @@ export namespace Prisma {
     contentHash: string
     frontmatter?: JsonNullValueInput | InputJsonValue
     markdownContent: string
-    indexStatus?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -159340,7 +159380,6 @@ export namespace Prisma {
     contentHash: string
     frontmatter?: JsonNullValueInput | InputJsonValue
     markdownContent: string
-    indexStatus?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -159769,7 +159808,6 @@ export namespace Prisma {
     contentHash?: StringFilter<"KnowledgeNoteProjection"> | string
     frontmatter?: JsonFilter<"KnowledgeNoteProjection">
     markdownContent?: StringFilter<"KnowledgeNoteProjection"> | string
-    indexStatus?: StringFilter<"KnowledgeNoteProjection"> | string
     createdAt?: DateTimeFilter<"KnowledgeNoteProjection"> | Date | string
     updatedAt?: DateTimeFilter<"KnowledgeNoteProjection"> | Date | string
     deletedAt?: DateTimeNullableFilter<"KnowledgeNoteProjection"> | Date | string | null
@@ -164284,11 +164322,13 @@ export namespace Prisma {
   export type AiKnowledgeIndexEntryCreateManyAccountInput = {
     id: string
     repositoryId: string
-    resourceId: string
-    resourcePath: string
+    knowledgeSpaceId: string
+    knowledgeDocumentId: string
+    sourcePath: string
     title?: string | null
     mimeType: string
-    contentHash: string
+    sourceContentHash: string
+    sourceVersion?: string | null
     status: string
     summary?: string | null
     keywords?: JsonNullValueInput | InputJsonValue
@@ -165718,11 +165758,13 @@ export namespace Prisma {
   export type AiKnowledgeIndexEntryUpdateWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
     repositoryId?: StringFieldUpdateOperationsInput | string
-    resourceId?: StringFieldUpdateOperationsInput | string
-    resourcePath?: StringFieldUpdateOperationsInput | string
+    knowledgeSpaceId?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: StringFieldUpdateOperationsInput | string
+    sourcePath?: StringFieldUpdateOperationsInput | string
     title?: NullableStringFieldUpdateOperationsInput | string | null
     mimeType?: StringFieldUpdateOperationsInput | string
-    contentHash?: StringFieldUpdateOperationsInput | string
+    sourceContentHash?: StringFieldUpdateOperationsInput | string
+    sourceVersion?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     keywords?: JsonNullValueInput | InputJsonValue
@@ -165740,11 +165782,13 @@ export namespace Prisma {
   export type AiKnowledgeIndexEntryUncheckedUpdateWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
     repositoryId?: StringFieldUpdateOperationsInput | string
-    resourceId?: StringFieldUpdateOperationsInput | string
-    resourcePath?: StringFieldUpdateOperationsInput | string
+    knowledgeSpaceId?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: StringFieldUpdateOperationsInput | string
+    sourcePath?: StringFieldUpdateOperationsInput | string
     title?: NullableStringFieldUpdateOperationsInput | string | null
     mimeType?: StringFieldUpdateOperationsInput | string
-    contentHash?: StringFieldUpdateOperationsInput | string
+    sourceContentHash?: StringFieldUpdateOperationsInput | string
+    sourceVersion?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     keywords?: JsonNullValueInput | InputJsonValue
@@ -165762,11 +165806,13 @@ export namespace Prisma {
   export type AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
     repositoryId?: StringFieldUpdateOperationsInput | string
-    resourceId?: StringFieldUpdateOperationsInput | string
-    resourcePath?: StringFieldUpdateOperationsInput | string
+    knowledgeSpaceId?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: StringFieldUpdateOperationsInput | string
+    sourcePath?: StringFieldUpdateOperationsInput | string
     title?: NullableStringFieldUpdateOperationsInput | string | null
     mimeType?: StringFieldUpdateOperationsInput | string
-    contentHash?: StringFieldUpdateOperationsInput | string
+    sourceContentHash?: StringFieldUpdateOperationsInput | string
+    sourceVersion?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     keywords?: JsonNullValueInput | InputJsonValue
@@ -168419,7 +168465,6 @@ export namespace Prisma {
     contentHash: string
     frontmatter?: JsonNullValueInput | InputJsonValue
     markdownContent: string
-    indexStatus?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -168516,7 +168561,6 @@ export namespace Prisma {
     contentHash?: StringFieldUpdateOperationsInput | string
     frontmatter?: JsonNullValueInput | InputJsonValue
     markdownContent?: StringFieldUpdateOperationsInput | string
-    indexStatus?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -168531,7 +168575,6 @@ export namespace Prisma {
     contentHash?: StringFieldUpdateOperationsInput | string
     frontmatter?: JsonNullValueInput | InputJsonValue
     markdownContent?: StringFieldUpdateOperationsInput | string
-    indexStatus?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -168546,7 +168589,6 @@ export namespace Prisma {
     contentHash?: StringFieldUpdateOperationsInput | string
     frontmatter?: JsonNullValueInput | InputJsonValue
     markdownContent?: StringFieldUpdateOperationsInput | string
-    indexStatus?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null

@@ -258,7 +258,6 @@ export class KnowledgeProjectionEngine implements IKnowledgeProjectionEngine {
       contentHash: createHash('sha256').update(file.markdownContent).digest('hex'),
       frontmatter,
       markdownContent: file.markdownContent,
-      indexStatus: 'pending',
     };
   }
 

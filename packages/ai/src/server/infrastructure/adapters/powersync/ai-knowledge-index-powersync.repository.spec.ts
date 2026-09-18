@@ -22,11 +22,13 @@ function indexedNote(path = 'Notes/Stable.md'): KnowledgeIndexedNote {
   return {
     identityId: 'identity-1',
     repositoryId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440602',
-    resourceId: DOCUMENT_ID,
-    resourcePath: path,
+    knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440602',
+    knowledgeDocumentId: DOCUMENT_ID,
+    sourcePath: path,
+    sourceContentHash: 'a'.repeat(64),
+    sourceVersion: 'commit-1',
     title: 'Stable note',
     mimeType: 'text/markdown',
-    contentHash: 'a'.repeat(64),
     summary: 'Stable knowledge identity',
     keywords: ['stable', 'knowledge'],
     embedding: [0.25, -0.5],
@@ -75,18 +77,20 @@ describe('AIKnowledgeIndexPowerSyncRepository', () => {
     expect(secondParams).toContain('Archive/After.md');
   });
 
-  it('reads stable resource ids directly from the local index table', async () => {
+  it('reads stable document ids directly from the local index table', async () => {
     const db = new FakeDatabase();
     db.getAll.mockResolvedValueOnce([
       {
         id: 'local-index-row',
         identity_id: 'identity-1',
         repository_id: 'space-1',
-        resource_id: DOCUMENT_ID,
-        resource_path: 'Notes/Stable.md',
+        knowledge_space_id: 'space-1',
+        knowledge_document_id: DOCUMENT_ID,
+        source_path: 'Notes/Stable.md',
         title: 'Stable note',
         mime_type: 'text/markdown',
-        content_hash: 'a'.repeat(64),
+        source_content_hash: 'a'.repeat(64),
+        source_version: 'commit-1',
         status: 'indexed',
         summary: 'Stable knowledge identity',
         keywords_json: JSON.stringify(['stable', 'knowledge']),
@@ -100,10 +104,14 @@ describe('AIKnowledgeIndexPowerSyncRepository', () => {
     ]);
     const repository = new AIKnowledgeIndexPowerSyncRepository(db);
 
-    await expect(repository.findByNoteIds('identity-1', [DOCUMENT_ID])).resolves.toEqual([
+    await expect(
+      repository.findByDocumentRefs('identity-1', [
+        { knowledgeSpaceId: 'space-1', knowledgeDocumentId: DOCUMENT_ID },
+      ]),
+    ).resolves.toEqual([
       expect.objectContaining({
-        resourceId: DOCUMENT_ID,
-        resourcePath: 'Notes/Stable.md',
+        knowledgeDocumentId: DOCUMENT_ID,
+        sourcePath: 'Notes/Stable.md',
         metadata: { knowledgeDocumentId: DOCUMENT_ID },
       }),
     ]);
@@ -115,8 +123,15 @@ describe('AIKnowledgeIndexPowerSyncRepository', () => {
     const db = new FakeDatabase();
     const repository = new AIKnowledgeIndexPowerSyncRepository(db);
 
-    await repository.markRequested('identity-1', [DOCUMENT_ID], 1234);
-    await repository.removeByNoteId('identity-1', DOCUMENT_ID);
+    await repository.markRequested(
+      'identity-1',
+      [{ knowledgeSpaceId: 'space-1', knowledgeDocumentId: DOCUMENT_ID }],
+      1234,
+    );
+    await repository.removeByDocumentRef('identity-1', {
+      knowledgeSpaceId: 'space-1',
+      knowledgeDocumentId: DOCUMENT_ID,
+    });
 
     expect(db.execute.mock.calls[0]![0]).toContain('UPDATE ai_knowledge_index_entries_local');
     expect(db.execute.mock.calls[1]![0]).toContain('DELETE FROM ai_knowledge_index_entries_local');

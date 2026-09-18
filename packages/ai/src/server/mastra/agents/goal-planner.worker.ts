@@ -101,15 +101,14 @@ export class GoalPlannerWorker implements GoalPlannerPort {
         6,
       );
       return notes.map((note) => {
-        const metadata = note.metadata ?? {};
         const knowledgeDocument = KnowledgeDocumentRefSchema.safeParse({
-          knowledgeSpaceId: metadata['knowledgeSpaceId'],
-          documentId: metadata['knowledgeDocumentId'] ?? note.resourceId,
+          knowledgeSpaceId: note.knowledgeSpaceId,
+          documentId: note.knowledgeDocumentId,
         });
         return {
-          title: note.title ?? note.resourcePath,
+          title: note.title ?? note.sourcePath,
           excerpt: note.content.slice(0, 1200),
-          sourceRef: note.resourcePath,
+          sourceRef: note.sourcePath,
           trust: 'retrieved_untrusted' as const,
           linkable: knowledgeDocument.success,
           knowledgeDocument: knowledgeDocument.success ? knowledgeDocument.data : null,

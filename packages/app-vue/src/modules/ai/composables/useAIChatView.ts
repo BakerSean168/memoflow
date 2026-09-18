@@ -2,6 +2,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
+import type { KnowledgeDocumentRef } from '@memoflow/contracts/repository';
 import { useAI } from './useAI';
 import { useGoal } from '../../goal/composables/useGoal';
 import { useRecentKnowledgeNotes } from '../../repository/composables/useRecentKnowledgeNotes';
@@ -58,7 +59,8 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   const recentKnowledgeNotes = useRecentKnowledgeNotes();
   const formatters = useAIFormatters();
 
-  async function requestOpenKnowledgeNote(noteId: string): Promise<void> {
+  async function requestOpenKnowledgeNote(note: string | KnowledgeDocumentRef): Promise<void> {
+    const noteId = typeof note === 'string' ? note : note.documentId;
     if (!noteId) return;
     await router.push({ path: '/repository', query: { note: noteId } });
   }

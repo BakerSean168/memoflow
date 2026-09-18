@@ -22,7 +22,6 @@ import type {
   KnowledgeNoteProjectionClientDTO,
   KnowledgeNoteProjectionListResponse,
   ListKnowledgeNoteProjectionsReq,
-  KnowledgeNoteProjectionIndexStatus,
   GetKnowledgeNoteLinkGraphReq,
   KnowledgeNoteLinkGraphResponse,
   KnowledgeAttachmentContentResponse,
@@ -127,15 +126,6 @@ export interface RepositoryApplicationPort {
     ctx: Context,
     request: AdoptKnowledgeDocumentReq,
   ): Promise<Result<AdoptKnowledgeDocumentResponse>>;
-  updateKnowledgeNoteProjectionIndexStatus(
-    ctx: Pick<Context, 'identityId'>,
-    request: {
-      connectionId: string;
-      resourceId: string;
-      contentHash: string;
-      status: KnowledgeNoteProjectionIndexStatus;
-    },
-  ): Promise<Result<{ updated: boolean }>>;
   ingestGithubWebhook(request: {
     deliveryId: string;
     eventName: string;

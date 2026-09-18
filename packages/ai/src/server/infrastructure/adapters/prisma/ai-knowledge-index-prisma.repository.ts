@@ -13,6 +13,7 @@ import type {
   KnowledgeIndexDiagnostics,
   KnowledgeIndexFailureRecord,
   KnowledgeIndexedNote,
+  KnowledgeDocumentIndexRef,
 } from '../../../application/ports';
 import {
   toChunkArray,
@@ -27,11 +28,13 @@ type KnowledgeIndexEntryRow = {
   id: string;
   identityId: string;
   repositoryId: string;
-  resourceId: string;
-  resourcePath: string;
+  knowledgeSpaceId: string;
+  knowledgeDocumentId: string;
+  sourcePath: string;
   title: string | null;
   mimeType: string;
-  contentHash: string;
+  sourceContentHash: string;
+  sourceVersion: string | null;
   status: string;
   summary: string | null;
   keywords: Prisma.JsonValue | null;
@@ -55,11 +58,7 @@ function toObjectRecord(value: unknown): Record<string, unknown> {
   return { ...(value as Record<string, unknown>) };
 }
 
-
-
-function mapEntryRowToIndexedResource(
-  row: KnowledgeIndexEntryRow,
-): KnowledgeIndexedNote | null {
+function mapEntryRowToIndexedResource(row: KnowledgeIndexEntryRow): KnowledgeIndexedNote | null {
   if (row.status !== 'indexed') {
     return null;
   }
@@ -68,11 +67,13 @@ function mapEntryRowToIndexedResource(
   return {
     identityId: row.identityId,
     repositoryId: row.repositoryId,
-    resourceId: row.resourceId,
-    resourcePath: row.resourcePath,
+    knowledgeSpaceId: row.knowledgeSpaceId,
+    knowledgeDocumentId: row.knowledgeDocumentId,
+    sourcePath: row.sourcePath,
+    sourceContentHash: row.sourceContentHash,
+    sourceVersion: row.sourceVersion,
     title: row.title ?? undefined,
     mimeType: row.mimeType,
-    contentHash: row.contentHash,
     summary: row.summary ?? '',
     keywords: toStringArray(row.keywords),
     embedding: toNumberArray(row.embedding),
@@ -84,12 +85,7 @@ function mapEntryRowToIndexedResource(
 /** Soft residual 1195: scoreIndexedResource dual retired onto knowledge-index-value-helpers sole. */
 
 function buildRetrievalEmbeddingSource(resource: KnowledgeIndexedNote): string {
-  return [
-    resource.title ?? '',
-    resource.resourcePath,
-    resource.summary,
-    resource.keywords.join(' '),
-  ]
+  return [resource.title ?? '', resource.sourcePath, resource.summary, resource.keywords.join(' ')]
     .filter((value) => value.length > 0)
     .join(' ');
 }
@@ -174,18 +170,21 @@ export class AIKnowledgeIndexPrismaRepository implements IKnowledgeIndexReposito
       .map(({ resource }) => resource);
   }
 
-  async findByNoteIds(
+  async findByDocumentRefs(
     identityId: string,
-    resourceIds: string[],
+    documentRefs: KnowledgeDocumentIndexRef[],
   ): Promise<KnowledgeIndexedNote[]> {
-    if (resourceIds.length === 0) {
+    if (documentRefs.length === 0) {
       return [];
     }
 
     const rows = (await this.prisma.aiKnowledgeIndexEntry.findMany({
       where: {
         identityId,
-        resourceId: { in: resourceIds },
+        OR: documentRefs.map((documentRef) => ({
+          knowledgeSpaceId: documentRef.knowledgeSpaceId,
+          knowledgeDocumentId: documentRef.knowledgeDocumentId,
+        })),
         deletedAt: null,
       },
     })) as KnowledgeIndexEntryRow[];
@@ -196,16 +195,23 @@ export class AIKnowledgeIndexPrismaRepository implements IKnowledgeIndexReposito
 
   async upsert(resource: KnowledgeIndexedNote): Promise<void> {
     await this.prisma.aiKnowledgeIndexEntry.upsert({
-      where: { resourceId: resource.resourceId },
+      where: {
+        knowledgeSpaceId_knowledgeDocumentId: {
+          knowledgeSpaceId: resource.knowledgeSpaceId,
+          knowledgeDocumentId: resource.knowledgeDocumentId,
+        },
+      },
       create: {
         id: randomUUID(),
         identityId: resource.identityId,
         repositoryId: resource.repositoryId,
-        resourceId: resource.resourceId,
-        resourcePath: resource.resourcePath,
+        knowledgeSpaceId: resource.knowledgeSpaceId,
+        knowledgeDocumentId: resource.knowledgeDocumentId,
+        sourcePath: resource.sourcePath,
         title: resource.title,
         mimeType: resource.mimeType,
-        contentHash: resource.contentHash,
+        sourceContentHash: resource.sourceContentHash,
+        sourceVersion: resource.sourceVersion,
         status: 'indexed',
         summary: resource.summary,
         keywords: toPrismaJson(resource.keywords),
@@ -218,10 +224,11 @@ export class AIKnowledgeIndexPrismaRepository implements IKnowledgeIndexReposito
       },
       update: {
         repositoryId: resource.repositoryId,
-        resourcePath: resource.resourcePath,
+        sourcePath: resource.sourcePath,
         title: resource.title,
         mimeType: resource.mimeType,
-        contentHash: resource.contentHash,
+        sourceContentHash: resource.sourceContentHash,
+        sourceVersion: resource.sourceVersion,
         status: 'indexed',
         summary: resource.summary,
         keywords: toPrismaJson(resource.keywords),
@@ -239,17 +246,20 @@ export class AIKnowledgeIndexPrismaRepository implements IKnowledgeIndexReposito
 
   async markRequested(
     identityId: string,
-    resourceIds: string[],
+    documentRefs: KnowledgeDocumentIndexRef[],
     requestedAt: number,
   ): Promise<void> {
-    if (resourceIds.length === 0) {
+    if (documentRefs.length === 0) {
       return;
     }
 
     await this.prisma.aiKnowledgeIndexEntry.updateMany({
       where: {
         identityId,
-        resourceId: { in: resourceIds },
+        OR: documentRefs.map((documentRef) => ({
+          knowledgeSpaceId: documentRef.knowledgeSpaceId,
+          knowledgeDocumentId: documentRef.knowledgeDocumentId,
+        })),
         deletedAt: null,
       },
       data: {
@@ -260,16 +270,23 @@ export class AIKnowledgeIndexPrismaRepository implements IKnowledgeIndexReposito
 
   async markFailed(record: KnowledgeIndexFailureRecord): Promise<void> {
     await this.prisma.aiKnowledgeIndexEntry.upsert({
-      where: { resourceId: record.resourceId },
+      where: {
+        knowledgeSpaceId_knowledgeDocumentId: {
+          knowledgeSpaceId: record.knowledgeSpaceId,
+          knowledgeDocumentId: record.knowledgeDocumentId,
+        },
+      },
       create: {
         id: randomUUID(),
         identityId: record.identityId,
         repositoryId: record.repositoryId,
-        resourceId: record.resourceId,
-        resourcePath: record.resourcePath,
+        knowledgeSpaceId: record.knowledgeSpaceId,
+        knowledgeDocumentId: record.knowledgeDocumentId,
+        sourcePath: record.sourcePath,
         title: record.title,
         mimeType: record.mimeType,
-        contentHash: record.contentHash,
+        sourceContentHash: record.sourceContentHash,
+        sourceVersion: record.sourceVersion,
         status: 'failed',
         summary: null,
         keywords: toPrismaJson([]),
@@ -282,10 +299,11 @@ export class AIKnowledgeIndexPrismaRepository implements IKnowledgeIndexReposito
       },
       update: {
         repositoryId: record.repositoryId,
-        resourcePath: record.resourcePath,
+        sourcePath: record.sourcePath,
         title: record.title,
         mimeType: record.mimeType,
-        contentHash: record.contentHash,
+        sourceContentHash: record.sourceContentHash,
+        sourceVersion: record.sourceVersion,
         status: 'failed',
         summary: null,
         keywords: toPrismaJson([]),
@@ -298,15 +316,23 @@ export class AIKnowledgeIndexPrismaRepository implements IKnowledgeIndexReposito
         deletedAt: null,
       },
     });
-    await this.clearRetrievalVector(record.resourceId);
+    await this.clearRetrievalVector(record.knowledgeSpaceId, record.knowledgeDocumentId);
   }
 
-  async removeByNoteId(identityId: string, resourceId: string): Promise<void> {
+  async removeByDocumentRef(
+    identityId: string,
+    documentRef: KnowledgeDocumentIndexRef,
+  ): Promise<void> {
     await this.prisma.aiKnowledgeIndexEntry.updateMany({
-      where: { identityId, resourceId, deletedAt: null },
+      where: {
+        identityId,
+        knowledgeSpaceId: documentRef.knowledgeSpaceId,
+        knowledgeDocumentId: documentRef.knowledgeDocumentId,
+        deletedAt: null,
+      },
       data: { deletedAt: new Date() },
     });
-    await this.clearRetrievalVector(resourceId);
+    await this.clearRetrievalVector(documentRef.knowledgeSpaceId, documentRef.knowledgeDocumentId);
   }
 
   private async findRelevantWithVectorQuery(
@@ -325,11 +351,13 @@ export class AIKnowledgeIndexPrismaRepository implements IKnowledgeIndexReposito
           id,
           identity_id AS "identityId",
           repository_id AS "repositoryId",
-          resource_id AS "resourceId",
-          resource_path AS "resourcePath",
+          knowledge_space_id AS "knowledgeSpaceId",
+          knowledge_document_id AS "knowledgeDocumentId",
+          source_path AS "sourcePath",
           title,
           mime_type AS "mimeType",
-          content_hash AS "contentHash",
+          source_content_hash AS "sourceContentHash",
+          source_version AS "sourceVersion",
           status,
           summary,
           keywords,
@@ -391,7 +419,8 @@ export class AIKnowledgeIndexPrismaRepository implements IKnowledgeIndexReposito
         Prisma.sql`
           UPDATE ai_knowledge_index_entries
           SET retrieval_vector = ${retrievalVector}::vector
-          WHERE resource_id = ${resource.resourceId}
+          WHERE knowledge_space_id = ${resource.knowledgeSpaceId}
+            AND knowledge_document_id = ${resource.knowledgeDocumentId}
         `,
       );
       this.vectorSupportState = 'enabled';
@@ -401,7 +430,10 @@ export class AIKnowledgeIndexPrismaRepository implements IKnowledgeIndexReposito
     }
   }
 
-  private async clearRetrievalVector(resourceId: string): Promise<void> {
+  private async clearRetrievalVector(
+    knowledgeSpaceId: string,
+    knowledgeDocumentId: string,
+  ): Promise<void> {
     if (this.vectorSupportState === 'disabled') {
       return;
     }
@@ -411,7 +443,8 @@ export class AIKnowledgeIndexPrismaRepository implements IKnowledgeIndexReposito
         Prisma.sql`
           UPDATE ai_knowledge_index_entries
           SET retrieval_vector = NULL
-          WHERE resource_id = ${resourceId}
+          WHERE knowledge_space_id = ${knowledgeSpaceId}
+            AND knowledge_document_id = ${knowledgeDocumentId}
         `,
       );
       this.vectorSupportState = 'enabled';

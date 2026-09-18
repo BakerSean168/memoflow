@@ -13,7 +13,7 @@ function projectionRow(overrides: Record<string, unknown> = {}) {
     frontmatter: { title: 'Architecture' },
     blobSha: 'a'.repeat(40),
     contentHash: 'b'.repeat(64),
-    indexStatus: 'pending',
+    commitSha: 'c'.repeat(40),
     ...overrides,
   };
 }
@@ -42,6 +42,7 @@ describe('RepositoryKnowledgeSourceAdapter', () => {
     expect(findMany).toHaveBeenCalledWith({
       where: {
         deletedAt: null,
+        knowledgeDocumentId: { not: null },
         binding: { identityId: 'identity-1', disconnectedAt: null },
       },
       include: { binding: { select: { knowledgeSpaceId: true } } },
@@ -52,14 +53,16 @@ describe('RepositoryKnowledgeSourceAdapter', () => {
       expect.objectContaining({
         identityId: 'identity-1',
         repositoryId: 'binding-1',
-        resourceId: 'kdoc_550e8400-e29b-41d4-a716-446655440012',
-        resourcePath: 'notes/architecture.md',
+        knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440011',
+        knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440012',
+        sourcePath: 'notes/architecture.md',
+        sourceContentHash: 'b'.repeat(64),
+        sourceVersion: 'c'.repeat(40),
         title: 'Architecture',
         metadata: expect.objectContaining({
           contentDigest: 'b'.repeat(64),
           knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440012',
           knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440011',
-          projectionIndexStatus: 'pending',
           sourceType: 'github-default-branch-projection',
         }),
       }),
@@ -67,7 +70,7 @@ describe('RepositoryKnowledgeSourceAdapter', () => {
   });
 
   it('hydrates a requested projection through the same identity boundary', async () => {
-    const findFirst = vi.fn(async () => projectionRow({ indexStatus: 'indexed' }));
+    const findFirst = vi.fn(async () => projectionRow());
     const db = {
       knowledgeNoteProjection: {
         findMany: vi.fn(),
@@ -76,36 +79,37 @@ describe('RepositoryKnowledgeSourceAdapter', () => {
     } as unknown as PrismaClient;
     const adapter = new RepositoryKnowledgeSourceAdapter(db);
 
-    const resource = await adapter.getNoteById('identity-1', 'projection-1');
+    const resource = await adapter.getNoteById(
+      'identity-1',
+      'kdoc_550e8400-e29b-41d4-a716-446655440012',
+      'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440011',
+    );
 
     expect(findFirst).toHaveBeenCalledWith({
       where: {
-        OR: [{ id: 'projection-1' }, { knowledgeDocumentId: 'projection-1' }],
+        knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440012',
         deletedAt: null,
-        binding: { identityId: 'identity-1', disconnectedAt: null },
+        binding: {
+          identityId: 'identity-1',
+          disconnectedAt: null,
+          knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440011',
+        },
       },
       include: { binding: { select: { knowledgeSpaceId: true } } },
     });
-    expect(resource?.metadata).toMatchObject({
-      projectionIndexStatus: 'indexed',
+    expect(resource).toMatchObject({
+      sourcePath: 'notes/architecture.md',
       knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440012',
-      knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440011',
     });
   });
 
-  it('keeps unmanaged path projections readable but without a stable document identity', async () => {
+  it('does not expose unmanaged path projections to the durable AI index', async () => {
     const findMany = vi.fn(async () => [projectionRow({ knowledgeDocumentId: null })]);
     const db = {
       knowledgeNoteProjection: { findMany, findFirst: vi.fn() },
     } as unknown as PrismaClient;
     const adapter = new RepositoryKnowledgeSourceAdapter(db);
 
-    const [resource] = await adapter.listIndexableNotes('identity-1', 1);
-
-    expect(resource?.resourceId).toBe('projection-1');
-    expect(resource?.metadata).toMatchObject({
-      knowledgeDocumentId: null,
-      knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440011',
-    });
+    await expect(adapter.listIndexableNotes('identity-1', 1)).resolves.toEqual([]);
   });
 });

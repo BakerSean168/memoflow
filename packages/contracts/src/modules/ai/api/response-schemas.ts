@@ -6,7 +6,10 @@ import type {
   AiMessageId,
   IdentityId,
 } from '../../../primitives';
-import { KnowledgeDocumentIdSchema } from '../../repository/aggregates/knowledge-document-identity';
+import {
+  KnowledgeDocumentIdSchema,
+  KnowledgeDocumentRefSchema,
+} from '../../repository/aggregates/knowledge-document-identity';
 import { TestAIProviderResultDTOSchema } from '../dtos/provider-test-result.dto';
 import { TokenUsageSchema } from '../value-objects/token-usage';
 import { ConversationStatus } from '../value-objects/conversation-status';
@@ -97,8 +100,8 @@ export { TestAIProviderResultDTOSchema };
 // Residual 755: KnowledgeCitationSchema is the sole citation transport shape
 // (KnowledgeCitation is a z.infer alias on ai-knowledge-query.dto).
 export const KnowledgeCitationSchema = z.object({
-  resourceId: z.string().min(1),
-  resourcePath: z.string().min(1),
+  documentRef: KnowledgeDocumentRefSchema,
+  sourcePath: z.string().min(1),
   title: z.string().optional(),
   chunkIndex: z.number().int().nonnegative(),
   excerpt: z.string().min(1),
