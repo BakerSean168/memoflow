@@ -21,3 +21,23 @@ export type {
 } from './ai-provider-config-server';
 
 export type { AIProviderConnection, AIProviderCredentialRef } from './ai-provider-connection';
+
+export {
+  AI_EXECUTION_REQUIREMENT_LEVELS,
+  AI_MODEL_CAPABILITIES,
+  AI_MODEL_CAPABILITY_PROVENANCE,
+  AI_MODEL_CAPABILITY_STATES,
+  AIExecutionRequirementSchema,
+  AIModelCapabilitySnapshotSchema,
+  AIModelCatalogSnapshotSchema,
+} from './ai-model-resolution';
+export type {
+  AIExecutionRequirement,
+  AIExecutionRequirementLevel,
+  AIModelCapability,
+  AIModelCapabilityMap,
+  AIModelCapabilityProvenance,
+  AIModelCapabilitySnapshot,
+  AIModelCapabilityState,
+  AIModelCatalogSnapshot,
+} from './ai-model-resolution';
