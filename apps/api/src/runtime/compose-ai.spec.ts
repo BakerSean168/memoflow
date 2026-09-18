@@ -85,8 +85,8 @@ vi.mock('../modules/ai/planner-read.adapter', () => ({
   }),
 }));
 vi.mock('../modules/ai/notification-read.adapter', () => ({
-  NotificationAIReadAdapter: vi.fn(function NotificationAIReadAdapterMock(repository: unknown) {
-    return { tag: 'notification-read', repository };
+  NotificationAIReadAdapter: vi.fn(function NotificationAIReadAdapterMock(inbox: unknown) {
+    return { tag: 'notification-read', inbox };
   }),
 }));
 
@@ -120,7 +120,8 @@ const taskApplicationPort = { tag: 'task-port' } as unknown as TaskApplicationPo
 const taskDashboardReadPort = { tag: 'task-dashboard-read-port' } as never;
 const routineCommandPort = { tag: 'routine-command-port' } as never;
 const scheduleRepository = { tag: 'schedule-repository' } as never;
-const notificationRepository = { tag: 'notification-repository' } as never;
+const scheduleEventApi = { tag: 'schedule-event-api' } as never;
+const notificationInbox = { tag: 'notification-inbox' } as never;
 const userTimeContextPort = { tag: 'user-time-context-port' } as never;
 const labelService = { tag: 'label-service' } as never;
 const goalKnowledgeService = { tag: 'goal-knowledge-service' } as never;
@@ -138,8 +139,9 @@ const dependencies = {
   taskApplicationPort,
   taskDashboardReadPort,
   routineCommandPort,
+  scheduleEventApi,
+  notificationInbox,
   scheduleRepository,
-  notificationRepository,
   userTimeContextPort,
   labelService,
   goalKnowledgeService,
@@ -195,9 +197,13 @@ describe('API composeAI Mastra-only ownership', () => {
       goalKnowledgeService,
     );
     expect(TaskPlanMutationAdapter).toHaveBeenCalledWith(taskApplicationPort, labelService);
-    expect(RoutineAICommandAdapter).toHaveBeenCalledWith(routineCommandPort, userTimeContextPort);
-    expect(PlannerAIReadAdapter).toHaveBeenCalledWith(scheduleRepository, taskApplicationPort);
-    expect(NotificationAIReadAdapter).toHaveBeenCalledWith(notificationRepository);
+    expect(RoutineAICommandAdapter).toHaveBeenCalledWith(routineCommandPort);
+    expect(PlannerAIReadAdapter).toHaveBeenCalledWith(
+      scheduleEventApi,
+      taskApplicationPort,
+      userTimeContextPort,
+    );
+    expect(NotificationAIReadAdapter).toHaveBeenCalledWith(notificationInbox);
 
     expect(KnowledgeCapturePersistenceAdapter).toHaveBeenCalledWith(persistence);
 

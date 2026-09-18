@@ -37,19 +37,27 @@ function fixture() {
   };
   const plannerReadPort = {
     getWindowSummary: vi.fn(async () => ({
-      startTime: 0,
-      endTime: 0,
-      calendar: [
+      range: { start: 0, end: 0 },
+      projections: [
         {
-          id: 'schedule-1',
+          identityId: IDENTITY_ID,
+          sourceType: 'schedule' as const,
+          sourceId: 'schedule-1',
           title: 'Focus block',
-          startTime: Date.parse('2026-09-19T10:00:00Z'),
-          endTime: Date.parse('2026-09-19T11:00:00Z'),
-          hasConflict: true,
-          conflictingEntryIds: ['schedule-2'],
+          occupancy: 'blocking' as const,
+          displayMetadata: { semantic: 'calendar-entry' as const },
+          editableCapabilities: { move: true, resize: true },
+          ownerCommandTarget: {
+            ownerType: 'schedule.calendar-entry' as const,
+            ownerId: 'schedule-1',
+          },
+          revision: 1,
+          allDay: false as const,
+          start: Date.parse('2026-09-19T10:00:00Z'),
+          end: Date.parse('2026-09-19T11:00:00Z'),
         },
       ],
-      tasks: [],
+      conflicts: [{} as never],
     })),
   };
   const notificationReadPort = {
@@ -119,8 +127,10 @@ describe('ControlledAnalyticsReadAdapter', () => {
       );
       expect(fixtureData.plannerReadPort.getWindowSummary).toHaveBeenCalledWith({
         identityId: IDENTITY_ID,
-        startTime: Date.parse('2026-09-18T00:00:00Z'),
-        endTime: Date.parse('2026-10-18T12:00:00Z'),
+        range: {
+          start: Date.parse('2026-09-18T00:00:00Z'),
+          end: Date.parse('2026-10-18T12:00:00Z'),
+        },
       });
       expect(fixtureData.activityReadPort.listRecent).toHaveBeenCalledWith({
         identityId: IDENTITY_ID,

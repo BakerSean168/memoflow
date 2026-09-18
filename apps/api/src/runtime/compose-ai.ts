@@ -36,8 +36,8 @@ import type { RepositoryApplicationPort } from '@memoflow/repository';
 import { createGoalPrismaRepositories, type GoalApplicationPort } from '@memoflow/goal';
 import { createTaskPrismaRepositories, type TaskApplicationPort } from '@memoflow/task';
 import type { RoutineCoachCommandPort } from '@memoflow/reminder/routine-runtime';
-import type { IScheduleRepository } from '@memoflow/schedule';
-import type { INotificationRepository } from '@memoflow/notification';
+import type { IScheduleRepository, ScheduleEventApplicationPort } from '@memoflow/schedule';
+import type { NotificationInboxPort } from '@memoflow/notification';
 import type { LabelService } from '@memoflow/label';
 import type { GoalKnowledgeService, KnowledgeDocumentRefResolver } from '@memoflow/relation';
 import type { UserTimeContextPort } from '@memoflow/time';
@@ -72,8 +72,11 @@ export interface ComposeAIDependencies {
   /** Identity-scoped Shared Label resolver reused by AI workflow application. */
   readonly labelService: LabelService;
   readonly routineCommandPort: RoutineCoachCommandPort;
+  /** Schedule-owned Calendar Event read seam for Planner projections. */
+  readonly scheduleEventApi: ScheduleEventApplicationPort;
+  /** Notification-owned Fact/Inbox seam for AI reads and typed actions. */
+  readonly notificationInbox: NotificationInboxPort;
   readonly scheduleRepository: IScheduleRepository;
-  readonly notificationRepository: INotificationRepository;
   readonly userTimeContextPort: UserTimeContextPort;
   /** Host-selected persistent Mastra storage; API uses PostgreSQL. */
   readonly mastraStorage: MastraStorageConfig;
@@ -97,10 +100,11 @@ export function composeAI(dependencies: ComposeAIDependencies): AIApiModuleDef {
   const taskRepositories = createTaskPrismaRepositories(dependencies.db);
   const contextAssembler = new AIContextAssembler(dependencies.userTimeContextPort);
   const plannerReadPort = new PlannerAIReadAdapter(
-    dependencies.scheduleRepository,
+    dependencies.scheduleEventApi,
     dependencies.taskApplicationPort,
+    dependencies.userTimeContextPort,
   );
-  const notificationReadPort = new NotificationAIReadAdapter(dependencies.notificationRepository);
+  const notificationReadPort = new NotificationAIReadAdapter(dependencies.notificationInbox);
   const activityReadPort: IAIActivityReadPort = new OwnerActivityAIReadAdapter({
     goalRepository: goalRepositories.goalRepository,
     taskPlanRepository: taskRepositories.taskPlanRepository,
@@ -141,10 +145,7 @@ export function composeAI(dependencies: ComposeAIDependencies): AIApiModuleDef {
     knowledgeSourcePort,
     executionLogPort: repositorySet.executionLogPort,
     usageReadPort: repositorySet.executionLogPort,
-    routineCommandPort: new RoutineAICommandAdapter(
-      dependencies.routineCommandPort,
-      dependencies.userTimeContextPort,
-    ),
+    routineCommandPort: new RoutineAICommandAdapter(dependencies.routineCommandPort),
     plannerReadPort,
     notificationReadPort,
     contextAssembler,

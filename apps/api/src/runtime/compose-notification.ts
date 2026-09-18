@@ -45,6 +45,7 @@ import {
   type NotificationOwnerCommandRegistry,
   type NotificationPortableCapability,
   type NotificationRequestedWriterPort,
+  type NotificationInboxPort,
 } from '@memoflow/notification';
 import {
   createNotificationApiModule,
@@ -83,6 +84,8 @@ export interface ComposedNotification {
   /** Late-bound owner command registry. Hosts register owner application ports after composition. */
   readonly ownerCommandRegistry: NotificationOwnerCommandRegistry;
   readonly portableFactCapability: NotificationPortableCapability;
+  /** Notification Fact/Inbox and typed action seam shared by transports. */
+  readonly inbox: NotificationInboxPort;
 }
 
 /**
@@ -153,5 +156,6 @@ export function composeNotification(
     requestedWriter: repositories.requestedWriter,
     ownerCommandRegistry: instance.ownerCommandRegistry,
     portableFactCapability: instance.portableFactCapability,
+    inbox: instance.api,
   };
 }

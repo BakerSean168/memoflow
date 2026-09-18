@@ -74,8 +74,7 @@ export class DesktopAnalyticsReadAdapter implements IAnalyticsReadPort {
       this.dependencies.taskDashboardReadPort.getDashboard(identityId),
       this.dependencies.plannerReadPort.getWindowSummary({
         identityId,
-        startTime: scheduleWindowStart,
-        endTime: scheduleWindowEnd,
+        range: { start: scheduleWindowStart, end: scheduleWindowEnd },
       }),
       this.dependencies.notificationReadPort.getUnreadSummary({ identityId, limit: 1 }),
       this.dependencies.activityReadPort.listRecent({
@@ -100,15 +99,18 @@ export class DesktopAnalyticsReadAdapter implements IAnalyticsReadPort {
         }
       : { todo: 0, inProgress: 0, done: 0, overdue: 0 };
 
-    const upcomingSchedule = planner.calendar
-      .filter((entry) => entry.startTime >= now)
-      .sort((left, right) => left.startTime - right.startTime)
+    const upcomingSchedule = planner.projections
+      .filter(
+        (entry): entry is Extract<typeof entry, { sourceType: 'schedule'; allDay: false }> =>
+          entry.sourceType === 'schedule' && !entry.allDay && Number(entry.start) >= now,
+      )
+      .sort((left, right) => Number(left.start) - Number(right.start))
       .slice(0, UPCOMING_SCHEDULE_LIMIT)
       .map((entry) => ({
-        id: entry.id,
+        id: entry.sourceId,
         title: entry.title,
-        startTime: entry.startTime,
-        endTime: entry.endTime,
+        startTime: Number(entry.start),
+        endTime: Number(entry.end),
         priority: 0 as const,
       }));
 
@@ -124,7 +126,7 @@ export class DesktopAnalyticsReadAdapter implements IAnalyticsReadPort {
         task: { board: taskBoard },
         schedule: {
           upcoming: upcomingSchedule,
-          conflictCount: planner.calendar.filter((entry) => entry.hasConflict).length,
+          conflictCount: planner.conflicts.length,
         },
         notification: { unreadCount: notifications.unreadCount },
         activity: { recent: activity },

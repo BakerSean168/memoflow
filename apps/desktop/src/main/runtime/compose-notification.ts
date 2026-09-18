@@ -48,6 +48,7 @@ import {
   type NotificationOwnerCommandRegistry,
   type NotificationPortableCapability,
   type NotificationRequestedWriterPort,
+  type NotificationInboxPort,
 } from '@memoflow/notification';
 import {
   createNotificationElectronModule,
@@ -88,6 +89,8 @@ export interface ComposedNotificationDesktop {
   /** Late-bound owner command registry. */
   readonly ownerCommandRegistry: NotificationOwnerCommandRegistry;
   readonly portableFactCapability: NotificationPortableCapability;
+  /** Notification Fact/Inbox and typed action seam shared by transports. */
+  readonly inbox: NotificationInboxPort;
 }
 
 /**
@@ -148,7 +151,6 @@ export function composeNotification(
       }),
   });
 
-
   const instance = createNotificationModule({
     notificationRepository: repositories.notificationRepository,
     preferenceRepository: repositories.notificationPreferenceRepository,
@@ -168,5 +170,6 @@ export function composeNotification(
     requestedWriter: repositories.requestedWriter,
     ownerCommandRegistry: instance.ownerCommandRegistry,
     portableFactCapability: instance.portableFactCapability,
+    inbox: instance.api,
   };
 }

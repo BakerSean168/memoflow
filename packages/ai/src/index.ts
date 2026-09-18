@@ -62,6 +62,16 @@ export {
   type AIOwnerActivityScheduleFact,
   type ProjectAIOwnerActivityInput,
 } from './server/application/services/owner-activity-projection';
+export {
+  projectPlannerCalendarEntry,
+  projectPlannerTaskOccurrence,
+  type PlannerProductTimePort,
+} from './server/application/services/planner-owner-projection';
+export {
+  projectNotificationAction,
+  projectNotificationFact,
+  projectNotificationInboxPage,
+} from './server/application/services/notification-owner-projection';
 // Host capability ports are re-exported through the package root so desktop
 // composers import only `@memoflow/ai` (no `/ports` subpath).
 export type {
@@ -83,10 +93,17 @@ export type {
   IAIRoutineCommandPort,
   IAIPlannerReadPort,
   IAINotificationReadPort,
+  AIProtocolMethodId,
+  AIWallClockTriggerInput,
+  AIElapsedTriggerInput,
+  AIActiveUsageTriggerInput,
+  AIRoutineTriggerInput,
   AIRoutineCreateInput,
   AIRoutineCommandReceipt,
+  AIPlannerRange,
   AIPlannerWindowSummary,
   AIPlannerConflictSummary,
-  AIPlannerTaskItem,
+  AINotificationFactProjection,
+  AINotificationActionReceipt,
   AIUnreadNotificationSummary,
 } from './ports';
