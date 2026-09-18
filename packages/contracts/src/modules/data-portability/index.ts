@@ -1,6 +1,3 @@
-// ============ Domain Events ============
-export * from './domain/events';
-
 // ============ Protocol ============
 export * from './protocol';
 

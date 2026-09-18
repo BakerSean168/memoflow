@@ -2,8 +2,8 @@
  * useDataPortability — composable for importable data backup/restore and the
  * separate server-held data disclosure.
  *
- * Uses DataPortabilityClientService via DI to export/import all user data
- * (not just settings). Handles file save/open via platform-specific IPC.
+ * Uses DataPortabilityClientService via DI for the V3 export, dry-run and apply
+ * product surface. Handles file save/open via platform-specific IPC.
  */
 
 import { ref, inject } from 'vue';
@@ -64,7 +64,7 @@ export function useDataPortability() {
     isExporting.value = true;
     lastResult.value = null;
     try {
-      const result = await service.exportUserData({});
+      const result = await service.exportPortableDataV3({});
       if (!result.ok) {
         lastResult.value = translateResultError(result.error, t, {
           scope: 'setting',
@@ -79,10 +79,7 @@ export function useDataPortability() {
 
       await saveJsonFile(fileName, content);
 
-      const counts = Object.entries(summary.entityCounts)
-        .map(([k, v]) => `${k}: ${v}`)
-        .join(', ');
-      lastResult.value = `Exported ${counts}${warnings}`;
+      lastResult.value = `Exported capabilities: ${summary.capabilityKeys.join(', ')}${warnings}`;
     } catch (err) {
       lastResult.value = `Export error: ${err instanceof Error ? err.message : String(err)}`;
     } finally {
@@ -170,7 +167,16 @@ export function useDataPortability() {
         return;
       }
 
-      const result = await service.importUserData({ content, dryRun: false });
+      const dryRun = await service.dryRunPortableDataV3({ content });
+      if (!dryRun.ok) {
+        lastResult.value = translateResultError(dryRun.error, t, {
+          scope: 'setting',
+          fallbackKey: 'setting.errors.importFailed',
+        });
+        return;
+      }
+
+      const result = await service.applyPortableDataV3({ content });
       if (!result.ok) {
         lastResult.value = translateResultError(result.error, t, {
           scope: 'setting',
@@ -179,11 +185,11 @@ export function useDataPortability() {
         return;
       }
 
-      const { created, updatedSingletons, warnings } = result.data;
+      const { created, updated, warnings } = result.data;
       const createdCounts = Object.entries(created)
         .map(([k, v]) => `${k}: ${v}`)
         .join(', ');
-      const updatedCounts = Object.entries(updatedSingletons)
+      const updatedCounts = Object.entries(updated)
         .map(([k, v]) => `${k}: ${v}`)
         .join(', ');
       const parts = [];

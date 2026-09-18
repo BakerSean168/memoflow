@@ -5126,14 +5126,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/data-portability/data-portability-contracts.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/contracts/src/modules/data-portability/portable-v3-contract.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5644,16 +5636,6 @@
       ]
     },
     {
-      "path": "packages/data-portability/src/electron/__tests__/data-portability-electron-module.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/data-portability/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/data-portability/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/data-portability/src/electron/index-lifecycle.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5714,26 +5696,6 @@
       ]
     },
     {
-      "path": "packages/data-portability/src/server/application/use-cases/__tests__/export-user-data.use-case.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/data-portability/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/data-portability/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/data-portability/src/server/application/use-cases/__tests__/import-server-held-disclosure-rejected.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/data-portability/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/data-portability/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/data-portability/src/server/application/use-cases/__tests__/portable-boundary-re-lock.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5764,46 +5726,6 @@
       ]
     },
     {
-      "path": "packages/data-portability/src/server/application/use-cases/__tests__/portable-runtime.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/data-portability/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/data-portability/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/data-portability/src/server/application/use-cases/__tests__/projection-powersync-rows.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/data-portability/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/data-portability/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/data-portability/src/server/application/use-cases/__tests__/projection-ref-safety.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/data-portability/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/data-portability/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/data-portability/src/server/application/use-cases/__tests__/sanitize.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/data-portability/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/data-portability/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/data-portability/src/server/application/use-cases/__tests__/server-held-disclosure-not-importable.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5814,137 +5736,7 @@
       ]
     },
     {
-      "path": "packages/data-portability/src/server/application/use-cases/projections/goal-resolve-ref-dual.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/data-portability/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/data-portability/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/data-portability/src/server/application/use-cases/projections/parse-json-field-keep-boundary.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/data-portability/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/data-portability/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/data-portability/src/server/application/use-cases/projections/projection-helpers.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/data-portability/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/data-portability/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/data-portability/src/server/application/use-cases/projections/resolve-export-ref-dual.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/data-portability/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/data-portability/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/data-portability/src/server/application/use-cases/projections/to-boolean-keep-boundary.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/data-portability/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/data-portability/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/data-portability/src/server/application/use-cases/projections/to-date-keep-boundary.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/data-portability/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/data-portability/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/data-portability/src/server/application/use-cases/projections/to-timestamp-keep-boundary.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/data-portability/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/data-portability/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/data-portability/src/server/infrastructure/__tests__/data-portability-module-partial-start.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/data-portability/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/data-portability/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/data-portability/src/server/infrastructure/__tests__/data-portability-repositories.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/data-portability/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/data-portability/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/data-portability/src/server/infrastructure/__tests__/prisma-adapters.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/data-portability/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/data-portability/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/data-portability/src/server/infrastructure/__tests__/prisma-data-portability-import-store.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/data-portability/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/data-portability/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/data-portability/src/server/infrastructure/powersync/__tests__/powersync-export-dependencies.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/data-portability/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/data-portability/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/data-portability/src/server/infrastructure/powersync/__tests__/powersync-import-store.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/data-portability/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/data-portability/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/data-portability/src/server/infrastructure/powersync/__tests__/powersync-round-trip.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/data-portability/vitest.config.ts"
@@ -10834,7 +10626,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 36
+      "fileCount": 16
     },
     {
       "id": "packages/domain-shared/vitest.config.ts",
@@ -11226,14 +11018,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 87
+      "fileCount": 86
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 36
+      "fileCount": 16
     },
     {
       "id": "packages/database/vitest.config.ts",
@@ -11590,37 +11382,17 @@
       "packages/data-portability/src/api/module-lifecycle.spec.ts",
       "packages/data-portability/src/application-client/data-portability-client-port-dual.surface.spec.ts",
       "packages/data-portability/src/application-client/ports/data-portability-api-client-port.surface.spec.ts",
-      "packages/data-portability/src/electron/__tests__/data-portability-electron-module.test.ts",
       "packages/data-portability/src/electron/index-lifecycle.spec.ts",
       "packages/data-portability/src/infrastructure-client/adapters/http/data-portability-http.adapter.test.ts",
       "packages/data-portability/src/infrastructure-client/adapters/ipc/__tests__/data-portability-ipc-adapter.test.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/editor-persistence-retirement.surface.spec.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/editor-portability-retirement.surface.spec.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/export-server-held-data-disclosure.use-case.test.ts",
-      "packages/data-portability/src/server/application/use-cases/__tests__/export-user-data.use-case.test.ts",
-      "packages/data-portability/src/server/application/use-cases/__tests__/import-server-held-disclosure-rejected.test.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/portable-boundary-re-lock.surface.spec.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/portable-capability-coordinator.test.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/portable-capability-registry.test.ts",
-      "packages/data-portability/src/server/application/use-cases/__tests__/portable-runtime.test.ts",
-      "packages/data-portability/src/server/application/use-cases/__tests__/projection-powersync-rows.test.ts",
-      "packages/data-portability/src/server/application/use-cases/__tests__/projection-ref-safety.test.ts",
-      "packages/data-portability/src/server/application/use-cases/__tests__/sanitize.test.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/server-held-disclosure-not-importable.surface.spec.ts",
-      "packages/data-portability/src/server/application/use-cases/projections/goal-resolve-ref-dual.surface.spec.ts",
-      "packages/data-portability/src/server/application/use-cases/projections/parse-json-field-keep-boundary.surface.spec.ts",
-      "packages/data-portability/src/server/application/use-cases/projections/projection-helpers.spec.ts",
-      "packages/data-portability/src/server/application/use-cases/projections/resolve-export-ref-dual.surface.spec.ts",
-      "packages/data-portability/src/server/application/use-cases/projections/to-boolean-keep-boundary.surface.spec.ts",
-      "packages/data-portability/src/server/application/use-cases/projections/to-date-keep-boundary.surface.spec.ts",
-      "packages/data-portability/src/server/application/use-cases/projections/to-timestamp-keep-boundary.surface.spec.ts",
       "packages/data-portability/src/server/infrastructure/__tests__/data-portability-module-partial-start.spec.ts",
-      "packages/data-portability/src/server/infrastructure/__tests__/data-portability-repositories.surface.spec.ts",
-      "packages/data-portability/src/server/infrastructure/__tests__/prisma-adapters.surface.spec.ts",
-      "packages/data-portability/src/server/infrastructure/__tests__/prisma-data-portability-import-store.test.ts",
-      "packages/data-portability/src/server/infrastructure/powersync/__tests__/powersync-export-dependencies.test.ts",
-      "packages/data-portability/src/server/infrastructure/powersync/__tests__/powersync-import-store.test.ts",
-      "packages/data-portability/src/server/infrastructure/powersync/__tests__/powersync-round-trip.test.ts",
       "packages/data-portability/src/server/infrastructure/prisma-server-held-data-disclosure.source.test.ts",
       "packages/data-portability/src/server/transport/data-portability.controller.test.ts",
       "packages/domain-shared/src/shared/primitives/__tests__/identity-id.spec.ts",
@@ -11949,7 +11721,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1037,
+    "unit": 1016,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

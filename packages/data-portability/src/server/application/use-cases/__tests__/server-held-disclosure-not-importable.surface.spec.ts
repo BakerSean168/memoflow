@@ -1,44 +1,43 @@
+import { describe, expect, it } from 'vitest';
+import {
+  parsePortableBackupEnvelopeV3,
+  ServerHeldDataDisclosureEnvelopeV1Schema,
+} from '@memoflow/contracts/data-portability';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { describe, expect, it } from 'vitest';
 
-/**
- * Server-held disclosure import boundary surface (stage-6 residual 106):
- * disclosure envelopes must never enter the import store transaction path.
- * Residual 885 (soft): portable boundary re-lock
- *   (portable-boundary-re-lock.surface.spec.ts).
- */
-describe('server-held disclosure not-importable surface', () => {
-  const importSafety = readFileSync(
-    resolve(
-      __dirname,
-      '../../../../../../contracts/src/modules/data-portability/rules/import-safety.ts',
-    ),
-    'utf8',
-  );
-  const importUseCase = readFileSync(
-    resolve(__dirname, '../import-user-data.use-case.ts'),
-    'utf8',
-  );
-  const exportDisclosure = readFileSync(
-    resolve(__dirname, '../export-server-held-data-disclosure.use-case.ts'),
-    'utf8',
-  );
-
-  it('parseUserDataExportEnvelope fail-closes server-held disclosure kind explicitly', () => {
-    expect(importSafety).toContain("kind === 'memoflow.server-held-data-disclosure'");
-    expect(importSafety).toContain('not importable');
-    expect(importSafety).toContain('memoflow.user-data-export');
+describe('server-held disclosure V3 import boundary', () => {
+  it('rejects disclosure envelopes before V3 capability validation', () => {
+    const parsed = parsePortableBackupEnvelopeV3({
+      kind: 'memoflow.server-held-data-disclosure',
+      schemaVersion: 1,
+    });
+    expect(parsed).toEqual({
+      ok: false,
+      error: expect.stringContaining('not importable'),
+    });
   });
 
-  it('import use case only accepts parseUserDataExportEnvelope success', () => {
-    expect(importUseCase).toContain('parseUserDataExportEnvelope(raw)');
-    expect(importUseCase).toContain('if (!parsed.ok)');
-    expect(importUseCase).toContain('throwValidationError(parsed.error)');
+  it('rejects legacy business backups without retaining a legacy parser', () => {
+    const parsed = parsePortableBackupEnvelopeV3({
+      kind: 'memoflow.user-data-export',
+      schemaVersion: 2,
+      data: {},
+    });
+    expect(parsed).toEqual({
+      ok: false,
+      error: expect.stringContaining('only V3 is supported'),
+    });
   });
 
-  it('export marks disclosure as not-importable product surface', () => {
-    expect(exportDisclosure).toContain("kind: 'memoflow.server-held-data-disclosure'");
-    expect(exportDisclosure).toContain("importMode: 'not-importable'");
+  it('keeps the disclosure contract explicitly non-importable', () => {
+    const source = readFileSync(
+      resolve(__dirname, '../export-server-held-data-disclosure.use-case.ts'),
+      'utf8',
+    );
+    expect(source).toContain("kind: 'memoflow.server-held-data-disclosure'");
+    expect(source).toContain("importMode: 'not-importable'");
+    expect(source).toContain('includesImportableBusinessDataBackup: false');
+    expect(ServerHeldDataDisclosureEnvelopeV1Schema.safeParse({}).success).toBe(false);
   });
 });

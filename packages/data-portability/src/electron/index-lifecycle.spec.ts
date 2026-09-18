@@ -3,7 +3,7 @@
  * 数据导出导入 Electron IPC 生命周期测试
  *
  * Verifies that createDataPortabilityElectronModule is a pure
- * transport/lifecycle adapter: it registers the EXPORT/IMPORT channels, starts
+ * transport/lifecycle adapter: it registers the V3 EXPORT/DRY_RUN/APPLY channels, starts
  * the already-assembled instance once, removes all channels on destroy,
  * disposes exactly once, and cleans up on start failure. It also locks the
  * per-handle state machine: double register() throws, register-after-destroy
@@ -51,14 +51,13 @@ import { createDataPortabilityElectronModule } from './index';
 
 function createFakeInstance() {
   const api = {
-    exportUserData: vi.fn(() => ok(null as never)),
-    importUserData: vi.fn(() => ok(null as never)),
+    exportPortableDataV3: vi.fn(() => ok(null as never)),
+    dryRunPortableDataV3: vi.fn(() => ok(null as never)),
+    applyPortableDataV3: vi.fn(() => ok(null as never)),
   };
   const start = vi.fn();
   const dispose = vi.fn();
   const instance: DataPortabilityModuleInstance = {
-    exportDependencies: {} as never,
-    importStore: {} as never,
     useCases: {} as never,
     api,
     start,
@@ -128,20 +127,20 @@ describe('createDataPortabilityElectronModule lifecycle', () => {
   });
 
   it('routes IPC calls through the controller to the same instance api', async () => {
-    fake.api.exportUserData.mockResolvedValue(
+    fake.api.exportPortableDataV3.mockResolvedValue(
       ok({
         fileName: 'export.json',
         content: '{}',
-        summary: { entityCounts: {}, cachedAttachmentBytes: 0, notes: [] },
+        summary: { capabilityKeys: [], warnings: [] },
       } as never),
     );
     moduleDef.register(context);
 
     const result = await registered(DataPortabilityChannels.EXPORT)(undefined, {
-      include: ['settings'],
+      capabilities: ['preferences'],
     });
     expect(result).toMatchObject({ ok: true });
-    expect(fake.api.exportUserData).toHaveBeenCalledTimes(1);
+    expect(fake.api.exportPortableDataV3).toHaveBeenCalledTimes(1);
   });
 
   it('destroy removes all channels and disposes exactly once (second call no-ops)', () => {

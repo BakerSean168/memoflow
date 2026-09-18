@@ -11,16 +11,15 @@
  * `ipcMain` 上，并托管该实例的 start/dispose 生命周期。
  *
  * The host (apps/desktop) is responsible for composition: it selects the
- * PowerSync adapters, builds the export dependency set and import store, calls
- * `createDataPortabilityModule(...)`, and passes the resulting instance in
- * through `DataPortabilityElectronModuleOptions`. This factory never reads
- * `ctx.db`, never constructs repositories/use cases, and never starts a runtime
- * adapter.
+ * owner-provided V3 capabilities, calls `createDataPortabilityModule(...)`,
+ * and passes the resulting instance through
+ * `DataPortabilityElectronModuleOptions`. This factory never reads `ctx.db`,
+ * constructs repositories/use cases, or starts a persistence adapter.
  *
- * 宿主（apps/desktop）负责组合：选择 PowerSync 适配器、构建导出依赖集合与
- * 导入存储、调用 `createDataPortabilityModule(...)`，再把组装结果通过
+ * 宿主（apps/desktop）负责组合：选择 owner V3 capability、调用
+ * `createDataPortabilityModule(...)`，再把组装结果通过
  * `DataPortabilityElectronModuleOptions` 传入。本工厂不读取 `ctx.db`，
- * 不创建 repository/use case，也不启动任何 runtime adapter。
+ * 不创建 repository/use case，也不启动 persistence adapter。
  *
  * `instance.api` is the HTTP/IPC-shared application seam
  * (`DataPortabilityApplicationPort`). Both the Express API transport and this
@@ -33,7 +32,7 @@
  *
  * Per-handle state machine (`created -> registered | failed`, then any state
  * -> `disposed`):
- * - register(): only allowed from `created`. Registers the EXPORT/IMPORT IPC
+ * - register(): only allowed from `created`. Registers the V3 EXPORT/DRY_RUN/APPLY IPC
  *   handlers, then calls `instance.start()` — channel registration happens
  *   BEFORE start, so a handler-build failure leaves no runtime side effects.
  *   On success the handle moves to `registered`; a second register() throws.
@@ -49,7 +48,7 @@
  *
  * 每个 handle 的状态机（`created -> registered | failed`，之后任意状态 ->
  * `disposed`）：
- * - register()：仅允许从 `created` 进入。注册 EXPORT/IMPORT IPC handler，
+ * - register()：仅允许从 `created` 进入。注册 V3 EXPORT/DRY_RUN/APPLY IPC handler，
  *   然后调用 `instance.start()`——handler 先于 start 注册，因此 handler 注册
  *   失败不会留下任何 runtime 副作用。成功则进入 `registered`，重复 register()
  *   抛错；任何失败会逆向移除本次调用已安装的通道、best-effort dispose 实例
@@ -68,10 +67,10 @@ import { ResultCode, ResultErrorException } from '@memoflow/contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
 import { formatZodErrors } from '@memoflow/utils/result';
 import {
-  ExportUserDataReqSchema,
-  ImportUserDataReqSchema,
-  type ExportUserDataReq,
-  type ImportUserDataReq,
+  ExportPortableDataV3ReqSchema,
+  PortableDataV3ImportReqSchema,
+  type ExportPortableDataV3Req,
+  type PortableDataV3ImportReq,
 } from '@memoflow/contracts/data-portability';
 import type { DataPortabilityModuleInstance } from '../server/infrastructure/data-portability.module';
 import { withAuthenticatedIdentity } from './authenticated-ipc';
@@ -114,8 +113,8 @@ export interface DataPortabilityElectronModuleOptions {
   readonly instance: DataPortabilityModuleInstance;
 }
 
-function parseExportPayload(dto: unknown): ExportUserDataReq {
-  const parsed = ExportUserDataReqSchema.safeParse(dto ?? {});
+function parseExportPayload(dto: unknown): ExportPortableDataV3Req {
+  const parsed = ExportPortableDataV3ReqSchema.safeParse(dto ?? {});
   if (!parsed.success) {
     throw new ResultErrorException(
       '参数验证失败',
@@ -126,8 +125,8 @@ function parseExportPayload(dto: unknown): ExportUserDataReq {
   return parsed.data;
 }
 
-function parseImportPayload(dto: unknown): ImportUserDataReq {
-  const parsed = ImportUserDataReqSchema.safeParse(dto ?? {});
+function parseImportPayload(dto: unknown): PortableDataV3ImportReq {
+  const parsed = PortableDataV3ImportReqSchema.safeParse(dto ?? {});
   if (!parsed.success) {
     throw new ResultErrorException(
       '参数验证失败',
@@ -146,12 +145,12 @@ function parseImportPayload(dto: unknown): ImportUserDataReq {
  * `IElectronModule`-compatible handle. The handle is a transport adapter, not a
  * composition root: it only registers IPC channels and owns start/dispose
  * lifecycle. IPC channel names, payload schemas, controller methods and
- * response envelopes are unchanged — see the handler registrations below.
+ * response envelopes are V3-only — see the handler registrations below.
  *
  * 把已装配的 `DataPortabilityModuleInstance` 变成兼容 `IElectronModule` 的
  * handle。该 handle 是传输适配器而非组合根：只注册 IPC 通道并托管
  * start/dispose 生命周期。IPC 通道名、payload schema、controller 方法与响应
- * 信封均保持不变——见下方各 handler 注册。
+ * 信封均为 V3——见下方各 handler 注册。
  *
  * @param options - Options carrying the assembled data-portability instance.
  * @returns An IElectronModule-compatible handle bound to the instance.
@@ -180,18 +179,26 @@ export function createDataPortabilityElectronModule(
         ipcMain.handle(DataPortabilityChannels.EXPORT, (_, dto) => {
           return withAuthenticatedIdentity(ctx, (identityId) => {
             const payload = parseExportPayload(dto);
-            return options.instance.api.exportUserData(identityId, payload);
+            return options.instance.api.exportPortableDataV3(identityId, payload);
           });
         });
         installed.push(DataPortabilityChannels.EXPORT);
 
-        ipcMain.handle(DataPortabilityChannels.IMPORT, (_, dto) => {
+        ipcMain.handle(DataPortabilityChannels.DRY_RUN, (_, dto) => {
           return withAuthenticatedIdentity(ctx, (identityId) => {
             const payload = parseImportPayload(dto);
-            return options.instance.api.importUserData(identityId, payload);
+            return options.instance.api.dryRunPortableDataV3(identityId, payload);
           });
         });
-        installed.push(DataPortabilityChannels.IMPORT);
+        installed.push(DataPortabilityChannels.DRY_RUN);
+
+        ipcMain.handle(DataPortabilityChannels.APPLY, (_, dto) => {
+          return withAuthenticatedIdentity(ctx, (identityId) => {
+            const payload = parseImportPayload(dto);
+            return options.instance.api.applyPortableDataV3(identityId, payload);
+          });
+        });
+        installed.push(DataPortabilityChannels.APPLY);
 
         options.instance.start();
         state = 'registered';

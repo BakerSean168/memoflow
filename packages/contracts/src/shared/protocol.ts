@@ -2,7 +2,6 @@ import type { AccountEventMap } from '../modules/account/protocol/account-event-
 import type { AccountRpcMap } from '../modules/account/protocol/account-rpc-map';
 import type { AIEventMap } from '../modules/ai/protocol/ai-event-map';
 import type { AIRpcMap } from '../modules/ai/protocol/ai-rpc-map';
-import type { DataPortabilityEventMap } from '../modules/data-portability/protocol/data-portability-event-map';
 import type { DataPortabilityRpcMap } from '../modules/data-portability/protocol/data-portability-rpc-map';
 import type { GoalEventMap } from '../modules/goal/protocol/goal-event-map';
 import type { GoalRpcMap } from '../modules/goal/protocol/goal-rpc-map';
@@ -37,7 +36,6 @@ export interface AppRpcRegistryExtensions extends Record<string, [unknown, unkno
 // 1. 组装全局事件表 (Global Event Registry)
 type CoreAppEventRegistry = AccountEventMap &
   AIEventMap &
-  DataPortabilityEventMap &
   GoalEventMap &
   GovernanceEventMap &
   NotificationEventMap &
@@ -61,6 +59,5 @@ type CoreAppRpcRegistry = AccountRpcMap &
   TaskRpcMap;
 
 export type AppRpcRegistry = CoreAppRpcRegistry & AppRpcRegistryExtensions;
-
 
 

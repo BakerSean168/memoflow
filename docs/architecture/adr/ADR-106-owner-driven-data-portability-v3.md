@@ -2,12 +2,12 @@
 tags: [adr, data-portability, backup, import, migration]
 description: Data Portability V3 采用 owner-driven capability registry 与 versioned manifest
 created: 2026-09-09T00:31:00+08:00
-updated: 2026-09-14T00:00:00+08:00
+updated: 2026-09-18T00:00:00+08:00
 ---
 
 # ADR-106: Owner-driven Data Portability V3
 
-**状态：** 已采纳，部分实施（V3 framework + account-profile@3、preferences@3、notification-delivery-preferences@3 owner 已落地；full cutover pending）
+**状态：** 已采纳并实施；PORT-1611 已完成 V3-only destructive cutover
 **日期：** 2026-09-09
 
 ## Problem
@@ -43,16 +43,19 @@ Capability implementations由 owner module 提供并在 host composition root �
 
 ### 2. Typed capability contracts
 
-Payload 不允许 unrestricted `unknown` 直通。每个 capability 有 canonical Zod/schema + explicit schema version。例如：
+Payload 不允许 unrestricted `unknown` 直通。每个 capability 有 canonical Zod/schema + explicit schema version。当前生产 registry 的实际 owner contracts 为：
 
 ```text
-goal@3
-task@3
-routine@2
-knowledge@2
 account-profile@3
 preferences@3
 notification-delivery-preferences@3
+routines@3
+schedules@3
+notifications@3
+labels@3
+goals@3
+tasks@3
+ai-conversations@3
 ```
 
 Data Portability 只通过统一 `PortableCapability` interface 编排。
@@ -96,7 +99,7 @@ V3 不新增以下 capability：
 - old Repository/Folder/Resource projections；
 - Better Auth credentials/sessions/providers。
 
-### 6. Legacy V2 policy — superseded by ADR-111
+### 6. Legacy V1/V2 policy — superseded by ADR-111 and completed by PORT-1611
 
 ADR-111 已明确采用 zero-legacy-data destructive cutover：
 
@@ -104,7 +107,28 @@ ADR-111 已明确采用 zero-legacy-data destructive cutover：
 - 不提供 V2 reader/migrator 或 compatibility window；
 - 旧 backup 明确 unsupported；
 - V3 只包含最终 surviving owner facts；
-- 当前生产 V2 路径仅是 full V3 owner coverage 完成前的实施中间态，不是兼容策略，必须由 PORT-1603 删除。
+- PORT-1611 已删除生产 V1/V2 reader、writer、importer、projection、mini-repository port、transport DTO 和 compatibility fixture。
+- V1/V2 backup 在 product boundary 明确返回 unsupported schemaVersion；系统不保留 parser、migrator、dual-read、dual-write、alias、fallback、backfill 或旧 backup restore path。
+
+### 7. Current product boundary after PORT-1611
+
+The only import/export business-backup surface is the owner-driven V3
+envelope/coordinator:
+
+```text
+POST /data-portability/export
+POST /data-portability/dry-run
+POST /data-portability/apply
+IPC data-portability:export / data-portability:dry-run / data-portability:apply
+```
+
+API and Desktop register the same ten owner capabilities. The registry orders
+dependencies deterministically (`preferences` before `account-profile`, then
+`labels` → `goals` → `tasks`). Server-held disclosure remains a separate Web
+export with `importMode: not-importable` and is rejected before V3 capability
+validation; it is never a V3 capability or restorable user data.
+
+Closure evidence: `docs/analysis/2026-09-18-port-1611-v3-only-cutover-evidence.md`.
 
 ## Protected security invariants
 

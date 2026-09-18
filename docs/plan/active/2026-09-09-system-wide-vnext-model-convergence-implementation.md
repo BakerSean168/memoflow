@@ -293,15 +293,15 @@ Removed `CloudAuthUser.status` from the Prisma schema and regenerated Prisma; `C
 
 ### PORT-1601 — Introduce V3 envelope and PortableCapability contract
 
-**状态：IN PROGRESS — 2026-09-10 foundation landed; production V3 cutover pending**
+**状态：DONE — 2026-09-18; completed on the PORT-1611 canonical cutover head**
 
 Add `PortableBackupEnvelopeV3` and a typed capability registration seam as the only supported portable format. Do not retain the V2 reader.
 
-Current checkpoint: the strict V3 envelope, unique/versioned capability entries, V3 import safety parser and owner-typed `PortableCapabilityRegistry` seam are implemented. Every registered owner payload is validated through the owner-provided Zod schema at export/dry-run/apply boundaries, and host-owned identity remains outside the payload. Two real owner implementations are now available: Setting exposes `preferences@3`, and Notification exposes `notification-delivery-preferences@3`. The Notification payload deliberately contains only the stable user-owned `globalChannels + workflowOverrides` facts; device presentation/sound, identity/persistence metadata, and the current `doNotDisturb/rateLimit` fields are excluded because ADR-088 still requires QuietHours/SystemDeliveryGuard convergence before those semantics are portable. The existing full Data Portability V2 export/import path is intentionally still present until the remaining surviving owners provide V3 capabilities and the registry can cut over without deleting current Goal/Task/etc. backup coverage; therefore this ticket is not marked DONE and no full-product V3 cutover is claimed yet.
+Current implementation is the strict V3 envelope, unique/versioned capability entries, V3 import-safety parser, owner-typed registry, exact version checks, stable refs, deterministic dependency order, and owner validation at export/dry-run/apply boundaries. The PORT-1611 coverage ledger proves the complete surviving set is registered: `preferences@3`, `account-profile@3`, `notification-delivery-preferences@3`, `routines@3`, `schedules@3`, `notifications@3`, `labels@3`, `goals@3`, `tasks@3`, and `ai-conversations@3`. Host-owned identity remains outside the payload. Evidence: `docs/analysis/2026-09-18-port-1611-v3-only-cutover-evidence.md`.
 
 ### PORT-1602 — Implement registry/coordinator/dry-run pipeline
 
-**状态：IN PROGRESS — 2026-09-10 generic coordinator complete; first production owner registry wiring landed**
+**状态：DONE — 2026-09-18; V3-only API/Desktop composition verified**
 
 - topological capability order;
 - host-owned identity;
@@ -309,11 +309,13 @@ Current checkpoint: the strict V3 envelope, unique/versioned capability entries,
 - stable portable references;
 - receipt and warning ledger.
 
-Current checkpoint: `PortableCapabilityCoordinator` now performs dependency-ordered export/dry-run/apply, exact capability-version checks and full owner-payload prevalidation before any mutation-capable apply call. `PortableReferenceRegistry` provides operation-local capability-scoped refs without serializing source/target persistence IDs, and receipts aggregate per-owner created/updated/skipped counts plus namespaced warnings. Export output is reparsed through the V3 safety boundary so owner schemas cannot accidentally emit persistent identity, secrets or non-JSON values. API and Desktop composition roots now pass the same two stable owner capabilities (`preferences@3` and `notification-delivery-preferences@3`) into the module-owned production registry; transport handles expose owner capabilities without re-composing repositories. Product-facing `ExportUserDataUseCase`/`ImportUserDataUseCase` still run V2 until all surviving final-model owners are ready. Evidence: generic V3 contracts 7/7; registry/coordinator 12/12; Notification portable contract + owner behavior 16/16; Notification API/Electron capability-handle lifecycle tests 21/21; API/Desktop host-registry surface/composition tests 46/46; Contracts/Notification/Data Portability/API/Desktop Nx typechecks PASS; affected package builds PASS; test inventory 1225 files; `git diff --check` PASS. The remaining owner capabilities are still required before V3 can replace V2 without feature loss. No full-product V3 cutover is claimed.
+Current implementation: `PortableCapabilityCoordinator` performs dependency-ordered export/dry-run/apply, exact capability-version checks, complete owner-payload prevalidation before mutation-capable apply calls, operation-local stable refs, and receipt/warning aggregation. API and Desktop pass the same ten owner capability registrations to the same V3 module; the V2 use cases, persistence-shaped mini-repositories, projections, and transport DTOs have been deleted. Evidence and command results are recorded in `docs/analysis/2026-09-18-port-1611-v3-only-cutover-evidence.md`.
 
 ### PORT-1603 — Delete V2 portability compatibility
 
-Remove V2 reader/writer/migrator contracts and tests. Old backups are unsupported in this refactor. V3 contains only surviving owner facts.
+**状态：DONE — 2026-09-18 as part of PORT-1611**
+
+V1/V2 reader/writer/migrator contracts, routes, IPC surface, persistence-shaped mini-repositories, owner projections, compatibility fixtures, and old use cases were deleted. Old backups are unsupported; the generic V3 boundary returns an unsupported-schema error without retaining a legacy parser or migrator.
 
 ---
 
@@ -600,8 +602,10 @@ references, use owner/application read seams, and provide deterministic dry-run
 and apply behavior with fail-closed internal reference checks. API and Desktop
 registration parity is covered by composition surface tests; owner round-trip
 and invalid-reference coverage lives with the Routine, Schedule, Notification,
-and contract modules. V2/V1 surfaces and downstream dependency ordering remain
-unchanged; PORT-1611 still owns their later deletion.
+and contract modules. PORT-1611 completed the later destructive deletion of the
+V1/V2 surfaces; the current registry resolves the explicit owner dependencies
+(`preferences` → `account-profile`, `labels` → `goals` → `tasks`) before the
+remaining independent capabilities.
 
 ---
 
@@ -646,11 +650,15 @@ Critical order:
 
 ## PORT-1610 — Implement owner capabilities for all surviving product facts
 
+**状态：DONE — PORT-1610B accepted and verified as an ancestor of the PORT-1611 base**
+
 Each module registers its canonical V3 portable capability. No central persistence-shaped clone.
 
 ## PORT-1611 — Assert V3-only portability surface
 
-Delete any remaining V1/V2 reader/writer/migrator code, old mini repository ports and compatibility fixtures. Only V3 owner capabilities remain.
+**状态：DONE — 2026-09-18; coverage complete and V3-only cutover implemented**
+
+The Stage A ledger proves every surviving portable product fact has an owner capability or an explicit disclosure-only/non-portable disposition. Stage B removed the remaining V1/V2 authority and cut API/Desktop export, dry-run and apply to V3. Stage C added precise anti-resurrection locks and updated current docs. Closure evidence: `docs/analysis/2026-09-18-port-1611-v3-only-cutover-evidence.md`.
 
 ## CLEAN-2601 — Whole-schema legacy sweep
 
@@ -740,4 +748,4 @@ Phases 0-4 are now owner-converged. Time/Label, Account/Setting, Knowledge/Edito
 4. After `AI-9606`, continue `AI-9607/9608/9609`; `HOME-1803` joins the explicit owner-read AI analytics cutover. Then resolve ActivityLedger (`HOME-1804`) and hard-delete Dashboard (`HOME-1805`).
 5. `PORT-1611` starts only after PORT-1610B + HOME-1805 + AI-9612 prove every surviving owner is V3-covered; `CLEAN-2601` and SYS-3001..3004 remain the final destructive sweep and whole-system closure.
 
-`SETTING-9209` deliberately kept the current V2 full-backup envelope's `settings` singleton as a strict canonical UserPreferenceProfile adapter while deleting all legacy Setting persistence/protocol/client code. That temporary V2 transport remains non-authoritative and is deleted by PORT-1611, not by reintroducing `user_settings`.
+`SETTING-9209`'s former V2 `settings` singleton was replaced at the product boundary by the owner-driven `preferences@3` capability. No `user_settings` compatibility adapter or V2 transport remains.

@@ -60,15 +60,29 @@ describe('PortableBackupEnvelopeV3', () => {
   });
 
   it('rejects V2 envelopes instead of treating them as V3', () => {
-    expect(
-      PortableBackupEnvelopeV3Schema.safeParse({
+    const legacy = {
         kind: 'memoflow.user-data-export',
         schemaVersion: 2,
         exportedAt: baseEnvelope.exportedAt,
         scope: { includesBinaryResources: false, importMode: 'append-create-like' },
         data: {},
-      }).success,
-    ).toBe(false);
+      };
+    expect(PortableBackupEnvelopeV3Schema.safeParse(legacy).success).toBe(false);
+    expect(parsePortableBackupEnvelopeV3(legacy)).toEqual({
+      ok: false,
+      error: 'Unsupported Data Portability schemaVersion: 2; only V3 is supported',
+    });
+  });
+
+  it('rejects a V1-shaped business backup without a legacy decoder', () => {
+    expect(parsePortableBackupEnvelopeV3({
+      kind: 'memoflow.user-data-export',
+      schemaVersion: 1,
+      data: {},
+    })).toEqual({
+      ok: false,
+      error: 'Unsupported Data Portability schemaVersion: 1; only V3 is supported',
+    });
   });
 });
 

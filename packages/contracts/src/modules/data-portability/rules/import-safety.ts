@@ -5,8 +5,6 @@
  * other sensitive data from leaking into portable import files.
  */
 
-import type { UserDataExportEnvelopeV2 } from '../dtos/portable-envelope.dto';
-import { UserDataExportEnvelopeV2Schema } from '../dtos/portable-envelope.dto';
 import type { PortableBackupEnvelopeV3 } from '../dtos/portable-v3.dto';
 import { PortableBackupEnvelopeV3Schema } from '../dtos/portable-v3.dto';
 
@@ -66,55 +64,7 @@ export function findBannedImportKey(value: unknown, path: string[] = []): string
   return null;
 }
 
-// ============ Typed Envelope Parser ============
-
-export type ParseUserDataExportEnvelopeResult =
-  | { ok: true; envelope: UserDataExportEnvelopeV2 }
-  | { ok: false; error: string };
-
-/**
- * Parse and validate a raw object as a UserDataExportEnvelopeV2.
- *
- * Unlike the old `validateEnvelope` which returned `{ ok, data: Record<string, unknown> }`
- * and required a downstream cast, this returns a fully typed envelope on success.
- */
-export function parseUserDataExportEnvelope(raw: unknown): ParseUserDataExportEnvelopeResult {
-  // Server-held disclosure is a distinct, non-importable product envelope (residual 106).
-  // Fail closed with an explicit message before generic schema diagnostics.
-  if (
-    raw !== null &&
-    typeof raw === 'object' &&
-    !Array.isArray(raw) &&
-  // Residual 885: server-held disclosure envelopes remain not-importable (portable user-data-export only).
-    (raw as { kind?: unknown }).kind === 'memoflow.server-held-data-disclosure'
-  ) {
-    return {
-      ok: false,
-      error:
-        'Server-held data disclosure is not importable. Export/import only memoflow.user-data-export business backups.',
-    };
-  }
-
-  const result = UserDataExportEnvelopeV2Schema.safeParse(raw);
-  if (!result.success) {
-    const issue = result.error.issues[0];
-    return {
-      ok: false,
-      error: `Envelope validation failed: ${issue.path.join('.')} — ${issue.message}`,
-    };
-  }
-
-  const bannedPath = findBannedImportKey(result.data.data);
-  if (bannedPath) {
-    return {
-      ok: false,
-      error: `Envelope validation failed: data.${bannedPath} — banned import field`,
-    };
-  }
-
-  return { ok: true, envelope: result.data };
-}
-
+// ============ V3-only Typed Envelope Parser ============
 
 export type ParsePortableBackupEnvelopeV3Result =
   | { ok: true; envelope: PortableBackupEnvelopeV3 }
@@ -138,6 +88,25 @@ export function parsePortableBackupEnvelopeV3(raw: unknown): ParsePortableBackup
       error:
         'Server-held data disclosure is not importable. Export/import only memoflow.user-data-export business backups.',
     };
+  }
+
+  if (raw !== null && typeof raw === 'object' && !Array.isArray(raw)) {
+    const candidate = raw as {
+      data?: unknown;
+      format?: unknown;
+      kind?: unknown;
+      schemaVersion?: unknown;
+    };
+    const isPortableBackup =
+      candidate.format === 'memoflow.user-data-export' ||
+      candidate.kind === 'memoflow.user-data-export' ||
+      candidate.data !== undefined;
+    if (isPortableBackup && typeof candidate.schemaVersion === 'number' && candidate.schemaVersion !== 3) {
+      return {
+        ok: false,
+        error: `Unsupported Data Portability schemaVersion: ${candidate.schemaVersion}; only V3 is supported`,
+      };
+    }
   }
 
   const result = PortableBackupEnvelopeV3Schema.safeParse(raw);

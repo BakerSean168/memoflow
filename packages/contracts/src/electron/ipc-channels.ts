@@ -289,10 +289,11 @@ export const AutoUpdateChannels = {
   CONFIG: 'auto-update:config',
 } as const;
 
-// Residual 885: portable user-data export/import only — no server-held disclosure IPC channel.
+// V3-only portable user-data surface — no server-held disclosure IPC channel.
 export const DataPortabilityChannels = {
   EXPORT: 'data-portability:export',
-  IMPORT: 'data-portability:import',
+  DRY_RUN: 'data-portability:dry-run',
+  APPLY: 'data-portability:apply',
 } as const;
 
 export const WindowChannels = {

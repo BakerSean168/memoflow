@@ -1,120 +1,88 @@
 ---
-tags: [analysis, data-portability, migration, vnext]
-description: Data Portability V2 当前契约、旧模块 DTO 与 owner-driven vNext 差距地图
+tags: [analysis, data-portability, vnext]
+description: Data Portability current V3-only system map after PORT-1611
 created: 2026-09-09T00:31:00+08:00
 updated: 2026-09-18T00:00:00+00:00
 ---
 
 # Data Portability Current-System Map
 
-## 1. Executive finding
+## Executive finding
 
-Data Portability 的定位正确：它没有自己的业务 Domain，而是跨 owner 的 export/import orchestrator。问题在于 `PortableUserDataV2` 已经逐渐成为一份 **复制所有模块内部模型的第二套产品 schema**，而上游 Goal/Task/Routine/Planner/Knowledge/Setting/AI 已全面重建，因此 V2 已显著陈旧。
+PORT-1611 completes the owner-driven destructive cutover. Data Portability owns
+only orchestration: V3 envelope decoding, capability registry, dependency and
+reference ordering, safety checks, dry-run/apply coordination and receipts.
+Business facts remain in their owner modules. There is no Data Portability
+mini-repository, persistence-shaped projection, legacy backup parser or V1/V2
+product route.
 
-## 2. Current strengths
+## Runtime composition
 
-- `memoflow.user-data-export` 与 `memoflow.server-held-data-disclosure` 完全分离。
-- server-held disclosure 明确不可导入。
-- import identity 由 trusted ExecutionContext 提供；payload 中持久 ID、auth、token/password/secret 等字段 fail closed。
-- 支持 dry-run、warning、created/updated/skipped receipt。
-- Web/API 与 Desktop/PowerSync 均有明确 adapter。
-- package 自己没有 Domain Aggregate。
-
-这些全部应保留。
-
-## 3. Verified model drift in schemaVersion 2
-
-### Goal
-
-仍包含 `description/motivation/feasibilityAnalysis/dueDate/completedAt/reminderConfig`，KR 仍使用 `startingValue/progressBaselineValue`，与 Goal vNext ADR-067~070 冲突。
-
-### Task
-
-仍包含 `taskType/tags/color/timeConfig/recurrenceRule/reminderConfig/lastGeneratedDate/generateAheadDays` 和 templates/instances 命名，与 TaskPlan/TaskOccurrence + canonical schedule 冲突。
-
-### Reminder/Routine
-
-仍以 legacy `ReminderGroup/ReminderTemplate/ReminderResponse` 为主要 portable truth，而 Routine vNext 已定义 Definition/Profile/Trigger/Occurrence/Interaction。
-
-### Schedule/Scheduler
-
-仍导出 Calendar `duration/priority` 与 legacy `ScheduleTask sourceModule/enabled/schedule/execution/metadata`，与 Planner/ScheduledInvocation target 冲突。Scheduler reliable runtime state 本来也不应该进入普通 user backup。
-
-### Knowledge/Repository
-
-仍导出旧 `Repository/Folder/Resource`，而 Knowledge vNext 已定义 KnowledgeSpace、binding、stable KnowledgeDocument。Git content/projection/cache/lease 也不能混成 importable business truth。
-
-### Editor
-
-仍完整导出/导入已经退休的 EditorWorkspace/Session/Group/Tab。它是阻碍旧 editor tables 最终删除的主要兼容边界。
-
-### AI（Stage A prerequisite closure）
-
-AI Conversation shell now has owner-driven V3 coverage through the canonical
-`ai-conversations@3` capability. Its strict payload contains only capability-scoped `ref`, shell
-`name`, and canonical `status`; import creates fresh host-owned shell IDs under the execution
-identity and never restores source identity, persistence metadata, timestamps, or deleted state.
-Mastra thread history remains runtime-owned; there is no `AiMessage`/`ai_messages` V3 portability
-path. Provider credentials, `AIExecutionRecord` operations projections, capability evidence, and AI
-index cache/vectors are not ordinary user backup truth. The V2 full-backup path still exports and
-imports the same shell metadata temporarily, solely until PORT-1611 cuts the product surface;
-PORT-1611 remains pending and V2 is not deleted by this prerequisite closure.
-
-### Settings
-
-仍是开放 `preferences: Record<string, unknown>`，与 namespace-scoped typed UserPreference vNext 冲突。
-
-### Notification
-
-已有独立 preference portable shape，但仍使用旧 DND/rateLimit envelope；Notification Fact/Delivery runtime 的 portable ownership需要重新区分。
-
-## 4. Structural coupling problem
-
-`DataPortabilityDependencies` 自己定义 GoalRepoPort、TaskPlanRepoPort、ReminderTemplateRepoPort、RepositoryRepoPort、ScheduleTaskRepoPort、EditorWorkspaceRepoPort、AIConversationRepoPort 等 mini-repository interfaces。
-
-这使 Data Portability 必须知道每个模块的 persistence shape，并在每次 owner 重构后同步重写 projection/importer。
-
-## 5. Target
-
-Data Portability 应拥有：
+Both production hosts pass the same ten semantic owner capabilities to the same
+V3 registry:
 
 ```text
-PortableBackupEnvelope
-PortableCapabilityRegistry
-ImportCoordinator
-ReferenceResolver
-SafetyPolicy
-MigrationPipeline
-Receipt
+account-profile@3                 depends on preferences
+preferences@3
+notification-delivery-preferences@3
+routines@3
+schedules@3
+notifications@3
+labels@3
+goals@3                           depends on labels
+tasks@3                           depends on labels, goals
+ai-conversations@3
 ```
 
-各 owner 模块拥有：
+The registry topologically orders a complete operation as:
 
 ```text
-GoalPortableCapability
-TaskPortableCapability
-RoutinePortableCapability
-KnowledgePortableCapability
-PreferencePortableCapability
-...
+preferences → account-profile → notification-delivery-preferences
+→ routines → schedules → notifications → labels → goals → tasks
+→ ai-conversations
 ```
 
-每个 capability 负责自己的：
+The API and Desktop transports share the application port and expose only:
 
-- schema/version；
-- export projection；
-- dry-run validation；
-- import/apply adapter；
-- portable reference production/consumption；
-- legacy version migration（如需）。
+- `export` — V3 envelope and capability summary;
+- `dry-run` — owner validation/conflict receipt with zero mutation;
+- `apply` — isolated preflight followed by owner apply and receipt.
 
-Data Portability 只编排 dependency order 和 cross-capability refs，不复制 owner internal persistence model。
+## Former V2 coverage disposition
 
-## 6. Backup classes
+The former full-backup branches were reviewed before deletion. Preferences,
+notification delivery choices, goals/KRs/reviews/records, task plans and
+occurrences, canonical schedule entries, and the AI conversation shell are
+covered by the owner capabilities above. Current-product labels, account
+profile, routine facts and notification facts are also covered by their current
+owners even though they were absent from the old full-backup shape.
 
-必须继续区分：
+The following are intentionally not portable business facts: old
+Repository/Folder/Resource projections; schedule duration/priority projection
+metadata; AI timestamps, transcripts and runtime metadata; scheduler/outbox/
+audit state; notification delivery/device state; database ids, source identity,
+credentials and secrets. These remain owner/runtime/schema concerns and are not
+recreated by Data Portability.
 
-1. **Importable User Business Backup** — 用户拥有、可恢复的产品事实；
-2. **Server-held Disclosure** — 合规/透明度导出，不可导入；
-3. **Device-local Optional Export** — 只有明确 host capability 时才导入；
-4. **Runtime/Projection/Cache** — 不作为 user backup truth。
+The old `reminders` selector had no exporter branch. Canonical Routine facts are
+provided by `routines@3`; no empty legacy selector survives.
+
+## Server-held disclosure boundary
+
+`server-held-data-disclosure` is a separate authenticated Web export. It is a
+transparency artifact for server-held Knowledge/repository observations and
+cached bytes, with `importMode: not-importable` and
+`includesImportableBusinessDataBackup: false`. It is not registered as a V3
+capability, has no Desktop IPC channel, and the V3 parser rejects its envelope
+before owner payload validation.
+
+## Deleted authority
+
+PORT-1611 deletes the old V1/V2 API DTOs and envelope contracts, selectors,
+reader/writer use cases, importer/projector tree, sanitize/runtime helpers,
+mini-repository ports and Prisma/PowerSync portability adapters/stores. It also
+removes old portability event topics and compatibility fixtures. Unrelated
+whole-schema tables and owner domain objects remain in scope for CLEAN-2601.
+
+See the [PORT-1611 closure evidence](./2026-09-18-port-1611-v3-only-cutover-evidence.md)
+for the source ledger, deletion inventory, exact verification and residue scan.

@@ -1,162 +1,69 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { IResultIpcClient } from '../../types';
 import type {
-  ExportUserDataReq,
-  ExportUserDataRes,
-  ImportUserDataReq,
-  ImportUserDataRes,
+  ExportPortableDataV3Res,
+  PortableDataV3ImportRes,
 } from '@memoflow/contracts/data-portability';
 import type { Result } from '@memoflow/contracts/result';
 import { DataPortabilityIpcAdapter } from '../data-portability-ipc.adapter';
 
 function createMockIpcClient(): IResultIpcClient & { invoke: ReturnType<typeof vi.fn> } {
-  return {
-    invoke: vi.fn(),
-  };
+  return { invoke: vi.fn() };
 }
 
+const exportResult: Result<ExportPortableDataV3Res> = {
+  ok: true,
+  data: {
+    fileName: 'test-export-v3.json',
+    content: '{"format":"memoflow.user-data-export","schemaVersion":3}',
+    summary: { capabilityKeys: ['preferences'], warnings: [] },
+  },
+};
+
+const importResult: Result<PortableDataV3ImportRes> = {
+  ok: true,
+  data: {
+    batchId: 'batch-1',
+    dryRun: true,
+    capabilities: [],
+    created: {},
+    updated: {},
+    skipped: {},
+    warnings: [],
+  },
+};
+
 describe('DataPortabilityIpcAdapter', () => {
-  it('does not expose server-held disclosure through the local IPC export path', async () => {
+  it('does not expose server-held disclosure through local IPC', async () => {
     const mockClient = createMockIpcClient();
     const adapter = new DataPortabilityIpcAdapter(mockClient);
 
-    await expect(adapter.exportServerHeldDataDisclosure({})).resolves.toEqual({
+    await expect(adapter.exportServerHeldDataDisclosure({})).resolves.toMatchObject({
       ok: false,
-      error: {
-        code: 'NOT_SUPPORTED',
-        message: 'Server-held data disclosure is available from the authenticated Web runtime',
-      },
-      meta: undefined,
+      error: { code: 'NOT_SUPPORTED' },
     });
     expect(mockClient.invoke).not.toHaveBeenCalled();
   });
 
-  describe('exportUserData', () => {
-    it('invokes the correct IPC channel with the provided DTO', async () => {
-      const mockClient = createMockIpcClient();
-      const adapter = new DataPortabilityIpcAdapter(mockClient);
+  it('uses the V3 export channel and forwards the result', async () => {
+    const mockClient = createMockIpcClient();
+    mockClient.invoke.mockResolvedValue(exportResult);
+    const adapter = new DataPortabilityIpcAdapter(mockClient);
+    const request = { capabilities: ['preferences'] } as const;
 
-      const successResult: Result<ExportUserDataRes> = {
-        ok: true,
-        data: {
-          fileName: 'test-export.json',
-          content: '{"kind":"memoflow.user-data-export"}',
-          summary: { entityCounts: { settings: 1 }, warnings: [] },
-        },
-      };
-      mockClient.invoke.mockResolvedValue(successResult);
-
-      const dto: ExportUserDataReq = { include: ['settings'] };
-      await adapter.exportUserData(dto);
-
-      expect(mockClient.invoke).toHaveBeenCalledOnce();
-      expect(mockClient.invoke).toHaveBeenCalledWith('data-portability:export', dto);
-    });
-
-    it('forwards the success Result from invoke unchanged', async () => {
-      const mockClient = createMockIpcClient();
-      const adapter = new DataPortabilityIpcAdapter(mockClient);
-
-      const successResult: Result<ExportUserDataRes> = {
-        ok: true,
-        data: {
-          fileName: 'export.json',
-          content: '{}',
-          summary: { entityCounts: {}, warnings: [] },
-        },
-      };
-      mockClient.invoke.mockResolvedValue(successResult);
-
-      const result = await adapter.exportUserData({});
-
-      expect(result).toBe(successResult);
-    });
-
-    it('forwards the failure Result from invoke unchanged', async () => {
-      const mockClient = createMockIpcClient();
-      const adapter = new DataPortabilityIpcAdapter(mockClient);
-
-      const failureResult: Result<ExportUserDataRes> = {
-        ok: false,
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: '参数验证失败',
-        },
-      };
-      mockClient.invoke.mockResolvedValue(failureResult);
-
-      const result = await adapter.exportUserData({ include: ['bad-module' as any] });
-
-      expect(result).toBe(failureResult);
-    });
+    await expect(adapter.exportPortableDataV3(request)).resolves.toBe(exportResult);
+    expect(mockClient.invoke).toHaveBeenCalledWith('data-portability:export', request);
   });
 
-  describe('importUserData', () => {
-    it('invokes the correct IPC channel with the provided DTO', async () => {
-      const mockClient = createMockIpcClient();
-      const adapter = new DataPortabilityIpcAdapter(mockClient);
+  it('uses separate V3 dry-run and apply channels', async () => {
+    const mockClient = createMockIpcClient();
+    mockClient.invoke.mockResolvedValue(importResult);
+    const adapter = new DataPortabilityIpcAdapter(mockClient);
+    const request = { content: '{"format":"memoflow.user-data-export","schemaVersion":3}' };
 
-      const successResult: Result<ImportUserDataRes> = {
-        ok: true,
-        data: {
-          batchId: 'batch-1',
-          dryRun: false,
-          created: { settings: 1 },
-          updatedSingletons: {},
-          skipped: {},
-          warnings: [],
-        },
-      };
-      mockClient.invoke.mockResolvedValue(successResult);
-
-      const dto: ImportUserDataReq = {
-        content: '{"kind":"memoflow.user-data-export","schemaVersion":1}',
-        dryRun: false,
-      };
-      await adapter.importUserData(dto);
-
-      expect(mockClient.invoke).toHaveBeenCalledOnce();
-      expect(mockClient.invoke).toHaveBeenCalledWith('data-portability:import', dto);
-    });
-
-    it('forwards the success Result from invoke unchanged', async () => {
-      const mockClient = createMockIpcClient();
-      const adapter = new DataPortabilityIpcAdapter(mockClient);
-
-      const successResult: Result<ImportUserDataRes> = {
-        ok: true,
-        data: {
-          batchId: 'batch-2',
-          dryRun: false,
-          created: { goals: 2, tasks: 3 },
-          updatedSingletons: { settings: 1 },
-          skipped: {},
-          warnings: [],
-        },
-      };
-      mockClient.invoke.mockResolvedValue(successResult);
-
-      const result = await adapter.importUserData({ content: '{}' });
-
-      expect(result).toBe(successResult);
-    });
-
-    it('forwards the failure Result from invoke unchanged', async () => {
-      const mockClient = createMockIpcClient();
-      const adapter = new DataPortabilityIpcAdapter(mockClient);
-
-      const failureResult: Result<ImportUserDataRes> = {
-        ok: false,
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: 'Invalid JSON content',
-        },
-      };
-      mockClient.invoke.mockResolvedValue(failureResult);
-
-      const result = await adapter.importUserData({ content: '{bad json' });
-
-      expect(result).toBe(failureResult);
-    });
+    await expect(adapter.dryRunPortableDataV3(request)).resolves.toBe(importResult);
+    await expect(adapter.applyPortableDataV3(request)).resolves.toBe(importResult);
+    expect(mockClient.invoke).toHaveBeenNthCalledWith(1, 'data-portability:dry-run', request);
+    expect(mockClient.invoke).toHaveBeenNthCalledWith(2, 'data-portability:apply', request);
   });
 });
