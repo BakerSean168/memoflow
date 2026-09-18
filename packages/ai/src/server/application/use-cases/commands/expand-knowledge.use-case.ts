@@ -7,7 +7,7 @@ import { createLogger } from '@memoflow/utils/logger';
 import type { IAIProviderConfigRepository } from '../../../domain/repositories/i-ai-provider-config-repository';
 import type {
   KnowledgeExpansionResult,
-  IAIExecutionLogPort,
+  IAIExecutionRecordPort,
   IAIProviderSecretVault,
   IKnowledgeQueryPort,
 } from '../../ports';
@@ -33,7 +33,7 @@ export class ExpandKnowledgeUseCase {
     private readonly providerConfigRepository: IAIProviderConfigRepository,
     private readonly knowledgeIndexService: SyncRelevantKnowledgeUseCase,
     private readonly knowledgeQueryPort: IKnowledgeQueryPort,
-    private readonly executionLogPort?: IAIExecutionLogPort,
+    private readonly executionRecordPort?: IAIExecutionRecordPort,
     private readonly secretVault?: IAIProviderSecretVault,
   ) {}
 
@@ -44,9 +44,8 @@ export class ExpandKnowledgeUseCase {
     const startedAt = Date.now();
     const requestId = cx.requestId;
     let providerMetadata: {
-      providerId?: string;
-      providerName?: string;
-      model?: string;
+      providerConnectionId?: string;
+      modelId?: string;
     } = {};
 
     try {
@@ -60,9 +59,8 @@ export class ExpandKnowledgeUseCase {
         temperature: 0.2,
       });
       providerMetadata = {
-        providerId: provider.id,
-        providerName: provider.name,
-        model: executionProviderConfig.model,
+        providerConnectionId: String(provider.id),
+        modelId: executionProviderConfig.model,
       };
       const retrievalQuery = [request.instruction, request.currentContent]
         .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
@@ -98,43 +96,24 @@ export class ExpandKnowledgeUseCase {
 
       await this.recordExecution({
         identityId: cx.identityId,
-        taskType: 'KNOWLEDGE_QUERY',
-        status: 'COMPLETED',
+        operation: 'knowledge.expand',
+        outcome: 'succeeded',
         requestId,
         ...providerMetadata,
-        input: {
-          instruction: request.instruction,
-          currentContent: request.currentContent,
-          maxResources: request.maxResources,
-          maxCitations: request.maxCitations,
-          mode: 'expand',
-        },
-        result: {
-          matchedResourceCount: response.matchedResourceCount,
-          citationCount: response.citations.length,
-          expandedContent: response.expandedContent,
-        },
         tokenUsage: response.tokenUsage,
-        processingMs: response.processingTimeMs,
+        latencyMs: response.processingTimeMs,
       });
       return ok(response);
     } catch (err) {
       await this.recordExecution({
         identityId: cx.identityId,
-        taskType: 'KNOWLEDGE_QUERY',
-        status: 'FAILED',
+        operation: 'knowledge.expand',
+        outcome: 'failed',
         requestId,
         ...providerMetadata,
         errorCategory: classifyAIExecutionError(err),
-        input: {
-          instruction: request.instruction,
-          currentContent: request.currentContent,
-          maxResources: request.maxResources,
-          maxCitations: request.maxCitations,
-          mode: 'expand',
-        },
-        error: err instanceof Error ? err.message : 'Knowledge expansion failed',
-        processingMs: Date.now() - startedAt,
+        safeError: 'Knowledge expansion failed',
+        latencyMs: Date.now() - startedAt,
       });
       logger.error('Knowledge expansion failed', {
         error: err,
@@ -147,14 +126,14 @@ export class ExpandKnowledgeUseCase {
   }
 
   private async recordExecution(
-    input: Parameters<NonNullable<IAIExecutionLogPort['record']>>[0],
+    input: Parameters<NonNullable<IAIExecutionRecordPort['record']>>[0],
   ): Promise<void> {
-    if (!this.executionLogPort) {
+    if (!this.executionRecordPort) {
       return;
     }
 
     try {
-      await this.executionLogPort.record(withAICostEstimate(input));
+      await this.executionRecordPort.record(withAICostEstimate(input));
     } catch (err) {
       logger.warn('Failed to record knowledge query execution log', {
         error: err,

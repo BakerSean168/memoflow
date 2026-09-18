@@ -1,16 +1,10 @@
 import { z } from 'zod';
 import { brandedId } from '../../../primitives';
-import type {
-  AiProviderConfigId,
-  AiConversationId,
-  AiMessageId,
-  IdentityId,
-} from '../../../primitives';
+import type { AiProviderConfigId, AiConversationId, IdentityId } from '../../../primitives';
 import { KnowledgeDocumentIdSchema } from '../../repository/aggregates/knowledge-document-identity';
 import { TestAIProviderResultDTOSchema } from '../dtos/provider-test-result.dto';
 import { TokenUsageSchema } from '../value-objects/token-usage';
 import { ConversationStatus } from '../value-objects/conversation-status';
-import { MessageRole } from '../value-objects/message-role';
 import {
   AIModelInfoSchema,
   AIProviderConfigClientDTOSchema,
@@ -26,24 +20,6 @@ export { TokenUsageSchema };
 
 // ============ Route Response Schemas ============
 
-// Residual 807: MessageClientDTO dual retired — this schema is the sole message client shape
-// (semantic MessageClientDTO is z.infer alias in entities/message-client.ts).
-export const MessageClientDTOSchema = z.object({
-  id: brandedId<AiMessageId>(),
-  conversationId: brandedId<AiConversationId>(),
-  role: z.enum(Object.values(MessageRole)),
-  content: z.string(),
-  tokenCount: z.number().nullable(),
-  version: z.number(),
-  createdAt: z.number(),
-  updatedAt: z.number(),
-  deletedAt: z.number().nullable(),
-  isUser: z.boolean(),
-  isAssistant: z.boolean(),
-  isSystem: z.boolean(),
-  formattedTime: z.string(),
-});
-
 // Residual 809: AIConversationClientDTO dual retired — sole ClientDTOSchema + z.infer
 // (identityId tightened to brandedId to match prior ClientDTO).
 export const AIConversationClientDTOSchema = z.object({
@@ -51,31 +27,18 @@ export const AIConversationClientDTOSchema = z.object({
   identityId: brandedId<IdentityId>(),
   name: z.string(),
   status: z.enum(Object.values(ConversationStatus)),
-  messageCount: z.number(),
-  lastMessageAt: z.number().nullable(),
   version: z.number(),
   createdAt: z.number(),
   updatedAt: z.number(),
   deletedAt: z.number().nullable(),
-  messages: z.array(MessageClientDTOSchema).nullable(),
 });
 
 // Residual 647: AIProviderConfigSummarySchema dual-track retired.
 // Residual 811: ClientDTOSchema owned by aggregates; list/get envelopes use it only.
 
-// Residual 695: AI response OpenAPI schemas are the sole response shapes for
-// SendMessage / ListAIProviderConfigs / QueryAnalytics / QueryKnowledge /
-// ExpandKnowledge / CreateKnowledgeNote (semantic *Res types are z.infer aliases).
-export const SendMessageResSchema = z.object({
-  userMessage: MessageClientDTOSchema,
-  assistantMessage: MessageClientDTOSchema,
-  tokenUsage: TokenUsageSchema,
-  providerId: brandedId<AiProviderConfigId>(),
-  processingTimeMs: z.number(),
-});
-
+// AI provider/analytics/knowledge response schemas remain below.
 // Residual 691: AI chat list OpenAPI schemas are the sole list response shapes
-// (ConversationListRes / MessageListRes are z.infer aliases).
+// (ConversationListRes is a z.infer alias).
 export const ConversationListResSchema = z.object({
   data: z.array(AIConversationClientDTOSchema),
   total: z.number(),
@@ -83,12 +46,6 @@ export const ConversationListResSchema = z.object({
   pageSize: z.number(),
 });
 
-export const MessageListResSchema = z.object({
-  data: z.array(MessageClientDTOSchema),
-  total: z.number(),
-  page: z.number(),
-  pageSize: z.number(),
-});
 
 // Residual 721: TestAIProviderResultDTOSchema owned by provider-test-result.dto.ts
 // (re-exported for OpenAPI route consumers).

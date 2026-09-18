@@ -1,7 +1,2 @@
-/**
- * AI Entities
- * AI 模块实体导出
- */
-
-export { Message } from './message';
-export type { MessageState } from './message';
+/** AI has no product-owned message entity after Mastra runtime authority cutover. */
+export {};

@@ -7,11 +7,11 @@ import {
 
 import type { IAIProviderConfigRepository } from '../../../../domain/repositories/i-ai-provider-config-repository';
 import type {
-  AIExecutionLogInput,
+  AIExecutionRecordInput,
   AnalyticsQueryContext,
   AnalyticsQueryInput,
   AnalyticsQueryResult,
-  IAIExecutionLogPort,
+  IAIExecutionRecordPort,
   IAnalyticsQueryPort,
   IAnalyticsReadPort,
   IKnowledgeIndexRepository,
@@ -218,8 +218,8 @@ class StubKnowledgeIndexStatusPort implements IKnowledgeIndexStatusPort {
   public readonly updateIndexStatus = vi.fn(async () => {});
 }
 
-class StubExecutionLogPort implements IAIExecutionLogPort {
-  public readonly record = vi.fn<(input: AIExecutionLogInput) => Promise<void>>(async () => {});
+class StubExecutionLogPort implements IAIExecutionRecordPort {
+  public readonly record = vi.fn<(input: AIExecutionRecordInput) => Promise<void>>(async () => {});
 }
 
 class StubAnalyticsReadPort implements IAnalyticsReadPort {
@@ -340,12 +340,12 @@ describe('AIKnowledgeQueryService', () => {
     const knowledgeIndexRepository = new StubKnowledgeIndexRepository();
     const ingestionPort = new StubKnowledgeIngestionPort();
     const queryPort = new StubKnowledgeQueryPort();
-    const executionLogPort = new StubExecutionLogPort();
+    const executionRecordPort = new StubExecutionLogPort();
     const syncRelevant = new SyncRelevantKnowledgeUseCase(
       sourcePort,
       knowledgeIndexRepository,
       ingestionPort,
-      executionLogPort,
+      executionRecordPort,
     );
     const service = new QueryKnowledgeUseCase(
       new StubProviderConfigRepository([
@@ -362,7 +362,7 @@ describe('AIKnowledgeQueryService', () => {
       ]) as unknown as IAIProviderConfigRepository,
       syncRelevant,
       queryPort,
-      executionLogPort,
+      executionRecordPort,
       secretVault,
     );
 
@@ -394,7 +394,7 @@ describe('AIKnowledgeQueryService', () => {
     );
     expect(knowledgeIndexRepository.upsert).toHaveBeenCalledTimes(1);
     expect(queryPort.query).toHaveBeenCalledTimes(1);
-    expect(executionLogPort.record).toHaveBeenCalledTimes(2);
+    expect(executionRecordPort.record).toHaveBeenCalledTimes(2);
     expect(queryPort.query).toHaveBeenCalledWith(
       expect.objectContaining({
         requestId: expect.any(String),
@@ -403,14 +403,14 @@ describe('AIKnowledgeQueryService', () => {
         }),
       }),
     );
-    for (const [call] of executionLogPort.record.mock.calls) {
+    for (const [call] of executionRecordPort.record.mock.calls) {
       expect(call).toEqual(
         expect.objectContaining({
           requestId: expect.any(String),
         }),
       );
     }
-    expect(executionLogPort.record.mock.calls[1]?.[0]).toEqual(
+    expect(executionRecordPort.record.mock.calls[1]?.[0]).toEqual(
       expect.objectContaining({
         costEstimate: expect.objectContaining({
           pricingModel: 'gpt-4o-mini',
@@ -444,12 +444,12 @@ describe('AIKnowledgeQueryService', () => {
     const knowledgeIndexRepository = new StubKnowledgeIndexRepository();
     const ingestionPort = new StubKnowledgeIngestionPort();
     const queryPort = new StubKnowledgeQueryPort();
-    const executionLogPort = new StubExecutionLogPort();
+    const executionRecordPort = new StubExecutionLogPort();
     const syncRelevant = new SyncRelevantKnowledgeUseCase(
       sourcePort,
       knowledgeIndexRepository,
       ingestionPort,
-      executionLogPort,
+      executionRecordPort,
     );
     const service = new QueryKnowledgeUseCase(
       new StubProviderConfigRepository([
@@ -466,7 +466,7 @@ describe('AIKnowledgeQueryService', () => {
       ]) as unknown as IAIProviderConfigRepository,
       syncRelevant,
       queryPort,
-      executionLogPort,
+      executionRecordPort,
       secretVault,
     );
 
@@ -516,12 +516,12 @@ describe('AIKnowledgeQueryService', () => {
     );
     const ingestionPort = new StubKnowledgeIngestionPort();
     const queryPort = new StubKnowledgeQueryPort();
-    const executionLogPort = new StubExecutionLogPort();
+    const executionRecordPort = new StubExecutionLogPort();
     const syncRelevant = new SyncRelevantKnowledgeUseCase(
       sourcePort,
       knowledgeIndexRepository,
       ingestionPort,
-      executionLogPort,
+      executionRecordPort,
     );
     const service = new QueryKnowledgeUseCase(
       new StubProviderConfigRepository([
@@ -538,7 +538,7 @@ describe('AIKnowledgeQueryService', () => {
       ]) as unknown as IAIProviderConfigRepository,
       syncRelevant,
       queryPort,
-      executionLogPort,
+      executionRecordPort,
       secretVault,
     );
 
@@ -570,12 +570,12 @@ describe('AIKnowledgeQueryService', () => {
     const knowledgeIndexRepository = new StubKnowledgeIndexRepository();
     const ingestionPort = new StubKnowledgeIngestionPort();
     const queryPort = new StubKnowledgeQueryPort();
-    const executionLogPort = new StubExecutionLogPort();
+    const executionRecordPort = new StubExecutionLogPort();
     const syncRelevant = new SyncRelevantKnowledgeUseCase(
       sourcePort,
       knowledgeIndexRepository,
       ingestionPort,
-      executionLogPort,
+      executionRecordPort,
     );
     const service = new ExpandKnowledgeUseCase(
       new StubProviderConfigRepository([
@@ -592,7 +592,7 @@ describe('AIKnowledgeQueryService', () => {
       ]) as unknown as IAIProviderConfigRepository,
       syncRelevant,
       queryPort,
-      executionLogPort,
+      executionRecordPort,
       secretVault,
     );
 
@@ -639,12 +639,12 @@ describe('AIKnowledgeQueryService', () => {
     const sourcePort = new StubKnowledgeSourcePort();
     const knowledgeIndexRepository = new StubKnowledgeIndexRepository();
     const ingestionPort = new StubKnowledgeIngestionPort();
-    const executionLogPort = new StubExecutionLogPort();
+    const executionRecordPort = new StubExecutionLogPort();
     const reindexAll = new ReindexAllKnowledgeUseCase(
       sourcePort,
       knowledgeIndexRepository,
       ingestionPort,
-      executionLogPort,
+      executionRecordPort,
     );
     const service = new ReindexKnowledgeUseCase(
       new StubProviderConfigRepository([
@@ -664,7 +664,7 @@ describe('AIKnowledgeQueryService', () => {
         sourcePort,
         knowledgeIndexRepository,
         ingestionPort,
-        executionLogPort,
+        executionRecordPort,
       ),
       secretVault,
     );
@@ -696,18 +696,18 @@ describe('AIKnowledgeQueryService', () => {
     const sourcePort = new StubKnowledgeSourcePort();
     const knowledgeIndexRepository = new StubKnowledgeIndexRepository();
     const ingestionPort = new StubKnowledgeIngestionPort();
-    const executionLogPort = new StubExecutionLogPort();
+    const executionRecordPort = new StubExecutionLogPort();
     const reindexAll = new ReindexAllKnowledgeUseCase(
       sourcePort,
       knowledgeIndexRepository,
       ingestionPort,
-      executionLogPort,
+      executionRecordPort,
     );
     const syncById = new SyncNoteByIdUseCase(
       sourcePort,
       knowledgeIndexRepository,
       ingestionPort,
-      executionLogPort,
+      executionRecordPort,
     );
     const service = new ReindexKnowledgeUseCase(
       new StubProviderConfigRepository([
@@ -751,20 +751,20 @@ describe('AIKnowledgeQueryService', () => {
     const sourcePort = new StubKnowledgeSourcePort();
     const knowledgeIndexRepository = new StubKnowledgeIndexRepository();
     const ingestionPort = new StubKnowledgeIngestionPort();
-    const executionLogPort = new StubExecutionLogPort();
+    const executionRecordPort = new StubExecutionLogPort();
     const service = new ReindexKnowledgeUseCase(
       new StubProviderConfigRepository([]) as unknown as IAIProviderConfigRepository,
       new ReindexAllKnowledgeUseCase(
         sourcePort,
         knowledgeIndexRepository,
         ingestionPort,
-        executionLogPort,
+        executionRecordPort,
       ),
       new SyncNoteByIdUseCase(
         sourcePort,
         knowledgeIndexRepository,
         ingestionPort,
-        executionLogPort,
+        executionRecordPort,
       ),
     );
 
@@ -790,7 +790,7 @@ describe('AIAnalyticsQueryService', () => {
   it('builds controlled analytics context and delegates the answer generation', async () => {
     const readPort = new StubAnalyticsReadPort();
     const queryPort = new StubAnalyticsQueryPort();
-    const executionLogPort = new StubExecutionLogPort();
+    const executionRecordPort = new StubExecutionLogPort();
     const service = new QueryAIAnalyticsUseCase(
       new StubProviderConfigRepository([
         {
@@ -806,7 +806,7 @@ describe('AIAnalyticsQueryService', () => {
       ]) as unknown as IAIProviderConfigRepository,
       readPort,
       queryPort,
-      executionLogPort,
+      executionRecordPort,
       secretVault,
     );
 
@@ -832,14 +832,13 @@ describe('AIAnalyticsQueryService', () => {
         }),
       }),
     );
-    expect(executionLogPort.record).toHaveBeenCalledTimes(1);
-    expect(executionLogPort.record).toHaveBeenCalledWith(
+    expect(executionRecordPort.record).toHaveBeenCalledTimes(1);
+    expect(executionRecordPort.record).toHaveBeenCalledWith(
       expect.objectContaining({
-        taskType: 'ANALYTICS_QUERY',
-        status: 'COMPLETED',
-        providerId: 'provider-1',
-        providerName: 'Main provider',
-        model: 'gpt-4o-mini',
+        operation: 'analytics.query',
+        outcome: 'succeeded',
+        providerConnectionId: 'provider-1',
+        modelId: 'gpt-4o-mini',
         requestId: expect.any(String),
         costEstimate: expect.objectContaining({
           pricingModel: 'gpt-4o-mini',

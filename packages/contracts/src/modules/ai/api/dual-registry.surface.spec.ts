@@ -2,102 +2,60 @@
  * Dual registry suite (elegance E3b tax cut).
  * Merged 20 dual-retired surface locks from this directory.
  * Behavior/assertions preserved; individual *-dual.surface.spec.ts removed.
- * Sources: agent-citation-dual.surface.spec.ts, ai-chat-list-res-dual.surface.spec.ts, ai-conversation-client-dto-dual.surface.spec.ts, ai-model-info-dual.surface.spec.ts, ai-provider-config-client-dto-dual.surface.spec.ts, ai-response-res-dual.surface.spec.ts, conversation-name-dual.surface.spec.ts, generate-goal-automation-res-dual.surface.spec.ts, goal-automation-plan-dual.surface.spec.ts, goal-generation-draft-dual.surface.spec.ts, goal-workflow-result-dual.surface.spec.ts, knowledge-citation-dual.surface.spec.ts, knowledge-note-persisted-ref-dual.surface.spec.ts, message-client-dto-dual.surface.spec.ts, provider-create-schema-dual.surface.spec.ts, provider-summary-dual.surface.spec.ts, provider-test-result-dual.surface.spec.ts, reindex-knowledge-res-dual.surface.spec.ts, stream-message-done-payload-dual.surface.spec.ts, token-usage-dual.surface.spec.ts
+ * Sources: agent-citation-dual.surface.spec.ts, ai-chat-list-res-dual.surface.spec.ts, ai-conversation-client-dto-dual.surface.spec.ts, ai-model-info-dual.surface.spec.ts, ai-provider-config-client-dto-dual.surface.spec.ts, ai-response-res-dual.surface.spec.ts, conversation-name-dual.surface.spec.ts, generate-goal-automation-res-dual.surface.spec.ts, goal-automation-plan-dual.surface.spec.ts, goal-generation-draft-dual.surface.spec.ts, goal-workflow-result-dual.surface.spec.ts, knowledge-citation-dual.surface.spec.ts, knowledge-note-persisted-ref-dual.surface.spec.ts, provider-create-schema-dual.surface.spec.ts, provider-summary-dual.surface.spec.ts, provider-test-result-dual.surface.spec.ts, reindex-knowledge-res-dual.surface.spec.ts, stream-message-done-payload-dual.surface.spec.ts, token-usage-dual.surface.spec.ts
  */
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-// --- merged from ai-chat-list-res-dual.surface.spec.ts ---
+// --- AI conversation shell / Mastra history ownership ---
 {
-  /**
-   * Residual 691: AI chat list response dual bodies retired.
-   * ConversationListRes / MessageListRes reuse *ListResSchema only (ClientDTO items).
-   * Soft residual 807: MessageClientDTO dual retired via MessageClientDTOSchema
-   * (see message-client-dto-dual surface; not asserted here to avoid dual-surface lock drift).
-   * Soft residual 809: AIConversationClientDTO dual retired via AIConversationClientDTOSchema
-   * (see ai-conversation-client-dto-dual surface).
-   */
-  describe('ai chat list response dual retired (residual 691)', () => {
+  describe('AI chat shell stays separate from Mastra runtime history', () => {
     const apiDir = __dirname;
     const responseSchemas = readFileSync(resolve(apiDir, 'response-schemas.ts'), 'utf8');
     const dto = readFileSync(resolve(apiDir, 'ai-chat.dto.ts'), 'utf8');
-    const routes = readFileSync(
+    const chatRoutes = readFileSync(
       resolve(apiDir, '../../../../../ai/src/api/routes/ai-chat.routes.ts'),
       'utf8',
     );
+    const runtimeRoutes = readFileSync(
+      resolve(apiDir, '../../../../../ai/src/api/routes/ai-runtime.routes.ts'),
+      'utf8',
+    );
 
-    it('exports list Res schemas with ClientDTO item arrays', () => {
-      expect(responseSchemas).toContain('Residual 691');
+    it('exports only conversation shell list contracts from ai-chat', () => {
       expect(responseSchemas).toContain('export const ConversationListResSchema');
-      expect(responseSchemas).toContain('export const MessageListResSchema');
       expect(responseSchemas).toContain('data: z.array(AIConversationClientDTOSchema)');
-      expect(responseSchemas).toContain('data: z.array(MessageClientDTOSchema)');
+      expect(responseSchemas).not.toContain('MessageListResSchema');
+      expect(responseSchemas).not.toContain('MessageClientDTOSchema');
+      expect(dto).toContain('export type ConversationListRes = z.infer<typeof ConversationListResSchema>');
+      expect(dto).not.toContain('SendMessageSchema');
+      expect(dto).not.toContain('MessageListRes');
     });
 
-    it('semantic list Res types are z.infer aliases without interface dual bodies', () => {
-      expect(dto).toContain('Residual 691');
-      expect(dto).toContain(
-        'export type ConversationListRes = z.infer<typeof ConversationListResSchema>',
-      );
-      expect(dto).toContain('export type MessageListRes = z.infer<typeof MessageListResSchema>');
-      expect(dto).not.toMatch(/export interface ConversationListRes\b/);
-      expect(dto).not.toMatch(/export interface MessageListRes\b/);
-    });
-
-    it('keeps conversation-shell list on chat routes while message history belongs to Mastra', () => {
-      const runtimeRoutes = readFileSync(
-        resolve(apiDir, '../../../../../ai/src/api/routes/ai-runtime.routes.ts'),
-        'utf8',
-      );
-      expect(routes).toContain('ConversationListResSchema');
-      expect(routes).toContain('successResponse(ConversationListResSchema');
-      expect(routes).not.toContain('MessageListResSchema');
+    it('keeps runtime message history behind AssistantRuntimeHistoryView', () => {
+      expect(chatRoutes).toContain('ConversationListResSchema');
+      expect(chatRoutes).not.toContain('MessageListResSchema');
       expect(runtimeRoutes).toContain('AssistantRuntimeHistoryViewSchema');
       expect(runtimeRoutes).toContain("router.post('/assistant/history'");
     });
   });
 }
 
-// --- merged from ai-conversation-client-dto-dual.surface.spec.ts ---
+// --- AIConversationClientDTO remains a shell DTO ---
 {
-  /**
-   * Residual 809: AIConversationClientDTO dual body retired.
-   * Sole AIConversationClientDTOSchema + z.infer; identityId branded; nests MessageClientDTOSchema.
-   */
-  describe('ai conversation client dto dual retired (residual 809)', () => {
+  describe('ai conversation client dto is shell-only', () => {
     const apiDir = __dirname;
     const responseSchemas = readFileSync(resolve(apiDir, 'response-schemas.ts'), 'utf8');
-    const aggregate = readFileSync(
-      resolve(apiDir, '../aggregates/ai-conversation-client.ts'),
-      'utf8',
-    );
-    const routes = readFileSync(
-      resolve(apiDir, '../../../../../ai/src/api/routes/ai-chat.routes.ts'),
-      'utf8',
-    );
+    const aggregate = readFileSync(resolve(apiDir, '../aggregates/ai-conversation-client.ts'), 'utf8');
 
-    it('owns AIConversationClientDTO as z.infer of AIConversationClientDTOSchema', () => {
-      expect(aggregate).toContain('Residual 809');
-      expect(aggregate).toContain("from '../api/response-schemas'");
-      expect(aggregate).toContain(
-        'export type AIConversationClientDTO = z.infer<typeof AIConversationClientDTOSchema>',
-      );
-      expect(aggregate).not.toMatch(/export interface AIConversationClientDTO\b/);
-    });
-
-    it('AIConversationClientDTOSchema brands identityId and nests MessageClientDTOSchema', () => {
-      expect(responseSchemas).toContain('Residual 809');
-      expect(responseSchemas).toContain('export const AIConversationClientDTOSchema = z.object({');
+    it('owns AIConversationClientDTO as z.infer of the shell schema', () => {
+      expect(aggregate).toContain('export type AIConversationClientDTO = z.infer<typeof AIConversationClientDTOSchema>');
+      expect(aggregate).not.toMatch(/export interface AIConversationClientDTO/);
       expect(responseSchemas).toContain('identityId: brandedId<IdentityId>()');
-      expect(responseSchemas).toContain('messages: z.array(MessageClientDTOSchema).nullable()');
-      expect(responseSchemas).toContain('lastMessageAt: z.number().nullable()');
-    });
-
-    it('OpenAPI chat routes use AIConversationClientDTOSchema', () => {
-      expect(routes).toContain('AIConversationClientDTOSchema');
-      const hits = routes.split('AIConversationClientDTOSchema').length - 1;
-      expect(hits).toBeGreaterThanOrEqual(2);
+      expect(responseSchemas).not.toContain('messages:');
+      expect(responseSchemas).not.toContain('messageCount:');
+      expect(responseSchemas).not.toContain('lastMessageAt:');
     });
   });
 }
@@ -194,9 +152,9 @@ import { describe, expect, it } from 'vitest';
 // --- merged from ai-response-res-dual.surface.spec.ts ---
 {
   /**
-   * Residual 695: AI response dual bodies retired.
-   * SendMessage / ListAIProviderConfigs / QueryAnalytics / QueryKnowledge /
-   * ExpandKnowledge / CreateKnowledgeNote *Res reuse *ResSchema only.
+   * Residual 695: remaining AI response dual bodies retired.
+   * Provider / analytics / knowledge *Res reuse *ResSchema only.
+   * Assistant messaging moved to Mastra runtime transport and is intentionally absent here.
    */
   describe('ai response res duals retired (residual 695)', () => {
     const apiDir = __dirname;
@@ -209,8 +167,7 @@ import { describe, expect, it } from 'vitest';
     const note = readFileSync(resolve(apiDir, 'ai-knowledge-note.dto.ts'), 'utf8');
 
     it('exports response schemas used by OpenAPI routes', () => {
-      expect(responseSchemas).toContain('Residual 695');
-      expect(responseSchemas).toContain('export const SendMessageResSchema');
+      expect(responseSchemas).not.toContain('export const SendMessageResSchema');
       expect(responseSchemas).toContain('export const ListAIProviderConfigsResSchema');
       expect(responseSchemas).toContain('export const QueryAnalyticsResSchema');
       expect(responseSchemas).toContain('export const QueryKnowledgeResSchema');
@@ -219,9 +176,7 @@ import { describe, expect, it } from 'vitest';
     });
 
     it('semantic Res types are z.infer aliases without interface dual bodies', () => {
-      expect(chat).toContain('Residual 695');
-      expect(chat).toContain('export type SendMessageRes = z.infer<typeof SendMessageResSchema>');
-      expect(chat).not.toMatch(/export interface SendMessageRes\b/);
+      expect(chat).not.toContain('SendMessageRes');
 
       expect(provider).toContain('Residual 695');
       expect(provider).toContain(
@@ -407,50 +362,19 @@ import { describe, expect, it } from 'vitest';
   });
 }
 
-// --- merged from message-client-dto-dual.surface.spec.ts ---
+// --- Legacy persisted Message DTOs are intentionally absent after Mastra authority cutover ---
 {
-  /**
-   * Residual 807: MessageClientDTO dual body retired.
-   * Sole MessageClientDTOSchema + z.infer (UI computed fields included).
-   */
-  describe('message client dto dual retired (residual 807)', () => {
+  describe('legacy AI message DTOs do not resurrect', () => {
     const apiDir = __dirname;
     const responseSchemas = readFileSync(resolve(apiDir, 'response-schemas.ts'), 'utf8');
-    const entity = readFileSync(resolve(apiDir, '../entities/message-client.ts'), 'utf8');
-    const routes = readFileSync(
-      resolve(apiDir, '../../../../../ai/src/api/routes/ai-chat.routes.ts'),
-      'utf8',
-    );
+    const entitiesIndex = readFileSync(resolve(apiDir, '../entities/index.ts'), 'utf8');
 
-    it('owns MessageClientDTO as z.infer of MessageClientDTOSchema', () => {
-      expect(entity).toContain('Residual 807');
-      expect(entity).toContain("from '../api/response-schemas'");
-      expect(entity).toContain(
-        'export type MessageClientDTO = z.infer<typeof MessageClientDTOSchema>',
-      );
-      expect(entity).not.toMatch(/export interface MessageClientDTO\b/);
-    });
-
-    it('MessageClientDTOSchema owns transport + UI computed fields', () => {
-      expect(responseSchemas).toContain('Residual 807');
-      expect(responseSchemas).toContain('export const MessageClientDTOSchema = z.object({');
-      expect(responseSchemas).toContain('tokenCount: z.number().nullable()');
-      expect(responseSchemas).toContain('isUser: z.boolean()');
-      expect(responseSchemas).toContain('isAssistant: z.boolean()');
-      expect(responseSchemas).toContain('isSystem: z.boolean()');
-      expect(responseSchemas).toContain('formattedTime: z.string()');
-    });
-
-    it('keeps the legacy DTO shape isolated from the conversation-shell route', () => {
-      const runtimeRoutes = readFileSync(
-        resolve(apiDir, '../../../../../ai/src/api/routes/ai-runtime.routes.ts'),
-        'utf8',
-      );
-      expect(responseSchemas).toContain('data: z.array(MessageClientDTOSchema)');
-      expect(responseSchemas).toContain('userMessage: MessageClientDTOSchema');
-      expect(responseSchemas).toContain('assistantMessage: MessageClientDTOSchema');
-      expect(routes).not.toContain('MessageListResSchema');
-      expect(runtimeRoutes).toContain('AssistantRuntimeHistoryViewSchema');
+    it('keeps transport history on runtime views instead of product Message DTOs', () => {
+      expect(responseSchemas).not.toContain('MessageClientDTOSchema');
+      expect(responseSchemas).not.toContain('SendMessageResSchema');
+      expect(entitiesIndex).toContain('AssistantRuntimeMessageView');
+      expect(entitiesIndex).not.toContain('message-client');
+      expect(entitiesIndex).not.toContain('message-server');
     });
   });
 }

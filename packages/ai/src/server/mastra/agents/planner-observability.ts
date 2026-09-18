@@ -1,13 +1,12 @@
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type {
-  AIExecutionLogInput,
+  AIExecutionRecordInput,
   ChatExecutionUsage,
-  IAIExecutionLogPort,
+  IAIExecutionRecordPort,
 } from '../../application/ports';
 import { estimateAIExecutionCost } from '../../application/use-cases/commands/ai-observability';
 
 const RESOLVED_PROVIDER_ID = 'resolvedProviderId';
-const RESOLVED_PROVIDER_NAME = 'resolvedProviderName';
 const RESOLVED_MODEL_ID = 'resolvedModelId';
 
 export interface PlannerRequestContext {
@@ -20,7 +19,6 @@ export function rememberResolvedPlannerModel(
   model: { providerId: string; providerName: string; modelId: string },
 ): void {
   requestContext.setRaw(RESOLVED_PROVIDER_ID, model.providerId);
-  requestContext.setRaw(RESOLVED_PROVIDER_NAME, model.providerName);
   requestContext.setRaw(RESOLVED_MODEL_ID, model.modelId);
 }
 
@@ -68,21 +66,15 @@ function executionContext(requestContext: PlannerRequestContext): ExecutionConte
     !requestId ||
     !traceId ||
     !Number.isFinite(startedAt) ||
-!isExecutionSource(source)
+    !isExecutionSource(source)
   ) {
     return undefined;
   }
-  return {
-    identityId,
-    requestId,
-    traceId,
-    startedAt,
-    source,
-  };
+  return { identityId, requestId, traceId, startedAt, source };
 }
 
 export async function recordPlannerExecution(
-  port: IAIExecutionLogPort | undefined,
+  port: IAIExecutionRecordPort | undefined,
   input: {
     identityId: string;
     conversationId: string;
@@ -98,30 +90,31 @@ export async function recordPlannerExecution(
   if (!port) return;
   const context = executionContext(input.requestContext);
   const providerId = stringValue(input.requestContext.getRaw(RESOLVED_PROVIDER_ID));
-  const providerName = stringValue(input.requestContext.getRaw(RESOLVED_PROVIDER_NAME));
-  const model = stringValue(input.requestContext.getRaw(RESOLVED_MODEL_ID));
+  const modelId = stringValue(input.requestContext.getRaw(RESOLVED_MODEL_ID));
   const runId = stringValue(input.requestContext.getRaw('workflowRunId'));
-  const costEstimate = model && input.usage ? estimateAIExecutionCost(model, input.usage) : undefined;
-  const log: AIExecutionLogInput = {
+  const costEstimate = modelId && input.usage ? estimateAIExecutionCost(modelId, input.usage) : undefined;
+  const operationByTask = {
+    MASTRA_GOAL_PLANNER: 'workflow.goal.plan',
+    MASTRA_TASK_PLANNER: 'workflow.task.plan',
+    MASTRA_KNOWLEDGE_PLANNER: 'workflow.knowledge.plan',
+  } as const;
+  const record: AIExecutionRecordInput = {
     identityId: input.identityId,
-    taskType: input.taskType,
-    status: input.status,
+    operation: operationByTask[input.taskType],
+    outcome: input.status === 'COMPLETED' ? 'succeeded' : 'failed',
     conversationId: input.conversationId,
     ...(runId ? { runId } : {}),
     ...(context?.requestId ? { requestId: context.requestId } : {}),
     ...(context?.traceId ? { traceId: context.traceId } : {}),
-    ...(providerId ? { providerId } : {}),
-    ...(providerName ? { providerName } : {}),
-    ...(model ? { model } : {}),
-    input: { mode: input.mode },
-    ...(input.outcome ? { result: { outcome: input.outcome } } : {}),
+    ...(providerId ? { providerConnectionId: providerId } : {}),
+    ...(modelId ? { modelId } : {}),
     ...(input.status === 'FAILED'
-      ? { error: 'AI planner request failed', errorCategory: 'MASTRA_PLANNER_ERROR' }
+      ? { safeError: 'AI planner request failed', errorCategory: 'MASTRA_PLANNER_ERROR' }
       : {}),
     ...(input.usage ? { tokenUsage: input.usage } : {}),
     ...(costEstimate ? { costEstimate } : {}),
-    processingMs: Math.max(0, input.processingMs),
+    latencyMs: Math.max(0, input.processingMs),
   };
   // Observability failure must not alter deterministic workflow semantics.
-  await port.record(log).catch(() => undefined);
+  await port.record(record).catch(() => undefined);
 }

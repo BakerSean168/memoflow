@@ -50,10 +50,10 @@ export class PrismaScheduleAdapter implements ScheduleRepoPort {
 
 export class PrismaAIConversationAdapter implements AIConversationRepoPort {
   constructor(private readonly prisma: PrismaClient) {}
-  async findByIdentityId(identityId: string, options?: { includeChildren?: boolean }): Promise<unknown[]> {
+  async findByIdentityId(identityId: string): Promise<unknown[]> {
     return this.prisma.aiConversation.findMany({
       where: { identityId, deletedAt: null },
-      include: options?.includeChildren ? { messages: { orderBy: { createdAt: 'asc' } } } : undefined,
+      orderBy: { createdAt: 'desc' },
     });
   }
 }

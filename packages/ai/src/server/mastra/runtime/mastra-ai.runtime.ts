@@ -24,7 +24,7 @@ import {
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type {
   AIUsageSummary,
-  IAIExecutionLogPort,
+  IAIExecutionRecordPort,
   IAIUsageReadPort,
   IAIRoutineCommandPort,
   IAIPlannerReadPort,
@@ -64,12 +64,12 @@ import {
 } from '../workflows';
 import { AsyncEventQueue } from './async-event-queue';
 import {
-  createAssistantExecutionLog,
+  createAssistantExecutionRecord,
   projectAssistantUsage,
   type AssistantUsageSnapshot,
 } from './assistant-observability';
 import { AssistantHistoryService } from './assistant-history.service';
-import type { AssistantTranscriptBootstrapSource } from './assistant-transcript-bootstrap.port';
+import type { AssistantConversationShellSource } from './assistant-conversation-shell.port';
 import type { AIWorkflowRuntimePort } from './workflow-runtime.port';
 
 function messageText(
@@ -107,7 +107,7 @@ function publicRuntimeError(errorType?: unknown): { code: string; message: strin
 export interface MastraAIRuntimeDependencies {
   readonly storage: MastraCompositeStore;
   readonly modelResolver: MastraModelResolver;
-  readonly transcriptBootstrapSource: AssistantTranscriptBootstrapSource;
+  readonly conversationShellSource: AssistantConversationShellSource;
   /** Host-bound canonical Goal/Task/Reminder application mutations for ADR-052. */
   readonly goalPlanMutationPort: GoalPlanMutationPort;
   /** Host-bound canonical Task application mutation for the task.create workflow. */
@@ -117,7 +117,7 @@ export interface MastraAIRuntimeDependencies {
   /** Existing Knowledge read owner reused by GoalPlan V2 for search/reuse evidence. */
   readonly knowledgeSourcePort: import('../../application/ports').IKnowledgeSourcePort;
   /** Canonical runtime observability sink; host-owned and persistence-agnostic. */
-  readonly executionLogPort?: IAIExecutionLogPort;
+  readonly executionRecordPort?: IAIExecutionRecordPort;
   /** Durable indexed usage projection for run/thread queries and workflow views. */
   readonly usageReadPort?: IAIUsageReadPort;
   readonly routineCommandPort: IAIRoutineCommandPort;
@@ -154,7 +154,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       storage: deps.storage,
       options: { lastMessages: 40 },
     });
-    this.history = new AssistantHistoryService(this.memory, deps.transcriptBootstrapSource);
+    this.history = new AssistantHistoryService(this.memory, deps.conversationShellSource);
     this.assistant = createMemoFlowAssistant({
       modelResolver: deps.modelResolver,
       memory: this.memory,
@@ -167,7 +167,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     this.goalPlanner = new GoalPlannerWorker(
       deps.modelResolver,
       deps.knowledgeSourcePort,
-      deps.executionLogPort,
+      deps.executionRecordPort,
       deps.contextAssembler,
     );
     this.goalCreateWorkflow = createGoalCreateWorkflow({
@@ -176,7 +176,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     });
     this.taskPlanner = new TaskPlannerWorker(
       deps.modelResolver,
-      deps.executionLogPort,
+      deps.executionRecordPort,
       deps.contextAssembler,
     );
     this.taskCreateWorkflow = createTaskCreateWorkflow({
@@ -185,7 +185,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     });
     this.knowledgeCapturePlanner = new KnowledgeCapturePlannerWorker(
       deps.modelResolver,
-      deps.executionLogPort,
+      deps.executionRecordPort,
       deps.contextAssembler,
     );
     this.knowledgeCaptureWorkflow = createKnowledgeCaptureWorkflow({
@@ -1000,18 +1000,15 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         emit(type, { reason: 'aborted' });
       }
 
-      if (this.deps.executionLogPort) {
+      if (this.deps.executionRecordPort) {
         observabilityWrites.push(
-          this.deps.executionLogPort.record(
-            createAssistantExecutionLog({
+          this.deps.executionRecordPort.record(
+            createAssistantExecutionRecord({
               identityId: input.identityId,
               ...(input.context ? { context: input.context } : {}),
               conversationId: input.conversationId,
-              contentLength: input.content.length,
               model: resolvedModel,
               runId: currentRunId(),
-              ...(assistantMessageId ? { assistantMessageId } : {}),
-              responseLength: lastText.length,
               outcome: type,
               ...(lastUsage ? { usage: lastUsage } : {}),
               ...(lastRuntimeError?.code ? { runtimeErrorCode: lastRuntimeError.code } : {}),

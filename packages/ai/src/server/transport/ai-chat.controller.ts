@@ -20,7 +20,6 @@ interface AIConversationControllerService {
   getConversation(
     id: string,
     cx: ExecutionContext,
-    includeMessages?: boolean,
   ): Promise<Result<GetConversationRes | null>>;
   updateConversation(
     id: string,
@@ -63,7 +62,7 @@ export class AIChatController {
   }
 
   async getConversation(id: string, cx: ExecutionContext): Promise<Result<GetConversationRes>> {
-    const result = await this.conversationService.getConversation(id, cx, false);
+    const result = await this.conversationService.getConversation(id, cx);
     if (!result.ok) return result;
     if (!result.data) return fail({ code: 'NOT_FOUND', message: 'Conversation not found' });
     return ok(result.data);

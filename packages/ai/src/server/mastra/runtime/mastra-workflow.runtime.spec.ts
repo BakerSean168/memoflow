@@ -150,7 +150,7 @@ async function createRuntime(file = join(tmpdir(), `memoflow-mastra-runtime-${ra
       createAIProviderSecretVaultStub(),
       vi.fn() as unknown as typeof fetch,
     ),
-    transcriptBootstrapSource: { load: vi.fn(async () => null) },
+    conversationShellSource: { loadShell: vi.fn(async () => null) },
     goalPlanMutationPort: mutations,
     taskPlanMutationPort: {
       resolveLabels: vi.fn(async (names: readonly string[]) =>

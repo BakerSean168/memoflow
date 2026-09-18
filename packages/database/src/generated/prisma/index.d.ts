@@ -24,20 +24,10 @@ export type Account = $Result.DefaultSelection<Prisma.$AccountPayload>
  */
 export type AiConversation = $Result.DefaultSelection<Prisma.$AiConversationPayload>
 /**
- * Model AiMessage
+ * Model AiExecutionRecord
  *
  */
-export type AiMessage = $Result.DefaultSelection<Prisma.$AiMessagePayload>
-/**
- * Model AiGenerationTask
- *
- */
-export type AiGenerationTask = $Result.DefaultSelection<Prisma.$AiGenerationTaskPayload>
-/**
- * Model AiUsageQuota
- *
- */
-export type AiUsageQuota = $Result.DefaultSelection<Prisma.$AiUsageQuotaPayload>
+export type AiExecutionRecord = $Result.DefaultSelection<Prisma.$AiExecutionRecordPayload>
 /**
  * Model AiProviderConfig
  *
@@ -55,11 +45,6 @@ export type AiProviderOnboardingSession = $Result.DefaultSelection<Prisma.$AiPro
  *  * PowerSync table and has no relation to portable provider connection state.
  */
 export type AiProviderSecret = $Result.DefaultSelection<Prisma.$AiProviderSecretPayload>
-/**
- * Model KnowledgeGenerationTask
- *
- */
-export type KnowledgeGenerationTask = $Result.DefaultSelection<Prisma.$KnowledgeGenerationTaskPayload>
 /**
  * Model AiKnowledgeIndexEntry
  *
@@ -615,34 +600,14 @@ export class PrismaClient<
   get aiConversation(): Prisma.AiConversationDelegate<ExtArgs, ClientOptions>;
 
   /**
-   * `prisma.aiMessage`: Exposes CRUD operations for the **AiMessage** model.
+   * `prisma.aiExecutionRecord`: Exposes CRUD operations for the **AiExecutionRecord** model.
     * Example usage:
     * ```ts
-    * // Fetch zero or more AiMessages
-    * const aiMessages = await prisma.aiMessage.findMany()
+    * // Fetch zero or more AiExecutionRecords
+    * const aiExecutionRecords = await prisma.aiExecutionRecord.findMany()
     * ```
     */
-  get aiMessage(): Prisma.AiMessageDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.aiGenerationTask`: Exposes CRUD operations for the **AiGenerationTask** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more AiGenerationTasks
-    * const aiGenerationTasks = await prisma.aiGenerationTask.findMany()
-    * ```
-    */
-  get aiGenerationTask(): Prisma.AiGenerationTaskDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.aiUsageQuota`: Exposes CRUD operations for the **AiUsageQuota** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more AiUsageQuotas
-    * const aiUsageQuotas = await prisma.aiUsageQuota.findMany()
-    * ```
-    */
-  get aiUsageQuota(): Prisma.AiUsageQuotaDelegate<ExtArgs, ClientOptions>;
+  get aiExecutionRecord(): Prisma.AiExecutionRecordDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.aiProviderConfig`: Exposes CRUD operations for the **AiProviderConfig** model.
@@ -673,16 +638,6 @@ export class PrismaClient<
     * ```
     */
   get aiProviderSecret(): Prisma.AiProviderSecretDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.knowledgeGenerationTask`: Exposes CRUD operations for the **KnowledgeGenerationTask** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more KnowledgeGenerationTasks
-    * const knowledgeGenerationTasks = await prisma.knowledgeGenerationTask.findMany()
-    * ```
-    */
-  get knowledgeGenerationTask(): Prisma.KnowledgeGenerationTaskDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.aiKnowledgeIndexEntry`: Exposes CRUD operations for the **AiKnowledgeIndexEntry** model.
@@ -1889,13 +1844,10 @@ export namespace Prisma {
   export const ModelName: {
     Account: 'Account',
     AiConversation: 'AiConversation',
-    AiMessage: 'AiMessage',
-    AiGenerationTask: 'AiGenerationTask',
-    AiUsageQuota: 'AiUsageQuota',
+    AiExecutionRecord: 'AiExecutionRecord',
     AiProviderConfig: 'AiProviderConfig',
     AiProviderOnboardingSession: 'AiProviderOnboardingSession',
     AiProviderSecret: 'AiProviderSecret',
-    KnowledgeGenerationTask: 'KnowledgeGenerationTask',
     AiKnowledgeIndexEntry: 'AiKnowledgeIndexEntry',
     DashboardConfig: 'DashboardConfig',
     CloudAuthUser: 'CloudAuthUser',
@@ -1988,7 +1940,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "account" | "aiConversation" | "aiMessage" | "aiGenerationTask" | "aiUsageQuota" | "aiProviderConfig" | "aiProviderOnboardingSession" | "aiProviderSecret" | "knowledgeGenerationTask" | "aiKnowledgeIndexEntry" | "dashboardConfig" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "rule" | "ruleRevision" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "routineDefinition" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "repository" | "folder" | "resource" | "repositoryResource" | "linkedContent" | "resourceReference" | "repositoryExplorer" | "repositoryStatistic" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
+      modelProps: "account" | "aiConversation" | "aiExecutionRecord" | "aiProviderConfig" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "dashboardConfig" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "rule" | "ruleRevision" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "routineDefinition" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "repository" | "folder" | "resource" | "repositoryResource" | "linkedContent" | "resourceReference" | "repositoryExplorer" | "repositoryStatistic" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2140,225 +2092,77 @@ export namespace Prisma {
           }
         }
       }
-      AiMessage: {
-        payload: Prisma.$AiMessagePayload<ExtArgs>
-        fields: Prisma.AiMessageFieldRefs
+      AiExecutionRecord: {
+        payload: Prisma.$AiExecutionRecordPayload<ExtArgs>
+        fields: Prisma.AiExecutionRecordFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.AiMessageFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiMessagePayload> | null
+            args: Prisma.AiExecutionRecordFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiExecutionRecordPayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.AiMessageFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiMessagePayload>
+            args: Prisma.AiExecutionRecordFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiExecutionRecordPayload>
           }
           findFirst: {
-            args: Prisma.AiMessageFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiMessagePayload> | null
+            args: Prisma.AiExecutionRecordFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiExecutionRecordPayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.AiMessageFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiMessagePayload>
+            args: Prisma.AiExecutionRecordFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiExecutionRecordPayload>
           }
           findMany: {
-            args: Prisma.AiMessageFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiMessagePayload>[]
+            args: Prisma.AiExecutionRecordFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiExecutionRecordPayload>[]
           }
           create: {
-            args: Prisma.AiMessageCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiMessagePayload>
+            args: Prisma.AiExecutionRecordCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiExecutionRecordPayload>
           }
           createMany: {
-            args: Prisma.AiMessageCreateManyArgs<ExtArgs>
+            args: Prisma.AiExecutionRecordCreateManyArgs<ExtArgs>
             result: BatchPayload
           }
           createManyAndReturn: {
-            args: Prisma.AiMessageCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiMessagePayload>[]
+            args: Prisma.AiExecutionRecordCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiExecutionRecordPayload>[]
           }
           delete: {
-            args: Prisma.AiMessageDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiMessagePayload>
+            args: Prisma.AiExecutionRecordDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiExecutionRecordPayload>
           }
           update: {
-            args: Prisma.AiMessageUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiMessagePayload>
+            args: Prisma.AiExecutionRecordUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiExecutionRecordPayload>
           }
           deleteMany: {
-            args: Prisma.AiMessageDeleteManyArgs<ExtArgs>
+            args: Prisma.AiExecutionRecordDeleteManyArgs<ExtArgs>
             result: BatchPayload
           }
           updateMany: {
-            args: Prisma.AiMessageUpdateManyArgs<ExtArgs>
+            args: Prisma.AiExecutionRecordUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
           updateManyAndReturn: {
-            args: Prisma.AiMessageUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiMessagePayload>[]
+            args: Prisma.AiExecutionRecordUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiExecutionRecordPayload>[]
           }
           upsert: {
-            args: Prisma.AiMessageUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiMessagePayload>
+            args: Prisma.AiExecutionRecordUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiExecutionRecordPayload>
           }
           aggregate: {
-            args: Prisma.AiMessageAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateAiMessage>
+            args: Prisma.AiExecutionRecordAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAiExecutionRecord>
           }
           groupBy: {
-            args: Prisma.AiMessageGroupByArgs<ExtArgs>
-            result: $Utils.Optional<AiMessageGroupByOutputType>[]
+            args: Prisma.AiExecutionRecordGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AiExecutionRecordGroupByOutputType>[]
           }
           count: {
-            args: Prisma.AiMessageCountArgs<ExtArgs>
-            result: $Utils.Optional<AiMessageCountAggregateOutputType> | number
-          }
-        }
-      }
-      AiGenerationTask: {
-        payload: Prisma.$AiGenerationTaskPayload<ExtArgs>
-        fields: Prisma.AiGenerationTaskFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.AiGenerationTaskFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiGenerationTaskPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.AiGenerationTaskFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiGenerationTaskPayload>
-          }
-          findFirst: {
-            args: Prisma.AiGenerationTaskFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiGenerationTaskPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.AiGenerationTaskFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiGenerationTaskPayload>
-          }
-          findMany: {
-            args: Prisma.AiGenerationTaskFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiGenerationTaskPayload>[]
-          }
-          create: {
-            args: Prisma.AiGenerationTaskCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiGenerationTaskPayload>
-          }
-          createMany: {
-            args: Prisma.AiGenerationTaskCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.AiGenerationTaskCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiGenerationTaskPayload>[]
-          }
-          delete: {
-            args: Prisma.AiGenerationTaskDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiGenerationTaskPayload>
-          }
-          update: {
-            args: Prisma.AiGenerationTaskUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiGenerationTaskPayload>
-          }
-          deleteMany: {
-            args: Prisma.AiGenerationTaskDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.AiGenerationTaskUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.AiGenerationTaskUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiGenerationTaskPayload>[]
-          }
-          upsert: {
-            args: Prisma.AiGenerationTaskUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiGenerationTaskPayload>
-          }
-          aggregate: {
-            args: Prisma.AiGenerationTaskAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateAiGenerationTask>
-          }
-          groupBy: {
-            args: Prisma.AiGenerationTaskGroupByArgs<ExtArgs>
-            result: $Utils.Optional<AiGenerationTaskGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.AiGenerationTaskCountArgs<ExtArgs>
-            result: $Utils.Optional<AiGenerationTaskCountAggregateOutputType> | number
-          }
-        }
-      }
-      AiUsageQuota: {
-        payload: Prisma.$AiUsageQuotaPayload<ExtArgs>
-        fields: Prisma.AiUsageQuotaFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.AiUsageQuotaFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiUsageQuotaPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.AiUsageQuotaFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiUsageQuotaPayload>
-          }
-          findFirst: {
-            args: Prisma.AiUsageQuotaFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiUsageQuotaPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.AiUsageQuotaFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiUsageQuotaPayload>
-          }
-          findMany: {
-            args: Prisma.AiUsageQuotaFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiUsageQuotaPayload>[]
-          }
-          create: {
-            args: Prisma.AiUsageQuotaCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiUsageQuotaPayload>
-          }
-          createMany: {
-            args: Prisma.AiUsageQuotaCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.AiUsageQuotaCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiUsageQuotaPayload>[]
-          }
-          delete: {
-            args: Prisma.AiUsageQuotaDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiUsageQuotaPayload>
-          }
-          update: {
-            args: Prisma.AiUsageQuotaUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiUsageQuotaPayload>
-          }
-          deleteMany: {
-            args: Prisma.AiUsageQuotaDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.AiUsageQuotaUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.AiUsageQuotaUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiUsageQuotaPayload>[]
-          }
-          upsert: {
-            args: Prisma.AiUsageQuotaUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AiUsageQuotaPayload>
-          }
-          aggregate: {
-            args: Prisma.AiUsageQuotaAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateAiUsageQuota>
-          }
-          groupBy: {
-            args: Prisma.AiUsageQuotaGroupByArgs<ExtArgs>
-            result: $Utils.Optional<AiUsageQuotaGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.AiUsageQuotaCountArgs<ExtArgs>
-            result: $Utils.Optional<AiUsageQuotaCountAggregateOutputType> | number
+            args: Prisma.AiExecutionRecordCountArgs<ExtArgs>
+            result: $Utils.Optional<AiExecutionRecordCountAggregateOutputType> | number
           }
         }
       }
@@ -2581,80 +2385,6 @@ export namespace Prisma {
           count: {
             args: Prisma.AiProviderSecretCountArgs<ExtArgs>
             result: $Utils.Optional<AiProviderSecretCountAggregateOutputType> | number
-          }
-        }
-      }
-      KnowledgeGenerationTask: {
-        payload: Prisma.$KnowledgeGenerationTaskPayload<ExtArgs>
-        fields: Prisma.KnowledgeGenerationTaskFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.KnowledgeGenerationTaskFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KnowledgeGenerationTaskPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.KnowledgeGenerationTaskFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KnowledgeGenerationTaskPayload>
-          }
-          findFirst: {
-            args: Prisma.KnowledgeGenerationTaskFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KnowledgeGenerationTaskPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.KnowledgeGenerationTaskFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KnowledgeGenerationTaskPayload>
-          }
-          findMany: {
-            args: Prisma.KnowledgeGenerationTaskFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KnowledgeGenerationTaskPayload>[]
-          }
-          create: {
-            args: Prisma.KnowledgeGenerationTaskCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KnowledgeGenerationTaskPayload>
-          }
-          createMany: {
-            args: Prisma.KnowledgeGenerationTaskCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.KnowledgeGenerationTaskCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KnowledgeGenerationTaskPayload>[]
-          }
-          delete: {
-            args: Prisma.KnowledgeGenerationTaskDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KnowledgeGenerationTaskPayload>
-          }
-          update: {
-            args: Prisma.KnowledgeGenerationTaskUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KnowledgeGenerationTaskPayload>
-          }
-          deleteMany: {
-            args: Prisma.KnowledgeGenerationTaskDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.KnowledgeGenerationTaskUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.KnowledgeGenerationTaskUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KnowledgeGenerationTaskPayload>[]
-          }
-          upsert: {
-            args: Prisma.KnowledgeGenerationTaskUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KnowledgeGenerationTaskPayload>
-          }
-          aggregate: {
-            args: Prisma.KnowledgeGenerationTaskAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateKnowledgeGenerationTask>
-          }
-          groupBy: {
-            args: Prisma.KnowledgeGenerationTaskGroupByArgs<ExtArgs>
-            result: $Utils.Optional<KnowledgeGenerationTaskGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.KnowledgeGenerationTaskCountArgs<ExtArgs>
-            result: $Utils.Optional<KnowledgeGenerationTaskCountAggregateOutputType> | number
           }
         }
       }
@@ -8466,13 +8196,10 @@ export namespace Prisma {
   export type GlobalOmitConfig = {
     account?: AccountOmit
     aiConversation?: AiConversationOmit
-    aiMessage?: AiMessageOmit
-    aiGenerationTask?: AiGenerationTaskOmit
-    aiUsageQuota?: AiUsageQuotaOmit
+    aiExecutionRecord?: AiExecutionRecordOmit
     aiProviderConfig?: AiProviderConfigOmit
     aiProviderOnboardingSession?: AiProviderOnboardingSessionOmit
     aiProviderSecret?: AiProviderSecretOmit
-    knowledgeGenerationTask?: KnowledgeGenerationTaskOmit
     aiKnowledgeIndexEntry?: AiKnowledgeIndexEntryOmit
     dashboardConfig?: DashboardConfigOmit
     cloudAuthUser?: CloudAuthUserOmit
@@ -8655,7 +8382,7 @@ export namespace Prisma {
     userPreferenceRecords: number
     notifications: number
     aiConversations: number
-    aiGenerationTasks: number
+    aiExecutionRecords: number
     aiKnowledgeIndexEntries: number
     aiProviderConfigs: number
     aiProviderOnboardingSessions: number
@@ -8665,7 +8392,6 @@ export namespace Prisma {
     routineInteractions: number
     notificationInteractions: number
     notificationDispatchOutboxes: number
-    aiMessages: number
     folders: number
     resources: number
     repositoryResources: number
@@ -8700,7 +8426,7 @@ export namespace Prisma {
     userPreferenceRecords?: boolean | AccountCountOutputTypeCountUserPreferenceRecordsArgs
     notifications?: boolean | AccountCountOutputTypeCountNotificationsArgs
     aiConversations?: boolean | AccountCountOutputTypeCountAiConversationsArgs
-    aiGenerationTasks?: boolean | AccountCountOutputTypeCountAiGenerationTasksArgs
+    aiExecutionRecords?: boolean | AccountCountOutputTypeCountAiExecutionRecordsArgs
     aiKnowledgeIndexEntries?: boolean | AccountCountOutputTypeCountAiKnowledgeIndexEntriesArgs
     aiProviderConfigs?: boolean | AccountCountOutputTypeCountAiProviderConfigsArgs
     aiProviderOnboardingSessions?: boolean | AccountCountOutputTypeCountAiProviderOnboardingSessionsArgs
@@ -8710,7 +8436,6 @@ export namespace Prisma {
     routineInteractions?: boolean | AccountCountOutputTypeCountRoutineInteractionsArgs
     notificationInteractions?: boolean | AccountCountOutputTypeCountNotificationInteractionsArgs
     notificationDispatchOutboxes?: boolean | AccountCountOutputTypeCountNotificationDispatchOutboxesArgs
-    aiMessages?: boolean | AccountCountOutputTypeCountAiMessagesArgs
     folders?: boolean | AccountCountOutputTypeCountFoldersArgs
     resources?: boolean | AccountCountOutputTypeCountResourcesArgs
     repositoryResources?: boolean | AccountCountOutputTypeCountRepositoryResourcesArgs
@@ -8908,8 +8633,8 @@ export namespace Prisma {
   /**
    * AccountCountOutputType without action
    */
-  export type AccountCountOutputTypeCountAiGenerationTasksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: AiGenerationTaskWhereInput
+  export type AccountCountOutputTypeCountAiExecutionRecordsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiExecutionRecordWhereInput
   }
 
   /**
@@ -8978,13 +8703,6 @@ export namespace Prisma {
   /**
    * AccountCountOutputType without action
    */
-  export type AccountCountOutputTypeCountAiMessagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: AiMessageWhereInput
-  }
-
-  /**
-   * AccountCountOutputType without action
-   */
   export type AccountCountOutputTypeCountFoldersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: FolderWhereInput
   }
@@ -9022,37 +8740,6 @@ export namespace Prisma {
    */
   export type AccountCountOutputTypeCountKnowledgeWriteRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: KnowledgeWriteRequestWhereInput
-  }
-
-
-  /**
-   * Count Type AiConversationCountOutputType
-   */
-
-  export type AiConversationCountOutputType = {
-    messages: number
-  }
-
-  export type AiConversationCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    messages?: boolean | AiConversationCountOutputTypeCountMessagesArgs
-  }
-
-  // Custom InputTypes
-  /**
-   * AiConversationCountOutputType without action
-   */
-  export type AiConversationCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiConversationCountOutputType
-     */
-    select?: AiConversationCountOutputTypeSelect<ExtArgs> | null
-  }
-
-  /**
-   * AiConversationCountOutputType without action
-   */
-  export type AiConversationCountOutputTypeCountMessagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: AiMessageWhereInput
   }
 
 
@@ -10091,9 +9778,8 @@ export namespace Prisma {
     userPreferenceRecords?: boolean | Account$userPreferenceRecordsArgs<ExtArgs>
     notifications?: boolean | Account$notificationsArgs<ExtArgs>
     aiConversations?: boolean | Account$aiConversationsArgs<ExtArgs>
-    aiGenerationTasks?: boolean | Account$aiGenerationTasksArgs<ExtArgs>
+    aiExecutionRecords?: boolean | Account$aiExecutionRecordsArgs<ExtArgs>
     aiKnowledgeIndexEntries?: boolean | Account$aiKnowledgeIndexEntriesArgs<ExtArgs>
-    aiUsageQuotas?: boolean | Account$aiUsageQuotasArgs<ExtArgs>
     aiProviderConfigs?: boolean | Account$aiProviderConfigsArgs<ExtArgs>
     aiProviderOnboardingSessions?: boolean | Account$aiProviderOnboardingSessionsArgs<ExtArgs>
     aiProviderSecrets?: boolean | Account$aiProviderSecretsArgs<ExtArgs>
@@ -10103,7 +9789,6 @@ export namespace Prisma {
     routineInteractions?: boolean | Account$routineInteractionsArgs<ExtArgs>
     notificationInteractions?: boolean | Account$notificationInteractionsArgs<ExtArgs>
     notificationDispatchOutboxes?: boolean | Account$notificationDispatchOutboxesArgs<ExtArgs>
-    aiMessages?: boolean | Account$aiMessagesArgs<ExtArgs>
     folders?: boolean | Account$foldersArgs<ExtArgs>
     resources?: boolean | Account$resourcesArgs<ExtArgs>
     repositoryResources?: boolean | Account$repositoryResourcesArgs<ExtArgs>
@@ -10171,9 +9856,8 @@ export namespace Prisma {
     userPreferenceRecords?: boolean | Account$userPreferenceRecordsArgs<ExtArgs>
     notifications?: boolean | Account$notificationsArgs<ExtArgs>
     aiConversations?: boolean | Account$aiConversationsArgs<ExtArgs>
-    aiGenerationTasks?: boolean | Account$aiGenerationTasksArgs<ExtArgs>
+    aiExecutionRecords?: boolean | Account$aiExecutionRecordsArgs<ExtArgs>
     aiKnowledgeIndexEntries?: boolean | Account$aiKnowledgeIndexEntriesArgs<ExtArgs>
-    aiUsageQuotas?: boolean | Account$aiUsageQuotasArgs<ExtArgs>
     aiProviderConfigs?: boolean | Account$aiProviderConfigsArgs<ExtArgs>
     aiProviderOnboardingSessions?: boolean | Account$aiProviderOnboardingSessionsArgs<ExtArgs>
     aiProviderSecrets?: boolean | Account$aiProviderSecretsArgs<ExtArgs>
@@ -10183,7 +9867,6 @@ export namespace Prisma {
     routineInteractions?: boolean | Account$routineInteractionsArgs<ExtArgs>
     notificationInteractions?: boolean | Account$notificationInteractionsArgs<ExtArgs>
     notificationDispatchOutboxes?: boolean | Account$notificationDispatchOutboxesArgs<ExtArgs>
-    aiMessages?: boolean | Account$aiMessagesArgs<ExtArgs>
     folders?: boolean | Account$foldersArgs<ExtArgs>
     resources?: boolean | Account$resourcesArgs<ExtArgs>
     repositoryResources?: boolean | Account$repositoryResourcesArgs<ExtArgs>
@@ -10229,9 +9912,8 @@ export namespace Prisma {
       userPreferenceRecords: Prisma.$UserPreferenceRecordPayload<ExtArgs>[]
       notifications: Prisma.$NotificationPayload<ExtArgs>[]
       aiConversations: Prisma.$AiConversationPayload<ExtArgs>[]
-      aiGenerationTasks: Prisma.$AiGenerationTaskPayload<ExtArgs>[]
+      aiExecutionRecords: Prisma.$AiExecutionRecordPayload<ExtArgs>[]
       aiKnowledgeIndexEntries: Prisma.$AiKnowledgeIndexEntryPayload<ExtArgs>[]
-      aiUsageQuotas: Prisma.$AiUsageQuotaPayload<ExtArgs> | null
       aiProviderConfigs: Prisma.$AiProviderConfigPayload<ExtArgs>[]
       aiProviderOnboardingSessions: Prisma.$AiProviderOnboardingSessionPayload<ExtArgs>[]
       aiProviderSecrets: Prisma.$AiProviderSecretPayload<ExtArgs>[]
@@ -10241,7 +9923,6 @@ export namespace Prisma {
       routineInteractions: Prisma.$RoutineInteractionPayload<ExtArgs>[]
       notificationInteractions: Prisma.$NotificationInteractionPayload<ExtArgs>[]
       notificationDispatchOutboxes: Prisma.$NotificationDispatchOutboxPayload<ExtArgs>[]
-      aiMessages: Prisma.$AiMessagePayload<ExtArgs>[]
       folders: Prisma.$FolderPayload<ExtArgs>[]
       resources: Prisma.$ResourcePayload<ExtArgs>[]
       repositoryResources: Prisma.$RepositoryResourcePayload<ExtArgs>[]
@@ -10677,9 +10358,8 @@ export namespace Prisma {
     userPreferenceRecords<T extends Account$userPreferenceRecordsArgs<ExtArgs> = {}>(args?: Subset<T, Account$userPreferenceRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPreferenceRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     notifications<T extends Account$notificationsArgs<ExtArgs> = {}>(args?: Subset<T, Account$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     aiConversations<T extends Account$aiConversationsArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiConversationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    aiGenerationTasks<T extends Account$aiGenerationTasksArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiGenerationTasksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiGenerationTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    aiExecutionRecords<T extends Account$aiExecutionRecordsArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiExecutionRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiExecutionRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     aiKnowledgeIndexEntries<T extends Account$aiKnowledgeIndexEntriesArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiKnowledgeIndexEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiKnowledgeIndexEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    aiUsageQuotas<T extends Account$aiUsageQuotasArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiUsageQuotasArgs<ExtArgs>>): Prisma__AiUsageQuotaClient<$Result.GetResult<Prisma.$AiUsageQuotaPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     aiProviderConfigs<T extends Account$aiProviderConfigsArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiProviderConfigsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiProviderConfigPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     aiProviderOnboardingSessions<T extends Account$aiProviderOnboardingSessionsArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiProviderOnboardingSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiProviderOnboardingSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     aiProviderSecrets<T extends Account$aiProviderSecretsArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiProviderSecretsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiProviderSecretPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -10689,7 +10369,6 @@ export namespace Prisma {
     routineInteractions<T extends Account$routineInteractionsArgs<ExtArgs> = {}>(args?: Subset<T, Account$routineInteractionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoutineInteractionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     notificationInteractions<T extends Account$notificationInteractionsArgs<ExtArgs> = {}>(args?: Subset<T, Account$notificationInteractionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationInteractionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     notificationDispatchOutboxes<T extends Account$notificationDispatchOutboxesArgs<ExtArgs> = {}>(args?: Subset<T, Account$notificationDispatchOutboxesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationDispatchOutboxPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    aiMessages<T extends Account$aiMessagesArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiMessagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiMessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     folders<T extends Account$foldersArgs<ExtArgs> = {}>(args?: Subset<T, Account$foldersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FolderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     resources<T extends Account$resourcesArgs<ExtArgs> = {}>(args?: Subset<T, Account$resourcesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ResourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     repositoryResources<T extends Account$repositoryResourcesArgs<ExtArgs> = {}>(args?: Subset<T, Account$repositoryResourcesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RepositoryResourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -11751,27 +11430,27 @@ export namespace Prisma {
   }
 
   /**
-   * Account.aiGenerationTasks
+   * Account.aiExecutionRecords
    */
-  export type Account$aiGenerationTasksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type Account$aiExecutionRecordsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the AiGenerationTask
+     * Select specific fields to fetch from the AiExecutionRecord
      */
-    select?: AiGenerationTaskSelect<ExtArgs> | null
+    select?: AiExecutionRecordSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the AiGenerationTask
+     * Omit specific fields from the AiExecutionRecord
      */
-    omit?: AiGenerationTaskOmit<ExtArgs> | null
+    omit?: AiExecutionRecordOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: AiGenerationTaskInclude<ExtArgs> | null
-    where?: AiGenerationTaskWhereInput
-    orderBy?: AiGenerationTaskOrderByWithRelationInput | AiGenerationTaskOrderByWithRelationInput[]
-    cursor?: AiGenerationTaskWhereUniqueInput
+    include?: AiExecutionRecordInclude<ExtArgs> | null
+    where?: AiExecutionRecordWhereInput
+    orderBy?: AiExecutionRecordOrderByWithRelationInput | AiExecutionRecordOrderByWithRelationInput[]
+    cursor?: AiExecutionRecordWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: AiGenerationTaskScalarFieldEnum | AiGenerationTaskScalarFieldEnum[]
+    distinct?: AiExecutionRecordScalarFieldEnum | AiExecutionRecordScalarFieldEnum[]
   }
 
   /**
@@ -11796,25 +11475,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: AiKnowledgeIndexEntryScalarFieldEnum | AiKnowledgeIndexEntryScalarFieldEnum[]
-  }
-
-  /**
-   * Account.aiUsageQuotas
-   */
-  export type Account$aiUsageQuotasArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiUsageQuota
-     */
-    select?: AiUsageQuotaSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiUsageQuota
-     */
-    omit?: AiUsageQuotaOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiUsageQuotaInclude<ExtArgs> | null
-    where?: AiUsageQuotaWhereInput
   }
 
   /**
@@ -12029,30 +11689,6 @@ export namespace Prisma {
   }
 
   /**
-   * Account.aiMessages
-   */
-  export type Account$aiMessagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiMessage
-     */
-    select?: AiMessageSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiMessage
-     */
-    omit?: AiMessageOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiMessageInclude<ExtArgs> | null
-    where?: AiMessageWhereInput
-    orderBy?: AiMessageOrderByWithRelationInput | AiMessageOrderByWithRelationInput[]
-    cursor?: AiMessageWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: AiMessageScalarFieldEnum | AiMessageScalarFieldEnum[]
-  }
-
-  /**
    * Account.folders
    */
   export type Account$foldersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -12228,12 +11864,10 @@ export namespace Prisma {
   }
 
   export type AiConversationAvgAggregateOutputType = {
-    messageCount: number | null
     version: number | null
   }
 
   export type AiConversationSumAggregateOutputType = {
-    messageCount: number | null
     version: number | null
   }
 
@@ -12242,8 +11876,6 @@ export namespace Prisma {
     identityId: string | null
     name: string | null
     status: string | null
-    messageCount: number | null
-    lastMessageAt: Date | null
     version: number | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -12255,8 +11887,6 @@ export namespace Prisma {
     identityId: string | null
     name: string | null
     status: string | null
-    messageCount: number | null
-    lastMessageAt: Date | null
     version: number | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -12268,8 +11898,6 @@ export namespace Prisma {
     identityId: number
     name: number
     status: number
-    messageCount: number
-    lastMessageAt: number
     version: number
     createdAt: number
     updatedAt: number
@@ -12279,12 +11907,10 @@ export namespace Prisma {
 
 
   export type AiConversationAvgAggregateInputType = {
-    messageCount?: true
     version?: true
   }
 
   export type AiConversationSumAggregateInputType = {
-    messageCount?: true
     version?: true
   }
 
@@ -12293,8 +11919,6 @@ export namespace Prisma {
     identityId?: true
     name?: true
     status?: true
-    messageCount?: true
-    lastMessageAt?: true
     version?: true
     createdAt?: true
     updatedAt?: true
@@ -12306,8 +11930,6 @@ export namespace Prisma {
     identityId?: true
     name?: true
     status?: true
-    messageCount?: true
-    lastMessageAt?: true
     version?: true
     createdAt?: true
     updatedAt?: true
@@ -12319,8 +11941,6 @@ export namespace Prisma {
     identityId?: true
     name?: true
     status?: true
-    messageCount?: true
-    lastMessageAt?: true
     version?: true
     createdAt?: true
     updatedAt?: true
@@ -12419,8 +12039,6 @@ export namespace Prisma {
     identityId: string
     name: string
     status: string
-    messageCount: number
-    lastMessageAt: Date | null
     version: number
     createdAt: Date
     updatedAt: Date
@@ -12451,15 +12069,11 @@ export namespace Prisma {
     identityId?: boolean
     name?: boolean
     status?: boolean
-    messageCount?: boolean
-    lastMessageAt?: boolean
     version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
-    messages?: boolean | AiConversation$messagesArgs<ExtArgs>
-    _count?: boolean | AiConversationCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["aiConversation"]>
 
   export type AiConversationSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -12467,8 +12081,6 @@ export namespace Prisma {
     identityId?: boolean
     name?: boolean
     status?: boolean
-    messageCount?: boolean
-    lastMessageAt?: boolean
     version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -12481,8 +12093,6 @@ export namespace Prisma {
     identityId?: boolean
     name?: boolean
     status?: boolean
-    messageCount?: boolean
-    lastMessageAt?: boolean
     version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -12495,19 +12105,15 @@ export namespace Prisma {
     identityId?: boolean
     name?: boolean
     status?: boolean
-    messageCount?: boolean
-    lastMessageAt?: boolean
     version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
   }
 
-  export type AiConversationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "status" | "messageCount" | "lastMessageAt" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["aiConversation"]>
+  export type AiConversationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "status" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["aiConversation"]>
   export type AiConversationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
-    messages?: boolean | AiConversation$messagesArgs<ExtArgs>
-    _count?: boolean | AiConversationCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type AiConversationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
@@ -12520,15 +12126,12 @@ export namespace Prisma {
     name: "AiConversation"
     objects: {
       account: Prisma.$AccountPayload<ExtArgs>
-      messages: Prisma.$AiMessagePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       identityId: string
       name: string
       status: string
-      messageCount: number
-      lastMessageAt: Date | null
       version: number
       createdAt: Date
       updatedAt: Date
@@ -12928,7 +12531,6 @@ export namespace Prisma {
   export interface Prisma__AiConversationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    messages<T extends AiConversation$messagesArgs<ExtArgs> = {}>(args?: Subset<T, AiConversation$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiMessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -12962,8 +12564,6 @@ export namespace Prisma {
     readonly identityId: FieldRef<"AiConversation", 'String'>
     readonly name: FieldRef<"AiConversation", 'String'>
     readonly status: FieldRef<"AiConversation", 'String'>
-    readonly messageCount: FieldRef<"AiConversation", 'Int'>
-    readonly lastMessageAt: FieldRef<"AiConversation", 'DateTime'>
     readonly version: FieldRef<"AiConversation", 'Int'>
     readonly createdAt: FieldRef<"AiConversation", 'DateTime'>
     readonly updatedAt: FieldRef<"AiConversation", 'DateTime'>
@@ -13369,30 +12969,6 @@ export namespace Prisma {
   }
 
   /**
-   * AiConversation.messages
-   */
-  export type AiConversation$messagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiMessage
-     */
-    select?: AiMessageSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiMessage
-     */
-    omit?: AiMessageOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiMessageInclude<ExtArgs> | null
-    where?: AiMessageWhereInput
-    orderBy?: AiMessageOrderByWithRelationInput | AiMessageOrderByWithRelationInput[]
-    cursor?: AiMessageWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: AiMessageScalarFieldEnum | AiMessageScalarFieldEnum[]
-  }
-
-  /**
    * AiConversation without action
    */
   export type AiConversationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -13412,1697 +12988,532 @@ export namespace Prisma {
 
 
   /**
-   * Model AiMessage
+   * Model AiExecutionRecord
    */
 
-  export type AggregateAiMessage = {
-    _count: AiMessageCountAggregateOutputType | null
-    _min: AiMessageMinAggregateOutputType | null
-    _max: AiMessageMaxAggregateOutputType | null
+  export type AggregateAiExecutionRecord = {
+    _count: AiExecutionRecordCountAggregateOutputType | null
+    _avg: AiExecutionRecordAvgAggregateOutputType | null
+    _sum: AiExecutionRecordSumAggregateOutputType | null
+    _min: AiExecutionRecordMinAggregateOutputType | null
+    _max: AiExecutionRecordMaxAggregateOutputType | null
   }
 
-  export type AiMessageMinAggregateOutputType = {
-    id: string | null
-    identityId: string | null
-    conversationId: string | null
-    role: string | null
-    content: string | null
-    tokenUsage: string | null
-    createdAt: Date | null
-  }
-
-  export type AiMessageMaxAggregateOutputType = {
-    id: string | null
-    identityId: string | null
-    conversationId: string | null
-    role: string | null
-    content: string | null
-    tokenUsage: string | null
-    createdAt: Date | null
-  }
-
-  export type AiMessageCountAggregateOutputType = {
-    id: number
-    identityId: number
-    conversationId: number
-    role: number
-    content: number
-    tokenUsage: number
-    createdAt: number
-    _all: number
-  }
-
-
-  export type AiMessageMinAggregateInputType = {
-    id?: true
-    identityId?: true
-    conversationId?: true
-    role?: true
-    content?: true
-    tokenUsage?: true
-    createdAt?: true
-  }
-
-  export type AiMessageMaxAggregateInputType = {
-    id?: true
-    identityId?: true
-    conversationId?: true
-    role?: true
-    content?: true
-    tokenUsage?: true
-    createdAt?: true
-  }
-
-  export type AiMessageCountAggregateInputType = {
-    id?: true
-    identityId?: true
-    conversationId?: true
-    role?: true
-    content?: true
-    tokenUsage?: true
-    createdAt?: true
-    _all?: true
-  }
-
-  export type AiMessageAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which AiMessage to aggregate.
-     */
-    where?: AiMessageWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of AiMessages to fetch.
-     */
-    orderBy?: AiMessageOrderByWithRelationInput | AiMessageOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the start position
-     */
-    cursor?: AiMessageWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` AiMessages from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` AiMessages.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Count returned AiMessages
-    **/
-    _count?: true | AiMessageCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the minimum value
-    **/
-    _min?: AiMessageMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the maximum value
-    **/
-    _max?: AiMessageMaxAggregateInputType
-  }
-
-  export type GetAiMessageAggregateType<T extends AiMessageAggregateArgs> = {
-        [P in keyof T & keyof AggregateAiMessage]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateAiMessage[P]>
-      : GetScalarType<T[P], AggregateAiMessage[P]>
-  }
-
-
-
-
-  export type AiMessageGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: AiMessageWhereInput
-    orderBy?: AiMessageOrderByWithAggregationInput | AiMessageOrderByWithAggregationInput[]
-    by: AiMessageScalarFieldEnum[] | AiMessageScalarFieldEnum
-    having?: AiMessageScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: AiMessageCountAggregateInputType | true
-    _min?: AiMessageMinAggregateInputType
-    _max?: AiMessageMaxAggregateInputType
-  }
-
-  export type AiMessageGroupByOutputType = {
-    id: string
-    identityId: string
-    conversationId: string
-    role: string
-    content: string
-    tokenUsage: string | null
-    createdAt: Date
-    _count: AiMessageCountAggregateOutputType | null
-    _min: AiMessageMinAggregateOutputType | null
-    _max: AiMessageMaxAggregateOutputType | null
-  }
-
-  type GetAiMessageGroupByPayload<T extends AiMessageGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<AiMessageGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof AiMessageGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], AiMessageGroupByOutputType[P]>
-            : GetScalarType<T[P], AiMessageGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type AiMessageSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    conversationId?: boolean
-    role?: boolean
-    content?: boolean
-    tokenUsage?: boolean
-    createdAt?: boolean
-    identity?: boolean | AccountDefaultArgs<ExtArgs>
-    conversation?: boolean | AiConversationDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["aiMessage"]>
-
-  export type AiMessageSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    conversationId?: boolean
-    role?: boolean
-    content?: boolean
-    tokenUsage?: boolean
-    createdAt?: boolean
-    identity?: boolean | AccountDefaultArgs<ExtArgs>
-    conversation?: boolean | AiConversationDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["aiMessage"]>
-
-  export type AiMessageSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    conversationId?: boolean
-    role?: boolean
-    content?: boolean
-    tokenUsage?: boolean
-    createdAt?: boolean
-    identity?: boolean | AccountDefaultArgs<ExtArgs>
-    conversation?: boolean | AiConversationDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["aiMessage"]>
-
-  export type AiMessageSelectScalar = {
-    id?: boolean
-    identityId?: boolean
-    conversationId?: boolean
-    role?: boolean
-    content?: boolean
-    tokenUsage?: boolean
-    createdAt?: boolean
-  }
-
-  export type AiMessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "conversationId" | "role" | "content" | "tokenUsage" | "createdAt", ExtArgs["result"]["aiMessage"]>
-  export type AiMessageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    identity?: boolean | AccountDefaultArgs<ExtArgs>
-    conversation?: boolean | AiConversationDefaultArgs<ExtArgs>
-  }
-  export type AiMessageIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    identity?: boolean | AccountDefaultArgs<ExtArgs>
-    conversation?: boolean | AiConversationDefaultArgs<ExtArgs>
-  }
-  export type AiMessageIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    identity?: boolean | AccountDefaultArgs<ExtArgs>
-    conversation?: boolean | AiConversationDefaultArgs<ExtArgs>
-  }
-
-  export type $AiMessagePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "AiMessage"
-    objects: {
-      identity: Prisma.$AccountPayload<ExtArgs>
-      conversation: Prisma.$AiConversationPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      identityId: string
-      conversationId: string
-      role: string
-      content: string
-      tokenUsage: string | null
-      createdAt: Date
-    }, ExtArgs["result"]["aiMessage"]>
-    composites: {}
-  }
-
-  type AiMessageGetPayload<S extends boolean | null | undefined | AiMessageDefaultArgs> = $Result.GetResult<Prisma.$AiMessagePayload, S>
-
-  type AiMessageCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<AiMessageFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: AiMessageCountAggregateInputType | true
-    }
-
-  export interface AiMessageDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AiMessage'], meta: { name: 'AiMessage' } }
-    /**
-     * Find zero or one AiMessage that matches the filter.
-     * @param {AiMessageFindUniqueArgs} args - Arguments to find a AiMessage
-     * @example
-     * // Get one AiMessage
-     * const aiMessage = await prisma.aiMessage.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends AiMessageFindUniqueArgs>(args: SelectSubset<T, AiMessageFindUniqueArgs<ExtArgs>>): Prisma__AiMessageClient<$Result.GetResult<Prisma.$AiMessagePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one AiMessage that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {AiMessageFindUniqueOrThrowArgs} args - Arguments to find a AiMessage
-     * @example
-     * // Get one AiMessage
-     * const aiMessage = await prisma.aiMessage.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends AiMessageFindUniqueOrThrowArgs>(args: SelectSubset<T, AiMessageFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AiMessageClient<$Result.GetResult<Prisma.$AiMessagePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first AiMessage that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AiMessageFindFirstArgs} args - Arguments to find a AiMessage
-     * @example
-     * // Get one AiMessage
-     * const aiMessage = await prisma.aiMessage.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends AiMessageFindFirstArgs>(args?: SelectSubset<T, AiMessageFindFirstArgs<ExtArgs>>): Prisma__AiMessageClient<$Result.GetResult<Prisma.$AiMessagePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first AiMessage that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AiMessageFindFirstOrThrowArgs} args - Arguments to find a AiMessage
-     * @example
-     * // Get one AiMessage
-     * const aiMessage = await prisma.aiMessage.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends AiMessageFindFirstOrThrowArgs>(args?: SelectSubset<T, AiMessageFindFirstOrThrowArgs<ExtArgs>>): Prisma__AiMessageClient<$Result.GetResult<Prisma.$AiMessagePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more AiMessages that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AiMessageFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all AiMessages
-     * const aiMessages = await prisma.aiMessage.findMany()
-     *
-     * // Get first 10 AiMessages
-     * const aiMessages = await prisma.aiMessage.findMany({ take: 10 })
-     *
-     * // Only select the `id`
-     * const aiMessageWithIdOnly = await prisma.aiMessage.findMany({ select: { id: true } })
-     *
-     */
-    findMany<T extends AiMessageFindManyArgs>(args?: SelectSubset<T, AiMessageFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiMessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a AiMessage.
-     * @param {AiMessageCreateArgs} args - Arguments to create a AiMessage.
-     * @example
-     * // Create one AiMessage
-     * const AiMessage = await prisma.aiMessage.create({
-     *   data: {
-     *     // ... data to create a AiMessage
-     *   }
-     * })
-     *
-     */
-    create<T extends AiMessageCreateArgs>(args: SelectSubset<T, AiMessageCreateArgs<ExtArgs>>): Prisma__AiMessageClient<$Result.GetResult<Prisma.$AiMessagePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many AiMessages.
-     * @param {AiMessageCreateManyArgs} args - Arguments to create many AiMessages.
-     * @example
-     * // Create many AiMessages
-     * const aiMessage = await prisma.aiMessage.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     */
-    createMany<T extends AiMessageCreateManyArgs>(args?: SelectSubset<T, AiMessageCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many AiMessages and returns the data saved in the database.
-     * @param {AiMessageCreateManyAndReturnArgs} args - Arguments to create many AiMessages.
-     * @example
-     * // Create many AiMessages
-     * const aiMessage = await prisma.aiMessage.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Create many AiMessages and only return the `id`
-     * const aiMessageWithIdOnly = await prisma.aiMessage.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    createManyAndReturn<T extends AiMessageCreateManyAndReturnArgs>(args?: SelectSubset<T, AiMessageCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiMessagePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a AiMessage.
-     * @param {AiMessageDeleteArgs} args - Arguments to delete one AiMessage.
-     * @example
-     * // Delete one AiMessage
-     * const AiMessage = await prisma.aiMessage.delete({
-     *   where: {
-     *     // ... filter to delete one AiMessage
-     *   }
-     * })
-     *
-     */
-    delete<T extends AiMessageDeleteArgs>(args: SelectSubset<T, AiMessageDeleteArgs<ExtArgs>>): Prisma__AiMessageClient<$Result.GetResult<Prisma.$AiMessagePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one AiMessage.
-     * @param {AiMessageUpdateArgs} args - Arguments to update one AiMessage.
-     * @example
-     * // Update one AiMessage
-     * const aiMessage = await prisma.aiMessage.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    update<T extends AiMessageUpdateArgs>(args: SelectSubset<T, AiMessageUpdateArgs<ExtArgs>>): Prisma__AiMessageClient<$Result.GetResult<Prisma.$AiMessagePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more AiMessages.
-     * @param {AiMessageDeleteManyArgs} args - Arguments to filter AiMessages to delete.
-     * @example
-     * // Delete a few AiMessages
-     * const { count } = await prisma.aiMessage.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     *
-     */
-    deleteMany<T extends AiMessageDeleteManyArgs>(args?: SelectSubset<T, AiMessageDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more AiMessages.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AiMessageUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many AiMessages
-     * const aiMessage = await prisma.aiMessage.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    updateMany<T extends AiMessageUpdateManyArgs>(args: SelectSubset<T, AiMessageUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more AiMessages and returns the data updated in the database.
-     * @param {AiMessageUpdateManyAndReturnArgs} args - Arguments to update many AiMessages.
-     * @example
-     * // Update many AiMessages
-     * const aiMessage = await prisma.aiMessage.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Update zero or more AiMessages and only return the `id`
-     * const aiMessageWithIdOnly = await prisma.aiMessage.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    updateManyAndReturn<T extends AiMessageUpdateManyAndReturnArgs>(args: SelectSubset<T, AiMessageUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiMessagePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one AiMessage.
-     * @param {AiMessageUpsertArgs} args - Arguments to update or create a AiMessage.
-     * @example
-     * // Update or create a AiMessage
-     * const aiMessage = await prisma.aiMessage.upsert({
-     *   create: {
-     *     // ... data to create a AiMessage
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the AiMessage we want to update
-     *   }
-     * })
-     */
-    upsert<T extends AiMessageUpsertArgs>(args: SelectSubset<T, AiMessageUpsertArgs<ExtArgs>>): Prisma__AiMessageClient<$Result.GetResult<Prisma.$AiMessagePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of AiMessages.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AiMessageCountArgs} args - Arguments to filter AiMessages to count.
-     * @example
-     * // Count the number of AiMessages
-     * const count = await prisma.aiMessage.count({
-     *   where: {
-     *     // ... the filter for the AiMessages we want to count
-     *   }
-     * })
-    **/
-    count<T extends AiMessageCountArgs>(
-      args?: Subset<T, AiMessageCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], AiMessageCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a AiMessage.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AiMessageAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends AiMessageAggregateArgs>(args: Subset<T, AiMessageAggregateArgs>): Prisma.PrismaPromise<GetAiMessageAggregateType<T>>
-
-    /**
-     * Group by AiMessage.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AiMessageGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     *
-    **/
-    groupBy<
-      T extends AiMessageGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: AiMessageGroupByArgs['orderBy'] }
-        : { orderBy?: AiMessageGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, AiMessageGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAiMessageGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the AiMessage model
-   */
-  readonly fields: AiMessageFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for AiMessage.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__AiMessageClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    identity<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    conversation<T extends AiConversationDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AiConversationDefaultArgs<ExtArgs>>): Prisma__AiConversationClient<$Result.GetResult<Prisma.$AiConversationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the AiMessage model
-   */
-  interface AiMessageFieldRefs {
-    readonly id: FieldRef<"AiMessage", 'String'>
-    readonly identityId: FieldRef<"AiMessage", 'String'>
-    readonly conversationId: FieldRef<"AiMessage", 'String'>
-    readonly role: FieldRef<"AiMessage", 'String'>
-    readonly content: FieldRef<"AiMessage", 'String'>
-    readonly tokenUsage: FieldRef<"AiMessage", 'String'>
-    readonly createdAt: FieldRef<"AiMessage", 'DateTime'>
-  }
-
-
-  // Custom InputTypes
-  /**
-   * AiMessage findUnique
-   */
-  export type AiMessageFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiMessage
-     */
-    select?: AiMessageSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiMessage
-     */
-    omit?: AiMessageOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiMessageInclude<ExtArgs> | null
-    /**
-     * Filter, which AiMessage to fetch.
-     */
-    where: AiMessageWhereUniqueInput
-  }
-
-  /**
-   * AiMessage findUniqueOrThrow
-   */
-  export type AiMessageFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiMessage
-     */
-    select?: AiMessageSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiMessage
-     */
-    omit?: AiMessageOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiMessageInclude<ExtArgs> | null
-    /**
-     * Filter, which AiMessage to fetch.
-     */
-    where: AiMessageWhereUniqueInput
-  }
-
-  /**
-   * AiMessage findFirst
-   */
-  export type AiMessageFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiMessage
-     */
-    select?: AiMessageSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiMessage
-     */
-    omit?: AiMessageOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiMessageInclude<ExtArgs> | null
-    /**
-     * Filter, which AiMessage to fetch.
-     */
-    where?: AiMessageWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of AiMessages to fetch.
-     */
-    orderBy?: AiMessageOrderByWithRelationInput | AiMessageOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for AiMessages.
-     */
-    cursor?: AiMessageWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` AiMessages from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` AiMessages.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of AiMessages.
-     */
-    distinct?: AiMessageScalarFieldEnum | AiMessageScalarFieldEnum[]
-  }
-
-  /**
-   * AiMessage findFirstOrThrow
-   */
-  export type AiMessageFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiMessage
-     */
-    select?: AiMessageSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiMessage
-     */
-    omit?: AiMessageOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiMessageInclude<ExtArgs> | null
-    /**
-     * Filter, which AiMessage to fetch.
-     */
-    where?: AiMessageWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of AiMessages to fetch.
-     */
-    orderBy?: AiMessageOrderByWithRelationInput | AiMessageOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for AiMessages.
-     */
-    cursor?: AiMessageWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` AiMessages from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` AiMessages.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of AiMessages.
-     */
-    distinct?: AiMessageScalarFieldEnum | AiMessageScalarFieldEnum[]
-  }
-
-  /**
-   * AiMessage findMany
-   */
-  export type AiMessageFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiMessage
-     */
-    select?: AiMessageSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiMessage
-     */
-    omit?: AiMessageOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiMessageInclude<ExtArgs> | null
-    /**
-     * Filter, which AiMessages to fetch.
-     */
-    where?: AiMessageWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of AiMessages to fetch.
-     */
-    orderBy?: AiMessageOrderByWithRelationInput | AiMessageOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for listing AiMessages.
-     */
-    cursor?: AiMessageWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` AiMessages from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` AiMessages.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of AiMessages.
-     */
-    distinct?: AiMessageScalarFieldEnum | AiMessageScalarFieldEnum[]
-  }
-
-  /**
-   * AiMessage create
-   */
-  export type AiMessageCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiMessage
-     */
-    select?: AiMessageSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiMessage
-     */
-    omit?: AiMessageOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiMessageInclude<ExtArgs> | null
-    /**
-     * The data needed to create a AiMessage.
-     */
-    data: XOR<AiMessageCreateInput, AiMessageUncheckedCreateInput>
-  }
-
-  /**
-   * AiMessage createMany
-   */
-  export type AiMessageCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many AiMessages.
-     */
-    data: AiMessageCreateManyInput | AiMessageCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * AiMessage createManyAndReturn
-   */
-  export type AiMessageCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiMessage
-     */
-    select?: AiMessageSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiMessage
-     */
-    omit?: AiMessageOmit<ExtArgs> | null
-    /**
-     * The data used to create many AiMessages.
-     */
-    data: AiMessageCreateManyInput | AiMessageCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiMessageIncludeCreateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * AiMessage update
-   */
-  export type AiMessageUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiMessage
-     */
-    select?: AiMessageSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiMessage
-     */
-    omit?: AiMessageOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiMessageInclude<ExtArgs> | null
-    /**
-     * The data needed to update a AiMessage.
-     */
-    data: XOR<AiMessageUpdateInput, AiMessageUncheckedUpdateInput>
-    /**
-     * Choose, which AiMessage to update.
-     */
-    where: AiMessageWhereUniqueInput
-  }
-
-  /**
-   * AiMessage updateMany
-   */
-  export type AiMessageUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update AiMessages.
-     */
-    data: XOR<AiMessageUpdateManyMutationInput, AiMessageUncheckedUpdateManyInput>
-    /**
-     * Filter which AiMessages to update
-     */
-    where?: AiMessageWhereInput
-    /**
-     * Limit how many AiMessages to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * AiMessage updateManyAndReturn
-   */
-  export type AiMessageUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiMessage
-     */
-    select?: AiMessageSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiMessage
-     */
-    omit?: AiMessageOmit<ExtArgs> | null
-    /**
-     * The data used to update AiMessages.
-     */
-    data: XOR<AiMessageUpdateManyMutationInput, AiMessageUncheckedUpdateManyInput>
-    /**
-     * Filter which AiMessages to update
-     */
-    where?: AiMessageWhereInput
-    /**
-     * Limit how many AiMessages to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiMessageIncludeUpdateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * AiMessage upsert
-   */
-  export type AiMessageUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiMessage
-     */
-    select?: AiMessageSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiMessage
-     */
-    omit?: AiMessageOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiMessageInclude<ExtArgs> | null
-    /**
-     * The filter to search for the AiMessage to update in case it exists.
-     */
-    where: AiMessageWhereUniqueInput
-    /**
-     * In case the AiMessage found by the `where` argument doesn't exist, create a new AiMessage with this data.
-     */
-    create: XOR<AiMessageCreateInput, AiMessageUncheckedCreateInput>
-    /**
-     * In case the AiMessage was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<AiMessageUpdateInput, AiMessageUncheckedUpdateInput>
-  }
-
-  /**
-   * AiMessage delete
-   */
-  export type AiMessageDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiMessage
-     */
-    select?: AiMessageSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiMessage
-     */
-    omit?: AiMessageOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiMessageInclude<ExtArgs> | null
-    /**
-     * Filter which AiMessage to delete.
-     */
-    where: AiMessageWhereUniqueInput
-  }
-
-  /**
-   * AiMessage deleteMany
-   */
-  export type AiMessageDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which AiMessages to delete
-     */
-    where?: AiMessageWhereInput
-    /**
-     * Limit how many AiMessages to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * AiMessage without action
-   */
-  export type AiMessageDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiMessage
-     */
-    select?: AiMessageSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiMessage
-     */
-    omit?: AiMessageOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiMessageInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model AiGenerationTask
-   */
-
-  export type AggregateAiGenerationTask = {
-    _count: AiGenerationTaskCountAggregateOutputType | null
-    _avg: AiGenerationTaskAvgAggregateOutputType | null
-    _sum: AiGenerationTaskSumAggregateOutputType | null
-    _min: AiGenerationTaskMinAggregateOutputType | null
-    _max: AiGenerationTaskMaxAggregateOutputType | null
-  }
-
-  export type AiGenerationTaskAvgAggregateOutputType = {
+  export type AiExecutionRecordAvgAggregateOutputType = {
     estimatedCostUsd: number | null
-    retryCount: number | null
-    processingMs: number | null
-    version: number | null
+    latencyMs: number | null
   }
 
-  export type AiGenerationTaskSumAggregateOutputType = {
+  export type AiExecutionRecordSumAggregateOutputType = {
     estimatedCostUsd: number | null
-    retryCount: number | null
-    processingMs: number | null
-    version: number | null
+    latencyMs: number | null
   }
 
-  export type AiGenerationTaskMinAggregateOutputType = {
+  export type AiExecutionRecordMinAggregateOutputType = {
     id: string | null
     identityId: string | null
-    taskType: string | null
-    status: string | null
+    operation: string | null
+    outcome: string | null
     conversationId: string | null
     runId: string | null
     requestId: string | null
     traceId: string | null
-    providerId: string | null
-    model: string | null
+    providerConnectionId: string | null
+    modelId: string | null
+    errorCategory: string | null
+    safeError: string | null
     estimatedCostUsd: number | null
-    input: string | null
-    result: string | null
-    error: string | null
-    retryCount: number | null
     tokenUsage: string | null
-    processingMs: number | null
-    version: number | null
+    latencyMs: number | null
     createdAt: Date | null
-    updatedAt: Date | null
     completedAt: Date | null
-    deletedAt: Date | null
   }
 
-  export type AiGenerationTaskMaxAggregateOutputType = {
+  export type AiExecutionRecordMaxAggregateOutputType = {
     id: string | null
     identityId: string | null
-    taskType: string | null
-    status: string | null
+    operation: string | null
+    outcome: string | null
     conversationId: string | null
     runId: string | null
     requestId: string | null
     traceId: string | null
-    providerId: string | null
-    model: string | null
+    providerConnectionId: string | null
+    modelId: string | null
+    errorCategory: string | null
+    safeError: string | null
     estimatedCostUsd: number | null
-    input: string | null
-    result: string | null
-    error: string | null
-    retryCount: number | null
     tokenUsage: string | null
-    processingMs: number | null
-    version: number | null
+    latencyMs: number | null
     createdAt: Date | null
-    updatedAt: Date | null
     completedAt: Date | null
-    deletedAt: Date | null
   }
 
-  export type AiGenerationTaskCountAggregateOutputType = {
+  export type AiExecutionRecordCountAggregateOutputType = {
     id: number
     identityId: number
-    taskType: number
-    status: number
+    operation: number
+    outcome: number
     conversationId: number
     runId: number
     requestId: number
     traceId: number
-    providerId: number
-    model: number
+    providerConnectionId: number
+    modelId: number
+    errorCategory: number
+    safeError: number
     estimatedCostUsd: number
-    input: number
-    result: number
-    error: number
-    retryCount: number
     tokenUsage: number
-    processingMs: number
-    version: number
+    latencyMs: number
     createdAt: number
-    updatedAt: number
     completedAt: number
-    deletedAt: number
     _all: number
   }
 
 
-  export type AiGenerationTaskAvgAggregateInputType = {
+  export type AiExecutionRecordAvgAggregateInputType = {
     estimatedCostUsd?: true
-    retryCount?: true
-    processingMs?: true
-    version?: true
+    latencyMs?: true
   }
 
-  export type AiGenerationTaskSumAggregateInputType = {
+  export type AiExecutionRecordSumAggregateInputType = {
     estimatedCostUsd?: true
-    retryCount?: true
-    processingMs?: true
-    version?: true
+    latencyMs?: true
   }
 
-  export type AiGenerationTaskMinAggregateInputType = {
+  export type AiExecutionRecordMinAggregateInputType = {
     id?: true
     identityId?: true
-    taskType?: true
-    status?: true
+    operation?: true
+    outcome?: true
     conversationId?: true
     runId?: true
     requestId?: true
     traceId?: true
-    providerId?: true
-    model?: true
+    providerConnectionId?: true
+    modelId?: true
+    errorCategory?: true
+    safeError?: true
     estimatedCostUsd?: true
-    input?: true
-    result?: true
-    error?: true
-    retryCount?: true
     tokenUsage?: true
-    processingMs?: true
-    version?: true
+    latencyMs?: true
     createdAt?: true
-    updatedAt?: true
     completedAt?: true
-    deletedAt?: true
   }
 
-  export type AiGenerationTaskMaxAggregateInputType = {
+  export type AiExecutionRecordMaxAggregateInputType = {
     id?: true
     identityId?: true
-    taskType?: true
-    status?: true
+    operation?: true
+    outcome?: true
     conversationId?: true
     runId?: true
     requestId?: true
     traceId?: true
-    providerId?: true
-    model?: true
+    providerConnectionId?: true
+    modelId?: true
+    errorCategory?: true
+    safeError?: true
     estimatedCostUsd?: true
-    input?: true
-    result?: true
-    error?: true
-    retryCount?: true
     tokenUsage?: true
-    processingMs?: true
-    version?: true
+    latencyMs?: true
     createdAt?: true
-    updatedAt?: true
     completedAt?: true
-    deletedAt?: true
   }
 
-  export type AiGenerationTaskCountAggregateInputType = {
+  export type AiExecutionRecordCountAggregateInputType = {
     id?: true
     identityId?: true
-    taskType?: true
-    status?: true
+    operation?: true
+    outcome?: true
     conversationId?: true
     runId?: true
     requestId?: true
     traceId?: true
-    providerId?: true
-    model?: true
+    providerConnectionId?: true
+    modelId?: true
+    errorCategory?: true
+    safeError?: true
     estimatedCostUsd?: true
-    input?: true
-    result?: true
-    error?: true
-    retryCount?: true
     tokenUsage?: true
-    processingMs?: true
-    version?: true
+    latencyMs?: true
     createdAt?: true
-    updatedAt?: true
     completedAt?: true
-    deletedAt?: true
     _all?: true
   }
 
-  export type AiGenerationTaskAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AiExecutionRecordAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Filter which AiGenerationTask to aggregate.
+     * Filter which AiExecutionRecord to aggregate.
      */
-    where?: AiGenerationTaskWhereInput
+    where?: AiExecutionRecordWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
-     * Determine the order of AiGenerationTasks to fetch.
+     * Determine the order of AiExecutionRecords to fetch.
      */
-    orderBy?: AiGenerationTaskOrderByWithRelationInput | AiGenerationTaskOrderByWithRelationInput[]
+    orderBy?: AiExecutionRecordOrderByWithRelationInput | AiExecutionRecordOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      *
      * Sets the start position
      */
-    cursor?: AiGenerationTaskWhereUniqueInput
+    cursor?: AiExecutionRecordWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
-     * Take `±n` AiGenerationTasks from the position of the cursor.
+     * Take `±n` AiExecutionRecords from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
-     * Skip the first `n` AiGenerationTasks.
+     * Skip the first `n` AiExecutionRecords.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      *
-     * Count returned AiGenerationTasks
+     * Count returned AiExecutionRecords
     **/
-    _count?: true | AiGenerationTaskCountAggregateInputType
+    _count?: true | AiExecutionRecordCountAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      *
      * Select which fields to average
     **/
-    _avg?: AiGenerationTaskAvgAggregateInputType
+    _avg?: AiExecutionRecordAvgAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      *
      * Select which fields to sum
     **/
-    _sum?: AiGenerationTaskSumAggregateInputType
+    _sum?: AiExecutionRecordSumAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      *
      * Select which fields to find the minimum value
     **/
-    _min?: AiGenerationTaskMinAggregateInputType
+    _min?: AiExecutionRecordMinAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      *
      * Select which fields to find the maximum value
     **/
-    _max?: AiGenerationTaskMaxAggregateInputType
+    _max?: AiExecutionRecordMaxAggregateInputType
   }
 
-  export type GetAiGenerationTaskAggregateType<T extends AiGenerationTaskAggregateArgs> = {
-        [P in keyof T & keyof AggregateAiGenerationTask]: P extends '_count' | 'count'
+  export type GetAiExecutionRecordAggregateType<T extends AiExecutionRecordAggregateArgs> = {
+        [P in keyof T & keyof AggregateAiExecutionRecord]: P extends '_count' | 'count'
       ? T[P] extends true
         ? number
-        : GetScalarType<T[P], AggregateAiGenerationTask[P]>
-      : GetScalarType<T[P], AggregateAiGenerationTask[P]>
+        : GetScalarType<T[P], AggregateAiExecutionRecord[P]>
+      : GetScalarType<T[P], AggregateAiExecutionRecord[P]>
   }
 
 
 
 
-  export type AiGenerationTaskGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: AiGenerationTaskWhereInput
-    orderBy?: AiGenerationTaskOrderByWithAggregationInput | AiGenerationTaskOrderByWithAggregationInput[]
-    by: AiGenerationTaskScalarFieldEnum[] | AiGenerationTaskScalarFieldEnum
-    having?: AiGenerationTaskScalarWhereWithAggregatesInput
+  export type AiExecutionRecordGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiExecutionRecordWhereInput
+    orderBy?: AiExecutionRecordOrderByWithAggregationInput | AiExecutionRecordOrderByWithAggregationInput[]
+    by: AiExecutionRecordScalarFieldEnum[] | AiExecutionRecordScalarFieldEnum
+    having?: AiExecutionRecordScalarWhereWithAggregatesInput
     take?: number
     skip?: number
-    _count?: AiGenerationTaskCountAggregateInputType | true
-    _avg?: AiGenerationTaskAvgAggregateInputType
-    _sum?: AiGenerationTaskSumAggregateInputType
-    _min?: AiGenerationTaskMinAggregateInputType
-    _max?: AiGenerationTaskMaxAggregateInputType
+    _count?: AiExecutionRecordCountAggregateInputType | true
+    _avg?: AiExecutionRecordAvgAggregateInputType
+    _sum?: AiExecutionRecordSumAggregateInputType
+    _min?: AiExecutionRecordMinAggregateInputType
+    _max?: AiExecutionRecordMaxAggregateInputType
   }
 
-  export type AiGenerationTaskGroupByOutputType = {
+  export type AiExecutionRecordGroupByOutputType = {
     id: string
     identityId: string
-    taskType: string
-    status: string
+    operation: string
+    outcome: string
     conversationId: string | null
     runId: string | null
     requestId: string | null
     traceId: string | null
-    providerId: string | null
-    model: string | null
+    providerConnectionId: string | null
+    modelId: string | null
+    errorCategory: string | null
+    safeError: string | null
     estimatedCostUsd: number | null
-    input: string
-    result: string | null
-    error: string | null
-    retryCount: number
     tokenUsage: string | null
-    processingMs: number | null
-    version: number
+    latencyMs: number | null
     createdAt: Date
-    updatedAt: Date
-    completedAt: Date | null
-    deletedAt: Date | null
-    _count: AiGenerationTaskCountAggregateOutputType | null
-    _avg: AiGenerationTaskAvgAggregateOutputType | null
-    _sum: AiGenerationTaskSumAggregateOutputType | null
-    _min: AiGenerationTaskMinAggregateOutputType | null
-    _max: AiGenerationTaskMaxAggregateOutputType | null
+    completedAt: Date
+    _count: AiExecutionRecordCountAggregateOutputType | null
+    _avg: AiExecutionRecordAvgAggregateOutputType | null
+    _sum: AiExecutionRecordSumAggregateOutputType | null
+    _min: AiExecutionRecordMinAggregateOutputType | null
+    _max: AiExecutionRecordMaxAggregateOutputType | null
   }
 
-  type GetAiGenerationTaskGroupByPayload<T extends AiGenerationTaskGroupByArgs> = Prisma.PrismaPromise<
+  type GetAiExecutionRecordGroupByPayload<T extends AiExecutionRecordGroupByArgs> = Prisma.PrismaPromise<
     Array<
-      PickEnumerable<AiGenerationTaskGroupByOutputType, T['by']> &
+      PickEnumerable<AiExecutionRecordGroupByOutputType, T['by']> &
         {
-          [P in ((keyof T) & (keyof AiGenerationTaskGroupByOutputType))]: P extends '_count'
+          [P in ((keyof T) & (keyof AiExecutionRecordGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
-              : GetScalarType<T[P], AiGenerationTaskGroupByOutputType[P]>
-            : GetScalarType<T[P], AiGenerationTaskGroupByOutputType[P]>
+              : GetScalarType<T[P], AiExecutionRecordGroupByOutputType[P]>
+            : GetScalarType<T[P], AiExecutionRecordGroupByOutputType[P]>
         }
       >
     >
 
 
-  export type AiGenerationTaskSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type AiExecutionRecordSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     identityId?: boolean
-    taskType?: boolean
-    status?: boolean
+    operation?: boolean
+    outcome?: boolean
     conversationId?: boolean
     runId?: boolean
     requestId?: boolean
     traceId?: boolean
-    providerId?: boolean
-    model?: boolean
+    providerConnectionId?: boolean
+    modelId?: boolean
+    errorCategory?: boolean
+    safeError?: boolean
     estimatedCostUsd?: boolean
-    input?: boolean
-    result?: boolean
-    error?: boolean
-    retryCount?: boolean
     tokenUsage?: boolean
-    processingMs?: boolean
-    version?: boolean
+    latencyMs?: boolean
     createdAt?: boolean
-    updatedAt?: boolean
     completedAt?: boolean
-    deletedAt?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["aiGenerationTask"]>
+  }, ExtArgs["result"]["aiExecutionRecord"]>
 
-  export type AiGenerationTaskSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type AiExecutionRecordSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     identityId?: boolean
-    taskType?: boolean
-    status?: boolean
+    operation?: boolean
+    outcome?: boolean
     conversationId?: boolean
     runId?: boolean
     requestId?: boolean
     traceId?: boolean
-    providerId?: boolean
-    model?: boolean
+    providerConnectionId?: boolean
+    modelId?: boolean
+    errorCategory?: boolean
+    safeError?: boolean
     estimatedCostUsd?: boolean
-    input?: boolean
-    result?: boolean
-    error?: boolean
-    retryCount?: boolean
     tokenUsage?: boolean
-    processingMs?: boolean
-    version?: boolean
+    latencyMs?: boolean
     createdAt?: boolean
-    updatedAt?: boolean
     completedAt?: boolean
-    deletedAt?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["aiGenerationTask"]>
+  }, ExtArgs["result"]["aiExecutionRecord"]>
 
-  export type AiGenerationTaskSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type AiExecutionRecordSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     identityId?: boolean
-    taskType?: boolean
-    status?: boolean
+    operation?: boolean
+    outcome?: boolean
     conversationId?: boolean
     runId?: boolean
     requestId?: boolean
     traceId?: boolean
-    providerId?: boolean
-    model?: boolean
+    providerConnectionId?: boolean
+    modelId?: boolean
+    errorCategory?: boolean
+    safeError?: boolean
     estimatedCostUsd?: boolean
-    input?: boolean
-    result?: boolean
-    error?: boolean
-    retryCount?: boolean
     tokenUsage?: boolean
-    processingMs?: boolean
-    version?: boolean
+    latencyMs?: boolean
     createdAt?: boolean
-    updatedAt?: boolean
     completedAt?: boolean
-    deletedAt?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["aiGenerationTask"]>
+  }, ExtArgs["result"]["aiExecutionRecord"]>
 
-  export type AiGenerationTaskSelectScalar = {
+  export type AiExecutionRecordSelectScalar = {
     id?: boolean
     identityId?: boolean
-    taskType?: boolean
-    status?: boolean
+    operation?: boolean
+    outcome?: boolean
     conversationId?: boolean
     runId?: boolean
     requestId?: boolean
     traceId?: boolean
-    providerId?: boolean
-    model?: boolean
+    providerConnectionId?: boolean
+    modelId?: boolean
+    errorCategory?: boolean
+    safeError?: boolean
     estimatedCostUsd?: boolean
-    input?: boolean
-    result?: boolean
-    error?: boolean
-    retryCount?: boolean
     tokenUsage?: boolean
-    processingMs?: boolean
-    version?: boolean
+    latencyMs?: boolean
     createdAt?: boolean
-    updatedAt?: boolean
     completedAt?: boolean
-    deletedAt?: boolean
   }
 
-  export type AiGenerationTaskOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "taskType" | "status" | "conversationId" | "runId" | "requestId" | "traceId" | "providerId" | "model" | "estimatedCostUsd" | "input" | "result" | "error" | "retryCount" | "tokenUsage" | "processingMs" | "version" | "createdAt" | "updatedAt" | "completedAt" | "deletedAt", ExtArgs["result"]["aiGenerationTask"]>
-  export type AiGenerationTaskInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AiExecutionRecordOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "operation" | "outcome" | "conversationId" | "runId" | "requestId" | "traceId" | "providerConnectionId" | "modelId" | "errorCategory" | "safeError" | "estimatedCostUsd" | "tokenUsage" | "latencyMs" | "createdAt" | "completedAt", ExtArgs["result"]["aiExecutionRecord"]>
+  export type AiExecutionRecordInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
   }
-  export type AiGenerationTaskIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AiExecutionRecordIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
   }
-  export type AiGenerationTaskIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AiExecutionRecordIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
   }
 
-  export type $AiGenerationTaskPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "AiGenerationTask"
+  export type $AiExecutionRecordPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AiExecutionRecord"
     objects: {
       account: Prisma.$AccountPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       identityId: string
-      taskType: string
-      status: string
+      operation: string
+      outcome: string
       conversationId: string | null
       runId: string | null
       requestId: string | null
       traceId: string | null
-      providerId: string | null
-      model: string | null
+      providerConnectionId: string | null
+      modelId: string | null
+      errorCategory: string | null
+      safeError: string | null
       estimatedCostUsd: number | null
-      input: string
-      result: string | null
-      error: string | null
-      retryCount: number
       tokenUsage: string | null
-      processingMs: number | null
-      version: number
+      latencyMs: number | null
       createdAt: Date
-      updatedAt: Date
-      completedAt: Date | null
-      deletedAt: Date | null
-    }, ExtArgs["result"]["aiGenerationTask"]>
+      completedAt: Date
+    }, ExtArgs["result"]["aiExecutionRecord"]>
     composites: {}
   }
 
-  type AiGenerationTaskGetPayload<S extends boolean | null | undefined | AiGenerationTaskDefaultArgs> = $Result.GetResult<Prisma.$AiGenerationTaskPayload, S>
+  type AiExecutionRecordGetPayload<S extends boolean | null | undefined | AiExecutionRecordDefaultArgs> = $Result.GetResult<Prisma.$AiExecutionRecordPayload, S>
 
-  type AiGenerationTaskCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<AiGenerationTaskFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: AiGenerationTaskCountAggregateInputType | true
+  type AiExecutionRecordCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AiExecutionRecordFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AiExecutionRecordCountAggregateInputType | true
     }
 
-  export interface AiGenerationTaskDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AiGenerationTask'], meta: { name: 'AiGenerationTask' } }
+  export interface AiExecutionRecordDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AiExecutionRecord'], meta: { name: 'AiExecutionRecord' } }
     /**
-     * Find zero or one AiGenerationTask that matches the filter.
-     * @param {AiGenerationTaskFindUniqueArgs} args - Arguments to find a AiGenerationTask
+     * Find zero or one AiExecutionRecord that matches the filter.
+     * @param {AiExecutionRecordFindUniqueArgs} args - Arguments to find a AiExecutionRecord
      * @example
-     * // Get one AiGenerationTask
-     * const aiGenerationTask = await prisma.aiGenerationTask.findUnique({
+     * // Get one AiExecutionRecord
+     * const aiExecutionRecord = await prisma.aiExecutionRecord.findUnique({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findUnique<T extends AiGenerationTaskFindUniqueArgs>(args: SelectSubset<T, AiGenerationTaskFindUniqueArgs<ExtArgs>>): Prisma__AiGenerationTaskClient<$Result.GetResult<Prisma.$AiGenerationTaskPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends AiExecutionRecordFindUniqueArgs>(args: SelectSubset<T, AiExecutionRecordFindUniqueArgs<ExtArgs>>): Prisma__AiExecutionRecordClient<$Result.GetResult<Prisma.$AiExecutionRecordPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one AiGenerationTask that matches the filter or throw an error with `error.code='P2025'`
+     * Find one AiExecutionRecord that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
-     * @param {AiGenerationTaskFindUniqueOrThrowArgs} args - Arguments to find a AiGenerationTask
+     * @param {AiExecutionRecordFindUniqueOrThrowArgs} args - Arguments to find a AiExecutionRecord
      * @example
-     * // Get one AiGenerationTask
-     * const aiGenerationTask = await prisma.aiGenerationTask.findUniqueOrThrow({
+     * // Get one AiExecutionRecord
+     * const aiExecutionRecord = await prisma.aiExecutionRecord.findUniqueOrThrow({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findUniqueOrThrow<T extends AiGenerationTaskFindUniqueOrThrowArgs>(args: SelectSubset<T, AiGenerationTaskFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AiGenerationTaskClient<$Result.GetResult<Prisma.$AiGenerationTaskPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends AiExecutionRecordFindUniqueOrThrowArgs>(args: SelectSubset<T, AiExecutionRecordFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AiExecutionRecordClient<$Result.GetResult<Prisma.$AiExecutionRecordPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find the first AiGenerationTask that matches the filter.
+     * Find the first AiExecutionRecord that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {AiGenerationTaskFindFirstArgs} args - Arguments to find a AiGenerationTask
+     * @param {AiExecutionRecordFindFirstArgs} args - Arguments to find a AiExecutionRecord
      * @example
-     * // Get one AiGenerationTask
-     * const aiGenerationTask = await prisma.aiGenerationTask.findFirst({
+     * // Get one AiExecutionRecord
+     * const aiExecutionRecord = await prisma.aiExecutionRecord.findFirst({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findFirst<T extends AiGenerationTaskFindFirstArgs>(args?: SelectSubset<T, AiGenerationTaskFindFirstArgs<ExtArgs>>): Prisma__AiGenerationTaskClient<$Result.GetResult<Prisma.$AiGenerationTaskPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends AiExecutionRecordFindFirstArgs>(args?: SelectSubset<T, AiExecutionRecordFindFirstArgs<ExtArgs>>): Prisma__AiExecutionRecordClient<$Result.GetResult<Prisma.$AiExecutionRecordPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find the first AiGenerationTask that matches the filter or
+     * Find the first AiExecutionRecord that matches the filter or
      * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {AiGenerationTaskFindFirstOrThrowArgs} args - Arguments to find a AiGenerationTask
+     * @param {AiExecutionRecordFindFirstOrThrowArgs} args - Arguments to find a AiExecutionRecord
      * @example
-     * // Get one AiGenerationTask
-     * const aiGenerationTask = await prisma.aiGenerationTask.findFirstOrThrow({
+     * // Get one AiExecutionRecord
+     * const aiExecutionRecord = await prisma.aiExecutionRecord.findFirstOrThrow({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findFirstOrThrow<T extends AiGenerationTaskFindFirstOrThrowArgs>(args?: SelectSubset<T, AiGenerationTaskFindFirstOrThrowArgs<ExtArgs>>): Prisma__AiGenerationTaskClient<$Result.GetResult<Prisma.$AiGenerationTaskPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends AiExecutionRecordFindFirstOrThrowArgs>(args?: SelectSubset<T, AiExecutionRecordFindFirstOrThrowArgs<ExtArgs>>): Prisma__AiExecutionRecordClient<$Result.GetResult<Prisma.$AiExecutionRecordPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find zero or more AiGenerationTasks that matches the filter.
+     * Find zero or more AiExecutionRecords that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {AiGenerationTaskFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @param {AiExecutionRecordFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
-     * // Get all AiGenerationTasks
-     * const aiGenerationTasks = await prisma.aiGenerationTask.findMany()
+     * // Get all AiExecutionRecords
+     * const aiExecutionRecords = await prisma.aiExecutionRecord.findMany()
      *
-     * // Get first 10 AiGenerationTasks
-     * const aiGenerationTasks = await prisma.aiGenerationTask.findMany({ take: 10 })
+     * // Get first 10 AiExecutionRecords
+     * const aiExecutionRecords = await prisma.aiExecutionRecord.findMany({ take: 10 })
      *
      * // Only select the `id`
-     * const aiGenerationTaskWithIdOnly = await prisma.aiGenerationTask.findMany({ select: { id: true } })
+     * const aiExecutionRecordWithIdOnly = await prisma.aiExecutionRecord.findMany({ select: { id: true } })
      *
      */
-    findMany<T extends AiGenerationTaskFindManyArgs>(args?: SelectSubset<T, AiGenerationTaskFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiGenerationTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends AiExecutionRecordFindManyArgs>(args?: SelectSubset<T, AiExecutionRecordFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiExecutionRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
-     * Create a AiGenerationTask.
-     * @param {AiGenerationTaskCreateArgs} args - Arguments to create a AiGenerationTask.
+     * Create a AiExecutionRecord.
+     * @param {AiExecutionRecordCreateArgs} args - Arguments to create a AiExecutionRecord.
      * @example
-     * // Create one AiGenerationTask
-     * const AiGenerationTask = await prisma.aiGenerationTask.create({
+     * // Create one AiExecutionRecord
+     * const AiExecutionRecord = await prisma.aiExecutionRecord.create({
      *   data: {
-     *     // ... data to create a AiGenerationTask
+     *     // ... data to create a AiExecutionRecord
      *   }
      * })
      *
      */
-    create<T extends AiGenerationTaskCreateArgs>(args: SelectSubset<T, AiGenerationTaskCreateArgs<ExtArgs>>): Prisma__AiGenerationTaskClient<$Result.GetResult<Prisma.$AiGenerationTaskPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends AiExecutionRecordCreateArgs>(args: SelectSubset<T, AiExecutionRecordCreateArgs<ExtArgs>>): Prisma__AiExecutionRecordClient<$Result.GetResult<Prisma.$AiExecutionRecordPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Create many AiGenerationTasks.
-     * @param {AiGenerationTaskCreateManyArgs} args - Arguments to create many AiGenerationTasks.
+     * Create many AiExecutionRecords.
+     * @param {AiExecutionRecordCreateManyArgs} args - Arguments to create many AiExecutionRecords.
      * @example
-     * // Create many AiGenerationTasks
-     * const aiGenerationTask = await prisma.aiGenerationTask.createMany({
+     * // Create many AiExecutionRecords
+     * const aiExecutionRecord = await prisma.aiExecutionRecord.createMany({
      *   data: [
      *     // ... provide data here
      *   ]
      * })
      *
      */
-    createMany<T extends AiGenerationTaskCreateManyArgs>(args?: SelectSubset<T, AiGenerationTaskCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    createMany<T extends AiExecutionRecordCreateManyArgs>(args?: SelectSubset<T, AiExecutionRecordCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Create many AiGenerationTasks and returns the data saved in the database.
-     * @param {AiGenerationTaskCreateManyAndReturnArgs} args - Arguments to create many AiGenerationTasks.
+     * Create many AiExecutionRecords and returns the data saved in the database.
+     * @param {AiExecutionRecordCreateManyAndReturnArgs} args - Arguments to create many AiExecutionRecords.
      * @example
-     * // Create many AiGenerationTasks
-     * const aiGenerationTask = await prisma.aiGenerationTask.createManyAndReturn({
+     * // Create many AiExecutionRecords
+     * const aiExecutionRecord = await prisma.aiExecutionRecord.createManyAndReturn({
      *   data: [
      *     // ... provide data here
      *   ]
      * })
      *
-     * // Create many AiGenerationTasks and only return the `id`
-     * const aiGenerationTaskWithIdOnly = await prisma.aiGenerationTask.createManyAndReturn({
+     * // Create many AiExecutionRecords and only return the `id`
+     * const aiExecutionRecordWithIdOnly = await prisma.aiExecutionRecord.createManyAndReturn({
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -15112,28 +13523,28 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      *
      */
-    createManyAndReturn<T extends AiGenerationTaskCreateManyAndReturnArgs>(args?: SelectSubset<T, AiGenerationTaskCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiGenerationTaskPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+    createManyAndReturn<T extends AiExecutionRecordCreateManyAndReturnArgs>(args?: SelectSubset<T, AiExecutionRecordCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiExecutionRecordPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
-     * Delete a AiGenerationTask.
-     * @param {AiGenerationTaskDeleteArgs} args - Arguments to delete one AiGenerationTask.
+     * Delete a AiExecutionRecord.
+     * @param {AiExecutionRecordDeleteArgs} args - Arguments to delete one AiExecutionRecord.
      * @example
-     * // Delete one AiGenerationTask
-     * const AiGenerationTask = await prisma.aiGenerationTask.delete({
+     * // Delete one AiExecutionRecord
+     * const AiExecutionRecord = await prisma.aiExecutionRecord.delete({
      *   where: {
-     *     // ... filter to delete one AiGenerationTask
+     *     // ... filter to delete one AiExecutionRecord
      *   }
      * })
      *
      */
-    delete<T extends AiGenerationTaskDeleteArgs>(args: SelectSubset<T, AiGenerationTaskDeleteArgs<ExtArgs>>): Prisma__AiGenerationTaskClient<$Result.GetResult<Prisma.$AiGenerationTaskPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends AiExecutionRecordDeleteArgs>(args: SelectSubset<T, AiExecutionRecordDeleteArgs<ExtArgs>>): Prisma__AiExecutionRecordClient<$Result.GetResult<Prisma.$AiExecutionRecordPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Update one AiGenerationTask.
-     * @param {AiGenerationTaskUpdateArgs} args - Arguments to update one AiGenerationTask.
+     * Update one AiExecutionRecord.
+     * @param {AiExecutionRecordUpdateArgs} args - Arguments to update one AiExecutionRecord.
      * @example
-     * // Update one AiGenerationTask
-     * const aiGenerationTask = await prisma.aiGenerationTask.update({
+     * // Update one AiExecutionRecord
+     * const aiExecutionRecord = await prisma.aiExecutionRecord.update({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -15143,30 +13554,30 @@ export namespace Prisma {
      * })
      *
      */
-    update<T extends AiGenerationTaskUpdateArgs>(args: SelectSubset<T, AiGenerationTaskUpdateArgs<ExtArgs>>): Prisma__AiGenerationTaskClient<$Result.GetResult<Prisma.$AiGenerationTaskPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends AiExecutionRecordUpdateArgs>(args: SelectSubset<T, AiExecutionRecordUpdateArgs<ExtArgs>>): Prisma__AiExecutionRecordClient<$Result.GetResult<Prisma.$AiExecutionRecordPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Delete zero or more AiGenerationTasks.
-     * @param {AiGenerationTaskDeleteManyArgs} args - Arguments to filter AiGenerationTasks to delete.
+     * Delete zero or more AiExecutionRecords.
+     * @param {AiExecutionRecordDeleteManyArgs} args - Arguments to filter AiExecutionRecords to delete.
      * @example
-     * // Delete a few AiGenerationTasks
-     * const { count } = await prisma.aiGenerationTask.deleteMany({
+     * // Delete a few AiExecutionRecords
+     * const { count } = await prisma.aiExecutionRecord.deleteMany({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      *
      */
-    deleteMany<T extends AiGenerationTaskDeleteManyArgs>(args?: SelectSubset<T, AiGenerationTaskDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    deleteMany<T extends AiExecutionRecordDeleteManyArgs>(args?: SelectSubset<T, AiExecutionRecordDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more AiGenerationTasks.
+     * Update zero or more AiExecutionRecords.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {AiGenerationTaskUpdateManyArgs} args - Arguments to update one or more rows.
+     * @param {AiExecutionRecordUpdateManyArgs} args - Arguments to update one or more rows.
      * @example
-     * // Update many AiGenerationTasks
-     * const aiGenerationTask = await prisma.aiGenerationTask.updateMany({
+     * // Update many AiExecutionRecords
+     * const aiExecutionRecord = await prisma.aiExecutionRecord.updateMany({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -15176,14 +13587,14 @@ export namespace Prisma {
      * })
      *
      */
-    updateMany<T extends AiGenerationTaskUpdateManyArgs>(args: SelectSubset<T, AiGenerationTaskUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    updateMany<T extends AiExecutionRecordUpdateManyArgs>(args: SelectSubset<T, AiExecutionRecordUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more AiGenerationTasks and returns the data updated in the database.
-     * @param {AiGenerationTaskUpdateManyAndReturnArgs} args - Arguments to update many AiGenerationTasks.
+     * Update zero or more AiExecutionRecords and returns the data updated in the database.
+     * @param {AiExecutionRecordUpdateManyAndReturnArgs} args - Arguments to update many AiExecutionRecords.
      * @example
-     * // Update many AiGenerationTasks
-     * const aiGenerationTask = await prisma.aiGenerationTask.updateManyAndReturn({
+     * // Update many AiExecutionRecords
+     * const aiExecutionRecord = await prisma.aiExecutionRecord.updateManyAndReturn({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -15192,8 +13603,8 @@ export namespace Prisma {
      *   ]
      * })
      *
-     * // Update zero or more AiGenerationTasks and only return the `id`
-     * const aiGenerationTaskWithIdOnly = await prisma.aiGenerationTask.updateManyAndReturn({
+     * // Update zero or more AiExecutionRecords and only return the `id`
+     * const aiExecutionRecordWithIdOnly = await prisma.aiExecutionRecord.updateManyAndReturn({
      *   select: { id: true },
      *   where: {
      *     // ... provide filter here
@@ -15206,56 +13617,56 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      *
      */
-    updateManyAndReturn<T extends AiGenerationTaskUpdateManyAndReturnArgs>(args: SelectSubset<T, AiGenerationTaskUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiGenerationTaskPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+    updateManyAndReturn<T extends AiExecutionRecordUpdateManyAndReturnArgs>(args: SelectSubset<T, AiExecutionRecordUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiExecutionRecordPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
-     * Create or update one AiGenerationTask.
-     * @param {AiGenerationTaskUpsertArgs} args - Arguments to update or create a AiGenerationTask.
+     * Create or update one AiExecutionRecord.
+     * @param {AiExecutionRecordUpsertArgs} args - Arguments to update or create a AiExecutionRecord.
      * @example
-     * // Update or create a AiGenerationTask
-     * const aiGenerationTask = await prisma.aiGenerationTask.upsert({
+     * // Update or create a AiExecutionRecord
+     * const aiExecutionRecord = await prisma.aiExecutionRecord.upsert({
      *   create: {
-     *     // ... data to create a AiGenerationTask
+     *     // ... data to create a AiExecutionRecord
      *   },
      *   update: {
      *     // ... in case it already exists, update
      *   },
      *   where: {
-     *     // ... the filter for the AiGenerationTask we want to update
+     *     // ... the filter for the AiExecutionRecord we want to update
      *   }
      * })
      */
-    upsert<T extends AiGenerationTaskUpsertArgs>(args: SelectSubset<T, AiGenerationTaskUpsertArgs<ExtArgs>>): Prisma__AiGenerationTaskClient<$Result.GetResult<Prisma.$AiGenerationTaskPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends AiExecutionRecordUpsertArgs>(args: SelectSubset<T, AiExecutionRecordUpsertArgs<ExtArgs>>): Prisma__AiExecutionRecordClient<$Result.GetResult<Prisma.$AiExecutionRecordPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
-     * Count the number of AiGenerationTasks.
+     * Count the number of AiExecutionRecords.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {AiGenerationTaskCountArgs} args - Arguments to filter AiGenerationTasks to count.
+     * @param {AiExecutionRecordCountArgs} args - Arguments to filter AiExecutionRecords to count.
      * @example
-     * // Count the number of AiGenerationTasks
-     * const count = await prisma.aiGenerationTask.count({
+     * // Count the number of AiExecutionRecords
+     * const count = await prisma.aiExecutionRecord.count({
      *   where: {
-     *     // ... the filter for the AiGenerationTasks we want to count
+     *     // ... the filter for the AiExecutionRecords we want to count
      *   }
      * })
     **/
-    count<T extends AiGenerationTaskCountArgs>(
-      args?: Subset<T, AiGenerationTaskCountArgs>,
+    count<T extends AiExecutionRecordCountArgs>(
+      args?: Subset<T, AiExecutionRecordCountArgs>,
     ): Prisma.PrismaPromise<
       T extends $Utils.Record<'select', any>
         ? T['select'] extends true
           ? number
-          : GetScalarType<T['select'], AiGenerationTaskCountAggregateOutputType>
+          : GetScalarType<T['select'], AiExecutionRecordCountAggregateOutputType>
         : number
     >
 
     /**
-     * Allows you to perform aggregations operations on a AiGenerationTask.
+     * Allows you to perform aggregations operations on a AiExecutionRecord.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {AiGenerationTaskAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @param {AiExecutionRecordAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
      * @example
      * // Ordered by age ascending
      * // Where email contains prisma.io
@@ -15275,13 +13686,13 @@ export namespace Prisma {
      *   take: 10,
      * })
     **/
-    aggregate<T extends AiGenerationTaskAggregateArgs>(args: Subset<T, AiGenerationTaskAggregateArgs>): Prisma.PrismaPromise<GetAiGenerationTaskAggregateType<T>>
+    aggregate<T extends AiExecutionRecordAggregateArgs>(args: Subset<T, AiExecutionRecordAggregateArgs>): Prisma.PrismaPromise<GetAiExecutionRecordAggregateType<T>>
 
     /**
-     * Group by AiGenerationTask.
+     * Group by AiExecutionRecord.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {AiGenerationTaskGroupByArgs} args - Group by arguments.
+     * @param {AiExecutionRecordGroupByArgs} args - Group by arguments.
      * @example
      * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
@@ -15296,14 +13707,14 @@ export namespace Prisma {
      *
     **/
     groupBy<
-      T extends AiGenerationTaskGroupByArgs,
+      T extends AiExecutionRecordGroupByArgs,
       HasSelectOrTake extends Or<
         Extends<'skip', Keys<T>>,
         Extends<'take', Keys<T>>
       >,
       OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: AiGenerationTaskGroupByArgs['orderBy'] }
-        : { orderBy?: AiGenerationTaskGroupByArgs['orderBy'] },
+        ? { orderBy: AiExecutionRecordGroupByArgs['orderBy'] }
+        : { orderBy?: AiExecutionRecordGroupByArgs['orderBy'] },
       OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
       ByFields extends MaybeTupleToUnion<T['by']>,
       ByValid extends Has<ByFields, OrderFields>,
@@ -15352,20 +13763,20 @@ export namespace Prisma {
             ? never
             : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
         }[OrderFields]
-    >(args: SubsetIntersection<T, AiGenerationTaskGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAiGenerationTaskGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+    >(args: SubsetIntersection<T, AiExecutionRecordGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAiExecutionRecordGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
   /**
-   * Fields of the AiGenerationTask model
+   * Fields of the AiExecutionRecord model
    */
-  readonly fields: AiGenerationTaskFieldRefs;
+  readonly fields: AiExecutionRecordFieldRefs;
   }
 
   /**
-   * The delegate class that acts as a "Promise-like" for AiGenerationTask.
+   * The delegate class that acts as a "Promise-like" for AiExecutionRecord.
    * Why is this prefixed with `Prisma__`?
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__AiGenerationTaskClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__AiExecutionRecordClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
@@ -15394,1630 +13805,442 @@ export namespace Prisma {
 
 
   /**
-   * Fields of the AiGenerationTask model
+   * Fields of the AiExecutionRecord model
    */
-  interface AiGenerationTaskFieldRefs {
-    readonly id: FieldRef<"AiGenerationTask", 'String'>
-    readonly identityId: FieldRef<"AiGenerationTask", 'String'>
-    readonly taskType: FieldRef<"AiGenerationTask", 'String'>
-    readonly status: FieldRef<"AiGenerationTask", 'String'>
-    readonly conversationId: FieldRef<"AiGenerationTask", 'String'>
-    readonly runId: FieldRef<"AiGenerationTask", 'String'>
-    readonly requestId: FieldRef<"AiGenerationTask", 'String'>
-    readonly traceId: FieldRef<"AiGenerationTask", 'String'>
-    readonly providerId: FieldRef<"AiGenerationTask", 'String'>
-    readonly model: FieldRef<"AiGenerationTask", 'String'>
-    readonly estimatedCostUsd: FieldRef<"AiGenerationTask", 'Float'>
-    readonly input: FieldRef<"AiGenerationTask", 'String'>
-    readonly result: FieldRef<"AiGenerationTask", 'String'>
-    readonly error: FieldRef<"AiGenerationTask", 'String'>
-    readonly retryCount: FieldRef<"AiGenerationTask", 'Int'>
-    readonly tokenUsage: FieldRef<"AiGenerationTask", 'String'>
-    readonly processingMs: FieldRef<"AiGenerationTask", 'Int'>
-    readonly version: FieldRef<"AiGenerationTask", 'Int'>
-    readonly createdAt: FieldRef<"AiGenerationTask", 'DateTime'>
-    readonly updatedAt: FieldRef<"AiGenerationTask", 'DateTime'>
-    readonly completedAt: FieldRef<"AiGenerationTask", 'DateTime'>
-    readonly deletedAt: FieldRef<"AiGenerationTask", 'DateTime'>
+  interface AiExecutionRecordFieldRefs {
+    readonly id: FieldRef<"AiExecutionRecord", 'String'>
+    readonly identityId: FieldRef<"AiExecutionRecord", 'String'>
+    readonly operation: FieldRef<"AiExecutionRecord", 'String'>
+    readonly outcome: FieldRef<"AiExecutionRecord", 'String'>
+    readonly conversationId: FieldRef<"AiExecutionRecord", 'String'>
+    readonly runId: FieldRef<"AiExecutionRecord", 'String'>
+    readonly requestId: FieldRef<"AiExecutionRecord", 'String'>
+    readonly traceId: FieldRef<"AiExecutionRecord", 'String'>
+    readonly providerConnectionId: FieldRef<"AiExecutionRecord", 'String'>
+    readonly modelId: FieldRef<"AiExecutionRecord", 'String'>
+    readonly errorCategory: FieldRef<"AiExecutionRecord", 'String'>
+    readonly safeError: FieldRef<"AiExecutionRecord", 'String'>
+    readonly estimatedCostUsd: FieldRef<"AiExecutionRecord", 'Float'>
+    readonly tokenUsage: FieldRef<"AiExecutionRecord", 'String'>
+    readonly latencyMs: FieldRef<"AiExecutionRecord", 'Int'>
+    readonly createdAt: FieldRef<"AiExecutionRecord", 'DateTime'>
+    readonly completedAt: FieldRef<"AiExecutionRecord", 'DateTime'>
   }
 
 
   // Custom InputTypes
   /**
-   * AiGenerationTask findUnique
+   * AiExecutionRecord findUnique
    */
-  export type AiGenerationTaskFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AiExecutionRecordFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the AiGenerationTask
+     * Select specific fields to fetch from the AiExecutionRecord
      */
-    select?: AiGenerationTaskSelect<ExtArgs> | null
+    select?: AiExecutionRecordSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the AiGenerationTask
+     * Omit specific fields from the AiExecutionRecord
      */
-    omit?: AiGenerationTaskOmit<ExtArgs> | null
+    omit?: AiExecutionRecordOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: AiGenerationTaskInclude<ExtArgs> | null
+    include?: AiExecutionRecordInclude<ExtArgs> | null
     /**
-     * Filter, which AiGenerationTask to fetch.
+     * Filter, which AiExecutionRecord to fetch.
      */
-    where: AiGenerationTaskWhereUniqueInput
+    where: AiExecutionRecordWhereUniqueInput
   }
 
   /**
-   * AiGenerationTask findUniqueOrThrow
+   * AiExecutionRecord findUniqueOrThrow
    */
-  export type AiGenerationTaskFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AiExecutionRecordFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the AiGenerationTask
+     * Select specific fields to fetch from the AiExecutionRecord
      */
-    select?: AiGenerationTaskSelect<ExtArgs> | null
+    select?: AiExecutionRecordSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the AiGenerationTask
+     * Omit specific fields from the AiExecutionRecord
      */
-    omit?: AiGenerationTaskOmit<ExtArgs> | null
+    omit?: AiExecutionRecordOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: AiGenerationTaskInclude<ExtArgs> | null
+    include?: AiExecutionRecordInclude<ExtArgs> | null
     /**
-     * Filter, which AiGenerationTask to fetch.
+     * Filter, which AiExecutionRecord to fetch.
      */
-    where: AiGenerationTaskWhereUniqueInput
+    where: AiExecutionRecordWhereUniqueInput
   }
 
   /**
-   * AiGenerationTask findFirst
+   * AiExecutionRecord findFirst
    */
-  export type AiGenerationTaskFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AiExecutionRecordFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the AiGenerationTask
+     * Select specific fields to fetch from the AiExecutionRecord
      */
-    select?: AiGenerationTaskSelect<ExtArgs> | null
+    select?: AiExecutionRecordSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the AiGenerationTask
+     * Omit specific fields from the AiExecutionRecord
      */
-    omit?: AiGenerationTaskOmit<ExtArgs> | null
+    omit?: AiExecutionRecordOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: AiGenerationTaskInclude<ExtArgs> | null
+    include?: AiExecutionRecordInclude<ExtArgs> | null
     /**
-     * Filter, which AiGenerationTask to fetch.
+     * Filter, which AiExecutionRecord to fetch.
      */
-    where?: AiGenerationTaskWhereInput
+    where?: AiExecutionRecordWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
-     * Determine the order of AiGenerationTasks to fetch.
+     * Determine the order of AiExecutionRecords to fetch.
      */
-    orderBy?: AiGenerationTaskOrderByWithRelationInput | AiGenerationTaskOrderByWithRelationInput[]
+    orderBy?: AiExecutionRecordOrderByWithRelationInput | AiExecutionRecordOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      *
-     * Sets the position for searching for AiGenerationTasks.
+     * Sets the position for searching for AiExecutionRecords.
      */
-    cursor?: AiGenerationTaskWhereUniqueInput
+    cursor?: AiExecutionRecordWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
-     * Take `±n` AiGenerationTasks from the position of the cursor.
+     * Take `±n` AiExecutionRecords from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
-     * Skip the first `n` AiGenerationTasks.
+     * Skip the first `n` AiExecutionRecords.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      *
-     * Filter by unique combinations of AiGenerationTasks.
+     * Filter by unique combinations of AiExecutionRecords.
      */
-    distinct?: AiGenerationTaskScalarFieldEnum | AiGenerationTaskScalarFieldEnum[]
+    distinct?: AiExecutionRecordScalarFieldEnum | AiExecutionRecordScalarFieldEnum[]
   }
 
   /**
-   * AiGenerationTask findFirstOrThrow
+   * AiExecutionRecord findFirstOrThrow
    */
-  export type AiGenerationTaskFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AiExecutionRecordFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the AiGenerationTask
+     * Select specific fields to fetch from the AiExecutionRecord
      */
-    select?: AiGenerationTaskSelect<ExtArgs> | null
+    select?: AiExecutionRecordSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the AiGenerationTask
+     * Omit specific fields from the AiExecutionRecord
      */
-    omit?: AiGenerationTaskOmit<ExtArgs> | null
+    omit?: AiExecutionRecordOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: AiGenerationTaskInclude<ExtArgs> | null
+    include?: AiExecutionRecordInclude<ExtArgs> | null
     /**
-     * Filter, which AiGenerationTask to fetch.
+     * Filter, which AiExecutionRecord to fetch.
      */
-    where?: AiGenerationTaskWhereInput
+    where?: AiExecutionRecordWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
-     * Determine the order of AiGenerationTasks to fetch.
+     * Determine the order of AiExecutionRecords to fetch.
      */
-    orderBy?: AiGenerationTaskOrderByWithRelationInput | AiGenerationTaskOrderByWithRelationInput[]
+    orderBy?: AiExecutionRecordOrderByWithRelationInput | AiExecutionRecordOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      *
-     * Sets the position for searching for AiGenerationTasks.
+     * Sets the position for searching for AiExecutionRecords.
      */
-    cursor?: AiGenerationTaskWhereUniqueInput
+    cursor?: AiExecutionRecordWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
-     * Take `±n` AiGenerationTasks from the position of the cursor.
+     * Take `±n` AiExecutionRecords from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
-     * Skip the first `n` AiGenerationTasks.
+     * Skip the first `n` AiExecutionRecords.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      *
-     * Filter by unique combinations of AiGenerationTasks.
+     * Filter by unique combinations of AiExecutionRecords.
      */
-    distinct?: AiGenerationTaskScalarFieldEnum | AiGenerationTaskScalarFieldEnum[]
+    distinct?: AiExecutionRecordScalarFieldEnum | AiExecutionRecordScalarFieldEnum[]
   }
 
   /**
-   * AiGenerationTask findMany
+   * AiExecutionRecord findMany
    */
-  export type AiGenerationTaskFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AiExecutionRecordFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the AiGenerationTask
+     * Select specific fields to fetch from the AiExecutionRecord
      */
-    select?: AiGenerationTaskSelect<ExtArgs> | null
+    select?: AiExecutionRecordSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the AiGenerationTask
+     * Omit specific fields from the AiExecutionRecord
      */
-    omit?: AiGenerationTaskOmit<ExtArgs> | null
+    omit?: AiExecutionRecordOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: AiGenerationTaskInclude<ExtArgs> | null
+    include?: AiExecutionRecordInclude<ExtArgs> | null
     /**
-     * Filter, which AiGenerationTasks to fetch.
+     * Filter, which AiExecutionRecords to fetch.
      */
-    where?: AiGenerationTaskWhereInput
+    where?: AiExecutionRecordWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
-     * Determine the order of AiGenerationTasks to fetch.
+     * Determine the order of AiExecutionRecords to fetch.
      */
-    orderBy?: AiGenerationTaskOrderByWithRelationInput | AiGenerationTaskOrderByWithRelationInput[]
+    orderBy?: AiExecutionRecordOrderByWithRelationInput | AiExecutionRecordOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      *
-     * Sets the position for listing AiGenerationTasks.
+     * Sets the position for listing AiExecutionRecords.
      */
-    cursor?: AiGenerationTaskWhereUniqueInput
+    cursor?: AiExecutionRecordWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
-     * Take `±n` AiGenerationTasks from the position of the cursor.
+     * Take `±n` AiExecutionRecords from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
-     * Skip the first `n` AiGenerationTasks.
+     * Skip the first `n` AiExecutionRecords.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      *
-     * Filter by unique combinations of AiGenerationTasks.
+     * Filter by unique combinations of AiExecutionRecords.
      */
-    distinct?: AiGenerationTaskScalarFieldEnum | AiGenerationTaskScalarFieldEnum[]
+    distinct?: AiExecutionRecordScalarFieldEnum | AiExecutionRecordScalarFieldEnum[]
   }
 
   /**
-   * AiGenerationTask create
+   * AiExecutionRecord create
    */
-  export type AiGenerationTaskCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AiExecutionRecordCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the AiGenerationTask
+     * Select specific fields to fetch from the AiExecutionRecord
      */
-    select?: AiGenerationTaskSelect<ExtArgs> | null
+    select?: AiExecutionRecordSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the AiGenerationTask
+     * Omit specific fields from the AiExecutionRecord
      */
-    omit?: AiGenerationTaskOmit<ExtArgs> | null
+    omit?: AiExecutionRecordOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: AiGenerationTaskInclude<ExtArgs> | null
+    include?: AiExecutionRecordInclude<ExtArgs> | null
     /**
-     * The data needed to create a AiGenerationTask.
+     * The data needed to create a AiExecutionRecord.
      */
-    data: XOR<AiGenerationTaskCreateInput, AiGenerationTaskUncheckedCreateInput>
+    data: XOR<AiExecutionRecordCreateInput, AiExecutionRecordUncheckedCreateInput>
   }
 
   /**
-   * AiGenerationTask createMany
+   * AiExecutionRecord createMany
    */
-  export type AiGenerationTaskCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AiExecutionRecordCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * The data used to create many AiGenerationTasks.
+     * The data used to create many AiExecutionRecords.
      */
-    data: AiGenerationTaskCreateManyInput | AiGenerationTaskCreateManyInput[]
+    data: AiExecutionRecordCreateManyInput | AiExecutionRecordCreateManyInput[]
     skipDuplicates?: boolean
   }
 
   /**
-   * AiGenerationTask createManyAndReturn
+   * AiExecutionRecord createManyAndReturn
    */
-  export type AiGenerationTaskCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AiExecutionRecordCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the AiGenerationTask
+     * Select specific fields to fetch from the AiExecutionRecord
      */
-    select?: AiGenerationTaskSelectCreateManyAndReturn<ExtArgs> | null
+    select?: AiExecutionRecordSelectCreateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the AiGenerationTask
+     * Omit specific fields from the AiExecutionRecord
      */
-    omit?: AiGenerationTaskOmit<ExtArgs> | null
+    omit?: AiExecutionRecordOmit<ExtArgs> | null
     /**
-     * The data used to create many AiGenerationTasks.
+     * The data used to create many AiExecutionRecords.
      */
-    data: AiGenerationTaskCreateManyInput | AiGenerationTaskCreateManyInput[]
+    data: AiExecutionRecordCreateManyInput | AiExecutionRecordCreateManyInput[]
     skipDuplicates?: boolean
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: AiGenerationTaskIncludeCreateManyAndReturn<ExtArgs> | null
+    include?: AiExecutionRecordIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
-   * AiGenerationTask update
+   * AiExecutionRecord update
    */
-  export type AiGenerationTaskUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AiExecutionRecordUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the AiGenerationTask
+     * Select specific fields to fetch from the AiExecutionRecord
      */
-    select?: AiGenerationTaskSelect<ExtArgs> | null
+    select?: AiExecutionRecordSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the AiGenerationTask
+     * Omit specific fields from the AiExecutionRecord
      */
-    omit?: AiGenerationTaskOmit<ExtArgs> | null
+    omit?: AiExecutionRecordOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: AiGenerationTaskInclude<ExtArgs> | null
+    include?: AiExecutionRecordInclude<ExtArgs> | null
     /**
-     * The data needed to update a AiGenerationTask.
+     * The data needed to update a AiExecutionRecord.
      */
-    data: XOR<AiGenerationTaskUpdateInput, AiGenerationTaskUncheckedUpdateInput>
+    data: XOR<AiExecutionRecordUpdateInput, AiExecutionRecordUncheckedUpdateInput>
     /**
-     * Choose, which AiGenerationTask to update.
+     * Choose, which AiExecutionRecord to update.
      */
-    where: AiGenerationTaskWhereUniqueInput
+    where: AiExecutionRecordWhereUniqueInput
   }
 
   /**
-   * AiGenerationTask updateMany
+   * AiExecutionRecord updateMany
    */
-  export type AiGenerationTaskUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AiExecutionRecordUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * The data used to update AiGenerationTasks.
+     * The data used to update AiExecutionRecords.
      */
-    data: XOR<AiGenerationTaskUpdateManyMutationInput, AiGenerationTaskUncheckedUpdateManyInput>
+    data: XOR<AiExecutionRecordUpdateManyMutationInput, AiExecutionRecordUncheckedUpdateManyInput>
     /**
-     * Filter which AiGenerationTasks to update
+     * Filter which AiExecutionRecords to update
      */
-    where?: AiGenerationTaskWhereInput
+    where?: AiExecutionRecordWhereInput
     /**
-     * Limit how many AiGenerationTasks to update.
+     * Limit how many AiExecutionRecords to update.
      */
     limit?: number
   }
 
   /**
-   * AiGenerationTask updateManyAndReturn
+   * AiExecutionRecord updateManyAndReturn
    */
-  export type AiGenerationTaskUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AiExecutionRecordUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the AiGenerationTask
+     * Select specific fields to fetch from the AiExecutionRecord
      */
-    select?: AiGenerationTaskSelectUpdateManyAndReturn<ExtArgs> | null
+    select?: AiExecutionRecordSelectUpdateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the AiGenerationTask
+     * Omit specific fields from the AiExecutionRecord
      */
-    omit?: AiGenerationTaskOmit<ExtArgs> | null
+    omit?: AiExecutionRecordOmit<ExtArgs> | null
     /**
-     * The data used to update AiGenerationTasks.
+     * The data used to update AiExecutionRecords.
      */
-    data: XOR<AiGenerationTaskUpdateManyMutationInput, AiGenerationTaskUncheckedUpdateManyInput>
+    data: XOR<AiExecutionRecordUpdateManyMutationInput, AiExecutionRecordUncheckedUpdateManyInput>
     /**
-     * Filter which AiGenerationTasks to update
+     * Filter which AiExecutionRecords to update
      */
-    where?: AiGenerationTaskWhereInput
+    where?: AiExecutionRecordWhereInput
     /**
-     * Limit how many AiGenerationTasks to update.
+     * Limit how many AiExecutionRecords to update.
      */
     limit?: number
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: AiGenerationTaskIncludeUpdateManyAndReturn<ExtArgs> | null
+    include?: AiExecutionRecordIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
-   * AiGenerationTask upsert
+   * AiExecutionRecord upsert
    */
-  export type AiGenerationTaskUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AiExecutionRecordUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the AiGenerationTask
+     * Select specific fields to fetch from the AiExecutionRecord
      */
-    select?: AiGenerationTaskSelect<ExtArgs> | null
+    select?: AiExecutionRecordSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the AiGenerationTask
+     * Omit specific fields from the AiExecutionRecord
      */
-    omit?: AiGenerationTaskOmit<ExtArgs> | null
+    omit?: AiExecutionRecordOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: AiGenerationTaskInclude<ExtArgs> | null
+    include?: AiExecutionRecordInclude<ExtArgs> | null
     /**
-     * The filter to search for the AiGenerationTask to update in case it exists.
+     * The filter to search for the AiExecutionRecord to update in case it exists.
      */
-    where: AiGenerationTaskWhereUniqueInput
+    where: AiExecutionRecordWhereUniqueInput
     /**
-     * In case the AiGenerationTask found by the `where` argument doesn't exist, create a new AiGenerationTask with this data.
+     * In case the AiExecutionRecord found by the `where` argument doesn't exist, create a new AiExecutionRecord with this data.
      */
-    create: XOR<AiGenerationTaskCreateInput, AiGenerationTaskUncheckedCreateInput>
+    create: XOR<AiExecutionRecordCreateInput, AiExecutionRecordUncheckedCreateInput>
     /**
-     * In case the AiGenerationTask was found with the provided `where` argument, update it with this data.
+     * In case the AiExecutionRecord was found with the provided `where` argument, update it with this data.
      */
-    update: XOR<AiGenerationTaskUpdateInput, AiGenerationTaskUncheckedUpdateInput>
+    update: XOR<AiExecutionRecordUpdateInput, AiExecutionRecordUncheckedUpdateInput>
   }
 
   /**
-   * AiGenerationTask delete
+   * AiExecutionRecord delete
    */
-  export type AiGenerationTaskDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AiExecutionRecordDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the AiGenerationTask
+     * Select specific fields to fetch from the AiExecutionRecord
      */
-    select?: AiGenerationTaskSelect<ExtArgs> | null
+    select?: AiExecutionRecordSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the AiGenerationTask
+     * Omit specific fields from the AiExecutionRecord
      */
-    omit?: AiGenerationTaskOmit<ExtArgs> | null
+    omit?: AiExecutionRecordOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: AiGenerationTaskInclude<ExtArgs> | null
+    include?: AiExecutionRecordInclude<ExtArgs> | null
     /**
-     * Filter which AiGenerationTask to delete.
+     * Filter which AiExecutionRecord to delete.
      */
-    where: AiGenerationTaskWhereUniqueInput
+    where: AiExecutionRecordWhereUniqueInput
   }
 
   /**
-   * AiGenerationTask deleteMany
+   * AiExecutionRecord deleteMany
    */
-  export type AiGenerationTaskDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AiExecutionRecordDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Filter which AiGenerationTasks to delete
+     * Filter which AiExecutionRecords to delete
      */
-    where?: AiGenerationTaskWhereInput
+    where?: AiExecutionRecordWhereInput
     /**
-     * Limit how many AiGenerationTasks to delete.
+     * Limit how many AiExecutionRecords to delete.
      */
     limit?: number
   }
 
   /**
-   * AiGenerationTask without action
+   * AiExecutionRecord without action
    */
-  export type AiGenerationTaskDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type AiExecutionRecordDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the AiGenerationTask
+     * Select specific fields to fetch from the AiExecutionRecord
      */
-    select?: AiGenerationTaskSelect<ExtArgs> | null
+    select?: AiExecutionRecordSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the AiGenerationTask
+     * Omit specific fields from the AiExecutionRecord
      */
-    omit?: AiGenerationTaskOmit<ExtArgs> | null
+    omit?: AiExecutionRecordOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: AiGenerationTaskInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model AiUsageQuota
-   */
-
-  export type AggregateAiUsageQuota = {
-    _count: AiUsageQuotaCountAggregateOutputType | null
-    _avg: AiUsageQuotaAvgAggregateOutputType | null
-    _sum: AiUsageQuotaSumAggregateOutputType | null
-    _min: AiUsageQuotaMinAggregateOutputType | null
-    _max: AiUsageQuotaMaxAggregateOutputType | null
-  }
-
-  export type AiUsageQuotaAvgAggregateOutputType = {
-    quotaLimit: number | null
-    currentUsage: number | null
-    version: number | null
-  }
-
-  export type AiUsageQuotaSumAggregateOutputType = {
-    quotaLimit: number | null
-    currentUsage: number | null
-    version: number | null
-  }
-
-  export type AiUsageQuotaMinAggregateOutputType = {
-    id: string | null
-    identityId: string | null
-    quotaLimit: number | null
-    currentUsage: number | null
-    resetPeriod: string | null
-    lastResetAt: Date | null
-    nextResetAt: Date | null
-    version: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-    deletedAt: Date | null
-  }
-
-  export type AiUsageQuotaMaxAggregateOutputType = {
-    id: string | null
-    identityId: string | null
-    quotaLimit: number | null
-    currentUsage: number | null
-    resetPeriod: string | null
-    lastResetAt: Date | null
-    nextResetAt: Date | null
-    version: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-    deletedAt: Date | null
-  }
-
-  export type AiUsageQuotaCountAggregateOutputType = {
-    id: number
-    identityId: number
-    quotaLimit: number
-    currentUsage: number
-    resetPeriod: number
-    lastResetAt: number
-    nextResetAt: number
-    version: number
-    createdAt: number
-    updatedAt: number
-    deletedAt: number
-    _all: number
-  }
-
-
-  export type AiUsageQuotaAvgAggregateInputType = {
-    quotaLimit?: true
-    currentUsage?: true
-    version?: true
-  }
-
-  export type AiUsageQuotaSumAggregateInputType = {
-    quotaLimit?: true
-    currentUsage?: true
-    version?: true
-  }
-
-  export type AiUsageQuotaMinAggregateInputType = {
-    id?: true
-    identityId?: true
-    quotaLimit?: true
-    currentUsage?: true
-    resetPeriod?: true
-    lastResetAt?: true
-    nextResetAt?: true
-    version?: true
-    createdAt?: true
-    updatedAt?: true
-    deletedAt?: true
-  }
-
-  export type AiUsageQuotaMaxAggregateInputType = {
-    id?: true
-    identityId?: true
-    quotaLimit?: true
-    currentUsage?: true
-    resetPeriod?: true
-    lastResetAt?: true
-    nextResetAt?: true
-    version?: true
-    createdAt?: true
-    updatedAt?: true
-    deletedAt?: true
-  }
-
-  export type AiUsageQuotaCountAggregateInputType = {
-    id?: true
-    identityId?: true
-    quotaLimit?: true
-    currentUsage?: true
-    resetPeriod?: true
-    lastResetAt?: true
-    nextResetAt?: true
-    version?: true
-    createdAt?: true
-    updatedAt?: true
-    deletedAt?: true
-    _all?: true
-  }
-
-  export type AiUsageQuotaAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which AiUsageQuota to aggregate.
-     */
-    where?: AiUsageQuotaWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of AiUsageQuotas to fetch.
-     */
-    orderBy?: AiUsageQuotaOrderByWithRelationInput | AiUsageQuotaOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the start position
-     */
-    cursor?: AiUsageQuotaWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` AiUsageQuotas from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` AiUsageQuotas.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Count returned AiUsageQuotas
-    **/
-    _count?: true | AiUsageQuotaCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to average
-    **/
-    _avg?: AiUsageQuotaAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to sum
-    **/
-    _sum?: AiUsageQuotaSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the minimum value
-    **/
-    _min?: AiUsageQuotaMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the maximum value
-    **/
-    _max?: AiUsageQuotaMaxAggregateInputType
-  }
-
-  export type GetAiUsageQuotaAggregateType<T extends AiUsageQuotaAggregateArgs> = {
-        [P in keyof T & keyof AggregateAiUsageQuota]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateAiUsageQuota[P]>
-      : GetScalarType<T[P], AggregateAiUsageQuota[P]>
-  }
-
-
-
-
-  export type AiUsageQuotaGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: AiUsageQuotaWhereInput
-    orderBy?: AiUsageQuotaOrderByWithAggregationInput | AiUsageQuotaOrderByWithAggregationInput[]
-    by: AiUsageQuotaScalarFieldEnum[] | AiUsageQuotaScalarFieldEnum
-    having?: AiUsageQuotaScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: AiUsageQuotaCountAggregateInputType | true
-    _avg?: AiUsageQuotaAvgAggregateInputType
-    _sum?: AiUsageQuotaSumAggregateInputType
-    _min?: AiUsageQuotaMinAggregateInputType
-    _max?: AiUsageQuotaMaxAggregateInputType
-  }
-
-  export type AiUsageQuotaGroupByOutputType = {
-    id: string
-    identityId: string
-    quotaLimit: number
-    currentUsage: number
-    resetPeriod: string
-    lastResetAt: Date
-    nextResetAt: Date
-    version: number
-    createdAt: Date
-    updatedAt: Date
-    deletedAt: Date | null
-    _count: AiUsageQuotaCountAggregateOutputType | null
-    _avg: AiUsageQuotaAvgAggregateOutputType | null
-    _sum: AiUsageQuotaSumAggregateOutputType | null
-    _min: AiUsageQuotaMinAggregateOutputType | null
-    _max: AiUsageQuotaMaxAggregateOutputType | null
-  }
-
-  type GetAiUsageQuotaGroupByPayload<T extends AiUsageQuotaGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<AiUsageQuotaGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof AiUsageQuotaGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], AiUsageQuotaGroupByOutputType[P]>
-            : GetScalarType<T[P], AiUsageQuotaGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type AiUsageQuotaSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    quotaLimit?: boolean
-    currentUsage?: boolean
-    resetPeriod?: boolean
-    lastResetAt?: boolean
-    nextResetAt?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    deletedAt?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["aiUsageQuota"]>
-
-  export type AiUsageQuotaSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    quotaLimit?: boolean
-    currentUsage?: boolean
-    resetPeriod?: boolean
-    lastResetAt?: boolean
-    nextResetAt?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    deletedAt?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["aiUsageQuota"]>
-
-  export type AiUsageQuotaSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    quotaLimit?: boolean
-    currentUsage?: boolean
-    resetPeriod?: boolean
-    lastResetAt?: boolean
-    nextResetAt?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    deletedAt?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["aiUsageQuota"]>
-
-  export type AiUsageQuotaSelectScalar = {
-    id?: boolean
-    identityId?: boolean
-    quotaLimit?: boolean
-    currentUsage?: boolean
-    resetPeriod?: boolean
-    lastResetAt?: boolean
-    nextResetAt?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    deletedAt?: boolean
-  }
-
-  export type AiUsageQuotaOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "quotaLimit" | "currentUsage" | "resetPeriod" | "lastResetAt" | "nextResetAt" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["aiUsageQuota"]>
-  export type AiUsageQuotaInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }
-  export type AiUsageQuotaIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }
-  export type AiUsageQuotaIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }
-
-  export type $AiUsageQuotaPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "AiUsageQuota"
-    objects: {
-      account: Prisma.$AccountPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      identityId: string
-      quotaLimit: number
-      currentUsage: number
-      resetPeriod: string
-      lastResetAt: Date
-      nextResetAt: Date
-      version: number
-      createdAt: Date
-      updatedAt: Date
-      deletedAt: Date | null
-    }, ExtArgs["result"]["aiUsageQuota"]>
-    composites: {}
-  }
-
-  type AiUsageQuotaGetPayload<S extends boolean | null | undefined | AiUsageQuotaDefaultArgs> = $Result.GetResult<Prisma.$AiUsageQuotaPayload, S>
-
-  type AiUsageQuotaCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<AiUsageQuotaFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: AiUsageQuotaCountAggregateInputType | true
-    }
-
-  export interface AiUsageQuotaDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AiUsageQuota'], meta: { name: 'AiUsageQuota' } }
-    /**
-     * Find zero or one AiUsageQuota that matches the filter.
-     * @param {AiUsageQuotaFindUniqueArgs} args - Arguments to find a AiUsageQuota
-     * @example
-     * // Get one AiUsageQuota
-     * const aiUsageQuota = await prisma.aiUsageQuota.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends AiUsageQuotaFindUniqueArgs>(args: SelectSubset<T, AiUsageQuotaFindUniqueArgs<ExtArgs>>): Prisma__AiUsageQuotaClient<$Result.GetResult<Prisma.$AiUsageQuotaPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one AiUsageQuota that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {AiUsageQuotaFindUniqueOrThrowArgs} args - Arguments to find a AiUsageQuota
-     * @example
-     * // Get one AiUsageQuota
-     * const aiUsageQuota = await prisma.aiUsageQuota.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends AiUsageQuotaFindUniqueOrThrowArgs>(args: SelectSubset<T, AiUsageQuotaFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AiUsageQuotaClient<$Result.GetResult<Prisma.$AiUsageQuotaPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first AiUsageQuota that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AiUsageQuotaFindFirstArgs} args - Arguments to find a AiUsageQuota
-     * @example
-     * // Get one AiUsageQuota
-     * const aiUsageQuota = await prisma.aiUsageQuota.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends AiUsageQuotaFindFirstArgs>(args?: SelectSubset<T, AiUsageQuotaFindFirstArgs<ExtArgs>>): Prisma__AiUsageQuotaClient<$Result.GetResult<Prisma.$AiUsageQuotaPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first AiUsageQuota that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AiUsageQuotaFindFirstOrThrowArgs} args - Arguments to find a AiUsageQuota
-     * @example
-     * // Get one AiUsageQuota
-     * const aiUsageQuota = await prisma.aiUsageQuota.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends AiUsageQuotaFindFirstOrThrowArgs>(args?: SelectSubset<T, AiUsageQuotaFindFirstOrThrowArgs<ExtArgs>>): Prisma__AiUsageQuotaClient<$Result.GetResult<Prisma.$AiUsageQuotaPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more AiUsageQuotas that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AiUsageQuotaFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all AiUsageQuotas
-     * const aiUsageQuotas = await prisma.aiUsageQuota.findMany()
-     *
-     * // Get first 10 AiUsageQuotas
-     * const aiUsageQuotas = await prisma.aiUsageQuota.findMany({ take: 10 })
-     *
-     * // Only select the `id`
-     * const aiUsageQuotaWithIdOnly = await prisma.aiUsageQuota.findMany({ select: { id: true } })
-     *
-     */
-    findMany<T extends AiUsageQuotaFindManyArgs>(args?: SelectSubset<T, AiUsageQuotaFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiUsageQuotaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a AiUsageQuota.
-     * @param {AiUsageQuotaCreateArgs} args - Arguments to create a AiUsageQuota.
-     * @example
-     * // Create one AiUsageQuota
-     * const AiUsageQuota = await prisma.aiUsageQuota.create({
-     *   data: {
-     *     // ... data to create a AiUsageQuota
-     *   }
-     * })
-     *
-     */
-    create<T extends AiUsageQuotaCreateArgs>(args: SelectSubset<T, AiUsageQuotaCreateArgs<ExtArgs>>): Prisma__AiUsageQuotaClient<$Result.GetResult<Prisma.$AiUsageQuotaPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many AiUsageQuotas.
-     * @param {AiUsageQuotaCreateManyArgs} args - Arguments to create many AiUsageQuotas.
-     * @example
-     * // Create many AiUsageQuotas
-     * const aiUsageQuota = await prisma.aiUsageQuota.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     */
-    createMany<T extends AiUsageQuotaCreateManyArgs>(args?: SelectSubset<T, AiUsageQuotaCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many AiUsageQuotas and returns the data saved in the database.
-     * @param {AiUsageQuotaCreateManyAndReturnArgs} args - Arguments to create many AiUsageQuotas.
-     * @example
-     * // Create many AiUsageQuotas
-     * const aiUsageQuota = await prisma.aiUsageQuota.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Create many AiUsageQuotas and only return the `id`
-     * const aiUsageQuotaWithIdOnly = await prisma.aiUsageQuota.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    createManyAndReturn<T extends AiUsageQuotaCreateManyAndReturnArgs>(args?: SelectSubset<T, AiUsageQuotaCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiUsageQuotaPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a AiUsageQuota.
-     * @param {AiUsageQuotaDeleteArgs} args - Arguments to delete one AiUsageQuota.
-     * @example
-     * // Delete one AiUsageQuota
-     * const AiUsageQuota = await prisma.aiUsageQuota.delete({
-     *   where: {
-     *     // ... filter to delete one AiUsageQuota
-     *   }
-     * })
-     *
-     */
-    delete<T extends AiUsageQuotaDeleteArgs>(args: SelectSubset<T, AiUsageQuotaDeleteArgs<ExtArgs>>): Prisma__AiUsageQuotaClient<$Result.GetResult<Prisma.$AiUsageQuotaPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one AiUsageQuota.
-     * @param {AiUsageQuotaUpdateArgs} args - Arguments to update one AiUsageQuota.
-     * @example
-     * // Update one AiUsageQuota
-     * const aiUsageQuota = await prisma.aiUsageQuota.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    update<T extends AiUsageQuotaUpdateArgs>(args: SelectSubset<T, AiUsageQuotaUpdateArgs<ExtArgs>>): Prisma__AiUsageQuotaClient<$Result.GetResult<Prisma.$AiUsageQuotaPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more AiUsageQuotas.
-     * @param {AiUsageQuotaDeleteManyArgs} args - Arguments to filter AiUsageQuotas to delete.
-     * @example
-     * // Delete a few AiUsageQuotas
-     * const { count } = await prisma.aiUsageQuota.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     *
-     */
-    deleteMany<T extends AiUsageQuotaDeleteManyArgs>(args?: SelectSubset<T, AiUsageQuotaDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more AiUsageQuotas.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AiUsageQuotaUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many AiUsageQuotas
-     * const aiUsageQuota = await prisma.aiUsageQuota.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    updateMany<T extends AiUsageQuotaUpdateManyArgs>(args: SelectSubset<T, AiUsageQuotaUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more AiUsageQuotas and returns the data updated in the database.
-     * @param {AiUsageQuotaUpdateManyAndReturnArgs} args - Arguments to update many AiUsageQuotas.
-     * @example
-     * // Update many AiUsageQuotas
-     * const aiUsageQuota = await prisma.aiUsageQuota.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Update zero or more AiUsageQuotas and only return the `id`
-     * const aiUsageQuotaWithIdOnly = await prisma.aiUsageQuota.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    updateManyAndReturn<T extends AiUsageQuotaUpdateManyAndReturnArgs>(args: SelectSubset<T, AiUsageQuotaUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiUsageQuotaPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one AiUsageQuota.
-     * @param {AiUsageQuotaUpsertArgs} args - Arguments to update or create a AiUsageQuota.
-     * @example
-     * // Update or create a AiUsageQuota
-     * const aiUsageQuota = await prisma.aiUsageQuota.upsert({
-     *   create: {
-     *     // ... data to create a AiUsageQuota
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the AiUsageQuota we want to update
-     *   }
-     * })
-     */
-    upsert<T extends AiUsageQuotaUpsertArgs>(args: SelectSubset<T, AiUsageQuotaUpsertArgs<ExtArgs>>): Prisma__AiUsageQuotaClient<$Result.GetResult<Prisma.$AiUsageQuotaPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of AiUsageQuotas.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AiUsageQuotaCountArgs} args - Arguments to filter AiUsageQuotas to count.
-     * @example
-     * // Count the number of AiUsageQuotas
-     * const count = await prisma.aiUsageQuota.count({
-     *   where: {
-     *     // ... the filter for the AiUsageQuotas we want to count
-     *   }
-     * })
-    **/
-    count<T extends AiUsageQuotaCountArgs>(
-      args?: Subset<T, AiUsageQuotaCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], AiUsageQuotaCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a AiUsageQuota.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AiUsageQuotaAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends AiUsageQuotaAggregateArgs>(args: Subset<T, AiUsageQuotaAggregateArgs>): Prisma.PrismaPromise<GetAiUsageQuotaAggregateType<T>>
-
-    /**
-     * Group by AiUsageQuota.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AiUsageQuotaGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     *
-    **/
-    groupBy<
-      T extends AiUsageQuotaGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: AiUsageQuotaGroupByArgs['orderBy'] }
-        : { orderBy?: AiUsageQuotaGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, AiUsageQuotaGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAiUsageQuotaGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the AiUsageQuota model
-   */
-  readonly fields: AiUsageQuotaFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for AiUsageQuota.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__AiUsageQuotaClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the AiUsageQuota model
-   */
-  interface AiUsageQuotaFieldRefs {
-    readonly id: FieldRef<"AiUsageQuota", 'String'>
-    readonly identityId: FieldRef<"AiUsageQuota", 'String'>
-    readonly quotaLimit: FieldRef<"AiUsageQuota", 'Int'>
-    readonly currentUsage: FieldRef<"AiUsageQuota", 'Int'>
-    readonly resetPeriod: FieldRef<"AiUsageQuota", 'String'>
-    readonly lastResetAt: FieldRef<"AiUsageQuota", 'DateTime'>
-    readonly nextResetAt: FieldRef<"AiUsageQuota", 'DateTime'>
-    readonly version: FieldRef<"AiUsageQuota", 'Int'>
-    readonly createdAt: FieldRef<"AiUsageQuota", 'DateTime'>
-    readonly updatedAt: FieldRef<"AiUsageQuota", 'DateTime'>
-    readonly deletedAt: FieldRef<"AiUsageQuota", 'DateTime'>
-  }
-
-
-  // Custom InputTypes
-  /**
-   * AiUsageQuota findUnique
-   */
-  export type AiUsageQuotaFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiUsageQuota
-     */
-    select?: AiUsageQuotaSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiUsageQuota
-     */
-    omit?: AiUsageQuotaOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiUsageQuotaInclude<ExtArgs> | null
-    /**
-     * Filter, which AiUsageQuota to fetch.
-     */
-    where: AiUsageQuotaWhereUniqueInput
-  }
-
-  /**
-   * AiUsageQuota findUniqueOrThrow
-   */
-  export type AiUsageQuotaFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiUsageQuota
-     */
-    select?: AiUsageQuotaSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiUsageQuota
-     */
-    omit?: AiUsageQuotaOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiUsageQuotaInclude<ExtArgs> | null
-    /**
-     * Filter, which AiUsageQuota to fetch.
-     */
-    where: AiUsageQuotaWhereUniqueInput
-  }
-
-  /**
-   * AiUsageQuota findFirst
-   */
-  export type AiUsageQuotaFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiUsageQuota
-     */
-    select?: AiUsageQuotaSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiUsageQuota
-     */
-    omit?: AiUsageQuotaOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiUsageQuotaInclude<ExtArgs> | null
-    /**
-     * Filter, which AiUsageQuota to fetch.
-     */
-    where?: AiUsageQuotaWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of AiUsageQuotas to fetch.
-     */
-    orderBy?: AiUsageQuotaOrderByWithRelationInput | AiUsageQuotaOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for AiUsageQuotas.
-     */
-    cursor?: AiUsageQuotaWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` AiUsageQuotas from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` AiUsageQuotas.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of AiUsageQuotas.
-     */
-    distinct?: AiUsageQuotaScalarFieldEnum | AiUsageQuotaScalarFieldEnum[]
-  }
-
-  /**
-   * AiUsageQuota findFirstOrThrow
-   */
-  export type AiUsageQuotaFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiUsageQuota
-     */
-    select?: AiUsageQuotaSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiUsageQuota
-     */
-    omit?: AiUsageQuotaOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiUsageQuotaInclude<ExtArgs> | null
-    /**
-     * Filter, which AiUsageQuota to fetch.
-     */
-    where?: AiUsageQuotaWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of AiUsageQuotas to fetch.
-     */
-    orderBy?: AiUsageQuotaOrderByWithRelationInput | AiUsageQuotaOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for AiUsageQuotas.
-     */
-    cursor?: AiUsageQuotaWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` AiUsageQuotas from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` AiUsageQuotas.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of AiUsageQuotas.
-     */
-    distinct?: AiUsageQuotaScalarFieldEnum | AiUsageQuotaScalarFieldEnum[]
-  }
-
-  /**
-   * AiUsageQuota findMany
-   */
-  export type AiUsageQuotaFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiUsageQuota
-     */
-    select?: AiUsageQuotaSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiUsageQuota
-     */
-    omit?: AiUsageQuotaOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiUsageQuotaInclude<ExtArgs> | null
-    /**
-     * Filter, which AiUsageQuotas to fetch.
-     */
-    where?: AiUsageQuotaWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of AiUsageQuotas to fetch.
-     */
-    orderBy?: AiUsageQuotaOrderByWithRelationInput | AiUsageQuotaOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for listing AiUsageQuotas.
-     */
-    cursor?: AiUsageQuotaWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` AiUsageQuotas from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` AiUsageQuotas.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of AiUsageQuotas.
-     */
-    distinct?: AiUsageQuotaScalarFieldEnum | AiUsageQuotaScalarFieldEnum[]
-  }
-
-  /**
-   * AiUsageQuota create
-   */
-  export type AiUsageQuotaCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiUsageQuota
-     */
-    select?: AiUsageQuotaSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiUsageQuota
-     */
-    omit?: AiUsageQuotaOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiUsageQuotaInclude<ExtArgs> | null
-    /**
-     * The data needed to create a AiUsageQuota.
-     */
-    data: XOR<AiUsageQuotaCreateInput, AiUsageQuotaUncheckedCreateInput>
-  }
-
-  /**
-   * AiUsageQuota createMany
-   */
-  export type AiUsageQuotaCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many AiUsageQuotas.
-     */
-    data: AiUsageQuotaCreateManyInput | AiUsageQuotaCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * AiUsageQuota createManyAndReturn
-   */
-  export type AiUsageQuotaCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiUsageQuota
-     */
-    select?: AiUsageQuotaSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiUsageQuota
-     */
-    omit?: AiUsageQuotaOmit<ExtArgs> | null
-    /**
-     * The data used to create many AiUsageQuotas.
-     */
-    data: AiUsageQuotaCreateManyInput | AiUsageQuotaCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiUsageQuotaIncludeCreateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * AiUsageQuota update
-   */
-  export type AiUsageQuotaUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiUsageQuota
-     */
-    select?: AiUsageQuotaSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiUsageQuota
-     */
-    omit?: AiUsageQuotaOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiUsageQuotaInclude<ExtArgs> | null
-    /**
-     * The data needed to update a AiUsageQuota.
-     */
-    data: XOR<AiUsageQuotaUpdateInput, AiUsageQuotaUncheckedUpdateInput>
-    /**
-     * Choose, which AiUsageQuota to update.
-     */
-    where: AiUsageQuotaWhereUniqueInput
-  }
-
-  /**
-   * AiUsageQuota updateMany
-   */
-  export type AiUsageQuotaUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update AiUsageQuotas.
-     */
-    data: XOR<AiUsageQuotaUpdateManyMutationInput, AiUsageQuotaUncheckedUpdateManyInput>
-    /**
-     * Filter which AiUsageQuotas to update
-     */
-    where?: AiUsageQuotaWhereInput
-    /**
-     * Limit how many AiUsageQuotas to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * AiUsageQuota updateManyAndReturn
-   */
-  export type AiUsageQuotaUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiUsageQuota
-     */
-    select?: AiUsageQuotaSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiUsageQuota
-     */
-    omit?: AiUsageQuotaOmit<ExtArgs> | null
-    /**
-     * The data used to update AiUsageQuotas.
-     */
-    data: XOR<AiUsageQuotaUpdateManyMutationInput, AiUsageQuotaUncheckedUpdateManyInput>
-    /**
-     * Filter which AiUsageQuotas to update
-     */
-    where?: AiUsageQuotaWhereInput
-    /**
-     * Limit how many AiUsageQuotas to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiUsageQuotaIncludeUpdateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * AiUsageQuota upsert
-   */
-  export type AiUsageQuotaUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiUsageQuota
-     */
-    select?: AiUsageQuotaSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiUsageQuota
-     */
-    omit?: AiUsageQuotaOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiUsageQuotaInclude<ExtArgs> | null
-    /**
-     * The filter to search for the AiUsageQuota to update in case it exists.
-     */
-    where: AiUsageQuotaWhereUniqueInput
-    /**
-     * In case the AiUsageQuota found by the `where` argument doesn't exist, create a new AiUsageQuota with this data.
-     */
-    create: XOR<AiUsageQuotaCreateInput, AiUsageQuotaUncheckedCreateInput>
-    /**
-     * In case the AiUsageQuota was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<AiUsageQuotaUpdateInput, AiUsageQuotaUncheckedUpdateInput>
-  }
-
-  /**
-   * AiUsageQuota delete
-   */
-  export type AiUsageQuotaDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiUsageQuota
-     */
-    select?: AiUsageQuotaSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiUsageQuota
-     */
-    omit?: AiUsageQuotaOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiUsageQuotaInclude<ExtArgs> | null
-    /**
-     * Filter which AiUsageQuota to delete.
-     */
-    where: AiUsageQuotaWhereUniqueInput
-  }
-
-  /**
-   * AiUsageQuota deleteMany
-   */
-  export type AiUsageQuotaDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which AiUsageQuotas to delete
-     */
-    where?: AiUsageQuotaWhereInput
-    /**
-     * Limit how many AiUsageQuotas to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * AiUsageQuota without action
-   */
-  export type AiUsageQuotaDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AiUsageQuota
-     */
-    select?: AiUsageQuotaSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AiUsageQuota
-     */
-    omit?: AiUsageQuotaOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AiUsageQuotaInclude<ExtArgs> | null
+    include?: AiExecutionRecordInclude<ExtArgs> | null
   }
 
 
@@ -20518,1131 +17741,6 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: AiProviderSecretInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model KnowledgeGenerationTask
-   */
-
-  export type AggregateKnowledgeGenerationTask = {
-    _count: KnowledgeGenerationTaskCountAggregateOutputType | null
-    _avg: KnowledgeGenerationTaskAvgAggregateOutputType | null
-    _sum: KnowledgeGenerationTaskSumAggregateOutputType | null
-    _min: KnowledgeGenerationTaskMinAggregateOutputType | null
-    _max: KnowledgeGenerationTaskMaxAggregateOutputType | null
-  }
-
-  export type KnowledgeGenerationTaskAvgAggregateOutputType = {
-    resourceCount: number | null
-    progress: number | null
-  }
-
-  export type KnowledgeGenerationTaskSumAggregateOutputType = {
-    resourceCount: number | null
-    progress: number | null
-  }
-
-  export type KnowledgeGenerationTaskMinAggregateOutputType = {
-    id: string | null
-    identityId: string | null
-    topic: string | null
-    resourceCount: number | null
-    targetAudience: string | null
-    folderPath: string | null
-    status: string | null
-    progress: number | null
-    error: string | null
-    createdAt: Date | null
-    completedAt: Date | null
-  }
-
-  export type KnowledgeGenerationTaskMaxAggregateOutputType = {
-    id: string | null
-    identityId: string | null
-    topic: string | null
-    resourceCount: number | null
-    targetAudience: string | null
-    folderPath: string | null
-    status: string | null
-    progress: number | null
-    error: string | null
-    createdAt: Date | null
-    completedAt: Date | null
-  }
-
-  export type KnowledgeGenerationTaskCountAggregateOutputType = {
-    id: number
-    identityId: number
-    topic: number
-    resourceCount: number
-    targetAudience: number
-    folderPath: number
-    status: number
-    progress: number
-    generatedResourceIds: number
-    error: number
-    createdAt: number
-    completedAt: number
-    _all: number
-  }
-
-
-  export type KnowledgeGenerationTaskAvgAggregateInputType = {
-    resourceCount?: true
-    progress?: true
-  }
-
-  export type KnowledgeGenerationTaskSumAggregateInputType = {
-    resourceCount?: true
-    progress?: true
-  }
-
-  export type KnowledgeGenerationTaskMinAggregateInputType = {
-    id?: true
-    identityId?: true
-    topic?: true
-    resourceCount?: true
-    targetAudience?: true
-    folderPath?: true
-    status?: true
-    progress?: true
-    error?: true
-    createdAt?: true
-    completedAt?: true
-  }
-
-  export type KnowledgeGenerationTaskMaxAggregateInputType = {
-    id?: true
-    identityId?: true
-    topic?: true
-    resourceCount?: true
-    targetAudience?: true
-    folderPath?: true
-    status?: true
-    progress?: true
-    error?: true
-    createdAt?: true
-    completedAt?: true
-  }
-
-  export type KnowledgeGenerationTaskCountAggregateInputType = {
-    id?: true
-    identityId?: true
-    topic?: true
-    resourceCount?: true
-    targetAudience?: true
-    folderPath?: true
-    status?: true
-    progress?: true
-    generatedResourceIds?: true
-    error?: true
-    createdAt?: true
-    completedAt?: true
-    _all?: true
-  }
-
-  export type KnowledgeGenerationTaskAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which KnowledgeGenerationTask to aggregate.
-     */
-    where?: KnowledgeGenerationTaskWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of KnowledgeGenerationTasks to fetch.
-     */
-    orderBy?: KnowledgeGenerationTaskOrderByWithRelationInput | KnowledgeGenerationTaskOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the start position
-     */
-    cursor?: KnowledgeGenerationTaskWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` KnowledgeGenerationTasks from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` KnowledgeGenerationTasks.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Count returned KnowledgeGenerationTasks
-    **/
-    _count?: true | KnowledgeGenerationTaskCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to average
-    **/
-    _avg?: KnowledgeGenerationTaskAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to sum
-    **/
-    _sum?: KnowledgeGenerationTaskSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the minimum value
-    **/
-    _min?: KnowledgeGenerationTaskMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the maximum value
-    **/
-    _max?: KnowledgeGenerationTaskMaxAggregateInputType
-  }
-
-  export type GetKnowledgeGenerationTaskAggregateType<T extends KnowledgeGenerationTaskAggregateArgs> = {
-        [P in keyof T & keyof AggregateKnowledgeGenerationTask]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateKnowledgeGenerationTask[P]>
-      : GetScalarType<T[P], AggregateKnowledgeGenerationTask[P]>
-  }
-
-
-
-
-  export type KnowledgeGenerationTaskGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KnowledgeGenerationTaskWhereInput
-    orderBy?: KnowledgeGenerationTaskOrderByWithAggregationInput | KnowledgeGenerationTaskOrderByWithAggregationInput[]
-    by: KnowledgeGenerationTaskScalarFieldEnum[] | KnowledgeGenerationTaskScalarFieldEnum
-    having?: KnowledgeGenerationTaskScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: KnowledgeGenerationTaskCountAggregateInputType | true
-    _avg?: KnowledgeGenerationTaskAvgAggregateInputType
-    _sum?: KnowledgeGenerationTaskSumAggregateInputType
-    _min?: KnowledgeGenerationTaskMinAggregateInputType
-    _max?: KnowledgeGenerationTaskMaxAggregateInputType
-  }
-
-  export type KnowledgeGenerationTaskGroupByOutputType = {
-    id: string
-    identityId: string
-    topic: string
-    resourceCount: number
-    targetAudience: string | null
-    folderPath: string
-    status: string
-    progress: number
-    generatedResourceIds: string[]
-    error: string | null
-    createdAt: Date
-    completedAt: Date | null
-    _count: KnowledgeGenerationTaskCountAggregateOutputType | null
-    _avg: KnowledgeGenerationTaskAvgAggregateOutputType | null
-    _sum: KnowledgeGenerationTaskSumAggregateOutputType | null
-    _min: KnowledgeGenerationTaskMinAggregateOutputType | null
-    _max: KnowledgeGenerationTaskMaxAggregateOutputType | null
-  }
-
-  type GetKnowledgeGenerationTaskGroupByPayload<T extends KnowledgeGenerationTaskGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<KnowledgeGenerationTaskGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof KnowledgeGenerationTaskGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], KnowledgeGenerationTaskGroupByOutputType[P]>
-            : GetScalarType<T[P], KnowledgeGenerationTaskGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type KnowledgeGenerationTaskSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    topic?: boolean
-    resourceCount?: boolean
-    targetAudience?: boolean
-    folderPath?: boolean
-    status?: boolean
-    progress?: boolean
-    generatedResourceIds?: boolean
-    error?: boolean
-    createdAt?: boolean
-    completedAt?: boolean
-  }, ExtArgs["result"]["knowledgeGenerationTask"]>
-
-  export type KnowledgeGenerationTaskSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    topic?: boolean
-    resourceCount?: boolean
-    targetAudience?: boolean
-    folderPath?: boolean
-    status?: boolean
-    progress?: boolean
-    generatedResourceIds?: boolean
-    error?: boolean
-    createdAt?: boolean
-    completedAt?: boolean
-  }, ExtArgs["result"]["knowledgeGenerationTask"]>
-
-  export type KnowledgeGenerationTaskSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    topic?: boolean
-    resourceCount?: boolean
-    targetAudience?: boolean
-    folderPath?: boolean
-    status?: boolean
-    progress?: boolean
-    generatedResourceIds?: boolean
-    error?: boolean
-    createdAt?: boolean
-    completedAt?: boolean
-  }, ExtArgs["result"]["knowledgeGenerationTask"]>
-
-  export type KnowledgeGenerationTaskSelectScalar = {
-    id?: boolean
-    identityId?: boolean
-    topic?: boolean
-    resourceCount?: boolean
-    targetAudience?: boolean
-    folderPath?: boolean
-    status?: boolean
-    progress?: boolean
-    generatedResourceIds?: boolean
-    error?: boolean
-    createdAt?: boolean
-    completedAt?: boolean
-  }
-
-  export type KnowledgeGenerationTaskOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "topic" | "resourceCount" | "targetAudience" | "folderPath" | "status" | "progress" | "generatedResourceIds" | "error" | "createdAt" | "completedAt", ExtArgs["result"]["knowledgeGenerationTask"]>
-
-  export type $KnowledgeGenerationTaskPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "KnowledgeGenerationTask"
-    objects: {}
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      identityId: string
-      topic: string
-      resourceCount: number
-      targetAudience: string | null
-      folderPath: string
-      status: string
-      progress: number
-      generatedResourceIds: string[]
-      error: string | null
-      createdAt: Date
-      completedAt: Date | null
-    }, ExtArgs["result"]["knowledgeGenerationTask"]>
-    composites: {}
-  }
-
-  type KnowledgeGenerationTaskGetPayload<S extends boolean | null | undefined | KnowledgeGenerationTaskDefaultArgs> = $Result.GetResult<Prisma.$KnowledgeGenerationTaskPayload, S>
-
-  type KnowledgeGenerationTaskCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<KnowledgeGenerationTaskFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: KnowledgeGenerationTaskCountAggregateInputType | true
-    }
-
-  export interface KnowledgeGenerationTaskDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['KnowledgeGenerationTask'], meta: { name: 'KnowledgeGenerationTask' } }
-    /**
-     * Find zero or one KnowledgeGenerationTask that matches the filter.
-     * @param {KnowledgeGenerationTaskFindUniqueArgs} args - Arguments to find a KnowledgeGenerationTask
-     * @example
-     * // Get one KnowledgeGenerationTask
-     * const knowledgeGenerationTask = await prisma.knowledgeGenerationTask.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends KnowledgeGenerationTaskFindUniqueArgs>(args: SelectSubset<T, KnowledgeGenerationTaskFindUniqueArgs<ExtArgs>>): Prisma__KnowledgeGenerationTaskClient<$Result.GetResult<Prisma.$KnowledgeGenerationTaskPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one KnowledgeGenerationTask that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {KnowledgeGenerationTaskFindUniqueOrThrowArgs} args - Arguments to find a KnowledgeGenerationTask
-     * @example
-     * // Get one KnowledgeGenerationTask
-     * const knowledgeGenerationTask = await prisma.knowledgeGenerationTask.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends KnowledgeGenerationTaskFindUniqueOrThrowArgs>(args: SelectSubset<T, KnowledgeGenerationTaskFindUniqueOrThrowArgs<ExtArgs>>): Prisma__KnowledgeGenerationTaskClient<$Result.GetResult<Prisma.$KnowledgeGenerationTaskPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first KnowledgeGenerationTask that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KnowledgeGenerationTaskFindFirstArgs} args - Arguments to find a KnowledgeGenerationTask
-     * @example
-     * // Get one KnowledgeGenerationTask
-     * const knowledgeGenerationTask = await prisma.knowledgeGenerationTask.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends KnowledgeGenerationTaskFindFirstArgs>(args?: SelectSubset<T, KnowledgeGenerationTaskFindFirstArgs<ExtArgs>>): Prisma__KnowledgeGenerationTaskClient<$Result.GetResult<Prisma.$KnowledgeGenerationTaskPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first KnowledgeGenerationTask that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KnowledgeGenerationTaskFindFirstOrThrowArgs} args - Arguments to find a KnowledgeGenerationTask
-     * @example
-     * // Get one KnowledgeGenerationTask
-     * const knowledgeGenerationTask = await prisma.knowledgeGenerationTask.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends KnowledgeGenerationTaskFindFirstOrThrowArgs>(args?: SelectSubset<T, KnowledgeGenerationTaskFindFirstOrThrowArgs<ExtArgs>>): Prisma__KnowledgeGenerationTaskClient<$Result.GetResult<Prisma.$KnowledgeGenerationTaskPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more KnowledgeGenerationTasks that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KnowledgeGenerationTaskFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all KnowledgeGenerationTasks
-     * const knowledgeGenerationTasks = await prisma.knowledgeGenerationTask.findMany()
-     *
-     * // Get first 10 KnowledgeGenerationTasks
-     * const knowledgeGenerationTasks = await prisma.knowledgeGenerationTask.findMany({ take: 10 })
-     *
-     * // Only select the `id`
-     * const knowledgeGenerationTaskWithIdOnly = await prisma.knowledgeGenerationTask.findMany({ select: { id: true } })
-     *
-     */
-    findMany<T extends KnowledgeGenerationTaskFindManyArgs>(args?: SelectSubset<T, KnowledgeGenerationTaskFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeGenerationTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a KnowledgeGenerationTask.
-     * @param {KnowledgeGenerationTaskCreateArgs} args - Arguments to create a KnowledgeGenerationTask.
-     * @example
-     * // Create one KnowledgeGenerationTask
-     * const KnowledgeGenerationTask = await prisma.knowledgeGenerationTask.create({
-     *   data: {
-     *     // ... data to create a KnowledgeGenerationTask
-     *   }
-     * })
-     *
-     */
-    create<T extends KnowledgeGenerationTaskCreateArgs>(args: SelectSubset<T, KnowledgeGenerationTaskCreateArgs<ExtArgs>>): Prisma__KnowledgeGenerationTaskClient<$Result.GetResult<Prisma.$KnowledgeGenerationTaskPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many KnowledgeGenerationTasks.
-     * @param {KnowledgeGenerationTaskCreateManyArgs} args - Arguments to create many KnowledgeGenerationTasks.
-     * @example
-     * // Create many KnowledgeGenerationTasks
-     * const knowledgeGenerationTask = await prisma.knowledgeGenerationTask.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     */
-    createMany<T extends KnowledgeGenerationTaskCreateManyArgs>(args?: SelectSubset<T, KnowledgeGenerationTaskCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many KnowledgeGenerationTasks and returns the data saved in the database.
-     * @param {KnowledgeGenerationTaskCreateManyAndReturnArgs} args - Arguments to create many KnowledgeGenerationTasks.
-     * @example
-     * // Create many KnowledgeGenerationTasks
-     * const knowledgeGenerationTask = await prisma.knowledgeGenerationTask.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Create many KnowledgeGenerationTasks and only return the `id`
-     * const knowledgeGenerationTaskWithIdOnly = await prisma.knowledgeGenerationTask.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    createManyAndReturn<T extends KnowledgeGenerationTaskCreateManyAndReturnArgs>(args?: SelectSubset<T, KnowledgeGenerationTaskCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeGenerationTaskPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a KnowledgeGenerationTask.
-     * @param {KnowledgeGenerationTaskDeleteArgs} args - Arguments to delete one KnowledgeGenerationTask.
-     * @example
-     * // Delete one KnowledgeGenerationTask
-     * const KnowledgeGenerationTask = await prisma.knowledgeGenerationTask.delete({
-     *   where: {
-     *     // ... filter to delete one KnowledgeGenerationTask
-     *   }
-     * })
-     *
-     */
-    delete<T extends KnowledgeGenerationTaskDeleteArgs>(args: SelectSubset<T, KnowledgeGenerationTaskDeleteArgs<ExtArgs>>): Prisma__KnowledgeGenerationTaskClient<$Result.GetResult<Prisma.$KnowledgeGenerationTaskPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one KnowledgeGenerationTask.
-     * @param {KnowledgeGenerationTaskUpdateArgs} args - Arguments to update one KnowledgeGenerationTask.
-     * @example
-     * // Update one KnowledgeGenerationTask
-     * const knowledgeGenerationTask = await prisma.knowledgeGenerationTask.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    update<T extends KnowledgeGenerationTaskUpdateArgs>(args: SelectSubset<T, KnowledgeGenerationTaskUpdateArgs<ExtArgs>>): Prisma__KnowledgeGenerationTaskClient<$Result.GetResult<Prisma.$KnowledgeGenerationTaskPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more KnowledgeGenerationTasks.
-     * @param {KnowledgeGenerationTaskDeleteManyArgs} args - Arguments to filter KnowledgeGenerationTasks to delete.
-     * @example
-     * // Delete a few KnowledgeGenerationTasks
-     * const { count } = await prisma.knowledgeGenerationTask.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     *
-     */
-    deleteMany<T extends KnowledgeGenerationTaskDeleteManyArgs>(args?: SelectSubset<T, KnowledgeGenerationTaskDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more KnowledgeGenerationTasks.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KnowledgeGenerationTaskUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many KnowledgeGenerationTasks
-     * const knowledgeGenerationTask = await prisma.knowledgeGenerationTask.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    updateMany<T extends KnowledgeGenerationTaskUpdateManyArgs>(args: SelectSubset<T, KnowledgeGenerationTaskUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more KnowledgeGenerationTasks and returns the data updated in the database.
-     * @param {KnowledgeGenerationTaskUpdateManyAndReturnArgs} args - Arguments to update many KnowledgeGenerationTasks.
-     * @example
-     * // Update many KnowledgeGenerationTasks
-     * const knowledgeGenerationTask = await prisma.knowledgeGenerationTask.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Update zero or more KnowledgeGenerationTasks and only return the `id`
-     * const knowledgeGenerationTaskWithIdOnly = await prisma.knowledgeGenerationTask.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    updateManyAndReturn<T extends KnowledgeGenerationTaskUpdateManyAndReturnArgs>(args: SelectSubset<T, KnowledgeGenerationTaskUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeGenerationTaskPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one KnowledgeGenerationTask.
-     * @param {KnowledgeGenerationTaskUpsertArgs} args - Arguments to update or create a KnowledgeGenerationTask.
-     * @example
-     * // Update or create a KnowledgeGenerationTask
-     * const knowledgeGenerationTask = await prisma.knowledgeGenerationTask.upsert({
-     *   create: {
-     *     // ... data to create a KnowledgeGenerationTask
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the KnowledgeGenerationTask we want to update
-     *   }
-     * })
-     */
-    upsert<T extends KnowledgeGenerationTaskUpsertArgs>(args: SelectSubset<T, KnowledgeGenerationTaskUpsertArgs<ExtArgs>>): Prisma__KnowledgeGenerationTaskClient<$Result.GetResult<Prisma.$KnowledgeGenerationTaskPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of KnowledgeGenerationTasks.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KnowledgeGenerationTaskCountArgs} args - Arguments to filter KnowledgeGenerationTasks to count.
-     * @example
-     * // Count the number of KnowledgeGenerationTasks
-     * const count = await prisma.knowledgeGenerationTask.count({
-     *   where: {
-     *     // ... the filter for the KnowledgeGenerationTasks we want to count
-     *   }
-     * })
-    **/
-    count<T extends KnowledgeGenerationTaskCountArgs>(
-      args?: Subset<T, KnowledgeGenerationTaskCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], KnowledgeGenerationTaskCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a KnowledgeGenerationTask.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KnowledgeGenerationTaskAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends KnowledgeGenerationTaskAggregateArgs>(args: Subset<T, KnowledgeGenerationTaskAggregateArgs>): Prisma.PrismaPromise<GetKnowledgeGenerationTaskAggregateType<T>>
-
-    /**
-     * Group by KnowledgeGenerationTask.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {KnowledgeGenerationTaskGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     *
-    **/
-    groupBy<
-      T extends KnowledgeGenerationTaskGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: KnowledgeGenerationTaskGroupByArgs['orderBy'] }
-        : { orderBy?: KnowledgeGenerationTaskGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, KnowledgeGenerationTaskGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetKnowledgeGenerationTaskGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the KnowledgeGenerationTask model
-   */
-  readonly fields: KnowledgeGenerationTaskFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for KnowledgeGenerationTask.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__KnowledgeGenerationTaskClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the KnowledgeGenerationTask model
-   */
-  interface KnowledgeGenerationTaskFieldRefs {
-    readonly id: FieldRef<"KnowledgeGenerationTask", 'String'>
-    readonly identityId: FieldRef<"KnowledgeGenerationTask", 'String'>
-    readonly topic: FieldRef<"KnowledgeGenerationTask", 'String'>
-    readonly resourceCount: FieldRef<"KnowledgeGenerationTask", 'Int'>
-    readonly targetAudience: FieldRef<"KnowledgeGenerationTask", 'String'>
-    readonly folderPath: FieldRef<"KnowledgeGenerationTask", 'String'>
-    readonly status: FieldRef<"KnowledgeGenerationTask", 'String'>
-    readonly progress: FieldRef<"KnowledgeGenerationTask", 'Int'>
-    readonly generatedResourceIds: FieldRef<"KnowledgeGenerationTask", 'String[]'>
-    readonly error: FieldRef<"KnowledgeGenerationTask", 'String'>
-    readonly createdAt: FieldRef<"KnowledgeGenerationTask", 'DateTime'>
-    readonly completedAt: FieldRef<"KnowledgeGenerationTask", 'DateTime'>
-  }
-
-
-  // Custom InputTypes
-  /**
-   * KnowledgeGenerationTask findUnique
-   */
-  export type KnowledgeGenerationTaskFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KnowledgeGenerationTask
-     */
-    select?: KnowledgeGenerationTaskSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KnowledgeGenerationTask
-     */
-    omit?: KnowledgeGenerationTaskOmit<ExtArgs> | null
-    /**
-     * Filter, which KnowledgeGenerationTask to fetch.
-     */
-    where: KnowledgeGenerationTaskWhereUniqueInput
-  }
-
-  /**
-   * KnowledgeGenerationTask findUniqueOrThrow
-   */
-  export type KnowledgeGenerationTaskFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KnowledgeGenerationTask
-     */
-    select?: KnowledgeGenerationTaskSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KnowledgeGenerationTask
-     */
-    omit?: KnowledgeGenerationTaskOmit<ExtArgs> | null
-    /**
-     * Filter, which KnowledgeGenerationTask to fetch.
-     */
-    where: KnowledgeGenerationTaskWhereUniqueInput
-  }
-
-  /**
-   * KnowledgeGenerationTask findFirst
-   */
-  export type KnowledgeGenerationTaskFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KnowledgeGenerationTask
-     */
-    select?: KnowledgeGenerationTaskSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KnowledgeGenerationTask
-     */
-    omit?: KnowledgeGenerationTaskOmit<ExtArgs> | null
-    /**
-     * Filter, which KnowledgeGenerationTask to fetch.
-     */
-    where?: KnowledgeGenerationTaskWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of KnowledgeGenerationTasks to fetch.
-     */
-    orderBy?: KnowledgeGenerationTaskOrderByWithRelationInput | KnowledgeGenerationTaskOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for KnowledgeGenerationTasks.
-     */
-    cursor?: KnowledgeGenerationTaskWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` KnowledgeGenerationTasks from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` KnowledgeGenerationTasks.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of KnowledgeGenerationTasks.
-     */
-    distinct?: KnowledgeGenerationTaskScalarFieldEnum | KnowledgeGenerationTaskScalarFieldEnum[]
-  }
-
-  /**
-   * KnowledgeGenerationTask findFirstOrThrow
-   */
-  export type KnowledgeGenerationTaskFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KnowledgeGenerationTask
-     */
-    select?: KnowledgeGenerationTaskSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KnowledgeGenerationTask
-     */
-    omit?: KnowledgeGenerationTaskOmit<ExtArgs> | null
-    /**
-     * Filter, which KnowledgeGenerationTask to fetch.
-     */
-    where?: KnowledgeGenerationTaskWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of KnowledgeGenerationTasks to fetch.
-     */
-    orderBy?: KnowledgeGenerationTaskOrderByWithRelationInput | KnowledgeGenerationTaskOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for KnowledgeGenerationTasks.
-     */
-    cursor?: KnowledgeGenerationTaskWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` KnowledgeGenerationTasks from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` KnowledgeGenerationTasks.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of KnowledgeGenerationTasks.
-     */
-    distinct?: KnowledgeGenerationTaskScalarFieldEnum | KnowledgeGenerationTaskScalarFieldEnum[]
-  }
-
-  /**
-   * KnowledgeGenerationTask findMany
-   */
-  export type KnowledgeGenerationTaskFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KnowledgeGenerationTask
-     */
-    select?: KnowledgeGenerationTaskSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KnowledgeGenerationTask
-     */
-    omit?: KnowledgeGenerationTaskOmit<ExtArgs> | null
-    /**
-     * Filter, which KnowledgeGenerationTasks to fetch.
-     */
-    where?: KnowledgeGenerationTaskWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of KnowledgeGenerationTasks to fetch.
-     */
-    orderBy?: KnowledgeGenerationTaskOrderByWithRelationInput | KnowledgeGenerationTaskOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for listing KnowledgeGenerationTasks.
-     */
-    cursor?: KnowledgeGenerationTaskWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` KnowledgeGenerationTasks from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` KnowledgeGenerationTasks.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of KnowledgeGenerationTasks.
-     */
-    distinct?: KnowledgeGenerationTaskScalarFieldEnum | KnowledgeGenerationTaskScalarFieldEnum[]
-  }
-
-  /**
-   * KnowledgeGenerationTask create
-   */
-  export type KnowledgeGenerationTaskCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KnowledgeGenerationTask
-     */
-    select?: KnowledgeGenerationTaskSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KnowledgeGenerationTask
-     */
-    omit?: KnowledgeGenerationTaskOmit<ExtArgs> | null
-    /**
-     * The data needed to create a KnowledgeGenerationTask.
-     */
-    data: XOR<KnowledgeGenerationTaskCreateInput, KnowledgeGenerationTaskUncheckedCreateInput>
-  }
-
-  /**
-   * KnowledgeGenerationTask createMany
-   */
-  export type KnowledgeGenerationTaskCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many KnowledgeGenerationTasks.
-     */
-    data: KnowledgeGenerationTaskCreateManyInput | KnowledgeGenerationTaskCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * KnowledgeGenerationTask createManyAndReturn
-   */
-  export type KnowledgeGenerationTaskCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KnowledgeGenerationTask
-     */
-    select?: KnowledgeGenerationTaskSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the KnowledgeGenerationTask
-     */
-    omit?: KnowledgeGenerationTaskOmit<ExtArgs> | null
-    /**
-     * The data used to create many KnowledgeGenerationTasks.
-     */
-    data: KnowledgeGenerationTaskCreateManyInput | KnowledgeGenerationTaskCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * KnowledgeGenerationTask update
-   */
-  export type KnowledgeGenerationTaskUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KnowledgeGenerationTask
-     */
-    select?: KnowledgeGenerationTaskSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KnowledgeGenerationTask
-     */
-    omit?: KnowledgeGenerationTaskOmit<ExtArgs> | null
-    /**
-     * The data needed to update a KnowledgeGenerationTask.
-     */
-    data: XOR<KnowledgeGenerationTaskUpdateInput, KnowledgeGenerationTaskUncheckedUpdateInput>
-    /**
-     * Choose, which KnowledgeGenerationTask to update.
-     */
-    where: KnowledgeGenerationTaskWhereUniqueInput
-  }
-
-  /**
-   * KnowledgeGenerationTask updateMany
-   */
-  export type KnowledgeGenerationTaskUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update KnowledgeGenerationTasks.
-     */
-    data: XOR<KnowledgeGenerationTaskUpdateManyMutationInput, KnowledgeGenerationTaskUncheckedUpdateManyInput>
-    /**
-     * Filter which KnowledgeGenerationTasks to update
-     */
-    where?: KnowledgeGenerationTaskWhereInput
-    /**
-     * Limit how many KnowledgeGenerationTasks to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * KnowledgeGenerationTask updateManyAndReturn
-   */
-  export type KnowledgeGenerationTaskUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KnowledgeGenerationTask
-     */
-    select?: KnowledgeGenerationTaskSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the KnowledgeGenerationTask
-     */
-    omit?: KnowledgeGenerationTaskOmit<ExtArgs> | null
-    /**
-     * The data used to update KnowledgeGenerationTasks.
-     */
-    data: XOR<KnowledgeGenerationTaskUpdateManyMutationInput, KnowledgeGenerationTaskUncheckedUpdateManyInput>
-    /**
-     * Filter which KnowledgeGenerationTasks to update
-     */
-    where?: KnowledgeGenerationTaskWhereInput
-    /**
-     * Limit how many KnowledgeGenerationTasks to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * KnowledgeGenerationTask upsert
-   */
-  export type KnowledgeGenerationTaskUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KnowledgeGenerationTask
-     */
-    select?: KnowledgeGenerationTaskSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KnowledgeGenerationTask
-     */
-    omit?: KnowledgeGenerationTaskOmit<ExtArgs> | null
-    /**
-     * The filter to search for the KnowledgeGenerationTask to update in case it exists.
-     */
-    where: KnowledgeGenerationTaskWhereUniqueInput
-    /**
-     * In case the KnowledgeGenerationTask found by the `where` argument doesn't exist, create a new KnowledgeGenerationTask with this data.
-     */
-    create: XOR<KnowledgeGenerationTaskCreateInput, KnowledgeGenerationTaskUncheckedCreateInput>
-    /**
-     * In case the KnowledgeGenerationTask was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<KnowledgeGenerationTaskUpdateInput, KnowledgeGenerationTaskUncheckedUpdateInput>
-  }
-
-  /**
-   * KnowledgeGenerationTask delete
-   */
-  export type KnowledgeGenerationTaskDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KnowledgeGenerationTask
-     */
-    select?: KnowledgeGenerationTaskSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KnowledgeGenerationTask
-     */
-    omit?: KnowledgeGenerationTaskOmit<ExtArgs> | null
-    /**
-     * Filter which KnowledgeGenerationTask to delete.
-     */
-    where: KnowledgeGenerationTaskWhereUniqueInput
-  }
-
-  /**
-   * KnowledgeGenerationTask deleteMany
-   */
-  export type KnowledgeGenerationTaskDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which KnowledgeGenerationTasks to delete
-     */
-    where?: KnowledgeGenerationTaskWhereInput
-    /**
-     * Limit how many KnowledgeGenerationTasks to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * KnowledgeGenerationTask without action
-   */
-  export type KnowledgeGenerationTaskDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the KnowledgeGenerationTask
-     */
-    select?: KnowledgeGenerationTaskSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the KnowledgeGenerationTask
-     */
-    omit?: KnowledgeGenerationTaskOmit<ExtArgs> | null
   }
 
 
@@ -112408,8 +108506,6 @@ export namespace Prisma {
     identityId: 'identityId',
     name: 'name',
     status: 'status',
-    messageCount: 'messageCount',
-    lastMessageAt: 'lastMessageAt',
     version: 'version',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
@@ -112419,62 +108515,27 @@ export namespace Prisma {
   export type AiConversationScalarFieldEnum = (typeof AiConversationScalarFieldEnum)[keyof typeof AiConversationScalarFieldEnum]
 
 
-  export const AiMessageScalarFieldEnum: {
+  export const AiExecutionRecordScalarFieldEnum: {
     id: 'id',
     identityId: 'identityId',
-    conversationId: 'conversationId',
-    role: 'role',
-    content: 'content',
-    tokenUsage: 'tokenUsage',
-    createdAt: 'createdAt'
-  };
-
-  export type AiMessageScalarFieldEnum = (typeof AiMessageScalarFieldEnum)[keyof typeof AiMessageScalarFieldEnum]
-
-
-  export const AiGenerationTaskScalarFieldEnum: {
-    id: 'id',
-    identityId: 'identityId',
-    taskType: 'taskType',
-    status: 'status',
+    operation: 'operation',
+    outcome: 'outcome',
     conversationId: 'conversationId',
     runId: 'runId',
     requestId: 'requestId',
     traceId: 'traceId',
-    providerId: 'providerId',
-    model: 'model',
+    providerConnectionId: 'providerConnectionId',
+    modelId: 'modelId',
+    errorCategory: 'errorCategory',
+    safeError: 'safeError',
     estimatedCostUsd: 'estimatedCostUsd',
-    input: 'input',
-    result: 'result',
-    error: 'error',
-    retryCount: 'retryCount',
     tokenUsage: 'tokenUsage',
-    processingMs: 'processingMs',
-    version: 'version',
+    latencyMs: 'latencyMs',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt',
-    completedAt: 'completedAt',
-    deletedAt: 'deletedAt'
+    completedAt: 'completedAt'
   };
 
-  export type AiGenerationTaskScalarFieldEnum = (typeof AiGenerationTaskScalarFieldEnum)[keyof typeof AiGenerationTaskScalarFieldEnum]
-
-
-  export const AiUsageQuotaScalarFieldEnum: {
-    id: 'id',
-    identityId: 'identityId',
-    quotaLimit: 'quotaLimit',
-    currentUsage: 'currentUsage',
-    resetPeriod: 'resetPeriod',
-    lastResetAt: 'lastResetAt',
-    nextResetAt: 'nextResetAt',
-    version: 'version',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt',
-    deletedAt: 'deletedAt'
-  };
-
-  export type AiUsageQuotaScalarFieldEnum = (typeof AiUsageQuotaScalarFieldEnum)[keyof typeof AiUsageQuotaScalarFieldEnum]
+  export type AiExecutionRecordScalarFieldEnum = (typeof AiExecutionRecordScalarFieldEnum)[keyof typeof AiExecutionRecordScalarFieldEnum]
 
 
   export const AiProviderConfigScalarFieldEnum: {
@@ -112529,24 +108590,6 @@ export namespace Prisma {
   };
 
   export type AiProviderSecretScalarFieldEnum = (typeof AiProviderSecretScalarFieldEnum)[keyof typeof AiProviderSecretScalarFieldEnum]
-
-
-  export const KnowledgeGenerationTaskScalarFieldEnum: {
-    id: 'id',
-    identityId: 'identityId',
-    topic: 'topic',
-    resourceCount: 'resourceCount',
-    targetAudience: 'targetAudience',
-    folderPath: 'folderPath',
-    status: 'status',
-    progress: 'progress',
-    generatedResourceIds: 'generatedResourceIds',
-    error: 'error',
-    createdAt: 'createdAt',
-    completedAt: 'completedAt'
-  };
-
-  export type KnowledgeGenerationTaskScalarFieldEnum = (typeof KnowledgeGenerationTaskScalarFieldEnum)[keyof typeof KnowledgeGenerationTaskScalarFieldEnum]
 
 
   export const AiKnowledgeIndexEntryScalarFieldEnum: {
@@ -114104,9 +110147,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordListRelationFilter
     notifications?: NotificationListRelationFilter
     aiConversations?: AiConversationListRelationFilter
-    aiGenerationTasks?: AiGenerationTaskListRelationFilter
+    aiExecutionRecords?: AiExecutionRecordListRelationFilter
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryListRelationFilter
-    aiUsageQuotas?: XOR<AiUsageQuotaNullableScalarRelationFilter, AiUsageQuotaWhereInput> | null
     aiProviderConfigs?: AiProviderConfigListRelationFilter
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionListRelationFilter
     aiProviderSecrets?: AiProviderSecretListRelationFilter
@@ -114116,7 +110158,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionListRelationFilter
     notificationInteractions?: NotificationInteractionListRelationFilter
     notificationDispatchOutboxes?: NotificationDispatchOutboxListRelationFilter
-    aiMessages?: AiMessageListRelationFilter
     folders?: FolderListRelationFilter
     resources?: ResourceListRelationFilter
     repositoryResources?: RepositoryResourceListRelationFilter
@@ -114159,9 +110200,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordOrderByRelationAggregateInput
     notifications?: NotificationOrderByRelationAggregateInput
     aiConversations?: AiConversationOrderByRelationAggregateInput
-    aiGenerationTasks?: AiGenerationTaskOrderByRelationAggregateInput
+    aiExecutionRecords?: AiExecutionRecordOrderByRelationAggregateInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryOrderByRelationAggregateInput
-    aiUsageQuotas?: AiUsageQuotaOrderByWithRelationInput
     aiProviderConfigs?: AiProviderConfigOrderByRelationAggregateInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionOrderByRelationAggregateInput
     aiProviderSecrets?: AiProviderSecretOrderByRelationAggregateInput
@@ -114171,7 +110211,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionOrderByRelationAggregateInput
     notificationInteractions?: NotificationInteractionOrderByRelationAggregateInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxOrderByRelationAggregateInput
-    aiMessages?: AiMessageOrderByRelationAggregateInput
     folders?: FolderOrderByRelationAggregateInput
     resources?: ResourceOrderByRelationAggregateInput
     repositoryResources?: RepositoryResourceOrderByRelationAggregateInput
@@ -114217,9 +110256,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordListRelationFilter
     notifications?: NotificationListRelationFilter
     aiConversations?: AiConversationListRelationFilter
-    aiGenerationTasks?: AiGenerationTaskListRelationFilter
+    aiExecutionRecords?: AiExecutionRecordListRelationFilter
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryListRelationFilter
-    aiUsageQuotas?: XOR<AiUsageQuotaNullableScalarRelationFilter, AiUsageQuotaWhereInput> | null
     aiProviderConfigs?: AiProviderConfigListRelationFilter
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionListRelationFilter
     aiProviderSecrets?: AiProviderSecretListRelationFilter
@@ -114229,7 +110267,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionListRelationFilter
     notificationInteractions?: NotificationInteractionListRelationFilter
     notificationDispatchOutboxes?: NotificationDispatchOutboxListRelationFilter
-    aiMessages?: AiMessageListRelationFilter
     folders?: FolderListRelationFilter
     resources?: ResourceListRelationFilter
     repositoryResources?: RepositoryResourceListRelationFilter
@@ -114270,14 +110307,11 @@ export namespace Prisma {
     identityId?: StringFilter<"AiConversation"> | string
     name?: StringFilter<"AiConversation"> | string
     status?: StringFilter<"AiConversation"> | string
-    messageCount?: IntFilter<"AiConversation"> | number
-    lastMessageAt?: DateTimeNullableFilter<"AiConversation"> | Date | string | null
     version?: IntFilter<"AiConversation"> | number
     createdAt?: DateTimeFilter<"AiConversation"> | Date | string
     updatedAt?: DateTimeFilter<"AiConversation"> | Date | string
     deletedAt?: DateTimeNullableFilter<"AiConversation"> | Date | string | null
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-    messages?: AiMessageListRelationFilter
   }
 
   export type AiConversationOrderByWithRelationInput = {
@@ -114285,14 +110319,11 @@ export namespace Prisma {
     identityId?: SortOrder
     name?: SortOrder
     status?: SortOrder
-    messageCount?: SortOrder
-    lastMessageAt?: SortOrderInput | SortOrder
     version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
     account?: AccountOrderByWithRelationInput
-    messages?: AiMessageOrderByRelationAggregateInput
   }
 
   export type AiConversationWhereUniqueInput = Prisma.AtLeast<{
@@ -114303,14 +110334,11 @@ export namespace Prisma {
     identityId?: StringFilter<"AiConversation"> | string
     name?: StringFilter<"AiConversation"> | string
     status?: StringFilter<"AiConversation"> | string
-    messageCount?: IntFilter<"AiConversation"> | number
-    lastMessageAt?: DateTimeNullableFilter<"AiConversation"> | Date | string | null
     version?: IntFilter<"AiConversation"> | number
     createdAt?: DateTimeFilter<"AiConversation"> | Date | string
     updatedAt?: DateTimeFilter<"AiConversation"> | Date | string
     deletedAt?: DateTimeNullableFilter<"AiConversation"> | Date | string | null
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-    messages?: AiMessageListRelationFilter
   }, "id">
 
   export type AiConversationOrderByWithAggregationInput = {
@@ -114318,8 +110346,6 @@ export namespace Prisma {
     identityId?: SortOrder
     name?: SortOrder
     status?: SortOrder
-    messageCount?: SortOrder
-    lastMessageAt?: SortOrderInput | SortOrder
     version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -114339,309 +110365,127 @@ export namespace Prisma {
     identityId?: StringWithAggregatesFilter<"AiConversation"> | string
     name?: StringWithAggregatesFilter<"AiConversation"> | string
     status?: StringWithAggregatesFilter<"AiConversation"> | string
-    messageCount?: IntWithAggregatesFilter<"AiConversation"> | number
-    lastMessageAt?: DateTimeNullableWithAggregatesFilter<"AiConversation"> | Date | string | null
     version?: IntWithAggregatesFilter<"AiConversation"> | number
     createdAt?: DateTimeWithAggregatesFilter<"AiConversation"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"AiConversation"> | Date | string
     deletedAt?: DateTimeNullableWithAggregatesFilter<"AiConversation"> | Date | string | null
   }
 
-  export type AiMessageWhereInput = {
-    AND?: AiMessageWhereInput | AiMessageWhereInput[]
-    OR?: AiMessageWhereInput[]
-    NOT?: AiMessageWhereInput | AiMessageWhereInput[]
-    id?: StringFilter<"AiMessage"> | string
-    identityId?: StringFilter<"AiMessage"> | string
-    conversationId?: StringFilter<"AiMessage"> | string
-    role?: StringFilter<"AiMessage"> | string
-    content?: StringFilter<"AiMessage"> | string
-    tokenUsage?: StringNullableFilter<"AiMessage"> | string | null
-    createdAt?: DateTimeFilter<"AiMessage"> | Date | string
-    identity?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-    conversation?: XOR<AiConversationScalarRelationFilter, AiConversationWhereInput>
-  }
-
-  export type AiMessageOrderByWithRelationInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    conversationId?: SortOrder
-    role?: SortOrder
-    content?: SortOrder
-    tokenUsage?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
-    identity?: AccountOrderByWithRelationInput
-    conversation?: AiConversationOrderByWithRelationInput
-  }
-
-  export type AiMessageWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    AND?: AiMessageWhereInput | AiMessageWhereInput[]
-    OR?: AiMessageWhereInput[]
-    NOT?: AiMessageWhereInput | AiMessageWhereInput[]
-    identityId?: StringFilter<"AiMessage"> | string
-    conversationId?: StringFilter<"AiMessage"> | string
-    role?: StringFilter<"AiMessage"> | string
-    content?: StringFilter<"AiMessage"> | string
-    tokenUsage?: StringNullableFilter<"AiMessage"> | string | null
-    createdAt?: DateTimeFilter<"AiMessage"> | Date | string
-    identity?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-    conversation?: XOR<AiConversationScalarRelationFilter, AiConversationWhereInput>
-  }, "id">
-
-  export type AiMessageOrderByWithAggregationInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    conversationId?: SortOrder
-    role?: SortOrder
-    content?: SortOrder
-    tokenUsage?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
-    _count?: AiMessageCountOrderByAggregateInput
-    _max?: AiMessageMaxOrderByAggregateInput
-    _min?: AiMessageMinOrderByAggregateInput
-  }
-
-  export type AiMessageScalarWhereWithAggregatesInput = {
-    AND?: AiMessageScalarWhereWithAggregatesInput | AiMessageScalarWhereWithAggregatesInput[]
-    OR?: AiMessageScalarWhereWithAggregatesInput[]
-    NOT?: AiMessageScalarWhereWithAggregatesInput | AiMessageScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"AiMessage"> | string
-    identityId?: StringWithAggregatesFilter<"AiMessage"> | string
-    conversationId?: StringWithAggregatesFilter<"AiMessage"> | string
-    role?: StringWithAggregatesFilter<"AiMessage"> | string
-    content?: StringWithAggregatesFilter<"AiMessage"> | string
-    tokenUsage?: StringNullableWithAggregatesFilter<"AiMessage"> | string | null
-    createdAt?: DateTimeWithAggregatesFilter<"AiMessage"> | Date | string
-  }
-
-  export type AiGenerationTaskWhereInput = {
-    AND?: AiGenerationTaskWhereInput | AiGenerationTaskWhereInput[]
-    OR?: AiGenerationTaskWhereInput[]
-    NOT?: AiGenerationTaskWhereInput | AiGenerationTaskWhereInput[]
-    id?: StringFilter<"AiGenerationTask"> | string
-    identityId?: StringFilter<"AiGenerationTask"> | string
-    taskType?: StringFilter<"AiGenerationTask"> | string
-    status?: StringFilter<"AiGenerationTask"> | string
-    conversationId?: StringNullableFilter<"AiGenerationTask"> | string | null
-    runId?: StringNullableFilter<"AiGenerationTask"> | string | null
-    requestId?: StringNullableFilter<"AiGenerationTask"> | string | null
-    traceId?: StringNullableFilter<"AiGenerationTask"> | string | null
-    providerId?: StringNullableFilter<"AiGenerationTask"> | string | null
-    model?: StringNullableFilter<"AiGenerationTask"> | string | null
-    estimatedCostUsd?: FloatNullableFilter<"AiGenerationTask"> | number | null
-    input?: StringFilter<"AiGenerationTask"> | string
-    result?: StringNullableFilter<"AiGenerationTask"> | string | null
-    error?: StringNullableFilter<"AiGenerationTask"> | string | null
-    retryCount?: IntFilter<"AiGenerationTask"> | number
-    tokenUsage?: StringNullableFilter<"AiGenerationTask"> | string | null
-    processingMs?: IntNullableFilter<"AiGenerationTask"> | number | null
-    version?: IntFilter<"AiGenerationTask"> | number
-    createdAt?: DateTimeFilter<"AiGenerationTask"> | Date | string
-    updatedAt?: DateTimeFilter<"AiGenerationTask"> | Date | string
-    completedAt?: DateTimeNullableFilter<"AiGenerationTask"> | Date | string | null
-    deletedAt?: DateTimeNullableFilter<"AiGenerationTask"> | Date | string | null
+  export type AiExecutionRecordWhereInput = {
+    AND?: AiExecutionRecordWhereInput | AiExecutionRecordWhereInput[]
+    OR?: AiExecutionRecordWhereInput[]
+    NOT?: AiExecutionRecordWhereInput | AiExecutionRecordWhereInput[]
+    id?: StringFilter<"AiExecutionRecord"> | string
+    identityId?: StringFilter<"AiExecutionRecord"> | string
+    operation?: StringFilter<"AiExecutionRecord"> | string
+    outcome?: StringFilter<"AiExecutionRecord"> | string
+    conversationId?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    runId?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    requestId?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    traceId?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    providerConnectionId?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    modelId?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    errorCategory?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    safeError?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    estimatedCostUsd?: FloatNullableFilter<"AiExecutionRecord"> | number | null
+    tokenUsage?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    latencyMs?: IntNullableFilter<"AiExecutionRecord"> | number | null
+    createdAt?: DateTimeFilter<"AiExecutionRecord"> | Date | string
+    completedAt?: DateTimeFilter<"AiExecutionRecord"> | Date | string
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
   }
 
-  export type AiGenerationTaskOrderByWithRelationInput = {
+  export type AiExecutionRecordOrderByWithRelationInput = {
     id?: SortOrder
     identityId?: SortOrder
-    taskType?: SortOrder
-    status?: SortOrder
+    operation?: SortOrder
+    outcome?: SortOrder
     conversationId?: SortOrderInput | SortOrder
     runId?: SortOrderInput | SortOrder
     requestId?: SortOrderInput | SortOrder
     traceId?: SortOrderInput | SortOrder
-    providerId?: SortOrderInput | SortOrder
-    model?: SortOrderInput | SortOrder
+    providerConnectionId?: SortOrderInput | SortOrder
+    modelId?: SortOrderInput | SortOrder
+    errorCategory?: SortOrderInput | SortOrder
+    safeError?: SortOrderInput | SortOrder
     estimatedCostUsd?: SortOrderInput | SortOrder
-    input?: SortOrder
-    result?: SortOrderInput | SortOrder
-    error?: SortOrderInput | SortOrder
-    retryCount?: SortOrder
     tokenUsage?: SortOrderInput | SortOrder
-    processingMs?: SortOrderInput | SortOrder
-    version?: SortOrder
+    latencyMs?: SortOrderInput | SortOrder
     createdAt?: SortOrder
-    updatedAt?: SortOrder
-    completedAt?: SortOrderInput | SortOrder
-    deletedAt?: SortOrderInput | SortOrder
+    completedAt?: SortOrder
     account?: AccountOrderByWithRelationInput
   }
 
-  export type AiGenerationTaskWhereUniqueInput = Prisma.AtLeast<{
+  export type AiExecutionRecordWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    AND?: AiGenerationTaskWhereInput | AiGenerationTaskWhereInput[]
-    OR?: AiGenerationTaskWhereInput[]
-    NOT?: AiGenerationTaskWhereInput | AiGenerationTaskWhereInput[]
-    identityId?: StringFilter<"AiGenerationTask"> | string
-    taskType?: StringFilter<"AiGenerationTask"> | string
-    status?: StringFilter<"AiGenerationTask"> | string
-    conversationId?: StringNullableFilter<"AiGenerationTask"> | string | null
-    runId?: StringNullableFilter<"AiGenerationTask"> | string | null
-    requestId?: StringNullableFilter<"AiGenerationTask"> | string | null
-    traceId?: StringNullableFilter<"AiGenerationTask"> | string | null
-    providerId?: StringNullableFilter<"AiGenerationTask"> | string | null
-    model?: StringNullableFilter<"AiGenerationTask"> | string | null
-    estimatedCostUsd?: FloatNullableFilter<"AiGenerationTask"> | number | null
-    input?: StringFilter<"AiGenerationTask"> | string
-    result?: StringNullableFilter<"AiGenerationTask"> | string | null
-    error?: StringNullableFilter<"AiGenerationTask"> | string | null
-    retryCount?: IntFilter<"AiGenerationTask"> | number
-    tokenUsage?: StringNullableFilter<"AiGenerationTask"> | string | null
-    processingMs?: IntNullableFilter<"AiGenerationTask"> | number | null
-    version?: IntFilter<"AiGenerationTask"> | number
-    createdAt?: DateTimeFilter<"AiGenerationTask"> | Date | string
-    updatedAt?: DateTimeFilter<"AiGenerationTask"> | Date | string
-    completedAt?: DateTimeNullableFilter<"AiGenerationTask"> | Date | string | null
-    deletedAt?: DateTimeNullableFilter<"AiGenerationTask"> | Date | string | null
+    AND?: AiExecutionRecordWhereInput | AiExecutionRecordWhereInput[]
+    OR?: AiExecutionRecordWhereInput[]
+    NOT?: AiExecutionRecordWhereInput | AiExecutionRecordWhereInput[]
+    identityId?: StringFilter<"AiExecutionRecord"> | string
+    operation?: StringFilter<"AiExecutionRecord"> | string
+    outcome?: StringFilter<"AiExecutionRecord"> | string
+    conversationId?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    runId?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    requestId?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    traceId?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    providerConnectionId?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    modelId?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    errorCategory?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    safeError?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    estimatedCostUsd?: FloatNullableFilter<"AiExecutionRecord"> | number | null
+    tokenUsage?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    latencyMs?: IntNullableFilter<"AiExecutionRecord"> | number | null
+    createdAt?: DateTimeFilter<"AiExecutionRecord"> | Date | string
+    completedAt?: DateTimeFilter<"AiExecutionRecord"> | Date | string
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
   }, "id">
 
-  export type AiGenerationTaskOrderByWithAggregationInput = {
+  export type AiExecutionRecordOrderByWithAggregationInput = {
     id?: SortOrder
     identityId?: SortOrder
-    taskType?: SortOrder
-    status?: SortOrder
+    operation?: SortOrder
+    outcome?: SortOrder
     conversationId?: SortOrderInput | SortOrder
     runId?: SortOrderInput | SortOrder
     requestId?: SortOrderInput | SortOrder
     traceId?: SortOrderInput | SortOrder
-    providerId?: SortOrderInput | SortOrder
-    model?: SortOrderInput | SortOrder
+    providerConnectionId?: SortOrderInput | SortOrder
+    modelId?: SortOrderInput | SortOrder
+    errorCategory?: SortOrderInput | SortOrder
+    safeError?: SortOrderInput | SortOrder
     estimatedCostUsd?: SortOrderInput | SortOrder
-    input?: SortOrder
-    result?: SortOrderInput | SortOrder
-    error?: SortOrderInput | SortOrder
-    retryCount?: SortOrder
     tokenUsage?: SortOrderInput | SortOrder
-    processingMs?: SortOrderInput | SortOrder
-    version?: SortOrder
+    latencyMs?: SortOrderInput | SortOrder
     createdAt?: SortOrder
-    updatedAt?: SortOrder
-    completedAt?: SortOrderInput | SortOrder
-    deletedAt?: SortOrderInput | SortOrder
-    _count?: AiGenerationTaskCountOrderByAggregateInput
-    _avg?: AiGenerationTaskAvgOrderByAggregateInput
-    _max?: AiGenerationTaskMaxOrderByAggregateInput
-    _min?: AiGenerationTaskMinOrderByAggregateInput
-    _sum?: AiGenerationTaskSumOrderByAggregateInput
+    completedAt?: SortOrder
+    _count?: AiExecutionRecordCountOrderByAggregateInput
+    _avg?: AiExecutionRecordAvgOrderByAggregateInput
+    _max?: AiExecutionRecordMaxOrderByAggregateInput
+    _min?: AiExecutionRecordMinOrderByAggregateInput
+    _sum?: AiExecutionRecordSumOrderByAggregateInput
   }
 
-  export type AiGenerationTaskScalarWhereWithAggregatesInput = {
-    AND?: AiGenerationTaskScalarWhereWithAggregatesInput | AiGenerationTaskScalarWhereWithAggregatesInput[]
-    OR?: AiGenerationTaskScalarWhereWithAggregatesInput[]
-    NOT?: AiGenerationTaskScalarWhereWithAggregatesInput | AiGenerationTaskScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"AiGenerationTask"> | string
-    identityId?: StringWithAggregatesFilter<"AiGenerationTask"> | string
-    taskType?: StringWithAggregatesFilter<"AiGenerationTask"> | string
-    status?: StringWithAggregatesFilter<"AiGenerationTask"> | string
-    conversationId?: StringNullableWithAggregatesFilter<"AiGenerationTask"> | string | null
-    runId?: StringNullableWithAggregatesFilter<"AiGenerationTask"> | string | null
-    requestId?: StringNullableWithAggregatesFilter<"AiGenerationTask"> | string | null
-    traceId?: StringNullableWithAggregatesFilter<"AiGenerationTask"> | string | null
-    providerId?: StringNullableWithAggregatesFilter<"AiGenerationTask"> | string | null
-    model?: StringNullableWithAggregatesFilter<"AiGenerationTask"> | string | null
-    estimatedCostUsd?: FloatNullableWithAggregatesFilter<"AiGenerationTask"> | number | null
-    input?: StringWithAggregatesFilter<"AiGenerationTask"> | string
-    result?: StringNullableWithAggregatesFilter<"AiGenerationTask"> | string | null
-    error?: StringNullableWithAggregatesFilter<"AiGenerationTask"> | string | null
-    retryCount?: IntWithAggregatesFilter<"AiGenerationTask"> | number
-    tokenUsage?: StringNullableWithAggregatesFilter<"AiGenerationTask"> | string | null
-    processingMs?: IntNullableWithAggregatesFilter<"AiGenerationTask"> | number | null
-    version?: IntWithAggregatesFilter<"AiGenerationTask"> | number
-    createdAt?: DateTimeWithAggregatesFilter<"AiGenerationTask"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"AiGenerationTask"> | Date | string
-    completedAt?: DateTimeNullableWithAggregatesFilter<"AiGenerationTask"> | Date | string | null
-    deletedAt?: DateTimeNullableWithAggregatesFilter<"AiGenerationTask"> | Date | string | null
-  }
-
-  export type AiUsageQuotaWhereInput = {
-    AND?: AiUsageQuotaWhereInput | AiUsageQuotaWhereInput[]
-    OR?: AiUsageQuotaWhereInput[]
-    NOT?: AiUsageQuotaWhereInput | AiUsageQuotaWhereInput[]
-    id?: StringFilter<"AiUsageQuota"> | string
-    identityId?: StringFilter<"AiUsageQuota"> | string
-    quotaLimit?: IntFilter<"AiUsageQuota"> | number
-    currentUsage?: IntFilter<"AiUsageQuota"> | number
-    resetPeriod?: StringFilter<"AiUsageQuota"> | string
-    lastResetAt?: DateTimeFilter<"AiUsageQuota"> | Date | string
-    nextResetAt?: DateTimeFilter<"AiUsageQuota"> | Date | string
-    version?: IntFilter<"AiUsageQuota"> | number
-    createdAt?: DateTimeFilter<"AiUsageQuota"> | Date | string
-    updatedAt?: DateTimeFilter<"AiUsageQuota"> | Date | string
-    deletedAt?: DateTimeNullableFilter<"AiUsageQuota"> | Date | string | null
-    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-  }
-
-  export type AiUsageQuotaOrderByWithRelationInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    quotaLimit?: SortOrder
-    currentUsage?: SortOrder
-    resetPeriod?: SortOrder
-    lastResetAt?: SortOrder
-    nextResetAt?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrderInput | SortOrder
-    account?: AccountOrderByWithRelationInput
-  }
-
-  export type AiUsageQuotaWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    identityId?: string
-    AND?: AiUsageQuotaWhereInput | AiUsageQuotaWhereInput[]
-    OR?: AiUsageQuotaWhereInput[]
-    NOT?: AiUsageQuotaWhereInput | AiUsageQuotaWhereInput[]
-    quotaLimit?: IntFilter<"AiUsageQuota"> | number
-    currentUsage?: IntFilter<"AiUsageQuota"> | number
-    resetPeriod?: StringFilter<"AiUsageQuota"> | string
-    lastResetAt?: DateTimeFilter<"AiUsageQuota"> | Date | string
-    nextResetAt?: DateTimeFilter<"AiUsageQuota"> | Date | string
-    version?: IntFilter<"AiUsageQuota"> | number
-    createdAt?: DateTimeFilter<"AiUsageQuota"> | Date | string
-    updatedAt?: DateTimeFilter<"AiUsageQuota"> | Date | string
-    deletedAt?: DateTimeNullableFilter<"AiUsageQuota"> | Date | string | null
-    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-  }, "id" | "identityId">
-
-  export type AiUsageQuotaOrderByWithAggregationInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    quotaLimit?: SortOrder
-    currentUsage?: SortOrder
-    resetPeriod?: SortOrder
-    lastResetAt?: SortOrder
-    nextResetAt?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrderInput | SortOrder
-    _count?: AiUsageQuotaCountOrderByAggregateInput
-    _avg?: AiUsageQuotaAvgOrderByAggregateInput
-    _max?: AiUsageQuotaMaxOrderByAggregateInput
-    _min?: AiUsageQuotaMinOrderByAggregateInput
-    _sum?: AiUsageQuotaSumOrderByAggregateInput
-  }
-
-  export type AiUsageQuotaScalarWhereWithAggregatesInput = {
-    AND?: AiUsageQuotaScalarWhereWithAggregatesInput | AiUsageQuotaScalarWhereWithAggregatesInput[]
-    OR?: AiUsageQuotaScalarWhereWithAggregatesInput[]
-    NOT?: AiUsageQuotaScalarWhereWithAggregatesInput | AiUsageQuotaScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"AiUsageQuota"> | string
-    identityId?: StringWithAggregatesFilter<"AiUsageQuota"> | string
-    quotaLimit?: IntWithAggregatesFilter<"AiUsageQuota"> | number
-    currentUsage?: IntWithAggregatesFilter<"AiUsageQuota"> | number
-    resetPeriod?: StringWithAggregatesFilter<"AiUsageQuota"> | string
-    lastResetAt?: DateTimeWithAggregatesFilter<"AiUsageQuota"> | Date | string
-    nextResetAt?: DateTimeWithAggregatesFilter<"AiUsageQuota"> | Date | string
-    version?: IntWithAggregatesFilter<"AiUsageQuota"> | number
-    createdAt?: DateTimeWithAggregatesFilter<"AiUsageQuota"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"AiUsageQuota"> | Date | string
-    deletedAt?: DateTimeNullableWithAggregatesFilter<"AiUsageQuota"> | Date | string | null
+  export type AiExecutionRecordScalarWhereWithAggregatesInput = {
+    AND?: AiExecutionRecordScalarWhereWithAggregatesInput | AiExecutionRecordScalarWhereWithAggregatesInput[]
+    OR?: AiExecutionRecordScalarWhereWithAggregatesInput[]
+    NOT?: AiExecutionRecordScalarWhereWithAggregatesInput | AiExecutionRecordScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AiExecutionRecord"> | string
+    identityId?: StringWithAggregatesFilter<"AiExecutionRecord"> | string
+    operation?: StringWithAggregatesFilter<"AiExecutionRecord"> | string
+    outcome?: StringWithAggregatesFilter<"AiExecutionRecord"> | string
+    conversationId?: StringNullableWithAggregatesFilter<"AiExecutionRecord"> | string | null
+    runId?: StringNullableWithAggregatesFilter<"AiExecutionRecord"> | string | null
+    requestId?: StringNullableWithAggregatesFilter<"AiExecutionRecord"> | string | null
+    traceId?: StringNullableWithAggregatesFilter<"AiExecutionRecord"> | string | null
+    providerConnectionId?: StringNullableWithAggregatesFilter<"AiExecutionRecord"> | string | null
+    modelId?: StringNullableWithAggregatesFilter<"AiExecutionRecord"> | string | null
+    errorCategory?: StringNullableWithAggregatesFilter<"AiExecutionRecord"> | string | null
+    safeError?: StringNullableWithAggregatesFilter<"AiExecutionRecord"> | string | null
+    estimatedCostUsd?: FloatNullableWithAggregatesFilter<"AiExecutionRecord"> | number | null
+    tokenUsage?: StringNullableWithAggregatesFilter<"AiExecutionRecord"> | string | null
+    latencyMs?: IntNullableWithAggregatesFilter<"AiExecutionRecord"> | number | null
+    createdAt?: DateTimeWithAggregatesFilter<"AiExecutionRecord"> | Date | string
+    completedAt?: DateTimeWithAggregatesFilter<"AiExecutionRecord"> | Date | string
   }
 
   export type AiProviderConfigWhereInput = {
@@ -114915,95 +110759,6 @@ export namespace Prisma {
     revokedAt?: DateTimeNullableWithAggregatesFilter<"AiProviderSecret"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"AiProviderSecret"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"AiProviderSecret"> | Date | string
-  }
-
-  export type KnowledgeGenerationTaskWhereInput = {
-    AND?: KnowledgeGenerationTaskWhereInput | KnowledgeGenerationTaskWhereInput[]
-    OR?: KnowledgeGenerationTaskWhereInput[]
-    NOT?: KnowledgeGenerationTaskWhereInput | KnowledgeGenerationTaskWhereInput[]
-    id?: StringFilter<"KnowledgeGenerationTask"> | string
-    identityId?: StringFilter<"KnowledgeGenerationTask"> | string
-    topic?: StringFilter<"KnowledgeGenerationTask"> | string
-    resourceCount?: IntFilter<"KnowledgeGenerationTask"> | number
-    targetAudience?: StringNullableFilter<"KnowledgeGenerationTask"> | string | null
-    folderPath?: StringFilter<"KnowledgeGenerationTask"> | string
-    status?: StringFilter<"KnowledgeGenerationTask"> | string
-    progress?: IntFilter<"KnowledgeGenerationTask"> | number
-    generatedResourceIds?: StringNullableListFilter<"KnowledgeGenerationTask">
-    error?: StringNullableFilter<"KnowledgeGenerationTask"> | string | null
-    createdAt?: DateTimeFilter<"KnowledgeGenerationTask"> | Date | string
-    completedAt?: DateTimeNullableFilter<"KnowledgeGenerationTask"> | Date | string | null
-  }
-
-  export type KnowledgeGenerationTaskOrderByWithRelationInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    topic?: SortOrder
-    resourceCount?: SortOrder
-    targetAudience?: SortOrderInput | SortOrder
-    folderPath?: SortOrder
-    status?: SortOrder
-    progress?: SortOrder
-    generatedResourceIds?: SortOrder
-    error?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
-    completedAt?: SortOrderInput | SortOrder
-  }
-
-  export type KnowledgeGenerationTaskWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    AND?: KnowledgeGenerationTaskWhereInput | KnowledgeGenerationTaskWhereInput[]
-    OR?: KnowledgeGenerationTaskWhereInput[]
-    NOT?: KnowledgeGenerationTaskWhereInput | KnowledgeGenerationTaskWhereInput[]
-    identityId?: StringFilter<"KnowledgeGenerationTask"> | string
-    topic?: StringFilter<"KnowledgeGenerationTask"> | string
-    resourceCount?: IntFilter<"KnowledgeGenerationTask"> | number
-    targetAudience?: StringNullableFilter<"KnowledgeGenerationTask"> | string | null
-    folderPath?: StringFilter<"KnowledgeGenerationTask"> | string
-    status?: StringFilter<"KnowledgeGenerationTask"> | string
-    progress?: IntFilter<"KnowledgeGenerationTask"> | number
-    generatedResourceIds?: StringNullableListFilter<"KnowledgeGenerationTask">
-    error?: StringNullableFilter<"KnowledgeGenerationTask"> | string | null
-    createdAt?: DateTimeFilter<"KnowledgeGenerationTask"> | Date | string
-    completedAt?: DateTimeNullableFilter<"KnowledgeGenerationTask"> | Date | string | null
-  }, "id">
-
-  export type KnowledgeGenerationTaskOrderByWithAggregationInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    topic?: SortOrder
-    resourceCount?: SortOrder
-    targetAudience?: SortOrderInput | SortOrder
-    folderPath?: SortOrder
-    status?: SortOrder
-    progress?: SortOrder
-    generatedResourceIds?: SortOrder
-    error?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
-    completedAt?: SortOrderInput | SortOrder
-    _count?: KnowledgeGenerationTaskCountOrderByAggregateInput
-    _avg?: KnowledgeGenerationTaskAvgOrderByAggregateInput
-    _max?: KnowledgeGenerationTaskMaxOrderByAggregateInput
-    _min?: KnowledgeGenerationTaskMinOrderByAggregateInput
-    _sum?: KnowledgeGenerationTaskSumOrderByAggregateInput
-  }
-
-  export type KnowledgeGenerationTaskScalarWhereWithAggregatesInput = {
-    AND?: KnowledgeGenerationTaskScalarWhereWithAggregatesInput | KnowledgeGenerationTaskScalarWhereWithAggregatesInput[]
-    OR?: KnowledgeGenerationTaskScalarWhereWithAggregatesInput[]
-    NOT?: KnowledgeGenerationTaskScalarWhereWithAggregatesInput | KnowledgeGenerationTaskScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"KnowledgeGenerationTask"> | string
-    identityId?: StringWithAggregatesFilter<"KnowledgeGenerationTask"> | string
-    topic?: StringWithAggregatesFilter<"KnowledgeGenerationTask"> | string
-    resourceCount?: IntWithAggregatesFilter<"KnowledgeGenerationTask"> | number
-    targetAudience?: StringNullableWithAggregatesFilter<"KnowledgeGenerationTask"> | string | null
-    folderPath?: StringWithAggregatesFilter<"KnowledgeGenerationTask"> | string
-    status?: StringWithAggregatesFilter<"KnowledgeGenerationTask"> | string
-    progress?: IntWithAggregatesFilter<"KnowledgeGenerationTask"> | number
-    generatedResourceIds?: StringNullableListFilter<"KnowledgeGenerationTask">
-    error?: StringNullableWithAggregatesFilter<"KnowledgeGenerationTask"> | string | null
-    createdAt?: DateTimeWithAggregatesFilter<"KnowledgeGenerationTask"> | Date | string
-    completedAt?: DateTimeNullableWithAggregatesFilter<"KnowledgeGenerationTask"> | Date | string | null
   }
 
   export type AiKnowledgeIndexEntryWhereInput = {
@@ -122062,9 +117817,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -122074,7 +117828,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -122116,9 +117869,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -122128,7 +117880,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -122170,9 +117921,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -122182,7 +117932,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -122224,9 +117973,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -122236,7 +117984,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -122275,14 +118022,11 @@ export namespace Prisma {
     id: string
     name: string
     status: string
-    messageCount?: number
-    lastMessageAt?: Date | string | null
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
     account: AccountCreateNestedOneWithoutAiConversationsInput
-    messages?: AiMessageCreateNestedManyWithoutConversationInput
   }
 
   export type AiConversationUncheckedCreateInput = {
@@ -122290,27 +118034,21 @@ export namespace Prisma {
     identityId: string
     name: string
     status: string
-    messageCount?: number
-    lastMessageAt?: Date | string | null
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
-    messages?: AiMessageUncheckedCreateNestedManyWithoutConversationInput
   }
 
   export type AiConversationUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
-    messageCount?: IntFieldUpdateOperationsInput | number
-    lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     account?: AccountUpdateOneRequiredWithoutAiConversationsNestedInput
-    messages?: AiMessageUpdateManyWithoutConversationNestedInput
   }
 
   export type AiConversationUncheckedUpdateInput = {
@@ -122318,13 +118056,10 @@ export namespace Prisma {
     identityId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
-    messageCount?: IntFieldUpdateOperationsInput | number
-    lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    messages?: AiMessageUncheckedUpdateManyWithoutConversationNestedInput
   }
 
   export type AiConversationCreateManyInput = {
@@ -122332,8 +118067,6 @@ export namespace Prisma {
     identityId: string
     name: string
     status: string
-    messageCount?: number
-    lastMessageAt?: Date | string | null
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -122344,8 +118077,6 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
-    messageCount?: IntFieldUpdateOperationsInput | number
-    lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -122357,351 +118088,149 @@ export namespace Prisma {
     identityId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
-    messageCount?: IntFieldUpdateOperationsInput | number
-    lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type AiMessageCreateInput = {
+  export type AiExecutionRecordCreateInput = {
     id: string
-    role: string
-    content: string
-    tokenUsage?: string | null
-    createdAt?: Date | string
-    identity: AccountCreateNestedOneWithoutAiMessagesInput
-    conversation: AiConversationCreateNestedOneWithoutMessagesInput
-  }
-
-  export type AiMessageUncheckedCreateInput = {
-    id: string
-    identityId: string
-    conversationId: string
-    role: string
-    content: string
-    tokenUsage?: string | null
-    createdAt?: Date | string
-  }
-
-  export type AiMessageUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    tokenUsage?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    identity?: AccountUpdateOneRequiredWithoutAiMessagesNestedInput
-    conversation?: AiConversationUpdateOneRequiredWithoutMessagesNestedInput
-  }
-
-  export type AiMessageUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    conversationId?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    tokenUsage?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type AiMessageCreateManyInput = {
-    id: string
-    identityId: string
-    conversationId: string
-    role: string
-    content: string
-    tokenUsage?: string | null
-    createdAt?: Date | string
-  }
-
-  export type AiMessageUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    tokenUsage?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type AiMessageUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    conversationId?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    tokenUsage?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type AiGenerationTaskCreateInput = {
-    id: string
-    taskType: string
-    status: string
+    operation: string
+    outcome: string
     conversationId?: string | null
     runId?: string | null
     requestId?: string | null
     traceId?: string | null
-    providerId?: string | null
-    model?: string | null
+    providerConnectionId?: string | null
+    modelId?: string | null
+    errorCategory?: string | null
+    safeError?: string | null
     estimatedCostUsd?: number | null
-    input: string
-    result?: string | null
-    error?: string | null
-    retryCount?: number
     tokenUsage?: string | null
-    processingMs?: number | null
-    version?: number
+    latencyMs?: number | null
     createdAt?: Date | string
-    updatedAt?: Date | string
-    completedAt?: Date | string | null
-    deletedAt?: Date | string | null
-    account: AccountCreateNestedOneWithoutAiGenerationTasksInput
+    completedAt?: Date | string
+    account: AccountCreateNestedOneWithoutAiExecutionRecordsInput
   }
 
-  export type AiGenerationTaskUncheckedCreateInput = {
+  export type AiExecutionRecordUncheckedCreateInput = {
     id: string
     identityId: string
-    taskType: string
-    status: string
+    operation: string
+    outcome: string
     conversationId?: string | null
     runId?: string | null
     requestId?: string | null
     traceId?: string | null
-    providerId?: string | null
-    model?: string | null
+    providerConnectionId?: string | null
+    modelId?: string | null
+    errorCategory?: string | null
+    safeError?: string | null
     estimatedCostUsd?: number | null
-    input: string
-    result?: string | null
-    error?: string | null
-    retryCount?: number
     tokenUsage?: string | null
-    processingMs?: number | null
-    version?: number
+    latencyMs?: number | null
     createdAt?: Date | string
-    updatedAt?: Date | string
-    completedAt?: Date | string | null
-    deletedAt?: Date | string | null
+    completedAt?: Date | string
   }
 
-  export type AiGenerationTaskUpdateInput = {
+  export type AiExecutionRecordUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    taskType?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    operation?: StringFieldUpdateOperationsInput | string
+    outcome?: StringFieldUpdateOperationsInput | string
     conversationId?: NullableStringFieldUpdateOperationsInput | string | null
     runId?: NullableStringFieldUpdateOperationsInput | string | null
     requestId?: NullableStringFieldUpdateOperationsInput | string | null
     traceId?: NullableStringFieldUpdateOperationsInput | string | null
-    providerId?: NullableStringFieldUpdateOperationsInput | string | null
-    model?: NullableStringFieldUpdateOperationsInput | string | null
+    providerConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
+    modelId?: NullableStringFieldUpdateOperationsInput | string | null
+    errorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    safeError?: NullableStringFieldUpdateOperationsInput | string | null
     estimatedCostUsd?: NullableFloatFieldUpdateOperationsInput | number | null
-    input?: StringFieldUpdateOperationsInput | string
-    result?: NullableStringFieldUpdateOperationsInput | string | null
-    error?: NullableStringFieldUpdateOperationsInput | string | null
-    retryCount?: IntFieldUpdateOperationsInput | number
     tokenUsage?: NullableStringFieldUpdateOperationsInput | string | null
-    processingMs?: NullableIntFieldUpdateOperationsInput | number | null
-    version?: IntFieldUpdateOperationsInput | number
+    latencyMs?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    account?: AccountUpdateOneRequiredWithoutAiGenerationTasksNestedInput
+    completedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    account?: AccountUpdateOneRequiredWithoutAiExecutionRecordsNestedInput
   }
 
-  export type AiGenerationTaskUncheckedUpdateInput = {
+  export type AiExecutionRecordUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
-    taskType?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    operation?: StringFieldUpdateOperationsInput | string
+    outcome?: StringFieldUpdateOperationsInput | string
     conversationId?: NullableStringFieldUpdateOperationsInput | string | null
     runId?: NullableStringFieldUpdateOperationsInput | string | null
     requestId?: NullableStringFieldUpdateOperationsInput | string | null
     traceId?: NullableStringFieldUpdateOperationsInput | string | null
-    providerId?: NullableStringFieldUpdateOperationsInput | string | null
-    model?: NullableStringFieldUpdateOperationsInput | string | null
+    providerConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
+    modelId?: NullableStringFieldUpdateOperationsInput | string | null
+    errorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    safeError?: NullableStringFieldUpdateOperationsInput | string | null
     estimatedCostUsd?: NullableFloatFieldUpdateOperationsInput | number | null
-    input?: StringFieldUpdateOperationsInput | string
-    result?: NullableStringFieldUpdateOperationsInput | string | null
-    error?: NullableStringFieldUpdateOperationsInput | string | null
-    retryCount?: IntFieldUpdateOperationsInput | number
     tokenUsage?: NullableStringFieldUpdateOperationsInput | string | null
-    processingMs?: NullableIntFieldUpdateOperationsInput | number | null
-    version?: IntFieldUpdateOperationsInput | number
+    latencyMs?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type AiGenerationTaskCreateManyInput = {
+  export type AiExecutionRecordCreateManyInput = {
     id: string
     identityId: string
-    taskType: string
-    status: string
+    operation: string
+    outcome: string
     conversationId?: string | null
     runId?: string | null
     requestId?: string | null
     traceId?: string | null
-    providerId?: string | null
-    model?: string | null
+    providerConnectionId?: string | null
+    modelId?: string | null
+    errorCategory?: string | null
+    safeError?: string | null
     estimatedCostUsd?: number | null
-    input: string
-    result?: string | null
-    error?: string | null
-    retryCount?: number
     tokenUsage?: string | null
-    processingMs?: number | null
-    version?: number
+    latencyMs?: number | null
     createdAt?: Date | string
-    updatedAt?: Date | string
-    completedAt?: Date | string | null
-    deletedAt?: Date | string | null
+    completedAt?: Date | string
   }
 
-  export type AiGenerationTaskUpdateManyMutationInput = {
+  export type AiExecutionRecordUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    taskType?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    operation?: StringFieldUpdateOperationsInput | string
+    outcome?: StringFieldUpdateOperationsInput | string
     conversationId?: NullableStringFieldUpdateOperationsInput | string | null
     runId?: NullableStringFieldUpdateOperationsInput | string | null
     requestId?: NullableStringFieldUpdateOperationsInput | string | null
     traceId?: NullableStringFieldUpdateOperationsInput | string | null
-    providerId?: NullableStringFieldUpdateOperationsInput | string | null
-    model?: NullableStringFieldUpdateOperationsInput | string | null
+    providerConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
+    modelId?: NullableStringFieldUpdateOperationsInput | string | null
+    errorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    safeError?: NullableStringFieldUpdateOperationsInput | string | null
     estimatedCostUsd?: NullableFloatFieldUpdateOperationsInput | number | null
-    input?: StringFieldUpdateOperationsInput | string
-    result?: NullableStringFieldUpdateOperationsInput | string | null
-    error?: NullableStringFieldUpdateOperationsInput | string | null
-    retryCount?: IntFieldUpdateOperationsInput | number
     tokenUsage?: NullableStringFieldUpdateOperationsInput | string | null
-    processingMs?: NullableIntFieldUpdateOperationsInput | number | null
-    version?: IntFieldUpdateOperationsInput | number
+    latencyMs?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type AiGenerationTaskUncheckedUpdateManyInput = {
+  export type AiExecutionRecordUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
-    taskType?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    operation?: StringFieldUpdateOperationsInput | string
+    outcome?: StringFieldUpdateOperationsInput | string
     conversationId?: NullableStringFieldUpdateOperationsInput | string | null
     runId?: NullableStringFieldUpdateOperationsInput | string | null
     requestId?: NullableStringFieldUpdateOperationsInput | string | null
     traceId?: NullableStringFieldUpdateOperationsInput | string | null
-    providerId?: NullableStringFieldUpdateOperationsInput | string | null
-    model?: NullableStringFieldUpdateOperationsInput | string | null
+    providerConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
+    modelId?: NullableStringFieldUpdateOperationsInput | string | null
+    errorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    safeError?: NullableStringFieldUpdateOperationsInput | string | null
     estimatedCostUsd?: NullableFloatFieldUpdateOperationsInput | number | null
-    input?: StringFieldUpdateOperationsInput | string
-    result?: NullableStringFieldUpdateOperationsInput | string | null
-    error?: NullableStringFieldUpdateOperationsInput | string | null
-    retryCount?: IntFieldUpdateOperationsInput | number
     tokenUsage?: NullableStringFieldUpdateOperationsInput | string | null
-    processingMs?: NullableIntFieldUpdateOperationsInput | number | null
-    version?: IntFieldUpdateOperationsInput | number
+    latencyMs?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type AiUsageQuotaCreateInput = {
-    id: string
-    quotaLimit?: number
-    currentUsage?: number
-    resetPeriod?: string
-    lastResetAt?: Date | string
-    nextResetAt: Date | string
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    account: AccountCreateNestedOneWithoutAiUsageQuotasInput
-  }
-
-  export type AiUsageQuotaUncheckedCreateInput = {
-    id: string
-    identityId: string
-    quotaLimit?: number
-    currentUsage?: number
-    resetPeriod?: string
-    lastResetAt?: Date | string
-    nextResetAt: Date | string
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-  }
-
-  export type AiUsageQuotaUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    quotaLimit?: IntFieldUpdateOperationsInput | number
-    currentUsage?: IntFieldUpdateOperationsInput | number
-    resetPeriod?: StringFieldUpdateOperationsInput | string
-    lastResetAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    nextResetAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    account?: AccountUpdateOneRequiredWithoutAiUsageQuotasNestedInput
-  }
-
-  export type AiUsageQuotaUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    quotaLimit?: IntFieldUpdateOperationsInput | number
-    currentUsage?: IntFieldUpdateOperationsInput | number
-    resetPeriod?: StringFieldUpdateOperationsInput | string
-    lastResetAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    nextResetAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type AiUsageQuotaCreateManyInput = {
-    id: string
-    identityId: string
-    quotaLimit?: number
-    currentUsage?: number
-    resetPeriod?: string
-    lastResetAt?: Date | string
-    nextResetAt: Date | string
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-  }
-
-  export type AiUsageQuotaUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    quotaLimit?: IntFieldUpdateOperationsInput | number
-    currentUsage?: IntFieldUpdateOperationsInput | number
-    resetPeriod?: StringFieldUpdateOperationsInput | string
-    lastResetAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    nextResetAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type AiUsageQuotaUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    quotaLimit?: IntFieldUpdateOperationsInput | number
-    currentUsage?: IntFieldUpdateOperationsInput | number
-    resetPeriod?: StringFieldUpdateOperationsInput | string
-    lastResetAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    nextResetAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type AiProviderConfigCreateInput = {
@@ -123014,111 +118543,6 @@ export namespace Prisma {
     revokedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type KnowledgeGenerationTaskCreateInput = {
-    id: string
-    identityId: string
-    topic: string
-    resourceCount?: number
-    targetAudience?: string | null
-    folderPath: string
-    status: string
-    progress?: number
-    generatedResourceIds?: KnowledgeGenerationTaskCreategeneratedResourceIdsInput | string[]
-    error?: string | null
-    createdAt?: Date | string
-    completedAt?: Date | string | null
-  }
-
-  export type KnowledgeGenerationTaskUncheckedCreateInput = {
-    id: string
-    identityId: string
-    topic: string
-    resourceCount?: number
-    targetAudience?: string | null
-    folderPath: string
-    status: string
-    progress?: number
-    generatedResourceIds?: KnowledgeGenerationTaskCreategeneratedResourceIdsInput | string[]
-    error?: string | null
-    createdAt?: Date | string
-    completedAt?: Date | string | null
-  }
-
-  export type KnowledgeGenerationTaskUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    topic?: StringFieldUpdateOperationsInput | string
-    resourceCount?: IntFieldUpdateOperationsInput | number
-    targetAudience?: NullableStringFieldUpdateOperationsInput | string | null
-    folderPath?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    progress?: IntFieldUpdateOperationsInput | number
-    generatedResourceIds?: KnowledgeGenerationTaskUpdategeneratedResourceIdsInput | string[]
-    error?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type KnowledgeGenerationTaskUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    topic?: StringFieldUpdateOperationsInput | string
-    resourceCount?: IntFieldUpdateOperationsInput | number
-    targetAudience?: NullableStringFieldUpdateOperationsInput | string | null
-    folderPath?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    progress?: IntFieldUpdateOperationsInput | number
-    generatedResourceIds?: KnowledgeGenerationTaskUpdategeneratedResourceIdsInput | string[]
-    error?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type KnowledgeGenerationTaskCreateManyInput = {
-    id: string
-    identityId: string
-    topic: string
-    resourceCount?: number
-    targetAudience?: string | null
-    folderPath: string
-    status: string
-    progress?: number
-    generatedResourceIds?: KnowledgeGenerationTaskCreategeneratedResourceIdsInput | string[]
-    error?: string | null
-    createdAt?: Date | string
-    completedAt?: Date | string | null
-  }
-
-  export type KnowledgeGenerationTaskUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    topic?: StringFieldUpdateOperationsInput | string
-    resourceCount?: IntFieldUpdateOperationsInput | number
-    targetAudience?: NullableStringFieldUpdateOperationsInput | string | null
-    folderPath?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    progress?: IntFieldUpdateOperationsInput | number
-    generatedResourceIds?: KnowledgeGenerationTaskUpdategeneratedResourceIdsInput | string[]
-    error?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type KnowledgeGenerationTaskUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    topic?: StringFieldUpdateOperationsInput | string
-    resourceCount?: IntFieldUpdateOperationsInput | number
-    targetAudience?: NullableStringFieldUpdateOperationsInput | string | null
-    folderPath?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    progress?: IntFieldUpdateOperationsInput | number
-    generatedResourceIds?: KnowledgeGenerationTaskUpdategeneratedResourceIdsInput | string[]
-    error?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type AiKnowledgeIndexEntryCreateInput = {
@@ -131219,21 +126643,16 @@ export namespace Prisma {
     none?: AiConversationWhereInput
   }
 
-  export type AiGenerationTaskListRelationFilter = {
-    every?: AiGenerationTaskWhereInput
-    some?: AiGenerationTaskWhereInput
-    none?: AiGenerationTaskWhereInput
+  export type AiExecutionRecordListRelationFilter = {
+    every?: AiExecutionRecordWhereInput
+    some?: AiExecutionRecordWhereInput
+    none?: AiExecutionRecordWhereInput
   }
 
   export type AiKnowledgeIndexEntryListRelationFilter = {
     every?: AiKnowledgeIndexEntryWhereInput
     some?: AiKnowledgeIndexEntryWhereInput
     none?: AiKnowledgeIndexEntryWhereInput
-  }
-
-  export type AiUsageQuotaNullableScalarRelationFilter = {
-    is?: AiUsageQuotaWhereInput | null
-    isNot?: AiUsageQuotaWhereInput | null
   }
 
   export type AiProviderConfigListRelationFilter = {
@@ -131287,12 +126706,6 @@ export namespace Prisma {
     every?: NotificationDispatchOutboxWhereInput
     some?: NotificationDispatchOutboxWhereInput
     none?: NotificationDispatchOutboxWhereInput
-  }
-
-  export type AiMessageListRelationFilter = {
-    every?: AiMessageWhereInput
-    some?: AiMessageWhereInput
-    none?: AiMessageWhereInput
   }
 
   export type FolderListRelationFilter = {
@@ -131436,7 +126849,7 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
-  export type AiGenerationTaskOrderByRelationAggregateInput = {
+  export type AiExecutionRecordOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -131473,10 +126886,6 @@ export namespace Prisma {
   }
 
   export type NotificationDispatchOutboxOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type AiMessageOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -131622,8 +127031,6 @@ export namespace Prisma {
     identityId?: SortOrder
     name?: SortOrder
     status?: SortOrder
-    messageCount?: SortOrder
-    lastMessageAt?: SortOrder
     version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -131631,7 +127038,6 @@ export namespace Prisma {
   }
 
   export type AiConversationAvgOrderByAggregateInput = {
-    messageCount?: SortOrder
     version?: SortOrder
   }
 
@@ -131640,8 +127046,6 @@ export namespace Prisma {
     identityId?: SortOrder
     name?: SortOrder
     status?: SortOrder
-    messageCount?: SortOrder
-    lastMessageAt?: SortOrder
     version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -131653,8 +127057,6 @@ export namespace Prisma {
     identityId?: SortOrder
     name?: SortOrder
     status?: SortOrder
-    messageCount?: SortOrder
-    lastMessageAt?: SortOrder
     version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -131662,7 +127064,6 @@ export namespace Prisma {
   }
 
   export type AiConversationSumOrderByAggregateInput = {
-    messageCount?: SortOrder
     version?: SortOrder
   }
 
@@ -131697,59 +127098,6 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
-  export type AiConversationScalarRelationFilter = {
-    is?: AiConversationWhereInput
-    isNot?: AiConversationWhereInput
-  }
-
-  export type AiMessageCountOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    conversationId?: SortOrder
-    role?: SortOrder
-    content?: SortOrder
-    tokenUsage?: SortOrder
-    createdAt?: SortOrder
-  }
-
-  export type AiMessageMaxOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    conversationId?: SortOrder
-    role?: SortOrder
-    content?: SortOrder
-    tokenUsage?: SortOrder
-    createdAt?: SortOrder
-  }
-
-  export type AiMessageMinOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    conversationId?: SortOrder
-    role?: SortOrder
-    content?: SortOrder
-    tokenUsage?: SortOrder
-    createdAt?: SortOrder
-  }
-
-  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    mode?: QueryMode
-    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedStringNullableFilter<$PrismaModel>
-    _max?: NestedStringNullableFilter<$PrismaModel>
-  }
-
   export type FloatNullableFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel> | null
     in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
@@ -131772,93 +127120,92 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
-  export type AiGenerationTaskCountOrderByAggregateInput = {
+  export type AiExecutionRecordCountOrderByAggregateInput = {
     id?: SortOrder
     identityId?: SortOrder
-    taskType?: SortOrder
-    status?: SortOrder
+    operation?: SortOrder
+    outcome?: SortOrder
     conversationId?: SortOrder
     runId?: SortOrder
     requestId?: SortOrder
     traceId?: SortOrder
-    providerId?: SortOrder
-    model?: SortOrder
+    providerConnectionId?: SortOrder
+    modelId?: SortOrder
+    errorCategory?: SortOrder
+    safeError?: SortOrder
     estimatedCostUsd?: SortOrder
-    input?: SortOrder
-    result?: SortOrder
-    error?: SortOrder
-    retryCount?: SortOrder
     tokenUsage?: SortOrder
-    processingMs?: SortOrder
-    version?: SortOrder
+    latencyMs?: SortOrder
     createdAt?: SortOrder
-    updatedAt?: SortOrder
     completedAt?: SortOrder
-    deletedAt?: SortOrder
   }
 
-  export type AiGenerationTaskAvgOrderByAggregateInput = {
+  export type AiExecutionRecordAvgOrderByAggregateInput = {
     estimatedCostUsd?: SortOrder
-    retryCount?: SortOrder
-    processingMs?: SortOrder
-    version?: SortOrder
+    latencyMs?: SortOrder
   }
 
-  export type AiGenerationTaskMaxOrderByAggregateInput = {
+  export type AiExecutionRecordMaxOrderByAggregateInput = {
     id?: SortOrder
     identityId?: SortOrder
-    taskType?: SortOrder
-    status?: SortOrder
+    operation?: SortOrder
+    outcome?: SortOrder
     conversationId?: SortOrder
     runId?: SortOrder
     requestId?: SortOrder
     traceId?: SortOrder
-    providerId?: SortOrder
-    model?: SortOrder
+    providerConnectionId?: SortOrder
+    modelId?: SortOrder
+    errorCategory?: SortOrder
+    safeError?: SortOrder
     estimatedCostUsd?: SortOrder
-    input?: SortOrder
-    result?: SortOrder
-    error?: SortOrder
-    retryCount?: SortOrder
     tokenUsage?: SortOrder
-    processingMs?: SortOrder
-    version?: SortOrder
+    latencyMs?: SortOrder
     createdAt?: SortOrder
-    updatedAt?: SortOrder
     completedAt?: SortOrder
-    deletedAt?: SortOrder
   }
 
-  export type AiGenerationTaskMinOrderByAggregateInput = {
+  export type AiExecutionRecordMinOrderByAggregateInput = {
     id?: SortOrder
     identityId?: SortOrder
-    taskType?: SortOrder
-    status?: SortOrder
+    operation?: SortOrder
+    outcome?: SortOrder
     conversationId?: SortOrder
     runId?: SortOrder
     requestId?: SortOrder
     traceId?: SortOrder
-    providerId?: SortOrder
-    model?: SortOrder
+    providerConnectionId?: SortOrder
+    modelId?: SortOrder
+    errorCategory?: SortOrder
+    safeError?: SortOrder
     estimatedCostUsd?: SortOrder
-    input?: SortOrder
-    result?: SortOrder
-    error?: SortOrder
-    retryCount?: SortOrder
     tokenUsage?: SortOrder
-    processingMs?: SortOrder
-    version?: SortOrder
+    latencyMs?: SortOrder
     createdAt?: SortOrder
-    updatedAt?: SortOrder
     completedAt?: SortOrder
-    deletedAt?: SortOrder
   }
 
-  export type AiGenerationTaskSumOrderByAggregateInput = {
+  export type AiExecutionRecordSumOrderByAggregateInput = {
     estimatedCostUsd?: SortOrder
-    retryCount?: SortOrder
-    processingMs?: SortOrder
-    version?: SortOrder
+    latencyMs?: SortOrder
+  }
+
+  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
   export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -131891,60 +127238,6 @@ export namespace Prisma {
     _sum?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedIntNullableFilter<$PrismaModel>
     _max?: NestedIntNullableFilter<$PrismaModel>
-  }
-
-  export type AiUsageQuotaCountOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    quotaLimit?: SortOrder
-    currentUsage?: SortOrder
-    resetPeriod?: SortOrder
-    lastResetAt?: SortOrder
-    nextResetAt?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrder
-  }
-
-  export type AiUsageQuotaAvgOrderByAggregateInput = {
-    quotaLimit?: SortOrder
-    currentUsage?: SortOrder
-    version?: SortOrder
-  }
-
-  export type AiUsageQuotaMaxOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    quotaLimit?: SortOrder
-    currentUsage?: SortOrder
-    resetPeriod?: SortOrder
-    lastResetAt?: SortOrder
-    nextResetAt?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrder
-  }
-
-  export type AiUsageQuotaMinOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    quotaLimit?: SortOrder
-    currentUsage?: SortOrder
-    resetPeriod?: SortOrder
-    lastResetAt?: SortOrder
-    nextResetAt?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrder
-  }
-
-  export type AiUsageQuotaSumOrderByAggregateInput = {
-    quotaLimit?: SortOrder
-    currentUsage?: SortOrder
-    version?: SortOrder
   }
 
   export type BoolFilter<$PrismaModel = never> = {
@@ -132108,67 +127401,6 @@ export namespace Prisma {
     revokedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-  }
-
-  export type StringNullableListFilter<$PrismaModel = never> = {
-    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    has?: string | StringFieldRefInput<$PrismaModel> | null
-    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
-    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
-    isEmpty?: boolean
-  }
-
-  export type KnowledgeGenerationTaskCountOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    topic?: SortOrder
-    resourceCount?: SortOrder
-    targetAudience?: SortOrder
-    folderPath?: SortOrder
-    status?: SortOrder
-    progress?: SortOrder
-    generatedResourceIds?: SortOrder
-    error?: SortOrder
-    createdAt?: SortOrder
-    completedAt?: SortOrder
-  }
-
-  export type KnowledgeGenerationTaskAvgOrderByAggregateInput = {
-    resourceCount?: SortOrder
-    progress?: SortOrder
-  }
-
-  export type KnowledgeGenerationTaskMaxOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    topic?: SortOrder
-    resourceCount?: SortOrder
-    targetAudience?: SortOrder
-    folderPath?: SortOrder
-    status?: SortOrder
-    progress?: SortOrder
-    error?: SortOrder
-    createdAt?: SortOrder
-    completedAt?: SortOrder
-  }
-
-  export type KnowledgeGenerationTaskMinOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    topic?: SortOrder
-    resourceCount?: SortOrder
-    targetAudience?: SortOrder
-    folderPath?: SortOrder
-    status?: SortOrder
-    progress?: SortOrder
-    error?: SortOrder
-    createdAt?: SortOrder
-    completedAt?: SortOrder
-  }
-
-  export type KnowledgeGenerationTaskSumOrderByAggregateInput = {
-    resourceCount?: SortOrder
-    progress?: SortOrder
   }
   export type JsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -136787,11 +132019,11 @@ export namespace Prisma {
     connect?: AiConversationWhereUniqueInput | AiConversationWhereUniqueInput[]
   }
 
-  export type AiGenerationTaskCreateNestedManyWithoutAccountInput = {
-    create?: XOR<AiGenerationTaskCreateWithoutAccountInput, AiGenerationTaskUncheckedCreateWithoutAccountInput> | AiGenerationTaskCreateWithoutAccountInput[] | AiGenerationTaskUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: AiGenerationTaskCreateOrConnectWithoutAccountInput | AiGenerationTaskCreateOrConnectWithoutAccountInput[]
-    createMany?: AiGenerationTaskCreateManyAccountInputEnvelope
-    connect?: AiGenerationTaskWhereUniqueInput | AiGenerationTaskWhereUniqueInput[]
+  export type AiExecutionRecordCreateNestedManyWithoutAccountInput = {
+    create?: XOR<AiExecutionRecordCreateWithoutAccountInput, AiExecutionRecordUncheckedCreateWithoutAccountInput> | AiExecutionRecordCreateWithoutAccountInput[] | AiExecutionRecordUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiExecutionRecordCreateOrConnectWithoutAccountInput | AiExecutionRecordCreateOrConnectWithoutAccountInput[]
+    createMany?: AiExecutionRecordCreateManyAccountInputEnvelope
+    connect?: AiExecutionRecordWhereUniqueInput | AiExecutionRecordWhereUniqueInput[]
   }
 
   export type AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput = {
@@ -136799,12 +132031,6 @@ export namespace Prisma {
     connectOrCreate?: AiKnowledgeIndexEntryCreateOrConnectWithoutAccountInput | AiKnowledgeIndexEntryCreateOrConnectWithoutAccountInput[]
     createMany?: AiKnowledgeIndexEntryCreateManyAccountInputEnvelope
     connect?: AiKnowledgeIndexEntryWhereUniqueInput | AiKnowledgeIndexEntryWhereUniqueInput[]
-  }
-
-  export type AiUsageQuotaCreateNestedOneWithoutAccountInput = {
-    create?: XOR<AiUsageQuotaCreateWithoutAccountInput, AiUsageQuotaUncheckedCreateWithoutAccountInput>
-    connectOrCreate?: AiUsageQuotaCreateOrConnectWithoutAccountInput
-    connect?: AiUsageQuotaWhereUniqueInput
   }
 
   export type AiProviderConfigCreateNestedManyWithoutAccountInput = {
@@ -136867,13 +132093,6 @@ export namespace Prisma {
     connectOrCreate?: NotificationDispatchOutboxCreateOrConnectWithoutAccountInput | NotificationDispatchOutboxCreateOrConnectWithoutAccountInput[]
     createMany?: NotificationDispatchOutboxCreateManyAccountInputEnvelope
     connect?: NotificationDispatchOutboxWhereUniqueInput | NotificationDispatchOutboxWhereUniqueInput[]
-  }
-
-  export type AiMessageCreateNestedManyWithoutIdentityInput = {
-    create?: XOR<AiMessageCreateWithoutIdentityInput, AiMessageUncheckedCreateWithoutIdentityInput> | AiMessageCreateWithoutIdentityInput[] | AiMessageUncheckedCreateWithoutIdentityInput[]
-    connectOrCreate?: AiMessageCreateOrConnectWithoutIdentityInput | AiMessageCreateOrConnectWithoutIdentityInput[]
-    createMany?: AiMessageCreateManyIdentityInputEnvelope
-    connect?: AiMessageWhereUniqueInput | AiMessageWhereUniqueInput[]
   }
 
   export type FolderCreateNestedManyWithoutIdentityInput = {
@@ -137099,11 +132318,11 @@ export namespace Prisma {
     connect?: AiConversationWhereUniqueInput | AiConversationWhereUniqueInput[]
   }
 
-  export type AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput = {
-    create?: XOR<AiGenerationTaskCreateWithoutAccountInput, AiGenerationTaskUncheckedCreateWithoutAccountInput> | AiGenerationTaskCreateWithoutAccountInput[] | AiGenerationTaskUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: AiGenerationTaskCreateOrConnectWithoutAccountInput | AiGenerationTaskCreateOrConnectWithoutAccountInput[]
-    createMany?: AiGenerationTaskCreateManyAccountInputEnvelope
-    connect?: AiGenerationTaskWhereUniqueInput | AiGenerationTaskWhereUniqueInput[]
+  export type AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput = {
+    create?: XOR<AiExecutionRecordCreateWithoutAccountInput, AiExecutionRecordUncheckedCreateWithoutAccountInput> | AiExecutionRecordCreateWithoutAccountInput[] | AiExecutionRecordUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiExecutionRecordCreateOrConnectWithoutAccountInput | AiExecutionRecordCreateOrConnectWithoutAccountInput[]
+    createMany?: AiExecutionRecordCreateManyAccountInputEnvelope
+    connect?: AiExecutionRecordWhereUniqueInput | AiExecutionRecordWhereUniqueInput[]
   }
 
   export type AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput = {
@@ -137111,12 +132330,6 @@ export namespace Prisma {
     connectOrCreate?: AiKnowledgeIndexEntryCreateOrConnectWithoutAccountInput | AiKnowledgeIndexEntryCreateOrConnectWithoutAccountInput[]
     createMany?: AiKnowledgeIndexEntryCreateManyAccountInputEnvelope
     connect?: AiKnowledgeIndexEntryWhereUniqueInput | AiKnowledgeIndexEntryWhereUniqueInput[]
-  }
-
-  export type AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput = {
-    create?: XOR<AiUsageQuotaCreateWithoutAccountInput, AiUsageQuotaUncheckedCreateWithoutAccountInput>
-    connectOrCreate?: AiUsageQuotaCreateOrConnectWithoutAccountInput
-    connect?: AiUsageQuotaWhereUniqueInput
   }
 
   export type AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput = {
@@ -137179,13 +132392,6 @@ export namespace Prisma {
     connectOrCreate?: NotificationDispatchOutboxCreateOrConnectWithoutAccountInput | NotificationDispatchOutboxCreateOrConnectWithoutAccountInput[]
     createMany?: NotificationDispatchOutboxCreateManyAccountInputEnvelope
     connect?: NotificationDispatchOutboxWhereUniqueInput | NotificationDispatchOutboxWhereUniqueInput[]
-  }
-
-  export type AiMessageUncheckedCreateNestedManyWithoutIdentityInput = {
-    create?: XOR<AiMessageCreateWithoutIdentityInput, AiMessageUncheckedCreateWithoutIdentityInput> | AiMessageCreateWithoutIdentityInput[] | AiMessageUncheckedCreateWithoutIdentityInput[]
-    connectOrCreate?: AiMessageCreateOrConnectWithoutIdentityInput | AiMessageCreateOrConnectWithoutIdentityInput[]
-    createMany?: AiMessageCreateManyIdentityInputEnvelope
-    connect?: AiMessageWhereUniqueInput | AiMessageWhereUniqueInput[]
   }
 
   export type FolderUncheckedCreateNestedManyWithoutIdentityInput = {
@@ -137610,18 +132816,18 @@ export namespace Prisma {
     deleteMany?: AiConversationScalarWhereInput | AiConversationScalarWhereInput[]
   }
 
-  export type AiGenerationTaskUpdateManyWithoutAccountNestedInput = {
-    create?: XOR<AiGenerationTaskCreateWithoutAccountInput, AiGenerationTaskUncheckedCreateWithoutAccountInput> | AiGenerationTaskCreateWithoutAccountInput[] | AiGenerationTaskUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: AiGenerationTaskCreateOrConnectWithoutAccountInput | AiGenerationTaskCreateOrConnectWithoutAccountInput[]
-    upsert?: AiGenerationTaskUpsertWithWhereUniqueWithoutAccountInput | AiGenerationTaskUpsertWithWhereUniqueWithoutAccountInput[]
-    createMany?: AiGenerationTaskCreateManyAccountInputEnvelope
-    set?: AiGenerationTaskWhereUniqueInput | AiGenerationTaskWhereUniqueInput[]
-    disconnect?: AiGenerationTaskWhereUniqueInput | AiGenerationTaskWhereUniqueInput[]
-    delete?: AiGenerationTaskWhereUniqueInput | AiGenerationTaskWhereUniqueInput[]
-    connect?: AiGenerationTaskWhereUniqueInput | AiGenerationTaskWhereUniqueInput[]
-    update?: AiGenerationTaskUpdateWithWhereUniqueWithoutAccountInput | AiGenerationTaskUpdateWithWhereUniqueWithoutAccountInput[]
-    updateMany?: AiGenerationTaskUpdateManyWithWhereWithoutAccountInput | AiGenerationTaskUpdateManyWithWhereWithoutAccountInput[]
-    deleteMany?: AiGenerationTaskScalarWhereInput | AiGenerationTaskScalarWhereInput[]
+  export type AiExecutionRecordUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<AiExecutionRecordCreateWithoutAccountInput, AiExecutionRecordUncheckedCreateWithoutAccountInput> | AiExecutionRecordCreateWithoutAccountInput[] | AiExecutionRecordUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiExecutionRecordCreateOrConnectWithoutAccountInput | AiExecutionRecordCreateOrConnectWithoutAccountInput[]
+    upsert?: AiExecutionRecordUpsertWithWhereUniqueWithoutAccountInput | AiExecutionRecordUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: AiExecutionRecordCreateManyAccountInputEnvelope
+    set?: AiExecutionRecordWhereUniqueInput | AiExecutionRecordWhereUniqueInput[]
+    disconnect?: AiExecutionRecordWhereUniqueInput | AiExecutionRecordWhereUniqueInput[]
+    delete?: AiExecutionRecordWhereUniqueInput | AiExecutionRecordWhereUniqueInput[]
+    connect?: AiExecutionRecordWhereUniqueInput | AiExecutionRecordWhereUniqueInput[]
+    update?: AiExecutionRecordUpdateWithWhereUniqueWithoutAccountInput | AiExecutionRecordUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: AiExecutionRecordUpdateManyWithWhereWithoutAccountInput | AiExecutionRecordUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: AiExecutionRecordScalarWhereInput | AiExecutionRecordScalarWhereInput[]
   }
 
   export type AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput = {
@@ -137636,16 +132842,6 @@ export namespace Prisma {
     update?: AiKnowledgeIndexEntryUpdateWithWhereUniqueWithoutAccountInput | AiKnowledgeIndexEntryUpdateWithWhereUniqueWithoutAccountInput[]
     updateMany?: AiKnowledgeIndexEntryUpdateManyWithWhereWithoutAccountInput | AiKnowledgeIndexEntryUpdateManyWithWhereWithoutAccountInput[]
     deleteMany?: AiKnowledgeIndexEntryScalarWhereInput | AiKnowledgeIndexEntryScalarWhereInput[]
-  }
-
-  export type AiUsageQuotaUpdateOneWithoutAccountNestedInput = {
-    create?: XOR<AiUsageQuotaCreateWithoutAccountInput, AiUsageQuotaUncheckedCreateWithoutAccountInput>
-    connectOrCreate?: AiUsageQuotaCreateOrConnectWithoutAccountInput
-    upsert?: AiUsageQuotaUpsertWithoutAccountInput
-    disconnect?: AiUsageQuotaWhereInput | boolean
-    delete?: AiUsageQuotaWhereInput | boolean
-    connect?: AiUsageQuotaWhereUniqueInput
-    update?: XOR<XOR<AiUsageQuotaUpdateToOneWithWhereWithoutAccountInput, AiUsageQuotaUpdateWithoutAccountInput>, AiUsageQuotaUncheckedUpdateWithoutAccountInput>
   }
 
   export type AiProviderConfigUpdateManyWithoutAccountNestedInput = {
@@ -137768,20 +132964,6 @@ export namespace Prisma {
     update?: NotificationDispatchOutboxUpdateWithWhereUniqueWithoutAccountInput | NotificationDispatchOutboxUpdateWithWhereUniqueWithoutAccountInput[]
     updateMany?: NotificationDispatchOutboxUpdateManyWithWhereWithoutAccountInput | NotificationDispatchOutboxUpdateManyWithWhereWithoutAccountInput[]
     deleteMany?: NotificationDispatchOutboxScalarWhereInput | NotificationDispatchOutboxScalarWhereInput[]
-  }
-
-  export type AiMessageUpdateManyWithoutIdentityNestedInput = {
-    create?: XOR<AiMessageCreateWithoutIdentityInput, AiMessageUncheckedCreateWithoutIdentityInput> | AiMessageCreateWithoutIdentityInput[] | AiMessageUncheckedCreateWithoutIdentityInput[]
-    connectOrCreate?: AiMessageCreateOrConnectWithoutIdentityInput | AiMessageCreateOrConnectWithoutIdentityInput[]
-    upsert?: AiMessageUpsertWithWhereUniqueWithoutIdentityInput | AiMessageUpsertWithWhereUniqueWithoutIdentityInput[]
-    createMany?: AiMessageCreateManyIdentityInputEnvelope
-    set?: AiMessageWhereUniqueInput | AiMessageWhereUniqueInput[]
-    disconnect?: AiMessageWhereUniqueInput | AiMessageWhereUniqueInput[]
-    delete?: AiMessageWhereUniqueInput | AiMessageWhereUniqueInput[]
-    connect?: AiMessageWhereUniqueInput | AiMessageWhereUniqueInput[]
-    update?: AiMessageUpdateWithWhereUniqueWithoutIdentityInput | AiMessageUpdateWithWhereUniqueWithoutIdentityInput[]
-    updateMany?: AiMessageUpdateManyWithWhereWithoutIdentityInput | AiMessageUpdateManyWithWhereWithoutIdentityInput[]
-    deleteMany?: AiMessageScalarWhereInput | AiMessageScalarWhereInput[]
   }
 
   export type FolderUpdateManyWithoutIdentityNestedInput = {
@@ -138228,18 +133410,18 @@ export namespace Prisma {
     deleteMany?: AiConversationScalarWhereInput | AiConversationScalarWhereInput[]
   }
 
-  export type AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput = {
-    create?: XOR<AiGenerationTaskCreateWithoutAccountInput, AiGenerationTaskUncheckedCreateWithoutAccountInput> | AiGenerationTaskCreateWithoutAccountInput[] | AiGenerationTaskUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: AiGenerationTaskCreateOrConnectWithoutAccountInput | AiGenerationTaskCreateOrConnectWithoutAccountInput[]
-    upsert?: AiGenerationTaskUpsertWithWhereUniqueWithoutAccountInput | AiGenerationTaskUpsertWithWhereUniqueWithoutAccountInput[]
-    createMany?: AiGenerationTaskCreateManyAccountInputEnvelope
-    set?: AiGenerationTaskWhereUniqueInput | AiGenerationTaskWhereUniqueInput[]
-    disconnect?: AiGenerationTaskWhereUniqueInput | AiGenerationTaskWhereUniqueInput[]
-    delete?: AiGenerationTaskWhereUniqueInput | AiGenerationTaskWhereUniqueInput[]
-    connect?: AiGenerationTaskWhereUniqueInput | AiGenerationTaskWhereUniqueInput[]
-    update?: AiGenerationTaskUpdateWithWhereUniqueWithoutAccountInput | AiGenerationTaskUpdateWithWhereUniqueWithoutAccountInput[]
-    updateMany?: AiGenerationTaskUpdateManyWithWhereWithoutAccountInput | AiGenerationTaskUpdateManyWithWhereWithoutAccountInput[]
-    deleteMany?: AiGenerationTaskScalarWhereInput | AiGenerationTaskScalarWhereInput[]
+  export type AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<AiExecutionRecordCreateWithoutAccountInput, AiExecutionRecordUncheckedCreateWithoutAccountInput> | AiExecutionRecordCreateWithoutAccountInput[] | AiExecutionRecordUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiExecutionRecordCreateOrConnectWithoutAccountInput | AiExecutionRecordCreateOrConnectWithoutAccountInput[]
+    upsert?: AiExecutionRecordUpsertWithWhereUniqueWithoutAccountInput | AiExecutionRecordUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: AiExecutionRecordCreateManyAccountInputEnvelope
+    set?: AiExecutionRecordWhereUniqueInput | AiExecutionRecordWhereUniqueInput[]
+    disconnect?: AiExecutionRecordWhereUniqueInput | AiExecutionRecordWhereUniqueInput[]
+    delete?: AiExecutionRecordWhereUniqueInput | AiExecutionRecordWhereUniqueInput[]
+    connect?: AiExecutionRecordWhereUniqueInput | AiExecutionRecordWhereUniqueInput[]
+    update?: AiExecutionRecordUpdateWithWhereUniqueWithoutAccountInput | AiExecutionRecordUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: AiExecutionRecordUpdateManyWithWhereWithoutAccountInput | AiExecutionRecordUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: AiExecutionRecordScalarWhereInput | AiExecutionRecordScalarWhereInput[]
   }
 
   export type AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput = {
@@ -138254,16 +133436,6 @@ export namespace Prisma {
     update?: AiKnowledgeIndexEntryUpdateWithWhereUniqueWithoutAccountInput | AiKnowledgeIndexEntryUpdateWithWhereUniqueWithoutAccountInput[]
     updateMany?: AiKnowledgeIndexEntryUpdateManyWithWhereWithoutAccountInput | AiKnowledgeIndexEntryUpdateManyWithWhereWithoutAccountInput[]
     deleteMany?: AiKnowledgeIndexEntryScalarWhereInput | AiKnowledgeIndexEntryScalarWhereInput[]
-  }
-
-  export type AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput = {
-    create?: XOR<AiUsageQuotaCreateWithoutAccountInput, AiUsageQuotaUncheckedCreateWithoutAccountInput>
-    connectOrCreate?: AiUsageQuotaCreateOrConnectWithoutAccountInput
-    upsert?: AiUsageQuotaUpsertWithoutAccountInput
-    disconnect?: AiUsageQuotaWhereInput | boolean
-    delete?: AiUsageQuotaWhereInput | boolean
-    connect?: AiUsageQuotaWhereUniqueInput
-    update?: XOR<XOR<AiUsageQuotaUpdateToOneWithWhereWithoutAccountInput, AiUsageQuotaUpdateWithoutAccountInput>, AiUsageQuotaUncheckedUpdateWithoutAccountInput>
   }
 
   export type AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput = {
@@ -138388,20 +133560,6 @@ export namespace Prisma {
     deleteMany?: NotificationDispatchOutboxScalarWhereInput | NotificationDispatchOutboxScalarWhereInput[]
   }
 
-  export type AiMessageUncheckedUpdateManyWithoutIdentityNestedInput = {
-    create?: XOR<AiMessageCreateWithoutIdentityInput, AiMessageUncheckedCreateWithoutIdentityInput> | AiMessageCreateWithoutIdentityInput[] | AiMessageUncheckedCreateWithoutIdentityInput[]
-    connectOrCreate?: AiMessageCreateOrConnectWithoutIdentityInput | AiMessageCreateOrConnectWithoutIdentityInput[]
-    upsert?: AiMessageUpsertWithWhereUniqueWithoutIdentityInput | AiMessageUpsertWithWhereUniqueWithoutIdentityInput[]
-    createMany?: AiMessageCreateManyIdentityInputEnvelope
-    set?: AiMessageWhereUniqueInput | AiMessageWhereUniqueInput[]
-    disconnect?: AiMessageWhereUniqueInput | AiMessageWhereUniqueInput[]
-    delete?: AiMessageWhereUniqueInput | AiMessageWhereUniqueInput[]
-    connect?: AiMessageWhereUniqueInput | AiMessageWhereUniqueInput[]
-    update?: AiMessageUpdateWithWhereUniqueWithoutIdentityInput | AiMessageUpdateWithWhereUniqueWithoutIdentityInput[]
-    updateMany?: AiMessageUpdateManyWithWhereWithoutIdentityInput | AiMessageUpdateManyWithWhereWithoutIdentityInput[]
-    deleteMany?: AiMessageScalarWhereInput | AiMessageScalarWhereInput[]
-  }
-
   export type FolderUncheckedUpdateManyWithoutIdentityNestedInput = {
     create?: XOR<FolderCreateWithoutIdentityInput, FolderUncheckedCreateWithoutIdentityInput> | FolderCreateWithoutIdentityInput[] | FolderUncheckedCreateWithoutIdentityInput[]
     connectOrCreate?: FolderCreateOrConnectWithoutIdentityInput | FolderCreateOrConnectWithoutIdentityInput[]
@@ -138492,20 +133650,6 @@ export namespace Prisma {
     connect?: AccountWhereUniqueInput
   }
 
-  export type AiMessageCreateNestedManyWithoutConversationInput = {
-    create?: XOR<AiMessageCreateWithoutConversationInput, AiMessageUncheckedCreateWithoutConversationInput> | AiMessageCreateWithoutConversationInput[] | AiMessageUncheckedCreateWithoutConversationInput[]
-    connectOrCreate?: AiMessageCreateOrConnectWithoutConversationInput | AiMessageCreateOrConnectWithoutConversationInput[]
-    createMany?: AiMessageCreateManyConversationInputEnvelope
-    connect?: AiMessageWhereUniqueInput | AiMessageWhereUniqueInput[]
-  }
-
-  export type AiMessageUncheckedCreateNestedManyWithoutConversationInput = {
-    create?: XOR<AiMessageCreateWithoutConversationInput, AiMessageUncheckedCreateWithoutConversationInput> | AiMessageCreateWithoutConversationInput[] | AiMessageUncheckedCreateWithoutConversationInput[]
-    connectOrCreate?: AiMessageCreateOrConnectWithoutConversationInput | AiMessageCreateOrConnectWithoutConversationInput[]
-    createMany?: AiMessageCreateManyConversationInputEnvelope
-    connect?: AiMessageWhereUniqueInput | AiMessageWhereUniqueInput[]
-  }
-
   export type IntFieldUpdateOperationsInput = {
     set?: number
     increment?: number
@@ -138522,70 +133666,14 @@ export namespace Prisma {
     update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutAiConversationsInput, AccountUpdateWithoutAiConversationsInput>, AccountUncheckedUpdateWithoutAiConversationsInput>
   }
 
-  export type AiMessageUpdateManyWithoutConversationNestedInput = {
-    create?: XOR<AiMessageCreateWithoutConversationInput, AiMessageUncheckedCreateWithoutConversationInput> | AiMessageCreateWithoutConversationInput[] | AiMessageUncheckedCreateWithoutConversationInput[]
-    connectOrCreate?: AiMessageCreateOrConnectWithoutConversationInput | AiMessageCreateOrConnectWithoutConversationInput[]
-    upsert?: AiMessageUpsertWithWhereUniqueWithoutConversationInput | AiMessageUpsertWithWhereUniqueWithoutConversationInput[]
-    createMany?: AiMessageCreateManyConversationInputEnvelope
-    set?: AiMessageWhereUniqueInput | AiMessageWhereUniqueInput[]
-    disconnect?: AiMessageWhereUniqueInput | AiMessageWhereUniqueInput[]
-    delete?: AiMessageWhereUniqueInput | AiMessageWhereUniqueInput[]
-    connect?: AiMessageWhereUniqueInput | AiMessageWhereUniqueInput[]
-    update?: AiMessageUpdateWithWhereUniqueWithoutConversationInput | AiMessageUpdateWithWhereUniqueWithoutConversationInput[]
-    updateMany?: AiMessageUpdateManyWithWhereWithoutConversationInput | AiMessageUpdateManyWithWhereWithoutConversationInput[]
-    deleteMany?: AiMessageScalarWhereInput | AiMessageScalarWhereInput[]
-  }
-
-  export type AiMessageUncheckedUpdateManyWithoutConversationNestedInput = {
-    create?: XOR<AiMessageCreateWithoutConversationInput, AiMessageUncheckedCreateWithoutConversationInput> | AiMessageCreateWithoutConversationInput[] | AiMessageUncheckedCreateWithoutConversationInput[]
-    connectOrCreate?: AiMessageCreateOrConnectWithoutConversationInput | AiMessageCreateOrConnectWithoutConversationInput[]
-    upsert?: AiMessageUpsertWithWhereUniqueWithoutConversationInput | AiMessageUpsertWithWhereUniqueWithoutConversationInput[]
-    createMany?: AiMessageCreateManyConversationInputEnvelope
-    set?: AiMessageWhereUniqueInput | AiMessageWhereUniqueInput[]
-    disconnect?: AiMessageWhereUniqueInput | AiMessageWhereUniqueInput[]
-    delete?: AiMessageWhereUniqueInput | AiMessageWhereUniqueInput[]
-    connect?: AiMessageWhereUniqueInput | AiMessageWhereUniqueInput[]
-    update?: AiMessageUpdateWithWhereUniqueWithoutConversationInput | AiMessageUpdateWithWhereUniqueWithoutConversationInput[]
-    updateMany?: AiMessageUpdateManyWithWhereWithoutConversationInput | AiMessageUpdateManyWithWhereWithoutConversationInput[]
-    deleteMany?: AiMessageScalarWhereInput | AiMessageScalarWhereInput[]
-  }
-
-  export type AccountCreateNestedOneWithoutAiMessagesInput = {
-    create?: XOR<AccountCreateWithoutAiMessagesInput, AccountUncheckedCreateWithoutAiMessagesInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutAiMessagesInput
+  export type AccountCreateNestedOneWithoutAiExecutionRecordsInput = {
+    create?: XOR<AccountCreateWithoutAiExecutionRecordsInput, AccountUncheckedCreateWithoutAiExecutionRecordsInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutAiExecutionRecordsInput
     connect?: AccountWhereUniqueInput
-  }
-
-  export type AiConversationCreateNestedOneWithoutMessagesInput = {
-    create?: XOR<AiConversationCreateWithoutMessagesInput, AiConversationUncheckedCreateWithoutMessagesInput>
-    connectOrCreate?: AiConversationCreateOrConnectWithoutMessagesInput
-    connect?: AiConversationWhereUniqueInput
   }
 
   export type NullableStringFieldUpdateOperationsInput = {
     set?: string | null
-  }
-
-  export type AccountUpdateOneRequiredWithoutAiMessagesNestedInput = {
-    create?: XOR<AccountCreateWithoutAiMessagesInput, AccountUncheckedCreateWithoutAiMessagesInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutAiMessagesInput
-    upsert?: AccountUpsertWithoutAiMessagesInput
-    connect?: AccountWhereUniqueInput
-    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutAiMessagesInput, AccountUpdateWithoutAiMessagesInput>, AccountUncheckedUpdateWithoutAiMessagesInput>
-  }
-
-  export type AiConversationUpdateOneRequiredWithoutMessagesNestedInput = {
-    create?: XOR<AiConversationCreateWithoutMessagesInput, AiConversationUncheckedCreateWithoutMessagesInput>
-    connectOrCreate?: AiConversationCreateOrConnectWithoutMessagesInput
-    upsert?: AiConversationUpsertWithoutMessagesInput
-    connect?: AiConversationWhereUniqueInput
-    update?: XOR<XOR<AiConversationUpdateToOneWithWhereWithoutMessagesInput, AiConversationUpdateWithoutMessagesInput>, AiConversationUncheckedUpdateWithoutMessagesInput>
-  }
-
-  export type AccountCreateNestedOneWithoutAiGenerationTasksInput = {
-    create?: XOR<AccountCreateWithoutAiGenerationTasksInput, AccountUncheckedCreateWithoutAiGenerationTasksInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutAiGenerationTasksInput
-    connect?: AccountWhereUniqueInput
   }
 
   export type NullableFloatFieldUpdateOperationsInput = {
@@ -138604,26 +133692,12 @@ export namespace Prisma {
     divide?: number
   }
 
-  export type AccountUpdateOneRequiredWithoutAiGenerationTasksNestedInput = {
-    create?: XOR<AccountCreateWithoutAiGenerationTasksInput, AccountUncheckedCreateWithoutAiGenerationTasksInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutAiGenerationTasksInput
-    upsert?: AccountUpsertWithoutAiGenerationTasksInput
+  export type AccountUpdateOneRequiredWithoutAiExecutionRecordsNestedInput = {
+    create?: XOR<AccountCreateWithoutAiExecutionRecordsInput, AccountUncheckedCreateWithoutAiExecutionRecordsInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutAiExecutionRecordsInput
+    upsert?: AccountUpsertWithoutAiExecutionRecordsInput
     connect?: AccountWhereUniqueInput
-    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutAiGenerationTasksInput, AccountUpdateWithoutAiGenerationTasksInput>, AccountUncheckedUpdateWithoutAiGenerationTasksInput>
-  }
-
-  export type AccountCreateNestedOneWithoutAiUsageQuotasInput = {
-    create?: XOR<AccountCreateWithoutAiUsageQuotasInput, AccountUncheckedCreateWithoutAiUsageQuotasInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutAiUsageQuotasInput
-    connect?: AccountWhereUniqueInput
-  }
-
-  export type AccountUpdateOneRequiredWithoutAiUsageQuotasNestedInput = {
-    create?: XOR<AccountCreateWithoutAiUsageQuotasInput, AccountUncheckedCreateWithoutAiUsageQuotasInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutAiUsageQuotasInput
-    upsert?: AccountUpsertWithoutAiUsageQuotasInput
-    connect?: AccountWhereUniqueInput
-    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutAiUsageQuotasInput, AccountUpdateWithoutAiUsageQuotasInput>, AccountUncheckedUpdateWithoutAiUsageQuotasInput>
+    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutAiExecutionRecordsInput, AccountUpdateWithoutAiExecutionRecordsInput>, AccountUncheckedUpdateWithoutAiExecutionRecordsInput>
   }
 
   export type AccountCreateNestedOneWithoutAiProviderConfigsInput = {
@@ -138670,15 +133744,6 @@ export namespace Prisma {
     upsert?: AccountUpsertWithoutAiProviderSecretsInput
     connect?: AccountWhereUniqueInput
     update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutAiProviderSecretsInput, AccountUpdateWithoutAiProviderSecretsInput>, AccountUncheckedUpdateWithoutAiProviderSecretsInput>
-  }
-
-  export type KnowledgeGenerationTaskCreategeneratedResourceIdsInput = {
-    set: string[]
-  }
-
-  export type KnowledgeGenerationTaskUpdategeneratedResourceIdsInput = {
-    set?: string[]
-    push?: string | string[]
   }
 
   export type AccountCreateNestedOneWithoutAiKnowledgeIndexEntriesInput = {
@@ -142146,6 +137211,17 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
   export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -142161,17 +137237,6 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
-  }
-
-  export type NestedFloatNullableFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
   export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -143374,26 +138439,20 @@ export namespace Prisma {
     id: string
     name: string
     status: string
-    messageCount?: number
-    lastMessageAt?: Date | string | null
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
-    messages?: AiMessageCreateNestedManyWithoutConversationInput
   }
 
   export type AiConversationUncheckedCreateWithoutAccountInput = {
     id: string
     name: string
     status: string
-    messageCount?: number
-    lastMessageAt?: Date | string | null
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
-    messages?: AiMessageUncheckedCreateNestedManyWithoutConversationInput
   }
 
   export type AiConversationCreateOrConnectWithoutAccountInput = {
@@ -143406,61 +138465,51 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type AiGenerationTaskCreateWithoutAccountInput = {
+  export type AiExecutionRecordCreateWithoutAccountInput = {
     id: string
-    taskType: string
-    status: string
+    operation: string
+    outcome: string
     conversationId?: string | null
     runId?: string | null
     requestId?: string | null
     traceId?: string | null
-    providerId?: string | null
-    model?: string | null
+    providerConnectionId?: string | null
+    modelId?: string | null
+    errorCategory?: string | null
+    safeError?: string | null
     estimatedCostUsd?: number | null
-    input: string
-    result?: string | null
-    error?: string | null
-    retryCount?: number
     tokenUsage?: string | null
-    processingMs?: number | null
-    version?: number
+    latencyMs?: number | null
     createdAt?: Date | string
-    updatedAt?: Date | string
-    completedAt?: Date | string | null
-    deletedAt?: Date | string | null
+    completedAt?: Date | string
   }
 
-  export type AiGenerationTaskUncheckedCreateWithoutAccountInput = {
+  export type AiExecutionRecordUncheckedCreateWithoutAccountInput = {
     id: string
-    taskType: string
-    status: string
+    operation: string
+    outcome: string
     conversationId?: string | null
     runId?: string | null
     requestId?: string | null
     traceId?: string | null
-    providerId?: string | null
-    model?: string | null
+    providerConnectionId?: string | null
+    modelId?: string | null
+    errorCategory?: string | null
+    safeError?: string | null
     estimatedCostUsd?: number | null
-    input: string
-    result?: string | null
-    error?: string | null
-    retryCount?: number
     tokenUsage?: string | null
-    processingMs?: number | null
-    version?: number
+    latencyMs?: number | null
     createdAt?: Date | string
-    updatedAt?: Date | string
-    completedAt?: Date | string | null
-    deletedAt?: Date | string | null
+    completedAt?: Date | string
   }
 
-  export type AiGenerationTaskCreateOrConnectWithoutAccountInput = {
-    where: AiGenerationTaskWhereUniqueInput
-    create: XOR<AiGenerationTaskCreateWithoutAccountInput, AiGenerationTaskUncheckedCreateWithoutAccountInput>
+  export type AiExecutionRecordCreateOrConnectWithoutAccountInput = {
+    where: AiExecutionRecordWhereUniqueInput
+    create: XOR<AiExecutionRecordCreateWithoutAccountInput, AiExecutionRecordUncheckedCreateWithoutAccountInput>
   }
 
-  export type AiGenerationTaskCreateManyAccountInputEnvelope = {
-    data: AiGenerationTaskCreateManyAccountInput | AiGenerationTaskCreateManyAccountInput[]
+  export type AiExecutionRecordCreateManyAccountInputEnvelope = {
+    data: AiExecutionRecordCreateManyAccountInput | AiExecutionRecordCreateManyAccountInput[]
     skipDuplicates?: boolean
   }
 
@@ -143516,37 +138565,6 @@ export namespace Prisma {
   export type AiKnowledgeIndexEntryCreateManyAccountInputEnvelope = {
     data: AiKnowledgeIndexEntryCreateManyAccountInput | AiKnowledgeIndexEntryCreateManyAccountInput[]
     skipDuplicates?: boolean
-  }
-
-  export type AiUsageQuotaCreateWithoutAccountInput = {
-    id: string
-    quotaLimit?: number
-    currentUsage?: number
-    resetPeriod?: string
-    lastResetAt?: Date | string
-    nextResetAt: Date | string
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-  }
-
-  export type AiUsageQuotaUncheckedCreateWithoutAccountInput = {
-    id: string
-    quotaLimit?: number
-    currentUsage?: number
-    resetPeriod?: string
-    lastResetAt?: Date | string
-    nextResetAt: Date | string
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-  }
-
-  export type AiUsageQuotaCreateOrConnectWithoutAccountInput = {
-    where: AiUsageQuotaWhereUniqueInput
-    create: XOR<AiUsageQuotaCreateWithoutAccountInput, AiUsageQuotaUncheckedCreateWithoutAccountInput>
   }
 
   export type AiProviderConfigCreateWithoutAccountInput = {
@@ -143916,34 +138934,6 @@ export namespace Prisma {
 
   export type NotificationDispatchOutboxCreateManyAccountInputEnvelope = {
     data: NotificationDispatchOutboxCreateManyAccountInput | NotificationDispatchOutboxCreateManyAccountInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type AiMessageCreateWithoutIdentityInput = {
-    id: string
-    role: string
-    content: string
-    tokenUsage?: string | null
-    createdAt?: Date | string
-    conversation: AiConversationCreateNestedOneWithoutMessagesInput
-  }
-
-  export type AiMessageUncheckedCreateWithoutIdentityInput = {
-    id: string
-    conversationId: string
-    role: string
-    content: string
-    tokenUsage?: string | null
-    createdAt?: Date | string
-  }
-
-  export type AiMessageCreateOrConnectWithoutIdentityInput = {
-    where: AiMessageWhereUniqueInput
-    create: XOR<AiMessageCreateWithoutIdentityInput, AiMessageUncheckedCreateWithoutIdentityInput>
-  }
-
-  export type AiMessageCreateManyIdentityInputEnvelope = {
-    data: AiMessageCreateManyIdentityInput | AiMessageCreateManyIdentityInput[]
     skipDuplicates?: boolean
   }
 
@@ -145167,56 +140157,49 @@ export namespace Prisma {
     identityId?: StringFilter<"AiConversation"> | string
     name?: StringFilter<"AiConversation"> | string
     status?: StringFilter<"AiConversation"> | string
-    messageCount?: IntFilter<"AiConversation"> | number
-    lastMessageAt?: DateTimeNullableFilter<"AiConversation"> | Date | string | null
     version?: IntFilter<"AiConversation"> | number
     createdAt?: DateTimeFilter<"AiConversation"> | Date | string
     updatedAt?: DateTimeFilter<"AiConversation"> | Date | string
     deletedAt?: DateTimeNullableFilter<"AiConversation"> | Date | string | null
   }
 
-  export type AiGenerationTaskUpsertWithWhereUniqueWithoutAccountInput = {
-    where: AiGenerationTaskWhereUniqueInput
-    update: XOR<AiGenerationTaskUpdateWithoutAccountInput, AiGenerationTaskUncheckedUpdateWithoutAccountInput>
-    create: XOR<AiGenerationTaskCreateWithoutAccountInput, AiGenerationTaskUncheckedCreateWithoutAccountInput>
+  export type AiExecutionRecordUpsertWithWhereUniqueWithoutAccountInput = {
+    where: AiExecutionRecordWhereUniqueInput
+    update: XOR<AiExecutionRecordUpdateWithoutAccountInput, AiExecutionRecordUncheckedUpdateWithoutAccountInput>
+    create: XOR<AiExecutionRecordCreateWithoutAccountInput, AiExecutionRecordUncheckedCreateWithoutAccountInput>
   }
 
-  export type AiGenerationTaskUpdateWithWhereUniqueWithoutAccountInput = {
-    where: AiGenerationTaskWhereUniqueInput
-    data: XOR<AiGenerationTaskUpdateWithoutAccountInput, AiGenerationTaskUncheckedUpdateWithoutAccountInput>
+  export type AiExecutionRecordUpdateWithWhereUniqueWithoutAccountInput = {
+    where: AiExecutionRecordWhereUniqueInput
+    data: XOR<AiExecutionRecordUpdateWithoutAccountInput, AiExecutionRecordUncheckedUpdateWithoutAccountInput>
   }
 
-  export type AiGenerationTaskUpdateManyWithWhereWithoutAccountInput = {
-    where: AiGenerationTaskScalarWhereInput
-    data: XOR<AiGenerationTaskUpdateManyMutationInput, AiGenerationTaskUncheckedUpdateManyWithoutAccountInput>
+  export type AiExecutionRecordUpdateManyWithWhereWithoutAccountInput = {
+    where: AiExecutionRecordScalarWhereInput
+    data: XOR<AiExecutionRecordUpdateManyMutationInput, AiExecutionRecordUncheckedUpdateManyWithoutAccountInput>
   }
 
-  export type AiGenerationTaskScalarWhereInput = {
-    AND?: AiGenerationTaskScalarWhereInput | AiGenerationTaskScalarWhereInput[]
-    OR?: AiGenerationTaskScalarWhereInput[]
-    NOT?: AiGenerationTaskScalarWhereInput | AiGenerationTaskScalarWhereInput[]
-    id?: StringFilter<"AiGenerationTask"> | string
-    identityId?: StringFilter<"AiGenerationTask"> | string
-    taskType?: StringFilter<"AiGenerationTask"> | string
-    status?: StringFilter<"AiGenerationTask"> | string
-    conversationId?: StringNullableFilter<"AiGenerationTask"> | string | null
-    runId?: StringNullableFilter<"AiGenerationTask"> | string | null
-    requestId?: StringNullableFilter<"AiGenerationTask"> | string | null
-    traceId?: StringNullableFilter<"AiGenerationTask"> | string | null
-    providerId?: StringNullableFilter<"AiGenerationTask"> | string | null
-    model?: StringNullableFilter<"AiGenerationTask"> | string | null
-    estimatedCostUsd?: FloatNullableFilter<"AiGenerationTask"> | number | null
-    input?: StringFilter<"AiGenerationTask"> | string
-    result?: StringNullableFilter<"AiGenerationTask"> | string | null
-    error?: StringNullableFilter<"AiGenerationTask"> | string | null
-    retryCount?: IntFilter<"AiGenerationTask"> | number
-    tokenUsage?: StringNullableFilter<"AiGenerationTask"> | string | null
-    processingMs?: IntNullableFilter<"AiGenerationTask"> | number | null
-    version?: IntFilter<"AiGenerationTask"> | number
-    createdAt?: DateTimeFilter<"AiGenerationTask"> | Date | string
-    updatedAt?: DateTimeFilter<"AiGenerationTask"> | Date | string
-    completedAt?: DateTimeNullableFilter<"AiGenerationTask"> | Date | string | null
-    deletedAt?: DateTimeNullableFilter<"AiGenerationTask"> | Date | string | null
+  export type AiExecutionRecordScalarWhereInput = {
+    AND?: AiExecutionRecordScalarWhereInput | AiExecutionRecordScalarWhereInput[]
+    OR?: AiExecutionRecordScalarWhereInput[]
+    NOT?: AiExecutionRecordScalarWhereInput | AiExecutionRecordScalarWhereInput[]
+    id?: StringFilter<"AiExecutionRecord"> | string
+    identityId?: StringFilter<"AiExecutionRecord"> | string
+    operation?: StringFilter<"AiExecutionRecord"> | string
+    outcome?: StringFilter<"AiExecutionRecord"> | string
+    conversationId?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    runId?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    requestId?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    traceId?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    providerConnectionId?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    modelId?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    errorCategory?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    safeError?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    estimatedCostUsd?: FloatNullableFilter<"AiExecutionRecord"> | number | null
+    tokenUsage?: StringNullableFilter<"AiExecutionRecord"> | string | null
+    latencyMs?: IntNullableFilter<"AiExecutionRecord"> | number | null
+    createdAt?: DateTimeFilter<"AiExecutionRecord"> | Date | string
+    completedAt?: DateTimeFilter<"AiExecutionRecord"> | Date | string
   }
 
   export type AiKnowledgeIndexEntryUpsertWithWhereUniqueWithoutAccountInput = {
@@ -145259,43 +140242,6 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"AiKnowledgeIndexEntry"> | Date | string
     updatedAt?: DateTimeFilter<"AiKnowledgeIndexEntry"> | Date | string
     deletedAt?: DateTimeNullableFilter<"AiKnowledgeIndexEntry"> | Date | string | null
-  }
-
-  export type AiUsageQuotaUpsertWithoutAccountInput = {
-    update: XOR<AiUsageQuotaUpdateWithoutAccountInput, AiUsageQuotaUncheckedUpdateWithoutAccountInput>
-    create: XOR<AiUsageQuotaCreateWithoutAccountInput, AiUsageQuotaUncheckedCreateWithoutAccountInput>
-    where?: AiUsageQuotaWhereInput
-  }
-
-  export type AiUsageQuotaUpdateToOneWithWhereWithoutAccountInput = {
-    where?: AiUsageQuotaWhereInput
-    data: XOR<AiUsageQuotaUpdateWithoutAccountInput, AiUsageQuotaUncheckedUpdateWithoutAccountInput>
-  }
-
-  export type AiUsageQuotaUpdateWithoutAccountInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    quotaLimit?: IntFieldUpdateOperationsInput | number
-    currentUsage?: IntFieldUpdateOperationsInput | number
-    resetPeriod?: StringFieldUpdateOperationsInput | string
-    lastResetAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    nextResetAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type AiUsageQuotaUncheckedUpdateWithoutAccountInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    quotaLimit?: IntFieldUpdateOperationsInput | number
-    currentUsage?: IntFieldUpdateOperationsInput | number
-    resetPeriod?: StringFieldUpdateOperationsInput | string
-    lastResetAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    nextResetAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type AiProviderConfigUpsertWithWhereUniqueWithoutAccountInput = {
@@ -145617,35 +140563,6 @@ export namespace Prisma {
     finishedAt?: DateTimeNullableFilter<"NotificationDispatchOutbox"> | Date | string | null
   }
 
-  export type AiMessageUpsertWithWhereUniqueWithoutIdentityInput = {
-    where: AiMessageWhereUniqueInput
-    update: XOR<AiMessageUpdateWithoutIdentityInput, AiMessageUncheckedUpdateWithoutIdentityInput>
-    create: XOR<AiMessageCreateWithoutIdentityInput, AiMessageUncheckedCreateWithoutIdentityInput>
-  }
-
-  export type AiMessageUpdateWithWhereUniqueWithoutIdentityInput = {
-    where: AiMessageWhereUniqueInput
-    data: XOR<AiMessageUpdateWithoutIdentityInput, AiMessageUncheckedUpdateWithoutIdentityInput>
-  }
-
-  export type AiMessageUpdateManyWithWhereWithoutIdentityInput = {
-    where: AiMessageScalarWhereInput
-    data: XOR<AiMessageUpdateManyMutationInput, AiMessageUncheckedUpdateManyWithoutIdentityInput>
-  }
-
-  export type AiMessageScalarWhereInput = {
-    AND?: AiMessageScalarWhereInput | AiMessageScalarWhereInput[]
-    OR?: AiMessageScalarWhereInput[]
-    NOT?: AiMessageScalarWhereInput | AiMessageScalarWhereInput[]
-    id?: StringFilter<"AiMessage"> | string
-    identityId?: StringFilter<"AiMessage"> | string
-    conversationId?: StringFilter<"AiMessage"> | string
-    role?: StringFilter<"AiMessage"> | string
-    content?: StringFilter<"AiMessage"> | string
-    tokenUsage?: StringNullableFilter<"AiMessage"> | string | null
-    createdAt?: DateTimeFilter<"AiMessage"> | Date | string
-  }
-
   export type FolderUpsertWithWhereUniqueWithoutIdentityInput = {
     where: FolderWhereUniqueInput
     update: XOR<FolderUpdateWithoutIdentityInput, FolderUncheckedUpdateWithoutIdentityInput>
@@ -145906,9 +140823,8 @@ export namespace Prisma {
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -145918,7 +140834,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -145959,9 +140874,8 @@ export namespace Prisma {
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -145971,7 +140885,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -145983,34 +140896,6 @@ export namespace Prisma {
   export type AccountCreateOrConnectWithoutAiConversationsInput = {
     where: AccountWhereUniqueInput
     create: XOR<AccountCreateWithoutAiConversationsInput, AccountUncheckedCreateWithoutAiConversationsInput>
-  }
-
-  export type AiMessageCreateWithoutConversationInput = {
-    id: string
-    role: string
-    content: string
-    tokenUsage?: string | null
-    createdAt?: Date | string
-    identity: AccountCreateNestedOneWithoutAiMessagesInput
-  }
-
-  export type AiMessageUncheckedCreateWithoutConversationInput = {
-    id: string
-    identityId: string
-    role: string
-    content: string
-    tokenUsage?: string | null
-    createdAt?: Date | string
-  }
-
-  export type AiMessageCreateOrConnectWithoutConversationInput = {
-    where: AiMessageWhereUniqueInput
-    create: XOR<AiMessageCreateWithoutConversationInput, AiMessageUncheckedCreateWithoutConversationInput>
-  }
-
-  export type AiMessageCreateManyConversationInputEnvelope = {
-    data: AiMessageCreateManyConversationInput | AiMessageCreateManyConversationInput[]
-    skipDuplicates?: boolean
   }
 
   export type AccountUpsertWithoutAiConversationsInput = {
@@ -146056,9 +140941,8 @@ export namespace Prisma {
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -146068,7 +140952,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -146109,285 +140992,8 @@ export namespace Prisma {
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
-    aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
-    aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
-    dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
-    taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
-    folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
-  }
-
-  export type AiMessageUpsertWithWhereUniqueWithoutConversationInput = {
-    where: AiMessageWhereUniqueInput
-    update: XOR<AiMessageUpdateWithoutConversationInput, AiMessageUncheckedUpdateWithoutConversationInput>
-    create: XOR<AiMessageCreateWithoutConversationInput, AiMessageUncheckedCreateWithoutConversationInput>
-  }
-
-  export type AiMessageUpdateWithWhereUniqueWithoutConversationInput = {
-    where: AiMessageWhereUniqueInput
-    data: XOR<AiMessageUpdateWithoutConversationInput, AiMessageUncheckedUpdateWithoutConversationInput>
-  }
-
-  export type AiMessageUpdateManyWithWhereWithoutConversationInput = {
-    where: AiMessageScalarWhereInput
-    data: XOR<AiMessageUpdateManyMutationInput, AiMessageUncheckedUpdateManyWithoutConversationInput>
-  }
-
-  export type AccountCreateWithoutAiMessagesInput = {
-    status?: string
-    profile: JsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    closedAt?: Date | string | null
-    cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    goals?: GoalCreateNestedManyWithoutAccountInput
-    labels?: LabelCreateNestedManyWithoutAccountInput
-    goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
-    taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
-    routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
-    routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
-    routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
-    routineProtocolSessions?: RoutineProtocolSessionCreateNestedManyWithoutAccountInput
-    repositories?: RepositoryCreateNestedManyWithoutAccountInput
-    repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
-    repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
-    schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
-    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
-    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    habits?: HabitCreateNestedManyWithoutAccountInput
-    relations?: RelationCreateNestedManyWithoutAccountInput
-    walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
-    walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
-    taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
-    notifications?: NotificationCreateNestedManyWithoutAccountInput
-    aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
-    aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
-    aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
-    dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
-    taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
-    routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    folders?: FolderCreateNestedManyWithoutIdentityInput
-    resources?: ResourceCreateNestedManyWithoutIdentityInput
-    repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
-  }
-
-  export type AccountUncheckedCreateWithoutAiMessagesInput = {
-    id: string
-    status?: string
-    profile: JsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    closedAt?: Date | string | null
-    goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
-    labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
-    goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
-    taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
-    routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
-    routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
-    routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
-    routineProtocolSessions?: RoutineProtocolSessionUncheckedCreateNestedManyWithoutAccountInput
-    repositories?: RepositoryUncheckedCreateNestedManyWithoutAccountInput
-    repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
-    repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
-    schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
-    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
-    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
-    relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
-    walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
-    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
-    taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
-    notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
-    aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
-    aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
-    aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
-    dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
-    taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
-    repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
-  }
-
-  export type AccountCreateOrConnectWithoutAiMessagesInput = {
-    where: AccountWhereUniqueInput
-    create: XOR<AccountCreateWithoutAiMessagesInput, AccountUncheckedCreateWithoutAiMessagesInput>
-  }
-
-  export type AiConversationCreateWithoutMessagesInput = {
-    id: string
-    name: string
-    status: string
-    messageCount?: number
-    lastMessageAt?: Date | string | null
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    account: AccountCreateNestedOneWithoutAiConversationsInput
-  }
-
-  export type AiConversationUncheckedCreateWithoutMessagesInput = {
-    id: string
-    identityId: string
-    name: string
-    status: string
-    messageCount?: number
-    lastMessageAt?: Date | string | null
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-  }
-
-  export type AiConversationCreateOrConnectWithoutMessagesInput = {
-    where: AiConversationWhereUniqueInput
-    create: XOR<AiConversationCreateWithoutMessagesInput, AiConversationUncheckedCreateWithoutMessagesInput>
-  }
-
-  export type AccountUpsertWithoutAiMessagesInput = {
-    update: XOR<AccountUpdateWithoutAiMessagesInput, AccountUncheckedUpdateWithoutAiMessagesInput>
-    create: XOR<AccountCreateWithoutAiMessagesInput, AccountUncheckedCreateWithoutAiMessagesInput>
-    where?: AccountWhereInput
-  }
-
-  export type AccountUpdateToOneWithWhereWithoutAiMessagesInput = {
-    where?: AccountWhereInput
-    data: XOR<AccountUpdateWithoutAiMessagesInput, AccountUncheckedUpdateWithoutAiMessagesInput>
-  }
-
-  export type AccountUpdateWithoutAiMessagesInput = {
-    status?: StringFieldUpdateOperationsInput | string
-    profile?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    goals?: GoalUpdateManyWithoutAccountNestedInput
-    labels?: LabelUpdateManyWithoutAccountNestedInput
-    goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
-    taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
-    routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
-    routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
-    routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
-    routineProtocolSessions?: RoutineProtocolSessionUpdateManyWithoutAccountNestedInput
-    repositories?: RepositoryUpdateManyWithoutAccountNestedInput
-    repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
-    repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
-    schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
-    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
-    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    habits?: HabitUpdateManyWithoutAccountNestedInput
-    relations?: RelationUpdateManyWithoutAccountNestedInput
-    walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
-    walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
-    taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
-    notifications?: NotificationUpdateManyWithoutAccountNestedInput
-    aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
-    aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
-    aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
-    dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
-    taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
-    routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    folders?: FolderUpdateManyWithoutIdentityNestedInput
-    resources?: ResourceUpdateManyWithoutIdentityNestedInput
-    repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
-  }
-
-  export type AccountUncheckedUpdateWithoutAiMessagesInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    profile?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
-    labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
-    goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
-    taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
-    routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
-    routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
-    routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
-    routineProtocolSessions?: RoutineProtocolSessionUncheckedUpdateManyWithoutAccountNestedInput
-    repositories?: RepositoryUncheckedUpdateManyWithoutAccountNestedInput
-    repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
-    repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
-    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
-    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
-    relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
-    walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
-    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
-    taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
-    notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
-    aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -146405,44 +141011,7 @@ export namespace Prisma {
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
 
-  export type AiConversationUpsertWithoutMessagesInput = {
-    update: XOR<AiConversationUpdateWithoutMessagesInput, AiConversationUncheckedUpdateWithoutMessagesInput>
-    create: XOR<AiConversationCreateWithoutMessagesInput, AiConversationUncheckedCreateWithoutMessagesInput>
-    where?: AiConversationWhereInput
-  }
-
-  export type AiConversationUpdateToOneWithWhereWithoutMessagesInput = {
-    where?: AiConversationWhereInput
-    data: XOR<AiConversationUpdateWithoutMessagesInput, AiConversationUncheckedUpdateWithoutMessagesInput>
-  }
-
-  export type AiConversationUpdateWithoutMessagesInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    messageCount?: IntFieldUpdateOperationsInput | number
-    lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    account?: AccountUpdateOneRequiredWithoutAiConversationsNestedInput
-  }
-
-  export type AiConversationUncheckedUpdateWithoutMessagesInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    messageCount?: IntFieldUpdateOperationsInput | number
-    lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type AccountCreateWithoutAiGenerationTasksInput = {
+  export type AccountCreateWithoutAiExecutionRecordsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
@@ -146476,7 +141045,6 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -146486,7 +141054,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -146495,7 +141062,7 @@ export namespace Prisma {
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
 
-  export type AccountUncheckedCreateWithoutAiGenerationTasksInput = {
+  export type AccountUncheckedCreateWithoutAiExecutionRecordsInput = {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
@@ -146529,7 +141096,6 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -146539,7 +141105,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -146548,23 +141113,23 @@ export namespace Prisma {
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
 
-  export type AccountCreateOrConnectWithoutAiGenerationTasksInput = {
+  export type AccountCreateOrConnectWithoutAiExecutionRecordsInput = {
     where: AccountWhereUniqueInput
-    create: XOR<AccountCreateWithoutAiGenerationTasksInput, AccountUncheckedCreateWithoutAiGenerationTasksInput>
+    create: XOR<AccountCreateWithoutAiExecutionRecordsInput, AccountUncheckedCreateWithoutAiExecutionRecordsInput>
   }
 
-  export type AccountUpsertWithoutAiGenerationTasksInput = {
-    update: XOR<AccountUpdateWithoutAiGenerationTasksInput, AccountUncheckedUpdateWithoutAiGenerationTasksInput>
-    create: XOR<AccountCreateWithoutAiGenerationTasksInput, AccountUncheckedCreateWithoutAiGenerationTasksInput>
+  export type AccountUpsertWithoutAiExecutionRecordsInput = {
+    update: XOR<AccountUpdateWithoutAiExecutionRecordsInput, AccountUncheckedUpdateWithoutAiExecutionRecordsInput>
+    create: XOR<AccountCreateWithoutAiExecutionRecordsInput, AccountUncheckedCreateWithoutAiExecutionRecordsInput>
     where?: AccountWhereInput
   }
 
-  export type AccountUpdateToOneWithWhereWithoutAiGenerationTasksInput = {
+  export type AccountUpdateToOneWithWhereWithoutAiExecutionRecordsInput = {
     where?: AccountWhereInput
-    data: XOR<AccountUpdateWithoutAiGenerationTasksInput, AccountUncheckedUpdateWithoutAiGenerationTasksInput>
+    data: XOR<AccountUpdateWithoutAiExecutionRecordsInput, AccountUncheckedUpdateWithoutAiExecutionRecordsInput>
   }
 
-  export type AccountUpdateWithoutAiGenerationTasksInput = {
+  export type AccountUpdateWithoutAiExecutionRecordsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -146598,7 +141163,6 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -146608,7 +141172,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -146617,7 +141180,7 @@ export namespace Prisma {
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
 
-  export type AccountUncheckedUpdateWithoutAiGenerationTasksInput = {
+  export type AccountUncheckedUpdateWithoutAiExecutionRecordsInput = {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
@@ -146651,7 +141214,6 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -146661,235 +141223,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
-    folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
-  }
-
-  export type AccountCreateWithoutAiUsageQuotasInput = {
-    status?: string
-    profile: JsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    closedAt?: Date | string | null
-    cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    goals?: GoalCreateNestedManyWithoutAccountInput
-    labels?: LabelCreateNestedManyWithoutAccountInput
-    goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
-    taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
-    routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
-    routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
-    routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
-    routineProtocolSessions?: RoutineProtocolSessionCreateNestedManyWithoutAccountInput
-    repositories?: RepositoryCreateNestedManyWithoutAccountInput
-    repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
-    repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
-    schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
-    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
-    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
-    habits?: HabitCreateNestedManyWithoutAccountInput
-    relations?: RelationCreateNestedManyWithoutAccountInput
-    walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
-    walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
-    taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
-    notifications?: NotificationCreateNestedManyWithoutAccountInput
-    aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
-    aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
-    dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
-    taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
-    routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
-    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
-    folders?: FolderCreateNestedManyWithoutIdentityInput
-    resources?: ResourceCreateNestedManyWithoutIdentityInput
-    repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
-  }
-
-  export type AccountUncheckedCreateWithoutAiUsageQuotasInput = {
-    id: string
-    status?: string
-    profile: JsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    closedAt?: Date | string | null
-    goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
-    labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
-    goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
-    taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
-    routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
-    routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
-    routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
-    routineProtocolSessions?: RoutineProtocolSessionUncheckedCreateNestedManyWithoutAccountInput
-    repositories?: RepositoryUncheckedCreateNestedManyWithoutAccountInput
-    repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
-    repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
-    schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
-    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
-    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
-    habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
-    relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
-    walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
-    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
-    taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
-    notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
-    aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
-    aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
-    dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
-    taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
-    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
-    folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
-    repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
-  }
-
-  export type AccountCreateOrConnectWithoutAiUsageQuotasInput = {
-    where: AccountWhereUniqueInput
-    create: XOR<AccountCreateWithoutAiUsageQuotasInput, AccountUncheckedCreateWithoutAiUsageQuotasInput>
-  }
-
-  export type AccountUpsertWithoutAiUsageQuotasInput = {
-    update: XOR<AccountUpdateWithoutAiUsageQuotasInput, AccountUncheckedUpdateWithoutAiUsageQuotasInput>
-    create: XOR<AccountCreateWithoutAiUsageQuotasInput, AccountUncheckedCreateWithoutAiUsageQuotasInput>
-    where?: AccountWhereInput
-  }
-
-  export type AccountUpdateToOneWithWhereWithoutAiUsageQuotasInput = {
-    where?: AccountWhereInput
-    data: XOR<AccountUpdateWithoutAiUsageQuotasInput, AccountUncheckedUpdateWithoutAiUsageQuotasInput>
-  }
-
-  export type AccountUpdateWithoutAiUsageQuotasInput = {
-    status?: StringFieldUpdateOperationsInput | string
-    profile?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    goals?: GoalUpdateManyWithoutAccountNestedInput
-    labels?: LabelUpdateManyWithoutAccountNestedInput
-    goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
-    taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
-    routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
-    routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
-    routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
-    routineProtocolSessions?: RoutineProtocolSessionUpdateManyWithoutAccountNestedInput
-    repositories?: RepositoryUpdateManyWithoutAccountNestedInput
-    repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
-    repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
-    schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
-    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
-    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
-    habits?: HabitUpdateManyWithoutAccountNestedInput
-    relations?: RelationUpdateManyWithoutAccountNestedInput
-    walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
-    walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
-    taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
-    notifications?: NotificationUpdateManyWithoutAccountNestedInput
-    aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
-    aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
-    dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
-    taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
-    routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
-    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
-    folders?: FolderUpdateManyWithoutIdentityNestedInput
-    resources?: ResourceUpdateManyWithoutIdentityNestedInput
-    repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
-  }
-
-  export type AccountUncheckedUpdateWithoutAiUsageQuotasInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    profile?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
-    labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
-    goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
-    taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
-    routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
-    routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
-    routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
-    routineProtocolSessions?: RoutineProtocolSessionUncheckedUpdateManyWithoutAccountNestedInput
-    repositories?: RepositoryUncheckedUpdateManyWithoutAccountNestedInput
-    repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
-    repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
-    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
-    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
-    habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
-    relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
-    walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
-    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
-    taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
-    notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
-    aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
-    aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
-    dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
-    taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
-    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -146931,9 +141264,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
@@ -146942,7 +141274,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -146984,9 +141315,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
@@ -146995,7 +141325,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -147053,9 +141382,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
@@ -147064,7 +141392,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -147106,9 +141433,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
@@ -147117,7 +141443,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -147159,9 +141484,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
@@ -147170,7 +141494,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -147212,9 +141535,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
@@ -147223,7 +141545,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -147281,9 +141602,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
@@ -147292,7 +141612,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -147334,9 +141653,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
@@ -147345,7 +141663,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -147387,9 +141704,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
@@ -147398,7 +141714,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -147440,9 +141755,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
@@ -147451,7 +141765,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -147509,9 +141822,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
@@ -147520,7 +141832,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -147562,9 +141873,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
@@ -147573,7 +141883,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -147615,8 +141924,7 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -147626,7 +141934,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -147668,8 +141975,7 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -147679,7 +141985,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -147737,8 +142042,7 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -147748,7 +142052,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -147790,8 +142093,7 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -147801,7 +142103,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -147843,9 +142144,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -147854,7 +142154,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -147896,9 +142195,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -147907,7 +142205,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -147965,9 +142262,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -147976,7 +142272,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -148018,9 +142313,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -148029,7 +142323,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -148174,9 +142467,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -148186,7 +142478,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -148227,9 +142518,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -148239,7 +142529,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -148393,9 +142682,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -148405,7 +142693,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -148446,9 +142733,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -148458,7 +142744,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -148715,9 +143000,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -148727,7 +143011,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -148768,9 +143051,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -148780,7 +143062,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -148976,9 +143257,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -148988,7 +143268,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -149029,9 +143308,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -149041,7 +143319,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -150062,9 +144339,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -150074,7 +144350,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -150115,9 +144390,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -150127,7 +144401,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -150233,9 +144506,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -150245,7 +144517,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -150286,9 +144557,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -150298,7 +144568,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -150641,9 +144910,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -150653,7 +144921,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -150694,9 +144961,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -150706,7 +144972,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -150801,9 +145066,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -150813,7 +145077,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -150854,9 +145117,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -150866,7 +145128,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -150939,9 +145200,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -150951,7 +145211,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -150992,9 +145251,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -151004,7 +145262,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -151137,9 +145394,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -151149,7 +145405,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -151190,9 +145445,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -151202,7 +145456,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -151331,9 +145584,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -151343,7 +145595,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -151384,9 +145635,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -151396,7 +145646,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -151538,9 +145787,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -151550,7 +145798,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -151591,9 +145838,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -151603,7 +145849,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -151875,9 +146120,8 @@ export namespace Prisma {
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -151887,7 +146131,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -151928,9 +146171,8 @@ export namespace Prisma {
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -151940,7 +146182,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -152061,9 +146302,8 @@ export namespace Prisma {
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -152073,7 +146313,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -152114,9 +146353,8 @@ export namespace Prisma {
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -152126,7 +146364,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -152168,9 +146405,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -152179,7 +146415,6 @@ export namespace Prisma {
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -152221,9 +146456,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -152232,7 +146466,6 @@ export namespace Prisma {
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -152357,9 +146590,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -152368,7 +146600,6 @@ export namespace Prisma {
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -152410,9 +146641,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -152421,7 +146651,6 @@ export namespace Prisma {
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -152743,9 +146972,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -152754,7 +146982,6 @@ export namespace Prisma {
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -152796,9 +147023,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -152807,7 +147033,6 @@ export namespace Prisma {
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -152938,9 +147163,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -152949,7 +147173,6 @@ export namespace Prisma {
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -152991,9 +147214,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -153002,7 +147224,6 @@ export namespace Prisma {
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -153043,9 +147264,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -153055,7 +147275,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -153096,9 +147315,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -153108,7 +147326,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -153165,9 +147382,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -153177,7 +147393,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -153218,9 +147433,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -153230,7 +147444,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -153271,9 +147484,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -153283,7 +147495,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -153324,9 +147535,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -153336,7 +147546,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -153550,9 +147759,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -153562,7 +147770,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -153603,9 +147810,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -153615,7 +147821,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -153730,9 +147935,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -153742,7 +147946,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -153783,9 +147986,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -153795,7 +147997,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -153879,9 +148080,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -153891,7 +148091,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -153932,9 +148131,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -153944,7 +148142,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -154001,9 +148198,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -154013,7 +148209,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -154054,9 +148249,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -154066,7 +148260,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -154185,9 +148378,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -154197,7 +148389,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -154238,9 +148429,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -154250,7 +148440,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -154365,9 +148554,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -154377,7 +148565,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -154418,9 +148605,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -154430,7 +148616,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -154522,9 +148707,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -154534,7 +148718,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -154575,9 +148758,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -154587,7 +148769,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -154644,9 +148825,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -154656,7 +148836,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -154697,9 +148876,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -154709,7 +148887,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -154791,9 +148968,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -154803,7 +148979,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -154844,9 +149019,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -154856,7 +149030,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -154964,9 +149137,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -154975,7 +149147,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -155017,9 +149188,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -155028,7 +149198,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -155161,9 +149330,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -155172,7 +149340,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -155214,9 +149381,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -155225,7 +149391,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -155283,9 +149448,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -155294,7 +149458,6 @@ export namespace Prisma {
     routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -155336,9 +149499,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -155347,7 +149509,6 @@ export namespace Prisma {
     routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -155511,9 +149672,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -155522,7 +149682,6 @@ export namespace Prisma {
     routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -155564,9 +149723,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -155575,7 +149733,6 @@ export namespace Prisma {
     routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -155769,9 +149926,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -155781,7 +149937,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -155822,9 +149977,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -155834,7 +149988,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -155932,9 +150085,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -155944,7 +150096,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -155985,9 +150136,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -155997,7 +150147,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -156038,9 +150187,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -156050,7 +150198,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -156091,9 +150238,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -156103,7 +150249,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -156348,9 +150493,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -156360,7 +150504,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -156401,9 +150544,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -156413,7 +150555,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -156519,9 +150660,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -156531,7 +150671,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
     knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
@@ -156572,9 +150711,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -156584,7 +150722,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
     knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
@@ -156763,9 +150900,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -156775,7 +150911,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
     knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
@@ -156816,9 +150951,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -156828,7 +150962,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
     knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
@@ -156981,9 +151114,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -156993,7 +151125,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
     knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
@@ -157034,9 +151165,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -157046,7 +151176,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
     knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
@@ -157154,9 +151283,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -157166,7 +151294,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
     knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
@@ -157207,9 +151334,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -157219,7 +151345,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
     knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
@@ -157359,9 +151484,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -157371,7 +151495,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
@@ -157412,9 +151535,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -157424,7 +151546,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
@@ -157628,9 +151749,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -157640,7 +151760,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
@@ -157681,9 +151800,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -157693,7 +151811,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
@@ -158148,9 +152265,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -158160,7 +152276,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -158201,9 +152316,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -158213,7 +152327,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -158321,9 +152434,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -158333,7 +152445,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -158374,9 +152485,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -158386,7 +152496,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -158484,9 +152593,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -158496,7 +152604,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -158537,9 +152644,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -158549,7 +152655,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -158606,9 +152711,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -158618,7 +152722,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -158659,9 +152762,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -158671,7 +152773,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -158713,9 +152814,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -158725,7 +152825,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -158766,9 +152865,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -158778,7 +152876,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -158835,9 +152932,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -158847,7 +152943,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -158888,9 +152983,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -158900,7 +152994,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -159127,9 +153220,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -159139,7 +153231,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -159180,9 +153271,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -159192,7 +153282,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -159541,9 +153630,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -159553,7 +153641,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -159594,9 +153681,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -159606,7 +153692,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -160556,9 +154641,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -160568,7 +154652,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -160609,9 +154692,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -160621,7 +154703,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -160723,9 +154804,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -160735,7 +154815,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -160776,9 +154855,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -160788,7 +154866,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -160879,9 +154956,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -160891,7 +154967,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -160932,9 +155007,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -160944,7 +155018,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -161001,9 +155074,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -161013,7 +155085,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -161054,9 +155125,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -161066,7 +155136,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -161107,9 +155176,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -161119,7 +155187,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -161160,9 +155227,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -161172,7 +155238,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -161273,9 +155338,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -161285,7 +155349,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -161326,9 +155389,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -161338,7 +155400,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -161395,9 +155456,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -161407,7 +155467,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -161448,9 +155507,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -161460,7 +155518,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -161582,9 +155639,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -161594,7 +155650,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -161635,9 +155690,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -161647,7 +155701,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -161759,9 +155812,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -161771,7 +155823,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -161812,9 +155863,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -161824,7 +155874,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -161881,9 +155930,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -161893,7 +155941,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -161934,9 +155981,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -161946,7 +155992,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -161987,9 +156032,8 @@ export namespace Prisma {
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -161999,7 +156043,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -162040,9 +156083,8 @@ export namespace Prisma {
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -162052,7 +156094,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -162109,9 +156150,8 @@ export namespace Prisma {
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -162121,7 +156161,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -162162,9 +156201,8 @@ export namespace Prisma {
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -162174,7 +156212,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -162215,9 +156252,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -162227,7 +156263,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -162268,9 +156303,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -162280,7 +156314,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -162474,9 +156507,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -162486,7 +156518,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -162527,9 +156558,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -162539,7 +156569,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -162682,9 +156711,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -162694,7 +156722,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -162735,9 +156762,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -162747,7 +156773,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -162862,9 +156887,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -162874,7 +156898,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -162915,9 +156938,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -162927,7 +156949,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -163033,9 +157054,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -163044,7 +157064,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -163086,9 +157105,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -163097,7 +157115,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -163213,9 +157230,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -163224,7 +157240,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -163266,9 +157281,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -163277,7 +157291,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -163382,9 +157395,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -163394,7 +157406,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -163435,9 +157446,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -163447,7 +157457,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -163538,9 +157547,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -163550,7 +157558,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -163591,9 +157598,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -163603,7 +157609,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -163685,9 +157690,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
@@ -163697,7 +157701,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
@@ -163738,9 +157741,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
     aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
     aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
@@ -163750,7 +157752,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
     notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
@@ -163838,9 +157839,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
@@ -163850,7 +157850,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
@@ -163891,9 +157890,8 @@ export namespace Prisma {
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
@@ -163903,7 +157901,6 @@ export namespace Prisma {
     routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
     notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
     notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
@@ -164249,36 +158246,29 @@ export namespace Prisma {
     id: string
     name: string
     status: string
-    messageCount?: number
-    lastMessageAt?: Date | string | null
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
   }
 
-  export type AiGenerationTaskCreateManyAccountInput = {
+  export type AiExecutionRecordCreateManyAccountInput = {
     id: string
-    taskType: string
-    status: string
+    operation: string
+    outcome: string
     conversationId?: string | null
     runId?: string | null
     requestId?: string | null
     traceId?: string | null
-    providerId?: string | null
-    model?: string | null
+    providerConnectionId?: string | null
+    modelId?: string | null
+    errorCategory?: string | null
+    safeError?: string | null
     estimatedCostUsd?: number | null
-    input: string
-    result?: string | null
-    error?: string | null
-    retryCount?: number
     tokenUsage?: string | null
-    processingMs?: number | null
-    version?: number
+    latencyMs?: number | null
     createdAt?: Date | string
-    updatedAt?: Date | string
-    completedAt?: Date | string | null
-    deletedAt?: Date | string | null
+    completedAt?: Date | string
   }
 
   export type AiKnowledgeIndexEntryCreateManyAccountInput = {
@@ -164436,15 +158426,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     finishedAt?: Date | string | null
-  }
-
-  export type AiMessageCreateManyIdentityInput = {
-    id: string
-    conversationId: string
-    role: string
-    content: string
-    tokenUsage?: string | null
-    createdAt?: Date | string
   }
 
   export type FolderCreateManyIdentityInput = {
@@ -165609,110 +159590,87 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
-    messageCount?: IntFieldUpdateOperationsInput | number
-    lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    messages?: AiMessageUpdateManyWithoutConversationNestedInput
   }
 
   export type AiConversationUncheckedUpdateWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
-    messageCount?: IntFieldUpdateOperationsInput | number
-    lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    messages?: AiMessageUncheckedUpdateManyWithoutConversationNestedInput
   }
 
   export type AiConversationUncheckedUpdateManyWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
-    messageCount?: IntFieldUpdateOperationsInput | number
-    lastMessageAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type AiGenerationTaskUpdateWithoutAccountInput = {
+  export type AiExecutionRecordUpdateWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
-    taskType?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    operation?: StringFieldUpdateOperationsInput | string
+    outcome?: StringFieldUpdateOperationsInput | string
     conversationId?: NullableStringFieldUpdateOperationsInput | string | null
     runId?: NullableStringFieldUpdateOperationsInput | string | null
     requestId?: NullableStringFieldUpdateOperationsInput | string | null
     traceId?: NullableStringFieldUpdateOperationsInput | string | null
-    providerId?: NullableStringFieldUpdateOperationsInput | string | null
-    model?: NullableStringFieldUpdateOperationsInput | string | null
+    providerConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
+    modelId?: NullableStringFieldUpdateOperationsInput | string | null
+    errorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    safeError?: NullableStringFieldUpdateOperationsInput | string | null
     estimatedCostUsd?: NullableFloatFieldUpdateOperationsInput | number | null
-    input?: StringFieldUpdateOperationsInput | string
-    result?: NullableStringFieldUpdateOperationsInput | string | null
-    error?: NullableStringFieldUpdateOperationsInput | string | null
-    retryCount?: IntFieldUpdateOperationsInput | number
     tokenUsage?: NullableStringFieldUpdateOperationsInput | string | null
-    processingMs?: NullableIntFieldUpdateOperationsInput | number | null
-    version?: IntFieldUpdateOperationsInput | number
+    latencyMs?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type AiGenerationTaskUncheckedUpdateWithoutAccountInput = {
+  export type AiExecutionRecordUncheckedUpdateWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
-    taskType?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    operation?: StringFieldUpdateOperationsInput | string
+    outcome?: StringFieldUpdateOperationsInput | string
     conversationId?: NullableStringFieldUpdateOperationsInput | string | null
     runId?: NullableStringFieldUpdateOperationsInput | string | null
     requestId?: NullableStringFieldUpdateOperationsInput | string | null
     traceId?: NullableStringFieldUpdateOperationsInput | string | null
-    providerId?: NullableStringFieldUpdateOperationsInput | string | null
-    model?: NullableStringFieldUpdateOperationsInput | string | null
+    providerConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
+    modelId?: NullableStringFieldUpdateOperationsInput | string | null
+    errorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    safeError?: NullableStringFieldUpdateOperationsInput | string | null
     estimatedCostUsd?: NullableFloatFieldUpdateOperationsInput | number | null
-    input?: StringFieldUpdateOperationsInput | string
-    result?: NullableStringFieldUpdateOperationsInput | string | null
-    error?: NullableStringFieldUpdateOperationsInput | string | null
-    retryCount?: IntFieldUpdateOperationsInput | number
     tokenUsage?: NullableStringFieldUpdateOperationsInput | string | null
-    processingMs?: NullableIntFieldUpdateOperationsInput | number | null
-    version?: IntFieldUpdateOperationsInput | number
+    latencyMs?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type AiGenerationTaskUncheckedUpdateManyWithoutAccountInput = {
+  export type AiExecutionRecordUncheckedUpdateManyWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
-    taskType?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    operation?: StringFieldUpdateOperationsInput | string
+    outcome?: StringFieldUpdateOperationsInput | string
     conversationId?: NullableStringFieldUpdateOperationsInput | string | null
     runId?: NullableStringFieldUpdateOperationsInput | string | null
     requestId?: NullableStringFieldUpdateOperationsInput | string | null
     traceId?: NullableStringFieldUpdateOperationsInput | string | null
-    providerId?: NullableStringFieldUpdateOperationsInput | string | null
-    model?: NullableStringFieldUpdateOperationsInput | string | null
+    providerConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
+    modelId?: NullableStringFieldUpdateOperationsInput | string | null
+    errorCategory?: NullableStringFieldUpdateOperationsInput | string | null
+    safeError?: NullableStringFieldUpdateOperationsInput | string | null
     estimatedCostUsd?: NullableFloatFieldUpdateOperationsInput | number | null
-    input?: StringFieldUpdateOperationsInput | string
-    result?: NullableStringFieldUpdateOperationsInput | string | null
-    error?: NullableStringFieldUpdateOperationsInput | string | null
-    retryCount?: IntFieldUpdateOperationsInput | number
     tokenUsage?: NullableStringFieldUpdateOperationsInput | string | null
-    processingMs?: NullableIntFieldUpdateOperationsInput | number | null
-    version?: IntFieldUpdateOperationsInput | number
+    latencyMs?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type AiKnowledgeIndexEntryUpdateWithoutAccountInput = {
@@ -166188,33 +160146,6 @@ export namespace Prisma {
     finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type AiMessageUpdateWithoutIdentityInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    tokenUsage?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    conversation?: AiConversationUpdateOneRequiredWithoutMessagesNestedInput
-  }
-
-  export type AiMessageUncheckedUpdateWithoutIdentityInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    conversationId?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    tokenUsage?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type AiMessageUncheckedUpdateManyWithoutIdentityInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    conversationId?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    tokenUsage?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
   export type FolderUpdateWithoutIdentityInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
@@ -166561,42 +160492,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type AiMessageCreateManyConversationInput = {
-    id: string
-    identityId: string
-    role: string
-    content: string
-    tokenUsage?: string | null
-    createdAt?: Date | string
-  }
-
-  export type AiMessageUpdateWithoutConversationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    tokenUsage?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    identity?: AccountUpdateOneRequiredWithoutAiMessagesNestedInput
-  }
-
-  export type AiMessageUncheckedUpdateWithoutConversationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    tokenUsage?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type AiMessageUncheckedUpdateManyWithoutConversationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
-    content?: StringFieldUpdateOperationsInput | string
-    tokenUsage?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type CloudAuthSessionCreateManyUserInput = {

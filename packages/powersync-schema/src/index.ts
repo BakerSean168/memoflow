@@ -619,59 +619,32 @@ const ai_conversations = new Table({
   identity_id: column.text,
   name: column.text,
   status: column.text,
-  message_count: column.integer,
-  last_message_at: column.text,
   version: column.integer,
   created_at: column.text,
   updated_at: column.text,
   deleted_at: column.text,
 });
 
-const ai_messages = new Table({
-  identity_id: column.text,
-  conversation_id: column.text, // FK
-  role: column.text,
-  content: column.text,
-  token_usage: column.text, // JSON
-  created_at: column.text,
-});
 
-const ai_generation_tasks = new Table({
+const ai_execution_records = new Table({
   identity_id: column.text,
-  task_type: column.text,
-  status: column.text,
+  operation: column.text,
+  outcome: column.text,
   conversation_id: column.text,
   run_id: column.text,
   request_id: column.text,
   trace_id: column.text,
-  provider_id: column.text,
-  model: column.text,
+  provider_connection_id: column.text,
+  model_id: column.text,
+  error_category: column.text,
+  safe_error: column.text,
   estimated_cost_usd: column.real,
-  input: column.text, // JSON
-  result: column.text, // JSON
-  error: column.text,
-  retry_count: column.integer,
-  token_usage: column.text, // JSON
-  processing_ms: column.integer,
-  version: column.integer,
+  token_usage: column.text,
+  latency_ms: column.integer,
   created_at: column.text,
-  updated_at: column.text,
   completed_at: column.text,
-  deleted_at: column.text,
 });
 
-const ai_usage_quotas = new Table({
-  identity_id: column.text,
-  quota_limit: column.integer,
-  current_usage: column.integer,
-  reset_period: column.text,
-  last_reset_at: column.text,
-  next_reset_at: column.text,
-  version: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-  deleted_at: column.text,
-});
 
 /**
  * Desktop provider connections are host-local while credentials are host-local.
@@ -983,9 +956,7 @@ export const PowerSyncAppSchema = new Schema({
   // Editor
   // AI
   ai_conversations,
-  ai_messages,
-  ai_generation_tasks,
-  ai_usage_quotas,
+  ai_execution_records,
   ai_provider_configs,
   ai_provider_onboarding_sessions,
   ai_provider_secrets,

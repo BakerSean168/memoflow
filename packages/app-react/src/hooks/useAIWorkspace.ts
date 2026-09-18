@@ -1,13 +1,11 @@
 import { useEffect, useState } from 'react';
 
 import {
-  MessageRole,
   type AICapabilities,
   type AIConversationClientDTO,
   type AIProviderConfigClientDTO,
   type AssistantRuntimeHistoryView,
   type AssistantRuntimeMessageView,
-  type MessageClientDTO,
 } from '@memoflow/contracts/ai';
 import { unwrap } from '@memoflow/contracts/result';
 import { presentErrorMessage } from '@memoflow/http-client';
@@ -24,26 +22,32 @@ function formatMessageTime(timestamp: number) {
   return getProductTime().format.hm(timestamp);
 }
 
-function toMessageClientDTO(message: AssistantRuntimeMessageView): MessageClientDTO {
-  const role =
-    message.role === 'user'
-      ? MessageRole.User
-      : message.role === 'system'
-        ? MessageRole.System
-        : MessageRole.Assistant;
+type AIWorkspaceMessage = {
+  id: string;
+  conversationId: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  createdAt: number;
+  isUser: boolean;
+  isAssistant: boolean;
+  isSystem: boolean;
+  formattedTime: string;
+};
+
+type AIWorkspaceConversation = AIConversationClientDTO & {
+  messages: AIWorkspaceMessage[];
+};
+
+function toWorkspaceMessage(message: AssistantRuntimeMessageView): AIWorkspaceMessage {
   return {
-    id: message.id as MessageClientDTO['id'],
-    conversationId: message.conversationId as MessageClientDTO['conversationId'],
-    role,
+    id: message.id,
+    conversationId: message.conversationId,
+    role: message.role,
     content: message.content,
-    tokenCount: null,
-    version: 1,
     createdAt: message.createdAt,
-    updatedAt: message.createdAt,
-    deletedAt: null,
-    isUser: role === MessageRole.User,
-    isAssistant: role === MessageRole.Assistant,
-    isSystem: role === MessageRole.System,
+    isUser: message.role === 'user',
+    isAssistant: message.role === 'assistant',
+    isSystem: message.role === 'system',
     formattedTime: formatMessageTime(message.createdAt),
   };
 }
@@ -51,14 +55,8 @@ function toMessageClientDTO(message: AssistantRuntimeMessageView): MessageClient
 function withRuntimeHistory(
   shell: AIConversationClientDTO,
   history: AssistantRuntimeHistoryView,
-): AIConversationClientDTO {
-  const messages = history.messages.map(toMessageClientDTO);
-  return {
-    ...shell,
-    messages,
-    messageCount: messages.length,
-    lastMessageAt: messages[messages.length - 1]?.createdAt ?? shell.lastMessageAt,
-  };
+): AIWorkspaceConversation {
+  return { ...shell, messages: history.messages.map(toWorkspaceMessage) };
 }
 
 /** Mobile projection of the canonical Mastra Assistant runtime. */
@@ -66,7 +64,7 @@ export function useAIWorkspace() {
   const { aiClient, aiAssistantRuntime: runtime } = useAppClientRegistry();
   const { isRemoteAuthenticated } = useAppSession();
   const [conversations, setConversations] = useState<AIConversationClientDTO[]>([]);
-  const [activeConversation, setActiveConversation] = useState<AIConversationClientDTO | null>(null);
+  const [activeConversation, setActiveConversation] = useState<AIWorkspaceConversation | null>(null);
   const [providers, setProviders] = useState<AIProviderConfigClientDTO[]>([]);
   const [capabilities, setCapabilities] = useState<AICapabilities | null>(null);
   const [selectedProviderId, setSelectedProviderId] = useState<string | null>(null);
@@ -91,7 +89,7 @@ export function useAIWorkspace() {
     setSelectedModel(preferred?.defaultModel ?? null);
   }
 
-  async function fetchConversation(id: string): Promise<AIConversationClientDTO> {
+  async function fetchConversation(id: string): Promise<AIWorkspaceConversation> {
     const [shellResult, history] = await Promise.all([
       aiClient.getConversation(id),
       runtime.listMessages(id),
@@ -221,31 +219,23 @@ export function useAIWorkspace() {
         );
       const conversationId = String(shell.id);
       const timestamp = Date.now();
-      const optimisticUser: MessageClientDTO = {
-        id: `draft-user-${timestamp}` as MessageClientDTO['id'],
-        conversationId: shell.id,
-        role: MessageRole.User,
+      const optimisticUser: AIWorkspaceMessage = {
+        id: `draft-user-${timestamp}`,
+        conversationId,
+        role: 'user',
         content,
-        tokenCount: null,
-        version: 0,
         createdAt: timestamp,
-        updatedAt: timestamp,
-        deletedAt: null,
         isUser: true,
         isAssistant: false,
         isSystem: false,
         formattedTime: formatMessageTime(timestamp),
       };
-      const optimisticAssistant: MessageClientDTO = {
-        id: `draft-assistant-${timestamp}` as MessageClientDTO['id'],
-        conversationId: shell.id,
-        role: MessageRole.Assistant,
+      const optimisticAssistant: AIWorkspaceMessage = {
+        id: `draft-assistant-${timestamp}`,
+        conversationId,
+        role: 'assistant',
         content: '',
-        tokenCount: null,
-        version: 0,
         createdAt: timestamp,
-        updatedAt: timestamp,
-        deletedAt: null,
         isUser: false,
         isAssistant: true,
         isSystem: false,
@@ -254,8 +244,6 @@ export function useAIWorkspace() {
       setActiveConversation({
         ...shell,
         messages: [...(activeConversation?.messages ?? []), optimisticUser, optimisticAssistant],
-        messageCount: (activeConversation?.messages?.length ?? 0) + 2,
-        lastMessageAt: timestamp,
       });
 
       let runtimeFailure: string | null = null;
@@ -290,7 +278,7 @@ export function useAIWorkspace() {
                 if (!last?.isAssistant) return current;
                 messages[messages.length - 1] = {
                   ...last,
-                  id: (event.data.assistantMessageId ?? last.id) as MessageClientDTO['id'],
+                  id: event.data.assistantMessageId ?? last.id,
                   content: event.data.content || last.content,
                 };
                 return { ...current, messages };

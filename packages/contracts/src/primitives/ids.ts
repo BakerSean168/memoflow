@@ -84,12 +84,6 @@ export type NotificationInteractionId = string & { readonly __brand: 'Notificati
 /** AI 对话 ID */
 export type AiConversationId = string & { readonly __brand: 'AiConversationId' };
 
-/** AI 消息 ID */
-export type AiMessageId = string & { readonly __brand: 'AiMessageId' };
-
-/** AI 生成任务 ID */
-export type AiGenerationTaskId = string & { readonly __brand: 'AiGenerationTaskId' };
-
 /** 同步配置 ID */
 export type SyncProfileId = string & { readonly __brand: 'SyncProfileId' };
 
@@ -131,9 +125,6 @@ export type AiProviderConnectionId = AiProviderConfigId;
 
 /** Opaque reference into the host-owned provider SecretVault. */
 export type AIProviderCredentialRef = string & { readonly __brand: 'AIProviderCredentialRef' };
-
-/** AI 使用配额 ID */
-export type AiUsageQuotaId = string & { readonly __brand: 'AiUsageQuotaId' };
 
 /** 治理规则 ID */
 export type RuleId = string & { readonly __brand: 'RuleId' };
@@ -197,10 +188,7 @@ export const ID_PREFIXES = {
 
   // === AI ===
   AiConversationId: 'IAiConversationId',
-  AiMessageId: 'IAiMessageId',
-  AiGenerationTaskId: 'IAiGenerationTaskId',
   AiProviderConfigId: 'IAiProviderConfigId',
-  AiUsageQuotaId: 'IAiUsageQuotaId',
 
   // === Governance ===
   RuleId: 'RuleId',

@@ -186,7 +186,6 @@ export function AIScreen() {
                     <ThemedText type="smallBold">{conversation.name}</ThemedText>
                     <View style={styles.pillRow}>
                       <StatusPill label={conversation.status} tone="tint" />
-                      <StatusPill label={`${conversation.messageCount} messages`} tone="textSecondary" />
                     </View>
                     <PrimaryButton
                       label={activeConversation?.id === conversation.id ? 'Active conversation' : 'Open conversation'}

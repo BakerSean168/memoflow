@@ -7,7 +7,7 @@ import {
   type KnowledgeDraft,
   type KnowledgeCaptureDecision,
 } from '@memoflow/contracts/ai';
-import type { IAIExecutionLogPort } from '../../application/ports';
+import type { IAIExecutionRecordPort } from '../../application/ports';
 import type { MastraModelResolver } from '../models/model-resolver';
 import {
   aiContextInstruction,
@@ -59,7 +59,7 @@ export class KnowledgeCapturePlannerWorker implements KnowledgeCapturePlannerPor
 
   constructor(
     modelResolver: MastraModelResolver,
-    private readonly executionLogPort: IAIExecutionLogPort | undefined,
+    private readonly executionRecordPort: IAIExecutionRecordPort | undefined,
     private readonly contextAssembler: AIContextAssemblerPort,
   ) {
     this.agent = new Agent({
@@ -161,7 +161,7 @@ export class KnowledgeCapturePlannerWorker implements KnowledgeCapturePlannerPor
         structuredOutput: { schema: KnowledgeCaptureDecisionSchema },
       });
       const decision = KnowledgeCaptureDecisionSchema.parse(output.object);
-      await recordPlannerExecution(this.executionLogPort, {
+      await recordPlannerExecution(this.executionRecordPort, {
         identityId: request.input.identityId,
         conversationId: request.input.conversationId,
         requestContext,
@@ -174,7 +174,7 @@ export class KnowledgeCapturePlannerWorker implements KnowledgeCapturePlannerPor
       });
       return decision;
     } catch (cause) {
-      await recordPlannerExecution(this.executionLogPort, {
+      await recordPlannerExecution(this.executionRecordPort, {
         identityId: request.input.identityId,
         conversationId: request.input.conversationId,
         requestContext,

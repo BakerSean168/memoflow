@@ -154,22 +154,12 @@ class PowerSyncScheduleAdapter implements ScheduleRepoPort {
 
 class PowerSyncAIConversationAdapter implements AIConversationRepoPort {
   constructor(private readonly db: IElectronDatabase) {}
-  async findByIdentityId(identityId: string, options?: { includeChildren?: boolean }): Promise<unknown[]> {
+  async findByIdentityId(identityId: string): Promise<unknown[]> {
     const rows = await this.db.getAll<Record<string, unknown>>(
       `SELECT * FROM ai_conversations WHERE identity_id = ? AND deleted_at IS NULL ORDER BY created_at DESC`,
       [identityId],
     );
-    const mapped = mapRows(rows) as Record<string, unknown>[];
-    if (options?.includeChildren) {
-      for (const conv of mapped) {
-        const messages = await this.db.getAll<Record<string, unknown>>(
-          `SELECT * FROM ai_messages WHERE conversation_id = ? ORDER BY created_at`,
-          [conv.id],
-        );
-        conv.messages = mapRows(messages);
-      }
-    }
-    return mapped;
+    return mapRows(rows);
   }
 }
 

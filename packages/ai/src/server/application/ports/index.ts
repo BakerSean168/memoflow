@@ -1,11 +1,11 @@
 export type {
   AICostEstimate,
-  AIExecutionLogInput,
-  IAIExecutionLogPort,
+  AIExecutionRecordInput,
+  IAIExecutionRecordPort,
   IAIUsageReadPort,
   AIUsageQuery,
   AIUsageSummary,
-} from './ai-execution-log.port';
+} from './ai-execution-record.port';
 export type {
   AIEvaluationCheckRecord,
   AIEvaluationHistoryRecord,

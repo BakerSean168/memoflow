@@ -2,7 +2,6 @@ import type { AIConversationCreatedEvent } from '../domain/events/ai-conversatio
 import type { AIConversationDeletedEvent } from '../domain/events/ai-conversation-deleted.event';
 import type { AIConversationStatusChangedEvent } from '../domain/events/ai-conversation-status-changed.event';
 import type { AIConversationUpdatedEvent } from '../domain/events/ai-conversation-updated.event';
-import type { AIMessageAddedEvent } from '../domain/events/ai-message-added.event';
 import type { AIProviderConfigCreatedEvent } from '../domain/events/ai-provider-config-created.event';
 import type { AIProviderConfigModelsUpdatedEvent } from '../domain/events/ai-provider-config-models-updated.event';
 import type { AIProviderConfigSetDefaultEvent } from '../domain/events/ai-provider-config-set-default.event';
@@ -14,7 +13,6 @@ export type AIEventMap = {
   'ai:conversation-updated': AIConversationUpdatedEvent;
   'ai:conversation-status-changed': AIConversationStatusChangedEvent;
   'ai:conversation-deleted': AIConversationDeletedEvent;
-  'ai:message-added': AIMessageAddedEvent;
   'ai:provider-config-created': AIProviderConfigCreatedEvent;
   'ai:provider-config-models-updated': AIProviderConfigModelsUpdatedEvent;
   'ai:provider-config-set-default': AIProviderConfigSetDefaultEvent;

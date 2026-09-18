@@ -1,17 +1,9 @@
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import type { AIEventMap } from '@memoflow/contracts/ai';
 import { AIConversation } from '../../../domain/aggregates/ai-conversation';
-import { Message } from '../../../domain/entities/message';
-import type {
-  AIConversationQueryOptions,
-  IAIConversationRepository,
-} from '../../../domain/repositories/i-ai-conversation-repository';
+import type { IAIConversationRepository } from '../../../domain/repositories/i-ai-conversation-repository';
 import { createTypedEventPublisher, eventBus, flushDomainEvents } from '@memoflow/utils/domain';
-import {
-  PowerSyncAIConversationMapper,
-  type PowerSyncAIConversationRow,
-  type PowerSyncAIMessageRow,
-} from './mappers';
+import { PowerSyncAIConversationMapper, type PowerSyncAIConversationRow } from './mappers';
 
 const aiEventPublisher = createTypedEventPublisher<AIEventMap>(eventBus);
 
@@ -20,154 +12,55 @@ export class PowerSyncAIConversationRepository implements IAIConversationReposit
 
   async save(conversation: AIConversation): Promise<void> {
     const persisted = PowerSyncAIConversationMapper.toPersistence(conversation);
-
     await this.db.writeTransaction(async (tx) => {
       const existing = await tx.getOptional<{ id: string }>(
         `SELECT id FROM ai_conversations WHERE id = ? LIMIT 1`,
         [persisted.id],
       );
-
       if (existing) {
         await tx.execute(
           `UPDATE ai_conversations
-           SET identity_id = ?,
-               name = ?,
-               status = ?,
-               message_count = ?,
-               last_message_at = ?,
-               version = ?,
-               updated_at = ?,
-               deleted_at = ?
+           SET identity_id = ?, name = ?, status = ?, version = ?, updated_at = ?, deleted_at = ?
            WHERE id = ?`,
-          [
-            persisted.identity_id,
-            persisted.name,
-            persisted.status,
-            persisted.message_count,
-            persisted.last_message_at,
-            persisted.version,
-            persisted.updated_at,
-            persisted.deleted_at,
-            persisted.id,
-          ],
+          [persisted.identity_id, persisted.name, persisted.status, persisted.version,
+           persisted.updated_at, persisted.deleted_at, persisted.id],
         );
       } else {
         await tx.execute(
           `INSERT INTO ai_conversations (
-             id, identity_id, name, status, message_count, last_message_at, version,
-             created_at, updated_at, deleted_at
-           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [
-            persisted.id,
-            persisted.identity_id,
-            persisted.name,
-            persisted.status,
-            persisted.message_count,
-            persisted.last_message_at,
-            persisted.version,
-            persisted.created_at,
-            persisted.updated_at,
-            persisted.deleted_at,
-          ],
-        );
-      }
-
-      const messages = PowerSyncAIConversationMapper.toMessagePersistence(conversation);
-      await tx.execute(`DELETE FROM ai_messages WHERE conversation_id = ?`, [persisted.id]);
-      for (const message of messages) {
-        await tx.execute(
-          `INSERT INTO ai_messages (
-             id, identity_id, conversation_id, role, content, token_usage, created_at
-           ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-          [
-            message.id,
-            message.identity_id,
-            message.conversation_id,
-            message.role,
-            message.content,
-            message.token_usage,
-            message.created_at,
-          ],
+             id, identity_id, name, status, version, created_at, updated_at, deleted_at
+           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          [persisted.id, persisted.identity_id, persisted.name, persisted.status,
+           persisted.version, persisted.created_at, persisted.updated_at, persisted.deleted_at],
         );
       }
     });
-
     flushDomainEvents(aiEventPublisher, conversation);
   }
 
-  async findByIdForIdentity(
-    identityId: string,
-    id: string,
-    options?: AIConversationQueryOptions,
-  ): Promise<AIConversation | null> {
+  async findByIdForIdentity(identityId: string, id: string): Promise<AIConversation | null> {
     const row = await this.db.getOptional<PowerSyncAIConversationRow>(
       `SELECT * FROM ai_conversations WHERE id = ? AND identity_id = ? AND deleted_at IS NULL LIMIT 1`,
       [id, identityId],
     );
-
-    if (!row) {
-      return null;
-    }
-
-    const messages = options?.includeChildren ? await this.loadMessages(row.id) : [];
-    return PowerSyncAIConversationMapper.toDomain(row, messages);
+    return row ? PowerSyncAIConversationMapper.toDomain(row) : null;
   }
 
-  async findByIdentityId(
-    identityId: string,
-    options?: AIConversationQueryOptions,
-  ): Promise<AIConversation[]> {
+  async findByIdentityId(identityId: string): Promise<AIConversation[]> {
     const rows = await this.db.getAll<PowerSyncAIConversationRow>(
       `SELECT * FROM ai_conversations WHERE identity_id = ? AND deleted_at IS NULL ORDER BY updated_at DESC`,
       [identityId],
     );
-
-    if (!options?.includeChildren) {
-      return rows.map((row) => PowerSyncAIConversationMapper.toDomain(row, []));
-    }
-
-    const messagesByConversationId = await this.loadMessagesByConversationIds(
-      rows.map((r) => r.id),
-    );
-    return rows.map((row) =>
-      PowerSyncAIConversationMapper.toDomain(row, messagesByConversationId.get(row.id) ?? []),
-    );
+    return rows.map((row) => PowerSyncAIConversationMapper.toDomain(row));
   }
-
-
 
   async delete(identityId: string, id: string): Promise<void> {
     const existing = await this.findByIdForIdentity(identityId, id);
-    if (!existing) {
-      throw new Error('Conversation not found for the current identity.');
-    }
+    if (!existing) throw new Error('Conversation not found for the current identity.');
     const now = new Date().toISOString();
     await this.db.execute(
       `UPDATE ai_conversations SET status = ?, deleted_at = ?, updated_at = ? WHERE id = ? AND identity_id = ?`,
       ['Archived', now, now, id, identityId],
     );
-  }
-
-
-  private async loadMessages(conversationId: string): Promise<Message[]> {
-    const rows = await this.db.getAll<PowerSyncAIMessageRow>(
-      `SELECT * FROM ai_messages WHERE conversation_id = ? ORDER BY created_at ASC`,
-      [conversationId],
-    );
-    return rows.map((row) => PowerSyncAIConversationMapper.toMessageDomain(row));
-  }
-
-  private async loadMessagesByConversationIds(
-    conversationIds: string[],
-  ): Promise<Map<string, Message[]>> {
-    const result = new Map<string, Message[]>();
-    if (conversationIds.length === 0) {
-      return result;
-    }
-
-    for (const conversationId of conversationIds) {
-      result.set(conversationId, await this.loadMessages(conversationId));
-    }
-    return result;
   }
 }

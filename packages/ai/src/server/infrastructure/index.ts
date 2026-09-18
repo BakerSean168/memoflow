@@ -42,12 +42,12 @@ export { createAIPrismaRepositories, type AIPrismaRepositorySet } from './prisma
 // ---------------------------------------------------------------------------
 // One-time vNext migration bridges
 // ---------------------------------------------------------------------------
-export { ConversationTranscriptBootstrapSource } from './migrations/conversation-transcript-bootstrap.source';
+export { ConversationShellSource } from './migrations/conversation-shell.source';
 
 // ---------------------------------------------------------------------------
 // Ports (Interfaces)
 // ---------------------------------------------------------------------------
-export { type IAIConversationRepository, type AIConversationQueryOptions } from '../domain';
+export { type IAIConversationRepository } from '../domain';
 export { type IAIProviderConfigRepository } from '../domain';
 
 // ---------------------------------------------------------------------------

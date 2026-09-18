@@ -7,7 +7,7 @@ import {
   type GoalPlanDraft,
   type GoalPlanningDecision,
 } from '@memoflow/contracts/ai';
-import type { IAIExecutionLogPort, IKnowledgeSourcePort } from '../../application/ports';
+import type { IAIExecutionRecordPort, IKnowledgeSourcePort } from '../../application/ports';
 import type { MastraModelResolver } from '../models/model-resolver';
 import {
   aiContextInstruction,
@@ -52,7 +52,7 @@ export class GoalPlannerWorker implements GoalPlannerPort {
   constructor(
     modelResolver: MastraModelResolver,
     private readonly knowledgeSourcePort: IKnowledgeSourcePort,
-    private readonly executionLogPort: IAIExecutionLogPort | undefined,
+    private readonly executionRecordPort: IAIExecutionRecordPort | undefined,
     private readonly contextAssembler: AIContextAssemblerPort,
   ) {
     this.agent = new Agent({
@@ -183,7 +183,7 @@ export class GoalPlannerWorker implements GoalPlannerPort {
         structuredOutput: { schema: GoalPlanningDecisionSchema },
       });
       const decision = GoalPlanningDecisionSchema.parse(output.object);
-      await recordPlannerExecution(this.executionLogPort, {
+      await recordPlannerExecution(this.executionRecordPort, {
         identityId: request.input.identityId,
         conversationId: request.input.conversationId,
         requestContext,
@@ -196,7 +196,7 @@ export class GoalPlannerWorker implements GoalPlannerPort {
       });
       return decision;
     } catch (cause) {
-      await recordPlannerExecution(this.executionLogPort, {
+      await recordPlannerExecution(this.executionRecordPort, {
         identityId: request.input.identityId,
         conversationId: request.input.conversationId,
         requestContext,
