@@ -2638,6 +2638,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/application/use-cases/commands/delete-ai-provider.use-case.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/application/use-cases/commands/probe-ai-provider-connection.use-case.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -2778,6 +2788,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/infrastructure/__tests__/ai-provider-secret-ownership.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/infrastructure/__tests__/ai-repositories.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -2888,6 +2908,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/infrastructure/adapters/memory/__tests__/ai-provider-onboarding-session-memory.repository.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/infrastructure/adapters/powersync/ai-knowledge-index-powersync.repository.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -2939,6 +2969,16 @@
     },
     {
       "path": "packages/ai/src/server/infrastructure/adapters/prisma/to-prisma-json-keep-boundary.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/infrastructure/adapters/provider-secret-vault.contract.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -10802,7 +10842,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 81
+      "fileCount": 85
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -11180,7 +11220,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 81
+      "fileCount": 85
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -11504,6 +11544,7 @@
       "packages/ai/src/server/application/use-cases/commands/__tests__/update-ai-provider.use-case.test.ts",
       "packages/ai/src/server/application/use-cases/commands/commit-ai-provider-onboarding.use-case.spec.ts",
       "packages/ai/src/server/application/use-cases/commands/commit-ai-provider-replacement.use-case.spec.ts",
+      "packages/ai/src/server/application/use-cases/commands/delete-ai-provider.use-case.spec.ts",
       "packages/ai/src/server/application/use-cases/commands/probe-ai-provider-connection.use-case.spec.ts",
       "packages/ai/src/server/application/use-cases/commands/probe-ai-provider-replacement.use-case.spec.ts",
       "packages/ai/src/server/application/use-cases/commands/refresh-ai-provider-models.use-case.spec.ts",
@@ -11518,6 +11559,7 @@
       "packages/ai/src/server/domain/value-objects/__tests__/token-usage.spec.ts",
       "packages/ai/src/server/infrastructure/__tests__/ai-module-mastra-lifecycle.spec.ts",
       "packages/ai/src/server/infrastructure/__tests__/ai-module-partial-start.spec.ts",
+      "packages/ai/src/server/infrastructure/__tests__/ai-provider-secret-ownership.surface.spec.ts",
       "packages/ai/src/server/infrastructure/__tests__/ai-repositories.surface.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/__tests__/ai-conversation-domain-events.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/__tests__/ai-conversation-repository.surface.spec.ts",
@@ -11529,12 +11571,14 @@
       "packages/ai/src/server/infrastructure/adapters/mastra-vnext-native-ai-adapters.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/memory/__tests__/ai-conversation-ownership.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/memory/__tests__/ai-provider-config-ownership.spec.ts",
+      "packages/ai/src/server/infrastructure/adapters/memory/__tests__/ai-provider-onboarding-session-memory.repository.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/powersync/ai-knowledge-index-powersync.repository.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/powersync/ai-provider-onboarding-commit-powersync.adapter.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/prisma/__tests__/ai-knowledge-index-prisma.repository.test.ts",
       "packages/ai/src/server/infrastructure/adapters/prisma/__tests__/ai-provider-config-ownership.surface.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/prisma/__tests__/ai-provider-config-prisma.repository.test.ts",
       "packages/ai/src/server/infrastructure/adapters/prisma/to-prisma-json-keep-boundary.surface.spec.ts",
+      "packages/ai/src/server/infrastructure/adapters/provider-secret-vault.contract.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/tokenize-keep-boundary.surface.spec.ts",
       "packages/ai/src/server/infrastructure/gateways/openai-compatible-model-catalog.gateway.spec.ts",
       "packages/ai/src/server/infrastructure/gateways/openai-compatible.gateway.spec.ts",
@@ -11929,7 +11973,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1035,
+    "unit": 1039,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 9,

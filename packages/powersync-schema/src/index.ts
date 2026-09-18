@@ -673,22 +673,31 @@ const ai_usage_quotas = new Table({
   deleted_at: column.text,
 });
 
-const ai_provider_configs = new Table({
-  identity_id: column.text,
-  name: column.text,
-  provider_definition_id: column.text,
-  base_url: column.text,
-  credential_ref: column.text,
-  default_model: column.text,
-  available_models: column.text, // JSON
-  is_active: column.integer, // boolean
-  is_default: column.integer, // boolean
-  priority: column.integer,
-  version: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-  deleted_at: column.text,
-});
+/**
+ * Desktop provider connections are host-local while credentials are host-local.
+ * Syncing an opaque credentialRef without the corresponding SecretVault entry
+ * would create a dangling cross-host connection, so cross-device provider
+ * connection sync stays disabled until an explicit credential-sync policy exists.
+ */
+const ai_provider_configs = new Table(
+  {
+    identity_id: column.text,
+    name: column.text,
+    provider_definition_id: column.text,
+    base_url: column.text,
+    credential_ref: column.text,
+    default_model: column.text,
+    available_models: column.text, // JSON
+    is_active: column.integer, // boolean
+    is_default: column.integer, // boolean
+    priority: column.integer,
+    version: column.integer,
+    created_at: column.text,
+    updated_at: column.text,
+    deleted_at: column.text,
+  },
+  { localOnly: true },
+);
 
 /**
  * Desktop-only Provider onboarding state. The session carries only an opaque

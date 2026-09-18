@@ -37,7 +37,6 @@ streams:
       - SELECT * FROM ai_conversations WHERE identity_id = auth.user_id()
       - SELECT * FROM ai_generation_tasks WHERE identity_id = auth.user_id()
       - SELECT * FROM ai_usage_quotas WHERE identity_id = auth.user_id()
-      - SELECT * FROM ai_provider_configs WHERE identity_id = auth.user_id()
       - SELECT * FROM dashboard_configs WHERE identity_id = auth.user_id()
       - SELECT * FROM ai_messages WHERE identity_id = auth.user_id()
       - SELECT * FROM repositories WHERE identity_id = auth.user_id()

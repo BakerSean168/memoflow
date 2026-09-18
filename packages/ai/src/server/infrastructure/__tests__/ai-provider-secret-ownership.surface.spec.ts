@@ -58,10 +58,18 @@ describe('AI provider secret ownership surface', () => {
     expect(providerConfigBlock).not.toContain('api_key_encrypted');
     expect(onboardingBlock).not.toContain('credentialEncrypted');
     expect(onboardingBlock).not.toContain('credential_encrypted');
+    expect(powersyncSchema).toContain('const ai_provider_configs = new Table(');
+    expect(powersyncSchema).toMatch(/const ai_provider_configs[\s\S]*?\{ localOnly: true \}/);
     expect(powersyncSchema).toContain('const ai_provider_secrets = new Table(');
     expect(powersyncSchema).toMatch(/const ai_provider_secrets[\s\S]*?\{ localOnly: true \}/);
+    expect(desktopPowerSync).toContain("'ai_provider_configs'");
     expect(desktopPowerSync).toContain("'ai_provider_secrets'");
+    expect(syncConfig).not.toContain('ai_provider_configs');
     expect(syncConfig).not.toContain('ai_provider_secrets');
     expect(syncConfig).not.toContain('api_key_encrypted');
+
+    const tableMapping = source('apps/api/src/modules/powersync/table-mapping.ts');
+    expect(tableMapping).not.toContain("'ai_provider_configs'");
+    expect(tableMapping).not.toContain('aiProviderConfig');
   });
 });

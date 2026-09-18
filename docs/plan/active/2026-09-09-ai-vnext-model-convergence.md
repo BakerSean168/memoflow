@@ -529,6 +529,7 @@ AIProviderSecretVault
 - serialization leak tests；
 - HTTP/IPC client DTO secret absence；
 - PowerSync upload queue secret policy；
+- Desktop Provider Connection 与 SecretVault 同为 host-local，避免同步不可解析的 `credentialRef`；跨设备 provider/credential 同步留待独立安全策略；
 - provider deletion/retry。
 
 #### Acceptance

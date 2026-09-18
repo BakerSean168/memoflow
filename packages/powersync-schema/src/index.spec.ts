@@ -58,6 +58,16 @@ describe('PowerSyncAppSchema', () => {
     }
   });
 
+  it('keeps Desktop provider connections host-local with their SecretVault refs', () => {
+    const connectionTable = PowerSyncAppSchema.props.ai_provider_configs;
+    const secretTable = PowerSyncAppSchema.props.ai_provider_secrets;
+    expect(connectionTable).toBeDefined();
+    expect(connectionTable.localOnly).toBe(true);
+    expect(secretTable).toBeDefined();
+    expect(secretTable.localOnly).toBe(true);
+    expect(getColumnType('ai_provider_configs', 'credential_ref')).toBe('TEXT');
+  });
+
   it('keeps the Desktop AI knowledge index device-local and stable-id keyed', () => {
     const table = PowerSyncAppSchema.props.ai_knowledge_index_entries_local;
     expect(table).toBeDefined();
