@@ -21,6 +21,16 @@ describe('Dashboard retirement characterization (SYS-0001 / ADR-108)', () => {
     resolve(repoRoot, 'apps/desktop/src/main/modules/ai/desktop-analytics-read.adapter.ts'),
     'utf8',
   );
+  const apiActivityRead = readFileSync(
+    resolve(repoRoot, 'apps/api/src/modules/ai/activity-ledger-read.adapter.ts'),
+    'utf8',
+  );
+  const apiCompose = readFileSync(resolve(repoRoot, 'apps/api/src/runtime/compose-ai.ts'), 'utf8');
+  const desktopMain = readFileSync(resolve(repoRoot, 'apps/desktop/src/main/main.ts'), 'utf8');
+  const desktopAnalyticsComposition = desktopMain.slice(
+    desktopMain.indexOf('const analyticsReadAdapter = new DesktopAnalyticsReadAdapter({'),
+    desktopMain.indexOf('const AIElectronModule = composeAI({'),
+  );
 
   it('keeps /dashboard as a compatibility redirect rather than a product page', () => {
     expect(router).toContain("path: 'dashboard'");
@@ -32,17 +42,30 @@ describe('Dashboard retirement characterization (SYS-0001 / ADR-108)', () => {
   it('confirms Home/Goal consumers have completed the owner-read cutover', () => {
     expect(todayOverview).not.toContain("from '../../modules/dashboard/composables/useDashboard'");
     expect(todayOverview).toContain('useGoalHomeSummary');
-    expect(goalCapsule).not.toContain(
-      "from '../../../modules/dashboard/composables/useDashboard'",
-    );
+    expect(goalCapsule).not.toContain("from '../../../modules/dashboard/composables/useDashboard'");
     expect(goalCapsule).toContain('useGoalHomeSummary');
   });
 
-  it('records the remaining AI analytics dependency on DashboardData', () => {
-    expect(apiAnalytics).toContain('getApiDashboardData');
-    expect(apiAnalytics).toContain('dashboard as unknown as Record<string, unknown>');
-    expect(desktopAnalytics).toContain("from '@memoflow/contracts/dashboard'");
-    expect(desktopAnalytics).toContain('dashboardDataLoader');
+  it('records AI owner-read cutover and the transitional ActivityLedger dependency', () => {
+    for (const source of [
+      apiAnalytics,
+      desktopAnalytics,
+      apiCompose,
+      desktopAnalyticsComposition,
+    ]) {
+      expect(source).not.toContain('DashboardData');
+      expect(source).not.toContain('dashboardDataLoader');
+      expect(source).not.toContain('getApiDashboardData');
+      expect(source).not.toContain('@memoflow/contracts/dashboard');
+      expect(source).not.toContain('as unknown as Record<string, unknown>');
+      expect(source).toContain('goalApplicationPort');
+      expect(source).toContain('taskDashboardReadPort');
+      expect(source).toContain('plannerReadPort');
+      expect(source).toContain('activityReadPort');
+    }
+    expect(apiActivityRead).toContain('ActivityLedger');
+    expect(apiActivityRead).toContain('HOME-1804');
+    expect(apiActivityRead).toContain('listRecent');
   });
 
   it('keeps the already-retired page-only components physically absent', () => {

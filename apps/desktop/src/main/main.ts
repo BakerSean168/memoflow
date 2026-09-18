@@ -24,6 +24,7 @@ import { registerDashboardIpcHandler } from './ipc/dashboard-handler';
 
 // ── Module Electron Entry Points ─────────────────────────────────────
 import { PowerSyncTaskBindingReadPort, TaskWorkspaceQueryService } from '@memoflow/task';
+import { GetTaskDashboardUseCase } from '@memoflow/task/analytics';
 import { createGoalTaskProgressPowerSyncHandler, GoalWorkspaceQueryService } from '@memoflow/goal';
 import { createTaskReminderScheduledHandlerRegistration } from '@memoflow/task/schedule-execution';
 import { createTaskPowerSyncScheduleProjectionSource } from '@memoflow/task/schedule-projection';
@@ -81,12 +82,12 @@ import { composeDataPortability } from './runtime/compose-data-portability';
 import { composeAI } from './runtime/compose-ai';
 import { composeRepository } from './runtime/compose-repository';
 import { DesktopAnalyticsReadAdapter } from './modules/ai/desktop-analytics-read.adapter';
+import { DesktopActivityAIReadAdapter } from './modules/ai/desktop-activity-read.adapter';
+import { DesktopPlannerAIReadAdapter } from './modules/ai/planner-read.adapter';
+import { DesktopNotificationAIReadAdapter } from './modules/ai/notification-read.adapter';
 import { DesktopKnowledgeNotePersistenceAdapter } from './modules/ai/desktop-knowledge-note-persistence.adapter';
 import { DesktopKnowledgeSourceAdapter } from './modules/ai/desktop-knowledge-source.adapter';
-import {
-  getDesktopDashboardData,
-  type DashboardReadDependencies,
-} from './services/dashboard-read-service';
+import { type DashboardReadDependencies } from './services/dashboard-read-service';
 import { configureDesktopShellIdentity } from './utils/app-icon';
 import { getApiBaseUrl } from './utils/api-config';
 import { createLogger } from '@memoflow/utils/logger';
@@ -430,6 +431,31 @@ async function registerBusinessModules(
   };
   activeProfileDashboardRepositories = dashboardRepositories;
 
+  const taskDashboardUseCase = new GetTaskDashboardUseCase(
+    taskComposed.repositories.taskPlanRepository,
+    taskComposed.repositories.taskOccurrenceRepository,
+    settingElectronModule.userTimeContextPort,
+  );
+  const taskDashboardReadPort = {
+    getDashboard: async (identityId: string) => {
+      const result = await taskDashboardUseCase.execute(identityId);
+      return result.ok ? result.data : undefined;
+    },
+  };
+  const plannerReadPort = new DesktopPlannerAIReadAdapter(
+    scheduleComposed.repositories.scheduleRepository,
+    taskComposed.applicationPort,
+  );
+  const notificationReadPort = new DesktopNotificationAIReadAdapter(
+    notificationComposed.repositories.notificationRepository,
+  );
+  const activityReadPort = new DesktopActivityAIReadAdapter(
+    goalComposed.repositories.goalRepository,
+    taskComposed.repositories.taskPlanRepository,
+    taskComposed.repositories.taskOccurrenceRepository,
+    scheduleComposed.repositories.scheduleRepository,
+  );
+
   // 5. Account/data-portability/setting/AI/repository with explicit instances.
   //    account/data-portability/setting/AI/repository 均以显式实例组装。
   const accountComposed = composeAccount({
@@ -529,11 +555,12 @@ async function registerBusinessModules(
   });
 
   const analyticsReadAdapter = new DesktopAnalyticsReadAdapter({
-    goalRepository: goalComposed.repositories.goalRepository,
-    taskPlanRepository: taskComposed.repositories.taskPlanRepository,
-    taskOccurrenceRepository: taskComposed.repositories.taskOccurrenceRepository,
+    goalApplicationPort: goalComposed.applicationPort,
+    taskDashboardReadPort,
+    plannerReadPort,
+    notificationReadPort,
+    activityReadPort,
     userTimeContextPort: settingElectronModule.userTimeContextPort,
-    dashboardDataLoader: (identityId) => getDesktopDashboardData(identityId, dashboardRepositories),
   });
 
   const AIElectronModule = composeAI({

@@ -17,11 +17,17 @@ export type {
   IAIEvaluationReportPort,
 } from './ai-evaluation-report.port';
 export type {
+  AnalyticsOwnerReads,
+  AnalyticsScheduleItem,
+  AnalyticsTaskBoard,
+  AnalyticsTaskDashboard,
+  IAITaskDashboardReadPort,
   AnalyticsQueryContext,
   AnalyticsQueryInput,
   AnalyticsQueryResult,
   IAnalyticsQueryPort,
 } from './analytics-query.port';
+export type { AIActivityItem, IAIActivityReadPort } from './activity-read.port';
 export type { IAnalyticsReadPort } from './analytics-read.port';
 export type {
   IAIProviderModelCatalogPort,
@@ -69,11 +75,24 @@ export type {
 } from './knowledge-query.port';
 export type { IKnowledgeSourcePort } from './knowledge-source.port';
 
-export type { IAIProviderCredentialProbePort, ProviderCredentialProbeInput } from './provider-credential-probe.port';
-export type { IAIProviderEndpointPolicyPort, ProviderEndpointValidationInput } from './provider-endpoint-policy.port';
-export type { IAIProviderOnboardingSessionRepository, AIProviderOnboardingSessionRecord, CreateAIProviderOnboardingSessionInput } from './provider-onboarding-session.repository';
+export type {
+  IAIProviderCredentialProbePort,
+  ProviderCredentialProbeInput,
+} from './provider-credential-probe.port';
+export type {
+  IAIProviderEndpointPolicyPort,
+  ProviderEndpointValidationInput,
+} from './provider-endpoint-policy.port';
+export type {
+  IAIProviderOnboardingSessionRepository,
+  AIProviderOnboardingSessionRecord,
+  CreateAIProviderOnboardingSessionInput,
+} from './provider-onboarding-session.repository';
 
-export type { IAIProviderOnboardingCommitPort, AIProviderOnboardingCommitOutcome } from './provider-onboarding-commit.port';
+export type {
+  IAIProviderOnboardingCommitPort,
+  AIProviderOnboardingCommitOutcome,
+} from './provider-onboarding-commit.port';
 export type {
   AIRoutineMethodId,
   AIProtocolMethodId,

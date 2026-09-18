@@ -57,7 +57,15 @@ export { AIEvaluationReportFileAdapter } from './server/infrastructure';
 // Host capability ports are re-exported through the package root so desktop
 // composers import only `@memoflow/ai` (no `/ports` subpath).
 export type {
+  AnalyticsOwnerReads,
+  AnalyticsScheduleItem,
+  AnalyticsTaskBoard,
+  AnalyticsTaskDashboard,
+  AnalyticsQueryContext,
+  IAITaskDashboardReadPort,
   IAnalyticsReadPort,
+  IAIActivityReadPort,
+  AIActivityItem,
   IKnowledgeSourcePort,
   IKnowledgeNotePersistencePort,
   IAIRoutineCommandPort,

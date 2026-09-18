@@ -78,6 +78,16 @@
       ]
     },
     {
+      "path": "apps/api/src/modules/ai/controlled-analytics-read.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/modules/ai/notification-read.adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -897,6 +907,14 @@
     },
     {
       "path": "apps/desktop/src/main/modules/ai/__tests__/desktop-knowledge-source.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/ai/desktop-analytics-read.adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -3031,6 +3049,16 @@
     },
     {
       "path": "packages/ai/src/server/mastra/ai-vnext-no-legacy.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/mastra/context/ai-context-assembler.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -10760,7 +10788,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 71
+      "fileCount": 72
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -10774,7 +10802,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 80
+      "fileCount": 81
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -11117,14 +11145,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 71
+      "fileCount": 72
     },
     {
       "id": "apps/desktop/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 69
+      "fileCount": 70
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -11152,7 +11180,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 80
+      "fileCount": 81
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -11355,6 +11383,7 @@
     "coverage": [
       "apps/api/src/bootstrap-module-names.surface.spec.ts",
       "apps/api/src/bootstrap.spec.ts",
+      "apps/api/src/modules/ai/controlled-analytics-read.adapter.spec.ts",
       "apps/api/src/modules/ai/notification-read.adapter.spec.ts",
       "apps/api/src/modules/ai/planner-read.adapter.spec.ts",
       "apps/api/src/modules/ai/repository-knowledge-cloud-data-purger.adapter.test.ts",
@@ -11517,6 +11546,7 @@
       "packages/ai/src/server/mastra/agents/planner-observability.spec.ts",
       "packages/ai/src/server/mastra/agents/user-time-context.spec.ts",
       "packages/ai/src/server/mastra/ai-vnext-no-legacy.surface.spec.ts",
+      "packages/ai/src/server/mastra/context/ai-context-assembler.spec.ts",
       "packages/ai/src/server/mastra/mastra-vnext-architecture.surface.spec.ts",
       "packages/ai/src/server/mastra/models/model-resolver.spec.ts",
       "packages/ai/src/server/mastra/runtime/assistant-history.persistence.spec.ts",
@@ -11899,7 +11929,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1032,
+    "unit": 1035,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 9,
