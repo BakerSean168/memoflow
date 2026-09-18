@@ -2,7 +2,6 @@ import type { PrismaClient } from '@memoflow/database';
 import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import type {
   KnowledgeNoteProjectionClientDTO,
-  KnowledgeNoteProjectionIndexStatus,
 } from '@memoflow/contracts/repository';
 import type {
   IKnowledgeNoteProjectionRepository,
@@ -36,7 +35,7 @@ export class KnowledgeNoteProjectionPrismaRepository implements IKnowledgeNotePr
         deletedAt: null,
         ...(paths.length ? { relativePath: { notIn: paths } } : {}),
       },
-      data: { deletedAt: new Date(), commitSha, indexStatus: 'pending' },
+      data: { deletedAt: new Date(), commitSha },
     });
     return deleted.map((row) => ({
       id: row.id,
@@ -55,7 +54,7 @@ export class KnowledgeNoteProjectionPrismaRepository implements IKnowledgeNotePr
     if (deletedPaths.length) {
       await this.db.knowledgeNoteProjection.updateMany({
         where: { bindingId: connectionId, relativePath: { in: [...new Set(deletedPaths)] } },
-        data: { deletedAt: new Date(), commitSha, indexStatus: 'pending' },
+        data: { deletedAt: new Date(), commitSha },
       });
     }
   }
@@ -159,24 +158,6 @@ export class KnowledgeNoteProjectionPrismaRepository implements IKnowledgeNotePr
     };
   }
 
-  async updateIndexStatusForIdentity(
-    identityId: string,
-    projectionId: string,
-    expectedContentHash: string,
-    status: KnowledgeNoteProjectionIndexStatus,
-  ): Promise<boolean> {
-    const updated = await this.db.knowledgeNoteProjection.updateMany({
-      where: {
-        id: projectionId,
-        contentHash: expectedContentHash,
-        deletedAt: null,
-        binding: { identityId, disconnectedAt: null },
-      },
-      data: { indexStatus: status },
-    });
-    return updated.count === 1;
-  }
-
   private async upsertMany(notes: KnowledgeNoteProjectionUpsert[]): Promise<void> {
     for (const note of notes) {
       await this.db.knowledgeNoteProjection.upsert({
@@ -195,7 +176,6 @@ export class KnowledgeNoteProjectionPrismaRepository implements IKnowledgeNotePr
           blobSha: note.blobSha,
           contentHash: note.contentHash,
           markdownContent: note.markdownContent,
-          indexStatus: note.indexStatus,
           frontmatter: note.frontmatter as never,
         },
         update: {
@@ -205,7 +185,6 @@ export class KnowledgeNoteProjectionPrismaRepository implements IKnowledgeNotePr
           contentHash: note.contentHash,
           frontmatter: note.frontmatter as never,
           markdownContent: note.markdownContent,
-          indexStatus: note.indexStatus,
           deletedAt: null,
         },
       });
@@ -237,7 +216,6 @@ export class KnowledgeNoteProjectionPrismaRepository implements IKnowledgeNotePr
       contentHash: row.contentHash,
       frontmatter,
       markdownContent: row.markdownContent,
-      indexStatus: row.indexStatus as KnowledgeNoteProjectionClientDTO['indexStatus'],
       createdAt: row.createdAt.getTime(),
       updatedAt: row.updatedAt.getTime(),
       deletedAt: row.deletedAt?.getTime() ?? null,

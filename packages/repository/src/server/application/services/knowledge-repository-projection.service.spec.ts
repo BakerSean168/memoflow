@@ -379,7 +379,6 @@ class MemoryProjectionRepository implements IKnowledgeNoteProjectionRepository {
       return deleted;
     },
   );
-  readonly updateIndexStatusForIdentity = vi.fn(async () => true);
 
   async listByIdentity() {
     return [];
@@ -583,7 +582,6 @@ describe('KnowledgeRepositoryProjectionService', () => {
       [
         expect.objectContaining({
           relativePath: 'notes/architecture.md',
-          indexStatus: 'pending',
         }),
       ],
       [],
@@ -853,33 +851,6 @@ describe('KnowledgeRepositoryProjectionService', () => {
     );
   });
 
-  it('updates index status only through the identity/content-hash guarded repository method', async () => {
-    const projectionRepository = new MemoryProjectionRepository();
-    const service = new KnowledgeRepositoryProjectionService({
-      ...createFourAxisRepositories(),
-      webhookSecret,
-      connectionRepository: new MemoryConnectionRepository(),
-      deliveryRepository: new MemoryDeliveryRepository(),
-      projectionRepository,
-      githubAppClient: githubClient(),
-    });
-
-    await expect(
-      service.updateIndexStatus(String(connection().identityId), {
-        connectionId: connection().id,
-        resourceId: 'projection-1',
-        contentHash: 'content-hash-1',
-        status: 'indexed',
-      }),
-    ).resolves.toEqual({ ok: true, data: { updated: true } });
-    expect(projectionRepository.updateIndexStatusForIdentity).toHaveBeenCalledWith(
-      String(connection().identityId),
-      'projection-1',
-      'content-hash-1',
-      'indexed',
-    );
-  });
-
   it('builds an identity-scoped link graph from the current projection read model', async () => {
     const projectionRepository = new MemoryProjectionRepository();
     projectionRepository.rows.set('center-note', {
@@ -891,7 +862,6 @@ describe('KnowledgeRepositoryProjectionService', () => {
       contentHash: 'hash-center',
       frontmatter: { title: 'Center' },
       markdownContent: 'Related to [[Target]].',
-      indexStatus: 'indexed',
     });
     projectionRepository.rows.set('target-note', {
       id: 'target-note',
@@ -902,7 +872,6 @@ describe('KnowledgeRepositoryProjectionService', () => {
       contentHash: 'hash-target',
       frontmatter: { title: 'Target' },
       markdownContent: '# Target',
-      indexStatus: 'indexed',
     });
     const service = new KnowledgeRepositoryProjectionService({
       ...createFourAxisRepositories(),
@@ -1141,7 +1110,6 @@ describe('KnowledgeRepositoryProjectionService', () => {
       contentHash: 'old-hash',
       frontmatter: {},
       markdownContent: '# Removed',
-      indexStatus: 'indexed',
     });
     const publishMutation = vi.fn();
     const deliveryRepository = new MemoryDeliveryRepository();
@@ -1358,7 +1326,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
       'new-sha',
     );
     expect(projectionRepository.applySnapshot).toHaveBeenCalledWith(connection().id, 'new-sha', [
-      expect.objectContaining({ relativePath: 'notes/reconciled.md', indexStatus: 'pending' }),
+        expect.objectContaining({ relativePath: 'notes/reconciled.md' }),
     ]);
     expect(
       fourAxis.projectionCheckpointRepository.rows.get(connection().id)?.projectedCommitSha,

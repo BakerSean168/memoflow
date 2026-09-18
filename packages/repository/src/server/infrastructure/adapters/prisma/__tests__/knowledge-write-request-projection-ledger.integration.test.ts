@@ -16,7 +16,6 @@ import type {
   IKnowledgeNoteProjectionRepository,
   KnowledgeNoteProjectionClientDTO,
   KnowledgeNoteProjectionDeletion,
-  KnowledgeNoteProjectionIndexStatus,
   KnowledgeNoteLinkGraphSourceSet,
   KnowledgeNoteProjectionUpsert,
 } from '../../../../application/ports/knowledge-note-projection.repository';
@@ -224,19 +223,6 @@ class ThrowingProjectionRepository implements IKnowledgeNoteProjectionRepository
     return this.delegate.loadLinkGraphSourcesForIdentity(identityId, centerProjectionId, limit);
   }
 
-  updateIndexStatusForIdentity(
-    identityId: string,
-    projectionId: string,
-    expectedContentHash: string,
-    status: KnowledgeNoteProjectionIndexStatus,
-  ): Promise<boolean> {
-    return this.delegate.updateIndexStatusForIdentity(
-      identityId,
-      projectionId,
-      expectedContentHash,
-      status,
-    );
-  }
 }
 
 /**

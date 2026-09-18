@@ -43,12 +43,11 @@ describe('stable knowledge-note persisted-ref boundary', () => {
     expect(api).not.toContain('LocalVaultElectronPort');
   });
 
-  it('allows path-derived identity only as an explicit unmanaged read fallback', () => {
-    expect(desktopSource).toContain('temporaryUnmanagedResourceIdForPath');
-    expect(desktopSource).toContain('Ephemeral AI identity for unmanaged notes only');
-    expect(desktopSource).toContain(
-      'note.knowledgeDocumentId ?? temporaryUnmanagedResourceIdForPath',
-    );
-    expect(desktopSource).toContain('adoption replaces it with the Markdown-carried kdoc id');
+  it('does not resurrect path-derived identity for unmanaged notes', () => {
+    expect(desktopSource).not.toContain('temporaryUnmanagedResourceIdForPath');
+    expect(desktopSource).not.toContain('note.knowledgeDocumentId ??');
+    expect(desktopSource).toContain('summary.knowledgeDocumentId !== null');
+    expect(desktopSource).toContain('note.knowledgeDocumentId');
+    expect(desktopSource).toContain('knowledgeSpaceId');
   });
 });

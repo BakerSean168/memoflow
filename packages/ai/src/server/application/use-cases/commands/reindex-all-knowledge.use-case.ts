@@ -3,7 +3,6 @@ import type {
   IAIExecutionLogPort,
   IKnowledgeIndexRepository,
   IKnowledgeIngestionPort,
-  IKnowledgeIndexStatusPort,
   IKnowledgeSourcePort,
 } from '../../ports';
 import { SyncKnowledgeNotesUseCase } from './sync-knowledge-notes.use-case';
@@ -23,13 +22,11 @@ export class ReindexAllKnowledgeUseCase {
     knowledgeIndexRepository: IKnowledgeIndexRepository,
     knowledgeIngestionPort: IKnowledgeIngestionPort,
     executionLogPort?: IAIExecutionLogPort,
-    knowledgeIndexStatusPort?: IKnowledgeIndexStatusPort,
   ) {
     this.syncNotes = new SyncKnowledgeNotesUseCase(
       knowledgeIndexRepository,
       knowledgeIngestionPort,
       executionLogPort,
-      knowledgeIndexStatusPort,
     );
   }
 

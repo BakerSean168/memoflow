@@ -1,10 +1,10 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
 import type { KnowledgeAnswer, UseAIKnowledgeQaWorkflowOptions } from './types';
 import { getAIErrorMessage } from './error';
 import { unwrap } from '@memoflow/contracts/result';
+import type { KnowledgeDocumentRef } from '@memoflow/contracts/repository';
 
 type KnowledgeRelatedNote = NonNullable<KnowledgeAnswer['relatedNotes']>[number];
 
@@ -15,7 +15,6 @@ type KnowledgeRelatedNote = NonNullable<KnowledgeAnswer['relatedNotes']>[number]
  */
 export function useAIKnowledgeQaWorkflow(options: UseAIKnowledgeQaWorkflowOptions) {
   const { t } = useI18n();
-  const router = useRouter();
   const knowledgeQueryLoading = ref(false);
   const knowledgeAnswer = ref<KnowledgeAnswer | null>(null);
 
@@ -41,18 +40,19 @@ export function useAIKnowledgeQaWorkflow(options: UseAIKnowledgeQaWorkflowOption
   function buildRelatedNotesFromCitations(
     citations: KnowledgeAnswer['citations'],
   ): KnowledgeRelatedNote[] {
-    const notesByResourceId = new Map<string, KnowledgeRelatedNote>();
+    const notesByDocumentRef = new Map<string, KnowledgeRelatedNote>();
     for (const citation of citations) {
-      if (notesByResourceId.has(citation.resourceId)) continue;
-      notesByResourceId.set(citation.resourceId, {
-        resourceId: citation.resourceId,
-        resourcePath: citation.resourcePath,
+      const key = `${citation.documentRef.knowledgeSpaceId}\0${citation.documentRef.documentId}`;
+      if (notesByDocumentRef.has(key)) continue;
+      notesByDocumentRef.set(key, {
+        documentRef: citation.documentRef,
+        sourcePath: citation.sourcePath,
         title: citation.title,
         excerpt: citation.excerpt,
         score: citation.score,
       });
     }
-    return [...notesByResourceId.values()];
+    return [...notesByDocumentRef.values()];
   }
 
   async function askKnowledgeFromConversation() {
@@ -88,10 +88,9 @@ export function useAIKnowledgeQaWorkflow(options: UseAIKnowledgeQaWorkflowOption
     }
   }
 
-  async function openKnowledgeCitation(resourceId: string) {
-    if (!resourceId) return;
-    await options.requestOpenKnowledgeNote(resourceId);
-    await router.push('/repository');
+  async function openKnowledgeCitation(documentRef: KnowledgeDocumentRef) {
+    if (!documentRef.documentId) return;
+    await options.requestOpenKnowledgeNote(documentRef);
   }
 
   return {

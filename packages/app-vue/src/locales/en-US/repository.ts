@@ -60,11 +60,6 @@ export default {
     "noteContent": "Markdown content",
     "noteReason": "Write reason",
     "invalidDraft": "Add a title, .md path, content, and write reason.",
-    "indexStatus": {
-      "pending": "Pending indexing",
-      "indexed": "Searchable",
-      "failed": "Indexing failed"
-    },
     "providerStatus": {
       "Ready": "Provider ready",
       "Blocked": "Provider blocked",

@@ -7,5 +7,9 @@ export interface IKnowledgeSourcePort {
     limit: number,
   ): Promise<KnowledgeSourceNote[]>;
   listIndexableNotes(identityId: string, limit: number): Promise<KnowledgeSourceNote[]>;
-  getNoteById(identityId: string, resourceId: string): Promise<KnowledgeSourceNote | null>;
+  getNoteById(
+    identityId: string,
+    knowledgeDocumentId: string,
+    knowledgeSpaceId?: string,
+  ): Promise<KnowledgeSourceNote | null>;
 }

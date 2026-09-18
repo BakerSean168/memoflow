@@ -8,6 +8,7 @@ import type {
   KnowledgeQueryInput,
   KnowledgeQueryResult,
 } from '../../application/ports';
+import { KnowledgeDocumentRefSchema } from '@memoflow/contracts/repository';
 import { OpenAICompatibleGateway } from '../gateways/openai-compatible.gateway';
 import { scoreIndexedResource, tokenize } from './knowledge-index-value-helpers';
 
@@ -20,7 +21,8 @@ interface RankedChunk {
 function chunkScore(chunk: KnowledgeIndexedChunk, question: string): number {
   const queryTokens = new Set(tokenize(question));
   if (queryTokens.size === 0) return 1;
-  const haystack = `${chunk.headingPath.join(' ')} ${chunk.keywords.join(' ')} ${chunk.content}`.toLowerCase();
+  const haystack =
+    `${chunk.headingPath.join(' ')} ${chunk.keywords.join(' ')} ${chunk.content}`.toLowerCase();
   let score = 0;
   for (const token of queryTokens) {
     if (chunk.keywords.includes(token)) score += 3;
@@ -39,16 +41,18 @@ function selectChunks(
     const noteScore = scoreIndexedResource(note, question);
     const sourceChunks = note.chunks.length
       ? note.chunks
-      : [{
-          chunkIndex: 0,
-          content: note.summary,
-          contentHash: note.contentHash,
-          startOffset: 0,
-          endOffset: note.summary.length,
-          headingPath: [],
-          keywords: note.keywords,
-          embedding: note.embedding,
-        } satisfies KnowledgeIndexedChunk];
+      : [
+          {
+            chunkIndex: 0,
+            content: note.summary,
+            contentHash: note.sourceContentHash,
+            startOffset: 0,
+            endOffset: note.summary.length,
+            headingPath: [],
+            keywords: note.keywords,
+            embedding: note.embedding,
+          } satisfies KnowledgeIndexedChunk,
+        ];
     for (const chunk of sourceChunks) {
       ranked.push({ note, chunk, score: noteScore * 2 + chunkScore(chunk, question) });
     }
@@ -61,8 +65,11 @@ function selectChunks(
 
 function citationsFromRanked(ranked: RankedChunk[]): KnowledgeQueryCitation[] {
   return ranked.map(({ note, chunk, score }) => ({
-    resourceId: note.resourceId,
-    resourcePath: note.resourcePath,
+    documentRef: KnowledgeDocumentRefSchema.parse({
+      knowledgeSpaceId: note.knowledgeSpaceId,
+      documentId: note.knowledgeDocumentId,
+    }),
+    sourcePath: note.sourcePath,
     title: note.title,
     chunkIndex: chunk.chunkIndex,
     excerpt: chunk.content.slice(0, 700),
@@ -74,7 +81,7 @@ function contextBlock(ranked: RankedChunk[]): string {
   return ranked
     .map(
       ({ note, chunk }, index) =>
-        `[${index + 1}] ${note.title ?? note.resourcePath} (${note.resourcePath})\n${chunk.content}`,
+        `[${index + 1}] ${note.title ?? note.sourcePath} (${note.sourcePath})\n${chunk.content}`,
     )
     .join('\n\n---\n\n');
 }

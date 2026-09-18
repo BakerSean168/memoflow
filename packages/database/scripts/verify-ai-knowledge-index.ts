@@ -11,10 +11,12 @@ const REQUIRED_BASE_COLUMNS = [
   'id',
   'identity_id',
   'repository_id',
-  'resource_id',
-  'resource_path',
+  'knowledge_space_id',
+  'knowledge_document_id',
+  'source_path',
   'mime_type',
-  'content_hash',
+  'source_content_hash',
+  'source_version',
   'status',
   'keywords',
   'metadata',
@@ -65,7 +67,6 @@ Options:
 function buildVectorLiteral(): string {
   return `[${Array.from({ length: RETRIEVAL_VECTOR_DIMENSION }, () => 0).join(',')}]`;
 }
-
 
 function printReport(report: SmokeReport, asJson: boolean): void {
   if (asJson) {

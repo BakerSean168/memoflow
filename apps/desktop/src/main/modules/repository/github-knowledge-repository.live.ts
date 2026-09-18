@@ -219,10 +219,6 @@ class LiveProjectionRepository implements IKnowledgeNoteProjectionRepository {
   async loadLinkGraphSourcesForIdentity(): Promise<null> {
     return null;
   }
-
-  async updateIndexStatusForIdentity(): Promise<boolean> {
-    return false;
-  }
 }
 
 class LiveWriteRequestRepository implements IKnowledgeWriteRequestRepository {

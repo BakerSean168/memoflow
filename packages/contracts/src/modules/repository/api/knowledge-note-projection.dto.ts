@@ -37,11 +37,6 @@ const vaultRelativeMarkdownPath = z
       .join('/'),
   );
 
-export const KnowledgeNoteProjectionIndexStatusSchema = z.enum(['pending', 'indexed', 'failed']);
-export type KnowledgeNoteProjectionIndexStatus = z.infer<
-  typeof KnowledgeNoteProjectionIndexStatusSchema
->;
-
 export const KnowledgeNoteProjectionClientSchema = z.object({
   id: z.string().min(1),
   connectionId: z.string().min(1),
@@ -53,7 +48,6 @@ export const KnowledgeNoteProjectionClientSchema = z.object({
   contentHash: z.string().min(1),
   frontmatter: z.record(z.string(), z.unknown()),
   markdownContent: z.string(),
-  indexStatus: KnowledgeNoteProjectionIndexStatusSchema,
   createdAt: z.number(),
   updatedAt: z.number(),
   deletedAt: z.number().nullable(),

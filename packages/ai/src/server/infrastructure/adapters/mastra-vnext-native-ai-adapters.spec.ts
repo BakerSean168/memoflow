@@ -19,15 +19,18 @@ describe('Mastra vNext native AI adapters', () => {
       note: {
         identityId: 'identity-1',
         repositoryId: 'repo-1',
-        resourceId: 'note-1',
-        resourcePath: '知识/架构.md',
+        knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440011',
+        knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440012',
+        sourcePath: '知识/架构.md',
+        sourceContentHash: 'source-hash',
+        sourceVersion: 'commit-1',
         title: 'AI 架构设计',
         mimeType: 'text/markdown',
         content:
           '# 架构\n\nMemoFlow 使用 Mastra 作为唯一 Agent runtime。\n\n## 约束\n\n业务写入必须经过 application port。',
       },
     });
-    expect(indexed.contentHash).toMatch(/^[a-f0-9]{64}$/);
+    expect(indexed.sourceContentHash).toBe('source-hash');
     expect(indexed.chunks).toHaveLength(1);
     expect(indexed.keywords.some((value) => value.includes('架构'))).toBe(true);
     expect(indexed.embedding.some((value) => value !== 0)).toBe(true);
@@ -49,11 +52,13 @@ describe('Mastra vNext native AI adapters', () => {
         {
           identityId: 'identity-1',
           repositoryId: 'repo-1',
-          resourceId: 'note-1',
-          resourcePath: 'architecture.md',
+          knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440011',
+          knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440012',
+          sourcePath: 'architecture.md',
+          sourceContentHash: 'hash',
+          sourceVersion: 'commit-1',
           title: 'Architecture',
           mimeType: 'text/markdown',
-          contentHash: 'hash',
           summary: 'Mastra is the single runtime.',
           keywords: ['mastra', 'runtime'],
           embedding: [],
@@ -76,7 +81,10 @@ describe('Mastra vNext native AI adapters', () => {
     });
     expect(result.answer).toContain('Mastra');
     expect(result.citations).toHaveLength(1);
-    expect(result.citations[0]?.resourceId).toBe('note-1');
+    expect(result.citations[0]?.documentRef).toEqual({
+      knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440011',
+      documentId: 'kdoc_550e8400-e29b-41d4-a716-446655440012',
+    });
     expect(complete).toHaveBeenCalledTimes(1);
     const request = complete.mock.calls[0]?.[0];
     expect(JSON.stringify(request)).not.toContain('Authorization');

@@ -52,13 +52,6 @@ vi.mock('../modules/ai/repository-knowledge-source.adapter', () => ({
     return { tag: 'knowledge-source', args };
   }),
 }));
-vi.mock('../modules/ai/repository-knowledge-index-status.adapter', () => ({
-  RepositoryKnowledgeIndexStatusAdapter: vi.fn(function RepositoryKnowledgeIndexStatusAdapterMock(
-    port: unknown,
-  ) {
-    return { tag: 'knowledge-index-status', port };
-  }),
-}));
 vi.mock('../modules/ai/controlled-analytics-read.adapter', () => ({
   ControlledAnalyticsReadAdapter: vi.fn(function ControlledAnalyticsReadAdapterMock(db: unknown) {
     return { tag: 'analytics-read', db };
@@ -104,7 +97,6 @@ import {
 import { createAIApiModule } from '@memoflow/ai/api';
 import { ControlledAnalyticsReadAdapter } from '../modules/ai/controlled-analytics-read.adapter';
 import { GoalPlanMutationAdapter } from '../modules/ai/goal-plan-mutation.adapter';
-import { RepositoryKnowledgeIndexStatusAdapter } from '../modules/ai/repository-knowledge-index-status.adapter';
 import { RepositoryKnowledgeNotePersistenceAdapter } from '../modules/ai/repository-knowledge-note-persistence.adapter';
 import { RepositoryKnowledgeSourceAdapter } from '../modules/ai/repository-knowledge-source.adapter';
 import { TaskPlanMutationAdapter } from '../modules/ai/task-plan-mutation.adapter';
@@ -232,7 +224,6 @@ describe('API composeAI Mastra-only ownership', () => {
 
     expect(RepositoryKnowledgeNotePersistenceAdapter).toHaveBeenCalledWith(repositoryApiPort);
     expect(RepositoryKnowledgeSourceAdapter).toHaveBeenCalledWith(fakeDb, repositoryStorageBaseDir);
-    expect(RepositoryKnowledgeIndexStatusAdapter).toHaveBeenCalledWith(repositoryApiPort);
     expect(ControlledAnalyticsReadAdapter).toHaveBeenCalledWith({
       goalApplicationPort,
       taskDashboardReadPort,
@@ -254,9 +245,6 @@ describe('API composeAI Mastra-only ownership', () => {
     );
     expect(moduleInput.knowledgeSourcePort).toBe(
       vi.mocked(RepositoryKnowledgeSourceAdapter).mock.results[0].value,
-    );
-    expect(moduleInput.knowledgeIndexStatusPort).toBe(
-      vi.mocked(RepositoryKnowledgeIndexStatusAdapter).mock.results[0].value,
     );
     expect(moduleInput.analyticsReadPort).toBe(
       vi.mocked(ControlledAnalyticsReadAdapter).mock.results[0].value,

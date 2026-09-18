@@ -40,7 +40,6 @@ import type {
   IAnalyticsQueryPort,
   IAnalyticsReadPort,
   IKnowledgeIndexRepository,
-  IKnowledgeIndexStatusPort,
   IKnowledgeQueryPort,
   IKnowledgeNotePersistencePort,
   IKnowledgeSourcePort,
@@ -142,7 +141,6 @@ export interface AIModuleDependencies {
   readonly providerConfigRepository: IAIProviderConfigRepository;
   readonly providerSecretVault: IAIProviderSecretVault;
   readonly knowledgeIndexRepository?: IKnowledgeIndexRepository;
-  readonly knowledgeIndexStatusPort?: IKnowledgeIndexStatusPort;
   readonly knowledgeIngestionPort?: IKnowledgeIngestionPort;
   readonly knowledgeQueryPort?: IKnowledgeQueryPort;
   readonly knowledgeSourcePort?: IKnowledgeSourcePort;
@@ -514,7 +512,6 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
         dependencies.knowledgeIndexRepository!,
         knowledgeIngestionPort,
         dependencies.executionLogPort,
-        dependencies.knowledgeIndexStatusPort,
       )
     : null;
 
@@ -527,21 +524,18 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
             dependencies.knowledgeIndexRepository!,
             knowledgeIngestionPort,
             dependencies.executionLogPort,
-            dependencies.knowledgeIndexStatusPort,
           ),
           syncRelevant: new SyncRelevantKnowledgeUseCase(
             dependencies.knowledgeSourcePort!,
             dependencies.knowledgeIndexRepository!,
             knowledgeIngestionPort,
             dependencies.executionLogPort,
-            dependencies.knowledgeIndexStatusPort,
           ),
           syncById: new SyncNoteByIdUseCase(
             dependencies.knowledgeSourcePort!,
             dependencies.knowledgeIndexRepository!,
             knowledgeIngestionPort,
             dependencies.executionLogPort,
-            dependencies.knowledgeIndexStatusPort,
           ),
           removeById: new RemoveKnowledgeIndexNoteUseCase(dependencies.knowledgeIndexRepository!),
         }
@@ -558,7 +552,6 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
               dependencies.knowledgeIndexRepository!,
               knowledgeIngestionPort,
               dependencies.executionLogPort,
-              dependencies.knowledgeIndexStatusPort,
             ),
             knowledgeQueryPort,
             dependencies.executionLogPort,
@@ -571,7 +564,6 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
               dependencies.knowledgeIndexRepository!,
               knowledgeIngestionPort,
               dependencies.executionLogPort,
-              dependencies.knowledgeIndexStatusPort,
             ),
             knowledgeQueryPort,
             dependencies.executionLogPort,
@@ -584,7 +576,6 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
               dependencies.knowledgeIndexRepository!,
               knowledgeIngestionPort,
               dependencies.executionLogPort,
-              dependencies.knowledgeIndexStatusPort,
             ),
             undefined,
             dependencies.providerSecretVault,

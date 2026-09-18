@@ -56,15 +56,6 @@ export interface IKnowledgeRepositoryProjectionService {
     projectionId: string,
     request: GetKnowledgeNoteLinkGraphReq,
   ): Promise<Result<KnowledgeNoteLinkGraphResponse>>;
-  updateIndexStatus(
-    identityId: string,
-    request: {
-      connectionId: string;
-      resourceId: string;
-      contentHash: string;
-      status: KnowledgeNoteProjectionClientDTO['indexStatus'];
-    },
-  ): Promise<Result<{ updated: boolean }>>;
   replayWriteRequestProjection(
     identityId: string,
     writeRequestId: string,

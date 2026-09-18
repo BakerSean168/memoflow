@@ -31,7 +31,7 @@ function tokenize(text: string): string[] {
 function scoreNote(resource: KnowledgeSourceNote, query: string): number {
   const tokens = new Set(tokenize(query));
   const haystack =
-    `${resource.title ?? ''} ${resource.resourcePath} ${resource.content}`.toLowerCase();
+    `${resource.title ?? ''} ${resource.sourcePath} ${resource.content}`.toLowerCase();
   let score = 0;
   for (const token of tokens) {
     if (haystack.includes(token)) score += 1;
@@ -39,15 +39,6 @@ function scoreNote(resource: KnowledgeSourceNote, query: string): number {
   const normalizedQuery = query.trim().toLowerCase();
   if (normalizedQuery && (resource.title ?? '').toLowerCase().includes(normalizedQuery)) score += 2;
   return score;
-}
-
-/**
- * Ephemeral lookup key for an unmanaged projection. The projection id is a
- * path locator and may be used for read/index lookup until explicit adoption;
- * it must never become a durable document relation or confirmed-write id.
- */
-function ephemeralUnmanagedProjectionResourceId(projectionId: string): string {
-  return projectionId;
 }
 
 /**
@@ -78,12 +69,20 @@ export class RepositoryKnowledgeSourceAdapter implements IKnowledgeSourcePort {
     return this.loadNotes(identityId, limit);
   }
 
-  async getNoteById(identityId: string, resourceId: string): Promise<KnowledgeSourceNote | null> {
+  async getNoteById(
+    identityId: string,
+    knowledgeDocumentId: string,
+    knowledgeSpaceId?: string,
+  ): Promise<KnowledgeSourceNote | null> {
     const row = await this.db.knowledgeNoteProjection.findFirst({
       where: {
-        OR: [{ id: resourceId }, { knowledgeDocumentId: resourceId }],
+        knowledgeDocumentId,
         deletedAt: null,
-        binding: { identityId, disconnectedAt: null },
+        binding: {
+          identityId,
+          disconnectedAt: null,
+          ...(knowledgeSpaceId ? { knowledgeSpaceId } : {}),
+        },
       },
       include: { binding: { select: { knowledgeSpaceId: true } } },
     });
@@ -94,13 +93,16 @@ export class RepositoryKnowledgeSourceAdapter implements IKnowledgeSourcePort {
     const rows = await this.db.knowledgeNoteProjection.findMany({
       where: {
         deletedAt: null,
+        knowledgeDocumentId: { not: null },
         binding: { identityId, disconnectedAt: null },
       },
       include: { binding: { select: { knowledgeSpaceId: true } } },
       orderBy: { updatedAt: 'desc' },
       take: limit,
     });
-    return rows.map((row) => this.toKnowledgeNote(identityId, row));
+    return rows
+      .filter((row) => row.knowledgeDocumentId !== null)
+      .map((row) => this.toKnowledgeNote(identityId, row));
   }
 
   private toKnowledgeNote(
@@ -114,7 +116,7 @@ export class RepositoryKnowledgeSourceAdapter implements IKnowledgeSourcePort {
       frontmatter: unknown;
       blobSha: string;
       contentHash: string;
-      indexStatus: string;
+      commitSha: string;
       binding: { knowledgeSpaceId: string };
     },
   ): KnowledgeSourceNote {
@@ -126,22 +128,24 @@ export class RepositoryKnowledgeSourceAdapter implements IKnowledgeSourcePort {
       typeof frontmatter['title'] === 'string'
         ? frontmatter['title']
         : (row.relativePath.split('/').slice(-1)[0]?.replace(/\.md$/i, '') ?? row.relativePath);
-    const contentHash =
+    const sourceContentHash =
       row.contentHash || createHash('sha256').update(row.markdownContent).digest('hex');
     return {
       identityId,
       repositoryId: row.bindingId,
-      resourceId: row.knowledgeDocumentId ?? ephemeralUnmanagedProjectionResourceId(row.id),
-      resourcePath: row.relativePath,
+      knowledgeSpaceId: row.binding.knowledgeSpaceId,
+      knowledgeDocumentId: row.knowledgeDocumentId,
+      sourcePath: row.relativePath,
+      sourceContentHash,
+      sourceVersion: row.commitSha,
       title,
       mimeType: 'text/markdown',
       content: row.markdownContent,
       metadata: {
         frontmatter,
         blobSha: row.blobSha,
-        contentHash,
-        contentDigest: contentHash,
-        projectionIndexStatus: row.indexStatus,
+        contentHash: sourceContentHash,
+        contentDigest: sourceContentHash,
         knowledgeDocumentId: row.knowledgeDocumentId,
         knowledgeSpaceId: row.binding.knowledgeSpaceId,
         sourceType: 'github-default-branch-projection',

@@ -446,7 +446,9 @@ test.describe('AI Goal Workflow', () => {
     await expect(page.getByTestId('knowledge-citation-open')).toBeVisible();
 
     await page.getByTestId('knowledge-citation-open').click();
-    await expect(page).toHaveURL(/\/repository$/);
+    await expect(page).toHaveURL(
+      /\/repository\?note=kdoc_550e8400-e29b-41d4-a716-446655440090$/,
+    );
     expect(telemetry.legacyEndpointCallCount).toBe(0);
   });
 
@@ -1318,8 +1320,11 @@ async function installGoalWorkflowMocks(
       answer: 'Grounded answers cite repository excerpts and show where each claim came from.',
       citations: [
         {
-          resourceId: 'resource-grounding-1',
-          resourcePath: 'notes/ai/grounding-policy.md',
+          documentRef: {
+            knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440091',
+            documentId: 'kdoc_550e8400-e29b-41d4-a716-446655440090',
+          },
+          sourcePath: 'notes/ai/grounding-policy.md',
           title: 'MemoFlow grounding policy',
           chunkIndex: 0,
           excerpt: 'Knowledge answers must cite repository evidence before sounding certain.',

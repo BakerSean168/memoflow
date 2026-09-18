@@ -135,7 +135,6 @@ export class PrismaServerHeldDataDisclosureSource implements ServerHeldDataDiscl
               contentHash: true,
               frontmatter: true,
               markdownContent: true,
-              indexStatus: true,
               createdAt: true,
               updatedAt: true,
               deletedAt: true,
@@ -193,11 +192,13 @@ export class PrismaServerHeldDataDisclosureSource implements ServerHeldDataDiscl
         select: {
           id: true,
           repositoryId: true,
-          resourceId: true,
-          resourcePath: true,
+          knowledgeSpaceId: true,
+          knowledgeDocumentId: true,
+          sourcePath: true,
           title: true,
           mimeType: true,
-          contentHash: true,
+          sourceContentHash: true,
+          sourceVersion: true,
           status: true,
           summary: true,
           keywords: true,
@@ -351,6 +352,7 @@ export class PrismaServerHeldDataDisclosureSource implements ServerHeldDataDiscl
       aiKnowledgeIndexEntries: aiKnowledgeIndexEntries.map(
         (entry): ServerHeldAiKnowledgeIndexEntry => ({
           ...entry,
+          knowledgeDocumentId: KnowledgeDocumentIdSchema.parse(entry.knowledgeDocumentId),
           indexedAt: iso(entry.indexedAt),
           lastRequestedAt: nullableIso(entry.lastRequestedAt),
           createdAt: iso(entry.createdAt),

@@ -96,30 +96,35 @@ function splitIntoChunks(
  */
 export class DeterministicKnowledgeIngestionAdapter implements IKnowledgeIngestionPort {
   async indexNote(input: KnowledgeIngestionInput): Promise<KnowledgeIndexedNote> {
+    if (!input.note.knowledgeDocumentId) {
+      throw new Error('Knowledge indexing requires a stable KnowledgeDocumentId');
+    }
     const maxChunkChars = Math.max(600, input.maxChunkChars ?? DEFAULT_CHUNK_CHARS);
     const overlapChars = Math.min(
       Math.max(0, input.overlapChars ?? DEFAULT_OVERLAP_CHARS),
       Math.floor(maxChunkChars / 3),
     );
-    const contentHash = sha256(input.note.content);
+    const sourceContentHash = input.note.sourceContentHash || sha256(input.note.content);
     const summarySource = cleanMarkdownForSummary(input.note.content);
     const summary = summarySource.slice(0, 800);
     const keywords = extractKeywords(
-      [input.note.title ?? '', input.note.resourcePath, input.note.content].join('\n'),
+      [input.note.title ?? '', input.note.sourcePath, input.note.content].join('\n'),
     );
 
     return {
       identityId: input.note.identityId,
       repositoryId: input.note.repositoryId,
-      resourceId: input.note.resourceId,
-      resourcePath: input.note.resourcePath,
+      knowledgeSpaceId: input.note.knowledgeSpaceId,
+      knowledgeDocumentId: input.note.knowledgeDocumentId,
+      sourcePath: input.note.sourcePath,
+      sourceContentHash,
+      sourceVersion: input.note.sourceVersion,
       title: input.note.title,
       mimeType: input.note.mimeType,
-      contentHash,
       summary,
       keywords,
       embedding: buildRetrievalEmbedding(
-        [input.note.title ?? '', input.note.resourcePath, summary, keywords.join(' ')].join(' '),
+        [input.note.title ?? '', input.note.sourcePath, summary, keywords.join(' ')].join(' '),
       ),
       chunks: splitIntoChunks(input.note.content, maxChunkChars, overlapChars),
       metadata: { ...(input.note.metadata ?? {}) },

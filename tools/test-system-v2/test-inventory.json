@@ -128,16 +128,6 @@
       ]
     },
     {
-      "path": "apps/api/src/modules/ai/repository-knowledge-index-status.adapter.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "apps/api/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "apps/api/vitest.config.ts"
-      ]
-    },
-    {
       "path": "apps/api/src/modules/ai/repository-knowledge-note-persistence.adapter.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10796,7 +10786,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 72
+      "fileCount": 71
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -11153,7 +11143,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 72
+      "fileCount": 71
     },
     {
       "id": "apps/desktop/vitest.config.ts",
@@ -11389,7 +11379,6 @@
       "apps/api/src/modules/ai/owner-activity-read.adapter.spec.ts",
       "apps/api/src/modules/ai/planner-read.adapter.spec.ts",
       "apps/api/src/modules/ai/repository-knowledge-cloud-data-purger.adapter.test.ts",
-      "apps/api/src/modules/ai/repository-knowledge-index-status.adapter.test.ts",
       "apps/api/src/modules/ai/repository-knowledge-note-persistence.adapter.test.ts",
       "apps/api/src/modules/ai/repository-knowledge-source.adapter.test.ts",
       "apps/api/src/modules/ai/routine-command.adapter.spec.ts",
@@ -11938,7 +11927,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1036,
+    "unit": 1035,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

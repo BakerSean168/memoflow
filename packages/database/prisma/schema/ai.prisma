@@ -193,11 +193,13 @@ model AiKnowledgeIndexEntry {
   id              String                     @id
   identityId      String                     @map("identity_id")
   repositoryId    String                     @map("repository_id")
-  resourceId      String                     @unique @map("resource_id")
-  resourcePath    String                     @map("resource_path")
+  knowledgeSpaceId    String                @map("knowledge_space_id")
+  knowledgeDocumentId String                @map("knowledge_document_id")
+  sourcePath      String                     @map("source_path")
   title           String?
   mimeType        String                     @map("mime_type")
-  contentHash     String                     @map("content_hash")
+  sourceContentHash String                   @map("source_content_hash")
+  sourceVersion   String?                    @map("source_version")
   status          String
   summary         String?                    @db.Text
   keywords        Json                       @default("[]")
@@ -215,6 +217,8 @@ model AiKnowledgeIndexEntry {
   account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
 
   @@index([identityId])
+  @@unique([knowledgeSpaceId, knowledgeDocumentId])
+  @@index([knowledgeSpaceId, knowledgeDocumentId])
   @@index([repositoryId])
   @@index([status])
   @@index([lastRequestedAt])

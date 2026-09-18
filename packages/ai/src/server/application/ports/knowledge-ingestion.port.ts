@@ -3,8 +3,11 @@ import type { ChatExecutionProviderConfig } from './chat-execution.port';
 export interface KnowledgeSourceNote {
   identityId: string;
   repositoryId: string;
-  resourceId: string;
-  resourcePath: string;
+  knowledgeSpaceId: string;
+  knowledgeDocumentId: string | null;
+  sourcePath: string;
+  sourceContentHash: string;
+  sourceVersion?: string | null;
   title?: string;
   mimeType: string;
   content: string;
@@ -25,11 +28,13 @@ export interface KnowledgeIndexedChunk {
 export interface KnowledgeIndexedNote {
   identityId: string;
   repositoryId: string;
-  resourceId: string;
-  resourcePath: string;
+  knowledgeSpaceId: string;
+  knowledgeDocumentId: string;
+  sourcePath: string;
+  sourceContentHash: string;
+  sourceVersion?: string | null;
   title?: string;
   mimeType: string;
-  contentHash: string;
   summary: string;
   keywords: string[];
   embedding: number[];
