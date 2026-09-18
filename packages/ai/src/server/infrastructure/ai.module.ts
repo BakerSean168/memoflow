@@ -39,6 +39,7 @@ import type {
   AIProviderManagementPort,
   AssistantConversationPort,
 } from '../application';
+import { AIConversationPortableCapability } from '../application';
 import type {
   IAIExecutionRecordPort,
   IAIEvaluationReportPort,
@@ -309,6 +310,8 @@ export interface AIModuleServices {
 export interface AIModuleInstance {
   readonly conversationRepository: IAIConversationRepository;
   readonly providerConfigRepository: IAIProviderConfigRepository;
+  /** AI-owner V3 portability for product Conversation shells. */
+  readonly portableCapability: AIConversationPortableCapability;
   readonly services: AIModuleServices;
   readonly providerManagement: AIProviderManagementPort;
   readonly assistantConversation: AssistantConversationPort;
@@ -445,6 +448,7 @@ function providerCatalogDto(): ListAIProviderCatalogRes {
  */
 export function createAIModule(dependencies: AIModuleDependencies): AIModuleInstance {
   const { conversationRepository, providerConfigRepository } = dependencies;
+  const portableCapability = new AIConversationPortableCapability(conversationRepository);
 
   // --- Runtime contributions (host-provided side effects) ---
 
@@ -766,6 +770,7 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
   return {
     conversationRepository,
     providerConfigRepository,
+    portableCapability,
     services,
     providerManagement,
     assistantConversation,

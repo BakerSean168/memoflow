@@ -539,7 +539,7 @@ async function registerBusinessModules(
     userTimeContextPort: settingElectronModule.userTimeContextPort,
   });
 
-  const AIElectronModule = composeAI({
+  const aiComposed = composeAI({
     db,
     knowledgeNotePersistence: new DesktopKnowledgeNotePersistenceAdapter(localVaultRuntime),
     knowledgeSourcePort: new DesktopKnowledgeSourceAdapter(localVaultRuntime),
@@ -571,6 +571,7 @@ async function registerBusinessModules(
       createLabelPortableCapability(labelService),
       goalComposed.portableCapability,
       taskComposed.portableCapability,
+      aiComposed.portableCapability,
     ],
   });
 
@@ -652,7 +653,7 @@ async function registerBusinessModules(
     .register(scheduleComposed.schedulerModule)
     .register(interventionWindowElectronModule)
     .register(focusWindowElectronModule)
-    .register(AIElectronModule)
+    .register(aiComposed.module)
     .register(governanceElectronModule)
     .register(repositoryElectronModule);
 

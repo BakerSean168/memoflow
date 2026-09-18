@@ -30,6 +30,7 @@ import {
   type IAIActivityReadPort,
   type IAITaskDashboardReadPort,
   type MastraStorageConfig,
+  type AIModuleInstance,
 } from '@memoflow/ai';
 import { createAIApiModule, type AIApiModuleDef } from '@memoflow/ai/api';
 import type { RepositoryApplicationPort } from '@memoflow/repository';
@@ -50,6 +51,12 @@ import { RoutineAICommandAdapter } from '../modules/ai/routine-command.adapter';
 import { PlannerAIReadAdapter } from '../modules/ai/planner-read.adapter';
 import { NotificationAIReadAdapter } from '../modules/ai/notification-read.adapter';
 import { OwnerActivityAIReadAdapter } from '../modules/ai/owner-activity-read.adapter';
+
+export interface ComposedAI {
+  readonly module: AIApiModuleDef;
+  /** AI-owned Conversation shell portability capability for host registration. */
+  readonly portableCapability: AIModuleInstance['portableCapability'];
+}
 
 export interface ComposeAIDependencies {
   /** Shared API-lane Prisma client owned by apps/api. */
@@ -93,7 +100,7 @@ export interface ComposeAIDependencies {
  * 4. createAIModule({ ...repository set, mastraRuntime, host ports }) — assemble.
  * 5. createAIApiModule({ instance }) — bind the instance to an IApiModule handle.
  */
-export function composeAI(dependencies: ComposeAIDependencies): AIApiModuleDef {
+export function composeAI(dependencies: ComposeAIDependencies): ComposedAI {
   const repositorySet = createAIPrismaRepositories(dependencies.db);
   const goalRepositories = createGoalPrismaRepositories(dependencies.db);
   const taskRepositories = createTaskPrismaRepositories(dependencies.db);
@@ -175,5 +182,8 @@ export function composeAI(dependencies: ComposeAIDependencies): AIApiModuleDef {
     analyticsReadPort,
   });
 
-  return createAIApiModule({ instance });
+  return {
+    module: createAIApiModule({ instance }),
+    portableCapability: instance.portableCapability,
+  };
 }

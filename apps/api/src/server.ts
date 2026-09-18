@@ -302,20 +302,6 @@ async function bootstrap(): Promise<void> {
     relationCleanupFactory: (tx) => new PrismaGoalRelationCleanupCapability(tx),
   });
 
-  const dataPortabilityApiModule = composeDataPortability({
-    db: prisma,
-    portableCapabilities: [
-      accountApiModule.portableCapability,
-      settingApiModule.portableCapability,
-      notificationApiModule.module.portableCapability,
-      routineComposed.portableCapability,
-      scheduleApiModule.portableCapability,
-      notificationApiModule.portableFactCapability,
-      createLabelPortableCapability(labelService),
-      goalComposed.portableCapability,
-      taskComposed.portableCapability,
-    ],
-  });
   const goalWorkspaceService = new GoalWorkspaceQueryService({
     goalRepository: goalComposed.repositories.goalRepository,
     goalRecordRepository: goalComposed.repositories.goalRecordRepository,
@@ -326,7 +312,7 @@ async function bootstrap(): Promise<void> {
   if (!env.DATABASE_URL) {
     throw new Error('AI Mastra runtime requires DATABASE_URL after environment normalization');
   }
-  const aiApiModule = composeAI({
+  const aiComposed = composeAI({
     db: prisma,
     repositoryApiPort: repositoryApiModule.getApplicationPort(),
     repositoryStorageBaseDir,
@@ -342,6 +328,21 @@ async function bootstrap(): Promise<void> {
     userTimeContextPort: settingApiModule.userTimeContextPort,
     labelService,
     mastraStorage: { kind: 'postgres', connectionString: env.DATABASE_URL },
+  });
+  const dataPortabilityApiModule = composeDataPortability({
+    db: prisma,
+    portableCapabilities: [
+      accountApiModule.portableCapability,
+      settingApiModule.portableCapability,
+      notificationApiModule.module.portableCapability,
+      routineComposed.portableCapability,
+      scheduleApiModule.portableCapability,
+      notificationApiModule.portableFactCapability,
+      createLabelPortableCapability(labelService),
+      goalComposed.portableCapability,
+      taskComposed.portableCapability,
+      aiComposed.portableCapability,
+    ],
   });
   const governanceApiModule = composeGovernance({ db: prisma });
   // App-local infrastructure modules: DB-backed dependencies are bound by the
@@ -371,7 +372,7 @@ async function bootstrap(): Promise<void> {
     .register(settingApiModule) // ✅ 设置模块 (runtime composer)
     .register(taskComposed.module) // ✅ 任务模块
     .register(taskWorkspaceApiModule) // ✅ Task Workspace read composition
-    .register(aiApiModule) // ✅ AI 模块 (runtime composer)
+    .register(aiComposed.module) // ✅ AI 模块 (runtime composer)
     .register(goalComposed.module) // ✅ 目标模块
     .register(goalWorkspaceApiModule) // ✅ Goal Workspace read composition
     .register(labelApiModule) // ✅ 共享标签目录

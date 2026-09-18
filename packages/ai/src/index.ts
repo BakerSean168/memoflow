@@ -34,6 +34,8 @@ export {
   type AIRuntimeContributionsInput,
   type AIPowerSyncRepositorySet,
   type AIPrismaRepositorySet,
+  AIConversationPortableCapability,
+  createAIConversationPortableCapability,
   type IAIConversationRepository,
   type IAIProviderConfigRepository,
   KnowledgeCapturePersistenceAdapter,

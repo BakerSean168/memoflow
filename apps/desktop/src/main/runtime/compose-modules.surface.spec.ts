@@ -77,7 +77,7 @@ describe('desktop runtime composer surface (Batch Step D)', () => {
       '.register(scheduleComposed.schedulerModule)',
       '.register(interventionWindowElectronModule)',
       '.register(focusWindowElectronModule)',
-      '.register(AIElectronModule)',
+      '.register(aiComposed.module)',
       '.register(governanceElectronModule)',
       '.register(repositoryElectronModule)',
     ];
@@ -186,6 +186,8 @@ describe('desktop runtime composer surface (Batch Step D)', () => {
     expect(main).toContain('notificationComposed.portableFactCapability');
     expect(main).toContain('createLabelPortableCapability(labelService)');
     expect(main).toContain('goalComposed.portableCapability');
+    expect(main).toContain('aiComposed.portableCapability');
+    expect(main.match(/aiComposed\.portableCapability/g)).toHaveLength(1);
   });
 
   it('notification composer exposes the durable NotificationRequested writer from the SAME repository set', () => {

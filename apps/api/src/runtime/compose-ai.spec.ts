@@ -153,6 +153,7 @@ beforeEach(() => {
     repositories as ReturnType<typeof createAIPrismaRepositories>,
   );
   vi.mocked(createAIModule).mockReturnValue({
+    portableCapability: { key: 'ai-conversations', schemaVersion: 3 },
     providerManagement: {},
     assistantConversation: {},
     knowledge: {},

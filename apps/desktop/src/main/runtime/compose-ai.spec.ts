@@ -132,6 +132,7 @@ beforeEach(() => {
     repositorySet as ReturnType<typeof createAIPowerSyncRepositories>,
   );
   vi.mocked(createAIModule).mockReturnValue({
+    portableCapability: { key: 'ai-conversations', schemaVersion: 3 },
     providerManagement: {},
     assistantConversation: {},
     knowledge: {},
