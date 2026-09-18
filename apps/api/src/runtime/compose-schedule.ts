@@ -7,6 +7,7 @@
  */
 import {
   createScheduleModule,
+  type SchedulePortableCapability,
   type ScheduleRepositorySet,
 } from '@memoflow/schedule';
 import {
@@ -36,6 +37,7 @@ export interface ComposeScheduleDependencies {
 export interface ComposedSchedule {
   readonly calendarModule: ScheduleApiModuleDef;
   readonly schedulerModule: SchedulerApiModuleDef;
+  readonly portableCapability: SchedulePortableCapability;
   readonly repositories: {
     readonly scheduleRepository: ScheduleRepositorySet['scheduleRepository'];
   };
@@ -78,6 +80,7 @@ export function composeSchedule(
   return {
     calendarModule: createScheduleApiModule({ instance: calendarInstance }),
     schedulerModule: createSchedulerApiModule({ instance: schedulerInstance }),
+    portableCapability: calendarInstance.portableCapability,
     repositories: {
       scheduleRepository: dependencies.calendarRepositories.scheduleRepository,
     },

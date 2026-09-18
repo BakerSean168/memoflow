@@ -181,6 +181,9 @@ describe('desktop runtime composer surface (Batch Step D)', () => {
     expect(main).toMatch(/composeDataPortability\(\{[\s\S]*?portableCapabilities:/);
     expect(main).toContain('settingElectronModule.portableCapability');
     expect(main).toContain('notificationComposed.module.portableCapability');
+    expect(main).toContain('routineComposed.portableCapability');
+    expect(main).toContain('scheduleComposed.portableCapability');
+    expect(main).toContain('notificationComposed.portableFactCapability');
     expect(main).toContain('createLabelPortableCapability(labelService)');
     expect(main).toContain('goalComposed.portableCapability');
   });

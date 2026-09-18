@@ -14,6 +14,7 @@
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import {
   createRoutinePowerSyncRepositories,
+  createRoutinePortableCapability,
   loadPowerSyncRoutineLocalRegistrations,
 } from '@memoflow/reminder';
 import {
@@ -63,6 +64,7 @@ const DEFAULT_DESKTOP_INTERVENTION_POLICY: InterventionPolicy = {
 export interface ComposedRoutineDesktop {
   /** Routine Coach owner-domain command seam for approved AI/product orchestration. */
   readonly routineCommandPort: RoutineCoachCommandPort;
+  readonly portableCapability: ReturnType<typeof createRoutinePortableCapability>;
   /** Per-profile local Routine intervention truth shared by occurrence coordinators and InterventionWindow. */
   readonly interventionRuntime: InterventionRuntime;
   readonly protocolBreakCreditRuntime: ProtocolBreakCreditRuntime;
@@ -328,6 +330,7 @@ export function composeRoutine(
 
   return {
     routineCommandPort,
+    portableCapability: createRoutinePortableCapability(repositories),
     interventionRuntime,
     protocolBreakCreditRuntime,
     activityRuntime,

@@ -26,9 +26,51 @@ describe('data-portability API runtime composer surface', () => {
     expect(server).toContain('accountApiModule.portableCapability');
     expect(server).toContain('settingApiModule.portableCapability');
     expect(server).toContain('notificationApiModule.module.portableCapability');
+    expect(server).toContain('routineComposed.portableCapability');
+    expect(server).toContain('scheduleApiModule.portableCapability');
+    expect(server).toContain('notificationApiModule.portableFactCapability');
     expect(server).toContain('createLabelPortableCapability(labelService)');
     expect(server).toContain('goalComposed.portableCapability');
     expect(server).toContain('.register(dataPortabilityApiModule.module)');
+  });
+
+  it('keeps API and Desktop owner capability registration keys in the same deterministic order', () => {
+    const desktop = readFileSync(
+      resolve(dir, '../../desktop/src/main/main.ts'),
+      'utf8',
+    );
+    const apiOrder = [
+      'accountApiModule.portableCapability',
+      'settingApiModule.portableCapability',
+      'notificationApiModule.module.portableCapability',
+      'routineComposed.portableCapability',
+      'scheduleApiModule.portableCapability',
+      'notificationApiModule.portableFactCapability',
+      'createLabelPortableCapability(labelService)',
+      'goalComposed.portableCapability',
+      'taskComposed.portableCapability',
+    ];
+    const desktopOrder = [
+      'accountComposed.portableCapability',
+      'settingElectronModule.portableCapability',
+      'notificationComposed.module.portableCapability',
+      'routineComposed.portableCapability',
+      'scheduleComposed.portableCapability',
+      'notificationComposed.portableFactCapability',
+      'createLabelPortableCapability(labelService)',
+      'goalComposed.portableCapability',
+      'taskComposed.portableCapability',
+    ];
+    const registrationBody = (source: string, first: string) =>
+      source.slice(source.indexOf(first));
+    const orderedIndexes = (source: string, entries: readonly string[]) =>
+      entries.map((entry) => source.indexOf(entry));
+    expect(orderedIndexes(registrationBody(server, apiOrder[0]!), apiOrder)).toEqual(
+      [...orderedIndexes(registrationBody(server, apiOrder[0]!), apiOrder)].sort((a, b) => a - b),
+    );
+    expect(orderedIndexes(registrationBody(desktop, desktopOrder[0]!), desktopOrder)).toEqual(
+      [...orderedIndexes(registrationBody(desktop, desktopOrder[0]!), desktopOrder)].sort((a, b) => a - b),
+    );
   });
 
   it('server.ts no longer references DataPortabilityApiModule or the data-portability/api seam', () => {

@@ -15,3 +15,12 @@ export {
 export * from './use-cases';
 export * from './services';
 export * from './notification-preference-portability';
+export {
+  NotificationPortableCapability,
+  createNotificationPortableCapability,
+} from './notification-portability';
+export type {
+  NotificationPortableFactV3,
+  NotificationPortableInteractionV3,
+  NotificationPortablePayloadV3,
+} from '@memoflow/contracts/notification';

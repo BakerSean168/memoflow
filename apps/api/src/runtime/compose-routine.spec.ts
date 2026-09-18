@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => {
   const runtimeContextStore = { tag: 'runtime-context' };
   const notifier = vi.fn();
   const commandPort = { tag: 'routine-command-port' };
+  const portableCapability = { tag: 'routine-portable-capability' };
   const repositories = {
     routineProfileStore: { tag: 'profile-store' },
     routineTemporaryOverrideStore: { tag: 'override-store' },
@@ -15,8 +16,10 @@ const mocks = vi.hoisted(() => {
     runtimeContextStore,
     notifier,
     commandPort,
+    portableCapability,
     repositories,
     createRoutinePrismaRepositories: vi.fn(() => repositories),
+    createRoutinePortableCapability: vi.fn(() => portableCapability),
     createInMemoryRoutineRuntimeContextStore: vi.fn(() => runtimeContextStore),
     createRoutineOverrideChangedNotifier: vi.fn(() => notifier),
     createRoutineCoachCommandService: vi.fn(() => commandPort),
@@ -25,6 +28,7 @@ const mocks = vi.hoisted(() => {
 
 vi.mock('@memoflow/reminder', () => ({
   createRoutinePrismaRepositories: mocks.createRoutinePrismaRepositories,
+  createRoutinePortableCapability: mocks.createRoutinePortableCapability,
 }));
 
 vi.mock('@memoflow/reminder/routine-runtime', () => ({
@@ -53,7 +57,11 @@ describe('composeRoutine', () => {
       protocolSessionStore: mocks.repositories.protocolSessionStore,
       onOverrideChanged: mocks.notifier,
     });
-    expect(composed).toEqual({ routineCommandPort: mocks.commandPort });
+    expect(mocks.createRoutinePortableCapability).toHaveBeenCalledWith(mocks.repositories);
+    expect(composed).toEqual({
+      routineCommandPort: mocks.commandPort,
+      portableCapability: mocks.portableCapability,
+    });
   });
 
   it('does not expose a transport module, legacy repositories, or schedule source aliases', () => {

@@ -289,6 +289,19 @@ export class PowerSyncRoutineOccurrenceTruthStore implements RoutineOccurrenceTr
     return row ? mapOccurrence(row) : null;
   }
 
+  async listOccurrences(input: { readonly identityId: string }): Promise<RoutineOccurrenceFact[]> {
+    const rows = await this.db.getAll<RoutineOccurrenceRow>(
+      `SELECT id, identity_id, routine_id, occurrence_key, scheduled_for, source_revision,
+              trigger_kind, became_due_at, resolution_state, resolved_at,
+              resolution_kind, resolution_reason
+         FROM routine_occurrences
+        WHERE identity_id = ?
+        ORDER BY became_due_at ASC, id ASC`,
+      [input.identityId],
+    );
+    return rows.map(mapOccurrence);
+  }
+
   async resolveOccurrence(input: ResolveRoutineOccurrenceInput): Promise<RoutineOccurrenceFact> {
     return this.db.writeTransaction(async (tx) => mapOccurrence(await resolveOnDb(tx, input)));
   }
@@ -396,6 +409,20 @@ export class PowerSyncRoutineOccurrenceTruthStore implements RoutineOccurrenceTr
         WHERE identity_id = ? AND routine_id = ? AND occurrence_key = ?
         ORDER BY acted_at ASC, id ASC`,
       [input.identityId, input.routineId, input.occurrenceKey],
+    );
+    return rows.map(mapInteraction);
+  }
+
+  async listInteractionsForIdentity(input: {
+    readonly identityId: string;
+  }): Promise<RoutineInteractionFact[]> {
+    const rows = await this.db.getAll<RoutineInteractionRow>(
+      `SELECT id, idempotency_key, identity_id, routine_id, occurrence_key, action,
+              acted_at, response_latency_ms, snooze_duration_ms, metadata_json
+         FROM routine_interactions
+        WHERE identity_id = ?
+        ORDER BY acted_at ASC, id ASC`,
+      [input.identityId],
     );
     return rows.map(mapInteraction);
   }
