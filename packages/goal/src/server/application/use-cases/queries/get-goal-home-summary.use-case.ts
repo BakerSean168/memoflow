@@ -20,9 +20,14 @@ export class GetGoalHomeSummaryUseCase {
       systemView: 'active',
     });
 
-    const ordered = activeGoals
-      .slice()
-      .sort((left, right) => Number(right.updatedAt) - Number(left.updatedAt));
+    const ordered = activeGoals.slice().sort((left, right) => {
+      const updatedAtDelta = Number(right.updatedAt) - Number(left.updatedAt);
+      if (updatedAtDelta !== 0) return updatedAtDelta;
+
+      const leftId = String(left.id);
+      const rightId = String(right.id);
+      return leftId < rightId ? -1 : leftId > rightId ? 1 : 0;
+    });
 
     return ok({
       activeCount: activeGoals.length,

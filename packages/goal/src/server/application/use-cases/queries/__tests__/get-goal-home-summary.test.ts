@@ -58,4 +58,20 @@ describe('GetGoalHomeSummaryUseCase', () => {
     const result = await useCase.execute('identity-1');
     expect(result).toEqual({ ok: true, data: { activeCount: 0, goals: [] } });
   });
+
+  it('uses goal id as a deterministic tie-breaker for equal update times', async () => {
+    const findByIdentityId = vi.fn().mockResolvedValue([
+      goal({ id: 'goal-b', updatedAt: 10 }),
+      goal({ id: 'goal-a', updatedAt: 10 }),
+    ]);
+    const useCase = new GetGoalHomeSummaryUseCase(
+      createMockRepo<IGoalRepository>({ findByIdentityId }),
+    );
+
+    const result = await useCase.execute('identity-1');
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.data.goals.map((item) => item.id)).toEqual(['goal-a', 'goal-b']);
+  });
 });
