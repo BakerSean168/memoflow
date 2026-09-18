@@ -1191,7 +1191,7 @@ Routine Coach 的日常体验不能依赖主 Reminder 页面。
 职责：
 
 - AI 对话；
-- Dashboard；
+- Home owner-read composition；
 - Routine 方法库；
 - Profile 管理；
 - Protocol 配置；

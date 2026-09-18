@@ -276,14 +276,6 @@ exports.Prisma.AiKnowledgeIndexEntryScalarFieldEnum = {
   deletedAt: 'deletedAt'
 };
 
-exports.Prisma.DashboardConfigScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  widgetConfig: 'widgetConfig',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
 exports.Prisma.CloudAuthUserScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -1406,7 +1398,6 @@ exports.Prisma.ModelName = {
   AiProviderSecret: 'AiProviderSecret',
   KnowledgeGenerationTask: 'KnowledgeGenerationTask',
   AiKnowledgeIndexEntry: 'AiKnowledgeIndexEntry',
-  DashboardConfig: 'DashboardConfig',
   CloudAuthUser: 'CloudAuthUser',
   CloudAuthSession: 'CloudAuthSession',
   CloudAuthProviderAccount: 'CloudAuthProviderAccount',

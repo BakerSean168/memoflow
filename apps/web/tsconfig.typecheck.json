@@ -25,9 +25,6 @@
       "@memoflow/app-vue/web-bootstrap": [
         "packages/app-vue/src/web-bootstrap.ts"
       ],
-      "@memoflow/app-vue/web-entry": [
-        "packages/app-vue/src/web-entry.ts"
-      ],
       "@memoflow/app-vue": [
         "packages/app-vue/src/index.ts"
       ],

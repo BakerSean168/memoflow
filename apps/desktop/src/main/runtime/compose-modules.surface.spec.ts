@@ -194,14 +194,6 @@ describe('desktop runtime composer surface (Batch Step D)', () => {
     expect(notification).toContain('requestedWriter: repositories.requestedWriter');
   });
 
-  it('dashboard-read-service no longer reads electron accessors', () => {
-    const dashboard = readFileSync(resolve(mainDir, 'services/dashboard-read-service.ts'), 'utf8');
-    expect(dashboard).not.toMatch(/get(Schedule|Notification)Repository/);
-    expect(dashboard).toContain('scheduleRepository');
-    expect(dashboard).not.toMatch(/reminderTemplateRepository/);
-    expect(dashboard).toContain('notificationRepository');
-  });
-
   it('window-manager and profile runtime drive the bound schedule runtime controller', () => {
     const windowManager = readFileSync(resolve(mainDir, 'lifecycle/window-manager.ts'), 'utf8');
     const profileManager = readFileSync(

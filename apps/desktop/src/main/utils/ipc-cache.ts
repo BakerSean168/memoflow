@@ -11,7 +11,6 @@ import { ipcMain } from 'electron';
 import type { IpcMainInvokeEvent } from 'electron';
 import {
   CacheChannels,
-  DashboardChannels,
   GoalChannels,
   TaskChannels,
 } from '@memoflow/contracts/electron';
@@ -394,7 +393,6 @@ export function getIpcCache(): IpcCache {
     // Configure specific channel TTLs
     ipcCacheInstance.setChannelTTL(GoalChannels.LIST, 10000); // 10 seconds
     ipcCacheInstance.setChannelTTL(TaskChannels.PLAN_LIST, 10000);
-    ipcCacheInstance.setChannelTTL(DashboardChannels.GET_STATS, 30000); // 30 seconds
   }
   return ipcCacheInstance;
 }
@@ -457,7 +455,7 @@ export function withCache<T>(
  *   async (event, request) => {
  *     return await goalService.create(request);
  *   },
- *   ['goal:list', 'dashboard:get-all']
+ *   ['goal:list']
  * ));
  * ```
  *

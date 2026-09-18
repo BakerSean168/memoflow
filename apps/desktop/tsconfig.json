@@ -87,9 +87,6 @@
       "@memoflow/http-client": [
         "../../packages/http-client/src/index.ts"
       ],
-      "@memoflow/dashboard": [
-        "../../packages/dashboard/src/index.ts"
-      ],
       "@memoflow/contracts": [
         "../../packages/contracts/src/index.ts"
       ],

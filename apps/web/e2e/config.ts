@@ -60,11 +60,6 @@ export const WEB_CONFIG = {
   HOME_PATH: '/',
 
   /**
-   * Dashboard 页面路径
-   */
-  DASHBOARD_PATH: '/dashboard',
-
-  /**
    * Settings 页面路径
    */
   SETTINGS_PATH: '/settings',

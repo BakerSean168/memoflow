@@ -53,9 +53,6 @@ export type IRuntimeUsageService = RuntimeUsageClient;
 export type IWorkflowRuntimeService = WorkflowRuntimeClient;
 export type IRuleService = GovernanceClientPort;
 
-// ── Dashboard（纯接口，无 private）──
-export type { IDashboardApiClient as IDashboardService } from '../modules/dashboard/types';
-
 // ── Module Capsules (UI Redesign V2 shell) ──
 /**
  * A top-level business module surfaced as a capsule in the V2 shell's

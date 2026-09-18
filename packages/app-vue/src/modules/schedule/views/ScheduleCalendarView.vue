@@ -77,13 +77,13 @@
       <Button
         size="sm"
         class="ml-auto h-8 shrink-0 px-2 @xl/panel:px-3"
-        :aria-label="t('schedule.dashboard.createSchedule')"
+        :aria-label="t('schedule.planning.createSchedule')"
         data-primary-action="create-schedule"
         data-testid="create-schedule-button"
         @click="showCreateDialog = true"
       >
         <Plus class="h-4 w-4 @xl/panel:mr-1.5" />
-        <span class="hidden @xl/panel:inline">{{ t('schedule.dashboard.createSchedule') }}</span>
+        <span class="hidden @xl/panel:inline">{{ t('schedule.planning.createSchedule') }}</span>
       </Button>
     </header>
 
@@ -96,7 +96,7 @@
         :view="activeView"
         :locale="locale"
         :loading="isLoading"
-        :loading-label="t('schedule.dashboard.loading')"
+        :loading-label="t('schedule.planning.loading')"
         @range-change="handleVisibleRange"
         @event-click="handleProjectionClick"
         @day-click="handleDayClick"

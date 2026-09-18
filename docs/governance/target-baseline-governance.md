@@ -29,7 +29,7 @@ updated: 2026-05-30T00:00:00
 |------|---------|------------|
 | `app` | web, desktop, mobile, api | build, lint, typecheck, test |
 | `runtime-lib` | domain 包、infra 包、shared 包（含 patterns、utils） | build, lint, typecheck, test |
-| `ui-lib` | app-vue, ui-vue-shadcn, ui-react-native, dashboard, assets | build, lint, typecheck, test |
+| `ui-lib` | app-vue, ui-vue-shadcn, ui-react-native, assets | build, lint, typecheck, test |
 | `tooling-lib` | nx-test-system, test-utils | build |
 | `meta-project` | memoflow (root) | 无强制要求 |
 

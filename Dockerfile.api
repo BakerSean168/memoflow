@@ -35,7 +35,6 @@ COPY packages/account/package.json ./packages/account/package.json
 COPY packages/ai/package.json ./packages/ai/package.json
 COPY packages/cloud-auth/package.json ./packages/cloud-auth/package.json
 COPY packages/contracts/package.json ./packages/contracts/package.json
-COPY packages/dashboard/package.json ./packages/dashboard/package.json
 COPY packages/data-portability/package.json ./packages/data-portability/package.json
 COPY packages/database/package.json ./packages/database/package.json
 COPY packages/database/prisma ./packages/database/prisma
@@ -75,7 +74,6 @@ COPY packages/account ./packages/account
 COPY packages/ai ./packages/ai
 COPY packages/cloud-auth ./packages/cloud-auth
 COPY packages/contracts ./packages/contracts
-COPY packages/dashboard ./packages/dashboard
 COPY packages/data-portability ./packages/data-portability
 COPY packages/database ./packages/database
 COPY packages/domain-shared ./packages/domain-shared

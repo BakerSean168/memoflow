@@ -30,7 +30,6 @@ export default createTsupConfig({
     'src/modules/operations/index.ts',
     'src/modules/reliable-messaging/index.ts',
     'src/modules/ai/index.ts',
-    'src/modules/dashboard/index.ts',
     'src/modules/data-portability/index.ts',
     'src/modules/label/index.ts',
     'src/modules/relation/index.ts',

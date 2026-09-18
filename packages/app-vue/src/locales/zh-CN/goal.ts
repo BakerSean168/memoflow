@@ -9,6 +9,11 @@ export default {
     "reviewDetail": "目标复盘记录",
     "krDetail": "关键结果详情"
   },
+  "homeProgress": {
+    "title": "目标进度",
+    "viewAll": "查看全部",
+    "empty": "暂无活跃目标"
+  },
   "error": {
     "loadListFailed": "加载目标列表失败",
     "loadListException": "加载目标列表时发生异常",

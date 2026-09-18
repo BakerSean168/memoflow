@@ -73,9 +73,6 @@
       "@memoflow/http-client": [
         "packages/http-client/dist/index.d.ts"
       ],
-      "@memoflow/dashboard": [
-        "packages/dashboard/dist/index.d.ts"
-      ],
       "@memoflow/contracts": [
         "packages/contracts/dist/index.d.ts"
       ],

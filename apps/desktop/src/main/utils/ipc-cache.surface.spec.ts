@@ -3,7 +3,6 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   CacheChannels,
-  DashboardChannels,
   GoalChannels,
   TaskChannels,
 } from '@memoflow/contracts/electron';
@@ -31,7 +30,6 @@ describe('ipc-cache channel surface', () => {
   it('configures list TTL keys via contracts channel constants', () => {
     expect(source).toContain('GoalChannels.LIST');
     expect(source).toContain('TaskChannels.PLAN_LIST');
-    expect(source).toContain('DashboardChannels.GET_STATS');
     expect(GoalChannels.LIST).toBe('goal:list');
     expect(CacheChannels.STATS).toBe('cache:stats');
   });

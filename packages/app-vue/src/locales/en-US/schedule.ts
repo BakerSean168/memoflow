@@ -1,7 +1,7 @@
 export default {
   "route": {
     "management": "Schedule",
-    "dashboard": "Schedule",
+    "planning": "Schedule",
     "weekView": "Week View",
     "calendar": "Schedule Calendar"
   },
@@ -28,7 +28,7 @@ export default {
     "conflictHint": "This time slot has a schedule conflict",
     "readOnlyHint": "Editing schedule events will arrive in a later release."
   },
-  "dashboard": {
+  "planning": {
     "title": "Schedule",
     "weekView": "Week View",
     "createSchedule": "New Schedule",

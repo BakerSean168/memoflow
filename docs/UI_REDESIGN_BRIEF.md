@@ -65,7 +65,6 @@
 | `/auth`                                                      | `views/AuthView.vue`                                   | —                | 登录/注册（Desktop 用 `DesktopAuthView` 覆写）      |
 | `/`                                                          | `modules/ai/views/AIChatView.vue`                      | 主导航「首页」   | **AI 工作台即首页**                                 |
 | `/ai/chat`                                                   | 同上 `AIChatView.vue`                                  | 主导航「AI对话」 | **与 `/` 完全同一组件，重复入口**                   |
-| `/dashboard`                                                 | `views/DashboardView.vue`                              | 主导航「仪表盘」 | Linear 风格聚合页                                   |
 | `/goals`                                                     | `goal/views/GoalModuleLayout.vue` + `GoalListView.vue` | 主导航「目标」   | 模块内含第二侧边栏（文件夹/系统视图/专注模式入口）  |
 | `/goals/focus`                                               | `goal/views/GoalFocusView.vue`                         | 目标侧边栏入口   | 专注模式状态页                                      |
 | `/goals/compare`                                             | `goal/views/MultiGoalComparisonView.vue`               | 列表页按钮       | 多目标对比                                          |
@@ -77,7 +76,7 @@
 | `/tasks`                                                     | `task/views/TaskManagementView.vue`                    | 主导航「任务」   | 任务模板管理（卡片网格）                            |
 | `/tasks/dependency-validation-demo`                          | `DependencyValidationDemoView.vue`                     | 仅 DEV           | 演示页                                              |
 | `/tasks/:id`                                                 | `task/views/TaskDetailView.vue`                        | —                | 模板详情（含依赖/父子关系）                         |
-| `/schedule` → `/schedule/calendar`                           | `schedule/views/ScheduleCalendarView.vue`              | 主导航「日程」   | 日/周/月三视图统一入口（无 week/dashboard 双轨 redirect） |
+| `/schedule` → `/schedule/calendar`                           | `schedule/views/ScheduleCalendarView.vue`              | 主导航「日程」   | 日/周/月三视图统一入口（无 week/legacy 双轨 redirect） |
 | `/reminders`                                                 | `reminder/views/ReminderLinearView.vue`                | 主导航「提醒」   | 分组侧边栏 + 模板列表 + 全局总开关                  |
 | `/repository`                                                | `repository/views/RepositoryWorkspaceView.vue`         | 主导航「仓库」   | Obsidian 风格工作区                                 |
 | `/note/:id`                                                  | `editor/views/EditorLinearView.vue`                    | —                | 单笔记编辑页（AI 知识笔记落点），meta `hideSidebar` |
@@ -112,20 +111,10 @@
 
 **页面级问题**：单文件 575 行、从 4 个 workflow 子 composable 解构约 80 个绑定；composer 的 action-rail 内嵌 3 套工作流 × 各 5–8 个条件按钮，是全应用状态最复杂的一块 UI。重构时应把"工作流控制"整体从 composer 迁到 context panel，让输入区回归纯对话。
 
-### 4.2 仪表盘（`/dashboard` → `views/DashboardView.vue`）
+### 4.2 首页 / AI 工作台
 
-**业务目标**：一屏总览今日状态并跳转各模块。
-**数据**：`useDashboard()`（stats/activityTimeline/trendDays/goalProgress，HTTP 与 IPC 双适配器 `modules/dashboard/adapters/`）+ 复用 `DailyTodoWidget`（task 模块）与 `UpcomingRemindersWidget`（reminder 模块）。
-
-| 分类               | 内容                                                                                                                                                            |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 必须展示           | 今日待办 widget；即将到来的提醒 widget；活跃目标进度条列表                                                                                                      |
-| 可弱化             | 6 张统计卡（activeTasks/completedToday/activeGoals/upcomingReminders/unreadNotifications/scheduleConflicts，`DashboardView.vue:199-254`）→ 可压成一行紧凑数字条 |
-| 可隐藏             | 趋势图（ECharts 双序列，仅回顾用途）→ 折叠或移入"统计"次级页；快捷操作条（4 个按钮全部等价于左侧导航，纯重复，`DashboardView.vue:329-334`）                     |
-| 可移入详情         | 活动时间线（activityTimeline）→ 与通知中心合并展示                                                                                                              |
-| 不可删除的交互状态 | 刷新（含 `reminderWidgetRefreshKey` 联动）；统计卡点击跳转；loading skeleton                                                                                    |
-
-**定位问题**：与 AI 首页争夺"home"角色（见 §8-P1）。
+独立跨域聚合页已按 ADR-108/111 退役并删除。首页由 AI 工作台承接，按需组合
+Task 今日列表、Routine upcoming、Goal-owned progress 和其他明确 owner read model；不再维护跨域聚合 DTO、配置模型或兼容入口。
 
 ### 4.3 目标模块（`/goals/**`）
 
@@ -189,7 +178,7 @@
 | 可移入详情         | —（本页即详情）                                                                                                                          |
 | 不可删除的交互状态 | 编辑对话框入口；父任务/依赖任务跳转                                                                                                      |
 
-**模型级问题**：UI 直接暴露"模板/实例"系统概念——用户在 `/tasks` 管理的是模板，而"今天要做的事"（实例）只出现在仪表盘 widget 和日历里，没有一个"今日任务清单"主页面（`DailyTodoWidget` 是最接近的，但只在 dashboard）。
+**模型级问题**：UI 直接暴露"模板/实例"系统概念——用户在 `/tasks` 管理的是模板，而"今天要做的事"（实例）只出现在 Home widget 和日历里，没有一个"今日任务清单"主页面（`DailyTodoWidget` 是最接近的）。
 
 ### 4.5 日程（`/schedule/calendar` → `ScheduleCalendarView.vue`）
 
@@ -252,7 +241,7 @@
 | 可移入详情         | 通知点击跳转的目标上下文                                                                                                               |
 | 不可删除的交互状态 | 逐条已读/删除；SSE 实时接入（`createNotificationStartupHook`，Desktop 启动时挂载，`apps/desktop/src/renderer/bootstrap/app.ts:74-81`） |
 
-**定位问题**：作为一级页面价值弱——通知天然是"信箱"，适合铃铛入口 + 抽屉/弹层，未读数已在 dashboard 统计卡出现。
+**定位问题**：作为一级页面价值弱——通知天然是"信箱"，适合铃铛入口 + 抽屉/弹层，未读数由通知 owner 与 shell 角标承接。
 
 ### 4.9 治理（`/governance/**`）
 
@@ -298,7 +287,7 @@
    `/` 知识问答模式 → 提问 → 得到带引用的接地回答（evidenceStatus=grounded）→ 「生成笔记草稿」→ 保存 → 「打开创建的笔记」→ `/note/:id`；或在 `/repository` 手动建笔记 → `[[` 链接建议 → 反链/图谱面板导航。
 
 5. **每日巡检**
-   `/dashboard` 看今日待办 widget + 提醒 widget + 目标进度 → 点卡片跳对应模块；提醒触达经通知（SSE/桌面弹窗）→ `/notifications`。
+   `/` 的 Home/AI 工作台查看今日待办 widget + 提醒 widget + 目标进度 → 点卡片跳对应模块；提醒触达经通知（SSE/桌面弹窗）→ `/notifications`。
 
 **路径观察**：1、3、4 是这个产品真正独特的路径；2、5 是通用工具路径。当前 IA 把 12 个入口平铺，没有体现这个优先级。
 
@@ -308,9 +297,9 @@
 
 按影响排序：
 
-- **P1 双首页/重复入口**：`/` 与 `/ai/chat` 渲染同一个 `AIChatView`，导航里「首页」「AI对话」两个按钮指向同一页面（`di/navigation.ts:18,20`）；同时 `/dashboard` 又是另一个"总览首页"。用户面对三个"起点"。
+- **P1 双首页/重复入口**：`/` 与 `/ai/chat` 渲染同一个 `AIChatView`，导航里「首页」「AI对话」两个按钮指向同一页面（`di/navigation.ts:18,20`）。用户面对两个"起点"。
 - **P1 导航无层级**：10+2 个纯文字入口平铺（`MainLayout.vue`），核心域（目标/任务/日程/提醒 = 计划执行）与外围（通知/治理/设置）无视觉分层；无图标、无折叠、无未读角标（通知入口与未读数割裂）。
-- **P1 三个"时间类"模块心智重叠**：任务（模板）、日程（日历，已投影任务实例）、提醒（模板分组）各占一级入口，但数据早已互通（日历完成任务、AI 一次性创建任务+提醒）。用户要回答"我今天该做什么"需要横跨 dashboard/tasks/schedule/reminders 四处。
+- **P1 三个"时间类"模块心智重叠**：任务（模板）、日程（日历，已投影任务实例）、提醒（模板分组）各占一级入口，但数据早已互通（日历完成任务、AI 一次性创建任务+提醒）。用户要回答"我今天该做什么"需要横跨 Home/tasks/schedule/reminders 四处。
 - **P2 双侧边栏套娃**：主导航侧栏（w-44）+ 模块内第二侧栏（goal w-64 / reminder w-64 / repository 可调），中间内容被两条竖栏夹击；而 task/schedule/notification 又没有第二侧栏——同层级模块壳形态不一致。
 - **P2 页面壳不统一**：内容最大宽度散布 `max-w-3xl/4xl/5xl/7xl/960px/1400px`；头部有 `h-14 border-b` 模式（task/schedule/notification/goal-list）与自由布局（governance 用 `p-6 max-w-[960px]` 无横栏头）两种；同为"列表+过滤"，governance 用按钮组、task 用按钮组+第二排、notification 用 Tab 条。
 - **P2 AI 工作台的 composer 过载**：3 种工具模式 × 各自完整生命周期按钮内嵌在输入框上方的 action-rail（§4.1），加上 localStorage 调试开关的遗留分支，操作密度远超对话界面应有形态。
@@ -331,7 +320,7 @@
 │
 │  工作台
 │   ◆ 首页（AI 工作台 = /，唯一 home；删除 /ai/chat 重复入口）
-│   ◆ 仪表盘（保留 /dashboard，从导航降级为首页头部的"今日概览"链接，或并入首页右栏）
+│   ◆ 首页（AI 工作台承接今日概览，按需组合 owner widgets）
 │
 │  计划
 │   ◆ 目标  /goals（含 focus/compare/detail 子树，不变）
@@ -353,7 +342,7 @@
 
 配套调整（均为既有能力的重排）：
 
-1. **首页 = AI 工作台**，但把 dashboard 的三个最有效 widget（今日待办 `DailyTodoWidget`、即将提醒 `UpcomingRemindersWidget`、目标进度列表）注入 AI 工作台左侧会话栏下方或右侧 context panel 的空闲态（该 panel 已有"无产物占位"分支，`AIChatView.vue:376-383`）——AI 空闲时右栏显示今日概览，工作流激活时显示产物。`/dashboard` 保留为完整统计页。
+1. **首页 = AI 工作台**，把三个最有效的 owner widget（今日待办 `DailyTodoWidget`、即将提醒 `UpcomingRemindersWidget`、目标进度列表）注入 AI 工作台左侧会话栏下方或右侧 context panel 的空闲态（该 panel 已有"无产物占位"分支，`AIChatView.vue:376-383`）——AI 空闲时右栏显示今日概览，工作流激活时显示产物。
 2. **导航配置只改 `di/navigation.ts` 与 `MainLayout.vue`**：NavigationItem 增加分组与图标字段（路由 meta 已有 `icon`、`order` 字段但 MainLayout 未消费——现成数据）。
 3. **演示/调试路由**：`rules-demo` 补 `showInNav/DEV` 守卫并从生产构建剔除；删除 4 个孤儿视图。
 4. **repository 路由 meta 改用 i18n key**，与其余模块对齐。
@@ -367,7 +356,7 @@
 | 页面                 | 现状                                                  | 建议布局                                                                                                                                    |
 | -------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | AI 首页              | 左会话栏 + 中对话 + 右产物栏；工作流按钮挤在 composer | 保持三栏骨架；**工作流生命周期按钮整体移入右栏顶部**（与产物同屏）；composer 只留发送/停止/模式切换/模型；右栏空闲态显示"今日概览"三 widget |
-| 仪表盘               | 6 卡 + 图表 + 时间线 + 3 widget + 快捷条              | 压缩为：一行紧凑统计条（6 数字）→ 三列 widget（待办/提醒/目标）→ 趋势图与活动时间线折叠区；删除快捷操作条                                   |
+| 首页概览               | owner reads + 3 widget              | 组合待办/提醒/目标；不创建跨域统计 DTO或配置模型                                   |
 | 目标列表             | 第二侧栏 + 卡片网格                                   | 保留；侧栏专注模式卡在未激活时缩为按钮；「对比」入 ⋯ 菜单                                                                                   |
 | 目标详情             | 概览卡 + KR 卡 + Tabs                                 | 保留结构；四宫格元数据压成单行；进度环缩小与 KR 完成数并排                                                                                  |
 | 任务                 | 双排过滤 + 卡片网格 + 图谱弹窗                        | 顶部一排：状态 Tab + 过滤下拉 + 视图切换（卡片 / 图谱——图谱从 Dialog 升为视图模式）；「全部删除」移入 ⋯ 危险区                              |
@@ -392,7 +381,7 @@
 
 **状态与数据层（全部保留）**
 
-- 所有 Pinia store 与 composable 门面：`useGoal`、`useTask`、`useSchedule`/`useCalendarView`、`useReminder`、`useRepository`（及其 5 个子 composable 拆分，`useRepository.ts:116-155`）、`useAIChatView` 及其 4 个 workflow 子 composable、`useDashboard`、`useNotification`、`useUserSetting`、`useAccount`、`useSession`。
+- 所有 Pinia store 与 composable 门面：`useGoal`、`useTask`、`useSchedule`/`useCalendarView`、`useReminder`、`useRepository`（及其 5 个子 composable 拆分，`useRepository.ts:116-155`）、`useAIChatView` 及其 4 个 workflow 子 composable、`useNotification`、`useUserSetting`、`useAccount`、`useSession`。
 - DI 端口体系：`di/keys.ts` 全部 injection key（`REPOSITORY_SERVICE_KEY`、`DESKTOP_AUTH_API_KEY`、`LOGOUT_HANDLER_KEY`、`MAIN_NAVIGATION_KEY`…）与两端 `di-app.ts` 装配——**布局层重构不得绕过端口直连 HTTP/IPC**。
 - 路由契约：`?dialog=goal&goalId=` 查询参对话框（AI 与空态深链依赖）；`/note/:id`、`/goals/:id` 等被 AI 工作流 `openRecentKnowledgeNote/openAutomatedGoal` 硬引用的路径。
 - 守卫类状态：编辑器未保存守卫（两个 composable）+ 标签页状态（`editor-workspace-ui-store.ts`）；认证守卫 `createAuthGuard`。
@@ -407,7 +396,7 @@
 
 **测试契约**
 
-- 大量 `data-testid`（`ai-chat-view`、`dashboard-stat-card-*`、`create-goal-button`、`goal-agent-*`、`notification-filter-*`…）被 Playwright 用例引用（`apps/web/e2e/`、`playwright.ai-workspace.config.ts` 等 5 份配置）——重构时 testid 必须随组件迁移。
+- 大量 `data-testid`（`ai-chat-view`、`create-goal-button`、`goal-agent-*`、`notification-filter-*`…）被 Playwright 用例引用（`apps/web/e2e/`、`playwright.ai-workspace.config.ts` 等 5 份配置）——重构时 testid 必须随组件迁移。
 
 ---
 
@@ -415,7 +404,7 @@
 
 1. **双端同源**：`app-vue` 同时服务 Web 与 Desktop（hash 路由 + IPC + 桌面通知弹窗路由 `/custom-notification`）。任何布局/导航改动都要在 Electron 下回归（尤其 `MainLayout.vue:12-16` 的 `isDesktopEnvironment` 分支——桌面端隐藏应用名，因为有系统标题栏）。
 2. **E2E 脆性**：5 份 Playwright 配置 + e2e 用例锚定 testid 与路由路径；导航重组（如删除 `/ai/chat`）会打断 `ai-workspace` 专项测试。建议先加路由 redirect 再删导航项。
-3. **深链兼容**：AI 工作流、通知点击、dashboard 卡片都以硬编码路径跳转；schedule 模块当前**仅**暴露 `/schedule/calendar` 单入口（无 week/dashboard 双轨 redirect）。删改其它路由时优先直达新路径，避免长期兼容 redirect 双轨。
+3. **深链兼容**：AI 工作流、通知点击、Home widgets 都以硬编码路径跳转；schedule 模块当前**仅**暴露 `/schedule/calendar` 单入口（无 week/legacy 双轨 redirect）。删改其它路由时优先直达新路径，避免长期兼容 redirect 双轨。
 4. **导航是 DI 可覆写的**：宿主可注入 `MAIN_NAVIGATION_KEY` 覆盖默认导航（`MainLayout.vue:18-19`）。改 NavigationItem 结构（加分组/图标）属于**破坏性接口变更**，需同步 web/desktop 两个宿主与 `di/types.ts`。
 5. **状态机 UI 的回归面**：AI goal-agent 的 6+ 等待态按钮互斥逻辑、编辑器未保存守卫、提醒组控制模式——这三处是"改布局时最容易改坏行为"的区域，迁移按钮位置时逻辑分支不要重写。
 6. **移动端不同步**：`apps/mobile` 是独立 React Native UI，本次重构范围外，但导航语义（模块命名、分组）若变，会造成两端心智不一致——命名变更需同步 mobile 文案。
@@ -520,7 +509,7 @@
 
 - 路由：`packages/app-vue/src/router/index.ts`、`router/guards.ts`、各 `modules/*/router/index.ts`（10 份）
 - 布局：`layouts/MainLayout.vue`、`layouts/AuthLayout.vue`、`di/navigation.ts`
-- 视图：`views/DashboardView.vue`、`modules/{ai,goal,task,schedule,reminder,repository,editor,notification,governance,setting,account}/views/*.vue`（22 个有路由视图 + 4 个孤儿视图）
+- 视图：`modules/{ai,goal,task,schedule,reminder,repository,editor,notification,governance,setting,account}/views/*.vue`（当前路由视图与少量历史孤儿视图）
 - 状态/服务：`modules/*/composables/*`、`modules/*/stores/*`、`repository/services/repository-resource-gateway.ts`、两端 `platform/di-app.ts`
 - 契约：`packages/contracts/src/modules/{goal,task,schedule,reminder,repository,editor,ai,governance,notification,setting}/`
 - 同步：`packages/powersync-schema/src/index.ts`
