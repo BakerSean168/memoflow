@@ -10,16 +10,36 @@ tags:
   - vnext
 description: AI vNext Model Convergence 当前系统地图——区分 Mastra runtime truth、MemoFlow product truth、legacy persistence 与跨模块 DTO 漂移
 created: 2026-09-09T00:00:00+08:00
-updated: 2026-09-09T00:00:00+08:00
+updated: 2026-09-18T00:00:00+00:00
 ---
 
 # AI vNext Model Convergence — Current System Map
 
 ## 1. 文档目的
 
-本文件只记录 **2026-09-09 当前代码和既有 ADR 能证明的事实、由这些事实推导的问题，以及本轮准备冻结的目标差异**。
+本文件记录 **AI-9612 exact-head closure 后当前代码和既有 ADR 能证明的实现事实**。早期
+consumer ledger 仍保留在文档中作为删除证据；如果它与下方 as-built 状态冲突，以当前源码、
+schema、PowerSync map 与 [AI-9612 closure evidence](./2026-09-18-ai-9612-vnext-closure-evidence.md)
+为准。本文不再把已实施的 convergence 描述成未来目标。
 
-它不把目标设计冒充成已经实施的现状。
+## 2A. AI-9612 as-built summary
+
+```text
+Mastra = Assistant transcript + Workflow execution/snapshot authority
+AIConversation = product shell metadata only
+ProviderDefinition + Connection + SecretVault + capability evidence = model boundary
+AIContextAssembler = Product Time/trust/token-budget boundary
+KnowledgeSpaceId + KnowledgeDocumentId = index/citation identity
+Goal/Task/Knowledge/Routine/Planner/Notification = owner-domain contracts
+AIExecutionRecord = bounded operations projection
+HTTP + Electron IPC = parity transport with stable redacted failure codes
+```
+
+The destructive AI-9610 cutover is complete: current production source/schema has no
+`AiMessage`, `ai_messages`, `AiGenerationTask`, `ai_generation_tasks`, `AiUsageQuota`, or
+`KnowledgeGenerationTask` authority. Data Portability exports/imports Conversation shell metadata
+only; Mastra transcript history remains runtime-owned and is not reintroduced as a second backup
+aggregate.
 
 本轮源码基线重点包括：
 
@@ -103,19 +123,16 @@ probe
 
 这是本轮 Provider 目标模型的重要参考。
 
-## 3. 当前 AI persistence inventory
+## 3. 当前 AI persistence inventory（AI-9612 as-built）
 
 当前 Prisma `ai.prisma` 中主要包含：
 
 ```text
 AiConversation
-AiMessage
-AiGenerationTask
-AiUsageQuota
 AiProviderConfig
 AiProviderOnboardingSession
-KnowledgeGenerationTask
 AiKnowledgeIndexEntry
+AiExecutionRecord
 ```
 
 `DashboardConfig` was the standalone Dashboard persistence model. HOME-1805
@@ -128,20 +145,18 @@ PowerSync, and AI persistence surfaces.
 
 | 当前模型                      | 当前真实用途/性质                                                        |
 | ----------------------------- | ------------------------------------------------------------------------ |
-| `AiConversation`              | 产品 conversation shell + legacy child relation                          |
-| `AiMessage`                   | legacy transcript/bootstrap source                                       |
-| `AiGenerationTask`            | 当前已主要被 execution-log adapter 当作 usage/trace/cost record          |
-| `AiUsageQuota`                | schema/VO 存在，但未发现有效 production runtime consumer                 |
-| `AiProviderConfig`            | 用户 BYOK connection + secret + endpoint + model/default/fallback config |
+| `AiConversation`              | 产品 conversation shell metadata；Mastra 持有 transcript                   |
+| `AiExecutionRecord`           | bounded usage/trace/cost/outcome operations projection                      |
+| `AiProviderConfig`            | 用户 BYOK Connection；只保存 credentialRef，不保存 plaintext secret       |
 | `AiProviderOnboardingSession` | 临时 credential/model onboarding state                                   |
-| `KnowledgeGenerationTask`     | schema 仍在，但未发现当前 Mastra workflow production consumer            |
-| `AiKnowledgeIndexEntry`       | AI-owned knowledge retrieval/index projection                            |
+| `AiKnowledgeIndexEntry`       | AI-owned knowledge retrieval/index projection keyed by stable document id |
 
-因此当前最大问题不是“表太多”，而是 **历史命名和 ownership 已经不再反映真实职责**。
+因此当前 persistence 已按 runtime/product/operations ownership 分离；历史名称只保留在
+archived characterization prose，不再出现在 production authority path。
 
 ## 4. Conversation / Message 当前状态
 
-### 4.1 当前 `AIConversation`
+### 4.1 当前 `AIConversation` shell
 
 Domain aggregate 当前包含：
 
@@ -150,112 +165,86 @@ AIConversation
 ├── id
 ├── identityId
 ├── name
-├── status: Active | Closed | Archived
-├── messageCount
-├── lastMessageAt
-├── messages[]
+├── status: Active | Archived
+├── deletedAt
 ├── version
 └── timestamps
 ```
 
-同时 Prisma 有 `AiConversation -> AiMessage[]` relation。
+Prisma/PowerSync stores contain the shell only; there is no `AiConversation -> AiMessage[]`
+relation and no `ai_messages` table.
 
 ### 4.2 当前真正 transcript authority
 
 当前 runtime path 已经把 Mastra thread/memory 作为 authoritative history。
 
-旧 `AiMessage` 只用于一次性 transcript bootstrap；新消息不应长期双写 legacy table。
-
-所以当前存在一个**已经完成 runtime cutover、但 product shell 仍保留旧 aggregate shape** 的过渡状态：
+AI-9610 direct cutover removed the bootstrap source and all legacy transcript persistence. The
+current boundary is:
 
 ```text
 Mastra thread/memory = runtime transcript truth
-AiConversation.messages[] = legacy aggregate shape
-AiMessage = bootstrap-era persistence
+AIConversation = shell metadata and owner-scoped delete/rename state
+Data Portability = shell metadata only
 ```
 
-### 4.3 `messageCount / lastMessageAt` 是派生数据
+### 4.3 `Closed` 已退休
 
-它们来自 thread history，本质属于 conversation list/read projection。
+The accepted AI-9602 characterization found no independent `Closed` journey. The contract/server
+value was removed; `Active` and explicit `Archived` remain.
 
-如果继续把它们当 aggregate truth，就要求在每次 Mastra message write 后同步第二份业务 row。
+## 5. UI durable workflow state（AI-9603 as-built）
 
-### 4.4 `Closed` 暂无强产品行为证据
-
-仓库搜索显示 `ConversationStatus.Closed` 主要存在于 value-object tests，没有发现稳定产品 journey 依赖“Closed 与 Archived 是两个独立生命周期阶段”。
-
-因此它是简化候选，但在删除前仍需做完整 route/UI/portability surface audit。
-
-## 5. UI durable workflow state 当前存在第二份 shadow
-
-`packages/app-vue/src/modules/ai/composables/useAIWorkflowPersistence.ts` 当前把下列对象写入 localStorage：
+`packages/app-vue/src/modules/ai/composables/useAIWorkflowPersistence.ts` 现在只把下列可恢复
+UI state 写入 localStorage：
 
 ```text
-ai:conversation-workflow-map
+ai:conversation-workflow-map:v3
 
-- goalWorkflowRun
-- taskWorkflowRun
-- knowledgeCaptureRun
-- knowledgeAnswer
-- clarificationAnswers
-- editableGoal
-- editableKeyResults
-- editableTaskTemplates
-- editableReminders
-- showGoalDraftEditor
+- activeRunId
+- optional revision-bound unsaved editor overlay
 ```
 
-随后 conversation restore 会：
+conversation restore 会：
 
 ```text
-restore localStorage snapshot
+read activeRunId/overlay pointer
 -> workflowRuntime.get(runId)
--> 再投影当前 runtime state
+-> verify owner + conversation id
+-> project current runtime state and rebase/discard stale overlay
 ```
 
-这意味着当前 UI 虽然不再拥有 AgentAction DAG，但仍持久保存了一份接近完整 WorkflowRun 的 shadow。
+UI 不保存 workflow status、suspension、result、usage 或 authoritative draft，因此没有第二份
+durable WorkflowRun authority。runtime unavailable、unknown run、owner mismatch 都 fail closed。
 
-这与 ADR-050 的目标存在张力：
+## 6. Provider 当前状态（AI-9604/9605/9612 as-built）
 
-> Mastra Workflow 应是 durable execution state 的唯一 authority。
+### 6.1 ProviderDefinition / Connection / SecretVault
 
-UI 可以保存未提交 editor state 或 active run pointer，但不应把 workflow status/suspension/result/draft revision 本身作为第二份 durable truth。
-
-## 6. Provider 当前状态
-
-### 6.1 `AIProviderConfig` 同时拥有多种职责
-
-当前模型同时包含：
+Saved `AIProviderConfig` is the Connection projection and contains:
 
 ```text
 name
-providerType
+providerDefinitionId
 baseUrl
-apiKey
+credentialRef
 defaultModel
-availableModels (persistence)
 isActive
 isDefault
 priority
 ```
 
-其中：
+ProviderDefinition metadata is supplied by the canonical catalog; SecretVault owns plaintext
+credentials; catalog/capability snapshots are evidence rather than connection invariants. There
+is no parallel provider-template registry or implicit model fallback.
 
-- provider/catalog identity；
-- 用户 connection/endpoint；
-- secret credential；
-- model discovery cache；
-- default/fallback routing；
+### 6.2 Plaintext boundary and revocation
 
-都塞在同一个 `ProviderConfig` 概念里。
+Repositories and ordinary server/client DTOs carry only `credentialRef`. Plaintext is resolved
+only by onboarding/probe/model execution edges. The ModelResolver's injected fetch rechecks the
+identity-scoped Connection and Vault value for every provider request, so revoke, replacement,
+disable, delete, endpoint change, or ownership mismatch fails closed.
 
-### 6.2 DB at-rest encryption 是正确的，但 plaintext boundary 仍然偏宽
-
-Prisma/PowerSync repository 会解密 `apiKeyEncrypted`，并把 plaintext API key 放回 `AIProviderConfigServerDTO.apiKey`。
-
-它没有进入 client DTO，这是重要安全保护；但 plaintext secret 仍穿过普通 repository/domain/application DTO，而不是只在 execution edge 被 SecretVault resolve。
-
-### 6.3 Provider resolution 仍有隐含模型假设
+### 6.3 Capability-aware provider resolution
 
 `resolveActiveProviderConfig()` 当前策略：
 
@@ -265,21 +254,14 @@ explicit selected provider
 -> first active provider
 ```
 
-`toChatExecutionProviderConfig()` 当前在缺 default model 时还有：
+缺少 selected/default model 时 resolver 返回 `configuration_required`；它不会发明
+`gpt-4o-mini` 或从另一 provider 静默切换。
 
-```text
-gpt-4o-mini
-```
-
-硬编码 fallback。
-
-这对“任意 OpenAI-compatible endpoint”并不安全：endpoint 未必提供这个 model，也未必支持 structured output/tool calling/streaming。
-
-### 6.4 当前 model verification 主要验证连接/模型可调用，不等于 capability contract
+### 6.4 Capability evidence is an execution contract
 
 Goal/Task/Knowledge planner 高度依赖 structured output；Assistant 可能依赖 streaming/tool calling。
 
-当前 Provider/Model contract 尚未把：
+Provider/Model resolution now checks fresh, identity-matched catalog/capability evidence for:
 
 ```text
 structuredOutput
@@ -288,63 +270,55 @@ toolCalling
 vision
 ```
 
-作为可验证 capability snapshot 与 workflow execution requirement 对接。
+`ExecutionRequirement` rejects unsupported, unknown, stale or mismatched evidence. Assistant,
+Goal/Task/Knowledge structured planners and streaming/tool paths therefore fail closed before
+execution rather than relying on provider 400/parse failures.
 
-## 7. Workflow Draft 当前与最新 Domain model 已漂移
+## 7. Workflow Draft 当前与 owner-domain contract 对齐
 
 ### 7.1 Goal workflow
 
-ADR-070 已经冻结 GoalPlanDraft V2，但当前 UI/runtime 仍大量消费旧字段：
+Goal planner and apply services use GoalPlanDraft V2 and canonical owner fields:
 
 ```text
-description
-motivation
-feasibilityAnalysis
+name
+summary
+status
 startDate
-dueDate
+target
 ```
 
-KR 仍使用旧：
+KR uses canonical:
 
 ```text
-startingValue
-progressBaselineValue
+initial
+current
+target
 ```
 
-Task draft 仍以：
+Task draft uses canonical `TaskPlanSchedule` rather than an AI-only cadence DSL.
+
+The current Task path preserves:
 
 ```text
-cadence
-timeOfDay
-daysOfWeek
+schedule
 ```
 
-为主，并继续含 `reminders[]` legacy draft。
-
-这与 ADR-067/068/069/070 目标不一致。
+and owner-defined goal-link/contribution/reminder policy.
 
 ### 7.2 Task workflow
 
-当前 Task planner 已经具备：
+Current Task planner/apply evidence includes:
 
 - Goal-only link；
 - contribution 需要 KR；
 - apply 最终映射到 canonical Task schedule；
 
-但 AI draft 自己仍维护 `cadence/startDate/timeOfDay/daysOfWeek/occurrences` 等 mini schedule DSL。
-
-Task vNext 已经冻结 `TaskPlanSchedule` 单一时间语言，因此长期保留两套 schedule vocabulary 会再次漂移。
+and no second AI schedule vocabulary.
 
 ### 7.3 Routine AI tools
 
-当前 AI product tools 仍包含 legacy trigger vocabulary：
-
-```text
-FixedTime
-Interval
-```
-
-而 Routine vNext 目标已经是：
+Routine tools use the owner trigger vocabulary:
 
 ```text
 WallClock
@@ -352,22 +326,18 @@ Elapsed
 ActiveUsage
 ```
 
-并进一步区分 RoutineDefinition、Runtime Context、TemporaryOverride、InterventionPolicy。
+with separate Definition, Runtime Context, TemporaryOverride and InterventionPolicy contracts.
 
-### 7.4 Planner / Notification AI-owned DTO 也有旧词汇残留
+### 7.4 Planner / Notification are read/command projections
 
-AI application ports 自己重新定义了 Planner/Notification tool DTO；这让 owner module 的模型升级后，AI 很容易保留旧：
+AI tools consume typed owner read/command ports and do not import raw repositories or recreate:
 
 ```text
-templateId
-instanceDate
-dueDate
-category
+Scheduler worker state, delivery worker state, or retired template/category vocabulary
 ```
 
-等词汇。
 
-## 8. Context / Memory 当前状态
+## 8. Context / Memory 当前状态（AI-9606 as-built）
 
 ADR-051 已经定义了正确目标：
 
@@ -390,7 +360,8 @@ sensitivity
 token budget
 ```
 
-但当前实现更多还是由各 worker/workflow 自己拼：
+`AIContextAssembler` is now the common invocation boundary for Assistant and the important
+planner workers. It assembles bounded, schema-validated sections from explicit owner projections:
 
 ```text
 conversation transcript
@@ -399,13 +370,14 @@ current draft
 selected query results
 ```
 
-尚没有统一、可审查的 `ContextAssembler / ContextEnvelope` 成为所有重要 AI invocation 的共同入口。
+There is no generic repository/context map; owner modules select the projections before assembly.
 
-### 8.1 User Time Context 尚未正式进入统一 AI context seam
+### 8.1 User Time Context is explicit
 
 Setting ADR-093 已经冻结 `UserTimeContextPort`。
 
-当前 AI workflow 的 locale/timezone 仍有多处从调用参数/UI state 或业务字段间接携带；未来解释：
+AI invocations receive owner-provided Product Time context. No host ambient timezone/date is used as
+AI semantic authority when interpreting:
 
 ```text
 今天
@@ -415,7 +387,7 @@ Setting ADR-093 已经冻结 `UserTimeContextPort`。
 Q4
 ```
 
-应使用 owner-provided Product Time context，而不是 host ambient timezone 或 prompt 猜测。
+and the assembled envelope carries trust/sensitivity/budget metadata.
 
 ### 8.2 Memory 必须继续保持非业务真值
 
@@ -439,14 +411,13 @@ Notification preference
 
 这些必须在 invocation 时从 owner domain 读取。
 
-## 9. Knowledge AI Index 当前状态
+## 9. Knowledge AI Index 当前状态（AI-9607 as-built）
 
-当前 `AiKnowledgeIndexEntry` key 仍围绕：
+`AiKnowledgeIndexEntry` is keyed by:
 
 ```text
-repositoryId
-resourceId
-resourcePath
+knowledgeSpaceId
+knowledgeDocumentId
 ```
 
 并存 summary/keywords/embedding/chunks/contentHash。
@@ -458,31 +429,25 @@ Knowledge projection truth
 != AI index truth
 ```
 
-因此 AI index 后续需要：
+Current behavior therefore:
 
-- 以 stable document identity 为 canonical key；
-- `resourcePath` 只作为可更新 display/source snapshot；
-- 不再把 AI indexing status 回写成 Repository 的第二份 truth；
-- Workspace/read model 在查询时组合 Knowledge projection 与 AI index state。
+- rename/move keeps the same semantic index/citation identity;
+- path/title/content hash are refreshable source/display projections;
+- index state is not written back as Repository truth;
+- query and citation compose Knowledge projection with AI index evidence.
 
-## 10. Execution / Usage 当前状态
+## 10. Execution / Usage 当前状态（AI-9610 as-built）
 
-### 10.1 `AiGenerationTask` 已经名实不符
+### 10.1 `AIExecutionRecord` is bounded observability
 
-当前 production adapter 名称是：
-
-```text
-AIExecutionLogPrismaAdapter
-AIExecutionLogPowerSyncAdapter
-```
-
-但底层表仍叫：
+Production adapters are:
 
 ```text
-ai_generation_tasks
+AIExecutionRecordPrismaAdapter
+AIExecutionRecordPowerSyncAdapter
 ```
 
-字段已经是：
+The physical table is `ai_execution_records` and fields are bounded to:
 
 ```text
 conversationId
@@ -497,31 +462,30 @@ processingMs
 error
 ```
 
-它实际是 observability/usage record，而不是 durable generation task aggregate。
+It is an operations/usage projection, never workflow state, draft, resume cursor, tool state, or
+accounting ledger.
 
-### 10.2 `AiUsageQuota` 是高置信度 legacy candidate
+### 10.2 Quota/generation candidates were removed
 
-本轮代码搜索没有发现真实 runtime/use-case 在执行 `AiUsageQuota` 的 quota state machine；主要剩 Prisma/generated code/ID VO tests。
+The exact-head source/schema audit found no live quota/generation aggregate consumer; the retired
+tables, IDs, and mappings are absent.
 
-当前不能只因名字看起来合理就继续保留。
-
-如果未来 SaaS 真有配额/计费，应重新以：
+If a future product needs quota/billing, it must be modeled separately as:
 
 ```text
 Entitlement / Budget / AIUsageLedger
 ```
 
-建模，并区分 observability 与 accounting。
+with explicit accounting ownership distinct from observability.
 
-### 10.3 `KnowledgeGenerationTask` 同样是高置信度 legacy candidate
+### 10.3 Knowledge generation is the Mastra workflow
 
-当前知识生成已经由 `knowledge.capture` Mastra durable Workflow 承载，本轮搜索未发现 `KnowledgeGenerationTask` 的 current product consumer。
+Knowledge generation is carried by the durable `knowledge.capture` Mastra workflow; no parallel
+generation-task persistence remains.
 
-删除前仍需完整 migration/portability/surface audit，但它不应继续作为目标态模型。
+## 11. AI application capability surface（AI-9611 as-built）
 
-## 11. `AIApplicationPort` 当前职责偏宽
-
-当前一个 `AIApplicationPort` 同时提供：
+The module exposes four proven consumer capabilities:
 
 ```text
 Provider onboarding/management
@@ -531,33 +495,30 @@ Analytics
 Evaluation overview
 ```
 
-目前尚未失控，但这些能力的调用方、风险和 ownership 已经不同。
-
-如果继续扩张，Settings、Assistant、Operations/Eval 会被迫依赖同一个大接口。
-
-目标应倾向窄 capability ports，而不是继续把所有“AI-related” API 塞进一个 facade。
+API and Desktop composition use the same four properties. There is no broad public
+`AIApplicationPort` or speculative micro-interface layer.
 
 ## 12. Current ownership matrix
 
-| State / capability                | Current effective owner        | Current problem                           |
+| State / capability                | Current effective owner        | Current boundary/status                  |
 | --------------------------------- | ------------------------------ | ----------------------------------------- |
-| Assistant thread/messages         | Mastra                         | `AiMessage`/Conversation child shape 仍在 |
-| Workflow run/snapshot             | Mastra                         | UI localStorage 保存 full shadow          |
-| Conversation title/list shell     | MemoFlow AI                    | aggregate 仍过胖                          |
-| Provider connection               | MemoFlow AI                    | config/secret/catalog/routing 混合        |
-| Provider secret at rest           | AI SecretCipher/Vault          | plaintext DTO boundary 偏宽               |
-| Model discovery                   | AI Provider path               | 尚无 capability contract                  |
-| Goal/Task/Knowledge product truth | owner domains                  | AI draft 仍复制旧业务 schema              |
-| Routine commands                  | Routine owner via AI tool port | tool schema 仍旧 trigger vocabulary       |
-| Product time preference           | Setting/Time owner             | 未统一进入 AI Context seam                |
-| Knowledge document identity       | Knowledge owner                | AI index 仍用 resourceId/path             |
-| AI index                          | AI                             | 需要与 Knowledge projection 解耦彻底      |
-| execution telemetry               | AI execution log               | `AiGenerationTask` 命名/状态语义过时      |
-| quota/billing                     | 无已证实 current owner         | `AiUsageQuota` 高概率 legacy              |
+| Assistant thread/messages         | Mastra                         | none; runtime authority is explicit       |
+| Workflow run/snapshot              | Mastra                         | UI keeps pointer/overlay only              |
+| Conversation title/list shell      | MemoFlow AI                    | shell-only by contract                    |
+| Provider definition/connection     | AI catalog + host persistence  | separate from Vault                       |
+| Provider secret at rest            | Host SecretVault               | request-time revocation guard              |
+| Model discovery/capability         | AI catalog/evidence + resolver | fail-closed on unknown/stale              |
+| Goal/Task/Knowledge product truth  | owner domains                  | typed drafts/apply ports                  |
+| Routine commands                   | Routine owner via AI tool port | approval + Product Time boundary           |
+| Product time preference            | Setting/Time owner             | explicit AI context input                 |
+| Knowledge document identity        | Knowledge owner                | stable space/document ids                 |
+| AI index                           | AI projection                  | no Repository status writeback             |
+| execution telemetry                | AIExecutionRecord              | bounded operations projection             |
+| quota/billing                      | future explicit owner          | no speculative AI quota aggregate         |
 
-## 13. 目标模型差异摘要
+## 13. Implemented model summary
 
-本轮设计准备收敛为：
+AI-9612 exact-head implementation is:
 
 ```text
 AssistantConversationShell
@@ -619,16 +580,14 @@ AIExecutionRecord
 
 ## 16. 结论
 
-当前 AI 的问题不是 runtime 地基错误，而是：
+AI-9612 closes the surrounding ownership drift without rewriting the runtime:
 
 ```text
-Mastra runtime 已经正确
-但周边 product shell / provider / context / drafts / persistence
-仍保留上一代模型的形状
+Mastra runtime remains sole authority
+product shell / provider / context / drafts / persistence now match the accepted model
 ```
 
-因此下一轮应称为：
-
-> **AI vNext Model Convergence / Domain Alignment**
+Remaining follow-up is non-blocking P3 documentation/history cleanup only; there are no
+unresolved P0/P1/P2 AI convergence findings. PORT-1611 remains a separate downstream ticket.
 
 而不是第二次 AI runtime rewrite。

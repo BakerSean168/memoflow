@@ -9,15 +9,19 @@ tags:
   - vnext
 description: ADR-096 - Assistant Conversation Shell、Mastra Thread/Workflow 单一状态所有权与 UI hydration boundary
 created: 2026-09-09T00:00:00+08:00
-updated: 2026-09-09T00:00:00+08:00
+updated: 2026-09-18T00:00:00+00:00
 ---
 
 # ADR-096: Assistant Conversation Shell 与 Mastra Runtime State Boundary
 
-**状态：** 已采纳（待实施）
+**状态：** 已实施并验收（AI-9612 exact-head closure）
 **日期：** 2026-09-09
 **影响范围：** AI Conversation、Mastra Runtime/Memory/Workflow、Vue AI workspace、Prisma/PowerSync、HTTP/IPC、Data Portability
 **依赖：** ADR-050、ADR-051、ADR-052
+
+**实现证据：** Conversation shell 与 Mastra transcript/workflow authority 已按本 ADR 落地；
+AI-9610 已删除 legacy message persistence，AI-9612 closure evidence 记录 restart/HITL/delete/
+transport parity 与 anti-resurrection gates。
 
 ## 1. 决策摘要
 

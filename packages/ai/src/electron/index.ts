@@ -87,6 +87,7 @@ import { fail, ok } from '@memoflow/contracts/result';
 import { formatZodErrors } from '@memoflow/utils/result';
 import { createLogger } from '@memoflow/utils/logger';
 import type { AITransportModuleInstance } from '../server/infrastructure';
+import { toAITransportFailure } from '../server/transport';
 import { withAuthenticatedValue } from './authenticated-ipc';
 
 const logger = createLogger('AIElectron');
@@ -383,12 +384,16 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                     });
                   }
                 }
-              } catch {
+              } catch (error) {
                 if (!abortController.signal.aborted && !event.sender.isDestroyed()) {
+                  const failure = toAITransportFailure(error, {
+                    fallbackCode: 'AI_RUNTIME_TRANSPORT_ERROR',
+                    fallbackMessage: 'AI runtime request failed',
+                  });
                   event.sender.send(AIStreamChannels.RUNTIME_ASSISTANT_ERROR, {
                     streamId,
-                    code: 'AI_RUNTIME_TRANSPORT_ERROR',
-                    message: 'AI runtime request failed',
+                    code: failure.code,
+                    message: failure.message,
                   });
                 }
               } finally {
@@ -459,7 +464,15 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
               ) {
                 return fail({ code: 'NOT_FOUND', message: 'Conversation not found' });
               }
-              return fail({ code: 'AI_RUNTIME_ERROR', message: 'AI runtime request failed' });
+              const failure = toAITransportFailure(error, {
+                fallbackCode: 'AI_RUNTIME_ERROR',
+                fallbackMessage: 'AI runtime request failed',
+              });
+              return fail({
+                code: failure.code,
+                message: failure.message,
+                context: failure.context,
+              });
             }
           }),
         );
@@ -485,8 +498,16 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                 }),
               });
               return ok(result);
-            } catch {
-              return fail({ code: 'AI_RUNTIME_ERROR', message: 'AI runtime request failed' });
+            } catch (error) {
+              const failure = toAITransportFailure(error, {
+                fallbackCode: 'AI_RUNTIME_ERROR',
+                fallbackMessage: 'AI runtime request failed',
+              });
+              return fail({
+                code: failure.code,
+                message: failure.message,
+                context: failure.context,
+              });
             }
           }),
         );
@@ -516,8 +537,16 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                 }),
               );
               return ok(summary);
-            } catch {
-              return fail({ code: 'AI_RUNTIME_ERROR', message: 'AI runtime request failed' });
+            } catch (error) {
+              const failure = toAITransportFailure(error, {
+                fallbackCode: 'AI_RUNTIME_ERROR',
+                fallbackMessage: 'AI runtime request failed',
+              });
+              return fail({
+                code: failure.code,
+                message: failure.message,
+                context: failure.context,
+              });
             }
           }),
         );
@@ -549,8 +578,16 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                 }),
               );
               return ok(run);
-            } catch {
-              return fail({ code: 'AI_WORKFLOW_RUNTIME_ERROR', message: 'Workflow failed' });
+            } catch (error) {
+              const failure = toAITransportFailure(error, {
+                fallbackCode: 'AI_WORKFLOW_RUNTIME_ERROR',
+                fallbackMessage: 'Workflow failed',
+              });
+              return fail({
+                code: failure.code,
+                message: failure.message,
+                context: failure.context,
+              });
             }
           }),
         );
@@ -579,8 +616,16 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                 }),
               );
               return ok(run);
-            } catch {
-              return fail({ code: 'AI_WORKFLOW_RUNTIME_ERROR', message: 'Workflow failed' });
+            } catch (error) {
+              const failure = toAITransportFailure(error, {
+                fallbackCode: 'AI_WORKFLOW_RUNTIME_ERROR',
+                fallbackMessage: 'Workflow failed',
+              });
+              return fail({
+                code: failure.code,
+                message: failure.message,
+                context: failure.context,
+              });
             }
           }),
         );
@@ -607,8 +652,16 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                 runId: parsed.data.runId,
               });
               return ok(run ? AIWorkflowRunViewSchema.parse(run) : null);
-            } catch {
-              return fail({ code: 'AI_WORKFLOW_RUNTIME_ERROR', message: 'Workflow failed' });
+            } catch (error) {
+              const failure = toAITransportFailure(error, {
+                fallbackCode: 'AI_WORKFLOW_RUNTIME_ERROR',
+                fallbackMessage: 'Workflow failed',
+              });
+              return fail({
+                code: failure.code,
+                message: failure.message,
+                context: failure.context,
+              });
             }
           }),
         );
@@ -635,8 +688,16 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                 conversationId: parsed.data.conversationId,
               });
               return ok(runs.map((run) => AIWorkflowRunViewSchema.parse(run)));
-            } catch {
-              return fail({ code: 'AI_WORKFLOW_RUNTIME_ERROR', message: 'Workflow failed' });
+            } catch (error) {
+              const failure = toAITransportFailure(error, {
+                fallbackCode: 'AI_WORKFLOW_RUNTIME_ERROR',
+                fallbackMessage: 'Workflow failed',
+              });
+              return fail({
+                code: failure.code,
+                message: failure.message,
+                context: failure.context,
+              });
             }
           }),
         );
@@ -663,8 +724,16 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                 runId: parsed.data.runId,
               });
               return ok(run ? AIWorkflowRunViewSchema.parse(run) : null);
-            } catch {
-              return fail({ code: 'AI_WORKFLOW_RUNTIME_ERROR', message: 'Workflow failed' });
+            } catch (error) {
+              const failure = toAITransportFailure(error, {
+                fallbackCode: 'AI_WORKFLOW_RUNTIME_ERROR',
+                fallbackMessage: 'Workflow failed',
+              });
+              return fail({
+                code: failure.code,
+                message: failure.message,
+                context: failure.context,
+              });
             }
           }),
         );

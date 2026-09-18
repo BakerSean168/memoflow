@@ -115,9 +115,39 @@ describe('MastraModelResolver', () => {
     expect(resolved.capabilities).toEqual(verifiedChatOnly);
     expect(resolved.model).toMatchObject({ modelId: 'model-override' });
     expect(JSON.stringify(resolved.model)).not.toContain('server-secret');
-    expect((resolved.model as unknown as { config?: { fetch?: unknown } }).config?.fetch).toBe(
+    expect((resolved.model as unknown as { config?: { fetch?: unknown } }).config?.fetch).not.toBe(
       inertFetch,
     );
+  });
+
+  it('fails closed when the provider credential is revoked during a resolved run', async () => {
+    const provider = createAIProviderConfigServerDTO({ defaultModel: 'model-override' });
+    const secretVault = createAIProviderSecretVaultStub();
+    const providerFetch = vi.fn(async () => new Response('{}')) as unknown as typeof fetch;
+    const resolver = new MastraModelResolver(
+      createAIProviderConfigRepositoryStub({
+        findByIdForIdentity: async () => provider,
+        findDefaultByIdentityId: async () => provider,
+      }),
+      secretVault,
+      providerFetch,
+      { modelCatalog: catalogPort(['model-override']) },
+    );
+
+    const resolved = await resolver.resolve({ identityId: 'identity-1' });
+    const modelFetch = (resolved.model as unknown as { config?: { fetch?: typeof fetch } }).config
+      ?.fetch;
+    expect(modelFetch).toBeTypeOf('function');
+
+    await secretVault.revoke({
+      identityId: 'identity-1',
+      credentialRef: provider.credentialRef,
+    });
+
+    await expect(modelFetch?.('https://api.openai.com/v1/chat/completions')).rejects.toMatchObject({
+      category: 'provider_unavailable',
+    });
+    expect(providerFetch).not.toHaveBeenCalled();
   });
 
   it('rejects a disabled explicitly selected provider instead of falling back', async () => {

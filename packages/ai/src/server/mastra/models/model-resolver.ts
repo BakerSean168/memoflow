@@ -126,6 +126,57 @@ function normalizeRequirement(requirement?: AIExecutionRequirement): AIExecution
   return { chat: 'required', ...requirement };
 }
 
+/**
+ * Keep a resolved SDK model fail-closed after the request-scoped resolver has
+ * returned. The AI SDK retains the injected fetch for the lifetime of a run,
+ * so each provider request must re-check the connection and its Vault value;
+ * otherwise a revoked/replaced credential could continue to be used.
+ */
+function createCredentialCheckedProviderFetch(input: {
+  readonly providerFetch: ProviderFetch;
+  readonly providers: IAIProviderConfigRepository;
+  readonly secretVault: IAIProviderSecretVault;
+  readonly identityId: string;
+  readonly providerId: string;
+  readonly baseUrl: string;
+  readonly credentialRef: Parameters<IAIProviderSecretVault['resolve']>[0]['credentialRef'];
+  readonly credential: string;
+}): ProviderFetch {
+  return (async (request, init) => {
+    let currentProvider: Awaited<ReturnType<IAIProviderConfigRepository['findByIdForIdentity']>>;
+    try {
+      currentProvider = await input.providers.findByIdForIdentity(
+        input.identityId,
+        input.providerId,
+      );
+    } catch (cause) {
+      throw new AIExecutionError('provider_unavailable', 'AI provider is unavailable', { cause });
+    }
+
+    if (
+      !currentProvider ||
+      String(currentProvider.identityId) !== input.identityId ||
+      !currentProvider.isActive ||
+      currentProvider.deletedAt != null ||
+      String(currentProvider.credentialRef) !== String(input.credentialRef) ||
+      currentProvider.baseUrl !== input.baseUrl
+    ) {
+      throw new AIExecutionError('provider_unavailable', 'AI provider is unavailable');
+    }
+
+    const currentCredential = await resolveProviderCredential(
+      input.secretVault,
+      input.identityId,
+      { credentialRef: input.credentialRef },
+    );
+    if (currentCredential !== input.credential) {
+      throw new AIExecutionError('provider_unavailable', 'AI provider credential changed during execution');
+    }
+
+    return input.providerFetch(request, init);
+  }) as ProviderFetch;
+}
+
 function assertRequiredCapabilities(
   modelId: string,
   capabilities: AIModelCapabilityMap,
@@ -261,7 +312,16 @@ export class MastraModelResolver {
       name: 'memoflow-byok',
       baseURL: provider.baseUrl,
       apiKey: credential,
-      fetch: this.providerFetch,
+      fetch: createCredentialCheckedProviderFetch({
+        providerFetch: this.providerFetch,
+        providers: this.providers,
+        secretVault: this.secretVault,
+        identityId: input.identityId,
+        providerId: String(provider.id),
+        baseUrl: provider.baseUrl,
+        credentialRef: provider.credentialRef,
+        credential,
+      }),
       supportsStructuredOutputs: capabilities.structuredOutput === 'verified',
     });
 

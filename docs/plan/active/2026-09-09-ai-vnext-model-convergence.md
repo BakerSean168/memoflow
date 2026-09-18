@@ -11,7 +11,7 @@ tags:
   - refactor
 description: AI vNext Model Convergence — Conversation/Mastra 状态所有权、Provider Secret/Model Capability、Context/Knowledge、Workflow Draft/Apply、ExecutionRecord 单轨收敛实施计划
 created: 2026-09-09T00:00:00+08:00
-updated: 2026-09-18T00:00:00+08:00
+updated: 2026-09-18T00:00:00+00:00
 ---
 
 # AI vNext Model Convergence
@@ -30,9 +30,9 @@ updated: 2026-09-18T00:00:00+08:00
 
 Runtime recovery/HITL/idempotency/security tests remain protected because they are behavioral invariants, not legacy-data compatibility.
 
-**状态：ACTIVE / AI-9602 accepted locally; AI-9603 implemented locally, review pending**
-**实施分支：** `chatgpt/ai-9603-conversation-shell`；本轮已完成 conversation shell/runtime boundary cutover，等待 ChatGPT Web review/acceptance
-**当前源码 truth：** `packages/ai` + `packages/contracts/ai` + Mastra runtime + Prisma/PowerSync + Vue AI workspace 现状
+**状态：AI-9612 ACCEPTED — five-layer review closed with zero unresolved P0/P1/P2**
+**实施分支：** `delegated/ai-9612-vnext-closure-luna`；AI-9612 closure commit is ready for ChatGPT Web final acceptance
+**当前源码 truth：** `packages/ai` + `packages/contracts/ai` + Mastra runtime + Prisma/PowerSync + Vue AI workspace + shell-only Data Portability
 **目标 ADR：** ADR-096～099
 **继续有效：** ADR-050、051、052、070
 **跨模块依赖：** ADR-067～095
@@ -140,20 +140,17 @@ AIExecutionRecord != Workflow state != Accounting ledger
 当前已确认：
 
 1. 2026-08 Mastra-native 大重构已完成并归档，Mastra 是唯一核心 Agent/Workflow runtime；
-2. `AIConversation` 仍包含 `messages[] / messageCount / lastMessageAt / Closed` 等 legacy aggregate shape；
-3. `AiMessage` 仍保留，但当前 authoritative transcript 已经是 Mastra thread/memory；
+2. `AIConversation` 当前只保存 shell metadata；`Closed` 与 legacy message fields 已退休；
+3. Mastra thread/memory 是唯一 authoritative transcript，生产路径不存在 `AiMessage`/`ai_messages`；
 4. AI-9603 已将 Vue `useAIWorkflowPersistence` 收敛为 run pointer + revision-bound unsaved editor overlay；Mastra runtime 是 restore truth；
-5. `AIProviderConfig` repository 解密 secret 后把 plaintext API key 放回 server DTO；
+5. `AIProviderConfig` 只保存 `credentialRef`，plaintext 只在 SecretVault execution edge resolve；
 6. Provider Onboarding V2 已经有正确的 opaque one-time session / credential protection；
-7. model resolver 仍存在缺省 `gpt-4o-mini` fallback，且没有 workflow capability requirement；
-8. Goal workflow 当前实现仍大量消费 ADR-067/068/070 之前的 old draft fields；
-9. Task workflow 仍维护 AI-only cadence/timeOfDay mini DSL；
-10. Routine AI tools 仍使用 legacy FixedTime/Interval vocabulary；
-11. AI Planner/Notification ports 复制了 owner module 的旧 DTO 词汇；
-12. `AiKnowledgeIndexEntry` 仍围绕 resourceId/path，而 Knowledge ADR-090 已冻结 stable document identity；
-13. `AiGenerationTask` 当前真实用途已经是 execution log/usage projection；
-14. `AiUsageQuota`、`KnowledgeGenerationTask` 本轮未发现真实 current product consumer，是高置信度 deletion candidates；
-15. `AIApplicationPort` 已同时覆盖 Provider、Conversation、Knowledge、Analytics、Eval，后续应按真实 consumer 收窄。
+7. ModelResolver 已移除 magic model fallback，按 catalog/capability evidence 与 ExecutionRequirement fail closed；
+8. Goal/Task/Knowledge workflows 使用 canonical owner drafts 与 deterministic apply；
+9. Routine/Planner/Notification tools 使用 owner command/read projections，不复制 retired vocabulary；
+10. `AiKnowledgeIndexEntry` 以 `KnowledgeSpaceId + KnowledgeDocumentId` 为 stable identity；
+11. `AIExecutionRecord` 是 bounded operations projection；legacy generation/quota models 已删除；
+12. `AIApplicationPort` 已按真实 consumer 收窄为四个 capability ports。
 
 ## 4. Protected contracts
 
@@ -240,7 +237,7 @@ AIExecutionRecord != Workflow state != Accounting ledger
 
 ### AI-9602 — Characterize runtime authority before legacy persistence deletion
 
-**状态：PLANNED**
+**状态：ACCEPTED — runtime authority characterization and destructive-cutover prerequisites verified**
 
 #### Goal
 
@@ -308,7 +305,7 @@ delete legacy persistence, add a backfill, or make a compatibility promise under
 | Assistant transcript                                                                       | Mastra `Memory` thread in the configured Mastra store; `conversationId` is the thread id and `identityId` is the resource id                  | `packages/ai/src/server/mastra/runtime/assistant-history.service.ts::AssistantHistoryService`; `packages/ai/src/server/mastra/runtime/storage.ts::createMastraStorage`; `MastraAIRuntime.listMessages/dispatchMessage` | Authoritative and durable. After the version marker, reads use `memory.recall`; the legacy source is not consulted.        |
 | Goal/Task/Knowledge workflow state, suspension, resume cursor, result, and terminal status | Mastra `workflows` store, keyed by `runId` and filtered by `resourceId`                                                                       | `packages/ai/src/server/mastra/runtime/mastra-ai.runtime.ts::MastraAIRuntime.workflowStore`, `get`, `list`, `resume`, `cancel`                                                                                         | Authoritative and durable; in-memory `activeRuns` is only a live cancellation handle.                                      |
 | Client workflow pointer/overlay                                                             | `localStorage` key `ai:conversation-workflow-map:v3`                                                                                          | `packages/app-vue/src/modules/ai/composables/useAIWorkflowPersistence.ts`; `useAIChatView.ts::restoreWorkflowState` calls `workflowRuntime.get` through `loadAuthoritativeWorkflowRun` | Derived/recoverable UI state only; runtime status/suspension/result/draft are never persisted or used as fallback.           |
-| AI execution/usage observation                                                             | `ai_generation_tasks` through the execution-log adapters                                                                                      | `packages/ai/src/server/infrastructure/adapters/prisma/ai-execution-log-prisma.adapter.ts`; `ai-execution-log-powersync.adapter.ts`                                                                                    | Adjacent derived observability, not transcript or workflow authority; later `AIExecutionRecord` work owns its convergence. |
+| AI execution/usage observation                                                             | `ai_execution_records` through the bounded `AIExecutionRecord` adapters                                                                       | `packages/ai/src/server/infrastructure/adapters/prisma/ai-execution-record-prisma.adapter.ts`; `ai-execution-record-powersync.adapter.ts`; `packages/ai/src/server/application/ports/ai-execution-record.port.ts` | Adjacent derived observability, not transcript or workflow authority; it contains bounded usage/outcome fields only.        |
 
 The host boundary is also characterized: authenticated HTTP routes and Electron IPC derive
 `identityId` from the host context and expose history/delete plus workflow
@@ -334,11 +331,11 @@ Delete is therefore recoverable but not a distributed transaction: the shell use
 the shell visible; a failed shell delete leaves a recoverable shell that can be retried. No
 runtime rewrite is needed for this characterization.
 
-##### Legacy `AiMessage` / transcript consumer ledger
+##### Legacy `AiMessage` / transcript consumer ledger (historical pre-cutover evidence)
 
-The following is the complete non-generated production surface found by the AI-9602 inventory.
-No current assistant runtime producer writes `AiMessage`; the remaining writes are aggregate
-repository persistence and data-portability import.
+The following is the complete non-generated production surface found by the AI-9602 inventory
+before the AI-9610 direct cutover. It is retained as deletion evidence only; the current source,
+schema, PowerSync map, and portability contract no longer contain these consumers.
 
 | Consumer                                        | Read/write surface                                                                                                                               | Classification and deletion implication                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -356,11 +353,10 @@ repository persistence and data-portability import.
 consumer; the aggregate creates `Active` and soft-deletes to `Archived`. AI-9603 retires the
 contract/server value and helper while keeping archive semantics explicit.
 
-##### Retirement gate handed to later tickets
+##### Retirement gate disposition
 
-AI-9602 and AI-9603 prove the authority boundary but do not open the physical `AiMessage`
-destructive gate. Before a later coordinated schema/portability cut removes `AiMessage`, the
-later work must explicitly show that:
+AI-9602 and AI-9603 proved the authority boundary. AI-9610 then opened and completed the direct
+destructive cutover after showing that:
 
 1. transcript export has a deliberate Mastra-authoritative source or is removed under the
    ADR-111 portability decision;
@@ -372,7 +368,7 @@ later work must explicitly show that:
    schema change.
 
 No migration, backfill, legacy-row preservation, runtime rewrite, permanent compatibility reader,
-or `AiMessage` fallback/dual write was added for this ticket.
+or `AiMessage` fallback/dual write was added; the cutover deletes the retired production surface.
 
 #### Dependencies
 
@@ -380,7 +376,7 @@ or `AiMessage` fallback/dual write was added for this ticket.
 
 ### AI-9603 — Converge AssistantConversationShell + remove UI durable workflow shadow
 
-**状态：IMPLEMENTED LOCALLY / REVIEW PENDING**
+**状态：ACCEPTED — shell/runtime authority and UI shadow retirement verified**
 
 #### Goal
 
@@ -397,8 +393,8 @@ AssistantConversationShell
 
 迁移：
 
-- `AIConversation` remains product shell metadata; aggregate `messages[]`, `messageCount`, and
-  `lastMessageAt` remain legacy repository/portability consumers and are explicitly deferred;
+- `AIConversation` is product shell metadata only; transcript fields and legacy message consumers
+  were removed by the AI-9610 direct cutover;
 - Vue conversation grouping no longer treats `lastMessageAt` as shell recency authority;
 - AI-9602 evidence showed no `Closed` product semantic, so the contract/server status is retired;
 - existing conversation ids/thread mapping and workspace deep links remain stable。
@@ -416,8 +412,8 @@ UI：
 Persistence：
 
 - no old-data compatibility migration or backfill is added under ADR-111;
-- physical `AiMessage`/Prisma/PowerSync/generated-client deletion remains deferred until the portability
-  and legacy repository consumer gate passes;
+- physical `AiMessage`/Prisma/PowerSync/generated-client deletion is completed; no compatibility
+  reader or dual write remains;
 - no permanent `AiMessage` fallback or dual write is introduced。
 
 #### Protected contracts
@@ -435,7 +431,7 @@ Persistence：
   unknown-run behavior；
 - delete retry ordering/visibility；
 - anti-resurrection lock for full WorkflowRun localStorage persistence；
-- legacy Prisma/PowerSync/portability deletion remains an explicit later-ticket gate。
+- legacy Prisma/PowerSync/portability anti-resurrection locks remain green。
 
 #### Acceptance
 
@@ -446,9 +442,8 @@ full WorkflowRun durable localStorage snapshot
 runtime-unavailable local snapshot fallback
 ```
 
-The legacy `AIConversation.messages`/`AiMessage` repository and portability surfaces remain
-physically present and are not claimed as deleted by AI-9603. They are derived legacy consumers
-with an explicit deletion blocker recorded above.
+AI-9603 owns the shell/UI authority change; AI-9610 owns the subsequent physical deletion. The
+combined accepted state has no legacy message repository or portability surface.
 
 #### Dependencies
 
@@ -474,19 +469,17 @@ with an explicit deletion blocker recorded above.
   preserved. Delete failure leaves the selected shell visible for retry.
 - `ConversationStatus.Closed` is retired because the AI-9602 consumer audit found no current runtime
   or product consumer; `Active` and explicit `Archived` remain.
-- Explicitly deferred blocker: `AiMessage`/`ai_messages` still has active aggregate repository,
-  Prisma/PowerSync mapper, data-portability export/import, legacy DTO/domain, schema, and generated
-  client consumers. AI-9603 does not delete those tables/clients, migrate/backfill old rows, or add a
-  compatibility reader; a later coordinated portability/consumer cutover must remove or deliberately
-  replace those consumers before physical deletion.
+- AI-9610 deletion disposition: the pre-cutover `AiMessage`/`ai_messages` consumers were removed
+  together with the schema and portability path; no old-data migration/backfill or compatibility
+  reader was added under ADR-111.
 - Executable coverage: `useAIWorkflowPersistence.spec.ts`, `chatViewHelpers.spec.ts`,
   `useAIChatSession.spec.ts`, existing AI-9602 Mastra restart/HITL tests, and the existing goal/task/
-  knowledge runtime projection tests. Local acceptance remains review-pending until the required
-  repository validation matrix completes.
+  knowledge runtime projection tests. AI-9612 exact-head closure completed the repository
+  validation matrix; see the linked closure evidence.
 
 ### AI-9604 — Establish ProviderDefinition/Connection/SecretVault domain seam
 
-**状态：ACCEPTED LOCALLY — implementation + P1 host-local repair + verification matrix passed**
+**状态：ACCEPTED — implementation, host-local repair, revoke hardening and verification matrix passed**
 
 #### Goal
 
@@ -550,7 +543,7 @@ Production code 中普通 Provider DTO 不含 `apiKey`；plaintext secret 只在
 
 ### AI-9605 — Add ModelCatalog/Capability/ExecutionRequirement aware resolution
 
-**状态：PLANNED**
+**状态：ACCEPTED — capability-aware resolver and stable failure mapping verified**
 
 #### Goal
 
@@ -610,7 +603,7 @@ Resolver：
 
 ### AI-9606 — Establish AIContextAssembler + Product Time / trust / token-budget foundation
 
-**状态：PLANNED**
+**状态：ACCEPTED — context assembler, Product Time, trust and token-budget boundary verified**
 
 #### Goal
 
@@ -663,7 +656,7 @@ Goal/Task/Knowledge planner 不再各自实现互相漂移的 timezone/trust con
 
 ### AI-9607 — Cut Knowledge index to stable document identity and remove index-status dual truth
 
-**状态：PLANNED**
+**状态：ACCEPTED — stable KnowledgeSpaceId/KnowledgeDocumentId identity and citation boundary verified**
 
 #### Goal
 
@@ -708,7 +701,7 @@ AI index 的 semantic identity 不再依赖 mutable path/resource id。
 
 ### AI-9608 — Converge Goal/Task/Knowledge workflow drafts to owner-domain target contracts
 
-**状态：PLANNED**
+**状态：ACCEPTED — owner-domain workflow drafts/apply/retry contracts verified**
 
 #### Goal
 
@@ -777,7 +770,7 @@ Production Goal/Task AI workflow 不再输出/消费旧 owner-domain vocabulary�
 
 ### AI-9609 — Converge Routine/Planner/Notification AI tools to owner contracts
 
-**状态：PLANNED**
+**状态：ACCEPTED — Routine/Planner/Notification owner ports and approval boundaries verified**
 
 #### Goal
 
@@ -832,7 +825,7 @@ Routine/Planner/Notification target contracts implemented enough for adapters；
 
 ### AI-9610 — Rename execution log to AIExecutionRecord and delete proven legacy AI models
 
-**状态：PLANNED**
+**状态：ACCEPTED — AIExecutionRecord cutover and legacy AI persistence deletion verified**
 
 #### Goal
 
@@ -840,7 +833,7 @@ Routine/Planner/Notification target contracts implemented enough for adapters；
 
 #### Scope
 
-`AiGenerationTask`：
+历史目标名 `AiGenerationTask`（已实施名称 `AIExecutionRecord`）：
 
 ```text
 -> AIExecutionRecord
@@ -902,7 +895,7 @@ Mastra Workflow = execution truth
 
 ### AI-9611 — Split over-broad AI application capabilities only where consumer boundaries are proven
 
-**状态：PLANNED**
+**状态：ACCEPTED — four capability ports and API/Desktop composition parity verified**
 
 #### Goal
 
@@ -946,7 +939,7 @@ AIEvaluationOperationsPort
 
 ### AI-9612 — Five-layer review / failure hardening / docs truth / exact-head closure
 
-**状态：PLANNED**
+**状态：ACCEPTED — five-layer exact-head review closed with zero unresolved P0/P1/P2**
 
 #### Goal
 
@@ -1138,13 +1131,17 @@ AI-9609 Routine/Planner/Notification tools
 
 ## 9. Risk ledger
 
+The impact column preserves the pre-closure severity classification; the containment column is
+the accepted disposition. It is not an unresolved-finding list. The complete finding register is
+in the AI-9612 closure evidence.
+
 | Risk                                              | Impact | Containment                                                      |
 | ------------------------------------------------- | ------ | ---------------------------------------------------------------- |
 | 提前删除 AiMessage 丢 transcript                  | P0     | AI-9602 characterization + idempotent bootstrap/export fixtures  |
 | UI local overlay 覆盖 newer workflow revision     | P1     | runtime revision binding + stale overlay discard/conflict UI     |
 | Secret refactor把 credential 泄漏进 migration/log | P0     | leak tests + secret-only edge boundary                           |
 | Model capability probe误判                        | P1     | provenance + unknown state + fail-closed on critical workflow    |
-| Owner-domain contracts 尚在迁移                   | P1     | adapter on canonical target, legacy only bounded migration layer |
+| Owner-domain contract drift                       | P3     | current adapters use canonical owner ports; future owner changes require the same boundary review |
 | Knowledge index identity cutover错绑 document     | P0/P1  | stable-id migration fixture + path rename/move corpus            |
 | draftRef migration破坏 partial retry              | P1     | deterministic idempotency/recovery fixtures before deletion      |
 | ExecutionRecord rename误删 usage history          | P1     | data migration + before/after aggregation parity                 |
@@ -1155,22 +1152,24 @@ AI-9609 Routine/Planner/Notification tools
 
 ```text
 AI-9601  DONE — docs/design package only
-AI-9602  ACCEPTED — runtime authority characterization and AiMessage consumer ledger
-AI-9603  ACCEPTED — shell/runtime cutover; physical AiMessage deletion deferred to AI-9610
-AI-9604  ACCEPTED LOCALLY — ProviderDefinition/Connection/SecretVault seam; PR integration pending
-AI-9605  READY AFTER AI-9604 INTEGRATION
+AI-9602  ACCEPTED — runtime authority characterization and pre-cutover consumer ledger
+AI-9603  ACCEPTED — shell/runtime cutover; UI pointer/overlay only
+AI-9604  ACCEPTED — ProviderDefinition/Connection/SecretVault seam and host-local secret boundary
+AI-9605  ACCEPTED — capability-aware ModelResolver and fail-closed execution requirements
 AI-9606  ACCEPTED — AIContextAssembler + Product Time/trust/token-budget foundation
-AI-9607  READY — depends on accepted AI-9606
-AI-9608  READY — depends on accepted AI-9606
-AI-9609  READY — depends on accepted AI-9606
-AI-9610  BLOCKED — waits for AI-9605/9608/9609
-AI-9611  BLOCKED — waits for AI-9603/9604/9607/9610
-AI-9612  BLOCKED — final AI closure
+AI-9607  ACCEPTED — stable Knowledge identity/index/citation cutover
+AI-9608  ACCEPTED — owner-domain Goal/Task/Knowledge drafts and deterministic apply
+AI-9609  ACCEPTED — Routine/Planner/Notification owner contracts and approval tools
+AI-9610  ACCEPTED — AIExecutionRecord cutover and destructive legacy persistence retirement
+AI-9611  ACCEPTED — four capability ports with API/Desktop parity
+AI-9612  ACCEPTED — five-layer review closed; zero unresolved P0/P1/P2
 ```
 
 本状态明确表示：
 
-> **runtime authority、conversation shell、AIContextAssembler 已进入 canonical convergence；AI-9604 provider/secret ownership 已本地验收，下一前沿是 AI-9605 与已经解锁的 AI-9607/9608/9609。**
+> **AI-9602～AI-9612 已进入 canonical convergence；AI-9612 closure evidence 记录了 exact-head
+> findings/disposition、failure hardening 与全部 required gates。PORT-1611 是独立后续 ticket，
+> 不属于本 closure。**
 
 2026-08 的 Mastra-native runtime implementation 已经完成；本计划只针对 2026-09 新冻结的 product model alignment。
 

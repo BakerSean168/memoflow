@@ -5,7 +5,7 @@ tags:
   - persistence
 description: AI vNext runtime persistence ownership——旧 AgentRun/LangGraph checkpoint 已退役
 created: 2026-06-12T00:00:00
-updated: 2026-08-22T12:50:00+08:00
+updated: 2026-09-18T00:00:00+00:00
 ---
 
 # AI Runtime Persistence Ownership
@@ -24,7 +24,7 @@ MemoFlow 不再维护 `AgentRunCheckpoint`、`LangGraphCheckpoint` 或 `LangGrap
 | Goal/Task/Knowledge workflow snapshot | Mastra storage |
 | Product Goal/Task/Reminder/Knowledge rows | MemoFlow domain stores |
 | ProviderConfig | MemoFlow AI persistence |
-| token/cost/request/trace projection | `ai_generation_tasks` execution log |
+| token/cost/request/trace projection | `ai_execution_records` / `AIExecutionRecord` bounded operations projection |
 
 API lane 的 Mastra storage 使用 PostgreSQL；Desktop profile 使用 local LibSQL。两端不通过 HTTP callback 互相复制 framework checkpoint。
 

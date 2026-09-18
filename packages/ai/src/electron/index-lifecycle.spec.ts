@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AIChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
 import { ok } from '@memoflow/contracts/result';
 import type { AIModuleInstance } from '../server/infrastructure';
+import { AIExecutionError } from '../shared/ai-execution-error';
 
 const mocks = vi.hoisted(() => {
   const handlers = new Map<string, (...args: unknown[]) => unknown>();
@@ -220,6 +221,37 @@ describe('createAIElectronModule lifecycle', () => {
     });
     expect(rejected).toMatchObject({ ok: false, error: { code: 'VALIDATION_ERROR' } });
     expect(fake.summarizeUsage).toHaveBeenCalledTimes(1);
+  });
+
+  it('maps runtime provider failures to the same stable public code as HTTP', async () => {
+    const workflowRuntime = {
+      start: vi.fn(async () => {
+        throw new AIExecutionError('capability_unverified', 'provider=server-secret');
+      }),
+      resume: vi.fn(),
+      get: vi.fn(),
+      list: vi.fn(),
+      cancel: vi.fn(),
+    };
+    fake.instance = { ...fake.instance, workflowRuntime } as AIModuleInstance;
+    moduleDef = createAIElectronModule({ instance: fake.instance });
+    await moduleDef.register(createFakeContext());
+
+    const handler = mocks.handlers.get(AIChannels.RUNTIME_WORKFLOW_START)!;
+    const result = await handler(undefined, {
+      kind: 'goal.create',
+      conversationId: 'conversation-1',
+      input: { idea: 'Run a 5K' },
+    });
+
+    expect(result).toMatchObject({
+      ok: false,
+      error: {
+        code: 'AI_CAPABILITY_UNVERIFIED',
+        message: 'The selected AI model capability has not been verified',
+      },
+    });
+    expect(JSON.stringify(result)).not.toContain('server-secret');
   });
 
   it('is single-register and destroy is idempotent', async () => {
