@@ -443,12 +443,11 @@ async function registerBusinessModules(
     },
   };
   const plannerReadPort = new DesktopPlannerAIReadAdapter(
-    scheduleComposed.repositories.scheduleRepository,
+    scheduleComposed.eventApi,
     taskComposed.applicationPort,
+    settingElectronModule.userTimeContextPort,
   );
-  const notificationReadPort = new DesktopNotificationAIReadAdapter(
-    notificationComposed.repositories.notificationRepository,
-  );
+  const notificationReadPort = new DesktopNotificationAIReadAdapter(notificationComposed.inbox);
   const activityReadPort = new DesktopActivityAIReadAdapter(
     goalComposed.repositories.goalRepository,
     taskComposed.repositories.taskPlanRepository,
@@ -573,8 +572,8 @@ async function registerBusinessModules(
     goalKnowledgeService,
     knowledgeDocumentRefResolver: localVaultKnowledgeRefResolver,
     routineCommandPort: routineComposed.routineCommandPort,
-    scheduleRepository: scheduleComposed.repositories.scheduleRepository,
-    notificationRepository: notificationComposed.repositories.notificationRepository,
+    scheduleEventApi: scheduleComposed.eventApi,
+    notificationInbox: notificationComposed.inbox,
     userTimeContextPort: settingElectronModule.userTimeContextPort,
     labelService,
     mastraStorage: {

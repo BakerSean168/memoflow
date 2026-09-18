@@ -4,6 +4,7 @@ import {
   type IScheduleRepository,
   type SchedulePortableCapability,
   type SchedulePowerSyncRepositories,
+  type ScheduleEventApplicationPort,
 } from '@memoflow/schedule';
 import {
   createScheduleElectronModule,
@@ -39,6 +40,8 @@ export interface ComposedScheduleElectron {
   readonly calendarModule: ScheduleElectronModuleDef;
   readonly schedulerModule: SchedulerElectronModuleDef;
   readonly portableCapability: SchedulePortableCapability;
+  /** Schedule-owned Calendar Event read/command seam shared by transports. */
+  readonly eventApi: ScheduleEventApplicationPort;
   readonly repositories: {
     readonly scheduleRepository: IScheduleRepository;
   };
@@ -49,9 +52,7 @@ function normalizeRuntimeContributions(
   input?: SchedulerRuntimeContributionsInput,
 ): readonly SchedulerModuleRuntimeContribution[] {
   if (!input) return [];
-  return Array.isArray(input)
-    ? Array.from(input)
-    : [input as SchedulerModuleRuntimeContribution];
+  return Array.isArray(input) ? Array.from(input) : [input as SchedulerModuleRuntimeContribution];
 }
 
 export function composeSchedule(
@@ -99,6 +100,7 @@ export function composeSchedule(
     calendarModule,
     schedulerModule,
     portableCapability: calendarInstance.portableCapability,
+    eventApi: calendarInstance.eventApi,
     repositories: {
       scheduleRepository: dependencies.calendarRepositories.scheduleRepository,
     },

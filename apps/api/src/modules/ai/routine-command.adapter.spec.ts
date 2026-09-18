@@ -2,10 +2,6 @@ import { describe, expect, it, vi } from 'vitest';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { RoutineAICommandAdapter } from './routine-command.adapter';
 
-const userTimeContextPort = {
-  getUserTimeContext: vi.fn(async () => ({ timeZone: 'Asia/Tokyo', weekStartsOn: 1 as const })),
-};
-
 const context: ExecutionContext = {
   identityId: 'identity-1',
   requestId: 'request-1',
@@ -14,76 +10,95 @@ const context: ExecutionContext = {
   source: 'http',
 };
 
+const wallClockTrigger = {
+  type: 'WallClock' as const,
+  timingOwner: 'scheduler' as const,
+  localTime: '22:30',
+  timeZone: 'Asia/Tokyo',
+  recurrence: {
+    startDate: '2026-09-16',
+    frequency: 'daily' as const,
+    interval: 1,
+    byWeekday: [],
+    count: null,
+    until: null,
+  },
+};
+
 describe('RoutineAICommandAdapter', () => {
-  it('maps a method preset into canonical Routine creation and preserves the receipt', async () => {
+  it('passes the canonical WallClock trigger to the Routine owner', async () => {
     const createRoutine = vi.fn(async () => ({
       routineId: 'r-1',
       identityId: 'identity-1',
-      name: 'Eye break',
+      name: 'Wind down',
       version: 1,
     }));
-    const adapter = new RoutineAICommandAdapter({ createRoutine } as never, userTimeContextPort);
+    const adapter = new RoutineAICommandAdapter({ createRoutine } as never);
 
     await expect(
       adapter.createRoutine({
         context,
-        title: 'Eye break',
-        methodId: '20-20-20',
+        name: 'Wind down',
+        trigger: wallClockTrigger,
         profileIds: ['work'],
       }),
     ).resolves.toEqual({
       kind: 'routine',
       id: 'r-1',
       status: 'created',
-      details: { title: 'Eye break' },
+      details: { name: 'Wind down' },
     });
 
     expect(createRoutine).toHaveBeenCalledWith(
       expect.objectContaining({
         identityId: 'identity-1',
-        name: 'Eye break',
+        name: 'Wind down',
         profileIds: ['work'],
         at: context.startedAt,
-        trigger: expect.objectContaining({ type: 'Elapsed', durationMs: 20 * 60_000 }),
-      }),
-    );
-  });
-
-  it('maps an explicit fixed-time trigger to the user timezone', async () => {
-    const createRoutine = vi.fn(async () => ({
-      routineId: 'r-2',
-      identityId: 'identity-1',
-      name: 'Wind down',
-      version: 1,
-    }));
-    const adapter = new RoutineAICommandAdapter({ createRoutine } as never, userTimeContextPort);
-
-    await adapter.createRoutine({
-      context,
-      title: 'Wind down',
-      trigger: { type: 'FixedTime', fixedTime: '22:30' },
-    });
-
-    expect(createRoutine).toHaveBeenCalledWith(
-      expect.objectContaining({
         trigger: expect.objectContaining({
           type: 'WallClock',
           localTime: '22:30',
           timeZone: 'Asia/Tokyo',
-          recurrence: expect.objectContaining({
-            startDate: '2026-09-16',
-            frequency: 'daily',
-          }),
+          recurrence: expect.objectContaining({ frequency: 'daily' }),
         }),
       }),
     );
   });
 
-  it('rejects Protocol presets on the Routine creation path', async () => {
-    const adapter = new RoutineAICommandAdapter({} as never, userTimeContextPort);
-    await expect(
-      adapter.createRoutine({ context, title: 'Focus', methodId: 'pomodoro' }),
-    ).rejects.toThrow(/routine_start_protocol/);
+  it('passes ActiveUsage semantics without selecting a method preset', async () => {
+    const createRoutine = vi.fn(async () => ({
+      routineId: 'r-2',
+      identityId: 'identity-1',
+      name: 'Active focus',
+      version: 1,
+    }));
+    const adapter = new RoutineAICommandAdapter({ createRoutine } as never);
+
+    await adapter.createRoutine({
+      context,
+      name: 'Active focus',
+      trigger: {
+        type: 'ActiveUsage',
+        timingOwner: 'local-runtime',
+        requiredActiveMs: 45 * 60_000,
+        anchor: 'last-satisfied',
+        naturalBreakCredit: {
+          idleDurationMs: 5 * 60_000,
+          effect: 'satisfy-and-reset',
+        },
+        protocolBreakCredit: null,
+      },
+    });
+
+    expect(createRoutine).toHaveBeenCalledWith(
+      expect.objectContaining({
+        trigger: expect.objectContaining({
+          type: 'ActiveUsage',
+          requiredActiveMs: 45 * 60_000,
+          naturalBreakCredit: { idleDurationMs: 5 * 60_000, effect: 'satisfy-and-reset' },
+        }),
+      }),
+    );
   });
 
   it('delegates profile, override, and protocol state to the Routine owner port', async () => {
@@ -106,7 +121,7 @@ describe('RoutineAICommandAdapter', () => {
         phaseKey: 'focus',
       })),
     };
-    const adapter = new RoutineAICommandAdapter(routine as never, userTimeContextPort);
+    const adapter = new RoutineAICommandAdapter(routine as never);
 
     await adapter.setProfileActive({ context, profileId: 'work', active: true });
     await adapter.setTemporaryOverride({

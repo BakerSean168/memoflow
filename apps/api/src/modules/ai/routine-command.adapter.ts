@@ -1,58 +1,40 @@
-import {
-  asInstant,
-  createTimeContext,
-  createTimeFacade,
-  type UserTimeContextPort,
-} from '@memoflow/time';
 import type { IAIRoutineCommandPort, AIRoutineCreateInput } from '@memoflow/ai';
-import { createElapsedTrigger, createWallClockTrigger } from '@memoflow/reminder/server';
-import type { RoutineCoachCommandPort } from '@memoflow/reminder/routine-runtime';
 import {
-  getRoutineMethodTemplatePreset,
-  type RoutineMethodId,
-} from '@memoflow/reminder/method-library';
+  createActiveUsageTrigger,
+  createElapsedTrigger,
+  createWallClockTrigger,
+} from '@memoflow/reminder/server';
+import type { RoutineCoachCommandPort } from '@memoflow/reminder/routine-runtime';
 
-function canonicalTrigger(input: AIRoutineCreateInput['trigger'], at: number, timeZone: string) {
-  if (!input) return null;
-  if (input.type === 'Interval') {
-    return createElapsedTrigger({
-      durationMs: input.intervalMinutes * 60_000,
-      anchor: 'routine-activation',
-    });
+function canonicalTrigger(input: AIRoutineCreateInput['trigger']) {
+  switch (input.type) {
+    case 'WallClock':
+      return createWallClockTrigger(input);
+    case 'Elapsed':
+      return createElapsedTrigger(input);
+    case 'ActiveUsage':
+      return createActiveUsageTrigger({
+        requiredActiveMs: input.requiredActiveMs,
+        anchor: input.anchor,
+        naturalBreakCredit: input.naturalBreakCredit
+          ? { idleDurationMs: input.naturalBreakCredit.idleDurationMs }
+          : null,
+        protocolBreakCredit: input.protocolBreakCredit,
+      });
   }
-  const startDate = createTimeFacade({
-    context: createTimeContext({ timeZone, weekStartsOn: 1 }),
-  }).calendar.toYmd(asInstant(at));
-  return createWallClockTrigger({
-    localTime: input.fixedTime,
-    timeZone,
-    recurrence: { startDate, frequency: 'daily' },
-  });
 }
 
 /** Host adapter: AI commands terminate at Reminder-owned application/runtime seams. */
 export class RoutineAICommandAdapter implements IAIRoutineCommandPort {
-  constructor(
-    private readonly routine: RoutineCoachCommandPort,
-    private readonly userTimeContextPort: UserTimeContextPort,
-  ) {}
+  constructor(private readonly routine: RoutineCoachCommandPort) {}
 
   async createRoutine(input: AIRoutineCreateInput) {
-    const preset = input.methodId
-      ? getRoutineMethodTemplatePreset(input.methodId as RoutineMethodId)
-      : null;
-    if (input.methodId && !preset) {
-      throw new TypeError(`Protocol method '${input.methodId}' must use routine_start_protocol`);
-    }
-    const trigger = input.trigger ?? preset?.trigger;
-    if (!trigger) throw new TypeError('Routine creation requires a method or explicit trigger');
-    const timeContext = await this.userTimeContextPort.getUserTimeContext(input.context.identityId);
     const created = await this.routine.createRoutine({
       identityId: input.context.identityId,
       ...(input.routineId === undefined ? {} : { routineId: input.routineId }),
-      name: input.title,
-      description: input.description ?? preset?.description,
-      trigger: canonicalTrigger(trigger, input.context.startedAt, timeContext.timeZone),
+      name: input.name,
+      description: input.description,
+      trigger: canonicalTrigger(input.trigger),
       profileIds: input.profileIds,
       at: input.context.startedAt,
     });
@@ -60,7 +42,7 @@ export class RoutineAICommandAdapter implements IAIRoutineCommandPort {
       kind: 'routine' as const,
       id: created.routineId,
       status: 'created',
-      details: { title: created.name },
+      details: { name: created.name },
     };
   }
 

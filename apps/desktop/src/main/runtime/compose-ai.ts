@@ -18,8 +18,8 @@
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import type { GoalApplicationPort } from '@memoflow/goal';
 import type { RoutineCoachCommandPort } from '@memoflow/reminder/routine-runtime';
-import type { IScheduleRepository } from '@memoflow/schedule';
-import type { INotificationRepository } from '@memoflow/notification';
+import type { ScheduleEventApplicationPort } from '@memoflow/schedule';
+import type { NotificationInboxPort } from '@memoflow/notification';
 import type { TaskApplicationPort } from '@memoflow/task';
 import type { LabelService } from '@memoflow/label';
 import type { GoalKnowledgeService, KnowledgeDocumentRefResolver } from '@memoflow/relation';
@@ -57,8 +57,10 @@ export interface ComposeAIElectronDependencies {
   readonly knowledgeDocumentRefResolver: KnowledgeDocumentRefResolver;
   readonly labelService: LabelService;
   readonly routineCommandPort: RoutineCoachCommandPort;
-  readonly scheduleRepository: IScheduleRepository;
-  readonly notificationRepository: INotificationRepository;
+  /** Schedule-owned Calendar Event read seam for Planner projections. */
+  readonly scheduleEventApi: ScheduleEventApplicationPort;
+  /** Notification-owned Fact/Inbox seam for AI reads and typed actions. */
+  readonly notificationInbox: NotificationInboxPort;
   readonly userTimeContextPort: UserTimeContextPort;
   readonly mastraStorage: MastraStorageConfig;
 }
@@ -101,15 +103,13 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): AIElectr
     knowledgeSourcePort: dependencies.knowledgeSourcePort,
     executionLogPort,
     usageReadPort: executionLogPort,
-    routineCommandPort: new DesktopRoutineAICommandAdapter(
-      dependencies.routineCommandPort,
+    routineCommandPort: new DesktopRoutineAICommandAdapter(dependencies.routineCommandPort),
+    plannerReadPort: new DesktopPlannerAIReadAdapter(
+      dependencies.scheduleEventApi,
+      dependencies.taskApplicationPort,
       dependencies.userTimeContextPort,
     ),
-    plannerReadPort: new DesktopPlannerAIReadAdapter(
-      dependencies.scheduleRepository,
-      dependencies.taskApplicationPort,
-    ),
-    notificationReadPort: new DesktopNotificationAIReadAdapter(dependencies.notificationRepository),
+    notificationReadPort: new DesktopNotificationAIReadAdapter(dependencies.notificationInbox),
     contextAssembler,
   });
 
