@@ -26,7 +26,6 @@ import type {
   CreateTaskOccurrenceInput,
   CreateScheduleInput,
   CreateAIConversationInput,
-  CreateAIMessageInput,
 } from '../../application/import-store/data-portability-import-store';
 
 class PrismaDataPortabilityImportTx implements DataPortabilityImportTx {
@@ -170,9 +169,6 @@ class PrismaDataPortabilityImportTx implements DataPortabilityImportTx {
     });
   }
 
-  async createAIMessage(input: CreateAIMessageInput): Promise<void> {
-    await this.tx.aiMessage.create({ data: input as Prisma.AiMessageUncheckedCreateInput });
-  }
 }
 
 export class PrismaDataPortabilityImportStore implements DataPortabilityImportStore {

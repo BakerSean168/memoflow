@@ -59,6 +59,10 @@ describe('PowerSync desktop data portability round trip', () => {
     expect(exported.content).toContain('"tasks"');
     expect(exported.content).not.toContain('"workspaces"');
     expect(exported.content).toContain('"conversations"');
+    const exportedData = JSON.parse(exported.content) as {
+      data?: { ai?: { conversations?: Array<Record<string, unknown>> } };
+    };
+    expect(exportedData.data?.ai?.conversations?.[0]).not.toHaveProperty('messages');
 
     const targetDb = new FakePowerSyncDb({}, { existingSingletonsIdentityId: identityB });
     const importUseCase = new ImportUserDataUseCase(
@@ -93,7 +97,7 @@ describe('PowerSync desktop data portability round trip', () => {
     const taskPlan = insertedRow(firstStatements, 'task_plans');
     const taskOccurrence = insertedRow(firstStatements, 'task_occurrences');
     const conversation = insertedRow(firstStatements, 'ai_conversations');
-    const message = insertedRow(firstStatements, 'ai_messages');
+    expect(firstStatements.some(({ sql }) => /ai_messages/i.test(sql))).toBe(false);
 
     expect(folder.repository_id).toBe(repository.id);
     expect(resource.repository_id).toBe(repository.id);
@@ -133,7 +137,7 @@ describe('PowerSync desktop data portability round trip', () => {
     expect(importedOccurrenceChecklist).toHaveLength(1);
     expect(importedOccurrenceChecklist[0]?.definitionId).toBe(importedPlanChecklist[0]?.id);
     expect(importedPlanChecklist[0]?.id).not.toBe('check-a');
-    expect(message.conversation_id).toBe(conversation.id);
+    expect(conversation.name).toBe('Portability help');
 
     await importUseCase.execute(identityB, exported.content);
     const secondStatements = targetDb.committedStatements.slice(firstStatementCount);
@@ -407,8 +411,6 @@ class FakePowerSyncDb {
         return rows.filter((row) => row.session_id === firstParameter);
       case 'editor_workspace_session_group_tabs':
         return rows.filter((row) => row.group_id === firstParameter);
-      case 'ai_messages':
-        return rows.filter((row) => row.conversation_id === firstParameter);
       default:
         return rows.filter((row) => row.identity_id === firstParameter);
     }
@@ -869,17 +871,6 @@ function seedProfile(identityUuid: string): SeedTables {
         created_at: now,
         updated_at: later,
         deleted_at: null,
-      },
-    ],
-    ai_messages: [
-      {
-        id: 'message-a',
-        conversation_id: 'conversation-a',
-        identity_id: identityUuid,
-        role: 'assistant',
-        content: 'Round trip ready',
-        token_usage: JSON.stringify({ totalTokens: 4 }),
-        created_at: now,
       },
     ],
   };

@@ -304,7 +304,7 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
         installed.push(AIChannels.CONVERSATION_LIST);
         ipcMain.handle(AIChannels.CONVERSATION_GET, async (_, id) =>
           withAuthenticatedValue(ctx, async (requestContext) => {
-            const result = await aiModule.api.getConversation(String(id), requestContext, true);
+            const result = await aiModule.api.getConversation(String(id), requestContext);
             if (!result.ok) return result;
             return result.data ?? null;
           }),

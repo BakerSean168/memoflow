@@ -183,7 +183,7 @@
           "const mastraRuntime = new MastraAIRuntime({",
           "mastraRuntime,",
           "workflowRuntime: mastraRuntime",
-          "usageReadPort: repositorySet.executionLogPort"
+          "usageReadPort: repositorySet.executionRecordPort"
         ]
       },
       {
@@ -192,7 +192,7 @@
           "const mastraRuntime = new MastraAIRuntime({",
           "mastraRuntime,",
           "workflowRuntime: mastraRuntime",
-          "usageReadPort: executionLogPort"
+          "usageReadPort: executionRecordPort"
         ]
       }
     ],

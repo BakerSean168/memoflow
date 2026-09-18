@@ -24,7 +24,6 @@ import type {
   CreateTaskOccurrenceInput,
   CreateScheduleInput,
   CreateAIConversationInput,
-  CreateAIMessageInput,
 } from '../../application/import-store/data-portability-import-store';
 
 // ============ Helpers ============
@@ -323,20 +322,6 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
     );
   }
 
-  async createAIMessage(input: CreateAIMessageInput): Promise<void> {
-    await this.tx.execute(
-      `INSERT INTO ai_messages (id, identity_id, conversation_id, role, content, token_usage, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [
-        input.id,
-        input.identityId,
-        input.conversationId,
-        input.role,
-        input.content,
-        str(input.tokenUsage),
-        createdAt(input),
-      ],
-    );
-  }
 }
 
 // ============ Store Implementation ============

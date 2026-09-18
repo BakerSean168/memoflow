@@ -1,18 +1,13 @@
-/**
- * Residual 971: withObservabilityPayload sole import
- * (../with-observability-payload.ts).
- */
 import { randomUUID } from 'node:crypto';
 
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import type {
-  AIExecutionLogInput,
+  AIExecutionRecordInput,
   AIUsageQuery,
   AIUsageSummary,
-  IAIExecutionLogPort,
+  IAIExecutionRecordPort,
   IAIUsageReadPort,
 } from '../../../application/ports';
-import { withObservabilityPayload } from '../with-observability-payload';
 
 type UsageRow = {
   token_usage: string | null;
@@ -41,48 +36,42 @@ function parseTokenUsage(raw: string | null): {
   }
 }
 
-export class AIExecutionLogPowerSyncAdapter implements IAIExecutionLogPort, IAIUsageReadPort {
+export class AIExecutionRecordPowerSyncAdapter implements IAIExecutionRecordPort, IAIUsageReadPort {
   constructor(private readonly db: IElectronDatabase) {}
 
-  async record(input: AIExecutionLogInput): Promise<void> {
+  async record(input: AIExecutionRecordInput): Promise<void> {
     const id = randomUUID();
     const now = new Date().toISOString();
-
     await this.db.execute(
-      `INSERT INTO ai_generation_tasks (
-         id, identity_id, task_type, status, conversation_id, run_id, request_id, trace_id,
-         provider_id, model, estimated_cost_usd, input, result, error, retry_count,
-         token_usage, processing_ms, version, created_at, updated_at, completed_at, deleted_at
-       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO ai_execution_records (
+         id, identity_id, operation, outcome, conversation_id, run_id, request_id, trace_id,
+         provider_connection_id, model_id, error_category, safe_error, estimated_cost_usd,
+         token_usage, latency_ms, created_at, completed_at
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         input.identityId,
-        input.taskType,
-        input.status,
+        input.operation,
+        input.outcome,
         input.conversationId ?? null,
         input.runId ?? null,
         input.requestId ?? null,
         input.traceId ?? null,
-        input.providerId ?? null,
-        input.model ?? null,
+        input.providerConnectionId ?? null,
+        input.modelId ?? null,
+        input.errorCategory ?? null,
+        input.safeError ?? null,
         input.costEstimate?.totalCostUsd ?? null,
-        JSON.stringify(withObservabilityPayload(input.input, input)),
-        input.result ? JSON.stringify(withObservabilityPayload(input.result, input)) : null,
-        input.error ?? null,
-        0,
         input.tokenUsage ? JSON.stringify(input.tokenUsage) : null,
-        input.processingMs ?? null,
-        1,
+        input.latencyMs ?? null,
         now,
         now,
-        now,
-        null,
       ],
     );
   }
 
   async summarizeUsage(input: AIUsageQuery): Promise<AIUsageSummary> {
-    const clauses = ['identity_id = ?', 'deleted_at IS NULL'];
+    const clauses = ['identity_id = ?'];
     const parameters: unknown[] = [input.identityId];
     if (input.conversationId) {
       clauses.push('conversation_id = ?');
@@ -94,7 +83,7 @@ export class AIExecutionLogPowerSyncAdapter implements IAIExecutionLogPort, IAIU
     }
     const rows = await this.db.getAll<UsageRow>(
       `SELECT token_usage, estimated_cost_usd
-       FROM ai_generation_tasks
+       FROM ai_execution_records
        WHERE ${clauses.join(' AND ')}
        ORDER BY created_at ASC`,
       parameters,

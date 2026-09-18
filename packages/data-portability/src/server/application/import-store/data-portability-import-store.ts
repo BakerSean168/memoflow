@@ -189,14 +189,6 @@ export interface CreateAIConversationInput extends TimestampedImportInput {
   status: string;
 }
 
-export interface CreateAIMessageInput extends CreatedImportInput {
-  id: string;
-  identityId: string;
-  conversationId: string;
-  role: string;
-  content: string;
-  tokenUsage: string | null;
-}
 
 // ============ Transaction Port ============
 
@@ -225,7 +217,6 @@ export interface DataPortabilityImportTx {
 
   // AI
   createAIConversation(input: CreateAIConversationInput): Promise<void>;
-  createAIMessage(input: CreateAIMessageInput): Promise<void>;
 }
 
 // ============ Store Port ============

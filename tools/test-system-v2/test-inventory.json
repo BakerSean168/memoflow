@@ -2694,16 +2694,6 @@
       ]
     },
     {
-      "path": "packages/ai/src/server/domain/entities/__tests__/message.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/ai/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/ai/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/ai/src/server/domain/services/__tests__/knowledge-series.validation.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -2804,7 +2794,7 @@
       ]
     },
     {
-      "path": "packages/ai/src/server/infrastructure/adapters/__tests__/ai-execution-log-usage.test.ts",
+      "path": "packages/ai/src/server/infrastructure/adapters/__tests__/ai-execution-record-usage.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -2994,7 +2984,7 @@
       ]
     },
     {
-      "path": "packages/ai/src/server/infrastructure/migrations/conversation-transcript-bootstrap.source.spec.ts",
+      "path": "packages/ai/src/server/infrastructure/migrations/conversation-shell.source.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -10800,7 +10790,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 86
+      "fileCount": 85
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -11178,7 +11168,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 86
+      "fileCount": 85
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -11503,7 +11493,6 @@
       "packages/ai/src/server/domain/aggregates/__tests__/ai-conversation.spec.ts",
       "packages/ai/src/server/domain/aggregates/__tests__/ai-provider-config.spec.ts",
       "packages/ai/src/server/domain/ai-provider-config-barrel.surface.spec.ts",
-      "packages/ai/src/server/domain/entities/__tests__/message.spec.ts",
       "packages/ai/src/server/domain/services/__tests__/knowledge-series.validation.test.ts",
       "packages/ai/src/server/domain/services/__tests__/summarization.validation.test.ts",
       "packages/ai/src/server/domain/value-objects/__tests__/ai-value-objects.spec.ts",
@@ -11514,7 +11503,7 @@
       "packages/ai/src/server/infrastructure/__tests__/ai-repositories.surface.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/__tests__/ai-conversation-domain-events.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/__tests__/ai-conversation-repository.surface.spec.ts",
-      "packages/ai/src/server/infrastructure/adapters/__tests__/ai-execution-log-usage.test.ts",
+      "packages/ai/src/server/infrastructure/adapters/__tests__/ai-execution-record-usage.test.ts",
       "packages/ai/src/server/infrastructure/adapters/__tests__/ai-provider-config-repository.surface.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/dual-registry.surface.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/fs/__tests__/ai-evaluation-report-file.adapter.test.ts",
@@ -11533,7 +11522,7 @@
       "packages/ai/src/server/infrastructure/adapters/tokenize-keep-boundary.surface.spec.ts",
       "packages/ai/src/server/infrastructure/gateways/openai-compatible-model-catalog.gateway.spec.ts",
       "packages/ai/src/server/infrastructure/gateways/openai-compatible.gateway.spec.ts",
-      "packages/ai/src/server/infrastructure/migrations/conversation-transcript-bootstrap.source.spec.ts",
+      "packages/ai/src/server/infrastructure/migrations/conversation-shell.source.spec.ts",
       "packages/ai/src/server/infrastructure/security/ai-secret-cipher.spec.ts",
       "packages/ai/src/server/infrastructure/security/provider-endpoint-policy.spec.ts",
       "packages/ai/src/server/infrastructure/security/provider-safe-fetch.spec.ts",
@@ -11927,7 +11916,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1035,
+    "unit": 1034,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

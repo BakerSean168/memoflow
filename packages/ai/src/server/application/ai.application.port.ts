@@ -99,7 +99,6 @@ export interface AIApplicationPort {
   getConversation(
     id: string,
     cx: ExecutionContext,
-    includeMessages?: boolean,
   ): Promise<Result<AIConversationClientDTO | null>>;
   deleteConversation(id: string, cx: ExecutionContext): Promise<Result<void>>;
 

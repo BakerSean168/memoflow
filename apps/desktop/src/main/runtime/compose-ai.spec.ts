@@ -10,9 +10,9 @@ vi.mock('@memoflow/ai', async (importOriginal) => {
     createAIModule: vi.fn(),
     createAIPowerSyncRepositories: vi.fn(),
     createMastraStorage: vi.fn(() => ({ tag: 'desktop-mastra-storage' })),
-    ConversationTranscriptBootstrapSource: vi.fn(
-      function ConversationTranscriptBootstrapSourceMock() {
-        return { tag: 'desktop-transcript-bootstrap-source' };
+    ConversationShellSource: vi.fn(
+      function ConversationShellSourceMock() {
+        return { tag: 'desktop-conversation-shell-source' };
       },
     ),
     KnowledgeCapturePersistenceAdapter: vi.fn(function KnowledgeCapturePersistenceAdapterMock(
@@ -72,7 +72,7 @@ import {
   createAIModule,
   createAIPowerSyncRepositories,
   createMastraStorage,
-  ConversationTranscriptBootstrapSource,
+  ConversationShellSource,
   KnowledgeCapturePersistenceAdapter,
   MastraAIRuntime,
   MastraModelResolver,
@@ -107,7 +107,7 @@ const repositorySet = {
   providerConfigRepository: { tag: 'provider-repository' },
   providerSecretVault: { tag: 'provider-secret-vault' },
   knowledgeIndexRepository: { tag: 'knowledge-index-repository' },
-  executionLogPort: { tag: 'execution-log' },
+  executionRecordPort: { tag: 'execution-log' },
   providerOnboardingSessionRepository: { tag: 'provider-onboarding-session' },
   providerOnboardingCommitPort: { tag: 'provider-onboarding-commit' },
 };
@@ -155,7 +155,7 @@ describe('Desktop composeAI Mastra-only ownership', () => {
       repositorySet.providerConfigRepository,
       repositorySet.providerSecretVault,
     );
-    expect(ConversationTranscriptBootstrapSource).toHaveBeenCalledWith(
+    expect(ConversationShellSource).toHaveBeenCalledWith(
       repositorySet.conversationRepository,
     );
     expect(DesktopGoalPlanMutationAdapter).toHaveBeenCalledWith(
@@ -180,15 +180,15 @@ describe('Desktop composeAI Mastra-only ownership', () => {
     expect(MastraAIRuntime).toHaveBeenCalledWith({
       storage: vi.mocked(createMastraStorage).mock.results[0].value,
       modelResolver: vi.mocked(MastraModelResolver).mock.results[0].value,
-      transcriptBootstrapSource: vi.mocked(ConversationTranscriptBootstrapSource).mock.results[0]
+      conversationShellSource: vi.mocked(ConversationShellSource).mock.results[0]
         .value,
       goalPlanMutationPort: vi.mocked(DesktopGoalPlanMutationAdapter).mock.results[0].value,
       taskPlanMutationPort: vi.mocked(DesktopTaskPlanMutationAdapter).mock.results[0].value,
       knowledgeCaptureMutationPort: vi.mocked(KnowledgeCapturePersistenceAdapter).mock.results[0]
         .value,
       knowledgeSourcePort,
-      executionLogPort: repositorySet.executionLogPort,
-      usageReadPort: repositorySet.executionLogPort,
+      executionRecordPort: repositorySet.executionRecordPort,
+      usageReadPort: repositorySet.executionRecordPort,
       routineCommandPort: vi.mocked(DesktopRoutineAICommandAdapter).mock.results[0].value,
       plannerReadPort: vi.mocked(DesktopPlannerAIReadAdapter).mock.results[0].value,
       notificationReadPort: vi.mocked(DesktopNotificationAIReadAdapter).mock.results[0].value,
@@ -210,7 +210,7 @@ describe('Desktop composeAI Mastra-only ownership', () => {
       repositorySet.providerOnboardingCommitPort,
     );
     expect(moduleInput.knowledgeIndexRepository).toBe(repositorySet.knowledgeIndexRepository);
-    expect(moduleInput.executionLogPort).toBe(repositorySet.executionLogPort);
+    expect(moduleInput.executionRecordPort).toBe(repositorySet.executionRecordPort);
     expect(moduleInput.knowledgeNotePersistence).toBe(knowledgeNotePersistence);
     expect(moduleInput.knowledgeSourcePort).toBe(knowledgeSourcePort);
     expect(moduleInput.analyticsReadPort).toBe(analyticsReadPort);

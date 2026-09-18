@@ -13,8 +13,6 @@ export type {
 
 export { ConversationStatus } from './conversation-status';
 
-export { MessageRole } from './message-role';
-
 export { AIProvider } from './ai-provider';
 
 export { AIProviderType } from './ai-provider-type';

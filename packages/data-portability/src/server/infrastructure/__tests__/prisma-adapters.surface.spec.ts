@@ -65,7 +65,8 @@ describe('data portability Prisma adapter placement', () => {
     expect(importStoreIndex).toContain('DataPortabilityImportStore');
     expect(importStoreIndex).toContain('DataPortabilityImportTx');
     expect(importStoreIndex).toContain('UpsertUserPreferencesInput');
-    expect(importStoreIndex).toContain('CreateAIMessageInput');
+    expect(importStoreIndex).toContain('CreateAIConversationInput');
+    expect(importStoreIndex).not.toContain('CreateAIMessageInput');
   });
 
   it('no production file under server/application imports PrismaClient', () => {

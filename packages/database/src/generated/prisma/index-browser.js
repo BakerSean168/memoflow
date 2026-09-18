@@ -134,61 +134,30 @@ exports.Prisma.AiConversationScalarFieldEnum = {
   identityId: 'identityId',
   name: 'name',
   status: 'status',
-  messageCount: 'messageCount',
-  lastMessageAt: 'lastMessageAt',
   version: 'version',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
 };
 
-exports.Prisma.AiMessageScalarFieldEnum = {
+exports.Prisma.AiExecutionRecordScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
-  conversationId: 'conversationId',
-  role: 'role',
-  content: 'content',
-  tokenUsage: 'tokenUsage',
-  createdAt: 'createdAt'
-};
-
-exports.Prisma.AiGenerationTaskScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  taskType: 'taskType',
-  status: 'status',
+  operation: 'operation',
+  outcome: 'outcome',
   conversationId: 'conversationId',
   runId: 'runId',
   requestId: 'requestId',
   traceId: 'traceId',
-  providerId: 'providerId',
-  model: 'model',
+  providerConnectionId: 'providerConnectionId',
+  modelId: 'modelId',
+  errorCategory: 'errorCategory',
+  safeError: 'safeError',
   estimatedCostUsd: 'estimatedCostUsd',
-  input: 'input',
-  result: 'result',
-  error: 'error',
-  retryCount: 'retryCount',
   tokenUsage: 'tokenUsage',
-  processingMs: 'processingMs',
-  version: 'version',
+  latencyMs: 'latencyMs',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  completedAt: 'completedAt',
-  deletedAt: 'deletedAt'
-};
-
-exports.Prisma.AiUsageQuotaScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  quotaLimit: 'quotaLimit',
-  currentUsage: 'currentUsage',
-  resetPeriod: 'resetPeriod',
-  lastResetAt: 'lastResetAt',
-  nextResetAt: 'nextResetAt',
-  version: 'version',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
+  completedAt: 'completedAt'
 };
 
 exports.Prisma.AiProviderConfigScalarFieldEnum = {
@@ -234,21 +203,6 @@ exports.Prisma.AiProviderSecretScalarFieldEnum = {
   revokedAt: 'revokedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
-};
-
-exports.Prisma.KnowledgeGenerationTaskScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  topic: 'topic',
-  resourceCount: 'resourceCount',
-  targetAudience: 'targetAudience',
-  folderPath: 'folderPath',
-  status: 'status',
-  progress: 'progress',
-  generatedResourceIds: 'generatedResourceIds',
-  error: 'error',
-  createdAt: 'createdAt',
-  completedAt: 'completedAt'
 };
 
 exports.Prisma.AiKnowledgeIndexEntryScalarFieldEnum = {
@@ -1390,13 +1344,10 @@ exports.Prisma.NullsOrder = {
 exports.Prisma.ModelName = {
   Account: 'Account',
   AiConversation: 'AiConversation',
-  AiMessage: 'AiMessage',
-  AiGenerationTask: 'AiGenerationTask',
-  AiUsageQuota: 'AiUsageQuota',
+  AiExecutionRecord: 'AiExecutionRecord',
   AiProviderConfig: 'AiProviderConfig',
   AiProviderOnboardingSession: 'AiProviderOnboardingSession',
   AiProviderSecret: 'AiProviderSecret',
-  KnowledgeGenerationTask: 'KnowledgeGenerationTask',
   AiKnowledgeIndexEntry: 'AiKnowledgeIndexEntry',
   CloudAuthUser: 'CloudAuthUser',
   CloudAuthSession: 'CloudAuthSession',

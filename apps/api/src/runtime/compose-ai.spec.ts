@@ -14,9 +14,9 @@ vi.mock('@memoflow/ai', async (importOriginal) => {
     createAIModule: vi.fn(),
     createAIPrismaRepositories: vi.fn(),
     createMastraStorage: vi.fn(() => ({ tag: 'mastra-storage' })),
-    ConversationTranscriptBootstrapSource: vi.fn(
-      function ConversationTranscriptBootstrapSourceMock() {
-        return { tag: 'transcript-bootstrap-source' };
+    ConversationShellSource: vi.fn(
+      function ConversationShellSourceMock() {
+        return { tag: 'conversation-shell-source' };
       },
     ),
     KnowledgeCapturePersistenceAdapter: vi.fn(function KnowledgeCapturePersistenceAdapterMock(
@@ -89,7 +89,7 @@ import {
   createAIModule,
   createAIPrismaRepositories,
   createMastraStorage,
-  ConversationTranscriptBootstrapSource,
+  ConversationShellSource,
   KnowledgeCapturePersistenceAdapter,
   MastraAIRuntime,
   MastraModelResolver,
@@ -146,7 +146,7 @@ const repositories = {
   providerConfigRepository: { tag: 'provider-config' },
   providerSecretVault: { tag: 'provider-secret-vault' },
   knowledgeIndexRepository: { tag: 'knowledge-index' },
-  executionLogPort: { tag: 'execution-log' },
+  executionRecordPort: { tag: 'execution-log' },
 };
 
 beforeEach(() => {
@@ -176,7 +176,7 @@ describe('API composeAI Mastra-only ownership', () => {
       repositories.providerConfigRepository,
       repositories.providerSecretVault,
     );
-    expect(ConversationTranscriptBootstrapSource).toHaveBeenCalledWith(
+    expect(ConversationShellSource).toHaveBeenCalledWith(
       repositories.conversationRepository,
     );
     const persistence = vi.mocked(RepositoryKnowledgeNotePersistenceAdapter).mock.results[0].value;
@@ -203,15 +203,15 @@ describe('API composeAI Mastra-only ownership', () => {
     expect(MastraAIRuntime).toHaveBeenCalledWith({
       storage: vi.mocked(createMastraStorage).mock.results[0].value,
       modelResolver: vi.mocked(MastraModelResolver).mock.results[0].value,
-      transcriptBootstrapSource: vi.mocked(ConversationTranscriptBootstrapSource).mock.results[0]
+      conversationShellSource: vi.mocked(ConversationShellSource).mock.results[0]
         .value,
       goalPlanMutationPort: vi.mocked(GoalPlanMutationAdapter).mock.results[0].value,
       taskPlanMutationPort: vi.mocked(TaskPlanMutationAdapter).mock.results[0].value,
       knowledgeCaptureMutationPort: vi.mocked(KnowledgeCapturePersistenceAdapter).mock.results[0]
         .value,
       knowledgeSourcePort: vi.mocked(RepositoryKnowledgeSourceAdapter).mock.results[0].value,
-      executionLogPort: repositories.executionLogPort,
-      usageReadPort: repositories.executionLogPort,
+      executionRecordPort: repositories.executionRecordPort,
+      usageReadPort: repositories.executionRecordPort,
       routineCommandPort: vi.mocked(RoutineAICommandAdapter).mock.results[0].value,
       plannerReadPort: vi.mocked(PlannerAIReadAdapter).mock.results[0].value,
       notificationReadPort: vi.mocked(NotificationAIReadAdapter).mock.results[0].value,
@@ -239,7 +239,7 @@ describe('API composeAI Mastra-only ownership', () => {
     expect(moduleInput.providerConfigRepository).toBe(repositories.providerConfigRepository);
     expect(moduleInput.providerSecretVault).toBe(repositories.providerSecretVault);
     expect(moduleInput.knowledgeIndexRepository).toBe(repositories.knowledgeIndexRepository);
-    expect(moduleInput.executionLogPort).toBe(repositories.executionLogPort);
+    expect(moduleInput.executionRecordPort).toBe(repositories.executionRecordPort);
     expect(moduleInput.knowledgeNotePersistence).toBe(
       vi.mocked(RepositoryKnowledgeNotePersistenceAdapter).mock.results[0].value,
     );

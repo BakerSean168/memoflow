@@ -35,7 +35,7 @@ import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { IAIConversationRepository, IAIProviderConfigRepository } from '../domain';
 import type { AIApplicationPort } from '../application';
 import type {
-  IAIExecutionLogPort,
+  IAIExecutionRecordPort,
   IAIEvaluationReportPort,
   IAnalyticsQueryPort,
   IAnalyticsReadPort,
@@ -146,7 +146,7 @@ export interface AIModuleDependencies {
   readonly knowledgeSourcePort?: IKnowledgeSourcePort;
   readonly analyticsReadPort?: IAnalyticsReadPort;
   readonly analyticsQueryPort?: IAnalyticsQueryPort;
-  readonly executionLogPort?: IAIExecutionLogPort;
+  readonly executionRecordPort?: IAIExecutionRecordPort;
   readonly evaluationReportPort?: IAIEvaluationReportPort;
   /** Short-lived identity-bound Provider onboarding state selected by the host. */
   readonly providerOnboardingSessionRepository?: IAIProviderOnboardingSessionRepository;
@@ -511,7 +511,7 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
     ? new SyncKnowledgeNotesUseCase(
         dependencies.knowledgeIndexRepository!,
         knowledgeIngestionPort,
-        dependencies.executionLogPort,
+        dependencies.executionRecordPort,
       )
     : null;
 
@@ -523,19 +523,19 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
             dependencies.knowledgeSourcePort!,
             dependencies.knowledgeIndexRepository!,
             knowledgeIngestionPort,
-            dependencies.executionLogPort,
+            dependencies.executionRecordPort,
           ),
           syncRelevant: new SyncRelevantKnowledgeUseCase(
             dependencies.knowledgeSourcePort!,
             dependencies.knowledgeIndexRepository!,
             knowledgeIngestionPort,
-            dependencies.executionLogPort,
+            dependencies.executionRecordPort,
           ),
           syncById: new SyncNoteByIdUseCase(
             dependencies.knowledgeSourcePort!,
             dependencies.knowledgeIndexRepository!,
             knowledgeIngestionPort,
-            dependencies.executionLogPort,
+            dependencies.executionRecordPort,
           ),
           removeById: new RemoveKnowledgeIndexNoteUseCase(dependencies.knowledgeIndexRepository!),
         }
@@ -551,10 +551,10 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
               dependencies.knowledgeSourcePort!,
               dependencies.knowledgeIndexRepository!,
               knowledgeIngestionPort,
-              dependencies.executionLogPort,
+              dependencies.executionRecordPort,
             ),
             knowledgeQueryPort,
-            dependencies.executionLogPort,
+            dependencies.executionRecordPort,
             dependencies.providerSecretVault,
           ),
           expand: new ExpandKnowledgeUseCase(
@@ -563,10 +563,10 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
               dependencies.knowledgeSourcePort!,
               dependencies.knowledgeIndexRepository!,
               knowledgeIngestionPort,
-              dependencies.executionLogPort,
+              dependencies.executionRecordPort,
             ),
             knowledgeQueryPort,
-            dependencies.executionLogPort,
+            dependencies.executionRecordPort,
             dependencies.providerSecretVault,
           ),
           reindex: new ReindexKnowledgeUseCase(
@@ -575,7 +575,7 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
               dependencies.knowledgeSourcePort!,
               dependencies.knowledgeIndexRepository!,
               knowledgeIngestionPort,
-              dependencies.executionLogPort,
+              dependencies.executionRecordPort,
             ),
             undefined,
             dependencies.providerSecretVault,
@@ -598,7 +598,7 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
             providerConfigRepository,
             dependencies.analyticsReadPort!,
             analyticsQueryPort,
-            dependencies.executionLogPort,
+            dependencies.executionRecordPort,
             dependencies.providerSecretVault,
           ).queryAnalytics(req, cx),
       }
@@ -716,11 +716,10 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
       services.conversationServices.updateConversation.execute(cx.identityId, id, req),
     listConversations: (cx, page, pageSize) =>
       services.conversationServices.listConversations.execute(cx, page, pageSize),
-    getConversation: async (id, cx, includeMessages) => {
+    getConversation: async (id, cx) => {
       const result = await services.conversationServices.getConversation.execute(
         cx.identityId,
         id,
-        includeMessages,
       );
       if (!result.ok) return result;
       if (result.data === null) {

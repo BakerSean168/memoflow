@@ -59,9 +59,8 @@ model Account {
   userPreferenceRecords         UserPreferenceRecord[]
   notifications                 Notification[]
   aiConversations               AiConversation[]
-  aiGenerationTasks             AiGenerationTask[]
+  aiExecutionRecords            AiExecutionRecord[]
   aiKnowledgeIndexEntries       AiKnowledgeIndexEntry[]
-  aiUsageQuotas                 AiUsageQuota?
   aiProviderConfigs             AiProviderConfig[]
   aiProviderOnboardingSessions  AiProviderOnboardingSession[]
   aiProviderSecrets             AiProviderSecret[]
@@ -72,7 +71,6 @@ model Account {
   routineInteractions                    RoutineInteraction[]
   notificationInteractions               NotificationInteraction[]               @relation("AccountNotificationInteractions")
   notificationDispatchOutboxes           NotificationDispatchOutbox[]            @relation("AccountNotificationDispatchOutboxes")
-  aiMessages                             AiMessage[]                             @relation("AccountAiMessages")
   folders                                Folder[]                                @relation("AccountFolders")
   resources                              Resource[]                              @relation("AccountResources")
   repositoryResources                    RepositoryResource[]                    @relation("AccountRepositoryResources")
@@ -85,102 +83,55 @@ model Account {
 
 // ==========================================
 // AI Module
-// AI 对话、消息、生成任务、配额、Provider 配置
+// AI 对话 shell、执行记录、Provider 配置
 // ==========================================
 
 model AiConversation {
-  id            String    @id
-  identityId    String    @map("identity_id")
-  name          String
-  status        String // ACTIVE, CLOSED, ARCHIVED
-  messageCount  Int       @default(0) @map("message_count")
-  lastMessageAt DateTime? @map("last_message_at")
-  version       Int       @default(1)
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
-  deletedAt     DateTime? @map("deleted_at")
+  id         String    @id
+  identityId String    @map("identity_id")
+  name       String
+  status     String // ACTIVE, ARCHIVED
+  version    Int       @default(1)
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
 
-  account  Account     @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  messages AiMessage[]
+  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
 
   @@index([identityId])
   @@index([status])
   @@index([createdAt])
-  @@index([lastMessageAt])
   @@map("ai_conversations")
 }
 
-model AiMessage {
-  id             String   @id
-  identityId     String   @map("identity_id")
-  conversationId String   @map("conversation_id")
-  role           String // USER, ASSISTANT, SYSTEM
-  content        String   @db.Text
-  tokenUsage     String?  @map("token_usage") // JSON
-  createdAt      DateTime @default(now()) @map("created_at")
-
-  identity     Account        @relation("AccountAiMessages", fields: [identityId], references: [id])
-  conversation AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@index([conversationId])
-  @@index([createdAt])
-  @@map("ai_messages")
-}
-
-model AiGenerationTask {
-  id               String    @id
-  identityId       String    @map("identity_id")
-  taskType         String    @map("task_type") // GOAL_KEY_RESULTS, TASK_TEMPLATES, etc.
-  status           String // PENDING, PROCESSING, COMPLETED, FAILED
-  conversationId   String?   @map("conversation_id")
-  runId            String?   @map("run_id")
-  requestId        String?   @map("request_id")
-  traceId          String?   @map("trace_id")
-  providerId       String?   @map("provider_id")
-  model            String?
-  estimatedCostUsd Float?    @map("estimated_cost_usd")
-  input            String    @db.Text // JSON string
-  result           String?   @db.Text // JSON string
-  error            String?   @db.Text
-  retryCount       Int       @default(0) @map("retry_count")
-  tokenUsage       String?   @map("token_usage") // JSON
-  processingMs     Int?      @map("processing_ms")
-  version          Int       @default(1)
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
-  completedAt      DateTime? @map("completed_at")
-  deletedAt        DateTime? @map("deleted_at")
+model AiExecutionRecord {
+  id                   String   @id
+  identityId           String   @map("identity_id")
+  operation            String
+  outcome              String
+  conversationId       String?  @map("conversation_id")
+  runId                String?  @map("run_id")
+  requestId            String?  @map("request_id")
+  traceId              String?  @map("trace_id")
+  providerConnectionId String?  @map("provider_connection_id")
+  modelId              String?  @map("model_id")
+  errorCategory        String?  @map("error_category")
+  safeError            String?  @map("safe_error") @db.Text
+  estimatedCostUsd     Float?   @map("estimated_cost_usd")
+  tokenUsage           String?  @map("token_usage")
+  latencyMs            Int?     @map("latency_ms")
+  createdAt            DateTime @default(now()) @map("created_at")
+  completedAt          DateTime @default(now()) @map("completed_at")
 
   account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
 
   @@index([identityId])
-  @@index([taskType])
-  @@index([status])
+  @@index([operation])
+  @@index([outcome])
   @@index([createdAt])
   @@index([identityId, conversationId, createdAt])
   @@index([identityId, runId, createdAt])
-  @@map("ai_generation_tasks")
-}
-
-model AiUsageQuota {
-  id           String    @id
-  identityId   String    @unique @map("identity_id")
-  quotaLimit   Int       @default(50) @map("quota_limit")
-  currentUsage Int       @default(0) @map("current_usage")
-  resetPeriod  String    @default("DAILY") @map("reset_period") // DAILY, WEEKLY, MONTHLY
-  lastResetAt  DateTime  @default(now()) @map("last_reset_at")
-  nextResetAt  DateTime  @map("next_reset_at")
-  version      Int       @default(1)
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
-  deletedAt    DateTime? @map("deleted_at")
-
-  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@index([nextResetAt])
-  @@map("ai_usage_quotas")
+  @@map("ai_execution_records")
 }
 
 model AiProviderConfig {
@@ -252,26 +203,6 @@ model AiProviderSecret {
   @@index([identityId])
   @@index([identityId, expiresAt])
   @@map("ai_provider_secrets")
-}
-
-model KnowledgeGenerationTask {
-  id                   String    @id
-  identityId           String    @map("identity_id")
-  topic                String
-  resourceCount        Int       @default(5) @map("resource_count")
-  targetAudience       String?   @map("target_audience")
-  folderPath           String    @map("folder_path")
-  status               String // PENDING, GENERATING, COMPLETED, FAILED
-  progress             Int       @default(0) // 0-100
-  generatedResourceIds String[]  @map("generated_resource_ids")
-  error                String?   @db.Text
-  createdAt            DateTime  @default(now()) @map("created_at")
-  completedAt          DateTime? @map("completed_at")
-
-  @@index([identityId])
-  @@index([status])
-  @@index([createdAt])
-  @@map("knowledge_generation_tasks")
 }
 
 model AiKnowledgeIndexEntry {

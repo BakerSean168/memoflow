@@ -19,7 +19,7 @@ describe('ai repository factories surface', () => {
   const fakePrisma = {} as unknown as PrismaClient;
   const expectedKeys = [
     'conversationRepository',
-    'executionLogPort',
+    'executionRecordPort',
     'knowledgeIndexRepository',
     'providerConfigRepository',
     'providerOnboardingCommitPort',
@@ -32,7 +32,7 @@ describe('ai repository factories surface', () => {
     expect(Object.keys(set).sort()).toEqual(expectedKeys);
     const typed: AIPowerSyncRepositorySet = set;
     expect(typeof typed.conversationRepository.findByIdForIdentity).toBe('function');
-    expect(typeof typed.executionLogPort.record).toBe('function');
+    expect(typeof typed.executionRecordPort.record).toBe('function');
     expect(typeof typed.providerOnboardingSessionRepository.create).toBe('function');
     expect(typeof typed.providerOnboardingCommitPort.commit).toBe('function');
   });
@@ -44,7 +44,7 @@ describe('ai repository factories surface', () => {
     expect(set).not.toHaveProperty('langGraphCheckpointPort');
     const typed: AIPrismaRepositorySet = set;
     expect(typeof typed.conversationRepository.findByIdForIdentity).toBe('function');
-    expect(typeof typed.executionLogPort.record).toBe('function');
+    expect(typeof typed.executionRecordPort.record).toBe('function');
     expect(typeof typed.providerOnboardingSessionRepository.create).toBe('function');
     expect(typeof typed.providerOnboardingCommitPort.commit).toBe('function');
   });
@@ -70,7 +70,7 @@ describe('ai repository factories surface', () => {
       providerOnboardingSessionRepository: repositories.providerOnboardingSessionRepository,
       providerOnboardingCommitPort: repositories.providerOnboardingCommitPort,
       knowledgeIndexRepository: repositories.knowledgeIndexRepository,
-      executionLogPort: repositories.executionLogPort,
+      executionRecordPort: repositories.executionRecordPort,
     });
     expect(typeof instance.start).toBe('function');
     expect(typeof instance.dispose).toBe('function');
@@ -81,9 +81,9 @@ describe('ai repository factories surface', () => {
       'PowerSyncAIConversationRepository',
       'PowerSyncAIProviderConfigRepository',
       'AIKnowledgeIndexPowerSyncRepository',
-      'AIExecutionLogPowerSyncAdapter',
+      'AIExecutionRecordPowerSyncAdapter',
       'AIConversationPrismaRepository',
-      'AIExecutionLogPrismaAdapter',
+      'AIExecutionRecordPrismaAdapter',
       'AIProviderConfigPrismaRepository',
       'AIKnowledgeIndexPrismaRepository',
       'AgentCheckpointPrismaAdapter',

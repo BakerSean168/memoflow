@@ -42,9 +42,8 @@ model Account {
   userPreferenceRecords           UserPreferenceRecord[]
   notifications                   Notification[]
   aiConversations                 AiConversation[]
-  aiGenerationTasks               AiGenerationTask[]
+  aiExecutionRecords              AiExecutionRecord[]
   aiKnowledgeIndexEntries         AiKnowledgeIndexEntry[]
-  aiUsageQuotas                   AiUsageQuota?
   aiProviderConfigs               AiProviderConfig[]
   aiProviderOnboardingSessions     AiProviderOnboardingSession[]
   aiProviderSecrets                AiProviderSecret[]
@@ -55,7 +54,6 @@ model Account {
   routineInteractions             RoutineInteraction[]
   notificationInteractions       NotificationInteraction[]        @relation("AccountNotificationInteractions")
   notificationDispatchOutboxes   NotificationDispatchOutbox[]    @relation("AccountNotificationDispatchOutboxes")
-  aiMessages                     AiMessage[]                     @relation("AccountAiMessages")
   folders                        Folder[]                        @relation("AccountFolders")
   resources                      Resource[]                      @relation("AccountResources")
   repositoryResources            RepositoryResource[]            @relation("AccountRepositoryResources")

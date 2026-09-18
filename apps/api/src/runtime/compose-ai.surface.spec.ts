@@ -100,7 +100,7 @@ describe('AI API runtime composer surface', () => {
       'AIConversationPrismaRepository',
       'AIProviderConfigPrismaRepository',
       'AIKnowledgeIndexPrismaRepository',
-      'AIExecutionLogPrismaAdapter',
+      'AIExecutionRecordPrismaAdapter',
       'AgentCheckpointPrismaAdapter',
       'LangGraphCheckpointPrismaAdapter',
       'AIEvaluationReportFileAdapter',

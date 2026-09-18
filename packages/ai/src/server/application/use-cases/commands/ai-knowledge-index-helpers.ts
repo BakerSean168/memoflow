@@ -1,5 +1,9 @@
 import { createHash } from 'node:crypto';
-import type { IAIExecutionLogPort, KnowledgeSourceNote, KnowledgeIndexedNote } from '../../ports';
+import type {
+  IAIExecutionRecordPort,
+  KnowledgeSourceNote,
+  KnowledgeIndexedNote,
+} from '../../ports';
 import { createLogger } from '@memoflow/utils/logger';
 
 const logger = createLogger('AIKnowledgeIndexHelpers');
@@ -60,19 +64,19 @@ export function resolveSourceContentHash(resource: KnowledgeSourceNote): string 
 }
 
 export async function recordExecution(
-  executionLogPort: IAIExecutionLogPort | undefined,
-  input: Parameters<NonNullable<IAIExecutionLogPort['record']>>[0],
+  executionRecordPort: IAIExecutionRecordPort | undefined,
+  input: Parameters<NonNullable<IAIExecutionRecordPort['record']>>[0],
 ): Promise<void> {
-  if (!executionLogPort) {
+  if (!executionRecordPort) {
     return;
   }
 
   try {
-    await executionLogPort.record(input);
+    await executionRecordPort.record(input);
   } catch (error) {
     logger.warn('Failed to record knowledge indexing execution log', {
       error,
-      taskType: input.taskType,
+      operation: input.operation,
     });
   }
 }

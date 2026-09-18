@@ -314,7 +314,7 @@ test.describe('AI Mastra open-chat product cutover', () => {
     expect(capture.historyRequests.length).toBeGreaterThanOrEqual(1);
   });
 
-  test('[P0] reload restores the authoritative Mastra transcript instead of legacy AiMessage history', async ({
+  test('[P0] reload restores the authoritative Mastra transcript instead of legacy persisted history', async ({
     page,
   }) => {
     const capture = await bootstrapMastraOpenChat(page);

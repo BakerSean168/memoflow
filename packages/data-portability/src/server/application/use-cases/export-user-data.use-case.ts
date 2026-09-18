@@ -144,7 +144,7 @@ export class ExportUserDataUseCase {
 
     // ─── AI ───
     if (modules.includes('ai')) {
-      const conversations = await this.deps.aiConversationRepository.findByIdentityId(identityId, { includeChildren: true });
+      const conversations = await this.deps.aiConversationRepository.findByIdentityId(identityId);
       data.ai = {
         conversations: projectAIConversations(conversations, ctx),
       };

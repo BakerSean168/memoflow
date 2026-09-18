@@ -1,6 +1,6 @@
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type {
-  IAIExecutionLogPort,
+  IAIExecutionRecordPort,
   IKnowledgeIndexRepository,
   IKnowledgeIngestionPort,
   KnowledgeSourceNote,
@@ -23,7 +23,7 @@ export class SyncKnowledgeNotesUseCase {
   constructor(
     private readonly knowledgeIndexRepository: IKnowledgeIndexRepository,
     private readonly knowledgeIngestionPort: IKnowledgeIngestionPort,
-    private readonly executionLogPort?: IAIExecutionLogPort,
+    private readonly executionRecordPort?: IAIExecutionRecordPort,
   ) {}
 
   async execute(
@@ -150,24 +150,15 @@ export class SyncKnowledgeNotesUseCase {
 
     await this.knowledgeIndexRepository.markRequested(cx.identityId, documentRefs, requestedAt);
 
-    await recordExecution(this.executionLogPort, {
+    await recordExecution(this.executionRecordPort, {
       identityId: cx.identityId,
-      taskType: 'KNOWLEDGE_INDEX_SYNC',
-      status: failedCount > 0 ? 'FAILED' : 'COMPLETED',
-      requestId: options?.requestId,
-      errorCategory: failedCount > 0 ? 'partial_failure' : undefined,
-      input: {
-        knowledgeDocumentIds: stableResources.map((resource) => resource.knowledgeDocumentId),
-        force: options?.force ?? false,
-      },
-      result: {
-        indexedCount,
-        reusedCount,
-        failedCount,
-      },
-      error:
-        failedCount > 0 ? `${failedCount} note(s) failed during knowledge indexing` : undefined,
-      processingMs: Date.now() - requestedAt,
+      operation: 'knowledge.index.sync',
+      outcome: failedCount > 0 ? 'failed' : 'succeeded',
+      ...(options?.requestId ? { requestId: options.requestId } : {}),
+      ...(failedCount > 0
+        ? { errorCategory: 'partial_failure', safeError: 'Knowledge indexing partially failed' }
+        : {}),
+      latencyMs: Date.now() - requestedAt,
     });
 
     return {

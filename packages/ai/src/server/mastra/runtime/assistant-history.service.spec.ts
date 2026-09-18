@@ -4,129 +4,72 @@ import {
   AssistantConversationUnavailableError,
   AssistantHistoryService,
 } from './assistant-history.service';
-import type { AssistantTranscriptBootstrapSource } from './assistant-transcript-bootstrap.port';
+import type { AssistantConversationShellSource } from './assistant-conversation-shell.port';
 
 function createMemoryHarness() {
-  let thread: {
-    id: string;
-    resourceId: string;
-    title?: string;
-    metadata?: Record<string, unknown>;
-  } | null = null;
+  let thread: { id: string; resourceId: string; title?: string; metadata?: Record<string, unknown> } | null = null;
   const messages = new Map<string, MastraDBMessage>();
-
   const memory = {
     getThreadById: vi.fn(async () => thread),
-    createThread: vi.fn(
-      async (input: {
-        resourceId: string;
-        threadId?: string;
-        title?: string;
-        metadata?: Record<string, unknown>;
-      }) => {
-        thread = {
-          id: input.threadId ?? 'generated-thread',
-          resourceId: input.resourceId,
-          title: input.title,
-          metadata: input.metadata,
-        };
-        return thread;
-      },
-    ),
-    updateThread: vi.fn(
-      async (input: { id: string; title?: string; metadata?: Record<string, unknown> }) => {
-        if (!thread) throw new Error('thread missing');
-        thread = {
-          ...thread,
-          ...(input.title === undefined ? {} : { title: input.title }),
-          ...(input.metadata === undefined ? {} : { metadata: input.metadata }),
-        };
-        return thread;
-      },
-    ),
+    createThread: vi.fn(async (input: { resourceId: string; threadId?: string; title?: string; metadata?: Record<string, unknown> }) => {
+      thread = {
+        id: input.threadId ?? 'generated-thread',
+        resourceId: input.resourceId,
+        title: input.title,
+        metadata: input.metadata,
+      };
+      return thread;
+    }),
     deleteThread: vi.fn(async () => {
       thread = null;
       messages.clear();
     }),
-    saveMessages: vi.fn(async (input: { messages: MastraDBMessage[] }) => {
-      for (const message of input.messages) messages.set(message.id, message);
-      return { messages: input.messages };
-    }),
     recall: vi.fn(async () => ({ messages: [...messages.values()] })),
   };
-
   return {
     memory,
     messages,
     getThread: () => thread,
-    setThread(next: typeof thread) {
-      thread = next;
-    },
+    setThread(next: typeof thread) { thread = next; },
   };
 }
 
-function bootstrapSource(): AssistantTranscriptBootstrapSource & {
-  load: ReturnType<typeof vi.fn>;
-} {
+function shellSource(): AssistantConversationShellSource & { loadShell: ReturnType<typeof vi.fn> } {
   return {
-    load: vi.fn().mockResolvedValue({
-      title: 'Legacy thread',
-      messages: [
-        { id: 'legacy-user', role: 'user', content: 'hello', createdAt: 10 },
-        { id: 'legacy-assistant', role: 'assistant', content: 'hi', createdAt: 20 },
-      ],
-    }),
-  } as never;
+    loadShell: vi.fn().mockResolvedValue({ title: 'Conversation shell' }),
+  } as AssistantConversationShellSource & { loadShell: ReturnType<typeof vi.fn> };
 }
 
 describe('AssistantHistoryService', () => {
-  it('imports the legacy transcript exactly once with stable message ids, then reads Mastra memory only', async () => {
+  it('creates an empty Mastra thread only after validating the product shell', async () => {
     const harness = createMemoryHarness();
-    const source = bootstrapSource();
+    const source = shellSource();
     const service = new AssistantHistoryService(harness.memory, source);
 
-    const first = await service.listMessages({
-      identityId: 'identity-1',
-      conversationId: 'conversation-1',
-    });
-    const second = await service.listMessages({
-      identityId: 'identity-1',
-      conversationId: 'conversation-1',
-    });
+    await expect(
+      service.listMessages({ identityId: 'identity-1', conversationId: 'conversation-1' }),
+    ).resolves.toEqual({ conversationId: 'conversation-1', messages: [] });
 
-    expect(source.load).toHaveBeenCalledTimes(1);
-    expect(harness.memory.saveMessages).toHaveBeenCalledTimes(1);
-    expect([...harness.messages.keys()]).toEqual(['legacy-user', 'legacy-assistant']);
-    expect(harness.getThread()?.metadata).toMatchObject({ memoflowTranscriptBootstrapVersion: 1 });
-    expect(first).toEqual(second);
-    expect(first.messages).toEqual([
-      {
-        id: 'legacy-user',
-        conversationId: 'conversation-1',
-        role: 'user',
-        content: 'hello',
-        createdAt: 10,
-      },
-      {
-        id: 'legacy-assistant',
-        conversationId: 'conversation-1',
-        role: 'assistant',
-        content: 'hi',
-        createdAt: 20,
-      },
-    ]);
+    expect(source.loadShell).toHaveBeenCalledWith({
+      identityId: 'identity-1',
+      conversationId: 'conversation-1',
+    });
+    expect(harness.memory.createThread).toHaveBeenCalledWith({
+      threadId: 'conversation-1',
+      resourceId: 'identity-1',
+      title: 'Conversation shell',
+      metadata: {},
+    });
   });
 
-  it('deduplicates concurrent bootstrap attempts in one process', async () => {
+  it('deduplicates concurrent shell validation and thread creation', async () => {
     const harness = createMemoryHarness();
     let release!: () => void;
-    const gate = new Promise<void>((resolve) => {
-      release = resolve;
-    });
-    const source: AssistantTranscriptBootstrapSource = {
-      load: vi.fn(async () => {
+    const gate = new Promise<void>((resolve) => { release = resolve; });
+    const source: AssistantConversationShellSource = {
+      loadShell: vi.fn(async () => {
         await gate;
-        return { title: 'Thread', messages: [] };
+        return { title: 'Thread' };
       }),
     };
     const service = new AssistantHistoryService(harness.memory, source);
@@ -134,47 +77,63 @@ describe('AssistantHistoryService', () => {
     const first = service.ensureConversation({ identityId: 'identity-1', conversationId: 'c1' });
     const second = service.ensureConversation({ identityId: 'identity-1', conversationId: 'c1' });
     await Promise.resolve();
-    expect(source.load).toHaveBeenCalledTimes(1);
+    expect(source.loadShell).toHaveBeenCalledTimes(1);
     release();
     await Promise.all([first, second]);
     expect(harness.memory.createThread).toHaveBeenCalledTimes(1);
   });
 
-  it('never consults the legacy source again when the persistent bootstrap marker already exists', async () => {
+  it('uses an existing owner-scoped Mastra thread without rereading shell state', async () => {
     const harness = createMemoryHarness();
-    harness.setThread({
-      id: 'conversation-1',
-      resourceId: 'identity-1',
-      metadata: { memoflowTranscriptBootstrapVersion: 1 },
-    });
-    const source: AssistantTranscriptBootstrapSource = {
-      load: vi.fn(async () => {
-        throw new Error('legacy transcript must not be read after cutover marker');
-      }),
+    harness.setThread({ id: 'conversation-1', resourceId: 'identity-1', metadata: {} });
+    const source: AssistantConversationShellSource = {
+      loadShell: vi.fn(async () => { throw new Error('shell must not be consulted'); }),
     };
     const service = new AssistantHistoryService(harness.memory, source);
 
     await expect(
       service.ensureConversation({ identityId: 'identity-1', conversationId: 'conversation-1' }),
     ).resolves.toBeUndefined();
-    expect(source.load).not.toHaveBeenCalled();
-    expect(harness.memory.saveMessages).not.toHaveBeenCalled();
+    expect(source.loadShell).not.toHaveBeenCalled();
   });
 
-  it('deletes only an owner-scoped Mastra thread and leaves foreign/missing threads untouched', async () => {
+  it('projects only Mastra Memory messages as history', async () => {
     const harness = createMemoryHarness();
-    harness.setThread({
-      id: 'conversation-1',
+    harness.setThread({ id: 'conversation-1', resourceId: 'identity-1', metadata: {} });
+    harness.messages.set('m1', {
+      id: 'm1',
+      role: 'assistant',
+      createdAt: new Date(20),
+      threadId: 'conversation-1',
       resourceId: 'identity-1',
-      metadata: { memoflowTranscriptBootstrapVersion: 1 },
-    });
-    const service = new AssistantHistoryService(harness.memory, bootstrapSource());
+      type: 'text',
+      content: { format: 2, parts: [{ type: 'text', text: 'runtime answer' }] },
+    } satisfies MastraDBMessage);
+    const service = new AssistantHistoryService(harness.memory, shellSource());
 
     await expect(
-      service.deleteConversation({
-        identityId: 'identity-other',
-        conversationId: 'conversation-1',
-      }),
+      service.listMessages({ identityId: 'identity-1', conversationId: 'conversation-1' }),
+    ).resolves.toEqual({
+      conversationId: 'conversation-1',
+      messages: [
+        {
+          id: 'm1',
+          conversationId: 'conversation-1',
+          role: 'assistant',
+          content: 'runtime answer',
+          createdAt: 20,
+        },
+      ],
+    });
+  });
+
+  it('deletes only an owner-scoped Mastra thread', async () => {
+    const harness = createMemoryHarness();
+    harness.setThread({ id: 'conversation-1', resourceId: 'identity-1', metadata: {} });
+    const service = new AssistantHistoryService(harness.memory, shellSource());
+
+    await expect(
+      service.deleteConversation({ identityId: 'identity-other', conversationId: 'conversation-1' }),
     ).resolves.toBe(false);
     expect(harness.memory.deleteThread).not.toHaveBeenCalled();
 
@@ -182,49 +141,17 @@ describe('AssistantHistoryService', () => {
       service.deleteConversation({ identityId: 'identity-1', conversationId: 'conversation-1' }),
     ).resolves.toBe(true);
     expect(harness.memory.deleteThread).toHaveBeenCalledWith('conversation-1');
-    expect(harness.getThread()).toBeNull();
   });
 
-  it('keeps the owner thread available when delete fails so a retry can finish cleanup', async () => {
+  it('fails closed for a missing shell or a foreign pre-existing thread', async () => {
     const harness = createMemoryHarness();
-    harness.setThread({
-      id: 'conversation-1',
-      resourceId: 'identity-1',
-      metadata: { memoflowTranscriptBootstrapVersion: 1 },
-    });
-    harness.memory.deleteThread.mockRejectedValueOnce(new Error('storage unavailable'));
-    const service = new AssistantHistoryService(harness.memory, bootstrapSource());
-
-    await expect(
-      service.deleteConversation({ identityId: 'identity-1', conversationId: 'conversation-1' }),
-    ).rejects.toThrow('storage unavailable');
-    expect(harness.getThread()).toMatchObject({
-      id: 'conversation-1',
-      resourceId: 'identity-1',
-    });
-
-    await expect(
-      service.deleteConversation({ identityId: 'identity-1', conversationId: 'conversation-1' }),
-    ).resolves.toBe(true);
-    expect(harness.getThread()).toBeNull();
-  });
-
-  it('fails closed when the legacy shell is unavailable or a pre-existing thread belongs to another identity', async () => {
-    const harness = createMemoryHarness();
-    const missingSource: AssistantTranscriptBootstrapSource = {
-      load: vi.fn().mockResolvedValue(null),
-    };
+    const missingSource: AssistantConversationShellSource = { loadShell: vi.fn().mockResolvedValue(null) };
     const service = new AssistantHistoryService(harness.memory, missingSource);
-
     await expect(
-      service.ensureConversation({ identityId: 'identity-1', conversationId: 'foreign' }),
+      service.ensureConversation({ identityId: 'identity-1', conversationId: 'missing' }),
     ).rejects.toBeInstanceOf(AssistantConversationUnavailableError);
 
-    harness.setThread({
-      id: 'conversation-1',
-      resourceId: 'identity-other',
-      metadata: {},
-    });
+    harness.setThread({ id: 'conversation-1', resourceId: 'identity-other', metadata: {} });
     await expect(
       service.ensureConversation({ identityId: 'identity-1', conversationId: 'conversation-1' }),
     ).rejects.toBeInstanceOf(AssistantConversationUnavailableError);

@@ -1,6 +1,2 @@
-/**
- * AI Entities
- * AI 模块实体导出
- */
-
-export { Message, type MessageState } from './message';
+/** AI client entities retired; Assistant messages are runtime transport views. */
+export {};

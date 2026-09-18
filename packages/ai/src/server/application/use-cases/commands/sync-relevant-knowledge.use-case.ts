@@ -1,6 +1,6 @@
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type {
-  IAIExecutionLogPort,
+  IAIExecutionRecordPort,
   IKnowledgeIndexRepository,
   IKnowledgeIngestionPort,
   IKnowledgeSourcePort,
@@ -23,12 +23,12 @@ export class SyncRelevantKnowledgeUseCase {
     private readonly knowledgeSourcePort: IKnowledgeSourcePort,
     private readonly knowledgeIndexRepository: IKnowledgeIndexRepository,
     knowledgeIngestionPort: IKnowledgeIngestionPort,
-    executionLogPort?: IAIExecutionLogPort,
+    executionRecordPort?: IAIExecutionRecordPort,
   ) {
     this.syncNotes = new SyncKnowledgeNotesUseCase(
       knowledgeIndexRepository,
       knowledgeIngestionPort,
-      executionLogPort,
+      executionRecordPort,
     );
   }
 

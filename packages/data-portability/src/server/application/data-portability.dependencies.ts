@@ -25,7 +25,7 @@ export interface ScheduleRepoPort {
   findByIdentityId(identityId: string): Promise<unknown[]>;
 }
 export interface AIConversationRepoPort {
-  findByIdentityId(identityId: string, options?: { includeChildren?: boolean }): Promise<unknown[]>;
+  findByIdentityId(identityId: string): Promise<unknown[]>;
 }
 export interface NotificationPreferenceRepoPort {
   findByIdentityId(identityId: string): Promise<unknown | null>;

@@ -1,18 +1,13 @@
-/**
- * Residual 971: withObservabilityPayload sole import
- * (../with-observability-payload.ts).
- */
 import { randomUUID } from 'node:crypto';
 
 import type { PrismaClient } from '@memoflow/database';
 import type {
-  AIExecutionLogInput,
+  AIExecutionRecordInput,
   AIUsageQuery,
   AIUsageSummary,
-  IAIExecutionLogPort,
+  IAIExecutionRecordPort,
   IAIUsageReadPort,
 } from '../../../application/ports';
-import { withObservabilityPayload } from '../with-observability-payload';
 
 function parseTokenUsage(raw: string | null): {
   promptTokens: number;
@@ -36,43 +31,38 @@ function parseTokenUsage(raw: string | null): {
   }
 }
 
-export class AIExecutionLogPrismaAdapter implements IAIExecutionLogPort, IAIUsageReadPort {
+export class AIExecutionRecordPrismaAdapter implements IAIExecutionRecordPort, IAIUsageReadPort {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async record(input: AIExecutionLogInput): Promise<void> {
+  async record(input: AIExecutionRecordInput): Promise<void> {
     const now = new Date();
-
-    await this.prisma.aiGenerationTask.create({
+    await this.prisma.aiExecutionRecord.create({
       data: {
         id: randomUUID(),
         identityId: input.identityId,
-        taskType: input.taskType,
-        status: input.status,
+        operation: input.operation,
+        outcome: input.outcome,
         conversationId: input.conversationId ?? null,
         runId: input.runId ?? null,
         requestId: input.requestId ?? null,
         traceId: input.traceId ?? null,
-        providerId: input.providerId ?? null,
-        model: input.model ?? null,
+        providerConnectionId: input.providerConnectionId ?? null,
+        modelId: input.modelId ?? null,
+        errorCategory: input.errorCategory ?? null,
+        safeError: input.safeError ?? null,
         estimatedCostUsd: input.costEstimate?.totalCostUsd ?? null,
-        input: JSON.stringify(withObservabilityPayload(input.input, input)),
-        result: input.result ? JSON.stringify(withObservabilityPayload(input.result, input)) : null,
-        error: input.error ?? null,
-        retryCount: 0,
         tokenUsage: input.tokenUsage ? JSON.stringify(input.tokenUsage) : null,
-        processingMs: input.processingMs ?? null,
-        completedAt: now,
+        latencyMs: input.latencyMs ?? null,
         createdAt: now,
-        updatedAt: now,
+        completedAt: now,
       },
     });
   }
 
   async summarizeUsage(input: AIUsageQuery): Promise<AIUsageSummary> {
-    const rows = await this.prisma.aiGenerationTask.findMany({
+    const rows = await this.prisma.aiExecutionRecord.findMany({
       where: {
         identityId: input.identityId,
-        deletedAt: null,
         ...(input.conversationId ? { conversationId: input.conversationId } : {}),
         ...(input.runId ? { runId: input.runId } : {}),
       },

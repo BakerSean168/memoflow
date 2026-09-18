@@ -8,7 +8,7 @@
 
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import type {
-  IAIExecutionLogPort,
+  IAIExecutionRecordPort,
   IAIUsageReadPort,
   IKnowledgeIndexRepository,
   IAIProviderOnboardingCommitPort,
@@ -16,7 +16,7 @@ import type {
   IAIProviderSecretVault,
 } from '../application/ports';
 import {
-  AIExecutionLogPowerSyncAdapter,
+  AIExecutionRecordPowerSyncAdapter,
   AIKnowledgeIndexPowerSyncRepository,
   PowerSyncAIConversationRepository,
   PowerSyncAIProviderConfigRepository,
@@ -31,7 +31,7 @@ export interface AIPowerSyncRepositorySet {
   readonly conversationRepository: IAIConversationRepository;
   readonly providerConfigRepository: IAIProviderConfigRepository;
   readonly knowledgeIndexRepository: IKnowledgeIndexRepository;
-  readonly executionLogPort: IAIExecutionLogPort & IAIUsageReadPort;
+  readonly executionRecordPort: IAIExecutionRecordPort & IAIUsageReadPort;
   readonly providerOnboardingSessionRepository: IAIProviderOnboardingSessionRepository;
   readonly providerOnboardingCommitPort: IAIProviderOnboardingCommitPort;
   readonly providerSecretVault: IAIProviderSecretVault;
@@ -44,7 +44,7 @@ export function createAIPowerSyncRepositories(db: IElectronDatabase): AIPowerSyn
     conversationRepository: new PowerSyncAIConversationRepository(db),
     providerConfigRepository: new PowerSyncAIProviderConfigRepository(db),
     knowledgeIndexRepository: new AIKnowledgeIndexPowerSyncRepository(db),
-    executionLogPort: new AIExecutionLogPowerSyncAdapter(db),
+    executionRecordPort: new AIExecutionRecordPowerSyncAdapter(db),
     providerOnboardingSessionRepository,
     providerOnboardingCommitPort: new PowerSyncAIProviderOnboardingCommitAdapter(db),
     providerSecretVault,

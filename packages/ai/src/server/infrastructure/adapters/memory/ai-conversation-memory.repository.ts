@@ -4,7 +4,7 @@
  * In-memory implementation of IAIConversationRepository for testing.
  */
 
-import type { IAIConversationRepository, AIConversationQueryOptions } from '../../../domain';
+import type { IAIConversationRepository } from '../../../domain';
 import type { AIConversation } from '../../../domain/aggregates/ai-conversation';
 
 /**
@@ -26,9 +26,7 @@ export class AIConversationMemoryRepository implements IAIConversationRepository
   async findByIdForIdentity(
     identityId: string,
     id: string,
-    options?: AIConversationQueryOptions,
   ): Promise<AIConversation | null> {
-    void options;
     const conversation = this.conversations.get(id) ?? null;
     if (!conversation || String(conversation.identityId) !== identityId) return null;
     return conversation;
@@ -36,9 +34,7 @@ export class AIConversationMemoryRepository implements IAIConversationRepository
 
   async findByIdentityId(
     identityId: string,
-    options?: AIConversationQueryOptions,
   ): Promise<AIConversation[]> {
-    void options;
     return Array.from(this.conversations.values()).filter(
       (conversation) => String(conversation.identityId) === identityId,
     );

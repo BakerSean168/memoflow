@@ -21,7 +21,6 @@ describe('PrismaDataPortabilityImportStore', () => {
       goal: { create: vi.fn(async () => undefined) },
       taskPlan: { create: vi.fn(async () => undefined) },
       aiConversation: { create: vi.fn(async () => undefined) },
-      aiMessage: { create: vi.fn(async () => undefined) },
     };
     const prisma = {
       $transaction: vi.fn(async (fn) => {

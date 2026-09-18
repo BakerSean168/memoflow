@@ -173,15 +173,8 @@ describe('parseUserDataExportEnvelope V2', () => {
           conversations: [
             {
               _ref: 'aiConversation:1',
-              name: 'Chat',
+              name: 'Remember to rotate the API token after migration.',
               status: 'ACTIVE',
-              messages: [
-                {
-                  _ref: 'aiMessage:1',
-                  role: 'user',
-                  content: 'Remember to rotate the API token after migration.',
-                },
-              ],
             },
           ],
         },
