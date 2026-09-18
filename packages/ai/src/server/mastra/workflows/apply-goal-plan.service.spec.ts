@@ -94,30 +94,40 @@ const draft = GoalPlanDraftSchema.parse({
 
 function ids(workflowRunId = 'workflow-1', revision = 1) {
   return {
-    goal: goalWorkflowEntityId({ workflowRunId, revision, kind: 'goal', draftRef: 'goal' }),
+    goal: goalWorkflowEntityId({
+      workflowRunId,
+      revision,
+      kind: 'goal',
+      draftRef: 'goal',
+      operation: 'goal_create',
+    }),
     kr: goalWorkflowEntityId({
       workflowRunId,
       revision,
       kind: 'key_result',
       draftRef: 'kr:mock-exams',
+      operation: 'key_result_create',
     }),
     taskDaily: goalWorkflowEntityId({
       workflowRunId,
       revision,
       kind: 'task_plan',
       draftRef: 'task:daily-study',
+      operation: 'task_create',
     }),
     taskResearch: goalWorkflowEntityId({
       workflowRunId,
       revision,
       kind: 'task_plan',
       draftRef: 'task:company-research',
+      operation: 'task_create',
     }),
     noteBrief: goalWorkflowEntityId({
       workflowRunId,
       revision,
       kind: 'knowledge_document',
       draftRef: 'note:goal-brief',
+      operation: 'knowledge_create',
     }),
   };
 }
@@ -382,5 +392,57 @@ describe('ApplyGoalPlanService V2', () => {
       draftRef: 'goal',
       code: 'INTERNAL_ERROR',
     });
+  });
+
+  it('makes duplicate approve idempotent for the same draft receipt', async () => {
+    const port = mutationPort();
+    const first = await new ApplyGoalPlanService(port).apply({
+      workflowRunId: 'workflow-duplicate-approve',
+      draft,
+      context,
+    });
+
+    const replay = await new ApplyGoalPlanService(port).apply({
+      workflowRunId: 'workflow-duplicate-approve',
+      draft,
+      context,
+      priorReceipt: first,
+    });
+
+    expect(replay).toEqual(first);
+    expect(port.createGoal).toHaveBeenCalledTimes(1);
+    expect(port.activateGoal).toHaveBeenCalledTimes(1);
+    expect(port.createKnowledgeDocument).toHaveBeenCalledTimes(1);
+    expect(port.linkGoalKnowledge).toHaveBeenCalledTimes(2);
+    expect(port.createTaskPlan).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps draftRef identities stable when reviewed child arrays are reordered', async () => {
+    const port = mutationPort();
+    const first = await new ApplyGoalPlanService(port).apply({
+      workflowRunId: 'workflow-reorder',
+      draft,
+      context,
+    });
+    const reordered = GoalPlanDraftSchema.parse({
+      ...draft,
+      keyResults: [...draft.keyResults].reverse(),
+      tasks: [...draft.tasks].reverse(),
+      knowledge: [...draft.knowledge].reverse(),
+    });
+
+    const replay = await new ApplyGoalPlanService(port).apply({
+      workflowRunId: 'workflow-reorder',
+      draft: reordered,
+      context,
+      priorReceipt: first,
+    });
+
+    expect(replay).toEqual(first);
+    expect(replay.referenceMap).toEqual(first.referenceMap);
+    expect(port.createGoal).toHaveBeenCalledTimes(1);
+    expect(port.createKnowledgeDocument).toHaveBeenCalledTimes(1);
+    expect(port.linkGoalKnowledge).toHaveBeenCalledTimes(2);
+    expect(port.createTaskPlan).toHaveBeenCalledTimes(2);
   });
 });
