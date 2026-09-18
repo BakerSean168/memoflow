@@ -118,8 +118,7 @@ function taskMutationPort(): ReturnType<typeof vi.fn> {
   return vi.fn(async (request) => ok({ taskId: String(request.id) }));
 }
 
-async function createRuntime() {
-  const file = join(tmpdir(), `memoflow-mastra-runtime-${randomUUID()}.db`);
+async function createRuntime(file = join(tmpdir(), `memoflow-mastra-runtime-${randomUUID()}.db`)) {
   const storage = new LibSQLStore({ id: randomUUID(), url: `file:${file}` });
   const mutations = mutationPort();
   const createTaskPlan = taskMutationPort();
@@ -164,7 +163,7 @@ async function createRuntime() {
     candidateDraft: knowledgeDraft,
   });
   resources.push({ runtime, file });
-  return { runtime, mutations, createTaskPlan, createConfirmedKnowledgeNote, summarizeUsage };
+  return { runtime, file, mutations, createTaskPlan, createConfirmedKnowledgeNote, summarizeUsage };
 }
 
 describe('MastraAIRuntime goal.create product projection', () => {
@@ -237,6 +236,52 @@ describe('MastraAIRuntime goal.create product projection', () => {
     });
     expect(duplicateApprove).toEqual(completed);
     expect(mutations.createGoal).toHaveBeenCalledTimes(1);
+  });
+
+  it('restores a suspended HITL run after a process-style restart and keeps approval idempotent', async () => {
+    const first = await createRuntime();
+    const identityId = 'identity-restart';
+
+    const started = await first.runtime.start({
+      context: context(identityId, 'request-restart-start'),
+      request: {
+        kind: 'goal.create',
+        conversationId: 'conversation-restart',
+        input: { idea: 'Recover this approval after restart' },
+      },
+    });
+    expect(started).toMatchObject({
+      status: 'suspended',
+      suspension: { type: 'goal_draft_review', revision: 1 },
+    });
+
+    await first.runtime.dispose();
+    const restarted = await createRuntime(first.file);
+    const restored = await restarted.runtime.get({ identityId, runId: started.runId });
+
+    expect(restored).toEqual(started);
+    expect(
+      await restarted.runtime.get({ identityId: 'other-identity', runId: started.runId }),
+    ).toBeNull();
+
+    const completed = await restarted.runtime.resume({
+      context: context(identityId, 'request-restart-approve'),
+      request: { runId: started.runId, command: { type: 'approve' } },
+    });
+    expect(completed).toMatchObject({
+      runId: started.runId,
+      status: 'completed',
+      result: { workflowRunId: started.runId, revision: 1, status: 'success' },
+    });
+    expect(first.mutations.createGoal).not.toHaveBeenCalled();
+    expect(restarted.mutations.createGoal).toHaveBeenCalledTimes(1);
+
+    const duplicateApprove = await restarted.runtime.resume({
+      context: context(identityId, 'request-restart-approve-again'),
+      request: { runId: started.runId, command: { type: 'approve' } },
+    });
+    expect(duplicateApprove).toEqual(completed);
+    expect(restarted.mutations.createGoal).toHaveBeenCalledTimes(1);
   });
 
   it('hard-cancels an identity-owned suspended workflow without executing domain mutations', async () => {

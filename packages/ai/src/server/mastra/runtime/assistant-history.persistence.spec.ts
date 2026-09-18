@@ -2,6 +2,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { MastraDBMessage } from '@mastra/core/agent';
 import { Memory } from '@mastra/memory';
 import { createMastraStorage } from './storage';
 import { AssistantHistoryService } from './assistant-history.service';
@@ -50,6 +51,23 @@ describe('AssistantHistoryService persistent restart cutover', () => {
       ],
     });
     expect(firstSource.load).toHaveBeenCalledTimes(1);
+
+    await firstMemory.saveMessages({
+      messages: [
+        {
+          id: 'mastra-follow-up',
+          role: 'assistant',
+          createdAt: new Date(30),
+          threadId: 'conversation-1',
+          resourceId: 'identity-1',
+          type: 'text',
+          content: {
+            format: 2,
+            parts: [{ type: 'text', text: 'answer from Mastra memory' }],
+          },
+        } satisfies MastraDBMessage,
+      ],
+    });
     await firstMemory.settled();
     await closeStorage(firstStorage);
 
@@ -76,6 +94,11 @@ describe('AssistantHistoryService persistent restart cutover', () => {
       messages: [
         { id: 'legacy-user', role: 'user', content: 'hello' },
         { id: 'legacy-assistant', role: 'assistant', content: 'hi' },
+        {
+          id: 'mastra-follow-up',
+          role: 'assistant',
+          content: 'answer from Mastra memory',
+        },
       ],
     });
     expect(restartedSource.load).not.toHaveBeenCalled();

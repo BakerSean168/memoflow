@@ -11,7 +11,7 @@ tags:
   - refactor
 description: AI vNext Model Convergence — Conversation/Mastra 状态所有权、Provider Secret/Model Capability、Context/Knowledge、Workflow Draft/Apply、ExecutionRecord 单轨收敛实施计划
 created: 2026-09-09T00:00:00+08:00
-updated: 2026-09-09T00:00:00+08:00
+updated: 2026-09-18T00:00:00+08:00
 ---
 
 # AI vNext Model Convergence
@@ -294,6 +294,86 @@ AiMessage can be retired after cutover
 ```
 
 或者列出必须先迁走的真实 consumer；不得凭 grep 数量直接删表。
+
+#### Characterization evidence ledger (2026-09-18)
+
+This is an as-built evidence record for AI-9602. It does not change the execution order,
+delete legacy persistence, add a backfill, or make a compatibility promise under ADR-111.
+
+##### Durable authority map
+
+| State                                                                                      | Current authority                                                                                                                             | Evidence / boundary                                                                                                                                                                                                    | Classification                                                                                                             |
+| ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Conversation identity, title, archive/delete metadata                                      | `AIConversation` / `ai_conversations`; `AIConversationPrismaRepository`, `PowerSyncAIConversationRepository`, and `DeleteConversationUseCase` | `packages/ai/src/server/domain/aggregates/ai-conversation.ts::AIConversation`; `packages/ai/src/server/application/use-cases/commands/delete-conversation.use-case.ts::DeleteConversationUseCase`                      | Authoritative product shell only; `messages[]`, `messageCount`, and `lastMessageAt` remain legacy projections.             |
+| Assistant transcript                                                                       | Mastra `Memory` thread in the configured Mastra store; `conversationId` is the thread id and `identityId` is the resource id                  | `packages/ai/src/server/mastra/runtime/assistant-history.service.ts::AssistantHistoryService`; `packages/ai/src/server/mastra/runtime/storage.ts::createMastraStorage`; `MastraAIRuntime.listMessages/dispatchMessage` | Authoritative and durable. After the version marker, reads use `memory.recall`; the legacy source is not consulted.        |
+| Goal/Task/Knowledge workflow state, suspension, resume cursor, result, and terminal status | Mastra `workflows` store, keyed by `runId` and filtered by `resourceId`                                                                       | `packages/ai/src/server/mastra/runtime/mastra-ai.runtime.ts::MastraAIRuntime.workflowStore`, `get`, `list`, `resume`, `cancel`                                                                                         | Authoritative and durable; in-memory `activeRuns` is only a live cancellation handle.                                      |
+| Client workflow snapshot                                                                   | `localStorage` key `ai:conversation-workflow-map:v2`                                                                                          | `packages/app-vue/src/modules/ai/composables/useAIWorkflowPersistence.ts`; `useAIChatView.ts::refreshRestoredWorkflowRuns` calls `workflowRuntime.get`                                                                 | Derived/recoverable shadow, not authority and not a safe fallback when Mastra is unavailable. Retirement is AI-9603 scope. |
+| AI execution/usage observation                                                             | `ai_generation_tasks` through the execution-log adapters                                                                                      | `packages/ai/src/server/infrastructure/adapters/prisma/ai-execution-log-prisma.adapter.ts`; `ai-execution-log-powersync.adapter.ts`                                                                                    | Adjacent derived observability, not transcript or workflow authority; later `AIExecutionRecord` work owns its convergence. |
+
+The host boundary is also characterized: authenticated HTTP routes and Electron IPC derive
+`identityId` from the host context and expose history/delete plus workflow
+start/get/list/resume/cancel; clients do not submit an identity override. See
+`packages/ai/src/api/routes/ai-runtime.routes.ts`, `packages/ai/src/electron/index.ts`,
+`packages/ai/src/client/runtime-assistant.ts`, and
+`packages/ai/src/client/runtime-workflow.ts`.
+
+##### Recovery, HITL, idempotency, and delete evidence
+
+| Boundary                                                                                                                                                            | Executable evidence                                                                                                                           |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| One-time legacy bootstrap, stable message ids, concurrent bootstrap collapse, marker short-circuit, and owner isolation                                             | `packages/ai/src/server/mastra/runtime/assistant-history.service.spec.ts`                                                                     |
+| Transcript survives a process-style LibSQL restart; restart does not reread the legacy source; a Mastra-only follow-up remains visible                              | `packages/ai/src/server/mastra/runtime/assistant-history.persistence.spec.ts`                                                                 |
+| Suspended HITL workflow survives storage/runtime disposal and reopening, restores only for its owner, resumes, and duplicate approval does not reapply the mutation | `packages/ai/src/server/mastra/runtime/mastra-workflow.runtime.spec.ts` (`restores a suspended HITL run after a process-style restart...`)    |
+| Lower-level goal/task restart, suspension, receipt retry, and deterministic apply behavior                                                                          | `packages/ai/src/server/mastra/workflows/goal-create.workflow.spec.ts`, `task-create.workflow.spec.ts`, and `apply-goal-plan.service.spec.ts` |
+| UI reconnect/reload rereads authoritative history                                                                                                                   | `apps/web/e2e/ai/multi-engine-host.spec.ts` (`reload restores authoritative Mastra transcript instead of legacy AiMessage history`)           |
+| Runtime delete is owner-scoped; a failed storage delete leaves the owner thread available for retry                                                                 | `assistant-history.service.spec.ts` owner/delete tests                                                                                        |
+| Product delete ordering is Mastra thread first, shell second, so a shell failure remains recoverable and does not leave an invisible runtime orphan                 | `packages/app-vue/src/modules/ai/composables/useAIChatSession.ts` and `useAIChatSession.spec.ts`                                              |
+
+Delete is therefore recoverable but not a distributed transaction: the shell use case soft-deletes
+`ai_conversations`, while the UI first deletes the Mastra thread. A failed Mastra delete leaves
+the shell visible; a failed shell delete leaves a recoverable shell that can be retried. No
+runtime rewrite is needed for this characterization.
+
+##### Legacy `AiMessage` / transcript consumer ledger
+
+The following is the complete non-generated production surface found by the AI-9602 inventory.
+No current assistant runtime producer writes `AiMessage`; the remaining writes are aggregate
+repository persistence and data-portability import.
+
+| Consumer                                        | Read/write surface                                                                                                                               | Classification and deletion implication                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ConversationTranscriptBootstrapSource`         | `findByIdForIdentity(..., { includeChildren: true })`, projects `conversation.getAllMessages()`                                                  | Derived/recoverable one-time bridge; read-only and explicitly never writes `AiMessage`. It is the temporary bootstrap blocker, not transcript authority. (`packages/ai/src/server/infrastructure/migrations/conversation-transcript-bootstrap.source.ts`)                                                                                                                                                                                                                                                                                                                                          |
+| `AssistantHistoryService`                       | Invokes the source only before the persistent bootstrap marker; writes imported rows into Mastra memory, then reads Mastra                       | Derived/recoverable bridge plus authoritative Mastra reader. The marker and restart tests prove the legacy read is not permanent. (`packages/ai/src/server/mastra/runtime/assistant-history.service.ts`)                                                                                                                                                                                                                                                                                                                                                                                           |
+| Prisma conversation repository                  | `save()` deletes/recreates `aiMessage` children when aggregate DTO includes messages; `find*({ includeChildren: true })` reads them              | Current shell persistence with a legacy transcript child path; derived/recoverable, not runtime authority. Must lose the child path before table deletion. (`packages/ai/src/server/infrastructure/adapters/prisma/ai-conversation-prisma.repository.ts`)                                                                                                                                                                                                                                                                                                                                          |
+| PowerSync conversation repository/mapper        | Same child delete/insert/read behavior in `ai_messages`; maps rows to `Message`                                                                  | Current Desktop/offline shell persistence with a legacy transcript child path; derived/recoverable, not runtime authority. (`packages/ai/src/server/infrastructure/adapters/powersync/ai-conversation-powersync.repository.ts`, `mappers/powersync-ai-conversation.mapper.ts`)                                                                                                                                                                                                                                                                                                                     |
+| Data Portability export                         | Prisma adapter includes `messages`; PowerSync adapter selects `ai_messages`; `projectAIConversations` emits portable `PortableAIMessage` records | Derived/recoverable and user-visible, but a current retirement blocker: export must be cut to Mastra history or the AI export contract must intentionally be removed before deleting rows. (`packages/data-portability/src/server/application/use-cases/export-user-data.use-case.ts`, `projections/ai.projection.ts`, `infrastructure/adapters/prisma-adapters.ts`, `infrastructure/powersync/powersync-export-dependencies.ts`)                                                                                                                                                                  |
+| Data Portability import                         | `importAI` calls `createAIMessage`; Prisma and PowerSync stores insert `AiMessage` / `ai_messages`                                               | Derived/recoverable legacy write compatibility, never runtime authority. ADR-111 requires no old-data migration/backfill; this importer must be explicitly retired or replaced before physical deletion. (`packages/data-portability/src/server/application/use-cases/importers/ai.importer.ts`, `infrastructure/import-store/prisma-data-portability-import-store.ts`, `infrastructure/powersync/powersync-import-store.ts`)                                                                                                                                                                      |
+| Domain and contract message model               | `AIConversation.messages`, `Message` entities, `AiMessageId`, server/client DTOs and AI response schemas                                         | Derived/recoverable active legacy model surface used by shell repositories/portability, but not by Mastra runtime authority. (`packages/ai/src/server/domain/aggregates/ai-conversation.ts`, `packages/ai/src/server/domain/entities/message.ts`, `packages/ai/src/domain-client/entities/message.ts`, `packages/contracts/src/modules/ai/entities/message-server.ts`, `packages/contracts/src/modules/ai/api/response-schemas.ts`, `packages/contracts/src/modules/data-portability/dtos/portable-ai.dto.ts`) Retire with its remaining consumers; do not preserve it as a second transcript API. |
+| Database/PowerSync schema and API table mapping | Prisma `AiMessage` model, PowerSync `ai_messages` table, API sync table/name mapping                                                             | Derived/recoverable storage/sync plumbing, not a semantic authority or independent reader. Remove only in the later coordinated schema cutover. (`packages/database/prisma/schema/ai.prisma`, `packages/powersync-schema/src/index.ts`, `apps/api/src/modules/powersync/table-mapping.ts`)                                                                                                                                                                                                                                                                                                         |
+| Tests, fixtures, and generated Prisma client    | Characterization/round-trip fixtures and generated `AiMessage` types/delegates                                                                   | Dead as production consumers; evidence/generated support only. Keep behavior tests that protect Mastra recovery; regenerate/delete generated artifacts only with the schema change.                                                                                                                                                                                                                                                                                                                                                                                                                |
+
+`ConversationStatus.Closed` is also fully inventoried: it is defined in the AI contract/server
+value object and covered by value-object tests, but has no current runtime/application consumer;
+the aggregate creates `Active` and soft-deletes to `Archived`. It is a dead legacy status
+candidate for AI-9603, not changed by AI-9602.
+
+##### Retirement gate handed to later tickets
+
+AI-9602 proves the authority boundary but does not open the destructive gate yet. Before
+AI-9603/AI-9610 remove `AiMessage`, the later work must explicitly show that:
+
+1. transcript export has a deliberate Mastra-authoritative source or is removed under the
+   ADR-111 portability decision;
+2. no importer/store creates `AiMessage` rows;
+3. conversation repositories and aggregate/DTO surfaces no longer read or write message
+   children;
+4. the `Message` contract/domain and `Closed` status surfaces have no remaining product
+   consumer; and
+5. Prisma, PowerSync, API sync mapping, and generated clients are cut in one coordinated
+   schema change.
+
+No migration, backfill, legacy-row preservation, runtime rewrite, or compatibility reader was
+added for this ticket.
 
 #### Dependencies
 

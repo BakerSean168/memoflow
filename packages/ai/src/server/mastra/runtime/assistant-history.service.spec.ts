@@ -185,6 +185,30 @@ describe('AssistantHistoryService', () => {
     expect(harness.getThread()).toBeNull();
   });
 
+  it('keeps the owner thread available when delete fails so a retry can finish cleanup', async () => {
+    const harness = createMemoryHarness();
+    harness.setThread({
+      id: 'conversation-1',
+      resourceId: 'identity-1',
+      metadata: { memoflowTranscriptBootstrapVersion: 1 },
+    });
+    harness.memory.deleteThread.mockRejectedValueOnce(new Error('storage unavailable'));
+    const service = new AssistantHistoryService(harness.memory, bootstrapSource());
+
+    await expect(
+      service.deleteConversation({ identityId: 'identity-1', conversationId: 'conversation-1' }),
+    ).rejects.toThrow('storage unavailable');
+    expect(harness.getThread()).toMatchObject({
+      id: 'conversation-1',
+      resourceId: 'identity-1',
+    });
+
+    await expect(
+      service.deleteConversation({ identityId: 'identity-1', conversationId: 'conversation-1' }),
+    ).resolves.toBe(true);
+    expect(harness.getThread()).toBeNull();
+  });
+
   it('fails closed when the legacy shell is unavailable or a pre-existing thread belongs to another identity', async () => {
     const harness = createMemoryHarness();
     const missingSource: AssistantTranscriptBootstrapSource = {
