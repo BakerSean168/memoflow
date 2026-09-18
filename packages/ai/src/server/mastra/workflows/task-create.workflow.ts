@@ -322,6 +322,8 @@ export function createTaskCreateWorkflow(input: {
       if (current.phase === 'recovery') {
         const priorReceipt = current.priorReceipt;
         if (!priorReceipt) throw new Error('task.create recovery phase is missing its receipt');
+        if (!current.draft) throw new Error('task.create recovery phase is missing its draft');
+        const taskDraftRef = current.draft.task.draftRef;
         if (resumeData.type === 'retry') {
           if (!priorReceipt.retryable) {
             throw new Error('task.create recovery has no retryable mutations');
@@ -329,7 +331,7 @@ export function createTaskCreateWorkflow(input: {
           return applyAndResolve(priorReceipt);
         }
         if (resumeData.type === 'accept_partial') {
-          if (priorReceipt.status !== 'partial' || !priorReceipt.taskPlanId) {
+          if (priorReceipt.status !== 'partial' || !priorReceipt.referenceMap[taskDraftRef]) {
             throw new Error('task.create has no partial business result to accept');
           }
           await persist({ ...current, phase: 'completed' });
@@ -339,7 +341,7 @@ export function createTaskCreateWorkflow(input: {
           });
         }
         if (resumeData.type === 'cancel_remaining') {
-          if (priorReceipt.status === 'partial' && priorReceipt.taskPlanId) {
+          if (priorReceipt.status === 'partial' && priorReceipt.referenceMap[taskDraftRef]) {
             await persist({ ...current, phase: 'completed' });
             return TaskCreateWorkflowOutputSchema.parse({
               outcome: 'completed',
