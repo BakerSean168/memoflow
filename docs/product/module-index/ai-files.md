@@ -5,12 +5,12 @@ tags:
   - ai
 description: AI 模块相关文件索引
 created: 2026-06-02T00:00:00
-updated: 2026-09-09T00:00:00+08:00
+updated: 2026-09-18T00:00:00+00:00
 ---
 
 # AI 模块文件索引
 
-AI-VNEXT-07 后，MemoFlow 的核心 AI execution runtime 已收敛为 **TypeScript + Mastra**。本索引只列当前生产路径；Python `apps/ai-service`、LangGraph bridge、Agent Host、TurnEngine、ProposalKernel 与双 runtime 路径已退役。
+AI-9612 后，MemoFlow 的核心 AI execution runtime 已收敛为 **TypeScript + Mastra**。本索引只列当前生产路径；Python `apps/ai-service`、LangGraph bridge、Agent Host、TurnEngine、ProposalKernel 与双 runtime 路径已退役。
 
 ## 前端工作区
 
@@ -37,6 +37,7 @@ AI-VNEXT-07 后，MemoFlow 的核心 AI execution runtime 已收敛为 **TypeScr
 | [`packages/ai/src/server/mastra/runtime/mastra-ai.runtime.ts`](../../../packages/ai/src/server/mastra/runtime/mastra-ai.runtime.ts)                           | 单一 Assistant / Workflow runtime owner                              |
 | [`packages/ai/src/server/mastra/runtime/assistant-history.service.ts`](../../../packages/ai/src/server/mastra/runtime/assistant-history.service.ts)           | Assistant transcript/history                                         |
 | [`packages/ai/src/server/mastra/models/model-resolver.ts`](../../../packages/ai/src/server/mastra/models/model-resolver.ts)                                   | BYOK provider/model resolution                                       |
+| [`packages/ai/src/server/mastra/context/ai-context-assembler.ts`](../../../packages/ai/src/server/mastra/context/ai-context-assembler.ts)                         | Product Time、trust metadata 与 token budget boundary                 |
 | [`packages/ai/src/server/mastra/agents/memoflow-assistant.ts`](../../../packages/ai/src/server/mastra/agents/memoflow-assistant.ts)                           | 用户开放式 Assistant                                                 |
 | [`packages/ai/src/server/mastra/agents/goal-planner.worker.ts`](../../../packages/ai/src/server/mastra/agents/goal-planner.worker.ts)                         | Goal planning worker                                                 |
 | [`packages/ai/src/server/mastra/agents/task-planner.worker.ts`](../../../packages/ai/src/server/mastra/agents/task-planner.worker.ts)                         | Task planning worker                                                 |
@@ -51,6 +52,14 @@ AI-VNEXT-07 后，MemoFlow 的核心 AI execution runtime 已收敛为 **TypeScr
 | [`packages/ai/src/server/application/ports/routine-command.port.ts`](../../../packages/ai/src/server/application/ports/routine-command.port.ts)               | AI-owned Routine command abstraction                                 |
 | [`packages/ai/src/server/application/ports/planner-read.port.ts`](../../../packages/ai/src/server/application/ports/planner-read.port.ts)                     | AI-owned read-only Planner projection                                |
 | [`packages/ai/src/server/application/ports/notification-read.port.ts`](../../../packages/ai/src/server/application/ports/notification-read.port.ts)           | AI-owned Notification Fact reader                                    |
+
+## Application capabilities 与 failure boundary
+
+| 文件                                                                                                                                                                      | 说明                                                                                         |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| [`packages/ai/src/server/application/ai.application.capabilities.ts`](../../../packages/ai/src/server/application/ai.application.capabilities.ts)                         | Provider、Assistant、Knowledge、Evaluation 四个真实 consumer capability ports               |
+| [`packages/ai/src/server/transport/ai-controller-errors.ts`](../../../packages/ai/src/server/transport/ai-controller-errors.ts)                                           | API/IPC 共用的 stable AI failure code、HTTP projection 与 secret-safe message mapping         |
+| [`packages/ai/src/server/infrastructure/security/provider-safe-fetch.ts`](../../../packages/ai/src/server/infrastructure/security/provider-safe-fetch.ts)                   | provider HTTPS/SSRF/DNS 与 request-time credential guard                                     |
 
 ## Transport 与宿主组合
 
@@ -83,21 +92,27 @@ AI-VNEXT-07 后，MemoFlow 的核心 AI execution runtime 已收敛为 **TypeScr
 | [`packages/contracts/src/modules/ai/api/ai-knowledge-capture-workflow.dto.ts`](../../../packages/contracts/src/modules/ai/api/ai-knowledge-capture-workflow.dto.ts) | Knowledge capture workflow contract                  |
 | [`packages/contracts/src/modules/ai/protocol/ai-rpc-map.ts`](../../../packages/contracts/src/modules/ai/protocol/ai-rpc-map.ts)                                     | AI RPC map                                           |
 | [`packages/database/prisma/schema/ai.prisma`](../../../packages/database/prisma/schema/ai.prisma)                                                                   | 当前 AI product persistence schema                   |
+| [`packages/powersync-schema/src/index.ts`](../../../packages/powersync-schema/src/index.ts)                                                                         | API/Desktop AI schema parity（含 `ai_execution_records`，无 `ai_messages`）                    |
+| [`packages/data-portability/src/server/application/use-cases/importers/ai.importer.ts`](../../../packages/data-portability/src/server/application/use-cases/importers/ai.importer.ts) | Conversation shell-only portability importer                         |
+| [`packages/ai/src/server/infrastructure/adapters/prisma/ai-execution-record-prisma.adapter.ts`](../../../packages/ai/src/server/infrastructure/adapters/prisma/ai-execution-record-prisma.adapter.ts) | bounded execution observability projection                              |
 
-## Target convergence docs（2026-09-09，待实施）
+## Convergence and closure docs（已实施）
 
 | 文件                                                                                                                                                                      | 说明                                                                                           |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| [`docs/analysis/2026-09-09-ai-vnext-model-convergence-current-system-map.md`](../../analysis/2026-09-09-ai-vnext-model-convergence-current-system-map.md)                 | 当前 Conversation/Provider/UI state/Workflow Draft/Knowledge Index/legacy persistence 证据地图 |
+| [`docs/analysis/2026-09-09-ai-vnext-model-convergence-current-system-map.md`](../../analysis/2026-09-09-ai-vnext-model-convergence-current-system-map.md)                 | AI vNext as-built ownership、runtime、provider、workflow 与 persistence 证据地图              |
 | [`docs/analysis/2026-09-09-ai-vnext-model-convergence-reference-and-reuse-ledger.md`](../../analysis/2026-09-09-ai-vnext-model-convergence-reference-and-reuse-ledger.md) | Mastra/Time/Knowledge/owner-domain 直接复用、薄 adapter 与禁止自研清单                         |
 | [`docs/architecture/ai-vnext-model-convergence.md`](../../architecture/ai-vnext-model-convergence.md)                                                                     | AI vNext Model Convergence 北极星架构                                                          |
-| [`docs/plan/active/2026-09-09-ai-vnext-model-convergence.md`](../../plan/active/2026-09-09-ai-vnext-model-convergence.md)                                                 | AI-9601～9612 实施顺序与 closure gate                                                          |
+| [`docs/plan/active/2026-09-09-ai-vnext-model-convergence.md`](../../plan/active/2026-09-09-ai-vnext-model-convergence.md)                                                 | AI-9601～9612 实施顺序、accepted status 与 closure gate                                       |
+| [`docs/analysis/2026-09-18-ai-9612-vnext-closure-evidence.md`](../../analysis/2026-09-18-ai-9612-vnext-closure-evidence.md)                                             | AI-9612 五层 exact-head findings/disposition 与 gates evidence                               |
 
-这组文档只冻结下一阶段目标；本索引前面的生产文件列表仍描述当前已实施的 Mastra runtime。
+这组文档现在记录已实施的 convergence truth 与 AI-9612 closure evidence；不构成 PORT-1611 的启动授权。
 
 ## 重点边界
 
 - Mastra 是唯一核心 Agent/Workflow runtime；不得重新引入 Python/LangGraph/AgentHost 双 runtime。
 - `identityId` 只来自宿主认证 `ExecutionContext`，客户端不得提交。
 - Provider credential 不进入客户端、prompt、event、snapshot 或 trace payload。
+- Provider/model capability evidence 过期、未知或不支持时 fail closed；撤销/替换 credential 在每次 provider request 前阻断。
 - Goal/Task/Knowledge/Routine mutation 必须经过 owner application/command port；Planner/Notification tools 只读；AI tool/adapter 禁止 import 或 mutation raw Scheduler worker state。
+- Conversation transcript/workflow snapshot 只由 Mastra 持有；`ai_conversations` 是 shell，`ai_execution_records` 是 bounded operations projection，生产路径不存在 `AiMessage`/`ai_messages`。

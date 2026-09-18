@@ -2,7 +2,7 @@
 tags: [analysis, data-portability, migration, vnext]
 description: Data Portability V2 当前契约、旧模块 DTO 与 owner-driven vNext 差距地图
 created: 2026-09-09T00:31:00+08:00
-updated: 2026-09-09T00:31:00+08:00
+updated: 2026-09-18T00:00:00+00:00
 ---
 
 # Data Portability Current-System Map
@@ -48,9 +48,12 @@ Data Portability 的定位正确：它没有自己的业务 Domain，而是跨 o
 
 仍完整导出/导入已经退休的 EditorWorkspace/Session/Group/Tab。它是阻碍旧 editor tables 最终删除的主要兼容边界。
 
-### AI
+### AI（AI-9612 as-built）
 
-仍将 `AIConversation + AiMessage[]` 当作 portable product truth，和 Mastra thread authority + thin Conversation shell target 冲突。Provider secret、execution records、index vectors也不应进入普通 backup。
+AI portability now exports/imports Conversation shell metadata only. Mastra thread history remains
+runtime-owned; there is no `AiMessage`/`ai_messages` portability path. Provider credentials,
+`AIExecutionRecord` operations projections, capability evidence, and AI index cache/vectors are
+not ordinary user backup truth.
 
 ### Settings
 

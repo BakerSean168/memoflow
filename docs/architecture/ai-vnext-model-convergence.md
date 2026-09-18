@@ -10,7 +10,7 @@ tags:
   - vnext
 description: AI vNext Model Convergence 北极星架构——保留 Mastra runtime，收敛 Conversation、Provider、Context、Workflow Draft、Knowledge Index 与 Execution Record
 created: 2026-09-09T00:00:00+08:00
-updated: 2026-09-09T00:00:00+08:00
+updated: 2026-09-18T00:00:00+00:00
 ---
 
 # AI vNext Model Convergence — North-Star Architecture
@@ -26,7 +26,7 @@ Mastra = Agent / Workflow / Memory / Runtime authority
 MemoFlow = Product truth / Provider ownership / Business apply authority
 ```
 
-2026-09 本轮只做 **Model Convergence**：
+2026-09 的 AI-9602～AI-9612 已完成 **Model Convergence**：
 
 1. 把 Conversation 收缩为 product shell；
 2. 把 durable workflow state 真正收回 Mastra 单一 authority；
@@ -34,8 +34,11 @@ MemoFlow = Product truth / Provider ownership / Business apply authority
 4. 建立统一 `AIContextEnvelope`；
 5. 让 Goal/Task/Routine/Knowledge AI contract 跟随 owner-domain 新模型；
 6. 让 AI Knowledge Index 使用 stable `KnowledgeDocumentId`；
-7. 把 `AiGenerationTask` 收敛成真实 `AIExecutionRecord`；
+7. 使用 `AIExecutionRecord` 作为 bounded operations projection；
 8. 删除无 current product consumer 的 legacy AI persistence，而不是继续维护假的 Domain aggregate。
+
+AI-9612 exact-head closure confirms that the topology below is current implementation truth. Any
+remaining historical migration wording in this document is rationale, not a compatibility promise.
 
 ## 2. North-star topology
 
@@ -630,7 +633,7 @@ Memory 只保存未来 turn 需要的 agent context：
 
 ## 15. Operations / Usage / Eval
 
-当前 `AiGenerationTask` 应改语义为：
+当前 implementation 使用：
 
 ```text
 AIExecutionRecord
@@ -672,7 +675,7 @@ AIUsageLedger / Entitlement / Budget
 
 ## 16. Application surface
 
-当前 `AIApplicationPort` 可以在迁移中保留 facade 兼容，但目标依赖应按 capability 收窄：
+当前 application surface 已按 proven consumer capability 收窄：
 
 ```text
 AIProviderManagementPort
@@ -685,41 +688,45 @@ Settings 只依赖 Provider capability；Assistant workspace 不被迫依赖 Eva
 
 不为“接口拆得漂亮”单独制造 transport churn；以真实 consumer dependency 为拆分依据。
 
-## 17. Persistence target
+## 17. Current persistence inventory
 
-最终 AI product persistence 目标大体为：
+AI product persistence is currently bounded to:
 
 ```text
-assistant_conversations
-ai_provider_connections
-ai_provider_onboarding_sessions
-ai_model_catalog_snapshots?        // if durable cache is useful
-ai_model_capability_snapshots?     // if durable verification is useful
-ai_knowledge_index_entries
+ai_conversations
 ai_execution_records
+ai_provider_configs
+ai_provider_onboarding_sessions
+ai_provider_secrets
+ai_knowledge_index_entries
 ```
 
-明确删除候选：
+Provider catalogs and capability evidence are resolved/verified through the ProviderDefinition,
+Connection, SecretVault, and capability registries; no speculative durable catalog or capability
+snapshot table is part of the current implementation.
+
+AI-9610 已完成删除：
 
 ```text
-ai_messages                // bootstrap fully retired after migration proof
-ai_usage_quotas            // no current product consumer
-knowledge_generation_tasks // replaced by Mastra workflow
+AiMessage / ai_messages
+AiUsageQuota / ai_usage_quotas
+KnowledgeGenerationTask / knowledge_generation_tasks
+AiGenerationTask / ai_generation_tasks
 ```
 
-删除必须经过：
+Deletion evidence included:
 
 - current consumer search；
 - portability/export audit；
-- migration fixture；
+- destructive reset/fresh-bootstrap fixture；
 - Prisma/PowerSync parity；
 - anti-resurrection surface lock。
 
 ## 18. Migration posture
 
-本轮不做长期 dual model。
+AI-9612 does not retain a long-term dual model.
 
-顺序：
+Completed order:
 
 ```text
 1. freeze contracts/ADRs/current map
@@ -734,7 +741,8 @@ knowledge_generation_tasks // replaced by Mastra workflow
 10. full review / exact-head CI / archive
 ```
 
-迁移中允许短期 adapter，但每个 adapter 必须有删除 ticket。
+The remaining direct provider gateways are bounded onboarding/Knowledge-QA adapters, not a
+second Agent/Workflow runtime or state authority.
 
 ## 19. Protected contracts
 

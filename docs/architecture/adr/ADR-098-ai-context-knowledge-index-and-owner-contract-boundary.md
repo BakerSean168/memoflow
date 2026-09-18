@@ -10,15 +10,20 @@ tags:
   - vnext
 description: ADR-098 - AIContextEnvelope、Product Time Context、Knowledge Index stable identity 与 owner-domain contract reuse boundary
 created: 2026-09-09T00:00:00+08:00
-updated: 2026-09-09T00:00:00+08:00
+updated: 2026-09-18T00:00:00+00:00
 ---
 
 # ADR-098: AI Context、Knowledge Index 与 Owner Contract Boundary
 
-**状态：** 已采纳（待实施）
+**状态：** 已实施并验收（AI-9612 exact-head closure）
 **日期：** 2026-09-09
 **影响范围：** AI Context/Memory/Tools、Goal/Task/Routine/Planner/Notification adapters、Knowledge/Repository、Setting/Product Time、Mastra workers/workflows
 **依赖：** ADR-051、ADR-076～079、ADR-080～088、ADR-089～093
+
+**实现证据：** AIContextAssembler、Product Time/trust/token budget boundary、stable
+KnowledgeSpaceId/KnowledgeDocumentId citation identity 与 owner-domain tool ports 已接入当前
+Assistant/workflow path；prompt-injection, truncation, secret-redaction and rename/move tests
+are part of the AI-9612 closure evidence.
 
 ## 1. 决策摘要
 

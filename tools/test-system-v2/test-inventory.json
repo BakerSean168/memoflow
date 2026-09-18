@@ -3224,6 +3224,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/transport/ai-controller-errors.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/transport/ai-provider-config.controller.onboarding-v2.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5091,14 +5101,6 @@
     },
     {
       "path": "packages/contracts/src/modules/ai/api/dual-registry.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/ai/configs/ai-provider-template-catalog.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -10800,7 +10802,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 86
+      "fileCount": 87
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -11178,7 +11180,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 86
+      "fileCount": 87
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -11206,7 +11208,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 87
+      "fileCount": 86
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -11556,6 +11558,7 @@
       "packages/ai/src/server/mastra/workflows/knowledge-capture-persistence.adapter.spec.ts",
       "packages/ai/src/server/mastra/workflows/task-create.workflow.spec.ts",
       "packages/ai/src/server/shared/__tests__/assemble-capabilities.spec.ts",
+      "packages/ai/src/server/transport/ai-controller-errors.spec.ts",
       "packages/ai/src/server/transport/ai-provider-config.controller.onboarding-v2.spec.ts",
       "packages/app-vue/src/modules/account/stores/accountStore.spec.ts",
       "packages/app-vue/src/modules/authentication/stores/authenticationStore.spec.ts",

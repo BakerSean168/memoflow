@@ -10,15 +10,19 @@ tags:
   - vnext
 description: ADR-097 - AI Provider Definition/Connection、SecretVault、Model Catalog/Capability 与 capability-aware ModelResolver
 created: 2026-09-09T00:00:00+08:00
-updated: 2026-09-09T00:00:00+08:00
+updated: 2026-09-18T00:00:00+00:00
 ---
 
 # ADR-097: AI Provider Connection、Secret 与 Model Capability Boundary
 
-**状态：** 已采纳（待实施）
+**状态：** 已实施并验收（AI-9612 exact-head closure）
 **日期：** 2026-09-09
 **影响范围：** AI Provider、Provider Onboarding、Secret Vault、ModelResolver、Mastra/AI SDK execution、Settings AI section、Prisma/PowerSync、HTTP/IPC
 **依赖：** ADR-050、ADR-051、ADR-092
+
+**实现证据：** canonical ProviderDefinition catalog、Connection/SecretVault seam、capability-aware
+ModelResolver 与 request-time revoke guard 已落地；unknown/stale/unsupported capability 与
+provider failure mapping 由 AI-9612 focused tests 和 closure evidence 覆盖。
 
 ## 1. 决策摘要
 

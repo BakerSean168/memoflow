@@ -9,7 +9,7 @@ tags:
   - vnext
 description: AI vNext Model Convergence reference/reuse ledger——明确直接复用、薄适配、owner-domain 复用与禁止自研项
 created: 2026-09-09T00:00:00+08:00
-updated: 2026-09-09T00:00:00+08:00
+updated: 2026-09-18T00:00:00+00:00
 ---
 
 # AI vNext Model Convergence — Reference & Reuse Ledger
@@ -27,6 +27,9 @@ updated: 2026-09-09T00:00:00+08:00
 3. 哪些业务语义必须复用 owner-domain contract；
 4. 哪些东西明确不再自研；
 5. 哪些 legacy object 不应该因为“已经写过”继续保留。
+
+AI-9612 已把本 ledger 中的 convergence posture 落到当前 production path；历史名称只作为
+retirement rationale 保留，不代表仍有 runtime/schema authority。
 
 ## 2. 总原则
 
@@ -55,7 +58,7 @@ AI runtime state -> Mastra
 | -------------------------- | -------------------------------------------------------------------------- | ------------------------------------------- | ----------------------------------------- |
 | Agent runtime              | Mastra Agent / AgentController                                             | identity、tools、product policy 注入        | 不再造 AgentHost                          |
 | Durable workflow           | Mastra Workflow / suspend-resume snapshot                                  | typed product draft、owner apply            | 不再造 WorkflowEngine/checkpoint          |
-| Agent memory/thread        | Mastra Memory + storage                                                    | conversation shell association              | 不再双写 AiMessage                        |
+| Agent memory/thread        | Mastra Memory + storage                                                    | conversation shell association              | 不复制到 legacy message persistence       |
 | Server runtime storage     | Mastra persistent storage on PostgreSQL-backed host                        | lifecycle/composition                       | 不在 Prisma 复制 workflow checkpoint      |
 | Desktop runtime storage    | Mastra LibSQL/local persistent storage                                     | profile binding/lifecycle                   | 不用 localStorage 做 runtime DB           |
 | Structured validation      | Zod contracts                                                              | domain preview validation + failure mapping | 不让 LLM 自己证明 invariant               |
@@ -319,13 +322,8 @@ full local WorkflowRun shadow
 - recorded replay gate；
 - existing requestId/traceId/provider/model/usage/cost correlation。
 
-本轮只把：
-
-```text
-AiGenerationTask
-```
-
-收敛为真实 `AIExecutionRecord` 语义。
+当前实现直接使用 `AIExecutionRecord` / `ai_execution_records`；旧 `AiGenerationTask` 命名仅在
+历史 rationale 中出现。
 
 不要建立第二套 observability stack。
 
@@ -354,25 +352,23 @@ Speculative AI billing/quota engine
 
 “现有代码已经存在”不是继续保留的理由。
 
-以下对象只有在 further consumer audit 证明有真实产品语义时才保留：
+以下对象已通过 consumer/schema/portability audit 退出 production authority：
 
 ```text
-AiMessage
+AiMessage / ai_messages
 AiUsageQuota
 KnowledgeGenerationTask
+AiGenerationTask / ai_generation_tasks naming/state model
 ConversationStatus.Closed
-AiGenerationTask naming/state model
 AI-only old Planner/Routine/Notification DTO
 ```
 
-否则：
+当前处理为：
 
 ```text
 reuse correct capability
-retire obsolete model
+retire obsolete model and anti-resurrection surface
 ```
-
-而不是为 obsolete model 继续补测试、补 UI、补 API。
 
 ## 14. Thin adapter rule
 

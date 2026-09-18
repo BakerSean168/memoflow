@@ -11,16 +11,20 @@ tags:
   - vnext
 description: ADR-099 - AI Workflow Draft/Apply、stable draftRef、ExecutionRecord 与 legacy AI persistence retirement
 created: 2026-09-09T00:00:00+08:00
-updated: 2026-09-09T00:00:00+08:00
+updated: 2026-09-18T00:00:00+00:00
 ---
 
 # ADR-099: AI Workflow Draft、Apply 与 Execution Record Boundary
 
-**状态：** 已采纳（待实施）
+**状态：** 已实施并验收（AI-9612 exact-head closure）
 **日期：** 2026-09-09
 **影响范围：** Goal/Task/Knowledge AI Workflows、Routine tools、AI execution log、Prisma/PowerSync、Data Portability、Eval/Operations、Vue workflow editors
 **依赖：** ADR-050～052、ADR-067～079、ADR-089～091、ADR-096～098
 **修订：** ADR-070 的 GoalPlanDraft V2 继续作为 Goal draft 真值；本 ADR 将同一原则推广到 Task/Knowledge/owner-domain alignment 与 AI operations persistence
+
+**实现证据：** stable draftRef/apply idempotency、HITL interrupt/resume、partial retry、owner
+mutation ports、bounded AIExecutionRecord 与 legacy persistence cutover 已由 AI-9612 closure
+review 汇总并通过 exact-head gates。
 
 ## 1. 决策摘要
 

@@ -6,12 +6,12 @@ tags:
   - mastra
 description: MemoFlow AI vNext 当前运行路径地图——Mastra 是唯一 Assistant/Workflow runtime
 created: 2026-07-26T00:00:00
-updated: 2026-08-22T12:50:00+08:00
+updated: 2026-09-18T00:00:00+00:00
 ---
 
 # AI 运行路径地图
 
-> ADR-050 / ADR-051 / ADR-052 已完成目标态切换。**TypeScript + Mastra 是唯一核心 AI execution runtime。**
+> ADR-050 / ADR-051 / ADR-052 与 AI-9612 已完成目标态切换。**TypeScript + Mastra 是唯一核心 AI execution runtime。**
 > Python `apps/ai-service`、Agent Host、LangGraph bridge、TurnEngine、ProposalKernel、AgentRun checkpoint 双轨均已退役。
 
 ## 当前权威路径
@@ -20,7 +20,7 @@ updated: 2026-08-22T12:50:00+08:00
 | -------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------- | ------------------------------------------ |
 | Open chat                        | `AssistantRuntimeClient` → `/ai/runtime/assistant/*` / `ai:runtime:assistant:*` | `MastraAIRuntime` + Mastra thread/memory             | Conversation shell + provider config       |
 | Goal / Task / Knowledge workflow | `WorkflowRuntimeClient` → `/ai/runtime/workflow/*` / `ai:runtime:workflow:*`    | `MastraAIRuntime` + durable Mastra workflow snapshot | Goal / Task / Repository application ports |
-| Usage / cost                     | `RuntimeUsageClient` → `/ai/runtime/usage` / `ai:runtime:usage:get`             | indexed `ai_generation_tasks` execution log          | Host-injected identity boundary            |
+| Usage / cost                     | `RuntimeUsageClient` → `/ai/runtime/usage` / `ai:runtime:usage:get`             | indexed `ai_execution_records` bounded projection    | Host-injected identity boundary            |
 | Eval / release gate              | `ai:eval:replay` + canonical report adapter                                     | TypeScript eval runner                               | `reports/apps/ai/evals`                    |
 
 ## 1. Open chat
@@ -36,10 +36,10 @@ AIChatView / useAIChatSession
     → Desktop: AssistantRuntimeIpcClient
       → MastraAIRuntime.dispatchMessage()
         → Mastra Assistant
-        → provider/model resolved from encrypted ProviderConfig
+        → provider/model resolved from ProviderDefinition + Connection + SecretVault + capability evidence
         → canonical assistant.* events
         → Mastra thread/memory persistence
-        → execution log (request/trace/provider/model/token/cost)
+        → AIExecutionRecord (request/trace/provider/model/token/cost)
 ```
 
 ### Contract rules
@@ -50,7 +50,7 @@ AIChatView / useAIChatSession
 - UI 只消费 canonical `assistant.*` event，不消费 provider/Mastra 私有 event。
 - cancel 使用 runtime 生成的 `runId` 并进行 owner check。
 - stream 中可显示即时 usage；terminal/history restore 后通过 `RuntimeUsageClient` 读取 durable conversation 累计 usage。
-- history authority 是 Mastra thread。旧 `AiMessage` 只在一次性 transcript bootstrap 时只读；新消息不双写。
+- history authority 是 Mastra thread；Conversation shell 只保存产品 metadata。生产路径没有 `AiMessage`/`ai_messages` transcript fallback 或双写。
 - 禁止默认聊天回退 `AIClientService.dispatchAssistant` / `AssistantFacade`；不存在 legacy open-chat fallback。
 
 ## 2. Durable workflows
@@ -82,7 +82,7 @@ Assistant turn 与 Goal/Task/Knowledge planner 调用都写入统一 execution l
 - usage：prompt/completion/total token；
 - cost：静态 pricing catalog 的 `estimated_cost_usd`；
 - input 只记录安全元数据（例如 `contentLength` / planner `mode`），不记录 raw prompt；
-- failure/cancel 使用稳定公开分类，不持久化 raw provider exception。
+- failure/cancel 使用稳定公开分类，不持久化 raw provider exception；HTTP/SSE/IPC 使用同一 redacted mapping。
 
 `IAIUsageReadPort` 必须把 authenticated identity 放进数据库查询条件，再按 conversation/run 聚合；禁止从 JSON payload 全表扫描后在内存做 owner filtering。
 

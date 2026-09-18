@@ -71,6 +71,7 @@ import {
 import { AssistantHistoryService } from './assistant-history.service';
 import type { AssistantConversationShellSource } from './assistant-conversation-shell.port';
 import type { AIWorkflowRuntimePort } from './workflow-runtime.port';
+import { toAIPublicFailure } from '../../../shared/ai-public-failure';
 
 function messageText(
   event: Extract<AgentControllerEvent, { type: 'message_update' | 'message_end' }>,
@@ -85,23 +86,12 @@ function messageText(
     .join('');
 }
 
-function normalizeRuntimeErrorCode(value: unknown): string {
-  const normalized = String(value ?? 'MASTRA_RUNTIME_ERROR')
-    .trim()
-    .toUpperCase()
-    .replace(/[^A-Z0-9_]+/g, '_')
-    .replace(/^_+|_+$/g, '');
-  return normalized || 'MASTRA_RUNTIME_ERROR';
-}
-
-function publicRuntimeError(errorType?: unknown): { code: string; message: string } {
-  return {
-    code: normalizeRuntimeErrorCode(errorType),
-    // Do not serialize provider/model/tool raw errors. They may contain request
-    // URLs, headers, response bodies, or credentials. Detailed errors belong in
-    // server-side observability only.
-    message: 'AI runtime request failed',
-  };
+function publicRuntimeError(error?: unknown): { code: string; message: string } {
+  const failure = toAIPublicFailure(error, {
+    fallbackCode: 'AI_RUNTIME_TRANSPORT_ERROR',
+    fallbackMessage: 'AI runtime request failed',
+  });
+  return { code: failure.code, message: failure.message };
 }
 
 export interface MastraAIRuntimeDependencies {
@@ -1059,7 +1049,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         return;
       }
       if (event.type === 'error') {
-        lastRuntimeError = publicRuntimeError(event.errorType);
+        lastRuntimeError = publicRuntimeError(event.error);
         return;
       }
       if (event.type === 'agent_end') {
@@ -1071,8 +1061,8 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
 
     const abort = () => session.abortRun();
     input.signal?.addEventListener('abort', abort, { once: true });
-    void session.sendMessage({ content: input.content, requestContext }).catch(() => {
-      lastRuntimeError = publicRuntimeError();
+    void session.sendMessage({ content: input.content, requestContext }).catch((error) => {
+      lastRuntimeError = publicRuntimeError(error);
       settle('assistant.run.failed');
     });
 

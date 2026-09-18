@@ -22,6 +22,11 @@ The phase ends only when `HOME-1805`, `AI-9612`, and `PORT-1610B` are accepted o
 
 This document is the execution-level bridge between the system-wide plan, the AI vNext plan, and the task graph. If they differ, the task graph determines dependency order; this document determines the Phase-5 execution/review protocol.
 
+**AI-9612 closure truth (2026-09-18):** AI vNext five-layer review is accepted on the exact
+closure head with zero unresolved P0/P1/P2 findings. Its findings, narrow repairs, and gate
+results are recorded in [`AI-9612 closure evidence`](../../analysis/2026-09-18-ai-9612-vnext-closure-evidence.md).
+This does not start or modify `PORT-1611`; Phase 6 remains a separate downstream ticket.
+
 ---
 
 ## 2. Current verified checkpoint
