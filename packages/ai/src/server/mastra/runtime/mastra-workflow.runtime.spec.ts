@@ -12,6 +12,7 @@ import { ok } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createTimeContext } from '@memoflow/time';
+import { AIContextAssembler } from '../context';
 import { MastraModelResolver } from '../models';
 import type { GoalPlanMutationPort } from '../workflows';
 import { MastraAIRuntime } from './mastra-ai.runtime';
@@ -145,7 +146,7 @@ async function createRuntime(file = join(tmpdir(), `memoflow-mastra-runtime-${ra
     },
     knowledgeCaptureMutationPort: { createConfirmedKnowledgeNote },
     usageReadPort: { summarizeUsage },
-    userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
+    contextAssembler: new AIContextAssembler(TEST_USER_TIME_CONTEXT_PORT),
   });
   vi.spyOn(runtime.goalPlanner, 'plan').mockResolvedValue({
     status: 'draft_ready',
@@ -182,10 +183,7 @@ describe('MastraAIRuntime goal.create product projection', () => {
     });
 
     const plannerContext = vi.mocked(runtime.goalPlanner.plan).mock.calls[0]?.[1];
-    expect(plannerContext?.getRaw('timeContext')).toEqual({
-      timeZone: 'Asia/Tokyo',
-      weekStartsOn: 1,
-    });
+    expect(plannerContext?.getRaw('timeContext')).toBeUndefined();
 
     expect(started).toMatchObject({
       kind: 'goal.create',

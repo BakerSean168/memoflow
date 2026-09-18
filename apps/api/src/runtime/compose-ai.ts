@@ -19,6 +19,7 @@
 import type { PrismaClient } from '@memoflow/database';
 import {
   AIEvaluationReportFileAdapter,
+  AIContextAssembler,
   createAIModule,
   createAIPrismaRepositories,
   createMastraStorage,
@@ -87,6 +88,7 @@ export interface ComposeAIDependencies {
  */
 export function composeAI(dependencies: ComposeAIDependencies): AIApiModuleDef {
   const repositorySet = createAIPrismaRepositories(dependencies.db);
+  const contextAssembler = new AIContextAssembler(dependencies.userTimeContextPort);
   const knowledgeSourcePort = new RepositoryKnowledgeSourceAdapter(
     dependencies.db,
     dependencies.repositoryStorageBaseDir,
@@ -127,7 +129,7 @@ export function composeAI(dependencies: ComposeAIDependencies): AIApiModuleDef {
       dependencies.taskApplicationPort,
     ),
     notificationReadPort: new NotificationAIReadAdapter(dependencies.notificationRepository),
-    userTimeContextPort: dependencies.userTimeContextPort,
+    contextAssembler,
   });
   const knowledgeIndexStatusPort = new RepositoryKnowledgeIndexStatusAdapter(
     dependencies.repositoryApiPort,

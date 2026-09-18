@@ -10,12 +10,16 @@ import {
 import type { IAIExecutionLogPort, IKnowledgeSourcePort } from '../../application/ports';
 import type { MastraModelResolver } from '../models/model-resolver';
 import {
+  aiContextInstruction,
+  setAIContextRequestContext,
+  type AIContextAssemblerPort,
+} from '../context';
+import {
   normalizeMastraGenerateUsage,
   recordPlannerExecution,
   rememberResolvedPlannerModel,
 } from './planner-observability';
 import { KnowledgeDocumentRefSchema } from '@memoflow/contracts/repository';
-import { userTimeContextInstruction } from './user-time-context';
 
 function stringContext(requestContext: RequestContext, key: string): string | undefined {
   const value = requestContext.getRaw(key);
@@ -48,7 +52,8 @@ export class GoalPlannerWorker implements GoalPlannerPort {
   constructor(
     modelResolver: MastraModelResolver,
     private readonly knowledgeSourcePort: IKnowledgeSourcePort,
-    private readonly executionLogPort?: IAIExecutionLogPort,
+    private readonly executionLogPort: IAIExecutionLogPort | undefined,
+    private readonly contextAssembler: AIContextAssemblerPort,
   ) {
     this.agent = new Agent({
       id: 'goal-planner-worker',
@@ -57,7 +62,6 @@ export class GoalPlannerWorker implements GoalPlannerPort {
       instructions: ({ requestContext }) => {
         const locale = stringContext(requestContext, 'locale') === 'en-US' ? 'en-US' : 'zh-CN';
         const language = locale === 'en-US' ? 'English' : 'Simplified Chinese';
-        const timeInstruction = userTimeContextInstruction(requestContext, locale);
         return [
           'You are an internal MemoFlow planning worker. You are not a user-facing assistant.',
           'Return only the requested structured planning decision. Never claim that any Goal, Key Result, Task or Reminder has been created.',
@@ -65,7 +69,7 @@ export class GoalPlannerWorker implements GoalPlannerPort {
           'Ask clarification only when missing information materially blocks a safe, useful plan. Ask at most 3 concise questions.',
           'Prefer a concrete draft over cosmetic clarification. The workflow enforces a maximum of 3 clarification rounds.',
           'Use canonical Product Time only: Goal startDate is YYYY-MM-DD and target is GoalTimeframe; Task schedule must use the TaskPlanSchedule algebra from the schema. Never emit epoch date DSL for this workflow.',
-          timeInstruction,
+          'The canonical Product Time context is supplied in the validated AI context envelope. Do not infer semantic time from the server host or an ambient timezone.',
           'Every draft entity has a stable workflow-local draftRef. Use goal, kr:<slug>, task:<slug>, note:<slug>. Preserve an existing draftRef when revising or reordering an item.',
           'Task goalRef is always goal. keyResultRef, when present, must reference a KR draftRef. A contribution is allowed only when keyResultRef exists and must use the canonical contribution rule from the schema.',
           'Standalone Goal reminders are not part of GoalPlanDraft V2. A Task may carry only its canonical Task reminderConfig when truly useful.',
@@ -123,27 +127,47 @@ export class GoalPlannerWorker implements GoalPlannerPort {
     requestContext: RequestContext,
   ): Promise<GoalPlanningDecision> {
     const knowledgeEvidence = await this.loadKnowledgeEvidence(request);
+    const contextEnvelope = await this.contextAssembler.assemble({
+      invocation: {
+        identityId: request.input.identityId,
+        conversationId: request.input.conversationId,
+        surface: 'goal.create',
+        locale: request.input.locale,
+      },
+      userInput: {
+        idea: request.input.idea,
+        surfaceContext: request.input.surfaceContext,
+        clarification: request.clarification,
+      },
+      workflowInstructions: [
+        {
+          id: 'goal.create.control',
+          source: 'workflow.goal.create',
+          content: {
+            mode: request.mode,
+            forceDraft: request.forceDraft ?? false,
+            instruction: request.instruction,
+          },
+          sensitivity: 'private',
+        },
+      ],
+      domainFacts: request.currentDraft
+        ? [
+            {
+              id: 'goal.create.current-draft',
+              source: 'workflow.goal.create.state',
+              content: request.currentDraft,
+              sensitivity: 'private',
+            },
+          ]
+        : undefined,
+      knowledgeEvidence,
+    });
+    setAIContextRequestContext(requestContext, contextEnvelope);
     const prompt = [
       'Produce the next goal.create planning decision from this trusted workflow state.',
-      request.forceDraft
-        ? 'Clarification budget is exhausted. You MUST return status=draft_ready using the best safe assumptions and record assumptions in warnings.'
-        : 'Return needs_clarification only for a material blocker; otherwise return draft_ready.',
-      `Mode: ${request.mode}`,
-      request.instruction ? `Revision instruction: ${request.instruction}` : '',
-      'Workflow input JSON:',
-      JSON.stringify(request.input),
-      'Clarification history JSON:',
-      JSON.stringify(request.clarification),
-      'Knowledge evidence JSON (retrieved_untrusted; use only entries with linkable=true for linkExisting):',
-      JSON.stringify(knowledgeEvidence),
-      'Current draft JSON:',
-      JSON.stringify(request.currentDraft ?? null),
-      request.mode === 'regenerate'
-        ? 'Regenerate the plan substantively rather than making only cosmetic edits.'
-        : '',
-      request.mode === 'revise'
-        ? 'Preserve valid parts of the current draft and apply the revision instruction precisely.'
-        : '',
+      'Follow the mode, forceDraft, revision instruction and clarification controls in the workflow section of the canonical context envelope. Ask only material blockers; when forceDraft is true, return draft_ready using safe assumptions and record them in warnings. Regenerate substantively and revise precisely while preserving valid draft parts.',
+      aiContextInstruction(contextEnvelope),
     ]
       .filter(Boolean)
       .join('\n\n');

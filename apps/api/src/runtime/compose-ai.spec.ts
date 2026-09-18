@@ -92,6 +92,7 @@ vi.mock('../modules/ai/notification-read.adapter', () => ({
 
 import {
   AIEvaluationReportFileAdapter,
+  AIContextAssembler,
   createAIModule,
   createAIPrismaRepositories,
   createMastraStorage,
@@ -210,7 +211,7 @@ describe('API composeAI Mastra-only ownership', () => {
       routineCommandPort: vi.mocked(RoutineAICommandAdapter).mock.results[0].value,
       plannerReadPort: vi.mocked(PlannerAIReadAdapter).mock.results[0].value,
       notificationReadPort: vi.mocked(NotificationAIReadAdapter).mock.results[0].value,
-      userTimeContextPort,
+      contextAssembler: expect.any(AIContextAssembler),
     });
   });
 
