@@ -43,6 +43,7 @@ export const LabelChannels = {
 
 export const GoalChannels = {
   LIST: 'goal:list',
+  HOME_SUMMARY: 'goal:home-summary',
   GET: 'goal:get',
   CREATE: 'goal:create',
   UPDATE: 'goal:update',

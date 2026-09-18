@@ -15,6 +15,7 @@ export {
   CreateGoalUseCase,
   GetGoalUseCase,
   ListGoalsUseCase,
+  GetGoalHomeSummaryUseCase,
   UpdateGoalUseCase,
   DeleteGoalUseCase,
   ArchiveGoalUseCase,

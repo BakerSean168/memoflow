@@ -1,11 +1,11 @@
 <script setup lang="ts">
 /**
  * GoalCapsulePreview — 目标胶囊摘要（§10）
- * 懒加载 useDashboard.goalProgress；短缓存由模块级 timestamp 承担。
+ * 懒加载 Goal-owned Home summary；短缓存只属于展示层。
  */
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useDashboard } from '../../../modules/dashboard/composables/useDashboard';
+import { useGoalHomeSummary } from '../../../modules/goal/composables/useGoalHomeSummary';
 
 const RECENT_LIMIT = 3;
 const CACHE_MS = 45_000;
@@ -16,18 +16,17 @@ defineEmits<{
 }>();
 
 const { t } = useI18n();
-const { goalProgress, stats, isLoading, error, fetchDashboard } = useDashboard();
+const { goals: goalProgress, activeCount, isLoading, error, refresh } = useGoalHomeSummary();
 
 const loadedAt = ref(0);
 const localError = ref<string | null>(null);
 
 const items = computed(() => goalProgress.value.slice(0, RECENT_LIMIT));
-const activeCount = computed(() => stats.value.activeGoals ?? items.value.length);
 
 async function load(force = false) {
   if (!force && loadedAt.value && Date.now() - loadedAt.value < CACHE_MS) return;
   localError.value = null;
-  await fetchDashboard();
+  await refresh();
   if (error.value) localError.value = error.value;
   loadedAt.value = Date.now();
 }

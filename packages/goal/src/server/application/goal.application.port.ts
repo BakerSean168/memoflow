@@ -2,6 +2,7 @@ import type {
   CloneGoalReq,
   CreateGoalReq,
   GetGoalAggregateRes,
+  GoalHomeProgressSummary,
   GetGoalRes,
   GoalMutationReceipt,
   GoalReviewSystemContext,
@@ -24,6 +25,7 @@ export interface GoalApplicationPort {
   createGoal(input: CreateGoalReq, cx: ExecutionContext): Promise<Result<GoalMutationReceipt>>;
   getGoal(id: string, identityId: string, includeChildren?: boolean): Promise<Result<GetGoalRes>>;
   listGoals(input: ListGoalsQuery): Promise<Result<QueryGoalsRes>>;
+  getHomeSummary(identityId: string): Promise<Result<GoalHomeProgressSummary>>;
   updateGoal(id: string, identityId: string, input: UpdateGoalReq): Promise<Result<UpdateGoalRes>>;
   deleteGoal(
     id: string,

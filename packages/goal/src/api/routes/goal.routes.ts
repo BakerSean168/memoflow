@@ -19,6 +19,7 @@ import {
   GoalClientDTOSchema,
   GoalMutationReceiptSchema,
   QueryGoalsResSchema,
+  GoalHomeProgressSummarySchema,
   GetGoalAggregateResSchema,
   UpdateGoalInvocationSchema,
   DeleteGoalInvocationSchema,
@@ -141,6 +142,20 @@ export function registerGoalCrudRoutes(
     [auth],
     (req, ctx) =>
       controller.list(normalizeGoalListQuery(req.query as Record<string, unknown>), ctx),
+  );
+
+  // GET /home-summary — Goal-owned bounded progress summary for Home
+  r.route(
+    {
+      method: 'get',
+      path: '/home-summary',
+      summary: '获取首页目标进度摘要',
+      responses: {
+        200: successResponse(GoalHomeProgressSummarySchema, '获取成功'),
+      },
+    },
+    [auth],
+    (_req, ctx) => controller.homeSummary(ctx),
   );
 
   // GET /search — 搜索目标

@@ -26,6 +26,7 @@ import type {
   DeleteGoalReviewReq,
   DeleteKeyResultReq,
   GoalSystemView,
+  GoalHomeProgressSummary,
   GetGoalAggregateRes,
   ListGoalsQuery,
   UpdateGoalReq,
@@ -40,6 +41,7 @@ import type {
   CreateGoalUseCase,
   GetGoalUseCase,
   ListGoalsUseCase,
+  GetGoalHomeSummaryUseCase,
   UpdateGoalUseCase,
   DeleteGoalUseCase,
   ArchiveGoalUseCase,
@@ -72,6 +74,7 @@ export interface GoalUseCases {
   createGoal: CreateGoalUseCase['execute'];
   getGoal: GetGoalUseCase['execute'];
   listGoals: ListGoalsUseCase['execute'];
+  getHomeSummary: GetGoalHomeSummaryUseCase['execute'];
   updateGoal: UpdateGoalUseCase['execute'];
   deleteGoal: DeleteGoalUseCase['execute'];
   archiveGoal: ArchiveGoalUseCase['execute'];
@@ -128,6 +131,10 @@ export class GoalController {
       identityId: cx.identityId as IdentityId,
     };
     return this.useCases.listGoals(query);
+  }
+
+  async homeSummary(cx: ExecutionContext): Promise<Result<GoalHomeProgressSummary>> {
+    return this.useCases.getHomeSummary(cx.identityId);
   }
 
   async search(query: string, cx: ExecutionContext, systemView?: string): Promise<Result<unknown>> {

@@ -190,6 +190,24 @@ export const QueryGoalsResSchema = z.object({
 
 export type QueryGoalsRes = z.infer<typeof QueryGoalsResSchema>;
 
+/** Goal-owned, bounded read model for the Home surface. */
+export const GoalHomeProgressItemSchema = z.object({
+  id: brandedId<GoalId>(),
+  name: z.string(),
+  progress: z.number().int().min(0).max(100),
+  status: z.enum(GoalStatus),
+  target: GoalTimeframeSchema.nullable(),
+  keyResultCount: z.number().int().min(0),
+});
+export type GoalHomeProgressItem = z.infer<typeof GoalHomeProgressItemSchema>;
+
+/** Home gets only Goal-owned progress truth, never a Dashboard aggregate. */
+export const GoalHomeProgressSummarySchema = z.object({
+  activeCount: z.number().int().min(0),
+  goals: z.array(GoalHomeProgressItemSchema).max(5),
+});
+export type GoalHomeProgressSummary = z.infer<typeof GoalHomeProgressSummarySchema>;
+
 /**
  * 目标聚合视图响应 Schema
  */

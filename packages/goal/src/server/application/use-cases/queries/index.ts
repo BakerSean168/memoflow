@@ -6,3 +6,4 @@ export * from './list-goals.use-case';
 export * from './search-goals.use-case';
 export * from './get-goal-aggregate.use-case';
 export * from './get-goal-review-context.use-case';
+export * from './get-goal-home-summary.use-case';

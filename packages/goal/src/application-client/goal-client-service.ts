@@ -32,6 +32,7 @@ import type {
   KeyResultClientDTO,
   GoalRecordClientDTO,
   QueryGoalsRes,
+  GoalHomeProgressSummary,
   GetKeyResultsRes,
   GetGoalRecordsRes,
   GetGoalReviewsRes,
@@ -133,6 +134,7 @@ function goalRecordFromDTO(dto: GoalRecordClientDTO): GoalRecord {
 export interface GoalClientPort {
   createGoal(request: CreateGoalReq): Promise<Result<GoalMutationReceipt>>;
   getGoal(id: string): Promise<Result<Goal>>;
+  getHomeSummary(): Promise<Result<GoalHomeProgressSummary>>;
   listGoals(params?: {
     page?: number;
     pageSize?: number;
@@ -242,6 +244,7 @@ export class GoalClientService implements GoalClientPort {
   constructor(private readonly goalApi: IGoalApiClient) {
     this.createGoal = this.createGoal.bind(this);
     this.getGoal = this.getGoal.bind(this);
+    this.getHomeSummary = this.getHomeSummary.bind(this);
     this.listGoals = this.listGoals.bind(this);
     this.updateGoal = this.updateGoal.bind(this);
     this.deleteGoal = this.deleteGoal.bind(this);
@@ -281,6 +284,10 @@ export class GoalClientService implements GoalClientPort {
   async getGoal(id: string): Promise<Result<Goal>> {
     const result = await this.goalApi.getGoalById(id);
     return mapResult(result, (dto) => goalFromDTO(dto));
+  }
+
+  async getHomeSummary(): Promise<Result<GoalHomeProgressSummary>> {
+    return this.goalApi.getHomeSummary();
   }
 
   async listGoals(params?: {

@@ -21,6 +21,7 @@ import {
   CreateGoalUseCase,
   GetGoalUseCase,
   ListGoalsUseCase,
+  GetGoalHomeSummaryUseCase,
   UpdateGoalUseCase,
   DeleteGoalUseCase,
   ArchiveGoalUseCase,
@@ -137,6 +138,7 @@ export interface GoalModuleUseCases {
   readonly createGoal: CreateGoalUseCase;
   readonly getGoal: GetGoalUseCase;
   readonly listGoals: ListGoalsUseCase;
+  readonly getHomeSummary: GetGoalHomeSummaryUseCase;
   readonly updateGoal: UpdateGoalUseCase;
   readonly deleteGoal: DeleteGoalUseCase;
   readonly permanentlyDeleteGoal: PermanentlyDeleteGoalUseCase;
@@ -264,6 +266,7 @@ export function createGoalUseCases(deps: GoalModuleDependencies): GoalModuleUseC
     ),
     getGoal: new GetGoalUseCase(goalRepository),
     listGoals: new ListGoalsUseCase(goalRepository),
+    getHomeSummary: new GetGoalHomeSummaryUseCase(goalRepository),
     updateGoal: new UpdateGoalUseCase(goalRepository, goalPolicy, goalWriteTransactionRunner),
     deleteGoal: new DeleteGoalUseCase(
       goalRepository,
@@ -404,6 +407,7 @@ export function createGoalModule(deps: GoalModuleDependencies): GoalModuleInstan
     getGoal: (id, identityId, includeChildren) =>
       useCases.getGoal.execute(id, identityId, includeChildren),
     listGoals: (input) => useCases.listGoals.execute(input),
+    getHomeSummary: (identityId) => useCases.getHomeSummary.execute(identityId),
     updateGoal: (id, identityId, input) => useCases.updateGoal.execute(id, identityId, input),
     deleteGoal: (id, identityId, expectedVersion) =>
       useCases.deleteGoal.execute(id, identityId, expectedVersion),
