@@ -1,25 +1,25 @@
 {
   "version": 1,
-  "generated": "2026-09-11",
+  "generated": "2026-09-18",
   "baseline": {
     "dual_surface": 237,
     "keep_boundary": 66,
     "note": "elegance plan E0 baseline"
   },
   "post_e3b": {
-    "dual_surface_files": 71,
-    "drop_from_baseline": 166,
-    "drop_pct": 70,
-    "registry_suites": 121
+    "dual_surface_files": 68,
+    "drop_from_baseline": 169,
+    "drop_pct": 71.3,
+    "registry_suites": 117
   },
   "counts": {
-    "total": 120,
+    "total": 117,
     "by_class": {
-      "keep_boundary": 49,
-      "retired": 71
+      "keep_boundary": 48,
+      "retired": 69
     },
-    "dual_surface_files": 71,
-    "keep_boundary_files": 49
+    "dual_surface_files": 68,
+    "keep_boundary_files": 48
   },
   "entries": [
     {

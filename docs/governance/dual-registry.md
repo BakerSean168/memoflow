@@ -4,7 +4,7 @@ tags:
   - dual-registry
 description: Dual Registry — retired locks vs keep-boundary vs open dual debt
 created: 2026-07-26T00:00:00
-updated: 2026-09-11T11:05:00+08:00
+updated: 2026-09-18T17:21:00+08:00
 ---
 
 # Dual Registry
@@ -29,7 +29,7 @@ updated: 2026-09-11T11:05:00+08:00
 
 | class | count |
 |-------|------:|
-| `keep_boundary` | 49 |
+| `keep_boundary` | 48 |
 | `retired` | 69 |
 
 ## 分类规则（摘要）
