@@ -1318,8 +1318,11 @@ async function installGoalWorkflowMocks(
       answer: 'Grounded answers cite repository excerpts and show where each claim came from.',
       citations: [
         {
-          resourceId: 'resource-grounding-1',
-          resourcePath: 'notes/ai/grounding-policy.md',
+          documentRef: {
+            knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440091',
+            documentId: 'kdoc_550e8400-e29b-41d4-a716-446655440090',
+          },
+          sourcePath: 'notes/ai/grounding-policy.md',
           title: 'MemoFlow grounding policy',
           chunkIndex: 0,
           excerpt: 'Knowledge answers must cite repository evidence before sounding certain.',
