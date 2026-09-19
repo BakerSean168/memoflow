@@ -2,7 +2,7 @@
 tags: [plan, active, vnext, system-wide, convergence]
 description: MemoFlow 全模块模型收敛唯一执行顺序、destructive cutover、验证与最终删除计划
 created: 2026-09-09T00:31:00+08:00
-updated: 2026-09-18T00:13:00+08:00
+updated: 2026-09-19T00:00:00+00:00
 ---
 
 # MemoFlow System-wide vNext Model Convergence — Implementation Plan
@@ -662,7 +662,7 @@ The Stage A ledger proves every surviving portable product fact has an owner cap
 
 ## CLEAN-2601 — Whole-schema legacy sweep
 
-**状态：IMPLEMENTED — 2026-09-19; final-head evidence captured; pending independent acceptance**
+**状态：ACCEPTED — 2026-09-19; final-head evidence captured**
 
 Delete only after capability cutovers:
 
@@ -678,7 +678,7 @@ Prisma + PowerSync parity is mandatory in the same batch.
 
 Implementation evidence: `docs/analysis/2026-09-19-clean-2601-whole-schema-sweep-evidence.md`.
 The exact-head gates are green, Governance remains permanent reference-feature
-state, and SYS-3001+ has not started.
+state, and SYS-3001 is accepted at the canonical convergence head.
 
 ---
 
@@ -687,6 +687,8 @@ state, and SYS-3001+ has not started.
 ## SYS-3001 — Cross-domain model review
 
 Re-run the ownership matrix against actual code. Search for all retired vocabulary and forbidden imports. Every exception requires owner + reason + retire-by.
+
+**状态：ACCEPTED — 2026-09-19;** ownership review evidence is recorded in [`2026-09-19-sys-3001-cross-domain-ownership-review.md`](../../analysis/2026-09-19-sys-3001-cross-domain-ownership-review.md). No unresolved P0/P1/P2 ownership finding remains; the documented residual is P3 only.
 
 ## SYS-3002 — Five-layer batch review
 
@@ -697,6 +699,8 @@ Re-run the ownership matrix against actual code. Search for all retired vocabula
 5. plan/document truth.
 
 Repair all P0/P1/P2 before delivery.
+
+**状态：IMPLEMENTATION COMPLETE — 2026-09-19;** review evidence is recorded in [`2026-09-19-sys-3002-five-layer-review.md`](../../analysis/2026-09-19-sys-3002-five-layer-review.md). Verified P1/P2 findings were repaired with regression evidence; no unresolved P0/P1/P2 remains. SYS-3003 and SYS-3004 are intentionally not started by this worker.
 
 ## SYS-3003 — Full validation
 
@@ -744,14 +748,8 @@ Plus affected integration/E2E, PowerSync parity, fresh Prisma bootstrap/reset ch
 - Prisma and PowerSync canonical parity must land in the same coherent batch;
 - if a vertical journey fails after cutover, revert the coherent batch and recreate persistence from the prior source revision; never revive a second permanent truth.
 
-## 7. Immediate next tickets
+## 7. Current closure state
 
-Phases 0-4 are now owner-converged. Time/Label, Account/Setting, Knowledge/Editor retirement, Governance, Goal/Task, Routine, Planner/Scheduler and Notification have all crossed their destructive cutover gates. The current dependency-ready frontier is Phase 5 plus the Phase 4-owner V3 portability completion:
-
-1. `HOME-1801` -> `HOME-1802` — add the narrow Goal-owned Home progress summary, then remove Home/Goal-capsule `useDashboard()` consumption.
-2. `AI-9602`, `AI-9604`, `AI-9606` — in independent AI boundaries, characterize Mastra conversation authority, establish ProviderDefinition/Connection/SecretVault, and establish AIContextAssembler with Product Time/trust/token budget.
-3. `PORT-1610B` — register complete owner-driven V3 capabilities for surviving Routine, Planner/Schedule and Notification facts.
-4. After `AI-9606`, continue `AI-9607/9608/9609`; `HOME-1803` joins the explicit owner-read AI analytics cutover. Then resolve ActivityLedger (`HOME-1804`) and hard-delete Dashboard (`HOME-1805`).
-5. `PORT-1611` starts only after PORT-1610B + HOME-1805 + AI-9612 prove every surviving owner is V3-covered; `CLEAN-2601` and SYS-3001..3004 remain the final destructive sweep and whole-system closure.
+The earlier ticket list in this section has been superseded by the accepted canonical head. CLEAN-2601 and SYS-3001 are accepted; SYS-3002 is implementation-complete with its five-layer evidence and minimum scoped gates recorded in the linked analysis document. SYS-3003 (full validation) and SYS-3004 (documentation/archive closure) remain explicitly pending and were not started by this worker.
 
 `SETTING-9209`'s former V2 `settings` singleton was replaced at the product boundary by the owner-driven `preferences@3` capability. No `user_settings` compatibility adapter or V2 transport remains.

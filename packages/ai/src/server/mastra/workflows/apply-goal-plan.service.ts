@@ -13,6 +13,7 @@ import type { ResultError } from '@memoflow/contracts/result';
 import type { CreateTaskPlanReq } from '@memoflow/contracts/task';
 import { goalWorkflowEntityId, goalWorkflowMutationRequestId } from './deterministic-entity-id';
 import type { ApplyGoalPlanInput, GoalPlanMutationPort } from './goal-plan-mutation.port';
+import { toWorkflowFailure } from './workflow-failure';
 
 const RETRYABLE_LEGACY_CODES = new Set([
   'DATABASE_ERROR',
@@ -36,11 +37,12 @@ function failure(
   draftRef: GoalPlanDraftRef,
   error: Pick<ResultError, 'code' | 'message' | 'failure'>,
 ): GoalPlanExecutionFailure {
+  const safeFailure = toWorkflowFailure(error);
   return {
     operation,
     draftRef,
-    code: String(error.code),
-    message: error.message,
+    code: safeFailure.code,
+    message: safeFailure.message,
     retryable: retryableFailure(error as ResultError),
   };
 }
@@ -50,15 +52,14 @@ function throwToFailure(
   draftRef: GoalPlanDraftRef,
   cause: unknown,
 ): GoalPlanExecutionFailure {
-  return failure(operation, draftRef, {
-    code: 'INTERNAL_ERROR',
-    message: cause instanceof Error ? cause.message : String(cause),
-    failure: {
-      code: 'INTERNAL_ERROR',
-      category: 'unavailable',
-      retryHint: { kind: 'transient' },
-    },
-  });
+  const safeFailure = toWorkflowFailure(cause);
+  return {
+    operation,
+    draftRef,
+    code: safeFailure.code,
+    message: safeFailure.message,
+    retryable: true,
+  };
 }
 
 function mismatchFailure(

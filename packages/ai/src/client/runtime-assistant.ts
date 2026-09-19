@@ -1,4 +1,5 @@
 import {
+  AssistantRuntimeCancelResultSchema,
   AssistantRuntimeClientCommandSchema,
   AssistantRuntimeConversationDeleteResultSchema,
   AssistantRuntimeEventSchema,
@@ -179,8 +180,12 @@ export class AssistantRuntimeHttpClient implements AssistantRuntimeClient {
 
   async cancelRun(runId: string): Promise<boolean> {
     const command = AssistantRuntimeClientCommandSchema.parse({ type: 'cancel_run', runId });
-    const result = await this.httpClient.post<{ cancelled: boolean }>(this.cancelUrl, command);
-    return unwrapOrThrowError(result).cancelled;
+    const result = await this.httpClient.post<unknown>(this.cancelUrl, command);
+    const parsed = AssistantRuntimeCancelResultSchema.safeParse(unwrapOrThrowError(result));
+    if (!parsed.success) {
+      throw runtimeProtocolError('AI runtime cancel failed protocol validation');
+    }
+    return parsed.data.cancelled;
   }
 }
 
@@ -309,11 +314,15 @@ export class AssistantRuntimeIpcClient implements AssistantRuntimeClient {
 
   async cancelRun(runId: string): Promise<boolean> {
     const command = AssistantRuntimeClientCommandSchema.parse({ type: 'cancel_run', runId });
-    const result = await this.ipcClient.invoke<{ cancelled: boolean }>(
+    const result = await this.ipcClient.invoke<unknown>(
       AIChannels.RUNTIME_ASSISTANT_CANCEL,
       command,
     );
-    return unwrapOrThrowError(result).cancelled;
+    const parsed = AssistantRuntimeCancelResultSchema.safeParse(unwrapOrThrowError(result));
+    if (!parsed.success) {
+      throw runtimeProtocolError('AI runtime cancel failed protocol validation');
+    }
+    return parsed.data.cancelled;
   }
 }
 

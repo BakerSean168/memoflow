@@ -24,6 +24,7 @@ import type { QueryAnalyticsReq, QueryAnalyticsRes } from '../api/ai-analytics-q
 import type { QueryKnowledgeReq, QueryKnowledgeRes } from '../api/ai-knowledge-query.dto';
 import type {
   AssistantRuntimeClientCommand,
+  AssistantRuntimeCancelResult,
   AssistantRuntimeConversationDeleteResult,
   AssistantRuntimeHistoryClientRequest,
   AssistantRuntimeHistoryView,
@@ -58,7 +59,7 @@ export type AIRpcMap = {
     { streamId: string; command: AssistantRuntimeClientCommand },
     void,
   ];
-  'ai:runtime:assistant:cancel': [AssistantRuntimeClientCommand, { cancelled: boolean }];
+  'ai:runtime:assistant:cancel': [AssistantRuntimeClientCommand, AssistantRuntimeCancelResult];
   'ai:runtime:assistant:history': [
     AssistantRuntimeHistoryClientRequest,
     AssistantRuntimeHistoryView,

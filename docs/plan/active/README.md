@@ -4,7 +4,7 @@ tags:
   - active
 description: 进行中的计划目录与当前状态
 created: 2026-04-26T00:00:00
-updated: 2026-09-14T13:06:51+08:00
+updated: 2026-09-19T00:00:00+00:00
 ---
 
 # Active Plans
@@ -17,7 +17,7 @@ updated: 2026-09-14T13:06:51+08:00
 
 | 计划                                                                                                      | 当前状态                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [AI vNext Model Convergence](./2026-09-09-ai-vnext-model-convergence.md)                                  | **ACTIVE / design frozen** — 保留 Mastra 单一 runtime，收敛 Conversation shell、Provider Secret/Model Capability、AI Context、Knowledge stable identity、Workflow Draft/Apply、ExecutionRecord；`AI-9601` 文档完成，其余 production implementation 未开始。                                                                                                                                                                                                                                                                                   |
+| [AI vNext Model Convergence](./2026-09-09-ai-vnext-model-convergence.md)                                  | **ACTIVE / implementation accepted** — Mastra 单一 runtime、Conversation shell、Provider Secret/Model Capability、AI Context、Knowledge stable identity、Workflow Draft/Apply、ExecutionRecord 已实现；`AI-9612` five-layer closure 已接受，剩余系统级收口由 system-wide plan 跟踪。                                                                                                                                                                                                                                                                                   |
 | [System-wide vNext Model Convergence](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) | **ACTIVE / canonical execution order** — ADR-067～111 统一 ownership review 已通过；ADR-111 明确零旧数据 destructive cutover，协调所有 module subplan 的依赖、共享 schema 单写者、直接删除与最终 exact-head closure。                                                                                                                                                                                                                                                                                                                         |
 
 ## 本轮已归档（2026-09-14）

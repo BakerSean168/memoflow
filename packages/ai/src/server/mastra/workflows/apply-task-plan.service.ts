@@ -8,6 +8,7 @@ import type { ResultError } from '@memoflow/contracts/result';
 import type { CreateTaskPlanReq } from '@memoflow/contracts/task';
 import { taskWorkflowEntityId } from './deterministic-entity-id';
 import type { ApplyTaskPlanInput, TaskPlanMutationPort } from './task-plan-mutation.port';
+import { toWorkflowFailure } from './workflow-failure';
 
 const RETRYABLE_LEGACY_CODES = new Set([
   'DATABASE_ERROR',
@@ -30,11 +31,12 @@ function failure(
   draftRef: TaskPlanDraft['task']['draftRef'],
   error: Pick<ResultError, 'code' | 'message' | 'failure'>,
 ): TaskPlanExecutionFailure {
+  const safeFailure = toWorkflowFailure(error);
   return {
     operation: 'task_plan',
     draftRef,
-    code: String(error.code),
-    message: error.message,
+    code: safeFailure.code,
+    message: safeFailure.message,
     retryable: retryableFailure(error as ResultError),
   };
 }
@@ -43,15 +45,14 @@ function throwToFailure(
   draftRef: TaskPlanDraft['task']['draftRef'],
   cause: unknown,
 ): TaskPlanExecutionFailure {
-  return failure(draftRef, {
-    code: 'INTERNAL_ERROR',
-    message: cause instanceof Error ? cause.message : String(cause),
-    failure: {
-      code: 'INTERNAL_ERROR',
-      category: 'unavailable',
-      retryHint: { kind: 'transient' },
-    },
-  });
+  const safeFailure = toWorkflowFailure(cause);
+  return {
+    operation: 'task_plan',
+    draftRef,
+    code: safeFailure.code,
+    message: safeFailure.message,
+    retryable: true,
+  };
 }
 
 function receipt(input: {
@@ -152,7 +153,7 @@ export class ApplyTaskPlanService {
     let request: CreateTaskPlanReq;
     try {
       request = taskRequest(draft, expectedTaskId, labels.data);
-    } catch (cause) {
+    } catch {
       return receipt({
         workflowRunId,
         revision: draft.revision,
@@ -162,7 +163,7 @@ export class ApplyTaskPlanService {
             operation: 'task_plan',
             draftRef,
             code: 'VALIDATION_ERROR',
-            message: cause instanceof Error ? cause.message : 'Invalid task plan',
+            message: 'Invalid task plan',
             retryable: false,
           },
         ],
