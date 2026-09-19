@@ -339,12 +339,58 @@ describe('ROUTINE-3401 Prisma durable adapters integration', () => {
       'Satisfied',
       'Satisfied',
     ]);
+    expect(receipts.map((receipt) => receipt.occurrence.resolutionKind)).toEqual([
+      'ExplicitComplete',
+      'ExplicitComplete',
+    ]);
     expect(await prisma.routineInteraction.count()).toBe(1);
     expect((await truth.findOccurrence({
       identityId,
       routineId: FIXTURE_F.routineId,
       occurrenceKey: occurrence.occurrenceKey,
     }))?.resolutionState).toBe('Satisfied');
+  });
+
+  it('coalesces higher-contention duplicate interaction commands behind the idempotency fence', async () => {
+    const prisma = await getPrisma();
+    const identityId = IdentityId.generate();
+    await seedAccount({ id: identityId });
+    await seedRoutineDefinition(prisma, identityId);
+
+    const truth = new PrismaRoutineOccurrenceTruthStore(prisma);
+    const dueAt = Date.now();
+    const occurrence = await truth.ensureOpenOccurrence({
+      identityId,
+      routineId: FIXTURE_F.routineId,
+      occurrenceKey: `routine:${FIXTURE_F.routineId}:active-usage:concurrent-high-contention`,
+      triggerKind: 'ActiveUsage',
+      becameDueAt: dueAt,
+    });
+    const command = {
+      idempotencyKey: `${occurrence.occurrenceKey}:v1:complete`,
+      identityId,
+      routineId: FIXTURE_F.routineId,
+      occurrenceKey: occurrence.occurrenceKey,
+      action: 'Completed' as const,
+      actedAt: dueAt + 1_000,
+      responseLatencyMs: 1_000,
+    };
+
+    const receipts = await Promise.all(
+      Array.from({ length: 16 }, () => truth.applyInteraction(command)),
+    );
+
+    expect(receipts).toHaveLength(16);
+    expect(receipts.filter((receipt) => !receipt.replayed)).toHaveLength(1);
+    expect(receipts.filter((receipt) => receipt.replayed)).toHaveLength(15);
+    expect(new Set(receipts.map((receipt) => receipt.interaction.id)).size).toBe(1);
+    expect(receipts.every((receipt) => receipt.occurrence.resolutionState === 'Satisfied')).toBe(
+      true,
+    );
+    expect(
+      receipts.every((receipt) => receipt.occurrence.resolutionKind === 'ExplicitComplete'),
+    ).toBe(true);
+    expect(await prisma.routineInteraction.count()).toBe(1);
   });
 
   it('commits snooze override + interaction atomically and does not extend it on replay', async () => {
