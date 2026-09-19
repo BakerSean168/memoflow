@@ -5,6 +5,10 @@ import { registerAndLogin } from '../helpers/testHelpers';
 
 const password = 'Test123456!';
 
+// New accounts use the canonical UTC Product Time default. Keep this suite's
+// browser calendar aligned with the server projection used by local Docker.
+test.use({ timezoneId: 'UTC' });
+
 type TaskPlanCreation = {
   plan: { id: string };
   occurrenceCount: number;
@@ -107,11 +111,7 @@ test.describe('Local Docker core product Phase B', () => {
         },
       }),
     );
-    const initialOccurrences = await listOccurrences(
-      page,
-      headers,
-      recurringCreation.plan.id,
-    );
+    const initialOccurrences = await listOccurrences(page, headers, recurringCreation.plan.id);
     const todayPending = initialOccurrences.find(
       (occurrence) =>
         occurrence.status === 'Pending' && occurrence.scheduleSnapshot.date === recurringStartDate,
@@ -130,22 +130,26 @@ test.describe('Local Docker core product Phase B', () => {
     expect(futurePending).toBeDefined();
     expect(futureToStart).toBeDefined();
     await expectApiData<TaskOccurrenceClientDTO>(
-      await page.request.post(`${API_CONFIG.FULL_URL}/task-occurrences/${futureToStart!.id}/start`, {
-        headers,
-      }),
+      await page.request.post(
+        `${API_CONFIG.FULL_URL}/task-occurrences/${futureToStart!.id}/start`,
+        {
+          headers,
+        },
+      ),
     );
 
     await page.reload({ waitUntil: 'domcontentloaded' });
     await showPlansSurface(page);
-    await taskCard(page, recurringPlanName).getByRole('button', { name: '编辑', exact: true }).click();
+    await taskCard(page, recurringPlanName)
+      .getByRole('button', { name: '编辑', exact: true })
+      .click();
     await expect(page.getByTestId('task-plan-update-impact')).toContainText(
       /将更新 \d+ 个尚未开始的待办任务/,
     );
-    await page.getByTestId('task-form-advanced-toggle').click();
-    await expect(page.getByTestId('task-form-advanced-toggle')).toHaveAttribute(
-      'aria-expanded',
-      'true',
-    );
+    await expect(page.getByTestId('task-plan-property-chips')).toBeVisible();
+    await expect(page.getByTestId('task-plan-property-editor')).toHaveCount(0);
+    await page.getByTestId('task-properties-chip').click();
+    await expect(page.getByTestId('task-plan-property-editor')).toBeVisible();
     await page.locator('#importance-select').click();
     await page.getByRole('option', { name: '高', exact: true }).click();
     const updatePromise = waitForTemplateWrite(page, 'PATCH');

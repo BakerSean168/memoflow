@@ -43,11 +43,21 @@ test.describe('Local Docker core product Phase D', () => {
     const goalDialog = page.getByTestId('goal-dialog');
     await expect(goalDialog).toBeVisible();
     await expect(page.getByTestId('goal-name-input')).toBeFocused();
-    await expect(page.getByLabel('开始日期', { exact: true })).toBeVisible();
-    await expect(page.getByLabel('目标日期', { exact: true })).toBeVisible();
+    const startChip = page.getByTestId('goal-start-chip');
+    await expect(startChip).toBeVisible();
+    await startChip.click();
+    await expect(page.locator('#goal-start-date')).toBeVisible();
+    await expect(page.getByRole('textbox', { name: '开始日期', exact: true })).toBeVisible();
+    await page.keyboard.press('Escape');
+    const targetChip = page.getByTestId('goal-target-chip');
+    await expect(targetChip).toHaveAttribute('aria-label', '目标时间');
+    await targetChip.click();
+    await expect(page.getByTestId('goal-target-chip-day')).toBeVisible();
+    await page.keyboard.press('Escape');
     await expectDialogGeometry(goalDialog);
     await expectNoSeriousAxeViolations(page, '[data-testid="goal-dialog"]');
 
+    await page.getByTestId('goal-name-input').focus();
     await page.keyboard.type(goalName);
     await tabTo(page, page.getByTestId('add-key-result-entry'));
     await page.keyboard.press('Enter');
@@ -62,7 +72,10 @@ test.describe('Local Docker core product Phase D', () => {
     await page.getByTestId('draft-kr-current-input').fill('73');
     await page.getByTestId('draft-kr-target-input').fill('70');
     await page.getByTestId('draft-kr-unit-input').fill('kg');
-    await page.getByLabel('目标时间（可选）', { exact: true }).fill('2027-12-31');
+    await page.getByTestId('draft-kr-target-timeframe').click();
+    await expect(page.getByTestId('draft-kr-target-timeframe-day')).toBeVisible();
+    await page.getByTestId('draft-kr-target-timeframe-day').fill('2027-12-31');
+    await page.keyboard.press('Escape');
     await tabTo(page, page.getByTestId('save-key-result-draft'));
     await page.keyboard.press('Enter');
     await expect(page.getByTestId('key-result-draft-form')).toBeHidden();
@@ -75,7 +88,9 @@ test.describe('Local Docker core product Phase D', () => {
     await expect(goalDialog).toBeHidden({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
     await expect(createGoal).toBeFocused();
     await expect(
-      page.getByTestId('goal-progress-row').filter({ has: page.getByText(goalName, { exact: true }) }),
+      page
+        .getByTestId('goal-progress-row')
+        .filter({ has: page.getByText(goalName, { exact: true }) }),
     ).toBeVisible();
 
     await page.goto('/tasks', { waitUntil: 'domcontentloaded' });
@@ -89,15 +104,19 @@ test.describe('Local Docker core product Phase D', () => {
     const taskDialog = page.getByTestId('task-plan-dialog');
     await expect(taskDialog).toBeVisible();
     await expect(page.getByTestId('task-plan-title-input')).toBeFocused();
-    await expect(page.getByTestId('task-form-advanced-toggle')).toHaveAttribute(
-      'aria-expanded',
-      'false',
+    await expect(page.getByTestId('task-plan-property-chips')).toBeVisible();
+    await expect(page.getByTestId('task-plan-property-editor')).toHaveCount(0);
+    await page.keyboard.type(taskPlanName);
+    await taskDialog.getByTestId('task-reminder-chip').press('Enter');
+    await expect(taskDialog.getByTestId('task-reminder-chip')).toHaveAttribute(
+      'aria-pressed',
+      'true',
     );
-    await expect(taskDialog.getByText('提醒设置', { exact: true })).toHaveCount(0);
+    await expect(page.getByTestId('task-plan-property-editor')).toBeVisible();
+    await expect(taskDialog.getByRole('heading', { name: '提醒设置', exact: true })).toBeVisible();
     await expectDialogGeometry(taskDialog);
     await expectNoSeriousAxeViolations(page, '[data-testid="task-plan-dialog"]');
 
-    await page.keyboard.type(taskPlanName);
     await tabTo(page, page.getByTestId('task-dialog-save-button'));
     await page.keyboard.press('Enter');
     await expect(taskDialog).toBeHidden({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });

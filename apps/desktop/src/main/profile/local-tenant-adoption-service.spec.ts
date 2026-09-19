@@ -49,6 +49,7 @@ describe('LocalTenantAdoptionService', () => {
     for (const retired of ['email_', 'phone_', 'settings', 'deleted_at']) {
       expect(accountInsertSql).not.toContain(retired);
     }
+    expect(accountInsertSql).not.toMatch(/\bversion\b/);
     expect(accountInsertSql).toContain('closed_at');
 
     expect(execute).not.toHaveBeenCalledWith(
