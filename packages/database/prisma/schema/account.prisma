@@ -26,9 +26,6 @@ model Account {
   routineProfileMemberships        RoutineProfileMembership[]
   routineProtocolDefinitions       RoutineProtocolDefinition[]
   routineProtocolSessions          RoutineProtocolSession[]
-  repositories                    Repository[]
-  repositoryExplorers             RepositoryExplorer[]
-  repositoryStatistics            RepositoryStatistic?
   schedules                       Schedule[]
   schedulingReconcileOperations   SchedulingReconcileOperation[]
   scheduledInvocations            ScheduledInvocation[]
@@ -54,9 +51,6 @@ model Account {
   routineInteractions             RoutineInteraction[]
   notificationInteractions       NotificationInteraction[]        @relation("AccountNotificationInteractions")
   notificationDispatchOutboxes   NotificationDispatchOutbox[]    @relation("AccountNotificationDispatchOutboxes")
-  folders                        Folder[]                        @relation("AccountFolders")
-  resources                      Resource[]                      @relation("AccountResources")
-  repositoryResources            RepositoryResource[]            @relation("AccountRepositoryResources")
   knowledgeRemoteBindings        KnowledgeRemoteBinding[]
   knowledgeRepositoryInstallationIntents KnowledgeRepositoryInstallationIntent[]
   knowledgeWriteRequests         KnowledgeWriteRequest[]

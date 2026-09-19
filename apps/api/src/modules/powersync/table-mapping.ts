@@ -11,7 +11,7 @@
  * Used to automatically inject the authenticated user's identity on write operations.
  *
  * NOTE: `accounts` is NOT included — its `id` IS the identity, not a foreign key.
- * Tables like `linked_contents`, `resource_references`, * `rules`, and `rule_revisions` do not have `identityId`.
+ * Tables like `rules` and `rule_revisions` do not have `identityId`.
  */
 export const IDENTITY_ID_TABLES = new Set([
   'user_preference_records',
@@ -39,12 +39,6 @@ export const IDENTITY_ID_TABLES = new Set([
   'ai_conversations',
   'ai_execution_records',
   'task_goal_outbox',
-  'repositories',
-  'repository_explorers',
-  'repository_statistics',
-  'folders',
-  'resources',
-  'repository_resources',
 ]);
 
 const TABLE_TO_MODEL: Record<string, string> = {
@@ -72,14 +66,6 @@ const TABLE_TO_MODEL: Record<string, string> = {
   ai_conversations: 'aiConversation',
   ai_execution_records: 'aiExecutionRecord',
   task_goal_outbox: 'taskGoalOutbox',
-  repositories: 'repository',
-  repository_explorers: 'repositoryExplorer',
-  repository_statistics: 'repositoryStatistic',
-  folders: 'folder',
-  resources: 'resource',
-  repository_resources: 'repositoryResource',
-  linked_contents: 'linkedContent',
-  resource_references: 'resourceReference',
   rules: 'rule',
   rule_revisions: 'ruleRevision',
 };

@@ -47,7 +47,7 @@ const NON_SYNCABLE_LOCAL_TABLES = [
   'ai_provider_secrets',
 ] as const;
 
-const PRE_HYDRATION_BOOTSTRAP_SYNC_TABLES = ['user_preference_records', 'repositories'] as const;
+const PRE_HYDRATION_BOOTSTRAP_SYNC_TABLES = ['user_preference_records'] as const;
 
 // ──────────────────────────────────────────────
 // Module state

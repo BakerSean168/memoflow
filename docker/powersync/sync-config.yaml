@@ -2,48 +2,50 @@ config:
   edition: 3
 
 streams:
-  # Preserve the current offline-first behavior during migration by keeping
-  # all profile-owned data auto-subscribed on connect.
+  # Auto-subscribe the canonical identity-owned PowerSync surface. Local-only
+  # desktop tables are intentionally absent from sync rules.
   user_data:
     auto_subscribe: true
     priority: 1
     queries:
-      - SELECT * FROM user_settings WHERE identity_id = auth.user_id()
       - SELECT * FROM user_preference_records WHERE identity_id = auth.user_id()
       - SELECT * FROM goals WHERE identity_id = auth.user_id()
       - SELECT * FROM key_results WHERE identity_id = auth.user_id()
       - SELECT * FROM goal_records WHERE identity_id = auth.user_id()
       - SELECT * FROM goal_reviews WHERE identity_id = auth.user_id()
       - SELECT * FROM key_result_weight_snapshots WHERE identity_id = auth.user_id()
+      - SELECT * FROM labels WHERE identity_id = auth.user_id()
+      - SELECT * FROM goal_labels WHERE identity_id = auth.user_id()
+      - SELECT * FROM task_labels WHERE identity_id = auth.user_id()
       - SELECT * FROM relations WHERE identity_id = auth.user_id()
-      - SELECT * FROM task_templates WHERE identity_id = auth.user_id()
-      - SELECT * FROM task_instances WHERE identity_id = auth.user_id()
-      - SELECT * FROM task_statistics WHERE identity_id = auth.user_id()
-      - SELECT * FROM task_template_history WHERE identity_id = auth.user_id()
+      - SELECT * FROM task_plans WHERE identity_id = auth.user_id()
+      - SELECT * FROM task_occurrences WHERE identity_id = auth.user_id()
+      - SELECT * FROM task_plan_history WHERE identity_id = auth.user_id()
+      - SELECT * FROM task_goal_outbox WHERE identity_id = auth.user_id()
       - SELECT * FROM schedules WHERE identity_id = auth.user_id()
+      - SELECT * FROM scheduling_reconcile_operations WHERE identity_id = auth.user_id()
       - SELECT * FROM scheduled_invocations WHERE identity_id = auth.user_id()
       - SELECT * FROM invocation_attempts WHERE identity_id = auth.user_id()
-      - SELECT * FROM reminder_templates WHERE identity_id = auth.user_id()
-      - SELECT * FROM reminder_groups WHERE identity_id = auth.user_id()
-      - SELECT * FROM reminder_instances WHERE identity_id = auth.user_id()
-      - SELECT * FROM reminder_statistics WHERE identity_id = auth.user_id()
-      - SELECT * FROM user_reminder_preferences WHERE identity_id = auth.user_id()
-      - SELECT * FROM reminder_history WHERE identity_id = auth.user_id()
-      - SELECT * FROM reminder_responses WHERE identity_id = auth.user_id()
+      - SELECT * FROM routine_definitions WHERE identity_id = auth.user_id()
+      - SELECT * FROM routine_profiles WHERE identity_id = auth.user_id()
+      - SELECT * FROM routine_profile_memberships WHERE identity_id = auth.user_id()
+      - SELECT * FROM routine_occurrences WHERE identity_id = auth.user_id()
+      - SELECT * FROM routine_interactions WHERE identity_id = auth.user_id()
+      - SELECT * FROM routine_temporary_overrides WHERE identity_id = auth.user_id()
+      - SELECT * FROM routine_protocol_definitions WHERE identity_id = auth.user_id()
+      - SELECT * FROM routine_protocol_sessions WHERE identity_id = auth.user_id()
       - SELECT * FROM notifications WHERE identity_id = auth.user_id()
+      - SELECT * FROM notification_delivery_decisions WHERE identity_id = auth.user_id()
+      - SELECT * FROM notification_dispatch_outbox WHERE identity_id = auth.user_id()
+      - SELECT * FROM notification_interactions WHERE identity_id = auth.user_id()
       - SELECT * FROM notification_preferences WHERE identity_id = auth.user_id()
-      - SELECT * FROM notification_channels WHERE identity_id = auth.user_id()
-      - SELECT * FROM notification_history WHERE identity_id = auth.user_id()
       - SELECT * FROM ai_conversations WHERE identity_id = auth.user_id()
       - SELECT * FROM ai_execution_records WHERE identity_id = auth.user_id()
-      - SELECT * FROM repositories WHERE identity_id = auth.user_id()
-      - SELECT * FROM repository_explorers WHERE identity_id = auth.user_id()
-      - SELECT * FROM repository_statistics WHERE identity_id = auth.user_id()
-      - SELECT * FROM folders WHERE identity_id = auth.user_id()
-      - SELECT * FROM resources WHERE identity_id = auth.user_id()
-      - SELECT * FROM repository_resources WHERE identity_id = auth.user_id()
 
+  # Governance is a permanent reference-feature surface, not identity-owned
+  # product data. Keep it available to every authorized sync client.
   system_data:
     auto_subscribe: true
     queries:
-      - SELECT * FROM notification_templates
+      - SELECT * FROM rules
+      - SELECT * FROM rule_revisions

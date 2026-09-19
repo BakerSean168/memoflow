@@ -759,116 +759,6 @@ const task_goal_outbox = new Table({
 });
 
 // ──────────────────────────────────────────────
-// Repository
-// ──────────────────────────────────────────────
-
-const repositories = new Table({
-  identity_id: column.text,
-  name: column.text,
-  type: column.text,
-  path: column.text,
-  description: column.text,
-  config: column.text, // JSON
-  stats: column.text, // JSON
-  related_goals: column.text,
-  status: column.text,
-  git: column.text,
-  sync_status: column.text,
-  last_accessed_at: column.text,
-  version: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-  deleted_at: column.text,
-});
-
-const repository_explorers = new Table({
-  repository_id: column.text, // FK
-  identity_id: column.text,
-  name: column.text,
-  description: column.text,
-  current_path: column.text,
-  filters: column.text, // JSON
-  view_config: column.text, // JSON
-  pinned_paths: column.text, // JSON
-  recent_paths: column.text, // JSON
-  last_scan_at: column.text,
-  created_at: column.text,
-  updated_at: column.text,
-});
-
-const repository_statistics = new Table({
-  identity_id: column.text,
-  total_repositories: column.integer,
-  active_repositories: column.integer,
-  archived_repositories: column.integer,
-  total_resources: column.integer,
-  total_files: column.integer,
-  total_folders: column.integer,
-  git_enabled_repos: column.integer,
-  total_commits: column.integer,
-  total_references: column.integer,
-  total_linked_contents: column.integer,
-  total_size_bytes: column.integer, // BigInt → integer
-  last_updated_at: column.text,
-  created_at: column.text,
-});
-
-const folders = new Table({
-  identity_id: column.text,
-  repository_id: column.text, // FK
-  parent_id: column.text, // FK (self)
-  name: column.text,
-  path: column.text,
-  order: column.integer,
-  is_expanded: column.integer, // boolean
-  metadata: column.text, // JSON
-  created_at: column.text,
-  updated_at: column.text,
-});
-
-const resources = new Table({
-  identity_id: column.text,
-  repository_id: column.text, // FK
-  folder_id: column.text, // FK
-  name: column.text,
-  type: column.text,
-  path: column.text,
-  size: column.integer,
-  content: column.text,
-  metadata: column.text, // JSON
-  stats: column.text, // JSON
-  description: column.text,
-  author: column.text,
-  version: column.integer,
-  tags: column.text, // JSON
-  category: column.text,
-  status: column.text,
-  created_at: column.text,
-  updated_at: column.text,
-  modified_at: column.text,
-  deleted_at: column.text,
-});
-
-const repository_resources = new Table({
-  identity_id: column.text,
-  repository_id: column.text, // FK
-  name: column.text,
-  type: column.text,
-  path: column.text,
-  size: column.integer,
-  description: column.text,
-  author: column.text,
-  version: column.text,
-  tags: column.text, // JSON
-  category: column.text,
-  status: column.text,
-  metadata: column.text, // JSON
-  created_at: column.text,
-  updated_at: column.text,
-  modified_at: column.text,
-});
-
-// ──────────────────────────────────────────────
 // Governance
 // ──────────────────────────────────────────────
 
@@ -948,7 +838,6 @@ export const PowerSyncAppSchema = new Schema({
   desktop_delivery_acks,
   notification_interactions,
   notification_preferences,
-  // Editor
   // AI
   ai_conversations,
   ai_execution_records,
@@ -957,13 +846,6 @@ export const PowerSyncAppSchema = new Schema({
   ai_provider_secrets,
   ai_knowledge_index_entries_local,
   task_goal_outbox,
-  // Repository
-  repositories,
-  repository_explorers,
-  repository_statistics,
-  folders,
-  resources,
-  repository_resources,
   // Governance
   rules,
   rule_revisions,

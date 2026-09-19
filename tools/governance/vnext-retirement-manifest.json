@@ -43,13 +43,13 @@
     },
     {
       "id": "legacy-editor-persistence",
-      "status": "staged",
+      "status": "active",
       "decision": "ADR-107 / EDITOR-1702",
       "forbiddenPaths": ["packages/database/prisma/schema/editor.prisma"]
     },
     {
       "id": "account-settings-legacy",
-      "status": "staged",
+      "status": "active",
       "decision": "ADR-104 / ACC-1403",
       "forbiddenPaths": [
         "packages/contracts/src/modules/account/value-objects/account-settings.ts",
@@ -58,7 +58,7 @@
     },
     {
       "id": "legacy-reminder-model",
-      "status": "staged",
+      "status": "active",
       "decision": "ADR-076..079 / ROUTINE-2201",
       "forbiddenPaths": ["packages/reminder/src/server/domain/aggregates/reminder-template.ts"]
     },
@@ -85,7 +85,7 @@
     },
     {
       "id": "legacy-notification-template",
-      "status": "staged",
+      "status": "active",
       "decision": "ADR-085 / NOTIF-2401",
       "forbiddenPaths": [
         "packages/notification/src/server/domain/aggregates/notification-template.ts"

@@ -19,7 +19,19 @@ describe('PowerSyncAppSchema', () => {
     expect(PowerSyncAppSchema.props).toHaveProperty('scheduled_invocations');
     expect(PowerSyncAppSchema.props).toHaveProperty('invocation_attempts');
     expect(PowerSyncAppSchema.props).toHaveProperty('notifications');
-    expect(PowerSyncAppSchema.props).toHaveProperty('repositories');
+    expect(PowerSyncAppSchema.props).toHaveProperty('routine_definitions');
+    expect(PowerSyncAppSchema.props).toHaveProperty('notification_delivery_decisions');
+    expect(PowerSyncAppSchema.props).toHaveProperty('ai_conversations');
+    for (const retired of [
+      'repositories',
+      'repository_explorers',
+      'repository_statistics',
+      'folders',
+      'resources',
+      'repository_resources',
+    ]) {
+      expect(PowerSyncAppSchema.props).not.toHaveProperty(retired);
+    }
     expect(PowerSyncAppSchema.tables).toHaveLength(Object.keys(PowerSyncAppSchema.props).length);
   });
 
@@ -81,11 +93,10 @@ describe('PowerSyncAppSchema', () => {
     expect(getColumnType('ai_knowledge_index_entries_local', 'metadata_json')).toBe('TEXT');
   });
 
-  it('keeps notification and repository payload columns serialized as text', () => {
+  it('keeps notification payload columns serialized as text', () => {
     expect(getColumnType('notifications', 'metadata')).toBe('TEXT');
     expect(getColumnType('notifications', 'is_read')).toBe('INTEGER');
-    expect(getColumnType('repositories', 'config')).toBe('TEXT');
-    expect(getColumnType('repository_statistics', 'total_size_bytes')).toBe('INTEGER');
+    expect(getColumnType('notification_dispatch_outbox', 'payload_json')).toBe('TEXT');
   });
 
   it('excludes phantom tables that do not exist in the Prisma schema', () => {

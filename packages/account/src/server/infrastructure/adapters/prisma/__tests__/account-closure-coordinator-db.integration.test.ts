@@ -323,17 +323,7 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
       },
     });
 
-    const repoId = crypto.randomUUID();
-    await prisma.repository.create({
-      data: {
-        id: repoId,
-        identityId,
-        name: 'Test Repo',
-        type: 'knowledge',
-        path: `/tmp/test-repo-${repoId}`,
-        status: 'ACTIVE',
-      },
-    });
+    const externalRepositoryId = crypto.randomUUID();
     const writeReqId = crypto.randomUUID();
     const knowledgeSpaceId = `KnowledgeSpaceId_${crypto.randomUUID()}`;
     const knowledgeBindingId = `KnowledgeRemoteBindingId_${crypto.randomUUID()}`;
@@ -344,9 +334,9 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
         knowledgeSpaceId,
         identityId,
         provider: 'GitHub',
-        installationId: `install-${repoId}`,
-        repositoryId: `gh-repo-${repoId}`,
-        repositoryFullNameSnapshot: `user/test-repo-${repoId}`,
+        installationId: `install-${externalRepositoryId}`,
+        repositoryId: `gh-repo-${externalRepositoryId}`,
+        repositoryFullNameSnapshot: `user/test-repo-${externalRepositoryId}`,
         connectedAt: new Date(),
       },
     });
@@ -435,12 +425,10 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
     const notifOutbox = await prisma.notificationDispatchOutbox.findUnique({
       where: { id: notifOutboxId },
     });
-    const repo = await prisma.repository.findUnique({ where: { id: repoId } });
     const writeReq = await prisma.knowledgeWriteRequest.findUnique({ where: { id: writeReqId } });
 
     expect(routine?.enabled).toBe(false);
     expect(notifOutbox?.status).toBe('cancelled');
-    expect(repo?.status).toBe('ARCHIVED');
     expect(writeReq?.status).toBe('CANCELLED');
 
     const receipts = await prisma.inboxReceipt.findMany({
