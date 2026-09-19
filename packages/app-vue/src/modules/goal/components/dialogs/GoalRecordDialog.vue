@@ -1,37 +1,17 @@
 <template>
   <Dialog :open="visible" @update:open="(val) => (visible = val)">
-    <DialogContent class="sm:max-w-[600px] gap-0 p-0">
-      <!-- 对话框头部 -->
-      <div class="flex items-center justify-between px-6 pt-6 pb-4">
-        <Button variant="ghost" size="sm" @click="handleCancel">
-          <X class="mr-1 h-4 w-4" />
-          {{ t('goal.recordDialog.cancel') }}
-        </Button>
-        <div class="flex items-center">
-          <PlusCircle class="mr-2 h-5 w-5 text-primary" />
-          <DialogTitle class="text-lg font-bold">{{
-            isEditing ? t('goal.recordDialog.editTitle') : t('goal.recordDialog.addTitle')
-          }}</DialogTitle>
-          <DialogDescription class="sr-only">
-            {{ t('goal.recordDialog.description') }}
-          </DialogDescription>
-        </div>
-        <Button
-          data-testid="save-goal-record"
-          size="sm"
-          :disabled="!isValid || isSubmitting"
-          @click="handleSave"
-        >
-          <Check class="mr-1 h-4 w-4" />
-          {{ t('goal.recordDialog.save') }}
-        </Button>
-      </div>
+    <ProductDialogShell
+      :open="visible"
+      test-id="goal-record-dialog"
+      size="sm"
+      initial-focus-selector="#change-amount"
+    >
+      <template #title>
+        {{ isEditing ? t('goal.recordDialog.editTitle') : t('goal.recordDialog.addTitle') }}
+      </template>
+      <template #description>{{ t('goal.recordDialog.description') }}</template>
 
-      <Separator />
-
-      <!-- 表单内容 -->
-      <form class="flex flex-col gap-6 p-6" @submit.prevent="handleSave">
-        <!-- 增加值输入 -->
+      <form id="goal-record-form" class="space-y-5" @submit.prevent="handleSave">
         <div class="space-y-2">
           <Label for="change-amount">{{ t('goal.recordDialog.incrementValue') }}</Label>
           <div class="relative flex items-center">
@@ -40,7 +20,7 @@
               id="change-amount"
               v-model.number="localRecord.changeAmount"
               type="number"
-              class="pl-9 pr-16"
+              class="h-11 pl-9 pr-16 text-lg font-semibold"
               min="0.1"
               step="0.1"
             />
@@ -54,12 +34,21 @@
           </p>
         </div>
 
-        <!-- 备注输入 -->
+        <div class="flex flex-wrap gap-2" :aria-label="t('goal.recordDialog.quickSelect')">
+          <ProductPropertyChip
+            v-for="quickValue in quickValues"
+            :key="quickValue"
+            :active="localRecord.changeAmount === quickValue"
+            :data-testid="`quick-goal-record-${quickValue}`"
+            :aria-label="`${t('goal.recordDialog.quickSelect')} ${quickValue}`"
+            @click="localRecord.changeAmount = quickValue"
+          >
+            +{{ quickValue }}
+          </ProductPropertyChip>
+        </div>
+
         <div class="space-y-2">
-          <Label for="record-note" class="flex items-center gap-1">
-            <FileText class="h-4 w-4 text-muted-foreground" />
-            {{ t('goal.recordDialog.remarks') }}
-          </Label>
+          <Label for="record-note">{{ t('goal.recordDialog.remarks') }}</Label>
           <Textarea
             id="record-note"
             v-model="localRecord.note"
@@ -68,31 +57,23 @@
             class="resize-none"
           />
         </div>
-
-        <!-- 快速选择值 -->
-        <div>
-          <div class="mb-3 flex items-center text-sm text-muted-foreground">
-            <Zap class="mr-1 h-4 w-4" />
-            {{ t('goal.recordDialog.quickSelect') }}
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <Button
-              v-for="quickValue in quickValues"
-              :key="quickValue"
-              type="button"
-              size="sm"
-              :variant="localRecord.changeAmount === quickValue ? 'default' : 'outline'"
-              :data-testid="`quick-goal-record-${quickValue}`"
-              :aria-label="`${t('goal.recordDialog.quickSelect')} ${quickValue}`"
-              class="select-none px-3 text-sm transition-shadow hover:shadow-md"
-              @click="localRecord.changeAmount = quickValue"
-            >
-              {{ quickValue }}
-            </Button>
-          </div>
-        </div>
       </form>
-    </DialogContent>
+
+      <template #footer>
+        <Button type="button" variant="ghost" :disabled="isSubmitting" @click="handleCancel">
+          {{ t('goal.recordDialog.cancel') }}
+        </Button>
+        <Button
+          type="button"
+          data-testid="save-goal-record"
+          :disabled="!isValid || isSubmitting"
+          :loading="isSubmitting"
+          @click="handleSave"
+        >
+          {{ t('goal.recordDialog.save') }}
+        </Button>
+      </template>
+    </ProductDialogShell>
   </Dialog>
 </template>
 
@@ -100,14 +81,9 @@
 import { computed, watch, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { GoalRecordClientDTO } from '@memoflow/contracts/goal';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@memoflow/ui-vue-shadcn';
-import { Button } from '@memoflow/ui-vue-shadcn';
-import { Input } from '@memoflow/ui-vue-shadcn';
-import { Label } from '@memoflow/ui-vue-shadcn';
-import { Textarea } from '@memoflow/ui-vue-shadcn';
-import { Badge } from '@memoflow/ui-vue-shadcn';
-import { Separator } from '@memoflow/ui-vue-shadcn';
-import { X, PlusCircle, Check, Plus, FileText, Zap } from '@lucide/vue';
+import { Badge, Button, Dialog, Input, Label, Textarea } from '@memoflow/ui-vue-shadcn';
+import { Plus } from '@lucide/vue';
+import { ProductDialogShell, ProductPropertyChip } from '../../../../shared/components';
 // composables
 import { useGoal } from '../../composables/useGoal';
 

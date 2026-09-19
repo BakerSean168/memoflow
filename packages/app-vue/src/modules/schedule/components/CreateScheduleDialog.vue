@@ -1,281 +1,339 @@
 <template>
   <Dialog :open="modelValue" @update:open="handleVisibleChange">
-    <DialogContent
-      class="flex max-h-[calc(100vh-2rem)] max-w-2xl flex-col overflow-hidden"
-      data-testid="schedule-dialog"
+    <ProductDialogShell
+      :open="modelValue"
+      test-id="schedule-dialog"
+      size="md"
+      initial-focus-selector="[data-testid='schedule-title-input']"
     >
-      <DialogHeader class="shrink-0">
-        <DialogTitle>{{
+      <template #title>
+        {{
           isEditing ? t('schedule.createDialog.titleEdit') : t('schedule.createDialog.titleCreate')
-        }}</DialogTitle>
-        <DialogDescription class="sr-only">
-          {{ t('schedule.createDialog.description') }}
-        </DialogDescription>
-      </DialogHeader>
+        }}
+      </template>
+      <template #description>{{ t('schedule.createDialog.description') }}</template>
 
-      <form class="flex min-h-0 flex-1 flex-col gap-4" @submit.prevent="handleSubmit">
-        <div class="min-h-0 flex-1 space-y-4 overflow-y-auto pr-2">
-          <!-- 标题 -->
-          <div>
-            <Label for="title">{{ t('schedule.createDialog.fieldTitle') }}</Label>
-            <Input
-              id="title"
-              v-model="formData.title"
-              :placeholder="t('schedule.createDialog.fieldTitlePlaceholder')"
-              maxlength="200"
-              required
-              data-testid="schedule-title-input"
-            />
-            <p class="text-sm text-muted-foreground mt-1">{{ formData.title.length }}/200</p>
-          </div>
+      <form id="schedule-form" class="space-y-5" @submit.prevent="handleSubmit">
+        <div class="border-b pb-4">
+          <Label for="title" class="sr-only">{{ t('schedule.createDialog.fieldTitle') }}</Label>
+          <Input
+            id="title"
+            v-model="formData.title"
+            :placeholder="t('schedule.createDialog.fieldTitlePlaceholder')"
+            maxlength="200"
+            required
+            data-testid="schedule-title-input"
+            class="h-11 border-0 bg-transparent px-0 text-lg font-semibold shadow-none focus-visible:bg-muted/40 focus-visible:ring-1 focus-visible:ring-ring/30"
+          />
+          <Label for="description" class="sr-only">{{
+            t('schedule.createDialog.fieldDescription')
+          }}</Label>
+          <Textarea
+            id="description"
+            v-model="formData.description"
+            :placeholder="t('schedule.createDialog.fieldDescriptionPlaceholder')"
+            rows="2"
+            maxlength="1000"
+            class="min-h-12 resize-none border-0 bg-transparent px-0 py-1 text-sm text-muted-foreground shadow-none focus-visible:bg-muted/40 focus-visible:ring-1 focus-visible:ring-ring/30"
+          />
+        </div>
 
-          <!-- 描述 -->
-          <div>
-            <Label for="description">{{ t('schedule.createDialog.fieldDescription') }}</Label>
-            <Textarea
-              id="description"
-              v-model="formData.description"
-              :placeholder="t('schedule.createDialog.fieldDescriptionPlaceholder')"
-              rows="3"
-              maxlength="1000"
-            />
-            <p class="text-sm text-muted-foreground mt-1">{{ formData.description.length }}/1000</p>
-          </div>
-
-          <div class="flex items-center justify-between rounded-lg border p-3">
-            <div>
-              <Label for="all-day" class="text-sm font-medium">{{
-                t('schedule.calendar.allDay')
-              }}</Label>
-            </div>
-            <Switch
-              id="all-day"
-              :model-value="formData.allDay"
-              @update:model-value="formData.allDay = $event"
-            />
-          </div>
-
-          <!-- 开始时间 -->
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <Label for="startDate">{{ t('schedule.createDialog.fieldStartDate') }}</Label>
-              <Popover>
-                <PopoverTrigger as-child>
-                  <Button
-                    variant="outline"
-                    class="w-full justify-start text-left font-normal"
-                    :class="{ 'text-muted-foreground': !formData.startDate }"
-                  >
-                    <CalendarIcon class="mr-2 h-4 w-4" />
-                    {{
-                      formData.startDate
-                        ? formatDisplayDate(formData.startDate, locale)
-                        : t('schedule.createDialog.fieldStartDate')
-                    }}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent class="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    :selected="parseToCalendarDate(formData.startDate)"
-                    @update:model-value="
-                      (d: unknown) =>
-                        handleCalendarSelect(d, (v) => {
-                          formData.startDate = v;
-                        })
-                    "
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div v-if="!formData.allDay">
-              <Label for="startTime">{{ t('schedule.createDialog.fieldStartTime') }}</Label>
-              <div class="flex gap-2 items-center">
-                <Select
-                  :model-value="startHour"
-                  @update:model-value="
-                    (v) => {
-                      startHour = String(v);
-                      syncStartTime();
-                    }
-                  "
-                >
-                  <SelectTrigger class="w-[80px]"><SelectValue placeholder="HH" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem v-for="h in hourOptions" :key="h" :value="h">{{ h }}</SelectItem>
-                  </SelectContent>
-                </Select>
-                <span class="font-medium">:</span>
-                <Select
-                  :model-value="startMinute"
-                  @update:model-value="
-                    (v) => {
-                      startMinute = String(v);
-                      syncStartTime();
-                    }
-                  "
-                >
-                  <SelectTrigger class="w-[80px]"><SelectValue placeholder="MM" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem v-for="m in minuteOptions" :key="m" :value="m">{{ m }}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-
-          <!-- 结束时间 -->
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <Label for="endDate">{{ t('schedule.createDialog.fieldEndDate') }}</Label>
-              <Popover>
-                <PopoverTrigger as-child>
-                  <Button
-                    variant="outline"
-                    class="w-full justify-start text-left font-normal"
-                    :class="{ 'text-muted-foreground': !formData.endDate }"
-                  >
-                    <CalendarIcon class="mr-2 h-4 w-4" />
-                    {{
-                      formData.endDate
-                        ? formatDisplayDate(formData.endDate, locale)
-                        : t('schedule.createDialog.fieldEndDate')
-                    }}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent class="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    :selected="parseToCalendarDate(formData.endDate)"
-                    @update:model-value="
-                      (d: unknown) =>
-                        handleCalendarSelect(d, (v) => {
-                          formData.endDate = v;
-                        })
-                    "
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div v-if="!formData.allDay">
-              <Label for="endTime">{{ t('schedule.createDialog.fieldEndTime') }}</Label>
-              <div class="flex gap-2 items-center">
-                <Select
-                  :model-value="endHour"
-                  @update:model-value="
-                    (v) => {
-                      endHour = String(v);
-                      syncEndTime();
-                    }
-                  "
-                >
-                  <SelectTrigger class="w-[80px]"><SelectValue placeholder="HH" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem v-for="h in hourOptions" :key="h" :value="h">{{ h }}</SelectItem>
-                  </SelectContent>
-                </Select>
-                <span class="font-medium">:</span>
-                <Select
-                  :model-value="endMinute"
-                  @update:model-value="
-                    (v) => {
-                      endMinute = String(v);
-                      syncEndTime();
-                    }
-                  "
-                >
-                  <SelectTrigger class="w-[80px]"><SelectValue placeholder="MM" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem v-for="m in minuteOptions" :key="m" :value="m">{{ m }}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-
-          <!-- 自动检测冲突：当前 P4-2301A 仅 Timed range 参与兼容冲突检测 -->
+        <div class="space-y-3">
           <div
-            v-if="!formData.allDay"
-            class="flex items-center justify-between rounded-lg border p-3"
+            class="flex flex-wrap items-center gap-2"
+            data-testid="schedule-property-chips"
+            aria-label="Schedule properties"
           >
-            <div>
-              <Label for="auto-detect-conflicts" class="text-sm font-medium">{{
-                t('schedule.createDialog.autoDetectConflicts')
-              }}</Label>
-              <p class="text-xs text-muted-foreground">
-                {{ t('schedule.createDialog.autoDetectConflictsDescription') }}
-              </p>
-            </div>
-            <Switch
-              id="auto-detect-conflicts"
-              :model-value="formData.autoDetectConflicts"
-              @update:model-value="formData.autoDetectConflicts = $event"
-            />
+            <ProductPropertyChip
+              data-testid="schedule-when-chip"
+              :active="activeProperty === 'when'"
+              @click="toggleProperty('when')"
+            >
+              <template #icon><CalendarClock class="h-3.5 w-3.5" /></template>
+              {{ whenChipLabel }}
+            </ProductPropertyChip>
+
+            <ProductPropertyChip
+              data-testid="schedule-location-chip"
+              :active="activeProperty === 'location'"
+              @click="toggleProperty('location')"
+            >
+              <template #icon><MapPin class="h-3.5 w-3.5" /></template>
+              {{ locationChipLabel }}
+            </ProductPropertyChip>
+
+            <ProductPropertyChip
+              data-testid="schedule-attendees-chip"
+              :active="activeProperty === 'attendees'"
+              @click="toggleProperty('attendees')"
+            >
+              <template #icon><Users class="h-3.5 w-3.5" /></template>
+              {{ attendeesChipLabel }}
+            </ProductPropertyChip>
+
+            <ProductPropertyChip
+              data-testid="schedule-conflict-chip"
+              :active="activeProperty === 'conflict'"
+              :disabled="formData.allDay"
+              @click="toggleProperty('conflict')"
+            >
+              <template #icon><ShieldCheck class="h-3.5 w-3.5" /></template>
+              {{ conflictChipLabel }}
+            </ProductPropertyChip>
           </div>
 
-          <!-- 地点 -->
-          <div>
-            <Label for="location">{{ t('schedule.createDialog.fieldLocation') }}</Label>
-            <div class="relative">
-              <MapPin class="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="location"
-                v-model="formData.location"
-                :placeholder="t('schedule.createDialog.fieldLocationPlaceholder')"
-                class="pl-10"
-                maxlength="200"
-              />
-            </div>
-            <p class="text-sm text-muted-foreground mt-1">{{ formData.location.length }}/200</p>
-          </div>
+          <div
+            v-if="activeProperty"
+            class="rounded-xl border bg-muted/20 p-4"
+            data-testid="schedule-property-editor"
+          >
+            <div v-if="activeProperty === 'when'" class="space-y-4">
+              <div class="flex items-center justify-between gap-4">
+                <div>
+                  <Label for="all-day" class="text-sm font-medium">{{
+                    t('schedule.calendar.allDay')
+                  }}</Label>
+                  <p class="mt-0.5 text-xs text-muted-foreground">{{ whenChipLabel }}</p>
+                </div>
+                <Switch
+                  id="all-day"
+                  :model-value="formData.allDay"
+                  @update:model-value="formData.allDay = $event"
+                />
+              </div>
 
-          <!-- 参与者 -->
-          <div>
-            <Label>{{ t('schedule.createDialog.fieldAttendees') }}</Label>
-            <div class="flex flex-wrap gap-2 mb-2">
-              <Badge
-                v-for="(attendee, index) in formData.attendees"
-                :key="index"
-                variant="secondary"
-                class="gap-1"
-              >
-                {{ attendee }}
-                <button
-                  type="button"
-                  @click="removeAttendee(index)"
-                  class="hover:bg-destructive/20 rounded-full"
+              <div class="grid gap-4 sm:grid-cols-2">
+                <div class="space-y-2">
+                  <Label for="startDate">{{ t('schedule.createDialog.fieldStartDate') }}</Label>
+                  <Popover>
+                    <PopoverTrigger as-child>
+                      <Button
+                        variant="outline"
+                        class="w-full justify-start text-left font-normal"
+                        :class="{ 'text-muted-foreground': !formData.startDate }"
+                      >
+                        <CalendarIcon class="mr-2 h-4 w-4" />
+                        {{
+                          formData.startDate
+                            ? formatDisplayDate(formData.startDate, locale)
+                            : t('schedule.createDialog.fieldStartDate')
+                        }}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent class="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        :selected="parseToCalendarDate(formData.startDate)"
+                        @update:model-value="
+                          (d: unknown) =>
+                            handleCalendarSelect(d, (v) => {
+                              formData.startDate = v;
+                            })
+                        "
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <div v-if="!formData.allDay" class="flex items-center gap-2">
+                    <Select
+                      :model-value="startHour"
+                      @update:model-value="
+                        (v) => {
+                          startHour = String(v);
+                          syncStartTime();
+                        }
+                      "
+                    >
+                      <SelectTrigger class="w-[80px]"
+                        ><SelectValue placeholder="HH"
+                      /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem v-for="h in hourOptions" :key="h" :value="h">{{
+                          h
+                        }}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <span class="font-medium">:</span>
+                    <Select
+                      :model-value="startMinute"
+                      @update:model-value="
+                        (v) => {
+                          startMinute = String(v);
+                          syncStartTime();
+                        }
+                      "
+                    >
+                      <SelectTrigger class="w-[80px]"
+                        ><SelectValue placeholder="MM"
+                      /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem v-for="m in minuteOptions" :key="m" :value="m">{{
+                          m
+                        }}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div class="space-y-2">
+                  <Label for="endDate">{{ t('schedule.createDialog.fieldEndDate') }}</Label>
+                  <Popover>
+                    <PopoverTrigger as-child>
+                      <Button
+                        variant="outline"
+                        class="w-full justify-start text-left font-normal"
+                        :class="{ 'text-muted-foreground': !formData.endDate }"
+                      >
+                        <CalendarIcon class="mr-2 h-4 w-4" />
+                        {{
+                          formData.endDate
+                            ? formatDisplayDate(formData.endDate, locale)
+                            : t('schedule.createDialog.fieldEndDate')
+                        }}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent class="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        :selected="parseToCalendarDate(formData.endDate)"
+                        @update:model-value="
+                          (d: unknown) =>
+                            handleCalendarSelect(d, (v) => {
+                              formData.endDate = v;
+                            })
+                        "
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <div v-if="!formData.allDay" class="flex items-center gap-2">
+                    <Select
+                      :model-value="endHour"
+                      @update:model-value="
+                        (v) => {
+                          endHour = String(v);
+                          syncEndTime();
+                        }
+                      "
+                    >
+                      <SelectTrigger class="w-[80px]"
+                        ><SelectValue placeholder="HH"
+                      /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem v-for="h in hourOptions" :key="h" :value="h">{{
+                          h
+                        }}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <span class="font-medium">:</span>
+                    <Select
+                      :model-value="endMinute"
+                      @update:model-value="
+                        (v) => {
+                          endMinute = String(v);
+                          syncEndTime();
+                        }
+                      "
+                    >
+                      <SelectTrigger class="w-[80px]"
+                        ><SelectValue placeholder="MM"
+                      /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem v-for="m in minuteOptions" :key="m" :value="m">{{
+                          m
+                        }}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div v-else-if="activeProperty === 'location'" class="space-y-2">
+              <Label for="location">{{ t('schedule.createDialog.fieldLocation') }}</Label>
+              <div class="relative">
+                <MapPin class="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="location"
+                  v-model="formData.location"
+                  :placeholder="t('schedule.createDialog.fieldLocationPlaceholder')"
+                  class="pl-10"
+                  maxlength="200"
+                />
+              </div>
+            </div>
+
+            <div v-else-if="activeProperty === 'attendees'" class="space-y-3">
+              <Label>{{ t('schedule.createDialog.fieldAttendees') }}</Label>
+              <div v-if="formData.attendees.length > 0" class="flex flex-wrap gap-2">
+                <Badge
+                  v-for="(attendee, index) in formData.attendees"
+                  :key="attendee"
+                  variant="secondary"
+                  class="gap-1"
                 >
-                  <X class="h-3 w-3" />
-                </button>
-              </Badge>
+                  {{ attendee }}
+                  <button
+                    type="button"
+                    :aria-label="`${t('common.delete')} ${attendee}`"
+                    class="rounded-full hover:bg-destructive/20"
+                    @click="removeAttendee(index)"
+                  >
+                    <X class="h-3 w-3" />
+                  </button>
+                </Badge>
+              </div>
+              <div class="flex gap-2">
+                <Input
+                  v-model="newAttendee"
+                  :placeholder="t('schedule.createDialog.fieldAttendeePlaceholder')"
+                  @keydown.enter.prevent="addAttendee"
+                />
+                <Button type="button" variant="outline" size="sm" @click="addAttendee">
+                  {{ t('schedule.createDialog.addAttendee') }}
+                </Button>
+              </div>
             </div>
-            <div class="flex gap-2">
-              <Input
-                v-model="newAttendee"
-                :placeholder="t('schedule.createDialog.fieldAttendeePlaceholder')"
-                @keydown.enter.prevent="addAttendee"
+
+            <div
+              v-else-if="activeProperty === 'conflict'"
+              class="flex items-center justify-between gap-4"
+            >
+              <div>
+                <Label for="auto-detect-conflicts" class="text-sm font-medium">{{
+                  t('schedule.createDialog.autoDetectConflicts')
+                }}</Label>
+                <p class="mt-1 text-xs text-muted-foreground">
+                  {{ t('schedule.createDialog.autoDetectConflictsDescription') }}
+                </p>
+              </div>
+              <Switch
+                id="auto-detect-conflicts"
+                :model-value="formData.autoDetectConflicts"
+                @update:model-value="formData.autoDetectConflicts = $event"
               />
-              <Button type="button" variant="outline" size="sm" @click="addAttendee">
-                {{ t('schedule.createDialog.addAttendee') }}
-              </Button>
             </div>
           </div>
         </div>
 
-        <DialogFooter class="shrink-0">
-          <Button type="button" variant="outline" :disabled="busy" @click="handleClose">
-            {{ t('common.cancel') }}
-          </Button>
-          <Button type="submit" :disabled="busy" data-testid="schedule-save-button">
-            <Loader2 v-if="busy" class="mr-2 h-4 w-4 animate-spin" />
-            {{ isEditing ? t('common.save') : t('common.create') }}
-          </Button>
-        </DialogFooter>
         <p v-if="submitError" role="alert" class="text-sm text-destructive">
           {{ submitError }}
         </p>
       </form>
-    </DialogContent>
+
+      <template #footer>
+        <Button type="button" variant="ghost" :disabled="busy" @click="handleClose">
+          {{ t('common.cancel') }}
+        </Button>
+        <Button
+          type="submit"
+          form="schedule-form"
+          :disabled="busy"
+          data-testid="schedule-save-button"
+        >
+          <Loader2 v-if="busy" class="mr-2 h-4 w-4 animate-spin" />
+          {{ isEditing ? t('common.save') : t('common.create') }}
+        </Button>
+      </template>
+    </ProductDialogShell>
   </Dialog>
 </template>
 
@@ -283,11 +341,6 @@
 import { computed, ref, reactive, watch } from 'vue';
 import {
   Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
   Input,
   Textarea,
   Button,
@@ -304,8 +357,17 @@ import {
   PopoverContent,
   Calendar,
 } from '@memoflow/ui-vue-shadcn';
-import { MapPin, X, Loader2, Calendar as CalendarIcon } from '@lucide/vue';
+import {
+  CalendarClock,
+  MapPin,
+  ShieldCheck,
+  Users,
+  X,
+  Loader2,
+  Calendar as CalendarIcon,
+} from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
+import { ProductDialogShell, ProductPropertyChip } from '../../../shared/components';
 import { parseToCalendarDate } from '../../../shared/utils/parse-to-date';
 import { handleCalendarSelect } from '../../../shared/utils/handle-calendar-select';
 import { formatDisplayDate } from '../../../shared/utils/format-display-date';
@@ -376,6 +438,8 @@ function syncTimeRefs() {
   endMinute.value = et.minute;
 }
 
+type ScheduleProperty = 'when' | 'location' | 'attendees' | 'conflict';
+const activeProperty = ref<ScheduleProperty | null>(null);
 const isEditing = ref(false);
 const newAttendee = ref('');
 
@@ -408,6 +472,39 @@ const formData = reactive({
 // Initialize hour/minute refs from initial formData values
 syncTimeRefs();
 
+const whenChipLabel = computed(() => {
+  const start = formatDisplayDate(formData.startDate, locale.value);
+  const end = formatDisplayDate(formData.endDate, locale.value);
+  if (formData.allDay) {
+    return formData.startDate === formData.endDate
+      ? `${start} · ${t('schedule.calendar.allDay')}`
+      : `${start} – ${end} · ${t('schedule.calendar.allDay')}`;
+  }
+  return formData.startDate === formData.endDate
+    ? `${start} · ${formData.startTime}–${formData.endTime}`
+    : `${start} ${formData.startTime} – ${end} ${formData.endTime}`;
+});
+const locationChipLabel = computed(
+  () => formData.location.trim() || t('schedule.createDialog.fieldLocation'),
+);
+const attendeesChipLabel = computed(() =>
+  formData.attendees.length > 0
+    ? `${t('schedule.createDialog.fieldAttendees')} · ${formData.attendees.length}`
+    : t('schedule.createDialog.fieldAttendees'),
+);
+const conflictChipLabel = computed(
+  () =>
+    `${t('schedule.createDialog.autoDetectConflicts')} · ${
+      formData.autoDetectConflicts
+        ? t('schedule.planning.enabled')
+        : t('schedule.planning.disabled')
+    }`,
+);
+
+function toggleProperty(property: ScheduleProperty): void {
+  activeProperty.value = activeProperty.value === property ? null : property;
+}
+
 function resetForm() {
   formData.title = '';
   formData.description = '';
@@ -420,6 +517,7 @@ function resetForm() {
   formData.attendees = [];
   formData.autoDetectConflicts = true;
   newAttendee.value = '';
+  activeProperty.value = null;
   syncTimeRefs();
 }
 

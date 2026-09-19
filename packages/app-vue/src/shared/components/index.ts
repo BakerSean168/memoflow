@@ -12,3 +12,4 @@ export type { LabelPickerOption } from './label-selection.types';
 // ── Actionable wrapper (context menu + hover dropdown) ──
 export { default as ActionableWrapper } from '../../components/shared/ActionableWrapper.vue';
 export type { MenuAction } from '../../components/shared/types';
+export { default as ProductPropertyChip } from './ProductPropertyChip.vue';

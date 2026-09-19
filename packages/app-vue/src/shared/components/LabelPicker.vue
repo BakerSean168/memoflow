@@ -63,7 +63,7 @@ function updateSelection(value: string[]): void {
         type="button"
         variant="outline"
         class="min-w-0 justify-between gap-2"
-        :class="compact ? 'w-full max-w-48' : 'w-full'"
+        :class="compact ? 'h-8 w-auto max-w-48 rounded-full px-3 font-normal' : 'w-full'"
         role="combobox"
         aria-haspopup="listbox"
         :aria-expanded="open"
