@@ -1,12 +1,13 @@
 <template>
   <Dialog :open="modelValue" @update:open="(v) => emit('update:modelValue', v)">
-    <DialogContent class="max-w-[800px]" @interact-outside.prevent>
-      <DialogHeader>
-        <DialogTitle class="flex items-center gap-2">
-          <LayoutGrid class="h-5 w-5 text-primary" />
-          {{ t('task.templateSelection.title') }}
-        </DialogTitle>
-      </DialogHeader>
+    <ProductDialogShell
+      :open="modelValue"
+      test-id="template-selection-dialog"
+      size="lg"
+      prevent-interact-outside
+    >
+      <template #icon><LayoutGrid class="mt-0.5 h-5 w-5 text-primary" /></template>
+      <template #title>{{ t('task.templateSelection.title') }}</template>
 
       <div class="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4 py-4">
         <div v-if="loading" class="col-span-full text-center py-8">
@@ -43,33 +44,24 @@
         </Card>
       </div>
 
-      <DialogFooter>
-        <div class="flex-1" />
+      <template #footer>
         <Button variant="ghost" @click="emit('cancel')">{{
           t('task.templateSelection.cancel')
         }}</Button>
         <Button :disabled="!selectedId" @click="confirmSelection">
           {{ t('task.templateSelection.useTemplate') }}
         </Button>
-      </DialogFooter>
-    </DialogContent>
+      </template>
+    </ProductDialogShell>
   </Dialog>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  Card,
-  CardContent,
-  Button,
-} from '@memoflow/ui-vue-shadcn';
-import { LayoutGrid, Loader2, FolderOpen, FileText } from '@lucide/vue';
+import { Dialog, Card, CardContent, Button } from '@memoflow/ui-vue-shadcn';
+import { FileText, FolderOpen, LayoutGrid, Loader2 } from '@lucide/vue';
+import { ProductDialogShell } from '../../../../shared/components';
 import type { TaskPlanViewModel } from '../types';
 
 const { t } = useI18n();

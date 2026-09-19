@@ -21,89 +21,65 @@
         @update:model-value="handlePlanUpdate"
       />
 
-      <div class="space-y-3 border-t pt-5">
+      <div class="space-y-3">
         <div
           class="flex flex-wrap items-center gap-2"
           data-testid="task-plan-property-chips"
           aria-label="Task plan properties"
         >
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            class="h-8 rounded-full px-3 font-normal"
+          <ProductPropertyChip
             data-testid="task-schedule-chip"
-            :aria-pressed="activeProperty === 'schedule'"
+            :active="activeProperty === 'schedule'"
             @click="toggleProperty('schedule')"
           >
-            <CalendarClock class="mr-1 h-3.5 w-3.5" />
+            <template #icon><CalendarClock class="h-3.5 w-3.5" /></template>
             {{ scheduleChipLabel }}
-          </Button>
+          </ProductPropertyChip>
 
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            class="h-8 rounded-full px-3 font-normal"
+          <ProductPropertyChip
             data-testid="task-recurrence-chip"
-            :aria-pressed="activeProperty === 'recurrence'"
+            :active="activeProperty === 'recurrence'"
             @click="toggleProperty('recurrence')"
           >
-            <Repeat2 class="mr-1 h-3.5 w-3.5" />
+            <template #icon><Repeat2 class="h-3.5 w-3.5" /></template>
             {{ recurrenceChipLabel }}
-          </Button>
+          </ProductPropertyChip>
 
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            class="h-8 rounded-full px-3 font-normal"
+          <ProductPropertyChip
             data-testid="task-goal-chip"
-            :aria-pressed="activeProperty === 'goal'"
+            :active="activeProperty === 'goal'"
             @click="toggleProperty('goal')"
           >
-            <Target class="mr-1 h-3.5 w-3.5" />
+            <template #icon><Target class="h-3.5 w-3.5" /></template>
             {{ goalChipLabel }}
-          </Button>
+          </ProductPropertyChip>
 
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            class="h-8 rounded-full px-3 font-normal"
+          <ProductPropertyChip
             data-testid="task-reminder-chip"
-            :aria-pressed="activeProperty === 'reminder'"
+            :active="activeProperty === 'reminder'"
             @click="toggleProperty('reminder')"
           >
-            <Bell class="mr-1 h-3.5 w-3.5" />
+            <template #icon><Bell class="h-3.5 w-3.5" /></template>
             {{ reminderChipLabel }}
-          </Button>
+          </ProductPropertyChip>
 
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            class="h-8 rounded-full px-3 font-normal"
+          <ProductPropertyChip
             data-testid="task-checklist-chip"
-            :aria-pressed="activeProperty === 'checklist'"
+            :active="activeProperty === 'checklist'"
             @click="toggleProperty('checklist')"
           >
-            <ListChecks class="mr-1 h-3.5 w-3.5" />
+            <template #icon><ListChecks class="h-3.5 w-3.5" /></template>
             {{ checklistChipLabel }}
-          </Button>
+          </ProductPropertyChip>
 
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            class="h-8 rounded-full px-3 font-normal"
+          <ProductPropertyChip
             data-testid="task-properties-chip"
-            :aria-pressed="activeProperty === 'metadata'"
+            :active="activeProperty === 'metadata'"
             @click="toggleProperty('metadata')"
           >
-            <SlidersHorizontal class="mr-1 h-3.5 w-3.5" />
+            <template #icon><SlidersHorizontal class="h-3.5 w-3.5" /></template>
             {{ metadataChipLabel }}
-          </Button>
+          </ProductPropertyChip>
         </div>
 
         <div
@@ -168,8 +144,17 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { AlertCircle, Bell, CalendarClock, Repeat2, SlidersHorizontal, Target } from '@lucide/vue';
+import {
+  AlertCircle,
+  Bell,
+  CalendarClock,
+  ListChecks,
+  Repeat2,
+  SlidersHorizontal,
+  Target,
+} from '@lucide/vue';
 import { Button } from '@memoflow/ui-vue-shadcn';
+import { ProductPropertyChip } from '../../../../shared/components';
 import BasicInfoSection from './sections/BasicInfoSection.vue';
 import TimeConfigSection from './sections/TimeConfigSection.vue';
 import RecurrenceSection from './sections/RecurrenceSection.vue';

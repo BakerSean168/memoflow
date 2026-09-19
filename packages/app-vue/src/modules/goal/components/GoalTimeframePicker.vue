@@ -1,18 +1,10 @@
 <template>
   <Popover v-model:open="open">
     <PopoverTrigger as-child>
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        class="h-8 max-w-full justify-start gap-1.5 rounded-full px-3 font-normal"
-        :disabled="disabled"
-        :data-testid="testId"
-        :aria-label="ariaLabel"
-      >
-        <CalendarRange class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-        <span class="truncate">{{ triggerLabel }}</span>
-      </Button>
+      <ProductPropertyChip :disabled="disabled" :data-testid="testId" :aria-label="ariaLabel">
+        <template #icon><CalendarRange class="h-3.5 w-3.5" /></template>
+        {{ triggerLabel }}
+      </ProductPropertyChip>
     </PopoverTrigger>
     <PopoverContent align="start" class="w-80 max-w-[calc(100vw-2rem)] space-y-3 p-3">
       <div class="space-y-1">
@@ -137,6 +129,7 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from '@memoflow/ui-vue-shadcn';
+import { ProductPropertyChip } from '../../../shared/components';
 import { fromProductYmdInputValue, getProductTodayYmd } from '../../../shared/utils/product-time';
 
 const props = withDefaults(

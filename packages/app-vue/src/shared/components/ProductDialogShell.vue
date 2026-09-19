@@ -9,6 +9,7 @@
     "
     :data-testid="testId"
     @open-auto-focus="handleOpenAutoFocus"
+    @interact-outside="handleInteractOutside"
   >
     <DialogHeader class="shrink-0 border-b px-6 py-5 text-left">
       <div class="flex min-w-0 items-start gap-3">
@@ -61,12 +62,14 @@ const props = withDefaults(
     contentClass?: HTMLAttributes['class'];
     bodyClass?: HTMLAttributes['class'];
     initialFocusSelector?: string;
+    preventInteractOutside?: boolean;
   }>(),
   {
     size: 'md',
     contentClass: undefined,
     bodyClass: undefined,
     initialFocusSelector: undefined,
+    preventInteractOutside: false,
   },
 );
 
@@ -84,6 +87,12 @@ function handleOpenAutoFocus(event: Event): void {
 
   event.preventDefault();
   scheduleInitialFocus();
+}
+
+function handleInteractOutside(event: Event): void {
+  if (props.preventInteractOutside) {
+    event.preventDefault();
+  }
 }
 
 function scheduleInitialFocus(): void {

@@ -27,25 +27,26 @@
       <template #description>{{ t('goal.dialog.vNextDescription') }}</template>
 
       <form id="goal-form" class="space-y-6" @submit.prevent="save">
-        <div class="space-y-2">
-          <Label for="goal-name">{{ t('goal.dialog.goalTitle') }}</Label>
+        <div class="border-b pb-4">
+          <Label for="goal-name" class="sr-only">{{ t('goal.dialog.goalTitle') }}</Label>
           <Input
             id="goal-name"
             v-model="draft.name"
             data-testid="goal-name-input"
-            class="h-11 text-lg font-medium"
+            class="h-11 border-0 bg-transparent px-0 text-lg font-semibold shadow-none focus-visible:bg-muted/40 focus-visible:ring-1 focus-visible:ring-ring/30"
             maxlength="256"
             :placeholder="t('goal.dialog.goalTitlePlaceholder')"
           />
+          <Label for="goal-summary" class="sr-only">{{ t('goal.dialog.summary') }}</Label>
+          <Input
+            id="goal-summary"
+            v-model="draft.summary"
+            data-testid="goal-summary-input"
+            class="h-9 border-0 bg-transparent px-0 text-sm text-muted-foreground shadow-none focus-visible:bg-muted/40 focus-visible:ring-1 focus-visible:ring-ring/30"
+            maxlength="500"
+            :placeholder="t('goal.dialog.summaryPlaceholder')"
+          />
         </div>
-
-        <Input
-          id="goal-summary"
-          v-model="draft.summary"
-          data-testid="goal-summary-input"
-          maxlength="500"
-          :placeholder="t('goal.dialog.summaryPlaceholder')"
-        />
 
         <div class="flex flex-wrap items-center gap-2" data-testid="goal-property-chips">
           <span
@@ -57,16 +58,10 @@
 
           <Popover>
             <PopoverTrigger as-child>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                class="h-8 rounded-full px-3 font-normal"
-                data-testid="goal-start-chip"
-              >
-                <CalendarDays class="mr-1 h-3.5 w-3.5" />
+              <ProductPropertyChip data-testid="goal-start-chip">
+                <template #icon><CalendarDays class="h-3.5 w-3.5" /></template>
                 {{ startChipLabel }}
-              </Button>
+              </ProductPropertyChip>
             </PopoverTrigger>
             <PopoverContent align="start" class="w-auto space-y-2 p-3">
               <Label for="goal-start-date">{{ t('goal.dialog.startDate') }}</Label>
@@ -111,16 +106,10 @@
 
           <Popover>
             <PopoverTrigger as-child>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                class="h-8 rounded-full px-3 font-normal"
-                data-testid="goal-notes-chip"
-              >
-                <NotebookText class="mr-1 h-3.5 w-3.5" />
+              <ProductPropertyChip data-testid="goal-notes-chip">
+                <template #icon><NotebookText class="h-3.5 w-3.5" /></template>
                 {{ t('goal.dialog.notes') }}
-              </Button>
+              </ProductPropertyChip>
             </PopoverTrigger>
             <PopoverContent align="start" class="w-72 space-y-3 p-3">
               <p class="text-sm text-muted-foreground">{{ t('goal.dialog.notesHint') }}</p>
@@ -421,7 +410,11 @@ import {
   SelectValue,
   Textarea,
 } from '@memoflow/ui-vue-shadcn';
-import { LabelPicker, ProductDialogShell } from '../../../../shared/components';
+import {
+  LabelPicker,
+  ProductDialogShell,
+  ProductPropertyChip,
+} from '../../../../shared/components';
 import GoalReminderChip from '../GoalReminderChip.vue';
 import GoalTimeframePicker from '../GoalTimeframePicker.vue';
 import {

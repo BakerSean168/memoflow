@@ -1,7 +1,7 @@
 import { defineComponent, ref } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
-import { Dialog as AppDialog } from '@memoflow/ui-vue-shadcn';
+import { Dialog as AppDialog, DialogContent } from '@memoflow/ui-vue-shadcn';
 import ProductDialogShell from './ProductDialogShell.vue';
 
 describe('ProductDialogShell', () => {
@@ -75,6 +75,34 @@ describe('ProductDialogShell', () => {
       document.querySelector<HTMLElement>('[data-testid="open-state-initial-field"]'),
     );
 
+    wrapper.unmount();
+  });
+  it('can preserve selection-style dialogs by preventing outside interaction', async () => {
+    const Host = defineComponent({
+      components: { AppDialog, ProductDialogShell },
+      template: `
+        <AppDialog :open="true">
+          <ProductDialogShell
+            :open="true"
+            test-id="outside-lock-dialog"
+            prevent-interact-outside
+          >
+            <template #title>Selection</template>
+            <template #description>Choose one item</template>
+            <div>Options</div>
+            <template #footer><button type="button">Choose</button></template>
+          </ProductDialogShell>
+        </AppDialog>
+      `,
+    });
+
+    const wrapper = mount(Host, { attachTo: document.body });
+    await flushPromises();
+    const content = wrapper.findComponent(DialogContent);
+    const event = new Event('pointerdown', { cancelable: true });
+    content.vm.$emit('interactOutside', event);
+
+    expect(event.defaultPrevented).toBe(true);
     wrapper.unmount();
   });
 });
