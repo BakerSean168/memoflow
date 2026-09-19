@@ -4,14 +4,14 @@ import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
 import { GoalReviewContextBuilder } from '../../services/goal-review-context-builder';
 import { createGoalMutationReceipt } from './goal-mutation-receipt';
-
-const DAY_MS = 24 * 60 * 60 * 1000;
+import { createTimeFacade, type UserTimeContextPort } from '@memoflow/time';
 
 export class AddGoalReviewUseCase {
   constructor(
     private readonly goalRepository: IGoalRepository,
     private readonly goalPolicy: GoalPolicy,
     private readonly contextBuilder: GoalReviewContextBuilder,
+    private readonly userTimeContextPort: UserTimeContextPort,
     private readonly now: () => number = () => Date.now(),
   ) {}
 
@@ -37,8 +37,10 @@ export class AddGoalReviewUseCase {
     this.goalPolicy.ensureGoalCanBeModified(goal);
     const windowEndAt = this.now();
     const windowDays = params.windowDays ?? 7;
+    const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
+    const goalTime = createTimeFacade({ context: timeContext });
     const systemContext = await this.contextBuilder.build(goal, {
-      windowStartAt: windowEndAt - windowDays * DAY_MS,
+      windowStartAt: Number(goalTime.calendar.addDays(windowEndAt, -windowDays)),
       windowEndAt,
     });
     const review = goal.createAndAddReview({

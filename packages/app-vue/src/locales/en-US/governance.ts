@@ -116,7 +116,9 @@ export default {
     "changeReactivated": "Reactivated"
   },
   "codeSnippet": {
-    "copyCode": "Copy code"
+    "copyCode": "Copy code",
+    "goodExample": "Good",
+    "badExample": "Bad"
   },
   "tagInput": {
     "label": "Tags",

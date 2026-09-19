@@ -60,7 +60,9 @@ const mocks = vi.hoisted(() => {
     createNotificationSseInvalidationSource: vi.fn(() => sseSource),
     createI18nPlugin: vi.fn(() => ({ name: 'i18n-plugin' })),
     loadLocaleMessages: vi.fn(async () => ({ hello: 'world' })),
-    translateMessageKey: vi.fn((key: string) => (key === 'dashboard.title' ? '仪表盘' : key)),
+    translateMessageKey: vi.fn((key: string) =>
+      key === 'aiAssistant.chatPage.title' ? 'AI Workspace' : key,
+    ),
     progressStart: vi.fn(),
     progressDone: vi.fn(),
     requestIdleCallback: vi.fn((cb: IdleRequestCallback) => {
@@ -211,8 +213,8 @@ describe('bootstrapMainApp', () => {
 
     const afterEachHandler = mocks.router.afterEach.mock.calls[0]?.[0];
     expect(afterEachHandler).toBeTypeOf('function');
-    afterEachHandler({ meta: { title: 'dashboard.title' } });
-    expect(document.title).toBe('仪表盘 - MemoFlow');
+    afterEachHandler({ meta: { title: 'aiAssistant.chatPage.title' } });
+    expect(document.title).toBe('AI Workspace - MemoFlow');
 
     afterEachHandler({ meta: { title: 'Inbox' } });
 

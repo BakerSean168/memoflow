@@ -4,7 +4,7 @@ import type {
   ConfirmKnowledgeRepositoryHeadReq,
   CreateKnowledgeRepositoryConnectionReq,
   DisconnectKnowledgeRepositoryConnectionRes,
-  KnowledgeRepositoryConnectionClientDTO,
+  KnowledgeRemoteBindingClientDTO,
   KnowledgeRepositoryInstallationTokenRes,
   KnowledgeRepositoryInstallationIntentStatusResponse,
   KnowledgeRepositoryContentState,
@@ -105,9 +105,18 @@ export class KnowledgeRepositoryRemoteGateway {
     return this.request('/repositories/knowledge-connections', { method: 'GET' });
   }
 
+  async refreshKnowledgeRepositoryObservation(
+    connectionId: string,
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>> {
+    return this.request(
+      `/repositories/knowledge-connections/${encodeURIComponent(connectionId)}/refresh-observation`,
+      { method: 'POST', body: {} },
+    );
+  }
+
   async connectKnowledgeRepository(
     request: CreateKnowledgeRepositoryConnectionReq,
-  ): Promise<Result<KnowledgeRepositoryConnectionClientDTO>> {
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>> {
     return this.request('/repositories/knowledge-connections', {
       method: 'POST',
       body: request,
@@ -146,7 +155,7 @@ export class KnowledgeRepositoryRemoteGateway {
   async confirmKnowledgeRepositoryHead(
     connectionId: string,
     request: ConfirmKnowledgeRepositoryHeadReq,
-  ): Promise<Result<KnowledgeRepositoryConnectionClientDTO>> {
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>> {
     return this.request(
       `/repositories/knowledge-connections/${encodeURIComponent(connectionId)}/head-confirmation`,
       { method: 'POST', body: request },

@@ -31,35 +31,15 @@ agent: agent
 
 ---
 
-## 📁 模块功能构思文档要求
+## 📁 产品规格文档要求
 
-每个业务模块（如 reminder）应在 docs/modules/{module}/features/ 下新建专门的“模块功能构思”文件夹：
+当前产品事实与 North Star 统一落在 `docs/product/`，架构决策落在 `docs/architecture/adr/`，实施计划落在 `docs/plan/`。不要新建或复活旧 `docs/modules/**` 平行体系。
 
-1. 主文件（README.md）需列出该模块所有“超越 CRUD”的功能点（按 MVP/MMP/未来分组），并链接到每个功能的详细文档。
-2. 每个功能点单独一个 .md 文件，内容包括：概述、目标与价值、主要设计点、MVP/MMP 路径、验收标准。
-3. 所有功能文档需字段对齐、结构统一，便于团队评审与后续实现。
+开始产品/规格工作时先读取：
 
-以 reminder 模块为例：
+- `docs/product/README.md`
+- 对应 `docs/product/modules/{module}.md`
+- 相关 `docs/product/*-vnext.md` / `docs/product/feature-map.md`
+- 相关 ADR 与 active plan
 
-- docs/modules/reminder/features/README.md
-- docs/modules/reminder/features/01-quick-template-library.md
-- docs/modules/reminder/features/02-failure-alert.md
-- ...
-
----
-
-## 📝 Reminder 模块功能构思（MVP & MMP）
-
-### MVP 核心功能 (2周)
-
-1. 快速创建提醒模板库
-2. 提醒失败告警
-3. 提醒触发日志查询
-4. 提醒归档与清理
-
-### MMP 扩展功能 (4周)
-
-5. 智能免打扰（Smart DND）
-6. 提醒效果仪表盘
-7. SNOOZE 智能建议
-8. 提醒 → Task 一键转化
+对 Routine 场景使用产品名 **Routine**；`packages/reminder` 只是历史物理包名，不代表 legacy ReminderTemplate 产品模型仍存在。

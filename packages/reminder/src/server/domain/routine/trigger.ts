@@ -1,6 +1,7 @@
 import {
   asInstant,
-  defaultTime,
+  createTimeContext,
+  createTimeFacade,
   isIanaTimeZoneId,
   type Hm,
   type Instant,
@@ -11,7 +12,6 @@ import {
   type TimeZoneId,
   type Ymd,
 } from '@memoflow/time';
-import type { FixedTimeTrigger, IntervalTrigger } from '@memoflow/contracts/reminder';
 
 /**
  * Timing truth is explicit in the trigger type itself.
@@ -95,16 +95,21 @@ export interface CreateWallClockTriggerInput {
 }
 
 export function createWallClockTrigger(input: CreateWallClockTriggerInput): WallClockTrigger {
-  const localTime = defaultTime.input.parseTimeValue(input.localTime);
+  if (!isIanaTimeZoneId(input.timeZone)) {
+    throw new TypeError(`Invalid IANA time zone: ${input.timeZone}`);
+  }
+  // WallClock owns an explicit schedule timezone snapshot. Parsing its Hm/Ymd
+  // values must never instantiate the host-local default facade.
+  const scheduleTime = createTimeFacade({
+    context: createTimeContext({ timeZone: input.timeZone, weekStartsOn: 1 }),
+  });
+  const localTime = scheduleTime.input.parseTimeValue(input.localTime);
   if (localTime == null) {
     throw new TypeError(`Invalid local time: ${input.localTime}`);
   }
-  const startDate = defaultTime.input.parseDateValue(input.recurrence.startDate);
+  const startDate = scheduleTime.input.parseDateValue(input.recurrence.startDate);
   if (startDate == null) {
     throw new TypeError(`Invalid recurrence start date: ${input.recurrence.startDate}`);
-  }
-  if (!isIanaTimeZoneId(input.timeZone)) {
-    throw new TypeError(`Invalid IANA time zone: ${input.timeZone}`);
   }
 
   const interval = input.recurrence.interval ?? 1;
@@ -310,79 +315,6 @@ export function temporaryOverrideAllowsExecution(
   if (override.snoozeUntil != null && nowMs < Number(override.snoozeUntil)) return false;
   if (override.suppressUntil != null && nowMs < Number(override.suppressUntil)) return false;
   return true;
-}
-
-export interface LegacyIntervalMigration {
-  target: 'Elapsed' | 'ActiveUsage';
-  trigger: ElapsedTrigger | ActiveUsageTrigger;
-  /** Legacy startTime is runtime state, not long-lived trigger configuration. */
-  legacyAnchorInstant: Instant | null;
-  rationale: string;
-}
-
-/**
- * ADR-059 characterizes legacy Interval as wall-clock elapsed. ActiveUsage is
- * selected only when migration evidence explicitly proves that intent.
- */
-export function migrateLegacyIntervalTrigger(
-  legacy: IntervalTrigger,
-  options: {
-    semanticEvidence?: 'elapsed' | 'active-usage';
-    elapsedAnchor?: ElapsedAnchor;
-    activeUsageAnchor?: ActiveUsageAnchor;
-    naturalBreakCreditMs?: number | null;
-    /** Actual legacy runtime recurrence base; Reminder uses activeTime.activatedAt. */
-    legacyAnchorInstant?: Instant | number | null;
-  } = {},
-): LegacyIntervalMigration {
-  assertPositiveFinite(legacy.minutes, 'legacy interval minutes');
-  const durationMs = legacy.minutes * 60_000;
-  const legacyAnchorInstant = normalizeInstant(
-    options.legacyAnchorInstant !== undefined ? options.legacyAnchorInstant : legacy.startTime,
-    'legacy interval runtime anchor',
-  );
-
-  if (options.semanticEvidence === 'active-usage') {
-    return {
-      target: 'ActiveUsage',
-      trigger: createActiveUsageTrigger({
-        requiredActiveMs: durationMs,
-        anchor: options.activeUsageAnchor,
-        naturalBreakCredit:
-          options.naturalBreakCreditMs == null
-            ? null
-            : { idleDurationMs: options.naturalBreakCreditMs },
-      }),
-      legacyAnchorInstant,
-      rationale: 'Explicit migration evidence identifies true active-computer usage semantics.',
-    };
-  }
-
-  return {
-    target: 'Elapsed',
-    trigger: createElapsedTrigger({ durationMs, anchor: options.elapsedAnchor }),
-    legacyAnchorInstant,
-    rationale:
-      options.semanticEvidence === 'elapsed'
-        ? 'Explicit migration evidence confirms elapsed-time semantics.'
-        : 'ADR-059 characterizes legacy Interval as wall-clock elapsed; no ActiveUsage evidence was provided.',
-  };
-}
-
-/**
- * FixedTime carries local clock time only; recurrence context comes from the
- * enclosing legacy Routine/Reminder. Null legacy timezone is the old contract's
- * explicit UTC default, never a host-local/fixed-city fallback.
- */
-export function migrateLegacyFixedTimeTrigger(input: {
-  legacy: FixedTimeTrigger;
-  recurrence: CreateWallClockTriggerInput['recurrence'];
-}): WallClockTrigger {
-  return createWallClockTrigger({
-    localTime: input.legacy.time,
-    timeZone: input.legacy.timezone ?? 'UTC',
-    recurrence: input.recurrence,
-  });
 }
 
 function normalizeInstant(value: Instant | number | null, field: string): Instant | null {

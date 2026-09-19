@@ -12,8 +12,7 @@ import {
 } from '@memoflow/contracts/notification';
 import { BusinessRuleViolationError } from '@memoflow/utils/errors';
 import type { NotificationPreference } from '../aggregates/notification-preference';
-import type { DoNotDisturbConfig } from '../value-objects/do-not-disturb-config';
-import type { RateLimit } from '../value-objects/rate-limit';
+import type { QuietHours } from '../value-objects/quiet-hours';
 
 export interface NotificationDeliveryDecision {
   channel: NotificationChannelType;
@@ -27,12 +26,11 @@ export interface NotificationPolicyContext {
   workflow: NotificationWorkflowDefinitionDTO;
   channel: NotificationChannelType;
   preference?: NotificationPreference | null;
-  doNotDisturb?: DoNotDisturbConfig | null;
-  rateLimit?: RateLimit | null;
-  rateLimitUsage?: { hourCount: number; dayCount: number };
+  quietHours?: QuietHours | null;
   now?: Date;
 }
 
+/** Product/user policy. Platform abuse/rate safety belongs to SystemDeliveryGuard. */
 export class NotificationPolicy {
   evaluate(context: NotificationPolicyContext): NotificationDeliveryDecision {
     const capability = context.workflow.channels[context.channel];
@@ -89,7 +87,7 @@ export class NotificationPolicy {
 
     const now = context.now ?? new Date();
     if (
-      context.doNotDisturb?.isActiveAt(now)
+      context.quietHours?.isActiveAt(now)
       && capability.dndBehavior !== NotificationDndBehavior.Bypass
     ) {
       if (capability.dndBehavior === NotificationDndBehavior.Suppress) {
@@ -100,7 +98,7 @@ export class NotificationPolicy {
           preferenceSource: source,
         };
       }
-      const retryAt = context.doNotDisturb.nextInactiveAt(now);
+      const retryAt = context.quietHours.nextInactiveAt(now);
       return {
         channel: context.channel,
         outcome: NotificationDeliveryPlanOutcome.Deferred,
@@ -108,25 +106,6 @@ export class NotificationPolicy {
         preferenceSource: source,
         ...(retryAt ? { retryAt } : {}),
       };
-    }
-
-    if (context.rateLimit?.enabled && context.rateLimitUsage) {
-      if (context.rateLimitUsage.hourCount >= context.rateLimit.maxPerHour) {
-        return {
-          channel: context.channel,
-          outcome: NotificationDeliveryPlanOutcome.RateLimited,
-          reason: NotificationDeliveryReason.RateLimitHour,
-          preferenceSource: source,
-        };
-      }
-      if (context.rateLimitUsage.dayCount >= context.rateLimit.maxPerDay) {
-        return {
-          channel: context.channel,
-          outcome: NotificationDeliveryPlanOutcome.RateLimited,
-          reason: NotificationDeliveryReason.RateLimitDay,
-          preferenceSource: source,
-        };
-      }
     }
 
     return {

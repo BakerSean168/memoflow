@@ -3,6 +3,7 @@ import { Router, type Request, type Response } from 'express';
 import { describe, expect, it, vi } from 'vitest';
 import type { AssistantRuntimeEvent } from '@memoflow/contracts/ai';
 import type { AIWorkflowRuntimePort, MastraAIRuntime } from '../../server/mastra/runtime';
+import { AIExecutionError } from '../../shared/ai-execution-error';
 import { registerAIRuntimeRoutes } from './ai-runtime.routes';
 
 type LayerWithRoute = {
@@ -177,6 +178,35 @@ describe('registerAIRuntimeRoutes', () => {
       `event: runtime\ndata: ${JSON.stringify(completed)}\n\n`,
     ]);
     expect(res.end).toHaveBeenCalledTimes(1);
+  });
+
+  it('preserves stable capability failure codes and redacts provider diagnostics in SSE', async () => {
+    const dispatchMessage = vi.fn(async function* () {
+      throw new AIExecutionError(
+        'capability_unsupported',
+        'provider=https://secret.example; apiKey=server-secret',
+      );
+    });
+    const runtime = {
+      dispatchMessage,
+      cancelRun: vi.fn(() => false),
+      listMessages: vi.fn(),
+      deleteConversation: vi.fn(),
+      summarizeUsage: vi.fn(),
+    } as unknown as MastraAIRuntime;
+    const router = registerAIRuntimeRoutes(runtime, { auth });
+    const handler = getRouteHandler(router, 'post', '/assistant/sse');
+    const { res, writes } = response();
+
+    await handler(request(messageCommand) as never, res as never);
+
+    expect(writes).toHaveLength(1);
+    expect(writes[0]).toContain('AI_CAPABILITY_UNSUPPORTED');
+    expect(writes[0]).toContain(
+      'The selected AI model does not support the required capability',
+    );
+    expect(writes[0]).not.toContain('secret.example');
+    expect(writes[0]).not.toContain('server-secret');
   });
 
   it('rejects client identity injection before runtime dispatch', async () => {
@@ -430,6 +460,37 @@ describe('registerAIRuntimeRoutes', () => {
       unavailableRes as never,
     );
     expect(unavailableRes.status).toHaveBeenCalledWith(503);
+  });
+
+  it('maps provider runtime failures to the same stable public code as Desktop IPC', async () => {
+    const assistant = runtimeStub();
+    const workflow = workflowRuntimeStub();
+    workflow.start.mockRejectedValueOnce(
+      new AIExecutionError('provider_unavailable', 'vault=server-secret'),
+    );
+    const router = registerAIRuntimeRoutes(assistant.runtime, { auth }, workflow.runtime);
+    const handler = getRouteHandler(router, 'post', '/workflow/start');
+    const { res } = response();
+
+    await handler(
+      request({
+        kind: 'goal.create',
+        conversationId: 'conversation-1',
+        input: { idea: 'Run a 5K' },
+      }) as never,
+      res as never,
+    );
+
+    expect(res.status).toHaveBeenCalledWith(503);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        error: {
+          code: 'SERVICE_UNAVAILABLE',
+          message: 'AI service is unavailable',
+        },
+      }),
+    );
+    expect(JSON.stringify(res.json.mock.calls[0]?.[0])).not.toContain('server-secret');
   });
 
   it('aborts the Mastra dispatch when the HTTP connection closes', async () => {

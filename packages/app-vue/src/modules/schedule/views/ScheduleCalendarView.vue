@@ -77,13 +77,13 @@
       <Button
         size="sm"
         class="ml-auto h-8 shrink-0 px-2 @xl/panel:px-3"
-        :aria-label="t('schedule.dashboard.createSchedule')"
+        :aria-label="t('schedule.planning.createSchedule')"
         data-primary-action="create-schedule"
         data-testid="create-schedule-button"
         @click="showCreateDialog = true"
       >
         <Plus class="h-4 w-4 @xl/panel:mr-1.5" />
-        <span class="hidden @xl/panel:inline">{{ t('schedule.dashboard.createSchedule') }}</span>
+        <span class="hidden @xl/panel:inline">{{ t('schedule.planning.createSchedule') }}</span>
       </Button>
     </header>
 
@@ -91,11 +91,12 @@
       <PlannerCalendar
         ref="plannerCalendarRef"
         :projections="projections"
+        :conflicts="conflicts"
         :owner-commands="ownerCommands"
         :view="activeView"
         :locale="locale"
         :loading="isLoading"
-        :loading-label="t('schedule.dashboard.loading')"
+        :loading-label="t('schedule.planning.loading')"
         @range-change="handleVisibleRange"
         @event-click="handleProjectionClick"
         @day-click="handleDayClick"
@@ -154,13 +155,14 @@ import PlannerCalendar, {
 import { createPlannerOwnerCommandRouter } from '../planner';
 
 const { t, locale } = useI18n();
-const { projections, events, isLoading, fetchForRange, windowStart, windowEnd } = useCalendarView();
+const { projections, conflicts, events, isLoading, fetchForRange, windowStart, windowEnd } =
+  useCalendarView();
 const schedule = useSchedule();
 const task = useTask();
 
 const ownerCommands = createPlannerOwnerCommandRouter({
   schedule: { updateSchedule: schedule.updateCalendarEntry },
-  task: { rescheduleInstance: task.rescheduleInstance },
+  task: { rescheduleOccurrence: task.rescheduleOccurrence },
 });
 
 const plannerCalendarRef = ref<InstanceType<typeof PlannerCalendar> | null>(null);
@@ -238,7 +240,7 @@ function handleEventClick(event: CalendarEventItem): void {
 }
 
 async function handleCompleteTask(originalId: string): Promise<void> {
-  const result = await task.completeInstance(originalId);
+  const result = await task.completeOccurrence(originalId);
   if (result && windowStart.value && windowEnd.value) {
     await fetchForRange(windowStart.value, windowEnd.value);
   }
@@ -260,7 +262,13 @@ async function handleCreateSchedule(data: CreateScheduleRequest): Promise<boolea
   const result = await schedule.createCalendarEntry(data);
   if (result) {
     if (windowStart.value && windowEnd.value) {
-      await fetchForRange(windowStart.value, windowEnd.value);
+      try {
+        await fetchForRange(windowStart.value, windowEnd.value);
+      } catch {
+        // The command already committed and the local Schedule store contains the returned DTO.
+        // A read-model refresh failure must never be reported as a failed create.
+        toast.warning(t('schedule.toast.scheduleCreatedRefreshFailed'));
+      }
     }
     toast.success(t('schedule.toast.scheduleCreated'));
     return true;

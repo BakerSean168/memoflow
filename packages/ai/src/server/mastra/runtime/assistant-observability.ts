@@ -1,6 +1,6 @@
 import type { AssistantRuntimeEvent } from '@memoflow/contracts/ai';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
-import type { AIExecutionLogInput } from '../../application/ports';
+import type { AIExecutionRecordInput } from '../../application/ports';
 import { estimateAIExecutionCost } from '../../application/use-cases/commands/ai-observability';
 import type { ResolvedAIModel } from '../models';
 
@@ -26,20 +26,18 @@ export function projectAssistantUsage(
   };
 }
 
-export function createAssistantExecutionLog(input: {
+/** Build the bounded terminal operations fact for one Assistant turn. */
+export function createAssistantExecutionRecord(input: {
   readonly identityId: string;
   readonly context?: Pick<ExecutionContext, 'requestId' | 'traceId'>;
   readonly conversationId: string;
-  readonly contentLength: number;
-  readonly model: Pick<ResolvedAIModel, 'providerId' | 'providerName' | 'modelId'>;
+  readonly model: Pick<ResolvedAIModel, 'providerId' | 'modelId'>;
   readonly runId: string;
-  readonly assistantMessageId?: string;
-  readonly responseLength: number;
   readonly outcome: AssistantTurnOutcome;
   readonly usage?: AssistantUsageSnapshot;
   readonly runtimeErrorCode?: string;
   readonly processingMs: number;
-}): AIExecutionLogInput {
+}): AIExecutionRecordInput {
   const completed = input.outcome === 'assistant.run.completed';
   const cancelled = input.outcome === 'assistant.run.cancelled';
   const costEstimate = input.usage
@@ -48,31 +46,22 @@ export function createAssistantExecutionLog(input: {
 
   return {
     identityId: input.identityId,
-    taskType: 'MASTRA_ASSISTANT_TURN',
-    status: completed ? 'COMPLETED' : 'FAILED',
+    operation: 'assistant.turn',
+    outcome: completed ? 'succeeded' : cancelled ? 'cancelled' : 'failed',
     conversationId: input.conversationId,
     runId: input.runId,
     ...(input.context?.requestId ? { requestId: input.context.requestId } : {}),
     ...(input.context?.traceId ? { traceId: input.context.traceId } : {}),
-    providerId: input.model.providerId,
-    providerName: input.model.providerName,
-    model: input.model.modelId,
+    providerConnectionId: String(input.model.providerId),
+    modelId: input.model.modelId,
     ...(!completed
-      ? { errorCategory: cancelled ? 'aborted' : input.runtimeErrorCode ?? 'MASTRA_RUNTIME_ERROR' }
+      ? {
+          errorCategory: cancelled ? 'aborted' : input.runtimeErrorCode ?? 'MASTRA_RUNTIME_ERROR',
+          safeError: cancelled ? 'aborted' : 'AI runtime request failed',
+        }
       : {}),
-    input: {
-      conversationId: input.conversationId,
-      contentLength: input.contentLength,
-    },
-    result: {
-      runId: input.runId,
-      ...(input.assistantMessageId ? { assistantMessageId: input.assistantMessageId } : {}),
-      responseLength: input.responseLength,
-      outcome: input.outcome,
-    },
-    ...(!completed ? { error: cancelled ? 'aborted' : 'AI runtime request failed' } : {}),
     ...(input.usage ? { tokenUsage: input.usage } : {}),
     ...(costEstimate ? { costEstimate } : {}),
-    processingMs: Math.max(0, input.processingMs),
+    latencyMs: Math.max(0, input.processingMs),
   };
 }

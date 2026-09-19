@@ -14,7 +14,7 @@
       </template>
       <template #actions>
         <Button
-          data-testid="create-task-template-button"
+          data-testid="create-task-plan-button"
           data-primary-action="create-task"
           @click="openCreateDialog"
         >
@@ -51,6 +51,20 @@
       data-testid="task-management-scroll-host"
     >
       <div class="mx-auto flex w-full max-w-5xl flex-col gap-4">
+        <div
+          v-if="queryGoalId"
+          class="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/30 px-3 py-2 text-sm"
+          data-testid="task-goal-deeplink-filter"
+        >
+          <span class="text-muted-foreground">
+            Goal {{ queryGoalId
+            }}<template v-if="queryKeyResultId"> · KR {{ queryKeyResultId }}</template>
+          </span>
+          <Button size="sm" variant="ghost" @click="router.replace({ name: 'task-list' })">
+            {{ t('common.clear') }}
+          </Button>
+        </div>
+
         <section
           class="grid gap-2 rounded-xl border bg-card p-3 @2xl/panel:grid-cols-[minmax(0,1fr)_repeat(3,minmax(9rem,auto))]"
           data-testid="task-filter-bar"
@@ -232,7 +246,7 @@
               v-for="occurrence in visibleOccurrences"
               :key="occurrence.id"
               :occurrence="occurrence"
-              :template="templateById.get(String(occurrence.templateId))!"
+              :template="templateById.get(String(occurrence.planId))!"
               :position="occurrencePositions.get(String(occurrence.id))"
               :busy="busyOccurrenceId === String(occurrence.id)"
               @open-plan="openTaskDetail"
@@ -240,6 +254,7 @@
               @uncomplete="uncompleteOccurrence"
               @missed="markOccurrenceMissed"
               @skip="skipOccurrence"
+              @checklist-change="setOccurrenceChecklistItem"
             />
           </div>
           <div
@@ -263,7 +278,7 @@
       </div>
     </main>
 
-    <TaskTemplateDialog
+    <TaskPlanDialog
       v-model="showDialog"
       :mode="dialogMode"
       :template="selectedTemplate"
@@ -275,9 +290,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Badge, Button, Input, useConfirm } from '@memoflow/ui-vue-shadcn';
 import {
@@ -289,25 +304,21 @@ import {
   RefreshCw,
   Search,
 } from '@lucide/vue';
-import {
-  TaskType,
-  type RecurrenceRuleDTO,
-  type TaskInstanceClientDTO,
-} from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
 import type { GoalId, KeyResultId } from '@memoflow/contracts/primitives';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
 import TaskOccurrenceRow from '../components/TaskOccurrenceRow.vue';
-import TaskTemplateDialog from '../components/dialogs/TaskTemplateDialog.vue';
-import type { TaskTemplateViewModel } from '../components/types';
+import TaskPlanDialog from '../components/dialogs/TaskPlanDialog.vue';
+import type { TaskPlanViewModel } from '../components/types';
 import { useTaskStore } from '../stores/task-store';
-import { useTaskInstances } from '../composables/useTaskInstances';
-import { useTaskTemplateListQuery } from '../composables/useTaskTemplateListQuery';
-import { useTaskTemplateMutations } from '../composables/useTaskTemplateMutations';
+import { useTaskOccurrences } from '../composables/useTaskOccurrences';
+import { useTaskPlanListQuery } from '../composables/useTaskPlanListQuery';
+import { useTaskPlanMutations } from '../composables/useTaskPlanMutations';
 import {
-  mapTaskTemplateDtoToViewModel,
-  toTaskTimeConfigPayload,
-} from '../utils/task-template-presentation';
+  mapTaskPlanDtoToViewModel,
+  toTaskPlanSchedulePayload,
+} from '../utils/task-plan-presentation';
 import {
   getTaskOccurrencePosition,
   isTaskOccurrenceOnSurface,
@@ -315,10 +326,11 @@ import {
   type TaskOccurrenceSort,
 } from '../utils/task-occurrence-presentation';
 
+const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 const surfaces = ['today', 'upcoming', 'plans'] as const;
-const instanceStatuses: TaskInstanceClientDTO['status'][] = [
+const instanceStatuses: TaskOccurrenceClientDTO['status'][] = [
   'Pending',
   'InProgress',
   'Completed',
@@ -328,30 +340,51 @@ const instanceStatuses: TaskInstanceClientDTO['status'][] = [
 
 const activeSurface = ref<(typeof surfaces)[number]>('today');
 const searchQuery = ref('');
-const statusFilter = ref<'all' | TaskInstanceClientDTO['status']>('all');
+const statusFilter = ref<'all' | TaskOccurrenceClientDTO['status']>('all');
 const labelFilter = ref('all');
 const goalFilter = ref<'all' | 'linked' | 'unlinked'>('all');
 const occurrenceSort = ref<TaskOccurrenceSort>('time');
 const showDialog = ref(false);
 const dialogMode = ref<'create' | 'edit'>('create');
-const selectedTemplate = ref<TaskTemplateViewModel | null>(null);
+const selectedTemplate = ref<TaskPlanViewModel | null>(null);
 const busyOccurrenceId = ref<string | null>(null);
 
+const queryGoalId = computed(() =>
+  typeof route.query.goalId === 'string' && route.query.goalId.length > 0
+    ? route.query.goalId
+    : null,
+);
+const queryKeyResultId = computed(() =>
+  typeof route.query.keyResultId === 'string' && route.query.keyResultId.length > 0
+    ? route.query.keyResultId
+    : null,
+);
+const taskListParams = computed(() => ({
+  page: 1,
+  limit: 500,
+  ...(queryGoalId.value ? { goalId: queryGoalId.value } : {}),
+}));
 const {
   templates,
   isLoading: templatesLoading,
   isError: templatesError,
   refetch: refetchTemplates,
-} = useTaskTemplateListQuery({ page: 1, limit: 500 });
+} = useTaskPlanListQuery(taskListParams);
 const {
-  createTemplateSafe,
-  updateTemplateSafe,
-  archiveTemplateSafe,
-  deleteTemplateSafe,
+  createPlanSafe,
+  updatePlanSafe,
+  archivePlanSafe,
+  deletePlanSafe,
   isSaving,
-} = useTaskTemplateMutations();
-const { fetchInstances, completeInstance, uncompleteInstance, markInstanceMissed, skipInstance } =
-  useTaskInstances();
+} = useTaskPlanMutations();
+const {
+  fetchInstances: fetchOccurrencesMutation,
+  completeOccurrence: completeOccurrenceMutation,
+  uncompleteOccurrence: uncompleteOccurrenceMutation,
+  markOccurrenceMissed: markOccurrenceMissedMutation,
+  skipOccurrence: skipOccurrenceMutation,
+  setOccurrenceChecklistItem: setOccurrenceChecklistItemMutation,
+} = useTaskOccurrences();
 const taskStore = useTaskStore();
 const { instances, isLoading: instancesLoading, error: instancesError } = storeToRefs(taskStore);
 
@@ -359,11 +392,13 @@ const templateById = computed(
   () => new Map(templates.value.map((template) => [String(template.id), template])),
 );
 const planViewModels = computed(() =>
-  templates.value.map((template) => mapTaskTemplateDtoToViewModel(template, t)),
+  templates.value.map((template) => mapTaskPlanDtoToViewModel(template, t)),
 );
 const availableLabels = computed(() => {
   const byId = new Map(
-    templates.value.flatMap((template) => template.labels).map((label) => [label.id, label] as const),
+    templates.value
+      .flatMap((template) => template.labels)
+      .map((label) => [label.id, label] as const),
   );
   return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name));
 });
@@ -373,6 +408,9 @@ const loadError = computed(() => templatesError.value || Boolean(instancesError.
 function templateMatchesFilters(templateId: string): boolean {
   const template = templateById.value.get(templateId);
   if (!template) return false;
+  if (queryGoalId.value && template.goalBinding?.goalId !== queryGoalId.value) return false;
+  if (queryKeyResultId.value && template.goalBinding?.keyResultId !== queryKeyResultId.value)
+    return false;
   const query = searchQuery.value.trim().toLowerCase();
   if (
     query &&
@@ -383,7 +421,11 @@ function templateMatchesFilters(templateId: string): boolean {
   ) {
     return false;
   }
-  if (labelFilter.value !== 'all' && !template.labels.some((label) => label.id === labelFilter.value)) return false;
+  if (
+    labelFilter.value !== 'all' &&
+    !template.labels.some((label) => label.id === labelFilter.value)
+  )
+    return false;
   if (goalFilter.value === 'linked' && !template.goalBinding) return false;
   if (goalFilter.value === 'unlinked' && template.goalBinding) return false;
   return true;
@@ -401,7 +443,7 @@ const visibleOccurrences = computed(() =>
   sortTaskOccurrences(
     surfaceOccurrences.value.filter(
       (occurrence) =>
-        templateMatchesFilters(String(occurrence.templateId)) &&
+        templateMatchesFilters(String(occurrence.planId)) &&
         (statusFilter.value === 'all' || occurrence.status === statusFilter.value),
     ),
     occurrenceSort.value,
@@ -416,7 +458,7 @@ const occurrencePositions = computed(
         getTaskOccurrencePosition(
           occurrence,
           instances.value,
-          templateById.value.get(String(occurrence.templateId)),
+          templateById.value.get(String(occurrence.planId)),
         ),
       ]),
     ),
@@ -441,7 +483,7 @@ const filteredPlans = computed(() =>
 );
 
 async function reloadSurface() {
-  await Promise.all([refetchTemplates(), fetchInstances({ page: 1, limit: 500 })]);
+  await Promise.all([refetchTemplates(), fetchOccurrencesMutation({ page: 1, limit: 500 })]);
 }
 
 function openCreateDialog() {
@@ -449,7 +491,7 @@ function openCreateDialog() {
   selectedTemplate.value = null;
   showDialog.value = true;
 }
-function openEditDialog(template: TaskTemplateViewModel) {
+function openEditDialog(template: TaskPlanViewModel) {
   dialogMode.value = 'edit';
   selectedTemplate.value = template;
   showDialog.value = true;
@@ -463,51 +505,48 @@ function closeDialog() {
   selectedTemplate.value = null;
 }
 
-function goalBinding(vm: TaskTemplateViewModel) {
-  if (!vm.goalBinding?.goalId || !vm.goalBinding.keyResultId) return null;
+function goalBinding(vm: TaskPlanViewModel) {
+  if (!vm.goalBinding?.goalId) return null;
   return {
     goalId: vm.goalBinding.goalId as GoalId,
-    keyResultId: vm.goalBinding.keyResultId as KeyResultId,
-    contribution: vm.goalBinding.contribution ?? null,
+    keyResultId: vm.goalBinding.keyResultId ? (vm.goalBinding.keyResultId as KeyResultId) : null,
+    contribution: vm.goalBinding.keyResultId ? (vm.goalBinding.contribution ?? null) : null,
   };
 }
 
-async function handleSubmit(vm: TaskTemplateViewModel) {
+async function handleSubmit(vm: TaskPlanViewModel) {
   const common = {
     name: vm.title,
     description: vm.description ?? null,
-    timeConfig: toTaskTimeConfigPayload(vm.timeConfig),
-    recurrenceRule: (vm.recurrenceRule as unknown as RecurrenceRuleDTO) ?? null,
+    schedule: toTaskPlanSchedulePayload(vm),
     reminderConfig: (vm.reminderConfig as never) ?? null,
     importance: (vm.importance as ImportanceLevel) ?? ImportanceLevel.Moderate,
     labelIds: vm.labelIds ?? vm.labels?.map((label) => label.id) ?? [],
     goalBinding: goalBinding(vm),
+    checklist: vm.checklist,
   };
   const saved =
     dialogMode.value === 'edit' && vm.id
-      ? await updateTemplateSafe(vm.id, common)
-      : await createTemplateSafe({
-          ...common,
-          taskType: vm.recurrenceRule ? TaskType.Recurring : TaskType.OneTime,
-        });
+      ? await updatePlanSafe(vm.id, common)
+      : await createPlanSafe(common);
   if (saved) {
     closeDialog();
     await reloadSurface();
   }
 }
 async function archive(id: string) {
-  if (await archiveTemplateSafe(id)) await refetchTemplates();
+  if (await archivePlanSafe(id)) await refetchTemplates();
 }
-async function remove(vm: TaskTemplateViewModel) {
+async function remove(vm: TaskPlanViewModel) {
   const confirmed = await useConfirm({
-    title: t('task.management.deleteTemplate'),
+    title: t('task.management.deletePlan'),
     description: t('task.management.confirmDelete', { name: vm.title }),
     confirmText: t('common.delete'),
     cancelText: t('common.cancel'),
     variant: 'destructive',
   });
   if (!confirmed) return;
-  if (await deleteTemplateSafe(vm.id)) await reloadSurface();
+  if (await deletePlanSafe(vm.id)) await reloadSurface();
 }
 async function runOccurrenceAction(id: string, action: (id: string) => Promise<unknown>) {
   busyOccurrenceId.value = id;
@@ -517,12 +556,32 @@ async function runOccurrenceAction(id: string, action: (id: string) => Promise<u
     busyOccurrenceId.value = null;
   }
 }
-const completeOccurrence = (id: string) => runOccurrenceAction(id, completeInstance);
-const uncompleteOccurrence = (id: string) => runOccurrenceAction(id, uncompleteInstance);
-const markOccurrenceMissed = (id: string) => runOccurrenceAction(id, markInstanceMissed);
-const skipOccurrence = (id: string) => runOccurrenceAction(id, skipInstance);
+const completeOccurrence = (id: string) => runOccurrenceAction(id, completeOccurrenceMutation);
+const uncompleteOccurrence = (id: string) => runOccurrenceAction(id, uncompleteOccurrenceMutation);
+const markOccurrenceMissed = (id: string) => runOccurrenceAction(id, markOccurrenceMissedMutation);
+const skipOccurrence = (id: string) => runOccurrenceAction(id, skipOccurrenceMutation);
+const setOccurrenceChecklistItem = (
+  occurrenceId: string,
+  definitionId: string,
+  completed: boolean,
+  expectedVersion: number,
+) =>
+  runOccurrenceAction(occurrenceId, (id) =>
+    setOccurrenceChecklistItemMutation(id, { definitionId, completed, expectedVersion }),
+  );
+
+watch(
+  [queryGoalId, queryKeyResultId],
+  ([goalId]) => {
+    if (goalId) {
+      activeSurface.value = 'plans';
+      goalFilter.value = 'linked';
+    }
+  },
+  { immediate: true },
+);
 
 onMounted(() => {
-  void fetchInstances({ page: 1, limit: 500 });
+  void fetchOccurrencesMutation({ page: 1, limit: 500 });
 });
 </script>

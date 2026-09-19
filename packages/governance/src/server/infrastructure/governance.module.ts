@@ -23,6 +23,7 @@ import {
   ListRulesUseCase,
   SearchRulesUseCase,
   GetRuleRevisionsUseCase,
+  ExportGovernanceRuleBundleUseCase,
   type GovernanceApplicationPort,
 } from '../application';
 import type {
@@ -68,6 +69,7 @@ function createGovernanceUseCases(
   readonly listRules: ListRulesUseCase;
   readonly searchRules: SearchRulesUseCase;
   readonly getRevisions: GetRuleRevisionsUseCase;
+  readonly exportRuleBundle: ExportGovernanceRuleBundleUseCase;
 } {
   const { ruleRepository, revisionRepository } = dependencies;
 
@@ -79,6 +81,7 @@ function createGovernanceUseCases(
     listRules: new ListRulesUseCase(ruleRepository),
     searchRules: new SearchRulesUseCase(ruleRepository),
     getRevisions: new GetRuleRevisionsUseCase(revisionRepository),
+    exportRuleBundle: new ExportGovernanceRuleBundleUseCase(ruleRepository, revisionRepository),
   };
 }
 
@@ -127,6 +130,7 @@ export function createGovernanceModule(
     listRules: (query) => useCases.listRules.execute(query),
     searchRules: (query, cx) => useCases.searchRules.execute(query, cx),
     getRevisions: (query) => useCases.getRevisions.execute(query),
+    exportRuleBundle: () => useCases.exportRuleBundle.execute(),
   };
 
   return {

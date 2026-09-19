@@ -48,8 +48,7 @@ describe('W5: ScheduleEventDeliveryLogConsumer — production idempotent consump
     const created = await service.createSchedule({
       identityId,
       title: 'Consumer Success',
-      startTime: 1000,
-      endTime: 2000,
+      range: { kind: 'Timed', start: 1000, end: 2000 },
     });
 
     const bus = new CrossPlatformEventBus();
@@ -88,8 +87,7 @@ describe('W5: ScheduleEventDeliveryLogConsumer — production idempotent consump
     await service.createSchedule({
       identityId,
       title: 'Consumer Sync Throw',
-      startTime: 1000,
-      endTime: 2000,
+      range: { kind: 'Timed', start: 1000, end: 2000 },
     });
 
     const bus = new CrossPlatformEventBus();
@@ -118,8 +116,7 @@ describe('W5: ScheduleEventDeliveryLogConsumer — production idempotent consump
     await service.createSchedule({
       identityId,
       title: 'Consumer Async Reject',
-      startTime: 1000,
-      endTime: 2000,
+      range: { kind: 'Timed', start: 1000, end: 2000 },
     });
 
     const bus = new CrossPlatformEventBus();
@@ -211,7 +208,9 @@ describe('W5: ScheduleEventDeliveryLogConsumer — production idempotent consump
     // The concurrent loser is recognized as consumed success, not a swallowed error.
     expect(settled.map((s) => s.status)).toEqual(['fulfilled', 'fulfilled']);
 
-    const receipts = await prisma.scheduleEventConsumerReceipt.findMany({ where: { idempotencyKey: key } });
+    const receipts = await prisma.scheduleEventConsumerReceipt.findMany({
+      where: { idempotencyKey: key },
+    });
     expect(receipts).toHaveLength(1);
     const logs = await prisma.scheduleEventDeliveryLog.findMany({ where: { idempotencyKey: key } });
     expect(logs).toHaveLength(1);
@@ -227,8 +226,7 @@ describe('W5: ScheduleEventDeliveryLogConsumer — production idempotent consump
     const created = await service.createSchedule({
       identityId,
       title: 'Crash Matrix',
-      startTime: 1000,
-      endTime: 2000,
+      range: { kind: 'Timed', start: 1000, end: 2000 },
     });
 
     // --- Process 1 (pre-crash): real production delivery seam, consumer records receipt + effect ---

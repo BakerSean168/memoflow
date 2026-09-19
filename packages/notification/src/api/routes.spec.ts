@@ -2,7 +2,7 @@ import type { RequestHandler } from 'express';
 import { EventEmitter } from 'node:events';
 import { describe, expect, it, vi } from 'vitest';
 import type { OpenApiRegistryLike } from '@memoflow/utils/result';
-import type { NotificationApplicationPort } from '../server/application';
+import type { NotificationInboxPort, NotificationOperationsPort } from '../server/application';
 import { registerNotificationRoutes } from './routes';
 
 type RegisteredRoute = {
@@ -24,7 +24,7 @@ class TestOpenApiRegistry implements OpenApiRegistryLike {
 
 const authMiddleware = ((_, __, next) => next()) as RequestHandler;
 
-function createControllerStub(): NotificationApplicationPort {
+function createControllerStub(): NotificationInboxPort {
   return {
     createNotification: vi.fn(),
     listNotifications: vi.fn(),
@@ -38,7 +38,25 @@ function createControllerStub(): NotificationApplicationPort {
     cleanupOldNotifications: vi.fn(),
     getPreferences: vi.fn(),
     updatePreferences: vi.fn(),
-  } as unknown as NotificationApplicationPort;
+  } as unknown as NotificationInboxPort;
+}
+
+function createOperationsStub(): NotificationOperationsPort {
+  return {
+    queryDeadLetters: vi.fn(async () => ({ ok: true, data: [] })),
+    replayDeadLetter: vi.fn(async () => ({ ok: true, data: null })),
+    getDeliveryReceipts: vi.fn(async () => ({ ok: true, data: [] })),
+    getOperationTimeline: vi.fn(async () => ({ ok: true, data: [] })),
+    getOperationAudit: vi.fn(async () => ({ ok: true, data: [] })),
+  };
+}
+
+function registerTestNotificationRoutes(
+  inbox: NotificationInboxPort,
+  middleware: Parameters<typeof registerNotificationRoutes>[2],
+  registry?: OpenApiRegistryLike | null,
+) {
+  return registerNotificationRoutes(inbox, createOperationsStub(), middleware, registry);
 }
 
 function getRegisteredRoute(
@@ -107,7 +125,7 @@ describe('notification route contracts', () => {
   it('list endpoint uses z.array(NotificationResponseSchema)', () => {
     const registry = new TestOpenApiRegistry();
 
-    registerNotificationRoutes(
+    registerTestNotificationRoutes(
       createControllerStub(),
       { auth: authMiddleware, requireRole: vi.fn(() => authMiddleware) },
       registry,
@@ -142,7 +160,7 @@ describe('notification route contracts', () => {
   it('detail endpoint uses NotificationResponseSchema', () => {
     const registry = new TestOpenApiRegistry();
 
-    registerNotificationRoutes(
+    registerTestNotificationRoutes(
       createControllerStub(),
       { auth: authMiddleware, requireRole: vi.fn(() => authMiddleware) },
       registry,
@@ -175,6 +193,7 @@ describe('notification route contracts', () => {
           createdAt: Date.now(),
           updatedAt: Date.now(),
           deletedAt: null,
+          archivedAt: null,
         },
         timestamp: Date.now(),
       }).success,
@@ -211,7 +230,7 @@ describe('notification route contracts', () => {
   it('create endpoint body uses CreateNotificationSchema', () => {
     const registry = new TestOpenApiRegistry();
 
-    registerNotificationRoutes(
+    registerTestNotificationRoutes(
       createControllerStub(),
       { auth: authMiddleware, requireRole: vi.fn(() => authMiddleware) },
       registry,
@@ -237,7 +256,7 @@ describe('notification route contracts', () => {
   it('delete endpoint response uses z.null()', () => {
     const registry = new TestOpenApiRegistry();
 
-    registerNotificationRoutes(
+    registerTestNotificationRoutes(
       createControllerStub(),
       { auth: authMiddleware, requireRole: vi.fn(() => authMiddleware) },
       registry,
@@ -272,7 +291,7 @@ describe('notification route contracts', () => {
   it('route params use branded IDs (not bare strings)', () => {
     const registry = new TestOpenApiRegistry();
 
-    registerNotificationRoutes(
+    registerTestNotificationRoutes(
       createControllerStub(),
       { auth: authMiddleware, requireRole: vi.fn(() => authMiddleware) },
       registry,
@@ -288,7 +307,7 @@ describe('notification route contracts', () => {
   it('core CRUD response schemas are contracts-based (not passthrough)', () => {
     const registry = new TestOpenApiRegistry();
 
-    registerNotificationRoutes(
+    registerTestNotificationRoutes(
       createControllerStub(),
       { auth: authMiddleware, requireRole: vi.fn(() => authMiddleware) },
       registry,
@@ -318,7 +337,7 @@ describe('notification route contracts', () => {
   it('preferences endpoints are identity-scoped static paths before /:id (residual 196)', () => {
     const registry = new TestOpenApiRegistry();
 
-    registerNotificationRoutes(
+    registerTestNotificationRoutes(
       createControllerStub(),
       { auth: authMiddleware, requireRole: vi.fn(() => authMiddleware) },
       registry,
@@ -408,12 +427,12 @@ describe('notification mutation routes run the real validation adapter (Phase 4)
       createNotification: vi.fn(async () => ({ ok: true, data: { id: 'n-1' } })),
       batchMarkAsRead: vi.fn(async () => ({ ok: true, data: { updatedCount: 2 } })),
       updatePreferences: vi.fn(async () => ({ ok: true, data: { enabled: true } })),
-    } as unknown as NotificationApplicationPort;
+    } as unknown as NotificationInboxPort;
   }
 
   it('create: valid body reaches the port, malformed body is rejected before it', async () => {
     const api = createApi();
-    const router = registerNotificationRoutes(api, {
+    const router = registerTestNotificationRoutes(api, {
       auth: authMiddleware,
       requireRole: () => authMiddleware,
     });
@@ -439,7 +458,7 @@ describe('notification mutation routes run the real validation adapter (Phase 4)
 
   it('batch-read: empty notificationIds is rejected before the port', async () => {
     const api = createApi();
-    const router = registerNotificationRoutes(api, {
+    const router = registerTestNotificationRoutes(api, {
       auth: authMiddleware,
       requireRole: () => authMiddleware,
     });
@@ -461,20 +480,20 @@ describe('notification mutation routes run the real validation adapter (Phase 4)
 
   it('preferences update: valid body reaches the port, malformed is rejected', async () => {
     const api = createApi();
-    const router = registerNotificationRoutes(api, {
+    const router = registerTestNotificationRoutes(api, {
       auth: authMiddleware,
       requireRole: () => authMiddleware,
     });
     const handler = getHandler(router, 'put', '/preferences');
 
     const validRes = createRes();
-    await handler(createReq({ enabled: true }), validRes);
+    await handler(createReq({ globalChannels: { InApp: true } }), validRes);
     expect(validRes.statusCode).toBe(200);
     expect(api.updatePreferences).toHaveBeenCalledTimes(1);
 
     const badRes = createRes();
     await handler(
-      createReq({ doNotDisturb: { enabled: true, startTime: '', endTime: '', daysOfWeek: [9] } }),
+      createReq({ quietHours: { enabled: true, timeZone: 'Asia/Tokyo', weeklyWindows: [{ daysOfWeek: [9], start: '22:00', end: '08:00' }] } }),
       badRes,
     );
     expect(badRes.statusCode).toBe(400);
@@ -540,9 +559,9 @@ describe('notification SSE framing + header-before-flush (RefArch Phase 2)', () 
     const api = {
       subscribeSseEvents: vi.fn(() => () => undefined),
       getDeliveryReceipts: vi.fn(async () => ({ ok: true, data: [] })),
-    } as unknown as NotificationApplicationPort;
+    } as unknown as NotificationInboxPort;
 
-    const router = registerNotificationRoutes(api, {
+    const router = registerTestNotificationRoutes(api, {
       // Real auth shape: the Cloud Auth middleware writes req.user.identityId.
       auth: ((req, _res, next) => {
         (req as Record<string, unknown>).user = { identityId: 'identity-1' };
@@ -587,9 +606,9 @@ describe('notification SSE framing + header-before-flush (RefArch Phase 2)', () 
     const api = {
       subscribeSseEvents: subscribe,
       getDeliveryReceipts: vi.fn(async () => ({ ok: true, data: [] })),
-    } as unknown as NotificationApplicationPort;
+    } as unknown as NotificationInboxPort;
 
-    const router = registerNotificationRoutes(api, {
+    const router = registerTestNotificationRoutes(api, {
       // Auth passed but the principal is absent (e.g. optional auth path).
       auth: ((_req, _res, next) => next()) as RequestHandler,
       requireRole: () => authMiddleware,
@@ -626,9 +645,9 @@ describe('notification SSE framing + header-before-flush (RefArch Phase 2)', () 
         return () => undefined;
       }),
       getDeliveryReceipts: vi.fn(async () => ({ ok: true, data: [] })),
-    } as unknown as NotificationApplicationPort;
+    } as unknown as NotificationInboxPort;
 
-    const router = registerNotificationRoutes(api, {
+    const router = registerTestNotificationRoutes(api, {
       auth: ((req, _res, next) => {
         (req as Record<string, unknown>).user = { identityId: 'identity-A' };
         next();

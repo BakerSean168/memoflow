@@ -46,16 +46,28 @@ const i18n = createI18n({
         center: 'Account',
         description: 'Manage your account.',
         guestLabel: 'Local guest',
+        emailVerified: 'Login email verified',
+        emailUnverified: 'Login email not verified',
         status: { loading: 'Loading profile...' },
         actions: { saveProfile: 'Save', logout: 'Log out', lockProfile: 'Lock Profile' },
         lockProfileHint: 'Lock local data.',
         localProtection: {
-          title: 'Local Profile protection', description: 'Device protection',
-          toggle: 'Use a local PIN', hint: 'Off by default', pin: 'Local PIN',
-          confirmPin: 'Confirm local PIN', pinPlaceholder: '6 to 12 digits',
-          enable: 'Enable PIN', enabled: 'PIN enabled', invalidPin: 'Invalid PIN',
-          pinMismatch: 'PIN mismatch', enableFailed: 'Enable failed', removeTitle: 'Remove?',
-          removeDescription: 'Remove PIN', removeConfirm: 'Remove', removeFailed: 'Remove failed',
+          title: 'Local Profile protection',
+          description: 'Device protection',
+          toggle: 'Use a local PIN',
+          hint: 'Off by default',
+          pin: 'Local PIN',
+          confirmPin: 'Confirm local PIN',
+          pinPlaceholder: '6 to 12 digits',
+          enable: 'Enable PIN',
+          enabled: 'PIN enabled',
+          invalidPin: 'Invalid PIN',
+          pinMismatch: 'PIN mismatch',
+          enableFailed: 'Enable failed',
+          removeTitle: 'Remove?',
+          removeDescription: 'Remove PIN',
+          removeConfirm: 'Remove',
+          removeFailed: 'Remove failed',
           removed: 'PIN removed',
         },
         profile: { nickname: 'Nickname', avatarUrl: 'Avatar', bio: 'Bio' },
@@ -141,12 +153,14 @@ const InputStub = defineComponent({
   props: ['modelValue', 'disabled'],
   emits: ['update:modelValue'],
   setup(props, { attrs, emit }) {
-    return () => h('input', {
-      ...attrs,
-      value: props.modelValue,
-      disabled: props.disabled,
-      onInput: (event: Event) => emit('update:modelValue', (event.target as HTMLInputElement).value),
-    });
+    return () =>
+      h('input', {
+        ...attrs,
+        value: props.modelValue,
+        disabled: props.disabled,
+        onInput: (event: Event) =>
+          emit('update:modelValue', (event.target as HTMLInputElement).value),
+      });
   },
 });
 
@@ -155,13 +169,14 @@ const SwitchStub = defineComponent({
   props: ['modelValue', 'disabled'],
   emits: ['update:modelValue'],
   setup(props, { attrs, emit }) {
-    return () => h('button', {
-      ...attrs,
-      type: 'button',
-      disabled: props.disabled,
-      'aria-checked': String(props.modelValue),
-      onClick: () => emit('update:modelValue', !props.modelValue),
-    });
+    return () =>
+      h('button', {
+        ...attrs,
+        type: 'button',
+        disabled: props.disabled,
+        'aria-checked': String(props.modelValue),
+        onClick: () => emit('update:modelValue', !props.modelValue),
+      });
   },
 });
 
@@ -204,18 +219,31 @@ function mountSection(
         },
         [LOGOUT_HANDLER_KEY as symbol]: vi.fn(),
         ...(lockProfile ? { [PROFILE_LOCK_HANDLER_KEY as symbol]: lockProfile } : {}),
-        ...(desktop ? {
-          [DESKTOP_BRIDGE_KEY as symbol]: { invoke: desktop.invoke },
-          [DESKTOP_ACCESS_SNAPSHOT_KEY as symbol]: ref({
-            profile: {
-              profileId: 'profile-1', profileKind: 'guest', displayName: 'Guest',
-              avatarSeed: 'seed', identifierHint: null, cloudAccountId: null,
-              lastActiveAt: 1, hasPin: desktop.hasPin === true,
-            },
-            unlockState: 'UNLOCKED', cloudState: 'UNBOUND',
-            capabilities: { local: true, sync: false, cloudAi: false, repositoryConnection: false },
-          }),
-        } : {}),
+        ...(desktop
+          ? {
+              [DESKTOP_BRIDGE_KEY as symbol]: { invoke: desktop.invoke },
+              [DESKTOP_ACCESS_SNAPSHOT_KEY as symbol]: ref({
+                profile: {
+                  profileId: 'profile-1',
+                  profileKind: 'guest',
+                  displayName: 'Guest',
+                  avatarSeed: 'seed',
+                  identifierHint: null,
+                  cloudAccountId: null,
+                  lastActiveAt: 1,
+                  hasPin: desktop.hasPin === true,
+                },
+                unlockState: 'UNLOCKED',
+                cloudState: 'UNBOUND',
+                capabilities: {
+                  local: true,
+                  sync: false,
+                  cloudAi: false,
+                  repositoryConnection: false,
+                },
+              }),
+            }
+          : {}),
       },
       stubs: {
         Button: ButtonStub,
@@ -248,8 +276,6 @@ describe('AccountProfileSection', () => {
     const accountService = {
       getMyProfile,
       updateMyProfile: vi.fn(),
-      checkAvailability: vi.fn(),
-      updateSettings: vi.fn(),
       closeAccount: vi.fn(),
     } as unknown as IAccountService;
 
@@ -282,30 +308,20 @@ describe('AccountProfileSection', () => {
         gender: 'Unspecified',
         birthday: null,
       },
-      settings: {
-        theme: 'System',
-        language: 'en-US',
-        timezone: 'UTC',
-        notificationEnabled: true,
-      },
-      email: {
-        address: 'local-guest-1@local.memoflow',
-        isVerified: false,
-        verifiedAt: null,
-        isPrimary: true,
-      },
-      phone: null,
       version: 1,
       createdAt: 1,
       updatedAt: 1,
-      deletedAt: null,
+      closedAt: null,
     } as const;
     const accountService = {
       getMyProfile: vi.fn().mockResolvedValue({
         ok: true,
-        data: { toDTO: () => dto },
+        data: { account: { toDTO: () => dto }, cloudIdentity: null },
       }),
-      updateMyProfile: vi.fn().mockResolvedValue({ ok: true, data: { toDTO: () => dto } }),
+      updateMyProfile: vi.fn().mockResolvedValue({
+        ok: true,
+        data: { account: { toDTO: () => dto }, cloudIdentity: null },
+      }),
     } as unknown as IAccountService;
 
     const wrapper = mountSection(accountService, lockProfile);
@@ -326,29 +342,34 @@ describe('AccountProfileSection', () => {
       id: 'cloud-1',
       status: 'Active',
       profile: {
-        nickname: 'User', realName: null, avatarUrl: null, bio: null,
-        gender: 'Unspecified', birthday: null,
+        nickname: 'User',
+        realName: null,
+        avatarUrl: null,
+        bio: null,
+        gender: 'Unspecified',
+        birthday: null,
       },
-      settings: {
-        theme: 'System', language: 'en-US', timezone: 'UTC', notificationEnabled: true,
-      },
-      email: {
-        address: 'user@example.com', isVerified: true, verifiedAt: 1, isPrimary: true,
-      },
-      phone: null,
       version: 1,
       createdAt: 1,
       updatedAt: 1,
-      deletedAt: null,
+      closedAt: null,
     } as const;
     const accountService = {
-      getMyProfile: vi.fn().mockResolvedValue({ ok: true, data: { toDTO: () => dto } }),
-      updateMyProfile: vi.fn().mockResolvedValue({ ok: true, data: { toDTO: () => dto } }),
+      getMyProfile: vi.fn().mockResolvedValue({
+        ok: true,
+        data: { account: { toDTO: () => dto }, cloudIdentity: null },
+      }),
+      updateMyProfile: vi.fn().mockResolvedValue({
+        ok: true,
+        data: { account: { toDTO: () => dto }, cloudIdentity: null },
+      }),
     } as unknown as IAccountService;
 
     const wrapper = mountSection(accountService, lockProfile, true);
     await flushPromises();
 
+    expect(wrapper.text()).toContain('user@example.com');
+    expect(wrapper.text()).toContain('Login email verified');
     expect(wrapper.find('[data-testid="account-logout-button"]').exists()).toBe(true);
     expect(wrapper.find('[data-testid="account-lock-profile-button"]').exists()).toBe(true);
   });
@@ -356,29 +377,47 @@ describe('AccountProfileSection', () => {
   it('keeps local PIN off by default and enables it only after confirmation', async () => {
     const invoke = vi.fn().mockResolvedValue({ ok: true, data: null });
     const dto = {
-      id: 'guest_1', status: 'Active',
-      profile: { nickname: 'Guest', realName: null, avatarUrl: null, bio: null, gender: 'Unspecified', birthday: null },
-      settings: { theme: 'System', language: 'en-US', timezone: 'UTC', notificationEnabled: true },
-      email: { address: 'guest@local.memoflow', isVerified: false, verifiedAt: null, isPrimary: true },
-      phone: null, version: 1, createdAt: 1, updatedAt: 1, deletedAt: null,
+      id: 'guest_1',
+      status: 'Active',
+      profile: {
+        nickname: 'Guest',
+        realName: null,
+        avatarUrl: null,
+        bio: null,
+        gender: 'Unspecified',
+        birthday: null,
+      },
+      version: 1,
+      createdAt: 1,
+      updatedAt: 1,
+      closedAt: null,
     } as const;
     const accountService = {
-      getMyProfile: vi.fn().mockResolvedValue({ ok: true, data: { toDTO: () => dto } }),
+      getMyProfile: vi.fn().mockResolvedValue({
+        ok: true,
+        data: { account: { toDTO: () => dto }, cloudIdentity: null },
+      }),
       updateMyProfile: vi.fn(),
     } as unknown as IAccountService;
     const wrapper = mountSection(accountService, undefined, false, { invoke });
     await flushPromises();
 
-    expect(wrapper.get('[data-testid="account-local-pin-toggle"]').attributes('aria-checked')).toBe('false');
+    expect(wrapper.get('[data-testid="account-local-pin-toggle"]').attributes('aria-checked')).toBe(
+      'false',
+    );
     expect(wrapper.find('[data-testid="account-local-pin"]').exists()).toBe(false);
     await wrapper.get('[data-testid="account-local-pin-toggle"]').trigger('click');
     await wrapper.get('[data-testid="account-local-pin"]').setValue('482700');
     await wrapper.get('[data-testid="account-local-pin-confirmation"]').setValue('482700');
-    await wrapper.get('[data-testid="account-local-pin-save"]').element.closest('form')
+    await wrapper
+      .get('[data-testid="account-local-pin-save"]')
+      .element.closest('form')
       ?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     await flushPromises();
 
     expect(invoke).toHaveBeenCalledWith(ProfileAccessChannels.PIN_SET, '482700');
-    expect(wrapper.get('[data-testid="account-local-pin-toggle"]').attributes('aria-checked')).toBe('true');
+    expect(wrapper.get('[data-testid="account-local-pin-toggle"]').attributes('aria-checked')).toBe(
+      'true',
+    );
   });
 });

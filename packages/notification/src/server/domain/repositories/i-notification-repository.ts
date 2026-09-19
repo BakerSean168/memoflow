@@ -48,8 +48,8 @@ export interface INotificationRepository {
   saveMany(notifications: Notification[]): Promise<void>;
 
   /**
-   * Counts already planned delivery channels for the same workflow surrogate
-   * (current NotificationCategory) and channel over rolling 1h / 24h windows.
+   * Counts canonical planned delivery decisions for the same workflow/channel
+   * over rolling 1h / 24h windows.
    */
   getDeliveryUsage(
     identityId: string,
@@ -62,10 +62,6 @@ export interface INotificationRepository {
    * Find notification by id + identity (ownership fence).
    * Returns null when missing or not owned by identityId.
    */
-  /**
-   * R3e：渠道 worker 用——按渠道状态查询（返回带渠道的聚合，渠道经 status 过滤）。
-   */
-  findChannelsByStatus(status: string, limit?: number): Promise<Notification[]>;
 
   findByIdForIdentity(
     identityId: string,
@@ -93,6 +89,7 @@ export interface INotificationRepository {
       includeChildren?: boolean;
       includeRead?: boolean;
       includeDeleted?: boolean;
+      archiveState?: 'active' | 'archived' | 'all';
       limit?: number;
       offset?: number;
     },
@@ -109,7 +106,7 @@ export interface INotificationRepository {
   findByCategory(
     identityId: string,
     category: NotificationCategory,
-    options?: { limit?: number; offset?: number },
+    options?: { archiveState?: 'active' | 'archived' | 'all'; limit?: number; offset?: number },
   ): Promise<Notification[]>;
 
   /**
@@ -118,7 +115,7 @@ export interface INotificationRepository {
    * @param identityId 璐︽埛 UUID
    * @param options.limit 闄愬埗鏁伴噺
    */
-  findUnread(identityId: string, options?: { limit?: number }): Promise<Notification[]>;
+  findUnread(identityId: string, options?: { archiveState?: 'active' | 'archived' | 'all'; limit?: number }): Promise<Notification[]>;
 
   /**
    * 鏌ユ壘鐩稿叧瀹炰綋鐨勯€氱煡
@@ -130,6 +127,7 @@ export interface INotificationRepository {
     identityId: string,
     relatedEntityType: string,
     relatedEntityId: string,
+    options?: { archiveState?: 'active' | 'archived' | 'all' },
   ): Promise<Notification[]>;
 
   /**
@@ -152,6 +150,8 @@ export interface INotificationRepository {
    * 杞垹闄ら€氱煡锛堟爣璁颁负宸插垹闄わ級
    */
   softDelete(identityId: string, id: string): Promise<void>;
+  archive(identityId: string, id: string, archivedAt: Date): Promise<void>;
+  restore(identityId: string, id: string): Promise<void>;
 
   /**
    * 妫€鏌ラ€氱煡鏄惁瀛樺湪

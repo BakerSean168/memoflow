@@ -179,6 +179,7 @@ describe('AI vNext runtime contracts', () => {
           title: 'Mastra Workflows',
           topic: 'Reference',
           markdown: '# Mastra',
+          knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440701',
           targetSubpath: '/var/local-vault/notes/mastra.md',
           revision: 1,
         },
@@ -200,6 +201,7 @@ describe('AI vNext runtime contracts', () => {
           title: 'Mastra Workflows',
           topic: 'Reference',
           markdown: '# Mastra',
+          knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440701',
           targetSubpath: 'notes/mastra.md',
           revision: 1,
         },
@@ -224,7 +226,8 @@ describe('AI vNext runtime contracts', () => {
         retryable: true,
         failures: [
           {
-            operation: 'task_template',
+            operation: 'task_plan',
+            draftRef: 'task:recovery',
             code: 'SERVICE_UNAVAILABLE',
             message: 'internal persistence detail',
             retryable: true,
@@ -238,7 +241,8 @@ describe('AI vNext runtime contracts', () => {
     expect(parsed.kind).toBe('task.create');
     expect(parsed.suspension?.type).toBe('recovery_required');
     if (parsed.suspension?.type === 'recovery_required') {
-      expect(parsed.suspension.failures[0]?.operation).toBe('task_template');
+      expect(parsed.suspension.failures[0]?.operation).toBe('task_plan');
+      expect(parsed.suspension.failures[0]?.draftRef).toBe('task:recovery');
     }
   });
 

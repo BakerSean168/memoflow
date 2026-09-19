@@ -1,3 +1,4 @@
+export { KnowledgeDocumentRefResolverService } from './knowledge-document-ref-resolver.service';
 export { KnowledgeRepositoryConnectionService } from './knowledge-repository-connection.service';
 export type { KnowledgeRepositoryConnectionServiceOptions } from './knowledge-repository-connection.service';
 export {
@@ -14,3 +15,16 @@ export {
   publishRepositoryNoteMutation,
   type RepositoryNoteMutationPayload,
 } from './repository-note-mutation.publisher';
+
+export {
+  KnowledgeProjectionEngine,
+  type IKnowledgeProjectionEngine,
+  type KnowledgeProjectionEngineOptions,
+  type KnowledgeProjectionChangeSet,
+  type KnowledgeProjectionSnapshot,
+} from './knowledge-projection.engine';
+
+export {
+  KnowledgeDocumentWorkspaceResolverService,
+  type KnowledgeDocumentWorkspaceProjection,
+} from './knowledge-document-workspace-resolver.service';

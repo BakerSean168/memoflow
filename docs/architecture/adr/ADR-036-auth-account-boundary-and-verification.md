@@ -100,7 +100,7 @@ MemoFlow 已在 monorepo 中自建：
 - 生产发信与 challenge 强化属于 authentication 安全闭环的一部分，与邮箱验证共享基础设施。
 - 前端「忘记密码」入口仅在链路可测、可配置完成后开放（含本地 mail 捕获或 console 策略下的 e2e）。
 
-旧独立计划 `docs/plan/active/2026-07-16-password-recovery.md` **作废**，内容归档至 `docs/plan/archive/2026-07-16-password-recovery.md`，实施并入 `docs/plan/archive/2026-07-17-auth-account-security-closure.md`。
+旧独立计划 `docs/plan/archive/2026-07-16-password-recovery.md` **作废**，内容归档至同一路径，实施并入 `docs/plan/archive/2026-07-17-auth-account-security-closure.md`。
 
 ### 6. 注销级联
 

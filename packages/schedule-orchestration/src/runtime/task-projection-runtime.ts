@@ -1,6 +1,7 @@
 import type { SchedulingPort } from '@memoflow/contracts/schedule';
 import {
   createTaskScheduleProjectionEventHandlers,
+  taskScheduleProjectionEventNames,
   type TaskScheduleProjectionEventMap,
   type TaskScheduleProjectionSource,
 } from '@memoflow/task/schedule-projection';
@@ -26,54 +27,24 @@ export function createTaskProjectionRuntime(
   const handlers = createTaskScheduleProjectionEventHandlers(projector);
   let started = false;
 
+  const eventNames = taskScheduleProjectionEventNames;
+
   return {
     async start(): Promise<void> {
       if (started) return;
 
-      deps.taskEvents.on('task:created', handlers['task:created']);
-      deps.taskEvents.on('task:updated', handlers['task:updated']);
-      deps.taskEvents.on('task:instance-generated', handlers['task:instance-generated']);
-      deps.taskEvents.on(
-        'task:template-schedule-time-changed',
-        handlers['task:template-schedule-time-changed'],
-      );
-      deps.taskEvents.on(
-        'task:template-recurrence-changed',
-        handlers['task:template-recurrence-changed'],
-      );
-      deps.taskEvents.on('task:template-resumed', handlers['task:template-resumed']);
-      deps.taskEvents.on('task:deleted', handlers['task:deleted']);
-      deps.taskEvents.on('task:template-paused', handlers['task:template-paused']);
-      deps.taskEvents.on('task:instance-completed', handlers['task:instance-completed']);
-      deps.taskEvents.on('task:instance-skipped', handlers['task:instance-skipped']);
-      deps.taskEvents.on('task:instance-deleted', handlers['task:instance-deleted']);
-      deps.taskEvents.on('task:instance-uncompleted', handlers['task:instance-uncompleted']);
-      deps.taskEvents.on('task:rescheduled', handlers['task:rescheduled']);
+      for (const eventName of eventNames) {
+        deps.taskEvents.on(eventName, handlers[eventName] as never);
+      }
       started = true;
     },
 
     async stop(): Promise<void> {
       if (!started) return;
 
-      deps.taskEvents.off('task:created', handlers['task:created']);
-      deps.taskEvents.off('task:updated', handlers['task:updated']);
-      deps.taskEvents.off('task:instance-generated', handlers['task:instance-generated']);
-      deps.taskEvents.off(
-        'task:template-schedule-time-changed',
-        handlers['task:template-schedule-time-changed'],
-      );
-      deps.taskEvents.off(
-        'task:template-recurrence-changed',
-        handlers['task:template-recurrence-changed'],
-      );
-      deps.taskEvents.off('task:template-resumed', handlers['task:template-resumed']);
-      deps.taskEvents.off('task:deleted', handlers['task:deleted']);
-      deps.taskEvents.off('task:template-paused', handlers['task:template-paused']);
-      deps.taskEvents.off('task:instance-completed', handlers['task:instance-completed']);
-      deps.taskEvents.off('task:instance-skipped', handlers['task:instance-skipped']);
-      deps.taskEvents.off('task:instance-deleted', handlers['task:instance-deleted']);
-      deps.taskEvents.off('task:instance-uncompleted', handlers['task:instance-uncompleted']);
-      deps.taskEvents.off('task:rescheduled', handlers['task:rescheduled']);
+      for (const eventName of eventNames) {
+        deps.taskEvents.off(eventName, handlers[eventName] as never);
+      }
       started = false;
     },
   };

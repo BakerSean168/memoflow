@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ipcMain } from 'electron';
-import { RoutineChannels, type FocusWindowCommand } from '@memoflow/contracts/electron';
+import { RoutineWindowChannels, type FocusWindowCommand } from '@memoflow/contracts/electron';
 import type { FocusWindowController } from './focus-window-controller';
 import { createFocusWindowElectronModule } from './focus-window.electron-module';
 
@@ -24,20 +24,19 @@ describe('FocusWindow Electron module', () => {
 
     expect(ipcMain.handle).toHaveBeenCalledTimes(2);
     expect(ipcMain.handle).toHaveBeenCalledWith(
-      RoutineChannels.FOCUS_WINDOW_GET,
+      RoutineWindowChannels.FOCUS_WINDOW_GET,
       expect.any(Function),
     );
     expect(ipcMain.handle).toHaveBeenCalledWith(
-      RoutineChannels.FOCUS_WINDOW_COMMAND,
+      RoutineWindowChannels.FOCUS_WINDOW_COMMAND,
       expect.any(Function),
     );
 
     const commandHandler = vi
       .mocked(ipcMain.handle)
-      .mock.calls.find(([channel]) => channel === RoutineChannels.FOCUS_WINDOW_COMMAND)?.[1] as (
-      _event: unknown,
-      command: FocusWindowCommand,
-    ) => Promise<unknown>;
+      .mock.calls.find(
+        ([channel]) => channel === RoutineWindowChannels.FOCUS_WINDOW_COMMAND,
+      )?.[1] as (_event: unknown, command: FocusWindowCommand) => Promise<unknown>;
     await commandHandler({}, { action: 'hide' });
     expect(controller.execute).toHaveBeenCalledWith({ action: 'hide' });
 
@@ -55,8 +54,8 @@ describe('FocusWindow Electron module', () => {
     expect(controller.execute).toHaveBeenCalledTimes(1);
 
     await module.destroy?.();
-    expect(ipcMain.removeHandler).toHaveBeenCalledWith(RoutineChannels.FOCUS_WINDOW_GET);
-    expect(ipcMain.removeHandler).toHaveBeenCalledWith(RoutineChannels.FOCUS_WINDOW_COMMAND);
+    expect(ipcMain.removeHandler).toHaveBeenCalledWith(RoutineWindowChannels.FOCUS_WINDOW_GET);
+    expect(ipcMain.removeHandler).toHaveBeenCalledWith(RoutineWindowChannels.FOCUS_WINDOW_COMMAND);
     expect(controller.destroy).toHaveBeenCalledTimes(1);
   });
 });

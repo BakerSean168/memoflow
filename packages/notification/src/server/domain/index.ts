@@ -6,10 +6,8 @@
  * 管理通知系统的核心业务逻辑，包括通知创建、发送、偏好设置、模板管理等
  * 
  * 【包含内容】
- * - 聚合根（Aggregates）：Notification, NotificationPreference, NotificationTemplate
- * - 实体（Entities）：NotificationChannel, NotificationHistory
- * - 仓储接口（Repositories）：INotificationRepository, INotificationTemplateRepository 等
- * - 领域服务（Domain Services）：NotificationDeliveryService, NotificationBatchService
+ * - 聚合根（Aggregates）：Notification, NotificationPreference; 交互事实：NotificationInteraction
+ * - 仓储接口（Repositories）：INotificationRepository, I * - 领域服务（Domain Services）：NotificationDeliveryService, NotificationBatchService
  * 
  * 【业务特性】
  * - 多渠道通知：邮件、短信、推送、站内信
@@ -38,21 +36,20 @@ export * from './value-objects';
 export * from './aggregates/notification';
 export { NotificationPreference } from './aggregates/notification-preference';
 export type { NotificationPreferenceState } from './aggregates/notification-preference';
-export { NotificationTemplate } from './aggregates/notification-template';
-export type { NotificationTemplateState } from './aggregates/notification-template';
-
-// Entities
-export { NotificationChannel } from './entities/notification-channel';
-export type { NotificationChannelState } from './entities/notification-channel';
-export { NotificationHistory } from './entities/notification-history';
-export type { NotificationHistoryState } from './entities/notification-history';
 
 // Repositories
-export type { INotificationRepository } from './repositories/i-notification-repository';
-export type { INotificationTemplateRepository } from './repositories/i-notification-template-repository';
+export type {
+  INotificationRepository,
+  NotificationDeliveryUsage,
+  NotificationOutboxDispatchPlan,
+} from './repositories/i-notification-repository';
 export type { INotificationPreferenceRepository } from './repositories/i-notification-preference-repository';
+export type {
+  INotificationInteractionRepository,
+  RecordNotificationInteractionInput,
+} from './repositories/i-notification-interaction-repository';
 
 // Services
 export * from './services';
 
-export { NotificationWorkflowCatalog, defaultNotificationWorkflowKey } from './services/notification-workflow-catalog';
+export { NotificationWorkflowCatalog, BUILTIN_NOTIFICATION_WORKFLOWS } from './services/notification-workflow-catalog';

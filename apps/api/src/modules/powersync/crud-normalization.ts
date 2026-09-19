@@ -12,36 +12,17 @@
  */
 
 export const JSON_FIELDS_BY_TABLE: Record<string, ReadonlySet<string>> = {
-  accounts: new Set(['profile', 'settings']),
-  user_settings: new Set(['preferences']),
+  accounts: new Set(['profile']),
+  user_preference_records: new Set(['payload']),
   goals: new Set(['tags']),
-  repositories: new Set(['config', 'stats']),
-  folders: new Set(['metadata']),
-  resources: new Set(['metadata', 'stats']),
-  editor_workspaces: new Set(['layout', 'setting']),
-  editor_workspace_sessions: new Set(['layout']),
-  editor_workspace_session_group_tabs: new Set(['view_state']),
   ai_knowledge_index_entries: new Set(['keywords', 'embedding', 'chunks', 'metadata']),
-  dashboard_configs: new Set(['widget_config']),
 };
 
 export const BOOLEAN_FIELDS_BY_TABLE: Record<string, ReadonlySet<string>> = {
-  accounts: new Set(['email_is_verified', 'email_is_primary', 'phone_is_verified']),
-  task_templates: new Set(['reminder_config_enabled', 'is_blocked']),
-  schedules: new Set(['has_conflict']),
-  schedule_tasks: new Set(['enabled']),
-  reminder_templates: new Set(['self_enabled']),
-  reminder_groups: new Set(['enabled']),
-  reminder_history: new Set(['notification_sent']),
-  user_reminder_preferences: new Set(['global_reminder_enabled']),
+  routine_definitions: new Set(['enabled']),
+  routine_profiles: new Set(['enabled']),
+  routine_profile_memberships: new Set(['enabled']),
   notifications: new Set(['is_read']),
-  notification_preferences: new Set(['enabled']),
-  notification_templates: new Set(['is_system', 'is_active']),
-  ai_provider_configs: new Set(['is_active', 'is_default']),
-  folders: new Set(['is_expanded']),
-  editor_workspaces: new Set(['is_active']),
-  editor_workspace_sessions: new Set(['is_active']),
-  editor_workspace_session_group_tabs: new Set(['is_pinned', 'is_active']),
 };
 
 function snakeToCamel(key: string): string {

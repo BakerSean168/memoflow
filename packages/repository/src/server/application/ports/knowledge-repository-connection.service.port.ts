@@ -16,7 +16,7 @@ import type {
   CompleteKnowledgeRepositoryInstallationRes,
   ConfirmKnowledgeRepositoryHeadReq,
   CreateKnowledgeRepositoryConnectionReq,
-  KnowledgeRepositoryConnectionClientDTO,
+  KnowledgeRemoteBindingClientDTO,
   KnowledgeRepositoryInstallationIntentStatusResponse,
   KnowledgeRepositoryReconciliationPreview,
   ListKnowledgeRepositoryConnectionsRes,
@@ -59,8 +59,12 @@ export interface IKnowledgeRepositoryConnectionService {
   connect(
     identityId: string,
     request: CreateKnowledgeRepositoryConnectionReq,
-  ): Promise<Result<KnowledgeRepositoryConnectionClientDTO>>;
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>>;
   list(identityId: string): Promise<Result<ListKnowledgeRepositoryConnectionsRes>>;
+  refreshObservation(
+    identityId: string,
+    connectionId: string,
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>>;
   disconnect(
     identityId: string,
     connectionId: string,
@@ -79,5 +83,5 @@ export interface IKnowledgeRepositoryConnectionService {
     identityId: string,
     connectionId: string,
     request: ConfirmKnowledgeRepositoryHeadReq,
-  ): Promise<Result<KnowledgeRepositoryConnectionClientDTO>>;
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>>;
 }

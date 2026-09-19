@@ -25,11 +25,11 @@
  * 启动任何 runtime adapter。
  *
  * `instance.api` is the HTTP/IPC-shared application seam
- * (`NotificationApplicationPort`). Both the Express API transport and this
+ * (`NotificationInboxPort`). Both the Express API transport and this
  * Electron IPC transport consume the same port, so behaviour parity across
  * hosts is guaranteed by construction.
  *
- * `instance.api` 是 HTTP/IPC 共用的应用 seam（`NotificationApplicationPort`）。
+ * `instance.api` 是 HTTP/IPC 共用的应用 seam（`NotificationInboxPort`）。
  * Express API 传输层与本 Electron IPC 传输层消费同一个 port，
  * 从而从构造上保证跨宿主行为一致。
  *
@@ -86,8 +86,12 @@ import {
   DeleteNotificationInvocationSchema,
   MarkAllNotificationsReadInvocationSchema,
   MarkNotificationReadInvocationSchema,
+  MarkNotificationUnreadInvocationSchema,
+  ArchiveNotificationInvocationSchema,
+  RestoreNotificationInvocationSchema,
   NotificationBatchInvocationSchema,
   UpdateNotificationPreferenceSchema,
+  ExecuteNotificationActionSchema,
 } from '@memoflow/contracts/notification';
 import { createLogger } from '@memoflow/utils/logger';
 import type { NotificationModuleInstance } from '../server/infrastructure';
@@ -150,12 +154,16 @@ const coreChannels = [
   NotificationChannels.GET,
   NotificationChannels.CREATE,
   NotificationChannels.MARK_READ,
+  NotificationChannels.MARK_UNREAD,
+  NotificationChannels.ARCHIVE,
+  NotificationChannels.RESTORE,
   NotificationChannels.MARK_ALL_READ,
   NotificationChannels.DELETE,
   NotificationChannels.CLEAR_ALL,
   NotificationChannels.GET_UNREAD_COUNT,
   NotificationChannels.PREFERENCES_GET,
   NotificationChannels.PREFERENCES_UPDATE,
+  NotificationChannels.EXECUTE_ACTION,
 ] as const;
 
 /**
@@ -198,6 +206,10 @@ type ModuleHandleState = 'created' | 'registered' | 'disposed' | 'failed';
  */
 export interface NotificationElectronModuleDef {
   readonly name: string;
+  /** Notification-owned stable delivery preference portability capability. */
+  readonly portableCapability: NotificationModuleInstance['portableCapability'];
+  /** Notification-owned Fact/Inbox and typed Interaction portability capability. */
+  readonly portableFactCapability: NotificationModuleInstance['portableFactCapability'];
   register(context: IElectronModuleContext): void;
   destroy?(): void;
 }
@@ -238,6 +250,8 @@ export function createNotificationElectronModule(
 
   return {
     name: 'Notification',
+    portableCapability: options.instance.portableCapability,
+    portableFactCapability: options.instance.portableFactCapability,
 
     register(ctx: IElectronModuleContext): void {
       if (state !== 'created') {
@@ -283,6 +297,12 @@ export function createNotificationElectronModule(
           (args) => ({ params: { id: (args as { id?: string }).id ?? (args as string) } }),
         );
         installed.push(NotificationChannels.MARK_READ);
+        registerValidatedChannel(ctx, NotificationChannels.MARK_UNREAD, MarkNotificationUnreadInvocationSchema, (data, requestContext) => controller.markAsUnread(data.params.id, requestContext), (args) => ({ params: { id: (args as { id?: string }).id ?? (args as string) } }));
+        installed.push(NotificationChannels.MARK_UNREAD);
+        registerValidatedChannel(ctx, NotificationChannels.ARCHIVE, ArchiveNotificationInvocationSchema, (data, requestContext) => controller.archive(data.params.id, requestContext), (args) => ({ params: { id: (args as { id?: string }).id ?? (args as string) } }));
+        installed.push(NotificationChannels.ARCHIVE);
+        registerValidatedChannel(ctx, NotificationChannels.RESTORE, RestoreNotificationInvocationSchema, (data, requestContext) => controller.restore(data.params.id, requestContext), (args) => ({ params: { id: (args as { id?: string }).id ?? (args as string) } }));
+        installed.push(NotificationChannels.RESTORE);
         registerValidatedChannel(
           ctx,
           NotificationChannels.MARK_ALL_READ,
@@ -331,6 +351,15 @@ export function createNotificationElectronModule(
           (args) => args ?? {},
         );
         installed.push(NotificationChannels.PREFERENCES_UPDATE);
+        registerValidatedChannel(
+          ctx,
+          NotificationChannels.EXECUTE_ACTION,
+          ExecuteNotificationActionSchema,
+          (data, requestContext) =>
+            controller.executeAction(data.notificationId, data.actionKey, requestContext),
+          (args) => args,
+        );
+        installed.push(NotificationChannels.EXECUTE_ACTION);
 
         options.instance.start();
         state = 'registered';

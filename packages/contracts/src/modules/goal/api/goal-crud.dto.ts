@@ -5,7 +5,7 @@
  */
 
 import { z } from 'zod';
-import { brandedId } from '../../../primitives';
+import { brandedId, YmdSchema } from '../../../primitives';
 import type { GoalId, IdentityId, KeyResultId } from '../../../primitives';
 import type { GoalClientDTO } from '../aggregates/goal-client';
 import { GoalStatus } from '../value-objects/goal-status';
@@ -14,6 +14,7 @@ import {
   GoalReminderConfigDTOSchema,
   ReminderTriggerSchema,
 } from '../value-objects/goal-reminder-config';
+import { GoalTimeframeSchema } from '../value-objects/goal-timeframe';
 import { KeyResultInputSchema } from './key-result-input.schema';
 
 const GoalNameSchema = z
@@ -44,11 +45,9 @@ export const CreateGoalSchema = z
   .object({
     id: brandedId<GoalId>().optional(),
     name: GoalNameSchema,
-    description: z.string().max(2000, '描述不能超过 2000 字符').optional(),
-    feasibilityAnalysis: z.string().max(2000).optional(),
-    motivation: z.string().max(2000).optional(),
-    startDate: z.number().int().optional(),
-    dueDate: z.number().int().optional(),
+    summary: z.string().trim().max(500, '目标摘要不能超过 500 字符').optional(),
+    startDate: YmdSchema.optional(),
+    target: GoalTimeframeSchema.optional(),
     labelIds: z.array(z.string().min(1)).max(50).optional(),
     reminderConfig: GoalReminderConfigRequestSchema.nullable().optional(),
     initialKeyResults: z.array(KeyResultInputSchema).max(50).optional(),
@@ -69,11 +68,9 @@ export const UpdateGoalSchema = z
   .object({
     expectedVersion: z.number().int().min(1),
     name: GoalNameSchema.optional(),
-    description: z.string().max(2000).nullable().optional(),
-    feasibilityAnalysis: z.string().max(2000).nullable().optional(),
-    motivation: z.string().max(2000).nullable().optional(),
-    startDate: z.number().int().nullable().optional(),
-    dueDate: z.number().int().nullable().optional(),
+    summary: z.string().trim().max(500, '目标摘要不能超过 500 字符').nullable().optional(),
+    startDate: YmdSchema.nullable().optional(),
+    target: GoalTimeframeSchema.nullable().optional(),
     labelIds: z.array(z.string().min(1)).max(50).optional(),
     reminderConfig: GoalReminderConfigRequestSchema.nullable().optional(),
     keyResults: z
@@ -125,9 +122,9 @@ export const ListGoalFiltersSchema = z.object({
   status: z.array(z.enum(GoalStatus)).optional(),
   query: z.string().max(256).optional(),
   labelIdsAll: z.array(z.string().min(1)).max(50).optional(),
-  startDate: z.number().int().optional(),
-  endDate: z.number().int().optional(),
-  sortBy: z.enum(['createdAt', 'updatedAt', 'dueDate']).default('createdAt').optional(),
+  targetStart: YmdSchema.optional(),
+  targetEnd: YmdSchema.optional(),
+  sortBy: z.enum(['createdAt', 'updatedAt', 'target']).default('createdAt').optional(),
   sortOrder: z.enum(['asc', 'desc']).default('desc').optional(),
   page: z.number().int().min(1).default(1).optional(),
   pageSize: z.number().int().min(1).max(100).default(20).optional(),
@@ -165,7 +162,7 @@ export type GetGoalAggregateReq = void;
 export const CloneGoalSchema = z
   .object({
     name: GoalNameSchema.optional(),
-    description: z.string().max(2000, '描述不能超过 2000 字符').optional(),
+    summary: z.string().trim().max(500, '目标摘要不能超过 500 字符').optional(),
     includeKeyResults: z.boolean().optional(),
     includeRecords: z.boolean().optional(),
   })
@@ -176,16 +173,6 @@ export type CloneGoalReq = z.infer<typeof CloneGoalSchema>;
 // ============================================================================
 // BATCH Operations
 // ============================================================================
-
-/**
- * 批量更新目标状态 Schema
- */
-export const BatchUpdateGoalStatusSchema = z.object({
-  goalIds: z.array(brandedId<GoalId>()).min(1, '至少需要选择一个目标'),
-  status: z.enum(GoalStatus),
-});
-
-export type BatchUpdateGoalStatusReq = z.infer<typeof BatchUpdateGoalStatusSchema>;
 
 /**
  * 批量删除目标 Schema

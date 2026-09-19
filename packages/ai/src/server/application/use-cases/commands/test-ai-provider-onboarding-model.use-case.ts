@@ -6,12 +6,17 @@ import type {
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { AIExecutionError } from '../../../../shared/ai-execution-error';
 import { normalizeOpenAICompatibleModelId } from '../../../shared/openai-compatible-normalize';
-import type { IAIChatExecutionPort, IAIProviderOnboardingSessionRepository } from '../../ports';
+import type {
+  IAIChatExecutionPort,
+  IAIProviderOnboardingSessionRepository,
+  IAIProviderSecretVault,
+} from '../../ports';
 
 export class TestAIProviderOnboardingModelUseCase {
   constructor(
     private readonly sessionRepository: IAIProviderOnboardingSessionRepository,
     private readonly chatExecution: IAIChatExecutionPort,
+    private readonly secretVault: IAIProviderSecretVault,
     private readonly now: () => number = Date.now,
   ) {}
 
@@ -28,13 +33,18 @@ export class TestAIProviderOnboardingModelUseCase {
     if (!session) throw new AIExecutionError('not_found', 'AI provider onboarding session is unavailable');
 
     const modelId = normalizeOpenAICompatibleModelId(request.modelId);
+    const credential = await this.secretVault.resolve({
+      identityId: cx.identityId,
+      credentialRef: session.credentialRef,
+      now: startedAt,
+    });
     await this.chatExecution.complete({
       identityId: cx.identityId,
       requestId: cx.requestId,
       providerConfig: {
         provider: 'openai_compatible',
         model: modelId,
-        apiKey: session.apiKey,
+        apiKey: credential.value,
         baseUrl: session.baseUrl,
         temperature: 0,
         maxTokens: 16,

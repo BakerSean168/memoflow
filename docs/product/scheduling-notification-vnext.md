@@ -10,10 +10,56 @@ tags:
   - vnext
 description: MemoFlow Scheduling / Planner / Routine / Notification vNext 的统一产品语义、端到端用户场景与 North Star 架构
 created: 2026-08-25T17:49:00+08:00
-updated: 2026-08-25T17:49:00+08:00
+updated: 2026-09-19T00:00:00+00:00
 ---
 
 # Scheduling / Planner / Routine / Notification vNext
+
+> **当前 as-built 状态（2026-09-19）：** Routine、Planner/Scheduler 与 Notification 的 Phase 4 owner cutovers 已完成；本页场景和架构推演以 `modules/reminder.md`、`modules/schedule.md` 与 `modules/notification.md` 的当前实现为准，未来能力明确标注为 future/non-goal。
+
+## 2026-09-08 Schedule / Scheduler Model Convergence Freeze
+
+ADR-060/061 的 bounded-context、SchedulingPort 与 Handler Registry 方向继续保持；本轮进一步冻结 ADR-080~083：
+
+```text
+Planner / Calendar
+  CalendarEntryRange = Timed | AllDay
+  PlannerEventProjection + occupancy
+  cross-source PlannerConflictProjection
+
+Scheduler / Temporal Engine
+  ScheduledIntent -> SchedulingPort.reconcile
+  ScheduledInvocation
+  InvocationAttempt
+  host lease / claim / retry / recovery
+```
+
+截至 Phase 4，legacy `ScheduleTask / ScheduleExecution / ScheduleConfig / SourceModule` 权威已由 S4-2302B 破坏式退休；Scheduler canonical persistence/runtime 为 `ScheduledInvocation + InvocationAttempt`。Planner range/occupancy/conflict 也已按 P4-2301A/B 收敛。详细模型见 [Schedule / Planner + Scheduler / Temporal Engine vNext](./schedule-planner-scheduler-vnext.md) 和 [Current System Map](../analysis/2026-09-08-schedule-scheduler-current-system-map.md)。
+
+## 2026-09-08 Notification Model Convergence Freeze
+
+ADR-063 已落地的 Notification 主干继续保护：
+
+```text
+NotificationRequested
+  -> Notification Fact
+  -> per-channel policy
+  -> durable dispatch / receipt
+```
+
+本轮进一步冻结 ADR-084~088：
+
+```text
+NotificationFact + InboxLifecycle
+NotificationWorkflowDefinition
+DeliveryPlan + DeliveryProjection
+NotificationInteraction + typed OwnerCommand
+QuietHours(TimeZoneId,Hm)
+InboxPort / OperationsPort
+InboxRealtime / DeliveryRealtime
+```
+
+截至 Phase 4，`NotificationChannel` aggregate、`NotificationHistory`、`NotificationTemplate`、closed `RelatedEntityType` 与 host-local DND/user-rate-limit 双真值已退休；canonical 主链为 Fact/Inbox + Workflow + DeliveryDecision/Outbox/Receipt + typed Interaction + QuietHours/SystemDeliveryGuard + Product/Operations ports。`NotificationCategory` 仍作为展示语义保留。详细见 [Notification vNext](./notification-vnext.md) 与 [Notification Current System Map](../analysis/2026-09-08-notification-current-system-map.md)。
 
 ## 1. 为什么需要这一份统一设计
 

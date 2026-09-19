@@ -14,7 +14,7 @@
           <span v-if="timeText" class="mr-1 font-medium">{{ timeText }}</span>
           <span class="truncate font-medium">{{ event.title }}</span>
           <span
-            v-if="event.extendedProps.projection.displayMetadata.hasConflict"
+            v-if="hasDerivedConflict(event.extendedProps.projection)"
             class="ml-1"
             aria-hidden="true"
             >⚠</span
@@ -45,9 +45,11 @@ import timeGridPlugin from '@fullcalendar/vue3/timegrid';
 import classicThemePlugin from '@fullcalendar/vue3/themes/classic';
 import zhCnLocale from '@fullcalendar/vue3/locales/zh-cn';
 import type { CalendarApi, CalendarOptions, EventApi, EventInput } from '@fullcalendar/vue3';
-import type { CalendarEventProjection } from '@memoflow/contracts/schedule';
+import type { CalendarEventProjection, PlannerConflictProjection } from '@memoflow/contracts/schedule';
+import { plannerConflictSourceKeys, plannerProjectionKey } from '@memoflow/schedule/client';
 import { Loader2 } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
+import { getProductTime, productTimeRevision } from '../../../shared/utils/product-time';
 import {
   applyFullCalendarPlannerMutation,
   defaultPlannerMutationTimePort,
@@ -68,6 +70,7 @@ export interface PlannerVisibleRange {
 const props = withDefaults(
   defineProps<{
     projections: readonly CalendarEventProjection[];
+    conflicts?: readonly PlannerConflictProjection[];
     ownerCommands: PlannerOwnerCommandRouter;
     view: PlannerCalendarView;
     loading?: boolean;
@@ -77,6 +80,7 @@ const props = withDefaults(
   }>(),
   {
     loading: false,
+    conflicts: () => [],
     initialDate: () => Date.now(),
     locale: 'en-US',
     loadingLabel: 'Loading',
@@ -100,6 +104,12 @@ const fullCalendarView: Record<PlannerCalendarView, string> = {
   month: 'dayGridMonth',
 };
 
+const conflictSourceKeys = computed(() => plannerConflictSourceKeys(props.conflicts));
+
+function hasDerivedConflict(projection: CalendarEventProjection): boolean {
+  return conflictSourceKeys.value.has(plannerProjectionKey(projection));
+}
+
 function projectionToEvent(projection: CalendarEventProjection): EventInput {
   return {
     id: `${projection.sourceType}:${projection.sourceId}`,
@@ -112,7 +122,7 @@ function projectionToEvent(projection: CalendarEventProjection): EventInput {
     durationEditable: projection.editableCapabilities.resize,
     classNames: [
       `planner-source-${projection.sourceType}`,
-      projection.displayMetadata.hasConflict ? 'planner-event-conflict' : '',
+      hasDerivedConflict(projection) ? 'planner-event-conflict' : '',
     ].filter(Boolean),
     extendedProps: { projection },
   };
@@ -143,80 +153,83 @@ async function applyMutation(
   emit('mutation', outcome);
 }
 
-const calendarOptions = computed<CalendarOptions>(() => ({
-  plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, classicThemePlugin],
-  initialView: fullCalendarView[props.view],
-  initialDate: new Date(props.initialDate),
-  headerToolbar: false,
-  locales: [zhCnLocale],
-  locale: props.locale.toLowerCase().startsWith('zh') ? 'zh-cn' : 'en',
-  firstDay: 1,
-  height: '100%',
-  nowIndicator: true,
-  selectable: true,
-  selectMirror: true,
-  editable: true,
-  allDaySlot: true,
-  dayMaxEvents: 3,
-  slotDuration: '00:30:00',
-  slotMinTime: '00:00:00',
-  slotMaxTime: '24:00:00',
-  eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
-  events: props.projections.map(projectionToEvent),
-  datesSet(info) {
-    const range: PlannerVisibleRange = {
-      start: info.start.getTime(),
-      end: Math.max(info.start.getTime(), info.end.getTime() - 1),
-      title: info.view.title,
-      view: plannerViewFromFullCalendar(info.view.type),
-    };
-    const rangeKey = `${range.view}:${range.start}:${range.end}:${range.title}`;
-    if (lastVisibleRangeKey.value === rangeKey) return;
-    lastVisibleRangeKey.value = rangeKey;
-    emit('range-change', range);
-  },
-  eventClick(info) {
-    const projection = projectionOf(info.event);
-    if (projection) emit('event-click', projection);
-  },
-  eventDidMount(info) {
-    const projection = projectionOf(info.event);
-    if (!projection) return;
-    info.el.setAttribute('role', 'button');
-    info.el.setAttribute('tabindex', '0');
-    info.el.setAttribute('aria-label', projection.title);
-    info.el.setAttribute(
-      'data-testid',
-      `schedule-event-${projection.sourceType}-${projection.sourceId}`,
-    );
-    info.el.onkeydown = (event: KeyboardEvent) => {
-      if (event.key !== 'Enter' && event.key !== ' ') return;
-      event.preventDefault();
-      emit('event-click', projection);
-    };
-  },
-  eventWillUnmount(info) {
-    info.el.onkeydown = null;
-  },
-  dayCellDidMount(info) {
-    const year = info.date.getFullYear();
-    const month = String(info.date.getMonth() + 1).padStart(2, '0');
-    const day = String(info.date.getDate()).padStart(2, '0');
-    info.el.setAttribute('data-testid', `schedule-day-${year}-${month}-${day}`);
-  },
-  dateClick(info) {
-    if (info.view.type === 'dayGridMonth') emit('day-click', info.date);
-  },
-  select(info) {
-    emit('select-range', {
-      start: info.start.getTime(),
-      end: info.end.getTime(),
-      allDay: info.allDay,
-    });
-  },
-  eventDrop: (info) => void applyMutation('move', info),
-  eventResize: (info) => void applyMutation('resize', info),
-}));
+const calendarOptions = computed<CalendarOptions>(() => {
+  void productTimeRevision.value;
+  const productTime = getProductTime();
+  return {
+    plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, classicThemePlugin],
+    initialView: fullCalendarView[props.view],
+    initialDate: new Date(props.initialDate),
+    headerToolbar: false,
+    locales: [zhCnLocale],
+    locale: props.locale.toLowerCase().startsWith('zh') ? 'zh-cn' : 'en',
+    timeZone: String(productTime.context.timeZone),
+    firstDay: productTime.context.weekStartsOn,
+    height: '100%',
+    nowIndicator: true,
+    selectable: true,
+    selectMirror: true,
+    editable: true,
+    allDaySlot: true,
+    dayMaxEvents: 3,
+    slotDuration: '00:30:00',
+    slotMinTime: '00:00:00',
+    slotMaxTime: '24:00:00',
+    eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+    events: props.projections.map(projectionToEvent),
+    datesSet(info) {
+      const range: PlannerVisibleRange = {
+        start: info.start.getTime(),
+        end: Math.max(info.start.getTime(), info.end.getTime() - 1),
+        title: info.view.title,
+        view: plannerViewFromFullCalendar(info.view.type),
+      };
+      const rangeKey = `${range.view}:${range.start}:${range.end}:${range.title}`;
+      if (lastVisibleRangeKey.value === rangeKey) return;
+      lastVisibleRangeKey.value = rangeKey;
+      emit('range-change', range);
+    },
+    eventClick(info) {
+      const projection = projectionOf(info.event);
+      if (projection) emit('event-click', projection);
+    },
+    eventDidMount(info) {
+      const projection = projectionOf(info.event);
+      if (!projection) return;
+      info.el.setAttribute('role', 'button');
+      info.el.setAttribute('tabindex', '0');
+      info.el.setAttribute('aria-label', projection.title);
+      info.el.setAttribute(
+        'data-testid',
+        `schedule-event-${projection.sourceType}-${projection.sourceId}`,
+      );
+      info.el.onkeydown = (event: KeyboardEvent) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        emit('event-click', projection);
+      };
+    },
+    eventWillUnmount(info) {
+      info.el.onkeydown = null;
+    },
+    dayCellDidMount(info) {
+      const dayKey = String(productTime.calendar.toYmd(info.date.getTime()));
+      info.el.setAttribute('data-testid', 'schedule-day-' + dayKey);
+    },
+    dateClick(info) {
+      if (info.view.type === 'dayGridMonth') emit('day-click', info.date);
+    },
+    select(info) {
+      emit('select-range', {
+        start: info.start.getTime(),
+        end: info.end.getTime(),
+        allDay: info.allDay,
+      });
+    },
+    eventDrop: (info) => void applyMutation('move', info),
+    eventResize: (info) => void applyMutation('resize', info),
+  };
+});
 
 watch(
   () => props.view,
@@ -255,7 +268,7 @@ function showDate(view: PlannerCalendarView, date: Date | number): void {
 defineExpose({ previous, next, today, goToDate, showDate });
 
 function eventToneClass(projection: CalendarEventProjection): string {
-  if (projection.displayMetadata.hasConflict) return 'planner-tone-warning';
+  if (hasDerivedConflict(projection)) return 'planner-tone-warning';
   return `planner-tone-${projection.displayMetadata.tone ?? 'default'}`;
 }
 </script>

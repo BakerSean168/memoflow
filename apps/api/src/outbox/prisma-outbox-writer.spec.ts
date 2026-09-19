@@ -16,7 +16,7 @@ describe('PrismaOutboxWriter (R1-2 adapter)', () => {
 
     const messageId = await writer.enqueue({
       messageType: 'task.instance.completed',
-      payloadJson: JSON.stringify({ instanceId: 'i-1' }),
+      payloadJson: JSON.stringify({ occurrenceId: 'i-1' }),
       correlationId: 'corr-1' as never,
       causationId: 'caus-1' as never,
       identityId: 'user-1',
@@ -27,7 +27,7 @@ describe('PrismaOutboxWriter (R1-2 adapter)', () => {
     expect(dbClient.outboxMessage.create).toHaveBeenCalledTimes(1);
     const data = dbClient.outboxMessage.create.mock.calls[0]![0]!.data;
     expect(data.messageType).toBe('task.instance.completed');
-    expect(data.payloadJson).toBe(JSON.stringify({ instanceId: 'i-1' }));
+    expect(data.payloadJson).toBe(JSON.stringify({ occurrenceId: 'i-1' }));
     expect(data.correlationId).toBe('corr-1');
     expect(data.causationId).toBe('caus-1');
     expect(data.identityId).toBe('user-1');

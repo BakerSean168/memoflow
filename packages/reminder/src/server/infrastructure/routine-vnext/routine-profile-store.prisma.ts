@@ -27,6 +27,71 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
     });
   }
 
+  async updateDefinition(input: {
+    readonly definition: RoutineDefinition;
+    readonly expectedVersion: number;
+  }): Promise<void> {
+    const data = routineDefinitionToPrisma(input.definition.snapshot());
+    const result = await this.prisma.routineDefinition.updateMany({
+      where: {
+        id: data.id,
+        identityId: data.identityId,
+        version: input.expectedVersion,
+      },
+      data: {
+        name: data.name,
+        description: data.description,
+        enabled: data.enabled,
+        triggerJson: data.triggerJson,
+        version: data.version,
+        updatedAt: data.updatedAt,
+      },
+    });
+    if (result.count !== 1) throw new Error(`Routine '${data.id}' version conflict`);
+  }
+
+  async createDefinitionWithMemberships(input: {
+    readonly definition: RoutineDefinition;
+    readonly memberships: readonly ProfileMembership[];
+  }): Promise<void> {
+    assertDefinitionCreation(input);
+    const definitionData = routineDefinitionToPrisma(input.definition.snapshot());
+    const membershipData = input.memberships.map((membership) =>
+      profileMembershipToPrisma(membership.snapshot()),
+    );
+    await this.prisma.$transaction(async (tx) => {
+      const existingDefinition = await tx.routineDefinition.findUnique({
+        where: { id: definitionData.id },
+      });
+      if (existingDefinition) {
+        throw new TypeError(
+          existingDefinition.identityId === definitionData.identityId
+            ? `Routine '${definitionData.id}' already exists`
+            : `Routine '${definitionData.id}' belongs to another identity`,
+        );
+      }
+      if (membershipData.length > 0) {
+        const profiles = await tx.routineProfile.findMany({
+          where: { id: { in: membershipData.map((membership) => membership.profileId) } },
+        });
+        const profilesById = new Map(profiles.map((profile) => [profile.id, profile.identityId]));
+        for (const membership of membershipData) {
+          const profileIdentity = profilesById.get(membership.profileId);
+          if (!profileIdentity) {
+            throw new TypeError(`Routine profile '${membership.profileId}' was not found`);
+          }
+          if (profileIdentity !== definitionData.identityId) {
+            throw new TypeError('Routine creation profile ownership mismatch');
+          }
+        }
+      }
+      await tx.routineDefinition.create({ data: definitionData });
+      for (const data of membershipData) {
+        await tx.routineProfileMembership.create({ data });
+      }
+    });
+  }
+
   async findDefinition(input: {
     readonly identityId: string;
     readonly routineId: string;
@@ -34,28 +99,50 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
     const row = await this.prisma.routineDefinition.findUnique({
       where: { identityId_id: { identityId: input.identityId, id: input.routineId } },
     });
-    return row
-      ? RoutineDefinition.load({
-          id: row.id,
-          identityId: row.identityId,
-          name: row.name,
-          description: row.description,
-          enabled: row.enabled,
-          trigger: deserializeRoutineTrigger(row.triggerJson),
-          version: row.version,
-          createdAt: row.createdAt,
-          updatedAt: row.updatedAt,
-        })
-      : null;
+    return row ? mapDefinition(row) : null;
+  }
+
+  async listDefinitions(input: { readonly identityId: string }): Promise<RoutineDefinition[]> {
+    const rows = await this.prisma.routineDefinition.findMany({
+      where: { identityId: input.identityId },
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+    });
+    return rows.map(mapDefinition);
   }
 
   async deleteDefinition(input: {
     readonly identityId: string;
     readonly routineId: string;
+    readonly expectedVersion?: number;
   }): Promise<void> {
-    await this.prisma.routineDefinition.deleteMany({
-      where: { id: input.routineId, identityId: input.identityId },
+    const result = await this.prisma.routineDefinition.deleteMany({
+      where: {
+        id: input.routineId,
+        identityId: input.identityId,
+        ...(input.expectedVersion === undefined ? {} : { version: input.expectedVersion }),
+      },
     });
+    if (input.expectedVersion !== undefined && result.count !== 1) {
+      throw new Error(`Routine '${input.routineId}' version conflict`);
+    }
+  }
+
+  async updateProfile(input: {
+    readonly profile: RoutineProfile;
+    readonly expectedVersion: number;
+  }): Promise<void> {
+    const data = routineProfileToPrisma(input.profile.snapshot());
+    const result = await this.prisma.routineProfile.updateMany({
+      where: { id: data.id, identityId: data.identityId, version: input.expectedVersion },
+      data: {
+        name: data.name,
+        description: data.description,
+        enabled: data.enabled,
+        version: data.version,
+        updatedAt: data.updatedAt,
+      },
+    });
+    if (result.count !== 1) throw new Error(`Profile '${data.id}' version conflict`);
   }
 
   async upsertProfile(profile: RoutineProfile): Promise<void> {
@@ -67,7 +154,6 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
         name: data.name,
         description: data.description,
         enabled: data.enabled,
-        active: data.active,
         version: data.version,
         updatedAt: data.updatedAt,
       },
@@ -88,7 +174,7 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
           name: row.name,
           description: row.description,
           enabled: row.enabled,
-          active: row.active,
+
           version: row.version,
           createdAt: row.createdAt,
           updatedAt: row.updatedAt,
@@ -108,7 +194,7 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
         name: row.name,
         description: row.description,
         enabled: row.enabled,
-        active: row.active,
+
         version: row.version,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
@@ -132,7 +218,7 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
         name: row.name,
         description: row.description,
         enabled: row.enabled,
-        active: row.active,
+
         version: row.version,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
@@ -143,14 +229,35 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
   async deleteProfile(input: {
     readonly identityId: string;
     readonly profileId: string;
+    readonly expectedVersion?: number;
   }): Promise<void> {
-    await this.prisma.routineProfile.deleteMany({
-      where: { id: input.profileId, identityId: input.identityId },
+    const result = await this.prisma.routineProfile.deleteMany({
+      where: {
+        id: input.profileId,
+        identityId: input.identityId,
+        ...(input.expectedVersion === undefined ? {} : { version: input.expectedVersion }),
+      },
     });
+    if (input.expectedVersion !== undefined && result.count !== 1) {
+      throw new Error(`Profile '${input.profileId}' version conflict`);
+    }
   }
 
-  async upsertMembership(membership: ProfileMembership): Promise<void> {
+  async upsertMembership(membership: ProfileMembership, expectedVersion?: number): Promise<void> {
     const data = profileMembershipToPrisma(membership.snapshot());
+    if (expectedVersion !== undefined) {
+      const result = await this.prisma.routineProfileMembership.updateMany({
+        where: {
+          identityId: data.identityId,
+          profileId: data.profileId,
+          routineId: data.routineId,
+          version: expectedVersion,
+        },
+        data: { enabled: data.enabled, version: data.version, updatedAt: data.updatedAt },
+      });
+      if (result.count !== 1) throw new Error('Routine membership version conflict');
+      return;
+    }
     await this.prisma.routineProfileMembership.upsert({
       where: {
         identityId_profileId_routineId: {
@@ -206,12 +313,14 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
     readonly identityId: string;
     readonly profileId: string;
     readonly routineId: string;
+    readonly expectedVersion?: number;
   }): Promise<void> {
     await this.prisma.routineProfileMembership.deleteMany({
       where: {
         identityId: input.identityId,
         profileId: input.profileId,
         routineId: input.routineId,
+        ...(input.expectedVersion === undefined ? {} : { version: input.expectedVersion }),
       },
     });
   }
@@ -220,9 +329,22 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
     readonly identityId: string;
     readonly routineId: string;
     readonly memberships: readonly ProfileMembership[];
+    readonly expectedVersion?: number;
   }): Promise<void> {
     assertMembershipSet(input);
     await this.prisma.$transaction(async (tx) => {
+      if (input.expectedVersion !== undefined) {
+        const routineUpdate = await tx.routineDefinition.updateMany({
+          where: {
+            id: input.routineId,
+            identityId: input.identityId,
+            version: input.expectedVersion,
+          },
+          data: { version: input.expectedVersion + 1 },
+        });
+        if (routineUpdate.count !== 1)
+          throw new Error(`Routine '${input.routineId}' version conflict`);
+      }
       await tx.routineProfileMembership.deleteMany({
         where: { identityId: input.identityId, routineId: input.routineId },
       });
@@ -232,6 +354,30 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
       }
     });
   }
+}
+
+function mapDefinition(row: {
+  id: string;
+  identityId: string;
+  name: string;
+  description: string | null;
+  enabled: boolean;
+  triggerJson: string | null;
+  version: number;
+  createdAt: Date;
+  updatedAt: Date;
+}): RoutineDefinition {
+  return RoutineDefinition.load({
+    id: row.id,
+    identityId: row.identityId,
+    name: row.name,
+    description: row.description,
+    enabled: row.enabled,
+    trigger: deserializeRoutineTrigger(row.triggerJson),
+    version: row.version,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  });
 }
 
 function mapMembership(row: {
@@ -244,6 +390,21 @@ function mapMembership(row: {
   updatedAt: Date;
 }): ProfileMembership {
   return ProfileMembership.load({ ...row });
+}
+
+function assertDefinitionCreation(input: {
+  readonly definition: RoutineDefinition;
+  readonly memberships: readonly ProfileMembership[];
+}): void {
+  const definition = input.definition;
+  if (!definition.identityId.trim() || !definition.id.trim()) {
+    throw new TypeError('Routine definition ownership is invalid');
+  }
+  assertMembershipSet({
+    identityId: definition.identityId,
+    routineId: definition.id,
+    memberships: input.memberships,
+  });
 }
 
 function assertMembershipSet(input: {

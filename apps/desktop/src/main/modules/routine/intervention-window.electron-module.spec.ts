@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ipcMain } from 'electron';
-import { RoutineChannels, type InterventionWindowCommand } from '@memoflow/contracts/electron';
+import {
+  RoutineWindowChannels,
+  type InterventionWindowCommand,
+} from '@memoflow/contracts/electron';
 import type { InterventionWindowController } from './intervention-window-controller';
 import { createInterventionWindowElectronModule } from './intervention-window.electron-module';
 
@@ -9,7 +12,7 @@ function controllerHarness(): InterventionWindowController {
     present: vi.fn(() => null),
     restoreIdentity: vi.fn(() => null),
     getProjection: vi.fn(() => null),
-    execute: vi.fn(() => null),
+    execute: vi.fn(async () => null),
     destroy: vi.fn(),
   };
 }
@@ -24,18 +27,18 @@ describe('InterventionWindow Electron module (ROUTINE-4104)', () => {
 
     expect(ipcMain.handle).toHaveBeenCalledTimes(2);
     expect(ipcMain.handle).toHaveBeenCalledWith(
-      RoutineChannels.INTERVENTION_WINDOW_GET,
+      RoutineWindowChannels.INTERVENTION_WINDOW_GET,
       expect.any(Function),
     );
     expect(ipcMain.handle).toHaveBeenCalledWith(
-      RoutineChannels.INTERVENTION_WINDOW_COMMAND,
+      RoutineWindowChannels.INTERVENTION_WINDOW_COMMAND,
       expect.any(Function),
     );
 
     const commandHandler = vi
       .mocked(ipcMain.handle)
       .mock.calls.find(
-        ([channel]) => channel === RoutineChannels.INTERVENTION_WINDOW_COMMAND,
+        ([channel]) => channel === RoutineWindowChannels.INTERVENTION_WINDOW_COMMAND,
       )?.[1] as (_event: unknown, command: InterventionWindowCommand) => Promise<unknown>;
 
     await commandHandler({}, { action: 'snooze', durationMs: 300_000 });
@@ -52,22 +55,24 @@ describe('InterventionWindow Electron module (ROUTINE-4104)', () => {
     expect(controller.execute).toHaveBeenCalledTimes(1);
 
     await module.destroy?.();
-    expect(ipcMain.removeHandler).toHaveBeenCalledWith(RoutineChannels.INTERVENTION_WINDOW_GET);
-    expect(ipcMain.removeHandler).toHaveBeenCalledWith(RoutineChannels.INTERVENTION_WINDOW_COMMAND);
+    expect(ipcMain.removeHandler).toHaveBeenCalledWith(
+      RoutineWindowChannels.INTERVENTION_WINDOW_GET,
+    );
+    expect(ipcMain.removeHandler).toHaveBeenCalledWith(
+      RoutineWindowChannels.INTERVENTION_WINDOW_COMMAND,
+    );
     expect(controller.destroy).toHaveBeenCalledTimes(1);
   });
 
   it('returns a stable product error instead of leaking controller exception text', async () => {
     const controller = controllerHarness();
-    vi.mocked(controller.execute).mockImplementation(() => {
-      throw new Error('PowerSync secret internal failure');
-    });
+    vi.mocked(controller.execute).mockRejectedValue(new Error('PowerSync secret internal failure'));
     const module = createInterventionWindowElectronModule(controller);
     await module.register({} as never);
     const commandHandler = vi
       .mocked(ipcMain.handle)
       .mock.calls.find(
-        ([channel]) => channel === RoutineChannels.INTERVENTION_WINDOW_COMMAND,
+        ([channel]) => channel === RoutineWindowChannels.INTERVENTION_WINDOW_COMMAND,
       )?.[1] as (_event: unknown, command: InterventionWindowCommand) => Promise<unknown>;
 
     const result = (await commandHandler({}, { action: 'dismiss' })) as {

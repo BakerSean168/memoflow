@@ -22,6 +22,8 @@ import type {
   SearchRulesRes,
   GetRuleRevisionsQueryInput,
   GetRuleRevisionsRes,
+  ExportGovernanceRuleBundleReq,
+  ExportGovernanceRuleBundleRes,
 } from '../api';
 import { GovernanceChannels } from './governance-channels';
 
@@ -38,6 +40,10 @@ export type GovernanceRpcMap = {
   [GovernanceChannels.RULE_LIST]: [ListRulesQueryInput, ListRulesRes];
   [GovernanceChannels.RULE_SEARCH]: [SearchRulesQueryInput, SearchRulesRes];
   [GovernanceChannels.RULE_REVISIONS]: [GetRuleRevisionsQueryInput, GetRuleRevisionsRes];
+  [GovernanceChannels.RULE_BUNDLE_EXPORT]: [
+    ExportGovernanceRuleBundleReq,
+    ExportGovernanceRuleBundleRes,
+  ];
 };
 
 export type GovernanceRpcChannel = keyof GovernanceRpcMap;

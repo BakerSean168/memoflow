@@ -1,15 +1,15 @@
-import { AccountStatus as AccountStatusContract, type AccountStatus as IAccountStatus } from '@memoflow/contracts/account';
+import {
+  AccountStatus as AccountStatusContract,
+  type AccountStatus as IAccountStatus,
+} from '@memoflow/contracts/account';
 
 export type AccountStatus = IAccountStatus & { readonly __brand: unique symbol };
 
-// Derive the valid-value set from the contracts source of truth so a new status
-// only ever has to be added in one place (@memoflow/contracts).
 const VALUES: IAccountStatus[] = Object.values(AccountStatusContract);
 
 export const AccountStatus = {
   Active: 'Active' as AccountStatus,
-  Suspended: 'Suspended' as AccountStatus,
-  Deactivated: 'Deactivated' as AccountStatus,
+  Closed: 'Closed' as AccountStatus,
 
   of(value: string): AccountStatus {
     if (!this.isValid(value)) {
@@ -29,19 +29,12 @@ export const AccountStatus = {
   isActive(status: AccountStatus): boolean {
     return status === this.Active;
   },
-  isSuspended(status: AccountStatus): boolean {
-    return status === this.Suspended;
+
+  isClosed(status: AccountStatus): boolean {
+    return status === this.Closed;
   },
-  isDeactivated(status: AccountStatus): boolean {
-    return status === this.Deactivated;
-  },
+
   canLogin(status: AccountStatus): boolean {
     return status === this.Active;
-  },
-  canBeSuspended(status: AccountStatus): boolean {
-    return status === this.Active;
-  },
-  canBeActivated(status: AccountStatus): boolean {
-    return status === this.Suspended || status === this.Deactivated;
   },
 };

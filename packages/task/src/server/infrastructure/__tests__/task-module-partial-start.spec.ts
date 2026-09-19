@@ -13,8 +13,8 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { ITaskInstanceRepository } from '../../domain/repositories/i-task-instance-repository';
-import type { ITaskTemplateRepository } from '../../domain/repositories/i-task-template-repository';
+import type { ITaskOccurrenceRepository } from '../../domain/repositories/i-task-occurrence-repository';
+import type { ITaskPlanRepository } from '../../domain/repositories/i-task-plan-repository';
 import type { TaskWriteTransactionRunner } from '../../application/use-cases/commands/task-write-support';
 import {
   createTaskModule,
@@ -41,10 +41,10 @@ function makeContribution(name: string, failOnStart = false): FakeContribution {
 
 function makeDeps(runtimeContributions: TaskModuleRuntimeContribution[]): TaskModuleDependencies {
   return {
-    taskTemplateRepository: {
-      findNeedGenerateInstances: vi.fn(async () => []),
-    } as unknown as ITaskTemplateRepository,
-    taskInstanceRepository: {} as unknown as ITaskInstanceRepository,
+    taskPlanRepository: {
+      findActiveRecurringPlansForMaterialization: vi.fn(async () => []),
+    } as unknown as ITaskPlanRepository,
+    taskOccurrenceRepository: {} as unknown as ITaskOccurrenceRepository,
     taskWriteTransactionRunner: {} as unknown as TaskWriteTransactionRunner,
     runtimeContributions,
   };
@@ -56,9 +56,9 @@ describe('createTaskModule partial-start cleanup', () => {
     const b = makeContribution('b');
     const c = makeContribution('c', true);
 
-    const instance = createTaskModule(makeDeps([a.contribution, b.contribution, c.contribution]));
+    const occurrence = createTaskModule(makeDeps([a.contribution, b.contribution, c.contribution]));
 
-    await expect(instance.start()).rejects.toThrow('c start failed');
+    await expect(occurrence.start()).rejects.toThrow('c start failed');
 
     expect(a.start).toHaveBeenCalledTimes(1);
     expect(b.start).toHaveBeenCalledTimes(1);
@@ -75,12 +75,12 @@ describe('createTaskModule partial-start cleanup', () => {
     const a = makeContribution('a');
     const b = makeContribution('b', true);
 
-    const instance = createTaskModule(makeDeps([a.contribution, b.contribution]));
+    const occurrence = createTaskModule(makeDeps([a.contribution, b.contribution]));
 
-    await expect(instance.start()).rejects.toThrow('b start failed');
+    await expect(occurrence.start()).rejects.toThrow('b start failed');
     expect(a.stop).toHaveBeenCalledTimes(1);
 
-    await instance.dispose();
+    await occurrence.dispose();
     expect(a.stop).toHaveBeenCalledTimes(1);
     expect(b.stop).not.toHaveBeenCalled();
   });
@@ -90,9 +90,9 @@ describe('createTaskModule partial-start cleanup', () => {
     a.stop.mockRejectedValue(new Error('a stop failed'));
     const b = makeContribution('b', true);
 
-    const instance = createTaskModule(makeDeps([a.contribution, b.contribution]));
+    const occurrence = createTaskModule(makeDeps([a.contribution, b.contribution]));
 
-    await expect(instance.start()).rejects.toThrow('b start failed');
+    await expect(occurrence.start()).rejects.toThrow('b start failed');
     expect(a.stop).toHaveBeenCalledTimes(1);
   });
 
@@ -100,13 +100,13 @@ describe('createTaskModule partial-start cleanup', () => {
     const a = makeContribution('a');
     const b = makeContribution('b');
 
-    const instance = createTaskModule(makeDeps([a.contribution, b.contribution]));
+    const occurrence = createTaskModule(makeDeps([a.contribution, b.contribution]));
 
-    await instance.start();
+    await occurrence.start();
     expect(a.start).toHaveBeenCalledTimes(1);
     expect(b.start).toHaveBeenCalledTimes(1);
 
-    await instance.dispose();
+    await occurrence.dispose();
     expect(b.stop.mock.invocationCallOrder[0]).toBeLessThan(a.stop.mock.invocationCallOrder[0]);
   });
 });

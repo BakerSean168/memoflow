@@ -124,36 +124,9 @@ exports.Prisma.AccountScalarFieldEnum = {
   id: 'id',
   status: 'status',
   profile: 'profile',
-  settings: 'settings',
-  emailAddress: 'emailAddress',
-  emailIsVerified: 'emailIsVerified',
-  emailVerifiedAt: 'emailVerifiedAt',
-  emailIsPrimary: 'emailIsPrimary',
-  phoneCountryCode: 'phoneCountryCode',
-  phoneNumber: 'phoneNumber',
-  phoneFullNumber: 'phoneFullNumber',
-  phoneIsVerified: 'phoneIsVerified',
-  phoneVerifiedAt: 'phoneVerifiedAt',
-  version: 'version',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
-};
-
-exports.Prisma.ActivityLedgerScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  actorId: 'actorId',
-  subjectType: 'subjectType',
-  subjectId: 'subjectId',
-  action: 'action',
-  title: 'title',
-  correlationId: 'correlationId',
-  beforeSummary: 'beforeSummary',
-  afterSummary: 'afterSummary',
-  sourceEvent: 'sourceEvent',
-  occurredAt: 'occurredAt',
-  createdAt: 'createdAt'
+  closedAt: 'closedAt'
 };
 
 exports.Prisma.AiConversationScalarFieldEnum = {
@@ -161,70 +134,39 @@ exports.Prisma.AiConversationScalarFieldEnum = {
   identityId: 'identityId',
   name: 'name',
   status: 'status',
-  messageCount: 'messageCount',
-  lastMessageAt: 'lastMessageAt',
   version: 'version',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
 };
 
-exports.Prisma.AiMessageScalarFieldEnum = {
+exports.Prisma.AiExecutionRecordScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
-  conversationId: 'conversationId',
-  role: 'role',
-  content: 'content',
-  tokenUsage: 'tokenUsage',
-  createdAt: 'createdAt'
-};
-
-exports.Prisma.AiGenerationTaskScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  taskType: 'taskType',
-  status: 'status',
+  operation: 'operation',
+  outcome: 'outcome',
   conversationId: 'conversationId',
   runId: 'runId',
   requestId: 'requestId',
   traceId: 'traceId',
-  providerId: 'providerId',
-  model: 'model',
+  providerConnectionId: 'providerConnectionId',
+  modelId: 'modelId',
+  errorCategory: 'errorCategory',
+  safeError: 'safeError',
   estimatedCostUsd: 'estimatedCostUsd',
-  input: 'input',
-  result: 'result',
-  error: 'error',
-  retryCount: 'retryCount',
   tokenUsage: 'tokenUsage',
-  processingMs: 'processingMs',
-  version: 'version',
+  latencyMs: 'latencyMs',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  completedAt: 'completedAt',
-  deletedAt: 'deletedAt'
-};
-
-exports.Prisma.AiUsageQuotaScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  quotaLimit: 'quotaLimit',
-  currentUsage: 'currentUsage',
-  resetPeriod: 'resetPeriod',
-  lastResetAt: 'lastResetAt',
-  nextResetAt: 'nextResetAt',
-  version: 'version',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
+  completedAt: 'completedAt'
 };
 
 exports.Prisma.AiProviderConfigScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
   name: 'name',
-  providerType: 'providerType',
+  providerDefinitionId: 'providerDefinitionId',
   baseUrl: 'baseUrl',
-  apiKeyEncrypted: 'apiKeyEncrypted',
+  credentialRef: 'credentialRef',
   defaultModel: 'defaultModel',
   availableModels: 'availableModels',
   isActive: 'isActive',
@@ -242,7 +184,7 @@ exports.Prisma.AiProviderOnboardingSessionScalarFieldEnum = {
   catalogId: 'catalogId',
   baseUrl: 'baseUrl',
   targetProviderId: 'targetProviderId',
-  credentialEncrypted: 'credentialEncrypted',
+  credentialRef: 'credentialRef',
   credentialStatus: 'credentialStatus',
   discoveryStatus: 'discoveryStatus',
   modelsJson: 'modelsJson',
@@ -253,30 +195,27 @@ exports.Prisma.AiProviderOnboardingSessionScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.KnowledgeGenerationTaskScalarFieldEnum = {
+exports.Prisma.AiProviderSecretScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
-  topic: 'topic',
-  resourceCount: 'resourceCount',
-  targetAudience: 'targetAudience',
-  folderPath: 'folderPath',
-  status: 'status',
-  progress: 'progress',
-  generatedResourceIds: 'generatedResourceIds',
-  error: 'error',
+  encryptedValue: 'encryptedValue',
+  expiresAt: 'expiresAt',
+  revokedAt: 'revokedAt',
   createdAt: 'createdAt',
-  completedAt: 'completedAt'
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.AiKnowledgeIndexEntryScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
   repositoryId: 'repositoryId',
-  resourceId: 'resourceId',
-  resourcePath: 'resourcePath',
+  knowledgeSpaceId: 'knowledgeSpaceId',
+  knowledgeDocumentId: 'knowledgeDocumentId',
+  sourcePath: 'sourcePath',
   title: 'title',
   mimeType: 'mimeType',
-  contentHash: 'contentHash',
+  sourceContentHash: 'sourceContentHash',
+  sourceVersion: 'sourceVersion',
   status: 'status',
   summary: 'summary',
   keywords: 'keywords',
@@ -291,21 +230,12 @@ exports.Prisma.AiKnowledgeIndexEntryScalarFieldEnum = {
   deletedAt: 'deletedAt'
 };
 
-exports.Prisma.DashboardConfigScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  widgetConfig: 'widgetConfig',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
 exports.Prisma.CloudAuthUserScalarFieldEnum = {
   id: 'id',
   name: 'name',
   email: 'email',
   emailVerified: 'emailVerified',
   image: 'image',
-  status: 'status',
   disabledAt: 'disabledAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -360,79 +290,15 @@ exports.Prisma.CloudAuthDeviceCodeScalarFieldEnum = {
   scope: 'scope'
 };
 
-exports.Prisma.EditorWorkspaceScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  name: 'name',
-  description: 'description',
-  projectPath: 'projectPath',
-  projectType: 'projectType',
-  layout: 'layout',
-  setting: 'setting',
-  isActive: 'isActive',
-  version: 'version',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  accessedAt: 'accessedAt',
-  deletedAt: 'deletedAt'
-};
-
-exports.Prisma.EditorWorkspaceSessionScalarFieldEnum = {
-  id: 'id',
-  workspaceId: 'workspaceId',
-  identityId: 'identityId',
-  name: 'name',
-  layout: 'layout',
-  isActive: 'isActive',
-  version: 'version',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
-};
-
-exports.Prisma.EditorWorkspaceSessionGroupScalarFieldEnum = {
-  id: 'id',
-  sessionId: 'sessionId',
-  workspaceId: 'workspaceId',
-  identityId: 'identityId',
-  groupIndex: 'groupIndex',
-  name: 'name',
-  splitDirection: 'splitDirection',
-  version: 'version',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
-};
-
-exports.Prisma.EditorWorkspaceSessionGroupTabScalarFieldEnum = {
-  id: 'id',
-  groupId: 'groupId',
-  sessionId: 'sessionId',
-  workspaceId: 'workspaceId',
-  identityId: 'identityId',
-  resourceId: 'resourceId',
-  tabIndex: 'tabIndex',
-  tabType: 'tabType',
-  title: 'title',
-  viewState: 'viewState',
-  isPinned: 'isPinned',
-  isActive: 'isActive',
-  version: 'version',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
-};
-
 exports.Prisma.GoalScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
   name: 'name',
-  description: 'description',
-  feasibilityAnalysis: 'feasibilityAnalysis',
-  motivation: 'motivation',
+  summary: 'summary',
   status: 'status',
   startDate: 'startDate',
-  dueDate: 'dueDate',
+  targetKind: 'targetKind',
+  targetEndDate: 'targetEndDate',
   completedAt: 'completedAt',
   archivedAt: 'archivedAt',
   sortOrder: 'sortOrder',
@@ -450,10 +316,12 @@ exports.Prisma.KeyResultScalarFieldEnum = {
   title: 'title',
   description: 'description',
   aggregationMethod: 'aggregationMethod',
-  startingValue: 'startingValue',
-  progressBaselineValue: 'progressBaselineValue',
+  initialValue: 'initialValue',
+  trackingBaseValue: 'trackingBaseValue',
   targetValue: 'targetValue',
   currentValue: 'currentValue',
+  targetKind: 'targetKind',
+  targetEndDate: 'targetEndDate',
   unit: 'unit',
   weight: 'weight',
   order: 'order',
@@ -589,7 +457,7 @@ exports.Prisma.GoalLabelScalarFieldEnum = {
 
 exports.Prisma.TaskLabelScalarFieldEnum = {
   identityId: 'identityId',
-  taskTemplateId: 'taskTemplateId',
+  taskPlanId: 'taskPlanId',
   labelId: 'labelId'
 };
 
@@ -618,33 +486,22 @@ exports.Prisma.NotificationScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt',
+  archivedAt: 'archivedAt',
   isRead: 'isRead'
 };
 
-exports.Prisma.NotificationChannelScalarFieldEnum = {
+exports.Prisma.NotificationInteractionScalarFieldEnum = {
   id: 'id',
+  idempotencyKey: 'idempotencyKey',
   identityId: 'identityId',
   notificationId: 'notificationId',
-  channelType: 'channelType',
-  status: 'status',
-  recipient: 'recipient',
-  maxRetries: 'maxRetries',
-  error: 'error',
-  response: 'response',
-  retryCount: 'retryCount',
-  sentAt: 'sentAt',
-  failedAt: 'failedAt',
-  attempts: 'attempts'
-};
-
-exports.Prisma.NotificationHistoryScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  notificationId: 'notificationId',
-  action: 'action',
-  details: 'details',
-  actorId: 'actorId',
-  createdAt: 'createdAt'
+  actionKey: 'actionKey',
+  actionKind: 'actionKind',
+  occurredAt: 'occurredAt',
+  commandReceiptId: 'commandReceiptId',
+  outcome: 'outcome',
+  correlationId: 'correlationId',
+  causationId: 'causationId'
 };
 
 exports.Prisma.NotificationDeliveryDecisionRecordScalarFieldEnum = {
@@ -665,29 +522,11 @@ exports.Prisma.NotificationPreferenceScalarFieldEnum = {
   identityId: 'identityId',
   globalChannels: 'globalChannels',
   workflowOverrides: 'workflowOverrides',
-  doNotDisturb: 'doNotDisturb',
-  rateLimit: 'rateLimit',
+  quietHours: 'quietHours',
   version: 'version',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
-};
-
-exports.Prisma.NotificationTemplateScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  displayName: 'displayName',
-  description: 'description',
-  type: 'type',
-  category: 'category',
-  titleTemplate: 'titleTemplate',
-  contentTemplate: 'contentTemplate',
-  variables: 'variables',
-  defaultActions: 'defaultActions',
-  isSystem: 'isSystem',
-  isActive: 'isActive',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.NotificationDispatchOutboxScalarFieldEnum = {
@@ -805,130 +644,6 @@ exports.Prisma.OperationAuditLogScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
-exports.Prisma.ReminderTemplateScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  name: 'name',
-  description: 'description',
-  type: 'type',
-  selfEnabled: 'selfEnabled',
-  status: 'status',
-  importanceLevel: 'importanceLevel',
-  tags: 'tags',
-  color: 'color',
-  icon: 'icon',
-  nextTriggerAt: 'nextTriggerAt',
-  version: 'version',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt',
-  trigger: 'trigger',
-  recurrence: 'recurrence',
-  activeTime: 'activeTime',
-  activeHours: 'activeHours',
-  notificationConfig: 'notificationConfig',
-  stats: 'stats'
-};
-
-exports.Prisma.ReminderGroupScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  name: 'name',
-  description: 'description',
-  color: 'color',
-  icon: 'icon',
-  enabled: 'enabled',
-  status: 'status',
-  order: 'order',
-  stats: 'stats',
-  version: 'version',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
-};
-
-exports.Prisma.ReminderInstanceScalarFieldEnum = {
-  id: 'id',
-  templateId: 'templateId',
-  identityId: 'identityId',
-  triggerAt: 'triggerAt',
-  status: 'status',
-  result: 'result',
-  processedAt: 'processedAt',
-  note: 'note',
-  payload: 'payload',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.ReminderHistoryScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  templateId: 'templateId',
-  triggeredAt: 'triggeredAt',
-  result: 'result',
-  error: 'error',
-  notificationSent: 'notificationSent',
-  notificationChannel: 'notificationChannel',
-  createdAt: 'createdAt'
-};
-
-exports.Prisma.ReminderStatisticScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  templateStats: 'templateStats',
-  groupStats: 'groupStats',
-  triggerStats: 'triggerStats',
-  calculatedAt: 'calculatedAt'
-};
-
-exports.Prisma.ReminderResponseScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  templateId: 'templateId',
-  action: 'action',
-  responseTime: 'responseTime',
-  snoozeDurationSeconds: 'snoozeDurationSeconds',
-  timestamp: 'timestamp',
-  createdAt: 'createdAt'
-};
-
-exports.Prisma.UserReminderPreferenceScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  bestTimeSlots: 'bestTimeSlots',
-  worstTimeSlots: 'worstTimeSlots',
-  globalReminderEnabled: 'globalReminderEnabled',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.ReminderOccurrenceScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  templateId: 'templateId',
-  source: 'source',
-  occurrenceKey: 'occurrenceKey',
-  idempotencyKey: 'idempotencyKey',
-  status: 'status',
-  attempt: 'attempt',
-  ownerToken: 'ownerToken',
-  claimId: 'claimId',
-  fencingToken: 'fencingToken',
-  leaseExpiresAt: 'leaseExpiresAt',
-  lastHeartbeatAt: 'lastHeartbeatAt',
-  heartbeatIntervalMs: 'heartbeatIntervalMs',
-  lastError: 'lastError',
-  nextRetryAt: 'nextRetryAt',
-  deadLetterAt: 'deadLetterAt',
-  correlationId: 'correlationId',
-  causationId: 'causationId',
-  attemptsHistoryJson: 'attemptsHistoryJson',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  finishedAt: 'finishedAt'
-};
-
 exports.Prisma.RoutineDefinitionScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
@@ -947,7 +662,6 @@ exports.Prisma.RoutineProfileScalarFieldEnum = {
   name: 'name',
   description: 'description',
   enabled: 'enabled',
-  active: 'active',
   version: 'version',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -997,6 +711,12 @@ exports.Prisma.RoutineOccurrenceScalarFieldEnum = {
   sourceRevision: 'sourceRevision',
   idempotencyKey: 'idempotencyKey',
   status: 'status',
+  triggerKind: 'triggerKind',
+  becameDueAt: 'becameDueAt',
+  resolutionState: 'resolutionState',
+  resolvedAt: 'resolvedAt',
+  resolutionKind: 'resolutionKind',
+  resolutionReason: 'resolutionReason',
   attempt: 'attempt',
   ownerToken: 'ownerToken',
   claimId: 'claimId',
@@ -1014,152 +734,27 @@ exports.Prisma.RoutineOccurrenceScalarFieldEnum = {
   finishedAt: 'finishedAt'
 };
 
+exports.Prisma.RoutineInteractionScalarFieldEnum = {
+  id: 'id',
+  idempotencyKey: 'idempotencyKey',
+  identityId: 'identityId',
+  routineId: 'routineId',
+  occurrenceKey: 'occurrenceKey',
+  action: 'action',
+  actedAt: 'actedAt',
+  responseLatencyMs: 'responseLatencyMs',
+  snoozeDurationMs: 'snoozeDurationMs',
+  metadataJson: 'metadataJson',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.RoutineTemporaryOverrideScalarFieldEnum = {
   identityId: 'identityId',
   routineId: 'routineId',
   overrideJson: 'overrideJson',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.RepositoryScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  name: 'name',
-  type: 'type',
-  path: 'path',
-  description: 'description',
-  config: 'config',
-  stats: 'stats',
-  relatedGoals: 'relatedGoals',
-  status: 'status',
-  git: 'git',
-  syncStatus: 'syncStatus',
-  lastAccessedAt: 'lastAccessedAt',
   version: 'version',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
-};
-
-exports.Prisma.FolderScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  repositoryId: 'repositoryId',
-  parentId: 'parentId',
-  name: 'name',
-  path: 'path',
-  order: 'order',
-  isExpanded: 'isExpanded',
-  metadata: 'metadata',
-  createdAt: 'createdAt',
   updatedAt: 'updatedAt'
-};
-
-exports.Prisma.ResourceScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  repositoryId: 'repositoryId',
-  folderId: 'folderId',
-  name: 'name',
-  type: 'type',
-  path: 'path',
-  size: 'size',
-  content: 'content',
-  metadata: 'metadata',
-  stats: 'stats',
-  description: 'description',
-  author: 'author',
-  version: 'version',
-  tags: 'tags',
-  category: 'category',
-  status: 'status',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  modifiedAt: 'modifiedAt',
-  deletedAt: 'deletedAt'
-};
-
-exports.Prisma.RepositoryResourceScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  repositoryId: 'repositoryId',
-  name: 'name',
-  type: 'type',
-  path: 'path',
-  size: 'size',
-  description: 'description',
-  author: 'author',
-  version: 'version',
-  tags: 'tags',
-  category: 'category',
-  status: 'status',
-  metadata: 'metadata',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  modifiedAt: 'modifiedAt'
-};
-
-exports.Prisma.LinkedContentScalarFieldEnum = {
-  id: 'id',
-  resourceId: 'resourceId',
-  title: 'title',
-  url: 'url',
-  contentType: 'contentType',
-  description: 'description',
-  thumbnail: 'thumbnail',
-  author: 'author',
-  publishedAt: 'publishedAt',
-  isAccessible: 'isAccessible',
-  lastCheckedAt: 'lastCheckedAt',
-  cachedAt: 'cachedAt',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.ResourceReferenceScalarFieldEnum = {
-  id: 'id',
-  sourceResourceId: 'sourceResourceId',
-  targetResourceId: 'targetResourceId',
-  referenceType: 'referenceType',
-  description: 'description',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  lastVerifiedAt: 'lastVerifiedAt'
-};
-
-exports.Prisma.RepositoryExplorerScalarFieldEnum = {
-  id: 'id',
-  repositoryId: 'repositoryId',
-  identityId: 'identityId',
-  name: 'name',
-  description: 'description',
-  currentPath: 'currentPath',
-  filters: 'filters',
-  viewConfig: 'viewConfig',
-  pinnedPaths: 'pinnedPaths',
-  recentPaths: 'recentPaths',
-  lastScanAt: 'lastScanAt',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-};
-
-exports.Prisma.RepositoryStatisticScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  totalRepositories: 'totalRepositories',
-  activeRepositories: 'activeRepositories',
-  archivedRepositories: 'archivedRepositories',
-  totalResources: 'totalResources',
-  totalFiles: 'totalFiles',
-  totalFolders: 'totalFolders',
-  gitEnabledRepos: 'gitEnabledRepos',
-  totalCommits: 'totalCommits',
-  totalReferences: 'totalReferences',
-  totalLinkedContents: 'totalLinkedContents',
-  totalSizeBytes: 'totalSizeBytes',
-  lastUpdatedAt: 'lastUpdatedAt',
-  createdAt: 'createdAt'
 };
 
 exports.Prisma.KnowledgeRepositoryInstallationIntentScalarFieldEnum = {
@@ -1181,29 +776,71 @@ exports.Prisma.KnowledgeRepositoryInstallationIntentScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.KnowledgeRepositoryConnectionScalarFieldEnum = {
+exports.Prisma.KnowledgeSpaceScalarFieldEnum = {
   id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.KnowledgeDocumentIdentityScalarFieldEnum = {
+  id: 'id',
+  knowledgeSpaceId: 'knowledgeSpaceId',
+  knowledgeDocumentId: 'knowledgeDocumentId',
+  origin: 'origin',
+  originRequestId: 'originRequestId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.KnowledgeRemoteBindingScalarFieldEnum = {
+  id: 'id',
+  knowledgeSpaceId: 'knowledgeSpaceId',
   identityId: 'identityId',
-  githubUserId: 'githubUserId',
-  githubRepositoryId: 'githubRepositoryId',
-  githubRepositoryFullName: 'githubRepositoryFullName',
+  provider: 'provider',
   installationId: 'installationId',
+  repositoryId: 'repositoryId',
+  repositoryFullNameSnapshot: 'repositoryFullNameSnapshot',
+  connectedAt: 'connectedAt',
+  disconnectedAt: 'disconnectedAt',
+  version: 'version'
+};
+
+exports.Prisma.RemoteRepositoryObservationScalarFieldEnum = {
+  bindingId: 'bindingId',
+  observedAt: 'observedAt',
+  accountId: 'accountId',
+  repositoryFullName: 'repositoryFullName',
   defaultBranch: 'defaultBranch',
   isPrivate: 'isPrivate',
-  status: 'status',
-  lastSyncedCommitSha: 'lastSyncedCommitSha',
-  lastProjectedCommitSha: 'lastProjectedCommitSha',
-  lastErrorCode: 'lastErrorCode',
-  lastErrorMessage: 'lastErrorMessage',
-  version: 'version',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
+  archived: 'archived',
+  disabled: 'disabled',
+  contentsPermission: 'contentsPermission',
+  installationSuspended: 'installationSuspended',
+  eligibilityState: 'eligibilityState',
+  blockReason: 'blockReason'
+};
+
+exports.Prisma.RemoteHistoryFenceScalarFieldEnum = {
+  bindingId: 'bindingId',
+  defaultBranch: 'defaultBranch',
+  lastConfirmedRemoteHeadSha: 'lastConfirmedRemoteHeadSha',
+  confirmedAt: 'confirmedAt'
+};
+
+exports.Prisma.KnowledgeProjectionCheckpointScalarFieldEnum = {
+  bindingId: 'bindingId',
+  branch: 'branch',
+  projectedCommitSha: 'projectedCommitSha',
+  state: 'state',
+  failureCode: 'failureCode',
+  failureMessage: 'failureMessage',
+  lastAttemptAt: 'lastAttemptAt',
+  projectedAt: 'projectedAt'
 };
 
 exports.Prisma.GithubWebhookDeliveryScalarFieldEnum = {
   id: 'id',
-  connectionId: 'connectionId',
+  bindingId: 'bindingId',
   deliveryId: 'deliveryId',
   eventName: 'eventName',
   beforeSha: 'beforeSha',
@@ -1217,14 +854,14 @@ exports.Prisma.GithubWebhookDeliveryScalarFieldEnum = {
 
 exports.Prisma.KnowledgeNoteProjectionScalarFieldEnum = {
   id: 'id',
-  connectionId: 'connectionId',
+  bindingId: 'bindingId',
+  knowledgeDocumentId: 'knowledgeDocumentId',
   relativePath: 'relativePath',
   commitSha: 'commitSha',
   blobSha: 'blobSha',
   contentHash: 'contentHash',
   frontmatter: 'frontmatter',
   markdownContent: 'markdownContent',
-  indexStatus: 'indexStatus',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -1232,7 +869,7 @@ exports.Prisma.KnowledgeNoteProjectionScalarFieldEnum = {
 
 exports.Prisma.KnowledgeAttachmentProjectionScalarFieldEnum = {
   id: 'id',
-  connectionId: 'connectionId',
+  bindingId: 'bindingId',
   relativePath: 'relativePath',
   commitSha: 'commitSha',
   blobSha: 'blobSha',
@@ -1244,7 +881,7 @@ exports.Prisma.KnowledgeAttachmentProjectionScalarFieldEnum = {
 };
 
 exports.Prisma.KnowledgeAttachmentContentCacheScalarFieldEnum = {
-  connectionId: 'connectionId',
+  bindingId: 'bindingId',
   blobSha: 'blobSha',
   byteSize: 'byteSize',
   contentBytes: 'contentBytes',
@@ -1255,7 +892,8 @@ exports.Prisma.KnowledgeAttachmentContentCacheScalarFieldEnum = {
 exports.Prisma.KnowledgeWriteRequestScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
-  connectionId: 'connectionId',
+  bindingId: 'bindingId',
+  knowledgeDocumentId: 'knowledgeDocumentId',
   requestId: 'requestId',
   requestHash: 'requestHash',
   relativePath: 'relativePath',
@@ -1289,12 +927,11 @@ exports.Prisma.ScheduleScalarFieldEnum = {
   identityId: 'identityId',
   title: 'title',
   description: 'description',
-  startTime: 'startTime',
-  endTime: 'endTime',
-  duration: 'duration',
-  hasConflict: 'hasConflict',
-  conflictingSchedules: 'conflictingSchedules',
-  priority: 'priority',
+  rangeKind: 'rangeKind',
+  timedStart: 'timedStart',
+  timedEnd: 'timedEnd',
+  allDayStart: 'allDayStart',
+  allDayEnd: 'allDayEnd',
   location: 'location',
   attendees: 'attendees',
   createdAt: 'createdAt',
@@ -1302,45 +939,52 @@ exports.Prisma.ScheduleScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.ScheduleTaskScalarFieldEnum = {
+exports.Prisma.ScheduledInvocationScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
-  name: 'name',
-  description: 'description',
-  sourceModule: 'sourceModule',
-  sourceEntityId: 'sourceEntityId',
-  schedulingKey: 'schedulingKey',
   ownerType: 'ownerType',
   ownerId: 'ownerId',
+  schedulingKey: 'schedulingKey',
   handlerKey: 'handlerKey',
   payloadVersion: 'payloadVersion',
+  payload: 'payload',
+  runAt: 'runAt',
   sourceRevision: 'sourceRevision',
-  status: 'status',
-  enabled: 'enabled',
-  cronExpression: 'cronExpression',
-  timezone: 'timezone',
-  startDate: 'startDate',
-  endDate: 'endDate',
-  maxExecutions: 'maxExecutions',
-  nextRunAt: 'nextRunAt',
-  lastRunAt: 'lastRunAt',
-  executionCount: 'executionCount',
-  lastExecutionStatus: 'lastExecutionStatus',
-  lastExecutionDuration: 'lastExecutionDuration',
-  consecutiveFailures: 'consecutiveFailures',
+  retryEnabled: 'retryEnabled',
   maxRetries: 'maxRetries',
   initialDelayMs: 'initialDelayMs',
   maxDelayMs: 'maxDelayMs',
   backoffMultiplier: 'backoffMultiplier',
-  retryableStatuses: 'retryableStatuses',
-  payload: 'payload',
-  tags: 'tags',
   priority: 'priority',
-  timeout: 'timeout',
-  version: 'version',
+  timeoutMs: 'timeoutMs',
+  status: 'status',
+  attemptCount: 'attemptCount',
+  nextAttemptAt: 'nextAttemptAt',
+  claimToken: 'claimToken',
+  claimExpiresAt: 'claimExpiresAt',
+  fencingToken: 'fencingToken',
+  name: 'name',
+  tags: 'tags',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.InvocationAttemptScalarFieldEnum = {
+  id: 'id',
+  identityId: 'identityId',
+  invocationId: 'invocationId',
+  attemptNumber: 'attemptNumber',
+  startedAt: 'startedAt',
+  finishedAt: 'finishedAt',
+  outcome: 'outcome',
+  result: 'result',
+  failureCode: 'failureCode',
+  failureMessage: 'failureMessage',
+  failureRetryable: 'failureRetryable',
+  workerId: 'workerId',
+  claimToken: 'claimToken',
+  fencingToken: 'fencingToken',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.SchedulingReconcileOperationScalarFieldEnum = {
@@ -1359,41 +1003,6 @@ exports.Prisma.SchedulingReconcileOperationScalarFieldEnum = {
   failureRetryable: 'failureRetryable',
   startedAt: 'startedAt',
   finishedAt: 'finishedAt',
-  createdAt: 'createdAt'
-};
-
-exports.Prisma.ScheduleExecutionScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  taskId: 'taskId',
-  executionTime: 'executionTime',
-  status: 'status',
-  duration: 'duration',
-  result: 'result',
-  error: 'error',
-  retryCount: 'retryCount',
-  createdAt: 'createdAt'
-};
-
-exports.Prisma.ScheduleStatisticScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  totalTasks: 'totalTasks',
-  activeTasks: 'activeTasks',
-  pausedTasks: 'pausedTasks',
-  completedTasks: 'completedTasks',
-  cancelledTasks: 'cancelledTasks',
-  failedTasks: 'failedTasks',
-  totalExecutions: 'totalExecutions',
-  successfulExecutions: 'successfulExecutions',
-  failedExecutions: 'failedExecutions',
-  skippedExecutions: 'skippedExecutions',
-  timeoutExecutions: 'timeoutExecutions',
-  avgExecutionDuration: 'avgExecutionDuration',
-  minExecutionDuration: 'minExecutionDuration',
-  maxExecutionDuration: 'maxExecutionDuration',
-  moduleStatistics: 'moduleStatistics',
-  lastUpdatedAt: 'lastUpdatedAt',
   createdAt: 'createdAt'
 };
 
@@ -1458,16 +1067,17 @@ exports.Prisma.ScheduleEventDeliveryLogScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
-exports.Prisma.UserSettingScalarFieldEnum = {
+exports.Prisma.UserPreferenceRecordScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
-  preferences: 'preferences',
-  version: 'version',
+  namespace: 'namespace',
+  payload: 'payload',
+  revision: 'revision',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.TaskTemplateScalarFieldEnum = {
+exports.Prisma.TaskPlanScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
   name: 'name',
@@ -1479,24 +1089,8 @@ exports.Prisma.TaskTemplateScalarFieldEnum = {
   archivedAt: 'archivedAt',
   abandonedReason: 'abandonedReason',
   importance: 'importance',
-  timeConfigType: 'timeConfigType',
-  timeConfigStartTime: 'timeConfigStartTime',
-  timeConfigEndTime: 'timeConfigEndTime',
-  timeConfigDurationMinutes: 'timeConfigDurationMinutes',
-  timeConfigTimePoint: 'timeConfigTimePoint',
-  timeConfigTimeRangeStart: 'timeConfigTimeRangeStart',
-  timeConfigTimeRangeEnd: 'timeConfigTimeRangeEnd',
-  recurrenceRuleType: 'recurrenceRuleType',
-  recurrenceRuleInterval: 'recurrenceRuleInterval',
-  recurrenceRuleDaysOfWeek: 'recurrenceRuleDaysOfWeek',
-  recurrenceRuleEndDate: 'recurrenceRuleEndDate',
-  recurrenceRuleCount: 'recurrenceRuleCount',
-  reminderConfigEnabled: 'reminderConfigEnabled',
-  reminderConfigTimeOffsetMinutes: 'reminderConfigTimeOffsetMinutes',
-  reminderConfigUnit: 'reminderConfigUnit',
-  reminderConfigChannel: 'reminderConfigChannel',
-  lastGeneratedDate: 'lastGeneratedDate',
-  generateAheadDays: 'generateAheadDays',
+  schedule: 'schedule',
+  reminderConfig: 'reminderConfig',
   goalId: 'goalId',
   keyResultId: 'keyResultId',
   goalRecordValue: 'goalRecordValue',
@@ -1508,18 +1102,18 @@ exports.Prisma.TaskTemplateScalarFieldEnum = {
   deletedAt: 'deletedAt'
 };
 
-exports.Prisma.TaskInstanceScalarFieldEnum = {
+exports.Prisma.TaskOccurrenceScalarFieldEnum = {
   id: 'id',
-  templateId: 'templateId',
+  planId: 'planId',
   identityId: 'identityId',
-  instanceDate: 'instanceDate',
   occurrenceKey: 'occurrenceKey',
+  scheduleDate: 'scheduleDate',
+  scheduleTiming: 'scheduleTiming',
+  importanceSnapshot: 'importanceSnapshot',
   status: 'status',
-  importance: 'importance',
-  timeConfig: 'timeConfig',
-  actualStartTime: 'actualStartTime',
-  actualEndTime: 'actualEndTime',
-  comment: 'comment',
+  actualStartAt: 'actualStartAt',
+  result: 'result',
+  checklistState: 'checklistState',
   version: 'version',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -1529,8 +1123,8 @@ exports.Prisma.TaskInstanceScalarFieldEnum = {
 exports.Prisma.TaskGoalOutboxScalarFieldEnum = {
   eventId: 'eventId',
   identityId: 'identityId',
-  taskInstanceId: 'taskInstanceId',
-  taskTemplateId: 'taskTemplateId',
+  taskOccurrenceId: 'taskOccurrenceId',
+  taskPlanId: 'taskPlanId',
   goalId: 'goalId',
   keyResultId: 'keyResultId',
   payload: 'payload',
@@ -1544,48 +1138,13 @@ exports.Prisma.TaskGoalOutboxScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.TaskTemplateHistoryScalarFieldEnum = {
+exports.Prisma.TaskPlanHistoryScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
-  templateId: 'templateId',
+  planId: 'planId',
   action: 'action',
   changes: 'changes',
   createdAt: 'createdAt'
-};
-
-exports.Prisma.TaskStatisticScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  calculatedAt: 'calculatedAt',
-  templateTotal: 'templateTotal',
-  templateActive: 'templateActive',
-  templatePaused: 'templatePaused',
-  templateArchived: 'templateArchived',
-  templateOneTime: 'templateOneTime',
-  templateRecurring: 'templateRecurring',
-  instanceTotal: 'instanceTotal',
-  instanceToday: 'instanceToday',
-  instanceWeek: 'instanceWeek',
-  instanceMonth: 'instanceMonth',
-  instancePending: 'instancePending',
-  instanceInProgress: 'instanceInProgress',
-  instanceCompleted: 'instanceCompleted',
-  instanceSkipped: 'instanceSkipped',
-  instanceMissed: 'instanceMissed',
-  completionToday: 'completionToday',
-  completionWeek: 'completionWeek',
-  completionMonth: 'completionMonth',
-  completionTotal: 'completionTotal',
-  completionAvgTime: 'completionAvgTime',
-  completionRate: 'completionRate',
-  timeAllDay: 'timeAllDay',
-  timePoint: 'timePoint',
-  timeRange: 'timeRange',
-  timeOverdue: 'timeOverdue',
-  timeUpcoming: 'timeUpcoming',
-  distributionByImportance: 'distributionByImportance',
-  distributionByUrgency: 'distributionByUrgency',
-  distributionByTag: 'distributionByTag'
 };
 
 exports.Prisma.WalletAccountScalarFieldEnum = {
@@ -1644,25 +1203,17 @@ exports.Prisma.NullsOrder = {
 
 exports.Prisma.ModelName = {
   Account: 'Account',
-  ActivityLedger: 'ActivityLedger',
   AiConversation: 'AiConversation',
-  AiMessage: 'AiMessage',
-  AiGenerationTask: 'AiGenerationTask',
-  AiUsageQuota: 'AiUsageQuota',
+  AiExecutionRecord: 'AiExecutionRecord',
   AiProviderConfig: 'AiProviderConfig',
   AiProviderOnboardingSession: 'AiProviderOnboardingSession',
-  KnowledgeGenerationTask: 'KnowledgeGenerationTask',
+  AiProviderSecret: 'AiProviderSecret',
   AiKnowledgeIndexEntry: 'AiKnowledgeIndexEntry',
-  DashboardConfig: 'DashboardConfig',
   CloudAuthUser: 'CloudAuthUser',
   CloudAuthSession: 'CloudAuthSession',
   CloudAuthProviderAccount: 'CloudAuthProviderAccount',
   CloudAuthVerification: 'CloudAuthVerification',
   CloudAuthDeviceCode: 'CloudAuthDeviceCode',
-  EditorWorkspace: 'EditorWorkspace',
-  EditorWorkspaceSession: 'EditorWorkspaceSession',
-  EditorWorkspaceSessionGroup: 'EditorWorkspaceSessionGroup',
-  EditorWorkspaceSessionGroupTab: 'EditorWorkspaceSessionGroupTab',
   Goal: 'Goal',
   KeyResult: 'KeyResult',
   GoalRecord: 'GoalRecord',
@@ -1678,11 +1229,9 @@ exports.Prisma.ModelName = {
   GoalLabel: 'GoalLabel',
   TaskLabel: 'TaskLabel',
   Notification: 'Notification',
-  NotificationChannel: 'NotificationChannel',
-  NotificationHistory: 'NotificationHistory',
+  NotificationInteraction: 'NotificationInteraction',
   NotificationDeliveryDecisionRecord: 'NotificationDeliveryDecisionRecord',
   NotificationPreference: 'NotificationPreference',
-  NotificationTemplate: 'NotificationTemplate',
   NotificationDispatchOutbox: 'NotificationDispatchOutbox',
   Relation: 'Relation',
   OutboxMessage: 'OutboxMessage',
@@ -1690,31 +1239,21 @@ exports.Prisma.ModelName = {
   ProjectionCursor: 'ProjectionCursor',
   AccountClosureOperation: 'AccountClosureOperation',
   OperationAuditLog: 'OperationAuditLog',
-  ReminderTemplate: 'ReminderTemplate',
-  ReminderGroup: 'ReminderGroup',
-  ReminderInstance: 'ReminderInstance',
-  ReminderHistory: 'ReminderHistory',
-  ReminderStatistic: 'ReminderStatistic',
-  ReminderResponse: 'ReminderResponse',
-  UserReminderPreference: 'UserReminderPreference',
-  ReminderOccurrence: 'ReminderOccurrence',
   RoutineDefinition: 'RoutineDefinition',
   RoutineProfile: 'RoutineProfile',
   RoutineProfileMembership: 'RoutineProfileMembership',
   RoutineProtocolDefinition: 'RoutineProtocolDefinition',
   RoutineProtocolSession: 'RoutineProtocolSession',
   RoutineOccurrence: 'RoutineOccurrence',
+  RoutineInteraction: 'RoutineInteraction',
   RoutineTemporaryOverride: 'RoutineTemporaryOverride',
-  Repository: 'Repository',
-  Folder: 'Folder',
-  Resource: 'Resource',
-  RepositoryResource: 'RepositoryResource',
-  LinkedContent: 'LinkedContent',
-  ResourceReference: 'ResourceReference',
-  RepositoryExplorer: 'RepositoryExplorer',
-  RepositoryStatistic: 'RepositoryStatistic',
   KnowledgeRepositoryInstallationIntent: 'KnowledgeRepositoryInstallationIntent',
-  KnowledgeRepositoryConnection: 'KnowledgeRepositoryConnection',
+  KnowledgeSpace: 'KnowledgeSpace',
+  KnowledgeDocumentIdentity: 'KnowledgeDocumentIdentity',
+  KnowledgeRemoteBinding: 'KnowledgeRemoteBinding',
+  RemoteRepositoryObservation: 'RemoteRepositoryObservation',
+  RemoteHistoryFence: 'RemoteHistoryFence',
+  KnowledgeProjectionCheckpoint: 'KnowledgeProjectionCheckpoint',
   GithubWebhookDelivery: 'GithubWebhookDelivery',
   KnowledgeNoteProjection: 'KnowledgeNoteProjection',
   KnowledgeAttachmentProjection: 'KnowledgeAttachmentProjection',
@@ -1722,21 +1261,19 @@ exports.Prisma.ModelName = {
   KnowledgeWriteRequest: 'KnowledgeWriteRequest',
   KnowledgeRepositoryLease: 'KnowledgeRepositoryLease',
   Schedule: 'Schedule',
-  ScheduleTask: 'ScheduleTask',
+  ScheduledInvocation: 'ScheduledInvocation',
+  InvocationAttempt: 'InvocationAttempt',
   SchedulingReconcileOperation: 'SchedulingReconcileOperation',
-  ScheduleExecution: 'ScheduleExecution',
-  ScheduleStatistic: 'ScheduleStatistic',
   ScheduleLease: 'ScheduleLease',
   ScheduleRebuildOutbox: 'ScheduleRebuildOutbox',
   ScheduleDomainEventOutbox: 'ScheduleDomainEventOutbox',
   ScheduleEventConsumerReceipt: 'ScheduleEventConsumerReceipt',
   ScheduleEventDeliveryLog: 'ScheduleEventDeliveryLog',
-  UserSetting: 'UserSetting',
-  TaskTemplate: 'TaskTemplate',
-  TaskInstance: 'TaskInstance',
+  UserPreferenceRecord: 'UserPreferenceRecord',
+  TaskPlan: 'TaskPlan',
+  TaskOccurrence: 'TaskOccurrence',
   TaskGoalOutbox: 'TaskGoalOutbox',
-  TaskTemplateHistory: 'TaskTemplateHistory',
-  TaskStatistic: 'TaskStatistic',
+  TaskPlanHistory: 'TaskPlanHistory',
   WalletAccount: 'WalletAccount',
   WalletTransaction: 'WalletTransaction'
 };

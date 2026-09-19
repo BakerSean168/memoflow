@@ -6,7 +6,7 @@
 
 import type { Result } from '@memoflow/contracts/result';
 import type {
-  LocalVaultBindingClientDTO,
+  LocalVaultBindingSnapshotDTO,
   SelectLocalVaultReq,
   ScanLocalVaultRes,
   ReadLocalVaultNoteReq,
@@ -19,7 +19,7 @@ import type {
   CompleteKnowledgeRepositoryInstallationReq,
   CompleteKnowledgeRepositoryInstallationRes,
   CreateKnowledgeRepositoryConnectionReq,
-  KnowledgeRepositoryConnectionClientDTO,
+  KnowledgeRemoteBindingClientDTO,
   KnowledgeRepositoryInstallationTokenRes,
   KnowledgeRepositoryInstallationIntentStatusResponse,
   KnowledgeRepositoryReconciliationPreview,
@@ -33,6 +33,8 @@ import type {
   SyncKnowledgeRepositoryRes,
   CreateConfirmedKnowledgeNoteReq,
   CreateConfirmedKnowledgeNoteResponse,
+  AdoptKnowledgeDocumentReq,
+  AdoptKnowledgeDocumentResponse,
   KnowledgeNoteProjectionClientDTO,
   KnowledgeNoteProjectionListResponse,
   ListKnowledgeNoteProjectionsReq,
@@ -78,9 +80,15 @@ export class RepositoryClientService implements IRepositoryApiClient {
     return this.repositoryApi.listKnowledgeRepositoryConnections();
   }
 
+  refreshKnowledgeRepositoryObservation(
+    connectionId: string,
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>> {
+    return this.repositoryApi.refreshKnowledgeRepositoryObservation(connectionId);
+  }
+
   connectKnowledgeRepository(
     request: CreateKnowledgeRepositoryConnectionReq,
-  ): Promise<Result<KnowledgeRepositoryConnectionClientDTO>> {
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>> {
     return this.repositoryApi.connectKnowledgeRepository(request);
   }
 
@@ -152,6 +160,12 @@ export class RepositoryClientService implements IRepositoryApiClient {
     return this.repositoryApi.createConfirmedKnowledgeNote(request);
   }
 
+  adoptKnowledgeDocument(
+    request: AdoptKnowledgeDocumentReq,
+  ): Promise<Result<AdoptKnowledgeDocumentResponse>> {
+    return this.repositoryApi.adoptKnowledgeDocument(request);
+  }
+
   listKnowledgeWriteRequests(
     request?: ListKnowledgeWriteRequestsReq,
   ): Promise<Result<ListKnowledgeWriteRequestsRes>> {
@@ -164,13 +178,13 @@ export class RepositoryClientService implements IRepositoryApiClient {
     return this.repositoryApi.replayKnowledgeWriteRequestProjection(writeRequestId);
   }
 
-  getLocalVaultBinding(): Promise<Result<LocalVaultBindingClientDTO | null>> {
+  getLocalVaultBinding(): Promise<Result<LocalVaultBindingSnapshotDTO | null>> {
     return this.repositoryApi.getLocalVaultBinding();
   }
 
   selectLocalVault(
     request?: SelectLocalVaultReq,
-  ): Promise<Result<LocalVaultBindingClientDTO | null>> {
+  ): Promise<Result<LocalVaultBindingSnapshotDTO | null>> {
     return this.repositoryApi.selectLocalVault(request);
   }
 

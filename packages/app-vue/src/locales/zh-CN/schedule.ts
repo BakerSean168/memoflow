@@ -1,7 +1,7 @@
 export default {
   "route": {
     "management": "日程管理",
-    "dashboard": "日程",
+    "planning": "日程",
     "weekView": "周视图",
     "calendar": "日程日历"
   },
@@ -28,7 +28,7 @@ export default {
     "conflictHint": "该时段存在日程冲突",
     "readOnlyHint": "日程事件编辑能力将在后续版本提供。"
   },
-  "dashboard": {
+  "planning": {
     "title": "日程",
     "weekView": "周视图",
     "createSchedule": "新建日程",
@@ -44,7 +44,8 @@ export default {
     "taskPaused": "调度任务已暂停",
     "taskResumed": "调度任务已恢复",
     "taskDeleted": "调度任务已删除",
-    "scheduleCreated": "日程已创建"
+    "scheduleCreated": "日程已创建",
+    "scheduleCreatedRefreshFailed": "日程已创建，但规划视图刷新失败。请刷新页面以重新加载最新状态。"
   },
   "confirm": {
     "deleteTask": "确认删除调度「{name}」？",

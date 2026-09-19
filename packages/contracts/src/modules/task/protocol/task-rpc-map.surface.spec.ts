@@ -23,27 +23,32 @@ const rpcMap = readFileSync(rpcMapFile, 'utf8');
  * no body (identity-scoped commands).
  */
 const TASK_LEDGER = [
-  ['task:template:create', 'CreateTaskTemplateSchema', 'TaskTemplateClientDTO'],
-  ['task:template:update', 'UpdateTaskTemplateSchema', 'TaskTemplateClientDTO'],
-  ['task:template:delete', 'void', 'null'],
-  ['task:template:activate', 'void', 'TaskTemplateClientDTO'],
-  ['task:template:abandon', 'AbandonTaskPlanSchema', 'TaskTemplateClientDTO'],
-  ['task:template:pause', 'void', 'TaskTemplateClientDTO'],
-  ['task:template:archive', 'void', 'TaskTemplateClientDTO'],
-  ['task:template:generate-instances', 'GenerateInstancesSchema', 'TaskInstanceClientDTO'],
-  ['task:template:bind-goal', 'TaskGoalBindingSchema', 'TaskTemplateClientDTO'],
-  ['task:template:unbind-goal', 'void', 'TaskTemplateClientDTO'],
-  ['task:instance:create', 'void', 'TaskInstanceClientDTO'],
-  ['task:instance:delete', 'void', 'null'],
-  ['task:instance:complete', 'CompleteTaskInstanceSchema', 'TaskInstanceClientDTO'],
-  ['task:instance:uncomplete', 'void', 'TaskInstanceClientDTO'],
-  ['task:instance:skip', 'SkipTaskInstanceSchema', 'TaskInstanceClientDTO'],
-  ['task:instance:mark-missed', 'MarkTaskInstanceMissedSchema', 'TaskInstanceClientDTO'],
+  ['task:plan:create', 'CreateTaskPlanSchema', 'TaskPlanClientDTO'],
+  ['task:plan:update', 'UpdateTaskPlanSchema', 'TaskPlanClientDTO'],
+  ['task:plan:delete', 'void', 'null'],
+  ['task:plan:activate', 'void', 'TaskPlanClientDTO'],
+  ['task:plan:abandon', 'AbandonTaskPlanSchema', 'TaskPlanClientDTO'],
+  ['task:plan:pause', 'void', 'TaskPlanClientDTO'],
+  ['task:plan:archive', 'void', 'TaskPlanClientDTO'],
+  ['task:plan:generate-occurrences', 'GenerateOccurrencesSchema', 'TaskOccurrenceClientDTO'],
+  ['task:plan:bind-goal', 'TaskGoalBindingSchema', 'TaskPlanClientDTO'],
+  ['task:plan:unbind-goal', 'void', 'TaskPlanClientDTO'],
+  ['task:occurrence:create', 'void', 'TaskOccurrenceClientDTO'],
+  ['task:occurrence:delete', 'void', 'null'],
+  ['task:occurrence:complete', 'CompleteTaskOccurrenceSchema', 'TaskOccurrenceClientDTO'],
+  ['task:occurrence:uncomplete', 'void', 'TaskOccurrenceClientDTO'],
+  ['task:occurrence:skip', 'SkipTaskOccurrenceSchema', 'TaskOccurrenceClientDTO'],
+  ['task:occurrence:mark-missed', 'MarkTaskOccurrenceMissedSchema', 'TaskOccurrenceClientDTO'],
+  [
+    'task:occurrence:checklist-set',
+    'SetTaskOccurrenceChecklistItemSchema',
+    'TaskOccurrenceClientDTO',
+  ],
 ] as const;
 
 const API_DTO_FILES = [
-  'task-template.dto.ts',
-  'task-instance.dto.ts',
+  'task-plan.dto.ts',
+  'task-occurrence.dto.ts',
   'task-schedule.dto.ts',
   'response-schemas.ts',
 ] as const;
@@ -87,9 +92,11 @@ describe('task RPC map surface (Phase 4 ledger)', () => {
 
   it('ledger response types resolve to response-schemas or the matching dto', () => {
     const responseSchemas = readApiFile('response-schemas.ts');
-    expect(responseSchemas).toContain('export const TaskTemplateResponseSchema');
-    expect(responseSchemas).toContain('export const TaskInstanceResponseSchema');
-    expect(readApiFile('task-instance.dto.ts')).toContain('export type TaskInstanceOperationRes =');
+    expect(responseSchemas).toContain('export const TaskPlanResponseSchema');
+    expect(responseSchemas).toContain('export const TaskOccurrenceResponseSchema');
+    expect(readApiFile('task-occurrence.dto.ts')).toContain(
+      'export type TaskOccurrenceOperationRes =',
+    );
   });
 
   it('imported names are all referenced by the map body (no dead imports)', () => {

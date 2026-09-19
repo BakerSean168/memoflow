@@ -4,37 +4,78 @@
     "noEmit": true,
     "baseUrl": "../..",
     "paths": {
-      "@/*": ["apps/desktop/src/*"],
-      "@main/*": ["apps/desktop/src/main/*"],
-      "@preload/*": ["apps/desktop/src/preload/*"],
-      "@renderer/*": ["apps/desktop/src/renderer/*"],
-      "@electron/*": ["apps/desktop/electron/*"],
-      "@common/*": ["apps/desktop/common/*"],
-      "@memoflow/app-vue": ["packages/app-vue/src/index.ts"],
-      "@memoflow/app-vue/*": ["packages/app-vue/src/*"],
+      "@/*": [
+        "apps/desktop/src/*"
+      ],
+      "@main/*": [
+        "apps/desktop/src/main/*"
+      ],
+      "@preload/*": [
+        "apps/desktop/src/preload/*"
+      ],
+      "@renderer/*": [
+        "apps/desktop/src/renderer/*"
+      ],
+      "@electron/*": [
+        "apps/desktop/electron/*"
+      ],
+      "@common/*": [
+        "apps/desktop/common/*"
+      ],
+      "@memoflow/app-vue": [
+        "packages/app-vue/src/index.ts"
+      ],
+      "@memoflow/app-vue/*": [
+        "packages/app-vue/src/*"
+      ],
       "@memoflow/ui-vue-shadcn/composables/*": [
         "packages/ui-vue-shadcn/src/composables/*"
       ],
-      "@memoflow/ai/client": ["packages/ai/dist/client/index.d.ts"],
-      "@memoflow/ai/electron": ["packages/ai/dist/electron/index.d.ts"],
-      "@memoflow/ai/ports": ["packages/ai/dist/ports/index.d.ts"],
-      "@memoflow/goal/client": ["packages/goal/dist/client/index.d.ts"],
-      "@memoflow/goal/electron": ["packages/goal/dist/electron/index.d.ts"],
-      "@memoflow/task/client": ["packages/task/dist/client/index.d.ts"],
-      "@memoflow/task/electron": ["packages/task/dist/electron/index.d.ts"],
-      "@memoflow/schedule/client": ["packages/schedule/dist/client/index.d.ts"],
-      "@memoflow/schedule/electron": ["packages/schedule/dist/electron/index.d.ts"],
-      "@memoflow/reminder/client": ["packages/reminder/dist/client/index.d.ts"],
-      "@memoflow/reminder/electron": ["packages/reminder/dist/electron/index.d.ts"],
+      "@memoflow/ai/client": [
+        "packages/ai/dist/client/index.d.ts"
+      ],
+      "@memoflow/ai/electron": [
+        "packages/ai/dist/electron/index.d.ts"
+      ],
+      "@memoflow/ai/ports": [
+        "packages/ai/dist/ports/index.d.ts"
+      ],
+      "@memoflow/goal/client": [
+        "packages/goal/dist/client/index.d.ts"
+      ],
+      "@memoflow/goal/electron": [
+        "packages/goal/dist/electron/index.d.ts"
+      ],
+      "@memoflow/task/client": [
+        "packages/task/dist/client/index.d.ts"
+      ],
+      "@memoflow/task/electron": [
+        "packages/task/dist/electron/index.d.ts"
+      ],
+      "@memoflow/schedule/client": [
+        "packages/schedule/dist/client/index.d.ts"
+      ],
+      "@memoflow/schedule/electron": [
+        "packages/schedule/dist/electron/index.d.ts"
+      ],
       "@memoflow/reminder/routine-runtime": [
         "packages/reminder/dist/routine-runtime/index.d.ts"
       ],
-      "@memoflow/notification/client": ["packages/notification/dist/client/index.d.ts"],
-      "@memoflow/notification/electron": ["packages/notification/dist/electron/index.d.ts"],
-      "@memoflow/ipc-client": ["packages/ipc-client/dist/index.d.ts"],
-      "@memoflow/http-client": ["packages/http-client/dist/index.d.ts"],
-      "@memoflow/dashboard": ["packages/dashboard/dist/index.d.ts"],
-      "@memoflow/contracts": ["packages/contracts/dist/index.d.ts"],
+      "@memoflow/notification/client": [
+        "packages/notification/dist/client/index.d.ts"
+      ],
+      "@memoflow/notification/electron": [
+        "packages/notification/dist/electron/index.d.ts"
+      ],
+      "@memoflow/ipc-client": [
+        "packages/ipc-client/dist/index.d.ts"
+      ],
+      "@memoflow/http-client": [
+        "packages/http-client/dist/index.d.ts"
+      ],
+      "@memoflow/contracts": [
+        "packages/contracts/dist/index.d.ts"
+      ],
       "@memoflow/contracts/notification": [
         "packages/contracts/dist/modules/notification/index.d.ts"
       ],
@@ -42,38 +83,74 @@
         "packages/contracts/dist/modules/*/index.d.ts",
         "packages/contracts/dist/*/index.d.ts"
       ],
-      "@memoflow/domain-shared": ["packages/domain-shared/dist/index.d.ts"],
-      "@memoflow/utils": ["packages/utils/dist/index.d.ts"],
-      "@memoflow/utils/*": ["packages/utils/dist/*/index.d.ts", "packages/utils/dist/*.d.ts"],
-      "@memoflow/goal/analytics": ["packages/goal/dist/analytics/index.d.ts"],
-      "@memoflow/goal/schedule-execution": ["packages/goal/dist/schedule-execution/index.d.ts"],
-      "@memoflow/goal/schedule-projection": ["packages/goal/dist/schedule-projection/index.d.ts"],
+      "@memoflow/domain-shared": [
+        "packages/domain-shared/dist/index.d.ts"
+      ],
+      "@memoflow/utils": [
+        "packages/utils/dist/index.d.ts"
+      ],
+      "@memoflow/utils/*": [
+        "packages/utils/dist/*/index.d.ts",
+        "packages/utils/dist/*.d.ts"
+      ],
+      "@memoflow/goal/analytics": [
+        "packages/goal/dist/analytics/index.d.ts"
+      ],
+      "@memoflow/goal/schedule-execution": [
+        "packages/goal/dist/schedule-execution/index.d.ts"
+      ],
+      "@memoflow/goal/schedule-projection": [
+        "packages/goal/dist/schedule-projection/index.d.ts"
+      ],
       "@memoflow/notification/schedule-execution": [
         "packages/notification/dist/schedule-execution/index.d.ts"
       ],
-      "@memoflow/notification/commands": ["packages/notification/dist/commands/index.d.ts"],
+      "@memoflow/notification/commands": [
+        "packages/notification/dist/commands/index.d.ts"
+      ],
       "@memoflow/reminder/schedule-execution": [
         "packages/reminder/dist/schedule-execution/index.d.ts"
       ],
       "@memoflow/reminder/schedule-projection": [
         "packages/reminder/dist/schedule-projection/index.d.ts"
       ],
-      "@memoflow/task": ["packages/task/dist/index.d.ts"],
-      "@memoflow/task/schedule-execution": ["packages/task/dist/schedule-execution/index.d.ts"],
-      "@memoflow/task/schedule-projection": ["packages/task/dist/schedule-projection/index.d.ts"],
+      "@memoflow/task": [
+        "packages/task/dist/index.d.ts"
+      ],
+      "@memoflow/task/schedule-execution": [
+        "packages/task/dist/schedule-execution/index.d.ts"
+      ],
+      "@memoflow/task/schedule-projection": [
+        "packages/task/dist/schedule-projection/index.d.ts"
+      ],
       "@memoflow/task/*": [
         "packages/task/dist/*/index.d.ts",
         "packages/task/dist/*.d.ts"
       ],
-      "@memoflow/task/analytics": ["packages/task/dist/analytics/index.d.ts"],
-      "@memoflow/schedule-orchestration": ["packages/schedule-orchestration/src/index.ts"],
+      "@memoflow/task/analytics": [
+        "packages/task/dist/analytics/index.d.ts"
+      ],
+      "@memoflow/schedule-orchestration": [
+        "packages/schedule-orchestration/src/index.ts"
+      ],
       "@memoflow/schedule-orchestration/*": [
         "packages/schedule-orchestration/src/*/index.ts",
         "packages/schedule-orchestration/src/*.ts"
       ],
-      "@memoflow/assets": ["packages/assets/dist/index.d.ts"],
-      "@memoflow/assets/*": ["packages/assets/dist/*/index.d.ts", "packages/assets/dist/*.d.ts"]
+      "@memoflow/assets": [
+        "packages/assets/dist/index.d.ts"
+      ],
+      "@memoflow/assets/*": [
+        "packages/assets/dist/*/index.d.ts",
+        "packages/assets/dist/*.d.ts"
+      ]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue", "electron/**/*", "common/**/*"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.vue",
+    "electron/**/*",
+    "common/**/*"
+  ]
 }

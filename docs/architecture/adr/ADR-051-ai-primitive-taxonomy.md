@@ -10,10 +10,12 @@ tags:
   - context
 description: AI vNext primitive taxonomy、Context/Memory 边界与能力选择规则
 created: 2026-08-20T00:00:00+08:00
-updated: 2026-08-20T00:00:00+08:00
+updated: 2026-09-09T00:00:00+08:00
 ---
 
 # ADR-051: AI Primitive Taxonomy — Agent / Tool / Workflow / Skill / Memory / Context
+
+> **2026-09-09 后续收敛：** 本 ADR 的 primitive taxonomy、Memory 非业务真值、Context trust/token-budget 方向继续有效；统一 `AIContextEnvelope`、`UserTimeContextPort` 接入、Knowledge stable identity 与 owner-contract reuse 由 ADR-098 细化，UI/runtime state ownership 由 ADR-096 细化。
 
 **状态：** 已采纳  
 **日期：** 2026-08-20  

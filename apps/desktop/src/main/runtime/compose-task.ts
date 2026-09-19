@@ -9,7 +9,7 @@
  * contributions (schedule projection runtime), and assembles the
  * transport-neutral `TaskModuleInstance`. The instance is then bound to an
  * `IElectronModule`-compatible handle via `createTaskElectronModule`, and the
- * host-facing repository view is returned so dashboard/AI consumers read data
+ * host-facing repository view is returned so AI consumers read data
  * through explicit instance-bound ports.
  *
  * 这是任务在 desktop lane 的组合根。桌面主进程运行时拥有按 profile 划分的
@@ -17,7 +17,7 @@
  * 构建模块自有的运行时贡献（基础贡献 + 条件性的 Task→Goal outbox runtime）、
  * 追加宿主贡献（schedule projection runtime），并装配与传输无关的
  * `TaskModuleInstance`。实例随后通过 `createTaskElectronModule` 绑定为兼容
- * `IElectronModule` 的 handle，同时返回宿主向 repository view，使 dashboard/AI
+ * `IElectronModule` 的 handle，同时返回宿主向 repository view，使 AI
  * 消费者通过显式的 instance-bound port 读取数据。
  *
  * The same transport-neutral createTaskModule() / TaskApplicationPort is reused
@@ -70,12 +70,13 @@ import {
   createTaskRuntimeContribution,
   normalizeTaskRuntimeContributions,
   type TaskApplicationPort,
-  type ITaskInstanceRepository,
-  type ITaskTemplateRepository,
+  type ITaskOccurrenceRepository,
+  type ITaskPlanRepository,
   type TaskRuntimeContributionsInput,
 } from '@memoflow/task';
 import { createTaskElectronModule, type TaskElectronModuleDef } from '@memoflow/task/electron';
 import type { TaskGoalProgressHandler } from '@memoflow/goal';
+import type { UserTimeContextPort } from '@memoflow/time';
 
 /**
  * Dependencies the task composer needs from the desktop host runtime.
@@ -88,6 +89,7 @@ export interface ComposeTaskDependencies {
   readonly runtimeContributions?: TaskRuntimeContributionsInput;
   /** Goal's durable Task→Goal progress handler; enables the outbox runtime when present. 目标侧持久 Task→Goal 进度处理器；提供时启用 outbox runtime。 */
   readonly goalProgressHandler?: TaskGoalProgressHandler;
+  readonly userTimeContextPort: UserTimeContextPort;
 }
 
 /**
@@ -96,11 +98,11 @@ export interface ComposeTaskDependencies {
  *
  * The module is the IElectronModule-compatible handle to register once; the
  * repositories are the exact instances the module owns, exposed so desktop
- * consumers (dashboard/AI) read through explicit ports instead of package
+ * consumers (AI) read through explicit ports instead of package
  * globals.
  *
  * module 是需要恰好注册一次的、兼容 IElectronModule 的 handle；repositories 是
- * 模块拥有的确切实例，暴露给 desktop 消费者（dashboard/AI），使其通过显式 port
+ * 模块拥有的确切实例，暴露给 desktop 消费者（AI），使其通过显式 port
  * 读取数据，而不是依赖包级全局变量。
  */
 export interface ComposeTaskResult {
@@ -108,11 +110,13 @@ export interface ComposeTaskResult {
   readonly module: TaskElectronModuleDef;
   /** Canonical transport-neutral application port from the SAME module instance. */
   readonly applicationPort: TaskApplicationPort;
-  /** Instance-bound repository view for desktop consumers (dashboard/AI). 供 desktop 消费者（dashboard/AI）使用的 instance-bound repository view。 */
+  /** Instance-bound repository view for desktop AI consumers. 供 desktop AI 消费者使用的 instance-bound repository view。 */
   readonly repositories: {
-    readonly taskTemplateRepository: ITaskTemplateRepository;
-    readonly taskInstanceRepository: ITaskInstanceRepository;
+    readonly taskPlanRepository: ITaskPlanRepository;
+    readonly taskOccurrenceRepository: ITaskOccurrenceRepository;
   };
+  /** Task-owned V3 portability capability registered by the host. */
+  readonly portableCapability: ReturnType<typeof createTaskModule>['portableCapability'];
 }
 
 /**
@@ -157,8 +161,8 @@ export interface ComposeTaskResult {
  */
 export function composeTask(dependencies: ComposeTaskDependencies): ComposeTaskResult {
   const {
-    taskTemplateRepository,
-    taskInstanceRepository,
+    taskPlanRepository,
+    taskOccurrenceRepository,
     taskWriteTransactionRunner,
   } = createTaskPowerSyncRepositories(dependencies.db);
 
@@ -171,9 +175,10 @@ export function composeTask(dependencies: ComposeTaskDependencies): ComposeTaskR
   ];
 
   const instance = createTaskModule({
-    taskTemplateRepository,
-    taskInstanceRepository,
+    taskPlanRepository,
+    taskOccurrenceRepository,
     taskWriteTransactionRunner,
+    userTimeContextPort: dependencies.userTimeContextPort,
     runtimeContributions,
   });
 
@@ -181,8 +186,9 @@ export function composeTask(dependencies: ComposeTaskDependencies): ComposeTaskR
     module: createTaskElectronModule({ instance }),
     applicationPort: instance.api,
     repositories: {
-      taskTemplateRepository,
-      taskInstanceRepository,
+      taskPlanRepository,
+      taskOccurrenceRepository,
     },
+    portableCapability: instance.portableCapability,
   };
 }

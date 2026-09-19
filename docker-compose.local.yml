@@ -232,6 +232,9 @@ services:
       args:
         VERSION: local
         PNPM_REGISTRY: ${PNPM_REGISTRY:-https://registry.npmmirror.com}
+      labels:
+        org.opencontainers.image.created: ${BUILD_DATE:-unknown}
+        org.opencontainers.image.revision: ${VCS_REF:-unknown}
     restart: unless-stopped
     depends_on:
       api:

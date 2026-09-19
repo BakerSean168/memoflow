@@ -1,7 +1,7 @@
 <template>
   <section
     class="flex h-full min-h-0 flex-col overflow-hidden bg-background"
-    data-testid="task-detail-view"
+    data-testid="task-plan-workspace"
   >
     <ModuleHeader data-testid="task-detail-toolbar">
       <template #leading>
@@ -101,7 +101,10 @@
           </div>
         </article>
 
-        <section aria-labelledby="task-plan-settings-heading" data-testid="task-plan-settings">
+        <section
+          aria-labelledby="task-plan-settings-heading"
+          data-testid="task-plan-workspace-properties"
+        >
           <div class="mb-3 flex items-center justify-between gap-3">
             <div>
               <h2 id="task-plan-settings-heading" class="font-semibold">
@@ -151,6 +154,40 @@
           </dl>
         </section>
 
+        <section class="grid gap-3 @xl/panel:grid-cols-2" data-testid="task-detail-execution-summary">
+          <div class="rounded-xl border bg-card p-4">
+            <h2 class="font-semibold">{{ t('task.detail.executionStats') }}</h2>
+            <div class="mt-3 grid grid-cols-2 gap-3 text-sm">
+              <span>{{ t('task.detail.totalInstances') }}: {{ executionSummary.total }}</span>
+              <span>{{ t('task.detail.completed') }}: {{ executionSummary.completed }}</span>
+              <span>{{ t('task.detail.completionRate') }}: {{ executionSummary.completionRate }}%</span>
+              <span>{{ t('task.detail.openCount', { count: executionSummary.pending + executionSummary.inProgress }) }}</span>
+              <span>{{ t('task.detail.instanceStatusMissed') }}: {{ executionSummary.missed }}</span>
+              <span>{{ t('task.detail.instanceStatusSkipped') }}: {{ executionSummary.skipped }}</span>
+            </div>
+          </div>
+          <div class="rounded-xl border bg-card p-4">
+            <h2 class="font-semibold">{{ t('task.detail.goalBinding') }}</h2>
+            <p class="mt-3 text-sm" data-testid="task-detail-goal-context">{{ goalContextText }}</p>
+            <p v-if="goalContextKeyResultText" class="mt-1 text-sm text-muted-foreground">{{ goalContextKeyResultText }}</p>
+          </div>
+        </section>
+
+        <section class="rounded-xl border bg-card p-4" data-testid="task-detail-linked-notes">
+          <h2 class="font-semibold">{{ t('task.detail.linkedNotes') }}</h2>
+          <div v-if="linkedNotes.length" class="mt-3 grid gap-2">
+            <div v-for="note in linkedNotes" :key="note.relationId" class="rounded-lg border p-3 text-sm">
+              <template v-if="note.state === 'Resolved'">
+                <div class="font-medium">{{ note.title }}</div>
+                <div class="text-muted-foreground">{{ note.relativePath }}</div>
+                <p class="mt-1 text-muted-foreground">{{ note.excerpt }}</p>
+              </template>
+              <span v-else class="text-muted-foreground">{{ t('task.detail.linkedNoteMissing') }}</span>
+            </div>
+          </div>
+          <p v-else class="mt-2 text-sm text-muted-foreground">{{ t('task.detail.noLinkedNotes') }}</p>
+        </section>
+
         <section
           aria-labelledby="task-occurrence-history-heading"
           data-testid="task-detail-occurrences"
@@ -165,9 +202,9 @@
               </p>
             </div>
             <div class="flex items-center gap-2 text-xs text-muted-foreground">
-              <span>{{ t('task.detail.completedCount', { count: completedCount }) }}</span>
+              <span>{{ t('task.detail.completedCount', { count: executionSummary.completed }) }}</span>
               <span aria-hidden="true">·</span>
-              <span>{{ t('task.detail.openCount', { count: openCount }) }}</span>
+              <span>{{ t('task.detail.openCount', { count: executionSummary.pending + executionSummary.inProgress }) }}</span>
             </div>
           </div>
 
@@ -177,13 +214,13 @@
               :key="occurrence.id"
               :occurrence="occurrence"
               :template="currentTemplate"
-              :position="occurrencePositions.get(String(occurrence.id))"
               :busy="busyOccurrenceId === String(occurrence.id)"
               @open-plan="noop"
               @complete="completeOccurrence"
               @uncomplete="uncompleteOccurrence"
               @missed="markOccurrenceMissed"
               @skip="skipOccurrence"
+              @checklist-change="setOccurrenceChecklistItem"
             />
           </div>
           <div
@@ -205,7 +242,7 @@
       </div>
     </main>
 
-    <TaskTemplateDialog
+    <TaskPlanDialog
       v-model="showEditDialog"
       mode="edit"
       :template="viewModel"
@@ -217,8 +254,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
-import { storeToRefs } from 'pinia';
+import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import {
@@ -235,95 +271,88 @@ import {
 import { Badge, Button, useConfirm } from '@memoflow/ui-vue-shadcn';
 import type { GoalId, KeyResultId } from '@memoflow/contracts/primitives';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
-import type { RecurrenceRuleDTO, TaskReminderConfigDTO } from '@memoflow/contracts/task';
+import type { TaskReminderConfigDTO } from '@memoflow/contracts/task';
 import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
-import { formatProductDate } from '../../../shared/utils/product-time';
 import TaskOccurrenceRow from '../components/TaskOccurrenceRow.vue';
-import TaskTemplateDialog from '../components/dialogs/TaskTemplateDialog.vue';
-import type { TaskTemplateViewModel } from '../components/types';
-import { useTaskStore } from '../stores/task-store';
-import { useTaskInstances } from '../composables/useTaskInstances';
-import { useTaskTemplateDetailQuery } from '../composables/useTaskTemplateDetailQuery';
-import { useTaskTemplateMutations } from '../composables/useTaskTemplateMutations';
+import TaskPlanDialog from '../components/dialogs/TaskPlanDialog.vue';
+import type { TaskPlanViewModel } from '../components/types';
+import { useTaskOccurrences } from '../composables/useTaskOccurrences';
+import { useTaskPlanWorkspaceQuery } from '../composables/useTaskPlanWorkspaceQuery';
+import { useTaskPlanMutations } from '../composables/useTaskPlanMutations';
 import {
-  getTaskTimeValueDisplay,
-  mapTaskTemplateDtoToViewModel,
-  toTaskTimeConfigPayload,
-} from '../utils/task-template-presentation';
-import {
-  getTaskOccurrencePosition,
-  sortTaskOccurrences,
-} from '../utils/task-occurrence-presentation';
+  getTaskPlanScheduleDate,
+  getTaskPlanScheduleTimeDisplay,
+  mapTaskPlanDtoToViewModel,
+  toTaskPlanSchedulePayload,
+} from '../utils/task-plan-presentation';
+import { sortTaskOccurrences } from '../utils/task-occurrence-presentation';
 
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 const id = computed(() => String(route.params.id ?? ''));
 const {
-  currentTemplate,
-  isLoading: templateLoading,
-  isError: templateError,
-  refetch,
-} = useTaskTemplateDetailQuery(id);
+  workspace,
+  query: workspaceQuery,
+  refetch: refetchWorkspace,
+} = useTaskPlanWorkspaceQuery(id);
 const {
-  updateTemplateSafe,
-  activateTemplateSafe,
-  pauseTemplateSafe,
-  archiveTemplateSafe,
-  deleteTemplateSafe,
+  updatePlanSafe,
+  activatePlanSafe,
+  pausePlanSafe,
+  archivePlanSafe,
+  deletePlanSafe,
   isSaving,
-} = useTaskTemplateMutations();
-const { fetchInstances, completeInstance, uncompleteInstance, markInstanceMissed, skipInstance } =
-  useTaskInstances();
-const taskStore = useTaskStore();
-const { instances, isLoading: instancesLoading, error: instancesError } = storeToRefs(taskStore);
+} = useTaskPlanMutations();
+const {
+  completeOccurrence: completeOccurrenceMutation,
+  uncompleteOccurrence: uncompleteOccurrenceMutation,
+  markOccurrenceMissed: markOccurrenceMissedMutation,
+  skipOccurrence: skipOccurrenceMutation,
+  setOccurrenceChecklistItem: setOccurrenceChecklistItemMutation,
+} = useTaskOccurrences();
+const currentTemplate = computed(() => workspace.value?.plan ?? null);
 const viewModel = computed(() =>
-  currentTemplate.value ? mapTaskTemplateDtoToViewModel(currentTemplate.value, t) : null,
+  currentTemplate.value ? mapTaskPlanDtoToViewModel(currentTemplate.value, t) : null,
 );
 const showEditDialog = ref(false);
 const busyOccurrenceId = ref<string | null>(null);
-const isLoading = computed(() => templateLoading.value || instancesLoading.value);
-const loadError = computed(() => templateError.value || Boolean(instancesError.value));
-const templateOccurrences = computed(() =>
-  instances.value.filter((occurrence) => String(occurrence.templateId) === id.value),
-);
+const isLoading = computed(() => workspaceQuery.isPending.value);
+const loadError = computed(() => workspaceQuery.isError.value);
+const templateOccurrences = computed(() => workspace.value?.recentOccurrences ?? []);
 const sortedOccurrences = computed(() =>
   sortTaskOccurrences(templateOccurrences.value, 'time', () => viewModel.value?.title ?? ''),
 );
-const occurrencePositions = computed(
-  () =>
-    new Map(
-      templateOccurrences.value.map((occurrence) => [
-        String(occurrence.id),
-        getTaskOccurrencePosition(occurrence, templateOccurrences.value, currentTemplate.value),
-      ]),
-    ),
+const executionSummary = computed(() => workspace.value?.occurrenceSummary ?? {
+  total: 0, completed: 0, missed: 0, skipped: 0, pending: 0, inProgress: 0, completionRate: 0,
+});
+const linkedNotes = computed(() => workspace.value?.linkedNotes ?? []);
+const goalContextText = computed(() => {
+  const context = workspace.value?.goalContext;
+  if (!context) return t('task.detail.goalBindingNone');
+  if (context.availability === 'Available') return context.goal.name;
+  return t(`task.detail.goalContext${context.availability}`);
+});
+const goalContextKeyResultText = computed(() => {
+  const context = workspace.value?.goalContext;
+  return context?.availability === 'Available' && context.keyResult
+    ? t('task.detail.keyResultValue', { name: context.keyResult.title })
+    : null;
+});
+const scheduleText = computed(() =>
+  getTaskPlanScheduleTimeDisplay(t, currentTemplate.value?.schedule),
 );
-const completedCount = computed(
-  () => templateOccurrences.value.filter((occurrence) => occurrence.status === 'Completed').length,
-);
-const openCount = computed(
-  () =>
-    templateOccurrences.value.filter(
-      (occurrence) => occurrence.status === 'Pending' || occurrence.status === 'InProgress',
-    ).length,
-);
-const scheduleText = computed(() => getTaskTimeValueDisplay(t, currentTemplate.value?.timeConfig));
 const planStartText = computed(() => {
-  const startDate = currentTemplate.value?.timeConfig.startDate;
-  return startDate == null
-    ? t('task.detail.noStartDate')
-    : t('task.detail.startsOn', { date: formatProductDate(startDate) });
+  const schedule = currentTemplate.value?.schedule;
+  if (!schedule) return t('task.detail.noStartDate');
+  return t('task.detail.startsOn', { date: getTaskPlanScheduleDate(schedule) });
 });
 const recurrenceBoundaryText = computed(() => {
-  const recurrence = currentTemplate.value?.recurrenceRule;
-  if (!recurrence) return t('task.detail.oneTimePlan');
-  if (recurrence.occurrences) {
-    return t('task.detail.occurrenceLimit', { count: recurrence.occurrences });
-  }
-  if (recurrence.endDate) {
-    return t('task.detail.endsOn', { date: formatProductDate(recurrence.endDate) });
-  }
+  const schedule = currentTemplate.value?.schedule;
+  if (!schedule || schedule.kind === 'OneTime') return t('task.detail.oneTimePlan');
+  const end = schedule.recurrence.end;
+  if (end.kind === 'Count') return t('task.detail.occurrenceLimit', { count: end.count });
+  if (end.kind === 'Until') return t('task.detail.endsOn', { date: end.date });
   return t('task.detail.noRecurrenceEnd');
 });
 const reminderText = computed(() => {
@@ -341,24 +370,24 @@ const goalBindingText = computed(() =>
 function openEdit() {
   showEditDialog.value = true;
 }
-function goalBinding(vm: TaskTemplateViewModel) {
-  if (!vm.goalBinding?.goalId || !vm.goalBinding.keyResultId) return null;
+function goalBinding(vm: TaskPlanViewModel) {
+  if (!vm.goalBinding?.goalId) return null;
   return {
     goalId: vm.goalBinding.goalId as GoalId,
-    keyResultId: vm.goalBinding.keyResultId as KeyResultId,
-    contribution: vm.goalBinding.contribution ?? null,
+    keyResultId: vm.goalBinding.keyResultId ? (vm.goalBinding.keyResultId as KeyResultId) : null,
+    contribution: vm.goalBinding.keyResultId ? (vm.goalBinding.contribution ?? null) : null,
   };
 }
-async function saveEdit(vm: TaskTemplateViewModel) {
-  const result = await updateTemplateSafe(id.value, {
+async function saveEdit(vm: TaskPlanViewModel) {
+  const result = await updatePlanSafe(id.value, {
     name: vm.title,
     description: vm.description ?? null,
-    timeConfig: toTaskTimeConfigPayload(vm.timeConfig),
-    recurrenceRule: (vm.recurrenceRule as unknown as RecurrenceRuleDTO) ?? null,
+    schedule: toTaskPlanSchedulePayload(vm),
     reminderConfig: (vm.reminderConfig as never) ?? null,
     importance: (vm.importance as ImportanceLevel) ?? ImportanceLevel.Moderate,
     labelIds: vm.labelIds ?? vm.labels?.map((label) => label.id) ?? [],
     goalBinding: goalBinding(vm),
+    checklist: vm.checklist,
   });
   if (result) {
     showEditDialog.value = false;
@@ -366,50 +395,53 @@ async function saveEdit(vm: TaskTemplateViewModel) {
   }
 }
 async function pause() {
-  if (await pauseTemplateSafe(id.value)) await refetch();
+  if (await pausePlanSafe(id.value)) await refetchWorkspace();
 }
 async function activate() {
-  if (await activateTemplateSafe(id.value)) await refetch();
+  if (await activatePlanSafe(id.value)) await refetchWorkspace();
 }
 async function archive() {
-  if (await archiveTemplateSafe(id.value)) await reloadDetail();
+  if (await archivePlanSafe(id.value)) await reloadDetail();
 }
 async function remove() {
   const confirmed = await useConfirm({
-    title: t('task.management.deleteTemplate'),
+    title: t('task.management.deletePlan'),
     description: t('task.management.confirmDelete', { name: viewModel.value?.title ?? '' }),
     confirmText: t('common.delete'),
     cancelText: t('common.cancel'),
     variant: 'destructive',
   });
   if (!confirmed) return;
-  if (await deleteTemplateSafe(id.value)) await router.push({ name: 'task-list' });
+  if (await deletePlanSafe(id.value)) await router.push({ name: 'task-list' });
 }
 async function reloadDetail() {
-  await Promise.all([refetch(), fetchInstances({ page: 1, limit: 500, templateId: id.value })]);
+  await refetchWorkspace();
 }
-async function runOccurrenceAction(instanceId: string, action: (id: string) => Promise<unknown>) {
-  busyOccurrenceId.value = instanceId;
+async function runOccurrenceAction(occurrenceId: string, action: (id: string) => Promise<unknown>) {
+  busyOccurrenceId.value = occurrenceId;
   try {
-    await action(instanceId);
+    if (await action(occurrenceId)) await refetchWorkspace();
   } finally {
     busyOccurrenceId.value = null;
   }
 }
-const completeOccurrence = (instanceId: string) =>
-  runOccurrenceAction(instanceId, completeInstance);
-const uncompleteOccurrence = (instanceId: string) =>
-  runOccurrenceAction(instanceId, uncompleteInstance);
-const markOccurrenceMissed = (instanceId: string) =>
-  runOccurrenceAction(instanceId, markInstanceMissed);
-const skipOccurrence = (instanceId: string) => runOccurrenceAction(instanceId, skipInstance);
+const completeOccurrence = (occurrenceId: string) =>
+  runOccurrenceAction(occurrenceId, completeOccurrenceMutation);
+const uncompleteOccurrence = (occurrenceId: string) =>
+  runOccurrenceAction(occurrenceId, uncompleteOccurrenceMutation);
+const markOccurrenceMissed = (occurrenceId: string) =>
+  runOccurrenceAction(occurrenceId, markOccurrenceMissedMutation);
+const skipOccurrence = (occurrenceId: string) =>
+  runOccurrenceAction(occurrenceId, skipOccurrenceMutation);
+const setOccurrenceChecklistItem = (
+  occurrenceId: string,
+  definitionId: string,
+  completed: boolean,
+  expectedVersion: number,
+) =>
+  runOccurrenceAction(occurrenceId, (id) =>
+    setOccurrenceChecklistItemMutation(id, { definitionId, completed, expectedVersion }),
+  );
 const noop = () => undefined;
 
-watch(
-  id,
-  (templateId) => {
-    if (templateId) void fetchInstances({ page: 1, limit: 500, templateId });
-  },
-  { immediate: true },
-);
 </script>

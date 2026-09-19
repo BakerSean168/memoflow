@@ -34,6 +34,8 @@ export interface NotificationPortOptions {
   mainWindow: BrowserWindow;
   /** Host-owned window manager needed by the custom notification renderer. */
   windowManager: WindowManager;
+  /** Resolve the active Profile's narrow notification preference file. */
+  resolveDevicePreferencePath: () => string | null;
 }
 
 /** Options accepted by {@link createElectronAutoLaunchPort}. */
@@ -92,17 +94,23 @@ export function createElectronAutoLaunchPort(
 /**
  * Build the notification capability port from `NotificationService`.
  *
- * The service maintains Do-Not-Disturb state, subscribes to the domain event
- * bus, and renders via the custom/native renderers. The broad
+ * The service maintains Do-Not-Disturb state and renders via the custom/native
+ * renderers. The broad
  * `initNotificationService` farm is narrowed here to the port surface: boolean
  * "was rendered" returns and no Electron leakage.
  */
 export function createElectronNotificationPort(
   options: NotificationPortOptions,
 ): NotificationPort {
-  const service = initNotificationService(options.mainWindow, options.windowManager);
+  const service = initNotificationService(
+    options.mainWindow,
+    options.windowManager,
+    options.resolveDevicePreferencePath,
+  );
   return {
-    setUseCustomNotification: (useCustom) => service.setUseCustomNotification(useCustom),
+    getDevicePreference: () => service.getDevicePreference(),
+    updateDevicePreference: (patch) => service.updateDevicePreference(patch),
+    resetDevicePreference: () => service.resetDevicePreference(),
     enableDND: () => service.enableDND(),
     disableDND: () => service.disableDND(),
     toggleDND: () => service.toggleDND(),
@@ -110,9 +118,7 @@ export function createElectronNotificationPort(
     setDNDSchedule: (startHour, endHour) => service.setDNDSchedule(startHour, endHour),
     disableDNDSchedule: () => service.disableDNDSchedule(),
     getDNDConfig: () => service.getDNDConfig(),
-    show: (config) => service.showNotification(config) !== null,
-    showReminder: (config) =>
-      service.showReminderNotification(config) !== null,
+    show: (config) => service.showCanonicalDelivery(config),
     showSchedule: (config) => service.showScheduleNotification(config) !== null,
     showGoalProgress: (config) => service.showGoalProgressNotification(config) !== null,
     showTaskCompleted: (config) => service.showTaskCompletedNotification(config) !== null,
@@ -133,4 +139,3 @@ export function createElectronExternalEditorPort(): ExternalEditorPort {
     },
   };
 }
-

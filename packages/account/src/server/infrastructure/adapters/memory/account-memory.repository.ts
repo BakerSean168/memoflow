@@ -12,29 +12,6 @@ export class MemoryAccountRepository implements IAccountRepository {
     return this.accounts.get(id) ?? null;
   }
 
-  async findByNickname(nickname: string): Promise<Account | null> {
-    return (
-      Array.from(this.accounts.values()).find((account) => {
-        return account.profile.nickname === nickname;
-      }) ?? null
-    );
-  }
-
-  async findByEmail(email: string): Promise<Account | null> {
-    return (
-      Array.from(this.accounts.values()).find((account) => account.email.address === email) ?? null
-    );
-  }
-
-
-  async existsByNickname(nickname: string): Promise<boolean> {
-    return (await this.findByNickname(nickname)) !== null;
-  }
-
-  async existsByEmail(email: string): Promise<boolean> {
-    return (await this.findByEmail(email)) !== null;
-  }
-
   async delete(id: string): Promise<void> {
     this.accounts.delete(id);
   }
@@ -42,16 +19,11 @@ export class MemoryAccountRepository implements IAccountRepository {
   async findAll(options?: {
     page?: number;
     pageSize?: number;
-    status?: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'DELETED';
+    status?: 'Active' | 'Closed';
   }): Promise<{ accounts: Account[]; total: number }> {
-    const mappedStatus =
-      options?.status === 'INACTIVE' || options?.status === 'DELETED'
-        ? 'DEACTIVATED'
-        : (options?.status ?? undefined);
-
     const filtered = Array.from(this.accounts.values()).filter((account) => {
-      if (!mappedStatus) return true;
-      return String(account.status) === mappedStatus;
+      if (!options?.status) return true;
+      return String(account.status) === options.status;
     });
 
     const page = options?.page ?? 1;

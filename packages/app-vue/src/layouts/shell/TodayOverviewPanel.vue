@@ -4,50 +4,47 @@ import { useI18n } from 'vue-i18n';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import { Plus, Target } from '@lucide/vue';
 import DailyTodoWidget from '../../modules/task/components/widgets/DailyTodoWidget.vue';
-import UpcomingRemindersWidget from '../../modules/reminder/components/widgets/UpcomingRemindersWidget.vue';
 import GoalProgressWidget from '../../modules/goal/components/widgets/GoalProgressWidget.vue';
-import { useDashboard } from '../../modules/dashboard/composables/useDashboard';
+import { useGoalHomeSummary } from '../../modules/goal/composables/useGoalHomeSummary';
+import { getProductTime, productTimeRevision } from '../../shared/utils/product-time';
 
 const props = defineProps<{ active: boolean }>();
 
 const emit = defineEmits<{
-  (e: 'open-route', module: 'goal' | 'task' | 'reminder', route: string): void;
+  (e: 'open-route', module: 'goal' | 'task', route: string): void;
 }>();
 
-const { t, locale } = useI18n();
-const { goalProgress, isLoading, fetchDashboard } = useDashboard();
-const dashboardReconciliationDelays = [0, 250, 500, 1_000, 2_000] as const;
-let dashboardRefreshGeneration = 0;
+const { t } = useI18n();
+const { goals: goalProgress, isLoading, refresh: refreshGoalSummary } = useGoalHomeSummary();
+const goalReconciliationDelays = [0, 250, 500, 1_000, 2_000] as const;
+let goalRefreshGeneration = 0;
 
-const todayLabel = computed(() =>
-  new Intl.DateTimeFormat(locale.value, {
-    month: 'long',
-    day: 'numeric',
-    weekday: 'short',
-  }).format(new Date()),
-);
+const todayLabel = computed(() => {
+  void productTimeRevision.value;
+  return getProductTime().format.pattern(Date.now(), 'MMMM d, EEE');
+});
 
 watch(
   () => props.active,
   (active) => {
-    if (active) void fetchDashboard();
+    if (active) void refreshGoalSummary();
   },
   { immediate: true },
 );
 
 async function refreshAfterTaskCompletion() {
-  const generation = ++dashboardRefreshGeneration;
-  for (const delay of dashboardReconciliationDelays) {
+  const generation = ++goalRefreshGeneration;
+  for (const delay of goalReconciliationDelays) {
     if (delay > 0) {
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
-    if (generation !== dashboardRefreshGeneration) return;
-    await fetchDashboard();
+    if (generation !== goalRefreshGeneration) return;
+    await refreshGoalSummary();
   }
 }
 
 onBeforeUnmount(() => {
-  dashboardRefreshGeneration++;
+  goalRefreshGeneration++;
 });
 </script>
 
@@ -97,11 +94,6 @@ onBeforeUnmount(() => {
         :active="active"
         @view-all="emit('open-route', 'task', '/tasks')"
         @completed="refreshAfterTaskCompletion"
-      />
-      <UpcomingRemindersWidget
-        class="min-h-[9rem]"
-        :refresh-key="0"
-        @view-all="emit('open-route', 'reminder', '/reminders')"
       />
       <GoalProgressWidget
         class="min-h-[9rem]"

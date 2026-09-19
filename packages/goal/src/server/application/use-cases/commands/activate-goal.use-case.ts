@@ -40,6 +40,8 @@ export class ActivateGoalUseCase {
     }
 
     this.goalPolicy.ensureGoalCanBeActivated(goal);
+    if (goal.status === 'InProgress') return ok(createGoalMutationReceipt(goal));
+
     goal.activate();
     goal.advanceVersion();
     try {

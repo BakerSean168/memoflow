@@ -3,51 +3,93 @@
   "compilerOptions": {
     "baseUrl": ".",
     "moduleResolution": "Bundler",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "types": ["vite/client", "node"],
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "types": [
+      "vite/client",
+      "node"
+    ],
     "noEmit": true,
     "composite": false,
     "declaration": false,
     "declarationMap": false,
     "sourceMap": false,
     "paths": {
-      "@/*": ["./src/*"],
-      "@electron/*": ["./electron/*"],
-      "@common/*": ["./common/*"],
-      "@memoflow/app-vue": ["../../packages/app-vue/src/index.ts"],
-      "@memoflow/ui-vue-shadcn/composables/*": ["../../packages/ui-vue-shadcn/src/composables/*"],
-      "@memoflow/ai/client": ["../../packages/ai/src/client/index.ts"],
-      "@memoflow/ai/electron": ["../../packages/ai/src/electron/index.ts"],
-      "@memoflow/ai/ports": ["../../packages/ai/src/ports/index.ts"],
-      "@memoflow/goal/client": ["../../packages/goal/src/client/index.ts"],
-      "@memoflow/goal/electron": ["../../packages/goal/src/electron/index.ts"],
+      "@/*": [
+        "./src/*"
+      ],
+      "@electron/*": [
+        "./electron/*"
+      ],
+      "@common/*": [
+        "./common/*"
+      ],
+      "@memoflow/app-vue": [
+        "../../packages/app-vue/src/index.ts"
+      ],
+      "@memoflow/ui-vue-shadcn/composables/*": [
+        "../../packages/ui-vue-shadcn/src/composables/*"
+      ],
+      "@memoflow/ai/client": [
+        "../../packages/ai/src/client/index.ts"
+      ],
+      "@memoflow/ai/electron": [
+        "../../packages/ai/src/electron/index.ts"
+      ],
+      "@memoflow/ai/ports": [
+        "../../packages/ai/src/ports/index.ts"
+      ],
+      "@memoflow/goal/client": [
+        "../../packages/goal/src/client/index.ts"
+      ],
+      "@memoflow/goal/electron": [
+        "../../packages/goal/src/electron/index.ts"
+      ],
       "@memoflow/goal/schedule-execution": [
         "../../packages/goal/src/schedule-execution/index.ts"
       ],
       "@memoflow/goal/schedule-projection": [
         "../../packages/goal/src/schedule-projection/index.ts"
       ],
-      "@memoflow/task/client": ["../../packages/task/src/client/index.ts"],
-      "@memoflow/task/electron": ["../../packages/task/src/electron/index.ts"],
+      "@memoflow/task/client": [
+        "../../packages/task/src/client/index.ts"
+      ],
+      "@memoflow/task/electron": [
+        "../../packages/task/src/electron/index.ts"
+      ],
       "@memoflow/task/schedule-execution": [
         "../../packages/task/src/schedule-execution/index.ts"
       ],
       "@memoflow/task/schedule-projection": [
         "../../packages/task/src/schedule-projection/index.ts"
       ],
-      "@memoflow/schedule/client": ["../../packages/schedule/src/client/index.ts"],
-      "@memoflow/schedule/electron": ["../../packages/schedule/src/electron/index.ts"],
-      "@memoflow/reminder/client": ["../../packages/reminder/src/client/index.ts"],
-      "@memoflow/reminder/electron": ["../../packages/reminder/src/electron/index.ts"],
+      "@memoflow/schedule/client": [
+        "../../packages/schedule/src/client/index.ts"
+      ],
+      "@memoflow/schedule/electron": [
+        "../../packages/schedule/src/electron/index.ts"
+      ],
       "@memoflow/reminder/routine-runtime": [
         "../../packages/reminder/src/routine-runtime/index.ts"
       ],
-      "@memoflow/notification/client": ["../../packages/notification/src/client/index.ts"],
-      "@memoflow/notification/electron": ["../../packages/notification/src/electron/index.ts"],
-      "@memoflow/ipc-client": ["../../packages/ipc-client/src/index.ts"],
-      "@memoflow/http-client": ["../../packages/http-client/src/index.ts"],
-      "@memoflow/dashboard": ["../../packages/dashboard/src/index.ts"],
-      "@memoflow/contracts": ["../../packages/contracts/src/index.ts"],
+      "@memoflow/notification/client": [
+        "../../packages/notification/src/client/index.ts"
+      ],
+      "@memoflow/notification/electron": [
+        "../../packages/notification/src/electron/index.ts"
+      ],
+      "@memoflow/ipc-client": [
+        "../../packages/ipc-client/src/index.ts"
+      ],
+      "@memoflow/http-client": [
+        "../../packages/http-client/src/index.ts"
+      ],
+      "@memoflow/contracts": [
+        "../../packages/contracts/src/index.ts"
+      ],
       "@memoflow/contracts/notification": [
         "../../packages/contracts/src/modules/notification/index.ts"
       ],
@@ -55,19 +97,46 @@
         "../../packages/contracts/src/modules/*/index.ts",
         "../../packages/contracts/src/*/index.ts"
       ],
-      "@memoflow/domain-shared": ["../../packages/domain-shared/src/index.ts"],
-      "@memoflow/utils": ["../../packages/utils/src/index.ts"],
-      "@memoflow/utils/*": ["../../packages/utils/src/*/index.ts", "../../packages/utils/src/*.ts"],
-      "@memoflow/goal/analytics": ["../../packages/goal/src/analytics/index.ts"],
-      "@memoflow/notification/commands": ["../../packages/notification/src/commands/index.ts"],
-      "@memoflow/task/analytics": ["../../packages/task/src/analytics/index.ts"],
-      "@memoflow/assets": ["../../packages/assets/src/index.ts"],
+      "@memoflow/domain-shared": [
+        "../../packages/domain-shared/src/index.ts"
+      ],
+      "@memoflow/utils": [
+        "../../packages/utils/src/index.ts"
+      ],
+      "@memoflow/utils/*": [
+        "../../packages/utils/src/*/index.ts",
+        "../../packages/utils/src/*.ts"
+      ],
+      "@memoflow/goal/analytics": [
+        "../../packages/goal/src/analytics/index.ts"
+      ],
+      "@memoflow/notification/commands": [
+        "../../packages/notification/src/commands/index.ts"
+      ],
+      "@memoflow/task/analytics": [
+        "../../packages/task/src/analytics/index.ts"
+      ],
+      "@memoflow/assets": [
+        "../../packages/assets/src/index.ts"
+      ],
       "@memoflow/assets/*": [
         "../../packages/assets/src/*/index.ts",
         "../../packages/assets/src/*.ts"
       ]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue", "electron/**/*", "common/**/*"],
-  "exclude": ["node_modules", "dist", "dist-electron", "**/*.test.ts", "**/*.spec.ts"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.vue",
+    "electron/**/*",
+    "common/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "dist-electron",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
 }

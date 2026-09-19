@@ -6,7 +6,6 @@ import type {
   NotificationEventMap,
   NotificationType,
   NotificationCategory,
-  RelatedEntityType,
 } from '@memoflow/contracts/notification';
 import type { IdentityId, NotificationId as NotificationIdBranded } from '@memoflow/contracts/primitives';
 import { ImportanceLevel, UrgencyLevel } from '@memoflow/contracts/shared';
@@ -16,7 +15,6 @@ import {
   NotificationAction,
   NotificationMetadata,
 } from '../value-objects';
-import { NotificationChannel } from '../entities/notification-channel';
 
 export interface NotificationState {
   id: NotificationId;
@@ -30,7 +28,7 @@ export interface NotificationState {
   category: NotificationCategory;
   importance: ImportanceLevel;
   urgency: UrgencyLevel;
-  relatedEntityType: RelatedEntityType | null;
+  relatedEntityType: string | null;
   relatedEntityId: string | null;
   navigationIntent: NotificationNavigationIntentDTO | null;
   correlationId: string | null;
@@ -42,9 +40,19 @@ export interface NotificationState {
   expiresAt: number | null;
   version: number;
   deletedAt: Date | null;
+  archivedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
-  notificationChannels: NotificationChannel[];
+}
+
+function cloneNavigationIntent(
+  navigationIntent: NotificationNavigationIntentDTO | null,
+): NotificationNavigationIntentDTO | null {
+  if (!navigationIntent) return null;
+  return {
+    ...navigationIntent,
+    params: navigationIntent.params ? { ...navigationIntent.params } : undefined,
+  };
 }
 
 /** Durable user-visible Notification Fact. Delivery lifecycle is not root state. */
@@ -53,7 +61,10 @@ export class Notification extends AggregateRoot<NotificationId> {
 
   private constructor(state: NotificationState) {
     super(state.id);
-    this._props = { ...state };
+    this._props = {
+      ...state,
+      navigationIntent: cloneNavigationIntent(state.navigationIntent),
+    };
   }
 
   get identityId(): IdentityId { return this._props.identityId; }
@@ -66,29 +77,29 @@ export class Notification extends AggregateRoot<NotificationId> {
   get category(): NotificationCategory { return this._props.category; }
   get importance(): ImportanceLevel { return this._props.importance; }
   get urgency(): UrgencyLevel { return this._props.urgency; }
-  get relatedEntityType(): RelatedEntityType | null { return this._props.relatedEntityType; }
+  get relatedEntityType(): string | null { return this._props.relatedEntityType; }
   get relatedEntityId(): string | null { return this._props.relatedEntityId; }
-  get navigationIntent(): NotificationNavigationIntentDTO | null { return this._props.navigationIntent; }
+  get navigationIntent(): NotificationNavigationIntentDTO | null {
+    return cloneNavigationIntent(this._props.navigationIntent);
+  }
   get correlationId(): string | null { return this._props.correlationId; }
   get causationId(): string | null { return this._props.causationId; }
-  get isRead(): boolean { return this._props.isRead; }
+  get isRead(): boolean { return this._props.readAt !== null; }
   get readAt(): number | null { return this._props.readAt; }
   get actions(): NotificationAction[] | null { return this._props.actions ? [...this._props.actions] : null; }
   get metadata(): NotificationMetadata | null { return this._props.metadata; }
   get expiresAt(): number | null { return this._props.expiresAt; }
   get version(): number { return this._props.version; }
   get deletedAt(): Date | null { return this._props.deletedAt; }
+  get archivedAt(): Date | null { return this._props.archivedAt; }
   get createdAt(): Date { return this._props.createdAt; }
   get updatedAt(): Date { return this._props.updatedAt; }
-  get notificationChannels(): NotificationChannel[] | null {
-    return this._props.notificationChannels.length > 0 ? [...this._props.notificationChannels] : null;
-  }
 
-  markAsRead(): void {
-    if (this._props.isRead) return;
+  markAsRead(now: Date = new Date()): void {
+    if (this._props.readAt !== null) return;
+    this._props.readAt = now.getTime();
     this._props.isRead = true;
-    this._props.readAt = Date.now();
-    this._props.updatedAt = new Date();
+    this._props.updatedAt = now;
     this.addDomainEvent<NotificationEventMap['notification:read']>('notification:read', {
       identityId: this._props.identityId,
       notificationId: this.id as NotificationIdBranded,
@@ -97,40 +108,47 @@ export class Notification extends AggregateRoot<NotificationId> {
     });
   }
 
-  markAsUnread(): void {
-    if (!this._props.isRead) return;
+  markAsUnread(now: Date = new Date()): void {
+    if (this._props.readAt === null) return;
     this._props.isRead = false;
     this._props.readAt = null;
-    this._props.updatedAt = new Date();
+    this._props.updatedAt = now;
+    this.addDomainEvent<NotificationEventMap['notification:unread']>('notification:unread', {
+      identityId: this._props.identityId,
+      notificationId: this.id as NotificationIdBranded,
+      notification: this.toServerDTO(),
+    });
   }
 
-  hasBeenRead(): boolean { return this._props.isRead; }
-
-  updateDetails(patch: {
-    title?: string;
-    content?: string;
-    metadata?: NotificationMetadataDTO | null;
-    navigationIntent?: NotificationNavigationIntentDTO | null;
-    importance?: ImportanceLevel;
-    urgency?: UrgencyLevel;
-    expiresAt?: number | null;
-  }): void {
-    if (patch.title !== undefined) this._props.title = patch.title;
-    if (patch.content !== undefined) this._props.content = patch.content;
-    if (patch.metadata !== undefined) {
-      this._props.metadata = patch.metadata ? NotificationMetadata.fromDTO(patch.metadata) : null;
-    }
-    if (patch.navigationIntent !== undefined) this._props.navigationIntent = patch.navigationIntent;
-    if (patch.importance !== undefined) this._props.importance = patch.importance;
-    if (patch.urgency !== undefined) this._props.urgency = patch.urgency;
-    if (patch.expiresAt !== undefined) this._props.expiresAt = patch.expiresAt;
-    this._props.updatedAt = new Date();
+  archive(now: Date = new Date()): void {
+    if (this._props.archivedAt !== null || this._props.deletedAt !== null) return;
+    this._props.archivedAt = now;
+    this._props.updatedAt = now;
+    this.addDomainEvent<NotificationEventMap['notification:archived']>('notification:archived', {
+      identityId: this._props.identityId,
+      notificationId: this.id as NotificationIdBranded,
+      notification: this.toServerDTO(),
+      archivedAt: now.getTime(),
+    });
   }
 
-  softDelete(): void {
+  restore(now: Date = new Date()): void {
+    if (this._props.archivedAt === null || this._props.deletedAt !== null) return;
+    this._props.archivedAt = null;
+    this._props.updatedAt = now;
+    this.addDomainEvent<NotificationEventMap['notification:restored']>('notification:restored', {
+      identityId: this._props.identityId,
+      notificationId: this.id as NotificationIdBranded,
+      notification: this.toServerDTO(),
+    });
+  }
+
+  hasBeenRead(): boolean { return this._props.readAt !== null; }
+
+  softDelete(now: Date = new Date()): void {
     if (this._props.deletedAt) return;
-    this._props.deletedAt = new Date();
-    this._props.updatedAt = new Date();
+    this._props.deletedAt = now;
+    this._props.updatedAt = now;
     this.addDomainEvent<NotificationEventMap['notification:deleted']>('notification:deleted', {
       identityId: this._props.identityId,
       notificationId: this.id as NotificationIdBranded,
@@ -140,14 +158,6 @@ export class Notification extends AggregateRoot<NotificationId> {
     });
   }
 
-  addChannel(channel: NotificationChannel): void {
-    this._props.notificationChannels.push(channel);
-    this._props.updatedAt = new Date();
-  }
-
-  getChannelByType(type: string): NotificationChannel | undefined {
-    return this._props.notificationChannels.find((channel) => channel.channelType === type);
-  }
 
   toServerDTO(): NotificationServerDTO {
     return {
@@ -164,10 +174,10 @@ export class Notification extends AggregateRoot<NotificationId> {
       urgency: this._props.urgency,
       relatedEntityType: this._props.relatedEntityType,
       relatedEntityId: this._props.relatedEntityId,
-      navigationIntent: this._props.navigationIntent,
+      navigationIntent: cloneNavigationIntent(this._props.navigationIntent),
       correlationId: this._props.correlationId,
       causationId: this._props.causationId,
-      isRead: this._props.isRead,
+      isRead: this._props.readAt !== null,
       readAt: this._props.readAt,
       actions: this._props.actions?.map((action) => action.toDTO()) ?? null,
       metadata: this._props.metadata?.toDTO() ?? null,
@@ -176,9 +186,7 @@ export class Notification extends AggregateRoot<NotificationId> {
       createdAt: this._props.createdAt.getTime(),
       updatedAt: this._props.updatedAt.getTime(),
       deletedAt: this._props.deletedAt?.getTime() ?? null,
-      notificationChannels: this._props.notificationChannels.length
-        ? this._props.notificationChannels.map((channel) => channel.toServerDTO())
-        : null,
+      archivedAt: this._props.archivedAt?.getTime() ?? null,
     };
   }
 
@@ -197,7 +205,7 @@ export class Notification extends AggregateRoot<NotificationId> {
     category: NotificationCategory;
     importance?: ImportanceLevel;
     urgency?: UrgencyLevel;
-    relatedEntityType?: RelatedEntityType | null;
+    relatedEntityType?: string | null;
     relatedEntityId?: string | null;
     actions?: NotificationActionDTO[];
     metadata?: NotificationMetadataDTO;
@@ -232,9 +240,9 @@ export class Notification extends AggregateRoot<NotificationId> {
       expiresAt: params.expiresAt ?? null,
       version: 1,
       deletedAt: null,
+      archivedAt: null,
       createdAt: now,
       updatedAt: now,
-      notificationChannels: [],
     });
 
     notification.addDomainEvent<NotificationEventMap['notification:created']>('notification:created', {

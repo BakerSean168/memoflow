@@ -143,6 +143,92 @@ describe('registerSystemIpcHandlers', () => {
     });
   });
 
+  it('fails all device preference calls when notification capability is degraded', async () => {
+    const { registerSystemIpcHandlers } = await import('../system-handlers');
+    registerSystemIpcHandlers(null, null, null);
+
+    for (const channel of [
+      DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_GET,
+      DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_UPDATE,
+      DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_RESET,
+    ]) {
+      await expect(getRegisteredHandler(channel)({}, {})).resolves.toEqual({
+        ok: false,
+        error: expect.objectContaining({ code: 'SERVICE_UNAVAILABLE' }),
+      });
+    }
+  });
+
+  it('returns SERVICE_UNAVAILABLE instead of leaking an inactive Profile scope exception', async () => {
+    const notificationPort = {
+      getDevicePreference: vi.fn(() => {
+        throw new Error('inactive profile');
+      }),
+      updateDevicePreference: vi.fn(() => {
+        throw new Error('inactive profile');
+      }),
+      resetDevicePreference: vi.fn(() => {
+        throw new Error('inactive profile');
+      }),
+    } as never;
+    const { registerSystemIpcHandlers } = await import('../system-handlers');
+    registerSystemIpcHandlers(null, null, null, notificationPort);
+
+    for (const [channel, payload] of [
+      [DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_GET, undefined],
+      [DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_UPDATE, { soundEnabled: false }],
+      [DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_RESET, undefined],
+    ] as const) {
+      await expect(getRegisteredHandler(channel)({}, payload)).resolves.toEqual({
+        ok: false,
+        error: expect.objectContaining({ code: 'SERVICE_UNAVAILABLE' }),
+      });
+    }
+  });
+
+  it('routes device preference get/update/reset to the notification port', async () => {
+    const notificationPort = {
+      getDevicePreference: vi.fn(() => ({ presentationMode: 'custom', soundEnabled: true })),
+      updateDevicePreference: vi.fn(() => ({ presentationMode: 'native', soundEnabled: false })),
+      resetDevicePreference: vi.fn(() => ({ presentationMode: 'custom', soundEnabled: true })),
+    } as never;
+    const { registerSystemIpcHandlers } = await import('../system-handlers');
+    registerSystemIpcHandlers(null, null, null, notificationPort);
+
+    await expect(
+      getRegisteredHandler(DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_GET)({}),
+    ).resolves.toEqual({ ok: true, data: { presentationMode: 'custom', soundEnabled: true } });
+    await expect(
+      getRegisteredHandler(DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_UPDATE)({}, {
+        presentationMode: 'native',
+      }),
+    ).resolves.toEqual({ ok: true, data: { presentationMode: 'native', soundEnabled: false } });
+    await expect(
+      getRegisteredHandler(DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_RESET)({}),
+    ).resolves.toEqual({ ok: true, data: { presentationMode: 'custom', soundEnabled: true } });
+  });
+
+  it.each([
+    ['invalid presentation mode', { presentationMode: 'system' }],
+    ['non-boolean soundEnabled', { soundEnabled: 'yes' }],
+    ['unknown field', { typo: true }],
+  ])('rejects %s device preference patches without calling the port', async (_, patch) => {
+    const updateDevicePreference = vi.fn();
+    const notificationPort = {
+      updateDevicePreference,
+    } as never;
+    const { registerSystemIpcHandlers } = await import('../system-handlers');
+    registerSystemIpcHandlers(null, null, null, notificationPort);
+
+    await expect(
+      getRegisteredHandler(DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_UPDATE)({}, patch),
+    ).resolves.toEqual({
+      ok: false,
+      error: expect.objectContaining({ code: 'VALIDATION_ERROR' }),
+    });
+    expect(updateDevicePreference).not.toHaveBeenCalled();
+  });
+
   it('updates the runtime user-files root when a new directory is selected', async () => {
     const selectedPath = path.join(os.tmpdir(), 'MemoFlow Files Picked');
     mocks.dialogShowOpenDialog.mockResolvedValue({

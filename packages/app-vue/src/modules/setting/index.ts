@@ -10,12 +10,10 @@ export type {
   PresentationPreferenceState,
   PresentationThemeMode,
 } from './stores/presentation-preference-store';
-export { useUserSettingStore } from './stores/user-setting-store';
-export type { UserSettingStoreType } from './stores/user-setting-store';
 
 // Composables
 export {
-  useUserSetting,
+  usePreferencePortability,
   usePresentationBootstrap,
   useLocaleSync,
   useThemeSync,
@@ -27,3 +25,4 @@ export { settingRoutes } from './router';
 
 // Components
 export * from './components';
+export { useUserPreferences } from './composables/useUserPreferences';

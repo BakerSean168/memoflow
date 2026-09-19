@@ -40,17 +40,20 @@ import type { PrismaClient } from '@memoflow/database';
 import {
   createGoalEventListenersRuntime,
   createGoalModule,
+  createGoalPortableCapability,
   createGoalPrismaRepositories,
+  createGoalPrismaDeletionTransactionRunner,
   createGoalRuntimeContribution,
   normalizeGoalRuntimeContributions,
   type GoalApplicationPort,
   type GoalRuntimeContributionsInput,
+  type IGoalRecordRepository,
+  type IGoalRepository,
+  type PrismaGoalRelationCleanupFactory,
 } from '@memoflow/goal';
-import {
-  createGoalApiModule,
-  type GoalApiModuleDef,
-} from '@memoflow/goal/api';
+import { createGoalApiModule, type GoalApiModuleDef } from '@memoflow/goal/api';
 import type { GoalDependencyReadPort } from '@memoflow/contracts/reliable-messaging';
+import type { UserTimeContextPort } from '@memoflow/time';
 
 /**
  * Dependencies the goal composer needs from the API host runtime.
@@ -61,6 +64,10 @@ export interface ComposeGoalDependencies {
   readonly db: PrismaClient;
   /** Host-provided Task→Goal dependency read port (PrismaTaskBindingReadPort). 宿主提供的 Task→Goal 依赖读取端口。 */
   readonly taskBindingReadPort: GoalDependencyReadPort;
+  /** Canonical identity-scoped Product Time context; required because Prisma enables Habit. */
+  readonly userTimeContextPort: UserTimeContextPort;
+  /** Shared Relation transaction-scoped cleanup adapter. */
+  readonly relationCleanupFactory: PrismaGoalRelationCleanupFactory;
   /** Extra runtime contributions from the host (e.g. schedule projection). 宿主提供的额外运行时贡献。 */
   readonly runtimeContributions?: GoalRuntimeContributionsInput;
 }
@@ -74,6 +81,13 @@ export interface ComposedGoal {
   readonly module: GoalApiModuleDef;
   /** The transport-neutral application port (`instance.api`) for sibling modules to orchestrate. 供兄弟模块编排的与传输无关 application port（`instance.api`）。 */
   readonly applicationPort: GoalApplicationPort;
+  /** Owner-provided V3 data portability capability from the same module instance. */
+  readonly portableCapability: ReturnType<typeof createGoalPortableCapability>;
+  /** Exact instance-bound owner repositories for host read-composition adapters. */
+  readonly repositories: {
+    readonly goalRepository: IGoalRepository;
+    readonly goalRecordRepository: IGoalRecordRepository;
+  };
 }
 
 /**
@@ -108,15 +122,12 @@ export interface ComposedGoal {
  * @param dependencies - ComposeGoalDependencies with the runtime Prisma client.
  * @returns ComposedGoal — the bound module handle and the shared application port.
  */
-export function composeGoal(
-  dependencies: ComposeGoalDependencies,
-): ComposedGoal {
+export function composeGoal(dependencies: ComposeGoalDependencies): ComposedGoal {
   const {
     goalRepository,
     goalRecordRepository,
     goalWriteTransactionRunner,
     habitRepository,
-    relationRepository,
     walletRepository,
   } = createGoalPrismaRepositories(dependencies.db);
 
@@ -136,15 +147,21 @@ export function composeGoal(
     goalRepository,
     goalRecordRepository,
     goalWriteTransactionRunner,
+    goalDeletionTransactionRunner: createGoalPrismaDeletionTransactionRunner(
+      dependencies.db,
+      dependencies.relationCleanupFactory,
+    ),
     habitRepository,
-    relationRepository,
     walletRepository,
     taskBindingReadPort: dependencies.taskBindingReadPort,
+    userTimeContextPort: dependencies.userTimeContextPort,
     runtimeContributions,
   });
 
   return {
     module: createGoalApiModule({ instance }),
     applicationPort: instance.api,
+    portableCapability: createGoalPortableCapability(instance.api, instance.portability),
+    repositories: { goalRepository, goalRecordRepository },
   };
 }

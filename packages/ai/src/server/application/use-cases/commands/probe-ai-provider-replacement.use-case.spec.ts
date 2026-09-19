@@ -9,9 +9,9 @@ const current = {
   id: 'provider-1',
   identityId: 'identity-1',
   name: 'Custom',
-  providerType: 'openai_compatible',
+  providerDefinitionId: 'custom',
   baseUrl: 'https://old.example/v1',
-  apiKey: 'old-secret',
+  credentialRef: 'credential-old',
   defaultModel: 'old-model',
   isActive: true,
   isDefault: true,
@@ -30,6 +30,7 @@ describe('ProbeAIProviderReplacementUseCase', () => {
       modelCatalog: { listModels: vi.fn(async () => [{ id: 'new-model', name: 'New Model' }]) },
       credentialProbe: { validate: vi.fn(async () => undefined) },
       endpointPolicy: { validate: vi.fn(async () => undefined) },
+      secretVault: { store: vi.fn(async () => 'credential-new') } as never,
       now: () => 3_000,
       generateId: () => 'replacement-1234567890',
     });
@@ -49,7 +50,7 @@ describe('ProbeAIProviderReplacementUseCase', () => {
     expect(session).toMatchObject({
       targetProviderId: 'provider-1',
       baseUrl: 'https://old.example/v1',
-      apiKey: 'new-secret',
+      credentialRef: 'credential-new',
     });
   });
 

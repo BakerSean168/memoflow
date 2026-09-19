@@ -34,7 +34,6 @@ export interface RoutineProfilePrismaRecord {
   name: string;
   description: string | null;
   enabled: boolean;
-  active: boolean;
   version: number;
   createdAt: Date;
   updatedAt: Date;
@@ -68,7 +67,6 @@ export interface RoutineProfilePowerSyncRecord {
   name: string;
   description: string | null;
   enabled: 0 | 1;
-  active: 0 | 1;
   version: number;
   created_at: string;
   updated_at: string;
@@ -135,7 +133,6 @@ export function routineProfileToPowerSync(
     name: state.name,
     description: state.description,
     enabled: boolInt(state.enabled),
-    active: boolInt(state.active),
     version: state.version,
     created_at: state.createdAt.toISOString(),
     updated_at: state.updatedAt.toISOString(),
@@ -197,7 +194,6 @@ export function normalizePrismaRoutineProfile(
     name: record.name,
     description: record.description,
     enabled: record.enabled,
-    active: record.active,
     version: record.version,
     createdAt: record.createdAt.toISOString(),
     updatedAt: record.updatedAt.toISOString(),
@@ -213,7 +209,6 @@ export function normalizePowerSyncRoutineProfile(
     name: record.name,
     description: record.description,
     enabled: record.enabled === 1,
-    active: record.active === 1,
     version: record.version,
     createdAt: record.created_at,
     updatedAt: record.updated_at,

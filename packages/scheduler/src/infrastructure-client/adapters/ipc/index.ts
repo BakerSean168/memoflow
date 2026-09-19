@@ -1,6 +1,8 @@
 import type { IResultIpcClient } from '../types';
-import { ScheduleTaskIpcAdapter } from './schedule-task-ipc.adapter';
-export { ScheduleTaskIpcAdapter } from './schedule-task-ipc.adapter';
-export function createSchedulerIpcAdapter(ipcClient: IResultIpcClient): ScheduleTaskIpcAdapter {
-  return new ScheduleTaskIpcAdapter(ipcClient);
+import { SchedulerDiagnosticsIpcAdapter } from './scheduler-diagnostics-ipc.adapter';
+export { SchedulerDiagnosticsIpcAdapter } from './scheduler-diagnostics-ipc.adapter';
+export function createSchedulerIpcAdapter(
+  ipcClient: IResultIpcClient,
+): SchedulerDiagnosticsIpcAdapter {
+  return new SchedulerDiagnosticsIpcAdapter(ipcClient);
 }

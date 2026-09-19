@@ -36,6 +36,7 @@ import { createApiResponseBuilder } from '../../shared/infrastructure/http/respo
 import { readStoredProfileSnapshotManifest } from './snapshot-storage.js';
 import { issuePowerSyncToken } from './token-issuer.js';
 import { executeCrudBatch } from './crud-executor.js';
+import { PowerSyncPreferenceConflictError } from './user-preference-crud-executor.js';
 
 const logger = createLogger('PowerSync');
 
@@ -237,6 +238,15 @@ export function composePowerSyncApiModule(options: ComposePowerSyncApiModuleOpti
           const result = await executeCrudBatch(db, identityId, transactions);
           return res.json(responseBuilder.success(result));
         } catch (error) {
+          if (error instanceof PowerSyncPreferenceConflictError) {
+            logger.warn('PowerSync preference CAS conflict', {
+              identityId: authenticatedReq.user?.identityId,
+              namespace: error.namespace,
+              expectedRevision: error.expectedRevision,
+              latestRevision: error.latest.revision,
+            });
+            return res.status(409).json(responseBuilder.conflict(error.message));
+          }
           logger.error('PowerSync CRUD processing failed', {
             error,
             identityId: authenticatedReq.user?.identityId,

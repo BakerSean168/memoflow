@@ -1,9 +1,14 @@
 import { toResultErrorException } from '@memoflow/contracts/result';
-import type { CalendarEntryClientDTO } from '@memoflow/contracts/schedule';
+import type { CalendarEntryClientDTO, CalendarEntryRange } from '@memoflow/contracts/schedule';
 import type { IdentityId } from '@memoflow/domain-shared';
 import { CalendarEntry } from '../../domain/aggregates/calendar-entry';
 import type { IScheduleRepository } from '../../domain/repositories/i-schedule-repository';
-import { ScheduleConflictCacheService } from './schedule-conflict-cache-service';
+
+type TimedRange = Extract<CalendarEntryRange, { kind: 'Timed' }>;
+
+function timedRange(range: CalendarEntryRange): TimedRange | null {
+  return range.kind === 'Timed' ? range : null;
+}
 
 export class ScheduleEventApplicationService {
   constructor(private scheduleRepository: IScheduleRepository) {}
@@ -17,7 +22,10 @@ export class ScheduleEventApplicationService {
 
   private static invalidVersion(): never {
     throw toResultErrorException(
-      { code: 'VALIDATION_ERROR', message: 'expectedVersion is required and must be a valid number' },
+      {
+        code: 'VALIDATION_ERROR',
+        message: 'expectedVersion is required and must be a valid number',
+      },
       400,
     );
   }
@@ -25,47 +33,25 @@ export class ScheduleEventApplicationService {
   async createSchedule(params: {
     identityId: string;
     title: string;
-    startTime: number;
-    endTime: number;
+    range: CalendarEntryRange;
     description?: string;
     location?: string;
-    priority?: number;
     attendees?: string[];
   }): Promise<CalendarEntryClientDTO> {
-    const result = await this.withScheduleRepository(async (scheduleRepository) => {
-      const conflictCacheService = new ScheduleConflictCacheService(scheduleRepository);
+    return this.withScheduleRepository(async (scheduleRepository) => {
       const schedule = CalendarEntry.create({
         identityId: params.identityId as IdentityId,
         title: params.title,
-        startTime: params.startTime,
-        endTime: params.endTime,
+        range: params.range,
         description: params.description,
         location: params.location,
-        priority: params.priority,
         attendees: params.attendees,
       });
 
       await scheduleRepository.save(schedule);
-      await conflictCacheService.refreshForTimeRange(
-        schedule.identityId,
-        schedule.startTime,
-        schedule.endTime,
-      );
-
-      await scheduleRepository.createRebuildOutbox({
-        identityId: schedule.identityId,
-        scheduleId: schedule.id,
-        startTime: schedule.startTime,
-        endTime: schedule.endTime,
-        sourceRevision: schedule.version,
-        idempotencyKey: `rebuild:${schedule.identityId}:${schedule.id}:${schedule.version}:create`,
-      });
-
-      const refreshed = await scheduleRepository.findByIdForIdentity(params.identityId, schedule.id);
-      return (refreshed ?? schedule).toClientDTO();
+      await this.enqueueTimedReadRebuild(scheduleRepository, schedule, 'create');
+      return schedule.toClientDTO();
     });
-
-    return result;
   }
 
   async updateSchedule(
@@ -73,11 +59,9 @@ export class ScheduleEventApplicationService {
     identityId: string,
     params: {
       title?: string;
-      startTime?: number;
-      endTime?: number;
+      range?: CalendarEntryRange;
       description?: string;
       location?: string;
-      priority?: number;
       attendees?: string[];
       expectedVersion: number;
     },
@@ -86,12 +70,9 @@ export class ScheduleEventApplicationService {
       ScheduleEventApplicationService.invalidVersion();
     }
 
-    const result = await this.withScheduleRepository(async (scheduleRepository) => {
-      const conflictCacheService = new ScheduleConflictCacheService(scheduleRepository);
+    return this.withScheduleRepository(async (scheduleRepository) => {
       const schedule = await scheduleRepository.findByIdForIdentity(identityId, id);
-      if (!schedule) {
-        ScheduleEventApplicationService.notFound(id);
-      }
+      if (!schedule) ScheduleEventApplicationService.notFound(id);
 
       if (schedule.version !== params.expectedVersion) {
         throw toResultErrorException(
@@ -104,44 +85,18 @@ export class ScheduleEventApplicationService {
         );
       }
 
-      const previousStartTime = schedule.startTime;
-      const previousEndTime = schedule.endTime;
-
+      const previousRange = schedule.range;
       schedule.update({
         title: params.title,
         description: params.description,
         location: params.location,
-        priority: params.priority,
         attendees: params.attendees,
-        startTime: params.startTime,
-        endTime: params.endTime,
+        range: params.range,
       });
-
       await scheduleRepository.save(schedule, params.expectedVersion);
-
-      const unionStart = Math.min(previousStartTime, schedule.startTime);
-      const unionEnd = Math.max(previousEndTime, schedule.endTime);
-
-      await conflictCacheService.refreshForTimeRange(
-        schedule.identityId,
-        unionStart,
-        unionEnd,
-      );
-
-      await scheduleRepository.createRebuildOutbox({
-        identityId: schedule.identityId,
-        scheduleId: schedule.id,
-        startTime: unionStart,
-        endTime: unionEnd,
-        sourceRevision: schedule.version,
-        idempotencyKey: `rebuild:${schedule.identityId}:${schedule.id}:${schedule.version}:update`,
-      });
-
-      const refreshed = await scheduleRepository.findByIdForIdentity(identityId, id);
-      return (refreshed ?? schedule).toClientDTO();
+      await this.enqueueChangedTimedReadRebuild(scheduleRepository, schedule, previousRange);
+      return schedule.toClientDTO();
     });
-
-    return result;
   }
 
   async deleteSchedule(id: string, identityId: string, expectedVersion: number): Promise<void> {
@@ -150,12 +105,8 @@ export class ScheduleEventApplicationService {
     }
 
     await this.withScheduleRepository(async (scheduleRepository) => {
-      const conflictCacheService = new ScheduleConflictCacheService(scheduleRepository);
       const schedule = await scheduleRepository.findByIdForIdentity(identityId, id);
-      if (!schedule) {
-        ScheduleEventApplicationService.notFound(id);
-      }
-
+      if (!schedule) ScheduleEventApplicationService.notFound(id);
       if (schedule.version !== expectedVersion) {
         throw toResultErrorException(
           {
@@ -167,22 +118,20 @@ export class ScheduleEventApplicationService {
         );
       }
 
+      const deletedRange = schedule.range;
       schedule.delete();
       await scheduleRepository.deleteAggregate(schedule, expectedVersion);
-      await conflictCacheService.refreshForTimeRange(
-        schedule.identityId,
-        schedule.startTime,
-        schedule.endTime,
-      );
-
-      await scheduleRepository.createRebuildOutbox({
-        identityId: schedule.identityId,
-        scheduleId: schedule.id,
-        startTime: schedule.startTime,
-        endTime: schedule.endTime,
-        sourceRevision: schedule.version,
-        idempotencyKey: `rebuild:${schedule.identityId}:${schedule.id}:${schedule.version}:delete`,
-      });
+      const timed = timedRange(deletedRange);
+      if (timed) {
+        await scheduleRepository.createRebuildOutbox({
+          identityId: schedule.identityId,
+          scheduleId: schedule.id,
+          startTime: timed.start,
+          endTime: timed.end,
+          sourceRevision: schedule.version,
+          idempotencyKey: `rebuild:${schedule.identityId}:${schedule.id}:${schedule.version}:delete`,
+        });
+      }
     });
   }
 
@@ -191,6 +140,13 @@ export class ScheduleEventApplicationService {
     return schedule ? schedule.toClientDTO() : null;
   }
 
+  async getSchedulesByAccount(identityId: string): Promise<CalendarEntryClientDTO[]> {
+    return (await this.scheduleRepository.findByIdentityId(identityId)).map((schedule) =>
+      schedule.toClientDTO(),
+    );
+  }
+
+  /** Timed-only compatibility query. AllDay reads use getSchedulesByAccount until P4-2301B Planner projection. */
   async getSchedulesByRange(
     identityId: string,
     startTime: number,
@@ -200,12 +156,57 @@ export class ScheduleEventApplicationService {
     return schedules.map((schedule) => schedule.toClientDTO());
   }
 
+  /**
+   * Preserve the versioned rebuild operation as a reliability/invalidation signal while
+   * P4-2301B removes persisted conflict truth. The rebuild worker now validates the
+   * derived read model only; it never writes conflict columns back into CalendarEntry.
+   */
+  private async enqueueTimedReadRebuild(
+    repository: IScheduleRepository,
+    schedule: CalendarEntry,
+    operation: 'create' | 'update',
+  ): Promise<void> {
+    const range = timedRange(schedule.range);
+    if (!range) return;
+    await repository.createRebuildOutbox({
+      identityId: schedule.identityId,
+      scheduleId: schedule.id,
+      startTime: range.start,
+      endTime: range.end,
+      sourceRevision: schedule.version,
+      idempotencyKey: `rebuild:${schedule.identityId}:${schedule.id}:${schedule.version}:${operation}`,
+    });
+  }
+
+  private async enqueueChangedTimedReadRebuild(
+    repository: IScheduleRepository,
+    schedule: CalendarEntry,
+    previousRange: CalendarEntryRange,
+  ): Promise<void> {
+    const before = timedRange(previousRange);
+    const after = timedRange(schedule.range);
+    if (!before && !after) return;
+
+    const start = before && after ? Math.min(before.start, after.start) : (before ?? after!).start;
+    const end = before && after ? Math.max(before.end, after.end) : (before ?? after!).end;
+    await repository.createRebuildOutbox({
+      identityId: schedule.identityId,
+      scheduleId: schedule.id,
+      startTime: start,
+      endTime: end,
+      sourceRevision: schedule.version,
+      idempotencyKey: `rebuild:${schedule.identityId}:${schedule.id}:${schedule.version}:update`,
+    });
+  }
+
   private async withScheduleRepository<T>(
     work: (scheduleRepository: IScheduleRepository) => Promise<T>,
   ): Promise<T> {
     if (!this.scheduleRepository.withTransaction) {
       throw new Error('PowerSync / Schedule repository must provide withTransaction');
     }
-    return this.scheduleRepository.withTransaction((scheduleRepository) => work(scheduleRepository));
+    return this.scheduleRepository.withTransaction((scheduleRepository) =>
+      work(scheduleRepository),
+    );
   }
 }

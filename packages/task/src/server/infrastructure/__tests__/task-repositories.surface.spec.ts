@@ -8,12 +8,13 @@ import {
   createTaskPowerSyncRepositories,
   type TaskRepositorySet,
   type TaskWriteTransactionRunner,
-  type ITaskInstanceRepository,
-  type ITaskTemplateRepository,
+  type ITaskOccurrenceRepository,
+  type ITaskPlanRepository,
   type TaskModuleInstance,
 } from '../../../../src';
 import { createTaskPrismaModule } from '../prisma';
 import { createTaskPowerSyncModule } from '../powersync';
+import { TASK_TEST_USER_TIME_CONTEXT_PORT } from '../../../testing';
 
 /**
  * Task repository seam surface.
@@ -34,8 +35,8 @@ describe('task repository factories surface', () => {
 
   it('createTaskPrismaRepositories returns the full repository Port set', () => {
     const set = createTaskPrismaRepositories(fakePrisma);
-    expect(set).toHaveProperty('taskTemplateRepository');
-    expect(set).toHaveProperty('taskInstanceRepository');
+    expect(set).toHaveProperty('taskPlanRepository');
+    expect(set).toHaveProperty('taskOccurrenceRepository');
     expect(set).toHaveProperty('taskWriteTransactionRunner');
     const typed: TaskRepositorySet = set;
     expect(typeof typed.taskWriteTransactionRunner.run).toBe('function');
@@ -43,8 +44,8 @@ describe('task repository factories surface', () => {
 
   it('createTaskPowerSyncRepositories returns the same Port shape', () => {
     const set = createTaskPowerSyncRepositories(fakeElectronDb);
-    expect(set).toHaveProperty('taskTemplateRepository');
-    expect(set).toHaveProperty('taskInstanceRepository');
+    expect(set).toHaveProperty('taskPlanRepository');
+    expect(set).toHaveProperty('taskOccurrenceRepository');
     expect(set).toHaveProperty('taskWriteTransactionRunner');
     expect(Object.keys(set).sort()).toEqual(
       Object.keys(createTaskPrismaRepositories(fakePrisma)).sort(),
@@ -54,29 +55,40 @@ describe('task repository factories surface', () => {
   });
 
   it('convenience module factories still expose api/start/dispose', () => {
-    const prismaInstance = createTaskPrismaModule(fakePrisma);
+    const prismaInstance = createTaskPrismaModule(fakePrisma, {
+      userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+    });
     expect(prismaInstance).toHaveProperty('api');
     expect(typeof prismaInstance.start).toBe('function');
     expect(typeof prismaInstance.dispose).toBe('function');
     const typed: TaskModuleInstance = prismaInstance;
-    expect(typeof typed.api.createTaskTemplate).toBe('function');
+    expect(typeof typed.api.createTaskPlan).toBe('function');
+    expect(typeof typed.canonicalRestore.restore).toBe('function');
+    expect(typed.portableCapability.key).toBe('tasks');
+    expect(typed.portableCapability.schemaVersion).toBe(3);
+    expect(typed.portableCapability.dependsOn).toEqual(['labels', 'goals']);
 
-    const powerSyncInstance = createTaskPowerSyncModule(fakeElectronDb);
+    const powerSyncInstance = createTaskPowerSyncModule(fakeElectronDb, {
+      userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+    });
     expect(powerSyncInstance).toHaveProperty('api');
     expect(typeof powerSyncInstance.start).toBe('function');
     expect(typeof powerSyncInstance.dispose).toBe('function');
+    expect(typeof powerSyncInstance.canonicalRestore.restore).toBe('function');
+    expect(powerSyncInstance.portableCapability.key).toBe('tasks');
+    expect(powerSyncInstance.portableCapability.dependsOn).toEqual(['labels', 'goals']);
   });
 
   it('does not leak concrete adapter classes through the root barrel', async () => {
     const forbidden = [
-      'TaskTemplatePrismaRepository',
-      'TaskInstancePrismaRepository',
+      'TaskPlanPrismaRepository',
+      'TaskOccurrencePrismaRepository',
       'TaskDependencyPrismaRepository',
       'TaskFolderPrismaRepository',
       'PrismaTaskWriteTransactionRunner',
       'PrismaTaskGoalOutboxDispatchStore',
-      'PowerSyncTaskTemplateRepository',
-      'PowerSyncTaskInstanceRepository',
+      'PowerSyncTaskPlanRepository',
+      'PowerSyncTaskOccurrenceRepository',
       'PowerSyncTaskDependencyRepository',
       'PowerSyncTaskFolderRepository',
       'PowerSyncTaskWriteTransactionRunner',
@@ -102,12 +114,12 @@ describe('task repository factories surface', () => {
     // reachable from @memoflow/task; the following value-level assertions pin the
     // field names so a renamed/removed port fails loudly.
     const run = (_t: TaskWriteTransactionRunner) => undefined;
-    const instance = (_t: ITaskInstanceRepository) => undefined;
-    const template = (_t: ITaskTemplateRepository) => undefined;
+    const occurrence = (_t: ITaskOccurrenceRepository) => undefined;
+    const plan = (_t: ITaskPlanRepository) => undefined;
 
     expect(typeof run).toBe('function');
-    expect(typeof instance).toBe('function');
-    expect(typeof template).toBe('function');
+    expect(typeof occurrence).toBe('function');
+    expect(typeof plan).toBe('function');
   });
 
   it('infrastructure public barrel keeps ingredient factories, set types, port types and cross-module read ports only', async () => {
@@ -128,14 +140,14 @@ describe('task repository factories surface', () => {
     const infraModule = await import('../index');
     const exportedNames = Object.keys(infraModule);
     for (const name of [
-      'TaskTemplatePrismaRepository',
-      'TaskInstancePrismaRepository',
+      'TaskPlanPrismaRepository',
+      'TaskOccurrencePrismaRepository',
       'TaskDependencyPrismaRepository',
       'TaskFolderPrismaRepository',
       'PrismaTaskWriteTransactionRunner',
       'PrismaTaskGoalOutboxDispatchStore',
-      'PowerSyncTaskTemplateRepository',
-      'PowerSyncTaskInstanceRepository',
+      'PowerSyncTaskPlanRepository',
+      'PowerSyncTaskOccurrenceRepository',
       'PowerSyncTaskDependencyRepository',
       'PowerSyncTaskFolderRepository',
       'PowerSyncTaskWriteTransactionRunner',

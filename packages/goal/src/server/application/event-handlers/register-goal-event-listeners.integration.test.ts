@@ -7,9 +7,17 @@ import { GoalPrismaRepository } from '../../infrastructure/adapters/prisma/goal-
 import { GoalRecordPrismaRepository } from '../../infrastructure/adapters/prisma/goal-record-prisma.repository';
 import { createGoalTaskProgressHandler } from './index';
 import { PrismaGoalWriteTransactionRunner } from '../../infrastructure/adapters/prisma/prisma-goal-write-transaction-runner';
-import { cleanAll, disconnectPrisma, getPrisma, seedAccount } from '../../../__tests__/integration-helpers';
+import {
+  cleanAll,
+  disconnectPrisma,
+  getPrisma,
+  seedAccount,
+} from '../../../__tests__/integration-helpers';
 
-async function waitFor<T>(probe: () => Promise<T | null | undefined>, timeoutMs = 5000): Promise<T> {
+async function waitFor<T>(
+  probe: () => Promise<T | null | undefined>,
+  timeoutMs = 5000,
+): Promise<T> {
   const deadline = Date.now() + timeoutMs;
   for (;;) {
     const value = await probe();
@@ -26,7 +34,7 @@ describe('GoalTaskProgressHandler V2 integration', () => {
   });
   beforeEach(async () => cleanAll());
 
-  it('applies an explicit TaskInstance source once and reverts it explicitly', async () => {
+  it('applies an explicit TaskOccurrence source once and reverts it explicitly', async () => {
     const prisma = await getPrisma();
     const identityId = IdentityId.generate();
     await seedAccount({ id: identityId });
@@ -41,16 +49,14 @@ describe('GoalTaskProgressHandler V2 integration', () => {
     const goal = Goal.create({
       identityId,
       name: 'Ship Wave 2',
-      description: null,
-      feasibilityAnalysis: null,
-      motivation: null,
+      summary: null,
       startDate: null,
       reminderConfig: null,
     });
     const keyResult = goal.createAndAddKeyResult({
       title: 'Completed tasks',
       aggregationMethod: 'Sum',
-      startingValue: 0,
+      initialValue: 0,
       currentValue: 0,
       targetValue: 10,
       weight: 1,
@@ -59,23 +65,26 @@ describe('GoalTaskProgressHandler V2 integration', () => {
     await goalRepository.save(goal);
 
     const readProgress = async () =>
-      (await goalRepository.findByIdForIdentity(String(identityId), goal.id, { includeChildren: true }))
-        ?.getKeyResult(String(keyResult.id))?.progress.currentValue;
+      (
+        await goalRepository.findByIdForIdentity(String(identityId), goal.id, {
+          includeChildren: true,
+        })
+      )?.getKeyResult(String(keyResult.id))?.progress.currentValue;
     const waitForProgress = (expected: number) =>
       waitFor(async () => ((await readProgress()) === expected ? expected : null));
 
     const apply = (occurredAt: number): TaskGoalProgressOutboxEventV2 => ({
-      eventId: `task-goal-apply:TaskInstance:ti-int-1:${occurredAt}`,
+      eventId: `task-goal-apply:TaskOccurrence:ti-int-1:${occurredAt}`,
       schemaVersion: 2,
       eventType: 'task.goal-progress-requested',
       action: 'apply',
       identityId: identityId as never,
-      taskInstanceId: 'ti-int-1' as never,
-      taskTemplateId: 'tt-int-1' as never,
+      taskOccurrenceId: 'ti-int-1' as never,
+      taskPlanId: 'tt-int-1' as never,
       goalId: goal.id as never,
       keyResultId: keyResult.id as never,
       value: 3,
-      source: { type: 'TaskInstance', id: 'ti-int-1' },
+      source: { type: 'TaskOccurrence', id: 'ti-int-1' },
       taskTitle: 'Finish integration test',
       occurredAt,
     });
@@ -85,10 +94,10 @@ describe('GoalTaskProgressHandler V2 integration', () => {
       eventType: 'task.goal-progress-requested',
       action: 'revert',
       identityId: identityId as never,
-      taskInstanceId: 'ti-int-1' as never,
-      taskTemplateId: 'tt-int-1' as never,
+      taskOccurrenceId: 'ti-int-1' as never,
+      taskPlanId: 'tt-int-1' as never,
       sources: [
-        { type: 'TaskInstance', id: 'ti-int-1' },
+        { type: 'TaskOccurrence', id: 'ti-int-1' },
         { type: 'TaskPlan', id: 'tt-int-1' },
       ],
       occurredAt,

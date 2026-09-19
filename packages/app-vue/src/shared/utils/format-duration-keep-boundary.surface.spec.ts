@@ -4,25 +4,18 @@ import { describe, expect, it } from 'vitest';
 
 /**
  * Residual 1243: formatDuration keep-boundary (schedule ms export vs minutes i18n vs task variants).
- * - app-vue schedule-presentation: durationMs null→'-'; ms/sec presentation i18n
  * - app-vue ScheduleConflictAlert: total minutes → schedule.duration.* (hours-only band)
  * Residual 1324: ScheduleConflictAlert + ScheduleFormDemo minutes maps dual-retired onto
  * formatScheduleDurationMinutes sole (still minutes unit vs presentation durationMs).
  * Soft residual 1243:
  * - ConflictAlert: ms floor; hoursMinutes always when h>0
- * - schedule-presentation durationMs/Sec keep-boundary remains
  * - formatTaskDuration: Intl unit hour/minute
- * - app-react buildDuration: compute minutes only
- * Soft residual 1237: formatTime keep-boundary remains separate.
+ * - ADR-080: CalendarEntry mutation payload no longer carries duration; read surfaces derive it from range
  * Soft residual 1240: formatDate keep-boundary remains separate.
  * Does not flip §13.2 checkboxes.
  */
 describe('formatDuration keep-boundary (residual 1243)', () => {
   const dir = __dirname;
-  const presentation = readFileSync(
-    resolve(dir, '../../modules/schedule/utils/schedule-presentation.ts'),
-    'utf8',
-  );
   const conflictAlert = readFileSync(
     resolve(dir, '../../modules/schedule/components/ScheduleConflictAlert.vue'),
     'utf8',
@@ -44,20 +37,6 @@ describe('formatDuration keep-boundary (residual 1243)', () => {
     'utf8',
   );
 
-  it('owns Residual 1243 keep-boundary markers on schedule-presentation ms formatDuration', () => {
-    expect(presentation).toContain('Residual 1243 keep-boundary');
-    expect(presentation).toMatch(/export function formatDuration\b/);
-    expect(presentation).toContain('durationMs: number | null | undefined');
-    expect(presentation).toContain("return '-'");
-    expect(presentation).toContain('schedule.presentation.durationMs');
-    expect(presentation).toContain('schedule.presentation.durationSec');
-    const body = presentation.match(/export function formatDuration\([\s\S]*?\n\}/)?.[0] ?? '';
-    expect(body).toContain('durationMs');
-    expect(body).toContain("toFixed(2)");
-    expect(body).not.toContain('schedule.duration.minutes');
-    expect(body).not.toContain('task.dependencyGraph');
-    expect(body).not.toContain('Intl.NumberFormat');
-  });
 
   it('differs from minutes-based ScheduleConflictAlert formatDuration (no force-merge)', () => {
     expect(conflictAlert).toContain('Residual 1243 keep-boundary');
@@ -76,7 +55,7 @@ describe('formatDuration keep-boundary (residual 1243)', () => {
     expect(sole).toContain('schedule.duration.hoursMinutes');
   });
 
-  it('soft residual 1243 ms floor / demo / Intl / buildDuration stay separate', () => {
+  it('soft residual 1243 ms floor / demo / Intl stay separate while CalendarEntry duration is derived', () => {
     expect(conflictMs).toContain('Soft residual 1243');
     const msBody = conflictMs.match(/function formatDuration\([\s\S]*?\n\}/)?.[0] ?? '';
     expect(msBody).toContain('splitDurationMs');
@@ -97,12 +76,10 @@ describe('formatDuration keep-boundary (residual 1243)', () => {
     expect(taskUtil).toContain('Intl.NumberFormat');
     expect(taskUtil).toContain("unit: 'hour'");
 
-    expect(react).toContain('Soft residual 1243');
-    expect(react).toMatch(/function buildDuration\b/);
-    const buildBody = react.match(/function buildDuration\([\s\S]*?\n\}/)?.[0] ?? '';
-    expect(buildBody).toContain('/ 60000');
-    expect(buildBody).toContain('Math.max(1');
-    expect(buildBody).not.toContain('t(');
+    expect(react).toContain('getProductTime');
+    expect(react).not.toMatch(/function buildDuration\b/);
+    expect(react).toContain("kind: 'Timed'");
+    expect(react).not.toMatch(/\bduration:\s*buildDuration/);
   });
 
   it('runtime: documents ms/sec vs minutes i18n vs compute contracts via body shape', () => {
@@ -125,9 +102,6 @@ describe('formatDuration keep-boundary (residual 1243)', () => {
         ? t('schedule.duration.hoursMinutes', { h: hours, m: mins })
         : t('schedule.duration.hours', { h: hours });
     }
-    function buildDuration(startTime: number, endTime: number): number {
-      return Math.max(1, Math.round((endTime - startTime) / 60000));
-    }
     const t = (k: string, p?: object) => (p ? `${k}:${JSON.stringify(p)}` : k);
     expect(presentationFormatDuration(null, t)).toBe('-');
     expect(presentationFormatDuration(500, t)).toContain('durationMs');
@@ -135,8 +109,6 @@ describe('formatDuration keep-boundary (residual 1243)', () => {
     expect(conflictMinutesFormatDuration(30, t)).toContain('minutes');
     expect(conflictMinutesFormatDuration(120, t)).toContain('hours');
     expect(conflictMinutesFormatDuration(90, t)).toContain('hoursMinutes');
-    expect(buildDuration(0, 90_000)).toBe(2);
-    expect(buildDuration(0, 10_000)).toBe(1);
   });
 
   it('documents residual 1243 lock intent without claiming §13.2 complete', () => {

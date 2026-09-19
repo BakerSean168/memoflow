@@ -1,11 +1,26 @@
-/**
- * Notification Application Module (Server)
- *
- * 提供 Notification 模块的所有 Services
- */
+/** Notification Application Module (Server) */
 
-// ===== Services =====
-export type { NotificationApplicationPort } from './notification.application.port';
-export type { NotificationSseDeliveryEvent } from './notification.application.port';
+export type {
+  NotificationInboxPort,
+  NotificationSseDeliveryEvent,
+} from './notification-inbox.port';
+export type { NotificationOperationsPort } from './notification-operations.port';
+export {
+  NotificationOwnerCommandRegistry,
+  type NotificationOwnerCommandPort,
+  type NotificationOwnerCommandRegistration,
+  type NotificationOwnerCommandInvocation,
+  type NotificationOwnerCommandReceipt,
+} from './notification-owner-command.registry';
 export * from './use-cases';
 export * from './services';
+export * from './notification-preference-portability';
+export {
+  NotificationPortableCapability,
+  createNotificationPortableCapability,
+} from './notification-portability';
+export type {
+  NotificationPortableFactV3,
+  NotificationPortableInteractionV3,
+  NotificationPortablePayloadV3,
+} from '@memoflow/contracts/notification';

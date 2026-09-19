@@ -41,10 +41,6 @@
       "types": "./dist/primitives/*.d.ts",
       "import": "./dist/primitives/*.js"
     },
-    "./reminder": {
-      "types": "./dist/modules/reminder/index.d.ts",
-      "import": "./dist/modules/reminder/index.js"
-    },
     "./repository": {
       "types": "./dist/modules/repository/index.d.ts",
       "import": "./dist/modules/repository/index.js"
@@ -69,10 +65,6 @@
       "types": "./dist/modules/ai/index.d.ts",
       "import": "./dist/modules/ai/index.js"
     },
-    "./dashboard": {
-      "types": "./dist/modules/dashboard/index.d.ts",
-      "import": "./dist/modules/dashboard/index.js"
-    },
     "./data-portability": {
       "types": "./dist/modules/data-portability/index.d.ts",
       "import": "./dist/modules/data-portability/index.js"
@@ -96,6 +88,10 @@
     "./label": {
       "types": "./dist/modules/label/index.d.ts",
       "import": "./dist/modules/label/index.js"
+    },
+    "./relation": {
+      "types": "./dist/modules/relation/index.d.ts",
+      "import": "./dist/modules/relation/index.js"
     }
   },
   "dependencies": {

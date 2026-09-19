@@ -1,6 +1,2 @@
-/**
- * AI Entities Index
- */
-
-export * from './message-client';
-export * from './message-server';
+/** Legacy persisted AI message DTOs retired; use AssistantRuntimeMessageView. */
+export {};

@@ -7,7 +7,7 @@ import { createLogger } from '@memoflow/utils/logger';
 const logger = createLogger('GetConversationUseCase');
 
 /**
- * 获取对话详情（包含消息）
+ * 获取产品拥有的对话 shell；消息历史由 Mastra runtime 提供
  */
 export class GetConversationUseCase {
   constructor(private readonly conversationRepository: IAIConversationRepository) {}
@@ -15,15 +15,11 @@ export class GetConversationUseCase {
   async execute(
     identityId: string,
     conversationId: string,
-    includeMessages: boolean = true,
   ): Promise<Result<AIConversationServer | null>> {
     try {
       const conversation = await this.conversationRepository.findByIdForIdentity(
         identityId,
         conversationId,
-        {
-          includeChildren: includeMessages,
-        },
       );
       if (!conversation) {
         return ok(null);

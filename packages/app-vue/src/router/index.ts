@@ -16,7 +16,6 @@ import { goalRoutes } from '../modules/goal/router';
 import { governanceRoutes } from '../modules/governance/router';
 import { taskRoutes } from '../modules/task/router';
 import { scheduleRoutes } from '../modules/schedule/router';
-import { reminderRoutes } from '../modules/reminder/router';
 import { repositoryRoutes } from '../modules/repository/router';
 import { notificationRoutes } from '../modules/notification/router';
 import { settingRoutes } from '../modules/setting/router';
@@ -59,19 +58,12 @@ export function createAppRouter(options?: {
           component: ShellHomeRoute,
           meta: { title: 'aiAssistant.chatPage.title' },
         },
-        {
-          // Dashboard 退役：今日概览由 AI 空闲态承接（V2 §3）。
-          path: 'dashboard',
-          name: 'dashboard',
-          redirect: '/',
-        },
         // Module routes
         ...accountRoutes,
         ...goalRoutes,
         ...governanceRoutes,
         ...taskRoutes,
         ...scheduleRoutes,
-        ...reminderRoutes,
         ...repositoryRoutes,
         ...notificationRoutes,
         ...aiRoutes,

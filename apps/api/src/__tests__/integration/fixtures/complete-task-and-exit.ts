@@ -1,14 +1,17 @@
 import { prisma } from '@memoflow/database';
 import { createTaskPrismaModule } from '@memoflow/task';
+import { TASK_TEST_USER_TIME_CONTEXT_PORT } from '@memoflow/task/testing';
 
-const [, , taskInstanceId, identityId] = process.argv;
+const [, , taskOccurrenceId, identityId] = process.argv;
 
-if (!taskInstanceId || !identityId) {
-  throw new Error('taskInstanceId and identityId are required');
+if (!taskOccurrenceId || !identityId) {
+  throw new Error('taskOccurrenceId and identityId are required');
 }
 
-const taskModule = createTaskPrismaModule(prisma);
-const result = await taskModule.api.completeTaskInstance(taskInstanceId, identityId);
+const taskModule = createTaskPrismaModule(prisma, {
+  userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+});
+const result = await taskModule.api.completeTaskOccurrence(taskOccurrenceId, identityId);
 
 if (!result.ok) {
   throw new Error(`${result.error.code}: ${result.error.message}`);

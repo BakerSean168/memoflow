@@ -1,7 +1,7 @@
 import { defineComponent, ref } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { TaskInstanceClientDTO, TaskTemplateClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
 import { useTask } from '../../composables/useTask';
 import DailyTodoWidget from './DailyTodoWidget.vue';
 
@@ -13,14 +13,29 @@ const PassThroughStub = defineComponent({
   template: '<div><slot /></div>',
 });
 
-function createInstance(status: TaskInstanceClientDTO['status']): TaskInstanceClientDTO {
+function createInstance(status: TaskOccurrenceClientDTO['status']): TaskOccurrenceClientDTO {
+  const now = Date.now();
   return {
-    id: 'TaskInstanceId_today',
-    templateId: 'TaskTemplateId_today',
-    instanceDate: Date.now(),
+    id: 'TaskOccurrenceId_today' as TaskOccurrenceClientDTO['id'],
+    planId: 'TaskPlanId_today' as TaskOccurrenceClientDTO['planId'],
+    identityId: 'IdentityId_today' as TaskOccurrenceClientDTO['identityId'],
+    occurrenceKey: 'TaskPlanId_today:today',
+    scheduleSnapshot: {
+      date: '2026-09-13' as TaskOccurrenceClientDTO['scheduleSnapshot']['date'],
+      timing: { kind: 'AllDay' },
+    },
+    importanceSnapshot: 'Moderate',
     status,
-    timeConfig: { timeType: 'AllDay', startDate: null, timePoint: null, timeRange: null },
-  } as TaskInstanceClientDTO;
+    actualStartAt: null,
+    result: null,
+    checklistState: [],
+    dueAt: now,
+    isOverdue: false,
+    version: 1,
+    createdAt: now,
+    updatedAt: now,
+    deletedAt: null,
+  };
 }
 
 describe('DailyTodoWidget', () => {
@@ -28,21 +43,21 @@ describe('DailyTodoWidget', () => {
     vi.clearAllMocks();
   });
 
-  it('refreshes the home progress and completed statistics after completing today\'s task', async () => {
-    const instances = ref<TaskInstanceClientDTO[]>([createInstance('Pending')]);
-    const templates = ref<TaskTemplateClientDTO[]>([
+  it("refreshes the home progress and completed statistics after completing today's task", async () => {
+    const instances = ref<TaskOccurrenceClientDTO[]>([createInstance('Pending')]);
+    const templates = ref<TaskPlanClientDTO[]>([
       {
-        id: 'TaskTemplateId_today',
+        id: 'TaskPlanId_today',
         name: 'Close the daily loop',
-      } as TaskTemplateClientDTO,
+      } as TaskPlanClientDTO,
     ]);
-    const completeInstance = vi.fn(async (id: string) => {
+    const completeOccurrence = vi.fn(async (id: string) => {
       instances.value = instances.value.map((instance) =>
         instance.id === id ? { ...instance, status: 'Completed' } : instance,
       );
       return instances.value.find((instance) => instance.id === id) ?? null;
     });
-    const uncompleteInstance = vi.fn(async (id: string) => {
+    const uncompleteOccurrence = vi.fn(async (id: string) => {
       instances.value = instances.value.map((instance) =>
         instance.id === id ? { ...instance, status: 'Pending' } : instance,
       );
@@ -55,8 +70,8 @@ describe('DailyTodoWidget', () => {
       isLoading: ref(false),
       fetchInstancesByDateRange: vi.fn().mockResolvedValue(undefined),
       fetchTemplates: vi.fn().mockResolvedValue(undefined),
-      completeInstance,
-      uncompleteInstance,
+      completeOccurrence,
+      uncompleteOccurrence,
     } as unknown as ReturnType<typeof useTask>);
 
     const wrapper = mount(DailyTodoWidget, {
@@ -87,9 +102,9 @@ describe('DailyTodoWidget', () => {
     await wrapper.get('button[title="标记完成"]').trigger('click');
     await flushPromises();
 
-    expect(completeInstance).toHaveBeenCalledWith('TaskInstanceId_today');
+    expect(completeOccurrence).toHaveBeenCalledWith('TaskOccurrenceId_today');
     expect(wrapper.emitted('completed')).toEqual([
-      [expect.objectContaining({ id: 'TaskInstanceId_today', status: 'Completed' })],
+      [expect.objectContaining({ id: 'TaskOccurrenceId_today', status: 'Completed' })],
     ]);
     expect(wrapper.text()).toContain('1/1');
     expect(wrapper.get('.h-full.rounded-full.bg-emerald-500').attributes('style')).toContain(
@@ -101,7 +116,7 @@ describe('DailyTodoWidget', () => {
     await undoButton.trigger('click');
     await flushPromises();
 
-    expect(uncompleteInstance).toHaveBeenCalledWith('TaskInstanceId_today');
+    expect(uncompleteOccurrence).toHaveBeenCalledWith('TaskOccurrenceId_today');
     expect(wrapper.text()).toContain('0/1');
     expect(wrapper.get('.h-full.rounded-full.bg-emerald-500').attributes('style')).toContain(
       'width: 0%',
@@ -113,13 +128,13 @@ describe('DailyTodoWidget', () => {
     const fetchTemplates = vi.fn().mockResolvedValue(undefined);
 
     vi.mocked(useTask).mockReturnValue({
-      instances: ref<TaskInstanceClientDTO[]>([]),
-      templates: ref<TaskTemplateClientDTO[]>([]),
+      instances: ref<TaskOccurrenceClientDTO[]>([]),
+      templates: ref<TaskPlanClientDTO[]>([]),
       isLoading: ref(false),
       fetchInstancesByDateRange,
       fetchTemplates,
-      completeInstance: vi.fn(),
-      uncompleteInstance: vi.fn(),
+      completeOccurrence: vi.fn(),
+      uncompleteOccurrence: vi.fn(),
     } as unknown as ReturnType<typeof useTask>);
 
     const wrapper = mount(DailyTodoWidget, {

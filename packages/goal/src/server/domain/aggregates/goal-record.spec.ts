@@ -73,14 +73,14 @@ describe('GoalRecord owned entity', () => {
       keyResultId: 'KeyResultId_1' as never,
       identityId: 'IdentityId_1' as never,
       value: 3,
-      source: { type: 'TASK_INSTANCE', id: 'task-instance-1' },
+      source: { type: 'TASK_INSTANCE', id: 'task-occurrence-1' },
     });
 
     expect(record.sourceType).toBe('TASK_INSTANCE');
-    expect(record.sourceId).toBe('task-instance-1');
+    expect(record.sourceId).toBe('task-occurrence-1');
     expect(record.toServerDTO()).toMatchObject({
       sourceType: 'TASK_INSTANCE',
-      sourceId: 'task-instance-1',
+      sourceId: 'task-occurrence-1',
     });
   });
 });

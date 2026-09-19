@@ -18,25 +18,73 @@ const requiredTables = [
   'goals',
   'key_results',
   'goal_records',
-  'task_templates',
-  'task_instances',
+  'task_plans',
+  'task_occurrences',
   'task_goal_outbox',
   'schedules',
-  'schedule_tasks',
+  'scheduled_invocations',
+  'invocation_attempts',
   'scheduling_reconcile_operations',
   'schedule_leases',
-  'reminder_templates',
-  'reminder_occurrences',
+  'labels',
+  'goal_labels',
+  'task_labels',
+  'task_plan_history',
   'routine_definitions',
   'routine_profiles',
   'routine_profile_memberships',
+  'routine_occurrences',
+  'routine_interactions',
+  'routine_protocol_definitions',
   'routine_protocol_sessions',
   'routine_temporary_overrides',
   'notifications',
-  'notification_channels',
   'notification_delivery_decisions',
   'notification_dispatch_outbox',
+  'notification_interactions',
+  'notification_preferences',
+  'ai_conversations',
+  'ai_execution_records',
   'reliable_outbox_messages',
+];
+
+const forbiddenTables = [
+  'repositories',
+  'repository_explorers',
+  'repository_statistics',
+  'folders',
+  'resources',
+  'repository_resources',
+  'linked_contents',
+  'resource_references',
+  'reminder_templates',
+  'reminder_groups',
+  'reminder_instances',
+  'reminder_statistics',
+  'user_reminder_preferences',
+  'reminder_history',
+  'reminder_responses',
+  'reminder_occurrences',
+  'schedule_tasks',
+  'schedule_executions',
+  'schedule_statistics',
+  'task_templates',
+  'task_instances',
+  'task_statistics',
+  'task_template_history',
+  'notification_templates',
+  'notification_history',
+  'notification_channels',
+  'ai_messages',
+  'ai_generation_tasks',
+  'ai_usage_quotas',
+  'knowledge_generation_tasks',
+  'user_settings',
+  'dashboard_configs',
+  'editor_workspaces',
+  'editor_workspace_sessions',
+  'editor_workspace_session_groups',
+  'editor_workspace_session_group_tabs',
 ];
 
 const admin = new Client({ connectionString: adminUrl });
@@ -75,18 +123,22 @@ try {
     const names = new Set(tables.rows.map((row) => row.tablename));
     const missing = requiredTables.filter((table) => !names.has(table));
     if (missing.length > 0) throw new Error(`production-like boot missing tables: ${missing.join(', ')}`);
+    const forbidden = forbiddenTables.filter((table) => names.has(table));
+    if (forbidden.length > 0) {
+      throw new Error(`production-like boot retained retired tables: ${forbidden.join(', ')}`);
+    }
 
     const uniqueSchedulingKey = await db.query(`
       SELECT 1
       FROM pg_indexes
       WHERE schemaname = 'public'
-        AND tablename = 'schedule_tasks'
+        AND tablename = 'scheduled_invocations'
         AND indexdef ILIKE '%UNIQUE%'
         AND indexdef ILIKE '%scheduling_key%'
       LIMIT 1
     `);
     if (uniqueSchedulingKey.rowCount !== 1) {
-      throw new Error('schedule_tasks has no unique scheduling_key index after boot');
+      throw new Error('scheduled_invocations has no unique scheduling_key index after boot');
     }
 
     const routineMembershipUnique = await db.query(`
@@ -108,24 +160,24 @@ try {
         pg_get_constraintdef(oid) AS definition,
         obj_description(oid, 'pg_constraint') AS comment
       FROM pg_constraint
-      WHERE conname = 'task_templates_goal_binding_complete'
-        AND conrelid = 'public.task_templates'::regclass
+      WHERE conname = 'task_plans_goal_binding_complete'
+        AND conrelid = 'public.task_plans'::regclass
     `);
     const taskGoalBindingRow = taskGoalBinding.rows[0];
     const taskGoalBindingDefinition = String(taskGoalBindingRow?.definition ?? '');
     if (
       taskGoalBinding.rowCount !== 1 ||
-      taskGoalBindingRow?.comment !== 'memoflow.task-goal-binding/v2' ||
+      taskGoalBindingRow?.comment !== 'memoflow.task-goal-binding/v3' ||
       !taskGoalBindingDefinition.includes('EachCompletion') ||
       !taskGoalBindingDefinition.includes('PlanCompletion') ||
       taskGoalBindingDefinition.includes('PER_INSTANCE') ||
       taskGoalBindingDefinition.includes('ALL_INSTANCES_COMPLETED')
     ) {
-      throw new Error('task_templates has no canonical v2 Goal-binding constraint after boot');
+      throw new Error('task_plans has no canonical v3 Goal-binding constraint after boot');
     }
 
     console.log(
-      `[hard-7103-schema-boot] passed: fresh database booted through database:prisma-push; ${tables.rowCount} public tables; ${requiredTables.length} core tables + pgvector + vNext uniqueness fences + Task Goal-binding v2 fence verified.`,
+      `[hard-7103-schema-boot] passed: fresh database booted through database:prisma-push; ${tables.rowCount} public tables; ${requiredTables.length} canonical tables + retired-table absence + pgvector + vNext uniqueness fences + Task Goal-binding v3 fence verified.`,
     );
   } finally {
     await db.end();

@@ -1,0 +1,243 @@
+{
+  "version": 1,
+  "owners": [
+    {
+      "id": "account",
+      "packagePath": "packages/account",
+      "forbiddenProductionDependencies": [
+        "@memoflow/cloud-auth",
+        "@memoflow/reminder",
+        "@memoflow/notification",
+        "@memoflow/repository"
+      ],
+      "forbiddenProductionImports": [
+        "@memoflow/cloud-auth",
+        "@memoflow/reminder",
+        "@memoflow/notification",
+        "@memoflow/repository"
+      ],
+      "forbiddenConfigurationReferences": [
+        {
+          "path": "packages/account/tsconfig.json",
+          "values": [
+            "@memoflow/cloud-auth",
+            "@memoflow/reminder/server",
+            "@memoflow/notification/server",
+            "@memoflow/repository/server"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ai",
+      "packagePath": "packages/ai",
+      "forbiddenProductionDependencies": ["@memoflow/repository", "@memoflow/setting"],
+      "forbiddenProductionImports": ["@memoflow/repository", "@memoflow/setting"],
+      "forbiddenConfigurationReferences": []
+    },
+    {
+      "id": "data-portability",
+      "packagePath": "packages/data-portability",
+      "forbiddenProductionDependencies": [
+        "@memoflow/goal",
+        "@memoflow/task",
+        "@memoflow/repository",
+        "@memoflow/schedule",
+        "@memoflow/ai",
+        "@memoflow/notification",
+        "@memoflow/setting"
+      ],
+      "forbiddenProductionImports": [
+        "@memoflow/goal",
+        "@memoflow/task",
+        "@memoflow/repository",
+        "@memoflow/schedule",
+        "@memoflow/ai",
+        "@memoflow/notification",
+        "@memoflow/setting"
+      ],
+      "forbiddenConfigurationReferences": [
+        {
+          "path": "packages/data-portability/tsup.config.ts",
+          "values": [
+            "@memoflow/goal",
+            "@memoflow/task",
+            "@memoflow/repository",
+            "@memoflow/schedule",
+            "@memoflow/ai",
+            "@memoflow/notification",
+            "@memoflow/setting"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "goal",
+      "packagePath": "packages/goal",
+      "forbiddenProductionDependencies": ["@memoflow/schedule", "@memoflow/task"],
+      "forbiddenProductionImports": ["@memoflow/schedule", "@memoflow/task"],
+      "forbiddenConfigurationReferences": [
+        {
+          "path": "packages/goal/tsup.config.ts",
+          "values": ["@memoflow/schedule"]
+        }
+      ]
+    },
+    {
+      "id": "task",
+      "packagePath": "packages/task",
+      "forbiddenProductionDependencies": ["@memoflow/schedule"],
+      "forbiddenProductionImports": ["@memoflow/schedule"],
+      "forbiddenConfigurationReferences": [
+        {
+          "path": "packages/task/tsup.config.ts",
+          "values": ["@memoflow/schedule"]
+        }
+      ]
+    },
+    {
+      "id": "reminder",
+      "packagePath": "packages/reminder",
+      "forbiddenProductionDependencies": ["@memoflow/schedule"],
+      "forbiddenProductionImports": ["@memoflow/schedule"],
+      "forbiddenConfigurationReferences": [
+        {
+          "path": "packages/reminder/tsup.config.ts",
+          "values": ["@memoflow/schedule"]
+        }
+      ]
+    },
+    {
+      "id": "notification",
+      "packagePath": "packages/notification",
+      "forbiddenProductionDependencies": [
+        "@memoflow/powersync-schema",
+        "@memoflow/scheduler"
+      ],
+      "forbiddenProductionImports": [
+        "@memoflow/powersync-schema",
+        "@memoflow/scheduler"
+      ],
+      "forbiddenConfigurationReferences": [
+        {
+          "path": "packages/notification/tsconfig.json",
+          "values": ["@memoflow/powersync-schema"]
+        }
+      ]
+    },
+    {
+      "id": "app-react-host",
+      "packagePath": "packages/app-react",
+      "forbiddenProductionDependencies": ["@memoflow/repository", "@memoflow/scheduler"],
+      "forbiddenProductionImports": ["@memoflow/repository", "@memoflow/scheduler"],
+      "forbiddenConfigurationReferences": []
+    },
+    {
+      "id": "app-vue-host",
+      "packagePath": "packages/app-vue",
+      "forbiddenProductionDependencies": ["@memoflow/cloud-auth"],
+      "forbiddenProductionImports": ["@memoflow/cloud-auth"],
+      "forbiddenConfigurationReferences": []
+    },
+    {
+      "id": "schedule-orchestration",
+      "packagePath": "packages/schedule-orchestration",
+      "forbiddenProductionDependencies": ["@memoflow/schedule"],
+      "forbiddenProductionImports": ["@memoflow/schedule"],
+      "forbiddenConfigurationReferences": [
+        {
+          "path": "packages/schedule-orchestration/tsconfig.json",
+          "values": ["@memoflow/schedule"]
+        },
+        {
+          "path": "packages/schedule-orchestration/tsup.config.ts",
+          "values": ["@memoflow/schedule"]
+        }
+      ]
+    }
+  ],
+  "retiredVocabulary": [
+    { "id": "task-template-type", "token": "TaskTemplate", "roots": ["apps", "packages"] },
+    { "id": "task-instance-type", "token": "TaskInstance", "roots": ["apps", "packages"] },
+    {
+      "id": "reminder-template-type",
+      "token": "ReminderTemplate",
+      "roots": ["apps", "packages"]
+    },
+    { "id": "reminder-group-type", "token": "ReminderGroup", "roots": ["apps", "packages"] },
+    { "id": "schedule-task-type", "token": "ScheduleTask", "roots": ["apps", "packages"] },
+    {
+      "id": "schedule-execution-type",
+      "token": "ScheduleExecution",
+      "roots": ["apps", "packages"]
+    },
+    {
+      "id": "notification-template-type",
+      "token": "NotificationTemplate",
+      "roots": ["apps", "packages"]
+    },
+    {
+      "id": "notification-channel-type",
+      "token": "NotificationChannel",
+      "roots": ["apps", "packages"]
+    },
+    { "id": "user-setting-type", "token": "UserSetting", "roots": ["apps", "packages"] },
+    {
+      "id": "activity-ledger-type",
+      "token": "ActivityLedger",
+      "roots": ["apps", "packages"]
+    },
+    { "id": "dashboard-data-type", "token": "DashboardData", "roots": ["apps", "packages"] }
+  ],
+  "exceptions": [
+    {
+      "id": "host-composition-roots",
+      "owner": "apps/api and apps/desktop",
+      "reason": "Hosts assemble owner modules and inject adapters at the application boundary.",
+      "retireBy": "permanent",
+      "architectureJustification": "The canonical host-composer rule keeps cross-owner construction at the two composition roots; owners expose ports and do not import each other for assembly."
+    },
+    {
+      "id": "schedule-orchestration-projection",
+      "owner": "@memoflow/schedule-orchestration",
+      "reason": "The system scheduling package composes Goal, Task, Routine and Scheduler projection/execution ports.",
+      "retireBy": "permanent",
+      "architectureJustification": "ADR-060/061 and ADR-081..083 define this package as the neutral orchestration boundary; it owns no product persistence truth and uses owner-driven projections."
+    },
+    {
+      "id": "portability-disclosure-source",
+      "owner": "@memoflow/data-portability",
+      "reason": "The server-held disclosure endpoint reads a dedicated Prisma disclosure source while V3 owner data uses registered capabilities.",
+      "retireBy": "permanent",
+      "architectureJustification": "ADR-106 permits this disclosure-only infrastructure port and forbids importing owner modules or cloning their persistence DTOs."
+    },
+    {
+      "id": "account-closure-structural-consumers",
+      "owner": "@memoflow/account and apps/api",
+      "reason": "Account closure publishes structural consumer ports; the host injects Routine, Notification and Knowledge cleanup consumers.",
+      "retireBy": "permanent",
+      "architectureJustification": "Account remains the lifecycle owner while host composition supplies cross-owner cleanup behavior; this preserves dependency direction and avoids direct account imports."
+    },
+    {
+      "id": "ai-owner-read-contracts",
+      "owner": "@memoflow/ai",
+      "reason": "AI consumes narrow owner contract/read ports for knowledge, planner, notification and analytics projections.",
+      "retireBy": "permanent",
+      "architectureJustification": "The canonical ownership matrix and ADR-108 allow consumer projections over explicit owner contracts; AI does not import owner persistence or command implementations."
+    },
+    {
+      "id": "knowledge-external-repository-identity",
+      "owner": "@memoflow/repository",
+      "reason": "Knowledge retains external GitHub repository identity and repository routes; these are not the retired local Repository/Folder/Resource persistence model.",
+      "retireBy": "permanent",
+      "architectureJustification": "The accepted Knowledge/GitHub projection architecture owns external repository identity and stable document projections; removing the word would change valid current V2 terminology rather than remove residue."
+    },
+    {
+      "id": "integration-test-composition",
+      "owner": "account and notification integration tests",
+      "reason": "Integration tests compose public owner server modules to verify closure and scheduler-to-fact behavior; those packages are dev-only dependencies.",
+      "retireBy": "permanent",
+      "architectureJustification": "Test-only composition exercises the same public ports used by host composition and cannot create production ownership coupling because production imports and dependencies are audited separately."
+    }
+  ]
+}

@@ -14,9 +14,6 @@ export class UpdateConversationUseCase {
     const conversation = await this.conversationRepository.findByIdForIdentity(
       identityId,
       conversationId,
-      {
-        includeChildren: false,
-      },
     );
     if (!conversation) {
       return error('NOT_FOUND', 'Conversation not found');

@@ -32,10 +32,12 @@ const boundaryRequiredTargets = new Map([
 const governedRequiredTargets = ['test', 'test:watch', 'test:coverage'];
 const coverageConfigsByProject = new Map([
   ['goal', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
-  ['reminder', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
-  // CLEAN-6304: Schedule owns Calendar/Planner; Temporal Engine use-case coverage belongs to Scheduler.
+  // R4-2201C: legacy Reminder CRUD use-case/mapper slices were physically retired; Routine uses the canonical suite.
+  ['reminder', ['vitest.config.ts']],
+  // CLEAN-6304 / S4-2302B: Schedule owns Calendar/Planner and Scheduler now owns only
+  // canonical ScheduledInvocation runtime + mapper coverage; the retired ScheduleTask use-case slice is gone.
   ['schedule', ['vitest.config.ts', 'vitest.mappers.config.ts']],
-  ['scheduler', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
+  ['scheduler', ['vitest.config.ts', 'vitest.mappers.config.ts']],
   ['task', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
 ]);
 
@@ -92,12 +94,12 @@ for (const projectFile of projectFiles) {
     changed = true;
   }
 
-  const targetTemplates = getBoundaryTargetTemplates(json.name);
-  if (targetTemplates) {
-    for (const [targetName, targetTemplate] of Object.entries(targetTemplates)) {
-      if (!areTargetsEqual(targets[targetName], targetTemplate)) {
+  const targetPlans = getBoundaryTargetPlans(json.name);
+  if (targetPlans) {
+    for (const [targetName, targetPlan] of Object.entries(targetPlans)) {
+      if (!areTargetsEqual(targets[targetName], targetPlan)) {
         if (shouldWrite) {
-          targets[targetName] = structuredClone(targetTemplate);
+          targets[targetName] = structuredClone(targetPlan);
           changed = true;
         } else {
           errors.push(
@@ -117,15 +119,15 @@ for (const projectFile of projectFiles) {
       usesVitest(targets['test:coverage']));
 
   if (shouldNormalizeLocalVitestTargets) {
-    const localVitestTargets = getLocalVitestTargetTemplates(
+    const localVitestTargets = getLocalVitestTargetPlans(
       projectRoot,
       isGovernedDomainProject,
       json.name,
     );
-    for (const [targetName, targetTemplate] of Object.entries(localVitestTargets)) {
-      if (!areTargetsEqual(targets[targetName], targetTemplate)) {
+    for (const [targetName, targetPlan] of Object.entries(localVitestTargets)) {
+      if (!areTargetsEqual(targets[targetName], targetPlan)) {
         if (shouldWrite) {
-          targets[targetName] = structuredClone(targetTemplate);
+          targets[targetName] = structuredClone(targetPlan);
           changed = true;
         } else {
           errors.push(
@@ -135,7 +137,7 @@ for (const projectFile of projectFiles) {
       }
     }
   } else if (isGovernedDomainProject && hasLocalVitestConfig) {
-    const coverageTarget = getLocalVitestTargetTemplates(projectRoot, true, json.name)[
+    const coverageTarget = getLocalVitestTargetPlans(projectRoot, true, json.name)[
       'test:coverage'
     ];
     if (!areTargetsEqual(targets['test:coverage'], coverageTarget)) {
@@ -260,7 +262,7 @@ function deriveWatchTarget(testTarget) {
   };
 }
 
-function getLocalVitestTargetTemplates(projectRoot, includeCoverage = false, projectName = '') {
+function getLocalVitestTargetPlans(projectRoot, includeCoverage = false, projectName = '') {
   const templates = {
     test: {
       executor: 'nx:run-commands',
@@ -306,7 +308,7 @@ function getLocalVitestTargetTemplates(projectRoot, includeCoverage = false, pro
   return templates;
 }
 
-function getBoundaryTargetTemplates(projectName) {
+function getBoundaryTargetPlans(projectName) {
   const templates = {
     api: {
       test: {

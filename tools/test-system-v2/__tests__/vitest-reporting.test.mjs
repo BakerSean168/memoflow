@@ -2,14 +2,21 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 
-const aggregateCoverageConfigs = ['task', 'goal', 'reminder', 'scheduler'].flatMap((project) => [
+const useCaseCoverageConfigs = ['task', 'goal'].flatMap((project) => [
   `packages/${project}/vitest.config.ts`,
   `packages/${project}/vitest.use-cases.config.ts`,
   `packages/${project}/vitest.mappers.config.ts`,
 ]);
 
+// R4-2201C: @memoflow/reminder now owns Routine vNext only; the old CRUD
+// use-case/mapper slices were deleted with their production code.
+useCaseCoverageConfigs.push('packages/reminder/vitest.config.ts');
+
 const coverageConfigs = [
-  ...aggregateCoverageConfigs,
+  ...useCaseCoverageConfigs,
+  // S4-2302B retired Scheduler's legacy ScheduleTask use-case slice.
+  'packages/scheduler/vitest.config.ts',
+  'packages/scheduler/vitest.mappers.config.ts',
   'packages/schedule/vitest.config.ts',
   'packages/schedule/vitest.mappers.config.ts',
 ];

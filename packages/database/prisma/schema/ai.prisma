@@ -1,110 +1,65 @@
 // ==========================================
 // AI Module
-// AI 对话、消息、生成任务、配额、Provider 配置
+// AI 对话 shell、执行记录、Provider 配置
 // ==========================================
 
 model AiConversation {
   id            String    @id
   identityId    String    @map("identity_id")
   name          String
-  status        String // ACTIVE, CLOSED, ARCHIVED
-  messageCount  Int       @default(0) @map("message_count")
-  lastMessageAt DateTime? @map("last_message_at")
+  status        String // ACTIVE, ARCHIVED
   version       Int       @default(1)
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
   deletedAt     DateTime? @map("deleted_at")
 
   account  Account     @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  messages AiMessage[]
 
   @@index([identityId])
   @@index([status])
   @@index([createdAt])
-  @@index([lastMessageAt])
   @@map("ai_conversations")
 }
 
-model AiMessage {
-  id             String   @id
-  identityId     String   @map("identity_id")
-  conversationId String   @map("conversation_id")
-  role           String // USER, ASSISTANT, SYSTEM
-  content        String   @db.Text
-  tokenUsage     String?  @map("token_usage") // JSON
-  createdAt      DateTime @default(now()) @map("created_at")
 
-  identity     Account        @relation("AccountAiMessages", fields: [identityId], references: [id])
-  conversation AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@index([conversationId])
-  @@index([createdAt])
-  @@map("ai_messages")
-}
-
-model AiGenerationTask {
-  id           String    @id
-  identityId   String    @map("identity_id")
-  taskType     String    @map("task_type") // GOAL_KEY_RESULTS, TASK_TEMPLATES, etc.
-  status           String // PENDING, PROCESSING, COMPLETED, FAILED
-  conversationId   String?   @map("conversation_id")
-  runId            String?   @map("run_id")
-  requestId        String?   @map("request_id")
-  traceId          String?   @map("trace_id")
-  providerId       String?   @map("provider_id")
-  model            String?
-  estimatedCostUsd Float?    @map("estimated_cost_usd")
-  input            String    @db.Text // JSON string
-  result           String?   @db.Text // JSON string
-  error            String?   @db.Text
-  retryCount       Int       @default(0) @map("retry_count")
-  tokenUsage       String?   @map("token_usage") // JSON
-  processingMs     Int?      @map("processing_ms")
-  version      Int       @default(1)
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
-  completedAt  DateTime? @map("completed_at")
-  deletedAt    DateTime? @map("deleted_at")
+model AiExecutionRecord {
+  id                   String   @id
+  identityId           String   @map("identity_id")
+  operation            String
+  outcome              String
+  conversationId       String?  @map("conversation_id")
+  runId                String?  @map("run_id")
+  requestId            String?  @map("request_id")
+  traceId              String?  @map("trace_id")
+  providerConnectionId String?  @map("provider_connection_id")
+  modelId              String?  @map("model_id")
+  errorCategory        String?  @map("error_category")
+  safeError            String?  @map("safe_error") @db.Text
+  estimatedCostUsd     Float?   @map("estimated_cost_usd")
+  tokenUsage           String?  @map("token_usage")
+  latencyMs            Int?     @map("latency_ms")
+  createdAt            DateTime @default(now()) @map("created_at")
+  completedAt          DateTime @default(now()) @map("completed_at")
 
   account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
 
   @@index([identityId])
-  @@index([taskType])
-  @@index([status])
+  @@index([operation])
+  @@index([outcome])
   @@index([createdAt])
   @@index([identityId, conversationId, createdAt])
   @@index([identityId, runId, createdAt])
-  @@map("ai_generation_tasks")
+  @@map("ai_execution_records")
 }
 
-model AiUsageQuota {
-  id           String    @id
-  identityId   String    @unique @map("identity_id")
-  quotaLimit   Int       @default(50) @map("quota_limit")
-  currentUsage Int       @default(0) @map("current_usage")
-  resetPeriod  String    @default("DAILY") @map("reset_period") // DAILY, WEEKLY, MONTHLY
-  lastResetAt  DateTime  @default(now()) @map("last_reset_at")
-  nextResetAt  DateTime  @map("next_reset_at")
-  version      Int       @default(1)
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
-  deletedAt    DateTime? @map("deleted_at")
-
-  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@index([nextResetAt])
-  @@map("ai_usage_quotas")
-}
 
 model AiProviderConfig {
   id              String    @id
   identityId      String    @map("identity_id")
   name            String // 配置名称
-  providerType    String    @map("provider_type") // OPENAI, QINIU, ANTHROPIC, CUSTOM_OPENAI_COMPATIBLE
+  providerDefinitionId String @map("provider_definition_id")
   baseUrl         String    @map("base_url") // API 基础地址
-  apiKeyEncrypted String    @map("api_key_encrypted") // AES-256-GCM 加密的 API Key
+  credentialRef   String    @map("credential_ref") // Opaque SecretVault reference
   defaultModel    String?   @map("default_model")
   availableModels String    @default("[]") @map("available_models") // 可用模型列表 JSON
   isActive        Boolean   @default(true) @map("is_active")
@@ -131,7 +86,7 @@ model AiProviderOnboardingSession {
   catalogId           String    @map("catalog_id")
   baseUrl             String    @map("base_url")
   targetProviderId    String?   @map("target_provider_id")
-  credentialEncrypted String    @map("credential_encrypted")
+  credentialRef       String    @map("credential_ref")
   credentialStatus    String    @map("credential_status")
   discoveryStatus     String    @map("discovery_status")
   modelsJson          String    @default("[]") @map("models_json")
@@ -149,35 +104,38 @@ model AiProviderOnboardingSession {
   @@map("ai_provider_onboarding_sessions")
 }
 
-model KnowledgeGenerationTask {
-  id                   String    @id
-  identityId           String    @map("identity_id")
-  topic                String
-  resourceCount        Int       @default(5) @map("resource_count")
-  targetAudience       String?   @map("target_audience")
-  folderPath           String    @map("folder_path")
-  status               String // PENDING, GENERATING, COMPLETED, FAILED
-  progress             Int       @default(0) // 0-100
-  generatedResourceIds String[]  @map("generated_resource_ids")
-  error                String?   @db.Text
-  createdAt            DateTime  @default(now()) @map("created_at")
-  completedAt          DateTime? @map("completed_at")
+/**
+ * Host-owned provider SecretVault storage. This table is deliberately not a
+ * PowerSync table and has no relation to portable provider connection state.
+ */
+model AiProviderSecret {
+  id             String    @id // opaque credential ref
+  identityId     String    @map("identity_id")
+  encryptedValue String    @map("encrypted_value")
+  expiresAt      DateTime? @map("expires_at")
+  revokedAt      DateTime? @map("revoked_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
 
   @@index([identityId])
-  @@index([status])
-  @@index([createdAt])
-  @@map("knowledge_generation_tasks")
+  @@index([identityId, expiresAt])
+  @@map("ai_provider_secrets")
 }
+
 
 model AiKnowledgeIndexEntry {
   id              String                     @id
   identityId      String                     @map("identity_id")
   repositoryId    String                     @map("repository_id")
-  resourceId      String                     @unique @map("resource_id")
-  resourcePath    String                     @map("resource_path")
+  knowledgeSpaceId    String                @map("knowledge_space_id")
+  knowledgeDocumentId String                @map("knowledge_document_id")
+  sourcePath      String                     @map("source_path")
   title           String?
   mimeType        String                     @map("mime_type")
-  contentHash     String                     @map("content_hash")
+  sourceContentHash String                   @map("source_content_hash")
+  sourceVersion   String?                    @map("source_version")
   status          String
   summary         String?                    @db.Text
   keywords        Json                       @default("[]")
@@ -195,21 +153,10 @@ model AiKnowledgeIndexEntry {
   account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
 
   @@index([identityId])
+  @@unique([knowledgeSpaceId, knowledgeDocumentId])
+  @@index([knowledgeSpaceId, knowledgeDocumentId])
   @@index([repositoryId])
   @@index([status])
   @@index([lastRequestedAt])
   @@map("ai_knowledge_index_entries")
-}
-
-model DashboardConfig {
-  id           Int      @id @default(autoincrement())
-  identityId   String   @unique @map("identity_id")
-  widgetConfig Json     @map("widget_config")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-
-  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@map("dashboard_configs")
 }

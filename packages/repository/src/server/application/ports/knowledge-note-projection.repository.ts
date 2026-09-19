@@ -1,6 +1,6 @@
+import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import type {
   KnowledgeNoteProjectionClientDTO,
-  KnowledgeNoteProjectionIndexStatus,
 } from '@memoflow/contracts/repository';
 
 export type GithubWebhookDeliveryStatus =
@@ -35,17 +35,18 @@ export interface IGithubWebhookDeliveryRepository {
 export interface KnowledgeNoteProjectionUpsert {
   id: string;
   connectionId: string;
+  knowledgeDocumentId: KnowledgeDocumentId | null;
   relativePath: string;
   commitSha: string;
   blobSha: string;
   contentHash: string;
   frontmatter: Record<string, unknown>;
   markdownContent: string;
-  indexStatus: KnowledgeNoteProjectionIndexStatus;
 }
 
 export interface KnowledgeNoteProjectionDeletion {
   id: string;
+  knowledgeDocumentId: KnowledgeDocumentId | null;
   relativePath: string;
 }
 
@@ -78,17 +79,16 @@ export interface IKnowledgeNoteProjectionRepository {
     connectionId: string,
     relativePath: string,
   ): Promise<KnowledgeNoteProjectionClientDTO | null>;
+  findLiveByDocumentId(
+    connectionId: string,
+    knowledgeDocumentId: KnowledgeDocumentId,
+  ): Promise<KnowledgeNoteProjectionClientDTO[]>;
+  listLiveByConnection(connectionId: string): Promise<KnowledgeNoteProjectionClientDTO[]>;
   loadLinkGraphSourcesForIdentity(
     identityId: string,
     centerProjectionId: string,
     limit: number,
   ): Promise<KnowledgeNoteLinkGraphSourceSet | null>;
-  updateIndexStatusForIdentity(
-    identityId: string,
-    projectionId: string,
-    expectedContentHash: string,
-    status: KnowledgeNoteProjectionIndexStatus,
-  ): Promise<boolean>;
 }
 
 export type KnowledgeWriteRequestStatus = 'Pending' | 'Committed' | 'Failed';
@@ -111,6 +111,7 @@ export interface KnowledgeWriteRequestRecord {
   connectionId: string;
   requestId: string;
   requestHash: string;
+  knowledgeDocumentId: KnowledgeDocumentId;
   relativePath: string;
   status: KnowledgeWriteRequestStatus;
   commitSha: string | null;
@@ -133,10 +134,7 @@ export interface IKnowledgeWriteRequestRepository {
     identityId: string,
     requestId: string,
   ): Promise<KnowledgeWriteRequestRecord | null>;
-  findByIdForIdentity(
-    identityId: string,
-    id: string,
-  ): Promise<KnowledgeWriteRequestRecord | null>;
+  findByIdForIdentity(identityId: string, id: string): Promise<KnowledgeWriteRequestRecord | null>;
   create(record: KnowledgeWriteRequestRecord): Promise<boolean>;
   /** Status transitions must stay scoped to the owning identity (residual 109). */
   retryFailed(identityId: string, id: string, updatedAt: number): Promise<boolean>;

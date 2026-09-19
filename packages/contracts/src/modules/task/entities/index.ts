@@ -3,9 +3,9 @@
  */
 
 export type {
-  TaskTemplateHistoryServerDTO,
-} from './task-template-history-server';
+  TaskPlanHistoryServerDTO,
+} from './task-plan-history-server';
 
 export type {
-  TaskTemplateHistoryClientDTO,
-} from './task-template-history-client';
+  TaskPlanHistoryClientDTO,
+} from './task-plan-history-client';

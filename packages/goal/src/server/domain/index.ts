@@ -38,7 +38,10 @@ export * from './entities';
 export * from './value-objects';
 
 // 仓储接口
-export { GoalLabelOwnershipError, GoalVersionConflictError } from './repositories/i-goal-repository';
+export {
+  GoalLabelOwnershipError,
+  GoalVersionConflictError,
+} from './repositories/i-goal-repository';
 
 export type {
   IGoalRepository,
@@ -46,17 +49,7 @@ export type {
   SnapshotQueryResult,
 } from './repositories';
 
-// R5 关系 / R7 钱包 仓储 Port（domain-owned）
-export {
-  SubjectTypes,
-  RelationTypes,
-  type SubjectType,
-  type RelationType,
-  type SubjectRef,
-  type RelationDTO,
-  type IRelationRepository,
-} from './repositories';
-
+// R7 钱包仓储 Port（domain-owned）
 export type { IWalletRepository, WalletAccountDTO, WalletTransactionDTO } from './repositories';
 
 // 领域服务（只保留真正的领域服务）

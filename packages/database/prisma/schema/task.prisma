@@ -3,9 +3,9 @@
 // 任务计划、实例、历史、统计
 // ==========================================
 
-/// TaskTemplate 聚合根 - 任务模板
+/// TaskPlan 聚合根 - 任务模板
 /// 管理任务的完整定义，包括时间配置、重复规则、提醒、Goal绑定等
-model TaskTemplate {
+model TaskPlan {
   // ============ 主键与外键 ============
   id         String @id
   identityId String @map("identity_id")
@@ -22,31 +22,9 @@ model TaskTemplate {
   importance  String  @default("moderate") /// ImportanceLevel
 
 
-  // ============ 时间配置（展开值对象） ============
-  timeConfigType            String?   @map("time_config_type")
-  timeConfigStartTime       DateTime? @map("time_config_start_time")
-  timeConfigEndTime         DateTime? @map("time_config_end_time")
-  timeConfigDurationMinutes Int?      @map("time_config_duration_minutes")
-  timeConfigTimePoint       Int?      @map("time_config_time_point") /// 时间点（分钟数，如 540 = 9:00）
-  timeConfigTimeRangeStart  Int?      @map("time_config_time_range_start") /// 时间段开始（分钟数）
-  timeConfigTimeRangeEnd    Int?      @map("time_config_time_range_end") /// 时间段结束（分钟数）
-
-  // ============ 重复规则（展开值对象） ============
-  recurrenceRuleType        String?   @map("recurrence_rule_type")
-  recurrenceRuleInterval    Int?      @map("recurrence_rule_interval")
-  recurrenceRuleDaysOfWeek  String?   @map("recurrence_rule_days_of_week")
-  recurrenceRuleEndDate     DateTime? @map("recurrence_rule_end_date")
-  recurrenceRuleCount       Int?      @map("recurrence_rule_count")
-
-  // ============ 提醒配置（展开值对象） ============
-  reminderConfigEnabled           Boolean? @map("reminder_config_enabled")
-  reminderConfigTimeOffsetMinutes Int?     @map("reminder_config_time_offset_minutes")
-  reminderConfigUnit              String?  @map("reminder_config_unit")
-  reminderConfigChannel           String?  @map("reminder_config_channel")
-
-  // ============ 循环任务生成 ============
-  lastGeneratedDate DateTime? @map("last_generated_date")
-  generateAheadDays Int?      @map("generate_ahead_days")
+  // ============ Canonical scheduling/reminder truth ============
+  schedule       Json /// TaskPlanSchedule canonical JSON
+  reminderConfig String? @map("reminder_config") /// JSON: TaskReminderConfig
 
   // ============ Goal 绑定（展开的关系值对象） ============
   goalId              String? @map("goal_id")
@@ -66,13 +44,13 @@ model TaskTemplate {
 
   // ============ 关系映射 ============
   account   Account     @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  keyResult KeyResult?  @relation("KeyResultTaskTemplates", fields: [keyResultId, goalId, identityId], references: [id, goalId, identityId], onDelete: Restrict)
+  keyResult KeyResult?  @relation("KeyResultTaskPlans", fields: [keyResultId, goalId, identityId], references: [id, goalId, identityId], onDelete: Restrict)
 
 
 
   // 实例
-  instances TaskInstance[]
-  history   TaskTemplateHistory[]
+  occurrences TaskOccurrence[]
+  history   TaskPlanHistory[]
   labelLinks TaskLabel[]
 
   // ============ 索引优化 ============
@@ -83,48 +61,36 @@ model TaskTemplate {
   @@index([identityId, goalId, deletedAt])
   @@index([identityId, keyResultId, deletedAt])
   @@index([deletedAt])
-  @@map("task_templates")
+  @@map("task_plans")
 }
 
-/// TaskInstance 聚合根 - 任务实例
+/// TaskOccurrence 聚合根 - 任务实例
 /// 从模板生成的具体任务实例，包含执行状态和时间追踪
-model TaskInstance {
-  // ============ 主键与外键 ============
-  id         String @id
-  templateId String @map("template_id")
-  identityId String @map("identity_id")
+model TaskOccurrence {
+  id                 String    @id
+  planId             String    @map("plan_id")
+  identityId         String    @map("identity_id")
+  occurrenceKey      String    @map("occurrence_key")
+  scheduleDate       String    @map("schedule_date") /// Ymd (YYYY-MM-DD)
+  scheduleTiming     String    @map("schedule_timing") /// JSON: TaskTiming
+  importanceSnapshot String    @default("Moderate") @map("importance_snapshot")
+  status             String /// TaskOccurrenceStatus
+  actualStartAt      DateTime? @map("actual_start_at")
+  result             String? /// JSON: TaskOccurrenceResult
+  checklistState     String    @default("[]") @map("checklist_state") /// JSON: TaskOccurrenceChecklistItem[]
+  version            Int       @default(1)
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+  deletedAt          DateTime? @map("deleted_at")
 
-  // ============ 实例基本信息 ============
-  instanceDate  DateTime @map("instance_date")
-  occurrenceKey String?  @map("occurrence_key") /// R2-1 幂等键 templateId:localDate
-  status        String /// TaskInstanceStatus
-  importance   String   @default("moderate") /// ImportanceLevel
+  account Account  @relation(fields: [identityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  plan    TaskPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
 
-  // ============ 时间追踪 ============
-  timeConfig      String    @map("time_config") /// JSON: TaskTimeConfigDTO
-  actualStartTime DateTime? @map("actual_start_time")
-  actualEndTime   DateTime? @map("actual_end_time")
-
-  // ============ 备注 ============
-  comment String? /// 实例备注
-
-  // ============ 版本与审计 ============
-  version   Int       @default(1)
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  deletedAt DateTime? @map("deleted_at")
-
-  // ============ 关系映射 ============
-  account  Account      @relation(fields: [identityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  template TaskTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
-
-  // ============ 索引优化 ============
-  @@index([templateId, instanceDate])
+  @@index([planId, scheduleDate])
   @@index([identityId, status])
-  @@index([identityId, instanceDate])
-  // R2-1：同一模板同一天最多一个实例（幂等键，防双宿主/并发重复生成）。
-  @@unique([templateId, occurrenceKey])
-  @@map("task_instances")
+  @@index([identityId, scheduleDate])
+  @@unique([planId, occurrenceKey])
+  @@map("task_occurrences")
 }
 
 /// Durable delivery log for completed tasks that contribute Goal progress.
@@ -132,8 +98,8 @@ model TaskInstance {
 model TaskGoalOutbox {
   eventId        String    @id @map("event_id")
   identityId     String    @map("identity_id")
-  taskInstanceId String    @map("task_instance_id")
-  taskTemplateId String    @map("task_template_id")
+  taskOccurrenceId String    @map("task_occurrence_id")
+  taskPlanId String    @map("task_plan_id")
   goalId         String    @map("goal_id")
   keyResultId    String    @map("key_result_id")
   payload        String
@@ -148,62 +114,22 @@ model TaskGoalOutbox {
 
   @@index([identityId, status, availableAt])
   @@index([status, availableAt])
-  @@index([taskInstanceId])
+  @@index([taskOccurrenceId])
   @@map("task_goal_outbox")
 }
 
-model TaskTemplateHistory {
+model TaskPlanHistory {
   id         String   @id
   identityId String   @map("identity_id")
-  templateId String   @map("template_id")
+  planId     String   @map("plan_id")
   action     String
   changes    String?
   createdAt  DateTime @default(now()) @map("created_at")
 
-  identity Account      @relation("AccountTaskTemplateHistory", fields: [identityId], references: [id])
-  template TaskTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  identity Account      @relation("AccountTaskPlanHistory", fields: [identityId], references: [id])
+  plan      TaskPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
 
   @@index([identityId])
-  @@index([templateId])
-  @@map("task_template_history")
-}
-
-model TaskStatistic {
-  id                       String   @id
-  identityId               String   @unique @map("identity_id")
-  calculatedAt             DateTime @map("calculated_at")
-  templateTotal            Int      @map("template_total")
-  templateActive           Int      @map("template_active")
-  templatePaused           Int      @map("template_paused")
-  templateArchived         Int      @map("template_archived")
-  templateOneTime          Int      @map("template_one_time")
-  templateRecurring        Int      @map("template_recurring")
-  instanceTotal            Int      @map("instance_total")
-  instanceToday            Int      @map("instance_today")
-  instanceWeek             Int      @map("instance_week")
-  instanceMonth            Int      @map("instance_month")
-  instancePending          Int      @map("instance_pending")
-  instanceInProgress       Int      @map("instance_in_progress")
-  instanceCompleted        Int      @map("instance_completed")
-  instanceSkipped          Int      @map("instance_skipped")
-  instanceMissed           Int      @map("instance_missed")
-  completionToday          Int      @map("completion_today")
-  completionWeek           Int      @map("completion_week")
-  completionMonth          Int      @map("completion_month")
-  completionTotal          Int      @map("completion_total")
-  completionAvgTime        Float?   @map("completion_avg_time")
-  completionRate           Float    @map("completion_rate")
-  timeAllDay               Int      @map("time_all_day")
-  timePoint                Int      @map("time_point")
-  timeRange                Int      @map("time_range")
-  timeOverdue              Int      @map("time_overdue")
-  timeUpcoming             Int      @map("time_upcoming")
-  distributionByImportance String   @map("distribution_by_importance")
-  distributionByUrgency    String   @map("distribution_by_urgency")
-  distributionByTag        String   @map("distribution_by_tag")
-
-  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@map("task_statistics")
+  @@index([planId])
+  @@map("task_plan_history")
 }

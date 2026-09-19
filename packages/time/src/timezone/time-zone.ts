@@ -1,4 +1,11 @@
-import type { TimeZoneId, TimeZonePolicy } from '../types';
+import { requireTimeZoneId } from '@memoflow/contracts/primitives';
+import type { TimeContext, TimeZoneId, Weekday } from '../types';
+
+export {
+  isIanaTimeZoneId,
+  parseTimeZoneId,
+  requireTimeZoneId,
+} from '@memoflow/contracts/primitives';
 
 /**
  * Explicit input source for the host/user IANA zone.
@@ -8,46 +15,40 @@ export interface TimeZoneSource {
   currentTimeZoneId(): TimeZoneId;
 }
 
-export function isIanaTimeZoneId(value: string): value is TimeZoneId {
-  if (value.length === 0 || value === 'local') return false;
-  try {
-    new Intl.DateTimeFormat('en-US', { timeZone: value }).format(0);
-    return true;
-  } catch {
-    return false;
+function isWeekday(value: number): value is Weekday {
+  return Number.isInteger(value) && value >= 0 && value <= 6;
+}
+
+/** Boundary constructor for canonical Product Time context. */
+export function createTimeContext(input: {
+  timeZone: string | TimeZoneId;
+  weekStartsOn?: number;
+}): TimeContext {
+  const weekStartsOn = input.weekStartsOn ?? 1;
+  if (!isWeekday(weekStartsOn)) {
+    throw new TypeError(`Invalid weekStartsOn: ${String(weekStartsOn)}`);
   }
+  return Object.freeze({
+    timeZone: requireTimeZoneId(input.timeZone),
+    weekStartsOn,
+  });
 }
 
 export function createSystemTimeZoneSource(): TimeZoneSource {
   return {
     currentTimeZoneId(): TimeZoneId {
       const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      if (!zone || !isIanaTimeZoneId(zone)) {
+      if (!zone) {
         throw new TypeError(`Host did not provide a valid IANA time zone: ${String(zone)}`);
       }
-      return zone;
+      return requireTimeZoneId(zone);
     },
   };
 }
 
 export function createFixedTimeZoneSource(timeZoneId: TimeZoneId): TimeZoneSource {
-  if (!isIanaTimeZoneId(timeZoneId)) {
-    throw new TypeError(`Invalid IANA time zone: ${timeZoneId}`);
-  }
+  const validated = requireTimeZoneId(timeZoneId);
   return {
-    currentTimeZoneId: () => timeZoneId,
+    currentTimeZoneId: () => validated,
   };
-}
-
-const systemTimeZoneSource = createSystemTimeZoneSource();
-
-export function resolveTimeZoneId(
-  policy: TimeZonePolicy,
-  source: TimeZoneSource = systemTimeZoneSource,
-): TimeZoneId {
-  const zone = policy === 'local' ? source.currentTimeZoneId() : policy;
-  if (!isIanaTimeZoneId(zone)) {
-    throw new TypeError(`Invalid IANA time zone: ${zone}`);
-  }
-  return zone;
 }

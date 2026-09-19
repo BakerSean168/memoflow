@@ -1,23 +1,59 @@
 {
-  "ai/goal-workflow.spec.ts": { "durationMs": 128628 },
-  "ai/multi-engine-host.spec.ts": { "durationMs": 35665 },
-  "authentication/auth-flow.spec.ts": { "durationMs": 45684 },
-  "authentication/auth-login.spec.ts": { "durationMs": 38300 },
-  "authentication/auth-oauth.spec.ts": { "durationMs": 2530 },
-  "authentication/auth-page-contract.spec.ts": { "durationMs": 23024 },
-  "authentication/auth-password.spec.ts": { "durationMs": 24204 },
-  "authentication/auth-register.spec.ts": { "durationMs": 8453 },
-  "dashboard/dashboard-overview.spec.ts": { "durationMs": 97139 },
-  "goal/goal-crud.spec.ts": { "durationMs": 71527 },
-  "note/legacy-note-mutation-boundary.spec.ts": { "durationMs": 12826 },
-  "note/note-workspace.spec.ts": { "durationMs": 13529 },
-  "notification/notification-center.spec.ts": { "durationMs": 65741 },
-  "notification/reminder-notification-loop.spec.ts": { "durationMs": 24414 },
-  "reminder/reminder-template-crud.spec.ts": { "durationMs": 82408 },
-  "schedule/schedule-calendar.spec.ts": { "durationMs": 40637 },
-  "task/task-completion-loop.spec.ts": { "durationMs": 18239 },
-  "task/task-template-crud.spec.ts": { "durationMs": 82285 },
-  "user-settings/data-portability.spec.ts": { "durationMs": 100529 },
-  "user-settings/notifications.spec.ts": { "durationMs": 49708 },
-  "user-settings/persistence.spec.ts": { "durationMs": 55073 }
+  "ai/goal-workflow.spec.ts": {
+    "durationMs": 128628
+  },
+  "ai/multi-engine-host.spec.ts": {
+    "durationMs": 35665
+  },
+  "authentication/auth-flow.spec.ts": {
+    "durationMs": 45684
+  },
+  "authentication/auth-login.spec.ts": {
+    "durationMs": 38300
+  },
+  "authentication/auth-oauth.spec.ts": {
+    "durationMs": 2530
+  },
+  "authentication/auth-page-contract.spec.ts": {
+    "durationMs": 23024
+  },
+  "authentication/auth-password.spec.ts": {
+    "durationMs": 24204
+  },
+  "authentication/auth-register.spec.ts": {
+    "durationMs": 8453
+  },
+  "goal/goal-crud.spec.ts": {
+    "durationMs": 71527
+  },
+  "note/legacy-note-mutation-boundary.spec.ts": {
+    "durationMs": 12826
+  },
+  "note/note-workspace.spec.ts": {
+    "durationMs": 13529
+  },
+  "notification/notification-center.spec.ts": {
+    "durationMs": 65741
+  },
+  "notification/notification-inbox-loop.spec.ts": {
+    "durationMs": 24414
+  },
+  "schedule/schedule-calendar.spec.ts": {
+    "durationMs": 40637
+  },
+  "task/task-completion-loop.spec.ts": {
+    "durationMs": 18239
+  },
+  "task/task-plan-crud.spec.ts": {
+    "durationMs": 82285
+  },
+  "user-settings/data-portability.spec.ts": {
+    "durationMs": 100529
+  },
+  "user-settings/notifications.spec.ts": {
+    "durationMs": 49708
+  },
+  "user-settings/persistence.spec.ts": {
+    "durationMs": 55073
+  }
 }

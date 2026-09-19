@@ -1,0 +1,111 @@
+/**
+ * Task Occurrence HTTP Adapter
+ *
+ * HTTP implementation of ITaskOccurrenceApiClient.
+ * Uses IResultHttpClient for making HTTP requests.
+ */
+
+import type { Result } from '@memoflow/contracts/result';
+import type { IResultHttpClient } from '@memoflow/http-client';
+import type { ITaskOccurrenceApiClient } from '../types';
+import type {
+  GetTaskOccurrencesByRangeReq,
+  TaskOccurrenceClientDTO,
+  CompleteTaskOccurrenceReq,
+  MarkTaskOccurrenceMissedReq,
+  SkipTaskOccurrenceReq,
+  RescheduleTaskInput,
+  SetTaskOccurrenceChecklistItemReq,
+} from '@memoflow/contracts/task';
+
+/**
+ * TaskOccurrenceHttpAdapter
+ *
+ * HTTP implementation of the task occurrence API client.
+ */
+export class TaskOccurrenceHttpAdapter implements ITaskOccurrenceApiClient {
+  private readonly baseUrl = '/task-occurrences';
+
+  constructor(private readonly httpClient: IResultHttpClient) {}
+
+  // ===== Task Occurrence CRUD =====
+
+  async getTaskOccurrences(params?: {
+    page?: number;
+    limit?: number;
+    planId?: string;
+    status?: string;
+  }): Promise<Result<TaskOccurrenceClientDTO[]>> {
+    return this.httpClient.get(this.baseUrl, { params });
+  }
+
+  async getTaskOccurrencesByDateRange(
+    request: GetTaskOccurrencesByRangeReq,
+  ): Promise<Result<TaskOccurrenceClientDTO[]>> {
+    return this.httpClient.get(`${this.baseUrl}/by-date-range`, {
+      params: request,
+    });
+  }
+
+  async getTaskOccurrenceById(id: string): Promise<Result<TaskOccurrenceClientDTO>> {
+    return this.httpClient.get(`${this.baseUrl}/${id}`);
+  }
+
+  async deleteTaskOccurrence(id: string): Promise<Result<void>> {
+    return this.httpClient.delete(`${this.baseUrl}/${id}`);
+  }
+
+  // ===== Task Occurrence State Management =====
+
+  async startTaskOccurrence(id: string): Promise<Result<TaskOccurrenceClientDTO>> {
+    return this.httpClient.post(`${this.baseUrl}/${id}/start`);
+  }
+
+  async completeTaskOccurrence(
+    id: string,
+    request?: CompleteTaskOccurrenceReq,
+  ): Promise<Result<TaskOccurrenceClientDTO>> {
+    return this.httpClient.post(`${this.baseUrl}/${id}/complete`, request);
+  }
+
+  async uncompleteTaskOccurrence(id: string): Promise<Result<TaskOccurrenceClientDTO>> {
+    return this.httpClient.post(`${this.baseUrl}/${id}/uncomplete`);
+  }
+
+  async skipTaskOccurrence(
+    id: string,
+    request?: SkipTaskOccurrenceReq,
+  ): Promise<Result<TaskOccurrenceClientDTO>> {
+    return this.httpClient.post(`${this.baseUrl}/${id}/skip`, request);
+  }
+
+  async markTaskOccurrenceMissed(
+    id: string,
+    request?: MarkTaskOccurrenceMissedReq,
+  ): Promise<Result<TaskOccurrenceClientDTO>> {
+    return this.httpClient.post(`${this.baseUrl}/${id}/missed`, request);
+  }
+
+  async rescheduleTaskOccurrence(
+    id: string,
+    request: RescheduleTaskInput,
+  ): Promise<Result<TaskOccurrenceClientDTO>> {
+    return this.httpClient.post(`${this.baseUrl}/${id}/reschedule`, request);
+  }
+
+  async setTaskOccurrenceChecklistItem(
+    id: string,
+    request: SetTaskOccurrenceChecklistItemReq,
+  ): Promise<Result<TaskOccurrenceClientDTO>> {
+    return this.httpClient.post(`${this.baseUrl}/${id}/checklist`, request);
+  }
+}
+
+/**
+ * Factory function to create TaskOccurrenceHttpAdapter
+ */
+export function createTaskOccurrenceHttpAdapter(
+  httpClient: IResultHttpClient,
+): TaskOccurrenceHttpAdapter {
+  return new TaskOccurrenceHttpAdapter(httpClient);
+}

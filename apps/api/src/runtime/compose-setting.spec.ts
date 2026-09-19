@@ -80,8 +80,9 @@ describe('composeSetting assembly order', () => {
     const repoSet = createSettingPrismaRepositories.mock.results[0].value;
     const moduleCall = createSettingModule.mock.calls[0][0];
     expect(moduleCall).toMatchObject({
-      userSettingRepository: repoSet.userSettingRepository,
+      userPreferenceRepository: repoSet.userPreferenceRepository,
     });
+    expect(moduleCall).not.toHaveProperty('userSettingRepository');
     expect(moduleCall.runtimeContributions).toContain(
       createSettingRuntimeContribution.mock.results[0].value,
     );
@@ -103,11 +104,11 @@ describe('composeSetting assembly order', () => {
  * Structural registration test using real factories and a fake db.
  * 用真实工厂 + fake db 的结构注册测试。
  *
- * Real factories: the user setting Prisma repository only holds the db reference
+ * Real factories: the canonical preference Prisma repository only holds the db reference
  * at construction, and the module-owned runtime only logs, so registering with a
  * fake db succeeds and mounts /settings.
  *
- * 真实工厂下：UserSetting Prisma 仓储构造时只持有 db 引用（无查询），模块自有运行时
+ * 真实工厂下：canonical preference Prisma 仓储构造时只持有 db 引用（无查询），模块自有运行时
  * 仅记录日志，因此用 fake db 注册可成功并挂载 /settings。
  */
 describe('composeSetting structural registration', () => {

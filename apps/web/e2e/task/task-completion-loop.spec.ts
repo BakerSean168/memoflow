@@ -4,8 +4,11 @@ import { registerAndLogin } from '../helpers/testHelpers';
 
 const testPassword = 'Test123456!';
 
+// New accounts use UTC Product Time until the user changes Regional preferences.
+test.use({ timezoneId: 'UTC' });
+
 test.describe('Task completion closed loop', () => {
-  test('[P0][Fixture B] EachCompletion updates task, stats, and Goal progress through the Web product loop', async ({
+  test('[P0][Fixture B] EachCompletion updates task and Goal progress through the Web product loop', async ({
     page,
   }) => {
     const suffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -18,6 +21,14 @@ test.describe('Task completion closed loop', () => {
       landingPath: '/',
     });
 
+    const taskDate = await page.evaluate(() => {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    });
+
     const headers = {};
 
     const goalReceipt = await expectApiData<{
@@ -28,9 +39,8 @@ test.describe('Task completion closed loop', () => {
         headers,
         data: {
           name: goalName,
-          description: 'Verifies task-to-goal progress projection.',
-          startDate: Date.now(),
-          dueDate: Date.now() + 7 * 24 * 60 * 60 * 1000,
+          summary: 'Verifies task-to-goal progress projection.',
+          startDate: taskDate,
         },
       }),
     );
@@ -44,7 +54,7 @@ test.describe('Task completion closed loop', () => {
           expectedVersion: goalReceipt.goalVersion,
           title: 'Complete linked work',
           calculationMethod: 'Sum',
-          startingValue: 0,
+          initialValue: 0,
           currentValue: 0,
           targetValue: 10,
           unit: 'tasks',
@@ -55,22 +65,20 @@ test.describe('Task completion closed loop', () => {
     const keyResultId = keyResultReceipt.affectedEntityIds.keyResultIds[0];
     expect(keyResultId).toBeTruthy();
     const creation = await expectApiData<{
-      template: { id: string };
-      todayInstanceCreated: boolean;
+      plan: { id: string };
+      occurrenceCount: number;
+      todayOccurrenceCreated: boolean;
     }>(
-      await page.request.post(`${API_CONFIG.API_PREFIX}/task-templates`, {
+      await page.request.post(`${API_CONFIG.API_PREFIX}/task-plans`, {
         headers,
         data: {
           name: taskName,
           description: 'Created for the P0 completion closed loop.',
-          taskType: 'OneTime',
-          timeConfig: {
-            timeType: 'AllDay',
-            startDate: Date.now(),
-            timePoint: null,
-            timeRange: null,
+          schedule: {
+            kind: 'OneTime',
+            date: taskDate,
+            timing: { kind: 'AllDay' },
           },
-          recurrenceRule: null,
           reminderConfig: null,
           importance: 'Moderate',
           labelIds: [],
@@ -82,7 +90,7 @@ test.describe('Task completion closed loop', () => {
         },
       }),
     );
-    expect(creation.todayInstanceCreated).toBe(true);
+    expect(creation.todayOccurrenceCreated).toBe(true);
 
     await page.reload({ waitUntil: 'domcontentloaded' });
     const todoWidget = page.getByTestId('daily-todo-widget');
@@ -125,20 +133,20 @@ test.describe('Task completion closed loop', () => {
     await expect
       .poll(
         async () => {
-          const dashboard = await expectApiData<{
-            stats: { completedToday: number };
-            goalProgress: Array<{ id: string; progress: number }>;
-          }>(await page.request.get(`${API_CONFIG.API_PREFIX}/dashboard/stats`, { headers }));
+          const homeSummary = await expectApiData<{
+            activeCount: number;
+            goals: Array<{ id: string; progress: number }>;
+          }>(await page.request.get(`${API_CONFIG.API_PREFIX}/goals/home-summary`, { headers }));
           return {
-            completedToday: dashboard.stats.completedToday,
+            activeGoalCount: homeSummary.activeCount,
             linkedGoalProgress:
-              dashboard.goalProgress.find((item) => item.id === goalReceipt.goalId)?.progress ??
+              homeSummary.goals.find((item) => item.id === goalReceipt.goalId)?.progress ??
               null,
           };
         },
         { timeout: TIMEOUT_CONFIG.ELEMENT_WAIT },
       )
-      .toEqual({ completedToday: 1, linkedGoalProgress: 10 });
+      .toEqual({ activeGoalCount: 1, linkedGoalProgress: 10 });
     await expect(goalItem.getByTestId('goal-progress-value')).toHaveText('10%');
   });
 });

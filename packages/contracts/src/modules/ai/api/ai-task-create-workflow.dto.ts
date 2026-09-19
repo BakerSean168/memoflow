@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { ImportanceLevel } from '../../../shared/value-objects/importance';
+import { TaskGoalLinkSchema, TaskPlanScheduleSchema, TaskReminderConfigSchema } from '../../task';
 
 /**
  * Canonical product contract for ADR-052-style `task.create` Mastra Workflow.
@@ -9,8 +10,6 @@ import { ImportanceLevel } from '../../../shared/value-objects/importance';
  * configuration or framework-private workflow state belongs here, and the
  * client schema rejects any client-supplied identityId.
  */
-
-const TimeOfDaySchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/);
 
 export const TaskCreateClientInputSchema = z
   .object({
@@ -36,48 +35,37 @@ export const TaskCreateWorkflowInputSchema = TaskCreateClientInputSchema.extend(
 }).strict();
 export type TaskCreateWorkflowInput = z.infer<typeof TaskCreateWorkflowInputSchema>;
 
-export const TaskPlanCadenceSchema = z.enum(['daily', 'weekly', 'once']);
-export type TaskPlanCadence = z.infer<typeof TaskPlanCadenceSchema>;
+const draftRefSlug = '[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?';
+export const TaskPlanDraftRefSchema = z.string().regex(new RegExp(`^task:${draftRefSlug}$`));
+export type TaskPlanDraftRef = z.infer<typeof TaskPlanDraftRefSchema>;
+
+/**
+ * Task owner link semantics projected into the standalone AI draft.
+ * `TaskGoalLinkSchema` remains the owner contract; the local strict wrapper
+ * only prevents AI-only fields from entering the workflow snapshot.
+ */
+const TaskPlanGoalBindingSchema = TaskGoalLinkSchema.strict().superRefine((value, ctx) => {
+  if (value.contribution && !value.keyResultId) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['keyResultId'],
+      message: 'Task contribution requires a Key Result link',
+    });
+  }
+});
 
 export const TaskPlanTaskSchema = z
   .object({
+    draftRef: TaskPlanDraftRefSchema,
     title: z.string().trim().min(1).max(256),
-    description: z.string().trim().max(2000).optional(),
+    description: z.string().trim().max(2000).nullable().optional(),
     importance: z.enum(ImportanceLevel).default(ImportanceLevel.Moderate),
-    cadence: TaskPlanCadenceSchema,
-    startDate: z.number().int().nonnegative().nullable().default(null),
-    timeOfDay: TimeOfDaySchema.optional(),
-    daysOfWeek: z.array(z.number().int().min(0).max(6)).max(7).default([]),
-    occurrences: z.number().int().positive().nullable().default(null),
-    goalId: z.string().trim().min(1).nullable().default(null),
-    keyResultId: z.string().trim().min(1).nullable().default(null),
-    contributionValue: z.number().positive().nullable().default(null),
+    schedule: TaskPlanScheduleSchema,
+    reminderConfig: TaskReminderConfigSchema.nullable().optional().default(null),
+    goalBinding: TaskPlanGoalBindingSchema.nullable().optional().default(null),
     labels: z.array(z.string().trim().min(1).max(50)).max(50).default([]),
   })
-  .strict()
-  .superRefine((value, ctx) => {
-    if (value.cadence === 'weekly' && value.daysOfWeek.length === 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['daysOfWeek'],
-        message: 'Weekly task plans require at least one dayOfWeek',
-      });
-    }
-    if ((value.goalId === null) !== (value.keyResultId === null)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: value.goalId === null ? ['goalId'] : ['keyResultId'],
-        message: 'Task goal links require both goalId and keyResultId',
-      });
-    }
-    if (value.contributionValue !== null && (value.goalId === null || value.keyResultId === null)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['contributionValue'],
-        message: 'Task contribution requires a Goal and Key Result link',
-      });
-    }
-  });
+  .strict();
 export type TaskPlanTask = z.infer<typeof TaskPlanTaskSchema>;
 
 export const TaskPlanDraftContentSchema = z
@@ -131,8 +119,8 @@ export type TaskClarificationState = z.infer<typeof TaskClarificationStateSchema
 
 export const TaskPlanExecutionFailureSchema = z
   .object({
-    operation: z.enum(['task_template']),
-    index: z.number().int().nonnegative().optional(),
+    operation: z.literal('task_plan'),
+    draftRef: TaskPlanDraftRefSchema,
     code: z.string().min(1),
     message: z.string(),
     retryable: z.boolean(),
@@ -145,8 +133,7 @@ export const TaskPlanExecutionReceiptSchema = z
     workflowRunId: z.string().min(1),
     revision: z.number().int().positive(),
     status: z.enum(['success', 'partial', 'failed']),
-    taskTemplateId: z.string().min(1).optional(),
-    taskIds: z.array(z.string().min(1)).default([]),
+    referenceMap: z.record(TaskPlanDraftRefSchema, z.string().min(1)).default({}),
     failures: z.array(TaskPlanExecutionFailureSchema).default([]),
     retryable: z.boolean(),
   })

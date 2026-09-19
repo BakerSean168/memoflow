@@ -17,11 +17,13 @@ describe('ProbeAIProviderConnectionUseCase', () => {
     const modelCatalog = {
       listModels: vi.fn(async () => [{ id: 'model-a', name: 'Model A' }]),
     };
+    const secretVault = { store: vi.fn(async () => 'credential-test') };
     const useCase = new ProbeAIProviderConnectionUseCase({
       sessionRepository: sessions,
       credentialProbe,
       modelCatalog,
       endpointPolicy: { validate: vi.fn(async () => undefined) },
+      secretVault: secretVault as never,
       now: () => 1_000,
       generateId: () => '01234567-89ab-cdef-0123-456789abcdef',
     });
@@ -40,7 +42,12 @@ describe('ProbeAIProviderConnectionUseCase', () => {
       discovery: { status: 'available', source: 'provider_api' },
     });
     const stored = await sessions.findUsable('identity-1', result.onboardingId, 1_001);
-    expect(stored?.apiKey).toBe('secret');
+    expect(stored?.credentialRef).toBe('credential-test');
+    expect(secretVault.store).toHaveBeenCalledWith({
+      identityId: 'identity-1',
+      value: 'secret',
+      expiresAt: 601_000,
+    });
   });
 
   it('keeps unsupported custom discovery unpersisted and requires an explicit model test', async () => {
@@ -54,6 +61,7 @@ describe('ProbeAIProviderConnectionUseCase', () => {
         }),
       },
       endpointPolicy: { validate: vi.fn(async () => undefined) },
+      secretVault: { store: vi.fn(async () => 'credential-test') } as never,
       now: () => 2_000,
       generateId: () => 'abcdef01-2345-6789-abcd-ef0123456789',
     });
@@ -75,6 +83,7 @@ describe('ProbeAIProviderConnectionUseCase', () => {
       credentialProbe: { validate: vi.fn(async () => undefined) },
       modelCatalog: { listModels: vi.fn(async () => []) },
       endpointPolicy: { validate: vi.fn(async () => undefined) },
+      secretVault: { store: vi.fn(async () => 'credential-test') } as never,
     });
     await expect(
       useCase.execute(

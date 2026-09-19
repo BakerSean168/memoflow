@@ -1,0 +1,622 @@
+/**
+ * TaskPlan aggregate (Server)
+ */
+
+import type { LabelClientDTO } from '@memoflow/contracts/label';
+import type {
+  TaskPlanClientDTO,
+  TaskPlanServerDTO,
+  TaskEventMap,
+  GoalContributionRule,
+} from '@memoflow/contracts/task';
+import { TaskPlanCompletionPolicy, TaskPlanOutcome } from '@memoflow/contracts/task';
+import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { TaskPlanStatus } from '../../domain/value-objects/task-plan-status';
+import { TaskPlanId } from '../../domain/value-objects/task-plan-id';
+import type { TaskOccurrenceId } from '../../domain/value-objects/task-occurrence-id';
+import { IdentityId } from '@memoflow/domain-shared';
+import type { Instant } from '@memoflow/contracts/primitives';
+import { type TimeContext } from '@memoflow/time';
+
+import { AggregateRoot } from '@memoflow/utils/domain';
+import {
+  TaskReminderConfig,
+  TaskGoalBinding,
+  ChecklistItemDefinition,
+  TaskPlanSchedule,
+} from '../value-objects';
+import { TaskPlanHistory } from '../entities';
+import type { TaskPlanProps, TaskPlanState } from './task-plan.state';
+import * as instanceGen from './occurrence-generation.policy';
+import * as goalPolicy from './task-plan-goal.policy';
+import * as lifecyclePolicy from './task-plan-lifecycle.policy';
+import {
+  InvalidTaskPlanStateError,
+  DuplicateChecklistItemIdError,
+} from '../value-objects/task-errors';
+
+/** TaskPlan aggregate root. */
+export class TaskPlan extends AggregateRoot<TaskPlanId> {
+  private _props: TaskPlanProps;
+
+  // ===== Child entity collections =====
+  private _history: TaskPlanHistory[];
+  private _labelProjection: LabelClientDTO[] = [];
+
+  // ===== Constructor (use factory methods to create) =====
+  protected constructor(state: TaskPlanState) {
+    super(state.id);
+    if (!TaskPlanStatus.isValid(String(state.status))) {
+      throw new InvalidTaskPlanStateError(
+        `Invalid persisted TaskPlanStatus: ${String(state.status)}`,
+        {
+          planId: state.id,
+          currentStatus: state.status,
+          attemptedAction: 'load',
+        },
+      );
+    }
+    if (state.outcome !== undefined && !Object.values(TaskPlanOutcome).includes(state.outcome)) {
+      throw new InvalidTaskPlanStateError(
+        `Invalid persisted TaskPlanOutcome: ${String(state.outcome)}`,
+        {
+          planId: state.id,
+          currentStatus: state.status,
+          attemptedAction: 'load',
+        },
+      );
+    }
+
+    const { id: _, ...rest } = state;
+    this._props = {
+      ...rest,
+      description: rest.description ?? null,
+      goalBinding: rest.goalBinding ?? null,
+      reminderConfig: rest.reminderConfig ?? null,
+      checklist: rest.checklist ?? [],
+      outcome: rest.outcome ?? TaskPlanOutcome.Open,
+      completionPolicy: rest.completionPolicy ?? TaskPlanCompletionPolicy.AllowCorrection,
+      closedAt: rest.closedAt ?? null,
+      archivedAt: rest.archivedAt ?? null,
+      abandonedReason: rest.abandonedReason ?? null,
+      deletedAt: rest.deletedAt ?? null,
+      version: rest.version ?? 1,
+    };
+
+    this._history = [];
+  }
+
+  private static instantiate(state: TaskPlanState): TaskPlan {
+    return new TaskPlan(state);
+  }
+
+  /** Publish a domain event — used by factory after construction. */
+  publishDomainEvent<T>(eventName: string, payload: T): void {
+    this.addDomainEvent(eventName, payload);
+  }
+
+  private static assertIdentityId(identityId: IdentityId, attemptedAction: string): void {
+    if (identityId) {
+      return;
+    }
+
+    throw new InvalidTaskPlanStateError('Identity ID is required', {
+      planId: '',
+      currentStatus: 'N/A',
+      attemptedAction,
+    });
+  }
+
+  private static normalizeTitle(title: string, attemptedAction: string): string {
+    if (!title || title.trim().length === 0) {
+      throw new InvalidTaskPlanStateError('Title is required', {
+        planId: '',
+        currentStatus: 'N/A',
+        attemptedAction,
+      });
+    }
+
+    return title.trim();
+  }
+
+  // ===== Getters =====
+
+  public get identityId(): IdentityId {
+    return this._props.identityId;
+  }
+
+  public get name(): string {
+    return this._props.title;
+  }
+
+  public get labels(): readonly LabelClientDTO[] {
+    return this._labelProjection.map((label) => ({ ...label }));
+  }
+
+  /** Hydrates shared labels for read projection only; Task business state is unchanged. */
+  public hydrateLabels(labels: readonly LabelClientDTO[]): void {
+    this._labelProjection = labels.map((label) => ({ ...label }));
+  }
+
+  public get title(): string {
+    return this._props.title;
+  }
+
+  public get description(): string | null {
+    return this._props.description;
+  }
+
+  public get schedule(): TaskPlanSchedule {
+    return this._props.schedule;
+  }
+
+  public get reminderConfig(): TaskReminderConfig | null {
+    return this._props.reminderConfig;
+  }
+
+  public get importance(): ImportanceLevel {
+    return this._props.importance;
+  }
+
+  public get goalBinding(): TaskGoalBinding | null {
+    return this._props.goalBinding;
+  }
+
+  public get status(): TaskPlanStatus {
+    return this._props.status;
+  }
+
+  public get outcome() {
+    return this._props.outcome;
+  }
+
+  public get completionPolicy() {
+    return this._props.completionPolicy;
+  }
+
+  public get closedAt(): Instant | null {
+    return this._props.closedAt;
+  }
+
+  public get archivedAt(): Instant | null {
+    return this._props.archivedAt;
+  }
+
+  public get abandonedReason(): string | null {
+    return this._props.abandonedReason;
+  }
+
+  public get checklist(): ChecklistItemDefinition[] {
+    return [...this._props.checklist];
+  }
+
+  public get createdAt(): Instant {
+    const v = this._props.createdAt;
+    return v as Instant;
+  }
+
+  public get updatedAt(): Instant {
+    const v = this._props.updatedAt;
+    return v as Instant;
+  }
+
+  public get deletedAt(): Instant | null {
+    const v = this._props.deletedAt;
+    if (v == null) return null;
+    return v as Instant;
+  }
+
+  public get version(): number {
+    return this._props.version;
+  }
+
+  /** R2-5a：编辑后递增版本（乐观锁；调用方在写回前调用一次）。 */
+  public advanceVersion(): void {
+    this._props.version += 1;
+  }
+
+  public get history(): TaskPlanHistory[] {
+    return this._history;
+  }
+
+  /** Internal props — used by extracted policy modules. */
+  get props(): TaskPlanProps {
+    return this._props;
+  }
+
+  private getScheduleContext(timeContext: TimeContext): instanceGen.OccurrenceGenerationContext {
+    return {
+      planId: this.id,
+      identityId: this._props.identityId,
+      status: this._props.status,
+      schedule: this._props.schedule.toDTO(),
+      importance: this._props.importance,
+      checklistDefinition: this._props.checklist.map((item) => item.toDTO()),
+      existingOccurrences: [],
+      timeContext,
+    };
+  }
+
+  // ===== State Transition Methods (delegated to task-plan-lifecycle.policy) =====
+
+  public activate(): void {
+    lifecyclePolicy.activate(this);
+    this.advanceVersion();
+  }
+
+  public pause(): void {
+    lifecyclePolicy.pause(this);
+    this.advanceVersion();
+  }
+
+  public updateCompletionPolicy(
+    policy: (typeof TaskPlanCompletionPolicy)[keyof typeof TaskPlanCompletionPolicy],
+  ): void {
+    if (this._props.status === TaskPlanStatus.Closed || this._props.deletedAt !== null) {
+      throw new InvalidTaskPlanStateError(
+        'Cannot change completion policy on a closed or deleted task plan',
+        {
+          planId: this.id,
+          currentStatus: this._props.status,
+          attemptedAction: 'updateCompletionPolicy',
+        },
+      );
+    }
+    this._props.completionPolicy = policy;
+    this._props.updatedAt = Date.now();
+    this.addHistory('completion_policy_updated', { policy });
+  }
+
+  public archive(): void {
+    lifecyclePolicy.archive(this);
+    this.advanceVersion();
+  }
+
+  public abandon(reason?: string): void {
+    lifecyclePolicy.abandon(this, reason);
+    this.advanceVersion();
+  }
+
+  /** Apply deterministic evaluator output and publish the authoritative plan-outcome fact. */
+  public applyPlanOutcome(
+    outcome:
+      | typeof TaskPlanOutcome.Succeeded
+      | typeof TaskPlanOutcome.Failed
+      | typeof TaskPlanOutcome.Open,
+    cause: { triggeringTaskOccurrenceId: TaskOccurrenceId },
+  ): void {
+    const previousOutcome = this._props.outcome;
+    lifecyclePolicy.applyEvaluation(this, outcome);
+    this.advanceVersion();
+
+    if (previousOutcome !== this._props.outcome) {
+      this.addDomainEvent<TaskEventMap['task:plan-outcome-changed']>('task:plan-outcome-changed', {
+        identityId: this._props.identityId,
+        taskPlanId: this.id,
+        triggeringTaskOccurrenceId: cause.triggeringTaskOccurrenceId,
+        taskTitle: this._props.title,
+        goalBinding: this._props.goalBinding?.toDTO() ?? null,
+        previousOutcome,
+        nextOutcome: this._props.outcome,
+        planVersion: this.version,
+        changedAt: Number(this._props.updatedAt),
+      });
+    }
+  }
+
+  public softDelete(): void {
+    lifecyclePolicy.softDelete(this);
+    this.advanceVersion();
+  }
+
+  public restore(): void {
+    lifecyclePolicy.restore(this);
+    this.advanceVersion();
+  }
+
+  // ===== Time-related methods (delegated to occurrence-generation.policy) =====
+
+  public isActiveOnDate(date: number, timeContext: TimeContext): boolean {
+    return instanceGen.isActiveOnDate(this.getScheduleContext(timeContext), date);
+  }
+
+  public getNextOccurrence(afterDate: number, timeContext: TimeContext): number | null {
+    return instanceGen.getNextOccurrence(this.getScheduleContext(timeContext), afterDate);
+  }
+
+  // ===== One-time task time methods =====
+
+  /** Updates the title. */
+  public updateTitle(newTitle: string): void {
+    if (!newTitle || newTitle.trim().length === 0) {
+      throw new InvalidTaskPlanStateError('Title cannot be empty', {
+        planId: this.id,
+        currentStatus: this._props.status,
+        attemptedAction: 'updateTitle',
+      });
+    }
+    const oldTitle = this._props.title;
+    this._props.title = newTitle.trim();
+    this._props.updatedAt = Date.now();
+    this.addHistory('title_updated', { oldTitle, newTitle: this._props.title });
+
+    // Publish domain event
+    this.addDomainEvent<TaskEventMap['task:updated']>('task:updated', {
+      identityId: this._props.identityId,
+      task: this.toServerDTO(),
+      changes: ['title'],
+    });
+  }
+
+  /** Updates the description. */
+  public updateDescription(newDescription: string | null): void {
+    const oldDescription = this._props.description;
+    this._props.description = newDescription ? newDescription.trim() : null;
+    this._props.updatedAt = Date.now();
+    this.addHistory('description_updated', {
+      oldDescription,
+      newDescription: this._props.description,
+    });
+  }
+
+  /**
+   * Builds the Plan-owned checklist definition. Definition ids are stable
+   * identity (ADR-073), so duplicates are rejected for every caller.
+   */
+  private static toChecklistDefinitions(
+    items: ReadonlyArray<{ id: string; title: string; order: number }>,
+  ): ChecklistItemDefinition[] {
+    const definitions = items
+      .map((item) => ChecklistItemDefinition.fromDTO(item))
+      .sort((left, right) => left.order - right.order);
+    const seen = new Set<string>();
+    for (const item of definitions) {
+      if (seen.has(item.id)) throw new DuplicateChecklistItemIdError(item.id);
+      seen.add(item.id);
+    }
+    return definitions;
+  }
+
+  /** Replaces the Plan-owned checklist definition. Existing occurrence snapshots are not rewritten. */
+  public updateChecklist(items: ReadonlyArray<{ id: string; title: string; order: number }>): void {
+    const next = TaskPlan.toChecklistDefinitions(items);
+    const oldChecklist = this._props.checklist.map((item) => item.toDTO());
+    const nextChecklist = next.map((item) => item.toDTO());
+    if (JSON.stringify(oldChecklist) === JSON.stringify(nextChecklist)) return;
+    this._props.checklist = next;
+    this._props.updatedAt = Date.now();
+    this.addHistory('checklist_updated', { oldChecklist, newChecklist: nextChecklist });
+    this.addDomainEvent<TaskEventMap['task:updated']>('task:updated', {
+      identityId: this._props.identityId,
+      task: this.toServerDTO(),
+      changes: ['checklist'],
+    });
+  }
+
+  /** Updates the reminder configuration. */
+  public updateReminderConfig(newReminderConfig: TaskReminderConfig | null): void {
+    const oldReminderConfig = this._props.reminderConfig?.toDTO() ?? null;
+    this._props.reminderConfig = newReminderConfig;
+    this._props.updatedAt = Date.now();
+    this.addHistory('reminder_config_updated', {
+      oldReminderConfig,
+      newReminderConfig: newReminderConfig?.toDTO() ?? null,
+    });
+
+    this.addDomainEvent<TaskEventMap['task:updated']>('task:updated', {
+      identityId: this._props.identityId,
+      task: this.toServerDTO(),
+      changes: ['reminderConfig'],
+    });
+  }
+
+  /** Replaces the canonical schedule. Future occurrence reconciliation is application-owned. */
+  public updateSchedule(newSchedule: TaskPlanSchedule): void {
+    const oldSchedule = this._props.schedule.toDTO();
+    const nextSchedule = newSchedule.toDTO();
+    if (JSON.stringify(oldSchedule) === JSON.stringify(nextSchedule)) return;
+    this._props.schedule = newSchedule;
+    this._props.updatedAt = Date.now();
+    this.addHistory('schedule_updated', { oldSchedule, newSchedule: nextSchedule });
+    this.addDomainEvent<TaskEventMap['task:updated']>('task:updated', {
+      identityId: this._props.identityId,
+      task: this.toServerDTO(),
+      changes: ['schedule'],
+    });
+  }
+
+  /** Updates the importance level. */
+  public updatePriority(newImportance: ImportanceLevel): void {
+    const oldImportance = this._props.importance;
+    this._props.importance = newImportance;
+    this._props.updatedAt = Date.now();
+    this.addHistory('priority_updated', { oldImportance, newImportance });
+
+    this.addDomainEvent<TaskEventMap['task:updated']>('task:updated', {
+      identityId: this._props.identityId,
+      task: this.toServerDTO(),
+      changes: ['importance'],
+    });
+  }
+
+  // ===== Reminder Methods =====
+
+  /** Checks whether a reminder is configured. */
+  public hasReminder(): boolean {
+    return this._props.reminderConfig !== null && this._props.reminderConfig.enabled;
+  }
+
+  /** Gets the reminder time for a given occurrence date. */
+  public getReminderTime(occurrenceDate: number): number | null {
+    if (!this.hasReminder() || !this._props.reminderConfig) {
+      return null;
+    }
+
+    // Standardized fallback: return 1 hour before (real implementation should use reminder configuration offset)
+    const ONE_HOUR_MS = 3600000;
+    return occurrenceDate - ONE_HOUR_MS;
+  }
+
+  // ===== Goal Binding Methods (delegated to task-plan-goal.policy) =====
+
+  public bindToGoal(
+    goalId: string,
+    keyResultId: string | null = null,
+    contribution: GoalContributionRule | null = null,
+  ): void {
+    goalPolicy.bindToGoal(this, goalId, keyResultId, contribution);
+  }
+
+  public unbindFromGoal(): void {
+    goalPolicy.unbindFromGoal(this);
+  }
+
+  public isLinkedToGoal(): boolean {
+    return goalPolicy.isLinkedToGoal(this._props);
+  }
+
+  // ===== History Methods =====
+
+  /** Adds a history record. */
+  public addHistory(action: string, changes?: unknown): void {
+    const history = TaskPlanHistory.create({
+      planId: this.id,
+      action,
+      changes: changes ? JSON.stringify(changes) : null,
+    });
+    this._history.push(history);
+    this._props.updatedAt = Date.now();
+  }
+
+  // ===== DTO Conversion =====
+
+  public toServerDTO(): TaskPlanServerDTO {
+    return {
+      id: this.id,
+      identityId: this._props.identityId,
+      name: this._props.title,
+      description: this._props.description,
+      schedule: this._props.schedule.toDTO(),
+      reminderConfig: this._props.reminderConfig?.toDTO() ?? null,
+      importance: this._props.importance,
+      goalBinding: this._props.goalBinding?.toDTO() ?? null,
+      checklist: this._props.checklist.map((item) => item.toDTO()),
+      status: this._props.status,
+      outcome: this._props.outcome,
+      completionPolicy: this._props.completionPolicy,
+      closedAt: this._props.closedAt,
+      archivedAt: this._props.archivedAt,
+      abandonedReason: this._props.abandonedReason,
+      createdAt: this._props.createdAt,
+      updatedAt: this._props.updatedAt,
+      deletedAt: this._props.deletedAt ?? null,
+      version: this._props.version,
+    };
+  }
+
+  /**
+   * Product-Time-aware base projection. Occurrence statistics/children are read-model data
+   * and are composed by application queries through ITaskOccurrenceRepository.
+   */
+  public toClientDTOAt(
+    _timeContext: TimeContext,
+    includeHistory: boolean = false,
+    _asOf: number = Date.now(),
+  ): TaskPlanClientDTO {
+    return {
+      id: this.id,
+      identityId: this._props.identityId,
+      name: this._props.title,
+      description: this._props.description,
+      schedule: this._props.schedule.toDTO(),
+      reminderConfig: this._props.reminderConfig?.toDTO() ?? null,
+      importance: this._props.importance,
+      goalBinding: this._props.goalBinding?.toDTO() ?? null,
+      checklist: this._props.checklist.map((item) => item.toDTO()),
+      labels: this._labelProjection.map((label) => ({ ...label })),
+      status: this._props.status,
+      outcome: this._props.outcome,
+      completionPolicy: this._props.completionPolicy,
+      closedAt: this._props.closedAt,
+      archivedAt: this._props.archivedAt,
+      abandonedReason: this._props.abandonedReason,
+      createdAt: this._props.createdAt,
+      updatedAt: this._props.updatedAt,
+      deletedAt: this._props.deletedAt ?? null,
+      version: this._props.version,
+      history: includeHistory ? this._history.map((entry) => entry.toClientDTO()) : undefined,
+      occurrenceCount: 0,
+      completedOccurrenceCount: 0,
+      pendingOccurrenceCount: 0,
+      dueOccurrenceCount: 0,
+      completedDueOccurrenceCount: 0,
+      completionWindowDays: 30,
+      futurePendingOccurrenceCount: 0,
+      singleOccurrenceStatus: null,
+      completionRate: 0,
+    };
+  }
+
+  public static create(params: {
+    id?: TaskPlanId;
+    identityId: IdentityId;
+    title: string;
+    description?: string;
+    schedule: TaskPlanSchedule;
+    reminderConfig?: TaskReminderConfig;
+    importance?: ImportanceLevel;
+    checklist?: Array<{ id: string; title: string; order: number }>;
+    goalBinding?: {
+      goalId: string;
+      keyResultId?: string | null;
+      contribution?: GoalContributionRule | null;
+    } | null;
+    completionPolicy?: (typeof TaskPlanCompletionPolicy)[keyof typeof TaskPlanCompletionPolicy];
+  }): TaskPlan {
+    TaskPlan.assertIdentityId(params.identityId, 'create');
+    const title = TaskPlan.normalizeTitle(params.title, 'create');
+
+    const now = Date.now();
+    const plan = TaskPlan.instantiate({
+      id: params.id ?? TaskPlanId.generate(),
+      identityId: params.identityId,
+      title,
+      description: params.description ?? null,
+      importance: params.importance ?? ImportanceLevel.Moderate,
+      status: TaskPlanStatus.Active,
+      outcome: TaskPlanOutcome.Open,
+      completionPolicy: params.completionPolicy ?? TaskPlanCompletionPolicy.AllowCorrection,
+      closedAt: null,
+      archivedAt: null,
+      abandonedReason: null,
+      goalBinding: params.goalBinding
+        ? TaskGoalBinding.create({
+            goalId: params.goalBinding.goalId as TaskGoalBinding['goalId'],
+            keyResultId: (params.goalBinding.keyResultId ?? null) as TaskGoalBinding['keyResultId'],
+            contribution: params.goalBinding.contribution ?? null,
+          })
+        : null,
+      checklist: TaskPlan.toChecklistDefinitions(params.checklist ?? []),
+      schedule: params.schedule,
+      reminderConfig: params.reminderConfig ?? null,
+      createdAt: now,
+      updatedAt: now,
+      deletedAt: null,
+      version: 1,
+    });
+
+    plan.addHistory('created');
+    plan.publishDomainEvent<TaskEventMap['task:created']>('task:created', {
+      identityId: params.identityId,
+      task: plan.toServerDTO(),
+      planId: plan.id,
+      goalId: plan.goalBinding?.goalId ?? null,
+    });
+
+    return plan;
+  }
+
+  public static load(state: TaskPlanState): TaskPlan {
+    return TaskPlan.instantiate(state);
+  }
+}

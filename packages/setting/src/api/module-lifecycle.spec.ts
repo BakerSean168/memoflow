@@ -19,23 +19,28 @@ import { createSettingApiModule, type SettingApiModuleContext } from './module';
 
 function createFakeInstance() {
   const api = {
-    getUserSetting: vi.fn(),
-    getDefaultSettings: vi.fn(),
-    patchUserSetting: vi.fn(),
-    resetUserSetting: vi.fn(),
+    getPreferenceProfile: vi.fn(),
+    getPreferenceNamespace: vi.fn(),
+    patchPreferenceNamespace: vi.fn(),
+    resetPreferenceNamespace: vi.fn(),
+    resetUserPreferences: vi.fn(),
     importSettings: vi.fn(),
     exportSettings: vi.fn(),
   };
+  const portableCapability = { key: 'preferences', schemaVersion: 3 } as never;
   const start = vi.fn();
   const dispose = vi.fn();
-  const instance: SettingModuleInstance = {
-    userSettingRepository: {} as never,
+  const instance = {
+    userPreferenceRepository: {} as never,
+    preferenceService: {} as never,
+    userTimeContextPort: {} as never,
+    portableCapability,
     useCases: {} as never,
     api,
     start,
     dispose,
-  } as SettingModuleInstance;
-  return { instance, api, start, dispose };
+  } as unknown as SettingModuleInstance;
+  return { instance, api, portableCapability, start, dispose };
 }
 
 function createFakeContext(): SettingApiModuleContext {
@@ -60,6 +65,11 @@ describe('createSettingApiModule lifecycle', () => {
   beforeEach(() => {
     fake = createFakeInstance();
     context = createFakeContext();
+  });
+
+  it('exposes the owner portability capability without composing Data Portability internally', () => {
+    const moduleDef = createSettingApiModule({ instance: fake.instance });
+    expect(moduleDef.portableCapability).toBe(fake.portableCapability);
   });
 
   it('register wires routes once, starts once, and never touches db', () => {

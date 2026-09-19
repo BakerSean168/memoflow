@@ -38,7 +38,8 @@ describe('moduleForPath (V2 §3 module matrix + settings scene D)', () => {
     expect(moduleForPath('/note/n-1')).toBeNull();
     expect(moduleForPath('/governance')).toBe('note');
     expect(moduleForPath('/governance/r-1/history')).toBe('note');
-    expect(moduleForPath('/reminders')).toBe('reminder');
+    // Legacy Reminder routes are physically retired; notifications remain a shell module.
+    expect(moduleForPath('/reminders')).toBeNull();
     expect(moduleForPath('/notifications')).toBe('notification');
     expect(moduleForPath('/sse-monitor')).toBe('notification');
     expect(moduleForPath('/schedule')).toBe('schedule');

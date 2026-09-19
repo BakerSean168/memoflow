@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "description": "数据可迁移性模块 - 用户数据导入导出",
   "type": "module",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -29,18 +31,9 @@
   "dependencies": {
     "@memoflow/contracts": "workspace:*",
     "@memoflow/database": "workspace:*",
-    "@memoflow/domain-shared": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",
     "@memoflow/utils": "workspace:*",
-    "@memoflow/goal": "workspace:*",
-    "@memoflow/task": "workspace:*",
-    "@memoflow/reminder": "workspace:*",
-    "@memoflow/repository": "workspace:*",
-    "@memoflow/schedule": "workspace:*",
-    "@memoflow/ai": "workspace:*",
-    "@memoflow/notification": "workspace:*",
-    "@memoflow/setting": "workspace:*",
     "express": "^5.2.1",
     "zod": "^4.4.3"
   },

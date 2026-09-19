@@ -1,18 +1,21 @@
 // ==========================================
 // Setting Module
-// User settings with JSONB preferences storage
+// Canonical user preferences: namespace-scoped persistence
 // ==========================================
 
-model UserSetting {
-  id          String   @id @default(uuid())
-  identityId  String   @unique @map("identity_id")
-  preferences Json     @default("{}")
-  version     Int      @default(1)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+// Canonical Setting vNext preferences. Namespace rows are the sync/CAS unit.
+model UserPreferenceRecord {
+  id         String   @id @default(uuid())
+  identityId String   @map("identity_id")
+  namespace  String
+  payload    Json
+  revision   Int      @default(1)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
 
+  @@unique([identityId, namespace])
   @@index([identityId])
-  @@map("user_settings")
+  @@map("user_preference_records")
 }

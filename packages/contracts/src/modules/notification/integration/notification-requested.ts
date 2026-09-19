@@ -20,6 +20,7 @@ import { NotificationType } from '../value-objects/notification-type';
 import { NotificationCategory } from '../value-objects/notification-category';
 import { ImportanceLevel } from '../../../shared/value-objects/importance';
 import { UrgencyLevel } from '../../../shared/value-objects/urgency';
+import { NotificationActionIntentSchema, NotificationEntityRefSchema } from '../api/notification-action.dto';
 
 /** 跨模块共享 outbox 消息类型：NotificationRequested 信封。 */
 export const NOTIFICATION_REQUESTED_MESSAGE_TYPE = 'notification.requested' as const;
@@ -53,12 +54,7 @@ export const NotificationRequestedSchema = z
     idempotencyKey: z.string().min(1),
     workflowKey: z.string().min(1),
     topic: z.string().optional(),
-    relatedEntity: z
-      .object({
-        type: z.string().min(1),
-        id: z.string().min(1),
-      })
-      .optional(),
+    relatedEntity: NotificationEntityRefSchema.optional(),
     content: NotificationContentInputSchema,
     suggestedChannels: z.array(z.nativeEnum(NotificationChannelType)).optional(),
     importance: z.nativeEnum(ImportanceLevel).optional(),
@@ -69,6 +65,7 @@ export const NotificationRequestedSchema = z
         params: z.record(z.string(), z.string()).optional(),
       })
       .optional(),
+    actions: z.array(NotificationActionIntentSchema).optional(),
     correlationId: z.string().optional(),
     causationId: z.string().optional(),
     expiresAt: z.number().int().positive().optional(),

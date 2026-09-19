@@ -36,8 +36,12 @@
               })
             }}
           </span>
-          <span v-else-if="template.recurrenceRule">{{ t('task.occurrence.recurring') }}</span>
-          <span v-if="template.labels.length">{{ template.labels.map((label) => label.name).join(' · ') }}</span>
+          <span v-else-if="template.schedule.kind === 'Recurring'">{{
+            t('task.occurrence.recurring')
+          }}</span>
+          <span v-if="template.labels.length">{{
+            template.labels.map((label) => label.name).join(' · ')
+          }}</span>
         </div>
       </button>
 
@@ -89,15 +93,51 @@
         </Button>
       </div>
     </div>
+    <div
+      v-if="occurrence.checklistState.length"
+      class="border-t pt-3"
+      data-testid="task-occurrence-checklist"
+    >
+      <p class="mb-2 text-xs font-medium text-muted-foreground">{{ t('task.checklist.title') }}</p>
+      <div class="grid gap-2 @2xl/panel:grid-cols-2">
+        <label
+          v-for="item in occurrence.checklistState"
+          :key="item.definitionId"
+          class="flex min-w-0 items-center gap-2 rounded-md px-1 py-1 text-sm hover:bg-muted/40"
+        >
+          <Checkbox
+            :model-value="item.completed"
+            :disabled="busy"
+            :aria-label="item.titleSnapshot"
+            :data-testid="`task-occurrence-checklist-${item.definitionId}`"
+            @update:model-value="
+              emit(
+                'checklist-change',
+                String(occurrence.id),
+                item.definitionId,
+                Boolean($event),
+                occurrence.version,
+              )
+            "
+          />
+          <span
+            class="min-w-0 truncate"
+            :class="{ 'text-muted-foreground line-through': item.completed }"
+          >
+            {{ item.titleSnapshot }}
+          </span>
+        </label>
+      </div>
+    </div>
   </article>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Badge, Button } from '@memoflow/ui-vue-shadcn';
+import { Badge, Button, Checkbox } from '@memoflow/ui-vue-shadcn';
 import { Check, ClockAlert, SkipForward, Undo2 } from '@lucide/vue';
-import type { TaskInstanceClientDTO, TaskTemplateClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
 import {
   getTaskOccurrenceScheduleLabel,
   getTaskOccurrenceStatusLabel,
@@ -106,8 +146,8 @@ import {
 
 const props = withDefaults(
   defineProps<{
-    occurrence: TaskInstanceClientDTO;
-    template: TaskTemplateClientDTO;
+    occurrence: TaskOccurrenceClientDTO;
+    template: TaskPlanClientDTO;
     position?: { position: number; total: number } | null;
     busy?: boolean;
     now?: number;
@@ -116,11 +156,17 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  'open-plan': [templateId: string];
-  complete: [instanceId: string];
-  uncomplete: [instanceId: string];
-  missed: [instanceId: string];
-  skip: [instanceId: string];
+  'open-plan': [planId: string];
+  complete: [occurrenceId: string];
+  uncomplete: [occurrenceId: string];
+  missed: [occurrenceId: string];
+  skip: [occurrenceId: string];
+  'checklist-change': [
+    occurrenceId: string,
+    definitionId: string,
+    completed: boolean,
+    expectedVersion: number,
+  ];
 }>();
 
 const { t } = useI18n();

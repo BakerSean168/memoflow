@@ -4,24 +4,48 @@
     "noEmit": true,
     "baseUrl": "../..",
     "paths": {
-      "@/*": ["apps/web/src/*"],
-      "@memoflow/app-vue/web-core": ["packages/app-vue/src/web-core.ts"],
-      "@memoflow/app-vue/web-shell-core": ["packages/app-vue/src/web-shell-core.ts"],
-      "@memoflow/app-vue/web-overlays": ["packages/app-vue/src/web-overlays.ts"],
-      "@memoflow/app-vue/web-shell": ["packages/app-vue/src/web-shell.ts"],
-      "@memoflow/app-vue/web-i18n": ["packages/app-vue/src/web-i18n.ts"],
-      "@memoflow/app-vue/web-bootstrap": ["packages/app-vue/src/web-bootstrap.ts"],
-      "@memoflow/app-vue/web-entry": ["packages/app-vue/src/web-entry.ts"],
-      "@memoflow/app-vue": ["packages/app-vue/src/index.ts"],
-      "@memoflow/goal/client": ["packages/goal/dist/client/index.d.ts"],
-      "@memoflow/ai/client": ["packages/ai/dist/client/index.d.ts"],
-      "@memoflow/reminder/client": ["packages/reminder/dist/client/index.d.ts"],
-      "@memoflow/schedule/client": ["packages/schedule/dist/client/index.d.ts"],
-      "@memoflow/notification/client": ["packages/notification/dist/client/index.d.ts"],
+      "@/*": [
+        "apps/web/src/*"
+      ],
+      "@memoflow/app-vue/web-core": [
+        "packages/app-vue/src/web-core.ts"
+      ],
+      "@memoflow/app-vue/web-shell-core": [
+        "packages/app-vue/src/web-shell-core.ts"
+      ],
+      "@memoflow/app-vue/web-overlays": [
+        "packages/app-vue/src/web-overlays.ts"
+      ],
+      "@memoflow/app-vue/web-shell": [
+        "packages/app-vue/src/web-shell.ts"
+      ],
+      "@memoflow/app-vue/web-i18n": [
+        "packages/app-vue/src/web-i18n.ts"
+      ],
+      "@memoflow/app-vue/web-bootstrap": [
+        "packages/app-vue/src/web-bootstrap.ts"
+      ],
+      "@memoflow/app-vue": [
+        "packages/app-vue/src/index.ts"
+      ],
+      "@memoflow/goal/client": [
+        "packages/goal/dist/client/index.d.ts"
+      ],
+      "@memoflow/ai/client": [
+        "packages/ai/dist/client/index.d.ts"
+      ],
+      "@memoflow/schedule/client": [
+        "packages/schedule/dist/client/index.d.ts"
+      ],
+      "@memoflow/notification/client": [
+        "packages/notification/dist/client/index.d.ts"
+      ],
       "@memoflow/repository/client": [
         "packages/repository/dist/client/index.d.ts"
       ],
-      "@memoflow/task/client": ["packages/task/dist/client/index.d.ts"],
+      "@memoflow/task/client": [
+        "packages/task/dist/client/index.d.ts"
+      ],
       "@memoflow/data-portability/client": [
         "packages/data-portability/dist/client/index.d.ts"
       ],
@@ -31,7 +55,9 @@
       "@memoflow/ui-vue-shadcn/composables/*": [
         "packages/ui-vue-shadcn/dist/composables/*.d.ts"
       ],
-      "@memoflow/contracts": ["packages/contracts/dist/index.d.ts"],
+      "@memoflow/contracts": [
+        "packages/contracts/dist/index.d.ts"
+      ],
       "@memoflow/contracts/notification": [
         "packages/contracts/dist/modules/notification/index.d.ts"
       ],
@@ -39,15 +65,35 @@
         "packages/contracts/dist/modules/*/index.d.ts",
         "packages/contracts/dist/*/index.d.ts"
       ],
-      "@memoflow/notification/commands": ["packages/notification/dist/commands/index.d.ts"],
-      "@memoflow/goal/analytics": ["packages/goal/dist/analytics/index.d.ts"],
-      "@memoflow/goal/events": ["packages/goal/dist/events/index.d.ts"],
-      "@memoflow/task/analytics": ["packages/task/dist/analytics/index.d.ts"],
-      "@memoflow/assets": ["packages/assets/dist/index.d.ts"],
-      "@memoflow/assets/*": ["packages/assets/dist/*/index.d.ts", "packages/assets/dist/*.d.ts"],
-      "@memoflow/http-client": ["packages/http-client/dist/index.d.ts"],
-      "@memoflow/test-utils": ["packages/test-utils/src/index.ts"]
+      "@memoflow/notification/commands": [
+        "packages/notification/dist/commands/index.d.ts"
+      ],
+      "@memoflow/goal/analytics": [
+        "packages/goal/dist/analytics/index.d.ts"
+      ],
+      "@memoflow/goal/events": [
+        "packages/goal/dist/events/index.d.ts"
+      ],
+      "@memoflow/task/analytics": [
+        "packages/task/dist/analytics/index.d.ts"
+      ],
+      "@memoflow/assets": [
+        "packages/assets/dist/index.d.ts"
+      ],
+      "@memoflow/assets/*": [
+        "packages/assets/dist/*/index.d.ts",
+        "packages/assets/dist/*.d.ts"
+      ],
+      "@memoflow/http-client": [
+        "packages/http-client/dist/index.d.ts"
+      ],
+      "@memoflow/test-utils": [
+        "packages/test-utils/src/index.ts"
+      ]
     }
   },
-  "include": ["src/**/*", "env.d.ts"]
+  "include": [
+    "src/**/*",
+    "env.d.ts"
+  ]
 }

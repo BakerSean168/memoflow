@@ -9,14 +9,11 @@
  * import {
  *   createMockGoal,
  *   createMockGoalList,
- *   createMockTaskTemplate,
+ *   createMockTaskPlan,
  *   createMockAccount,
- *   createMockScheduleTask,
- *   createMockReminderTemplate,
  *   createMockNotification,
  *   createMockRule,
  *   createMockRuleRevision,
- *   createMockUserSetting,
  * } from '@memoflow/contracts/mocks';
  * ```
  */
@@ -24,8 +21,5 @@
 export * from './goal.mock';
 export * from './task.mock';
 export * from './account.mock';
-export * from './schedule.mock';
-export * from './reminder.mock';
 export * from './notification.mock';
-export * from './setting.mock';
 export * from './governance.mock';

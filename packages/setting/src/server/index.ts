@@ -1,7 +1,5 @@
-/**
- * Canonical setting server seam.
- */
-
+/** Canonical Setting server seam. */
+export * from './application';
+export * from './preferences';
 export * from './infrastructure';
-export type * from './application';
-export * from './domain';
+export * from './transport';

@@ -231,7 +231,7 @@ ContextItem 携带来源、信任等级、敏感级别和 token 估算。Vault�
 
 ## 6. 相关资料
 
-- [统一助手与可插拔 Agent Host 实施方案](../../plan/active/2026-07-17-unified-assistant-agent-host.md)
+- [统一助手与可插拔 Agent Host 实施方案](../../plan/archive/2026-07-17-unified-assistant-agent-host.md)
 - [AI 模块说明](../../product/modules/ai.md)
 - [ADR-034: 本地 Obsidian Vault 与可选 GitHub 知识仓库](./ADR-034-obsidian-vault-repository.md)
 - [ADR-025: Module Composition Pattern](./ADR-025-module-composition-pattern.md)

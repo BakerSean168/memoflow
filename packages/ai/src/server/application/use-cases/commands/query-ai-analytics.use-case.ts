@@ -5,7 +5,12 @@ import type { QueryAnalyticsReq, QueryAnalyticsRes } from '@memoflow/contracts/a
 import { createLogger } from '@memoflow/utils/logger';
 
 import type { IAIProviderConfigRepository } from '../../../domain/repositories/i-ai-provider-config-repository';
-import type { IAIExecutionLogPort, IAnalyticsQueryPort, IAnalyticsReadPort } from '../../ports';
+import type {
+  IAIExecutionRecordPort,
+  IAIProviderSecretVault,
+  IAnalyticsQueryPort,
+  IAnalyticsReadPort,
+} from '../../ports';
 import {
   attachRequestIdToError,
   classifyAIExecutionError,
@@ -13,6 +18,7 @@ import {
 } from './ai-observability';
 import {
   resolveActiveProviderConfig,
+  resolveProviderCredential,
   toChatExecutionProviderConfig,
 } from './ai-provider-resolution';
 
@@ -23,7 +29,8 @@ export class QueryAIAnalyticsUseCase {
     private readonly providerConfigRepository: IAIProviderConfigRepository,
     private readonly analyticsReadPort: IAnalyticsReadPort,
     private readonly analyticsQueryPort: IAnalyticsQueryPort,
-    private readonly executionLogPort?: IAIExecutionLogPort,
+    private readonly executionRecordPort?: IAIExecutionRecordPort,
+    private readonly secretVault?: IAIProviderSecretVault,
   ) {}
 
   async queryAnalytics(
@@ -33,9 +40,8 @@ export class QueryAIAnalyticsUseCase {
     const startedAt = Date.now();
     const requestId = cx.requestId;
     let providerMetadata: {
-      providerId?: string;
-      providerName?: string;
-      model?: string;
+      providerConnectionId?: string;
+      modelId?: string;
     } = {};
 
     try {
@@ -44,13 +50,13 @@ export class QueryAIAnalyticsUseCase {
         cx.identityId,
         request.providerId,
       );
-      const executionProviderConfig = toChatExecutionProviderConfig(provider, {
+      const credential = await resolveProviderCredential(this.requireSecretVault(), cx.identityId, provider);
+      const executionProviderConfig = toChatExecutionProviderConfig(provider, credential, {
         temperature: 0.2,
       });
       providerMetadata = {
-        providerId: provider.id,
-        providerName: provider.name,
-        model: executionProviderConfig.model,
+        providerConnectionId: String(provider.id),
+        modelId: executionProviderConfig.model,
       };
       const context = await this.analyticsReadPort.buildContext(cx.identityId, request.query);
       const result = await this.analyticsQueryPort.query({
@@ -71,37 +77,25 @@ export class QueryAIAnalyticsUseCase {
 
       await this.recordExecution({
         identityId: cx.identityId,
-        taskType: 'ANALYTICS_QUERY',
-        status: 'COMPLETED',
+        operation: 'analytics.query',
+        outcome: 'succeeded',
         requestId,
         ...providerMetadata,
-        input: {
-          query: request.query,
-          selectedProviderId: request.providerId,
-        },
-        result: {
-          answer: response.answer,
-          highlights: response.highlights,
-        },
         tokenUsage: response.tokenUsage,
-        processingMs: response.processingTimeMs,
+        latencyMs: response.processingTimeMs,
       });
 
       return ok(response);
     } catch (err) {
       await this.recordExecution({
         identityId: cx.identityId,
-        taskType: 'ANALYTICS_QUERY',
-        status: 'FAILED',
+        operation: 'analytics.query',
+        outcome: 'failed',
         requestId,
         ...providerMetadata,
         errorCategory: classifyAIExecutionError(err),
-        input: {
-          query: request.query,
-          selectedProviderId: request.providerId,
-        },
-        error: err instanceof Error ? err.message : 'Analytics query failed',
-        processingMs: Date.now() - startedAt,
+        safeError: 'Analytics query failed',
+        latencyMs: Date.now() - startedAt,
       });
       logger.error('Analytics query failed', {
         error: err,
@@ -114,19 +108,24 @@ export class QueryAIAnalyticsUseCase {
   }
 
   private async recordExecution(
-    input: Parameters<NonNullable<IAIExecutionLogPort['record']>>[0],
+    input: Parameters<NonNullable<IAIExecutionRecordPort['record']>>[0],
   ): Promise<void> {
-    if (!this.executionLogPort) {
+    if (!this.executionRecordPort) {
       return;
     }
 
     try {
-      await this.executionLogPort.record(withAICostEstimate(input));
+      await this.executionRecordPort.record(withAICostEstimate(input));
     } catch (err) {
       logger.warn('Failed to record analytics execution log', {
         error: err,
         identityId: input.identityId,
       });
     }
+  }
+
+  private requireSecretVault(): IAIProviderSecretVault {
+    if (!this.secretVault) throw new Error('AI provider SecretVault is unavailable');
+    return this.secretVault;
   }
 }

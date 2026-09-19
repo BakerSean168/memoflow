@@ -2,7 +2,12 @@ import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-const FORBIDDEN_CONTRACT_IMPORTS = ['rrule', 'ical.js', '@internationalized/date'];
+const FORBIDDEN_CONTRACT_IMPORTS = [
+  'rrule',
+  'ical.js',
+  '@internationalized/date',
+  '@date-fns/tz',
+];
 
 function collectTsFiles(root: string): string[] {
   return readdirSync(root, { withFileTypes: true }).flatMap((entry) => {

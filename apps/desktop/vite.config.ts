@@ -27,8 +27,6 @@ const desktopRendererDevWorkspaceEntries = [
   ['@memoflow/task/client', 'packages/task/src/client/index.ts'],
   ['@memoflow/schedule/client', 'packages/schedule/src/client/index.ts'],
   ['@memoflow/schedule/electron', 'packages/schedule/src/electron/index.ts'],
-  ['@memoflow/reminder/client', 'packages/reminder/src/client/index.ts'],
-  ['@memoflow/reminder/electron', 'packages/reminder/src/electron/index.ts'],
   ['@memoflow/notification/client', 'packages/notification/src/client/index.ts'],
   ['@memoflow/notification/electron', 'packages/notification/src/electron/index.ts'],
 ] as const;
@@ -51,7 +49,6 @@ const workspacePkgs = [
   '@memoflow/utils',
   '@memoflow/contracts',
   '@memoflow/app-vue',
-  '@memoflow/dashboard',
   '@memoflow/ui-vue-shadcn',
   '@memoflow/ipc-client',
   '@memoflow/assets',

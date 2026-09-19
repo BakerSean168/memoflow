@@ -24,16 +24,22 @@ import {
 import {
   PowerSyncNotificationRepository,
   PowerSyncNotificationPreferenceRepository,
-  PowerSyncNotificationTemplateRepository,
+  NotificationInteractionPowerSyncRepository,
   PowerSyncNotificationReliableAdapter,
   NotificationRequestedPowerSyncWriterAdapter,
 } from './adapters/powersync';
 import type { NotificationMetricsService } from '../domain/services/notification-metrics-service';
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
-import type { INotificationRepository, INotificationPreferenceRepository, INotificationTemplateRepository } from '../domain/repositories';
+import type { UserTimeContextPort } from '@memoflow/time';
+import type {
+  INotificationInteractionRepository,
+  INotificationRepository,
+  INotificationPreferenceRepository,
+} from '../domain/repositories';
 import type { NotificationRequestedWriterPort } from '@memoflow/contracts/notification';
 
 export interface CreateNotificationPowerSyncModuleOptions {
+  readonly userTimeContextPort: UserTimeContextPort;
   readonly runtimeContributions?: NotificationRuntimeContributionsInput;
   readonly durableRuntime?: NotificationDurableRuntimePort;
   readonly transport?: unknown;
@@ -57,7 +63,7 @@ export interface CreateNotificationPowerSyncModuleOptions {
 export interface NotificationPowerSyncRepositorySet {
   readonly notificationRepository: INotificationRepository;
   readonly notificationPreferenceRepository: INotificationPreferenceRepository;
-  readonly notificationTemplateRepository: INotificationTemplateRepository;
+  readonly notificationInteractionRepository: INotificationInteractionRepository;
   readonly reliableAdapter: NotificationReliableOperationPort;
   /**
    * Durable NotificationRequested writer for business handlers (NOTIF-3301).
@@ -89,7 +95,7 @@ export function createNotificationPowerSyncRepositories(
   return {
     notificationRepository: new PowerSyncNotificationRepository(db, metricsService),
     notificationPreferenceRepository: new PowerSyncNotificationPreferenceRepository(db),
-    notificationTemplateRepository: new PowerSyncNotificationTemplateRepository(db),
+    notificationInteractionRepository: new NotificationInteractionPowerSyncRepository(db),
     reliableAdapter: new PowerSyncNotificationReliableAdapter(db, metricsService),
     requestedWriter: new NotificationRequestedPowerSyncWriterAdapter(db),
   };
@@ -237,8 +243,12 @@ export class PowerSyncDesktopTransportAckStore implements DesktopTransportAckSto
  */
 export function createDefaultElectronDesktopTransport(optionsOrDb?: unknown): unknown {
   let ackStore: DesktopTransportAckStore;
+  let renderer: ((dto: unknown, context?: unknown) => boolean | Promise<boolean>) | null = null;
   if (optionsOrDb && typeof optionsOrDb === 'object') {
     const opts = optionsOrDb as Record<string, unknown>;
+    if (typeof opts.renderer === 'function') {
+      renderer = opts.renderer as (dto: unknown, context?: unknown) => boolean | Promise<boolean>;
+    }
     if ('getAck' in opts && 'saveAck' in opts) {
       ackStore = opts as unknown as DesktopTransportAckStore;
     } else if ('ackStore' in opts && opts.ackStore) {
@@ -288,7 +298,28 @@ export function createDefaultElectronDesktopTransport(optionsOrDb?: unknown): un
       }
 
       try {
-        // Try Electron native Notification if running inside main process GUI context
+        if (renderer) {
+          const rendered = await renderer(dto, context);
+          if (!rendered) {
+            throw new Error('Desktop notification renderer is unavailable or declined delivery');
+          }
+          const deliveredAck = {
+            ackId,
+            status: 'delivered' as const,
+            timestamp,
+          };
+          if (idempotencyKey) {
+            await ackStore.saveAck(idempotencyKey, deliveredAck);
+          }
+          return deliveredAck;
+        }
+
+        // Fallback for Electron main-process hosts without an injected renderer.
+        // Plain Node/Vitest processes must fail closed without loading the Electron package:
+        // requiring it outside a real Electron runtime can trigger binary resolution/download.
+        if (!process.versions.electron) {
+          throw new Error('Electron native Notification unavailable outside Electron runtime');
+        }
         const electron = require('electron');
         if (
           electron &&
@@ -380,6 +411,7 @@ export function createNotificationPowerSyncModule(
   let transport: unknown | undefined;
   let channelCapabilities: ChannelCapabilitySpec[] | undefined;
   let metricsService: NotificationMetricsService | undefined;
+  let userTimeContextPort: UserTimeContextPort | undefined;
 
   if (options) {
     if (
@@ -387,7 +419,8 @@ export function createNotificationPowerSyncModule(
       'runtimeContributions' in options ||
       'transport' in options ||
       'channelCapabilities' in options ||
-      'metricsService' in options
+      'metricsService' in options ||
+      'userTimeContextPort' in options
     ) {
       const opts = options as CreateNotificationPowerSyncModuleOptions;
       durableRuntime = opts.durableRuntime;
@@ -395,9 +428,14 @@ export function createNotificationPowerSyncModule(
       transport = opts.transport;
       channelCapabilities = opts.channelCapabilities;
       metricsService = opts.metricsService;
+      userTimeContextPort = opts.userTimeContextPort;
     } else if (Array.isArray(options)) {
       runtimeContributions = options as NotificationRuntimeContributionsInput;
     }
+  }
+
+  if (!userTimeContextPort) {
+    throw new Error('[FAIL-CLOSED] createNotificationPowerSyncModule requires userTimeContextPort');
   }
 
   const repositories = createNotificationPowerSyncRepositories(db, metricsService);
@@ -414,6 +452,7 @@ export function createNotificationPowerSyncModule(
       notificationRepository,
       preferenceRepository: repositories.notificationPreferenceRepository,
       closureChecker,
+      userTimeContextPort,
       reliableAdapter: powerSyncReliableAdapter,
       channelCapabilities: channelCapabilities ?? [
         { channelType: 'InApp', status: 'available' },
@@ -427,10 +466,11 @@ export function createNotificationPowerSyncModule(
   return createNotificationModule({
     notificationRepository,
     preferenceRepository: repositories.notificationPreferenceRepository,
-    templateRepository: repositories.notificationTemplateRepository,
+    interactionRepository: repositories.notificationInteractionRepository,
     durableRuntime,
     runtimeContributions: runtimeContributions ?? [durableRuntime],
     closureChecker,
+    userTimeContextPort,
   });
 }
 
@@ -438,7 +478,6 @@ export function createNotificationPowerSyncModule(
 export {
   PowerSyncNotificationRepository,
   PowerSyncNotificationPreferenceRepository,
-  PowerSyncNotificationTemplateRepository,
   PowerSyncNotificationReliableAdapter,
   NotificationRequestedPowerSyncWriterAdapter,
 };

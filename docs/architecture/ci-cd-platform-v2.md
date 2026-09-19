@@ -13,7 +13,7 @@ updated: 2026-08-05T00:00:00Z
 
 > 决策来源：[ADR-041: CI/CD Platform V2 解耦与可扩展交付平台](./adr/ADR-041-ci-cd-platform-v2.md)
 >
-> 实施入口：[CI/CD Platform V2 一次性重构计划](../plan/active/2026-08-05-ci-cd-platform-v2-refactor.md)
+> 实施入口：[CI/CD Platform V2 一次性重构计划](../plan/archive/2026-08-05-ci-cd-platform-v2-refactor.md)
 
 ## 1. 目标
 

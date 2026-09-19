@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AIChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
 import { ok } from '@memoflow/contracts/result';
 import type { AIModuleInstance } from '../server/infrastructure';
+import { AIExecutionError } from '../shared/ai-execution-error';
 
 const mocks = vi.hoisted(() => {
   const handlers = new Map<string, (...args: unknown[]) => unknown>();
@@ -13,7 +14,9 @@ const mocks = vi.hoisted(() => {
   return { handlers, handle, removeHandler };
 });
 
-vi.mock('electron', () => ({ ipcMain: { handle: mocks.handle, removeHandler: mocks.removeHandler } }));
+vi.mock('electron', () => ({
+  ipcMain: { handle: mocks.handle, removeHandler: mocks.removeHandler },
+}));
 import { createAIElectronModule } from './index';
 
 const CURRENT_CHANNELS = [
@@ -54,7 +57,7 @@ const CURRENT_CHANNELS = [
 ] as const;
 
 function createFakeInstance() {
-  const api = {
+  const providerManagement = {
     getCapabilities: vi.fn(async () => ok(null as never)),
     getProviderCatalog: vi.fn(async () => ok([] as never)),
     probeProviderConnection: vi.fn(async () => ok(null as never)),
@@ -69,15 +72,20 @@ function createFakeInstance() {
     testConnection: vi.fn(async () => ok(null as never)),
     setDefaultProvider: vi.fn(async () => ok(null as never)),
     refreshProviderModels: vi.fn(async () => ok(null as never)),
+  };
+  const assistantConversation = {
     createConversation: vi.fn(async () => ok(null as never)),
     updateConversation: vi.fn(async () => ok(null as never)),
     listConversations: vi.fn(async () => ok({ data: [], total: 0 } as never)),
     getConversation: vi.fn(async () => ok(null as never)),
     deleteConversation: vi.fn(async () => ok(null as never)),
-    createKnowledgeNote: vi.fn(async () => ok(null as never)),
+  };
+  const knowledge = {
     queryKnowledge: vi.fn(async () => ok(null as never)),
     expandKnowledge: vi.fn(async () => ok(null as never)),
     reindexKnowledge: vi.fn(async () => ok(null as never)),
+  };
+  const evaluationOperations = {
     queryAnalytics: vi.fn(async () => ok(null as never)),
     getEvaluationOverview: vi.fn(async () => ok(null as never)),
   };
@@ -94,13 +102,25 @@ function createFakeInstance() {
     conversationRepository: {} as never,
     providerConfigRepository: {} as never,
     services: {} as never,
-    api,
+    providerManagement,
+    assistantConversation,
+    knowledge,
+    evaluationOperations,
     mastraRuntime: { summarizeUsage } as never,
     workflowRuntime: null,
     start,
     dispose,
   } as AIModuleInstance;
-  return { instance, api, summarizeUsage, start, dispose };
+  return {
+    instance,
+    providerManagement,
+    assistantConversation,
+    knowledge,
+    evaluationOperations,
+    summarizeUsage,
+    start,
+    dispose,
+  };
 }
 
 function createFakeContext(): IElectronModuleContext {
@@ -119,7 +139,11 @@ describe('createAIElectronModule lifecycle', () => {
   });
 
   afterEach(async () => {
-    try { await moduleDef.destroy?.(); } catch { /* tested separately */ }
+    try {
+      await moduleDef.destroy?.();
+    } catch {
+      /* tested separately */
+    }
     mocks.handlers.clear();
     vi.clearAllMocks();
   });
@@ -133,12 +157,12 @@ describe('createAIElectronModule lifecycle', () => {
     expect(mocks.handlers.has('ai:chat:message:stream:start')).toBe(false);
   });
 
-  it('routes product IPC through the same instance api', async () => {
+  it('routes product IPC through the matching capability port', async () => {
     await moduleDef.register(createFakeContext());
     const handler = mocks.handlers.get(AIChannels.PROVIDER_LIST)!;
     const result = await handler(undefined, undefined);
     expect(result).toMatchObject({ ok: true });
-    expect(fake.api.listProviders).toHaveBeenCalledTimes(1);
+    expect(fake.providerManagement.listProviders).toHaveBeenCalledTimes(1);
   });
 
   it('routes Provider onboarding IPC through authenticated identity-bound application methods', async () => {
@@ -147,7 +171,7 @@ describe('createAIElectronModule lifecycle', () => {
     const handler = mocks.handlers.get(AIChannels.PROVIDER_ONBOARDING_PROBE)!;
     const result = await handler(undefined, request);
     expect(result).toMatchObject({ ok: true });
-    expect(fake.api.probeProviderConnection).toHaveBeenCalledWith(
+    expect(fake.providerManagement.probeProviderConnection).toHaveBeenCalledWith(
       request,
       expect.objectContaining({ identityId: 'identity-1' }),
     );
@@ -161,7 +185,7 @@ describe('createAIElectronModule lifecycle', () => {
     };
     const probeHandler = mocks.handlers.get(AIChannels.PROVIDER_REPLACEMENT_PROBE)!;
     expect(await probeHandler(undefined, probePayload)).toMatchObject({ ok: true });
-    expect(fake.api.probeProviderReplacement).toHaveBeenCalledWith(
+    expect(fake.providerManagement.probeProviderReplacement).toHaveBeenCalledWith(
       'provider-1',
       probePayload.request,
       expect.objectContaining({ identityId: 'identity-1' }),
@@ -173,7 +197,7 @@ describe('createAIElectronModule lifecycle', () => {
     };
     const commitHandler = mocks.handlers.get(AIChannels.PROVIDER_REPLACEMENT_COMMIT)!;
     expect(await commitHandler(undefined, commitPayload)).toMatchObject({ ok: true });
-    expect(fake.api.commitProviderReplacement).toHaveBeenCalledWith(
+    expect(fake.providerManagement.commitProviderReplacement).toHaveBeenCalledWith(
       'provider-1',
       commitPayload.request,
       expect.objectContaining({ identityId: 'identity-1' }),
@@ -197,6 +221,37 @@ describe('createAIElectronModule lifecycle', () => {
     });
     expect(rejected).toMatchObject({ ok: false, error: { code: 'VALIDATION_ERROR' } });
     expect(fake.summarizeUsage).toHaveBeenCalledTimes(1);
+  });
+
+  it('maps runtime provider failures to the same stable public code as HTTP', async () => {
+    const workflowRuntime = {
+      start: vi.fn(async () => {
+        throw new AIExecutionError('capability_unverified', 'provider=server-secret');
+      }),
+      resume: vi.fn(),
+      get: vi.fn(),
+      list: vi.fn(),
+      cancel: vi.fn(),
+    };
+    fake.instance = { ...fake.instance, workflowRuntime } as AIModuleInstance;
+    moduleDef = createAIElectronModule({ instance: fake.instance });
+    await moduleDef.register(createFakeContext());
+
+    const handler = mocks.handlers.get(AIChannels.RUNTIME_WORKFLOW_START)!;
+    const result = await handler(undefined, {
+      kind: 'goal.create',
+      conversationId: 'conversation-1',
+      input: { idea: 'Run a 5K' },
+    });
+
+    expect(result).toMatchObject({
+      ok: false,
+      error: {
+        code: 'AI_CAPABILITY_UNVERIFIED',
+        message: 'The selected AI model capability has not been verified',
+      },
+    });
+    expect(JSON.stringify(result)).not.toContain('server-secret');
   });
 
   it('is single-register and destroy is idempotent', async () => {

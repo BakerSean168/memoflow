@@ -1,4 +1,8 @@
-import type { TaskGoalBindingTriggerValue } from '@memoflow/contracts/task';
+import type {
+  ChecklistItemDefinitionDTO,
+  TaskGoalBindingTriggerValue,
+  TaskPlanSchedule,
+} from '@memoflow/contracts/task';
 import type { LabelClientDTO } from '@memoflow/contracts/label';
 
 export type UIPriority = 'high' | 'normal' | 'low' | 'urgent';
@@ -12,26 +16,14 @@ export interface EditableTaskUI {
   selected: boolean;
 }
 
-export interface TaskTimeRangeViewModel {
-  start: number;
-  end: number;
-}
-
-export interface TaskTimeConfigViewModel {
-  timeType?: 'AllDay' | 'TimePoint' | 'TimeRange';
-  timePoint?: number | null;
-  timeRange?: TaskTimeRangeViewModel | null;
-  startDate?: string | Date | number;
-}
-
 export interface TaskGoalContributionViewModel {
   value: number;
   trigger: TaskGoalBindingTriggerValue;
 }
 
 export interface TaskGoalBindingViewModel {
-  goalId?: string;
-  keyResultId?: string;
+  goalId: string;
+  keyResultId: string | null;
   contribution?: TaskGoalContributionViewModel;
 }
 
@@ -60,7 +52,7 @@ export interface KeyResultBindingOption {
   progress: GoalBindingProgress;
 }
 
-export interface TaskTemplateViewModel {
+export interface TaskPlanViewModel {
   id: string;
   title: string;
   description?: string;
@@ -71,31 +63,27 @@ export interface TaskTemplateViewModel {
   isArchived?: boolean;
   importance?: string;
   importanceText?: string;
-  estimatedMinutes?: number | null;
-  dueDate?: string | number | null;
   recurrenceText?: string;
   labels?: LabelClientDTO[];
   labelIds?: string[];
   goalBinding?: TaskGoalBindingViewModel | null;
-  timeConfig: TaskTimeConfigViewModel;
-  recurrenceRule?: Record<string, unknown> | null;
+  checklist: ChecklistItemDefinitionDTO[];
+  schedule: TaskPlanSchedule;
   reminderConfig?: Record<string, unknown> | null;
-  instanceCount?: number;
-  completedInstanceCount?: number;
-  pendingInstanceCount?: number;
-  dueInstanceCount?: number;
-  completedDueInstanceCount?: number;
+  occurrenceCount?: number;
+  completedOccurrenceCount?: number;
+  pendingOccurrenceCount?: number;
+  dueOccurrenceCount?: number;
+  completedDueOccurrenceCount?: number;
   completionWindowDays?: 30;
-  futurePendingInstanceCount?: number;
-  singleInstanceStatus?: 'Pending' | 'InProgress' | 'Completed' | 'Missed' | 'Skipped' | null;
+  futurePendingOccurrenceCount?: number;
+  singleOccurrenceStatus?: 'Pending' | 'InProgress' | 'Completed' | 'Missed' | 'Skipped' | null;
   completionRate?: number;
   formattedCreatedAt?: string;
-  /** TaskType enum value mapped for CreateTaskTemplateReq.taskType */
-  taskType?: string;
 }
 
-export interface TaskTemplateFormProps {
-  modelValue?: TaskTemplateViewModel | null;
+export interface TaskPlanFormProps {
+  modelValue?: TaskPlanViewModel | null;
   isEditMode?: boolean;
   readonly?: boolean;
   goals?: GoalBindingOption[];
@@ -109,28 +97,14 @@ export interface TaskTemplateFormProps {
   ) => Promise<KeyResultBindingOption[] | void> | void;
 }
 
-export interface TaskTemplateFormValidationState {
+export interface TaskPlanFormValidationState {
   isValid: boolean;
 }
 
-export interface TaskTemplateFormEmits {
-  'update:modelValue': [value: TaskTemplateViewModel];
-  'update:validation': [validation: TaskTemplateFormValidationState];
+export interface TaskPlanFormEmits {
+  'update:modelValue': [value: TaskPlanViewModel];
+  'update:validation': [validation: TaskPlanFormValidationState];
   close: [];
-}
-
-export interface TaskInstanceViewModel {
-  id: string;
-  templateId?: string;
-  templateTitle?: string;
-  isCompleted: boolean;
-  statusText?: string;
-  instanceDate: string | Date;
-  instanceDateFormatted?: string;
-  note?: string;
-  actualEndTime?: string | Date | null;
-  timeConfig: TaskTimeConfigViewModel;
-  goalBinding?: TaskGoalBindingViewModel | null;
 }
 
 // ── 任务库列表过滤 / 视图模式（UI_PAGE_REDESIGN_PLAN §6）──

@@ -1,121 +1,111 @@
-/**
- * Residual 969: knowledge-index value helpers sole import
- * (../knowledge-index-value-helpers.ts).
- */
+import { createHash } from 'node:crypto';
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import type {
   IKnowledgeIndexRepository,
   KnowledgeIndexDiagnostics,
   KnowledgeIndexFailureRecord,
-  KnowledgeIndexedChunk,
   KnowledgeIndexedNote,
+  KnowledgeDocumentIndexRef,
 } from '../../../application/ports';
 import {
+  scoreIndexedResource,
   toChunkArray,
   toNumberArray,
   toStringArray,
-  scoreIndexedResource,
 } from '../knowledge-index-value-helpers';
 
-const KNOWLEDGE_INDEX_KEY = 'aiKnowledgeIndex';
+/** Residual 969: this adapter imports the sole knowledge-index value helpers. */
+/** Soft residual 1195: scoreIndexedResource dual retired onto that sole helper. */
+const LOCAL_INDEX_TABLE = 'ai_knowledge_index_entries_local';
 
-interface PowerSyncResourceRow {
+interface LocalKnowledgeIndexRow {
   id: string;
   identity_id: string;
   repository_id: string;
-  name: string;
-  type: string;
-  path: string;
-  metadata: string | null;
-}
-
-interface StoredKnowledgeIndexRecord {
+  knowledge_space_id: string;
+  knowledge_document_id: string;
+  source_path: string;
+  title: string | null;
+  mime_type: string;
+  source_content_hash: string;
+  source_version: string | null;
   status: 'indexed' | 'failed';
-  contentHash: string;
-  summary?: string;
-  keywords?: string[];
-  embedding?: number[];
-  chunks?: KnowledgeIndexedChunk[];
-  indexedAt: number;
-  lastRequestedAt?: number;
-  error?: string;
+  summary: string | null;
+  keywords_json: string | null;
+  embedding_json: string | null;
+  chunks_json: string | null;
+  metadata_json: string | null;
+  error: string | null;
+  indexed_at: number;
+  last_requested_at: number | null;
 }
 
-function parseJsonRecord(value: string | null): Record<string, unknown> {
-  if (!value) {
-    return {};
-  }
-
+function parseJson(value: string | null): unknown {
+  if (!value) return null;
   try {
-    const parsed = JSON.parse(value);
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-      return {};
-    }
-    return { ...(parsed as Record<string, unknown>) };
+    return JSON.parse(value) as unknown;
   } catch {
-    return {};
+    return null;
   }
 }
 
+function parseObject(value: string | null): Record<string, unknown> {
+  const parsed = parseJson(value);
+  return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+    ? { ...(parsed as Record<string, unknown>) }
+    : {};
+}
 
-function parseStoredIndex(metadata: Record<string, unknown>): StoredKnowledgeIndexRecord | null {
-  const candidate = metadata[KNOWLEDGE_INDEX_KEY];
-  if (!candidate || typeof candidate !== 'object' || Array.isArray(candidate)) {
-    return null;
-  }
-
-  const row = candidate as Record<string, unknown>;
-  if (row.status !== 'indexed' && row.status !== 'failed') {
-    return null;
-  }
-  if (typeof row.contentHash !== 'string' || row.contentHash.length === 0) {
-    return null;
-  }
-  if (typeof row.indexedAt !== 'number') {
-    return null;
-  }
-
+function mapIndexed(row: LocalKnowledgeIndexRow): KnowledgeIndexedNote | null {
+  if (row.status !== 'indexed') return null;
   return {
-    status: row.status,
-    contentHash: row.contentHash,
-    summary: typeof row.summary === 'string' ? row.summary : undefined,
-    keywords: toStringArray(row.keywords),
-    embedding: toNumberArray(row.embedding),
-    chunks: toChunkArray(row.chunks),
-    indexedAt: row.indexedAt,
-    lastRequestedAt: typeof row.lastRequestedAt === 'number' ? row.lastRequestedAt : undefined,
-    error: typeof row.error === 'string' ? row.error : undefined,
+    identityId: row.identity_id,
+    repositoryId: row.repository_id,
+    knowledgeSpaceId: row.knowledge_space_id,
+    knowledgeDocumentId: row.knowledge_document_id,
+    sourcePath: row.source_path,
+    sourceContentHash: row.source_content_hash,
+    sourceVersion: row.source_version,
+    title: row.title ?? undefined,
+    mimeType: row.mime_type,
+    summary: row.summary ?? '',
+    keywords: toStringArray(parseJson(row.keywords_json)),
+    embedding: toNumberArray(parseJson(row.embedding_json)),
+    chunks: toChunkArray(parseJson(row.chunks_json)),
+    metadata: parseObject(row.metadata_json),
   };
 }
 
-function resolveMimeType(metadata: Record<string, unknown>, fallbackType: string): string {
-  if (typeof metadata.mimeType === 'string' && metadata.mimeType.length > 0) {
-    return metadata.mimeType;
-  }
-
-  if (fallbackType === 'markdown') {
-    return 'text/markdown';
-  }
-  if (fallbackType === 'code') {
-    return 'text/plain';
-  }
-
-  return 'text/plain';
+function localIndexId(
+  identityId: string,
+  knowledgeSpaceId: string,
+  knowledgeDocumentId: string,
+): string {
+  const digest = createHash('sha256')
+    .update(`${identityId}\0${knowledgeSpaceId}\0${knowledgeDocumentId}`, 'utf8')
+    .digest('hex');
+  return `ai-kindex-${digest}`;
 }
 
-/** Soft residual 1195: scoreIndexedResource dual retired onto knowledge-index-value-helpers sole. */
-
+/**
+ * Desktop-only rebuildable knowledge index.
+ *
+ * The source of truth is the Local Vault, never the legacy Resource aggregate.
+ * This local-only PowerSync table is intentionally outside the upload queue and
+ * can be discarded/rebuilt at any time. Managed notes use KnowledgeDocumentId
+ * as knowledgeDocumentId, so path changes update sourcePath without changing identity.
+ */
 export class AIKnowledgeIndexPowerSyncRepository implements IKnowledgeIndexRepository {
   constructor(private readonly db: IElectronDatabase) {}
 
   async getDiagnostics(): Promise<KnowledgeIndexDiagnostics> {
     return {
-      persistenceBackend: 'powersync-resource-metadata',
+      persistenceBackend: 'powersync-local-knowledge-index',
       persistenceStatus: 'enabled',
       vectorRecallBackend: 'local-js-hybrid',
       vectorRecallStatus: 'fallback',
       vectorRecallReason:
-        'Desktop and PowerSync currently use metadata-backed lexical or hybrid retrieval without pgvector ANN support.',
+        'Desktop persists a device-local rebuildable index and ranks it with local lexical or hybrid retrieval.',
     };
   }
 
@@ -124,205 +114,132 @@ export class AIKnowledgeIndexPowerSyncRepository implements IKnowledgeIndexRepos
     query: string,
     limit: number,
   ): Promise<KnowledgeIndexedNote[]> {
-    if (limit <= 0) {
-      return [];
-    }
-
-    const rows = await this.db.getAll<PowerSyncResourceRow>(
-      `SELECT id, identity_id, repository_id, name, type, path, metadata
-       FROM resources
-       WHERE identity_id = ? AND deleted_at IS NULL`,
-      [identityId],
+    if (limit <= 0) return [];
+    const scanLimit = query.trim().length === 0 ? limit : Math.min(Math.max(limit * 4, 40), 200);
+    const rows = await this.db.getAll<LocalKnowledgeIndexRow>(
+      `SELECT * FROM ${LOCAL_INDEX_TABLE}
+       WHERE identity_id = ? AND status = 'indexed'
+       ORDER BY last_requested_at DESC, indexed_at DESC
+       LIMIT ?`,
+      [identityId, scanLimit],
     );
-
-    const indexedNotes = rows
-      .map((row): KnowledgeIndexedNote | null => {
-        const metadata = parseJsonRecord(row.metadata);
-        const stored = parseStoredIndex(metadata);
-        if (!stored || stored.status !== 'indexed') {
-          return null;
-        }
-
-        return {
-          identityId: row.identity_id,
-          repositoryId: row.repository_id,
-          resourceId: row.id,
-          resourcePath: row.path,
-          title: row.name,
-          mimeType: resolveMimeType(metadata, row.type),
-          contentHash: stored.contentHash,
-          summary: stored.summary ?? '',
-          keywords: stored.keywords ?? [],
-          embedding: stored.embedding ?? [],
-          chunks: stored.chunks ?? [],
-          metadata,
-        } satisfies KnowledgeIndexedNote;
-      })
-      .filter((item): item is KnowledgeIndexedNote => item !== null);
-
-    if (query.trim().length === 0) {
-      return indexedNotes.slice(0, limit);
-    }
-
-    return indexedNotes
-      .map((resource) => ({
-        resource,
-        score: scoreIndexedResource(resource, query),
-      }))
+    const indexed = rows
+      .map(mapIndexed)
+      .filter((note): note is KnowledgeIndexedNote => note !== null);
+    if (query.trim().length === 0) return indexed.slice(0, limit);
+    return indexed
+      .map((resource) => ({ resource, score: scoreIndexedResource(resource, query) }))
       .filter(({ score }) => score > 0)
-      .sort((left, right) => right.score - left.score)
+      .sort((a, b) => b.score - a.score)
       .slice(0, limit)
       .map(({ resource }) => resource);
   }
 
-  async findByNoteIds(
+  async findByDocumentRefs(
     identityId: string,
-    resourceIds: string[],
+    documentRefs: KnowledgeDocumentIndexRef[],
   ): Promise<KnowledgeIndexedNote[]> {
-    if (resourceIds.length === 0) {
-      return [];
-    }
-
-    const placeholders = resourceIds.map(() => '?').join(', ');
-    const rows = await this.db.getAll<PowerSyncResourceRow>(
-      `SELECT id, identity_id, repository_id, name, type, path, metadata
-       FROM resources
-       WHERE identity_id = ? AND id IN (${placeholders}) AND deleted_at IS NULL`,
-      [identityId, ...resourceIds],
+    if (documentRefs.length === 0) return [];
+    const clauses = documentRefs.map(
+      () => '(knowledge_space_id = ? AND knowledge_document_id = ?)',
     );
-
-    const indexedNotes = rows
-      .map((row): KnowledgeIndexedNote | null => {
-        const metadata = parseJsonRecord(row.metadata);
-        const stored = parseStoredIndex(metadata);
-        if (!stored || stored.status !== 'indexed') {
-          return null;
-        }
-
-        return {
-          identityId: row.identity_id,
-          repositoryId: row.repository_id,
-          resourceId: row.id,
-          resourcePath: row.path,
-          title: row.name,
-          mimeType: resolveMimeType(metadata, row.type),
-          contentHash: stored.contentHash,
-          summary: stored.summary ?? '',
-          keywords: stored.keywords ?? [],
-          embedding: stored.embedding ?? [],
-          chunks: stored.chunks ?? [],
-          metadata,
-        } satisfies KnowledgeIndexedNote;
-      })
-      .filter((item): item is KnowledgeIndexedNote => item !== null);
-
-    return indexedNotes;
+    const rows = await this.db.getAll<LocalKnowledgeIndexRow>(
+      `SELECT * FROM ${LOCAL_INDEX_TABLE}
+       WHERE identity_id = ? AND (${clauses.join(' OR ')})`,
+      [
+        identityId,
+        ...documentRefs.flatMap((ref) => [ref.knowledgeSpaceId, ref.knowledgeDocumentId]),
+      ],
+    );
+    return rows.map(mapIndexed).filter((note): note is KnowledgeIndexedNote => note !== null);
   }
 
   async upsert(resource: KnowledgeIndexedNote): Promise<void> {
-    const row = await this.db.getOptional<{ metadata: string | null }>(
-      `SELECT metadata FROM resources WHERE id = ? AND identity_id = ? AND deleted_at IS NULL LIMIT 1`,
-      [resource.resourceId, resource.identityId],
+    const now = Date.now();
+    await this.db.execute(
+      `INSERT OR REPLACE INTO ${LOCAL_INDEX_TABLE} (
+         id, identity_id, repository_id, knowledge_space_id, knowledge_document_id, source_path, title,
+         mime_type, source_content_hash, source_version, status, summary, keywords_json, embedding_json,
+         chunks_json, metadata_json, error, indexed_at, last_requested_at
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'indexed', ?, ?, ?, ?, NULL, ?, ?)`,
+      [
+        localIndexId(resource.identityId, resource.knowledgeSpaceId, resource.knowledgeDocumentId),
+        resource.identityId,
+        resource.repositoryId,
+        resource.knowledgeSpaceId,
+        resource.knowledgeDocumentId,
+        resource.sourcePath,
+        resource.title ?? null,
+        resource.mimeType,
+        resource.sourceContentHash,
+        resource.sourceVersion ?? null,
+        resource.summary,
+        JSON.stringify(resource.keywords),
+        JSON.stringify(resource.embedding),
+        JSON.stringify(resource.chunks),
+        JSON.stringify(resource.metadata),
+        now,
+        now,
+      ],
     );
-
-    if (!row) {
-      return;
-    }
-
-    const metadata = parseJsonRecord(row.metadata);
-    metadata[KNOWLEDGE_INDEX_KEY] = {
-      status: 'indexed',
-      contentHash: resource.contentHash,
-      summary: resource.summary,
-      keywords: resource.keywords,
-      embedding: resource.embedding,
-      chunks: resource.chunks,
-      indexedAt: Date.now(),
-      lastRequestedAt: Date.now(),
-    } satisfies StoredKnowledgeIndexRecord;
-
-    await this.db.execute(`UPDATE resources SET metadata = ? WHERE id = ?`, [
-      JSON.stringify(metadata),
-      resource.resourceId,
-    ]);
   }
 
   async markRequested(
     identityId: string,
-    resourceIds: string[],
+    documentRefs: KnowledgeDocumentIndexRef[],
     requestedAt: number,
   ): Promise<void> {
-    if (resourceIds.length === 0) {
-      return;
-    }
-
-    const placeholders = resourceIds.map(() => '?').join(', ');
-    const rows = await this.db.getAll<{ id: string; metadata: string | null }>(
-      `SELECT id, metadata
-       FROM resources
-       WHERE identity_id = ? AND id IN (${placeholders}) AND deleted_at IS NULL`,
-      [identityId, ...resourceIds],
+    if (documentRefs.length === 0) return;
+    const clauses = documentRefs.map(
+      () => '(knowledge_space_id = ? AND knowledge_document_id = ?)',
     );
-
-    await Promise.all(
-      rows.map(async (row) => {
-        const metadata = parseJsonRecord(row.metadata);
-        const stored = parseStoredIndex(metadata);
-        if (!stored) {
-          return;
-        }
-
-        metadata[KNOWLEDGE_INDEX_KEY] = {
-          ...stored,
-          lastRequestedAt: requestedAt,
-        } satisfies StoredKnowledgeIndexRecord;
-
-        await this.db.execute(`UPDATE resources SET metadata = ? WHERE id = ?`, [
-          JSON.stringify(metadata),
-          row.id,
-        ]);
-      }),
+    await this.db.execute(
+      `UPDATE ${LOCAL_INDEX_TABLE}
+       SET last_requested_at = ?
+       WHERE identity_id = ? AND (${clauses.join(' OR ')})`,
+      [
+        requestedAt,
+        identityId,
+        ...documentRefs.flatMap((ref) => [ref.knowledgeSpaceId, ref.knowledgeDocumentId]),
+      ],
     );
   }
 
   async markFailed(record: KnowledgeIndexFailureRecord): Promise<void> {
-    const row = await this.db.getOptional<{ metadata: string | null }>(
-      `SELECT metadata FROM resources WHERE id = ? AND identity_id = ? AND deleted_at IS NULL LIMIT 1`,
-      [record.resourceId, record.identityId],
+    const now = Date.now();
+    await this.db.execute(
+      `INSERT OR REPLACE INTO ${LOCAL_INDEX_TABLE} (
+         id, identity_id, repository_id, knowledge_space_id, knowledge_document_id, source_path, title,
+         mime_type, source_content_hash, source_version, status, summary, keywords_json, embedding_json,
+         chunks_json, metadata_json, error, indexed_at, last_requested_at
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'failed', NULL, '[]', '[]', '[]', ?, ?, ?, ?)`,
+      [
+        localIndexId(record.identityId, record.knowledgeSpaceId, record.knowledgeDocumentId),
+        record.identityId,
+        record.repositoryId,
+        record.knowledgeSpaceId,
+        record.knowledgeDocumentId,
+        record.sourcePath,
+        record.title ?? null,
+        record.mimeType,
+        record.sourceContentHash,
+        record.sourceVersion ?? null,
+        JSON.stringify(record.metadata),
+        record.error,
+        now,
+        now,
+      ],
     );
-
-    if (!row) {
-      return;
-    }
-
-    const metadata = parseJsonRecord(row.metadata);
-    metadata[KNOWLEDGE_INDEX_KEY] = {
-      status: 'failed',
-      contentHash: record.contentHash,
-      indexedAt: Date.now(),
-      lastRequestedAt: Date.now(),
-      error: record.error,
-    } satisfies StoredKnowledgeIndexRecord;
-
-    await this.db.execute(`UPDATE resources SET metadata = ? WHERE id = ?`, [
-      JSON.stringify(metadata),
-      record.resourceId,
-    ]);
   }
 
-  async removeByNoteId(identityId: string, resourceId: string): Promise<void> {
-    const row = await this.db.getOptional<{ metadata: string | null }>(
-      `SELECT metadata FROM resources WHERE id = ? AND identity_id = ? LIMIT 1`,
-      [resourceId, identityId],
+  async removeByDocumentRef(
+    identityId: string,
+    documentRef: KnowledgeDocumentIndexRef,
+  ): Promise<void> {
+    await this.db.execute(
+      `DELETE FROM ${LOCAL_INDEX_TABLE}
+       WHERE identity_id = ? AND knowledge_space_id = ? AND knowledge_document_id = ?`,
+      [identityId, documentRef.knowledgeSpaceId, documentRef.knowledgeDocumentId],
     );
-    if (!row) return;
-
-    const metadata = parseJsonRecord(row.metadata);
-    if (!(KNOWLEDGE_INDEX_KEY in metadata)) return;
-    delete metadata[KNOWLEDGE_INDEX_KEY];
-    await this.db.execute(`UPDATE resources SET metadata = ? WHERE id = ?`, [
-      JSON.stringify(metadata),
-      resourceId,
-    ]);
   }
 }

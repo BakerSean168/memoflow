@@ -1,63 +1,136 @@
 /**
  * App-local AI host adapter (API lane).
- * apps/api 本地的 AI 宿主适配器（API lane）。
  *
- * Import seam: this adapter consumes the public `@memoflow/ai/ports` seam and
- * other package roots/`/analytics` seams. It must never import the
- * package-internal `/server` subpath (any deep package-internal path). Only
- * `apps/api/src/runtime/compose-ai.ts` imports the package `/api` transport
- * seam; app-local adapters stay behind the port interfaces.
- *
- * 导入边界：本适配器只使用公开的 `@memoflow/ai/ports` seam 与其他包根/`/analytics`
- * seam，绝不导入包内 `/server` 子路径（或任何包内深路径）。只有
- * `apps/api/src/runtime/compose-ai.ts` 导入 package `/api` transport seam；
- * app-local adapter 保持在 port 接口之后。
+ * Analytics is a read-only composition surface. It consumes explicit owner
+ * capabilities and emits an AI context projection; it does not import a
+ * retired cross-owner package or recreate its compatibility projection.
  */
-import type { IAnalyticsReadPort } from '@memoflow/ai/ports';
-import type { PrismaClient } from '@memoflow/database';
-import { SearchGoalsUseCase } from '@memoflow/goal/analytics';
-import { createGoalPrismaModule } from '@memoflow/goal';
-import { PrismaTaskBindingReadPort } from '@memoflow/task';
-import { GetTaskDashboardUseCase } from '@memoflow/task/analytics';
-import { createTaskPrismaRepositories } from '@memoflow/task';
+import type {
+  IAIActivityReadPort,
+  IAITaskDashboardReadPort,
+  IAIPlannerReadPort,
+  IAINotificationReadPort,
+  IAnalyticsReadPort,
+} from '@memoflow/ai/ports';
+import type { GoalApplicationPort } from '@memoflow/goal';
+import { IdentityId } from '@memoflow/domain-shared/shared';
+import { TaskOccurrenceStatus } from '@memoflow/contracts/task';
+import type { GoalHomeProgressSummary } from '@memoflow/contracts/goal';
+import type { UserTimeContextPort } from '@memoflow/time';
+import { createTimeFacade } from '@memoflow/time';
 
-import { getApiDashboardData } from '../dashboard/dashboard-read-service';
+const ACTIVITY_WINDOW_DAYS = 14;
+const ACTIVITY_LIMIT = 10;
+const SCHEDULE_WINDOW_DAYS = 30;
+const UPCOMING_SCHEDULE_LIMIT = 5;
 
+const EMPTY_GOAL_PROGRESS: GoalHomeProgressSummary = {
+  activeCount: 0,
+  goals: [],
+};
+
+export interface ControlledAnalyticsReadAdapterDependencies {
+  readonly goalApplicationPort: Pick<
+    GoalApplicationPort,
+    'getHomeSummary' | 'listGoals' | 'searchGoals'
+  >;
+  readonly taskDashboardReadPort: IAITaskDashboardReadPort;
+  readonly plannerReadPort: IAIPlannerReadPort;
+  readonly notificationReadPort: IAINotificationReadPort;
+  readonly activityReadPort: IAIActivityReadPort;
+  readonly userTimeContextPort: UserTimeContextPort;
+}
+
+/** Read-only API host composition for AI analytics. */
 export class ControlledAnalyticsReadAdapter implements IAnalyticsReadPort {
-  constructor(private readonly db: PrismaClient) {}
+  constructor(private readonly dependencies: ControlledAnalyticsReadAdapterDependencies) {}
 
   async buildContext(identityId: string, question: string) {
-    const goalModule = createGoalPrismaModule(this.db, {
-      taskBindingReadPort: new PrismaTaskBindingReadPort(this.db),
-    });
-    const taskRepos = createTaskPrismaRepositories(this.db);
-    const dashboard = await getApiDashboardData(this.db, identityId);
-    const taskDashboard = await new GetTaskDashboardUseCase(taskRepos.taskTemplateRepository).execute(
-      identityId,
-    );
-    const activeGoals = await goalModule.goalRepository.findByIdentityId(identityId, {
-      includeChildren: true,
-      systemView: 'active',
-    });
-    const goalSearch = await new SearchGoalsUseCase(goalModule.goalRepository).execute(
-      identityId,
-      question,
-      'active',
-    );
+    const timeContext = await this.dependencies.userTimeContextPort.getUserTimeContext(identityId);
+    const time = createTimeFacade({ context: timeContext });
+    const now = Number(time.now());
+    const scheduleWindowStart = Number(time.calendar.startOfDay(now));
+    const scheduleWindowEnd = Number(time.calendar.addDays(now, SCHEDULE_WINDOW_DAYS));
+    const activitySince = Number(time.calendar.addDays(now, -ACTIVITY_WINDOW_DAYS));
+
+    const [
+      goalProgress,
+      goals,
+      goalSearchResults,
+      taskDashboard,
+      planner,
+      notifications,
+      activity,
+    ] = await Promise.all([
+      this.dependencies.goalApplicationPort.getHomeSummary(identityId),
+      this.dependencies.goalApplicationPort.listGoals({
+        identityId: IdentityId.of(identityId),
+        systemView: 'active',
+        includeKeyResults: true,
+        page: 1,
+        pageSize: 10,
+      }),
+      this.dependencies.goalApplicationPort.searchGoals(identityId, question, 'active'),
+      this.dependencies.taskDashboardReadPort.getDashboard(identityId),
+      this.dependencies.plannerReadPort.getWindowSummary({
+        identityId,
+        range: { start: scheduleWindowStart, end: scheduleWindowEnd },
+      }),
+      this.dependencies.notificationReadPort.getUnreadSummary({ identityId, limit: 1 }),
+      this.dependencies.activityReadPort.listRecent({
+        identityId,
+        since: activitySince,
+        limit: ACTIVITY_LIMIT,
+      }),
+    ]);
+
+    const taskBoard = taskDashboard
+      ? {
+          todo: taskDashboard.todayTasks.filter(
+            (task) => task.status === TaskOccurrenceStatus.Pending,
+          ).length,
+          inProgress: taskDashboard.todayTasks.filter(
+            (task) => task.status === TaskOccurrenceStatus.InProgress,
+          ).length,
+          done: taskDashboard.todayTasks.filter(
+            (task) => task.status === TaskOccurrenceStatus.Completed,
+          ).length,
+          overdue: taskDashboard.overdueTasks.length,
+        }
+      : { todo: 0, inProgress: 0, done: 0, overdue: 0 };
+
+    const upcomingSchedule = planner.projections
+      .filter(
+        (entry): entry is Extract<typeof entry, { sourceType: 'schedule'; allDay: false }> =>
+          entry.sourceType === 'schedule' && !entry.allDay && Number(entry.start) >= now,
+      )
+      .sort((left, right) => Number(left.start) - Number(right.start))
+      .slice(0, UPCOMING_SCHEDULE_LIMIT)
+      .map((entry) => ({
+        id: entry.sourceId,
+        title: entry.title,
+        startTime: Number(entry.start),
+        endTime: Number(entry.end),
+        priority: 0 as const,
+      }));
 
     return {
-      dashboard: dashboard as unknown as Record<string, unknown>,
-      taskDashboard: taskDashboard.ok
-        ? (taskDashboard.data as unknown as Record<string, unknown>)
-        : undefined,
-      goals: activeGoals
-        .slice(0, 10)
-        .map((goal) => goal.toClientDTO(true) as unknown as Record<string, unknown>),
-      goalSearchResults: goalSearch.ok
-        ? goalSearch.data.data.map(
-            (goal) => goal as unknown as Record<string, unknown>,
-          )
-        : [],
+      timeContext,
+      taskDashboard,
+      goals: goals.ok ? goals.data.data : [],
+      goalSearchResults: goalSearchResults.ok ? goalSearchResults.data.data : [],
+      ownerReads: {
+        goal: {
+          progress: goalProgress.ok ? goalProgress.data : EMPTY_GOAL_PROGRESS,
+        },
+        task: { board: taskBoard },
+        schedule: {
+          upcoming: upcomingSchedule,
+          conflictCount: planner.conflicts.length,
+        },
+        notification: { unreadCount: notifications.unreadCount },
+        activity: { recent: activity },
+      },
       extra: {},
     };
   }

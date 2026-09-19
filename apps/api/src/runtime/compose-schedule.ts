@@ -2,45 +2,41 @@
  * Planner/Calendar + Temporal Engine host composition.
  *
  * The host creates both repository sets once. Orchestration consumes the
- * Scheduler task repository; Calendar consumes only its own repository and a
- * shared lease port supplied by the Scheduler infrastructure set.
+ * canonical Scheduler invocation repositories; Calendar consumes only its own
+ * repository and the shared lease port supplied by Scheduler infrastructure.
  */
 import {
   createScheduleModule,
+  type SchedulePortableCapability,
   type ScheduleRepositorySet,
+  type ScheduleEventApplicationPort,
 } from '@memoflow/schedule';
-import {
-  createScheduleApiModule,
-  type ScheduleApiModuleDef,
-} from '@memoflow/schedule/api';
+import { createScheduleApiModule, type ScheduleApiModuleDef } from '@memoflow/schedule/api';
 import {
   createSchedulerModule,
-  createSchedulerRuntimeContribution,
-  type ScheduleTask,
-  type ScheduleTaskSourceExecutor,
+  createScheduledInvocationRuntimeContribution,
+  type ScheduledInvocationHandlerRegistry,
   type SchedulerModuleRuntimeContribution,
   type SchedulerRepositorySet,
   type SchedulerRuntimeContributionsInput,
 } from '@memoflow/scheduler';
-import {
-  createSchedulerApiModule,
-  type SchedulerApiModuleDef,
-} from '@memoflow/scheduler/api';
+import { createSchedulerApiModule, type SchedulerApiModuleDef } from '@memoflow/scheduler/api';
 
 export interface ComposeScheduleDependencies {
   readonly calendarRepositories: ScheduleRepositorySet;
   readonly schedulerRepositories: SchedulerRepositorySet;
-  readonly sourceExecutor: ScheduleTaskSourceExecutor;
+  readonly handlerRegistry: ScheduledInvocationHandlerRegistry;
   readonly schedulerRuntimeContributions?: SchedulerRuntimeContributionsInput;
-  readonly shouldScheduleTask?: (task: ScheduleTask) => boolean | Promise<boolean>;
 }
 
 export interface ComposedSchedule {
   readonly calendarModule: ScheduleApiModuleDef;
   readonly schedulerModule: SchedulerApiModuleDef;
+  readonly portableCapability: SchedulePortableCapability;
+  /** Schedule-owned Calendar Event read/command seam shared by transports. */
+  readonly eventApi: ScheduleEventApplicationPort;
   readonly repositories: {
     readonly scheduleRepository: ScheduleRepositorySet['scheduleRepository'];
-    readonly scheduleTaskRepository: SchedulerRepositorySet['scheduleTaskRepository'];
   };
 }
 
@@ -48,24 +44,19 @@ function normalizeRuntimeContributions(
   input?: SchedulerRuntimeContributionsInput,
 ): readonly SchedulerModuleRuntimeContribution[] {
   if (!input) return [];
-  return Array.isArray(input)
-    ? Array.from(input)
-    : [input as SchedulerModuleRuntimeContribution];
+  return Array.isArray(input) ? Array.from(input) : [input as SchedulerModuleRuntimeContribution];
 }
 
-export function composeSchedule(
-  dependencies: ComposeScheduleDependencies,
-): ComposedSchedule {
-  const queueRuntime = createSchedulerRuntimeContribution({
-    scheduleTaskRepository: dependencies.schedulerRepositories.scheduleTaskRepository,
-    sourceExecutor: dependencies.sourceExecutor,
+export function composeSchedule(dependencies: ComposeScheduleDependencies): ComposedSchedule {
+  const queueRuntime = createScheduledInvocationRuntimeContribution({
+    repository: dependencies.schedulerRepositories.scheduledInvocationRepository,
+    handlerRegistry: dependencies.handlerRegistry,
     leaseCoordinator: dependencies.schedulerRepositories.leaseCoordinator,
-    shouldScheduleTask: dependencies.shouldScheduleTask,
   });
 
   const schedulerInstance = createSchedulerModule({
-    scheduleTaskRepository: dependencies.schedulerRepositories.scheduleTaskRepository,
-    scheduleExecutionRepository: dependencies.schedulerRepositories.scheduleExecutionRepository,
+    scheduledInvocationRepository: dependencies.schedulerRepositories.scheduledInvocationRepository,
+    invocationAttemptRepository: dependencies.schedulerRepositories.invocationAttemptRepository,
     runtimeContributions: [
       queueRuntime,
       ...normalizeRuntimeContributions(dependencies.schedulerRuntimeContributions),
@@ -82,9 +73,10 @@ export function composeSchedule(
   return {
     calendarModule: createScheduleApiModule({ instance: calendarInstance }),
     schedulerModule: createSchedulerApiModule({ instance: schedulerInstance }),
+    portableCapability: calendarInstance.portableCapability,
+    eventApi: calendarInstance.eventApi,
     repositories: {
       scheduleRepository: dependencies.calendarRepositories.scheduleRepository,
-      scheduleTaskRepository: dependencies.schedulerRepositories.scheduleTaskRepository,
     },
   };
 }

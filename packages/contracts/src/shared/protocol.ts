@@ -2,7 +2,6 @@ import type { AccountEventMap } from '../modules/account/protocol/account-event-
 import type { AccountRpcMap } from '../modules/account/protocol/account-rpc-map';
 import type { AIEventMap } from '../modules/ai/protocol/ai-event-map';
 import type { AIRpcMap } from '../modules/ai/protocol/ai-rpc-map';
-import type { DataPortabilityEventMap } from '../modules/data-portability/protocol/data-portability-event-map';
 import type { DataPortabilityRpcMap } from '../modules/data-portability/protocol/data-portability-rpc-map';
 import type { GoalEventMap } from '../modules/goal/protocol/goal-event-map';
 import type { GoalRpcMap } from '../modules/goal/protocol/goal-rpc-map';
@@ -10,8 +9,6 @@ import type { GovernanceEventMap } from '../modules/governance/protocol/governan
 import type { GovernanceRpcMap } from '../modules/governance/protocol/governance-rpc-map';
 import type { NotificationEventMap } from '../modules/notification/protocol/notification-event-map';
 import type { NotificationRpcMap } from '../modules/notification/protocol/notification-rpc-map';
-import type { ReminderEventMap } from '../modules/reminder/protocol/reminder-event-map';
-import type { ReminderRpcMap } from '../modules/reminder/protocol/reminder-rpc-map';
 import type { RepositoryEventMap } from '../modules/repository/protocol/repository-event-map';
 import type { RepositoryRpcMap } from '../modules/repository/protocol/repository-rpc-map';
 import type { ScheduleEventMap } from '../modules/schedule/protocol/schedule-event-map';
@@ -39,11 +36,9 @@ export interface AppRpcRegistryExtensions extends Record<string, [unknown, unkno
 // 1. 组装全局事件表 (Global Event Registry)
 type CoreAppEventRegistry = AccountEventMap &
   AIEventMap &
-  DataPortabilityEventMap &
   GoalEventMap &
   GovernanceEventMap &
   NotificationEventMap &
-  ReminderEventMap &
   RepositoryEventMap &
   ScheduleEventMap &
   SettingEventMap &
@@ -58,13 +53,11 @@ type CoreAppRpcRegistry = AccountRpcMap &
   GoalRpcMap &
   GovernanceRpcMap &
   NotificationRpcMap &
-  ReminderRpcMap &
   RepositoryRpcMap &
   ScheduleRpcMap &
   SettingRpcMap &
   TaskRpcMap;
 
 export type AppRpcRegistry = CoreAppRpcRegistry & AppRpcRegistryExtensions;
-
 
 

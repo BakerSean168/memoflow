@@ -1,27 +1,41 @@
 /**
  * useCalendarView - 日历视图聚合 composable
  *
- * 将 CalendarEntry（schedule 模块）、Goal 和 TaskInstance 三个来源
+ * 将 CalendarEntry（schedule 模块）、Goal 和 TaskOccurrence 三个来源
  * 统一转换为内部 CalendarEventItem 类型后提供给日历组件渲染。
  */
 
 import { computed, ref } from 'vue';
-import { formatLocalHHmm } from '../../../shared/utils/format-local-hhmm';
-import { padTwoDigits } from '../../../shared/utils/pad-two-digits';
 import { useSchedule } from './useSchedule';
 import { useTask } from '../../task/composables/useTask';
+import { GOAL_SERVICE_KEY } from '../../../di/keys';
+import { useStrictInject } from '../../../shared/utils/useStrictInject';
+import type { GoalClientDTO } from '@memoflow/contracts/goal';
 import type {
-  TaskInstanceClientDTO,
-  TaskInstanceStatus,
-  TaskTemplateClientDTO,
+  TaskOccurrenceClientDTO,
+  TaskOccurrenceStatus,
+  TaskPlanClientDTO,
 } from '@memoflow/contracts/task';
 import type { CalendarEventProjection } from '@memoflow/contracts/schedule';
-import { endOfDayMs, getProductTime, startOfDayMs } from '../../../shared/utils/product-time';
+import {
+  derivePlannerConflicts,
+  plannerConflictSourceKeys,
+  plannerProjectionKey,
+} from '@memoflow/schedule/client';
+import {
+  endOfDayMs,
+  getProductTime,
+  productTimeRevision,
+  startOfDayMs,
+} from '../../../shared/utils/product-time';
 import {
   projectPlannerReadModel,
   projectTaskOccurrence,
   type PlannerProductTimePort,
 } from '../planner';
+
+const PLANNER_GOAL_PAGE_SIZE = 100;
+type PlannerGoalEntity = { toDTO(): GoalClientDTO };
 
 // ============ 统一内部事件类型 ============
 
@@ -34,28 +48,26 @@ export interface CalendarEventItem {
   source: 'schedule' | 'task' | 'goal';
   hasConflict?: boolean;
   originalId: string;
-  /** 仅当 source === 'task' 时存在，对应 TaskInstanceStatus 值 */
-  instanceStatus?: TaskInstanceStatus;
+  /** 仅当 source === 'task' 时存在，对应 TaskOccurrenceStatus 值 */
+  instanceStatus?: TaskOccurrenceStatus;
 }
 
 /**
  * Residual 1282: sole toLocalDateKey — Date | number → YYYY-MM-DD local calendar key.
  * Dual-retired from Day/Week/Month calendar local toDateStr copies.
  * Residual 1321: padStart dual retired onto padTwoDigits sole (Date|number key contract stays local).
- * Soft residual 1252: formatDateToYMD Date-only form sole remains separate (storage encoding).
+ * TIME-1206: date keys are canonical session-calendar Ymd values, not Date-derived storage encodings.
  */
 export function toLocalDateKey(value: Date | number): string {
-  const date = typeof value === 'number' ? new Date(value) : value;
-  const year = date.getFullYear();
-  const month = padTwoDigits(date.getMonth() + 1);
-  const day = padTwoDigits(date.getDate());
-  return `${year}-${month}-${day}`;
+  void productTimeRevision.value;
+  const instant = typeof value === 'number' ? value : value.getTime();
+  return String(getProductTime().calendar.toYmd(instant));
 }
 
 /**
  * Residual 1291: sole calendarEventSourceLabel — schedule/goal/task source → i18n label.
  * Dual-retired from DayDetailSheet + EventDetailSheet local sourceLabel copies.
- * Soft residual 1294: formatLocalHHmm dual-retired sole (formatCapsuleTime alias) remains separate.
+ * TIME-1206: capsule HH:mm formatting resolves through the session Product Time facade.
  * Soft residual 1288: Month eventClass translucent + getEventStyle Day/Week layout keep-boundaries remain separate.
  */
 export function calendarEventSourceLabel(
@@ -71,11 +83,12 @@ export function calendarEventSourceLabel(
 }
 
 /**
- * Residual 1294: formatCapsuleTime dual body retired onto formatLocalHHmm sole.
+ * TIME-1206: formatCapsuleTime is a thin session Product Time presentation helper.
  * Thin schedule alias for shell capsule consumers (same HH:mm local padStart contract).
  */
 export function formatCapsuleTime(ms: number): string {
-  return formatLocalHHmm(ms);
+  void productTimeRevision.value;
+  return getProductTime().format.hm(ms);
 }
 
 export type ScheduleCapsuleSnapshot = {
@@ -152,8 +165,7 @@ export function formatScheduleCapsuleLabel(
 function plannerProductTimePort(): PlannerProductTimePort {
   const time = getProductTime();
   return {
-    toYmd: (instant) => time.calendar.toYmd(instant),
-    startOfDay: (instant) => time.calendar.startOfDay(instant),
+    combine: (date, hm) => time.input.combine(date, hm),
   };
 }
 
@@ -164,6 +176,7 @@ function plannerProductTimePort(): PlannerProductTimePort {
  */
 function projectionToLegacyCalendarEvent(
   projection: Extract<CalendarEventProjection, { sourceType: 'schedule' | 'task' }>,
+  conflictingSourceKeys: ReadonlySet<string> = new Set(),
 ): CalendarEventItem {
   const time = getProductTime();
   const startTime = projection.allDay
@@ -180,26 +193,26 @@ function projectionToLegacyCalendarEvent(
     endTime,
     displayMode: projection.allDay ? 'all-day' : 'timed',
     source: projection.sourceType,
-    hasConflict: projection.displayMetadata.hasConflict ?? false,
+    hasConflict: conflictingSourceKeys.has(plannerProjectionKey(projection)),
     originalId: projection.ownerCommandTarget.ownerId,
     instanceStatus:
       projection.sourceType === 'task'
-        ? (projection.displayMetadata.status as TaskInstanceStatus | undefined)
+        ? (projection.displayMetadata.status as TaskOccurrenceStatus | undefined)
         : undefined,
   };
 }
 
-/** TaskInstance → legacy CalendarEventItem through the canonical PLAN-4302 projection. */
-export function taskInstancesToEvents(
-  instances: TaskInstanceClientDTO[],
-  templates: TaskTemplateClientDTO[],
+/** TaskOccurrence → legacy CalendarEventItem through the canonical PLAN-4302 projection. */
+export function taskOccurrencesToEvents(
+  instances: TaskOccurrenceClientDTO[],
+  templates: TaskPlanClientDTO[],
 ): CalendarEventItem[] {
   const templateMap = new Map(templates.map((template) => [String(template.id), template]));
   const time = plannerProductTimePort();
   return instances.flatMap((instance) => {
     const projection = projectTaskOccurrence(
       instance,
-      templateMap.get(String(instance.templateId)),
+      templateMap.get(String(instance.planId)),
       time,
     );
     return projection ? [projectionToLegacyCalendarEvent(projection)] : [];
@@ -211,16 +224,22 @@ export function taskInstancesToEvents(
 export function useCalendarView() {
   const schedule = useSchedule();
   const task = useTask();
+  const goalService = useStrictInject(GOAL_SERVICE_KEY, 'GoalService');
+  const plannerGoals = ref<Parameters<typeof projectPlannerReadModel>[0]['goals']>([]);
+  const plannerRoutineOccurrences = ref<
+    Parameters<typeof projectPlannerReadModel>[0]['routineOccurrences']
+  >([]);
+  const plannerOwnerReadsLoading = ref(false);
 
   /** Currently displayed time window (set when calendar navigation changes) */
   const windowStart = ref<number>(0);
   const windowEnd = ref<number>(0);
 
   /**
-   * Canonical owner-aware read model. Goal/Routine adapters are already part of
-   * PLAN-4302, while their live client feeds are wired in the later Planner
-   * source-integration slice. Raw worker-invocation persistence rows never
-   * enter this computed value.
+   * Canonical owner-aware Planner read model. CalendarEntry, TaskOccurrence,
+   * Goal dates and the current Routine occurrence marker feed are composed here;
+   * raw Scheduler invocation persistence never enters this value. R4-2201B may
+   * later replace the Routine marker source without changing Planner semantics.
    */
   const projections = computed<CalendarEventProjection[]>(() => {
     const entriesRaw = schedule.calendarEntries.value;
@@ -229,12 +248,16 @@ export function useCalendarView() {
     return projectPlannerReadModel({
       calendarEntries: Array.isArray(entriesRaw) ? entriesRaw : [],
       taskOccurrences: Array.isArray(instancesRaw) ? instancesRaw : [],
-      taskTemplates: Array.isArray(templatesRaw) ? templatesRaw : [],
-      goals: [],
-      routineOccurrences: [],
+      taskPlans: Array.isArray(templatesRaw) ? templatesRaw : [],
+      goals: plannerGoals.value,
+      routineOccurrences: plannerRoutineOccurrences.value,
       time: plannerProductTimePort(),
     });
   });
+
+  /** Pure cross-owner conflict read model. No owner projection stores conflict truth. */
+  const conflicts = computed(() => derivePlannerConflicts(projections.value));
+  const conflictingSourceKeys = computed(() => plannerConflictSourceKeys(conflicts.value));
 
   /** Legacy custom-calendar view model, derived from canonical Schedule/Task projections. */
   const events = computed<CalendarEventItem[]>(() =>
@@ -243,13 +266,47 @@ export function useCalendarView() {
         (event): event is Extract<CalendarEventProjection, { sourceType: 'schedule' | 'task' }> =>
           event.sourceType === 'schedule' || event.sourceType === 'task',
       )
-      .map(projectionToLegacyCalendarEvent)
+      .map((projection) => projectionToLegacyCalendarEvent(projection, conflictingSourceKeys.value))
       .sort((a, b) => a.startTime - b.startTime),
   );
 
-  const isLoading = computed(() => schedule.isLoading.value || task.isLoading.value);
+  const isLoading = computed(
+    () => schedule.isLoading.value || task.isLoading.value || plannerOwnerReadsLoading.value,
+  );
 
-  /** Fetch all data for the given time window (ms timestamps) */
+  async function fetchPlannerOwnerMarkers(startTime: number, endTime: number) {
+    plannerOwnerReadsLoading.value = true;
+    try {
+      const collectedGoals: PlannerGoalEntity[] = [];
+      let page = 1;
+      let hasMore = true;
+
+      while (hasMore) {
+        const goalResult = await goalService.listGoals({
+          systemView: 'all',
+          page,
+          pageSize: PLANNER_GOAL_PAGE_SIZE,
+        });
+        if (!goalResult.ok) {
+          plannerGoals.value = [];
+          return;
+        }
+
+        collectedGoals.push(...goalResult.data.goals);
+        hasMore = Boolean(goalResult.data.pagination?.hasMore);
+        page += 1;
+      }
+
+      plannerGoals.value = collectedGoals.map((goal) => goal.toDTO());
+      // R4-2201C: legacy Reminder markers are retired. Phase 5 will
+      // reconnect Planner to the canonical Routine occurrence read model.
+      plannerRoutineOccurrences.value = [];
+    } finally {
+      plannerOwnerReadsLoading.value = false;
+    }
+  }
+
+  /** Fetch all owner facts for the given Planner time window. */
   async function fetchForRange(startTime: number, endTime: number) {
     windowStart.value = startTime;
     windowEnd.value = endTime;
@@ -258,6 +315,7 @@ export function useCalendarView() {
       schedule.fetchCalendarEntries(startTime, endTime),
       task.fetchInstancesByDateRange(startTime, endTime),
       task.fetchTemplates(),
+      fetchPlannerOwnerMarkers(startTime, endTime),
     ]);
   }
 
@@ -278,6 +336,7 @@ export function useCalendarView() {
 
   return {
     projections,
+    conflicts,
     events,
     isLoading,
     windowStart,

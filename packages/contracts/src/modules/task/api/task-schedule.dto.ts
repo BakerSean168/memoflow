@@ -1,47 +1,25 @@
 import { z } from 'zod';
 import { brandedId } from '../../../primitives';
-import type { TaskInstanceId } from '../../../primitives';
-import { TaskTimeConfigSchema } from './task-template.dto';
-import type { TaskInstanceClientDTO } from '../aggregates/task-instance-client';
-
-function requireRescheduleDate(
-  value: { newTime: { startDate: number | null } },
-  ctx: z.RefinementCtx,
-): void {
-  if (value.newTime.startDate == null) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ['newTime', 'startDate'],
-      message: '重新安排任务实例必须提供 startDate',
-    });
-  }
-}
+import type { TaskOccurrenceId } from '../../../primitives';
+import { TaskOccurrenceScheduleSnapshotSchema } from '../value-objects/task-occurrence-schedule-snapshot';
+import type { TaskOccurrenceClientDTO } from '../aggregates/task-occurrence-client';
 
 export const RescheduleTaskBodySchema = z
   .object({
-    newTime: TaskTimeConfigSchema,
+    scheduleSnapshot: TaskOccurrenceScheduleSnapshotSchema,
     expectedVersion: z.number().int().positive(),
   })
-  .strict()
-  .superRefine(requireRescheduleDate);
+  .strict();
 export type RescheduleTaskInput = z.infer<typeof RescheduleTaskBodySchema>;
 
-/** Existing RPC shape retained and completed for Electron/typed RPC callers. */
+/** Canonical Electron/typed RPC reschedule shape (TASK-7306). */
 export const RescheduleTaskSchema = z
   .object({
-    instanceId: brandedId<TaskInstanceId>(),
-    newTime: TaskTimeConfigSchema,
+    occurrenceId: brandedId<TaskOccurrenceId>(),
+    scheduleSnapshot: TaskOccurrenceScheduleSnapshotSchema,
     expectedVersion: z.number().int().positive(),
   })
-  .strict()
-  .superRefine(requireRescheduleDate);
+  .strict();
 
 export type RescheduleTaskReq = z.infer<typeof RescheduleTaskSchema>;
-export type RescheduleTaskRes = TaskInstanceClientDTO;
-
-export const ToggleTaskCompletionSchema = z.object({
-  instanceId: brandedId<TaskInstanceId>(),
-  note: z.string().optional(),
-});
-
-export type ToggleTaskCompletionReq = z.infer<typeof ToggleTaskCompletionSchema>;
+export type RescheduleTaskRes = TaskOccurrenceClientDTO;

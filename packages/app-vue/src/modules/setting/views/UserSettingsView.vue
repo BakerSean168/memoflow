@@ -1,58 +1,33 @@
 <script setup lang="ts">
 /**
- * UserSettingsView — 设置页（UI 重构 V2 § Settings / §7；沿 V1 §13 分组方案）
+ * UserSettingsView — Settings Hub composition root.
  *
- * 10 个平铺 Tab 重组为 7 组：
- *   外观与语言 / 知识库 / AI / 通知与提醒 / 账户与隐私（账户中心迁入）/ 数据 / 高级
- * 分组定义集中在 `GROUP_DEFINITIONS` 单一模型（值 + i18n label key），
- * `groups` 与 `GROUP_VALUES` 均由其派生，避免注释/代码漂移。
- * 设置内容容器窄于 1024px 时使用顶部分组 tabs；宽容器使用左侧垂直分组导航
- * （sticky，长页面滚动时保持可见）。
- * `?tab=` 查询参数为分组深链契约（/account/center redirect 依赖）。
- * `settings-tab-{value}` testid 保留（appearance / notifications 被 e2e 锚定）。
- * 作为 AppShell STATE D 独立场景渲染，不进 BusinessPanel。
+ * The root owns navigation/layout only. Each section owns its own capability client,
+ * loading/error/mutation state. `?tab=` and `settings-tab-{value}` remain the stable
+ * deep-link/E2E contract.
  */
-
-import { ref, onMounted, onBeforeUnmount, computed, watch, nextTick } from 'vue';
+import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { Loader2 } from '@lucide/vue';
-import { SystemChannels } from '@memoflow/contracts/electron';
-import { isOk, type Result } from '@memoflow/contracts/result';
+import UserPreferenceSettingsSection from '../components/UserPreferenceSettingsSection.vue';
 
-import AppearanceSettings from '../components/AppearanceSettings.vue';
-import AISettings from '../components/AISettings.vue';
-import LocaleSettings from '../components/LocaleSettings.vue';
-import KnowledgeRepositorySettings from '../components/KnowledgeRepositorySettings.vue';
-import PrivacySettings from '../components/PrivacySettings.vue';
-import ShortcutSettings from '../components/ShortcutSettings.vue';
-import NotificationSettings from '../components/NotificationSettings.vue';
-import ExperimentalSettings from '../components/ExperimentalSettings.vue';
-import SettingAdvancedActions from '../components/SettingAdvancedActions.vue';
-import SettingsResetSection from '../components/SettingsResetSection.vue';
-import UserFilesSettings from '../components/UserFilesSettings.vue';
-import { AccountProfileSection, CloudPasswordSection } from '../../account/components';
-
-import { useUserSetting } from '../composables/useUserSetting';
-import { useDataPortability } from '../composables/useDataPortability';
-import { applyThemeMode } from '../composables';
-import { usePresentationPreferenceStore } from '../stores/presentation-preference-store';
-import type { AppLocale } from '../../../plugins/i18n';
-import type { UserSettingPreferences } from '@memoflow/contracts/setting';
-import { inject } from 'vue';
-import { AUTH_SERVICE_KEY, DESKTOP_AUTH_API_KEY } from '../../../di/keys';
+const AISettings = defineAsyncComponent(() => import('../components/AISettings.vue'));
+const KnowledgeRepositorySettings = defineAsyncComponent(
+  () => import('../components/KnowledgeRepositorySettings.vue'),
+);
+const NotificationSettings = defineAsyncComponent(
+  () => import('../components/NotificationSettings.vue'),
+);
+const AccountSettingsSection = defineAsyncComponent(
+  () => import('../components/AccountSettingsSection.vue'),
+);
+const DataSettingsSection = defineAsyncComponent(
+  () => import('../components/DataSettingsSection.vue'),
+);
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
-const presentationStore = usePresentationPreferenceStore();
-const desktopApi = inject(DESKTOP_AUTH_API_KEY, undefined);
-// Cloud password management is a host capability: Web provides the full
-// CloudAuthClientPort, while Desktop currently exposes only its narrower
-// device-authorization/session port. Do not mount the strict password
-// composable unless the host actually provides AUTH_SERVICE_KEY.
-const cloudPasswordService = inject(AUTH_SERVICE_KEY, null);
-// 独立设置场景：适配依据设置内容容器，而不是整个窗口。
 const SETTINGS_NARROW_VIEWPORT = 1024;
 const contentWidth = ref(
   typeof window !== 'undefined' ? window.innerWidth : SETTINGS_NARROW_VIEWPORT,
@@ -61,47 +36,16 @@ const isNarrow = computed(() => contentWidth.value < SETTINGS_NARROW_VIEWPORT);
 const settingsContentRef = ref<HTMLElement | null>(null);
 let settingsResizeObserver: ResizeObserver | null = null;
 
-const {
-  userSetting,
-  defaults,
-  isLoading,
-  getCategory,
-  loadSettings,
-  exportSettings,
-  importSettings,
-  updateCategory,
-} = useUserSetting();
+type SettingsGroup = 'appearance' | 'repository' | 'ai' | 'notifications' | 'account' | 'data';
 
-const {
-  isAvailable: isDataPortabilityAvailable,
-  isServerDisclosureAvailable,
-  isExporting: isExportingData,
-  isExportingServerDisclosure,
-  isImporting: isImportingData,
-  lastResult: dataPortabilityResult,
-  exportAllData,
-  exportServerHeldDataDisclosure,
-  importAllData,
-} = useDataPortability();
-
-// ── 分组导航（§13-3；Phase 3 单一模型）──
-type SettingsGroup =
-  'appearance' | 'repository' | 'ai' | 'notifications' | 'account' | 'data' | 'advanced';
-
-/** 分组定义唯一来源：value + i18n label key。groups / GROUP_VALUES 由此派生。 */
-const GROUP_DEFINITIONS: ReadonlyArray<{
-  value: SettingsGroup;
-  labelKey: string;
-}> = [
+const GROUP_DEFINITIONS: ReadonlyArray<{ value: SettingsGroup; labelKey: string }> = [
   { value: 'appearance', labelKey: 'setting.groups.appearance' },
   { value: 'repository', labelKey: 'setting.groups.repository' },
   { value: 'ai', labelKey: 'setting.groups.ai' },
   { value: 'notifications', labelKey: 'setting.groups.notifications' },
   { value: 'account', labelKey: 'setting.groups.account' },
   { value: 'data', labelKey: 'setting.groups.data' },
-  { value: 'advanced', labelKey: 'setting.groups.advanced' },
 ];
-
 const GROUP_VALUES: SettingsGroup[] = GROUP_DEFINITIONS.map((group) => group.value);
 
 function normalizeGroup(value: unknown): SettingsGroup {
@@ -109,277 +53,32 @@ function normalizeGroup(value: unknown): SettingsGroup {
 }
 
 const activeTab = ref<SettingsGroup>(normalizeGroup(route.query.tab));
-
 const groups = computed(() =>
   GROUP_DEFINITIONS.map((group) => ({ value: group.value, label: t(group.labelKey) })),
 );
 
-// `?tab=` 双向同步（深链契约）
 watch(
   () => route.query.tab,
   (tab) => {
     const next = normalizeGroup(tab);
-    if (next !== activeTab.value) {
-      activeTab.value = next;
-    }
+    if (next !== activeTab.value) activeTab.value = next;
   },
 );
 
-function selectGroup(group: SettingsGroup) {
+function selectGroup(group: SettingsGroup): void {
   activeTab.value = group;
   if (route.query.tab !== group) {
     void router.replace({ query: { ...route.query, tab: group } });
   }
 }
 
-const isHydratingAppearance = ref(true);
-const fileInput = ref<HTMLInputElement | null>(null);
-type LocaleFormState = Required<UserSettingPreferences['locale']>;
-type LocaleSettingsInput = {
-  language?: string;
-  timezone?: string;
-  dateFormat?: string;
-  timeFormat?: string;
-  weekStartsOn?: number;
-  currency?: string;
-};
-
-type OpenTextResult = {
-  canceled: boolean;
-  content: string | null;
-};
-
-interface ShortcutCategory {
-  name: string;
-  label: string;
-  iconComponent: unknown;
-  shortcuts: { id: string; label: string; description: string; key: string; defaultKey: string }[];
-}
-
-interface Backup {
-  key: string;
-  label: string;
-  time: number;
-}
-
-// ── Section models — local reactive copies for v-model ──
-const appearance = ref({
-  theme: 'auto' as UserSettingPreferences['appearance']['theme'],
-});
-
-const locale = ref<LocaleFormState>({
-  language: 'zh-CN',
-  timezone: 'Asia/Shanghai',
-  dateFormat: 'YYYY-MM-DD',
-  timeFormat: '24H',
-  weekStartsOn: 1,
-  currency: 'CNY',
-});
-
-const privacy = ref({
-  profileVisibility: 'PRIVATE',
-  showOnlineStatus: false,
-  allowSearchByEmail: true,
-  allowSearchByPhone: false,
-  shareUsageData: false,
-});
-
-const experimental = ref({
-  enabled: false,
-  features: [] as string[],
-});
-
-// Shortcut state (read-only display for now)
-const shortcutCategories = ref<ShortcutCategory[]>([]);
-const editingShortcut = ref(null);
-const editingKey = ref('');
-
-// Advanced state
-const backups = ref<Backup[]>([]);
-const syncStatus = ref(null);
-const syncing = ref(false);
-
-function isSupportedLocale(value: unknown): value is AppLocale {
-  return value === 'zh-CN' || value === 'en-US';
-}
-
-function normalizeTimeFormat(
-  value: string | undefined,
-  fallback: LocaleFormState['timeFormat'],
-): LocaleFormState['timeFormat'] {
-  return value === '12H' || value === '24H' ? value : fallback;
-}
-
-/** Wrap importSettings for the @import event (which has no payload). */
-async function handleImport() {
-  const electronApi = desktopApi;
-  if (electronApi?.invoke) {
-    try {
-      const response = (await electronApi.invoke(SystemChannels.USER_FILES_OPEN_TEXT, {
-        subdirectory: 'exports',
-        filters: [{ name: 'JSON', extensions: ['json'] }],
-      })) as Result<OpenTextResult>;
-
-      if (isOk(response) && !response.data.canceled && response.data.content) {
-        await importSettings(JSON.parse(response.data.content));
-      }
-    } catch (err) {
-      console.error('Failed to import settings JSON from desktop file dialog:', err);
-    }
-    return;
-  }
-
-  fileInput.value?.click();
-}
-
-function createSettingsExportFilename(): string {
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  return `memoflow-settings-${timestamp}.json`;
-}
-
-async function handleExportJson() {
-  const exported = await exportSettings();
-  if (!exported) {
-    return;
-  }
-
-  const electronApi = desktopApi;
-  if (electronApi?.invoke) {
-    try {
-      const response = (await electronApi.invoke(SystemChannels.USER_FILES_SAVE_TEXT, {
-        subdirectory: 'exports',
-        defaultFileName: createSettingsExportFilename(),
-        content: exported,
-        filters: [{ name: 'JSON', extensions: ['json'] }],
-      })) as Result<{ canceled: boolean; filePath: string | null }>;
-      if (isOk(response)) {
-        return;
-      }
-      console.error('Failed to export settings JSON via desktop file dialog:', response.error);
-    } catch (err) {
-      console.error('Failed to export settings JSON via desktop file dialog:', err);
-    }
-  }
-
-  const blob = new Blob([exported], { type: 'application/json;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = createSettingsExportFilename();
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
-/** Handle file selection and read JSON content. */
-async function onFileSelected(event: Event) {
-  const target = event.target as HTMLInputElement;
-  const file = target.files?.[0];
-  if (!file) {
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    try {
-      const content = e.target?.result as string;
-      const data = JSON.parse(content);
-      await importSettings(data);
-    } catch (err) {
-      console.error('Failed to parse settings JSON:', err);
-    } finally {
-      // Reset input so the same file can be selected again
-      target.value = '';
-    }
-  };
-  reader.readAsText(file);
-}
-
-async function handleLocaleUpdate(value: LocaleSettingsInput) {
-  const previous = { ...locale.value };
-  const next: LocaleFormState = {
-    ...locale.value,
-    ...value,
-    timeFormat: normalizeTimeFormat(value.timeFormat, locale.value.timeFormat),
-  };
-  locale.value = next;
-
-  if (isSupportedLocale(next.language)) {
-    presentationStore.setLocale(next.language);
-  }
-
-  const result = await updateCategory('locale', next);
-  if (result) {
-    return;
-  }
-
-  locale.value = previous;
-  if (isSupportedLocale(previous.language)) {
-    presentationStore.setLocale(previous.language);
-  }
-}
-
-// ── Hydrate from store when settings load ──
-function hydrateFromStore() {
-  isHydratingAppearance.value = true;
-
-  try {
-    const a = getCategory('appearance');
-    if (a) Object.assign(appearance.value, a);
-
-    const l = getCategory('locale');
-    if (l) Object.assign(locale.value, l);
-
-    const p = getCategory('privacy');
-    if (p) Object.assign(privacy.value, p);
-
-    const exp = getCategory('experimental');
-    if (exp) Object.assign(experimental.value, exp);
-  } finally {
-    // Keep the hydration guard active until the appearance watcher has run in
-    // the reactive flush. Resetting synchronously would let the watcher see the
-    // hydrated theme and echo a redundant updateCategory write to the server
-    // (and, on a failed write, pollute the store error with a spurious message).
-    void nextTick(() => {
-      isHydratingAppearance.value = false;
-    });
-  }
-}
-
-watch(userSetting, () => hydrateFromStore());
-
-// The root presentation bootstrap loads defaults concurrently with the
-// settings record. When defaults land after the settings record, re-hydrate
-// so a brand-new user (no persisted appearance/locale) still sees the server
-// defaults in the UI instead of the view's initial literals.
-watch(defaults, () => hydrateFromStore());
-
-watch(
-  () => appearance.value.theme,
-  async (theme, previousTheme) => {
-    if (isHydratingAppearance.value) {
-      return;
-    }
-
-    applyThemeMode(theme);
-
-    if (theme === previousTheme || previousTheme === undefined) {
-      return;
-    }
-
-    await updateCategory('appearance', { theme });
-  },
-  { immediate: true },
-);
-
-onMounted(async () => {
+onMounted(() => {
   if (typeof ResizeObserver !== 'undefined' && settingsContentRef.value) {
     settingsResizeObserver = new ResizeObserver(([entry]) => {
       if (entry) contentWidth.value = entry.contentRect.width;
     });
     settingsResizeObserver.observe(settingsContentRef.value);
   }
-  await loadSettings();
-  hydrateFromStore();
 });
 
 onBeforeUnmount(() => {
@@ -394,30 +93,12 @@ onBeforeUnmount(() => {
     class="min-h-full min-w-0 overflow-hidden bg-background"
     data-testid="user-settings-view"
   >
-    <!-- Hidden file input for importing settings -->
-    <input
-      ref="fileInput"
-      type="file"
-      accept=".json"
-      class="hidden"
-      aria-hidden="true"
-      @change="onFileSelected"
-    />
-
     <div class="mx-auto max-w-5xl px-6 py-8">
-      <!-- Loading state -->
-      <div v-if="isLoading" class="flex items-center justify-center py-12">
-        <Loader2 class="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
-
       <div
-        v-else
         class="flex min-h-0 gap-6"
         :class="isNarrow ? 'flex-col' : 'flex-row'"
         data-testid="settings-panel-layout"
       >
-        <!-- 窄档：顶部分组横向 tabs；宽档：左侧垂直分组导航（V2 §7 / V1 §13-8）。
-             Phase 3：宽档 nav sticky top-0（相对正文滚动容器），长页面滚动时保持可见。 -->
         <nav
           class="flex shrink-0 gap-1"
           :class="
@@ -444,60 +125,13 @@ onBeforeUnmount(() => {
           </button>
         </nav>
 
-        <!-- 右侧内容 max-w-3xl（§13-3） -->
         <div class="min-w-0 max-w-3xl flex-1 space-y-8">
-          <template v-if="activeTab === 'appearance'">
-            <AppearanceSettings v-model="appearance" />
-            <LocaleSettings :model-value="locale" @update:model-value="handleLocaleUpdate" />
-          </template>
-
-          <template v-else-if="activeTab === 'ai'">
-            <AISettings />
-          </template>
-
-          <template v-else-if="activeTab === 'repository'">
-            <KnowledgeRepositorySettings />
-          </template>
-
-          <template v-else-if="activeTab === 'notifications'">
-            <NotificationSettings />
-          </template>
-
-          <template v-else-if="activeTab === 'account'">
-            <AccountProfileSection />
-            <CloudPasswordSection v-if="cloudPasswordService" />
-            <PrivacySettings v-model="privacy" />
-          </template>
-
-          <template v-else-if="activeTab === 'data'">
-            <UserFilesSettings />
-            <SettingAdvancedActions
-              :backups="backups"
-              :sync-status="syncStatus"
-              :syncing="syncing"
-              :exporting-data="isExportingData"
-              :importing-data="isImportingData"
-              :data-portability-available="isDataPortabilityAvailable"
-              :server-data-disclosure-available="isServerDisclosureAvailable"
-              :exporting-server-data-disclosure="isExportingServerDisclosure"
-              :data-portability-result="dataPortabilityResult"
-              @export-j-s-o-n="handleExportJson"
-              @import="handleImport"
-              @export-all-data="exportAllData"
-              @export-server-data-disclosure="exportServerHeldDataDisclosure"
-              @import-all-data="importAllData"
-            />
-          </template>
-
-          <template v-else-if="activeTab === 'advanced'">
-            <ShortcutSettings
-              :categories="shortcutCategories"
-              :editing-shortcut="editingShortcut"
-              :editing-key="editingKey"
-            />
-            <SettingsResetSection />
-            <ExperimentalSettings v-model="experimental" />
-          </template>
+          <UserPreferenceSettingsSection v-if="activeTab === 'appearance'" />
+          <AISettings v-else-if="activeTab === 'ai'" />
+          <KnowledgeRepositorySettings v-else-if="activeTab === 'repository'" />
+          <NotificationSettings v-else-if="activeTab === 'notifications'" />
+          <AccountSettingsSection v-else-if="activeTab === 'account'" />
+          <DataSettingsSection v-else-if="activeTab === 'data'" />
         </div>
       </div>
     </div>

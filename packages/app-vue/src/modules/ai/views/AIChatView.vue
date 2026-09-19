@@ -71,45 +71,45 @@
             <AIRuntimeUsageBadge :usage="lastRuntimeUsage" />
             <div class="flex items-center gap-1 md:hidden">
               <Button
-              variant="ghost"
-              size="icon"
-              :aria-label="t('aiAssistant.chatPage.sidebar.open')"
-              class="h-8 w-8"
-              :title="t('aiAssistant.chatPage.sidebar.open')"
-              data-testid="ai-mobile-sidebar-toggle"
-              @click="openMobileSidebar"
-            >
-              <Menu class="h-4 w-4" />
-            </Button>
-            <Button
-              v-if="hasWorkflowContext"
-              variant="ghost"
-              size="icon"
-              :aria-label="
-                contextPanelOpen
-                  ? t('aiAssistant.chatPage.context.hide')
-                  : t('aiAssistant.chatPage.context.show')
-              "
-              class="h-8 w-8"
-              :title="
-                contextPanelOpen
-                  ? t('aiAssistant.chatPage.context.hide')
-                  : t('aiAssistant.chatPage.context.show')
-              "
-              data-testid="ai-context-panel-toggle"
-              @click="toggleContextPanel"
-            >
-              <PanelRightOpen class="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              :aria-label="t('aiAssistant.dialogs.chat.newConversation')"
-              class="h-8 w-8"
-              :title="t('aiAssistant.dialogs.chat.newConversation')"
-              @click="startNewConversation()"
-            >
-              <Plus class="h-4 w-4" />
+                variant="ghost"
+                size="icon"
+                :aria-label="t('aiAssistant.chatPage.sidebar.open')"
+                class="h-8 w-8"
+                :title="t('aiAssistant.chatPage.sidebar.open')"
+                data-testid="ai-mobile-sidebar-toggle"
+                @click="openMobileSidebar"
+              >
+                <Menu class="h-4 w-4" />
+              </Button>
+              <Button
+                v-if="hasWorkflowContext"
+                variant="ghost"
+                size="icon"
+                :aria-label="
+                  contextPanelOpen
+                    ? t('aiAssistant.chatPage.context.hide')
+                    : t('aiAssistant.chatPage.context.show')
+                "
+                class="h-8 w-8"
+                :title="
+                  contextPanelOpen
+                    ? t('aiAssistant.chatPage.context.hide')
+                    : t('aiAssistant.chatPage.context.show')
+                "
+                data-testid="ai-context-panel-toggle"
+                @click="toggleContextPanel"
+              >
+                <PanelRightOpen class="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                :aria-label="t('aiAssistant.dialogs.chat.newConversation')"
+                class="h-8 w-8"
+                :title="t('aiAssistant.dialogs.chat.newConversation')"
+                @click="startNewConversation()"
+              >
+                <Plus class="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -234,8 +234,8 @@
           :clarification-answers="clarificationAnswers"
           :editable-goal="editableGoal"
           :editable-key-results="editableKeyResults"
-          :editable-task-templates="editableTaskTemplates"
-          :editable-reminders="editableReminders"
+          :editable-tasks="editableTasks"
+          :editable-knowledge="editableKnowledge"
           :show-goal-draft-editor="showGoalDraftEditor"
           :knowledge-answer="knowledgeAnswer"
           :format-execution-outcome="formatExecutionOutcome"
@@ -245,20 +245,21 @@
           @remove-key-result="removeKeyResultDraft"
           @update-goal="handleUpdateGoalDraft"
           @update-key-result="updateKeyResultDraft"
-          @add-task-template="addTaskTemplateDraft"
-          @remove-task-template="removeTaskTemplateDraft"
-          @update-task-template="updateTaskTemplateDraft"
-          @add-reminder="addReminderDraft"
-          @remove-reminder="removeReminderDraft"
-          @update-reminder="updateReminderDraft"
+          @remove-task="removeTaskDraft"
+          @update-task="updateTaskDraft"
+          @remove-knowledge="removeKnowledgeDraft"
+          @update-knowledge="updateKnowledgeDraft"
           @open-knowledge-citation="openKnowledgeCitation"
         />
         <AITaskWorkflowPanel
           :tool-mode="toolMode"
           :task-workflow-run="taskWorkflowRun"
+          :editable-task="editableTask"
+          :show-task-draft-editor="showTaskDraftEditor"
           @confirm="confirmTaskAgentRun"
           @cancel="cancelTaskAgentRun"
           @retry="retryTaskAgentExecution"
+          @update-task="updateStandaloneTaskDraft"
           @edit-started="showTaskDraftEditor = true"
         />
         <AIKnowledgeCapturePanel
@@ -283,7 +284,7 @@
 
 <script setup lang="ts">
 import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Menu, PanelRightOpen, Plus } from '@lucide/vue';
 import { Button } from '@memoflow/ui-vue-shadcn';
@@ -307,6 +308,7 @@ import { useAIChatView } from '../composables/useAIChatView';
 import type { ConversationSummary, WorkflowMode } from '../composables/types';
 
 const { t } = useI18n();
+const route = useRoute();
 const router = useRouter();
 
 withDefaults(
@@ -375,8 +377,8 @@ const {
   goalAgentResuming,
   editableGoal,
   editableKeyResults,
-  editableTaskTemplates,
-  editableReminders,
+  editableTasks,
+  editableKnowledge,
   canRunGoalAgent,
   canResumeGoalAgentClarification,
   canContinueGoalAgentExecution,
@@ -397,12 +399,10 @@ const {
   removeKeyResultDraft,
   updateKeyResultDraft,
   handleUpdateGoalDraft,
-  addTaskTemplateDraft,
-  removeTaskTemplateDraft,
-  updateTaskTemplateDraft,
-  addReminderDraft,
-  removeReminderDraft,
-  updateReminderDraft,
+  removeTaskDraft,
+  updateTaskDraft,
+  removeKnowledgeDraft,
+  updateKnowledgeDraft,
   toggleGoalDraftEditor,
 } = goalWorkflow;
 
@@ -418,12 +418,14 @@ const {
   taskAgentLoading,
   taskWorkflowRun,
   showTaskDraftEditor,
+  editableTask,
   canRunTaskAgent,
   linkedGoalId,
   setLinkedGoalId,
   startTaskAgentRun,
   cancelTaskAgentRun,
   confirmTaskAgentRun,
+  updateTaskDraft: updateStandaloneTaskDraft,
   retryTaskAgentExecution,
 } = taskWorkflow;
 
@@ -477,6 +479,19 @@ watch(
   { immediate: true },
 );
 
+watch(
+  () => route.query.workflow,
+  (workflow) => {
+    if (workflow !== 'goal-create') return;
+    startNewConversation('goal-create');
+    requestContextPanel('explicit');
+    const query = { ...route.query };
+    delete query.workflow;
+    void router.replace({ path: route.path, query });
+  },
+  { immediate: true },
+);
+
 watch([goalWorkflowRun, automatedGoalId, toolMode], () => {
   if (
     toolMode.value !== 'goal-create' ||
@@ -526,8 +541,12 @@ function closeContextPanel() {
   if (shellStore) shellStore.closeWorkflowSurface();
   else contextPanelOpen.value = false;
 }
-function openMobileSidebar() { mobileSidebarOpen.value = true; }
-function closeMobileSidebar() { mobileSidebarOpen.value = false; }
+function openMobileSidebar() {
+  mobileSidebarOpen.value = true;
+}
+function closeMobileSidebar() {
+  mobileSidebarOpen.value = false;
+}
 
 function startNewConversation(mode: WorkflowMode | string = 'chat') {
   lastOpenedGoalId.value = null;
@@ -553,11 +572,22 @@ async function openRecentKnowledgeNoteFromMobile(resourceId: string) {
   closeMobileSidebar();
   await openRecentKnowledgeNote(resourceId);
 }
-function openSettingsFromMobile() { closeMobileSidebar(); openSettings(); }
-function openAISettings() { void router.push('/settings?tab=ai'); }
-function openGoalWithoutAI() { void router.push('/goals?dialog=goal'); }
-function openQuickTaskWithoutAI() { void router.push('/tasks?dialog=quick-task'); }
-function handleClarificationAnswersUpdate(answers: string[]) { clarificationAnswers.value = answers; }
+function openSettingsFromMobile() {
+  closeMobileSidebar();
+  openSettings();
+}
+function openAISettings() {
+  void router.push('/settings?tab=ai');
+}
+function openGoalWithoutAI() {
+  void router.push('/goals?dialog=goal');
+}
+function openQuickTaskWithoutAI() {
+  void router.push('/tasks?dialog=quick-task');
+}
+function handleClarificationAnswersUpdate(answers: string[]) {
+  clarificationAnswers.value = answers;
+}
 
 onMounted(() => {
   const viewport = messagePanelRef.value?.viewport;

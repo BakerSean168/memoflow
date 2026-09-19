@@ -15,6 +15,7 @@ function createLocalVaultPort(): LocalVaultElectronPort {
       created: true,
       note: {
         relativePath: 'Research/Approved.md',
+        knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440520' as never,
         title: 'Approved',
         excerpt: 'Reviewed body',
         tags: ['agent'],
@@ -40,6 +41,7 @@ describe('DesktopKnowledgeNotePersistenceAdapter', () => {
         path: 'Research/Unconfirmed.md',
         fileName: 'Unconfirmed.md',
         content: '# Unconfirmed',
+        knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440520' as never,
       }),
     ).rejects.toThrow(/confirmed knowledge-note proposal/i);
     expect(localVault.writeConfirmedNote).not.toHaveBeenCalled();
@@ -54,19 +56,22 @@ describe('DesktopKnowledgeNotePersistenceAdapter', () => {
       path: 'Research/Approved.md',
       fileName: 'Approved.md',
       content: '# Approved\n\nReviewed body',
+      knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440520',
       proposalId: 'proposal-1',
       proposalRevision: 4,
       requestId: 'request-1',
     });
 
-    expect(localVault.writeConfirmedNote).toHaveBeenCalledWith('identity-1', {
+    expect(localVault.writeConfirmedNote).toHaveBeenCalledWith({
       relativePath: 'Research/Approved.md',
+      knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440520',
       contentMarkdown: '# Approved\n\nReviewed body',
       proposalId: 'proposal-1',
       proposalRevision: 4,
       requestId: 'request-1',
     });
     expect(result.note).toMatchObject({
+      id: 'kdoc_550e8400-e29b-41d4-a716-446655440520',
       name: 'Approved.md',
       path: 'Research/Approved.md',
       content: '# Approved\n\nReviewed body',

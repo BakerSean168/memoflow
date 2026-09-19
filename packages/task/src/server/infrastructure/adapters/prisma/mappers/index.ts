@@ -1,2 +1,2 @@
-export { PrismaTaskTemplateMapper } from './prisma-task-template-mapper';
-export { PrismaTaskInstanceMapper } from './prisma-task-instance-mapper';
+export { PrismaTaskPlanMapper } from './prisma-task-plan-mapper';
+export { PrismaTaskOccurrenceMapper } from './prisma-task-occurrence-mapper';

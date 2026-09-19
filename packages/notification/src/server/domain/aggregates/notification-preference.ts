@@ -3,26 +3,27 @@ import type {
   NotificationPreferenceClientDTO,
   NotificationChannelType,
 } from '@memoflow/contracts/notification';
-import type { IdentityId, NotificationPreferenceId as NotificationPreferenceIdBranded } from '@memoflow/contracts/primitives';
+import type {
+  IdentityId,
+  NotificationPreferenceId as NotificationPreferenceIdBranded,
+} from '@memoflow/contracts/primitives';
 import { AggregateRoot } from '@memoflow/utils/domain';
 import { NotificationPreferenceId } from '../value-objects/notification-preference-id';
-import { DoNotDisturbConfig } from '../value-objects/do-not-disturb-config';
-import { RateLimit } from '../value-objects/rate-limit';
+import { QuietHours } from '../value-objects/quiet-hours';
 
 export interface NotificationPreferenceState {
   id: NotificationPreferenceId;
   identityId: IdentityId;
   globalChannels: Map<NotificationChannelType, boolean>;
   workflowOverrides: Map<string, Map<NotificationChannelType, boolean>>;
-  doNotDisturb?: DoNotDisturbConfig | null;
-  rateLimit?: RateLimit | null;
+  quietHours?: QuietHours | null;
   version: number;
   deletedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
 
-/** User-owned preference layers; workflow capability/default is not stored here. */
+/** User-owned preference layers. Platform delivery guards are intentionally separate. */
 export class NotificationPreference extends AggregateRoot<NotificationPreferenceId> {
   private _props: NotificationPreferenceState;
 
@@ -42,8 +43,7 @@ export class NotificationPreference extends AggregateRoot<NotificationPreference
   get workflowOverrides(): Map<string, Map<NotificationChannelType, boolean>> {
     return new Map([...this._props.workflowOverrides].map(([key, value]) => [key, new Map(value)]));
   }
-  get doNotDisturb(): DoNotDisturbConfig | null { return this._props.doNotDisturb ?? null; }
-  get rateLimit(): RateLimit | null { return this._props.rateLimit ?? null; }
+  get quietHours(): QuietHours | null { return this._props.quietHours ?? null; }
   get version(): number { return this._props.version; }
   get deletedAt(): Date | null { return this._props.deletedAt; }
   get createdAt(): Date { return this._props.createdAt; }
@@ -89,13 +89,8 @@ export class NotificationPreference extends AggregateRoot<NotificationPreference
     this.touch();
   }
 
-  setDoNotDisturb(config: DoNotDisturbConfig | null): void {
-    this._props.doNotDisturb = config;
-    this.touch();
-  }
-
-  setRateLimit(rateLimit: RateLimit | null): void {
-    this._props.rateLimit = rateLimit;
+  setQuietHours(config: QuietHours | null): void {
+    this._props.quietHours = config;
     this.touch();
   }
 
@@ -107,8 +102,7 @@ export class NotificationPreference extends AggregateRoot<NotificationPreference
       workflowOverrides: Object.fromEntries(
         [...this._props.workflowOverrides].map(([key, value]) => [key, Object.fromEntries(value)]),
       ),
-      doNotDisturb: this.doNotDisturb?.toDTO() ?? null,
-      rateLimit: this.rateLimit?.toDTO() ?? null,
+      quietHours: this.quietHours?.toDTO() ?? null,
       version: this._props.version,
       deletedAt: this._props.deletedAt?.getTime() ?? null,
       createdAt: this._props.createdAt.getTime(),
@@ -131,8 +125,7 @@ export class NotificationPreference extends AggregateRoot<NotificationPreference
       identityId: params.identityId,
       globalChannels: new Map(),
       workflowOverrides: new Map(),
-      doNotDisturb: null,
-      rateLimit: null,
+      quietHours: null,
       version: 1,
       deletedAt: null,
       createdAt: now,

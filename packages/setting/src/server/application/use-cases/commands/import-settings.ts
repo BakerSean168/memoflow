@@ -1,57 +1,44 @@
-/**
- * Import Settings
- *
- * 导入用户设置 — 支持合并或覆盖模式
- */
-
-import type { IUserSettingRepository } from '../../../domain/repositories/i-user-setting-repository';
-import { UserSetting } from '../../../domain/aggregates/user-setting';
-import type { UserSettingClientDTO, UserSettingPreferences } from '@memoflow/contracts/setting';
+/** Canonical V3 preference-only import. Legacy v1/v2 files are unsupported under ADR-111. */
+import {
+  PreferencePortableDocumentV3Schema,
+  PreferencePortableImportReceiptV3Schema,
+  type PreferencePortableImportReceiptV3,
+} from '@memoflow/contracts/setting';
+import type { PreferencePortableService } from '../../../preferences/preference-portability';
 
 export class ImportSettings {
-  constructor(private readonly userSettingRepository: IUserSettingRepository) {}
+  constructor(private readonly portableService: PreferencePortableService) {}
 
   async execute(
     identityId: string,
-    data: Record<string, unknown>,
-    options?: { merge?: boolean },
-  ): Promise<UserSettingClientDTO> {
-    const { merge = false } = options ?? {};
-    this.validateImportData(data);
-
-    const importedPreferences = data.settings as Partial<UserSettingPreferences>;
-
-    let setting = await this.userSettingRepository.findByIdentityId(identityId);
-
-    if (!setting) {
-      setting = UserSetting.create({ identityId });
+    data: unknown,
+  ): Promise<PreferencePortableImportReceiptV3> {
+    if (data && typeof data === 'object' && !Array.isArray(data)) {
+      const raw = data as Record<string, unknown>;
+      if (raw.schemaVersion !== undefined && raw.schemaVersion !== 3) {
+        throw new Error(
+          `Unsupported preference import schemaVersion: ${String(raw.schemaVersion)}; only V3 is supported`,
+        );
+      }
+      if ('version' in raw || 'settings' in raw) {
+        throw new Error('Legacy preference import V1/V2 is unsupported under ADR-111');
+      }
     }
 
-    if (merge) {
-      // 合并模式：只覆盖提供的分类/字段
-      setting.importPreferences(importedPreferences);
-    } else {
-      // 覆盖模式：先重置，再导入
-      setting.resetAll();
-      setting.importPreferences(importedPreferences);
+    const parsed = PreferencePortableDocumentV3Schema.safeParse(data);
+    if (!parsed.success) {
+      const issue = parsed.error.issues[0];
+      throw new Error(
+        `Invalid preference V3 import: ${issue.path.join('.')} — ${issue.message}`,
+      );
     }
 
-    await this.userSettingRepository.save(setting);
-    return setting.toClientDTO();
-  }
-
-  private validateImportData(data: Record<string, unknown>): void {
-    if (!data.settings) {
-      throw new Error('Invalid import data: missing settings field');
-    }
-
-    if (!data.version) {
-      throw new Error('Invalid import data: missing version field');
-    }
-
-    const supportedVersions = ['1.0.0', '2.0.0'];
-    if (!supportedVersions.includes(data.version as string)) {
-      throw new Error(`Unsupported settings version: ${data.version}`);
-    }
+    const receipt = await this.portableService.apply(identityId, parsed.data.preferences);
+    return PreferencePortableImportReceiptV3Schema.parse({
+      schemaVersion: 3,
+      imported: receipt.created + receipt.updated,
+      skipped: receipt.skipped,
+      warnings: [...receipt.warnings],
+    });
   }
 }

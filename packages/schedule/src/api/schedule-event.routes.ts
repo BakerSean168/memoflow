@@ -86,8 +86,8 @@ export function registerScheduleEventRoutes(
       summary: '按时间范围查询日程事件',
       request: {
         query: z.object({
-          startTime: z.string().describe('开始时间戳（毫秒）'),
-          endTime: z.string().describe('结束时间戳（毫秒）'),
+          startTime: z.string().optional().describe('开始时间戳（毫秒）'),
+          endTime: z.string().optional().describe('结束时间戳（毫秒）'),
         }),
       },
       responses: {
@@ -95,14 +95,12 @@ export function registerScheduleEventRoutes(
       },
     },
     [auth],
-    (req, ctx) =>
-      controller.getByTimeRange(
-        {
-          startTime: req.query?.startTime,
-          endTime: req.query?.endTime,
-        },
-        ctx,
-      ),
+    (req, ctx) => {
+      const startTime = req.query?.startTime;
+      const endTime = req.query?.endTime;
+      if (startTime == null && endTime == null) return controller.getAll(ctx);
+      return controller.getByTimeRange({ startTime, endTime }, ctx);
+    },
   );
 
   // GET /:id — 获取日程详情

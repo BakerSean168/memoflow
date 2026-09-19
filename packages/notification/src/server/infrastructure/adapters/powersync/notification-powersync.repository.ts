@@ -14,8 +14,7 @@ import type {
 } from '../../../domain/repositories/i-notification-repository';
 import type { NotificationDeliveryDecision } from '../../../domain/services/notification-policy';
 import { Notification } from '../../../domain/aggregates/notification';
-import { NotificationChannel } from '../../../domain/entities/notification-channel';
-import { NotificationId, NotificationAction, NotificationMetadata, NotificationChannelId, ChannelError, ChannelResponse } from '../../../domain/value-objects';
+import { NotificationId, NotificationAction, NotificationMetadata } from '../../../domain/value-objects';
 import { createTypedEventPublisher, eventBus, flushDomainEvents } from '@memoflow/utils/domain';
 // Residual 1025: sole parseJsonSafe (local dual retired).
 import { parseJsonSafe } from '@memoflow/utils/shared';
@@ -48,23 +47,9 @@ interface NotificationRow {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+  archived_at: string | null;
 }
 
-interface NotificationChannelRow {
-  id: string;
-  identity_id: string;
-  notification_id: string;
-  channel_type: string;
-  status: string;
-  recipient: string | null;
-  max_retries: number;
-  retry_count: number;
-  attempts: number;
-  sent_at: string | null;
-  failed_at: string | null;
-  error: string | null;
-  response: string | null;
-}
 
 // Residual 1101 keep-boundary: PowerSync row ISO string → number|null (empty/invalid → null).
 // Soft residual 1101: projection unknown→undefined and AI positive-only keep-boundaries (no force-merge).
@@ -94,7 +79,7 @@ function toServerDTO(row: NotificationRow): NotificationServerDTO {
     navigationIntent: parseJsonSafe(row.navigation_intent),
     correlationId: row.correlation_id,
     causationId: row.causation_id,
-    isRead: Boolean(row.is_read ?? 0),
+    isRead: row.read_at !== null,
     readAt: toTimestamp(row.read_at),
     actions: parseJsonSafe<NotificationServerDTO['actions']>(row.actions),
     metadata: parseJsonSafe<NotificationServerDTO['metadata']>(row.metadata),
@@ -103,35 +88,11 @@ function toServerDTO(row: NotificationRow): NotificationServerDTO {
     createdAt: toTimestamp(row.created_at) ?? Date.now(),
     updatedAt: toTimestamp(row.updated_at) ?? Date.now(),
     deletedAt: toTimestamp(row.deleted_at),
-    notificationChannels: null,
+    archivedAt: toTimestamp(row.archived_at),
   };
 }
 
-/**
- * Hydrate a single notification_channels row into a domain NotificationChannel
- * entity, mirroring NotificationPrismaMapper.channelToDomain (Prisma baseline):
- * the channel is rehydrated with its persisted status/response/error so the
- * durable worker can reconcile delivery state and persist acks back.
- */
-function hydrateNotificationChannel(row: NotificationChannelRow): NotificationChannel {
-  const sentAt = toTimestamp(row.sent_at);
-  const failedAt = toTimestamp(row.failed_at);
-  return NotificationChannel.load({
-    id: NotificationChannelId.of(row.id),
-    notificationId: NotificationId.of(row.notification_id),
-    channelType: row.channel_type as never,
-    status: row.status as never,
-    recipient: row.recipient,
-    sendAttempts: row.retry_count,
-    maxRetries: row.max_retries,
-    error: row.error ? ChannelError.fromDTO(parseJsonSafe(row.error)!) : null,
-    response: row.response ? ChannelResponse.fromDTO(parseJsonSafe(row.response)!) : null,
-    sentAt: sentAt ? new Date(sentAt) : null,
-    failedAt: failedAt ? new Date(failedAt) : null,
-  });
-}
-
-function hydrateNotification(row: NotificationRow, channels: NotificationChannelRow[] = []): Notification {
+function hydrateNotification(row: NotificationRow): Notification {
   const dto = toServerDTO(row);
 
   return Notification.load({
@@ -158,9 +119,9 @@ function hydrateNotification(row: NotificationRow, channels: NotificationChannel
     expiresAt: dto.expiresAt ?? null,
     version: dto.version,
     deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
+    archivedAt: dto.archivedAt ? new Date(dto.archivedAt) : null,
     createdAt: new Date(dto.createdAt),
     updatedAt: new Date(dto.updatedAt),
-    notificationChannels: channels.map(hydrateNotificationChannel),
   });
 }
 
@@ -179,33 +140,18 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
   private async ensureTablesExist(): Promise<void> {
     if (this.tablesInitialized) return;
     await this.db.execute(`
-      CREATE TABLE IF NOT EXISTS notification_channels (
+      CREATE TABLE IF NOT EXISTS notification_interactions (
         id TEXT PRIMARY KEY,
+        idempotency_key TEXT UNIQUE NOT NULL,
         identity_id TEXT NOT NULL,
         notification_id TEXT NOT NULL,
-        channel_type TEXT NOT NULL,
-        status TEXT NOT NULL,
-        recipient TEXT NOT NULL,
-        max_retries INTEGER NOT NULL DEFAULT 3,
-        retry_count INTEGER NOT NULL DEFAULT 0,
-        attempts INTEGER NOT NULL DEFAULT 0,
-        sent_at TEXT,
-        failed_at TEXT,
-        error TEXT,
-        response TEXT,
-        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
-    await this.db.execute(`
-      CREATE TABLE IF NOT EXISTS notification_history (
-        id TEXT PRIMARY KEY,
-        identity_id TEXT NOT NULL,
-        notification_id TEXT NOT NULL,
-        action TEXT NOT NULL,
-        details TEXT,
-        actor_id TEXT,
-        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        action_key TEXT NOT NULL,
+        action_kind TEXT NOT NULL,
+        occurred_at TEXT NOT NULL,
+        command_receipt_id TEXT,
+        outcome TEXT NOT NULL,
+        correlation_id TEXT,
+        causation_id TEXT
       );
     `);
     await this.db.execute(`
@@ -275,7 +221,7 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
                 title = ?, content = ?, type = ?, category = ?, importance = ?, urgency = ?,
                 is_read = ?, read_at = ?, related_entity_type = ?, related_entity_id = ?,
                 navigation_intent = ?, correlation_id = ?, causation_id = ?, metadata = ?, actions = ?,
-                expires_at = ?, version = ?, updated_at = ?, deleted_at = ?
+                expires_at = ?, version = ?, updated_at = ?, deleted_at = ?, archived_at = ?
           WHERE id = ?`,
         [
           dto.identityId, dto.workflowKey, dto.topic, dto.idempotencyKey,
@@ -288,7 +234,8 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
           dto.actions ? JSON.stringify(dto.actions) : null,
           dto.expiresAt ? new Date(dto.expiresAt).toISOString() : null,
           dto.version, new Date(dto.updatedAt).toISOString(),
-          dto.deletedAt ? new Date(dto.deletedAt).toISOString() : null, dto.id,
+          dto.deletedAt ? new Date(dto.deletedAt).toISOString() : null,
+          dto.archivedAt ? new Date(dto.archivedAt).toISOString() : null, dto.id,
         ],
       );
     } else {
@@ -297,8 +244,8 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
             id, identity_id, workflow_key, topic, idempotency_key, title, content, type, category,
             importance, urgency, is_read, read_at, related_entity_type, related_entity_id,
             navigation_intent, correlation_id, causation_id, metadata, actions, expires_at,
-            version, created_at, updated_at, deleted_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            version, created_at, updated_at, deleted_at, archived_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           dto.id, dto.identityId, dto.workflowKey, dto.topic, dto.idempotencyKey,
           dto.title, dto.content, dto.type, dto.category, dto.importance, dto.urgency,
@@ -311,79 +258,9 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
           dto.expiresAt ? new Date(dto.expiresAt).toISOString() : null, dto.version,
           new Date(dto.createdAt).toISOString(), new Date(dto.updatedAt).toISOString(),
           dto.deletedAt ? new Date(dto.deletedAt).toISOString() : null,
+          dto.archivedAt ? new Date(dto.archivedAt).toISOString() : null,
         ],
       );
-    }
-
-    if (dto.notificationChannels && dto.notificationChannels.length > 0) {
-      for (const ch of dto.notificationChannels) {
-        const channelId = String(ch.id);
-        const existingCh = await tx.getOptional<{ id: string }>(
-          `SELECT id FROM notification_channels WHERE id = ? LIMIT 1`,
-          [channelId],
-        );
-        const sentAtIso = ch.sentAt ? new Date(ch.sentAt).toISOString() : null;
-        const failedAtIso = ch.failedAt ? new Date(ch.failedAt).toISOString() : null;
-        const errorJson = ch.error ? JSON.stringify(ch.error) : null;
-        const responseJson = ch.response ? JSON.stringify(ch.response) : null;
-
-        if (existingCh) {
-          await tx.execute(
-            `UPDATE notification_channels
-                SET channel_type = ?,
-                    status = ?,
-                    recipient = ?,
-                    max_retries = ?,
-                    retry_count = ?,
-                    attempts = ?,
-                    sent_at = ?,
-                    failed_at = ?,
-                    error = ?,
-                    response = ?,
-                    updated_at = ?
-              WHERE id = ?`,
-            [
-              ch.channelType,
-              ch.status,
-              ch.recipient,
-              ch.maxRetries,
-              ch.sendAttempts,
-              ch.sendAttempts,
-              sentAtIso,
-              failedAtIso,
-              errorJson,
-              responseJson,
-              new Date().toISOString(),
-              channelId,
-            ],
-          );
-        } else {
-          await tx.execute(
-            `INSERT INTO notification_channels (
-                id, identity_id, notification_id, channel_type, status, recipient,
-                max_retries, retry_count, attempts, sent_at, failed_at, error, response,
-                created_at, updated_at
-              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [
-              channelId,
-              dto.identityId,
-              dto.id,
-              ch.channelType,
-              ch.status,
-              ch.recipient,
-              ch.maxRetries,
-              ch.sendAttempts,
-              ch.sendAttempts,
-              sentAtIso,
-              failedAtIso,
-              errorJson,
-              responseJson,
-              new Date().toISOString(),
-              new Date().toISOString(),
-            ],
-          );
-        }
-      }
     }
 
     if (outboxDispatches && outboxDispatches.length > 0) {
@@ -471,57 +348,16 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
       `SELECT
          SUM(CASE WHEN n.created_at >= ? THEN 1 ELSE 0 END) AS hour_count,
          COUNT(*) AS day_count
-       FROM notification_channels c
-       JOIN notifications n ON n.id = c.notification_id
-       WHERE c.identity_id = ?
-         AND c.channel_type = ?
+       FROM notification_delivery_decisions d
+       JOIN notifications n ON n.id = d.notification_id
+       WHERE d.identity_id = ?
+         AND d.channel = ?
+         AND d.outcome IN ('enqueued', 'deferred')
          AND n.workflow_key = ?
          AND n.created_at >= ?`,
       [hourStart, identityId, channel, workflowKey, dayStart],
     );
-
-    return {
-      hourCount: Number(row?.hour_count ?? 0),
-      dayCount: Number(row?.day_count ?? 0),
-    };
-  }
-
-  private async loadChannels(notificationId: string): Promise<NotificationChannelRow[]> {
-    return this.db.getAll<NotificationChannelRow>(
-      `SELECT * FROM notification_channels WHERE notification_id = ? ORDER BY created_at ASC`,
-      [notificationId],
-    );
-  }
-
-  /**
-   * Hydrate notification rows together with their child notification_channels
-   * rows (single batched query), mirroring the Prisma baseline which includes
-   * channels by default (INCLUDE_CHANNELS).
-   */
-  private async hydrateWithChannels(rows: NotificationRow[]): Promise<Notification[]> {
-    if (rows.length === 0) return [];
-    const placeholders = rows.map(() => '?').join(', ');
-    const channelRows = await this.db.getAll<NotificationChannelRow>(
-      `SELECT * FROM notification_channels WHERE notification_id IN (${placeholders}) ORDER BY created_at ASC`,
-      rows.map((row) => row.id),
-    );
-    const channelsByNotificationId = new Map<string, NotificationChannelRow[]>();
-    for (const channelRow of channelRows) {
-      const list = channelsByNotificationId.get(channelRow.notification_id) ?? [];
-      list.push(channelRow);
-      channelsByNotificationId.set(channelRow.notification_id, list);
-    }
-    return rows.map((row) => hydrateNotification(row, channelsByNotificationId.get(row.id) ?? []));
-  }
-
-  async findChannelsByStatus(status: string, limit?: number): Promise<Notification[]> {
-    const rows = await this.db.getAll<NotificationRow>(
-      `SELECT n.* FROM notifications n
-       JOIN notification_channels c ON c.notification_id = n.id
-       WHERE n.deleted_at IS NULL AND c.status = ? ${limit ? 'LIMIT ?' : ''}`,
-      limit ? [status, limit] : [status],
-    );
-    return this.hydrateWithChannels(rows);
+    return { hourCount: Number(row?.hour_count ?? 0), dayCount: Number(row?.day_count ?? 0) };
   }
 
   async findByIdForIdentity(
@@ -534,8 +370,7 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
       [id, identityId],
     );
     if (!row) return null;
-    const channels = await this.loadChannels(row.id);
-    return hydrateNotification(row, channels);
+    return hydrateNotification(row);
   }
 
   async findByIdempotencyKey(identityId: string, idempotencyKey: string): Promise<Notification | null> {
@@ -544,8 +379,7 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
       [identityId, idempotencyKey],
     );
     if (!row) return null;
-    const channels = await this.loadChannels(row.id);
-    return hydrateNotification(row, channels);
+    return hydrateNotification(row);
   }
 
   async findByIdentityId(
@@ -554,6 +388,7 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
       includeChildren?: boolean;
       includeRead?: boolean;
       includeDeleted?: boolean;
+      archiveState?: 'active' | 'archived' | 'all';
       limit?: number;
       offset?: number;
     },
@@ -565,7 +400,12 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
       filters.push('deleted_at IS NULL');
     }
     if (options?.includeRead === false) {
-      filters.push('COALESCE(is_read, 0) = 0');
+      filters.push('read_at IS NULL');
+    }
+    if (options?.archiveState === 'active' || options?.archiveState === undefined) {
+      filters.push('archived_at IS NULL');
+    } else if (options.archiveState === 'archived') {
+      filters.push('archived_at IS NOT NULL');
     }
 
     let sql = `SELECT * FROM notifications WHERE ${filters.join(' AND ')} ORDER BY created_at DESC`;
@@ -579,13 +419,13 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
     }
 
     const rows = await this.db.getAll<NotificationRow>(sql, params);
-    return this.hydrateWithChannels(rows);
+    return rows.map(hydrateNotification);
   }
 
   async findByCategory(
     identityId: string,
     category: NotificationCategory,
-    options?: { limit?: number; offset?: number },
+    options?: { archiveState?: 'active' | 'archived' | 'all'; limit?: number; offset?: number },
   ): Promise<Notification[]> {
     return this.findByIdentityId(identityId, {
       ...options,
@@ -593,10 +433,11 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
     }).then((items) => items.filter((item) => item.toServerDTO().category === category));
   }
 
-  async findUnread(identityId: string, options?: { limit?: number }): Promise<Notification[]> {
+  async findUnread(identityId: string, options?: { archiveState?: 'active' | 'archived' | 'all'; limit?: number }): Promise<Notification[]> {
     return this.findByIdentityId(identityId, {
       includeRead: false,
       includeDeleted: false,
+      archiveState: options?.archiveState,
       limit: options?.limit,
     });
   }
@@ -605,17 +446,24 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
     identityId: string,
     relatedEntityType: string,
     relatedEntityId: string,
+    options?: { archiveState?: 'active' | 'archived' | 'all' },
   ): Promise<Notification[]> {
+    const archiveFilter = options?.archiveState === 'archived'
+      ? 'AND archived_at IS NOT NULL'
+      : options?.archiveState === 'all'
+        ? ''
+        : 'AND archived_at IS NULL';
     const rows = await this.db.getAll<NotificationRow>(
       `SELECT * FROM notifications
         WHERE identity_id = ?
           AND related_entity_type = ?
           AND related_entity_id = ?
           AND deleted_at IS NULL
+          ${archiveFilter}
         ORDER BY created_at DESC`,
       [identityId, relatedEntityType, relatedEntityId],
     );
-    return this.hydrateWithChannels(rows);
+    return rows.map(hydrateNotification);
   }
 
   async delete(identityId: string, id: string): Promise<void> {
@@ -649,6 +497,25 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
     );
   }
 
+  async archive(identityId: string, id: string, archivedAt: Date): Promise<void> {
+    const result = await this.db.execute(
+      `UPDATE notifications SET archived_at = ?, updated_at = ?
+        WHERE id = ? AND identity_id = ? AND deleted_at IS NULL`,
+      [archivedAt.toISOString(), archivedAt.toISOString(), id, identityId],
+    );
+    if (result.rowsAffected !== 1) throw new Error('Notification not found for the current identity.');
+  }
+
+  async restore(identityId: string, id: string): Promise<void> {
+    const now = new Date().toISOString();
+    const result = await this.db.execute(
+      `UPDATE notifications SET archived_at = NULL, updated_at = ?
+        WHERE id = ? AND identity_id = ? AND deleted_at IS NULL`,
+      [now, id, identityId],
+    );
+    if (result.rowsAffected !== 1) throw new Error('Notification not found for the current identity.');
+  }
+
   async exists(identityId: string, id: string): Promise<boolean> {
     return (await this.findByIdForIdentity(identityId, id)) !== null;
   }
@@ -659,7 +526,8 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
          FROM notifications
         WHERE identity_id = ?
           AND deleted_at IS NULL
-          AND COALESCE(is_read, 0) = 0`,
+          AND archived_at IS NULL
+          AND read_at IS NULL`,
       [identityId],
     );
     return Number(row?.count ?? 0);
@@ -715,7 +583,8 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
               updated_at = ?
         WHERE identity_id = ?
           AND deleted_at IS NULL
-          AND COALESCE(is_read, 0) = 0`,
+          AND archived_at IS NULL
+          AND read_at IS NULL`,
       [now, now, identityId],
     );
   }

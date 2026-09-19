@@ -183,15 +183,14 @@ describe('legacy editor/repository runtime surface', () => {
     expect(shapeAudit).not.toContain("'editor'");
   });
 
-  it('portable editor schema + prepare script remain for backup re-import only (residual 193)', () => {
-    expect(existsSync(resolve(repoRoot, 'packages/database/prisma/schema/editor.prisma'))).toBe(
-      true,
-    );
+  it('legacy Editor runtime and persistence stay deleted', () => {
+    expect(existsSync(resolve(repoRoot, 'packages/editor'))).toBe(false);
+    expect(existsSync(resolve(repoRoot, 'packages/database/prisma/schema/editor.prisma'))).toBe(false);
     expect(
       existsSync(
         resolve(repoRoot, 'packages/database/scripts/prepare-editor-workspace-natural-key.ts'),
       ),
-    ).toBe(true);
+    ).toBe(false);
     expect(
       existsSync(
         resolve(
@@ -199,8 +198,6 @@ describe('legacy editor/repository runtime surface', () => {
           'packages/data-portability/src/server/application/use-cases/importers/editor.importer.ts',
         ),
       ),
-    ).toBe(true);
-    // Runtime package stays deleted (import path is data-portability only).
-    expect(existsSync(resolve(repoRoot, 'packages/editor'))).toBe(false);
+    ).toBe(false);
   });
 });

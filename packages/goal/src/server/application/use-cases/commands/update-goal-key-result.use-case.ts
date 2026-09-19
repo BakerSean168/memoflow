@@ -4,7 +4,7 @@
 
 import { GoalVersionConflictError, type IGoalRepository } from '../../../domain';
 import { GoalPolicy } from '../../../domain';
-import type { GoalMutationReceipt } from '@memoflow/contracts/goal';
+import type { GoalMutationReceipt, GoalTimeframe } from '@memoflow/contracts/goal';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
 import { createGoalMutationReceipt } from './goal-mutation-receipt';
@@ -23,8 +23,8 @@ export class UpdateGoalKeyResultUseCase {
       title?: string;
       description?: string;
       weight?: number;
-      startingValue?: number;
-      progressBaselineValue?: number | null;
+      initialValue?: number;
+      target?: GoalTimeframe | null;
       aggregationMethod?: import('@memoflow/contracts/goal').KeyResultCalculationMethod;
       currentValue?: number;
       targetValue?: number;
@@ -52,8 +52,8 @@ export class UpdateGoalKeyResultUseCase {
       title: updates.title,
       description: updates.description,
       weight: updates.weight,
-      startingValue: updates.startingValue,
-      progressBaselineValue: updates.progressBaselineValue,
+      initialValue: updates.initialValue,
+      target: updates.target,
       aggregationMethod: updates.aggregationMethod,
       currentValue: updates.currentValue,
       targetValue: updates.targetValue,

@@ -1,0 +1,22 @@
+[
+  {
+    "input": "  ＷＯＲＫ 项目  ",
+    "name": "WORK 项目",
+    "normalizedName": "work 项目"
+  },
+  {
+    "input": "High Priority",
+    "name": "High Priority",
+    "normalizedName": "high priority"
+  },
+  {
+    "input": "  Café  ",
+    "name": "Café",
+    "normalizedName": "café"
+  },
+  {
+    "input": "#AI",
+    "name": "#AI",
+    "normalizedName": "#ai"
+  }
+]

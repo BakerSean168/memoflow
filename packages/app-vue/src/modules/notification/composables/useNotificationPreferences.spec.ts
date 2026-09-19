@@ -105,6 +105,21 @@ describe('useNotificationPreferences vNext hierarchy', () => {
     expect(api.hasChannel('task', 'push')).toBe(true);
   });
 
+  it('reads and writes global delivery channels through globalChannels only', async () => {
+    service.getPreferences.mockResolvedValue(ok(basePreference as never));
+    service.updatePreferences.mockResolvedValue(
+      ok({ ...basePreference, globalChannels: { InApp: true, Push: false, Email: false } } as never),
+    );
+
+    const api = mountComposable();
+    await api.loadPreferences();
+    expect(api.hasGlobalChannel('inApp')).toBe(false);
+    expect(await api.setGlobalChannel('email', false)).toBe(true);
+    expect(service.updatePreferences).toHaveBeenCalledWith({
+      globalChannels: { Email: false },
+    });
+  });
+
   it('surfaces load failures without throwing', async () => {
     service.getPreferences.mockResolvedValue(fail({ code: 'INTERNAL', message: 'boom' }));
     const api = mountComposable();

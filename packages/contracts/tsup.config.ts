@@ -22,7 +22,6 @@ export default createTsupConfig({
     'src/modules/task/index.ts',
     'src/modules/goal/index.ts',
     'src/modules/governance/index.ts',
-    'src/modules/reminder/index.ts',
     'src/modules/repository/index.ts',
     'src/modules/account/index.ts',
     'src/modules/schedule/index.ts',
@@ -31,9 +30,9 @@ export default createTsupConfig({
     'src/modules/operations/index.ts',
     'src/modules/reliable-messaging/index.ts',
     'src/modules/ai/index.ts',
-    'src/modules/dashboard/index.ts',
     'src/modules/data-portability/index.ts',
     'src/modules/label/index.ts',
+    'src/modules/relation/index.ts',
     // 其他模块入口
     'src/result/index.ts',
     'src/shared/index.ts',

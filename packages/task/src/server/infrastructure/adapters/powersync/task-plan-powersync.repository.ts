@@ -1,0 +1,373 @@
+import {
+  TaskLabelOwnershipError,
+  type ITaskPlanRepository,
+  type TaskFilters,
+} from '../../../domain/repositories/i-task-plan-repository';
+import { TaskPlan } from '../../../domain/aggregates/task-plan';
+import type { IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import type { TaskPlanStatus } from '@memoflow/contracts/task';
+import { LabelColorSchema, type LabelClientDTO } from '@memoflow/contracts/label';
+import { AggregateRepositoryBase, createEventBusAdapter, type IEventBus } from '@memoflow/patterns';
+import { eventBus } from '@memoflow/utils/domain';
+import {
+  PowerSyncTaskPlanMapper,
+  type PowerSyncTaskPlanRow,
+} from './mappers/powersync-task-plan.mapper';
+
+const eventBusAdapter = createEventBusAdapter(eventBus);
+
+export class PowerSyncTaskPlanRepository
+  extends AggregateRepositoryBase<TaskPlan>
+  implements ITaskPlanRepository
+{
+  constructor(
+    private readonly db: IElectronDatabaseTransaction,
+    eventBus: IEventBus = eventBusAdapter,
+  ) {
+    super(eventBus);
+  }
+
+  private static labelDto(row: Record<string, unknown>): LabelClientDTO {
+    return {
+      id: String(row.id),
+      name: String(row.name),
+      color: row.color == null ? null : LabelColorSchema.parse(String(row.color)),
+      createdAt: Date.parse(String(row.created_at)),
+      updatedAt: Date.parse(String(row.updated_at)),
+    };
+  }
+
+  private async loadLabelMap(
+    identityId: string,
+    taskPlanIds: readonly string[],
+  ): Promise<Map<string, LabelClientDTO[]>> {
+    const ids = [...new Set(taskPlanIds)];
+    const result = new Map(ids.map((id) => [id, [] as LabelClientDTO[]]));
+    if (ids.length === 0) return result;
+
+    const placeholders = ids.map(() => '?').join(', ');
+    const rows = await this.db.getAll<Record<string, unknown>>(
+      `SELECT l.*, tl.task_plan_id AS owner_id
+       FROM labels l
+       INNER JOIN task_labels tl ON tl.label_id = l.id AND tl.identity_id = l.identity_id
+       WHERE tl.identity_id = ? AND tl.task_plan_id IN (${placeholders})
+       ORDER BY tl.task_plan_id ASC, l.name ASC, l.id ASC`,
+      [identityId, ...ids],
+    );
+    for (const row of rows) {
+      result.get(String(row.owner_id))?.push(PowerSyncTaskPlanRepository.labelDto(row));
+    }
+    return result;
+  }
+
+  private async hydrateTemplates(identityId: string, plans: TaskPlan[]): Promise<TaskPlan[]> {
+    const labelMap = await this.loadLabelMap(
+      identityId,
+      plans.map((plan) => String(plan.id)),
+    );
+    for (const plan of plans) {
+      plan.hydrateLabels(labelMap.get(String(plan.id)) ?? []);
+    }
+    return plans;
+  }
+
+  private async hydrateTemplate(
+    identityId: string,
+    plan: TaskPlan | null,
+  ): Promise<TaskPlan | null> {
+    if (!plan) return null;
+    await this.hydrateTemplates(identityId, [plan]);
+    return plan;
+  }
+
+  protected async persist(plan: TaskPlan): Promise<void> {
+    const data = PowerSyncTaskPlanMapper.toPersistence(plan);
+    const existing = await this.db.getOptional<{ id: string }>(
+      'SELECT id FROM task_plans WHERE id = ? LIMIT 1',
+      [data.id],
+    );
+    const mutableColumns: readonly (readonly [string, unknown])[] = [
+      ['identity_id', data.identityId],
+      ['name', data.name],
+      ['description', data.description],
+      ['status', data.status],
+      ['outcome', data.outcome],
+      ['completion_policy', data.completionPolicy],
+      ['closed_at', data.closedAt],
+      ['archived_at', data.archivedAt],
+      ['abandoned_reason', data.abandonedReason],
+      ['importance', data.importance],
+      ['schedule', data.schedule],
+      ['reminder_config', data.reminderConfig],
+      ['goal_id', data.goalId],
+      ['key_result_id', data.keyResultId],
+      ['goal_record_value', data.goalRecordValue],
+      ['goal_progress_trigger', data.goalProgressTrigger],
+      ['checklist', data.checklist],
+      ['version', data.version],
+      ['updated_at', data.updatedAt],
+      ['deleted_at', data.deletedAt],
+    ];
+
+    if (existing) {
+      await this.db.execute(
+        `UPDATE task_plans SET ${mutableColumns.map(([column]) => `${column} = ?`).join(', ')} WHERE id = ?`,
+        [...mutableColumns.map(([, value]) => value), data.id],
+      );
+      return;
+    }
+
+    const insertColumns: readonly (readonly [string, unknown])[] = [
+      ['id', data.id],
+      ...mutableColumns,
+      ['created_at', data.createdAt],
+    ];
+    await this.db.execute(
+      `INSERT INTO task_plans (${insertColumns.map(([column]) => column).join(', ')}) VALUES (${insertColumns.map(() => '?').join(', ')})`,
+      insertColumns.map(([, value]) => value),
+    );
+  }
+
+  async findByIdForIdentity(identityId: string, id: string): Promise<TaskPlan | null> {
+    const row = await this.db.getOptional<PowerSyncTaskPlanRow>(
+      'SELECT * FROM task_plans WHERE id = ? AND identity_id = ? LIMIT 1',
+      [id, identityId],
+    );
+    return this.hydrateTemplate(identityId, row ? PowerSyncTaskPlanMapper.toDomain(row) : null);
+  }
+
+  async findByIdentityId(identityId: string): Promise<TaskPlan[]> {
+    return this.queryTemplates(
+      identityId,
+      'SELECT * FROM task_plans WHERE identity_id = ? AND deleted_at IS NULL ORDER BY created_at DESC',
+      [identityId],
+    );
+  }
+
+  async findByStatus(identityId: string, status: TaskPlanStatus): Promise<TaskPlan[]> {
+    return this.queryTemplates(
+      identityId,
+      'SELECT * FROM task_plans WHERE identity_id = ? AND status = ? AND deleted_at IS NULL ORDER BY created_at DESC',
+      [identityId, status],
+    );
+  }
+
+  async findActiveTemplates(identityId: string): Promise<TaskPlan[]> {
+    return this.findByStatus(identityId, 'Active' as TaskPlanStatus);
+  }
+
+  async findByGoalId(identityId: string, goalId: string): Promise<TaskPlan[]> {
+    return this.queryTemplates(
+      identityId,
+      'SELECT * FROM task_plans WHERE identity_id = ? AND goal_id = ? AND deleted_at IS NULL ORDER BY created_at DESC',
+      [identityId, goalId],
+    );
+  }
+
+  async findByLabelIdsAll(identityId: string, labelIds: readonly string[]): Promise<TaskPlan[]> {
+    const requiredLabelIds = [...new Set(labelIds)];
+    if (requiredLabelIds.length === 0) return this.findByIdentityId(identityId);
+
+    const placeholders = requiredLabelIds.map(() => '?').join(', ');
+    const matches = await this.db.getAll<{ task_plan_id: string }>(
+      `SELECT task_plan_id FROM task_labels
+       WHERE identity_id = ? AND label_id IN (${placeholders})
+       GROUP BY task_plan_id
+       HAVING COUNT(DISTINCT label_id) = ?`,
+      [identityId, ...requiredLabelIds, requiredLabelIds.length],
+    );
+    if (matches.length === 0) return [];
+
+    const templatePlaceholders = matches.map(() => '?').join(', ');
+    return this.queryTemplates(
+      identityId,
+      `SELECT * FROM task_plans
+       WHERE identity_id = ? AND id IN (${templatePlaceholders}) AND deleted_at IS NULL
+       ORDER BY created_at DESC`,
+      [identityId, ...matches.map((row) => row.task_plan_id)],
+    );
+  }
+
+  async replaceLabels(
+    identityId: string,
+    taskPlanId: string,
+    labelIds: readonly string[],
+  ): Promise<LabelClientDTO[]> {
+    const owner = await this.db.getOptional<{ id: string }>(
+      'SELECT id FROM task_plans WHERE id = ? AND identity_id = ? LIMIT 1',
+      [taskPlanId, identityId],
+    );
+    if (!owner) throw new Error('Task plan not found.');
+
+    const uniqueIds = [...new Set(labelIds)];
+    for (const labelId of uniqueIds) {
+      const label = await this.db.getOptional<{ id: string }>(
+        'SELECT id FROM labels WHERE id = ? AND identity_id = ? LIMIT 1',
+        [labelId, identityId],
+      );
+      if (!label) throw new TaskLabelOwnershipError();
+    }
+
+    await this.db.execute(
+      'DELETE FROM task_labels WHERE identity_id = ? AND task_plan_id = ?',
+      [identityId, taskPlanId],
+    );
+    for (const labelId of uniqueIds) {
+      await this.db.execute(
+        'INSERT INTO task_labels (id, identity_id, task_plan_id, label_id) VALUES (?, ?, ?, ?)',
+        [`${identityId}:${taskPlanId}:${labelId}`, identityId, taskPlanId, labelId],
+      );
+    }
+    return (await this.loadLabelMap(identityId, [taskPlanId])).get(taskPlanId) ?? [];
+  }
+
+  async findAllPlanRefs(): Promise<Array<{ id: string; identityId: string }>> {
+    // PowerSync only contains rows synchronized for the local profile. Enumerate
+    // every local row (including soft-deleted/archived plans) so startup
+    // repair can both recreate missed intents and remove stale Scheduler owners.
+    const rows = await this.db.getAll<{ id: string; identity_id: string }>(
+      'SELECT id, identity_id FROM task_plans ORDER BY id ASC',
+      [],
+    );
+    return rows.map((row) => ({ id: String(row.id), identityId: String(row.identity_id) }));
+  }
+
+  async findActiveRecurringPlansForMaterialization(): Promise<TaskPlan[]> {
+    const rows = await this.db.getAll<PowerSyncTaskPlanRow>(
+      `SELECT * FROM task_plans
+       WHERE json_extract(schedule, '$.kind') = 'Recurring' AND status = 'Active' AND deleted_at IS NULL
+       ORDER BY updated_at ASC`,
+      [],
+    );
+    return rows.map((row) => PowerSyncTaskPlanMapper.toDomain(row));
+  }
+
+  async delete(identityId: string, id: string): Promise<void> {
+    const existing = await this.findByIdForIdentity(identityId, id);
+    if (!existing) {
+      throw new Error('Task plan not found for the current identity.');
+    }
+    await this.db.execute('DELETE FROM task_plans WHERE id = ? AND identity_id = ?', [
+      id,
+      identityId,
+    ]);
+  }
+
+  async softDelete(identityId: string, id: string): Promise<void> {
+    const existing = await this.findByIdForIdentity(identityId, id);
+    if (!existing) {
+      throw new Error('Task plan not found for the current identity.');
+    }
+    const now = new Date().toISOString();
+    await this.db.execute(
+      'UPDATE task_plans SET deleted_at = ?, updated_at = ? WHERE id = ? AND identity_id = ?',
+      [now, now, id, identityId],
+    );
+  }
+
+  async restore(identityId: string, id: string): Promise<void> {
+    const existing = await this.findByIdForIdentity(identityId, id);
+    if (!existing) {
+      throw new Error('Task plan not found for the current identity.');
+    }
+    await this.db.execute(
+      'UPDATE task_plans SET deleted_at = NULL, archived_at = NULL, updated_at = ? WHERE id = ? AND identity_id = ?',
+      [new Date().toISOString(), id, identityId],
+    );
+  }
+
+  async findOneTimeTasks(identityId: string, filters?: TaskFilters): Promise<TaskPlan[]> {
+    return this.queryByType(identityId, true, filters);
+  }
+
+  async findRecurringTasks(identityId: string, filters?: TaskFilters): Promise<TaskPlan[]> {
+    return this.queryByType(identityId, false, filters);
+  }
+
+  async findByGoalAndKeyResultId(
+    identityId: string,
+    goalId: string,
+    keyResultId: string,
+  ): Promise<TaskPlan[]> {
+    return this.queryTemplates(
+      identityId,
+      'SELECT * FROM task_plans WHERE identity_id = ? AND goal_id = ? AND key_result_id = ? AND deleted_at IS NULL ORDER BY created_at DESC',
+      [identityId, goalId, keyResultId],
+    );
+  }
+
+  async countTasks(identityId: string, filters?: TaskFilters): Promise<number> {
+    const where = this.buildFilters(
+      ['identity_id = ?', 'deleted_at IS NULL'],
+      [identityId],
+      filters,
+    );
+    const result = await this.db.get<{ count: number }>(
+      `SELECT COUNT(*) as count FROM task_plans WHERE ${where.clauses.join(' AND ')}`,
+      where.params,
+    );
+    return Number(result.count ?? 0);
+  }
+
+  async saveBatch(plans: TaskPlan[]): Promise<void> {
+    for (const plan of plans) {
+      await this.save(plan);
+    }
+  }
+
+  async deleteBatch(identityId: string, ids: string[]): Promise<void> {
+    if (ids.length === 0) return;
+    const placeholders = ids.map(() => '?').join(', ');
+    await this.db.execute(
+      `DELETE FROM task_plans WHERE identity_id = ? AND id IN (${placeholders})`,
+      [identityId, ...ids],
+    );
+  }
+
+  private async queryByType(
+    identityId: string,
+    oneTime: boolean,
+    filters?: TaskFilters,
+  ): Promise<TaskPlan[]> {
+    const clauses = ['identity_id = ?', 'deleted_at IS NULL'];
+    const params: unknown[] = [identityId];
+    clauses.push(
+      oneTime
+        ? "json_extract(schedule, '$.kind') = 'OneTime'"
+        : "json_extract(schedule, '$.kind') = 'Recurring'",
+    );
+    const where = this.buildFilters(clauses, params, filters);
+    let sql = `SELECT * FROM task_plans WHERE ${where.clauses.join(' AND ')} ORDER BY created_at DESC`;
+    if (filters?.limit) {
+      sql += ' LIMIT ?';
+      where.params.push(filters.limit);
+    }
+    if (filters?.offset) {
+      sql += ' OFFSET ?';
+      where.params.push(filters.offset);
+    }
+    return this.queryTemplates(identityId, sql, where.params);
+  }
+
+  private buildFilters(baseClauses: string[], baseParams: unknown[], filters?: TaskFilters) {
+    const clauses = [...baseClauses];
+    const params = [...baseParams];
+    if (filters?.status) {
+      clauses.push('status = ?');
+      params.push(filters.status);
+    }
+    return { clauses, params };
+  }
+
+  private async queryTemplates(
+    identityId: string,
+    sql: string,
+    params: unknown[],
+  ): Promise<TaskPlan[]> {
+    const rows = await this.db.getAll<PowerSyncTaskPlanRow>(sql, params);
+    return this.hydrateTemplates(
+      identityId,
+      rows.map((row) => PowerSyncTaskPlanMapper.toDomain(row)),
+    );
+  }
+}

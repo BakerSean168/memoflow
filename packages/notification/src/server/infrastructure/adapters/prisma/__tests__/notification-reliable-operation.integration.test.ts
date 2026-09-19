@@ -1,16 +1,16 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { randomUUID } from 'crypto';
 import { buildIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
+import { createTimeContext } from '@memoflow/time';
 import {
   NotificationType,
   NotificationCategory,
   NotificationChannelType,
 } from '@memoflow/contracts/notification';
-import { ReminderType } from '@memoflow/contracts/reminder';
 import { NotificationReliableOperationPrismaAdapter } from '../notification-reliable-operation-prisma.adapter';
 import { NotificationPrismaRepository } from '../notification-prisma.repository';
 import { NotificationPreferencePrismaRepository } from '../notification-preference-prisma.repository';
-import { NotificationTemplatePrismaRepository } from '../notification-template-prisma.repository';
+import { NotificationInteractionPrismaRepository } from '../notification-interaction-prisma.repository';
 import { CreateNotificationUseCase } from '../../../../application/use-cases/commands/create-notification.use-case';
 import { createNotificationRuntimeContribution } from '../../../runtime/notification.runtime';
 import { RealInAppChannelDeliverer } from '../../deliverers/real-channel-deliverers';
@@ -20,15 +20,17 @@ import {
   getPrisma,
   seedAccount,
 } from '@memoflow/test-utils/setup/integration-helpers';
-// eslint-disable-next-line @nx/enforce-module-boundaries
-import { ReminderTemplate, createReminderPrismaRepositories } from '@memoflow/reminder/server';
+
+const TEST_NOTIFICATION_TIME_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
+const TEST_USER_TIME_CONTEXT_PORT = {
+  getUserTimeContext: async () => TEST_NOTIFICATION_TIME_CONTEXT,
+};
 
 describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', () => {
   let prisma: ReturnType<typeof getPrisma>;
   let reliableAdapter: NotificationReliableOperationPrismaAdapter;
   let notificationRepo: NotificationPrismaRepository;
   let preferenceRepo: NotificationPreferencePrismaRepository;
-  let templateRepo: NotificationTemplatePrismaRepository;
   let identityId: string;
 
   beforeEach(async () => {
@@ -40,7 +42,6 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     reliableAdapter = new NotificationReliableOperationPrismaAdapter(prisma);
     notificationRepo = new NotificationPrismaRepository(prisma);
     preferenceRepo = new NotificationPreferencePrismaRepository(prisma);
-    templateRepo = new NotificationTemplatePrismaRepository(prisma);
   });
 
   async function seedNotification(id: string) {
@@ -60,28 +61,9 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
         version: 1,
         createdAt: new Date(),
         updatedAt: new Date(),
-        channels: {
-          create: {
-            id: randomUUID(),
-            identityId,
-            channelType: 'InApp',
-            recipient: identityId,
-            status: 'Pending',
-            maxRetries: 3,
-            retryCount: 0,
-            attempts: 0,
-          },
-        },
       },
     });
   }
-
-  afterAll(async () => {
-    if (prisma) {
-      await cleanAll();
-      await disconnectPrisma();
-    }
-  });
 
   it('1. Atomic outbox dispatch creation with canonical idempotency key', async () => {
     const opId = randomUUID();
@@ -295,11 +277,12 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     expect(deadLettersAfter).toHaveLength(0);
   });
 
-  it('6. CreateNotificationUseCase writes aggregate, channels, and outbox in same transaction', async () => {
+  it('6. CreateNotificationUseCase writes Fact, decisions, and outbox in same transaction', async () => {
     const useCase = new CreateNotificationUseCase(
       notificationRepo,
       preferenceRepo,
       async () => false,
+      TEST_USER_TIME_CONTEXT_PORT,
     );
 
     let deliveredCount = 0;
@@ -310,6 +293,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     };
 
     const runtime = createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       environment: 'test',
       repository: notificationRepo,
       reliableAdapter,
@@ -318,6 +302,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
 
     const res = await useCase.execute({
       identityId,
+      workflowKey: 'system.general',
       title: 'Tx Test',
       content: 'Testing atomic transaction',
       type: NotificationType.Info,
@@ -329,10 +314,10 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     expect(res.ok).toBe(true);
     const clientDTO = res.data;
 
-    // Verify Notification and Channels exist in DB
+    // Fact is persisted independently from delivery execution truth.
     const notifInDb = await notificationRepo.findByIdForIdentity(identityId, clientDTO.id);
     expect(notifInDb).not.toBeNull();
-    expect(notifInDb?.notificationChannels).toHaveLength(2);
+    expect(notifInDb?.toServerDTO()).not.toHaveProperty('notificationChannels');
 
     // Verify Outbox rows were written in same transaction
     const outboxes = await prisma.notificationDispatchOutbox.findMany({
@@ -438,6 +423,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
   it('8. Authorized Application/API entrances for dead-letter query & replay', async () => {
     const { createNotificationPrismaModule } = await import('../../../prisma');
     const moduleInstance = createNotificationPrismaModule(prisma, {
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       closureChecker: async () => false,
     });
 
@@ -474,14 +460,14 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     });
 
     // Query via module API
-    const dlResult = await moduleInstance.api.queryDeadLetters(identityId);
+    const dlResult = await moduleInstance.operations.queryDeadLetters(identityId);
     expect(dlResult.ok).toBe(true);
     const dlList = dlResult.ok ? (dlResult.data as any[]) : [];
     expect(dlList).toHaveLength(1);
     expect(dlList[0].operationId).toBe(opId);
 
     // Replay via module API
-    const replayResult = await moduleInstance.api.replayDeadLetter(opId, identityId);
+    const replayResult = await moduleInstance.operations.replayDeadLetter(opId, identityId);
     expect(replayResult.ok).toBe(true);
     const replayedData = replayResult.ok ? (replayResult.data as any) : null;
     expect(replayedData.status).toBe('retryable');
@@ -492,6 +478,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
   it('9. Delivery receipts timeline query for disconnect recovery', async () => {
     const { createNotificationPrismaModule } = await import('../../../prisma');
     const moduleInstance = createNotificationPrismaModule(prisma, {
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       closureChecker: async () => false,
     });
 
@@ -518,7 +505,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
       { notificationId },
     );
 
-    const receiptsRes = await moduleInstance.api.getDeliveryReceipts(identityId, { limit: 10 });
+    const receiptsRes = await moduleInstance.operations.getDeliveryReceipts(identityId, { limit: 10 });
     expect(receiptsRes.ok).toBe(true);
     const receipts = receiptsRes.ok ? (receiptsRes.data as any[]) : [];
     expect(receipts.length).toBeGreaterThanOrEqual(1);
@@ -530,6 +517,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
   it('9b. W7 unified operation timeline exposes failure reason and next retry', async () => {
     const { createNotificationPrismaModule } = await import('../../../prisma');
     const moduleInstance = createNotificationPrismaModule(prisma, {
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       closureChecker: async () => false,
     });
 
@@ -577,7 +565,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
       finishedAt: null,
     });
 
-    const timelineRes = await moduleInstance.api.getOperationTimeline(identityId);
+    const timelineRes = await moduleInstance.operations.getOperationTimeline(identityId);
     expect(timelineRes.ok).toBe(true);
     const entries = timelineRes.ok ? (timelineRes.data as any[]) : [];
     const entry = entries.find((e) => e.operationId === opId);
@@ -595,6 +583,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
   it('9c. W7 replay records audit trail and moves state forward; unauthorized identity is rejected', async () => {
     const { createNotificationPrismaModule } = await import('../../../prisma');
     const moduleInstance = createNotificationPrismaModule(prisma, {
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       closureChecker: async () => false,
     });
 
@@ -629,7 +618,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
       updatedAt: new Date().toISOString(),
     });
 
-    const dlResult = await moduleInstance.api.queryDeadLetters(identityId);
+    const dlResult = await moduleInstance.operations.queryDeadLetters(identityId);
     expect(dlResult.ok).toBe(true);
     const dl = (dlResult.ok ? (dlResult.data as any[]) : []).find((d) => d.operationId === opId);
     expect(dl).toBeDefined();
@@ -637,16 +626,16 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     // Unauthorized identity cannot replay another identity's dead letter
     const otherIdentity = `identity_other_${randomUUID()}`;
     await seedAccount({ id: otherIdentity });
-    const rejected = await moduleInstance.api.replayDeadLetter(opId, otherIdentity);
+    const rejected = await moduleInstance.operations.replayDeadLetter(opId, otherIdentity);
     expect(rejected.ok).toBe(false);
 
     // Authorized replay advances state and records audit
-    const replayResult = await moduleInstance.api.replayDeadLetter(opId, identityId);
+    const replayResult = await moduleInstance.operations.replayDeadLetter(opId, identityId);
     expect(replayResult.ok).toBe(true);
     const replayed = replayResult.ok ? (replayResult.data as any) : null;
     expect(replayed.status).toBe('retryable');
 
-    const auditRes = await moduleInstance.api.getOperationAudit(identityId);
+    const auditRes = await moduleInstance.operations.getOperationAudit(identityId);
     expect(auditRes.ok).toBe(true);
     const audit = auditRes.ok ? (auditRes.data as any[]) : [];
     const replayAudit = audit.find(
@@ -656,7 +645,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     expect(replayAudit.actorIdentityId).toBe(identityId);
 
     // Audit is actor-scoped: other identity sees none of ours
-    const otherAuditRes = await moduleInstance.api.getOperationAudit(otherIdentity);
+    const otherAuditRes = await moduleInstance.operations.getOperationAudit(otherIdentity);
     expect(otherAuditRes.ok).toBe(true);
     const otherAudit = otherAuditRes.ok ? (otherAuditRes.data as any[]) : [];
     expect(otherAudit.some((a) => a.operationId === opId)).toBe(false);
@@ -667,6 +656,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
   it('9d. P1-3 timeline query writes a timeline_query audit with result count', async () => {
     const { createNotificationPrismaModule } = await import('../../../prisma');
     const moduleInstance = createNotificationPrismaModule(prisma, {
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       closureChecker: async () => false,
     });
 
@@ -692,7 +682,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
       { notificationId },
     );
 
-    const timelineRes = await moduleInstance.api.getOperationTimeline(identityId);
+    const timelineRes = await moduleInstance.operations.getOperationTimeline(identityId);
     expect(timelineRes.ok).toBe(true);
     expect((timelineRes.ok ? (timelineRes.data as any[]) : []).length).toBeGreaterThanOrEqual(1);
 
@@ -767,16 +757,17 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     const moduleInstance = createNotificationModule({
       notificationRepository: notificationRepo,
       preferenceRepository: preferenceRepo,
-      templateRepository: templateRepo,
+      interactionRepository: new NotificationInteractionPrismaRepository(prisma),
       closureChecker: async () => false,
       durableRuntime: createNotificationRuntimeContribution({
+        userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
         repository: notificationRepo,
         reliableAdapter,
       }),
       auditRepository: failingAudit as never,
     });
 
-    const replayResult = await moduleInstance.api.replayDeadLetter(opId, identityId);
+    const replayResult = await moduleInstance.operations.replayDeadLetter(opId, identityId);
     expect(replayResult.ok).toBe(false);
 
     const after = await prisma.notificationDispatchOutbox.findUniqueOrThrow({
@@ -801,16 +792,17 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     const moduleInstance = createNotificationModule({
       notificationRepository: notificationRepo,
       preferenceRepository: preferenceRepo,
-      templateRepository: templateRepo,
+      interactionRepository: new NotificationInteractionPrismaRepository(prisma),
       closureChecker: async () => false,
       durableRuntime: createNotificationRuntimeContribution({
+        userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
         repository: notificationRepo,
         reliableAdapter,
       }),
       auditRepository: failingAudit as never,
     });
 
-    await expect(moduleInstance.api.getOperationTimeline(identityId)).rejects.toThrow(
+    await expect(moduleInstance.operations.getOperationTimeline(identityId)).rejects.toThrow(
       'audit write failure injected',
     );
 
@@ -827,6 +819,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     };
 
     const worker1 = createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       environment: 'test',
       ownerToken: 'worker-1',
       repository: notificationRepo,
@@ -835,6 +828,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     });
 
     const worker2 = createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       environment: 'test',
       ownerToken: 'worker-2',
       repository: notificationRepo,
@@ -891,12 +885,14 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
       async deliver() {},
     };
     const runtime = createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       environment: 'test',
       repository: notificationRepo,
       reliableAdapter,
       deliverer: mockDeliverer,
     });
     const moduleInstance = createNotificationPrismaModule(prisma, {
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       runtimeContributions: [runtime],
       closureChecker: async () => false,
     });
@@ -912,7 +908,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
       next();
     };
 
-    const router = registerNotificationRoutes(moduleInstance.api, {
+    const router = registerNotificationRoutes(moduleInstance.api, moduleInstance.operations, {
       auth: mockAuth,
       requireRole: () => mockAuth,
     });
@@ -1036,162 +1032,9 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     await new Promise((resolve) => server.close(resolve as any));
   });
 
-  it('12. Cross-module Reminder NotificationRequested is materialized, then dispatched with the real FK/id', async () => {
-    // W1 cron trigger intent (0 9 * * *) is expressed via FixedTime trigger in the current contract
-    const template = ReminderTemplate.create({
-      identityId: identityId as any,
-      title: 'Cross Module Reminder',
-      description: 'Testing W1 intent consumption',
-      type: ReminderType.Recurring,
-      trigger: {
-        type: 'FixedTime',
-        fixedTime: { time: '09:00', timezone: 'UTC' },
-        interval: null,
-      },
-      activeTime: { activatedAt: Date.now() - 60_000 },
-      notificationConfig: {
-        channels: ['InApp'],
-        title: 'Cross Module Reminder',
-        body: 'Testing W1 intent consumption',
-        sound: { enabled: true, soundName: null },
-        vibration: { enabled: true, pattern: null },
-        actions: null,
-      },
-    });
-
-    const templateId = template.id as string;
-    // Real W1 occurrenceKey: `${templateId}:${triggerTimeIso}` — its prefix is the
-    // reminder template id, NOT a pre-existing Notification id. No masking seed is allowed.
-    const triggerTime = Date.now();
-    const triggerTimeIso = new Date(triggerTime).toISOString();
-    const occurrenceKey = `${templateId}:${triggerTimeIso}`;
-    const idempotencyKey = buildIdempotencyKeyString({
-      identityId,
-      source: 'reminder',
-      occurrenceKey,
-    });
-    const ownerToken = 'runner-1';
-    const fencingToken = 1;
-    const occurrenceId = randomUUID();
-
-    const tplDto = template.toServerDTO();
-    await prisma.reminderTemplate.create({
-      data: {
-        id: templateId,
-        identityId,
-        name: tplDto.name,
-        description: tplDto.description,
-        type: tplDto.type,
-        selfEnabled: tplDto.selfEnabled,
-        status: tplDto.status,
-        importanceLevel: tplDto.importanceLevel,
-        tags: JSON.stringify(tplDto.tags),
-        color: tplDto.color,
-        icon: tplDto.icon,
-        trigger: JSON.stringify(tplDto.trigger),
-        activeTime: JSON.stringify(tplDto.activeTime),
-        activeHours: tplDto.activeHours ? JSON.stringify(tplDto.activeHours) : null,
-        notificationConfig: JSON.stringify(tplDto.notificationConfig),
-        nextTriggerAt: tplDto.nextTriggerAt != null ? new Date(tplDto.nextTriggerAt) : null,
-        stats: '{}',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    });
-
-    await prisma.reminderOccurrence.create({
-      data: {
-        id: occurrenceId,
-        templateId,
-        identityId,
-        source: 'reminder',
-        occurrenceKey,
-        idempotencyKey,
-        status: 'running',
-        attempt: 1,
-        ownerToken,
-        claimId: randomUUID(),
-        fencingToken,
-        leaseExpiresAt: new Date(Date.now() + 30000),
-        correlationId: occurrenceId,
-        causationId: occurrenceId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    });
-
-    const runner = createReminderPrismaRepositories(prisma).transactionRunner;
-
-    await runner.executeClaimedOccurrenceTransaction({
-      template,
-      occurrence: {
-        id: occurrenceId,
-        identityId,
-        templateId,
-        occurrenceKey,
-        idempotencyKey,
-        fencingToken,
-        ownerToken,
-      },
-      isEnabled: true,
-      triggerTime,
-    });
-
-    // Reminder owns only the business-level NotificationRequested handoff.
-    // Channel expansion stays inside Notification.
-    const pendingOutbox = await prisma.outboxMessage.findFirst({
-      where: { identityId, messageType: 'notification.requested', status: 'pending' },
-    });
-    expect(pendingOutbox).not.toBeNull();
-
-    // First tick materializes the Notification Fact + per-channel dispatch outbox.
-    const mockDeliverer = {
-      async deliver() {},
-    };
-
-    const runtime = createNotificationRuntimeContribution({
-      environment: 'test',
-      repository: notificationRepo,
-      preferenceRepository: preferenceRepo,
-      reliableAdapter,
-      deliverer: mockDeliverer,
-    });
-
-    await runtime.tick();
-
-    // A second tick owns delivery because dispatch outboxes are Priority 1 and the
-    // NotificationRequested envelope is consumed in Priority 2 of the first tick.
-    await runtime.tick();
-
-    // Verify NotificationRequested shared outbox is succeeded
-    const updatedOutbox = await prisma.outboxMessage.findUnique({
-      where: { id: pendingOutbox!.id },
-    });
-    expect(updatedOutbox?.status).toBe('succeeded');
-    expect(updatedOutbox?.dispatchedAt).not.toBeNull();
-
-    // Verify Notification aggregate is persisted in DB
-    const notifs = await notificationRepo.findByIdentityId(identityId);
-    const persisted = notifs.find((n) => n.title === 'Cross Module Reminder');
-    expect(persisted).toBeDefined();
-    const persistedNotificationId = String(persisted!.id);
-
-    // Verify NotificationDispatchOutbox row exists and its FK points at the real
-    // persisted Notification id (NOT the W1 occurrenceKey prefix = template id),
-    // proving the consumer created correct FK/id itself.
-    const outboxes = await prisma.notificationDispatchOutbox.findMany({
-      where: { identityId, source: 'notification' },
-    });
-    expect(outboxes.length).toBeGreaterThanOrEqual(1);
-    const dispatchOutbox = outboxes.find((o) => o.notificationId === persistedNotificationId);
-    expect(dispatchOutbox).toBeDefined();
-    expect(dispatchOutbox?.status).toBe('succeeded');
-    expect(dispatchOutbox?.notificationId).not.toBe(templateId);
-  });
-
   it('14. Fault Injection 2: Side effect succeeded but crash before receipt commit -> reclaimed -> does not re-invoke deliverer', async () => {
     let delivererCount = 0;
-    const realInAppDeliverer = new RealInAppChannelDeliverer(notificationRepo);
+    const realInAppDeliverer = new RealInAppChannelDeliverer();
     const countingDeliverer = {
       async deliver(notif: any, ch: any, ctx: any) {
         delivererCount++;
@@ -1200,6 +1043,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     };
 
     const worker2 = createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       environment: 'test',
       ownerToken: 'worker-sideeffect-2',
       repository: notificationRepo,
@@ -1238,10 +1082,9 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     });
     expect(claims).toHaveLength(1);
 
-    // Worker 1 executes deliverer (side effect succeeds, channel response updated & saved to DB)
+    // InApp has no pre-receipt external side effect; executing it is replay-safe.
     const notifObj = await notificationRepo.findByIdForIdentity(identityId, notifId);
-    const ch = notifObj!.notificationChannels!.find((c) => c.channelType === 'InApp')!;
-    await countingDeliverer.deliver(notifObj!, ch, {
+    await countingDeliverer.deliver(notifObj!, { channelType: 'InApp', recipient: identityId }, {
       deliveryId: opId,
       idempotencyKey,
       identityId,
@@ -1255,8 +1098,8 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     // Worker 2 claims expired outbox item and ticks
     await worker2.tick();
 
-    // Deliverer call count must STILL be 1 (worker 2 recognized side effect was completed and skipped deliverer)
-    expect(delivererCount).toBe(1);
+    // The pre-receipt no-op may replay; the durable receipt remains the only execution truth.
+    expect(delivererCount).toBe(2);
 
     const receipt = (await reliableAdapter.queryReceipts(identityId)).find(
       (r) => r.operationId === opId,
@@ -1353,12 +1196,14 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
 
     const mockDeliverer = { async deliver() {} };
     const runtime = createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       environment: 'test',
       repository: notificationRepo,
       reliableAdapter,
       deliverer: mockDeliverer,
     });
     const moduleInstance = createNotificationPrismaModule(prisma, {
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       runtimeContributions: [runtime],
       closureChecker: async () => false,
     });
@@ -1374,7 +1219,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
       next();
     };
 
-    const router = registerNotificationRoutes(moduleInstance.api, {
+    const router = registerNotificationRoutes(moduleInstance.api, moduleInstance.operations, {
       auth: mockAuth,
       requireRole: () => mockAuth,
     });
@@ -1480,6 +1325,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     app.use(express.json());
 
     const moduleInstance = createNotificationPrismaModule(prisma, {
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       closureChecker: async () => false,
     });
     const mockAuth = (_req: any, _res: any, next: any) => {
@@ -1493,7 +1339,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
       next();
     };
 
-    const router = registerNotificationRoutes(moduleInstance.api, {
+    const router = registerNotificationRoutes(moduleInstance.api, moduleInstance.operations, {
       auth: mockAuth,
       requireRole: () => mockAuth,
     });
@@ -1604,7 +1450,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     }
   }, 60000);
 
-  it('18. Fault Injection 6: InApp deliverer repo save failure -> receipt fails/retries and no broadcast', async () => {
+  it('18. Fact repository save is not part of InApp delivery completion after channel retirement', async () => {
     let broadcastCount = 0;
     const mockSseAdapter = {
       broadcastDeliveryEvent() {
@@ -1613,17 +1459,18 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     };
 
     const failingRepo = {
-      ...notificationRepo,
+      findByIdForIdentity: notificationRepo.findByIdForIdentity.bind(notificationRepo),
       async save() {
-        throw new Error('Database disk error simulation');
+        throw new Error('Fact save must never be called by delivery worker');
       },
     } as any;
 
-    const failingDeliverer = new RealInAppChannelDeliverer(failingRepo);
+    const failingDeliverer = new RealInAppChannelDeliverer();
 
     const runtime = createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       environment: 'test',
-      repository: notificationRepo,
+      repository: failingRepo,
       reliableAdapter,
       deliverer: failingDeliverer,
       sseAdapter: mockSseAdapter as any,
@@ -1655,15 +1502,11 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     // Run worker tick
     await runtime.tick();
 
-    // Outbox receipt must NOT be succeeded (it failed during deliverer save)
     const receipt = (await reliableAdapter.queryReceipts(identityId)).find(
       (r) => r.operationId === opId,
     );
-    expect(receipt?.status).not.toBe('succeeded');
-    expect(receipt?.status).toBe('retryable');
-
-    // SSE broadcast count must be 0 (no success broadcast)
-    expect(broadcastCount).toBe(0);
+    expect(receipt?.status).toBe('succeeded');
+    expect(broadcastCount).toBe(1);
   });
 
   it('19. Fault Injection 7: Shared outbox stale owner completion write returns conflict and does not overwrite new owner', async () => {
@@ -1744,5 +1587,4 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     expect(updated?.status).toBe('succeeded');
     expect(updated?.lastError).toBeNull();
   });
-
 });

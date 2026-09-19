@@ -20,6 +20,7 @@ import {
   type CreateRuleRes,
   type DeleteRuleReq,
   type DeleteRuleRes,
+  type ExportGovernanceRuleBundleRes,
   type GetRuleReq,
   type GetRuleRes,
   type GetRuleRevisionsQueryInput,
@@ -48,6 +49,7 @@ export interface GovernanceClientPort {
   listRules(query?: ListRulesQueryInput): Promise<Result<ListRulesRes>>;
   searchRules(query: SearchRulesQueryInput): Promise<Result<SearchRulesRes>>;
   getRevisions(query: GetRuleRevisionsQueryInput): Promise<Result<GetRuleRevisionsRes>>;
+  exportRuleBundle(): Promise<Result<ExportGovernanceRuleBundleRes>>;
 }
 
 class HttpGovernanceClient implements GovernanceClientPort {
@@ -95,6 +97,10 @@ class HttpGovernanceClient implements GovernanceClientPort {
       },
     });
   }
+
+  exportRuleBundle(): Promise<Result<ExportGovernanceRuleBundleRes>> {
+    return this.httpClient.get(`${this.baseUrl}/bundle`);
+  }
 }
 
 class IpcGovernanceClient implements GovernanceClientPort {
@@ -130,6 +136,10 @@ class IpcGovernanceClient implements GovernanceClientPort {
 
   getRevisions(query: GetRuleRevisionsQueryInput): Promise<Result<GetRuleRevisionsRes>> {
     return this.ipcClient.invoke(GovernanceChannels.RULE_REVISIONS, query);
+  }
+
+  exportRuleBundle(): Promise<Result<ExportGovernanceRuleBundleRes>> {
+    return this.ipcClient.invoke(GovernanceChannels.RULE_BUNDLE_EXPORT, {});
   }
 }
 

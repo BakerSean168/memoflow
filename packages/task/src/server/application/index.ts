@@ -16,3 +16,13 @@ export * from './services';
 export * from './outbox';
 
 export type { TaskApplicationPort } from './task.application.port';
+export {
+  TaskWorkspaceQueryService,
+  type TaskWorkspaceQueryServiceDependencies,
+} from './services/task-workspace-query.service';
+export type { TaskWorkspaceApplicationPort } from './task-workspace.application.port';
+
+// ===== Cross-module owner read ports =====
+export type * from './ports';
+
+export * from './task-portability';

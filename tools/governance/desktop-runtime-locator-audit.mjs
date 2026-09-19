@@ -4,7 +4,7 @@
  * Desktop Runtime Locator Audit
  *
  * Scans `apps/desktop/src/main` for module-level singleton getters,
- * `static getInstance()` patterns, and module-level process-global owners
+ * `static getOccurrence()` patterns, and module-level process-global owners
  * (`let xxx: XxxManager | null = null`) that act as service locators.
  *
  * These patterns bypass explicit dependency injection and make the desktop
@@ -139,11 +139,11 @@ function scanFile(fullPath, fileRel) {
       }
     }
 
-    // ── Pattern 2: static getInstance() ──
-    if (/\bstatic\s+getInstance\s*\(\s*\)/.test(line)) {
+    // ── Pattern 2: static getOccurrence() ──
+    if (/\bstatic\s+getOccurrence\s*\(\s*\)/.test(line)) {
       // Already covered by singleton-audit for packages, but double-check
       // desktop main too (singleton-audit only scans packages/)
-      errors.push(`${fileRel}:${lineNum}: static getInstance() — use explicit injection instead`);
+      errors.push(`${fileRel}:${lineNum}: static getOccurrence() — use explicit injection instead`);
     }
 
     // ── Pattern 3: module-level `let xxx: XxxManager | null = null` ──

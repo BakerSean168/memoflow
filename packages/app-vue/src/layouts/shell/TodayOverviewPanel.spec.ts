@@ -6,17 +6,17 @@ import { defineComponent, h, nextTick } from 'vue';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import TodayOverviewPanel from './TodayOverviewPanel.vue';
 
-const dashboardMocks = vi.hoisted(() => ({
-  fetchDashboard: vi.fn(async () => undefined),
+const goalHomeMocks = vi.hoisted(() => ({
+  refresh: vi.fn(async () => undefined),
 }));
 
-vi.mock('../../modules/dashboard/composables/useDashboard', async () => {
+vi.mock('../../modules/goal/composables/useGoalHomeSummary', async () => {
   const { ref } = await import('vue');
   return {
-    useDashboard: () => ({
-      goalProgress: ref([]),
+    useGoalHomeSummary: () => ({
+      goals: ref([]),
       isLoading: ref(false),
-      fetchDashboard: dashboardMocks.fetchDashboard,
+      refresh: goalHomeMocks.refresh,
     }),
   };
 });
@@ -33,17 +33,6 @@ const DailyTodoWidgetStub = defineComponent({
           { 'data-testid': 'daily-todo-complete', onClick: () => emit('completed') },
           'complete',
         ),
-      ]);
-  },
-});
-
-const UpcomingRemindersWidgetStub = defineComponent({
-  name: 'UpcomingRemindersWidget',
-  emits: ['view-all'],
-  setup(_, { emit }) {
-    return () =>
-      h('div', { 'data-testid': 'upcoming-reminders-widget' }, [
-        h('button', { onClick: () => emit('view-all') }, 'reminders'),
       ]);
   },
 });
@@ -84,7 +73,6 @@ function mountPanel(active: boolean) {
       plugins: [i18n],
       stubs: {
         DailyTodoWidget: DailyTodoWidgetStub,
-        UpcomingRemindersWidget: UpcomingRemindersWidgetStub,
         GoalProgressWidget: GoalProgressWidgetStub,
       },
     },
@@ -100,14 +88,14 @@ describe('TodayOverviewPanel', () => {
     vi.useRealTimers();
   });
 
-  it('loads dashboard data only when the Home surface becomes active', async () => {
+  it('loads Goal-owned Home progress only when the Home surface becomes active', async () => {
     const wrapper = mountPanel(false);
-    expect(dashboardMocks.fetchDashboard).not.toHaveBeenCalled();
+    expect(goalHomeMocks.refresh).not.toHaveBeenCalled();
 
     await wrapper.setProps({ active: true });
     await nextTick();
 
-    expect(dashboardMocks.fetchDashboard).toHaveBeenCalledOnce();
+    expect(goalHomeMocks.refresh).toHaveBeenCalledOnce();
     expect(wrapper.get('[data-testid="today-overview-widgets"]').exists()).toBe(true);
   });
 
@@ -117,7 +105,6 @@ describe('TodayOverviewPanel', () => {
     await wrapper.get('[data-testid="today-overview-create-goal"]').trigger('click');
     await wrapper.get('[data-testid="today-overview-create-task"]').trigger('click');
     await wrapper.get('[data-testid="daily-todo-widget"] button').trigger('click');
-    await wrapper.get('[data-testid="upcoming-reminders-widget"] button').trigger('click');
     await wrapper.get('[data-testid="goal-progress-widget"] button:nth-child(1)').trigger('click');
     await wrapper.get('[data-testid="goal-progress-widget"] button:nth-child(2)').trigger('click');
 
@@ -125,21 +112,20 @@ describe('TodayOverviewPanel', () => {
       ['goal', '/goals?dialog=goal'],
       ['task', '/tasks?dialog=quick-task'],
       ['task', '/tasks'],
-      ['reminder', '/reminders'],
       ['goal', '/goals'],
       ['goal', '/goals/goal-1'],
     ]);
   });
 
-  it('reconciles the dashboard projection after task completion', async () => {
+  it('reconciles the Goal owner projection after task completion', async () => {
     vi.useFakeTimers();
     const wrapper = mountPanel(true);
     await nextTick();
-    dashboardMocks.fetchDashboard.mockClear();
+    goalHomeMocks.refresh.mockClear();
 
     await wrapper.get('[data-testid="daily-todo-complete"]').trigger('click');
     await vi.runAllTimersAsync();
 
-    expect(dashboardMocks.fetchDashboard).toHaveBeenCalledTimes(5);
+    expect(goalHomeMocks.refresh).toHaveBeenCalledTimes(5);
   });
 });

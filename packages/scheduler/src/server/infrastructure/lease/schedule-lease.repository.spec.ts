@@ -11,23 +11,36 @@ function request() {
   };
 }
 
-describe('createScheduleLeasePrismaRepository', () => {
-  it('projects a concurrent P2002 lease race to not-acquired', async () => {
-    const transactionLease = {
-      deleteMany: vi.fn(async () => ({ count: 0 })),
-      create: vi.fn(async () => {
-        throw Object.assign(new Error('unique lease race'), { code: 'P2002' });
-      }),
-    };
-    const db = {
-      $transaction: vi.fn(async (work: (tx: unknown) => Promise<unknown>) =>
-        work({ scheduleLease: transactionLease }),
-      ),
-    };
+function createDb(insertedCount: number) {
+  const transactionLease = {
+    deleteMany: vi.fn(async () => ({ count: 0 })),
+    createMany: vi.fn(async () => ({ count: insertedCount })),
+  };
+  const db = {
+    $transaction: vi.fn(async (work: (tx: unknown) => Promise<unknown>) =>
+      work({ scheduleLease: transactionLease }),
+    ),
+  };
+  return { db, transactionLease };
+}
 
+describe('createScheduleLeasePrismaRepository', () => {
+  it('acquires the lease when the conflict-free insert wins', async () => {
+    const { db, transactionLease } = createDb(1);
+    const repository = createScheduleLeasePrismaRepository(db as never);
+
+    await expect(repository.tryAcquire(request())).resolves.toBe(true);
+    expect(transactionLease.createMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skipDuplicates: true }),
+    );
+  });
+
+  it('projects a concurrent duplicate lease insert to not-acquired without exception control flow', async () => {
+    const { db, transactionLease } = createDb(0);
     const repository = createScheduleLeasePrismaRepository(db as never);
 
     await expect(repository.tryAcquire(request())).resolves.toBe(false);
+    expect(transactionLease.createMany).toHaveBeenCalledTimes(1);
   });
 
   it('does not hide unexpected lease repository failures', async () => {

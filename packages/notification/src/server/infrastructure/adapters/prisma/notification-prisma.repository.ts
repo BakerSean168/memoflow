@@ -26,18 +26,6 @@ import { randomUUID } from 'crypto';
 
 const notificationEventPublisher = createTypedEventPublisher<NotificationEventMap>(eventBus);
 
-// ============================================================
-// Include presets
-// ============================================================
-
-const INCLUDE_CHILDREN = {
-  channels: true,
-  history: true,
-};
-
-const INCLUDE_CHANNELS = {
-  channels: true,
-};
 
 /**
  * Notification Prisma Repository
@@ -83,6 +71,7 @@ export class NotificationPrismaRepository implements INotificationRepository {
           expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : null,
           version: dto.version,
           deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
+          archivedAt: dto.archivedAt ? new Date(dto.archivedAt) : null,
         },
         update: {
           title: dto.title,
@@ -106,58 +95,12 @@ export class NotificationPrismaRepository implements INotificationRepository {
           expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : null,
           version: dto.version,
           deletedAt: dto.deletedAt ? new Date(dto.deletedAt) : null,
+          archivedAt: dto.archivedAt ? new Date(dto.archivedAt) : null,
           updatedAt: new Date(),
         },
       });
 
-      // 2. Sync NotificationChannels: delete removed + upsert remaining
-      if (dto.notificationChannels) {
-        const currentChannelIds = dto.notificationChannels.map((c) => String(c.id));
-
-        // Delete channels that no longer exist in the aggregate
-        await tx.notificationChannel.deleteMany({
-          where: {
-            notificationId: String(dto.id),
-            id: { notIn: currentChannelIds },
-          },
-        });
-
-        // Upsert each channel
-        for (const channel of dto.notificationChannels) {
-          await tx.notificationChannel.upsert({
-            where: { id: String(channel.id) },
-            create: {
-              id: String(channel.id),
-              identityId: String(dto.identityId),
-              notificationId: String(dto.id),
-              channelType: channel.channelType,
-              status: channel.status,
-              recipient: channel.recipient,
-              maxRetries: channel.maxRetries,
-              retryCount: channel.sendAttempts,
-              attempts: channel.sendAttempts,
-              sentAt: channel.sentAt ? new Date(channel.sentAt) : null,
-              failedAt: channel.failedAt ? new Date(channel.failedAt) : null,
-              error: channel.error ? JSON.stringify(channel.error) : null,
-              response: channel.response ? JSON.stringify(channel.response) : null,
-            },
-            update: {
-              channelType: channel.channelType,
-              status: channel.status,
-              recipient: channel.recipient,
-              maxRetries: channel.maxRetries,
-              retryCount: channel.sendAttempts,
-              attempts: channel.sendAttempts,
-              sentAt: channel.sentAt ? new Date(channel.sentAt) : null,
-              failedAt: channel.failedAt ? new Date(channel.failedAt) : null,
-              error: channel.error ? JSON.stringify(channel.error) : null,
-              response: channel.response ? JSON.stringify(channel.response) : null,
-            },
-          });
-        }
-      }
-
-      // 3. Save NotificationDispatchOutbox entries in the same transaction
+      // 2. Save NotificationDispatchOutbox entries in the same transaction
       if (outboxDispatches && outboxDispatches.length > 0) {
         let insertedCount = 0;
         const now = new Date();
@@ -243,51 +186,26 @@ export class NotificationPrismaRepository implements INotificationRepository {
   ): Promise<NotificationDeliveryUsage> {
     const hourStart = new Date(now.getTime() - 60 * 60 * 1000);
     const dayStart = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    const baseWhere = {
-      identityId,
-      channelType: channel,
-    };
-
-    const [hourCount, dayCount] = await Promise.all([
-      this.prisma.notificationChannel.count({
-        where: {
-          ...baseWhere,
-          notification: { is: { workflowKey, createdAt: { gte: hourStart } } },
-        },
-      }),
-      this.prisma.notificationChannel.count({
-        where: {
-          ...baseWhere,
-          notification: { is: { workflowKey, createdAt: { gte: dayStart } } },
-        },
-      }),
-    ]);
-
-    return { hourCount, dayCount };
-  }
-
-  async findChannelsByStatus(status: string, limit?: number): Promise<Notification[]> {
-    const rows = await this.prisma.notification.findMany({
+    const plannedOutcomes = ['enqueued', 'deferred'];
+    const count = (since: Date) => this.prisma.notificationDeliveryDecisionRecord.count({
       where: {
-        deletedAt: null,
-        channels: { some: { status } },
+        identityId,
+        channel,
+        outcome: { in: plannedOutcomes },
+        notification: { is: { workflowKey, createdAt: { gte: since } } },
       },
-      include: INCLUDE_CHILDREN,
-      take: limit,
     });
-    return rows.map((row) =>
-      NotificationPrismaMapper.toDomain(row as PrismaNotificationWithRelations),
-    );
+    const [hourCount, dayCount] = await Promise.all([count(hourStart), count(dayStart)]);
+    return { hourCount, dayCount };
   }
 
   async findByIdForIdentity(
     identityId: string,
     id: string,
-    options?: { includeChildren?: boolean },
+    _options?: { includeChildren?: boolean },
   ): Promise<Notification | null> {
     const row = await this.prisma.notification.findFirst({
       where: { id, identityId },
-      include: options?.includeChildren ? INCLUDE_CHILDREN : INCLUDE_CHANNELS,
     });
     if (!row) return null;
     return NotificationPrismaMapper.toDomain(row as PrismaNotificationWithRelations);
@@ -296,7 +214,6 @@ export class NotificationPrismaRepository implements INotificationRepository {
   async findByIdempotencyKey(identityId: string, idempotencyKey: string): Promise<Notification | null> {
     const row = await this.prisma.notification.findUnique({
       where: { identityId_idempotencyKey: { identityId, idempotencyKey } },
-      include: INCLUDE_CHANNELS,
     });
     return row ? NotificationPrismaMapper.toDomain(row as PrismaNotificationWithRelations) : null;
   }
@@ -307,6 +224,7 @@ export class NotificationPrismaRepository implements INotificationRepository {
       includeChildren?: boolean;
       includeRead?: boolean;
       includeDeleted?: boolean;
+      archiveState?: 'active' | 'archived' | 'all';
       limit?: number;
       offset?: number;
     },
@@ -317,12 +235,16 @@ export class NotificationPrismaRepository implements INotificationRepository {
       where.deletedAt = null;
     }
     if (options?.includeRead === false) {
-      where.isRead = false;
+      where.readAt = null;
+    }
+    if (options?.archiveState === 'active' || options?.archiveState === undefined) {
+      where.archivedAt = null;
+    } else if (options.archiveState === 'archived') {
+      where.archivedAt = { not: null };
     }
 
     const rows = await this.prisma.notification.findMany({
       where,
-      include: options?.includeChildren ? INCLUDE_CHILDREN : INCLUDE_CHANNELS,
       orderBy: { createdAt: 'desc' },
       take: options?.limit,
       skip: options?.offset,
@@ -334,15 +256,15 @@ export class NotificationPrismaRepository implements INotificationRepository {
   async findByCategory(
     identityId: string,
     category: NotificationCategory,
-    options?: { limit?: number; offset?: number },
+    options?: { archiveState?: 'active' | 'archived' | 'all'; limit?: number; offset?: number },
   ): Promise<Notification[]> {
     const rows = await this.prisma.notification.findMany({
       where: {
         identityId,
         category,
         deletedAt: null,
+        ...(options?.archiveState === 'archived' ? { archivedAt: { not: null } } : options?.archiveState === 'all' ? {} : { archivedAt: null }),
       },
-      include: INCLUDE_CHANNELS,
       orderBy: { createdAt: 'desc' },
       take: options?.limit,
       skip: options?.offset,
@@ -355,10 +277,10 @@ export class NotificationPrismaRepository implements INotificationRepository {
     const rows = await this.prisma.notification.findMany({
       where: {
         identityId,
-        isRead: false,
+        readAt: null,
         deletedAt: null,
+        archivedAt: null,
       },
-      include: INCLUDE_CHANNELS,
       orderBy: { createdAt: 'desc' },
       take: options?.limit,
     });
@@ -370,6 +292,7 @@ export class NotificationPrismaRepository implements INotificationRepository {
     identityId: string,
     relatedEntityType: string,
     relatedEntityId: string,
+    options?: { archiveState?: 'active' | 'archived' | 'all' },
   ): Promise<Notification[]> {
     const rows = await this.prisma.notification.findMany({
       where: {
@@ -377,8 +300,8 @@ export class NotificationPrismaRepository implements INotificationRepository {
         relatedEntityType,
         relatedEntityId,
         deletedAt: null,
+        ...(options?.archiveState === 'archived' ? { archivedAt: { not: null } } : options?.archiveState === 'all' ? {} : { archivedAt: null }),
       },
-      include: INCLUDE_CHANNELS,
       orderBy: { createdAt: 'desc' },
     });
 
@@ -411,6 +334,22 @@ export class NotificationPrismaRepository implements INotificationRepository {
     }
   }
 
+  async archive(identityId: string, id: string, archivedAt: Date): Promise<void> {
+    const result = await this.prisma.notification.updateMany({
+      where: { id, identityId, deletedAt: null },
+      data: { archivedAt, updatedAt: archivedAt },
+    });
+    if (result.count !== 1) throw new Error('Notification not found for the current identity.');
+  }
+
+  async restore(identityId: string, id: string): Promise<void> {
+    const result = await this.prisma.notification.updateMany({
+      where: { id, identityId, deletedAt: null },
+      data: { archivedAt: null, updatedAt: new Date() },
+    });
+    if (result.count !== 1) throw new Error('Notification not found for the current identity.');
+  }
+
   async exists(identityId: string, id: string): Promise<boolean> {
     const count = await this.prisma.notification.count({ where: { id, identityId } });
     return count > 0;
@@ -420,8 +359,9 @@ export class NotificationPrismaRepository implements INotificationRepository {
     return this.prisma.notification.count({
       where: {
         identityId,
-        isRead: false,
+        readAt: null,
         deletedAt: null,
+        archivedAt: null,
       },
     });
   }
@@ -432,6 +372,7 @@ export class NotificationPrismaRepository implements INotificationRepository {
       where: {
         identityId,
         deletedAt: null,
+        archivedAt: null,
       },
       _count: { id: true },
     });
@@ -457,7 +398,7 @@ export class NotificationPrismaRepository implements INotificationRepository {
     if (ids.length === 0) return;
     const now = new Date();
     await this.prisma.notification.updateMany({
-      where: { id: { in: ids }, identityId },
+      where: { id: { in: ids }, identityId, deletedAt: null },
       data: {
         isRead: true,
         readAt: now,
@@ -471,8 +412,9 @@ export class NotificationPrismaRepository implements INotificationRepository {
     await this.prisma.notification.updateMany({
       where: {
         identityId,
-        isRead: false,
+        readAt: null,
         deletedAt: null,
+        archivedAt: null,
       },
       data: {
         isRead: true,
@@ -486,6 +428,7 @@ export class NotificationPrismaRepository implements INotificationRepository {
     const result = await this.prisma.notification.deleteMany({
       where: {
         deletedAt: null,
+        archivedAt: null,
         expiresAt: {
           not: null,
           lt: new Date(beforeTimestamp),

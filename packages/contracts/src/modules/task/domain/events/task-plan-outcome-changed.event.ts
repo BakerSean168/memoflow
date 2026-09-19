@@ -1,4 +1,4 @@
-import type { IdentityId, TaskInstanceId, TaskTemplateId } from '../../../../primitives';
+import type { IdentityId, TaskOccurrenceId, TaskPlanId } from '../../../../primitives';
 import type { TaskGoalBindingDTO } from '../../value-objects/task-goal-binding';
 import type { TaskPlanOutcome as TaskPlanOutcomeValue } from '../../value-objects/task-plan-outcome';
 
@@ -11,8 +11,8 @@ import type { TaskPlanOutcome as TaskPlanOutcomeValue } from '../../value-object
  */
 export interface TaskPlanOutcomeChangedEvent {
   identityId: IdentityId;
-  taskTemplateId: TaskTemplateId;
-  triggeringTaskInstanceId: TaskInstanceId;
+  taskPlanId: TaskPlanId;
+  triggeringTaskOccurrenceId: TaskOccurrenceId;
   taskTitle: string;
   goalBinding: TaskGoalBindingDTO | null;
   previousOutcome: TaskPlanOutcomeValue;

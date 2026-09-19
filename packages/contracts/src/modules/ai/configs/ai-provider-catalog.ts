@@ -1,5 +1,3 @@
-import { AIProviderType } from '../value-objects/ai-provider-type';
-
 export const AI_PROVIDER_CATALOG_IDS = [
   'openrouter',
   'openai',
@@ -9,15 +7,16 @@ export const AI_PROVIDER_CATALOG_IDS = [
 ] as const;
 
 export type AIProviderCatalogId = (typeof AI_PROVIDER_CATALOG_IDS)[number];
+/** Canonical ProviderDefinition identity; catalog is the current registry implementation. */
+export type AIProviderDefinitionId = AIProviderCatalogId;
 export type AIProviderCredentialProbeStrategy = 'openrouter_key' | 'authenticated_models';
 export type AIProviderModelDiscoveryStrategy = 'openai_models';
 
-export interface AIProviderCatalogEntry {
-  readonly id: AIProviderCatalogId;
+export interface AIProviderDefinition {
+  readonly id: AIProviderDefinitionId;
   readonly name: string;
   readonly description: string;
   readonly icon: string;
-  readonly providerType: typeof AIProviderType.OpenAICompatible;
   readonly protocol: 'openai_compatible';
   readonly defaultBaseUrl: string;
   readonly baseUrlEditable: boolean;
@@ -33,6 +32,9 @@ export interface AIProviderCatalogEntry {
   };
 }
 
+/** Existing catalog name retained as a type alias; the catalog is the definition owner. */
+export type AIProviderCatalogEntry = AIProviderDefinition;
+
 /**
  * Product-owned provider onboarding catalog.
  *
@@ -40,13 +42,12 @@ export interface AIProviderCatalogEntry {
  * silently chooses a default model. `recommendedModelIds` may influence UI
  * ranking, but the user must explicitly select `defaultModelId` before commit.
  */
-export const AI_PROVIDER_CATALOG: readonly AIProviderCatalogEntry[] = [
+export const AI_PROVIDER_CATALOG: readonly AIProviderDefinition[] = [
   {
     id: 'openrouter',
     name: 'OpenRouter',
     description: 'OpenAI-compatible multi-model gateway',
     icon: 'openrouter',
-    providerType: AIProviderType.OpenAICompatible,
     protocol: 'openai_compatible',
     defaultBaseUrl: 'https://openrouter.ai/api/v1',
     baseUrlEditable: false,
@@ -63,7 +64,6 @@ export const AI_PROVIDER_CATALOG: readonly AIProviderCatalogEntry[] = [
     name: 'OpenAI',
     description: 'Official OpenAI API',
     icon: 'openai',
-    providerType: AIProviderType.OpenAICompatible,
     protocol: 'openai_compatible',
     defaultBaseUrl: 'https://api.openai.com/v1',
     baseUrlEditable: false,
@@ -80,7 +80,6 @@ export const AI_PROVIDER_CATALOG: readonly AIProviderCatalogEntry[] = [
     name: 'Gemini',
     description: 'Official Gemini API via Google OpenAI-compatible endpoint',
     icon: 'gemini',
-    providerType: AIProviderType.OpenAICompatible,
     protocol: 'openai_compatible',
     defaultBaseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai',
     baseUrlEditable: false,
@@ -97,7 +96,6 @@ export const AI_PROVIDER_CATALOG: readonly AIProviderCatalogEntry[] = [
     name: 'DeepSeek',
     description: 'Official DeepSeek OpenAI-compatible endpoint',
     icon: 'deepseek',
-    providerType: AIProviderType.OpenAICompatible,
     protocol: 'openai_compatible',
     defaultBaseUrl: 'https://api.deepseek.com/v1',
     baseUrlEditable: false,
@@ -114,7 +112,6 @@ export const AI_PROVIDER_CATALOG: readonly AIProviderCatalogEntry[] = [
     name: 'Custom OpenAI-compatible',
     description: 'Connect any OpenAI-compatible HTTPS endpoint',
     icon: 'custom',
-    providerType: AIProviderType.OpenAICompatible,
     protocol: 'openai_compatible',
     defaultBaseUrl: '',
     baseUrlEditable: true,
@@ -126,6 +123,6 @@ export const AI_PROVIDER_CATALOG: readonly AIProviderCatalogEntry[] = [
   },
 ] as const;
 
-export function getAIProviderCatalogEntry(id: string): AIProviderCatalogEntry | undefined {
+export function getAIProviderCatalogEntry(id: string): AIProviderDefinition | undefined {
   return AI_PROVIDER_CATALOG.find((entry) => entry.id === id);
 }

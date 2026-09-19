@@ -1,9 +1,8 @@
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
-import type { NotificationChannelType, DoNotDisturbConfigDTO, RateLimitDTO } from '@memoflow/contracts/notification';
+import type { NotificationChannelType, QuietHoursDTO } from '@memoflow/contracts/notification';
 import { parseJsonSafe } from '@memoflow/utils/shared';
 import { NotificationPreference } from '../../../domain/aggregates/notification-preference';
-import { DoNotDisturbConfig } from '../../../domain/value-objects/do-not-disturb-config';
-import { RateLimit } from '../../../domain/value-objects/rate-limit';
+import { QuietHours } from '../../../domain/value-objects/quiet-hours';
 import type { INotificationPreferenceRepository } from '../../../domain/repositories/i-notification-preference-repository';
 
 interface NotificationPreferenceRow {
@@ -11,8 +10,7 @@ interface NotificationPreferenceRow {
   identity_id: string;
   global_channels: string | null;
   workflow_overrides: string | null;
-  do_not_disturb: string | null;
-  rate_limit: string | null;
+  quiet_hours: string | null;
   version: number | null;
   created_at: string;
   updated_at: string;
@@ -36,13 +34,9 @@ function hydratePreference(row: NotificationPreferenceRow): NotificationPreferen
         new Map(Object.entries(channels) as [NotificationChannelType, boolean][]),
       ]),
     ),
-    doNotDisturb: (() => {
-      const dto = parseJsonSafe<DoNotDisturbConfigDTO>(row.do_not_disturb);
-      return dto ? DoNotDisturbConfig.fromDTO(dto) : null;
-    })(),
-    rateLimit: (() => {
-      const dto = parseJsonSafe<RateLimitDTO>(row.rate_limit);
-      return dto ? RateLimit.fromDTO(dto) : null;
+    quietHours: (() => {
+      const dto = parseJsonSafe<QuietHoursDTO>(row.quiet_hours);
+      return dto ? QuietHours.fromDTO(dto) : null;
     })(),
     version: row.version ?? 1,
     deletedAt: row.deleted_at ? new Date(row.deleted_at) : null,
@@ -58,16 +52,15 @@ export class PowerSyncNotificationPreferenceRepository implements INotificationP
     const dto = preference.toServerDTO();
     await this.db.execute(
       `INSERT OR REPLACE INTO notification_preferences (
-         id, identity_id, global_channels, workflow_overrides, do_not_disturb, rate_limit,
+         id, identity_id, global_channels, workflow_overrides, quiet_hours,
          version, created_at, updated_at, deleted_at
-       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         dto.id,
         dto.identityId,
         JSON.stringify(dto.globalChannels),
         JSON.stringify(dto.workflowOverrides),
-        dto.doNotDisturb ? JSON.stringify(dto.doNotDisturb) : null,
-        dto.rateLimit ? JSON.stringify(dto.rateLimit) : null,
+        dto.quietHours ? JSON.stringify(dto.quietHours) : null,
         dto.version,
         new Date(dto.createdAt).toISOString(),
         new Date(dto.updatedAt).toISOString(),

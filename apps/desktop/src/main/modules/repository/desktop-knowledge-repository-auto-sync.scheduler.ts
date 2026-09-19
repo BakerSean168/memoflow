@@ -3,8 +3,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { watch, type ChokidarOptions, type FSWatcher } from 'chokidar';
 import {
-  KnowledgeRepositoryConnectionClientSchema,
-  type KnowledgeRepositoryConnectionClientDTO,
+  KnowledgeRemoteBindingClientSchema,
+  type KnowledgeRemoteBindingClientDTO,
 } from '@memoflow/contracts/repository';
 import type { LocalVaultElectronPort } from '@memoflow/repository/electron';
 // Residual 957: isMissing/isTemporaryFile duals retired — sole repository electron vault-fs-guards.
@@ -12,6 +12,7 @@ import { isMissing, isTemporaryFile } from '@memoflow/repository/electron';
 import { createLogger } from '@memoflow/utils/logger';
 import type { DesktopKnowledgeRepositorySyncService } from './desktop-knowledge-repository-sync.service';
 import type { KnowledgeRepositoryDesktopRemotePort } from './knowledge-repository-desktop-remote.port';
+import { resolveReadyKnowledgeRemoteSyncState } from './knowledge-remote-binding-sync.policy';
 
 const logger = createLogger('KnowledgeRepositoryAutoSync');
 const DEFAULT_DEBOUNCE_MS = 2_500;
@@ -28,8 +29,8 @@ const IGNORED_TOP_LEVEL_DIRECTORIES = new Set([
 ]);
 
 interface StoredKnowledgeRepositoryAutoSyncState {
-  schemaVersion: 1;
-  connection: KnowledgeRepositoryConnectionClientDTO | null;
+  schemaVersion: 2;
+  connection: KnowledgeRemoteBindingClientDTO | null;
 }
 
 export interface KnowledgeRepositoryAutoSyncLifecyclePort {
@@ -60,7 +61,6 @@ export interface KnowledgeRepositoryAutoSyncSchedulerPort {
   stop(options?: { commitPendingChanges?: boolean }): Promise<void>;
 }
 
-
 /** Keep watcher input aligned with the paths accepted by the managed Git runtime. */
 export function shouldIgnoreKnowledgeRepositoryWatchPath(
   rootPath: string,
@@ -76,11 +76,11 @@ export function shouldIgnoreKnowledgeRepositoryWatchPath(
 }
 
 function selectAutomaticConnection(
-  connections: KnowledgeRepositoryConnectionClientDTO[],
-): KnowledgeRepositoryConnectionClientDTO | null {
-  const eligible = connections.filter(
-    (connection) =>
-      connection.status === 'Active' && connection.canSync && connection.lastSyncedCommitSha,
+  connections: KnowledgeRemoteBindingClientDTO[],
+  localKnowledgeSpaceId: string,
+): KnowledgeRemoteBindingClientDTO | null {
+  const eligible = connections.filter((connection) =>
+    Boolean(resolveReadyKnowledgeRemoteSyncState(connection, localKnowledgeSpaceId)),
   );
   if (eligible.length !== 1) {
     if (eligible.length > 1) {
@@ -93,15 +93,14 @@ function selectAutomaticConnection(
   return eligible[0]!;
 }
 
-
 export class DesktopKnowledgeRepositoryAutoSyncScheduler implements KnowledgeRepositoryAutoSyncSchedulerPort {
   private readonly watchFactory: (rootPath: string, options: ChokidarOptions) => FSWatcher;
   private readonly debounceMs: number;
   private readonly stabilityThresholdMs: number;
   private readonly shutdownCommitTimeoutMs: number;
   private identityId: string | null = null;
-  private connection: KnowledgeRepositoryConnectionClientDTO | null = null;
-  private cachedConnection: KnowledgeRepositoryConnectionClientDTO | null = null;
+  private connection: KnowledgeRemoteBindingClientDTO | null = null;
+  private cachedConnection: KnowledgeRemoteBindingClientDTO | null = null;
   private watchedRootPath: string | null = null;
   private watcher: FSWatcher | null = null;
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -216,8 +215,8 @@ export class DesktopKnowledgeRepositoryAutoSyncScheduler implements KnowledgeRep
   private async refreshInternal(identityId: string, clearPause: boolean): Promise<void> {
     if (this.stopped || identityId !== this.identityId) return;
 
-    const binding = await this.options.localVault.getBinding(identityId);
-    if (!binding || binding.status !== 'Active') {
+    const binding = await this.options.localVault.getBinding();
+    if (!binding || binding.health.state !== 'Available') {
       this.connection = null;
       this.pausedConnectionId = null;
       await this.closeWatcher();
@@ -225,16 +224,26 @@ export class DesktopKnowledgeRepositoryAutoSyncScheduler implements KnowledgeRep
     }
 
     const connections = await this.options.remote.listKnowledgeRepositoryConnections();
-    let connection: KnowledgeRepositoryConnectionClientDTO | null;
+    let connection: KnowledgeRemoteBindingClientDTO | null;
     if (connections.ok) {
-      connection = selectAutomaticConnection(connections.data.connections);
+      connection = selectAutomaticConnection(
+        connections.data.connections,
+        binding.binding.knowledgeSpaceId,
+      );
       this.cachedConnection = connection;
       await this.persistCachedConnection(connection);
     } else {
       logger.warn('Unable to refresh automatic knowledge repository synchronization', {
         code: connections.error.code,
       });
-      connection = this.cachedConnection;
+      connection =
+        this.cachedConnection &&
+        resolveReadyKnowledgeRemoteSyncState(
+          this.cachedConnection,
+          binding.binding.knowledgeSpaceId,
+        )
+          ? this.cachedConnection
+          : null;
     }
 
     if (!connection) {
@@ -248,7 +257,7 @@ export class DesktopKnowledgeRepositoryAutoSyncScheduler implements KnowledgeRep
       this.pausedConnectionId = null;
     }
     this.connection = connection;
-    await this.ensureWatcher(binding.rootPath);
+    await this.ensureWatcher(binding.binding.rootPath);
   }
 
   private async ensureWatcher(rootPath: string): Promise<void> {
@@ -328,7 +337,7 @@ export class DesktopKnowledgeRepositoryAutoSyncScheduler implements KnowledgeRep
       const result = await this.options.synchronization.executeAutomatic(identityId, connection);
       if (!result.ok) {
         this.handleSynchronizationFailure(connection.id, reason, result.error);
-        if (typeof result.error.context?.['lifecycleErrorCode'] === 'string') {
+        if (typeof result.error.context?.['remoteRepositoryBlockReason'] === 'string') {
           await this.refreshInternal(identityId, false);
         }
         return;
@@ -402,7 +411,7 @@ export class DesktopKnowledgeRepositoryAutoSyncScheduler implements KnowledgeRep
 
   private async loadCachedConnection(
     identityId: string,
-  ): Promise<KnowledgeRepositoryConnectionClientDTO | null> {
+  ): Promise<KnowledgeRemoteBindingClientDTO | null> {
     const stateFilePath = this.options.stateFilePath;
     if (!stateFilePath) return null;
     try {
@@ -415,8 +424,8 @@ export class DesktopKnowledgeRepositoryAutoSyncScheduler implements KnowledgeRep
         schemaVersion?: unknown;
         connection?: unknown;
       };
-      if (parsed.schemaVersion !== 1 || parsed.connection === null) return null;
-      const connection = KnowledgeRepositoryConnectionClientSchema.safeParse(parsed.connection);
+      if (parsed.schemaVersion !== 2 || parsed.connection === null) return null;
+      const connection = KnowledgeRemoteBindingClientSchema.safeParse(parsed.connection);
       if (!connection.success || String(connection.data.identityId) !== identityId) {
         logger.warn('Knowledge repository automatic sync state file is invalid');
         return null;
@@ -431,12 +440,12 @@ export class DesktopKnowledgeRepositoryAutoSyncScheduler implements KnowledgeRep
   }
 
   private async persistCachedConnection(
-    connection: KnowledgeRepositoryConnectionClientDTO | null,
+    connection: KnowledgeRemoteBindingClientDTO | null,
   ): Promise<void> {
     const stateFilePath = this.options.stateFilePath;
     if (!stateFilePath) return;
     const temporaryPath = `${stateFilePath}.${process.pid}.${randomUUID()}.tmp`;
-    const state: StoredKnowledgeRepositoryAutoSyncState = { schemaVersion: 1, connection };
+    const state: StoredKnowledgeRepositoryAutoSyncState = { schemaVersion: 2, connection };
     try {
       await fs.promises.mkdir(path.dirname(stateFilePath), { recursive: true });
       await fs.promises.writeFile(temporaryPath, `${JSON.stringify(state, null, 2)}\n`, {

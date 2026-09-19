@@ -1,6 +1,5 @@
 export {
-  createSchedulerRuntimeContribution,
-  type SchedulerRuntimeDependencies,
-  type ScheduleTaskExecutionResult,
-  type ScheduleTaskSourceExecutor,
-} from './schedule.runtime';
+  createScheduledInvocationRuntimeContribution,
+  type ScheduledInvocationHandlerRegistry,
+  type ScheduledInvocationRuntimeDependencies,
+} from './scheduled-invocation.runtime';

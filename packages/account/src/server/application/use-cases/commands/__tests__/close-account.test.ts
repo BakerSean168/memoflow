@@ -8,6 +8,7 @@ import { AccountClosureCoordinator } from '../../../services/account-closure-coo
 import { InMemoryAccountClosureOperationRepository } from '../../../../infrastructure/adapters/in-memory/account-closure-operation-in-memory.repository';
 import type { CloudAuthRevocationPort } from '../../../ports/cloud-auth-revocation.port';
 import type { AccountClosureEventPublisher } from '../../../ports/account-closure-event-publisher.port';
+import { asInstant, createFixedClock } from '@memoflow/time';
 
 describe('CloseAccountUseCase', () => {
   let repo: ReturnType<typeof createMockRepo<IAccountRepository>>;
@@ -17,10 +18,11 @@ describe('CloseAccountUseCase', () => {
   let coordinator: AccountClosureCoordinator;
   let useCase: CloseAccountUseCase;
 
-  function anAccount(overrides: { id?: IdentityId; email?: string } = {}) {
+  function anAccount(overrides: { id?: IdentityId; nicknameSeed?: string } = {}) {
     return Account.create({
       id: overrides.id ?? IdentityId.generate(),
-      email: overrides.email ?? 'test@example.com',
+      nicknameSeed: overrides.nicknameSeed ?? 'Test User',
+      now: asInstant(1_700_000_000_000),
     });
   }
 
@@ -41,6 +43,7 @@ describe('CloseAccountUseCase', () => {
       closureOperationRepository: closureOpRepo,
       revocationPort: mockRevocationPort,
       eventPublisher: mockEventPublisher,
+      clock: createFixedClock(1_700_000_000_200),
     });
     useCase = new CloseAccountUseCase(coordinator);
   });
@@ -80,7 +83,7 @@ describe('CloseAccountUseCase', () => {
 
   it('should handle already closed account idempotently and return succeeded receipt', async () => {
     const account = anAccount();
-    account.close(); // first close succeeds
+    account.close(asInstant(1_700_000_000_100)); // first close succeeds
     (repo.findById as ReturnType<typeof vi.fn>).mockResolvedValue(account);
 
     const result = await useCase.execute(

@@ -92,6 +92,7 @@ function createPortStub(): GoalApplicationPort {
     createGoal: fn(okReceipt()),
     updateGoal: fn(okReceipt()),
     deleteGoal: fn(okReceipt()),
+    planGoal: fn(okReceipt()),
     archiveGoal: fn(okReceipt()),
     abandonGoal: fn(okReceipt()),
     activateGoal: fn(okReceipt()),
@@ -104,7 +105,8 @@ function createPortStub(): GoalApplicationPort {
     batchUpdateKeyResultWeights: fn(okReceipt()),
     addReview: fn(okReceipt()),
     getReviewContext: fn({
-      windowStartAt: 0, windowEndAt: 1,
+      windowStartAt: 0,
+      windowEndAt: 1,
       overallProgress: { startPercentage: 0, endPercentage: 0, deltaPercentage: 0 },
       keyResults: [],
       summary: { recordCount: 0, manualRecordCount: 0, taskContributionCount: 0 },
@@ -116,6 +118,19 @@ function createPortStub(): GoalApplicationPort {
     deleteRecord: fn(okReceipt()),
     getGoal: vi.fn(),
     listGoals: vi.fn(),
+    getHomeSummary: fn({
+      activeCount: 2,
+      goals: [
+        {
+          id: GOAL_ID,
+          name: 'Ship architecture fixes',
+          progress: 45,
+          status: 'InProgress',
+          target: null,
+          keyResultCount: 3,
+        },
+      ],
+    }),
     searchGoals: vi.fn(),
     getGoalAggregate: vi.fn(),
     permanentlyDeleteGoal: vi.fn(),
@@ -188,7 +203,7 @@ const validAddKr = {
   goalId: GOAL_ID,
   title: 'KR',
   calculationMethod: 'Sum',
-  startingValue: 0,
+  initialValue: 0,
   currentValue: 0,
   targetValue: 10,
   weight: 3,
@@ -350,6 +365,30 @@ describe('goal transport parity (Phase 4) — production registrations', () => {
     }
   }
 
+  it('home summary: HTTP and IPC expose the same Goal-owned read model', async () => {
+    const port = createPortStub();
+    const http = buildHttp(port);
+    const ipc = buildIpc(port);
+    const httpHandler = http.get('goal GET /home-summary');
+    expect(httpHandler).toBeDefined();
+
+    const httpRes = createRes();
+    await httpHandler!(makeReq({}), httpRes);
+    expect(httpRes.statusCode).toBe(200);
+    expect(httpRes.body.ok).toBe(true);
+
+    const ipcHandler = ipc.get(GoalChannels.HOME_SUMMARY);
+    expect(ipcHandler).toBeDefined();
+    const ipcResult = await ipcHandler!({ sender: {}, senderFrame: {} });
+    expect(ipcResult.ok).toBe(true);
+    expect(httpRes.body.data).toEqual((ipcResult as { data: unknown }).data);
+
+    const mock = port.getHomeSummary as ReturnType<typeof vi.fn>;
+    expect(mock).toHaveBeenCalledTimes(2);
+    expect(mock.mock.calls[0]?.[0]).toBe('identity-1');
+    expect(mock.mock.calls[1]?.[0]).toBe('identity-1');
+  });
+
   it.each<[string, RowSpec]>([
     [
       'create',
@@ -428,6 +467,27 @@ describe('goal transport parity (Phase 4) — production registrations', () => {
         malformedIpcArgs: [GOAL_ID, malformedVersionCommand],
         assertPort: (port) => {
           const mock = port.archiveGoal as ReturnType<typeof vi.fn>;
+          expect(mock).toHaveBeenCalledTimes(2);
+          for (const call of mock.mock.calls) {
+            expect(call[0]).toBe(GOAL_ID);
+            expect(call[1]).toBe('identity-1');
+            expect(call[2]).toBe(1);
+          }
+        },
+      },
+    ],
+    [
+      'plan',
+      {
+        httpKey: 'goal POST /:id/plan',
+        ipcChannel: GoalChannels.PLAN,
+        httpReq: { params: { id: GOAL_ID }, body: validVersionCommand },
+        ipcArgs: [GOAL_ID, validVersionCommand],
+        validInvocation: { params: { id: GOAL_ID }, body: validVersionCommand },
+        malformedHttpReq: { params: { id: GOAL_ID }, body: malformedVersionCommand },
+        malformedIpcArgs: [GOAL_ID, malformedVersionCommand],
+        assertPort: (port) => {
+          const mock = port.planGoal as ReturnType<typeof vi.fn>;
           expect(mock).toHaveBeenCalledTimes(2);
           for (const call of mock.mock.calls) {
             expect(call[0]).toBe(GOAL_ID);

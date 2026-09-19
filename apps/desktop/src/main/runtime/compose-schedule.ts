@@ -2,7 +2,9 @@
 import {
   createScheduleModule,
   type IScheduleRepository,
+  type SchedulePortableCapability,
   type SchedulePowerSyncRepositories,
+  type ScheduleEventApplicationPort,
 } from '@memoflow/schedule';
 import {
   createScheduleElectronModule,
@@ -10,10 +12,8 @@ import {
 } from '@memoflow/schedule/electron';
 import {
   createSchedulerModule,
-  createSchedulerRuntimeContribution,
-  type IScheduleTaskRepository,
-  type ScheduleTask,
-  type ScheduleTaskSourceExecutor,
+  createScheduledInvocationRuntimeContribution,
+  type ScheduledInvocationHandlerRegistry,
   type SchedulerModuleRuntimeContribution,
   type SchedulerPowerSyncRepositories,
   type SchedulerRuntimeContributionsInput,
@@ -31,17 +31,19 @@ export interface ScheduleRuntimeController {
 export interface ComposeScheduleDesktopDependencies {
   readonly calendarRepositories: SchedulePowerSyncRepositories;
   readonly schedulerRepositories: SchedulerPowerSyncRepositories;
-  readonly sourceExecutor: ScheduleTaskSourceExecutor;
+  readonly handlerRegistry: ScheduledInvocationHandlerRegistry;
   readonly schedulerRuntimeContributions?: SchedulerRuntimeContributionsInput;
-  readonly shouldScheduleTask?: (task: ScheduleTask) => boolean | Promise<boolean>;
+  readonly shouldExecuteIdentity?: (identityId: string) => boolean | Promise<boolean>;
 }
 
 export interface ComposedScheduleElectron {
   readonly calendarModule: ScheduleElectronModuleDef;
   readonly schedulerModule: SchedulerElectronModuleDef;
+  readonly portableCapability: SchedulePortableCapability;
+  /** Schedule-owned Calendar Event read/command seam shared by transports. */
+  readonly eventApi: ScheduleEventApplicationPort;
   readonly repositories: {
     readonly scheduleRepository: IScheduleRepository;
-    readonly scheduleTaskRepository: IScheduleTaskRepository;
   };
   readonly runtimeController: ScheduleRuntimeController;
 }
@@ -50,24 +52,22 @@ function normalizeRuntimeContributions(
   input?: SchedulerRuntimeContributionsInput,
 ): readonly SchedulerModuleRuntimeContribution[] {
   if (!input) return [];
-  return Array.isArray(input)
-    ? Array.from(input)
-    : [input as SchedulerModuleRuntimeContribution];
+  return Array.isArray(input) ? Array.from(input) : [input as SchedulerModuleRuntimeContribution];
 }
 
 export function composeSchedule(
   dependencies: ComposeScheduleDesktopDependencies,
 ): ComposedScheduleElectron {
-  const queueRuntime = createSchedulerRuntimeContribution({
-    scheduleTaskRepository: dependencies.schedulerRepositories.scheduleTaskRepository,
-    sourceExecutor: dependencies.sourceExecutor,
+  const queueRuntime = createScheduledInvocationRuntimeContribution({
+    repository: dependencies.schedulerRepositories.scheduledInvocationRepository,
+    handlerRegistry: dependencies.handlerRegistry,
     leaseCoordinator: dependencies.schedulerRepositories.leaseCoordinator,
-    shouldScheduleTask: dependencies.shouldScheduleTask,
+    shouldExecuteIdentity: dependencies.shouldExecuteIdentity,
   });
 
   const schedulerInstance = createSchedulerModule({
-    scheduleTaskRepository: dependencies.schedulerRepositories.scheduleTaskRepository,
-    scheduleExecutionRepository: dependencies.schedulerRepositories.scheduleExecutionRepository,
+    scheduledInvocationRepository: dependencies.schedulerRepositories.scheduledInvocationRepository,
+    invocationAttemptRepository: dependencies.schedulerRepositories.invocationAttemptRepository,
     runtimeContributions: [
       queueRuntime,
       ...normalizeRuntimeContributions(dependencies.schedulerRuntimeContributions),
@@ -99,9 +99,10 @@ export function composeSchedule(
   return {
     calendarModule,
     schedulerModule,
+    portableCapability: calendarInstance.portableCapability,
+    eventApi: calendarInstance.eventApi,
     repositories: {
       scheduleRepository: dependencies.calendarRepositories.scheduleRepository,
-      scheduleTaskRepository: dependencies.schedulerRepositories.scheduleTaskRepository,
     },
     runtimeController,
   };

@@ -9,7 +9,6 @@
     "@memoflow/ai": "workspace:*",
     "@memoflow/cloud-auth": "workspace:*",
     "@memoflow/contracts": "workspace:*",
-    "@memoflow/dashboard": "workspace:*",
     "@memoflow/data-portability": "workspace:*",
     "@memoflow/database": "workspace:*",
     "@memoflow/domain-shared": "workspace:*",
@@ -52,7 +51,8 @@
     "node-cron": "^4.2.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
-    "zod": "^4.4.3"
+    "zod": "^4.4.3",
+    "@memoflow/relation": "workspace:*"
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",

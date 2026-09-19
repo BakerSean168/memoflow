@@ -26,3 +26,9 @@ export * from './api';
 
 // ============ DTOs ============
 export * from './dtos';
+
+// ============ Invocation Context ============
+export * from './context';
+
+// ============ Owner-driven Data Portability V3 ============
+export * from './portable-v3';

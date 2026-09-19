@@ -1,83 +1,100 @@
 // ==========================================
 // Schedule Module
-// 日程聚合根、调度任务、调度作业、执行、统计
+// CalendarEntry product truth + canonical Temporal Engine runtime
 // ==========================================
 
 model Schedule {
-  id                   String   @id
-  identityId           String   @map("identity_id")
+  id                   String    @id
+  identityId           String    @map("identity_id")
   title                String
   description          String?
-  startTime            DateTime @map("start_time")
-  endTime              DateTime @map("end_time")
-  duration             Int
-  hasConflict          Boolean  @default(false) @map("has_conflict")
-  conflictingSchedules String?  @map("conflicting_schedules")
-  priority             Int?
+  // ADR-080 canonical CalendarEntry range truth. Timed and AllDay are mutually exclusive by domain invariant.
+  rangeKind            String    @map("range_kind")
+  timedStart           DateTime? @map("timed_start")
+  timedEnd             DateTime? @map("timed_end")
+  allDayStart          String?   @map("all_day_start")
+  allDayEnd            String?   @map("all_day_end")
   location             String?
   attendees            String?
-  createdAt            DateTime @default(now()) @map("created_at")
-  version              Int      @default(1)
-  updatedAt            DateTime @updatedAt @map("updated_at")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  version              Int       @default(1)
+  updatedAt            DateTime  @updatedAt @map("updated_at")
 
   account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
 
-  @@index([startTime, endTime])
+  @@index([identityId, rangeKind, timedStart, timedEnd], map: "schedules_timed_range_idx")
+  @@index([identityId, rangeKind, allDayStart, allDayEnd], map: "schedules_all_day_range_idx")
   @@map("schedules")
 }
 
-model ScheduleTask {
-  id                    String    @id
-  identityId            String    @map("identity_id")
-  name                  String
-  description           String?
-  sourceModule          String    @map("source_module")
-  sourceEntityId        String    @map("source_entity_id")
-  // ADR-061 neutral scheduling identity. Legacy projector rows remain NULL until migrated.
-  schedulingKey         String?   @map("scheduling_key")
-  ownerType             String?   @map("owner_type")
-  ownerId               String?   @map("owner_id")
-  handlerKey             String?   @map("handler_key")
-  payloadVersion         Int?      @map("payload_version")
-  sourceRevision        String?   @map("source_revision")
-  status                String
-  enabled               Boolean
-  cronExpression        String?   @map("cron_expression")
-  timezone              String
-  startDate             DateTime? @map("start_date")
-  endDate               DateTime? @map("end_date")
-  maxExecutions         Int?      @map("max_executions")
-  nextRunAt             DateTime? @map("next_run_at")
-  lastRunAt             DateTime? @map("last_run_at")
-  executionCount        Int       @default(0) @map("execution_count")
-  lastExecutionStatus   String?   @map("last_execution_status")
-  lastExecutionDuration Int?      @map("last_execution_duration")
-  consecutiveFailures   Int       @default(0) @map("consecutive_failures")
-  maxRetries            Int       @map("max_retries")
-  initialDelayMs        Int       @map("initial_delay_ms")
-  maxDelayMs            Int       @map("max_delay_ms")
-  backoffMultiplier     Float     @map("backoff_multiplier")
-  retryableStatuses     String    @default("[]") @map("retryable_statuses")
-  payload               String?
-  tags                  String    @default("[]")
-  priority              String
-  timeout               Int?
-  version               Int       @default(1)
-  createdAt             DateTime  @default(now()) @map("created_at")
-  updatedAt             DateTime  @updatedAt @map("updated_at")
-  deletedAt             DateTime? @map("deleted_at")
-
-  executions ScheduleExecution[]
-  account    Account             @relation(fields: [identityId], references: [id], onDelete: Cascade)
-
-  @@index([status])
-  @@unique([identityId, ownerType, ownerId, schedulingKey], map: "schedule_tasks_owner_scheduling_key_unique")
-  @@index([identityId, ownerType, ownerId], map: "schedule_tasks_owner_lookup_idx")
-  @@map("schedule_tasks")
-}
 
 /// Durable evidence for one owner-level desired-state reconcile.
-/// Successful rows are written inside the same transaction as ScheduleTask upsert/delete.
+/// Successful rows are written inside the same transaction as ScheduledInvocation reconcile.
+
+
+model ScheduledInvocation {
+  id             String   @id
+  identityId     String   @map("identity_id")
+  ownerType      String   @map("owner_type")
+  ownerId        String   @map("owner_id")
+  schedulingKey  String   @map("scheduling_key")
+  handlerKey     String   @map("handler_key")
+  payloadVersion Int      @map("payload_version")
+  payload        Json
+  runAt          DateTime @map("run_at")
+  sourceRevision Json?    @map("source_revision")
+  retryEnabled   Boolean  @default(true) @map("retry_enabled")
+  maxRetries     Int      @map("max_retries")
+  initialDelayMs Int      @map("initial_delay_ms")
+  maxDelayMs     Int      @map("max_delay_ms")
+  backoffMultiplier Float @map("backoff_multiplier")
+  priority       String
+  timeoutMs      Int?     @map("timeout_ms")
+  status         String
+  attemptCount   Int      @default(0) @map("attempt_count")
+  nextAttemptAt  DateTime? @map("next_attempt_at")
+  claimToken     String?  @map("claim_token")
+  claimExpiresAt DateTime? @map("claim_expires_at")
+  fencingToken   Int      @default(0) @map("fencing_token")
+  name           String?
+  tags           Json
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  attempts InvocationAttempt[]
+
+  @@unique([identityId, ownerType, ownerId, schedulingKey], map: "scheduled_invocations_owner_key_unique")
+  @@index([identityId, status, nextAttemptAt], map: "scheduled_invocations_due_idx")
+  @@index([identityId, ownerType, ownerId], map: "scheduled_invocations_owner_idx")
+  @@map("scheduled_invocations")
+}
+
+model InvocationAttempt {
+  id             String   @id
+  identityId     String   @map("identity_id")
+  invocationId   String   @map("invocation_id")
+  attemptNumber  Int      @map("attempt_number")
+  startedAt      DateTime @map("started_at")
+  finishedAt     DateTime? @map("finished_at")
+  outcome        String
+  result         Json?
+  failureCode    String?  @map("failure_code")
+  failureMessage String?  @map("failure_message")
+  failureRetryable Boolean? @map("failure_retryable")
+  workerId       String?  @map("worker_id")
+  claimToken     String?  @map("claim_token")
+  fencingToken   Int?     @map("fencing_token")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  invocation ScheduledInvocation @relation(fields: [invocationId], references: [id], onDelete: Cascade)
+
+  @@unique([invocationId, attemptNumber], map: "invocation_attempts_number_unique")
+  @@index([identityId, invocationId, createdAt], map: "invocation_attempts_lookup_idx")
+  @@map("invocation_attempts")
+}
+
 model SchedulingReconcileOperation {
   operationId      String   @id @map("operation_id")
   identityId       String   @map("identity_id")
@@ -102,56 +119,11 @@ model SchedulingReconcileOperation {
   @@map("scheduling_reconcile_operations")
 }
 
-model ScheduleExecution {
-  id            String   @id
-  identityId    String   @map("identity_id")
-  taskId        String   @map("task_id")
-  executionTime DateTime @map("execution_time")
-  status        String
-  duration      Int?
-  result        String?
-  error         String?
-  retryCount    Int      @default(0) @map("retry_count")
-  createdAt     DateTime @default(now()) @map("created_at")
 
-  identity Account      @relation("AccountScheduleExecutions", fields: [identityId], references: [id])
-  task     ScheduleTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@index([taskId])
-  @@map("schedule_executions")
-}
-
-model ScheduleStatistic {
-  id                   Int      @id @default(autoincrement())
-  identityId           String   @unique @map("identity_id")
-  totalTasks           Int      @map("total_tasks")
-  activeTasks          Int      @map("active_tasks")
-  pausedTasks          Int      @map("paused_tasks")
-  completedTasks       Int      @map("completed_tasks")
-  cancelledTasks       Int      @map("cancelled_tasks")
-  failedTasks          Int      @map("failed_tasks")
-  totalExecutions      Int      @map("total_executions")
-  successfulExecutions Int      @map("successful_executions")
-  failedExecutions     Int      @map("failed_executions")
-  skippedExecutions    Int      @map("skipped_executions")
-  timeoutExecutions    Int      @map("timeout_executions")
-  avgExecutionDuration Float    @map("avg_execution_duration")
-  minExecutionDuration Float    @map("min_execution_duration")
-  maxExecutionDuration Float    @map("max_execution_duration")
-  moduleStatistics     String   @default("{}") @map("module_statistics")
-  lastUpdatedAt        DateTime @map("last_updated_at")
-  createdAt            DateTime @default(now()) @map("created_at")
-
-  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@map("schedule_statistics")
-}
 
 /// R3a：调度器宿主互斥租约（DB lease/heartbeat）。
 /// 共享数据库的多个宿主（API 多实例、同库进程）通过本表互斥：
-/// 只有成功 acquire 的宿主启动 ScheduleTaskQueue；其余宿主只消费读模型。
+/// 只有成功 acquire 的宿主启动 ScheduledInvocationQueue；其余宿主只消费读模型。
 model ScheduleLease {
   id         String   @id
   leaseKey   String   @unique @map("lease_key")

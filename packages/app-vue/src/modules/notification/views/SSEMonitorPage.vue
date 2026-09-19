@@ -81,6 +81,7 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ArrowLeft, Radio } from '@lucide/vue';
 import { Button, Badge, ScrollArea, Separator } from '@memoflow/ui-vue-shadcn';
+import { getProductTime, productTimeRevision } from '../../../shared/utils/product-time';
 
 interface SSEMessage {
   time: number;
@@ -88,7 +89,7 @@ interface SSEMessage {
   data: string;
 }
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 
 const connected = ref(false);
 const messages = ref<SSEMessage[]>([]);
@@ -116,7 +117,8 @@ function toggleConnection() {
  * Soft residual 1207: app-react useAIWorkspace formatMessageTime is Intl zh-CN (no force-merge).
  */
 function formatMessageTime(timestamp: number): string {
-  return new Date(timestamp).toLocaleTimeString(locale.value);
+  void productTimeRevision.value;
+  return getProductTime().format.hm(timestamp);
 }
 
 function clearMessages() {

@@ -2,14 +2,12 @@ import type {
   TaskCreatedEvent,
   TaskUpdatedEvent,
   TaskDeletedEvent,
-  TaskInstanceCompletedEvent,
-  TaskInstanceSkippedEvent,
-  TaskInstanceDeletedEvent,
-  TaskInstancesGeneratedEvent,
-  TaskTemplatePausedEvent,
-  TaskTemplateResumedEvent,
-  TaskTemplateScheduleTimeChangedEvent,
-  TaskTemplateRecurrenceChangedEvent,
+  TaskOccurrenceCompletedEvent,
+  TaskOccurrenceSkippedEvent,
+  TaskOccurrenceDeletedEvent,
+  TaskOccurrencesGeneratedEvent,
+  TaskPlanPausedEvent,
+  TaskPlanResumedEvent,
   TaskUncompletedEvent,
   TaskRescheduledEvent,
   TaskPlanOutcomeChangedEvent,
@@ -25,15 +23,13 @@ export type TaskEventMap = {
   'task:created': TaskCreatedEvent;
   'task:updated': TaskUpdatedEvent;
   'task:deleted': TaskDeletedEvent;
-  'task:instance-completed': TaskInstanceCompletedEvent;
-  'task:instance-skipped': TaskInstanceSkippedEvent;
-  'task:instance-deleted': TaskInstanceDeletedEvent;
-  'task:instance-generated': TaskInstancesGeneratedEvent;
-  'task:template-paused': TaskTemplatePausedEvent;
-  'task:template-resumed': TaskTemplateResumedEvent;
-  'task:template-schedule-time-changed': TaskTemplateScheduleTimeChangedEvent;
-  'task:template-recurrence-changed': TaskTemplateRecurrenceChangedEvent;
-  'task:instance-uncompleted': TaskUncompletedEvent;
+  'task:occurrence-completed': TaskOccurrenceCompletedEvent;
+  'task:occurrence-skipped': TaskOccurrenceSkippedEvent;
+  'task:occurrence-deleted': TaskOccurrenceDeletedEvent;
+  'task:occurrence-generated': TaskOccurrencesGeneratedEvent;
+  'task:plan-paused': TaskPlanPausedEvent;
+  'task:plan-resumed': TaskPlanResumedEvent;
+  'task:occurrence-uncompleted': TaskUncompletedEvent;
   'task:plan-outcome-changed': TaskPlanOutcomeChangedEvent;
   'task:rescheduled': TaskRescheduledEvent;
 };

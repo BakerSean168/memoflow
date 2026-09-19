@@ -2,22 +2,20 @@ import type { Account as PrismaAccount } from '@memoflow/database';
 import type { AccountState } from '../../../../domain';
 import { Account } from '../../../../domain';
 import { IdentityId } from '@memoflow/domain-shared/shared';
-import {
-  AccountProfile,
-  AccountSettings,
-  ContactEmail,
-  AccountStatus,
-  ContactPhone,
-} from '../../../../domain/value-objects';
-import type { AccountProfileDTO, AccountSettingsDTO } from '@memoflow/contracts/account';
-
+import { AccountProfile, AccountStatus } from '../../../../domain/value-objects';
+import type { AccountProfileDTO } from '@memoflow/contracts/account';
 
 /** Prisma Date/DateTime → Instant (epoch ms). Required fields never null. */
 function requiredInstant(value: Date | string | number | null | undefined): number {
-  if (value instanceof Date) return value.getTime();
-  if (value == null) return Date.now();
-  const n = typeof value === 'number' ? value : Number(value);
-  return Number.isFinite(n) ? n : Date.now();
+  if (value == null) throw new Error('Account timestamp is required');
+  const n =
+    value instanceof Date
+      ? value.getTime()
+      : typeof value === 'number'
+        ? value
+        : Date.parse(value);
+  if (!Number.isFinite(n)) throw new Error('Account timestamp must be a finite Instant');
+  return n;
 }
 
 /** Prisma Date/DateTime → Instant | null. */
@@ -28,11 +26,9 @@ function optionalInstant(value: Date | string | number | null | undefined): numb
   return Number.isFinite(n) ? n : null;
 }
 
-
 export class AccountPrismaMapper {
   static toDomain(row: PrismaAccount): Account {
     const profile = row.profile as unknown as AccountProfileDTO;
-    const settings = row.settings as unknown as AccountSettingsDTO;
 
     const state: AccountState = {
       id: IdentityId.of(row.id),
@@ -45,31 +41,9 @@ export class AccountPrismaMapper {
         gender: profile.gender,
         birthday: profile.birthday ?? null,
       }),
-      settings: AccountSettings.create({
-        theme: settings.theme,
-        language: settings.language,
-        timezone: settings.timezone,
-        notificationEnabled: settings.notificationEnabled,
-      }),
-      email: ContactEmail.create({
-        address: row.emailAddress,
-        isVerified: row.emailIsVerified,
-        verifiedAt: row.emailVerifiedAt ? new Date(row.emailVerifiedAt).getTime() : null,
-        isPrimary: row.emailIsPrimary,
-      }),
-      phone: row.phoneNumber
-        ? ContactPhone.create({
-            fullNumber: row.phoneFullNumber as string,
-            countryCode: row.phoneCountryCode as string,
-            number: row.phoneNumber,
-            isVerified: row.phoneIsVerified as boolean,
-            verifiedAt: row.phoneVerifiedAt ? new Date(row.phoneVerifiedAt).getTime() : null,
-          })
-        : null,
-      version: row.version,
       createdAt: requiredInstant(row.createdAt),
       updatedAt: requiredInstant(row.updatedAt),
-      deletedAt: optionalInstant(row.deletedAt),
+      closedAt: optionalInstant(row.closedAt),
     };
     return Account.load(state);
   }

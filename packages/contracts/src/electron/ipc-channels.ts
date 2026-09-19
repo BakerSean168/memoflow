@@ -1,27 +1,39 @@
 export const TaskChannels = {
-  TEMPLATE_LIST: 'task:template:list',
-  TEMPLATE_GET: 'task:template:get',
-  TEMPLATE_CREATE: 'task:template:create',
-  TEMPLATE_UPDATE: 'task:template:update',
-  TEMPLATE_DELETE: 'task:template:delete',
-  TEMPLATE_ARCHIVE: 'task:template:archive',
-  TEMPLATE_ACTIVATE: 'task:template:activate',
-  TEMPLATE_ABANDON: 'task:template:abandon',
-  TEMPLATE_PAUSE: 'task:template:pause',
-  TEMPLATE_GENERATE_INSTANCES: 'task:template:generate-instances',
-  TEMPLATE_GET_INSTANCES: 'task:template:get-instances',
-  TEMPLATE_BIND_GOAL: 'task:template:bind-goal',
-  TEMPLATE_UNBIND_GOAL: 'task:template:unbind-goal',
-  INSTANCE_LIST: 'task:instance:list',
-  INSTANCE_LIST_BY_DATE_RANGE: 'task:instance:list-by-date-range',
-  INSTANCE_GET: 'task:instance:get',
-  INSTANCE_CREATE: 'task:instance:create',
-  INSTANCE_DELETE: 'task:instance:delete',
-  INSTANCE_COMPLETE: 'task:instance:complete',
-  INSTANCE_UNCOMPLETE: 'task:instance:uncomplete',
-  INSTANCE_SKIP: 'task:instance:skip',
-  INSTANCE_MARK_MISSED: 'task:instance:mark-missed',
-  INSTANCE_RESCHEDULE: 'task:reschedule-instance',
+  PLAN_LIST: 'task:plan:list',
+  PLAN_GET: 'task:plan:get',
+  PLAN_CREATE: 'task:plan:create',
+  PLAN_UPDATE: 'task:plan:update',
+  PLAN_DELETE: 'task:plan:delete',
+  PLAN_ARCHIVE: 'task:plan:archive',
+  PLAN_ACTIVATE: 'task:plan:activate',
+  PLAN_ABANDON: 'task:plan:abandon',
+  PLAN_PAUSE: 'task:plan:pause',
+  PLAN_GENERATE_OCCURRENCES: 'task:plan:generate-occurrences',
+  PLAN_GET_OCCURRENCES: 'task:plan:get-occurrences',
+  PLAN_BIND_GOAL: 'task:plan:bind-goal',
+  PLAN_UNBIND_GOAL: 'task:plan:unbind-goal',
+  OCCURRENCE_LIST: 'task:occurrence:list',
+  OCCURRENCE_LIST_BY_DATE_RANGE: 'task:occurrence:list-by-date-range',
+  OCCURRENCE_GET: 'task:occurrence:get',
+  OCCURRENCE_CREATE: 'task:occurrence:create',
+  OCCURRENCE_DELETE: 'task:occurrence:delete',
+  OCCURRENCE_COMPLETE: 'task:occurrence:complete',
+  OCCURRENCE_UNCOMPLETE: 'task:occurrence:uncomplete',
+  OCCURRENCE_SKIP: 'task:occurrence:skip',
+  OCCURRENCE_MARK_MISSED: 'task:occurrence:mark-missed',
+  OCCURRENCE_CHECKLIST_SET: 'task:occurrence:checklist-set',
+  OCCURRENCE_RESCHEDULE: 'task:reschedule-occurrence',
+} as const;
+
+export const TaskWorkspaceChannels = {
+  GET: 'task:workspace:get',
+} as const;
+
+export const RelationChannels = {
+  GOAL_KNOWLEDGE_LINK: 'relation:goal-knowledge:link',
+  GOAL_KNOWLEDGE_UNLINK: 'relation:goal-knowledge:unlink',
+  GOAL_KNOWLEDGE_LIST: 'relation:goal-knowledge:list',
+  GOAL_KNOWLEDGE_REVERSE_LIST: 'relation:goal-knowledge:reverse-list',
 } as const;
 
 export const LabelChannels = {
@@ -31,12 +43,14 @@ export const LabelChannels = {
 
 export const GoalChannels = {
   LIST: 'goal:list',
+  HOME_SUMMARY: 'goal:home-summary',
   GET: 'goal:get',
   CREATE: 'goal:create',
   UPDATE: 'goal:update',
   DELETE: 'goal:delete',
   ARCHIVE: 'goal:archive',
   ABANDON: 'goal:abandon',
+  PLAN: 'goal:plan',
   ACTIVATE: 'goal:activate',
   COMPLETE: 'goal:complete',
   SEARCH: 'goal:search',
@@ -59,6 +73,12 @@ export const GoalChannels = {
   RECORD_DELETE: 'goal:record:delete',
 } as const;
 
+export const GoalWorkspaceChannels = {
+  GET: 'goal:workspace:get',
+  TASKS: 'goal:workspace:tasks',
+  KNOWLEDGE: 'goal:workspace:knowledge',
+} as const;
+
 export const ScheduleChannels = {
   LIST: 'schedule:list',
   LIST_BY_DATE_RANGE: 'schedule:list-by-date-range',
@@ -70,43 +90,18 @@ export const ScheduleChannels = {
   DETECT_CONFLICTS: 'schedule:detect-conflicts',
   CREATE_WITH_CONFLICT_DETECTION: 'schedule:create-with-conflict-detection',
   RESOLVE_CONFLICT: 'schedule:resolve-conflict',
-  // Raw ScheduleTask worker jobs are Scheduler-owned persistence. IPC exposes
-  // diagnostics only; product mutations flow through owner-domain commands.
-  TASK_LIST: 'schedule:task:list',
-  TASK_GET_BY_ID: 'schedule:task:get-by-id',
-  TASK_GET_DUE: 'schedule:task:get-due',
-  TASK_GET_BY_SOURCE: 'schedule:task:get-by-source',
 } as const;
 
-export const ReminderChannels = {
-  TEMPLATE_LIST: 'reminder:template:list',
-  TEMPLATE_GET: 'reminder:template:get',
-  TEMPLATE_CREATE: 'reminder:template:create',
-  TEMPLATE_UPDATE: 'reminder:template:update',
-  TEMPLATE_DELETE: 'reminder:template:delete',
-  TEMPLATE_TOGGLE_ENABLED: 'reminder:template:toggle-enabled',
-  TEMPLATE_REPLACE_PROFILES: 'reminder:template:replace-profiles',
-  UPCOMING_GET: 'reminder:upcoming:get',
-  TODAY_SCHEDULE_GET: 'reminder:today-schedule:get',
-  GROUP_LIST: 'reminder:group:list',
-  GROUP_GET: 'reminder:group:get',
-  GROUP_CREATE: 'reminder:group:create',
-  GROUP_UPDATE: 'reminder:group:update',
-  GROUP_DELETE: 'reminder:group:delete',
-  GROUP_TOGGLE_STATUS: 'reminder:group:toggle-status',
-  PREFERENCES_GET: 'reminder:preferences:get',
-  PREFERENCES_UPDATE: 'reminder:preferences:update',
-} as const;
-
-export const DashboardChannels = {
-  GET_STATS: 'dashboard:get-stats',
+/** Read-only internal/dev/ops transport for canonical Scheduler diagnostics. */
+export const SchedulerChannels = {
+  INVOCATION_LIST: 'scheduler:invocation:list',
+  INVOCATION_GET_BY_ID: 'scheduler:invocation:get-by-id',
+  INVOCATION_GET_DUE: 'scheduler:invocation:get-due',
 } as const;
 
 export const AccountChannels = {
   GET_ME: 'account:get-me',
   UPDATE_PROFILE: 'account:update-profile',
-  UPDATE_SETTINGS: 'account:update-settings',
-  CHECK_AVAILABILITY: 'account:check-availability',
   CLOSE: 'account:close',
 } as const;
 
@@ -180,13 +175,17 @@ export const NotificationChannels = {
   GET: 'notification:get',
   CREATE: 'notification:create',
   MARK_READ: 'notification:mark-read',
+  MARK_UNREAD: 'notification:mark-unread',
   MARK_ALL_READ: 'notification:mark-all-read',
+  ARCHIVE: 'notification:archive',
+  RESTORE: 'notification:restore',
   DELETE: 'notification:delete',
   CLEAR_ALL: 'notification:clear-all',
   GET_UNREAD_COUNT: 'notification:unread-count',
   // Residual 196: identity-scoped preference get/update (no dual-track body identityId).
   PREFERENCES_GET: 'notification:preferences:get',
   PREFERENCES_UPDATE: 'notification:preferences:update',
+  EXECUTE_ACTION: 'notification:execute-action',
   CUSTOM_RECEIVE: 'notification:custom:receive',
   CUSTOM_CLICK: 'notification:custom:click',
   CUSTOM_CLOSE: 'notification:custom:close',
@@ -205,6 +204,7 @@ export const RepositoryChannels = {
   KNOWLEDGE_CONNECTION_INSTALLATION_FINALIZE:
     'repository:knowledge-connection:installation:finalize',
   KNOWLEDGE_CONNECTION_LIST: 'repository:knowledge-connection:list',
+  KNOWLEDGE_CONNECTION_REFRESH_OBSERVATION: 'repository:knowledge-connection:refresh-observation',
   KNOWLEDGE_CONNECTION_CONNECT: 'repository:knowledge-connection:connect',
   KNOWLEDGE_CONNECTION_DISCONNECT: 'repository:knowledge-connection:disconnect',
   KNOWLEDGE_CONNECTION_RECONCILIATION_PREVIEW:
@@ -226,12 +226,13 @@ export const RepositoryChannels = {
 } as const;
 
 export const SettingChannels = {
-  GET_ALL: 'setting:all',
-  GET_DEFAULTS: 'setting:defaults',
-  PATCH: 'setting:patch',
-  RESET: 'setting:reset',
   IMPORT: 'setting:import',
   EXPORT: 'setting:export',
+  PREFERENCES_PROFILE_GET: 'setting:preferences:profile',
+  PREFERENCES_RESET: 'setting:preferences:reset',
+  PREFERENCE_GET: 'setting:preference:get',
+  PREFERENCE_PATCH: 'setting:preference:patch',
+  PREFERENCE_RESET: 'setting:preference:reset',
 } as const;
 
 export const SystemChannels = {
@@ -255,6 +256,9 @@ export const DesktopFeatureChannels = {
   SHORTCUTS_UPDATE: 'desktop:shortcuts:update',
   TRAY_FLASH: 'desktop:tray:flash',
   TRAY_STOP_FLASH: 'desktop:tray:stopFlash',
+  NOTIFICATION_DEVICE_PREFERENCE_GET: 'desktop:notification:device-preference:get',
+  NOTIFICATION_DEVICE_PREFERENCE_UPDATE: 'desktop:notification:device-preference:update',
+  NOTIFICATION_DEVICE_PREFERENCE_RESET: 'desktop:notification:device-preference:reset',
 } as const;
 
 export const RendererEventChannels = {
@@ -285,10 +289,11 @@ export const AutoUpdateChannels = {
   CONFIG: 'auto-update:config',
 } as const;
 
-// Residual 885: portable user-data export/import only — no server-held disclosure IPC channel.
+// V3-only portable user-data surface — no server-held disclosure IPC channel.
 export const DataPortabilityChannels = {
   EXPORT: 'data-portability:export',
-  IMPORT: 'data-portability:import',
+  DRY_RUN: 'data-portability:dry-run',
+  APPLY: 'data-portability:apply',
 } as const;
 
 export const WindowChannels = {
@@ -303,8 +308,22 @@ export const WindowChannels = {
   FOCUS_MAIN_WINDOW: 'window:focus-main-window',
 } as const;
 
-/** Routine-owned dedicated-window IPC. Kept separate from legacy ReminderChannels. */
+/** Routine-owned dedicated-window IPC. */
 export const RoutineChannels = {
+  LIST: 'routine:list',
+  GET: 'routine:get',
+  CREATE: 'routine:create',
+  UPDATE: 'routine:update',
+  DELETE: 'routine:delete',
+  TOGGLE_ENABLED: 'routine:toggle-enabled',
+  REPLACE_PROFILES: 'routine:replace-profiles',
+  UPCOMING_GET: 'routine:upcoming:get',
+  TODAY_SCHEDULE_GET: 'routine:today-schedule:get',
+  PREFERENCES_GET: 'routine:preferences:get',
+  PREFERENCES_UPDATE: 'routine:preferences:update',
+} as const;
+
+export const RoutineWindowChannels = {
   INTERVENTION_WINDOW_GET: 'routine:intervention-window:get',
   INTERVENTION_WINDOW_COMMAND: 'routine:intervention-window:command',
   INTERVENTION_WINDOW_PROJECTION: 'routine:intervention-window:projection',

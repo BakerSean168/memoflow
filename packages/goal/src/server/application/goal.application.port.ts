@@ -2,9 +2,11 @@ import type {
   CloneGoalReq,
   CreateGoalReq,
   GetGoalAggregateRes,
+  GoalHomeProgressSummary,
   GetGoalRes,
   GoalMutationReceipt,
   GoalReviewSystemContext,
+  GoalTimeframe,
   ListGoalsQuery,
   QueryGoalsRes,
   UpdateGoalReq,
@@ -23,6 +25,7 @@ export interface GoalApplicationPort {
   createGoal(input: CreateGoalReq, cx: ExecutionContext): Promise<Result<GoalMutationReceipt>>;
   getGoal(id: string, identityId: string, includeChildren?: boolean): Promise<Result<GetGoalRes>>;
   listGoals(input: ListGoalsQuery): Promise<Result<QueryGoalsRes>>;
+  getHomeSummary(identityId: string): Promise<Result<GoalHomeProgressSummary>>;
   updateGoal(id: string, identityId: string, input: UpdateGoalReq): Promise<Result<UpdateGoalRes>>;
   deleteGoal(
     id: string,
@@ -40,6 +43,11 @@ export interface GoalApplicationPort {
     expectedVersion: number,
   ): Promise<Result<GoalMutationReceipt>>;
   abandonGoal(
+    id: string,
+    identityId: string,
+    expectedVersion: number,
+  ): Promise<Result<GoalMutationReceipt>>;
+  planGoal(
     id: string,
     identityId: string,
     expectedVersion: number,
@@ -66,10 +74,10 @@ export interface GoalApplicationPort {
     keyResult: {
       title: string;
       aggregationMethod?: import('@memoflow/contracts/goal').KeyResultCalculationMethod;
-      startingValue?: number;
+      initialValue?: number;
       targetValue: number;
       currentValue?: number;
-      progressBaselineValue?: number | null;
+      target?: GoalTimeframe | null;
       unit?: string | null;
       weight?: number;
       expectedVersion: number;
@@ -83,8 +91,8 @@ export interface GoalApplicationPort {
       title?: string;
       description?: string;
       weight?: number;
-      startingValue?: number;
-      progressBaselineValue?: number | null;
+      initialValue?: number;
+      target?: GoalTimeframe | null;
       aggregationMethod?: import('@memoflow/contracts/goal').KeyResultCalculationMethod;
       currentValue?: number;
       targetValue?: number;

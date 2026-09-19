@@ -29,6 +29,7 @@ import type {
   CreateRuleReq,
   CreateRuleRes,
   DeleteRuleReq,
+  ExportGovernanceRuleBundleRes,
   GetRuleReq,
   GetRuleRevisionsQueryInput,
   GetRuleRevisionsRes,
@@ -125,6 +126,10 @@ export class GovernanceController {
     }
 
     return this.useCases.searchRules(parsed.data, ctx);
+  }
+
+  async exportRuleBundle(): Promise<Result<ExportGovernanceRuleBundleRes>> {
+    return this.useCases.exportRuleBundle();
   }
 
   async getRevisions(query: GetRuleRevisionsQueryInput): Promise<Result<GetRuleRevisionsRes>> {

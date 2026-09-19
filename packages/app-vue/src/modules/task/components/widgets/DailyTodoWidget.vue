@@ -59,7 +59,7 @@
               class="group flex items-center gap-3 rounded-md px-1 py-1.5 hover:bg-muted/50 transition-colors"
               :class="{ 'opacity-50': inst.status === 'Completed' || inst.status === 'Skipped' }"
               data-testid="daily-todo-item"
-              :data-task-instance-id="inst.id"
+              :data-task-occurrence-id="inst.id"
               :data-task-status="inst.status"
             >
               <!-- Complete button (circle dot) -->
@@ -87,7 +87,7 @@
                 class="flex-1 min-w-0 text-xs text-foreground truncate"
                 :class="{ 'line-through text-muted-foreground': inst.status === 'Completed' }"
               >
-                {{ templateName(inst.templateId) }}
+                {{ templateName(inst.planId) }}
               </span>
 
               <!-- Time label -->
@@ -130,12 +130,11 @@ import {
 } from '@memoflow/ui-vue-shadcn';
 import { ListTodo, ArrowRight, CheckCircle2, Check, Loader2 } from '@lucide/vue';
 import { useTask } from '../../composables/useTask';
-import type { TaskInstanceClientDTO, TaskTemplateClientDTO } from '@memoflow/contracts/task';
-import { formatHHmmParts } from '../../../../shared/utils/format-hhmm-parts';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
 
 const emit = defineEmits<{
   (e: 'view-all'): void;
-  (e: 'completed', instance: TaskInstanceClientDTO): void;
+  (e: 'completed', instance: TaskOccurrenceClientDTO): void;
 }>();
 
 const props = withDefaults(
@@ -182,9 +181,9 @@ watch(
 const isLoading = computed(() => task.isLoading.value);
 
 // ── Derive today's instances ──
-const todayInstances = computed<TaskInstanceClientDTO[]>(() => {
+const todayInstances = computed<TaskOccurrenceClientDTO[]>(() => {
   return (task.instances.value ?? []).filter((inst) => {
-    return isTodayMs(inst.instanceDate);
+    return isTodayMs(inst.dueAt);
   });
 });
 
@@ -196,11 +195,7 @@ const sortedInstances = computed(() => {
   const done = todayInstances.value.filter(
     (i) => i.status === 'Completed' || i.status === 'Skipped' || i.status === 'Missed',
   );
-  const byTime = (a: TaskInstanceClientDTO, b: TaskInstanceClientDTO) => {
-    const ta = a.timeConfig?.timeRange?.start ?? a.timeConfig?.timePoint ?? 0;
-    const tb = b.timeConfig?.timeRange?.start ?? b.timeConfig?.timePoint ?? 0;
-    return (ta ?? 0) - (tb ?? 0);
-  };
+  const byTime = (a: TaskOccurrenceClientDTO, b: TaskOccurrenceClientDTO) => a.dueAt - b.dueAt;
   return [...active.sort(byTime), ...done.sort(byTime)];
 });
 
@@ -215,7 +210,7 @@ const progressPct = computed(() => {
 });
 
 // ── Template name lookup ──
-const templateMap = computed<Map<string, TaskTemplateClientDTO>>(() => {
+const templateMap = computed<Map<string, TaskPlanClientDTO>>(() => {
   return new Map((task.templates.value ?? []).map((t) => [t.id, t]));
 });
 
@@ -224,21 +219,10 @@ function templateName(templateId: string): string {
 }
 
 // ── Time label ──
-/** Residual 1297: minutes-of-day HH:mm dual retired onto formatHHmmParts sole. */
-function timeLabel(inst: TaskInstanceClientDTO): string {
-  const fmt = (minutes: number) => {
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
-    return formatHHmmParts(h, m);
-  };
-  const tr = inst.timeConfig?.timeRange;
-  if (tr && typeof tr.start === 'number') {
-    return fmt(tr.start);
-  }
-  const tp = inst.timeConfig?.timePoint;
-  if (typeof tp === 'number') {
-    return fmt(tp);
-  }
+function timeLabel(inst: TaskOccurrenceClientDTO): string {
+  const timing = inst.scheduleSnapshot.timing;
+  if (timing.kind === 'At') return timing.time;
+  if (timing.kind === 'Window') return timing.start;
   return '全天';
 }
 
@@ -254,14 +238,14 @@ function completeBtnClass(status: string): string {
 }
 
 // ── Complete handler ──
-async function handleComplete(inst: TaskInstanceClientDTO) {
+async function handleComplete(inst: TaskOccurrenceClientDTO) {
   if (completing.value || inst.status === 'Skipped' || inst.status === 'Missed') return;
   completing.value = inst.id;
   try {
     if (inst.status === 'Completed') {
-      await task.uncompleteInstance(inst.id);
+      await task.uncompleteOccurrence(inst.id);
     } else {
-      const completed = await task.completeInstance(inst.id);
+      const completed = await task.completeOccurrence(inst.id);
       if (completed) {
         emit('completed', completed);
       }

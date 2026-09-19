@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "adapters": [
+    {
+      "ruleKey": "DDD-003",
+      "adapterId": "package-internal-boundary",
+      "coverage": "partial",
+      "checkScript": "tools/governance/package-internal-boundary-audit.mjs",
+      "description": "Enforces the persistence/import-isolation subset of DDD-003. It does not claim complete Layer Isolation coverage.",
+      "proposal": {
+        "kind": "review-required",
+        "summary": "Move infrastructure access behind an application/domain port instead of importing persistence from domain/application code.",
+        "suggestedActions": [
+          "Introduce or extend a narrow repository/application port at the owning boundary.",
+          "Move Prisma or other infrastructure-specific access into server/infrastructure or the host composer.",
+          "Update callers to depend on the port and re-run package-internal-boundary-audit.mjs."
+        ]
+      }
+    }
+  ]
+}

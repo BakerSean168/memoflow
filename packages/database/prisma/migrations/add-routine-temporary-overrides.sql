@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS "routine_temporary_overrides" (
   "identity_id" TEXT NOT NULL,
   "routine_id" TEXT NOT NULL,
   "override_json" TEXT NOT NULL,
+  "version" INTEGER NOT NULL DEFAULT 1,
   "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updated_at" TIMESTAMP(3) NOT NULL,
 

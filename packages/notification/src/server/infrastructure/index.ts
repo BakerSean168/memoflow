@@ -22,11 +22,14 @@ export {
   type NotificationModuleUseCases,
   type NotificationRuntimeContributionsInput,
 } from './notification.module';
-export type { NotificationApplicationPort } from '../application';
+export type {
+  NotificationInboxPort,
+  NotificationOperationsPort,
+} from '../application';
 export type {
   INotificationRepository,
   INotificationPreferenceRepository,
-  INotificationTemplateRepository,
+  INotificationInteractionRepository,
 } from '../domain/repositories';
 
 export { createNotificationPowerSyncModule } from './powersync';

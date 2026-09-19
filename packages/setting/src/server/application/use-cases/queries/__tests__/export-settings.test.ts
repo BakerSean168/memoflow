@@ -1,73 +1,39 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createMockRepo } from '@memoflow/test-utils/mocks';
-import { anIdentityId } from '@memoflow/test-utils/fixtures';
-import type { IUserSettingRepository } from '../../../../domain/repositories/i-user-setting-repository';
-import { UserSetting } from '../../../../domain/aggregates/user-setting';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { UserPreferenceProfile } from '@memoflow/contracts/setting';
 import { ExportSettings } from '../export-settings';
+import type { PreferencePortableService } from '../../../../preferences/preference-portability';
 
-// Mock eventBus to prevent real event publishing
-vi.mock('@memoflow/utils', async () => {
-  const actual = await vi.importActual<typeof import('@memoflow/utils')>('@memoflow/utils');
-  return { ...actual, eventBus: { send: vi.fn() } };
-});
+const profile: UserPreferenceProfile = {
+  presentation: { theme: 'dark', language: 'en-US' },
+  regional: {
+    timeZone: 'Asia/Tokyo',
+    dateStyle: 'long',
+    timeStyle: '12h',
+    weekStartsOn: 0,
+  },
+};
 
-describe('ExportSettings', () => {
-  let repo: ReturnType<typeof createMockRepo<IUserSettingRepository>>;
+describe('ExportSettings V3', () => {
+  let portableService: PreferencePortableService;
   let useCase: ExportSettings;
-  const identityId = anIdentityId();
 
   beforeEach(() => {
-    vi.clearAllMocks();
-    repo = createMockRepo<IUserSettingRepository>({
-      findByIdentityId: vi.fn(),
+    portableService = {
+      export: vi.fn().mockResolvedValue(profile),
+    } as unknown as PreferencePortableService;
+    useCase = new ExportSettings(portableService, () => '2026-09-10T05:00:00.000Z');
+  });
+
+  it('exports strict preference-only V3 without identity or persistence metadata', async () => {
+    const result = await useCase.execute('destination-user');
+    expect(result.fileName).toBe('memoflow-settings-2026-09-10T05-00-00-000Z.json');
+    expect(JSON.parse(result.data)).toEqual({
+      schemaVersion: 3,
+      exportedAt: '2026-09-10T05:00:00.000Z',
+      preferences: profile,
     });
-    useCase = new ExportSettings(repo);
-  });
-
-  it('should throw when setting not found', async () => {
-    vi.mocked(repo.findByIdentityId).mockResolvedValue(null);
-
-    await expect(useCase.execute(identityId)).rejects.toThrow('User setting not found');
-  });
-
-  it('should return export payload with version and settings', async () => {
-    const setting = UserSetting.create({ identityId });
-    vi.mocked(repo.findByIdentityId).mockResolvedValue(setting);
-
-    const result = await useCase.execute(identityId);
-
-    expect(result.version).toBe('2.0.0');
-    expect(result.identityId).toBe(identityId);
-    expect(result.settings).toBeDefined();
-    expect(result.exportedAt).toBeDefined();
-  });
-
-  it('should include current preferences in export', async () => {
-    const setting = UserSetting.create({ identityId });
-    setting.patchCategory('appearance', { theme: 'dark' });
-    vi.mocked(repo.findByIdentityId).mockResolvedValue(setting);
-
-    const result = await useCase.execute(identityId);
-
-    expect((result.settings as any).appearance.theme).toBe('dark');
-  });
-
-  it('should include valid ISO timestamp in exportedAt', async () => {
-    const setting = UserSetting.create({ identityId });
-    vi.mocked(repo.findByIdentityId).mockResolvedValue(setting);
-
-    const result = await useCase.execute(identityId);
-
-    const date = new Date(result.exportedAt as string);
-    expect(date.getTime()).not.toBeNaN();
-  });
-
-  it('should look up by identityId', async () => {
-    const setting = UserSetting.create({ identityId });
-    vi.mocked(repo.findByIdentityId).mockResolvedValue(setting);
-
-    await useCase.execute(identityId);
-
-    expect(repo.findByIdentityId).toHaveBeenCalledWith(identityId);
+    expect(result.data).not.toContain('destination-user');
+    expect(result.data).not.toContain('revision');
+    expect(portableService.export).toHaveBeenCalledWith('destination-user');
   });
 });

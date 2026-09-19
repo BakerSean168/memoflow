@@ -7,9 +7,9 @@
  * 
  * 【包含内容】
  * - 聚合根（Aggregates）：Task - 任务聚合根
- * - 实体（Entities）：TaskInstance - 任务实例
+ * - 实体（Entities）：TaskOccurrence - 任务实例
  * - 值对象（Value Objects）：TaskRecurrence, TaskDuration, TaskPriority 等
- * - 仓储接口（Repositories）：ITaskRepository, ITaskInstanceRepository
+ * - 仓储接口（Repositories）：ITaskRepository, ITaskOccurrenceRepository
  * - 领域事件（Domain Events）：发布 TaskEventMap 键；事件类型以 @memoflow/contracts/task 为真值
  * - 错误类（Errors）：TaskErrors - 任务相关业务异常
  * 

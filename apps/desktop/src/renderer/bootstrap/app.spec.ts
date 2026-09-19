@@ -54,7 +54,9 @@ const mocks = vi.hoisted(() => {
     usePresentationPreferenceStore: vi.fn(() => ({ locale: 'en-US' })),
     createI18nPlugin: vi.fn(() => ({ name: 'desktop-i18n-plugin' })),
     loadLocaleMessages: vi.fn(async () => ({ hello: 'desktop' })),
-    translateMessageKey: vi.fn((key: string) => (key === 'dashboard.title' ? 'Dashboard' : key)),
+    translateMessageKey: vi.fn((key: string) =>
+      key === 'aiAssistant.chatPage.title' ? 'AI Workspace' : key,
+    ),
     requireElectronBridge: vi.fn(() => bridge),
     readDesktopAccessSnapshot: vi.fn(async () => ({ unlockState: 'UNLOCKED' })),
     getCloudSession: vi.fn(async () => ({
@@ -63,7 +65,7 @@ const mocks = vi.hoisted(() => {
     })),
     getMyProfile: vi.fn(async () => ({
       ok: true,
-      data: { toDTO: () => ({ id: 'cloud-1' }) },
+      data: { account: { toDTO: () => ({ id: 'cloud-1' }) } },
     })),
     createNotificationStartupHook: vi.fn(() => notificationHook),
     installDesktopServerStateRuntime: vi.fn(() => serverStateRuntime),
@@ -244,8 +246,8 @@ describe('desktop bootstrapMainApp', () => {
 
     const afterEachHandler = mocks.router.afterEach.mock.calls[0]?.[0];
     expect(afterEachHandler).toBeTypeOf('function');
-    afterEachHandler({ meta: { title: 'dashboard.title' } });
-    expect(document.title).toBe('Dashboard - MemoFlow');
+    afterEachHandler({ meta: { title: 'aiAssistant.chatPage.title' } });
+    expect(document.title).toBe('AI Workspace - MemoFlow');
 
     afterEachHandler({ meta: { title: 'Desktop Home' } });
 

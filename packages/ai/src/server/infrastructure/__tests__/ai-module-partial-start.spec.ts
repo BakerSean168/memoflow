@@ -42,6 +42,7 @@ function makeDeps(runtimeContributions: AIModuleRuntimeContribution[]): AIModule
   return {
     conversationRepository: {} as unknown as IAIConversationRepository,
     providerConfigRepository: {} as unknown as IAIProviderConfigRepository,
+    providerSecretVault: {} as never,
     runtimeContributions,
   };
 }

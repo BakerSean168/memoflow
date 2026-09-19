@@ -54,10 +54,10 @@ describe('TaskCapsulePreview', () => {
     instancesRef.value = [
       {
         id: 'i1',
-        templateId: 'tpl-1',
-        instanceDate: today,
+        planId: 'tpl-1',
+        dueAt: today,
         status: 'Pending',
-        timeConfig: { timePoint: 9 * 60 },
+        scheduleSnapshot: { date: '2026-09-13', timing: { kind: 'At', time: '09:00' } },
       },
     ];
     const wrapper = mountPreview();

@@ -5,5 +5,5 @@ import { TaskClientService, createTaskClientService } from './task-client-servic
 
 export function createTaskServiceFromHttpClient(httpClient: IResultHttpClient): TaskClientService {
   const adapters = createTaskHttpAdapters(httpClient);
-  return createTaskClientService(adapters.template, adapters.instance);
+  return createTaskClientService(adapters.plan, adapters.occurrence);
 }

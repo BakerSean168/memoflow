@@ -1,14 +1,6 @@
-import type { KeyResultCalculationMethod } from '@memoflow/contracts/goal';
+import type { KeyResultCalculationMethod, KeyResultMeasurement } from '@memoflow/contracts/goal';
 
 export type KeyResultProgressDirection = 'increasing' | 'decreasing';
-
-export interface KeyResultMeasurement {
-  startingValue: number;
-  currentValue: number;
-  targetValue: number;
-  progressBaselineValue: number | null;
-  aggregationMethod: KeyResultCalculationMethod;
-}
 
 export interface KeyResultProgressCalculation {
   currentValue: number;
@@ -18,11 +10,11 @@ export interface KeyResultProgressCalculation {
 }
 
 /**
- * The single arithmetic authority for KR Measurement V2.
+ * Single arithmetic authority for KR Measurement V3.
  *
- * When `recordValues` is supplied, currentValue is first derived from the
- * configured aggregation. When it is omitted, the measurement's currentValue
- * is treated as the authoritative already-aggregated fact.
+ * `initialValue` defines user-visible 0% progress. `trackingBaseValue` is only
+ * the seed/fallback for authoritative record aggregation and never changes the
+ * visible progress baseline.
  */
 export function calculateKeyResultProgress(
   measurement: KeyResultMeasurement,
@@ -32,30 +24,17 @@ export function calculateKeyResultProgress(
   const currentValue =
     recordValues === undefined
       ? measurement.currentValue
-      : aggregateRecords(measurement.startingValue, measurement.aggregationMethod, recordValues);
+      : aggregateRecords(
+          measurement.trackingBaseValue,
+          measurement.aggregationMethod,
+          recordValues,
+        );
 
   if (!Number.isFinite(currentValue)) throw new Error('currentValue must be a finite number');
 
-  const baseline = measurement.progressBaselineValue;
-  if (baseline === null) {
-    if (measurement.targetValue <= 0) {
-      throw new Error('progressBaselineValue is required when targetValue is zero or negative');
-    }
-    if (measurement.targetValue < measurement.startingValue) {
-      throw new Error('progressBaselineValue is required for a decreasing target');
-    }
-    return {
-      currentValue,
-      percentage: round(clamp((currentValue / measurement.targetValue) * 100)),
-      direction: 'increasing',
-      isCompleted: currentValue >= measurement.targetValue,
-    };
-  }
-
-  const span = measurement.targetValue - baseline;
-  if (span === 0) throw new Error('progressBaselineValue must differ from targetValue');
+  const span = measurement.targetValue - measurement.initialValue;
   const direction: KeyResultProgressDirection = span > 0 ? 'increasing' : 'decreasing';
-  const ratio = (currentValue - baseline) / span;
+  const ratio = (currentValue - measurement.initialValue) / span;
   return {
     currentValue,
     percentage: round(clamp(ratio * 100)),
@@ -68,15 +47,17 @@ export function calculateKeyResultProgress(
 }
 
 function aggregateRecords(
-  startingValue: number,
+  trackingBaseValue: number,
   method: KeyResultCalculationMethod,
   values: readonly number[],
 ): number {
   if (values.some((value) => !Number.isFinite(value))) {
     throw new Error('record values must be finite numbers');
   }
-  if (method === 'Sum') return startingValue + values.reduce((sum, value) => sum + value, 0);
-  if (values.length === 0) return startingValue;
+  if (method === 'Sum') {
+    return trackingBaseValue + values.reduce((sum, value) => sum + value, 0);
+  }
+  if (values.length === 0) return trackingBaseValue;
   switch (method) {
     case 'Average':
       return values.reduce((sum, value) => sum + value, 0) / values.length;
@@ -93,17 +74,15 @@ function aggregateRecords(
 
 function validateMeasurement(measurement: KeyResultMeasurement): void {
   for (const [name, value] of [
-    ['startingValue', measurement.startingValue],
+    ['initialValue', measurement.initialValue],
     ['currentValue', measurement.currentValue],
     ['targetValue', measurement.targetValue],
+    ['trackingBaseValue', measurement.trackingBaseValue],
   ] as const) {
     if (!Number.isFinite(value)) throw new Error(`${name} must be a finite number`);
   }
-  if (
-    measurement.progressBaselineValue !== null &&
-    !Number.isFinite(measurement.progressBaselineValue)
-  ) {
-    throw new Error('progressBaselineValue must be a finite number');
+  if (measurement.targetValue === measurement.initialValue) {
+    throw new Error('targetValue must differ from initialValue');
   }
 }
 

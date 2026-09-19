@@ -28,7 +28,9 @@ export {
   createNotificationScheduleNotificationPort,
   createPowerSyncClosureChecker,
   createDefaultElectronDesktopTransport,
-  type NotificationApplicationPort,
+  type NotificationInboxPort,
+  type NotificationOperationsPort,
+  type NotificationOwnerCommandRegistry,
   type NotificationModuleDependencies,
   type NotificationModuleInstance,
   type NotificationModuleRuntimeContribution,
@@ -37,12 +39,13 @@ export {
   type NotificationPowerSyncRepositorySet,
   type NotificationReliableOperationPort,
   type NotificationRequestedWriterPort,
+  type NotificationPortableCapability,
   type ChannelCapabilitySpec,
   type NotificationChannelDeliverer,
   type NotificationDurableRuntimePort,
   type INotificationRepository,
   type INotificationPreferenceRepository,
-  type INotificationTemplateRepository,
+  type INotificationInteractionRepository,
 } from './server';
 // Host composers import only `@memoflow/notification`; the command / schedule
 // seams are re-exported through the root so no `/commands` or

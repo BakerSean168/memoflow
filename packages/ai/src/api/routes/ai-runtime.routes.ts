@@ -1,5 +1,6 @@
 import { Router, type Request, type RequestHandler, type Response } from 'express';
 import {
+  AssistantRuntimeCancelResultSchema,
   AssistantRuntimeClientCommandSchema,
   AssistantRuntimeConversationDeleteResultSchema,
   AssistantRuntimeEventSchema,
@@ -25,6 +26,7 @@ import {
   extractAiExpressExecutionContext,
   readAiExpressEnvelopeMeta,
 } from '../../shared/express-execution-context';
+import { toAITransportFailure } from '../../server/transport';
 
 interface PlatformMiddleware {
   readonly auth: RequestHandler;
@@ -118,11 +120,15 @@ export function registerAIRuntimeRoutes(
           break;
         }
       }
-    } catch {
+    } catch (error) {
       if (!connectionClosed && !abortController.signal.aborted) {
+        const failure = toAITransportFailure(error, {
+          fallbackCode: 'AI_RUNTIME_TRANSPORT_ERROR',
+          fallbackMessage: 'AI runtime request failed',
+        });
         writeRuntimeSse(res, 'error', {
-          code: 'AI_RUNTIME_TRANSPORT_ERROR',
-          message: 'AI runtime request failed',
+          code: failure.code,
+          message: failure.message,
         });
       }
     } finally {
@@ -163,7 +169,13 @@ export function registerAIRuntimeRoutes(
         res.status(404).json(responseBuilder.error('NOT_FOUND', 'Conversation not found'));
         return;
       }
-      res.status(500).json(responseBuilder.error('AI_RUNTIME_ERROR', 'AI runtime request failed'));
+      const failure = toAITransportFailure(error, {
+        fallbackCode: 'AI_RUNTIME_ERROR',
+        fallbackMessage: 'AI runtime request failed',
+      });
+      res.status(failure.statusCode).json(
+        responseBuilder.error(failure.code, failure.message, undefined, failure.context),
+      );
     }
   });
 
@@ -193,8 +205,14 @@ export function registerAIRuntimeRoutes(
         }),
       });
       res.status(200).json(responseBuilder.success(result));
-    } catch {
-      res.status(500).json(responseBuilder.error('AI_RUNTIME_ERROR', 'AI runtime request failed'));
+    } catch (error) {
+      const failure = toAITransportFailure(error, {
+        fallbackCode: 'AI_RUNTIME_ERROR',
+        fallbackMessage: 'AI runtime request failed',
+      });
+      res.status(failure.statusCode).json(
+        responseBuilder.error(failure.code, failure.message, undefined, failure.context),
+      );
     }
   });
 
@@ -220,7 +238,9 @@ export function registerAIRuntimeRoutes(
     }
 
     const cancelled = runtime.cancelRun({ identityId, runId: parsed.data.runId });
-    res.status(200).json(responseBuilder.success({ cancelled }));
+    res
+      .status(200)
+      .json(responseBuilder.success(AssistantRuntimeCancelResultSchema.parse({ cancelled })));
   });
 
   router.post('/usage', auth, async (req, res) => {
@@ -250,8 +270,14 @@ export function registerAIRuntimeRoutes(
         }),
       );
       res.status(200).json(responseBuilder.success(summary));
-    } catch {
-      res.status(500).json(responseBuilder.error('AI_RUNTIME_ERROR', 'AI runtime request failed'));
+    } catch (error) {
+      const failure = toAITransportFailure(error, {
+        fallbackCode: 'AI_RUNTIME_ERROR',
+        fallbackMessage: 'AI runtime request failed',
+      });
+      res.status(failure.statusCode).json(
+        responseBuilder.error(failure.code, failure.message, undefined, failure.context),
+      );
     }
   });
 
@@ -281,8 +307,14 @@ export function registerAIRuntimeRoutes(
         }),
       );
       res.status(200).json(responseBuilder.success(run));
-    } catch {
-      res.status(500).json(responseBuilder.error('AI_WORKFLOW_RUNTIME_ERROR', 'Workflow failed'));
+    } catch (error) {
+      const failure = toAITransportFailure(error, {
+        fallbackCode: 'AI_WORKFLOW_RUNTIME_ERROR',
+        fallbackMessage: 'Workflow failed',
+      });
+      res.status(failure.statusCode).json(
+        responseBuilder.error(failure.code, failure.message, undefined, failure.context),
+      );
     }
   });
 
@@ -312,8 +344,14 @@ export function registerAIRuntimeRoutes(
         }),
       );
       res.status(200).json(responseBuilder.success(run));
-    } catch {
-      res.status(500).json(responseBuilder.error('AI_WORKFLOW_RUNTIME_ERROR', 'Workflow failed'));
+    } catch (error) {
+      const failure = toAITransportFailure(error, {
+        fallbackCode: 'AI_WORKFLOW_RUNTIME_ERROR',
+        fallbackMessage: 'Workflow failed',
+      });
+      res.status(failure.statusCode).json(
+        responseBuilder.error(failure.code, failure.message, undefined, failure.context),
+      );
     }
   });
 
@@ -340,8 +378,14 @@ export function registerAIRuntimeRoutes(
       res
         .status(200)
         .json(responseBuilder.success(run ? AIWorkflowRunViewSchema.parse(run) : null));
-    } catch {
-      res.status(500).json(responseBuilder.error('AI_WORKFLOW_RUNTIME_ERROR', 'Workflow failed'));
+    } catch (error) {
+      const failure = toAITransportFailure(error, {
+        fallbackCode: 'AI_WORKFLOW_RUNTIME_ERROR',
+        fallbackMessage: 'Workflow failed',
+      });
+      res.status(failure.statusCode).json(
+        responseBuilder.error(failure.code, failure.message, undefined, failure.context),
+      );
     }
   });
 
@@ -371,8 +415,14 @@ export function registerAIRuntimeRoutes(
       res
         .status(200)
         .json(responseBuilder.success(runs.map((run) => AIWorkflowRunViewSchema.parse(run))));
-    } catch {
-      res.status(500).json(responseBuilder.error('AI_WORKFLOW_RUNTIME_ERROR', 'Workflow failed'));
+    } catch (error) {
+      const failure = toAITransportFailure(error, {
+        fallbackCode: 'AI_WORKFLOW_RUNTIME_ERROR',
+        fallbackMessage: 'Workflow failed',
+      });
+      res.status(failure.statusCode).json(
+        responseBuilder.error(failure.code, failure.message, undefined, failure.context),
+      );
     }
   });
 
@@ -399,8 +449,14 @@ export function registerAIRuntimeRoutes(
       res
         .status(200)
         .json(responseBuilder.success(run ? AIWorkflowRunViewSchema.parse(run) : null));
-    } catch {
-      res.status(500).json(responseBuilder.error('AI_WORKFLOW_RUNTIME_ERROR', 'Workflow failed'));
+    } catch (error) {
+      const failure = toAITransportFailure(error, {
+        fallbackCode: 'AI_WORKFLOW_RUNTIME_ERROR',
+        fallbackMessage: 'Workflow failed',
+      });
+      res.status(failure.statusCode).json(
+        responseBuilder.error(failure.code, failure.message, undefined, failure.context),
+      );
     }
   });
 

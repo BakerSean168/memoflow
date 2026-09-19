@@ -1,7 +1,7 @@
 import type { PrismaClient } from '@memoflow/database';
+import type { TimeContext } from '@memoflow/time';
 import {
   Habit,
-  startOfLocalDay,
   type HabitState,
 } from '../../../domain/habit/habit';
 import type { IHabitRepository } from '../../../application/use-cases/commands/habit.use-cases';
@@ -36,7 +36,7 @@ function toState(row: {
     occurrences: (row.occurrences ?? []).map((o) => ({
       id: o.id,
       habitId: row.id,
-      occurrenceDate: startOfLocalDay(o.occurrenceDate.getTime()),
+      occurrenceDate: o.occurrenceDate.getTime(),
       status: o.status as HabitState['occurrences'][number]['status'],
       checkedAt: o.checkIns?.[0]?.checkedAt?.getTime() ?? null,
       note: o.checkIns?.[0]?.note ?? null,
@@ -49,7 +49,7 @@ function toState(row: {
 export class PrismaHabitRepository implements IHabitRepository {
   constructor(private readonly db: PrismaClient) {}
 
-  async save(habit: Habit): Promise<void> {
+  async save(habit: Habit, timeContext: TimeContext, now = Date.now()): Promise<void> {
     const s = habit.state;
     await this.db.$transaction(async (tx) => {
       await tx.habit.upsert({
@@ -106,7 +106,7 @@ export class PrismaHabitRepository implements IHabitRepository {
         }
       }
       // streak 投影
-      const streak = habit.streak(Date.now());
+      const streak = habit.streak(now, timeContext);
       await tx.habitStreakProjection.upsert({
         where: { habitId: s.id },
         create: {

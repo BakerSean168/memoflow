@@ -224,6 +224,12 @@ export function createGoalElectronModule(
           ),
         );
         installed.push(GoalChannels.LIST);
+        ipcMain.handle(GoalChannels.HOME_SUMMARY, async () =>
+          withAuthenticatedValue(ctx, async (requestContext: ExecutionContext) =>
+            goalController.homeSummary(requestContext),
+          ),
+        );
+        installed.push(GoalChannels.HOME_SUMMARY);
         ipcMain.handle(GoalChannels.GET, async (_event, id, includeChildren = true) =>
           withAuthenticatedValue(ctx, async (requestContext: ExecutionContext) =>
             goalController.get(id, requestContext, includeChildren),
@@ -279,6 +285,15 @@ export function createGoalElectronModule(
           (args) => ({ params: { id: args[0] }, body: args[1] }),
         );
         installed.push(GoalChannels.ABANDON);
+        registerValidatedChannel(
+          ctx,
+          GoalChannels.PLAN,
+          GoalStatusCommandInvocationSchema,
+          (data, requestContext) =>
+            goalController.plan(data.params.id, data.body.expectedVersion, requestContext),
+          (args) => ({ params: { id: args[0] }, body: args[1] }),
+        );
+        installed.push(GoalChannels.PLAN);
         registerValidatedChannel(
           ctx,
           GoalChannels.ACTIVATE,

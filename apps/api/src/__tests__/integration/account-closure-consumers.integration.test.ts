@@ -3,18 +3,16 @@ import { prisma } from '@memoflow/database';
 import { IdentityId } from '@memoflow/domain-shared';
 import { Account } from '@memoflow/account/server';
 import { createAccountPrismaModule } from '@memoflow/account/server';
-import { ReminderAccountClosedConsumer } from '@memoflow/reminder/server';
+import { RoutineAccountClosedConsumer } from '@memoflow/reminder/server';
 import { NotificationAccountClosedConsumer } from '@memoflow/notification/server';
 import { RepositoryAccountClosedConsumer } from '@memoflow/repository/server';
 import { AccountClosedWorker } from '@memoflow/account/server';
-import {
-  cleanAll,
-  disconnectPrisma,
-} from '@memoflow/test-utils/setup/integration-helpers';
+import { cleanAll, disconnectPrisma } from '@memoflow/test-utils/setup/integration-helpers';
+import { asInstant, createSystemClock, createTimeContext } from '@memoflow/time';
 
 /**
  * W3 real-path integration: closure saga -> account-closed outbox ->
- * worker (lease) -> real Reminder/Notification/Repository consumers cancel pending work.
+ * worker (lease) -> real Routine/Notification/Repository consumers close pending work.
  */
 describe('API host account-closed consumer chain', () => {
   beforeEach(async () => {
@@ -26,7 +24,7 @@ describe('API host account-closed consumer chain', () => {
     await disconnectPrisma();
   });
 
-  it('closure saga publishes account-closed; worker with real consumers cancels reminder/notification/repository pending work', async () => {
+  it('closure saga publishes account-closed; worker with real consumers disables Routine and cancels notification/repository pending work', async () => {
     const identityId = IdentityId.generate().toString();
     const __idempotencyKey = `chain-${Date.now()}`;
 
@@ -41,39 +39,29 @@ describe('API host account-closed consumer chain', () => {
 
     const account = Account.create({
       id: IdentityId.of(identityId),
-      email: `chain-${identityId}@example.com`,
+      nicknameSeed: 'Chain User',
+      now: asInstant(1_700_000_000_000),
     });
     const module = createAccountPrismaModule(prisma, {
+      clock: createSystemClock(),
+      userTimeContextPort: {
+        getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+      },
       revocationPort: { revokeAll: async () => ({ revokedSessions: 1 }) },
     });
     await module.accountRepository.save(account);
 
-    // Seed pending reminder work
-    const reminderId = crypto.randomUUID();
-    await prisma.reminderTemplate.create({
+    // Seed canonical Routine owner state. Account closure disables future Routine work;
+    // historical occurrence/interaction facts remain owner truth until account cascade deletion.
+    const routineId = crypto.randomUUID();
+    await prisma.routineDefinition.create({
       data: {
-        id: reminderId,
+        id: routineId,
         identityId,
-        name: 'Pending Reminder',
-        status: 'active',
-        type: 'Recurring',
-        selfEnabled: true,
-        importanceLevel: 'Normal',
-        tags: '[]',
-        trigger: 'cron',
-        activeTime: '{}',
-        notificationConfig: '{}',
-        stats: '{}',
-      },
-    });
-    await prisma.reminderOccurrence.create({
-      data: {
-        id: crypto.randomUUID(),
-        occurrenceKey: `notif_${reminderId}:1`,
-        idempotencyKey: `v1:7:${identityId}:notif_${reminderId}:1`,
-        status: 'pending',
-        template: { connect: { id: reminderId } },
-        account: { connect: { id: identityId } },
+        name: 'Pending Routine',
+        enabled: true,
+        triggerJson: JSON.stringify({ kind: 'WallClock', timeZone: 'UTC', time: '10:00' }),
+        version: 1,
       },
     });
 
@@ -108,28 +96,20 @@ describe('API host account-closed consumer chain', () => {
       },
     });
 
-    // Seed pending repository work
-    const repoId = crypto.randomUUID();
-    await prisma.repository.create({
-      data: {
-        id: repoId,
-        identityId,
-        name: 'Test Repo',
-        type: 'git',
-        path: '/test/repo',
-        status: 'ACTIVE',
-      },
-    });
-    const connId = crypto.randomUUID();
-    await prisma.knowledgeRepositoryConnection.create({
+    // Seed pending Knowledge-owner work
+    const connId = `KnowledgeRemoteBindingId_${crypto.randomUUID()}`;
+    const knowledgeSpaceId = `KnowledgeSpaceId_${crypto.randomUUID()}`;
+    await prisma.knowledgeSpace.create({ data: { id: knowledgeSpaceId } });
+    await prisma.knowledgeRemoteBinding.create({
       data: {
         id: connId,
+        knowledgeSpaceId,
         identityId,
-        githubUserId: 'gh-1',
-        githubRepositoryId: 'gh-repo-1',
-        githubRepositoryFullName: 'user/repo',
+        provider: 'GitHub',
         installationId: 'inst-1',
-        status: 'ACTIVE',
+        repositoryId: `gh-repo-${crypto.randomUUID()}`,
+        repositoryFullNameSnapshot: 'user/repo',
+        connectedAt: new Date(),
       },
     });
     const writeReqId = crypto.randomUUID();
@@ -137,7 +117,8 @@ describe('API host account-closed consumer chain', () => {
       data: {
         id: writeReqId,
         identityId,
-        connectionId: connId,
+        bindingId: connId,
+        knowledgeDocumentId: `kdoc_${crypto.randomUUID()}`,
         requestId: 'req-1',
         requestHash: 'hash-1',
         relativePath: 'note.md',
@@ -146,42 +127,38 @@ describe('API host account-closed consumer chain', () => {
     });
 
     // Full closure saga via the real use-case
-    const result = await module.useCases.closeAccount.execute(
-      { reason: 'Chain test' },
-      { identityId, deviceId: 'device-1' } as never,
-    );
+    const result = await module.useCases.closeAccount.execute({ reason: 'Chain test' }, {
+      identityId,
+      deviceId: 'device-1',
+    } as never);
     expect(result.ok).toBe(true);
 
     // Worker consumes the outbox with REAL consumers
     const worker = new AccountClosedWorker(prisma, {
-      reminderConsumer: new ReminderAccountClosedConsumer(prisma),
+      routineConsumer: new RoutineAccountClosedConsumer(prisma),
       notificationConsumer: new NotificationAccountClosedConsumer(prisma),
       repositoryConsumer: new RepositoryAccountClosedConsumer(prisma),
     });
     const processed = await worker.processPendingMessages(50);
     expect(processed).toBeGreaterThanOrEqual(1);
 
-    // Reminder pending work cancelled
-    const template = await prisma.reminderTemplate.findUnique({ where: { id: reminderId } });
-    expect(template?.status).toBe('disabled');
-    const occurrences = await prisma.reminderOccurrence.findMany({ where: { identityId } });
-    expect(occurrences.every((occ) => occ.status === 'cancelled')).toBe(true);
+    // Routine owner is disabled; no legacy Reminder occurrence mutation is involved.
+    const routine = await prisma.routineDefinition.findUnique({ where: { id: routineId } });
+    expect(routine?.enabled).toBe(false);
 
     // Notification pending dispatch cancelled
     const dispatches = await prisma.notificationDispatchOutbox.findMany({ where: { identityId } });
     expect(dispatches.every((disp) => disp.status === 'cancelled')).toBe(true);
 
-    // Repository pending write request cancelled and repository archived
-    const repository = await prisma.repository.findUnique({ where: { id: repoId } });
-    expect(repository?.status).toBe('ARCHIVED');
+    // Knowledge-owner pending write request cancelled
     const writeReq = await prisma.knowledgeWriteRequest.findUnique({ where: { id: writeReqId } });
     expect(writeReq?.status).toBe('CANCELLED');
 
     // Inbox receipts recorded for all three consumers
-    const reminderReceipt = await prisma.inboxReceipt.findFirst({
-      where: { consumer: 'reminder-account-closed' },
+    const routineReceipt = await prisma.inboxReceipt.findFirst({
+      where: { consumer: 'routine-account-closed' },
     });
-    expect(reminderReceipt).not.toBeNull();
+    expect(routineReceipt).not.toBeNull();
 
     const notificationReceipt = await prisma.inboxReceipt.findFirst({
       where: { consumer: 'notification-account-closed' },

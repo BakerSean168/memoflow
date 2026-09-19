@@ -6,16 +6,13 @@ import { resolveEmptyLabel } from '@memoflow/time';
 describe('Product date-time presentation boundary', () => {
   const dir = __dirname;
   const react = readFileSync(resolve(dir, '../../../../app-react/src/utils/entity-presentation.ts'), 'utf8');
-  const scheduleDetail = readFileSync(resolve(dir, '../../modules/schedule/components/ScheduleTaskDetailDialog.vue'), 'utf8');
   const eventList = readFileSync(resolve(dir, '../../modules/schedule/components/ScheduleEventList.vue'), 'utf8');
   const goalReview = readFileSync(resolve(dir, '../../modules/goal/views/GoalReviewDetailView.vue'), 'utf8');
 
   it('keeps date-time surfaces on the shared Product Time facade', () => {
     expect(react).toContain('formatProductDateTime');
-    expect(scheduleDetail).toContain('formatProductDateTime');
-    expect(scheduleDetail).toContain("emptyKind('na')");
     expect(eventList).toContain('formatProductDateTime');
-    for (const source of [react, scheduleDetail, eventList]) {
+    for (const source of [react, eventList]) {
       expect(source).not.toMatch(/function formatDateTime\b/);
       expect(source).not.toContain('toLocaleString');
     }

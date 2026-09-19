@@ -35,13 +35,17 @@
  */
 
 import type { PrismaClient } from '@memoflow/database';
+import type { UserTimeContextPort } from '@memoflow/time';
 import {
   createNotificationDurableRuntime,
   createNotificationModule,
   createNotificationPrismaRepositories,
   type ChannelCapabilitySpec,
   type INotificationRepository,
+  type NotificationOwnerCommandRegistry,
+  type NotificationPortableCapability,
   type NotificationRequestedWriterPort,
+  type NotificationInboxPort,
 } from '@memoflow/notification';
 import {
   createNotificationApiModule,
@@ -57,6 +61,7 @@ export interface ComposeNotificationDependencies {
   readonly db: PrismaClient;
   /** Host-owned account-active checker (fail-closed for closed accounts). 宿主持有的账户激活检查器（对已关闭账户 fail-closed）。 */
   readonly closureChecker: (identityId: string) => Promise<boolean>;
+  readonly userTimeContextPort: UserTimeContextPort;
   /** Explicit channel capabilities selected by the host. 宿主显式选择的 channel capabilities。 */
   readonly channelCapabilities: readonly ChannelCapabilitySpec[];
 }
@@ -76,6 +81,11 @@ export interface ComposedNotification {
   };
   /** Compatibility alias for Goal reminder composition; points to repositories.requestedWriter. */
   readonly requestedWriter: NotificationRequestedWriterPort;
+  /** Late-bound owner command registry. Hosts register owner application ports after composition. */
+  readonly ownerCommandRegistry: NotificationOwnerCommandRegistry;
+  readonly portableFactCapability: NotificationPortableCapability;
+  /** Notification Fact/Inbox and typed action seam shared by transports. */
+  readonly inbox: NotificationInboxPort;
 }
 
 /**
@@ -121,6 +131,7 @@ export function composeNotification(
     notificationRepository: repositories.notificationRepository,
     preferenceRepository: repositories.notificationPreferenceRepository,
     closureChecker: dependencies.closureChecker,
+    userTimeContextPort: dependencies.userTimeContextPort,
     reliableAdapter: repositories.reliableAdapter,
     channelCapabilities: Array.from(dependencies.channelCapabilities),
   });
@@ -128,8 +139,9 @@ export function composeNotification(
   const instance = createNotificationModule({
     notificationRepository: repositories.notificationRepository,
     preferenceRepository: repositories.notificationPreferenceRepository,
-    templateRepository: repositories.notificationTemplateRepository,
+    interactionRepository: repositories.notificationInteractionRepository,
     closureChecker: dependencies.closureChecker,
+    userTimeContextPort: dependencies.userTimeContextPort,
     durableRuntime,
     runtimeContributions: [durableRuntime],
     auditRepository: repositories.auditRepository,
@@ -142,5 +154,8 @@ export function composeNotification(
       requestedWriter: repositories.requestedWriter,
     },
     requestedWriter: repositories.requestedWriter,
+    ownerCommandRegistry: instance.ownerCommandRegistry,
+    portableFactCapability: instance.portableFactCapability,
+    inbox: instance.api,
   };
 }

@@ -10,11 +10,9 @@ vi.mock('@memoflow/ai', async (importOriginal) => {
     createAIModule: vi.fn(),
     createAIPowerSyncRepositories: vi.fn(),
     createMastraStorage: vi.fn(() => ({ tag: 'desktop-mastra-storage' })),
-    ConversationTranscriptBootstrapSource: vi.fn(
-      function ConversationTranscriptBootstrapSourceMock() {
-        return { tag: 'desktop-transcript-bootstrap-source' };
-      },
-    ),
+    ConversationShellSource: vi.fn(function ConversationShellSourceMock() {
+      return { tag: 'desktop-conversation-shell-source' };
+    }),
     KnowledgeCapturePersistenceAdapter: vi.fn(function KnowledgeCapturePersistenceAdapterMock(
       persistence: unknown,
     ) {
@@ -47,7 +45,9 @@ vi.mock('../modules/ai/task-plan-mutation.adapter', () => ({
   }),
 }));
 vi.mock('../modules/ai/routine-command.adapter', () => ({
-  DesktopRoutineAICommandAdapter: vi.fn(function DesktopRoutineAICommandAdapterMock(...args: unknown[]) {
+  DesktopRoutineAICommandAdapter: vi.fn(function DesktopRoutineAICommandAdapterMock(
+    ...args: unknown[]
+  ) {
     return { tag: 'desktop-routine-command', args };
   }),
 }));
@@ -57,17 +57,20 @@ vi.mock('../modules/ai/planner-read.adapter', () => ({
   }),
 }));
 vi.mock('../modules/ai/notification-read.adapter', () => ({
-  DesktopNotificationAIReadAdapter: vi.fn(function DesktopNotificationAIReadAdapterMock(repository: unknown) {
-    return { tag: 'desktop-notification-read', repository };
+  DesktopNotificationAIReadAdapter: vi.fn(function DesktopNotificationAIReadAdapterMock(
+    inbox: unknown,
+  ) {
+    return { tag: 'desktop-notification-read', inbox };
   }),
 }));
 
 import {
   AIEvaluationReportFileAdapter,
+  AIContextAssembler,
   createAIModule,
   createAIPowerSyncRepositories,
   createMastraStorage,
-  ConversationTranscriptBootstrapSource,
+  ConversationShellSource,
   KnowledgeCapturePersistenceAdapter,
   MastraAIRuntime,
   MastraModelResolver,
@@ -86,11 +89,13 @@ const knowledgeSourcePort = { tag: 'knowledge-source' } as never;
 const analyticsReadPort = { tag: 'analytics-read' } as never;
 const goalApplicationPort = { tag: 'goal-application' } as never;
 const taskApplicationPort = { tag: 'task-application' } as never;
-const reminderApplicationPort = { tag: 'reminder-application' } as never;
 const routineCommandPort = { tag: 'routine-command-port' } as never;
-const scheduleRepository = { tag: 'schedule-repository' } as never;
-const notificationRepository = { tag: 'notification-repository' } as never;
+const scheduleEventApi = { tag: 'schedule-event-api' } as never;
+const notificationInbox = { tag: 'notification-inbox' } as never;
+const userTimeContextPort = { tag: 'user-time-context-port' } as never;
 const labelService = { tag: 'label-service' } as never;
+const goalKnowledgeService = { tag: 'goal-knowledge-service' } as never;
+const knowledgeDocumentRefResolver = { tag: 'knowledge-ref-resolver' } as never;
 const mastraStorage = {
   kind: 'libsql' as const,
   url: 'file:///profiles/profile-1/storage/mastra.db',
@@ -98,8 +103,9 @@ const mastraStorage = {
 const repositorySet = {
   conversationRepository: { tag: 'conversation-repository' },
   providerConfigRepository: { tag: 'provider-repository' },
+  providerSecretVault: { tag: 'provider-secret-vault' },
   knowledgeIndexRepository: { tag: 'knowledge-index-repository' },
-  executionLogPort: { tag: 'execution-log' },
+  executionRecordPort: { tag: 'execution-log' },
   providerOnboardingSessionRepository: { tag: 'provider-onboarding-session' },
   providerOnboardingCommitPort: { tag: 'provider-onboarding-commit' },
 };
@@ -110,11 +116,13 @@ const dependencies = {
   analyticsReadPort,
   goalApplicationPort,
   taskApplicationPort,
-  reminderApplicationPort,
   routineCommandPort,
-  scheduleRepository,
-  notificationRepository,
+  scheduleEventApi,
+  notificationInbox,
+  userTimeContextPort,
   labelService,
+  goalKnowledgeService,
+  knowledgeDocumentRefResolver,
   mastraStorage,
 };
 
@@ -124,7 +132,13 @@ beforeEach(() => {
     repositorySet as ReturnType<typeof createAIPowerSyncRepositories>,
   );
   vi.mocked(createAIModule).mockReturnValue({
-    api: {},
+    portableCapability: { key: 'ai-conversations', schemaVersion: 3 },
+    providerManagement: {},
+    assistantConversation: {},
+    knowledge: {},
+    evaluationOperations: {},
+    mastraRuntime: null,
+    workflowRuntime: null,
     start: vi.fn(),
     dispose: vi.fn(),
   } as ReturnType<typeof createAIModule>);
@@ -141,35 +155,45 @@ describe('Desktop composeAI Mastra-only ownership', () => {
 
     expect(createAIPowerSyncRepositories).toHaveBeenCalledWith(db);
     expect(createMastraStorage).toHaveBeenCalledWith(mastraStorage);
-    expect(MastraModelResolver).toHaveBeenCalledWith(repositorySet.providerConfigRepository);
-    expect(ConversationTranscriptBootstrapSource).toHaveBeenCalledWith(
-      repositorySet.conversationRepository,
+    expect(MastraModelResolver).toHaveBeenCalledWith(
+      repositorySet.providerConfigRepository,
+      repositorySet.providerSecretVault,
     );
+    expect(ConversationShellSource).toHaveBeenCalledWith(repositorySet.conversationRepository);
     expect(DesktopGoalPlanMutationAdapter).toHaveBeenCalledWith(
       goalApplicationPort,
       taskApplicationPort,
-      reminderApplicationPort,
       labelService,
+      knowledgeNotePersistence,
+      knowledgeDocumentRefResolver,
+      goalKnowledgeService,
     );
     expect(DesktopTaskPlanMutationAdapter).toHaveBeenCalledWith(taskApplicationPort, labelService);
-    expect(DesktopRoutineAICommandAdapter).toHaveBeenCalledWith(reminderApplicationPort, routineCommandPort);
-    expect(DesktopPlannerAIReadAdapter).toHaveBeenCalledWith(scheduleRepository, taskApplicationPort);
-    expect(DesktopNotificationAIReadAdapter).toHaveBeenCalledWith(notificationRepository);
+    expect(DesktopRoutineAICommandAdapter).toHaveBeenCalledWith(routineCommandPort);
+    expect(DesktopPlannerAIReadAdapter).toHaveBeenCalledWith(
+      scheduleEventApi,
+      taskApplicationPort,
+      userTimeContextPort,
+    );
+    expect(DesktopNotificationAIReadAdapter).toHaveBeenCalledWith(notificationInbox);
     expect(KnowledgeCapturePersistenceAdapter).toHaveBeenCalledWith(knowledgeNotePersistence);
 
     expect(MastraAIRuntime).toHaveBeenCalledTimes(1);
     expect(MastraAIRuntime).toHaveBeenCalledWith({
       storage: vi.mocked(createMastraStorage).mock.results[0].value,
       modelResolver: vi.mocked(MastraModelResolver).mock.results[0].value,
-      transcriptBootstrapSource: vi.mocked(ConversationTranscriptBootstrapSource).mock.results[0].value,
+      conversationShellSource: vi.mocked(ConversationShellSource).mock.results[0].value,
       goalPlanMutationPort: vi.mocked(DesktopGoalPlanMutationAdapter).mock.results[0].value,
       taskPlanMutationPort: vi.mocked(DesktopTaskPlanMutationAdapter).mock.results[0].value,
-      knowledgeCaptureMutationPort: vi.mocked(KnowledgeCapturePersistenceAdapter).mock.results[0].value,
-      executionLogPort: repositorySet.executionLogPort,
-      usageReadPort: repositorySet.executionLogPort,
+      knowledgeCaptureMutationPort: vi.mocked(KnowledgeCapturePersistenceAdapter).mock.results[0]
+        .value,
+      knowledgeSourcePort,
+      executionRecordPort: repositorySet.executionRecordPort,
+      usageReadPort: repositorySet.executionRecordPort,
       routineCommandPort: vi.mocked(DesktopRoutineAICommandAdapter).mock.results[0].value,
       plannerReadPort: vi.mocked(DesktopPlannerAIReadAdapter).mock.results[0].value,
       notificationReadPort: vi.mocked(DesktopNotificationAIReadAdapter).mock.results[0].value,
+      contextAssembler: expect.any(AIContextAssembler),
     });
   });
 
@@ -179,12 +203,15 @@ describe('Desktop composeAI Mastra-only ownership', () => {
     const moduleInput = vi.mocked(createAIModule).mock.calls[0][0];
     expect(moduleInput.conversationRepository).toBe(repositorySet.conversationRepository);
     expect(moduleInput.providerConfigRepository).toBe(repositorySet.providerConfigRepository);
+    expect(moduleInput.providerSecretVault).toBe(repositorySet.providerSecretVault);
     expect(moduleInput.providerOnboardingSessionRepository).toBe(
       repositorySet.providerOnboardingSessionRepository,
     );
-    expect(moduleInput.providerOnboardingCommitPort).toBe(repositorySet.providerOnboardingCommitPort);
+    expect(moduleInput.providerOnboardingCommitPort).toBe(
+      repositorySet.providerOnboardingCommitPort,
+    );
     expect(moduleInput.knowledgeIndexRepository).toBe(repositorySet.knowledgeIndexRepository);
-    expect(moduleInput.executionLogPort).toBe(repositorySet.executionLogPort);
+    expect(moduleInput.executionRecordPort).toBe(repositorySet.executionRecordPort);
     expect(moduleInput.knowledgeNotePersistence).toBe(knowledgeNotePersistence);
     expect(moduleInput.knowledgeSourcePort).toBe(knowledgeSourcePort);
     expect(moduleInput.analyticsReadPort).toBe(analyticsReadPort);

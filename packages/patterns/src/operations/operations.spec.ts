@@ -16,7 +16,7 @@ import {
 describe('W7 operations contracts (surface)', () => {
   it('OperationTimelineEntry requires all W7 fields', () => {
     const entry = OperationTimelineEntrySchema.parse({
-      source: 'reminder',
+      source: 'notification',
       operationId: 'op-1',
       status: 'dead_letter',
       failureReason: 'deliverer timeout',
@@ -26,9 +26,12 @@ describe('W7 operations contracts (surface)', () => {
       updatedAt: '2026-08-12T00:00:00.000Z',
     });
     expect(entry.replayable).toBe(true);
+    expect(
+      OperationTimelineEntrySchema.safeParse({ ...entry, source: 'reminder' }).success,
+    ).toBe(false);
     expect(() =>
       OperationTimelineEntrySchema.parse({
-        source: 'reminder',
+        source: 'notification',
         operationId: 'op-1',
         status: 'dead_letter',
         attempts: 3,
@@ -87,8 +90,8 @@ describe('W7 operations contracts (surface)', () => {
 
 describe('W7 unified metric naming (B)', () => {
   it('builds memoflow.<module>.outbox.<state> keys', () => {
-    expect(outboxMetricKey('reminder', 'persisted')).toBe(
-      'memoflow.reminder.outbox.persisted',
+    expect(outboxMetricKey('notification', 'persisted')).toBe(
+      'memoflow.notification.outbox.persisted',
     );
     expect(outboxMetricKey('notification', 'dead_letter')).toBe(
       'memoflow.notification.outbox.dead_letter',
@@ -115,7 +118,7 @@ describe('W7 timeline mapping (A)', () => {
         schemaVersion: 1,
         operationId: 'op-1',
         identityId: 'identity-1',
-        source: 'reminder',
+        source: 'notification',
         occurrenceKey: 'tpl:2026-08-12T00:00:00.000Z',
         idempotencyKey: 'identity-1:reminder:tpl:2026-08-12T00:00:00.000Z',
         status: 'dead_letter',
@@ -131,7 +134,7 @@ describe('W7 timeline mapping (A)', () => {
         updatedAt: '2026-08-12T00:00:00.000Z',
         finishedAt: null,
       },
-      'reminder',
+      'notification',
     );
     expect(entry.status).toBe('dead_letter');
     expect(entry.attempts).toBe(4);

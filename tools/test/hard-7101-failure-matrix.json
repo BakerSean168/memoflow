@@ -30,8 +30,8 @@
       "evidence": [
         {
           "runner": "scheduler-integration",
-          "file": "packages/scheduler/src/server/infrastructure/adapters/prisma/schedule-task-prisma.repository.integration.test.ts",
-          "title": "rolls back a transaction-scoped save when the owner reconcile callback fails"
+          "file": "packages/scheduler/src/server/infrastructure/adapters/prisma/scheduled-invocation-prisma.repository.integration.test.ts",
+          "title": "rolls back a canonical ScheduledInvocation transaction when the owner reconcile callback fails"
         }
       ]
     },
@@ -41,8 +41,8 @@
       "evidence": [
         {
           "runner": "scheduler-integration",
-          "file": "packages/scheduler/src/server/infrastructure/adapters/prisma/schedule-task-prisma.repository.integration.test.ts",
-          "title": "recovers a claimed invocation after the scheduler worker crashes and its host lease expires"
+          "file": "packages/scheduler/src/server/infrastructure/adapters/prisma/scheduled-invocation-prisma.repository.integration.test.ts",
+          "title": "recovers a claimed canonical invocation after the scheduler worker crashes and its host lease expires"
         }
       ]
     },
@@ -52,8 +52,8 @@
       "evidence": [
         {
           "runner": "scheduler-integration",
-          "file": "packages/scheduler/src/server/infrastructure/adapters/prisma/schedule-task-prisma.repository.integration.test.ts",
-          "title": "recovers a claimed invocation after the scheduler worker crashes and its host lease expires"
+          "file": "packages/scheduler/src/server/infrastructure/adapters/prisma/scheduled-invocation-prisma.repository.integration.test.ts",
+          "title": "recovers a claimed canonical invocation after the scheduler worker crashes and its host lease expires"
         }
       ]
     },
@@ -63,7 +63,7 @@
       "evidence": [
         {
           "runner": "scheduler-unit",
-          "file": "packages/scheduler/src/server/infrastructure/scheduling/__tests__/legacy-schedule-task-scheduling.adapter.spec.ts",
+          "file": "packages/scheduler/src/server/infrastructure/scheduling/__tests__/scheduled-invocation-scheduling.adapter.spec.ts",
           "title": "rejects duplicate desired scheduling keys before writing"
         }
       ]
@@ -74,8 +74,8 @@
       "evidence": [
         {
           "runner": "reminder-unit",
-          "file": "packages/reminder/src/server/infrastructure/reminder-template-scheduled-handler.spec.ts",
-          "title": "maps a stale Reminder occurrence to skipped without replaying the business commit"
+          "file": "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-schedule-execution-source.spec.ts",
+          "title": "skips cleanly on revision drift"
         }
       ]
     },
@@ -130,7 +130,7 @@
         {
           "runner": "notification-unit",
           "file": "packages/notification/src/server/application/use-cases/commands/__tests__/create-notification.test.ts",
-          "title": "Fixture I: DND keeps the Inbox Fact unread when Desktop delivery is suppressed"
+          "title": "keeps Inbox Fact visible while QuietHours suppresses Desktop delivery"
         }
       ]
     },
@@ -141,7 +141,7 @@
         {
           "runner": "notification-unit",
           "file": "packages/notification/src/server/application/use-cases/commands/__tests__/create-notification.test.ts",
-          "title": "preserves rate-limit suppression without mutating Fact read state"
+          "title": "applies SystemDeliveryGuard independently from user preferences"
         }
       ]
     },
@@ -152,7 +152,7 @@
         {
           "runner": "notification-unit",
           "file": "packages/notification/src/server/infrastructure/runtime/notification.runtime.spec.ts",
-          "title": "treats a device-offline channel failure as retryable and delivers after recovery"
+          "title": "retries a failed delivery and succeeds after recovery"
         }
       ]
     },
@@ -249,7 +249,7 @@
         {
           "runner": "goal-integration",
           "file": "packages/goal/src/server/application/event-handlers/register-goal-event-listeners.integration.test.ts",
-          "title": "applies an explicit TaskInstance source once and reverts it explicitly"
+          "title": "applies an explicit TaskOccurrence source once and reverts it explicitly"
         }
       ]
     },

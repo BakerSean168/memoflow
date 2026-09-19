@@ -1,31 +1,13 @@
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import type { AIProviderConfigServerDTO } from '@memoflow/contracts/ai';
 import type { IAIProviderConfigRepository } from '../../../domain/repositories/i-ai-provider-config-repository';
-import type { IAIProviderSecretVault } from '../../../application/ports/provider-secret-vault.port';
-import { AISecretCipher } from '../../security/ai-secret-cipher';
 import { PowerSyncAIProviderConfigMapper, type PowerSyncAIProviderConfigRow } from './mappers';
 
 export class PowerSyncAIProviderConfigRepository implements IAIProviderConfigRepository {
-  private cipher: IAIProviderSecretVault | null;
-
-  constructor(
-    private readonly db: IElectronDatabase,
-    secretCipher?: IAIProviderSecretVault,
-  ) {
-    this.cipher = secretCipher ?? null;
-  }
-
-  /**
-   * 惰性解析加密器：只有真正加解密 provider 密钥时才读取 env 并 fail-fast，
-   * 而不是在模块注册/构造时。未使用 AI provider 加密的启动路径无需配置
-   * AI_PROVIDER_ENCRYPTION_KEY，同时保证真正落库/读取密钥时缺 key 决不静默降级。
-   */
-  private get secretCipher(): IAIProviderSecretVault {
-    return (this.cipher ??= AISecretCipher.fromEnv());
-  }
+  constructor(private readonly db: IElectronDatabase) {}
 
   async save(config: AIProviderConfigServerDTO) {
-    const d = PowerSyncAIProviderConfigMapper.toPersistence(config, this.secretCipher);
+    const d = PowerSyncAIProviderConfigMapper.toPersistence(config);
     return this.db.writeTransaction(async (tx) => {
       const existing = await tx.getOptional<{ id: string; identity_id: string }>(
         `SELECT id, identity_id FROM ai_provider_configs WHERE id = ? LIMIT 1`,
@@ -48,9 +30,9 @@ export class PowerSyncAIProviderConfigRepository implements IAIProviderConfigRep
           `UPDATE ai_provider_configs
          SET identity_id = ?,
              name = ?,
-             provider_type = ?,
+             provider_definition_id = ?,
              base_url = ?,
-             api_key_encrypted = ?,
+             credential_ref = ?,
              default_model = ?,
              is_active = ?,
              is_default = ?,
@@ -62,9 +44,9 @@ export class PowerSyncAIProviderConfigRepository implements IAIProviderConfigRep
           [
             d.identity_id,
             d.name,
-            d.provider_type,
+            d.provider_definition_id,
             d.base_url,
-            d.api_key_encrypted,
+            d.credential_ref,
             d.default_model,
             d.is_active,
             d.is_default,
@@ -78,7 +60,7 @@ export class PowerSyncAIProviderConfigRepository implements IAIProviderConfigRep
       } else {
         await tx.execute(
           `INSERT INTO ai_provider_configs (
-           id, identity_id, name, provider_type, base_url, api_key_encrypted,
+           id, identity_id, name, provider_definition_id, base_url, credential_ref,
            default_model, is_active, is_default, priority,
            version, created_at, updated_at, deleted_at
          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -86,9 +68,9 @@ export class PowerSyncAIProviderConfigRepository implements IAIProviderConfigRep
             d.id,
             d.identity_id,
             d.name,
-            d.provider_type,
+            d.provider_definition_id,
             d.base_url,
-            d.api_key_encrypted,
+            d.credential_ref,
             d.default_model,
             d.is_active,
             d.is_default,
@@ -112,7 +94,7 @@ export class PowerSyncAIProviderConfigRepository implements IAIProviderConfigRep
       `SELECT * FROM ai_provider_configs WHERE id = ? AND identity_id = ? AND deleted_at IS NULL LIMIT 1`,
       [id, identityId],
     );
-    return row ? PowerSyncAIProviderConfigMapper.toDTO(row, this.secretCipher) : null;
+    return row ? PowerSyncAIProviderConfigMapper.toDTO(row) : null;
   }
 
   async findByIdentityId(identityId: string): Promise<AIProviderConfigServerDTO[]> {
@@ -122,7 +104,7 @@ export class PowerSyncAIProviderConfigRepository implements IAIProviderConfigRep
        ORDER BY priority ASC, created_at ASC`,
       [identityId],
     );
-    return rows.map((row) => PowerSyncAIProviderConfigMapper.toDTO(row, this.secretCipher));
+    return rows.map((row) => PowerSyncAIProviderConfigMapper.toDTO(row));
   }
 
   async findDefaultByIdentityId(identityId: string): Promise<AIProviderConfigServerDTO | null> {
@@ -132,7 +114,7 @@ export class PowerSyncAIProviderConfigRepository implements IAIProviderConfigRep
        LIMIT 1`,
       [identityId],
     );
-    return row ? PowerSyncAIProviderConfigMapper.toDTO(row, this.secretCipher) : null;
+    return row ? PowerSyncAIProviderConfigMapper.toDTO(row) : null;
   }
 
   async delete(identityId: string, id: string): Promise<void> {

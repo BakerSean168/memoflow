@@ -5,11 +5,13 @@ import type {
   SchedulingPort,
   SchedulingReconcileReceipt,
 } from '@memoflow/contracts/schedule';
-import type {
-  GoalReminderScheduledPayload,
-  GoalScheduleProjectionEventMap,
-  GoalScheduleProjectionSource,
+import {
+  GOAL_REMINDER_PAYLOAD_VERSION,
+  type GoalReminderScheduledPayload,
+  type GoalScheduleProjectionEventMap,
+  type GoalScheduleProjectionSource,
 } from '@memoflow/goal/schedule-projection';
+import { requireYmd } from '@memoflow/contracts/primitives';
 import type { Subscriber } from '@memoflow/utils/domain';
 import { createGoalProjectionRuntime } from '../runtime/goal-projection-runtime';
 
@@ -22,14 +24,14 @@ function intent(key = 'intent-1'): ScheduledIntent<GoalReminderScheduledPayload>
     schedulingKey: key,
     handlerKey: 'goal.reminder.fire',
     runAt: Date.UTC(2030, 0, 13, 0, 0),
-    payloadVersion: 1,
+    payloadVersion: GOAL_REMINDER_PAYLOAD_VERSION,
     payload: {
       goalId: 'GoalId_goal',
       goalTitle: 'Goal',
       triggerType: 'RemainingDays',
       triggerValue: 7,
       startDate: null,
-      dueDate: Date.UTC(2030, 0, 20, 0, 0),
+      target: { kind: 'day', date: requireYmd('2030-01-20') },
       reminderTime: Date.UTC(2030, 0, 13, 0, 0),
     },
   };

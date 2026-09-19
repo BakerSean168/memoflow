@@ -1,8 +1,6 @@
 import type {
   CreateNotificationReq,
   CreateNotificationRes,
-  UpdateNotificationReq,
-  UpdateNotificationRes,
   NotificationQuery,
   NotificationListRes,
   MarkAsReadBatchReq,
@@ -19,16 +17,13 @@ import type {
   UpdateNotificationPreferenceRes,
   GetNotificationPreferenceReq,
   GetNotificationPreferenceRes,
-  SendNotificationReq,
-  SendNotificationRes,
-  RetryChannelReq,
-  RetryChannelRes,
-  ListNotificationChannelsReq,
-  ListNotificationChannelsRes,
 } from '../api';
 import type {
   DeleteNotificationInvocation,
   MarkNotificationReadInvocation,
+  MarkNotificationUnreadInvocation,
+  ArchiveNotificationInvocation,
+  RestoreNotificationInvocation,
   NotificationBatchInvocation,
   ReplayDeadLetterInvocation,
 } from '../api/notification-invocation.schemas';
@@ -39,16 +34,15 @@ import type {
 } from '../api/response-schemas';
 
 // === Notification Module RPC Map ===
-// Phase 4: every map entry corresponds to a live HTTP route / IPC channel with
-// the SAME canonical request shape. Protocol-only operations (execute-action,
-// send, retry, channel:list, get-stats, update) remain documented as explicit
-// unsupported transport surfaces — never a silently different payload on one host.
+// Every map entry corresponds to a live transport surface.
 export type NotificationRpcMap = {
   // === CRUD / status ===
   'notification:create': [CreateNotificationReq, CreateNotificationRes];
-  'notification:update': [UpdateNotificationReq, UpdateNotificationRes];
   'notification:delete': [DeleteNotificationInvocation, null];
   'notification:mark-read': [MarkNotificationReadInvocation, NotificationResponse];
+  'notification:mark-unread': [MarkNotificationUnreadInvocation, NotificationResponse];
+  'notification:archive': [ArchiveNotificationInvocation, NotificationResponse];
+  'notification:restore': [RestoreNotificationInvocation, NotificationResponse];
   'notification:mark-all-read': [void, UnreadCountResponse];
   'notification:query': [NotificationQuery, NotificationListRes];
 
@@ -74,9 +68,4 @@ export type NotificationRpcMap = {
     UpdateNotificationPreferenceRes,
   ];
   'notification-preference:get': [GetNotificationPreferenceReq, GetNotificationPreferenceRes];
-
-  // === Channels (protocol-only; no live transport) ===
-  'notification:send': [SendNotificationReq, SendNotificationRes];
-  'notification-channel:retry': [RetryChannelReq, RetryChannelRes];
-  'notification-channel:list': [ListNotificationChannelsReq, ListNotificationChannelsRes];
 };

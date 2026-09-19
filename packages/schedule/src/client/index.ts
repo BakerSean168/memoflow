@@ -4,6 +4,9 @@ import type { IResultIpcClient } from '@memoflow/ipc-client';
 import {
   createScheduleClientService,
   createScheduleServiceFromHttpClient,
+  derivePlannerConflicts,
+  plannerConflictSourceKeys,
+  plannerProjectionKey,
   type ScheduleClientPort,
 } from '../application-client';
 import {
@@ -37,4 +40,7 @@ export {
   createScheduleClientService,
   createScheduleEventHttpAdapter,
   createScheduleEventIpcAdapter,
+  derivePlannerConflicts,
+  plannerConflictSourceKeys,
+  plannerProjectionKey,
 };

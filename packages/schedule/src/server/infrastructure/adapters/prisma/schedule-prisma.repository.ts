@@ -7,7 +7,10 @@
  */
 
 import type { PrismaClient, Schedule as PrismaSchedule } from '@memoflow/database';
-import type { IScheduleRepository, ScheduleRebuildOutboxDTO } from '../../../domain/repositories/i-schedule-repository';
+import type {
+  IScheduleRepository,
+  ScheduleRebuildOutboxDTO,
+} from '../../../domain/repositories/i-schedule-repository';
 import { CalendarEntry } from '../../../domain/aggregates/calendar-entry';
 import { LeaseLostError } from '@memoflow/patterns/lease';
 import { PrismaScheduleMapper } from './mappers/prisma-schedule-mapper';
@@ -32,8 +35,16 @@ export class SchedulePrismaRepository implements IScheduleRepository {
   private readonly rootClient: PrismaTransactionRoot | null;
   private readonly metrics?: UnifiedOperationMetricsRecorder;
 
-  constructor(prisma: PrismaClient, rootClient?: PrismaTransactionRoot, metrics?: UnifiedOperationMetricsRecorder);
-  constructor(prisma: ScheduleDb, rootClient?: PrismaTransactionRoot, metrics?: UnifiedOperationMetricsRecorder);
+  constructor(
+    prisma: PrismaClient,
+    rootClient?: PrismaTransactionRoot,
+    metrics?: UnifiedOperationMetricsRecorder,
+  );
+  constructor(
+    prisma: ScheduleDb,
+    rootClient?: PrismaTransactionRoot,
+    metrics?: UnifiedOperationMetricsRecorder,
+  );
   constructor(
     prisma: ScheduleDb | PrismaClient,
     rootClient?: PrismaTransactionRoot,
@@ -126,7 +137,7 @@ export class SchedulePrismaRepository implements IScheduleRepository {
   async findByIdentityId(identityId: string): Promise<CalendarEntry[]> {
     const schedules = await this.db.schedule.findMany({
       where: { identityId },
-      orderBy: { startTime: 'asc' },
+      orderBy: { createdAt: 'asc' },
     });
 
     return schedules.map((s) => this.mapToEntity(s));
@@ -136,16 +147,17 @@ export class SchedulePrismaRepository implements IScheduleRepository {
     identityId: string,
     startTime: number,
     endTime: number,
-    excludeId?: string
+    excludeId?: string,
   ): Promise<CalendarEntry[]> {
     const schedules = await this.db.schedule.findMany({
       where: {
         identityId,
-        startTime: { lt: new Date(endTime) },
-        endTime: { gt: new Date(startTime) },
+        rangeKind: 'Timed',
+        timedStart: { lt: new Date(endTime) },
+        timedEnd: { gt: new Date(startTime) },
         ...(excludeId && { id: { not: excludeId } }),
       },
-      orderBy: { startTime: 'asc' },
+      orderBy: { timedStart: 'asc' },
     });
 
     return schedules.map((s) => this.mapToEntity(s));
@@ -180,41 +192,6 @@ export class SchedulePrismaRepository implements IScheduleRepository {
   async deleteAggregate(entry: CalendarEntry, expectedVersion: number): Promise<void> {
     await this.flushDomainEvents(entry);
     await this.deleteById(entry.identityId, entry.id, expectedVersion);
-  }
-
-  async updateConflictProjection(
-    identityId: string,
-    id: string,
-    hasConflict: boolean,
-    conflictingEntries: string[] | null,
-    sourceRevision: number
-  ): Promise<void> {
-    const current = await this.db.schedule.findFirst({
-      where: { id, identityId },
-      select: { version: true, hasConflict: true, conflictingSchedules: true },
-    });
-    if (!current) return;
-    if (current.version > sourceRevision) return;
-
-    const newConflictingStr = conflictingEntries && conflictingEntries.length > 0
-      ? JSON.stringify(conflictingEntries)
-      : null;
-
-    if (current.hasConflict === hasConflict && current.conflictingSchedules === newConflictingStr) {
-      return;
-    }
-
-    await this.db.schedule.updateMany({
-      where: {
-        id,
-        identityId,
-        version: { lte: sourceRevision },
-      },
-      data: {
-        hasConflict,
-        conflictingSchedules: newConflictingStr,
-      },
-    });
   }
 
   async createRebuildOutbox(item: {
@@ -268,10 +245,7 @@ export class SchedulePrismaRepository implements IScheduleRepository {
     });
   }
 
-  async fetchRebuildTimeline(
-    identityId: string,
-    limit = 100,
-  ): Promise<ScheduleRebuildOutboxDTO[]> {
+  async fetchRebuildTimeline(identityId: string, limit = 100): Promise<ScheduleRebuildOutboxDTO[]> {
     if (!identityId) {
       throw new Error('identityId is required for rebuild timeline query');
     }
@@ -438,7 +412,9 @@ export class SchedulePrismaRepository implements IScheduleRepository {
         },
       });
       if (res.count === 0) {
-        throw new LeaseLostError(`Rebuild outbox item ${id} is no longer owned by this claim token (lease lost)`);
+        throw new LeaseLostError(
+          `Rebuild outbox item ${id} is no longer owned by this claim token (lease lost)`,
+        );
       }
       return;
     }
@@ -447,7 +423,9 @@ export class SchedulePrismaRepository implements IScheduleRepository {
       where: { id, claimToken, status: 'processing' },
     });
     if (!existing) {
-      throw new LeaseLostError(`Rebuild outbox item ${id} is no longer owned by this claim token (lease lost)`);
+      throw new LeaseLostError(
+        `Rebuild outbox item ${id} is no longer owned by this claim token (lease lost)`,
+      );
     }
 
     const nextAttempts = existing.attempts + 1;
@@ -462,7 +440,9 @@ export class SchedulePrismaRepository implements IScheduleRepository {
         },
       });
       if (res.count === 0) {
-        throw new LeaseLostError(`Rebuild outbox item ${id} is no longer owned by this claim token (lease lost)`);
+        throw new LeaseLostError(
+          `Rebuild outbox item ${id} is no longer owned by this claim token (lease lost)`,
+        );
       }
     } else {
       const backoffMs = Math.pow(2, nextAttempts) * 1000;
@@ -477,7 +457,9 @@ export class SchedulePrismaRepository implements IScheduleRepository {
         },
       });
       if (res.count === 0) {
-        throw new LeaseLostError(`Rebuild outbox item ${id} is no longer owned by this claim token (lease lost)`);
+        throw new LeaseLostError(
+          `Rebuild outbox item ${id} is no longer owned by this claim token (lease lost)`,
+        );
       }
     }
   }
@@ -510,7 +492,9 @@ export class SchedulePrismaRepository implements IScheduleRepository {
   async fetchPendingDomainEventOutbox(
     identityId?: string,
     limit = 50,
-  ): Promise<import('../../../domain/repositories/i-schedule-repository').ScheduleDomainEventOutboxDTO[]> {
+  ): Promise<
+    import('../../../domain/repositories/i-schedule-repository').ScheduleDomainEventOutboxDTO[]
+  > {
     if (!this.db.scheduleDomainEventOutbox) return [];
     return this.db.scheduleDomainEventOutbox.findMany({
       where: {
@@ -526,7 +510,9 @@ export class SchedulePrismaRepository implements IScheduleRepository {
     claimToken: string,
     limit = 50,
     timeoutMs = 30000,
-  ): Promise<import('../../../domain/repositories/i-schedule-repository').ScheduleDomainEventOutboxDTO[]> {
+  ): Promise<
+    import('../../../domain/repositories/i-schedule-repository').ScheduleDomainEventOutboxDTO[]
+  > {
     if (!this.db.scheduleDomainEventOutbox) return [];
     const now = new Date();
     const timeoutThreshold = new Date(now.getTime() - timeoutMs);
@@ -585,7 +571,9 @@ export class SchedulePrismaRepository implements IScheduleRepository {
         },
       });
       if (res.count === 0) {
-        throw new LeaseLostError(`Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`);
+        throw new LeaseLostError(
+          `Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`,
+        );
       }
       return;
     }
@@ -594,7 +582,9 @@ export class SchedulePrismaRepository implements IScheduleRepository {
       where: { id, claimToken, status: 'processing' },
     });
     if (!existing) {
-      throw new LeaseLostError(`Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`);
+      throw new LeaseLostError(
+        `Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`,
+      );
     }
 
     const nextAttempts = existing.attempts + 1;
@@ -609,7 +599,9 @@ export class SchedulePrismaRepository implements IScheduleRepository {
         },
       });
       if (res.count === 0) {
-        throw new LeaseLostError(`Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`);
+        throw new LeaseLostError(
+          `Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`,
+        );
       }
     } else {
       const backoffMs = Math.pow(2, nextAttempts) * 1000;
@@ -624,14 +616,14 @@ export class SchedulePrismaRepository implements IScheduleRepository {
         },
       });
       if (res.count === 0) {
-        throw new LeaseLostError(`Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`);
+        throw new LeaseLostError(
+          `Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`,
+        );
       }
     }
   }
 
-  async withTransaction<T>(
-    fn: (repo: IScheduleRepository) => Promise<T>
-  ): Promise<T> {
+  async withTransaction<T>(fn: (repo: IScheduleRepository) => Promise<T>): Promise<T> {
     if (!this.rootClient) {
       throw new Error('withTransaction requires a root PrismaClient (not a TransactionClient)');
     }

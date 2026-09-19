@@ -116,7 +116,9 @@ export default {
     "changeReactivated": "重新激活"
   },
   "codeSnippet": {
-    "copyCode": "复制代码"
+    "copyCode": "复制代码",
+    "goodExample": "正例",
+    "badExample": "反例"
   },
   "tagInput": {
     "label": "标签",

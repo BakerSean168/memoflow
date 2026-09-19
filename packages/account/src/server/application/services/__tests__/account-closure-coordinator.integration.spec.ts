@@ -3,11 +3,15 @@ import { AccountClosureCoordinator } from '../account-closure-coordinator';
 import { InMemoryAccountClosureOperationRepository } from '../../../infrastructure/adapters/in-memory/account-closure-operation-in-memory.repository';
 import type { IAccountRepository } from '../../../domain/repositories/i-account-repository';
 import type { CloudAuthRevocationPort } from '../../ports/cloud-auth-revocation.port';
-import type { AccountClosureEventPublisher, AccountClosedEventPayload } from '../../ports/account-closure-event-publisher.port';
+import type {
+  AccountClosureEventPublisher,
+  AccountClosedEventPayload,
+} from '../../ports/account-closure-event-publisher.port';
 import { Account } from '../../../domain/aggregates/account';
 import { IdentityId } from '@memoflow/domain-shared/shared';
 import { AccountStatus } from '../../../domain/value-objects';
 import { createAccountModule, createAccountUseCases } from '../../../infrastructure/account.module';
+import { asInstant, createFixedClock } from '@memoflow/time';
 
 class InMemoryAccountRepository implements IAccountRepository {
   private readonly accounts = new Map<string, Account>();
@@ -19,22 +23,6 @@ class InMemoryAccountRepository implements IAccountRepository {
   async findById(id: string): Promise<Account | null> {
     const acc = this.accounts.get(id);
     return acc ? acc : null;
-  }
-
-  async findByNickname(): Promise<Account | null> {
-    return null;
-  }
-
-  async findByEmail(): Promise<Account | null> {
-    return null;
-  }
-
-  async existsByNickname(): Promise<boolean> {
-    return false;
-  }
-
-  async existsByEmail(): Promise<boolean> {
-    return false;
   }
 
   async delete(id: string): Promise<void> {
@@ -55,7 +43,8 @@ describe('AccountClosureCoordinator Integration Tests', () => {
     const identityId = IdentityId.generate().toString();
     const account = Account.create({
       id: IdentityId.of(identityId),
-      email: 'test-saga@example.com',
+      nicknameSeed: 'Test Saga',
+      now: asInstant(1_700_000_000_000),
     });
     await accountRepo.save(account);
 
@@ -85,6 +74,7 @@ describe('AccountClosureCoordinator Integration Tests', () => {
       closureOperationRepository: closureOpRepo,
       revocationPort,
       eventPublisher,
+      clock: createFixedClock(1_700_000_000_000),
     });
 
     const receipt = await coordinator.execute(identityId, 'integration-key-1');
@@ -95,7 +85,7 @@ describe('AccountClosureCoordinator Integration Tests', () => {
 
     const updatedAccount = await accountRepo.findById(identityId);
     expect(updatedAccount).not.toBeNull();
-    expect(AccountStatus.isDeactivated(updatedAccount!.status)).toBe(true);
+    expect(AccountStatus.isClosed(updatedAccount!.status)).toBe(true);
 
     expect(publishedEvents).toHaveLength(1);
     expect(publishedEvents[0].identityId).toBe(identityId);
@@ -107,8 +97,20 @@ describe('AccountClosureCoordinator Integration Tests', () => {
 
     const userA = IdentityId.generate().toString();
     const userB = IdentityId.generate().toString();
-    await accountRepo.save(Account.create({ id: IdentityId.of(userA), email: 'usera@example.com' }));
-    await accountRepo.save(Account.create({ id: IdentityId.of(userB), email: 'userb@example.com' }));
+    await accountRepo.save(
+      Account.create({
+        id: IdentityId.of(userA),
+        nicknameSeed: 'User A',
+        now: asInstant(1_700_000_000_000),
+      }),
+    );
+    await accountRepo.save(
+      Account.create({
+        id: IdentityId.of(userB),
+        nicknameSeed: 'User B',
+        now: asInstant(1_700_000_000_000),
+      }),
+    );
 
     const revocationPort: CloudAuthRevocationPort = {
       async revokeAuthentication() {
@@ -124,6 +126,7 @@ describe('AccountClosureCoordinator Integration Tests', () => {
       closureOperationRepository: closureOpRepo,
       revocationPort,
       eventPublisher: { publishAccountClosed: async () => {} },
+      clock: createFixedClock(1_700_000_000_000),
     });
 
     const sameKey = 'shared-key-123';

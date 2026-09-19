@@ -2,8 +2,7 @@
 /**
  * GoalProgressWidget — 活跃目标进度列表
  *
- * 从 DashboardView 抽出（UI_PAGE_REDESIGN_PLAN §2/§6），落 goal 模块 widgets，
- * 与 task/reminder 的 widgets 目录约定对齐，供仪表盘与 AI 首页右栏复用。
+ * Goal-owned Home progress widget, shared by the Home and AI surfaces.
  * 纯展示：数据由父级传入，不自取数（布局层不直连数据源）。
  */
 import { useI18n } from 'vue-i18n';
@@ -17,11 +16,11 @@ import {
   Button,
 } from '@memoflow/ui-vue-shadcn';
 import { Target, ArrowRight } from '@lucide/vue';
-import type { GoalProgressItem } from '@memoflow/contracts/dashboard';
+import type { GoalHomeProgressItem } from '@memoflow/contracts/goal';
 
 withDefaults(
   defineProps<{
-    goals: GoalProgressItem[];
+    goals: GoalHomeProgressItem[];
     loading?: boolean;
   }>(),
   { loading: false },
@@ -40,10 +39,10 @@ const { t } = useI18n();
     <CardHeader class="pb-2 px-4 pt-4 flex flex-row items-center justify-between">
       <CardTitle class="text-sm font-medium text-foreground flex items-center gap-2">
         <Target class="w-4 h-4 text-muted-foreground" />
-        {{ t('dashboard.goalProgress.title') }}
+        {{ t('goal.homeProgress.title') }}
       </CardTitle>
       <Button variant="ghost" size="sm" class="h-7 text-xs" @click="$emit('view-all')">
-        {{ t('dashboard.viewAll') }}
+        {{ t('goal.homeProgress.viewAll') }}
         <ArrowRight class="w-3 h-3 ml-1" />
       </Button>
     </CardHeader>
@@ -81,7 +80,7 @@ const { t } = useI18n();
         </div>
       </template>
       <p v-else class="py-6 text-center text-xs text-muted-foreground">
-        {{ t('dashboard.goalProgress.empty') }}
+        {{ t('goal.homeProgress.empty') }}
       </p>
     </CardContent>
   </Card>

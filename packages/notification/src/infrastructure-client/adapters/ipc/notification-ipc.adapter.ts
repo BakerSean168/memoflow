@@ -40,6 +40,18 @@ export class NotificationIpcAdapter implements INotificationApiClient {
     return this.ipcClient.invoke(NotificationChannels.MARK_READ, id);
   }
 
+  async markAsUnread(id: string): Promise<Result<NotificationClientDTO>> {
+    return this.ipcClient.invoke(NotificationChannels.MARK_UNREAD, id);
+  }
+
+  async archiveNotification(id: string): Promise<Result<NotificationClientDTO>> {
+    return this.ipcClient.invoke(NotificationChannels.ARCHIVE, id);
+  }
+
+  async restoreNotification(id: string): Promise<Result<NotificationClientDTO>> {
+    return this.ipcClient.invoke(NotificationChannels.RESTORE, id);
+  }
+
   async markAllAsRead(): Promise<Result<{ count: number }>> {
     return this.ipcClient.invoke(NotificationChannels.MARK_ALL_READ);
   }

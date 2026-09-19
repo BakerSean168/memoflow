@@ -201,6 +201,11 @@ export function createGovernanceElectronModule(
         );
         installed.push(GovernanceChannels.RULE_DELETE);
 
+        ipcMain.handle(GovernanceChannels.RULE_BUNDLE_EXPORT, () =>
+          withAuthenticatedValue(ctx, async () => controller.exportRuleBundle()),
+        );
+        installed.push(GovernanceChannels.RULE_BUNDLE_EXPORT);
+
         ipcMain.handle(
           GovernanceChannels.RULE_REVISIONS,
           (_event, payload: GetRuleRevisionsQueryInput) => controller.getRevisions(payload),

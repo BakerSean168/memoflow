@@ -9,7 +9,7 @@
  * It intentionally does not claim Electron runtime coverage.
  */
 import { expect, test, type Page, type Route } from '@playwright/test';
-import { createMockUserSetting } from '@memoflow/contracts/mocks';
+import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
 import { TIMEOUT_CONFIG, WEB_CONFIG } from '../config';
 import { registerAndLogin } from '../helpers/testHelpers';
 
@@ -69,52 +69,23 @@ async function installMastraOpenChatMocks(page: Page): Promise<MastraOpenChatCap
   const messages: RuntimeMessage[] = [];
   let hasConversation = false;
 
-  await page.route('**/api/v1/settings', async (route) => {
+  await page.route('**/api/v1/settings/preferences', async (route) => {
     if (route.request().method() !== 'GET') {
       await route.continue();
       return;
     }
     await fulfillJson(
       route,
-      createMockUserSetting({
-        preferences: {
-          appearance: { theme: 'light' },
-          locale: {
-            language: 'en-US',
-            timezone: 'Asia/Shanghai',
-            dateFormat: 'YYYY-MM-DD',
-            timeFormat: '24H',
-            currency: 'CNY',
-            weekStartsOn: 1,
-          },
-          workflow: {
-            autoSave: true,
-            autoSaveInterval: 30000,
-            confirmBeforeDelete: true,
-            defaultTaskView: 'LIST',
-            defaultGoalView: 'LIST',
-            defaultScheduleView: 'WEEK',
-          },
-          privacy: {
-            profileVisibility: 'PRIVATE',
-            showOnlineStatus: false,
-            shareUsageData: false,
-            allowSearchByEmail: false,
-            allowSearchByPhone: false,
-          },
-          notification: {
-            email: false,
-            push: false,
-            inApp: true,
-            sound: false,
-            useCustomNotification: false,
-          },
-          shortcuts: { enabled: true, custom: {} },
-          experimental: { enabled: false, features: [] },
-          ui: { startPage: 'dashboard', sidebarCollapsed: false },
-          ai: {},
+      {
+        ...createDefaultUserPreferenceProfile(),
+        presentation: { theme: 'light', language: 'en-US' },
+        regional: {
+          timeZone: 'Asia/Shanghai',
+          dateStyle: 'medium',
+          timeStyle: '24h',
+          weekStartsOn: 1,
         },
-      }),
+      },
     );
   });
 
@@ -125,9 +96,9 @@ async function installMastraOpenChatMocks(page: Page): Promise<MastraOpenChatCap
           id: providerId,
           identityId: 'IdentityId_550e8400-e29b-41d4-a716-446655440000',
           name: 'E2E OpenAI',
-          providerType: 'openai_compatible',
+          providerDefinitionId: 'openai',
           baseUrl: 'https://api.openai.com/v1',
-          apiKeyMasked: 'sk-****e2e',
+          credentialRef: 'credential-e2e',
           defaultModel: modelId,
           availableModels: [{ id: modelId, name: modelId }],
           isActive: true,
@@ -343,7 +314,7 @@ test.describe('AI Mastra open-chat product cutover', () => {
     expect(capture.historyRequests.length).toBeGreaterThanOrEqual(1);
   });
 
-  test('[P0] reload restores the authoritative Mastra transcript instead of legacy AiMessage history', async ({
+  test('[P0] reload restores the authoritative Mastra transcript instead of legacy persisted history', async ({
     page,
   }) => {
     const capture = await bootstrapMastraOpenChat(page);

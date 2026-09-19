@@ -4,10 +4,6 @@ import { describe, expect, it } from 'vitest';
 
 describe('status presentation ownership', () => {
   const dir = __dirname;
-  const schedule = readFileSync(
-    resolve(dir, '../../modules/schedule/utils/schedule-presentation.ts'),
-    'utf8',
-  );
   const goalDetail = readFileSync(
     resolve(dir, '../../modules/goal/views/GoalDetailView.vue'),
     'utf8',
@@ -17,17 +13,12 @@ describe('status presentation ownership', () => {
     'utf8',
   );
 
-  it('keeps Scheduler status translation in the schedule presentation boundary', () => {
-    expect(schedule).toMatch(/export function getStatusLabel\b/);
-    expect(schedule).toContain('ScheduleTaskStatus');
-    expect(schedule).toContain('schedule.taskStatus.paused');
-    expect(schedule).toContain('schedule.taskStatus.failed');
-  });
 
   it('keeps Goal lifecycle status presentation local without resurrecting Draft/Archived mapping logic', () => {
     expect(goalDetail).toContain('goal.status');
-    expect(goalRow).toContain('goal.list.overdue');
+    expect(goalRow).toContain('goal.list.pastTarget');
     expect(goalRow).toContain("props.goal.status === 'Completed'");
+    expect(goalRow).toContain("props.goal.status === 'Abandoned'");
     for (const source of [goalDetail, goalRow]) {
       expect(source).not.toMatch(/getStatusLabel\b/);
       expect(source).not.toContain('goal.cards.goalStatus.draft');

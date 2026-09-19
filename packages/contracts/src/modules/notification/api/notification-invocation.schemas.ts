@@ -41,6 +41,24 @@ export const MarkNotificationReadInvocationSchema = z.object({
 });
 export type MarkNotificationReadInvocation = z.infer<typeof MarkNotificationReadInvocationSchema>;
 
+/** POST /:id/unread — mark a notification as unread. */
+export const MarkNotificationUnreadInvocationSchema = z.object({
+  params: NotificationIdParamsSchema,
+});
+export type MarkNotificationUnreadInvocation = z.infer<typeof MarkNotificationUnreadInvocationSchema>;
+
+/** POST /:id/archive — archive a notification. */
+export const ArchiveNotificationInvocationSchema = z.object({
+  params: NotificationIdParamsSchema,
+});
+export type ArchiveNotificationInvocation = z.infer<typeof ArchiveNotificationInvocationSchema>;
+
+/** POST /:id/restore — restore an archived notification. */
+export const RestoreNotificationInvocationSchema = z.object({
+  params: NotificationIdParamsSchema,
+});
+export type RestoreNotificationInvocation = z.infer<typeof RestoreNotificationInvocationSchema>;
+
 /** POST /dead-letters/:id/replay — replay a dead-letter operation (id-only command). 重发死信操作。 */
 export const ReplayDeadLetterInvocationSchema = z.object({
   params: DeadLetterIdParamsSchema,

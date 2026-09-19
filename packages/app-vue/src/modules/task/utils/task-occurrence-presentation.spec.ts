@@ -1,6 +1,6 @@
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
-import type { TaskInstanceClientDTO, TaskTemplateClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
 import enTask from '../../../locales/en-US/task';
 import { startOfDayMs } from '../../../shared/utils/product-time';
 import {
@@ -23,42 +23,41 @@ const now = day + 12 * 60 * 60_000;
 
 function occurrence(
   id: string,
-  overrides: Partial<TaskInstanceClientDTO> = {},
-): TaskInstanceClientDTO {
+  overrides: Partial<TaskOccurrenceClientDTO> = {},
+): TaskOccurrenceClientDTO {
   return {
-    id,
-    templateId: 'plan-a',
-    identityId: 'identity-a',
-    instanceDate: day,
-    timeConfig: {
-      timeType: 'TimePoint',
-      startDate: day,
-      timePoint: 9 * 60,
-      timeRange: null,
+    id: id as TaskOccurrenceClientDTO['id'],
+    planId: 'plan-a' as TaskOccurrenceClientDTO['planId'],
+    identityId: 'identity-a' as TaskOccurrenceClientDTO['identityId'],
+    occurrenceKey: `plan-a:${id}`,
+    scheduleSnapshot: {
+      date: '2026-08-28' as TaskOccurrenceClientDTO['scheduleSnapshot']['date'],
+      timing: { kind: 'At', time: '09:00' },
     },
-    importance: 'Moderate',
+    importanceSnapshot: 'Moderate',
     status: 'Pending',
+    actualStartAt: null,
+    result: null,
+    checklistState: [],
+    dueAt: day + 9 * 60 * 60_000,
     isOverdue: false,
-    actualStartTime: null,
-    actualEndTime: null,
-    comment: null,
     version: 1,
     createdAt: day,
     updatedAt: day,
     deletedAt: null,
     ...overrides,
-  } as TaskInstanceClientDTO;
+  };
 }
 
 describe('task occurrence presentation', () => {
   it('places today and overdue open occurrences on Today while future occurrences stay Upcoming', () => {
     const today = occurrence('today');
-    const yesterdayOpen = occurrence('yesterday', { instanceDate: day - 86_400_000 });
+    const yesterdayOpen = occurrence('yesterday', { dueAt: day - 86_400_000 + 9 * 60 * 60_000 });
     const yesterdayCompleted = occurrence('done', {
-      instanceDate: day - 86_400_000,
+      dueAt: day - 86_400_000 + 9 * 60 * 60_000,
       status: 'Completed',
     });
-    const tomorrow = occurrence('tomorrow', { instanceDate: day + 86_400_000 });
+    const tomorrow = occurrence('tomorrow', { dueAt: day + 86_400_000 + 9 * 60 * 60_000 });
 
     expect(isTaskOccurrenceOnSurface(today, 'today', now)).toBe(true);
     expect(isTaskOccurrenceOnSurface(yesterdayOpen, 'today', now)).toBe(true);
@@ -70,12 +69,11 @@ describe('task occurrence presentation', () => {
   it('derives due time and overdue status from the occurrence time config', () => {
     const morning = occurrence('morning');
     const evening = occurrence('evening', {
-      timeConfig: {
-        timeType: 'TimeRange',
-        startDate: day,
-        timePoint: null,
-        timeRange: { start: 17 * 60, end: 18 * 60 },
+      scheduleSnapshot: {
+        date: '2026-08-28' as TaskOccurrenceClientDTO['scheduleSnapshot']['date'],
+        timing: { kind: 'Window', start: '17:00', end: '18:00' },
       },
+      dueAt: day + 18 * 60 * 60_000,
     });
 
     expect(getTaskOccurrenceDueAt(morning)).toBe(day + 9 * 60 * 60_000);
@@ -85,31 +83,30 @@ describe('task occurrence presentation', () => {
   });
 
   it('keeps repeat position scoped to the same plan and honors durable instance count', () => {
-    const first = occurrence('a', { instanceDate: day });
-    const second = occurrence('b', { instanceDate: day + 86_400_000 });
+    const first = occurrence('a', { dueAt: day + 9 * 60 * 60_000 });
+    const second = occurrence('b', { dueAt: day + 86_400_000 + 9 * 60 * 60_000 });
     const other = occurrence('c', {
-      templateId: 'plan-b' as TaskInstanceClientDTO['templateId'],
+      planId: 'plan-b' as TaskOccurrenceClientDTO['planId'],
     });
 
     expect(
       getTaskOccurrencePosition(second, [other, second, first], {
-        instanceCount: 8,
-      } as Pick<TaskTemplateClientDTO, 'instanceCount'>),
+        occurrenceCount: 8,
+      } as Pick<TaskPlanClientDTO, 'occurrenceCount'>),
     ).toEqual({ position: 2, total: 8 });
   });
 
   it('sorts by time, status, or plan title without mutating source input', () => {
     const later = occurrence('later', {
-      templateId: 'plan-z' as TaskInstanceClientDTO['templateId'],
-      timeConfig: {
-        timeType: 'TimePoint',
-        startDate: day,
-        timePoint: 15 * 60,
-        timeRange: null,
+      planId: 'plan-z' as TaskOccurrenceClientDTO['planId'],
+      scheduleSnapshot: {
+        date: '2026-08-28' as TaskOccurrenceClientDTO['scheduleSnapshot']['date'],
+        timing: { kind: 'At', time: '15:00' },
       },
+      dueAt: day + 15 * 60 * 60_000,
     });
     const completed = occurrence('completed', {
-      templateId: 'plan-a' as TaskInstanceClientDTO['templateId'],
+      planId: 'plan-a' as TaskOccurrenceClientDTO['planId'],
       status: 'Completed',
     });
     const source = [later, completed];

@@ -5,7 +5,6 @@ export {
   GOAL_SERVICE_KEY,
   LABEL_SERVICE_KEY,
   NOTIFICATION_SERVICE_KEY,
-  REMINDER_SERVICE_KEY,
   REPOSITORY_SERVICE_KEY,
   RULE_SERVICE_KEY,
   SCHEDULE_SERVICE_KEY,
@@ -15,7 +14,6 @@ export {
   AI_RUNTIME_USAGE_KEY,
   AI_WORKFLOW_RUNTIME_KEY,
   TASK_SERVICE_KEY,
-  DASHBOARD_SERVICE_KEY,
   DESKTOP_AUTH_API_KEY,
   DESKTOP_BRIDGE_KEY,
   PROFILE_LOCK_HANDLER_KEY,
@@ -44,21 +42,13 @@ export { useDesktopWindowControls } from './shared/composables/useDesktopWindowC
 // ── Router ──
 export { createAppRouter } from './router';
 
-// ── Dashboard adapters ──
-export {
-  createDashboardIpcAdapter,
-  createDashboardHttpAdapter,
-} from './modules/dashboard/adapters';
-
 // ── Stores (consumed by app containers for DI/provide) ──
 export { useAuthenticationStore } from './modules/authentication';
 export { useAccountStore } from './modules/account';
 export { useGoalStore } from './modules/goal';
 export { useTaskStore } from './modules/task';
 export { useScheduleStore } from './modules/schedule';
-export { useReminderStore } from './modules/reminder';
 export { useNotificationStore } from './modules/notification';
-export { useUserSettingStore } from './modules/setting';
 export { useGovernanceStore } from './modules/governance';
 export { usePresentationPreferenceStore } from './modules/setting';
 

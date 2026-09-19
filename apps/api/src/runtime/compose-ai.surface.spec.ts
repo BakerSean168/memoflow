@@ -32,18 +32,25 @@ describe('AI API runtime composer surface', () => {
   it('server.ts composes AI with owner-domain mutation ports plus read-only Planner/Notification capabilities', () => {
     expect(server).toContain("from './runtime/compose-ai'");
     expect(server).toMatch(
-      /composeAI\(\{\s*db: prisma,\s*repositoryApiPort: repositoryApiModule\.getApplicationPort\(\),\s*repositoryStorageBaseDir,\s*goalApplicationPort: goalComposed\.applicationPort,\s*taskApplicationPort: taskComposed\.applicationPort,\s*reminderApplicationPort: reminderComposed\.executorReminderPort,\s*routineCommandPort: reminderComposed\.routineCommandPort,\s*scheduleRepository: scheduleApiModule\.repositories\.scheduleRepository,\s*notificationRepository: notificationApiModule\.repositories\.notificationRepository,\s*labelService,\s*mastraStorage: \{ kind: 'postgres', connectionString: env\.DATABASE_URL \},\s*\}/,
+      /composeAI\(\{\s*db: prisma,\s*repositoryApiPort: repositoryApiModule\.getApplicationPort\(\),\s*repositoryStorageBaseDir,\s*goalApplicationPort: goalComposed\.applicationPort,\s*taskApplicationPort: taskComposed\.applicationPort,\s*taskDashboardReadPort,\s*goalKnowledgeService,\s*knowledgeDocumentRefResolver: repositoryApiModule\.knowledgeDocumentRefResolver,\s*routineCommandPort: routineComposed\.routineCommandPort,\s*scheduleEventApi: scheduleApiModule\.eventApi,\s*notificationInbox: notificationApiModule\.inbox,\s*scheduleRepository: scheduleApiModule\.repositories\.scheduleRepository,\s*userTimeContextPort: settingApiModule\.userTimeContextPort,\s*labelService,\s*mastraStorage: \{ kind: 'postgres', connectionString: env\.DATABASE_URL \},\s*\}/,
     );
-    expect(server).toContain('.register(aiApiModule)');
-    expect(server).toContain('routineCommandPort: reminderComposed.routineCommandPort');
-    expect(server).toContain('scheduleRepository: scheduleApiModule.repositories.scheduleRepository');
-    expect(server).toContain('notificationRepository: notificationApiModule.repositories.notificationRepository');
+    expect(server).toContain('.register(aiComposed.module)');
+    expect(server).toContain('goalKnowledgeService,');
+    expect(server).toContain(
+      'knowledgeDocumentRefResolver: repositoryApiModule.knowledgeDocumentRefResolver',
+    );
+    expect(server).toContain('routineCommandPort: routineComposed.routineCommandPort');
+    expect(server).toContain(
+      'scheduleRepository: scheduleApiModule.repositories.scheduleRepository',
+    );
+    expect(server).toContain('scheduleEventApi: scheduleApiModule.eventApi');
+    expect(server).toContain('notificationInbox: notificationApiModule.inbox');
     expect(server).not.toContain('schedulerRepository:');
   });
 
-  it('keeps the AI registration between Task and Goal (taskComposed.module → aiApiModule → goalComposed.module)', () => {
+  it('keeps the AI registration between Task and Goal (taskComposed.module → aiComposed.module → goalComposed.module)', () => {
     const taskIndex = server.indexOf('.register(taskComposed.module)');
-    const aiIndex = server.indexOf('.register(aiApiModule)');
+    const aiIndex = server.indexOf('.register(aiComposed.module)');
     const goalIndex = server.indexOf('.register(goalComposed.module)');
     expect(taskIndex).toBeGreaterThan(-1);
     expect(aiIndex).toBeGreaterThan(-1);
@@ -55,7 +62,6 @@ describe('AI API runtime composer surface', () => {
   it('server.ts feeds the composed goal/task/reminder application ports into composeAI and registers their .module handles', () => {
     expect(server).toContain('goalComposed.applicationPort');
     expect(server).toContain('taskComposed.applicationPort');
-    expect(server).toContain('reminderComposed.executorReminderPort');
     expect(server).toContain('.register(taskComposed.module)');
     expect(server).toContain('.register(goalComposed.module)');
     expect(server).not.toMatch(/create(Goal|Task|Reminder)PrismaModule/);
@@ -94,7 +100,7 @@ describe('AI API runtime composer surface', () => {
       'AIConversationPrismaRepository',
       'AIProviderConfigPrismaRepository',
       'AIKnowledgeIndexPrismaRepository',
-      'AIExecutionLogPrismaAdapter',
+      'AIExecutionRecordPrismaAdapter',
       'AgentCheckpointPrismaAdapter',
       'LangGraphCheckpointPrismaAdapter',
       'AIEvaluationReportFileAdapter',

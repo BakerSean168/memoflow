@@ -1,13 +1,22 @@
 import type { Instant, Ymd } from '@memoflow/contracts/primitives';
 import type {
   Clock,
-  PartialTimeStyle,
+  PartialTimePresentationStyle,
+  TimeContext,
   TimeDisplaySlot,
   TimeEngine,
-  TimeStyle,
+  TimePresentationStyle,
 } from '../types';
-import { mergeTimeStyle } from '../style/default-style';
+import { mergeTimePresentationStyle } from '../style/default-style';
 import { isFiniteInstantMs } from '../codec/brand';
+import {
+  formatInstantDate,
+  formatInstantDateTime,
+  formatInstantDateTimeSeconds,
+  formatInstantHm,
+  formatInstantSlot,
+  formatYmdForDisplay,
+} from './intl-format';
 import {
   splitDurationMs,
   splitDurationMinutes,
@@ -16,139 +25,162 @@ import {
 } from './duration';
 
 export interface FormatApi {
-  hm(instant: Instant | number | null | undefined, styleOverride?: PartialTimeStyle): string;
-  date(instant: Instant | number | null | undefined, styleOverride?: PartialTimeStyle): string;
-  dateTime(instant: Instant | number | null | undefined, styleOverride?: PartialTimeStyle): string;
-  /** Absolute `yyyy-MM-dd HH:mm:ss` (common detail timestamps). */
+  hm(
+    instant: Instant | number | null | undefined,
+    styleOverride?: PartialTimePresentationStyle,
+  ): string;
+  date(
+    instant: Instant | number | null | undefined,
+    styleOverride?: PartialTimePresentationStyle,
+  ): string;
+  dateTime(
+    instant: Instant | number | null | undefined,
+    styleOverride?: PartialTimePresentationStyle,
+  ): string;
+  /** Stable `yyyy-MM-dd HH:mm:ss` rendered in TimeContext.timeZone. */
   dateTimeSeconds(
     instant: Instant | number | null | undefined,
-    styleOverride?: PartialTimeStyle,
+    styleOverride?: PartialTimePresentationStyle,
   ): string;
-  ymdDisplay(ymd: Ymd | string | null | undefined, styleOverride?: PartialTimeStyle): string;
+  ymdDisplay(
+    ymd: Ymd | string | null | undefined,
+    styleOverride?: PartialTimePresentationStyle,
+  ): string;
   relative(
     instant: Instant | number | null | undefined,
-    styleOverride?: PartialTimeStyle,
+    styleOverride?: PartialTimePresentationStyle,
   ): string;
   /**
-   * Named product patterns via engine (date-fns tokens). Prefer hm/date/dateTime;
-   * use pattern only when a fixed chart/export token is required.
+   * Fixed chart/export escape hatch using the registered date-fns token patterns.
+   * Current callers use numeric date/time fields, `MMM d`, and explicit `X`/`x`
+   * offsets. Ordinary product UI must prefer semantic hm/date/dateTime/slot
+   * formatters; this is not a locale or named-timezone presentation API.
    */
   pattern(
     instant: Instant | number | null | undefined,
     pattern: string,
-    styleOverride?: PartialTimeStyle,
+    styleOverride?: PartialTimePresentationStyle,
   ): string;
-  /** Named calendar chrome slot (P6) — Style.display.period* patterns. */
+  /** Named semantic calendar chrome slot rendered through Intl. */
   slot(
     name: TimeDisplaySlot,
     instant: Instant | number | null | undefined,
-    styleOverride?: PartialTimeStyle,
+    styleOverride?: PartialTimePresentationStyle,
   ): string;
-  /** Duration from milliseconds (P4) — arithmetic sole; optional L4 dictionary labels. */
   durationMs(
     ms: number | null | undefined,
     options?: {
-      labels?: { hours?: (n: number) => string; minutes?: (n: number) => string; seconds?: (n: number) => string; join?: string };
-      styleOverride?: PartialTimeStyle;
+      labels?: {
+        hours?: (n: number) => string;
+        minutes?: (n: number) => string;
+        seconds?: (n: number) => string;
+        join?: string;
+      };
+      styleOverride?: PartialTimePresentationStyle;
     },
   ): string;
-  /** Duration from total minutes (P4). */
   durationMinutes(
     minutes: number | null | undefined,
     options?: {
-      labels?: { hours?: (n: number) => string; minutes?: (n: number) => string; join?: string };
-      styleOverride?: PartialTimeStyle;
+      labels?: {
+        hours?: (n: number) => string;
+        minutes?: (n: number) => string;
+        join?: string;
+      };
+      styleOverride?: PartialTimePresentationStyle;
     },
   ): string;
-  /** Split helpers for L4 dictionaries. */
   splitDurationMs(ms: number): DurationParts;
   splitDurationMinutes(totalMinutes: number): DurationParts;
-  /** Lifted from app-vue sole: local HH:mm from epoch ms */
-  localHHmm(ms: number | null | undefined, styleOverride?: PartialTimeStyle): string;
-  /** Lifted: Date → YYYY-MM-DD local */
-  dateToYmd(date: Date | null | undefined, styleOverride?: PartialTimeStyle): string;
-  /** Lifted: hour+minute → HH:mm */
+  /** @deprecated TIME-1206: use hm() through an explicit facade. */
   hhmmParts(hour: number, minute: number): string;
-  /** Lifted: hour → HH:00 */
   hourLabel(hour: number): string;
   padTwoDigits(n: number): string;
 }
 
-function resolveStyle(base: TimeStyle, override?: PartialTimeStyle): TimeStyle {
-  return mergeTimeStyle(base, override);
+function resolveStyle(
+  base: TimePresentationStyle,
+  override?: PartialTimePresentationStyle,
+): TimePresentationStyle {
+  return mergeTimePresentationStyle(base, override);
 }
 
-function emptyOr(
-  value: Instant | number | null | undefined,
-  style: TimeStyle,
-): Instant | null {
-  if (value == null || !isFiniteInstantMs(value)) {
-    return null;
-  }
+function emptyOr(value: Instant | number | null | undefined): Instant | null {
+  if (value == null || !isFiniteInstantMs(value)) return null;
   return value as Instant;
 }
 
+function formatInstantOrEmpty(
+  value: Instant | null,
+  empty: string,
+  format: (instant: Instant) => string,
+): string {
+  if (value == null) return empty;
+  // Preserve the engine's existing empty-string result for finite values
+  // outside JavaScript Date's representable range.
+  if (Number.isNaN(new Date(value).getTime())) return '';
+  return format(value);
+}
+
 export function createFormat(
-  style: TimeStyle,
+  presentation: TimePresentationStyle,
+  context: TimeContext,
   engine: TimeEngine,
   clock: Clock,
 ): FormatApi {
   return {
     hm(instant, styleOverride) {
-      const s = resolveStyle(style, styleOverride);
-      const i = emptyOr(instant, s);
-      if (i == null) return s.empty.display;
-      return engine.formatHm(i, s.display.hm);
+      const style = resolveStyle(presentation, styleOverride);
+      return formatInstantOrEmpty(emptyOr(instant), style.empty.display, (value) =>
+        formatInstantHm(value, context, style),
+      );
     },
 
     date(instant, styleOverride) {
-      const s = resolveStyle(style, styleOverride);
-      const i = emptyOr(instant, s);
-      if (i == null) return s.empty.display;
-      return engine.formatDate(i, s.locale, s.display.date);
+      const style = resolveStyle(presentation, styleOverride);
+      return formatInstantOrEmpty(emptyOr(instant), style.empty.display, (value) =>
+        formatInstantDate(value, context, style),
+      );
     },
 
     dateTime(instant, styleOverride) {
-      const s = resolveStyle(style, styleOverride);
-      const i = emptyOr(instant, s);
-      if (i == null) return s.empty.display;
-      return engine.formatDateTime(i, s.locale, s.display.dateTime);
+      const style = resolveStyle(presentation, styleOverride);
+      return formatInstantOrEmpty(emptyOr(instant), style.empty.display, (value) =>
+        formatInstantDateTime(value, context, style),
+      );
     },
 
     dateTimeSeconds(instant, styleOverride) {
-      const s = resolveStyle(style, styleOverride);
-      const i = emptyOr(instant, s);
-      if (i == null) return s.empty.display;
-      return engine.formatPattern(i, 'yyyy-MM-dd HH:mm:ss');
+      const style = resolveStyle(presentation, styleOverride);
+      return formatInstantOrEmpty(emptyOr(instant), style.empty.display, (value) =>
+        formatInstantDateTimeSeconds(value, context.timeZone),
+      );
     },
 
     pattern(instant, pattern, styleOverride) {
-      const s = resolveStyle(style, styleOverride);
-      const i = emptyOr(instant, s);
-      if (i == null) return s.empty.display;
-      return engine.formatPattern(i, pattern);
+      const style = resolveStyle(presentation, styleOverride);
+      return formatInstantOrEmpty(emptyOr(instant), style.empty.display, (value) =>
+        engine.formatPattern(value, pattern, context.timeZone),
+      );
     },
 
     slot(name, instant, styleOverride) {
-      const s = resolveStyle(style, styleOverride);
-      const i = emptyOr(instant, s);
-      if (i == null) return s.empty.display;
-      const pattern = s.display[name];
-      return engine.formatPattern(i, pattern);
+      const style = resolveStyle(presentation, styleOverride);
+      return formatInstantOrEmpty(emptyOr(instant), style.empty.display, (value) =>
+        formatInstantSlot(name, value, context, style),
+      );
     },
 
     durationMs(ms, options) {
-      const s = resolveStyle(style, options?.styleOverride);
-      if (ms == null || !Number.isFinite(ms)) return s.duration.zero;
-      const parts = splitDurationMs(ms);
-      return formatDurationParts(parts, s, options?.labels);
+      const style = resolveStyle(presentation, options?.styleOverride);
+      if (ms == null || !Number.isFinite(ms)) return style.duration.zero;
+      return formatDurationParts(splitDurationMs(ms), style, options?.labels);
     },
 
     durationMinutes(minutes, options) {
-      const s = resolveStyle(style, options?.styleOverride);
-      if (minutes == null || !Number.isFinite(minutes)) return s.duration.zero;
-      const parts = splitDurationMinutes(minutes);
-      return formatDurationParts(parts, s, options?.labels);
+      const style = resolveStyle(presentation, options?.styleOverride);
+      if (minutes == null || !Number.isFinite(minutes)) return style.duration.zero;
+      return formatDurationParts(splitDurationMinutes(minutes), style, options?.labels);
     },
 
     splitDurationMs(ms) {
@@ -160,62 +192,35 @@ export function createFormat(
     },
 
     ymdDisplay(ymd, styleOverride) {
-      const s = resolveStyle(style, styleOverride);
-      if (ymd == null || ymd === '') return s.empty.display;
-      // Local calendar day — avoid UTC shift via T00:00:00.
-      const d = new Date(`${ymd}T00:00:00`);
-      if (Number.isNaN(d.getTime())) return s.empty.unknown;
-      try {
-        return d.toLocaleDateString(s.locale, {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        });
-      } catch {
-        return String(ymd);
-      }
+      const style = resolveStyle(presentation, styleOverride);
+      if (ymd == null || ymd === '') return style.empty.display;
+      return formatYmdForDisplay(ymd, style.locale, style.dateStyle) ?? style.empty.unknown;
     },
 
     relative(instant, styleOverride) {
-      const s = resolveStyle(style, styleOverride);
-      const i = emptyOr(instant, s);
-      if (i == null) return s.empty.display;
-      if (!s.relative.enabled) {
-        return engine.formatDateTime(i, s.locale, s.display.dateTime);
+      const style = resolveStyle(presentation, styleOverride);
+      const value = emptyOr(instant);
+      if (value == null) return style.empty.display;
+      if (Number.isNaN(new Date(value).getTime())) return '';
+      if (!style.relative.enabled) return formatInstantDateTime(value, context, style);
+
+      const delta = clock.now() - value;
+      if (Math.abs(delta) > style.relative.maxAgeMs) {
+        return formatInstantDateTime(value, context, style);
       }
-      const now = clock.now();
-      const delta = now - i;
-      if (Math.abs(delta) > s.relative.maxAgeMs) {
-        return engine.formatDateTime(i, s.locale, s.display.dateTime);
-      }
+
       try {
-        const rtf = new Intl.RelativeTimeFormat(s.locale, {
-          numeric: s.relative.numeric,
+        const rtf = new Intl.RelativeTimeFormat(style.locale, {
+          numeric: style.relative.numeric,
         });
         const abs = Math.abs(delta);
-        const minutes = Math.round(delta / 60_000);
         if (abs < 60_000) return rtf.format(-Math.round(delta / 1000), 'second');
-        if (abs < 3_600_000) return rtf.format(-minutes, 'minute');
+        if (abs < 3_600_000) return rtf.format(-Math.round(delta / 60_000), 'minute');
         if (abs < 86_400_000) return rtf.format(-Math.round(delta / 3_600_000), 'hour');
         return rtf.format(-Math.round(delta / 86_400_000), 'day');
       } catch {
-        return engine.formatDateTime(i, s.locale, s.display.dateTime);
+        return formatInstantDateTime(value, context, style);
       }
-    },
-
-    localHHmm(ms, styleOverride) {
-      return this.hm(ms, styleOverride);
-    },
-
-    dateToYmd(date, styleOverride) {
-      const s = resolveStyle(style, styleOverride);
-      if (!date || !(date instanceof Date) || Number.isNaN(date.getTime())) {
-        return s.empty.input;
-      }
-      const y = date.getFullYear();
-      const m = engine.padTwoDigits(date.getMonth() + 1);
-      const d = engine.padTwoDigits(date.getDate());
-      return `${y}-${m}-${d}`;
     },
 
     hhmmParts(hour, minute) {

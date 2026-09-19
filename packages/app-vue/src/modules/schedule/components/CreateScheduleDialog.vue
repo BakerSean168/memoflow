@@ -42,6 +42,19 @@
             <p class="text-sm text-muted-foreground mt-1">{{ formData.description.length }}/1000</p>
           </div>
 
+          <div class="flex items-center justify-between rounded-lg border p-3">
+            <div>
+              <Label for="all-day" class="text-sm font-medium">{{
+                t('schedule.calendar.allDay')
+              }}</Label>
+            </div>
+            <Switch
+              id="all-day"
+              :model-value="formData.allDay"
+              @update:model-value="formData.allDay = $event"
+            />
+          </div>
+
           <!-- 开始时间 -->
           <div class="grid grid-cols-2 gap-4">
             <div>
@@ -64,7 +77,7 @@
                 <PopoverContent class="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    :selected="parseToDate(formData.startDate)"
+                    :selected="parseToCalendarDate(formData.startDate)"
                     @update:model-value="
                       (d: unknown) =>
                         handleCalendarSelect(d, (v) => {
@@ -75,7 +88,7 @@
                 </PopoverContent>
               </Popover>
             </div>
-            <div>
+            <div v-if="!formData.allDay">
               <Label for="startTime">{{ t('schedule.createDialog.fieldStartTime') }}</Label>
               <div class="flex gap-2 items-center">
                 <Select
@@ -133,7 +146,7 @@
                 <PopoverContent class="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    :selected="parseToDate(formData.endDate)"
+                    :selected="parseToCalendarDate(formData.endDate)"
                     @update:model-value="
                       (d: unknown) =>
                         handleCalendarSelect(d, (v) => {
@@ -144,7 +157,7 @@
                 </PopoverContent>
               </Popover>
             </div>
-            <div>
+            <div v-if="!formData.allDay">
               <Label for="endTime">{{ t('schedule.createDialog.fieldEndTime') }}</Label>
               <div class="flex gap-2 items-center">
                 <Select
@@ -180,35 +193,11 @@
             </div>
           </div>
 
-          <!-- 优先级 -->
-          <div>
-            <Label for="priority">{{ t('schedule.createDialog.fieldPriority') }}</Label>
-            <Select v-model="formData.priority">
-              <SelectTrigger>
-                <SelectValue :placeholder="t('schedule.createDialog.fieldPriorityPlaceholder')" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="0">{{ t('schedule.createDialog.priorityNone') }}</SelectItem>
-                <SelectItem value="1">{{ t('schedule.createDialog.priorityLowest') }}</SelectItem>
-                <SelectItem value="2">{{ t('schedule.createDialog.priorityVeryLow') }}</SelectItem>
-                <SelectItem value="3">{{ t('schedule.createDialog.priorityLow') }}</SelectItem>
-                <SelectItem value="4">{{
-                  t('schedule.createDialog.priorityBelowMedium')
-                }}</SelectItem>
-                <SelectItem value="5">{{ t('schedule.createDialog.priorityMedium') }}</SelectItem>
-                <SelectItem value="6">{{
-                  t('schedule.createDialog.priorityAboveMedium')
-                }}</SelectItem>
-                <SelectItem value="7">{{ t('schedule.createDialog.priorityHigh') }}</SelectItem>
-                <SelectItem value="8">{{ t('schedule.createDialog.priorityVeryHigh') }}</SelectItem>
-                <SelectItem value="9">{{ t('schedule.createDialog.priorityExtreme') }}</SelectItem>
-                <SelectItem value="10">{{ t('schedule.createDialog.priorityHighest') }}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <!-- 自动检测冲突 -->
-          <div class="flex items-center justify-between rounded-lg border p-3">
+          <!-- 自动检测冲突：当前 P4-2301A 仅 Timed range 参与兼容冲突检测 -->
+          <div
+            v-if="!formData.allDay"
+            class="flex items-center justify-between rounded-lg border p-3"
+          >
             <div>
               <Label for="auto-detect-conflicts" class="text-sm font-medium">{{
                 t('schedule.createDialog.autoDetectConflicts')
@@ -317,10 +306,11 @@ import {
 } from '@memoflow/ui-vue-shadcn';
 import { MapPin, X, Loader2, Calendar as CalendarIcon } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
-import { parseToDate } from '../../../shared/utils/parse-to-date';
+import { parseToCalendarDate } from '../../../shared/utils/parse-to-date';
 import { handleCalendarSelect } from '../../../shared/utils/handle-calendar-select';
 import { formatDisplayDate } from '../../../shared/utils/format-display-date';
 import { padTwoDigits } from '../../../shared/utils/pad-two-digits';
+import { getProductTime } from '../../../shared/utils/product-time';
 import type { CalendarEntryClientDTO, CreateScheduleRequest } from '@memoflow/contracts/schedule';
 
 interface Props {
@@ -346,7 +336,7 @@ const submitting = ref(false);
 const submitError = ref('');
 const busy = computed(() => props.loading || submitting.value);
 
-// Residual 1249 / Residual 1252: formatDisplayDate dual retired onto shared sole; formatDateToYMD dual retired onto shared sole (Residual 1252); parseToDate dual retired onto shared sole (Residual 1255); handleCalendarSelect dual retired onto shared sole (Residual 1258).
+// TIME-1206: schedule date fields use canonical Ymd plus CalendarDate boundary adapters; no Date -> Ymd compatibility path remains.
 
 // ── Time picker options ────────────────────────────────────────────────
 /** Residual 1312: hour/minute option pad dual retired onto padTwoDigits sole. */
@@ -390,14 +380,16 @@ const isEditing = ref(false);
 const newAttendee = ref('');
 
 function nowDateStr(): string {
-  return new Date().toISOString().split('T')[0];
+  const time = getProductTime();
+  return String(time.calendar.toYmd(time.now()));
 }
 function nowTimeStr(): string {
-  return new Date().toTimeString().slice(0, 5);
+  const time = getProductTime();
+  return String(time.input.timeValue(time.now()));
 }
 function oneHourLaterTimeStr(): string {
-  const later = new Date(Date.now() + 60 * 60 * 1000);
-  return later.toTimeString().slice(0, 5);
+  const time = getProductTime();
+  return String(time.input.timeValue(time.now() + 60 * 60 * 1000));
 }
 
 const formData = reactive({
@@ -407,7 +399,7 @@ const formData = reactive({
   startTime: nowTimeStr(),
   endDate: nowDateStr(),
   endTime: oneHourLaterTimeStr(),
-  priority: '' as string,
+  allDay: false,
   location: '',
   attendees: [] as string[],
   autoDetectConflicts: true,
@@ -423,7 +415,7 @@ function resetForm() {
   formData.startTime = nowTimeStr();
   formData.endDate = nowDateStr();
   formData.endTime = oneHourLaterTimeStr();
-  formData.priority = '';
+  formData.allDay = false;
   formData.location = '';
   formData.attendees = [];
   formData.autoDetectConflicts = true;
@@ -455,10 +447,28 @@ function removeAttendee(index: number) {
 
 async function handleSubmit() {
   if (busy.value) return;
-  const startTimestamp = new Date(`${formData.startDate}T${formData.startTime}`).getTime();
-  const endTimestamp = new Date(`${formData.endDate}T${formData.endTime}`).getTime();
+  const time = getProductTime();
+  const startDate = time.input.parseDateValue(formData.startDate);
+  const endDate = time.input.parseDateValue(formData.endDate);
+  if (startDate == null || endDate == null) {
+    alert(t('schedule.confirm.endBeforeStart'));
+    return;
+  }
 
-  if (startTimestamp >= endTimestamp) {
+  const range: CreateScheduleRequest['range'] | null = formData.allDay
+    ? {
+        kind: 'AllDay',
+        start: startDate,
+        end: startDate === endDate ? null : endDate,
+      }
+    : (() => {
+        const start = time.input.combine(startDate, formData.startTime);
+        const end = time.input.combine(endDate, formData.endTime);
+        if (start == null || end == null || start >= end) return null;
+        return { kind: 'Timed' as const, start, end };
+      })();
+
+  if (range == null || (range.kind === 'AllDay' && range.end != null && range.start > range.end)) {
     alert(t('schedule.confirm.endBeforeStart'));
     return;
   }
@@ -469,13 +479,10 @@ async function handleSubmit() {
     const saved = await props.onSubmit({
       name: formData.title,
       description: formData.description || undefined,
-      startTime: startTimestamp,
-      endTime: endTimestamp,
-      duration: endTimestamp - startTimestamp,
-      priority: formData.priority ? Number(formData.priority) : undefined,
+      range,
       location: formData.location || undefined,
       attendees: formData.attendees.length > 0 ? formData.attendees : undefined,
-      autoDetectConflicts: formData.autoDetectConflicts,
+      autoDetectConflicts: range.kind === 'Timed' && formData.autoDetectConflicts,
     });
     if (saved) {
       emit('update:modelValue', false);
@@ -497,17 +504,20 @@ watch(
       isEditing.value = true;
       formData.title = schedule.title;
       formData.description = schedule.description || '';
-      formData.priority = String(schedule.priority || '');
       formData.location = schedule.location || '';
       formData.attendees = schedule.attendees ? [...schedule.attendees] : [];
-
-      const startDate = new Date(schedule.startTime);
-      const endDate = new Date(schedule.endTime);
-
-      formData.startDate = startDate.toISOString().split('T')[0];
-      formData.startTime = startDate.toTimeString().slice(0, 5);
-      formData.endDate = endDate.toISOString().split('T')[0];
-      formData.endTime = endDate.toTimeString().slice(0, 5);
+      const time = getProductTime();
+      if (schedule.range.kind === 'AllDay') {
+        formData.allDay = true;
+        formData.startDate = schedule.range.start;
+        formData.endDate = schedule.range.end ?? schedule.range.start;
+      } else {
+        formData.allDay = false;
+        formData.startDate = time.input.dateValue(schedule.range.start);
+        formData.startTime = time.input.timeValue(schedule.range.start);
+        formData.endDate = time.input.dateValue(schedule.range.end);
+        formData.endTime = time.input.timeValue(schedule.range.end);
+      }
       syncTimeRefs();
     } else {
       isEditing.value = false;
@@ -523,13 +533,11 @@ watch(
     if (!value) {
       resetForm();
     } else if (!props.schedule) {
-      const now = new Date();
-      const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
-
-      formData.startDate = now.toISOString().split('T')[0];
-      formData.startTime = now.toTimeString().slice(0, 5);
-      formData.endDate = oneHourLater.toISOString().split('T')[0];
-      formData.endTime = oneHourLater.toTimeString().slice(0, 5);
+      formData.startDate = nowDateStr();
+      formData.startTime = nowTimeStr();
+      formData.endDate = nowDateStr();
+      formData.endTime = oneHourLaterTimeStr();
+      formData.allDay = false;
       syncTimeRefs();
     }
   },

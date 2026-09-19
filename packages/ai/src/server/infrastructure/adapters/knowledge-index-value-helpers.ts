@@ -74,7 +74,7 @@ export function scoreIndexedResource(
   const tokens = new Set(tokenize(trimmedQuery));
   const keywordSet = new Set(resource.keywords.map((keyword) => keyword.toLowerCase()));
   const haystack =
-    `${resource.title ?? ''} ${resource.resourcePath} ${resource.summary} ${resource.keywords.join(' ')}`.toLowerCase();
+    `${resource.title ?? ''} ${resource.sourcePath} ${resource.summary} ${resource.keywords.join(' ')}`.toLowerCase();
   let score = 0;
 
   for (const token of tokens) {
@@ -90,7 +90,7 @@ export function scoreIndexedResource(
   if ((resource.title ?? '').toLowerCase().includes(trimmedQuery)) {
     score += 3;
   }
-  if (resource.resourcePath.toLowerCase().includes(trimmedQuery)) {
+  if (resource.sourcePath.toLowerCase().includes(trimmedQuery)) {
     score += 2;
   }
   if (resource.summary.toLowerCase().includes(trimmedQuery)) {

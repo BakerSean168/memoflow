@@ -3,7 +3,6 @@ import type { PrismaClient } from '@memoflow/database';
 import type { RepositoryApplicationPort } from '@memoflow/repository';
 import type { GoalApplicationPort } from '@memoflow/goal';
 import type { TaskApplicationPort } from '@memoflow/task';
-import type { ReminderApplicationPort } from '@memoflow/reminder';
 
 vi.mock('@memoflow/ai', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@memoflow/ai')>();
@@ -15,11 +14,9 @@ vi.mock('@memoflow/ai', async (importOriginal) => {
     createAIModule: vi.fn(),
     createAIPrismaRepositories: vi.fn(),
     createMastraStorage: vi.fn(() => ({ tag: 'mastra-storage' })),
-    ConversationTranscriptBootstrapSource: vi.fn(
-      function ConversationTranscriptBootstrapSourceMock() {
-        return { tag: 'transcript-bootstrap-source' };
-      },
-    ),
+    ConversationShellSource: vi.fn(function ConversationShellSourceMock() {
+      return { tag: 'conversation-shell-source' };
+    }),
     KnowledgeCapturePersistenceAdapter: vi.fn(function KnowledgeCapturePersistenceAdapterMock(
       persistence: unknown,
     ) {
@@ -40,22 +37,17 @@ vi.mock('@memoflow/ai/api', async (importOriginal) => {
 });
 
 vi.mock('../modules/ai/repository-knowledge-note-persistence.adapter', () => ({
-  RepositoryKnowledgeNotePersistenceAdapter: vi.fn(function RepositoryKnowledgeNotePersistenceAdapterMock(
-    port: unknown,
-  ) {
-    return { tag: 'knowledge-note-persistence', port };
-  }),
+  RepositoryKnowledgeNotePersistenceAdapter: vi.fn(
+    function RepositoryKnowledgeNotePersistenceAdapterMock(port: unknown) {
+      return { tag: 'knowledge-note-persistence', port };
+    },
+  ),
 }));
 vi.mock('../modules/ai/repository-knowledge-source.adapter', () => ({
-  RepositoryKnowledgeSourceAdapter: vi.fn(function RepositoryKnowledgeSourceAdapterMock(...args: unknown[]) {
-    return { tag: 'knowledge-source', args };
-  }),
-}));
-vi.mock('../modules/ai/repository-knowledge-index-status.adapter', () => ({
-  RepositoryKnowledgeIndexStatusAdapter: vi.fn(function RepositoryKnowledgeIndexStatusAdapterMock(
-    port: unknown,
+  RepositoryKnowledgeSourceAdapter: vi.fn(function RepositoryKnowledgeSourceAdapterMock(
+    ...args: unknown[]
   ) {
-    return { tag: 'knowledge-index-status', port };
+    return { tag: 'knowledge-source', args };
   }),
 }));
 vi.mock('../modules/ai/controlled-analytics-read.adapter', () => ({
@@ -84,17 +76,18 @@ vi.mock('../modules/ai/planner-read.adapter', () => ({
   }),
 }));
 vi.mock('../modules/ai/notification-read.adapter', () => ({
-  NotificationAIReadAdapter: vi.fn(function NotificationAIReadAdapterMock(repository: unknown) {
-    return { tag: 'notification-read', repository };
+  NotificationAIReadAdapter: vi.fn(function NotificationAIReadAdapterMock(inbox: unknown) {
+    return { tag: 'notification-read', inbox };
   }),
 }));
 
 import {
   AIEvaluationReportFileAdapter,
+  AIContextAssembler,
   createAIModule,
   createAIPrismaRepositories,
   createMastraStorage,
-  ConversationTranscriptBootstrapSource,
+  ConversationShellSource,
   KnowledgeCapturePersistenceAdapter,
   MastraAIRuntime,
   MastraModelResolver,
@@ -102,7 +95,6 @@ import {
 import { createAIApiModule } from '@memoflow/ai/api';
 import { ControlledAnalyticsReadAdapter } from '../modules/ai/controlled-analytics-read.adapter';
 import { GoalPlanMutationAdapter } from '../modules/ai/goal-plan-mutation.adapter';
-import { RepositoryKnowledgeIndexStatusAdapter } from '../modules/ai/repository-knowledge-index-status.adapter';
 import { RepositoryKnowledgeNotePersistenceAdapter } from '../modules/ai/repository-knowledge-note-persistence.adapter';
 import { RepositoryKnowledgeSourceAdapter } from '../modules/ai/repository-knowledge-source.adapter';
 import { TaskPlanMutationAdapter } from '../modules/ai/task-plan-mutation.adapter';
@@ -115,11 +107,15 @@ const fakeDb = { tag: 'fake-db' } as unknown as PrismaClient;
 const repositoryApiPort = { tag: 'repository-port' } as unknown as RepositoryApplicationPort;
 const goalApplicationPort = { tag: 'goal-port' } as unknown as GoalApplicationPort;
 const taskApplicationPort = { tag: 'task-port' } as unknown as TaskApplicationPort;
-const reminderApplicationPort = { tag: 'reminder-port' } as unknown as ReminderApplicationPort;
+const taskDashboardReadPort = { tag: 'task-dashboard-read-port' } as never;
 const routineCommandPort = { tag: 'routine-command-port' } as never;
 const scheduleRepository = { tag: 'schedule-repository' } as never;
-const notificationRepository = { tag: 'notification-repository' } as never;
+const scheduleEventApi = { tag: 'schedule-event-api' } as never;
+const notificationInbox = { tag: 'notification-inbox' } as never;
+const userTimeContextPort = { tag: 'user-time-context-port' } as never;
 const labelService = { tag: 'label-service' } as never;
+const goalKnowledgeService = { tag: 'goal-knowledge-service' } as never;
+const knowledgeDocumentRefResolver = { tag: 'knowledge-ref-resolver' } as never;
 const repositoryStorageBaseDir = '/tmp/memoflow-ai-compose-test';
 const mastraStorage = {
   kind: 'postgres' as const,
@@ -131,19 +127,24 @@ const dependencies = {
   repositoryStorageBaseDir,
   goalApplicationPort,
   taskApplicationPort,
-  reminderApplicationPort,
+  taskDashboardReadPort,
   routineCommandPort,
+  scheduleEventApi,
+  notificationInbox,
   scheduleRepository,
-  notificationRepository,
+  userTimeContextPort,
   labelService,
+  goalKnowledgeService,
+  knowledgeDocumentRefResolver,
   mastraStorage,
 };
 
 const repositories = {
   conversationRepository: { tag: 'conversation' },
   providerConfigRepository: { tag: 'provider-config' },
+  providerSecretVault: { tag: 'provider-secret-vault' },
   knowledgeIndexRepository: { tag: 'knowledge-index' },
-  executionLogPort: { tag: 'execution-log' },
+  executionRecordPort: { tag: 'execution-log' },
 };
 
 beforeEach(() => {
@@ -152,7 +153,13 @@ beforeEach(() => {
     repositories as ReturnType<typeof createAIPrismaRepositories>,
   );
   vi.mocked(createAIModule).mockReturnValue({
-    api: {},
+    portableCapability: { key: 'ai-conversations', schemaVersion: 3 },
+    providerManagement: {},
+    assistantConversation: {},
+    knowledge: {},
+    evaluationOperations: {},
+    mastraRuntime: null,
+    workflowRuntime: null,
     start: vi.fn(),
     dispose: vi.fn(),
   } as ReturnType<typeof createAIModule>);
@@ -169,37 +176,47 @@ describe('API composeAI Mastra-only ownership', () => {
 
     expect(createAIPrismaRepositories).toHaveBeenCalledWith(fakeDb);
     expect(createMastraStorage).toHaveBeenCalledWith(mastraStorage);
-    expect(MastraModelResolver).toHaveBeenCalledWith(repositories.providerConfigRepository);
-    expect(ConversationTranscriptBootstrapSource).toHaveBeenCalledWith(
-      repositories.conversationRepository,
+    expect(MastraModelResolver).toHaveBeenCalledWith(
+      repositories.providerConfigRepository,
+      repositories.providerSecretVault,
     );
+    expect(ConversationShellSource).toHaveBeenCalledWith(repositories.conversationRepository);
+    const persistence = vi.mocked(RepositoryKnowledgeNotePersistenceAdapter).mock.results[0].value;
     expect(GoalPlanMutationAdapter).toHaveBeenCalledWith(
       goalApplicationPort,
       taskApplicationPort,
-      reminderApplicationPort,
       labelService,
+      persistence,
+      knowledgeDocumentRefResolver,
+      goalKnowledgeService,
     );
     expect(TaskPlanMutationAdapter).toHaveBeenCalledWith(taskApplicationPort, labelService);
-    expect(RoutineAICommandAdapter).toHaveBeenCalledWith(reminderApplicationPort, routineCommandPort);
-    expect(PlannerAIReadAdapter).toHaveBeenCalledWith(scheduleRepository, taskApplicationPort);
-    expect(NotificationAIReadAdapter).toHaveBeenCalledWith(notificationRepository);
+    expect(RoutineAICommandAdapter).toHaveBeenCalledWith(routineCommandPort);
+    expect(PlannerAIReadAdapter).toHaveBeenCalledWith(
+      scheduleEventApi,
+      taskApplicationPort,
+      userTimeContextPort,
+    );
+    expect(NotificationAIReadAdapter).toHaveBeenCalledWith(notificationInbox);
 
-    const persistence = vi.mocked(RepositoryKnowledgeNotePersistenceAdapter).mock.results[0].value;
     expect(KnowledgeCapturePersistenceAdapter).toHaveBeenCalledWith(persistence);
 
     expect(MastraAIRuntime).toHaveBeenCalledTimes(1);
     expect(MastraAIRuntime).toHaveBeenCalledWith({
       storage: vi.mocked(createMastraStorage).mock.results[0].value,
       modelResolver: vi.mocked(MastraModelResolver).mock.results[0].value,
-      transcriptBootstrapSource: vi.mocked(ConversationTranscriptBootstrapSource).mock.results[0].value,
+      conversationShellSource: vi.mocked(ConversationShellSource).mock.results[0].value,
       goalPlanMutationPort: vi.mocked(GoalPlanMutationAdapter).mock.results[0].value,
       taskPlanMutationPort: vi.mocked(TaskPlanMutationAdapter).mock.results[0].value,
-      knowledgeCaptureMutationPort: vi.mocked(KnowledgeCapturePersistenceAdapter).mock.results[0].value,
-      executionLogPort: repositories.executionLogPort,
-      usageReadPort: repositories.executionLogPort,
+      knowledgeCaptureMutationPort: vi.mocked(KnowledgeCapturePersistenceAdapter).mock.results[0]
+        .value,
+      knowledgeSourcePort: vi.mocked(RepositoryKnowledgeSourceAdapter).mock.results[0].value,
+      executionRecordPort: repositories.executionRecordPort,
+      usageReadPort: repositories.executionRecordPort,
       routineCommandPort: vi.mocked(RoutineAICommandAdapter).mock.results[0].value,
       plannerReadPort: vi.mocked(PlannerAIReadAdapter).mock.results[0].value,
       notificationReadPort: vi.mocked(NotificationAIReadAdapter).mock.results[0].value,
+      contextAssembler: expect.any(AIContextAssembler),
     });
   });
 
@@ -207,27 +224,28 @@ describe('API composeAI Mastra-only ownership', () => {
     composeAI(dependencies);
 
     expect(RepositoryKnowledgeNotePersistenceAdapter).toHaveBeenCalledWith(repositoryApiPort);
-    expect(RepositoryKnowledgeSourceAdapter).toHaveBeenCalledWith(
-      fakeDb,
-      repositoryStorageBaseDir,
-    );
-    expect(RepositoryKnowledgeIndexStatusAdapter).toHaveBeenCalledWith(repositoryApiPort);
-    expect(ControlledAnalyticsReadAdapter).toHaveBeenCalledWith(fakeDb);
+    expect(RepositoryKnowledgeSourceAdapter).toHaveBeenCalledWith(fakeDb, repositoryStorageBaseDir);
+    expect(ControlledAnalyticsReadAdapter).toHaveBeenCalledWith({
+      goalApplicationPort,
+      taskDashboardReadPort,
+      plannerReadPort: vi.mocked(PlannerAIReadAdapter).mock.results[0].value,
+      notificationReadPort: vi.mocked(NotificationAIReadAdapter).mock.results[0].value,
+      activityReadPort: expect.objectContaining({}),
+      userTimeContextPort,
+    });
     expect(AIEvaluationReportFileAdapter).toHaveBeenCalledTimes(1);
 
     const moduleInput = vi.mocked(createAIModule).mock.calls[0][0];
     expect(moduleInput.conversationRepository).toBe(repositories.conversationRepository);
     expect(moduleInput.providerConfigRepository).toBe(repositories.providerConfigRepository);
+    expect(moduleInput.providerSecretVault).toBe(repositories.providerSecretVault);
     expect(moduleInput.knowledgeIndexRepository).toBe(repositories.knowledgeIndexRepository);
-    expect(moduleInput.executionLogPort).toBe(repositories.executionLogPort);
+    expect(moduleInput.executionRecordPort).toBe(repositories.executionRecordPort);
     expect(moduleInput.knowledgeNotePersistence).toBe(
       vi.mocked(RepositoryKnowledgeNotePersistenceAdapter).mock.results[0].value,
     );
     expect(moduleInput.knowledgeSourcePort).toBe(
       vi.mocked(RepositoryKnowledgeSourceAdapter).mock.results[0].value,
-    );
-    expect(moduleInput.knowledgeIndexStatusPort).toBe(
-      vi.mocked(RepositoryKnowledgeIndexStatusAdapter).mock.results[0].value,
     );
     expect(moduleInput.analyticsReadPort).toBe(
       vi.mocked(ControlledAnalyticsReadAdapter).mock.results[0].value,

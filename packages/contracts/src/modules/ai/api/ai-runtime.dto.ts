@@ -8,6 +8,7 @@ import {
 import {
   TaskCreateClientInputSchema,
   TaskPlanDraftSchema,
+  TaskPlanExecutionFailureSchema,
   TaskPlanExecutionReceiptSchema,
 } from './ai-task-create-workflow.dto';
 import {
@@ -86,6 +87,11 @@ export const AssistantRuntimeConversationDeleteResultSchema = z
 export type AssistantRuntimeConversationDeleteResult = z.infer<
   typeof AssistantRuntimeConversationDeleteResultSchema
 >;
+
+export const AssistantRuntimeCancelResultSchema = z
+  .object({ cancelled: z.boolean() })
+  .strict();
+export type AssistantRuntimeCancelResult = z.infer<typeof AssistantRuntimeCancelResultSchema>;
 
 const RuntimeEventBaseShape = {
   eventId: z.string().min(1),
@@ -173,6 +179,7 @@ export type AIWorkflowStatus = z.infer<typeof AIWorkflowStatusSchema>;
 
 export const AIWorkflowExecutionFailureSchema = z.discriminatedUnion('operation', [
   GoalPlanExecutionFailureSchema,
+  TaskPlanExecutionFailureSchema,
   KnowledgeCaptureExecutionFailureSchema,
 ]);
 export type AIWorkflowExecutionFailure = z.infer<typeof AIWorkflowExecutionFailureSchema>;

@@ -23,7 +23,6 @@ import type { GovernanceClientPort } from '@memoflow/governance/client';
 import type { GoalClientPort } from '@memoflow/goal/client';
 import type { LabelClientPort } from '@memoflow/label/client';
 import type { NotificationClientPort } from '@memoflow/notification/client';
-import type { ReminderClientPort } from '@memoflow/reminder/client';
 import type { RepositoryClientPort } from '@memoflow/repository/client';
 import type { ScheduleClientPort } from '@memoflow/schedule/client';
 import type { SettingClientPort } from '@memoflow/setting/client';
@@ -41,7 +40,6 @@ export type IGoalService = GoalClientPort;
 export type ILabelService = LabelClientPort;
 export type ITaskService = TaskClientPort;
 export type IScheduleService = ScheduleClientPort;
-export type IReminderService = ReminderClientPort;
 export type IRepositoryService = RepositoryClientPort;
 export type INotificationService = NotificationClientPort;
 export type ISettingService = SettingClientPort;
@@ -54,9 +52,6 @@ export type IRuntimeUsageService = RuntimeUsageClient;
 /** Mastra-native durable Workflow seam for goal/task/knowledge product workflows. */
 export type IWorkflowRuntimeService = WorkflowRuntimeClient;
 export type IRuleService = GovernanceClientPort;
-
-// ── Dashboard（纯接口，无 private）──
-export type { IDashboardApiClient as IDashboardService } from '../modules/dashboard/types';
 
 // ── Module Capsules (UI Redesign V2 shell) ──
 /**
@@ -71,7 +66,7 @@ export type { IDashboardApiClient as IDashboardService } from '../modules/dashbo
  * @see docs/UI_REDESIGN_V2_PLAN.md §2.1, §5
  */
 export interface ModuleCapsule {
-  /** Stable module id, e.g. 'goal' | 'task' | 'note' | 'reminder' | 'schedule' | 'notification'. */
+  /** Stable module id, e.g. 'goal' | 'task' | 'note' | 'schedule' | 'notification'. */
   id: string;
   /** i18n key for the capsule label (e.g. 'nav.capsule.goal'). */
   title: string;

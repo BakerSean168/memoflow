@@ -7,7 +7,7 @@ import {
 
 describe('NotificationRequested durable integration envelope (NOTIF-3301 / ADR-063 §8)', () => {
   const identityId = 'identity_test';
-  const occurrenceKey = 'reminder:1';
+  const occurrenceKey = 'event:1';
   const idempotencyKey = buildIdempotencyKeyString({
     identityId,
     source: 'notification',

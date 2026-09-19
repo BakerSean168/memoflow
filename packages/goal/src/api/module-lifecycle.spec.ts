@@ -26,6 +26,7 @@ function createApiStub(): GoalApplicationPort {
     updateGoal: vi.fn(),
     deleteGoal: vi.fn(),
     permanentlyDeleteGoal: vi.fn(),
+    planGoal: vi.fn(),
     archiveGoal: vi.fn(),
     archiveExpiredGoals: vi.fn(),
     activateGoal: vi.fn(),

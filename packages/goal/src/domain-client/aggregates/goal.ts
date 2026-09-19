@@ -1,4 +1,4 @@
-import type { Instant } from '@memoflow/contracts/primitives';
+import type { Instant, Ymd } from '@memoflow/contracts/primitives';
 /**
  * Goal Aggregate Root - Domain Client
  * 目标聚合根 - 领域客户端
@@ -10,7 +10,7 @@ import type { Instant } from '@memoflow/contracts/primitives';
  * - Instance toDTO(): GoalClientDTO
  */
 
-import type { GoalClientDTO, GoalReminderConfig } from '@memoflow/contracts/goal';
+import type { GoalClientDTO, GoalReminderConfig, GoalTimeframe } from '@memoflow/contracts/goal';
 import type { LabelDto } from '@memoflow/contracts/label';
 import { GoalStatus } from '@memoflow/contracts/goal';
 import { AggregateRoot } from '@memoflow/utils/domain';
@@ -22,12 +22,10 @@ export interface GoalState {
   id: GoalId;
   identityId: IdentityId;
   name: string;
-  description: string | null;
-  feasibilityAnalysis: string | null;
-  motivation: string | null;
+  summary: string | null;
   status: GoalStatus;
-  startDate: Instant | null;
-  dueDate: Instant | null;
+  startDate: Ymd | null;
+  target: GoalTimeframe | null;
   completedAt: Instant | null;
   archivedAt: Instant | null;
   sortOrder: number;
@@ -61,32 +59,20 @@ export class Goal extends AggregateRoot<GoalId> {
     return this._props.name;
   }
 
-  get description(): string | null {
-    return this._props.description;
-  }
-
-  get feasibilityAnalysis(): string | null {
-    return this._props.feasibilityAnalysis;
-  }
-
-  get motivation(): string | null {
-    return this._props.motivation;
+  get summary(): string | null {
+    return this._props.summary;
   }
 
   get status(): GoalStatus {
     return this._props.status;
   }
 
-  get startDate(): Instant | null {
-    const v = this._props.startDate;
-    if (v == null) return null;
-    return v as Instant;
+  get startDate(): Ymd | null {
+    return this._props.startDate;
   }
 
-  get dueDate(): Instant | null {
-    const v = this._props.dueDate;
-    if (v == null) return null;
-    return v as Instant;
+  get target(): GoalTimeframe | null {
+    return this._props.target;
   }
 
   get completedAt(): Instant | null {
@@ -157,12 +143,10 @@ export class Goal extends AggregateRoot<GoalId> {
         id: String(this._props.id) as GoalClientDTO['id'],
         identityId: String(this._props.identityId) as GoalClientDTO['identityId'],
         name: this._props.name,
-        description: this._props.description,
-        feasibilityAnalysis: this._props.feasibilityAnalysis,
-        motivation: this._props.motivation,
+        summary: this._props.summary,
         status: this._props.status,
         startDate: this._props.startDate ?? null,
-        dueDate: this._props.dueDate ?? null,
+        target: this._props.target ?? null,
         completedAt: this._props.completedAt ?? null,
         archivedAt: this._props.archivedAt ?? null,
         sortOrder: this._props.sortOrder,

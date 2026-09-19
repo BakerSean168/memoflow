@@ -3,10 +3,10 @@ import { brandedId, openApiJsonValue } from '../../../primitives';
 import type { NotificationServerDTO } from '../aggregates/notification-server';
 import { NotificationType } from '../value-objects/notification-type';
 import { NotificationCategory } from '../value-objects/notification-category';
-import { RelatedEntityType } from '../value-objects/related-entity-type';
 import { NotificationChannelType } from '../value-objects/notification-channel-type';
 import { ImportanceLevel } from '../../../shared/value-objects/importance';
 import { UrgencyLevel } from '../../../shared/value-objects/urgency';
+import { NotificationActionIntentSchema } from './notification-action.dto';
 
 export const CreateNotificationSchema = z.object({
   workflowKey: z.string().min(1).max(200).optional(),
@@ -18,12 +18,12 @@ export const CreateNotificationSchema = z.object({
   category: z.enum(NotificationCategory),
   importance: z.enum(ImportanceLevel).optional(),
   urgency: z.enum(UrgencyLevel).optional(),
-  relatedEntityType: z.enum(RelatedEntityType).optional(),
+  relatedEntityType: z.string().trim().min(1).max(120).optional(),
   relatedEntityId: brandedId<string>().optional(),
   navigationIntent: z.object({ route: z.string(), params: z.record(z.string(), z.string()).optional() }).optional(),
   correlationId: z.string().optional(),
   causationId: z.string().optional(),
-  actions: z.array(z.unknown()).optional(),
+  actions: z.array(NotificationActionIntentSchema).optional(),
   metadata: z.record(z.string(), openApiJsonValue).optional(),
   expiresAt: z.number().int().optional(),
   sendImmediately: z.boolean().default(false).optional(),
@@ -31,16 +31,3 @@ export const CreateNotificationSchema = z.object({
 });
 export type CreateNotificationReq = z.infer<typeof CreateNotificationSchema>;
 export type CreateNotificationRes = NotificationServerDTO;
-
-/** Fact update only. Delivery status is never writable on this endpoint. */
-export const UpdateNotificationSchema = z.object({
-  title: z.string().min(1).max(200).optional(),
-  content: z.string().min(1).optional(),
-  importance: z.enum(ImportanceLevel).optional(),
-  urgency: z.enum(UrgencyLevel).optional(),
-  navigationIntent: z.object({ route: z.string(), params: z.record(z.string(), z.string()).optional() }).nullable().optional(),
-  metadata: z.record(z.string(), openApiJsonValue).optional(),
-  expiresAt: z.number().int().nullable().optional(),
-});
-export type UpdateNotificationReq = z.infer<typeof UpdateNotificationSchema>;
-export type UpdateNotificationRes = NotificationServerDTO;

@@ -302,10 +302,6 @@ export function createSharedConfig(options: SharedConfigOptions) {
       replacement: path.resolve(workspaceRoot, 'packages/database/src/powersync-schema.ts'),
     },
     {
-      find: /^@memoflow\/database\/dashboard-schema$/,
-      replacement: path.resolve(workspaceRoot, 'packages/database/src/dashboard-schema.ts'),
-    },
-    {
       find: /^@memoflow\/domain-shared\/(.+)$/,
       replacement: path.resolve(workspaceRoot, 'packages/domain-shared/src/$1'),
     },

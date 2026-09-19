@@ -9,13 +9,11 @@ import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import {
   NotificationPrismaRepository,
   NotificationPreferencePrismaRepository,
-  NotificationTemplatePrismaRepository,
 } from '../adapters/prisma';
 
 import {
   PowerSyncNotificationRepository,
   PowerSyncNotificationPreferenceRepository,
-  PowerSyncNotificationTemplateRepository,
 } from '../adapters/powersync';
 
 /**
@@ -29,7 +27,6 @@ export class NotificationRepositoryFactory {
     return {
       notificationRepository: new NotificationPrismaRepository(prisma),
       notificationPreferenceRepository: new NotificationPreferencePrismaRepository(prisma),
-      notificationTemplateRepository: new NotificationTemplatePrismaRepository(prisma),
     };
   }
 
@@ -40,7 +37,6 @@ export class NotificationRepositoryFactory {
     return {
       notificationRepository: new PowerSyncNotificationRepository(db),
       notificationPreferenceRepository: new PowerSyncNotificationPreferenceRepository(db),
-      notificationTemplateRepository: new PowerSyncNotificationTemplateRepository(db),
     };
   }
 

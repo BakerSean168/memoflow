@@ -17,18 +17,20 @@
 
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import type { GoalApplicationPort } from '@memoflow/goal';
-import type { ReminderApplicationPort } from '@memoflow/reminder';
 import type { RoutineCoachCommandPort } from '@memoflow/reminder/routine-runtime';
-import type { IScheduleRepository } from '@memoflow/schedule';
-import type { INotificationRepository } from '@memoflow/notification';
+import type { ScheduleEventApplicationPort } from '@memoflow/schedule';
+import type { NotificationInboxPort } from '@memoflow/notification';
 import type { TaskApplicationPort } from '@memoflow/task';
 import type { LabelService } from '@memoflow/label';
+import type { GoalKnowledgeService, KnowledgeDocumentRefResolver } from '@memoflow/relation';
+import type { UserTimeContextPort } from '@memoflow/time';
 import {
   AIEvaluationReportFileAdapter,
+  AIContextAssembler,
   createAIModule,
   createAIPowerSyncRepositories,
   createMastraStorage,
-  ConversationTranscriptBootstrapSource,
+  ConversationShellSource,
   KnowledgeCapturePersistenceAdapter,
   MastraAIRuntime,
   MastraModelResolver,
@@ -36,6 +38,7 @@ import {
   type IAnalyticsReadPort,
   type IKnowledgeNotePersistencePort,
   type IKnowledgeSourcePort,
+  type AIModuleInstance,
 } from '@memoflow/ai';
 import { createAIElectronModule, type AIElectronModuleDef } from '@memoflow/ai/electron';
 import { DesktopGoalPlanMutationAdapter } from '../modules/ai/goal-plan-mutation.adapter';
@@ -51,31 +54,47 @@ export interface ComposeAIElectronDependencies {
   readonly analyticsReadPort: IAnalyticsReadPort;
   readonly goalApplicationPort: GoalApplicationPort;
   readonly taskApplicationPort: TaskApplicationPort;
-  readonly reminderApplicationPort: ReminderApplicationPort;
+  readonly goalKnowledgeService: Pick<GoalKnowledgeService, 'link'>;
+  readonly knowledgeDocumentRefResolver: KnowledgeDocumentRefResolver;
   readonly labelService: LabelService;
   readonly routineCommandPort: RoutineCoachCommandPort;
-  readonly scheduleRepository: IScheduleRepository;
-  readonly notificationRepository: INotificationRepository;
+  /** Schedule-owned Calendar Event read seam for Planner projections. */
+  readonly scheduleEventApi: ScheduleEventApplicationPort;
+  /** Notification-owned Fact/Inbox seam for AI reads and typed actions. */
+  readonly notificationInbox: NotificationInboxPort;
+  readonly userTimeContextPort: UserTimeContextPort;
   readonly mastraStorage: MastraStorageConfig;
 }
 
 /**
  * Composes the AI Electron module handle from the desktop runtime's database.
  */
-export function composeAI(dependencies: ComposeAIElectronDependencies): AIElectronModuleDef {
+export interface ComposedAIElectron {
+  readonly module: AIElectronModuleDef;
+  /** AI-owned Conversation shell portability capability for host registration. */
+  readonly portableCapability: AIModuleInstance['portableCapability'];
+}
+
+export function composeAI(
+  dependencies: ComposeAIElectronDependencies,
+): ComposedAIElectron {
   const {
     conversationRepository,
     providerConfigRepository,
+    providerSecretVault,
     knowledgeIndexRepository,
-    executionLogPort,
+    executionRecordPort,
     providerOnboardingSessionRepository,
     providerOnboardingCommitPort,
   } = createAIPowerSyncRepositories(dependencies.db);
+  const contextAssembler = new AIContextAssembler(dependencies.userTimeContextPort);
   const goalPlanMutationPort = new DesktopGoalPlanMutationAdapter(
     dependencies.goalApplicationPort,
     dependencies.taskApplicationPort,
-    dependencies.reminderApplicationPort,
     dependencies.labelService,
+    dependencies.knowledgeNotePersistence,
+    dependencies.knowledgeDocumentRefResolver,
+    dependencies.goalKnowledgeService,
   );
   const taskPlanMutationAdapter = new DesktopTaskPlanMutationAdapter(
     dependencies.taskApplicationPort,
@@ -83,40 +102,44 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): AIElectr
   );
   const mastraRuntime = new MastraAIRuntime({
     storage: createMastraStorage(dependencies.mastraStorage),
-    modelResolver: new MastraModelResolver(providerConfigRepository),
-    transcriptBootstrapSource: new ConversationTranscriptBootstrapSource(conversationRepository),
+    modelResolver: new MastraModelResolver(providerConfigRepository, providerSecretVault),
+    conversationShellSource: new ConversationShellSource(conversationRepository),
     goalPlanMutationPort,
     taskPlanMutationPort: taskPlanMutationAdapter,
     knowledgeCaptureMutationPort: new KnowledgeCapturePersistenceAdapter(
       dependencies.knowledgeNotePersistence,
     ),
-    executionLogPort,
-    usageReadPort: executionLogPort,
-    routineCommandPort: new DesktopRoutineAICommandAdapter(
-      dependencies.reminderApplicationPort,
-      dependencies.routineCommandPort,
-    ),
+    knowledgeSourcePort: dependencies.knowledgeSourcePort,
+    executionRecordPort,
+    usageReadPort: executionRecordPort,
+    routineCommandPort: new DesktopRoutineAICommandAdapter(dependencies.routineCommandPort),
     plannerReadPort: new DesktopPlannerAIReadAdapter(
-      dependencies.scheduleRepository,
+      dependencies.scheduleEventApi,
       dependencies.taskApplicationPort,
+      dependencies.userTimeContextPort,
     ),
-    notificationReadPort: new DesktopNotificationAIReadAdapter(dependencies.notificationRepository),
+    notificationReadPort: new DesktopNotificationAIReadAdapter(dependencies.notificationInbox),
+    contextAssembler,
   });
 
   const instance = createAIModule({
     conversationRepository,
     providerConfigRepository,
+    providerSecretVault,
     providerOnboardingSessionRepository,
     providerOnboardingCommitPort,
     mastraRuntime,
     workflowRuntime: mastraRuntime,
     knowledgeIndexRepository,
-    executionLogPort,
+    executionRecordPort,
     evaluationReportPort: new AIEvaluationReportFileAdapter(),
     knowledgeNotePersistence: dependencies.knowledgeNotePersistence,
     knowledgeSourcePort: dependencies.knowledgeSourcePort,
     analyticsReadPort: dependencies.analyticsReadPort,
   });
 
-  return createAIElectronModule({ instance });
+  return {
+    module: createAIElectronModule({ instance }),
+    portableCapability: instance.portableCapability,
+  };
 }

@@ -1,61 +1,27 @@
-/**
- * Data Portability — IPC Handler Integration Test
- *
- * Verifies that the composed DataPortabilityElectronModule.register() installs
- * handlers that can be invoked through the mock ipcMain, and that the full
- * handler → use case → PowerSync path works end-to-end. The module handle is
- * built through the desktop runtime composer (instance-bound), never through a
- * retired package-global constant.
- */
-
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { IElectronDatabase, IElectronModuleContext } from '@memoflow/contracts/electron';
-import { UserDataExportEnvelopeV2Schema } from '@memoflow/contracts/data-portability';
-import { DataPortabilityChannels } from '@memoflow/contracts/electron';
+import { z } from 'zod';
+import { DataPortabilityChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
+import type { PortableCapability } from '@memoflow/contracts/data-portability';
 import type { DataPortabilityElectronModuleDef } from '@memoflow/data-portability/electron';
 import { composeDataPortability } from '../../runtime/compose-data-portability';
 
-const electronMock = vi.hoisted(() => ({
-  handle: vi.fn(),
-  removeHandler: vi.fn(),
-}));
+const electronMock = vi.hoisted(() => ({ handle: vi.fn(), removeHandler: vi.fn() }));
 
 vi.mock('electron', () => ({
-  ipcMain: {
-    handle: electronMock.handle,
-    removeHandler: electronMock.removeHandler,
-  },
+  ipcMain: { handle: electronMock.handle, removeHandler: electronMock.removeHandler },
 }));
 
-function createFakeDb(): IElectronDatabase {
-  return {
-    execute: vi.fn(async () => ({ rowsAffected: 1 })),
-    getAll: vi.fn(async () => []),
-    get: vi.fn(async () => ({})),
-    getOptional: vi.fn(async (sql: string) => {
-      if (sql.includes('FROM user_settings')) {
-        return {
-          id: 'settings-1',
-          identity_id: 'identity-test',
-          preferences: '{"theme":"dark"}',
-        };
-      }
-      return null;
-    }),
-    writeTransaction: vi.fn(async (callback) =>
-      callback({
-        execute: vi.fn(async () => ({ rowsAffected: 1 })),
-        getAll: vi.fn(async () => []),
-        get: vi.fn(async () => ({})),
-        getOptional: vi.fn(async () => null),
-      }),
-    ),
-  } as unknown as IElectronDatabase;
-}
+const preferencesCapability: PortableCapability<{ theme: string }> = {
+  key: 'preferences',
+  schemaVersion: 3,
+  payloadSchema: z.object({ theme: z.string() }).strict(),
+  export: vi.fn(async () => ({ theme: 'dark' })),
+  dryRun: vi.fn(async () => ({ created: 0, updated: 0, skipped: 1, warnings: [] })),
+  apply: vi.fn(async () => ({ created: 0, updated: 0, skipped: 1, warnings: [] })),
+};
 
 function createContext(): IElectronModuleContext {
   return {
-    db: createFakeDb(),
     auth: {
       requireRequestContext: vi.fn(async () => ({
         identityId: 'identity-test',
@@ -69,117 +35,84 @@ function createContext(): IElectronModuleContext {
 type IpcHandler = (_event: unknown, dto: unknown) => Promise<unknown>;
 
 function getHandler(channel: string): IpcHandler {
-  const call = electronMock.handle.mock.calls.find(([ch]) => ch === channel);
+  const call = electronMock.handle.mock.calls.find(([registeredChannel]) => registeredChannel === channel);
   expect(call, `Expected handler for channel ${channel} to be registered`).toBeTruthy();
   return call![1] as IpcHandler;
 }
 
 function registerModule(context: IElectronModuleContext): DataPortabilityElectronModuleDef {
-  const module = composeDataPortability({ db: context.db });
+  const module = composeDataPortability({ portableCapabilities: [preferencesCapability] });
   module.register(context);
   return module;
 }
 
-describe('DataPortabilityElectronModule IPC handler integration', () => {
+describe('DataPortabilityElectronModule V3 IPC surface', () => {
   beforeEach(() => {
     electronMock.handle.mockClear();
     electronMock.removeHandler.mockClear();
+    vi.clearAllMocks();
   });
 
-  it('registers export and import handlers with shared channel constants', () => {
-    registerModule(createContext());
-
-    const registeredChannels = electronMock.handle.mock.calls.map(([ch]) => ch);
-    expect(registeredChannels).toContain(DataPortabilityChannels.EXPORT);
-    expect(registeredChannels).toContain(DataPortabilityChannels.IMPORT);
-    expect(registeredChannels).toHaveLength(2);
+  it('registers only the V3 export, dry-run and apply channels', () => {
+    const module = registerModule(createContext());
+    const registeredChannels = electronMock.handle.mock.calls.map(([channel]) => channel);
+    expect(registeredChannels).toEqual([
+      DataPortabilityChannels.EXPORT,
+      DataPortabilityChannels.DRY_RUN,
+      DataPortabilityChannels.APPLY,
+    ]);
+    module.destroy?.();
   });
 
-  it('export handler returns a valid envelope with fileName, content, and summary', async () => {
-    registerModule(createContext());
-    const handler = getHandler(DataPortabilityChannels.EXPORT);
-    const result = (await handler({}, { include: ['settings'] })) as {
-      ok: boolean;
-      data: { fileName: string; content: string; summary: { entityCounts: Record<string, number>; warnings: string[] } };
+  it('exports V3 data and round-trips through dry-run then apply', async () => {
+    const module = registerModule(createContext());
+    const exportResult = (await getHandler(DataPortabilityChannels.EXPORT)({}, {
+      capabilities: ['preferences'],
+    })) as { ok: boolean; data: { content: string; summary: { capabilityKeys: string[] } } };
+    expect(exportResult.ok).toBe(true);
+    expect(exportResult.data.summary.capabilityKeys).toEqual(['preferences']);
+    const envelope = JSON.parse(exportResult.data.content) as {
+      format: string;
+      schemaVersion: number;
     };
+    expect(envelope).toMatchObject({ format: 'memoflow.user-data-export', schemaVersion: 3 });
 
-    expect(result).toMatchObject({
-      ok: true,
-      data: {
-        fileName: expect.stringMatching(/\.json$/),
-        content: expect.any(String),
-        summary: {
-          entityCounts: expect.any(Object),
-          warnings: expect.any(Array),
-        },
-      },
-    });
-
-    const envelope = UserDataExportEnvelopeV2Schema.parse(JSON.parse(result.data.content));
-    expect(envelope.kind).toBe('memoflow.user-data-export');
-    expect(envelope.schemaVersion).toBe(2);
-    expect(envelope).toHaveProperty('data');
+    const dryRun = (await getHandler(DataPortabilityChannels.DRY_RUN)({}, {
+      content: exportResult.data.content,
+    })) as { ok: boolean; data: { dryRun: boolean } };
+    const apply = (await getHandler(DataPortabilityChannels.APPLY)({}, {
+      content: exportResult.data.content,
+    })) as { ok: boolean; data: { dryRun: boolean } };
+    expect(dryRun).toMatchObject({ ok: true, data: { dryRun: true } });
+    expect(apply).toMatchObject({ ok: true, data: { dryRun: false } });
+    module.destroy?.();
   });
 
-  it('import handler succeeds with valid export content', async () => {
-    registerModule(createContext());
+  it('rejects malformed and banned V3 input with structured validation errors', async () => {
+    const module = registerModule(createContext());
+    const malformed = await getHandler(DataPortabilityChannels.DRY_RUN)({}, { content: '{bad json' });
+    expect(malformed).toMatchObject({ ok: false, error: { code: 'VALIDATION_ERROR' } });
 
-    // First export to get valid content
-    const exportHandler = getHandler(DataPortabilityChannels.EXPORT);
-    const exportResult = (await exportHandler({}, { include: ['settings'] })) as {
-      ok: boolean;
+    const exported = (await getHandler(DataPortabilityChannels.EXPORT)({}, {})) as {
       data: { content: string };
     };
-    const { content } = exportResult.data;
-
-    // Import the exported content
-    const importHandler = getHandler(DataPortabilityChannels.IMPORT);
-    const importResult = (await importHandler({}, { content, dryRun: false })) as {
-      ok: boolean;
-      data: { batchId: string; dryRun: boolean; created: Record<string, number>; updatedSingletons: Record<string, number>; warnings: string[] };
+    const envelope = JSON.parse(exported.data.content) as {
+      capabilities: Array<{ payload: Record<string, unknown> }>;
     };
-
-    expect(importResult).toMatchObject({
-      ok: true,
-      data: {
-        batchId: expect.any(String),
-        dryRun: false,
-        created: expect.any(Object),
-        updatedSingletons: expect.any(Object),
-        warnings: expect.any(Array),
-      },
+    envelope.capabilities[0]!.payload.identityId = 'source-identity';
+    const banned = await getHandler(DataPortabilityChannels.DRY_RUN)({}, {
+      content: JSON.stringify(envelope),
     });
+    expect(banned).toMatchObject({ ok: false, error: { code: 'VALIDATION_ERROR' } });
+    module.destroy?.();
   });
 
-  it('import handler rejects content with banned identity fields', async () => {
-    registerModule(createContext());
-
-    // Export first to get a valid envelope, then inject a banned field
-    const exportHandler = getHandler(DataPortabilityChannels.EXPORT);
-    const exportResult = (await exportHandler({}, {})) as { ok: boolean; data: { content: string } };
-    const envelope = JSON.parse(exportResult.data.content);
-    envelope.data.settings.identityId = 'stolen-identity';
-
-    const importHandler = getHandler(DataPortabilityChannels.IMPORT);
-    const importResult = (await importHandler({}, { content: JSON.stringify(envelope) })) as {
-      ok: boolean;
-      error: { code: string };
-    };
-
-    expect(importResult).toMatchObject({
-      ok: false,
-      error: {
-        code: 'VALIDATION_ERROR',
-      },
-    });
-  });
-
-  it('destroy removes all registered handlers', () => {
+  it('removes all registered handlers on destroy', () => {
     const module = registerModule(createContext());
     module.destroy?.();
-
-    expect(electronMock.removeHandler).toHaveBeenCalledWith(DataPortabilityChannels.EXPORT);
-    expect(electronMock.removeHandler).toHaveBeenCalledWith(DataPortabilityChannels.IMPORT);
-    expect(electronMock.removeHandler).toHaveBeenCalledTimes(2);
+    expect(electronMock.removeHandler).toHaveBeenCalledTimes(3);
+    for (const channel of Object.values(DataPortabilityChannels)) {
+      expect(electronMock.removeHandler).toHaveBeenCalledWith(channel);
+    }
   });
 });

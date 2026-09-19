@@ -1,6 +1,10 @@
 import { expect, test, type Page, type Route } from '@playwright/test';
-import type { AIWorkflowRunView, GoalPlanDraft } from '@memoflow/contracts/ai';
-import { createMockUserSetting } from '@memoflow/contracts/mocks';
+import type {
+  AIWorkflowRunView,
+  GoalPlanDraft,
+  GoalPlanExecutionFailure,
+} from '@memoflow/contracts/ai';
+import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
 import { TIMEOUT_CONFIG, WEB_CONFIG } from '../config';
 import { registerAndLogin } from '../helpers/testHelpers';
 
@@ -41,12 +45,16 @@ async function seedAiLocalState(
       conversationWorkflowStorageKey,
       lastModelStorageKey,
       conversationModelStorageKey,
+      retiredConversationWorkflowStorageKey,
       legacyGoalWorkflowStorageKey,
       seededConversationId,
       seededModelKey,
       seededWorkflowEntry,
     }) => {
       window.localStorage.removeItem(lastModelStorageKey);
+      // AI-9603: durable WorkflowRun snapshots are retired. Only the v3 active-run
+      // pointer may survive a reload; the authoritative run is reloaded from Mastra.
+      window.localStorage.removeItem(retiredConversationWorkflowStorageKey);
       // Residual 211: legacy goal-workflow debug dual-track is retired; clear any stale key.
       window.localStorage.removeItem(legacyGoalWorkflowStorageKey);
 
@@ -77,7 +85,8 @@ async function seedAiLocalState(
     },
     {
       lastConversationStorageKey: 'ai:last-conversation-id',
-      conversationWorkflowStorageKey: 'ai:conversation-workflow-map',
+      conversationWorkflowStorageKey: 'ai:conversation-workflow-map:v3',
+      retiredConversationWorkflowStorageKey: 'ai:conversation-workflow-map:v2',
       lastModelStorageKey: 'ai:last-model-key',
       conversationModelStorageKey: 'ai:conversation-model-map',
       legacyGoalWorkflowStorageKey: 'ai:debug:legacy-goal-workflow',
@@ -293,8 +302,8 @@ test.describe('AI Goal Workflow', () => {
     await expect(workflowPanel).toContainText(/suspended/i);
     await expect(workflowPanel).toContainText(/Agent-created AI workflow/i);
     await expect(workflowPanel).toContainText(/Run the Goal Agent workflow end to end/i);
-    // Task template / reminder names render only inside the optional draft
-    // editor; the review card shows the goal, key result, and rationale.
+    // Task and Knowledge details render inside the optional draft editor; the review card
+    // stays a compact projection of Goal/KR/rationale.
     await expect(workflowPanel).toContainText(
       /Create the approved goal draft with a measurable key result/i,
     );
@@ -307,7 +316,7 @@ test.describe('AI Goal Workflow', () => {
     await expect(page.getByTestId('goal-workflow-recovery')).toBeVisible({
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
-    await expect(page.getByTestId('goal-workflow-recovery')).toContainText(/KEY_RESULT_FAILED/i);
+    await expect(page.getByTestId('goal-workflow-recovery')).toContainText(/TASK_CREATE_FAILED/i);
     await expect(page.getByTestId('goal-workflow-recovery')).toContainText(
       /Workflow execution failed/i,
     );
@@ -387,7 +396,7 @@ test.describe('AI Goal Workflow', () => {
 
     const result = page.getByTestId('task-workflow-result');
     await expect(result).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
-    await expect(result).toContainText(/task-template-e2e-mastra-1/i);
+    await expect(result).toContainText(/task-plan-e2e-mastra-1/i);
     expect(telemetry.taskWorkflowStartCount).toBe(1);
     expect(telemetry.taskWorkflowApproveCount).toBe(1);
     expect(telemetry.legacyEndpointCallCount).toBe(0);
@@ -437,7 +446,9 @@ test.describe('AI Goal Workflow', () => {
     await expect(page.getByTestId('knowledge-citation-open')).toBeVisible();
 
     await page.getByTestId('knowledge-citation-open').click();
-    await expect(page).toHaveURL(/\/repository$/);
+    await expect(page).toHaveURL(
+      /\/repository\?note=kdoc_550e8400-e29b-41d4-a716-446655440090$/,
+    );
     expect(telemetry.legacyEndpointCallCount).toBe(0);
   });
 
@@ -579,32 +590,17 @@ type GoalWorkflowMockTelemetry = {
   legacyEndpointCallCount: number;
 };
 
-type GoalWorkflowExecutionFailure = {
-  operation: 'goal' | 'task_template' | 'reminder';
-  index?: number;
-  code: string;
-  message: string;
-  retryable: boolean;
-};
-
-/**
- * ADR-052 durable goal.create Workflow simulation.
- *
- * Batch C: the Mastra-owned `/ai/runtime/workflow/*` endpoints are the only
- * authority. There is no `agents/runs` AgentRun / Host Proposal double-track
- * for goal.create anymore — the panel is AIWorkflowRunView-backed
- * (`goal-workflow-panel`) with typed suspensions.
- */
 type GoalWorkflowMockRun = {
   runId: string;
   conversationId: string;
   createdAt: number;
   draft: GoalPlanDraft;
-  /** Execution simulation state (approved/executed mutations). */
-  executedGoalId: string | null;
-  executedTaskIds: string[];
-  executedReminderIds: string[];
-  failures: GoalWorkflowExecutionFailure[];
+  /** Durable V2 apply receipt state after approved child mutations. */
+  referenceMap: Record<string, string>;
+  relationIds: Record<string, string>;
+  goalVersion?: number;
+  appliedGoalStatus?: 'Planned' | 'InProgress';
+  failures: GoalPlanExecutionFailure[];
   executionStatus: 'success' | 'partial' | 'failed';
 };
 
@@ -637,14 +633,20 @@ function createTaskWorkflowDraft(
       title,
       description: 'Verify the Mastra-only task workflow from review to deterministic apply.',
       importance: 'Moderate',
-      cadence: 'weekly',
-      startDate: null,
-      timeOfDay: '09:00',
-      daysOfWeek: [1],
-      occurrences: null,
-      goalId: null,
-      keyResultId: null,
-      contributionValue: null,
+      draftRef: 'task:review-mastra-migration',
+      schedule: {
+        kind: 'Recurring',
+        startDate: '2026-09-01',
+        timing: { kind: 'At', time: '09:00' },
+        recurrence: {
+          frequency: 'Weekly',
+          interval: 1,
+          byWeekday: [1],
+          end: { kind: 'Never' },
+        },
+      },
+      reminderConfig: null,
+      goalBinding: null,
       labels: ['ai', 'mastra'],
     },
     rationale: 'Keep task creation behind the canonical task mutation port.',
@@ -657,6 +659,7 @@ function createKnowledgeCaptureDraft(
 ): KnowledgeCaptureMockRun['draft'] {
   return {
     revision: 1,
+    knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440701',
     title,
     topic: 'Durable Mastra workflow recovery and checkpoint ownership',
     markdown: [
@@ -697,8 +700,7 @@ function createTaskCompletedRun(mockRun: TaskWorkflowMockRun): AIWorkflowRunView
       workflowRunId: mockRun.runId,
       revision: mockRun.draft.revision,
       status: 'success',
-      taskTemplateId: 'task-template-e2e-mastra-1',
-      taskIds: ['task-instance-e2e-mastra-1'],
+      referenceMap: { [mockRun.draft.task.draftRef]: 'task-plan-e2e-mastra-1' },
       failures: [],
       retryable: false,
     },
@@ -768,160 +770,108 @@ function createKnowledgeCaptureCancelledRun(mockRun: KnowledgeCaptureMockRun): A
 }
 
 function createRestoredGoalWorkflowDraft(): GoalPlanDraft {
-  const now = Date.now();
   return {
     revision: 1,
     goal: {
+      draftRef: 'goal',
       name: 'Restored AI Agent workspace',
-      description: 'A pending approval run restored from local workflow state.',
-      motivation: 'Restore the runtime-owned durable goal.create run after refresh.',
-      feasibilityAnalysis: 'Scoped to goal and key result creation after confirmation.',
-      startDate: now,
-      dueDate: now + 60 * 24 * 60 * 60 * 1000,
+      summary: 'A pending approval run restored from local workflow state.',
+      status: 'Planned',
+      startDate: '2026-09-12',
+      target: { kind: 'year', year: 2026 },
+      labels: [],
     },
     keyResults: [
       {
+        draftRef: 'kr:restored-approval',
         title: 'Complete the restored workflow approval',
         description: 'Confirm the pending workflow from the durable run.',
-        calculationMethod: 'Sum',
-        startingValue: 0,
-        progressBaselineValue: null,
+        aggregationMethod: 'Sum',
+        initialValue: 0,
         currentValue: 0,
         targetValue: 1,
+        target: null,
         unit: 'workflow',
         weight: 3,
       },
     ],
-    taskTemplates: [],
-    reminders: [],
+    tasks: [],
+    knowledge: [],
     rationale: 'Create the restored Agent goal after user approval.',
     warnings: [],
   };
 }
 
 function createPendingApprovalWorkflowEntry() {
-  const now = Date.now();
-  const draft = createRestoredGoalWorkflowDraft();
-
-  return {
-    mode: 'goal-create',
-    goalWorkflowStage: 'confirm',
-    goalWorkflowRun: {
-      runId: 'workflow-e2e-restored-approval',
-      kind: 'goal.create',
-      conversationId: e2eConversationId,
-      status: 'suspended',
-      suspension: {
-        type: 'goal_draft_review',
-        draft,
-        warnings: draft.warnings,
-        revision: draft.revision,
-      },
-      createdAt: now,
-      updatedAt: now,
-    },
-    knowledgeAnswer: null,
-    clarificationAnswers: [],
-    editableGoal: {
-      name: draft.goal.name,
-      description: draft.goal.description,
-      motivation: draft.goal.motivation ?? '',
-      feasibilityAnalysis: draft.goal.feasibilityAnalysis ?? '',
-      startDate: draft.goal.startDate,
-      dueDate: draft.goal.dueDate,
-    },
-    editableKeyResults: [],
-    editableTaskTemplates: [],
-    editableReminders: [],
-    showGoalDraftEditor: false,
-  };
+  return { activeRunId: 'workflow-e2e-restored-approval' };
 }
 
 function createPendingTaskApprovalWorkflowEntry() {
-  const now = Date.now();
-  const mockRun: TaskWorkflowMockRun = {
-    runId: 'workflow-e2e-restored-task-approval',
-    conversationId: e2eConversationId,
-    createdAt: now,
-    draft: createTaskWorkflowDraft('Restored Mastra task workflow'),
-  };
-  return {
-    mode: 'task-create',
-    taskWorkflowRun: createTaskReviewRun(mockRun),
-    goalWorkflowRun: null,
-    knowledgeCaptureRun: null,
-    knowledgeAnswer: null,
-    clarificationAnswers: [],
-    editableGoal: {
-      name: '',
-      description: '',
-      motivation: '',
-      feasibilityAnalysis: '',
-      startDate: null,
-      dueDate: null,
-    },
-    editableKeyResults: [],
-    editableTaskTemplates: [],
-    editableReminders: [],
-    showGoalDraftEditor: false,
-  };
+  return { activeRunId: 'workflow-e2e-restored-task-approval' };
 }
 
 function createGoalAgentWorkflowDraft(): GoalPlanDraft {
-  const now = Date.now();
   return {
     revision: 1,
     goal: {
+      draftRef: 'goal',
       name: 'Agent-created AI workflow',
-      description: 'Create a structured goal through the Mastra Workflow runtime.',
-      motivation: 'Turn the Agent plan into tracked execution.',
-      feasibilityAnalysis: 'The approved plan is scoped to goal and KR creation.',
-      startDate: now,
-      dueDate: now + 60 * 24 * 60 * 60 * 1000,
+      summary: 'Create a structured goal through the Mastra Workflow runtime.',
+      status: 'InProgress',
+      startDate: '2026-09-12',
+      target: { kind: 'quarter', year: 2026, quarter: 4 },
+      labels: ['ai-vnext'],
     },
     keyResults: [
       {
+        draftRef: 'kr:end-to-end',
         title: 'Run the Goal Agent workflow end to end',
         description: 'Confirm Mastra Workflow execution through the controlled executor.',
-        calculationMethod: 'Sum',
-        startingValue: 0,
-        progressBaselineValue: null,
+        aggregationMethod: 'Sum',
+        initialValue: 0,
         currentValue: 0,
         targetValue: 1,
+        target: null,
         unit: 'workflow',
         weight: 3,
       },
     ],
-    taskTemplates: [
+    tasks: [
       {
-        name: 'Review Agent execution',
+        draftRef: 'task:review-execution',
+        title: 'Review Agent execution',
         description: 'Check result and recovery.',
         importance: 'Moderate',
-        cadence: 'weekly',
-        startDate: now,
-        timeOfDay: '09:00',
-        daysOfWeek: [1],
-        occurrences: null,
-        keyResultIndex: 0,
-        contributionValue: 1,
+        schedule: {
+          kind: 'Recurring',
+          startDate: '2026-09-12',
+          timing: { kind: 'At', time: '09:00' },
+          recurrence: {
+            frequency: 'Weekly',
+            interval: 1,
+            byWeekday: [1],
+            end: { kind: 'Never' },
+          },
+        },
+        reminderConfig: null,
         labels: [],
+        goalRef: 'goal',
+        keyResultRef: 'kr:end-to-end',
+        contribution: { value: 1, trigger: 'EachCompletion' },
       },
     ],
-    reminders: [
+    knowledge: [
       {
-        title: 'Review Agent result',
-        description: 'Review failed actions.',
-        importance: 'Moderate',
-        cadence: 'weekly',
-        scheduledAt: now,
-        timeOfDay: '09:00',
-        timezone: null,
-        channels: ['InApp'],
-        tags: [],
+        draftRef: 'note:goal-brief',
+        mode: 'create',
+        title: 'Agent Goal Brief',
+        markdown: '# Agent Goal Brief\n\nValidated through the durable GoalPlanDraft V2 workflow.',
+        targetSubpath: 'goals/agent-goal-brief.md',
+        sourceRefs: ['conversation:e2e-goal-workflow'],
       },
     ],
     rationale:
-      'Create the approved goal draft with a measurable key result, task template, and reminder.',
+      'Create the approved goal draft with a measurable key result, Knowledge brief, and canonical Task plan.',
     warnings: [],
   };
 }
@@ -936,9 +886,8 @@ function createGoalWorkflowMockRun(request: {
     conversationId: request.conversationId ?? e2eConversationId,
     createdAt: Date.now(),
     draft,
-    executedGoalId: null,
-    executedTaskIds: [],
-    executedReminderIds: [],
+    referenceMap: {},
+    relationIds: {},
     failures: [],
     executionStatus: 'failed',
   };
@@ -993,10 +942,10 @@ function createGoalRecoveryRun(mockRun: GoalWorkflowMockRun): AIWorkflowRunView 
       workflowRunId: mockRun.runId,
       revision: mockRun.draft.revision,
       status: mockRun.executionStatus,
-      goalId: mockRun.executedGoalId ?? undefined,
-      keyResultIds: [],
-      taskIds: mockRun.executedTaskIds,
-      reminderIds: mockRun.executedReminderIds,
+      referenceMap: { ...mockRun.referenceMap },
+      relationIds: { ...mockRun.relationIds },
+      goalVersion: mockRun.goalVersion,
+      appliedGoalStatus: mockRun.appliedGoalStatus,
       failures: mockRun.failures,
       retryable: true,
     },
@@ -1016,10 +965,10 @@ function createGoalCompletedRun(mockRun: GoalWorkflowMockRun): AIWorkflowRunView
       workflowRunId: mockRun.runId,
       revision: mockRun.draft.revision,
       status: mockRun.executionStatus,
-      goalId: mockRun.executedGoalId ?? undefined,
-      keyResultIds: mockRun.draft.keyResults.map((_, index) => `kr-e2e-${index + 1}`),
-      taskIds: mockRun.executedTaskIds,
-      reminderIds: mockRun.executedReminderIds,
+      referenceMap: { ...mockRun.referenceMap },
+      relationIds: { ...mockRun.relationIds },
+      goalVersion: mockRun.goalVersion,
+      appliedGoalStatus: mockRun.appliedGoalStatus,
       failures: mockRun.failures,
       retryable: false,
     },
@@ -1047,21 +996,25 @@ function executeGoalWorkflowMockRun(
   telemetry.goalAgentExecuteRequestCount += 1;
   const retrySucceeded = telemetry.goalAgentExecuteRequestCount > 1;
 
-  mockRun.executedGoalId = 'goal-e2e-1';
+  mockRun.referenceMap = {
+    goal: 'goal-e2e-1',
+    'kr:end-to-end': 'kr-e2e-1',
+    'note:goal-brief': 'kdoc_e2e_goal_brief',
+    ...(retrySucceeded ? { 'task:review-execution': 'task-plan-e2e-1' } : {}),
+  };
+  mockRun.relationIds = { 'note:goal-brief': 'relation-e2e-goal-brief' };
+  mockRun.goalVersion = 2;
+  mockRun.appliedGoalStatus = 'InProgress';
   if (retrySucceeded) {
-    mockRun.executedTaskIds = ['task-template-e2e-1'];
-    mockRun.executedReminderIds = ['reminder-e2e-1'];
     mockRun.failures = [];
     mockRun.executionStatus = 'success';
   } else {
-    mockRun.executedTaskIds = [];
-    mockRun.executedReminderIds = ['reminder-e2e-1'];
     mockRun.failures = [
       {
-        operation: 'task_template',
-        index: 0,
-        code: 'KEY_RESULT_FAILED',
-        message: '关键结果创建失败，字段仍需修正。',
+        operation: 'task_create',
+        draftRef: 'task:review-execution',
+        code: 'TASK_CREATE_FAILED',
+        message: 'Task plan persistence is temporarily unavailable.',
         retryable: true,
       },
     ];
@@ -1091,64 +1044,22 @@ async function installGoalWorkflowMocks(
     knowledgeCaptureCancelCount: 0,
     legacyEndpointCallCount: 0,
   };
-  await page.route('**/api/v1/settings', async (route) => {
+  await page.route('**/api/v1/settings/preferences', async (route) => {
     if (route.request().method() !== 'GET') {
       await route.continue();
       return;
     }
 
-    await fulfillJson(
-      route,
-      createMockUserSetting({
-        preferences: {
-          appearance: { theme: 'light' },
-          locale: {
-            language: 'en-US',
-            timezone: 'Asia/Shanghai',
-            dateFormat: 'YYYY-MM-DD',
-            timeFormat: '24H',
-            currency: 'CNY',
-            weekStartsOn: 1,
-          },
-          workflow: {
-            autoSave: true,
-            autoSaveInterval: 30000,
-            confirmBeforeDelete: true,
-            defaultTaskView: 'LIST',
-            defaultGoalView: 'LIST',
-            defaultScheduleView: 'WEEK',
-          },
-          privacy: {
-            profileVisibility: 'PRIVATE',
-            showOnlineStatus: false,
-            shareUsageData: false,
-            allowSearchByEmail: false,
-            allowSearchByPhone: false,
-          },
-          notification: {
-            email: false,
-            push: false,
-            inApp: true,
-            sound: false,
-            useCustomNotification: false,
-          },
-
-          shortcuts: {
-            enabled: true,
-            custom: {},
-          },
-          experimental: {
-            enabled: false,
-            features: [],
-          },
-          ui: {
-            startPage: 'dashboard',
-            sidebarCollapsed: false,
-          },
-          ai: {},
-        },
-      }),
-    );
+    await fulfillJson(route, {
+      ...createDefaultUserPreferenceProfile(),
+      presentation: { theme: 'light', language: 'en-US' },
+      regional: {
+        timeZone: 'Asia/Shanghai',
+        dateStyle: 'medium',
+        timeStyle: '24h',
+        weekStartsOn: 1,
+      },
+    });
   });
 
   await page.route('**/api/v1/ai/providers', async (route) => {
@@ -1158,9 +1069,9 @@ async function installGoalWorkflowMocks(
           id: 'provider-e2e-openai',
           identityId: 'IdentityId_550e8400-e29b-41d4-a716-446655440000',
           name: 'E2E OpenAI',
-          providerType: 'openai_compatible',
+          providerDefinitionId: 'openai',
           baseUrl: 'https://api.openai.com/v1',
-          apiKeyMasked: 'sk-****e2e',
+          credentialRef: 'credential-e2e',
           defaultModel: 'gpt-4.1-mini',
           availableModels: [{ id: 'gpt-4.1-mini', name: 'gpt-4.1-mini' }],
           isActive: true,
@@ -1409,8 +1320,11 @@ async function installGoalWorkflowMocks(
       answer: 'Grounded answers cite repository excerpts and show where each claim came from.',
       citations: [
         {
-          resourceId: 'resource-grounding-1',
-          resourcePath: 'notes/ai/grounding-policy.md',
+          documentRef: {
+            knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440091',
+            documentId: 'kdoc_550e8400-e29b-41d4-a716-446655440090',
+          },
+          sourcePath: 'notes/ai/grounding-policy.md',
           title: 'MemoFlow grounding policy',
           chunkIndex: 0,
           excerpt: 'Knowledge answers must cite repository evidence before sounding certain.',

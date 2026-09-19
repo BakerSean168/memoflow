@@ -1,4 +1,5 @@
-import type { AIProviderConfigServerDTO } from '@memoflow/contracts/ai';
+import type { AIProviderConnectionServerDTO } from '@memoflow/contracts/ai';
+import type { AIProviderCredentialRef } from '@memoflow/contracts/primitives';
 
 export type AIProviderOnboardingCommitOutcome = 'COMMITTED' | 'SESSION_UNAVAILABLE' | 'CONFLICT';
 export type AIProviderReplacementCommitOutcome =
@@ -16,7 +17,7 @@ export interface IAIProviderOnboardingCommitPort {
   commit(input: {
     identityId: string;
     onboardingId: string;
-    provider: AIProviderConfigServerDTO;
+    provider: AIProviderConnectionServerDTO;
     now: number;
   }): Promise<AIProviderOnboardingCommitOutcome>;
 
@@ -25,7 +26,8 @@ export interface IAIProviderOnboardingCommitPort {
     onboardingId: string;
     targetProviderId: string;
     expectedVersion: number;
-    replacement: AIProviderConfigServerDTO;
+    previousCredentialRef: AIProviderCredentialRef;
+    replacement: AIProviderConnectionServerDTO;
     now: number;
   }): Promise<AIProviderReplacementCommitOutcome>;
 }

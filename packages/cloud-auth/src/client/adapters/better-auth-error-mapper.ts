@@ -14,6 +14,10 @@ const PROVIDER_FAILURE_PROJECTIONS: Readonly<Record<string, FailureProjection>> 
     code: 'EMAIL_VERIFICATION_REQUIRED',
     message: 'Email verification required',
   }),
+  USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: Object.freeze({
+    code: 'USER_ALREADY_EXISTS',
+    message: 'Account already exists',
+  }),
 });
 
 const APPLICATION_FAILURE_PROJECTIONS: Readonly<Record<string, FailureProjection>> = Object.freeze({

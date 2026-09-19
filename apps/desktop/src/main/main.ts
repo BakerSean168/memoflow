@@ -20,11 +20,11 @@ import { powerMonitor } from 'electron';
 import { initMemoryMonitorForDev, registerCacheIpcHandlers } from './utils';
 import { registerAppLifecycleHandlers } from './lifecycle';
 import { ElectronBootstrapper } from './bootstrap';
-import { registerDashboardIpcHandler } from './ipc/dashboard-handler';
 
 // ── Module Electron Entry Points ─────────────────────────────────────
-import { PowerSyncTaskBindingReadPort } from '@memoflow/task';
-import { createGoalTaskProgressPowerSyncHandler } from '@memoflow/goal';
+import { PowerSyncTaskBindingReadPort, TaskWorkspaceQueryService } from '@memoflow/task';
+import { GetTaskDashboardUseCase } from '@memoflow/task/analytics';
+import { createGoalTaskProgressPowerSyncHandler, GoalWorkspaceQueryService } from '@memoflow/goal';
 import { createTaskReminderScheduledHandlerRegistration } from '@memoflow/task/schedule-execution';
 import { createTaskPowerSyncScheduleProjectionSource } from '@memoflow/task/schedule-projection';
 import { createScheduleOrchestrationModule } from '@memoflow/schedule-orchestration';
@@ -37,14 +37,31 @@ import {
 } from '@memoflow/repository/electron';
 import { createSchedulePowerSyncRepositories } from '@memoflow/schedule';
 import { createSchedulerPowerSyncRepositories } from '@memoflow/scheduler';
-import { LabelService, PowerSyncLabelRepository } from '@memoflow/label';
+import {
+  LabelService,
+  PowerSyncLabelRepository,
+  createLabelPortableCapability,
+} from '@memoflow/label';
+import {
+  GoalKnowledgeService,
+  TaskKnowledgeService,
+  PowerSyncRelationRepository,
+  PowerSyncGoalRelationCleanupCapability,
+} from '@memoflow/relation';
+import { createGoalKnowledgeElectronModule } from './modules/relation/relation.electron-module';
+import { LocalVaultKnowledgeDocumentRefResolver } from './modules/relation/local-vault-knowledge-document-ref.resolver';
+import { LocalVaultKnowledgeWorkspaceResolver } from './modules/relation/local-vault-knowledge-workspace.resolver';
+import { createGoalWorkspaceElectronModule } from './modules/goal/goal-workspace.electron-module';
+import { createTaskWorkspaceElectronModule } from './modules/task/task-workspace.electron-module';
+import { createSystemClock } from '@memoflow/time';
 import { createLabelElectronModule } from './modules/label/label.electron-module';
 import { composeGovernance } from './runtime/compose-governance';
 import { composeGoal } from './runtime/compose-goal';
 import { composeTask } from './runtime/compose-task';
 import { composeAccount } from './runtime/compose-account';
 import { composeNotification } from './runtime/compose-notification';
-import { composeReminder } from './runtime/compose-reminder';
+import { composeRoutine } from './runtime/compose-routine';
+import { registerRoutineNotificationOwnerCommands } from '@memoflow/reminder';
 import { PowerSyncProtocolSessionStore } from '@memoflow/reminder/server';
 import { createProtocolSessionRuntime } from '@memoflow/reminder/routine-runtime';
 import {
@@ -64,12 +81,11 @@ import { composeDataPortability } from './runtime/compose-data-portability';
 import { composeAI } from './runtime/compose-ai';
 import { composeRepository } from './runtime/compose-repository';
 import { DesktopAnalyticsReadAdapter } from './modules/ai/desktop-analytics-read.adapter';
+import { DesktopActivityAIReadAdapter } from './modules/ai/desktop-activity-read.adapter';
+import { DesktopPlannerAIReadAdapter } from './modules/ai/planner-read.adapter';
+import { DesktopNotificationAIReadAdapter } from './modules/ai/notification-read.adapter';
 import { DesktopKnowledgeNotePersistenceAdapter } from './modules/ai/desktop-knowledge-note-persistence.adapter';
 import { DesktopKnowledgeSourceAdapter } from './modules/ai/desktop-knowledge-source.adapter';
-import {
-  getDesktopDashboardData,
-  type DashboardRepositoryDependencies,
-} from './services/dashboard-read-service';
 import { configureDesktopShellIdentity } from './utils/app-icon';
 import { getApiBaseUrl } from './utils/api-config';
 import { createLogger } from '@memoflow/utils/logger';
@@ -102,16 +118,11 @@ let mainRuntime: DesktopMainRuntime | null = null;
 const windowManager = new WindowManager();
 let activeFocusWindowController: FocusWindowController | null = null;
 let activeInterventionWindowController: InterventionWindowController | null = null;
-let activeReminderActivityRuntime: { stop: () => void } | null = null;
-let activeReminderUsageRuntime: { stop: () => void } | null = null;
-
-// Composed Goal/Task repository view for the active profile. The dashboard IPC
-// handler is registered once at shell init, but the repositories only exist
-// after a profile activates (registerBusinessModules); bridge them here.
-// 当前激活 profile 的组合 Goal/Task repository view。dashboard IPC handler 在
-// shell 初始化时只注册一次，而仓储要等 profile 激活（registerBusinessModules）
-// 之后才存在，因此在这里做桥接。
-let activeProfileDashboardRepositories: DashboardRepositoryDependencies | null = null;
+type StartStopRuntime = { start: () => void; stop: () => void };
+let activeReminderActivityRuntime: StartStopRuntime | null = null;
+let activeReminderElapsedRuntime: StartStopRuntime | null = null;
+let activeReminderUsageRuntime: StartStopRuntime | null = null;
+let activeReminderOccurrenceFlush: (() => Promise<void>) | null = null;
 
 /**
  * Register all business modules on a bootstrapper for the active profile.
@@ -159,12 +170,13 @@ async function registerBusinessModules(
   const localVaultRuntime = createLocalVaultRuntime({
     bindingFilePath: profilePaths.localVaultBindingPath,
     writeLedgerFilePath: profilePaths.localVaultWriteLedgerPath,
+    localProfileId: profilePaths.profileId,
     platform: localVaultPlatform,
   });
 
   // Step D：宿主 runtime 负责 feature 装配。通知/提醒 composer 先于 schedule
   // 编排（编排消费它们返回的 source/notification ports），schedule 采用两阶段
-  // 装配（单一 PowerSync 集合，scheduleTaskRepository 与编排共享，不建第二套）。
+  // 装配（单一 PowerSync Scheduler invocation 集合，不建第二套 worker truth）。
   // 1. Raw schedule ingredient set — the ONE two-phase schedule repository set.
   //    原始 schedule 原料集合 —— 唯一的、两阶段的 schedule 仓储集合。
   const calendarRepositorySet = createSchedulePowerSyncRepositories(db);
@@ -176,8 +188,25 @@ async function registerBusinessModules(
   //    先组装通知/提醒 composer —— schedule 编排消费它们返回的 source/notification
   //    ports。桌面 channel capabilities 显式声明（InApp + Desktop），杜绝包默认值
   //    替宿主决定策略。
+  const settingElectronModule = composeSetting({ db });
   const notificationComposed = composeNotification({
     db,
+    userTimeContextPort: settingElectronModule.userTimeContextPort,
+    desktopRenderer: (dto) => {
+      const renderer = mainRuntime?.notification;
+      if (!renderer) return false;
+      const payload = dto as Record<string, unknown>;
+      return renderer.show({
+        title: String(payload.title ?? 'Notification'),
+        body: String(payload.content ?? ''),
+        data: {
+          notificationId: payload.id,
+          identityId: payload.identityId,
+          notificationType: payload.type,
+          notificationCategory: payload.category,
+        },
+      });
+    },
     channelCapabilities: [
       { channelType: 'InApp', status: 'available' },
       { channelType: 'Desktop', status: 'available' },
@@ -189,29 +218,68 @@ async function registerBusinessModules(
       'Reminder local Routine runtime requires an active or prepared profile identity',
     );
   }
-  const reminderComposed = composeReminder({
+  const routineComposed = composeRoutine({
     db,
     identityId: profileIdentityId,
-    notificationRequestedWriter: notificationComposed.requestedWriter,
   });
+  registerRoutineNotificationOwnerCommands(
+    notificationComposed.ownerCommandRegistry,
+    routineComposed.routineCommandPort,
+  );
   // Project the durable vNext Routine snapshot before sensors start so the first
   // activity transition cannot race ahead of registration. ROUTINE-5301 can
   // reuse the same refresh seam after configuration mutations.
-  await reminderComposed.refreshLocalRoutineRegistrations();
+  await routineComposed.refreshLocalRoutineRegistrations();
   // Activity truth is a per-profile runtime. Start the sensor before the
   // accumulator so no idle/resume transition is lost during activation.
-  reminderComposed.activityRuntime.start();
-  reminderComposed.activeUsageRuntime.start();
-  activeReminderActivityRuntime = reminderComposed.activityRuntime;
-  activeReminderUsageRuntime = reminderComposed.activeUsageRuntime;
+  routineComposed.activityRuntime.start();
+  routineComposed.elapsedRuntime.start();
+  routineComposed.activeUsageRuntime.start();
+  activeReminderActivityRuntime = routineComposed.activityRuntime;
+  activeReminderElapsedRuntime = routineComposed.elapsedRuntime;
+  activeReminderUsageRuntime = routineComposed.activeUsageRuntime;
+  activeReminderOccurrenceFlush = routineComposed.flushRoutineOccurrencePersistence;
 
   // Routine InterventionWindow is a Main Process projection over the per-profile
   // InterventionRuntime returned by the Reminder composition root. It owns only
   // one low-intrusion BrowserWindow; occurrence truth remains in the runtime.
   const interventionWindowHost = new ElectronInterventionWindowHost();
   const interventionWindowController = createInterventionWindowController({
-    runtime: reminderComposed.interventionRuntime,
+    runtime: routineComposed.interventionRuntime,
     host: interventionWindowHost,
+    onCommand: async ({ commandId, snapshot, command, at }) => {
+      const receipt = await routineComposed.routineCommandPort.respondToOccurrence({
+        commandId,
+        identityId: snapshot.identityId,
+        routineId: snapshot.routineId,
+        occurrenceKey: snapshot.occurrenceKey,
+        action: command.action,
+        snoozeDurationMs: command.action === 'snooze' ? command.durationMs : undefined,
+        metadata: { surface: 'InterventionWindow' },
+        at,
+      });
+
+      if (command.action === 'complete') {
+        if (receipt.occurrence.triggerKind === 'ActiveUsage') {
+          routineComposed.activeUsageRuntime.markSatisfied({
+            identityId: snapshot.identityId,
+            routineId: snapshot.routineId,
+            at,
+          });
+        } else if (receipt.occurrence.triggerKind === 'Elapsed') {
+          routineComposed.elapsedRuntime.markSatisfied({
+            identityId: snapshot.identityId,
+            routineId: snapshot.routineId,
+            at,
+          });
+        }
+      }
+      if (command.action === 'snooze') {
+        // Reload the durable override into runtime gates. The composer preserves
+        // the current accumulator snapshot across this refresh.
+        await routineComposed.refreshLocalRoutineRegistrations();
+      }
+    },
   });
   const interventionWindowElectronModule = createInterventionWindowElectronModule(
     interventionWindowController,
@@ -224,7 +292,7 @@ async function registerBusinessModules(
   const protocolSessionStore = new PowerSyncProtocolSessionStore(db);
   const protocolSessionRuntime = createProtocolSessionRuntime({
     store: protocolSessionStore,
-    protocolBreakCreditRuntime: reminderComposed.protocolBreakCreditRuntime,
+    protocolBreakCreditRuntime: routineComposed.protocolBreakCreditRuntime,
   });
   const focusWindowHost = new ElectronFocusWindowHost();
   const focusWindowController = createFocusWindowController({
@@ -244,19 +312,22 @@ async function registerBusinessModules(
   //    runtime controller 是桌面 lane 中 schedule 启停的唯一所有者（取代已退役的
   //    schedule runtime 包级全局）。
   const scheduleOrchestrationModule = createScheduleOrchestrationModule({
+    scheduler: {
+      invocationRepository: schedulerRepositorySet.scheduledInvocationRepository,
+    },
     taskProjection: {
-      source: createTaskPowerSyncScheduleProjectionSource(db),
-      scheduleTaskRepository: schedulerRepositorySet.scheduleTaskRepository,
+      source: createTaskPowerSyncScheduleProjectionSource(
+        db,
+        settingElectronModule.userTimeContextPort,
+      ),
     },
     goalProjection: {
-      source: createGoalPowerSyncScheduleProjectionSource(db),
+      source: createGoalPowerSyncScheduleProjectionSource(
+        db,
+        settingElectronModule.userTimeContextPort,
+      ),
     },
-    reminderProjection: {
-      source: reminderComposed.scheduleProjectionSource,
-    },
-    execution: {
-      reminderSource: reminderComposed.scheduleExecutionSource,
-    },
+    execution: {},
   });
   scheduleOrchestrationModule.handlerRegistry.register(
     createGoalPowerSyncReminderFireHandler(db, notificationComposed.requestedWriter),
@@ -264,21 +335,19 @@ async function registerBusinessModules(
   const scheduleComposed = composeSchedule({
     calendarRepositories: calendarRepositorySet,
     schedulerRepositories: schedulerRepositorySet,
-    sourceExecutor: scheduleOrchestrationModule.sourceExecutor,
-    shouldScheduleTask: (task) => {
+    handlerRegistry: scheduleOrchestrationModule.handlerRegistry,
+    shouldExecuteIdentity: (candidateIdentityId) => {
       const identityId = mainRuntime?.profileRuntimeManager.getCurrentIdentityId() ?? null;
-      return identityId !== null && String(task.identityId) === identityId;
+      return identityId !== null && candidateIdentityId === identityId;
     },
   });
 
-  // 4. Goal/task composers (existing reference), then the expanded dashboard
-  //    repository view (schedule/reminder/notification ports included).
-  //    goal/task composer（既有参考），随后是扩展后的 dashboard 仓储视图（含
-  //    schedule/reminder/notification ports）。
+  // 4. Goal/task composers provide the owner-bound reads consumed by AI.
   const taskComposed = composeTask({
     db,
     runtimeContributions: scheduleOrchestrationModule.projectionRuntime,
     goalProgressHandler: createGoalTaskProgressPowerSyncHandler(db),
+    userTimeContextPort: settingElectronModule.userTimeContextPort,
   });
   // Register the Task reminder fire handler so scheduled `task.reminder` work
   // (e.g. a one-time task + relative reminder) is executed by the registry-based
@@ -286,36 +355,89 @@ async function registerBusinessModules(
   // into the shared outbox consumed by the notification durable runtime.
   scheduleOrchestrationModule.handlerRegistry.register(
     createTaskReminderScheduledHandlerRegistration({
-      taskInstanceRepository: taskComposed.repositories.taskInstanceRepository,
-      taskTemplateRepository: taskComposed.repositories.taskTemplateRepository,
+      taskOccurrenceRepository: taskComposed.repositories.taskOccurrenceRepository,
+      taskPlanRepository: taskComposed.repositories.taskPlanRepository,
       notificationRequestedWriter: notificationComposed.repositories.requestedWriter,
     }),
   );
   const taskElectronModule = taskComposed.module;
 
+  const taskGoalContextReadPort = new PowerSyncTaskBindingReadPort(db);
+  const relationRepository = new PowerSyncRelationRepository(db);
+  const localVaultKnowledgeRefResolver = new LocalVaultKnowledgeDocumentRefResolver(
+    localVaultRuntime,
+  );
+  const goalKnowledgeService = new GoalKnowledgeService(
+    relationRepository,
+    localVaultKnowledgeRefResolver,
+  );
+  const taskKnowledgeService = new TaskKnowledgeService(relationRepository);
   const goalComposed = composeGoal({
     db,
-    taskBindingReadPort: new PowerSyncTaskBindingReadPort(db),
+    taskBindingReadPort: taskGoalContextReadPort,
+    userTimeContextPort: settingElectronModule.userTimeContextPort,
+    relationCleanupFactory: (tx) => new PowerSyncGoalRelationCleanupCapability(tx),
+  });
+  const goalWorkspaceService = new GoalWorkspaceQueryService({
+    goalRepository: goalComposed.repositories.goalRepository,
+    goalRecordRepository: goalComposed.repositories.goalRecordRepository,
+    taskContextReadPort: taskGoalContextReadPort,
+    knowledgeRelationReadPort: goalKnowledgeService,
+    knowledgeContextReadPort: new LocalVaultKnowledgeWorkspaceResolver(localVaultRuntime),
+  });
+  const taskWorkspaceService = new TaskWorkspaceQueryService({
+    taskPlanRepository: taskComposed.repositories.taskPlanRepository,
+    taskOccurrenceRepository: taskComposed.repositories.taskOccurrenceRepository,
+    userTimeContextPort: settingElectronModule.userTimeContextPort,
+    goalReadPort: goalComposed.applicationPort,
+    knowledgeRelationReadPort: taskKnowledgeService,
+    knowledgeContextReadPort: new LocalVaultKnowledgeWorkspaceResolver(localVaultRuntime),
   });
 
-  const labelService = new LabelService(new PowerSyncLabelRepository(db));
+  const labelService = new LabelService(new PowerSyncLabelRepository(db), {
+    clock: createSystemClock(),
+  });
   const labelElectronModule = createLabelElectronModule({ service: labelService });
+  const goalKnowledgeElectronModule = createGoalKnowledgeElectronModule({
+    service: goalKnowledgeService,
+  });
+  const goalWorkspaceElectronModule = createGoalWorkspaceElectronModule({
+    port: goalWorkspaceService,
+  });
+  const taskWorkspaceElectronModule = createTaskWorkspaceElectronModule({
+    port: taskWorkspaceService,
+  });
 
-  const dashboardRepositories: DashboardRepositoryDependencies = {
-    goalRepository: goalComposed.repositories.goalRepository,
-    taskTemplateRepository: taskComposed.repositories.taskTemplateRepository,
-    taskInstanceRepository: taskComposed.repositories.taskInstanceRepository,
-    scheduleRepository: scheduleComposed.repositories.scheduleRepository,
-    scheduleTaskRepository: scheduleComposed.repositories.scheduleTaskRepository,
-    reminderTemplateRepository: reminderComposed.repositories.reminderTemplateRepository,
-    notificationRepository: notificationComposed.repositories.notificationRepository,
+  const taskDashboardUseCase = new GetTaskDashboardUseCase(
+    taskComposed.repositories.taskPlanRepository,
+    taskComposed.repositories.taskOccurrenceRepository,
+    settingElectronModule.userTimeContextPort,
+  );
+  const taskDashboardReadPort = {
+    getDashboard: async (identityId: string) => {
+      const result = await taskDashboardUseCase.execute(identityId);
+      return result.ok ? result.data : undefined;
+    },
   };
-  activeProfileDashboardRepositories = dashboardRepositories;
+  const plannerReadPort = new DesktopPlannerAIReadAdapter(
+    scheduleComposed.eventApi,
+    taskComposed.applicationPort,
+    settingElectronModule.userTimeContextPort,
+  );
+  const notificationReadPort = new DesktopNotificationAIReadAdapter(notificationComposed.inbox);
+  const activityReadPort = new DesktopActivityAIReadAdapter(
+    goalComposed.repositories.goalRepository,
+    taskComposed.repositories.taskPlanRepository,
+    taskComposed.repositories.taskOccurrenceRepository,
+    scheduleComposed.repositories.scheduleRepository,
+  );
 
   // 5. Account/data-portability/setting/AI/repository with explicit instances.
   //    account/data-portability/setting/AI/repository 均以显式实例组装。
   const accountComposed = composeAccount({
     db,
+    clock: createSystemClock(),
+    userTimeContextPort: settingElectronModule.userTimeContextPort,
     syncOptions: {
       getCloudAccountId: () =>
         mainRuntime?.profileRuntimeManager.getActiveProfileDescriptorSync()?.cloudBinding
@@ -409,22 +531,27 @@ async function registerBusinessModules(
   });
 
   const analyticsReadAdapter = new DesktopAnalyticsReadAdapter({
-    goalRepository: goalComposed.repositories.goalRepository,
-    taskTemplateRepository: taskComposed.repositories.taskTemplateRepository,
-    dashboardDataLoader: (identityId) => getDesktopDashboardData(identityId, dashboardRepositories),
+    goalApplicationPort: goalComposed.applicationPort,
+    taskDashboardReadPort,
+    plannerReadPort,
+    notificationReadPort,
+    activityReadPort,
+    userTimeContextPort: settingElectronModule.userTimeContextPort,
   });
 
-  const AIElectronModule = composeAI({
+  const aiComposed = composeAI({
     db,
     knowledgeNotePersistence: new DesktopKnowledgeNotePersistenceAdapter(localVaultRuntime),
     knowledgeSourcePort: new DesktopKnowledgeSourceAdapter(localVaultRuntime),
     analyticsReadPort: analyticsReadAdapter,
     goalApplicationPort: goalComposed.applicationPort,
     taskApplicationPort: taskComposed.applicationPort,
-    reminderApplicationPort: reminderComposed.applicationPort,
-    routineCommandPort: reminderComposed.routineCommandPort,
-    scheduleRepository: scheduleComposed.repositories.scheduleRepository,
-    notificationRepository: notificationComposed.repositories.notificationRepository,
+    goalKnowledgeService,
+    knowledgeDocumentRefResolver: localVaultKnowledgeRefResolver,
+    routineCommandPort: routineComposed.routineCommandPort,
+    scheduleEventApi: scheduleComposed.eventApi,
+    notificationInbox: notificationComposed.inbox,
+    userTimeContextPort: settingElectronModule.userTimeContextPort,
     labelService,
     mastraStorage: {
       kind: 'libsql',
@@ -432,8 +559,20 @@ async function registerBusinessModules(
     },
   });
 
-  const dataPortabilityElectronModule = composeDataPortability({ db });
-  const settingElectronModule = composeSetting({ db });
+  const dataPortabilityElectronModule = composeDataPortability({
+    portableCapabilities: [
+      accountComposed.portableCapability,
+      settingElectronModule.portableCapability,
+      notificationComposed.module.portableCapability,
+      routineComposed.portableCapability,
+      scheduleComposed.portableCapability,
+      notificationComposed.portableFactCapability,
+      createLabelPortableCapability(labelService),
+      goalComposed.portableCapability,
+      taskComposed.portableCapability,
+      aiComposed.portableCapability,
+    ],
+  });
 
   const knowledgeRepositoryRemoteGateway = new KnowledgeRepositoryRemoteGateway({
     getAccessToken: getCloudAccessToken,
@@ -504,14 +643,16 @@ async function registerBusinessModules(
     .register(dataPortabilityElectronModule)
     // Feature modules
     .register(goalComposed.module)
+    .register(goalWorkspaceElectronModule)
+    .register(taskWorkspaceElectronModule)
     .register(labelElectronModule)
+    .register(goalKnowledgeElectronModule)
     .register(taskElectronModule)
     .register(scheduleComposed.calendarModule)
     .register(scheduleComposed.schedulerModule)
-    .register(reminderComposed.module)
     .register(interventionWindowElectronModule)
     .register(focusWindowElectronModule)
-    .register(AIElectronModule)
+    .register(aiComposed.module)
     .register(governanceElectronModule)
     .register(repositoryElectronModule);
 
@@ -539,7 +680,11 @@ async function initializeShellRuntime(): Promise<void> {
   await profileRegistry.load();
   console.log('[Shell] ProfileRegistry initialized');
 
-  const profileRuntimeManager = new DesktopProfileRuntimeManager(sharedResolver, profileRegistry);
+  const profileRuntimeManager = new DesktopProfileRuntimeManager(
+    sharedResolver,
+    profileRegistry,
+    createSystemClock(),
+  );
   const cloudSessionStore = new CloudSessionStore(sharedResolver.rootDir);
   const cloudConnectionManager = new DesktopCloudConnectionManager(
     cloudSessionStore,
@@ -603,12 +748,28 @@ async function initializeShellRuntime(): Promise<void> {
       logger.warn('FocusWindow restore failed; ProtocolSession remains durable', { error });
     });
   });
-  profileRuntimeManager.setBeforeDeactivation(() => {
-    activeReminderUsageRuntime?.stop();
-    activeReminderActivityRuntime?.stop();
+  profileRuntimeManager.setBeforeDeactivation(async () => {
+    const usageRuntime = activeReminderUsageRuntime;
+    const elapsedRuntime = activeReminderElapsedRuntime;
+    const activityRuntime = activeReminderActivityRuntime;
+    usageRuntime?.stop();
+    elapsedRuntime?.stop();
+    activityRuntime?.stop();
+    try {
+      await activeReminderOccurrenceFlush?.();
+    } catch (error) {
+      // Deactivation is fail-closed for Routine owner truth. Restore the local
+      // runtime in activation order so the current Profile remains usable and
+      // the re-armed occurrence can retry persistence.
+      activityRuntime?.start();
+      elapsedRuntime?.start();
+      usageRuntime?.start();
+      throw error;
+    }
     activeReminderUsageRuntime = null;
+    activeReminderElapsedRuntime = null;
     activeReminderActivityRuntime = null;
-    activeProfileDashboardRepositories = null;
+    activeReminderOccurrenceFlush = null;
     activeInterventionWindowController = null;
     activeFocusWindowController = null;
     // Clear the WindowManager's bound schedule runtime controller BEFORE the
@@ -626,16 +787,6 @@ async function initializeShellRuntime(): Promise<void> {
   // Ancillary
   initMemoryMonitorForDev();
   registerCacheIpcHandlers();
-  registerDashboardIpcHandler(
-    () => mainRuntime?.profileRuntimeManager.getActiveProfileAccessContext() ?? null,
-    () => {
-      const repositories = activeProfileDashboardRepositories;
-      if (!repositories) {
-        throw new Error('Dashboard IPC invoked before profile business modules were composed');
-      }
-      return repositories;
-    },
-  );
 
   const initTime = performance.now() - startTime;
   console.log(`[Shell] Shell runtime initialized in ${initTime.toFixed(2)}ms`);

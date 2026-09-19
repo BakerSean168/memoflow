@@ -1,12 +1,12 @@
 // ==========================================
 // Relation Module (R5)
-// 跨模块 SubjectRef 关系：Note/Goal/Task/Reminder/Habit 双向连接
+// 跨模块 SubjectRef 关系：Note/Goal/Task/Habit/Wallet 双向连接
 // ==========================================
 
 model Relation {
   id           String   @id
   identityId   String   @map("identity_id")
-  subjectType  String   @map("subject_type") /// note | goal | task | reminder | habit
+  subjectType  String   @map("subject_type") /// note | goal | task | habit | wallet
   subjectId    String   @map("subject_id")
   relationType String   @map("relation_type") /// references | related | depends_on | contributes_to
   objectType   String   @map("object_type")

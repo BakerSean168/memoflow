@@ -95,6 +95,18 @@ export const ResultCodeToHttpStatus: Record<string, number> = {
   [ResultCode.SERVICE_UNAVAILABLE]: 503,
   [ResultCode.TIMEOUT]: 504,
 
+  // AI transport codes are feature-owned but still need a consistent HTTP
+  // projection so API envelopes and SSE/IPC failure categories agree.
+  AI_CONFIGURATION_REQUIRED: 422,
+  AI_CAPABILITY_UNSUPPORTED: 422,
+  AI_CAPABILITY_UNVERIFIED: 422,
+  MODEL_NOT_AVAILABLE: 422,
+  PROVIDER_AUTH_FAILED: 401,
+  CANCELED: 499,
+  AI_RUNTIME_TRANSPORT_ERROR: 503,
+  AI_RUNTIME_ERROR: 500,
+  AI_WORKFLOW_RUNTIME_ERROR: 500,
+
   // 业务错误（映射为 400）
   [ResultCode.BUSINESS_ERROR]: 400,
   [ResultCode.DOMAIN_ERROR]: 400,

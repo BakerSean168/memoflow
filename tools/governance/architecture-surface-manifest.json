@@ -157,7 +157,6 @@
     "receiptAdapters": [
       "packages/goal/src/server/infrastructure/adapters/prisma/prisma-goal-reliable-operation.adapter.ts",
       "packages/goal/src/server/infrastructure/adapters/powersync/powersync-goal-reliable-operation.adapter.ts",
-      "packages/reminder/src/server/infrastructure/adapters/prisma/reminder-reliable-operation-prisma.adapter.ts",
       "packages/notification/src/server/infrastructure/adapters/prisma/notification-reliable-operation-prisma.adapter.ts",
       "packages/notification/src/server/infrastructure/adapters/powersync/power-sync-notification-reliable.adapter.ts"
     ]
@@ -184,7 +183,7 @@
           "const mastraRuntime = new MastraAIRuntime({",
           "mastraRuntime,",
           "workflowRuntime: mastraRuntime",
-          "usageReadPort: repositorySet.executionLogPort"
+          "usageReadPort: repositorySet.executionRecordPort"
         ]
       },
       {
@@ -193,7 +192,7 @@
           "const mastraRuntime = new MastraAIRuntime({",
           "mastraRuntime,",
           "workflowRuntime: mastraRuntime",
-          "usageReadPort: executionLogPort"
+          "usageReadPort: executionRecordPort"
         ]
       }
     ],

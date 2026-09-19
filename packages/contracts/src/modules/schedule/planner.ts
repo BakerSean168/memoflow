@@ -2,8 +2,11 @@ import type { Instant, Ymd } from '../../primitives';
 
 export type PlannerSourceType = 'schedule' | 'task' | 'goal' | 'routine';
 
+/** Whether a Planner projection actually consumes time for conflict purposes. */
+export type PlannerOccupancy = 'blocking' | 'non-blocking' | 'marker';
+
 export type PlannerDisplaySemantic =
-  'calendar-entry' | 'task-occurrence' | 'goal-start' | 'goal-deadline' | 'routine-wall-clock';
+  'calendar-entry' | 'task-occurrence' | 'goal-start' | 'goal-target' | 'routine-wall-clock';
 
 export type PlannerDisplayTone = 'default' | 'muted' | 'accent' | 'warning' | 'success';
 
@@ -12,7 +15,6 @@ export interface PlannerDisplayMetadata {
   readonly subtitle?: string | null;
   readonly tone?: PlannerDisplayTone;
   readonly status?: string | null;
-  readonly hasConflict?: boolean;
 }
 
 export interface PlannerEditableCapabilities {
@@ -22,7 +24,7 @@ export interface PlannerEditableCapabilities {
 
 export type PlannerOwnerCommandTarget =
   | { readonly ownerType: 'schedule.calendar-entry'; readonly ownerId: string }
-  | { readonly ownerType: 'task.instance'; readonly ownerId: string }
+  | { readonly ownerType: 'task.occurrence'; readonly ownerId: string }
   | { readonly ownerType: 'goal.goal'; readonly ownerId: string }
   | { readonly ownerType: 'routine.routine'; readonly ownerId: string };
 
@@ -50,6 +52,8 @@ interface CalendarEventProjectionBase<
   /** Stable identity of the projected fact, not of any Scheduler invocation. */
   readonly sourceId: string;
   readonly title: string;
+  /** Derived Planner occupancy policy; never persisted back into the owner domain. */
+  readonly occupancy: PlannerOccupancy;
   readonly displayMetadata: PlannerDisplayMetadata;
   readonly editableCapabilities: PlannerEditableCapabilities;
   readonly ownerCommandTarget: TTarget;
@@ -68,7 +72,7 @@ export type ScheduleCalendarEventProjection = CalendarEventProjectionFor<
 
 export type TaskCalendarEventProjection = CalendarEventProjectionFor<
   'task',
-  Extract<PlannerOwnerCommandTarget, { ownerType: 'task.instance' }>
+  Extract<PlannerOwnerCommandTarget, { ownerType: 'task.occurrence' }>
 >;
 
 export type GoalCalendarEventProjection = CalendarEventProjectionFor<
@@ -84,7 +88,7 @@ export type RoutineCalendarEventProjection = CalendarEventProjectionFor<
 /**
  * Canonical Planner read contract (ADR-060 / PLAN-4302).
  *
- * This is deliberately a projection of owner-domain facts. ScheduleTask,
+ * This is deliberately a projection of owner-domain facts. raw Scheduler worker state,
  * ScheduledInvocationContext, retry/lease/dead-letter state and handler keys are
  * not valid inputs or fields of this contract.
  */
@@ -93,3 +97,31 @@ export type CalendarEventProjection =
   | TaskCalendarEventProjection
   | GoalCalendarEventProjection
   | RoutineCalendarEventProjection;
+
+
+export interface PlannerProjectionRef {
+  readonly sourceType: PlannerSourceType;
+  readonly sourceId: string;
+}
+
+export interface PlannerConflictSuggestion {
+  /** Owner fact that would be changed if a future product flow accepts this suggestion. */
+  readonly target: PlannerProjectionRef;
+  readonly kind: 'move-earlier' | 'move-later';
+  readonly range: { readonly kind: 'Timed'; readonly start: Instant; readonly end: Instant };
+}
+
+/**
+ * Pure Planner read-model conflict. It is recomputed from owner projections and
+ * is never persisted as CalendarEntry/Task/Goal/Routine truth.
+ */
+export interface PlannerConflictProjection {
+  readonly id: string;
+  readonly identityId: string;
+  readonly left: PlannerProjectionRef;
+  readonly right: PlannerProjectionRef;
+  readonly overlapRange: { readonly kind: 'Timed'; readonly start: Instant; readonly end: Instant };
+  readonly overlapDurationMs: number;
+  readonly severity: 'Minor' | 'Moderate' | 'Severe';
+  readonly suggestions: readonly PlannerConflictSuggestion[];
+}

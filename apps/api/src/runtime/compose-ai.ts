@@ -19,33 +19,44 @@
 import type { PrismaClient } from '@memoflow/database';
 import {
   AIEvaluationReportFileAdapter,
+  AIContextAssembler,
   createAIModule,
   createAIPrismaRepositories,
   createMastraStorage,
-  ConversationTranscriptBootstrapSource,
+  ConversationShellSource,
   KnowledgeCapturePersistenceAdapter,
   MastraAIRuntime,
   MastraModelResolver,
+  type IAIActivityReadPort,
+  type IAITaskDashboardReadPort,
   type MastraStorageConfig,
+  type AIModuleInstance,
 } from '@memoflow/ai';
 import { createAIApiModule, type AIApiModuleDef } from '@memoflow/ai/api';
 import type { RepositoryApplicationPort } from '@memoflow/repository';
-import type { GoalApplicationPort } from '@memoflow/goal';
-import type { TaskApplicationPort } from '@memoflow/task';
-import type { ReminderApplicationPort } from '@memoflow/reminder';
+import { createGoalPrismaRepositories, type GoalApplicationPort } from '@memoflow/goal';
+import { createTaskPrismaRepositories, type TaskApplicationPort } from '@memoflow/task';
 import type { RoutineCoachCommandPort } from '@memoflow/reminder/routine-runtime';
-import type { IScheduleRepository } from '@memoflow/schedule';
-import type { INotificationRepository } from '@memoflow/notification';
+import type { IScheduleRepository, ScheduleEventApplicationPort } from '@memoflow/schedule';
+import type { NotificationInboxPort } from '@memoflow/notification';
 import type { LabelService } from '@memoflow/label';
+import type { GoalKnowledgeService, KnowledgeDocumentRefResolver } from '@memoflow/relation';
+import type { UserTimeContextPort } from '@memoflow/time';
 import { GoalPlanMutationAdapter } from '../modules/ai/goal-plan-mutation.adapter';
 import { TaskPlanMutationAdapter } from '../modules/ai/task-plan-mutation.adapter';
 import { ControlledAnalyticsReadAdapter } from '../modules/ai/controlled-analytics-read.adapter';
-import { RepositoryKnowledgeIndexStatusAdapter } from '../modules/ai/repository-knowledge-index-status.adapter';
 import { RepositoryKnowledgeNotePersistenceAdapter } from '../modules/ai/repository-knowledge-note-persistence.adapter';
 import { RepositoryKnowledgeSourceAdapter } from '../modules/ai/repository-knowledge-source.adapter';
 import { RoutineAICommandAdapter } from '../modules/ai/routine-command.adapter';
 import { PlannerAIReadAdapter } from '../modules/ai/planner-read.adapter';
 import { NotificationAIReadAdapter } from '../modules/ai/notification-read.adapter';
+import { OwnerActivityAIReadAdapter } from '../modules/ai/owner-activity-read.adapter';
+
+export interface ComposedAI {
+  readonly module: AIApiModuleDef;
+  /** AI-owned Conversation shell portability capability for host registration. */
+  readonly portableCapability: AIModuleInstance['portableCapability'];
+}
 
 export interface ComposeAIDependencies {
   /** Shared API-lane Prisma client owned by apps/api. */
@@ -58,13 +69,21 @@ export interface ComposeAIDependencies {
   readonly goalApplicationPort: GoalApplicationPort;
   /** The shared Task application port composed once by the API runtime. */
   readonly taskApplicationPort: TaskApplicationPort;
-  /** The Reminder application port wired for the AI executor. */
-  readonly reminderApplicationPort: ReminderApplicationPort;
+  /** Task-owned bounded read projection used by AI analytics. */
+  readonly taskDashboardReadPort: IAITaskDashboardReadPort;
+  /** Existing Shared Relation facade reused by GoalPlan V2. */
+  readonly goalKnowledgeService: Pick<GoalKnowledgeService, 'link'>;
+  /** Repository-owned stable KnowledgeDocumentRef resolver. */
+  readonly knowledgeDocumentRefResolver: KnowledgeDocumentRefResolver;
   /** Identity-scoped Shared Label resolver reused by AI workflow application. */
   readonly labelService: LabelService;
   readonly routineCommandPort: RoutineCoachCommandPort;
+  /** Schedule-owned Calendar Event read seam for Planner projections. */
+  readonly scheduleEventApi: ScheduleEventApplicationPort;
+  /** Notification-owned Fact/Inbox seam for AI reads and typed actions. */
+  readonly notificationInbox: NotificationInboxPort;
   readonly scheduleRepository: IScheduleRepository;
-  readonly notificationRepository: INotificationRepository;
+  readonly userTimeContextPort: UserTimeContextPort;
   /** Host-selected persistent Mastra storage; API uses PostgreSQL. */
   readonly mastraStorage: MastraStorageConfig;
 }
@@ -81,67 +100,90 @@ export interface ComposeAIDependencies {
  * 4. createAIModule({ ...repository set, mastraRuntime, host ports }) — assemble.
  * 5. createAIApiModule({ instance }) — bind the instance to an IApiModule handle.
  */
-export function composeAI(dependencies: ComposeAIDependencies): AIApiModuleDef {
+export function composeAI(dependencies: ComposeAIDependencies): ComposedAI {
   const repositorySet = createAIPrismaRepositories(dependencies.db);
-  const goalPlanMutationPort = new GoalPlanMutationAdapter(
-    dependencies.goalApplicationPort,
+  const goalRepositories = createGoalPrismaRepositories(dependencies.db);
+  const taskRepositories = createTaskPrismaRepositories(dependencies.db);
+  const contextAssembler = new AIContextAssembler(dependencies.userTimeContextPort);
+  const plannerReadPort = new PlannerAIReadAdapter(
+    dependencies.scheduleEventApi,
     dependencies.taskApplicationPort,
-    dependencies.reminderApplicationPort,
-    dependencies.labelService,
+    dependencies.userTimeContextPort,
   );
-  const taskPlanMutationPort = new TaskPlanMutationAdapter(
-    dependencies.taskApplicationPort,
-    dependencies.labelService,
-  );
-  const knowledgeNotePersistence = new RepositoryKnowledgeNotePersistenceAdapter(
-    dependencies.repositoryApiPort,
-  );
-  const mastraRuntime = new MastraAIRuntime({
-    storage: createMastraStorage(dependencies.mastraStorage),
-    modelResolver: new MastraModelResolver(repositorySet.providerConfigRepository),
-    transcriptBootstrapSource: new ConversationTranscriptBootstrapSource(
-      repositorySet.conversationRepository,
-    ),
-    goalPlanMutationPort,
-    taskPlanMutationPort,
-    knowledgeCaptureMutationPort: new KnowledgeCapturePersistenceAdapter(knowledgeNotePersistence),
-    executionLogPort: repositorySet.executionLogPort,
-    usageReadPort: repositorySet.executionLogPort,
-    routineCommandPort: new RoutineAICommandAdapter(
-      dependencies.reminderApplicationPort,
-      dependencies.routineCommandPort,
-    ),
-    plannerReadPort: new PlannerAIReadAdapter(
-      dependencies.scheduleRepository,
-      dependencies.taskApplicationPort,
-    ),
-    notificationReadPort: new NotificationAIReadAdapter(dependencies.notificationRepository),
+  const notificationReadPort = new NotificationAIReadAdapter(dependencies.notificationInbox);
+  const activityReadPort: IAIActivityReadPort = new OwnerActivityAIReadAdapter({
+    goalRepository: goalRepositories.goalRepository,
+    taskPlanRepository: taskRepositories.taskPlanRepository,
+    taskOccurrenceRepository: taskRepositories.taskOccurrenceRepository,
+    scheduleRepository: dependencies.scheduleRepository,
   });
   const knowledgeSourcePort = new RepositoryKnowledgeSourceAdapter(
     dependencies.db,
     dependencies.repositoryStorageBaseDir,
   );
-  const knowledgeIndexStatusPort = new RepositoryKnowledgeIndexStatusAdapter(
+  const knowledgeNotePersistence = new RepositoryKnowledgeNotePersistenceAdapter(
     dependencies.repositoryApiPort,
   );
-  const analyticsReadPort = new ControlledAnalyticsReadAdapter(dependencies.db);
+  const goalPlanMutationPort = new GoalPlanMutationAdapter(
+    dependencies.goalApplicationPort,
+    dependencies.taskApplicationPort,
+    dependencies.labelService,
+    knowledgeNotePersistence,
+    dependencies.knowledgeDocumentRefResolver,
+    dependencies.goalKnowledgeService,
+  );
+  const taskPlanMutationPort = new TaskPlanMutationAdapter(
+    dependencies.taskApplicationPort,
+    dependencies.labelService,
+  );
+  const mastraRuntime = new MastraAIRuntime({
+    storage: createMastraStorage(dependencies.mastraStorage),
+    modelResolver: new MastraModelResolver(
+      repositorySet.providerConfigRepository,
+      repositorySet.providerSecretVault,
+    ),
+    conversationShellSource: new ConversationShellSource(
+      repositorySet.conversationRepository,
+    ),
+    goalPlanMutationPort,
+    taskPlanMutationPort,
+    knowledgeCaptureMutationPort: new KnowledgeCapturePersistenceAdapter(knowledgeNotePersistence),
+    knowledgeSourcePort,
+    executionRecordPort: repositorySet.executionRecordPort,
+    usageReadPort: repositorySet.executionRecordPort,
+    routineCommandPort: new RoutineAICommandAdapter(dependencies.routineCommandPort),
+    plannerReadPort,
+    notificationReadPort,
+    contextAssembler,
+  });
+  const analyticsReadPort = new ControlledAnalyticsReadAdapter({
+    goalApplicationPort: dependencies.goalApplicationPort,
+    taskDashboardReadPort: dependencies.taskDashboardReadPort,
+    plannerReadPort,
+    notificationReadPort,
+    activityReadPort,
+    userTimeContextPort: dependencies.userTimeContextPort,
+  });
   const evaluationReportPort = new AIEvaluationReportFileAdapter();
 
   const instance = createAIModule({
     conversationRepository: repositorySet.conversationRepository,
     providerConfigRepository: repositorySet.providerConfigRepository,
+    providerSecretVault: repositorySet.providerSecretVault,
     providerOnboardingSessionRepository: repositorySet.providerOnboardingSessionRepository,
     providerOnboardingCommitPort: repositorySet.providerOnboardingCommitPort,
     mastraRuntime,
     workflowRuntime: mastraRuntime,
     knowledgeIndexRepository: repositorySet.knowledgeIndexRepository,
-    executionLogPort: repositorySet.executionLogPort,
+    executionRecordPort: repositorySet.executionRecordPort,
     evaluationReportPort,
     knowledgeNotePersistence,
     knowledgeSourcePort,
-    knowledgeIndexStatusPort,
     analyticsReadPort,
   });
 
-  return createAIApiModule({ instance });
+  return {
+    module: createAIApiModule({ instance }),
+    portableCapability: instance.portableCapability,
+  };
 }

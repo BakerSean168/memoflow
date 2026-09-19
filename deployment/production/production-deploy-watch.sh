@@ -83,6 +83,58 @@ production_set_sha_label=$(image_label "$runtime_channel" io.memoflow.production
 [[ "$production_set_label" =~ ^sha256:[0-9a-f]{64}$ ]] || fail 'runtime production-set digest label is invalid'
 [[ "$production_set_sha_label" =~ ^sha256:[0-9a-f]{64}$ ]] || fail 'runtime production-set file hash label is invalid'
 
+state_value() {
+  local key="$1"
+  sed -n "s/^${key}=//p" "$STATE_FILE" 2>/dev/null | tail -1 || true
+}
+live_container_id() {
+  local service="$1"
+  docker ps -q --filter "label=com.docker.compose.project=$COMPOSE_PROJECT" --filter "label=com.docker.compose.service=$service" | head -n1
+}
+live_container_ref() {
+  local service="$1" id
+  id=$(live_container_id "$service")
+  [[ -n "$id" ]] || return 1
+  docker inspect "$id" --format '{{.Config.Image}}' 2>/dev/null || true
+}
+live_service_is_healthy() {
+  local service="$1" id status
+  id=$(live_container_id "$service")
+  [[ -n "$id" ]] || return 1
+  status=$(docker inspect "$id" --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' 2>/dev/null || true)
+  [[ "$status" == healthy || "$status" == running ]]
+}
+state_ref() {
+  local service="$1" component_digest
+  component_digest=$(state_value "${service}_digest")
+  [[ "$component_digest" =~ ^sha256:[0-9a-f]{64}$ ]] || return 1
+  printf '%s\n' "$REGISTRY/$NAMESPACE/memoflow-$service@$component_digest"
+}
+fast_state_matches() {
+  [[ "$(state_value status)" == DEPLOYED ]] || return 1
+  [[ "$(state_value production_set_digest)" == "$production_set_label" ]] || return 1
+  [[ "$(state_value runtime_digest)" == "$runtime_digest" ]] || return 1
+  [[ "$(state_value release_sha)" == "$release_sha_label" ]] || return 1
+  [[ "$(state_value control_plane_sha)" == "$control_plane_sha" ]] || return 1
+  [[ "$(state_value migrator_digest)" =~ ^sha256:[0-9a-f]{64}$ ]] || return 1
+
+  local service expected actual
+  for service in api web powersync postgres redis caddy; do
+    expected=$(state_ref "$service") || return 1
+    actual=$(live_container_ref "$service") || return 1
+    [[ "$actual" == "$expected" ]] || return 1
+    live_service_is_healthy "$service" || return 1
+  done
+}
+
+managed_status=$(state_value status)
+managed_set=$(state_value production_set_digest)
+if ! $CHECK_ONLY && ! $FORCE && fast_state_matches; then
+  managed_release_tag=$(state_value release_tag)
+  log "already deployed production release ${managed_release_tag:-unknown} set=$production_set_label fast_path=state+live-runtime; skipped component pulls"
+  exit 0
+fi
+
 stage=$(mktemp -d "$STATE_DIR/production-runtime-next.XXXXXX")
 runtime_container=$(docker create "$runtime_channel" /bin/true)
 docker cp "$runtime_container:/runtime/production/." "$stage/"
@@ -123,8 +175,8 @@ for component in postgres redis powersync caddy; do
   pull_exact "$(runtime_ref "$component")"
 done
 
-managed_status=$(sed -n 's/^status=//p' "$STATE_FILE" 2>/dev/null | tail -1 || true)
-managed_set=$(sed -n 's/^production_set_digest=//p' "$STATE_FILE" 2>/dev/null | tail -1 || true)
+managed_status=$(state_value status)
+managed_set=$(state_value production_set_digest)
 if $CHECK_ONLY; then
   log "PRODUCTION_SELECTION=COHERENT release=$release_tag release_sha=$release_sha set=$production_set_digest managed=${managed_set:-none} status=${managed_status:-none}"
   exit 0
@@ -163,12 +215,6 @@ service_is_healthy() {
   [[ -n "$id" ]] || return 1
   status=$(docker inspect "$id" --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' 2>/dev/null || true)
   [[ "$status" == healthy || "$status" == running ]]
-}
-live_container_ref() {
-  local service="$1" id
-  id=$(docker ps -q --filter "label=com.docker.compose.project=$COMPOSE_PROJECT" --filter "label=com.docker.compose.service=$service" | head -n1)
-  [[ -n "$id" ]] || return 1
-  docker inspect "$id" --format '{{.Config.Image}}' 2>/dev/null || true
 }
 root_expected_ref() {
   local root="$1" service="$2" key

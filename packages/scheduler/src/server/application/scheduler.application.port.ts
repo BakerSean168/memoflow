@@ -1,9 +1,19 @@
 import type { Result } from '@memoflow/contracts/result';
 import type { Context } from '@memoflow/contracts/shared';
+import type {
+  ScheduledInvocationDiagnostic,
+  ScheduledInvocationDiagnosticQuery,
+} from '@memoflow/contracts/schedule';
 
-/** Read-only Temporal Engine diagnostics surface. */
+/** Read-only internal/dev/ops diagnostics surface for canonical Scheduler invocations. */
 export interface SchedulerApplicationPort {
-  listTasks(query: Record<string, unknown>, ctx: Context): Promise<Result<unknown>>;
-  getTask(id: string, ctx: Context): Promise<Result<unknown>>;
-  getDueTasks(ctx: Context): Promise<Result<unknown>>;
+  listInvocations(
+    query: ScheduledInvocationDiagnosticQuery,
+    ctx: Context,
+  ): Promise<Result<ScheduledInvocationDiagnostic[]>>;
+  getInvocation(
+    id: string,
+    ctx: Context,
+  ): Promise<Result<ScheduledInvocationDiagnostic | null>>;
+  listDueInvocations(ctx: Context): Promise<Result<ScheduledInvocationDiagnostic[]>>;
 }

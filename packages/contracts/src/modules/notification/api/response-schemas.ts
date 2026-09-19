@@ -10,14 +10,13 @@ import type {
   IdentityId,
   NotificationId,
   NotificationPreferenceId,
-  NotificationTemplateId,
 } from '../../../primitives';
 import { NotificationType } from '../value-objects/notification-type';
 import { NotificationCategory } from '../value-objects/notification-category';
 import { NotificationChannelType } from '../value-objects/notification-channel-type';
 import { ImportanceLevel } from '../../../shared/value-objects/importance';
 import { UrgencyLevel } from '../../../shared/value-objects/urgency';
-import { RelatedEntityType } from '../value-objects/related-entity-type';
+import { QuietHoursSchema } from './notification-preference.dto';
 
 /**
  * Notification Fact response schema. Delivery status is intentionally absent.
@@ -34,7 +33,7 @@ export const NotificationResponseSchema = z.object({
   category: z.enum(NotificationCategory),
   importance: z.enum(ImportanceLevel),
   urgency: z.enum(UrgencyLevel),
-  relatedEntityType: z.enum(RelatedEntityType).nullable().optional(),
+  relatedEntityType: z.string().trim().min(1).max(120).nullable().optional(),
   relatedEntityId: z.string().nullable().optional(),
   navigationIntent: z.object({
     route: z.string(),
@@ -49,6 +48,7 @@ export const NotificationResponseSchema = z.object({
   createdAt: z.number(),
   updatedAt: z.number(),
   deletedAt: z.number().nullable(),
+  archivedAt: z.number().nullable(),
 });
 
 /**
@@ -96,69 +96,9 @@ export const NotificationPreferenceResponseSchema = z.object({
     z.string(),
     z.partialRecord(z.enum(NotificationChannelType), z.boolean()),
   ),
-  doNotDisturb: z.object({
-    enabled: z.boolean(),
-    startTime: z.string(),
-    endTime: z.string(),
-    daysOfWeek: z.array(z.number()),
-  }).nullable(),
-  rateLimit: z.object({
-    enabled: z.boolean(),
-    maxPerHour: z.number(),
-    maxPerDay: z.number(),
-  }).nullable(),
+  quietHours: QuietHoursSchema.nullable(),
   version: z.number(),
   createdAt: z.number(),
   updatedAt: z.number(),
   deletedAt: z.number().nullable(),
-});
-
-// Residual 839: NotificationTemplateClientDTO dual retired — sole NotificationTemplateResponseSchema + z.infer
-// (semantic type is z.infer alias in aggregates/notification-template-client.ts).
-// Residual 845: NotificationTemplateServerDTO also z.infer of this schema (client+server single-track).
-// Nested config matches NotificationTemplateConfigServerDTO shape.
-export const NotificationTemplateContentSchema = z.object({
-  title: z.string(),
-  content: z.string(),
-  variables: z.array(z.string()).optional(),
-});
-
-export const NotificationEmailTemplateContentSchema = z.object({
-  subject: z.string(),
-  htmlBody: z.string().nullable().optional(),
-  textBody: z.string().nullable().optional(),
-});
-
-export const NotificationPushTemplateContentSchema = z.object({
-  title: z.string(),
-  body: z.string(),
-  icon: z.string().nullable().optional(),
-  sound: z.string().nullable().optional(),
-});
-
-export const NotificationChannelConfigSchema = z.object({
-  inApp: z.boolean(),
-  email: z.boolean(),
-  push: z.boolean(),
-  sms: z.boolean(),
-});
-
-export const NotificationTemplateConfigSchema = z.object({
-  template: NotificationTemplateContentSchema,
-  channels: NotificationChannelConfigSchema,
-  emailTemplate: NotificationEmailTemplateContentSchema.nullable().optional(),
-  pushTemplate: NotificationPushTemplateContentSchema.nullable().optional(),
-});
-
-export const NotificationTemplateResponseSchema = z.object({
-  id: brandedId<NotificationTemplateId>(),
-  name: z.string(),
-  description: z.string().nullable(),
-  type: z.enum(NotificationType),
-  category: z.enum(NotificationCategory),
-  template: NotificationTemplateConfigSchema,
-  isActive: z.boolean(),
-  isSystemTemplate: z.boolean(),
-  createdAt: z.number(),
-  updatedAt: z.number(),
 });

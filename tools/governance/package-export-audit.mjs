@@ -51,6 +51,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './task',
     './goal',
     './label',
+    './relation',
     './governance',
     './reminder',
     './repository',
@@ -59,7 +60,6 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './setting',
     './notification',
     './ai',
-    './dashboard',
     './response',
     './result',
     './data-portability',
@@ -124,7 +124,6 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './modules/repository',
     './modules/setting',
     './modules/governance',
-    './modules/dashboard/adapters',
     './modules/ai',
   ],
 };

@@ -38,12 +38,12 @@ describe('createAppAccessGuard', () => {
       useHardLoginRedirect: false,
     });
     const result = guard(
-      createTo('/dashboard', true),
+      createTo('/goals', true),
       {} as RouteLocationNormalizedLoaded,
       vi.fn() as NavigationGuardNext,
     );
 
-    expect(result).toEqual({ path: '/signin', query: { redirect: '/dashboard' } });
+    expect(result).toEqual({ path: '/signin', query: { redirect: '/goals' } });
   });
 
   it('hard-redirects web auth entry so the platform AuthApp owns /auth', () => {
@@ -72,7 +72,7 @@ describe('createAppAccessGuard', () => {
   it('allows route when auth is required and user is authenticated', () => {
     const guard = createAppAccessGuard({ canAccessApp: () => true, useHardLoginRedirect: false });
     const result = guard(
-      createTo('/dashboard', true),
+      createTo('/goals', true),
       {} as RouteLocationNormalizedLoaded,
       vi.fn() as NavigationGuardNext,
     );

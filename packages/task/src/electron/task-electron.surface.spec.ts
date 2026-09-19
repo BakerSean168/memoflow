@@ -6,7 +6,7 @@ import { TaskChannels } from '@memoflow/contracts/electron';
 /**
  * Task electron seam surface (stage-6 residual):
  * Register via contracts TaskChannels only; no local Ch map and no unsupported
- * task:instance:update dual-track handler.
+ * task:occurrence:update dual-track handler.
  */
 describe('TaskElectronModule channel surface', () => {
   const source = readFileSync(resolve(__dirname, 'index.ts'), 'utf8');
@@ -16,17 +16,17 @@ describe('TaskElectronModule channel surface', () => {
     expect(source).toContain("from '@memoflow/contracts/electron'");
     expect(source).not.toMatch(/const Ch = \{/);
     expect(source).toContain('Object.values(TaskChannels)');
-    expect(source).toContain('TaskChannels.TEMPLATE_LIST');
-    expect(source).toContain('TaskChannels.INSTANCE_LIST');
-    expect(source).toContain('TaskChannels.INSTANCE_UNCOMPLETE');
+    expect(source).toContain('TaskChannels.PLAN_LIST');
+    expect(source).toContain('TaskChannels.OCCURRENCE_LIST');
+    expect(source).toContain('TaskChannels.OCCURRENCE_UNCOMPLETE');
     expect(source).not.toContain('TaskChannels.DEPENDENCY_CREATE');
     expect(TaskChannels).not.toHaveProperty('DEPENDENCY_CREATE');
   });
 
-  it('does not expose retired unsupported task:instance:update channel', () => {
-    expect(source).not.toContain('task:instance:update');
+  it('does not expose retired unsupported task:occurrence:update channel', () => {
+    expect(source).not.toContain('task:occurrence:update');
     expect(source).not.toContain('INSTANCE_UPDATE');
     expect(TaskChannels).not.toHaveProperty('INSTANCE_UPDATE');
-    expect(Object.values(TaskChannels)).not.toContain('task:instance:update');
+    expect(Object.values(TaskChannels)).not.toContain('task:occurrence:update');
   });
 });

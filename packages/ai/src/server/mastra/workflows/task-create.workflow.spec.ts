@@ -32,13 +32,21 @@ afterEach(async () => {
 
 const draftContent = TaskPlanDraftContentSchema.parse({
   task: {
+    draftRef: 'task:weekly-report',
     title: 'Prepare weekly report',
     description: 'Compile and send the weekly status report.',
     importance: 'Important',
-    cadence: 'weekly',
-    daysOfWeek: [1],
-    startDate: Date.UTC(2026, 8, 1),
-    timeOfDay: '09:00',
+    schedule: {
+      kind: 'Recurring',
+      startDate: '2026-09-01',
+      timing: { kind: 'At', time: '09:00' },
+      recurrence: {
+        frequency: 'Weekly',
+        interval: 1,
+        byWeekday: [1],
+        end: { kind: 'Never' },
+      },
+    },
     labels: ['Reporting'],
   },
   rationale: 'The user asked for a recurring weekly task.',
@@ -72,13 +80,13 @@ function mastraRequestContext(requestId: string): RequestContext {
 
 function mutationPort(): TaskPlanMutationPort & {
   resolveLabels: ReturnType<typeof vi.fn>;
-  createTaskTemplate: ReturnType<typeof vi.fn>;
+  createTaskPlan: ReturnType<typeof vi.fn>;
 } {
   return {
     resolveLabels: vi.fn(async (names: readonly string[]) =>
       ok(names.map((name) => `label:${name.trim().toLowerCase()}`)),
     ),
-    createTaskTemplate: vi.fn(async (request) => ok({ taskId: String(request.id) })),
+    createTaskPlan: vi.fn(async (request) => ok({ taskId: String(request.id) })),
   };
 }
 
@@ -171,9 +179,9 @@ describe('task.create durable Mastra Workflow (AI-VNEXT-06)', () => {
       outcome: 'completed',
       receipt: { workflowRunId: runId, revision: 1, status: 'success' },
     });
-    expect(mutations.createTaskTemplate).toHaveBeenCalledTimes(1);
+    expect(mutations.createTaskPlan).toHaveBeenCalledTimes(1);
     // Domain mutation uses the current approval entry context, not the start context.
-    expect(mutations.createTaskTemplate.mock.calls[0]?.[1]).toMatchObject({
+    expect(mutations.createTaskPlan.mock.calls[0]?.[1]).toMatchObject({
       requestId: 'request-approve',
       source: 'http',
       identityId: workflowInput.identityId,
@@ -202,7 +210,7 @@ describe('task.create durable Mastra Workflow (AI-VNEXT-06)', () => {
       requestContext: mastraRequestContext('request-cancel'),
     });
     expect(cancelled.result).toMatchObject({ outcome: 'cancelled' });
-    expect(mutations.createTaskTemplate).not.toHaveBeenCalled();
+    expect(mutations.createTaskPlan).not.toHaveBeenCalled();
   });
 
   it('maps an explicit contribution and does not invent one when omitted', async () => {
@@ -212,11 +220,18 @@ describe('task.create durable Mastra Workflow (AI-VNEXT-06)', () => {
 
     const linkedDraft = TaskPlanDraftContentSchema.parse({
       task: {
+        draftRef: 'task:contribute-to-kr',
         title: 'Contribute to KR',
-        cadence: 'once',
-        goalId: 'goal-1',
-        keyResultId: 'kr-1',
-        contributionValue: 3,
+        schedule: {
+          kind: 'OneTime',
+          date: '2026-09-08',
+          timing: { kind: 'AllDay' },
+        },
+        goalBinding: {
+          goalId: 'GoalId_550e8400-e29b-41d4-a716-446655440001',
+          keyResultId: 'KeyResultId_550e8400-e29b-41d4-a716-446655440002',
+          contribution: { value: 3, trigger: 'EachCompletion' },
+        },
         labels: ['Planning'],
       },
     });
@@ -225,11 +240,13 @@ describe('task.create durable Mastra Workflow (AI-VNEXT-06)', () => {
       draft: { ...linkedDraft, revision: 1 },
       context,
     });
-    expect(mutations.createTaskTemplate.mock.calls[0]?.[0]).toMatchObject({
+    expect(mutations.createTaskPlan.mock.calls[0]?.[0]).toMatchObject({
+      schedule: linkedDraft.task.schedule,
+      reminderConfig: null,
       labelIds: ['label:planning'],
       goalBinding: {
-        goalId: 'goal-1',
-        keyResultId: 'kr-1',
+        goalId: 'GoalId_550e8400-e29b-41d4-a716-446655440001',
+        keyResultId: 'KeyResultId_550e8400-e29b-41d4-a716-446655440002',
         contribution: { value: 3, trigger: 'EachCompletion' },
       },
     });
@@ -238,10 +255,18 @@ describe('task.create durable Mastra Workflow (AI-VNEXT-06)', () => {
     const noContributionService = new ApplyTaskPlanService(noContributionMutations);
     const noContributionDraft = TaskPlanDraftContentSchema.parse({
       task: {
+        draftRef: 'task:linked-context',
         title: 'Linked context only',
-        cadence: 'once',
-        goalId: 'goal-1',
-        keyResultId: 'kr-1',
+        schedule: {
+          kind: 'OneTime',
+          date: '2026-09-08',
+          timing: { kind: 'AllDay' },
+        },
+        goalBinding: {
+          goalId: 'GoalId_550e8400-e29b-41d4-a716-446655440001',
+          keyResultId: 'KeyResultId_550e8400-e29b-41d4-a716-446655440002',
+          contribution: null,
+        },
       },
     });
     await noContributionService.apply({
@@ -249,8 +274,47 @@ describe('task.create durable Mastra Workflow (AI-VNEXT-06)', () => {
       draft: { ...noContributionDraft, revision: 1 },
       context,
     });
-    expect(noContributionMutations.createTaskTemplate.mock.calls[0]?.[0]).toMatchObject({
-      goalBinding: { goalId: 'goal-1', keyResultId: 'kr-1', contribution: null },
+    expect(noContributionMutations.createTaskPlan.mock.calls[0]?.[0]).toMatchObject({
+      goalBinding: {
+        goalId: 'GoalId_550e8400-e29b-41d4-a716-446655440001',
+        keyResultId: 'KeyResultId_550e8400-e29b-41d4-a716-446655440002',
+        contribution: null,
+      },
+    });
+  });
+
+  it('maps a Goal-only context link without synthesizing a Key Result or contribution', async () => {
+    const mutations = mutationPort();
+    const service = new ApplyTaskPlanService(mutations);
+    const draft = TaskPlanDraftContentSchema.parse({
+      task: {
+        draftRef: 'task:goal-context-only',
+        title: 'Goal context only',
+        schedule: {
+          kind: 'OneTime',
+          date: '2026-09-08',
+          timing: { kind: 'AllDay' },
+        },
+        goalBinding: {
+          goalId: 'GoalId_550e8400-e29b-41d4-a716-446655440001',
+          keyResultId: null,
+          contribution: null,
+        },
+      },
+    });
+
+    await service.apply({
+      workflowRunId: 'task-workflow-goal-only',
+      draft: { ...draft, revision: 1 },
+      context: executionContext('request-goal-only'),
+    });
+
+    expect(mutations.createTaskPlan.mock.calls[0]?.[0]).toMatchObject({
+      goalBinding: {
+        goalId: 'GoalId_550e8400-e29b-41d4-a716-446655440001',
+        keyResultId: null,
+        contribution: null,
+      },
     });
   });
 
@@ -268,7 +332,7 @@ describe('task.create durable Mastra Workflow (AI-VNEXT-06)', () => {
       context,
     });
     expect(first.status).toBe('success');
-    expect(mutations.createTaskTemplate).toHaveBeenCalledTimes(1);
+    expect(mutations.createTaskPlan).toHaveBeenCalledTimes(1);
 
     // Retry with the prior successful receipt short-circuits the mutation port,
     // so a double approve can never create a duplicate task template.
@@ -279,7 +343,7 @@ describe('task.create durable Mastra Workflow (AI-VNEXT-06)', () => {
       priorReceipt: first,
     });
     expect(again.status).toBe('success');
-    expect(again.taskTemplateId).toBe(first.taskTemplateId);
-    expect(mutations.createTaskTemplate).toHaveBeenCalledTimes(1);
+    expect(again.referenceMap['task:weekly-report']).toBe(first.referenceMap['task:weekly-report']);
+    expect(mutations.createTaskPlan).toHaveBeenCalledTimes(1);
   });
 });

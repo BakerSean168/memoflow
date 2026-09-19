@@ -321,9 +321,6 @@ importers:
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
-      '@memoflow/dashboard':
-        specifier: workspace:*
-        version: link:../../packages/dashboard
       '@memoflow/data-portability':
         specifier: workspace:*
         version: link:../../packages/data-portability
@@ -354,6 +351,9 @@ importers:
       '@memoflow/powersync-schema':
         specifier: workspace:*
         version: link:../../packages/powersync-schema
+      '@memoflow/relation':
+        specifier: workspace:*
+        version: link:../../packages/relation
       '@memoflow/reminder':
         specifier: workspace:*
         version: link:../../packages/reminder
@@ -526,9 +526,6 @@ importers:
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
-      '@memoflow/dashboard':
-        specifier: workspace:*
-        version: link:../../packages/dashboard
       '@memoflow/data-portability':
         specifier: workspace:*
         version: link:../../packages/data-portability
@@ -556,6 +553,9 @@ importers:
       '@memoflow/powersync-schema':
         specifier: workspace:*
         version: link:../../packages/powersync-schema
+      '@memoflow/relation':
+        specifier: workspace:*
+        version: link:../../packages/relation
       '@memoflow/reminder':
         specifier: workspace:*
         version: link:../../packages/reminder
@@ -979,9 +979,6 @@ importers:
       '@memoflow/notification':
         specifier: workspace:*
         version: link:../../packages/notification
-      '@memoflow/reminder':
-        specifier: workspace:*
-        version: link:../../packages/reminder
       '@memoflow/repository':
         specifier: workspace:*
         version: link:../../packages/repository
@@ -1052,9 +1049,6 @@ importers:
 
   packages/account:
     dependencies:
-      '@memoflow/cloud-auth':
-        specifier: workspace:*
-        version: link:../cloud-auth
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -1070,18 +1064,9 @@ importers:
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client
-      '@memoflow/notification':
-        specifier: workspace:*
-        version: link:../notification
       '@memoflow/patterns':
         specifier: workspace:*
         version: link:../patterns
-      '@memoflow/reminder':
-        specifier: workspace:*
-        version: link:../reminder
-      '@memoflow/repository':
-        specifier: workspace:*
-        version: link:../repository
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time
@@ -1098,6 +1083,15 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
+      '@memoflow/notification':
+        specifier: workspace:*
+        version: link:../notification
+      '@memoflow/reminder':
+        specifier: workspace:*
+        version: link:../reminder
+      '@memoflow/repository':
+        specifier: workspace:*
+        version: link:../repository
       '@types/express':
         specifier: ^5.0.0
         version: 5.0.6
@@ -1134,12 +1128,9 @@ importers:
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client
-      '@memoflow/repository':
+      '@memoflow/time':
         specifier: workspace:*
-        version: link:../repository
-      '@memoflow/setting':
-        specifier: workspace:*
-        version: link:../setting
+        version: link:../time
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
@@ -1186,18 +1177,9 @@ importers:
       '@memoflow/notification':
         specifier: workspace:*
         version: link:../notification
-      '@memoflow/reminder':
-        specifier: workspace:*
-        version: link:../reminder
-      '@memoflow/repository':
-        specifier: workspace:*
-        version: link:../repository
       '@memoflow/schedule':
         specifier: workspace:*
         version: link:../schedule
-      '@memoflow/scheduler':
-        specifier: workspace:*
-        version: link:../scheduler
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../setting
@@ -1256,9 +1238,6 @@ importers:
       '@memoflow/assets':
         specifier: workspace:*
         version: link:../assets
-      '@memoflow/cloud-auth':
-        specifier: workspace:*
-        version: link:../cloud-auth
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -1283,9 +1262,6 @@ importers:
       '@memoflow/notification':
         specifier: workspace:*
         version: link:../notification
-      '@memoflow/reminder':
-        specifier: workspace:*
-        version: link:../reminder
       '@memoflow/repository':
         specifier: workspace:*
         version: link:../repository
@@ -1458,66 +1434,20 @@ importers:
         specifier: ~6.0.3
         version: 6.0.3
 
-  packages/dashboard:
-    dependencies:
-      '@asteasolutions/zod-to-openapi':
-        specifier: ^8.5.0
-        version: 8.5.0(zod@4.4.3)
-      '@memoflow/contracts':
-        specifier: workspace:*
-        version: link:../contracts
-      zod:
-        specifier: ^4.4.3
-        version: 4.4.3
-    devDependencies:
-      tsup:
-        specifier: ^8.3.5
-        version: 8.5.1(@swc/core@1.15.43(@swc/helpers@0.5.17))(jiti@2.4.2)(postcss@8.5.19)(supports-color@10.2.2)(tsx@4.23.1)(typescript@6.0.3)(yaml@2.9.0)
-      typescript:
-        specifier: ~6.0.3
-        version: 6.0.3
-
   packages/data-portability:
     dependencies:
-      '@memoflow/ai':
-        specifier: workspace:*
-        version: link:../ai
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
       '@memoflow/database':
         specifier: workspace:*
         version: link:../database
-      '@memoflow/domain-shared':
-        specifier: workspace:*
-        version: link:../domain-shared
-      '@memoflow/goal':
-        specifier: workspace:*
-        version: link:../goal
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client
-      '@memoflow/notification':
-        specifier: workspace:*
-        version: link:../notification
-      '@memoflow/reminder':
-        specifier: workspace:*
-        version: link:../reminder
-      '@memoflow/repository':
-        specifier: workspace:*
-        version: link:../repository
-      '@memoflow/schedule':
-        specifier: workspace:*
-        version: link:../schedule
-      '@memoflow/setting':
-        specifier: workspace:*
-        version: link:../setting
-      '@memoflow/task':
-        specifier: workspace:*
-        version: link:../task
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
@@ -1608,12 +1538,6 @@ importers:
       '@memoflow/patterns':
         specifier: workspace:*
         version: link:../patterns
-      '@memoflow/schedule':
-        specifier: workspace:*
-        version: link:../schedule
-      '@memoflow/task':
-        specifier: workspace:*
-        version: link:../task
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time
@@ -1711,6 +1635,9 @@ importers:
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client
+      '@memoflow/time':
+        specifier: workspace:*
+        version: link:../time
     devDependencies:
       '@memoflow/test-utils':
         specifier: workspace:*
@@ -1745,12 +1672,6 @@ importers:
       '@memoflow/patterns':
         specifier: workspace:*
         version: link:../patterns
-      '@memoflow/powersync-schema':
-        specifier: workspace:*
-        version: link:../powersync-schema
-      '@memoflow/scheduler':
-        specifier: workspace:*
-        version: link:../scheduler
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
@@ -1761,6 +1682,12 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
+      '@memoflow/powersync-schema':
+        specifier: workspace:*
+        version: link:../powersync-schema
+      '@memoflow/scheduler':
+        specifier: workspace:*
+        version: link:../scheduler
       '@types/express':
         specifier: ^5.0.0
         version: 5.0.6
@@ -1803,6 +1730,34 @@ importers:
         specifier: ~6.0.3
         version: 6.0.3
 
+  packages/relation:
+    dependencies:
+      '@memoflow/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@memoflow/database':
+        specifier: workspace:*
+        version: link:../database
+      '@memoflow/http-client':
+        specifier: workspace:*
+        version: link:../http-client
+      '@memoflow/ipc-client':
+        specifier: workspace:*
+        version: link:../ipc-client
+    devDependencies:
+      '@memoflow/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(@swc/core@1.15.43(@swc/helpers@0.5.17))(jiti@2.4.2)(postcss@8.5.19)(supports-color@10.2.2)(tsx@4.23.1)(typescript@6.0.3)(yaml@2.9.0)
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: 4.1.10
+        version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(happy-dom@20.10.6)(jsdom@29.1.1(@noble/hashes@2.2.0))(msw@2.15.0(@types/node@24.13.3)(typescript@6.0.3))(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.4.2)(sass-embedded@1.100.0)(sass@1.100.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.1)(yaml@2.9.0))
+
   packages/reminder:
     dependencies:
       '@memoflow/contracts':
@@ -1811,30 +1766,12 @@ importers:
       '@memoflow/database':
         specifier: workspace:*
         version: link:../database
-      '@memoflow/domain-shared':
-        specifier: workspace:*
-        version: link:../domain-shared
-      '@memoflow/http-client':
-        specifier: workspace:*
-        version: link:../http-client
-      '@memoflow/ipc-client':
-        specifier: workspace:*
-        version: link:../ipc-client
-      '@memoflow/patterns':
-        specifier: workspace:*
-        version: link:../patterns
-      '@memoflow/schedule':
-        specifier: workspace:*
-        version: link:../schedule
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
-      express:
-        specifier: ^5.2.1
-        version: 5.2.1(supports-color@10.2.2)
       zod:
         specifier: ^4.4.3
         version: 4.4.3
@@ -1842,9 +1779,6 @@ importers:
       '@memoflow/test-utils':
         specifier: workspace:*
         version: link:../test-utils
-      '@types/express':
-        specifier: ^5.0.0
-        version: 5.0.6
 
   packages/repository:
     dependencies:
@@ -1940,9 +1874,6 @@ importers:
       '@memoflow/reminder':
         specifier: workspace:*
         version: link:../reminder
-      '@memoflow/schedule':
-        specifier: workspace:*
-        version: link:../schedule
       '@memoflow/scheduler':
         specifier: workspace:*
         version: link:../scheduler
@@ -2020,6 +1951,9 @@ importers:
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client
+      '@memoflow/time':
+        specifier: workspace:*
+        version: link:../time
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
@@ -2057,9 +1991,6 @@ importers:
       '@memoflow/patterns':
         specifier: workspace:*
         version: link:../patterns
-      '@memoflow/schedule':
-        specifier: workspace:*
-        version: link:../schedule
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time
@@ -2125,6 +2056,9 @@ importers:
 
   packages/time:
     dependencies:
+      '@date-fns/tz':
+        specifier: 1.5.0
+        version: 1.5.0
       '@internationalized/date':
         specifier: 3.11.0
         version: 3.11.0
@@ -3382,6 +3316,9 @@ packages:
 
   '@dabh/diagnostics@2.0.8':
     resolution: {integrity: sha512-R4MSXTVnuMzGD7bzHdW2ZhhdPC/igELENcq5IjEverBvq5hn1SXCWcsi6eSsdWP0/Ur+SItRRjAktmdoX/8R/Q==}
+
+  '@date-fns/tz@1.5.0':
+    resolution: {integrity: sha512-lwYN/vDPeNRULcepoE/LO2Pgx+7/RV+S9ARfbc9lr2DtGkOD7pAiruHvbR1RX3Qyf6ja47EWJDMsNK5vK08DJg==}
 
   '@dependents/detective-less@5.0.1':
     resolution: {integrity: sha512-Y6+WUMsTFWE5jb20IFP4YGa5IrGY/+a/FbOSjDF/wz9gepU2hwCYSXRHP/vPwBvwcY3SVMASt4yXxbXNXigmZQ==}
@@ -17215,6 +17152,8 @@ snapshots:
       '@so-ric/colorspace': 1.1.6
       enabled: 2.0.0
       kuler: 2.0.0
+
+  '@date-fns/tz@1.5.0': {}
 
   '@dependents/detective-less@5.0.1':
     dependencies:

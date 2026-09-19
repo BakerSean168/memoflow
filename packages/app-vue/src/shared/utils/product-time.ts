@@ -1,33 +1,60 @@
+import { shallowRef } from 'vue';
 /**
  * App-vue session product time facade (ADR-037).
- * Change DEFAULT empty.display / locale via withStyle or bootstrap preference (W8).
+ * Guest bootstrap uses explicit device context; signed-in bootstrap applies canonical preferences.
  * P1: empty kinds via resolveEmptyLabel / emptyKind — no L5 formatDate wrappers.
  */
+import type { UserPreferenceProfile } from '@memoflow/contracts/setting';
+import type { Ymd } from '@memoflow/contracts/primitives';
 import {
+  createSystemTimeZoneSource,
+  createTimeContext,
   createTimeFacade,
-  timeStyleFromPresentationLocale,
   resolveEmptyLabel,
   type TimeFacade,
-  type PartialTimeStyle,
   type TimeEmptyKind,
   type ResolveEmptyLabelOptions,
 } from '@memoflow/time';
 import { detectBrowserLocale } from '@memoflow/utils/shared';
 
-let sessionTime: TimeFacade = createTimeFacade({
-  style: timeStyleFromPresentationLocale(detectBrowserLocale()),
-});
+export const productTimeRevision = shallowRef(0);
+
+function createLocalSessionTime(): TimeFacade {
+  const timeZoneSource = createSystemTimeZoneSource();
+  return createTimeFacade({
+    context: createTimeContext({
+      timeZone: timeZoneSource.currentTimeZoneId(),
+      weekStartsOn: 1,
+    }),
+    presentation: { locale: detectBrowserLocale() },
+  });
+}
+
+let sessionTime: TimeFacade = createLocalSessionTime();
 
 export function getProductTime(): TimeFacade {
   return sessionTime;
 }
 
-export function setProductTimeStyle(partial: PartialTimeStyle): TimeFacade {
-  sessionTime = sessionTime.withStyle(partial);
+/** Apply canonical cross-device regional/presentation preferences to the session facade. */
+export function setProductTimePreferences(profile: UserPreferenceProfile): TimeFacade {
+  sessionTime = sessionTime
+    .withContext(
+      createTimeContext({
+        timeZone: profile.regional.timeZone,
+        weekStartsOn: profile.regional.weekStartsOn,
+      }),
+    )
+    .withPresentation({
+      locale: profile.presentation.language,
+      dateStyle: profile.regional.dateStyle,
+      timeStyle: profile.regional.timeStyle,
+    });
+  productTimeRevision.value += 1;
   return sessionTime;
 }
 
-/** Product empty label override (i18n / copy). Falls back to TimeStyle.empty. */
+/** Product empty label override (i18n / copy). Falls back to canonical TimePresentationStyle.empty. */
 export type EmptyLabel = string | { display?: string; unknown?: string };
 
 /** Resolve catalog kind → EmptyLabel string (optional i18n via options.translate). */
@@ -46,7 +73,7 @@ export function emptyUnknown(t: (key: string) => string, key = 'common.unknown')
 }
 
 function emptyLabels(override?: EmptyLabel): { display: string; unknown: string } {
-  const base = sessionTime.style.empty;
+  const base = sessionTime.presentation.empty;
   if (override == null) {
     return { display: base.display, unknown: base.unknown };
   }
@@ -83,9 +110,7 @@ export function formatProductDateTime(
 }
 
 /** Product-time conversion for native date input values (YYYY-MM-DD). */
-export function toProductDateInputValue(
-  value: number | null | undefined,
-): string {
+export function toProductDateInputValue(value: number | null | undefined): string {
   return sessionTime.input.dateValue(value);
 }
 
@@ -94,6 +119,28 @@ export function fromProductDateInputValue(raw: string): number | null {
   const ymd = sessionTime.input.parseDateValue(raw);
   if (ymd == null) return null;
   return sessionTime.input.combine(ymd, '00:00') as number | null;
+}
+
+/** Calendar-native Goal/date-only input value. Never converts through Instant/JS Date. */
+export function toProductYmdInputValue(value: Ymd | null | undefined): string {
+  return value ?? '';
+}
+
+/** Parse a native date input as canonical Ymd without applying a timezone. */
+export function fromProductYmdInputValue(raw: string): Ymd | null {
+  return sessionTime.input.parseDateValue(raw);
+}
+
+/** Render a calendar-native Ymd without host-timezone reinterpretation. */
+export function formatProductYmd(value: Ymd | null | undefined, empty?: EmptyLabel): string {
+  const labels = emptyLabels(empty);
+  if (value == null || value === '') return labels.display;
+  return sessionTime.format.ymdDisplay(value) || labels.unknown;
+}
+
+/** Current product calendar day in the signed-in user's canonical timezone. */
+export function getProductTodayYmd(): Ymd {
+  return sessionTime.calendar.toYmd(sessionTime.now());
 }
 
 export function formatProductDate(

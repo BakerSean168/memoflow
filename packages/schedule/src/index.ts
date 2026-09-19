@@ -15,5 +15,7 @@ export {
   type ScheduleRuntimeContributionsInput,
   type ScheduleRepositorySet,
   type SchedulePowerSyncRepositories,
+  SchedulePortableCapability,
+  createSchedulePortableCapability,
 } from './server';
 export type { IScheduleRepository } from './server';

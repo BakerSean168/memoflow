@@ -59,7 +59,7 @@ export interface ComposeSettingDependencies {
  * 1. createSettingPrismaRepositories(db) — select the Prisma adapter.
  * 2. createSettingRuntimeContribution() — build the module-owned runtime
  *    contribution.
- * 3. createSettingModule({ userSettingRepository, runtimeContributions }) —
+ * 3. createSettingModule({ userPreferenceRepository, runtimeContributions }) —
  *    assemble the transport-neutral setting instance.
  * 4. createSettingApiModule({ instance }) — bind the instance to an IApiModule
  *    handle (transport + lifecycle only).
@@ -67,7 +67,7 @@ export interface ComposeSettingDependencies {
  * 接线顺序：
  * 1. createSettingPrismaRepositories(db) —— 选择 Prisma 适配器。
  * 2. createSettingRuntimeContribution() —— 构建模块自有运行时贡献。
- * 3. createSettingModule({ userSettingRepository, runtimeContributions })
+ * 3. createSettingModule({ userPreferenceRepository, runtimeContributions })
  *    —— 装配与传输无关的设置实例。
  * 4. createSettingApiModule({ instance }) —— 把实例绑定到 IApiModule handle
  *    （只负责 transport 与生命周期）。
@@ -84,10 +84,10 @@ export interface ComposeSettingDependencies {
 export function composeSetting(
   dependencies: ComposeSettingDependencies,
 ): SettingApiModuleDef {
-  const { userSettingRepository } = createSettingPrismaRepositories(dependencies.db);
+  const { userPreferenceRepository } = createSettingPrismaRepositories(dependencies.db);
 
   const instance = createSettingModule({
-    userSettingRepository,
+    userPreferenceRepository,
     runtimeContributions: [createSettingRuntimeContribution()],
   });
 

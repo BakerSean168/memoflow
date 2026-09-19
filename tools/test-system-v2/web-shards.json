@@ -4,48 +4,46 @@
   "shards": [
     {
       "shard": 1,
-      "estimatedDurationMs": 317877,
+      "estimatedDurationMs": 291724,
       "specs": [
         "schedule/planner-task-revert.spec.ts",
-        "schedule/schedule-calendar.spec.ts",
-        "notification/reminder-notification-loop.spec.ts",
-        "note/legacy-note-mutation-boundary.spec.ts"
-      ]
-    },
-    {
-      "shard": 2,
-      "estimatedDurationMs": 317296,
-      "specs": [
-        "ai/goal-workflow.spec.ts",
-        "goal/goal-crud.spec.ts",
-        "user-settings/notifications.spec.ts",
         "ai/multi-engine-host.spec.ts",
-        "task/task-completion-loop.spec.ts",
-        "note/note-workspace.spec.ts"
-      ]
-    },
-    {
-      "shard": 3,
-      "estimatedDurationMs": 310305,
-      "specs": [
-        "user-settings/data-portability.spec.ts",
-        "task/task-template-crud.spec.ts",
-        "user-settings/persistence.spec.ts",
-        "authentication/auth-flow.spec.ts",
-        "authentication/auth-password.spec.ts",
+        "note/note-workspace.spec.ts",
         "authentication/auth-oauth.spec.ts"
       ]
     },
     {
-      "shard": 4,
-      "estimatedDurationMs": 315065,
+      "shard": 2,
+      "estimatedDurationMs": 297124,
       "specs": [
-        "dashboard/dashboard-overview.spec.ts",
-        "reminder/reminder-template-crud.spec.ts",
+        "ai/goal-workflow.spec.ts",
         "notification/notification-center.spec.ts",
-        "authentication/auth-login.spec.ts",
-        "authentication/auth-page-contract.spec.ts",
+        "authentication/auth-flow.spec.ts",
+        "notification/notification-inbox-loop.spec.ts",
+        "authentication/auth-password.spec.ts",
         "authentication/auth-register.spec.ts"
+      ]
+    },
+    {
+      "shard": 3,
+      "estimatedDurationMs": 298831,
+      "specs": [
+        "user-settings/data-portability.spec.ts",
+        "goal/goal-crud.spec.ts",
+        "user-settings/persistence.spec.ts",
+        "schedule/schedule-calendar.spec.ts",
+        "task/task-completion-loop.spec.ts",
+        "note/legacy-note-mutation-boundary.spec.ts"
+      ]
+    },
+    {
+      "shard": 4,
+      "estimatedDurationMs": 290456,
+      "specs": [
+        "task/task-plan-crud.spec.ts",
+        "user-settings/notifications.spec.ts",
+        "authentication/auth-login.spec.ts",
+        "authentication/auth-page-contract.spec.ts"
       ]
     }
   ]

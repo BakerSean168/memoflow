@@ -1,17 +1,22 @@
 import type {
   NotificationPreferenceClientDTO,
   NotificationChannelType,
+  QuietHoursDTO,
 } from '@memoflow/contracts/notification';
 import { AggregateRoot } from '@memoflow/utils/domain';
 import { NotificationPreferenceId } from '../../server/domain/value-objects/notification-preference-id';
 import { IdentityId } from '@memoflow/domain-shared';
-import type { NotificationPreferenceId as NotificationPreferenceIdBranded, IdentityId as IdentityIdBranded } from '@memoflow/contracts/primitives';
+import type {
+  NotificationPreferenceId as NotificationPreferenceIdBranded,
+  IdentityId as IdentityIdBranded,
+} from '@memoflow/contracts/primitives';
 
 export interface NotificationPreferenceState {
   id: NotificationPreferenceId;
   identityId: IdentityId;
   globalChannels: Partial<Record<NotificationChannelType, boolean>>;
   workflowOverrides: Record<string, Partial<Record<NotificationChannelType, boolean>>>;
+  quietHours: QuietHoursDTO | null;
   version: number;
   createdAt: Date;
   updatedAt: Date;
@@ -23,6 +28,7 @@ export class NotificationPreference extends AggregateRoot<NotificationPreference
   get identityId(): IdentityId { return this._props.identityId; }
   get globalChannels() { return this._props.globalChannels; }
   get workflowOverrides() { return this._props.workflowOverrides; }
+  get quietHours(): QuietHoursDTO | null { return this._props.quietHours; }
   get version(): number { return this._props.version; }
   get createdAt(): Date { return this._props.createdAt; }
   get updatedAt(): Date { return this._props.updatedAt; }
@@ -36,8 +42,7 @@ export class NotificationPreference extends AggregateRoot<NotificationPreference
       identityId: this._props.identityId as unknown as IdentityIdBranded,
       globalChannels: this._props.globalChannels,
       workflowOverrides: this._props.workflowOverrides,
-      doNotDisturb: null,
-      rateLimit: null,
+      quietHours: this._props.quietHours,
       version: this._props.version,
       createdAt: this._props.createdAt.getTime(),
       updatedAt: this._props.updatedAt.getTime(),

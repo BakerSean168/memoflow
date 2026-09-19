@@ -5,6 +5,7 @@ import { createMockRepo } from '@memoflow/test-utils/mocks';
 import type { IGoalRepository } from '../../../../domain/repositories/i-goal-repository';
 import { Goal, GoalId, GoalLabelOwnershipError, GoalPolicy, KeyResultId } from '../../../../domain';
 import { CreateGoalUseCase } from '../create-goal.use-case';
+import type { GoalPortabilityCreateInput } from '../../../goal-portability.application.port';
 
 describe('CreateGoalUseCase', () => {
   let goalRepo: ReturnType<typeof createMockRepo<IGoalRepository>>;
@@ -41,6 +42,53 @@ describe('CreateGoalUseCase', () => {
       expect(result.data.readModel.name).toBe('Learn TypeScript');
       expect(result.data.readModel.id).toBeDefined();
     }
+  });
+
+  it('defaults public key-result tracking base to current value', async () => {
+    const result = await useCase.execute(
+      aCreateInput({
+        initialKeyResults: [
+          {
+            title: 'Track the public journey',
+            valueType: 'Incremental',
+            calculationMethod: 'Sum',
+            startValue: 0,
+            currentValue: 50,
+            targetValue: 100,
+            weight: 3,
+          },
+        ],
+      }),
+      aContext(),
+    );
+
+    expect(result).toBeOk();
+    const savedGoal = vi.mocked(goalRepo.save).mock.calls[0]?.[0];
+    expect(savedGoal?.keyResults[0]?.progress.trackingBaseValue).toBe(50);
+  });
+
+  it('preserves a distinct tracking base through the internal portability seam', async () => {
+    const input: GoalPortabilityCreateInput = {
+      ...aCreateInput(),
+      initialKeyResults: [
+        {
+          title: 'Restore the server baseline',
+          valueType: 'Incremental',
+          calculationMethod: 'Sum',
+          startValue: 0,
+          currentValue: 50,
+          trackingBaseValue: 40,
+          targetValue: 100,
+          weight: 3,
+        },
+      ],
+    };
+
+    const result = await useCase.createGoalForPortability(input, aContext());
+
+    expect(result).toBeOk();
+    const savedGoal = vi.mocked(goalRepo.save).mock.calls[0]?.[0];
+    expect(savedGoal?.keyResults[0]?.progress.trackingBaseValue).toBe(40);
   });
 
   it('creates the goal and every initial key result with one aggregate save', async () => {
@@ -166,11 +214,9 @@ describe('CreateGoalUseCase', () => {
       id: goalId,
       identityId: testIdentityId,
       name: 'Learn TypeScript',
-      description: null,
-      feasibilityAnalysis: null,
-      motivation: null,
+      summary: null,
       startDate: null,
-      dueDate: null,
+      target: null,
       reminderConfig: null,
     });
     committed.createAndAddKeyResult({

@@ -149,6 +149,68 @@ export function useGoal() {
     }
   }
 
+  // ── Goal lifecycle ───────────────────────────────────────────────────
+
+  async function applyLifecycleMutation(
+    id: string,
+    mutate: (expectedVersion: number) => ReturnType<typeof service.planGoal>,
+    fallbackKey: string,
+    scope: string,
+  ) {
+    savingId.value = id;
+    store.setError(null);
+    try {
+      const expectedVersion = store.getGoalById(id)?.version;
+      if (expectedVersion === undefined) return false;
+      const receipt = await executeGoalOperation(() => mutate(expectedVersion), {
+        ...opOpts,
+        fallbackKey,
+        scope,
+      });
+      if (!receipt) return false;
+      store.applyGoalMutationReceipt(receipt);
+      return true;
+    } finally {
+      savingId.value = null;
+    }
+  }
+
+  async function planGoal(id: string) {
+    return applyLifecycleMutation(
+      id,
+      (expectedVersion) => service.planGoal(id, expectedVersion),
+      'goal.error.planFailed',
+      'planGoal',
+    );
+  }
+
+  async function activateGoal(id: string) {
+    return applyLifecycleMutation(
+      id,
+      (expectedVersion) => service.activateGoal(id, expectedVersion),
+      'goal.error.activateFailed',
+      'activateGoal',
+    );
+  }
+
+  async function completeGoal(id: string) {
+    return applyLifecycleMutation(
+      id,
+      (expectedVersion) => service.completeGoal(id, expectedVersion),
+      'goal.error.completeFailed',
+      'completeGoal',
+    );
+  }
+
+  async function abandonGoal(id: string) {
+    return applyLifecycleMutation(
+      id,
+      (expectedVersion) => service.abandonGoal(id, expectedVersion),
+      'goal.error.abandonFailed',
+      'abandonGoal',
+    );
+  }
+
   // ── Aggregate View ───────────────────────────────────────────────────
 
   async function getGoalAggregateView(goalId: string): Promise<GetGoalAggregateRes | null> {
@@ -196,6 +258,10 @@ export function useGoal() {
     createGoal,
     updateGoal,
     deleteGoal,
+    planGoal,
+    activateGoal,
+    completeGoal,
+    abandonGoal,
     // Aggregate view
     getGoalAggregateView,
     // Filters (delegated)

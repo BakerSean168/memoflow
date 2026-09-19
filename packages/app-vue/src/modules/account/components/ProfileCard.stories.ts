@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
+import { requireYmd } from '@memoflow/contracts/primitives';
 import ProfileCard from './ProfileCard.vue';
 
 const meta = {
@@ -24,7 +25,7 @@ const mockProfile = {
   avatarUrl: null,
   bio: '一个热爱编程和生活的全栈开发者，喜欢用代码创造有趣的产品。',
   gender: 'Male' as const,
-  birthday: new Date('1995-06-15').getTime(),
+  birthday: requireYmd('1995-06-15'),
 };
 
 export const Default: Story = {
@@ -77,7 +78,7 @@ export const FemaleProfile: Story = {
       realName: 'Jane Doe',
       gender: 'Female' as const,
       bio: '设计师 & 前端开发，追求极致的用户体验。',
-      birthday: new Date('1998-03-20').getTime(),
+      birthday: requireYmd('1998-03-20'),
     },
   },
 };

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
-import { notificationSound, reminderSound } from '@memoflow/assets/audio';
+import { notificationSound } from '@memoflow/assets/audio';
 import { NotificationChannels } from '@memoflow/contracts/electron';
 // Residual 911: local ElectronBridge dual retired — sole body from @memoflow/ipc-client.
 // Residual 941: local getElectronBridge dual retired — sole host helper in platform/electron-bridge.
@@ -62,8 +62,6 @@ function handleReceiveNotification(data: CustomNotification) {
   if (soundEnabled) {
     if (data.sound?.name && typeof data.sound.name === 'string') {
       void playNotificationSound(data.sound.name);
-    } else if (data.data?.type && data.data.type === 'reminder') {
-      void playNotificationSound(reminderSound);
     } else {
       void playNotificationSound(notificationSound);
     }

@@ -77,21 +77,6 @@
         "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts --coverage",
         "cwd": "packages/setting"
       }
-    },
-    "test:integration": {
-      "executor": "nx:run-commands",
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
-      ],
-      "inputs": [
-        "default",
-        "^production"
-      ],
-      "cache": false,
-      "options": {
-        "command": "vitest run --config vitest.integration.config.ts",
-        "cwd": "packages/setting"
-      }
     }
   }
 }

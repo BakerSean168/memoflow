@@ -1,8 +1,8 @@
 import { error, ok, type Result } from '@memoflow/contracts/result';
 import type { IKnowledgeNotePersistencePort } from '../../application/ports';
 import type {
+  CreateConfirmedKnowledgeNoteResult,
   KnowledgeCaptureMutationPort,
-  SaveKnowledgeNoteResult,
 } from './knowledge-note-mutation.port';
 
 /**
@@ -13,13 +13,14 @@ import type {
 export class KnowledgeCapturePersistenceAdapter implements KnowledgeCaptureMutationPort {
   constructor(private readonly persistence: IKnowledgeNotePersistencePort) {}
 
-  async saveKnowledgeNote(
-    input: Parameters<KnowledgeCaptureMutationPort['saveKnowledgeNote']>[0],
-  ): Promise<Result<SaveKnowledgeNoteResult>> {
+  async createConfirmedKnowledgeNote(
+    input: Parameters<KnowledgeCaptureMutationPort['createConfirmedKnowledgeNote']>[0],
+  ): Promise<Result<CreateConfirmedKnowledgeNoteResult>> {
     try {
       const persisted = await this.persistence.createKnowledgeNote({
         identityId: input.context.identityId,
         context: input.context,
+        knowledgeDocumentId: input.knowledgeDocumentId,
         fileName: input.fileName,
         path: input.path,
         content: input.content,

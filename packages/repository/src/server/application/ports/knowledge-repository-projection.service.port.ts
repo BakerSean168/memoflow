@@ -34,9 +34,7 @@ import type {
 export interface IKnowledgeRepositoryProjectionService {
   start(): void;
   stop(): void;
-  ingest(
-    request: GithubWebhookIngressRequest,
-  ): Promise<Result<GithubWebhookIngressResponse>>;
+  ingest(request: GithubWebhookIngressRequest): Promise<Result<GithubWebhookIngressResponse>>;
   listNotes(
     identityId: string,
     request: ListKnowledgeNoteProjectionsReq,
@@ -58,14 +56,6 @@ export interface IKnowledgeRepositoryProjectionService {
     projectionId: string,
     request: GetKnowledgeNoteLinkGraphReq,
   ): Promise<Result<KnowledgeNoteLinkGraphResponse>>;
-  updateIndexStatus(
-    identityId: string,
-    request: {
-      projectionId: string;
-      contentHash: string;
-      status: KnowledgeNoteProjectionClientDTO['indexStatus'];
-    },
-  ): Promise<Result<{ updated: boolean }>>;
   replayWriteRequestProjection(
     identityId: string,
     writeRequestId: string,

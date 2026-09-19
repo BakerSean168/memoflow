@@ -30,6 +30,8 @@ interface SeedCodeSnippet {
  * In-memory seed rule shape before Prisma upsert.
  * Prisma upsert 之前的内存种子规则结构。
  */
+const GOVERNANCE_SEED_AUTHOR_ID = '00000000-0000-4000-8000-000000000001';
+
 interface SeedRule {
   code: string;
   title: string;
@@ -276,7 +278,7 @@ const toPersistenceSnippets = (snippets: SeedCodeSnippet[]): string => JSON.stri
   * @param authorId - 
   * @returns any - 
  */
-export async function seedGovernanceRules(authorId = 'governance-seed'): Promise<number> {
+export async function seedGovernanceRules(authorId = GOVERNANCE_SEED_AUTHOR_ID): Promise<number> {
   for (const rule of GOVERNANCE_SEED_RULES) {
     await prisma.rule.upsert({
       where: { code: rule.code },

@@ -46,38 +46,10 @@ export class PowerSyncAccountRepository
         `UPDATE accounts
          SET status = ?,
              profile = ?,
-             settings = ?,
-             email_address = ?,
-             email_is_verified = ?,
-             email_verified_at = ?,
-             email_is_primary = ?,
-             phone_country_code = ?,
-             phone_number = ?,
-             phone_full_number = ?,
-             phone_is_verified = ?,
-             phone_verified_at = ?,
-             version = ?,
              updated_at = ?,
-             deleted_at = ?
+             closed_at = ?
          WHERE id = ?`,
-        [
-          row.status,
-          row.profile,
-          row.settings,
-          row.email_address,
-          row.email_is_verified,
-          row.email_verified_at,
-          row.email_is_primary,
-          row.phone_country_code,
-          row.phone_number,
-          row.phone_full_number,
-          row.phone_is_verified,
-          row.phone_verified_at,
-          row.version,
-          row.updated_at,
-          row.deleted_at,
-          row.id,
-        ],
+        [row.status, row.profile, row.updated_at, row.closed_at, row.id],
       );
     } else {
       await executor.execute(
@@ -85,40 +57,11 @@ export class PowerSyncAccountRepository
            id,
            status,
            profile,
-           settings,
-           email_address,
-           email_is_verified,
-           email_verified_at,
-           email_is_primary,
-           phone_country_code,
-           phone_number,
-           phone_full_number,
-           phone_is_verified,
-           phone_verified_at,
-           version,
            created_at,
            updated_at,
-           deleted_at
-         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          row.id,
-          row.status,
-          row.profile,
-          row.settings,
-          row.email_address,
-          row.email_is_verified,
-          row.email_verified_at,
-          row.email_is_primary,
-          row.phone_country_code,
-          row.phone_number,
-          row.phone_full_number,
-          row.phone_is_verified,
-          row.phone_verified_at,
-          row.version,
-          row.created_at,
-          row.updated_at,
-          row.deleted_at,
-        ],
+           closed_at
+         ) VALUES (?, ?, ?, ?, ?, ?)`,
+        [row.id, row.status, row.profile, row.created_at, row.updated_at, row.closed_at],
       );
     }
   }
@@ -137,43 +80,6 @@ export class PowerSyncAccountRepository
     return row ? AccountPowerSyncMapper.toDomain(row) : null;
   }
 
-  async findByNickname(nickname: string, tx?: unknown): Promise<Account | null> {
-    const executor = this.asQueryable(tx) ?? this.db;
-    const row = await executor.getOptional<PowerSyncAccountRow>(
-      `SELECT * FROM accounts WHERE json_extract(profile, '$.nickname') = ? LIMIT 1`,
-      [nickname],
-    );
-    return row ? AccountPowerSyncMapper.toDomain(row) : null;
-  }
-
-  async findByEmail(email: string, tx?: unknown): Promise<Account | null> {
-    const executor = this.asQueryable(tx) ?? this.db;
-    const row = await executor.getOptional<PowerSyncAccountRow>(
-      `SELECT * FROM accounts WHERE email_address = ? LIMIT 1`,
-      [email],
-    );
-    return row ? AccountPowerSyncMapper.toDomain(row) : null;
-  }
-
-
-  async existsByNickname(nickname: string, tx?: unknown): Promise<boolean> {
-    const executor = this.asQueryable(tx) ?? this.db;
-    const row = await executor.getOptional<{ exists: number }>(
-      `SELECT 1 as exists FROM accounts WHERE json_extract(profile, '$.nickname') = ? LIMIT 1`,
-      [nickname],
-    );
-    return !!row;
-  }
-
-  async existsByEmail(email: string, tx?: unknown): Promise<boolean> {
-    const executor = this.asQueryable(tx) ?? this.db;
-    const row = await executor.getOptional<{ exists: number }>(
-      `SELECT 1 as exists FROM accounts WHERE email_address = ? LIMIT 1`,
-      [email],
-    );
-    return !!row;
-  }
-
   async delete(id: string, tx?: unknown): Promise<void> {
     const executor = this.asQueryable(tx) ?? this.db;
     await executor.execute(`DELETE FROM accounts WHERE id = ?`, [id]);
@@ -183,7 +89,7 @@ export class PowerSyncAccountRepository
     options?: {
       page?: number;
       pageSize?: number;
-      status?: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'DELETED';
+      status?: 'Active' | 'Closed';
     },
     tx?: unknown,
   ): Promise<{ accounts: Account[]; total: number }> {
@@ -229,18 +135,7 @@ export class PowerSyncAccountRepository
     return null;
   }
 
-  private mapStatusFilter(
-    status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'DELETED' | undefined,
-  ): string | null {
-    if (status === 'SUSPENDED') {
-      return 'Suspended';
-    }
-    if (status === 'INACTIVE' || status === 'DELETED') {
-      return 'Deactivated';
-    }
-    if (status === 'ACTIVE') {
-      return 'Active';
-    }
-    return null;
+  private mapStatusFilter(status: 'Active' | 'Closed' | undefined): string | null {
+    return status ?? null;
   }
 }

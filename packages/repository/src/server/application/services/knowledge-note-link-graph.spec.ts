@@ -18,7 +18,6 @@ function note(
     contentHash: `hash-${id}`,
     frontmatter: options.frontmatter ?? {},
     markdownContent,
-    indexStatus: 'indexed',
     createdAt: 1,
     updatedAt: 1,
     deletedAt: null,

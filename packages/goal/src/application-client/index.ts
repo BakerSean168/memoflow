@@ -8,23 +8,6 @@
 // ===== Port Interfaces =====
 export type { IGoalApiClient } from './ports/goal-api-client.port';
 
-// ===== Data & Rules =====
-export {
-  BUILT_IN_TEMPLATES,
-  getTemplatesByCategory,
-  getTemplatesByRole,
-  getTemplatesByIndustry,
-  getTemplateById,
-} from './goal-templates';
-export {
-  BUILT_IN_RULES,
-  sortRulesByPriority,
-  getEnabledRules,
-  findRuleById,
-  RULE_TEMPLATES,
-} from './built-in-rules';
-export type { GoalTemplate, KeyResultTemplate } from './goal-templates';
-
 // ===== Constructor-Injected Service (Result-based) =====
 export { GoalClientService, createGoalClientService } from './goal-client-service';
 export type { GoalClientPort } from './goal-client-service';

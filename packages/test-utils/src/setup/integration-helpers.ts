@@ -33,7 +33,6 @@ export async function seedAccount(
     id?: string;
     emailAddress?: string;
     profile?: AccountJsonInput | Record<string, unknown>;
-    settings?: AccountJsonInput | Record<string, unknown>;
     status?: string;
     /** Default email local-part prefix when emailAddress is omitted. */
     emailPrefix?: string;
@@ -63,24 +62,14 @@ export async function seedAccount(
   return prisma.account.upsert({
     where: { id },
     update: {
-      status: overrides.status ?? 'ACTIVE',
+      status: overrides.status ?? 'Active',
       profile: (overrides.profile ?? {}) as AccountJsonInput,
-      settings: (overrides.settings ?? {}) as AccountJsonInput,
-      emailAddress,
-      emailIsVerified: true,
-      emailVerifiedAt: new Date(),
-      emailIsPrimary: true,
-      deletedAt: null,
+      closedAt: null,
     },
     create: {
       id,
-      status: overrides.status ?? 'ACTIVE',
+      status: overrides.status ?? 'Active',
       profile: (overrides.profile ?? {}) as AccountJsonInput,
-      settings: (overrides.settings ?? {}) as AccountJsonInput,
-      emailAddress,
-      emailIsVerified: true,
-      emailVerifiedAt: new Date(),
-      emailIsPrimary: true,
     },
   });
 }

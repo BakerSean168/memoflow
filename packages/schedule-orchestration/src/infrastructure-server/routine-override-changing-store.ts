@@ -16,6 +16,9 @@ export function createRoutineOverrideChangedPublishingStore(deps: {
   readonly publish: (event: RoutineOverrideChangedEvent) => void;
 }): RoutineTemporaryOverrideStore {
   return {
+    async findRoutineTemporaryOverride(input) {
+      return deps.store.findRoutineTemporaryOverride(input);
+    },
     async setRoutineTemporaryOverride(input) {
       await deps.store.setRoutineTemporaryOverride(input);
       deps.publish({ routineId: input.routineId, identityId: input.identityId });

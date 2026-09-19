@@ -3,7 +3,10 @@
 import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { RoutineChannels, type InterventionWindowProjection } from '@memoflow/contracts/electron';
+import {
+  RoutineWindowChannels,
+  type InterventionWindowProjection,
+} from '@memoflow/contracts/electron';
 import { ok } from '@memoflow/contracts/result';
 import InterventionWindowApp from './InterventionWindowApp.vue';
 
@@ -36,8 +39,8 @@ describe('InterventionWindowApp (ROUTINE-4104)', () => {
     vi.setSystemTime(t0);
     projectionListener = null;
     invoke.mockReset().mockImplementation(async (channel: string, _command?: unknown) => {
-      if (channel === RoutineChannels.INTERVENTION_WINDOW_GET) return ok(gentleProjection());
-      if (channel === RoutineChannels.INTERVENTION_WINDOW_COMMAND) {
+      if (channel === RoutineWindowChannels.INTERVENTION_WINDOW_GET) return ok(gentleProjection());
+      if (channel === RoutineWindowChannels.INTERVENTION_WINDOW_COMMAND) {
         return ok(gentleProjection());
       }
       throw new Error(`unexpected channel ${channel}`);
@@ -47,7 +50,7 @@ describe('InterventionWindowApp (ROUTINE-4104)', () => {
       value: {
         invoke,
         on: vi.fn((channel: string, callback: (payload: unknown) => void) => {
-          if (channel === RoutineChannels.INTERVENTION_WINDOW_PROJECTION) {
+          if (channel === RoutineWindowChannels.INTERVENTION_WINDOW_PROJECTION) {
             projectionListener = callback;
           }
         }),
@@ -70,7 +73,7 @@ describe('InterventionWindowApp (ROUTINE-4104)', () => {
     await nextTick();
     expect(wrapper.get('[data-testid="intervention-countdown"]').text()).toBe('00:59');
     expect(invoke).toHaveBeenCalledTimes(1);
-    expect(invoke).toHaveBeenCalledWith(RoutineChannels.INTERVENTION_WINDOW_GET);
+    expect(invoke).toHaveBeenCalledWith(RoutineWindowChannels.INTERVENTION_WINDOW_GET);
 
     projectionListener?.(
       gentleProjection({
@@ -89,7 +92,7 @@ describe('InterventionWindowApp (ROUTINE-4104)', () => {
 
     wrapper.unmount();
     expect(off).toHaveBeenCalledWith(
-      RoutineChannels.INTERVENTION_WINDOW_PROJECTION,
+      RoutineWindowChannels.INTERVENTION_WINDOW_PROJECTION,
       expect.any(Function),
     );
   });
@@ -104,14 +107,14 @@ describe('InterventionWindowApp (ROUTINE-4104)', () => {
     await wrapper.get('button[aria-label="Dismiss intervention"]').trigger('click');
 
     await vi.waitFor(() => {
-      expect(invoke).toHaveBeenCalledWith(RoutineChannels.INTERVENTION_WINDOW_COMMAND, {
+      expect(invoke).toHaveBeenCalledWith(RoutineWindowChannels.INTERVENTION_WINDOW_COMMAND, {
         action: 'complete',
       });
-      expect(invoke).toHaveBeenCalledWith(RoutineChannels.INTERVENTION_WINDOW_COMMAND, {
+      expect(invoke).toHaveBeenCalledWith(RoutineWindowChannels.INTERVENTION_WINDOW_COMMAND, {
         action: 'snooze',
         durationMs: 300_000,
       });
-      expect(invoke).toHaveBeenCalledWith(RoutineChannels.INTERVENTION_WINDOW_COMMAND, {
+      expect(invoke).toHaveBeenCalledWith(RoutineWindowChannels.INTERVENTION_WINDOW_COMMAND, {
         action: 'dismiss',
       });
     });

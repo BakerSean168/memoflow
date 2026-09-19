@@ -4,7 +4,7 @@ tags:
   - dual-registry
 description: Dual Registry — retired locks vs keep-boundary vs open dual debt
 created: 2026-07-26T00:00:00
-updated: 2026-08-22T15:38:00+08:00
+updated: 2026-09-18T17:21:00+08:00
 ---
 
 # Dual Registry
@@ -18,19 +18,19 @@ updated: 2026-08-22T15:38:00+08:00
 | 项 | 值 |
 |----|----|
 | 基线 dual-surface 文件 | 237 |
-| 当前 dual-surface 文件 | 84 |
-| E3b 降幅 | 64.6%（目标 ≥25%） |
-| Registry suites | 25 |
-| keep-boundary 文件 | 66 |
-| 登记条目总数 | 150 |
+| 当前 dual-surface 文件 | 68 |
+| E3b 降幅 | 71.3%（目标 ≥25%） |
+| Registry suites | 117 |
+| keep-boundary 文件 | 48 |
+| 登记条目总数 | 117 |
 | 未分类 | 0（覆盖率 100%） |
 
 ### 按 class
 
 | class | count |
 |-------|------:|
-| `keep_boundary` | 66 |
-| `retired` | 84 |
+| `keep_boundary` | 48 |
+| `retired` | 69 |
 
 ## 分类规则（摘要）
 
@@ -49,14 +49,13 @@ updated: 2026-08-22T15:38:00+08:00
 | package | retired | keep_boundary | other |
 |---------|--------:|--------------:|------:|
 | `apps/api` | 0 | 3 | 0 |
-| `apps/desktop` | 6 | 7 | 0 |
+| `apps/desktop` | 3 | 0 | 0 |
 | `apps/web` | 2 | 1 | 0 |
 | `packages/account` | 1 | 1 | 0 |
 | `packages/ai` | 4 | 7 | 0 |
-| `packages/app-vue` | 10 | 25 | 0 |
+| `packages/app-vue` | 6 | 20 | 0 |
 | `packages/authentication` | 3 | 2 | 0 |
-| `packages/contracts` | 32 | 5 | 0 |
-| `packages/dashboard` | 1 | 1 | 0 |
+| `packages/contracts` | 28 | 2 | 0 |
 | `packages/data-portability` | 3 | 4 | 0 |
 | `packages/goal` | 3 | 3 | 0 |
 | `packages/governance` | 3 | 1 | 0 |
@@ -79,7 +78,6 @@ updated: 2026-08-22T15:38:00+08:00
 | `keep_boundary` | `apps/api/src/shared/infrastructure/config/get-cors-origins-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `apps/api/src/shared/infrastructure/load-workspace-env-keep-boundary.surface.spec.ts` |
 | `retired` | `apps/desktop/src/main/desktop-shared-ipc-channels-dual.surface.spec.ts` |
-| `keep_boundary` | `apps/desktop/src/main/modules/ai/to-knowledge-note-ref-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `apps/desktop/src/main/modules/authentication/application/auto-login-result-extension-keep-boundary.surface.spec.ts` |
 | `retired` | `apps/desktop/src/main/modules/authentication/application/dual-registry.surface.spec.ts` |
 | `keep_boundary` | `apps/desktop/src/main/modules/authentication/application/refresh-result-layered-keep-boundary.surface.spec.ts` |
@@ -118,7 +116,6 @@ updated: 2026-08-22T15:38:00+08:00
 | `keep_boundary` | `packages/app-vue/src/modules/authentication/composables/password-toast-only-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `packages/app-vue/src/modules/authentication/composables/remove-remembered-toast-only-keep-boundary.surface.spec.ts` |
 | `retired` | `packages/app-vue/src/modules/authentication/composables/reportAuthOperationFailure-dual.surface.spec.ts` |
-| `retired` | `packages/app-vue/src/modules/dashboard/adapters/dashboard-transport-dual.surface.spec.ts` |
 | `keep_boundary` | `packages/app-vue/src/modules/goal/composables/goal-operations-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `packages/app-vue/src/modules/goal/utils/clamp-percentage-keep-boundary.surface.spec.ts` |
 | `retired` | `packages/app-vue/src/modules/reminder/composables/reminder-desktop-api-dual.surface.spec.ts` |
@@ -132,7 +129,6 @@ updated: 2026-08-22T15:38:00+08:00
 | `keep_boundary` | `packages/app-vue/src/shared/utils/format-duration-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `packages/app-vue/src/shared/utils/format-event-time-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `packages/app-vue/src/shared/utils/format-message-time-keep-boundary.surface.spec.ts` |
-| `keep_boundary` | `packages/app-vue/src/shared/utils/format-time-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `packages/app-vue/src/shared/utils/format-time-range-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `packages/app-vue/src/shared/utils/format-timestamp-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `packages/app-vue/src/shared/utils/get-importance-label-keep-boundary.surface.spec.ts` |
@@ -183,15 +179,7 @@ updated: 2026-08-22T15:38:00+08:00
 | `keep_boundary` | `packages/contracts/src/result/is-record-keep-boundary.surface.spec.ts` |
 | `retired` | `packages/contracts/src/shared/dtos/shared-dtos-dual.surface.spec.ts` |
 | `retired` | `packages/contracts/src/shared/dual-registry.surface.spec.ts` |
-| `keep_boundary` | `packages/dashboard/src/start-of-day-keep-boundary.surface.spec.ts` |
-| `retired` | `packages/dashboard/src/to-dashboard-task-instance-record-dual.surface.spec.ts` |
 | `retired` | `packages/data-portability/src/application-client/data-portability-client-port-dual.surface.spec.ts` |
-| `retired` | `packages/data-portability/src/server/application/use-cases/projections/goal-editor-resolve-ref-dual.surface.spec.ts` |
-| `keep_boundary` | `packages/data-portability/src/server/application/use-cases/projections/parse-json-field-keep-boundary.surface.spec.ts` |
-| `retired` | `packages/data-portability/src/server/application/use-cases/projections/resolve-export-ref-dual.surface.spec.ts` |
-| `keep_boundary` | `packages/data-portability/src/server/application/use-cases/projections/to-boolean-keep-boundary.surface.spec.ts` |
-| `keep_boundary` | `packages/data-portability/src/server/application/use-cases/projections/to-date-keep-boundary.surface.spec.ts` |
-| `keep_boundary` | `packages/data-portability/src/server/application/use-cases/projections/to-timestamp-keep-boundary.surface.spec.ts` |
 | `retired` | `packages/goal/src/__tests__/dual-registry.surface.spec.ts` |
 | `keep_boundary` | `packages/goal/src/api/routes/goal-parse-number-string-array-keep-boundary.surface.spec.ts` |
 | `retired` | `packages/goal/src/api/routes/parse-boolean-dual.surface.spec.ts` |
@@ -224,4 +212,3 @@ updated: 2026-08-22T15:38:00+08:00
 | `keep_boundary` | `packages/utils/src/shared/format-date-to-input-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `packages/utils/src/shared/generate-uuid-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `packages/utils/src/shared/new-id-keep-boundary.surface.spec.ts` |
-

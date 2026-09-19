@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "id": "dashboard-page-only-surfaces",
+      "status": "active",
+      "decision": "ADR-108 / SYS-0002",
+      "forbiddenPaths": [
+        "packages/app-vue/src/modules/dashboard/components/DashboardActivityTimeline.vue",
+        "packages/app-vue/src/modules/dashboard/components/DashboardStatsStrip.vue",
+        "packages/app-vue/src/modules/dashboard/components/DashboardTrendPanel.vue",
+        "packages/app-vue/src/shared/utils/format-time-keep-boundary.surface.spec.ts"
+      ]
+    },
+    {
+      "id": "cross-domain-activity-ledger",
+      "status": "active",
+      "decision": "ADR-108 / HOME-1804",
+      "forbiddenPaths": [
+        "apps/api/src/modules/dashboard/activity-ledger.ts",
+        "apps/api/src/modules/ai/activity-ledger-read.adapter.ts",
+        "packages/database/prisma/schema/activity.prisma"
+      ]
+    },
+    {
+      "id": "editor-runtime-package",
+      "status": "active",
+      "decision": "ADR-107",
+      "forbiddenPaths": ["packages/editor"]
+    },
+    {
+      "id": "standalone-dashboard-bounded-context",
+      "status": "active",
+      "decision": "ADR-108 / HOME-1805",
+      "forbiddenPaths": [
+        "packages/dashboard",
+        "packages/contracts/src/modules/dashboard",
+        "packages/app-vue/src/modules/dashboard",
+        "apps/api/src/modules/dashboard",
+        "apps/desktop/src/main/ipc/dashboard-handler.ts",
+        "apps/desktop/src/main/services/dashboard-read-service.ts"
+      ]
+    },
+    {
+      "id": "legacy-editor-persistence",
+      "status": "active",
+      "decision": "ADR-107 / EDITOR-1702",
+      "forbiddenPaths": ["packages/database/prisma/schema/editor.prisma"]
+    },
+    {
+      "id": "account-settings-legacy",
+      "status": "active",
+      "decision": "ADR-104 / ACC-1403",
+      "forbiddenPaths": [
+        "packages/contracts/src/modules/account/value-objects/account-settings.ts",
+        "packages/account/src/server/application/use-cases/commands/update-account-settings.use-case.ts"
+      ]
+    },
+    {
+      "id": "legacy-reminder-model",
+      "status": "active",
+      "decision": "ADR-076..079 / ROUTINE-2201",
+      "forbiddenPaths": ["packages/reminder/src/server/domain/aggregates/reminder-template.ts"]
+    },
+    {
+      "id": "legacy-schedule-task-model",
+      "status": "active",
+      "decision": "ADR-081..083 / S4-2302B",
+      "forbiddenPaths": [
+        "packages/scheduler/src/server/domain/aggregates/schedule-task.ts",
+        "packages/scheduler/src/server/domain/entities/schedule-execution.ts",
+        "packages/scheduler/src/server/infrastructure/runtime/schedule.runtime.ts",
+        "packages/scheduler/src/server/infrastructure/scheduling/legacy-schedule-task-scheduling.adapter.ts",
+        "packages/scheduler/src/server/infrastructure/adapters/prisma/schedule-task-prisma.repository.ts",
+        "packages/scheduler/src/server/infrastructure/adapters/prisma/schedule-execution-prisma.repository.ts",
+        "packages/scheduler/src/server/infrastructure/adapters/powersync/schedule-task-powersync.repository.ts",
+        "packages/scheduler/src/server/infrastructure/adapters/powersync/schedule-execution-powersync.repository.ts",
+        "packages/contracts/src/modules/schedule/aggregates/schedule-task-client.ts",
+        "packages/contracts/src/modules/schedule/aggregates/schedule-task-server.ts",
+        "packages/contracts/src/modules/schedule/entities/schedule-execution-client.ts",
+        "packages/contracts/src/modules/schedule/entities/schedule-execution-server.ts",
+        "packages/contracts/src/modules/schedule/value-objects/source-module.ts",
+        "packages/contracts/src/modules/schedule/value-objects/schedule-config.ts"
+      ]
+    },
+    {
+      "id": "legacy-notification-template",
+      "status": "active",
+      "decision": "ADR-085 / NOTIF-2401",
+      "forbiddenPaths": [
+        "packages/notification/src/server/domain/aggregates/notification-template.ts"
+      ]
+    }
+  ]
+}

@@ -17,7 +17,15 @@ export default {
     "refresh": "Refresh projection",
     "createAction": "New note",
     "commit": "commit {sha}",
-    "readOnly": "Read-only projection",    "noteViews": "Knowledge note views",
+    "readOnly": "Read-only projection",
+    "documentId": "Stable document identity",
+    "adoptAction": "Adopt into MemoFlow",
+    "adoptTitle": "Adopt this knowledge note",
+    "adoptDescription": "MemoFlow will make one metadata-only Git commit that adds a stable document identity. The note body is not edited.",
+    "adoptPatch": "Metadata patch",
+    "adoptImmutable": "This confirmation is bound to the currently projected Git blob. If the file changes before commit, adoption stops instead of overwriting it.",
+    "adoptConfirmAction": "Confirm metadata commit",
+    "noteViews": "Knowledge note views",
     "previewTab": "Preview",
     "relationsTab": "Relations",
     "graphDepth": "Depth",
@@ -52,18 +60,10 @@ export default {
     "noteContent": "Markdown content",
     "noteReason": "Write reason",
     "invalidDraft": "Add a title, .md path, content, and write reason.",
-    "indexStatus": {
-      "pending": "Pending indexing",
-      "indexed": "Searchable",
-      "failed": "Indexing failed"
-    },
-    "status": {
-      "Active": "Connected",
-      "Suspended": "Suspended",
-      "Revoked": "Revoked",
-      "Error": "Needs attention",
-      "PendingInstall": "Pending installation",
-      "Unknown": "Unknown status"
+    "providerStatus": {
+      "Ready": "Provider ready",
+      "Blocked": "Provider blocked",
+      "Unchecked": "Not checked"
     }
   },
   "writeRequestLedger": {
@@ -219,96 +219,4 @@ export default {
     "renamePersisted": "Bookmark renamed",
     "renameLocalOnly": "Bookmark rename is only temporary in this session until backend persistence is available."
   },
-  "fileTreePanel": {
-    "loading": "Loading file tree...",
-    "empty": "No files yet",
-    "createFolder": "Legacy folder action"
-  },
-  "treeNode": {
-    "today": "Today",
-    "yesterday": "Yesterday",
-    "daysAgo": "{days} days ago"
-  },
-  "resourceDetails": {
-    "title": "Resource details",
-    "metadata": "Metadata",
-    "path": "Path",
-    "type": "Type",
-    "size": "Size",
-    "createdAt": "Created",
-    "updatedAt": "Updated",
-    "references": "References",
-    "tags": "Tags",
-    "usedBy": "Used by notes",
-    "noReferences": "This resource is not referenced by any note.",
-    "brokenReferenceWarning": "Some notes reference this resource through broken markdown paths.",
-    "delete": "Delete resource",
-    "deleteConfirmTitle": "Delete Resource",
-    "deleteConfirm": "Delete this resource?",
-    "deleteImpact": "This resource is referenced {count} times across {notes} notes. Delete anyway?",
-    "deleteSuccess": "Resource deleted",
-    "deleteFailed": "Failed to delete resource",
-    "renameTitle": "Rename resource",
-    "renameDescription": "Update the resource name. If you omit the extension, the current one is kept.",
-    "renamePlaceholder": "Enter resource name",
-    "renameSuccess": "Resource renamed to {name}",
-    "renameFailed": "Failed to rename resource"
-  },
-  "createResource": {
-    "title": "Create Resource",
-    "description": "Create a new resource file",
-    "labelName": "Resource Name",
-    "placeholderName": "Enter resource name...",
-    "labelType": "Resource Type",
-    "placeholderType": "Select resource type",
-    "typeMarkdown": "Markdown Note",
-    "typeImage": "Image",
-    "typeVideo": "Video",
-    "typeAudio": "Audio",
-    "typeLink": "Link",
-    "typeOther": "Other",
-    "labelFolder": "Target Folder (optional)",
-    "placeholderFolder": "Select target folder...",
-    "btnCancel": "Cancel",
-    "btnCreate": "Create"
-  },
-  "createFolder": {
-    "title": "Create Folder",
-    "description": "Create a new folder",
-    "descriptionInParent": "Create a new folder in \"{name}\"",
-    "labelName": "Folder Name",
-    "placeholderName": "Enter folder name...",
-    "labelIcon": "Icon (optional)",
-    "btnCancel": "Cancel",
-    "btnCreate": "Create"
-  },
-  "presentation": {
-    "statusActive": "Active",
-    "statusArchived": "Archived",
-    "statusDeleted": "Deleted",
-    "typeMarkdown": "Markdown",
-    "typeCode": "Code",
-    "typeMixed": "Mixed"
-  },
-  "aiKnowledge": {
-    "title": "AI Knowledge Generator",
-    "description": "Describe a knowledge topic you want to learn about, and AI will generate structured knowledge notes for you.",
-    "topic": "Knowledge Topic",
-    "topicPlaceholder": "e.g., Explain soft router knowledge in detail, including common soft router system comparisons, hardware selection, typical use cases, etc.",
-    "createSubfolder": "Create Subfolder",
-    "folderName": "Folder Name",
-    "folderNamePlaceholder": "Leave empty to use topic name",
-    "saveLocation": "Save location: ",
-    "generating": "Generating knowledge note...",
-    "generatedChars": "{count} characters generated",
-    "generateComplete": "Generation Complete",
-    "generateCompleteDesc": "Knowledge note has been generated and saved successfully",
-    "error": "Error",
-    "cancel": "Cancel",
-    "generate": "Generate",
-    "viewNote": "View Note",
-    "done": "Done",
-    "defaultRepositoryName": "Knowledge Base",
-    "newKnowledge": "New Knowledge"
-  }
 } as const;

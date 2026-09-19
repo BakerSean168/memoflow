@@ -1,18 +1,28 @@
 import { ThemeProvider } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
-import type { PropsWithChildren } from 'react';
+import { createContext, type PropsWithChildren } from 'react';
 
-import { getNavigationTheme } from '../constants/theme';
+import { getNavigationTheme, resolveThemeName, type AppThemeName } from '../constants/theme';
 import { useColorScheme } from '../hooks/useColorScheme';
 
-export function AppThemeProvider({ children }: PropsWithChildren) {
-  const colorScheme = useColorScheme();
-  const navigationTheme = getNavigationTheme(colorScheme);
+export type AppThemeMode = 'auto' | AppThemeName;
+
+export const AppThemeNameContext = createContext<AppThemeName | null>(null);
+
+export function AppThemeProvider({
+  children,
+  themeMode = 'auto',
+}: PropsWithChildren<{ themeMode?: AppThemeMode }>) {
+  const systemScheme = useColorScheme();
+  const themeName = themeMode === 'auto' ? resolveThemeName(systemScheme) : themeMode;
+  const navigationTheme = getNavigationTheme(themeName);
 
   return (
-    <ThemeProvider value={navigationTheme}>
-      <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-      {children}
-    </ThemeProvider>
+    <AppThemeNameContext.Provider value={themeName}>
+      <ThemeProvider value={navigationTheme}>
+        <StatusBar style={themeName === 'dark' ? 'light' : 'dark'} />
+        {children}
+      </ThemeProvider>
+    </AppThemeNameContext.Provider>
   );
 }

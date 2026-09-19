@@ -30,7 +30,7 @@ export class ListGoalsUseCase {
       ? goals.filter(
           (g) =>
             g.name.toLowerCase().includes(normalizedQuery) ||
-            g.description?.toLowerCase().includes(normalizedQuery),
+            g.summary?.toLowerCase().includes(normalizedQuery),
         )
       : goals;
 

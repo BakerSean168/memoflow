@@ -1,41 +1,41 @@
 {
-  "version": 1,
-  "generated": "2026-07-26",
+  "version": 2,
+  "generated": "2026-09-09",
   "constitution": "docs/architecture/adr/ADR-037-product-time-system.md",
   "entries": [
     {
       "kind": "canonical",
       "path": "packages/time/src/facade.ts",
-      "symbol": "createTimeFacade",
-      "reason": "Product time entry \u2014 Clock/Style/Codec/Format/Input/Calendar",
+      "symbol": "createTimeFacade|TimeFacade|TimeContext|TimePresentationStyle",
+      "reason": "Context-required Product Time entry: Clock/Codec/Format/Input/Calendar plus presentation-only preferences",
       "owner": "platform"
     },
     {
       "kind": "canonical",
       "path": "packages/time/src/engine/date-fns-engine.ts",
       "symbol": "createDateFnsEngine",
-      "reason": "Only business date-fns importer surface",
+      "reason": "Only production date-fns importer surface",
       "owner": "platform"
     },
     {
       "kind": "canonical",
       "path": "packages/time/src/free/format-helpers.ts",
-      "symbol": "padTwoDigits|formatLocalHHmm|formatDateToYMD|formatHHmmParts|formatHour|formatDisplayDate",
-      "reason": "Public free-function helpers over defaultTime.format (app-vue soles re-export)",
+      "symbol": "padTwoDigits|formatHHmmParts|formatHour|formatDisplayDate",
+      "reason": "Pure string/Ymd presentation helpers only; no clock or timezone fallback",
       "owner": "platform"
     },
     {
       "kind": "canonical",
       "path": "packages/contracts/src/primitives/instant.ts",
       "symbol": "Instant",
-      "reason": "Brand epoch ms; TransferDate \u2261 Instant",
+      "reason": "Brand epoch ms; TransferDate is the transport representation of an Instant",
       "owner": "contracts"
     },
     {
       "kind": "canonical",
       "path": "packages/contracts/src/primitives/ymd.ts",
-      "symbol": "Ymd",
-      "reason": "Local calendar day brand",
+      "symbol": "Ymd|YmdSchema|parseYmd|requireYmd",
+      "reason": "Validated portable local calendar-day primitive",
       "owner": "contracts"
     },
     {
@@ -49,42 +49,42 @@
       "kind": "canonical",
       "path": "packages/time/src/empty-catalog.ts",
       "symbol": "resolveEmptyLabel|TimeEmptyKind",
-      "reason": "P1 empty catalog sole",
+      "reason": "Semantic empty-label catalog",
       "owner": "platform"
     },
     {
       "kind": "canonical",
       "path": "packages/app-vue/src/shared/utils/product-time.ts",
-      "symbol": "getProductTime",
-      "reason": "App-vue session facade",
+      "symbol": "getProductTime|setProductTimePreferences",
+      "reason": "App-vue session facade: explicit device bootstrap then canonical preference context",
       "owner": "app-vue"
     },
     {
       "kind": "canonical",
       "path": "packages/app-react/src/utils/product-time.ts",
-      "symbol": "getProductTime",
-      "reason": "App-react session facade (P2)",
+      "symbol": "getProductTime|setProductTimePreferences",
+      "reason": "App-react session facade: explicit device bootstrap then canonical preference context",
       "owner": "app-react"
     },
     {
       "kind": "boundary",
       "path": "packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue",
       "symbol": "formatMessageTime",
-      "reason": "Residual 1207: SSE monitor raw locale clock \u2014 durable exemption (P3 end-state)",
+      "reason": "Raw SSE diagnostics display; not a Product Time business/presentation authority",
       "owner": "notification"
     },
     {
       "kind": "boundary",
       "path": "packages/app-vue/src/modules/task/utils/format-task-duration.ts",
       "symbol": "formatTaskDuration",
-      "reason": "P4 L4 duration dictionary (Intl unit) over time splitDurationMinutes",
+      "reason": "L4 duration dictionary over Product Time duration splitting",
       "owner": "task"
     },
     {
       "kind": "boundary",
       "path": "packages/app-vue/src/shared/utils/format-schedule-duration-minutes.ts",
       "symbol": "formatScheduleDurationMinutes",
-      "reason": "P4 L4 schedule.duration.* dictionary over time split",
+      "reason": "L4 schedule duration dictionary over Product Time duration splitting",
       "owner": "schedule"
     }
   ]

@@ -8,7 +8,7 @@ import type {
   CreateKnowledgeRepositoryConnectionReq,
   KnowledgeRepositoryInstallationTokenRes,
   KnowledgeRepositoryInstallationIntentStatusResponse,
-  KnowledgeRepositoryConnectionClientDTO,
+  KnowledgeRemoteBindingClientDTO,
   ListKnowledgeRepositoryConnectionsRes,
   StartKnowledgeRepositoryInstallationReq,
   StartKnowledgeRepositoryInstallationRes,
@@ -17,10 +17,11 @@ import type {
   PreviewKnowledgeRepositoryReconciliationReq,
   CreateConfirmedKnowledgeNoteReq,
   CreateConfirmedKnowledgeNoteResponse,
+  AdoptKnowledgeDocumentReq,
+  AdoptKnowledgeDocumentResponse,
   KnowledgeNoteProjectionClientDTO,
   KnowledgeNoteProjectionListResponse,
   ListKnowledgeNoteProjectionsReq,
-  KnowledgeNoteProjectionIndexStatus,
   GetKnowledgeNoteLinkGraphReq,
   KnowledgeNoteLinkGraphResponse,
   KnowledgeAttachmentContentResponse,
@@ -69,10 +70,14 @@ export interface RepositoryApplicationPort {
   listKnowledgeRepositoryConnections(
     ctx: Context,
   ): Promise<Result<ListKnowledgeRepositoryConnectionsRes>>;
+  refreshKnowledgeRepositoryObservation(
+    ctx: Context,
+    connectionId: string,
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>>;
   connectKnowledgeRepository(
     ctx: Context,
     request: CreateKnowledgeRepositoryConnectionReq,
-  ): Promise<Result<KnowledgeRepositoryConnectionClientDTO>>;
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>>;
   disconnectKnowledgeRepository(
     ctx: Context,
     connectionId: string,
@@ -91,7 +96,7 @@ export interface RepositoryApplicationPort {
     ctx: Context,
     connectionId: string,
     request: ConfirmKnowledgeRepositoryHeadReq,
-  ): Promise<Result<KnowledgeRepositoryConnectionClientDTO>>;
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>>;
   listKnowledgeNoteProjections(
     ctx: Context,
     request: ListKnowledgeNoteProjectionsReq,
@@ -117,14 +122,10 @@ export interface RepositoryApplicationPort {
     ctx: Context,
     request: CreateConfirmedKnowledgeNoteReq,
   ): Promise<Result<CreateConfirmedKnowledgeNoteResponse>>;
-  updateKnowledgeNoteProjectionIndexStatus(
-    ctx: Pick<Context, 'identityId'>,
-    request: {
-      projectionId: string;
-      contentHash: string;
-      status: KnowledgeNoteProjectionIndexStatus;
-    },
-  ): Promise<Result<{ updated: boolean }>>;
+  adoptKnowledgeDocument(
+    ctx: Context,
+    request: AdoptKnowledgeDocumentReq,
+  ): Promise<Result<AdoptKnowledgeDocumentResponse>>;
   ingestGithubWebhook(request: {
     deliveryId: string;
     eventName: string;

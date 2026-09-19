@@ -7,9 +7,13 @@ import { ok, error } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { IAccountRepository } from '../../../domain';
 import type { AccountClientDTO, UpdateAccountReq } from '@memoflow/contracts/account';
+import type { Clock } from '@memoflow/time';
 
 export class UpdateAccountProfileUseCase {
-  constructor(private readonly accountRepository: IAccountRepository) {}
+  constructor(
+    private readonly accountRepository: IAccountRepository,
+    private readonly clock: Clock,
+  ) {}
 
   async execute(
     request: UpdateAccountReq,
@@ -35,7 +39,7 @@ export class UpdateAccountProfileUseCase {
       profile = profile.updateBio(request.bio ?? '');
     }
 
-    account.updateProfile(profile);
+    account.updateProfile(profile, this.clock.now());
     if (tx) {
       await this.accountRepository.save(account, tx);
     } else {

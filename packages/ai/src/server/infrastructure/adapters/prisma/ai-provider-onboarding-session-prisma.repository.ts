@@ -1,29 +1,17 @@
 import type { PrismaClient } from '@memoflow/database';
 import type { AIModelInfo, AIProviderCatalogId } from '@memoflow/contracts/ai';
+import type { AIProviderCredentialRef } from '@memoflow/contracts/primitives';
 import type {
   AIProviderOnboardingSessionRecord,
   CreateAIProviderOnboardingSessionInput,
   IAIProviderOnboardingSessionRepository,
 } from '../../../application/ports/provider-onboarding-session.repository';
-import type { IAIProviderSecretVault } from '../../../application/ports/provider-secret-vault.port';
-import { AISecretCipher } from '../../security/ai-secret-cipher';
 
 type OnboardingDb = Pick<PrismaClient, 'aiProviderOnboardingSession'>;
 type SessionRow = Awaited<ReturnType<OnboardingDb['aiProviderOnboardingSession']['findUnique']>>;
 
 export class AIProviderOnboardingSessionPrismaRepository implements IAIProviderOnboardingSessionRepository {
-  private cipher: IAIProviderSecretVault | null;
-
-  constructor(
-    private readonly db: OnboardingDb,
-    secretVault?: IAIProviderSecretVault,
-  ) {
-    this.cipher = secretVault ?? null;
-  }
-
-  private get secretVault(): IAIProviderSecretVault {
-    return (this.cipher ??= AISecretCipher.fromEnv());
-  }
+  constructor(private readonly db: OnboardingDb) {}
 
   async create(input: CreateAIProviderOnboardingSessionInput): Promise<void> {
     await this.db.aiProviderOnboardingSession.create({
@@ -33,7 +21,7 @@ export class AIProviderOnboardingSessionPrismaRepository implements IAIProviderO
         catalogId: input.catalogId,
         baseUrl: input.baseUrl,
         targetProviderId: input.targetProviderId ?? null,
-        credentialEncrypted: this.secretVault.encrypt(input.apiKey),
+        credentialRef: input.credentialRef,
         credentialStatus: input.credentialStatus,
         discoveryStatus: input.discoveryStatus,
         modelsJson: JSON.stringify(input.models),
@@ -109,7 +97,7 @@ export class AIProviderOnboardingSessionPrismaRepository implements IAIProviderO
       catalogId: row.catalogId as AIProviderCatalogId,
       baseUrl: row.baseUrl,
       targetProviderId: row.targetProviderId,
-      apiKey: this.secretVault.decrypt(row.credentialEncrypted),
+      credentialRef: row.credentialRef as AIProviderCredentialRef,
       credentialStatus: row.credentialStatus as AIProviderOnboardingSessionRecord['credentialStatus'],
       discoveryStatus: row.discoveryStatus as AIProviderOnboardingSessionRecord['discoveryStatus'],
       models: parseModels(row.modelsJson),

@@ -8,15 +8,6 @@ export type {
   SnapshotQueryResult,
 } from './i-weight-snapshot-repository';
 export type { IGoalRecordRepository, GoalRecordQueryOptions } from './i-goal-record-repository';
-export {
-  SubjectTypes,
-  RelationTypes,
-  type SubjectType,
-  type RelationType,
-  type SubjectRef,
-  type RelationDTO,
-  type IRelationRepository,
-} from './i-relation-repository';
 export type {
   IWalletRepository,
   WalletAccountDTO,

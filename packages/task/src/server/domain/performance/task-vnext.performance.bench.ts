@@ -1,20 +1,28 @@
 import { describe, expect, it } from 'vitest';
 import {
-  RecurrenceFrequency,
-  TaskInstanceStatus,
+  TaskOccurrenceStatus,
   TaskPlanCompletionPolicy,
   TaskPlanOutcome,
-  TaskType,
+  TaskPlanScheduleKind,
+  TaskRecurrenceEndKind,
   type TaskPlanOutcomeValue,
 } from '@memoflow/contracts/task';
-import { TaskTemplate } from '../aggregates/task-template';
-import { TaskTemplateId } from '../value-objects/task-template-id';
-import { TaskTemplateStatus } from '../value-objects/task-template-status';
+import { TaskPlan } from '../aggregates/task-plan';
+import { TaskPlanId } from '../value-objects/task-plan-id';
+import { TaskPlanStatus } from '../value-objects/task-plan-status';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
+import type { Ymd } from '@memoflow/contracts/primitives';
 import { IdentityId } from '@memoflow/domain-shared';
 import { createTaskRecurrenceDateAdapter } from '../aggregates/task-recurrence-date.adapter';
 import { TaskPlanOutcomeEvaluator } from '../services/task-plan-outcome-evaluator';
-import { RecurrenceRule, TaskTimeConfig } from '../value-objects';
+import { asYmd, createTimeContext } from '@memoflow/time';
+import {
+  aDailyRecurrence,
+  anAllDayTiming,
+  canonicalTaskPlanScheduleForTest,
+} from '../../../testing';
+
+const PERFORMANCE_TIME_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
 
 function averageDuration(iterations: number, work: () => void): number {
   for (let i = 0; i < 3; i++) work();
@@ -28,14 +36,24 @@ describe('Task vNext performance budgets', () => {
     const occurrenceCount = 20_000;
     const evaluator = new TaskPlanOutcomeEvaluator();
     const now = Date.now();
-    const template = TaskTemplate.load({
-      id: TaskTemplateId.generate(),
+    const anchor = Date.UTC(2026, 0, 1);
+    const plan = TaskPlan.load({
+      id: TaskPlanId.generate(),
       identityId: IdentityId.generate(),
-      title: 'Performance benchmark template',
+      title: 'Performance benchmark plan',
       description: null,
-      taskType: TaskType.Recurring,
+      schedule: canonicalTaskPlanScheduleForTest(
+        TaskPlanScheduleKind.Recurring,
+        anchor,
+        anAllDayTiming(),
+        {
+          ...aDailyRecurrence(),
+          end: { kind: TaskRecurrenceEndKind.Count, count: occurrenceCount },
+        },
+        PERFORMANCE_TIME_CONTEXT,
+      ),
       importance: ImportanceLevel.Moderate,
-      status: TaskTemplateStatus.Active,
+      status: TaskPlanStatus.Active,
       outcome: TaskPlanOutcome.Open,
       completionPolicy: TaskPlanCompletionPolicy.AllowCorrection,
       closedAt: null,
@@ -43,36 +61,21 @@ describe('Task vNext performance budgets', () => {
       abandonedReason: null,
       goalBinding: null,
       checklist: [],
-      timeConfig: null,
-      recurrenceRule: RecurrenceRule.create({
-        frequency: 'Daily',
-        interval: 1,
-        daysOfWeek: [],
-        endDate: null,
-        occurrences: occurrenceCount,
-      }),
       reminderConfig: null,
-      lastGeneratedDate: null,
-      generateAheadDays: null,
-      startDate: null,
-      dueDate: null,
-      completedAt: null,
-      estimatedMinutes: null,
-      actualMinutes: null,
-      note: null,
       createdAt: now,
       updatedAt: now,
       deletedAt: null,
       version: 1,
     });
-    const occurrences = Array.from({ length: occurrenceCount }, () => ({
-      status: TaskInstanceStatus.Completed,
+    const occurrences = Array.from({ length: occurrenceCount }, (_, index) => ({
+      scheduleDate: new Date(Date.UTC(2026, 0, index + 1)).toISOString().slice(0, 10) as Ymd,
+      status: TaskOccurrenceStatus.Completed,
       deletedAt: null,
     }));
 
     let result: TaskPlanOutcomeValue = TaskPlanOutcome.Open;
     const avgMs = averageDuration(40, () => {
-      result = evaluator.evaluate(template, occurrences);
+      result = evaluator.evaluate(plan, occurrences, PERFORMANCE_TIME_CONTEXT);
     });
 
     expect(result).toBe(TaskPlanOutcome.Succeeded);
@@ -81,21 +84,23 @@ describe('Task vNext performance budgets', () => {
 
   it('expands 1000 daily candidate dates through the canonical recurrence adapter', () => {
     const adapter = createTaskRecurrenceDateAdapter();
-    const anchor = new Date(2026, 0, 1, 0, 0, 0, 0);
-    const timeConfig = TaskTimeConfig.createAllDay(anchor);
-    const rule = RecurrenceRule.create({
-      frequency: RecurrenceFrequency.Daily,
-      interval: 1,
-      daysOfWeek: [],
-      endDate: null,
-      occurrences: 1000,
-    });
+    const anchor = new Date(Date.UTC(2026, 0, 1, 0, 0, 0, 0));
+    const recurrence = {
+      ...aDailyRecurrence(),
+      end: { kind: TaskRecurrenceEndKind.Count, count: 1000 },
+    };
     const from = anchor.getTime();
-    const to = new Date(2030, 0, 1, 0, 0, 0, 0).getTime();
+    const to = Date.UTC(2030, 0, 1, 0, 0, 0, 0);
 
     let dates: number[] = [];
     const avgMs = averageDuration(5, () => {
-      dates = adapter.between(rule, timeConfig, from, to);
+      dates = adapter.between(
+        recurrence,
+        asYmd('2026-01-01'),
+        from,
+        to,
+        createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+      );
     });
 
     expect(dates).toHaveLength(1000);

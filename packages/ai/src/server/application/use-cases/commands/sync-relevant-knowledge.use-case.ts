@@ -1,9 +1,8 @@
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type {
-  IAIExecutionLogPort,
+  IAIExecutionRecordPort,
   IKnowledgeIndexRepository,
   IKnowledgeIngestionPort,
-  IKnowledgeIndexStatusPort,
   IKnowledgeSourcePort,
   KnowledgeSourceNote,
 } from '../../ports';
@@ -24,14 +23,12 @@ export class SyncRelevantKnowledgeUseCase {
     private readonly knowledgeSourcePort: IKnowledgeSourcePort,
     private readonly knowledgeIndexRepository: IKnowledgeIndexRepository,
     knowledgeIngestionPort: IKnowledgeIngestionPort,
-    executionLogPort?: IAIExecutionLogPort,
-    knowledgeIndexStatusPort?: IKnowledgeIndexStatusPort,
+    executionRecordPort?: IAIExecutionRecordPort,
   ) {
     this.syncNotes = new SyncKnowledgeNotesUseCase(
       knowledgeIndexRepository,
       knowledgeIngestionPort,
-      executionLogPort,
-      knowledgeIndexStatusPort,
+      executionRecordPort,
     );
   }
 
@@ -55,7 +52,11 @@ export class SyncRelevantKnowledgeUseCase {
       (
         await Promise.all(
           indexedCandidates.map(async (resource) =>
-            this.knowledgeSourcePort.getNoteById(cx.identityId, resource.resourceId),
+            this.knowledgeSourcePort.getNoteById(
+              cx.identityId,
+              resource.knowledgeDocumentId,
+              resource.knowledgeSpaceId,
+            ),
           ),
         )
       ).filter((resource): resource is KnowledgeSourceNote => resource !== null),
@@ -63,11 +64,7 @@ export class SyncRelevantKnowledgeUseCase {
     const relevantNotes =
       hydratedIndexedNotes.length >= Math.min(requestedLimit, 6)
         ? []
-        : await this.knowledgeSourcePort.listRelevantNotes(
-            cx.identityId,
-            query,
-            candidateLimit,
-          );
+        : await this.knowledgeSourcePort.listRelevantNotes(cx.identityId, query, candidateLimit);
     const fallbackNotes =
       hydratedIndexedNotes.length + relevantNotes.length >= Math.min(requestedLimit, 6)
         ? []

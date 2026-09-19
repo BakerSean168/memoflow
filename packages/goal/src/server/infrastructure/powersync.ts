@@ -6,6 +6,7 @@
  * 对标 `packages/governance/src/infrastructure/powersync.ts`。
  */
 
+import type { UserTimeContextPort } from '@memoflow/time';
 import {
   createGoalModule,
   type GoalModuleInstance,
@@ -14,6 +15,10 @@ import {
 import { GoalPowerSyncRepository } from './adapters/powersync/goal-powersync.repository';
 import { GoalRecordPowerSyncRepository } from './adapters/powersync/goal-record-powersync.repository';
 import { PowerSyncGoalWriteTransactionRunner } from './adapters/powersync/powersync-goal-write-transaction-runner';
+import {
+  PowerSyncGoalDeletionTransactionRunner,
+  type PowerSyncGoalRelationCleanupFactory,
+} from './adapters/powersync/powersync-goal-deletion-transaction-runner';
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import { createGoalScheduleProjectionSource } from './schedule-projection-source';
 import {
@@ -49,10 +54,21 @@ export function createGoalPowerSyncModule(
     runtimeContributions?: GoalRuntimeContributionsInput;
     /** Required: W0 GoalDependencyReadPort implementation (provided by the Task package). */
     taskBindingReadPort: GoalDependencyReadPort;
+    userTimeContextPort: UserTimeContextPort;
+    /** Shared Relation supplies a transaction-scoped cleanup adapter. */
+    relationCleanupFactory: PowerSyncGoalRelationCleanupFactory;
   },
 ): GoalModuleInstance {
   if (!options?.taskBindingReadPort) {
     throw new Error('[FAIL-CLOSED] createGoalPowerSyncModule requires options.taskBindingReadPort');
+  }
+  if (!options?.userTimeContextPort) {
+    throw new Error('[FAIL-CLOSED] createGoalPowerSyncModule requires options.userTimeContextPort');
+  }
+  if (!options?.relationCleanupFactory) {
+    throw new Error(
+      '[FAIL-CLOSED] createGoalPowerSyncModule requires options.relationCleanupFactory',
+    );
   }
   const { goalRepository, goalRecordRepository, goalWriteTransactionRunner } =
     createGoalPowerSyncRepositories(db);
@@ -60,7 +76,12 @@ export function createGoalPowerSyncModule(
     goalRepository,
     goalRecordRepository,
     goalWriteTransactionRunner,
+    goalDeletionTransactionRunner: new PowerSyncGoalDeletionTransactionRunner(
+      db,
+      options.relationCleanupFactory,
+    ),
     taskBindingReadPort: options.taskBindingReadPort,
+    userTimeContextPort: options.userTimeContextPort,
     runtimeContributions: options?.runtimeContributions,
   });
 }
@@ -89,11 +110,20 @@ export function createGoalPowerSyncRepositories(db: IElectronDatabase): GoalRepo
   };
 }
 
+export function createGoalPowerSyncDeletionTransactionRunner(
+  db: IElectronDatabase,
+  relationCleanupFactory: PowerSyncGoalRelationCleanupFactory,
+): PowerSyncGoalDeletionTransactionRunner {
+  return new PowerSyncGoalDeletionTransactionRunner(db, relationCleanupFactory);
+}
+
 export function createGoalPowerSyncScheduleProjectionSource(
   db: IElectronDatabase,
+  userTimeContextPort: UserTimeContextPort,
 ): GoalScheduleProjectionSource {
   return createGoalScheduleProjectionSource({
     goalRepository: createGoalPowerSyncRepositories(db).goalRepository,
+    userTimeContextPort,
   });
 }
 
@@ -118,3 +148,5 @@ export function createGoalPowerSyncReminderFireHandler(
 }
 
 export { GoalPowerSyncRepository, GoalRecordPowerSyncRepository };
+
+export type { PowerSyncGoalRelationCleanupFactory };

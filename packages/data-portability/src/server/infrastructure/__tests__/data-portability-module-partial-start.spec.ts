@@ -13,8 +13,6 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { DataPortabilityDependencies } from '../application/data-portability.dependencies';
-import type { DataPortabilityImportStore } from '../application/import-store/data-portability-import-store';
 import {
   createDataPortabilityModule,
   type DataPortabilityModuleDependencies,
@@ -42,8 +40,6 @@ function makeDeps(
   runtimeContributions: DataPortabilityModuleRuntimeContribution[],
 ): DataPortabilityModuleDependencies {
   return {
-    exportDependencies: {} as unknown as DataPortabilityDependencies,
-    importStore: {} as unknown as DataPortabilityImportStore,
     runtimeContributions,
   };
 }

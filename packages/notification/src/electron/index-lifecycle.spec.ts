@@ -23,10 +23,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  NotificationChannels,
-  type IElectronModuleContext,
-} from '@memoflow/contracts/electron';
+import { NotificationChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
 import { ok } from '@memoflow/contracts/result';
 import type { NotificationModuleInstance } from '../server/infrastructure';
 
@@ -62,12 +59,16 @@ const coreChannels = [
   NotificationChannels.GET,
   NotificationChannels.CREATE,
   NotificationChannels.MARK_READ,
+  NotificationChannels.MARK_UNREAD,
+  NotificationChannels.ARCHIVE,
+  NotificationChannels.RESTORE,
   NotificationChannels.MARK_ALL_READ,
   NotificationChannels.DELETE,
   NotificationChannels.CLEAR_ALL,
   NotificationChannels.GET_UNREAD_COUNT,
   NotificationChannels.PREFERENCES_GET,
   NotificationChannels.PREFERENCES_UPDATE,
+  NotificationChannels.EXECUTE_ACTION,
 ];
 
 function createFakeInstance() {
@@ -76,6 +77,9 @@ function createFakeInstance() {
     getNotification: vi.fn(() => ok(null as never)),
     listNotifications: vi.fn(() => ok([] as never)),
     markAsRead: vi.fn(() => ok(null as never)),
+    markAsUnread: vi.fn(() => ok(null as never)),
+    archive: vi.fn(() => ok(null as never)),
+    restore: vi.fn(() => ok(null as never)),
     markAllAsRead: vi.fn(() => ok(null as never)),
     deleteNotification: vi.fn(() => ok(null as never)),
     batchDelete: vi.fn(() => ok(null as never)),
@@ -83,19 +87,23 @@ function createFakeInstance() {
     getPreferences: vi.fn(() => ok(null as never)),
     updatePreferences: vi.fn(() => ok(null as never)),
   };
+  const portableCapability = {
+    key: 'notification-delivery-preferences',
+    schemaVersion: 3,
+  } as never;
   const start = vi.fn();
   const dispose = vi.fn();
   const instance: NotificationModuleInstance = {
     notificationRepository: {} as never,
     preferenceRepository: {} as never,
-    templateRepository: {} as never,
+    portableCapability,
     useCases: {} as never,
     api,
     durableRuntime: {} as never,
     start,
     dispose,
   } as NotificationModuleInstance;
-  return { instance, api, start, dispose };
+  return { instance, api, portableCapability, start, dispose };
 }
 
 function createFakeContext(): IElectronModuleContext {

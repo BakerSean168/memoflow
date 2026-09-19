@@ -4,7 +4,7 @@ tags:
   - archive
 description: 归档计划目录
 created: 2026-04-26T00:00:00
-updated: 2026-09-08T12:14:00+08:00
+updated: 2026-09-19T00:00:00+00:00
 ---
 
 # Archived Plans
@@ -25,9 +25,20 @@ updated: 2026-09-08T12:14:00+08:00
 
 ## 本轮归档
 
+| 日期       | 计划                                                                                                      | 结果                                                                                                                                                                                                 |
+| ---------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-09-19 | [System-wide vNext Model Convergence](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) | SYS-3001/3002/3003/3004 完成；SYS-3003 exact-head evidence 在 PR #385 merge commit `37c24c79bb631997e06434d999b9912765ea047f` 上接受；SYS-3004 文档/归档闭环见 final evidence。PR #340 exact-head CI run `35445635678` green but 仍 open/unmerged。 |
+| 2026-09-19 | [AI vNext Model Convergence](./2026-09-09-ai-vnext-model-convergence.md)                                  | AI-9601～9612 accepted；AI-9612 five-layer review P0/P1/P2 = 0，Mastra/owner-port/portable-shell canonical truth 已进入系统级 exact-head closure。 |
+| 2026-09-19 | [Phase 5 Home / Dashboard / AI / Portability](./2026-09-18-phase5-home-dashboard-ai-portability-implementation.md) | HOME-1801..1805、AI-9602..9612、PORT-1610B 已接受；Phase 6 PORT-1611 与 whole-schema cleanup 也已完成。 |
+| 2026-09-19 | [System vNext execution graph](./2026-09-16-system-vnext-execution.tasks.json)                             | Task graph terminal task SYS-3004 completed; graph status is `archived`, with exact validation and documentation closure evidence linked from the graph. |
+
 | 日期       | 计划                                                                                                     | 结果                                                                                                                                                                                            |
 | ---------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-09-08 | [MemoFlow Core vNext — Unified Refactor Orchestration](./2026-08-25-core-vnext-orchestration.md) | Goal/Task/Routine/Planner/Scheduler/Notification/EventBus 重构与 residual 全闭环；HARD-7101~7105 完成，PR #338 exact-head CI 19/19 全绿并合入 `088a9f16499` |
+| 2026-09-14 | [Time + Label vNext Model Convergence](./2026-09-09-time-label-vnext-model-convergence.md) | `TIME-1201～1206`、`LABEL-1301～1305`、`FOUNDATION-1401` 全部 DONE；五层复审 P0/P1 = 0。PR #340 首个 exact head `40f0b0a1efaa` / run `34809651084` 与 archive head `95721d3a256` / run `34811284555` 两道 gate 均全绿，最终闭环完成 |
+| 2026-09-14 | [Setting vNext Model Convergence](./2026-09-08-setting-vnext-model-convergence.md)                          | `SETTING-9201～9210` 全部 DONE；五层 review P0/P1 = 0。PR #340 首个 exact head `f94de6de664` / run `34804907664` 与 archive head `3a79b4b5eb6` / run `34808509548` 两道 gate 均全绿 |
+| 2026-09-14 | [Task vNext Model Convergence](./2026-09-08-task-vnext-model-convergence.md)                             | `TASK-7301～7310` 全部 DONE；`TASK-7310` 五层 review P0/P1 = 0，PR #340 首个 exact head `2465c1b0506` / run `34799711173` 与 archive head `7101589ac25` / run `34800927772` 两道 exact-head gate 均全绿，最终闭环完成 |
+| 2026-09-13 | [Goal vNext Model Convergence](./2026-09-08-goal-vnext-model-convergence.md)                             | `GOAL-7201～7211` 全部 DONE；五层 review P0/P1 = 0，PR #340 head `a6c9d622f0b` run `34730694318` 与 archive head `4101ff3e52c` run `34731400439` 两道 exact-head gate 均全绿                    |
+| 2026-09-08 | [MemoFlow Core vNext — Unified Refactor Orchestration](./2026-08-25-core-vnext-orchestration.md)         | Goal/Task/Routine/Planner/Scheduler/Notification/EventBus 重构与 residual 全闭环；HARD-7101~7105 完成，PR #338 exact-head CI 19/19 全绿并合入 `088a9f16499`                                     |
 | 2026-09-06 | [MemoFlow Delivery Platform V3](./2026-09-02-delivery-platform-v3.md)                                    | Phase 1–4 完成；exact candidate/staging/release/production authority、v0.13.3 live rollout、retain-split timing、Action pinning、macOS trust capability 与 final CI/Coverage observation 全闭环 |
 | 2026-09-04 | [AI Provider Onboarding V2](./2026-08-25-ai-provider-onboarding-v2.md)                                   | CC Switch/LobeChat 风格 onboarding、SSRF / DNS pinning、one-time handle、atomic encrypted save/replacement、Custom + real OpenRouter E2E、PR required CI/local Docker acceptance 全闭环         |
 | 2026-08-23 | [MemoFlow AI vNext — Mastra-native 一次性大重构](./2026-08-20-mastra-native-ai-vnext-refactor.md)        | AI-VNEXT-01–09 完成；PR #252 全绿合并；Mastra 唯一 runtime、legacy hard-delete、eval/usage/local Docker 验收闭合                                                                                |

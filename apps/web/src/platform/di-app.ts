@@ -15,7 +15,6 @@ import {
   GOAL_SERVICE_KEY,
   LABEL_SERVICE_KEY,
   NOTIFICATION_SERVICE_KEY,
-  REMINDER_SERVICE_KEY,
   REPOSITORY_SERVICE_KEY,
   RULE_SERVICE_KEY,
   SCHEDULE_SERVICE_KEY,
@@ -26,7 +25,6 @@ import {
   AI_RUNTIME_USAGE_KEY,
   AI_WORKFLOW_RUNTIME_KEY,
   TASK_SERVICE_KEY,
-  DASHBOARD_SERVICE_KEY,
   MODULE_CAPSULES_KEY,
   LOGOUT_HANDLER_KEY,
   ASSISTANT_SURFACE_KEY,
@@ -64,11 +62,6 @@ const labelService = createLazyService(async () => {
 const notificationService = createLazyService(async () => {
   const { createNotificationHttpClient } = await import('@memoflow/notification/client');
   return createNotificationHttpClient(resultHttpClient);
-});
-
-const reminderService = createLazyService(async () => {
-  const { createReminderHttpClient } = await import('@memoflow/reminder/client');
-  return createReminderHttpClient(resultHttpClient);
 });
 
 const repositoryService = createLazyService(async () => {
@@ -116,11 +109,6 @@ const taskService = createLazyService(async () => {
   return createTaskHttpClient(resultHttpClient);
 });
 
-const dashboardService = createLazyService(async () => {
-  const { createDashboardHttpAdapter } = await import('@memoflow/app-vue/web-entry');
-  return createDashboardHttpAdapter(resultHttpClient);
-});
-
 export function installAppServices(app: App): void {
   app.provide(ACCOUNT_SERVICE_KEY, accountService);
   app.provide(AUTH_SERVICE_KEY, authService);
@@ -128,7 +116,6 @@ export function installAppServices(app: App): void {
   app.provide(GOAL_SERVICE_KEY, goalService);
   app.provide(LABEL_SERVICE_KEY, labelService);
   app.provide(NOTIFICATION_SERVICE_KEY, notificationService);
-  app.provide(REMINDER_SERVICE_KEY, reminderService);
   app.provide(REPOSITORY_SERVICE_KEY, repositoryService);
   app.provide(SCHEDULE_SERVICE_KEY, scheduleService);
   app.provide(SETTING_SERVICE_KEY, settingService);
@@ -139,7 +126,6 @@ export function installAppServices(app: App): void {
   app.provide(AI_WORKFLOW_RUNTIME_KEY, aiWorkflowRuntime);
   app.provide(TASK_SERVICE_KEY, taskService);
 
-  app.provide(DASHBOARD_SERVICE_KEY, dashboardService);
   // V2 shell capsule navigation (UI_REDESIGN_V2_PLAN §2.2 / Brief §12-4)
   app.provide(MODULE_CAPSULES_KEY, defaultModuleCapsules);
   // Residual 349: Web host advertises the 'web' assistant surface to shared Vue.

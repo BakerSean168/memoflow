@@ -61,7 +61,7 @@ function noTimer() {
 }
 
 describe('InterventionWindowController (ROUTINE-4104)', () => {
-  it('keeps one surface, prioritizes the stronger phase, then reveals the next active occurrence', () => {
+  it('keeps one surface, prioritizes the stronger phase, then reveals the next active occurrence', async () => {
     const runtime = createInterventionRuntime();
     createDue(runtime, 'routine:stand:0');
     createDue(runtime, 'routine:eyes:0', t0 - 5 * minute);
@@ -80,7 +80,7 @@ describe('InterventionWindowController (ROUTINE-4104)', () => {
     });
     expect(host.calls.filter((call) => call.type === 'show')).toHaveLength(1);
 
-    expect(controller.execute({ action: 'complete' })).toMatchObject({
+    expect(await controller.execute({ action: 'complete' })).toMatchObject({
       occurrenceKey: 'routine:stand:0',
       state: 'Gentle',
     });
@@ -91,7 +91,7 @@ describe('InterventionWindowController (ROUTINE-4104)', () => {
     controller.destroy();
   });
 
-  it('maps native close to an explicit dismiss runtime command', () => {
+  it('maps native close to an explicit dismiss runtime command', async () => {
     const runtime = createInterventionRuntime();
     createDue(runtime, 'routine:stand:close');
     const host = hostHarness();
@@ -104,10 +104,44 @@ describe('InterventionWindowController (ROUTINE-4104)', () => {
     controller.restoreIdentity('identity-1');
 
     host.requestClose();
+    await vi.waitFor(() => {
+      expect(runtime.getSnapshot('routine:stand:close')?.state).toBe('Dismissed');
+    });
 
     expect(runtime.getSnapshot('routine:stand:close')?.state).toBe('Dismissed');
     expect(controller.getProjection()).toBeNull();
     expect(host.calls[host.calls.length - 1]?.type).toBe('hide');
+    controller.destroy();
+  });
+
+  it('persists the owner command before advancing the surface and fails closed on write error', async () => {
+    const runtime = createInterventionRuntime();
+    createDue(runtime, 'routine:eyes:durable');
+    const host = hostHarness();
+    const onCommand = vi.fn().mockRejectedValueOnce(new Error('local db unavailable'));
+    const controller = createInterventionWindowController({
+      runtime,
+      host,
+      onCommand,
+      now: () => t0,
+      ...noTimer(),
+    });
+    controller.restoreIdentity('identity-1');
+
+    await expect(controller.execute({ action: 'complete' })).rejects.toThrow(/local db unavailable/);
+    expect(runtime.getSnapshot('routine:eyes:durable')?.state).toBe('Gentle');
+    expect(controller.getProjection()?.occurrenceKey).toBe('routine:eyes:durable');
+    expect(onCommand).toHaveBeenCalledWith(
+      expect.objectContaining({
+        commandId: 'routine:eyes:durable:v2:complete',
+        command: { action: 'complete' },
+        at: t0,
+      }),
+    );
+
+    onCommand.mockResolvedValueOnce(undefined);
+    await expect(controller.execute({ action: 'complete' })).resolves.toBeNull();
+    expect(runtime.getSnapshot('routine:eyes:durable')?.state).toBe('Completed');
     controller.destroy();
   });
 

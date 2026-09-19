@@ -18,15 +18,7 @@ describe('Product date presentation boundary', () => {
     'utf8',
   );
   const taskPresentation = readFileSync(
-    resolve(dir, '../../modules/task/utils/task-template-presentation.ts'),
-    'utf8',
-  );
-  const schedule = readFileSync(
-    resolve(dir, '../../modules/schedule/components/ScheduleTaskDetailDialog.vue'),
-    'utf8',
-  );
-  const reminder = readFileSync(
-    resolve(dir, '../../modules/reminder/components/ReminderTemplateCard.vue'),
+    resolve(dir, '../../modules/task/utils/task-plan-presentation.ts'),
     'utf8',
   );
   const rule = readFileSync(
@@ -41,30 +33,31 @@ describe('Product date presentation boundary', () => {
     expect(resolveEmptyLabel('unknown')).toBe(DEFAULT_EMPTY_LITERALS.unknown);
   });
 
-  it('renders Goal dates directly through Product Time without local Date wrappers', () => {
+  it('renders Goal calendar dates and broad targets without local Date wrappers', () => {
+    expect(goalDetail).toContain('formatProductYmd');
+    expect(goalDetail).toContain('formatProductDate');
+    expect(goalDetail).toContain('goalTimeframeLabel');
+    expect(goalRow).toContain('formatProductYmd');
+    expect(goalRow).toContain('goalTimeframeLabel');
     for (const source of [goalDetail, goalRow]) {
-      expect(source).toContain('formatProductDate');
       expect(source).not.toMatch(/function formatDate\b/);
       expect(source).not.toContain('toISOString');
       expect(source).not.toContain('toLocaleDateString');
     }
-    expect(goalDetail).toContain('emptyNotSet');
   });
 
   it('keeps Task date formatting behind the canonical presentation and Product Time helpers', () => {
     expect(taskPresentation).toContain('formatProductDate');
     expect(taskPresentation).toContain('formattedCreatedAt');
-    expect(taskDetail).toContain('formatProductDate');
+    expect(taskPresentation).toContain('getTaskPlanScheduleDate');
+    expect(taskDetail).toContain('getTaskPlanScheduleDate');
     expect(taskDetail).not.toMatch(/function formatDate\b/);
+    expect(taskDetail).not.toContain('formatProductDate');
     expect(taskDetail).not.toContain('new Date(');
     expect(taskDetail).not.toContain('toLocaleDateString');
   });
 
-  it('keeps other date surfaces on Product Time helpers', () => {
-    expect(schedule).toContain('formatProductDate');
-    expect(schedule).toContain("emptyKind('na')");
-    expect(reminder).toContain('formatProductDateTimeSeconds');
-    expect(reminder).toContain('emptyUnknown');
+  it('keeps governance date surfaces on Product Time helpers', () => {
     expect(rule).toContain('formatProductMonthDay');
   });
 });

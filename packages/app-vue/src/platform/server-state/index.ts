@@ -32,4 +32,4 @@ export {
 } from './invalidation-dispatcher';
 export { createTestServerQueryClient, createServerQueryClient } from './query-client';
 export { resultQueryFn, type ResultErrorException } from './result-query';
-export type { CanonicalNotificationListQuery, CanonicalTaskTemplateListQuery } from './query-keys';
+export type { CanonicalNotificationListQuery, CanonicalTaskPlanListQuery } from './query-keys';

@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
   canonicalizeGovernanceListQuery,
   canonicalizeNotificationListQuery,
-  canonicalizeTaskTemplateListQuery,
+  canonicalizeTaskPlanListQuery,
   governanceQueryKeys,
   notificationQueryKeys,
-  taskTemplateQueryKeys,
+  taskPlanQueryKeys,
 } from './query-keys';
 
 describe('notificationQueryKeys (plan §3.2 frozen shape)', () => {
@@ -99,24 +99,24 @@ describe('canonicalizeNotificationListQuery', () => {
   });
 });
 
-describe('taskTemplateQueryKeys (plan §3.2 frozen shape)', () => {
+describe('taskPlanQueryKeys (plan §3.2 frozen shape)', () => {
   it('builds the frozen key hierarchy', () => {
-    expect(taskTemplateQueryKeys.all).toEqual(['server-state', 'task-template']);
-    expect(taskTemplateQueryKeys.identity('id-1')).toEqual([
+    expect(taskPlanQueryKeys.all).toEqual(['server-state', 'task-plan']);
+    expect(taskPlanQueryKeys.identity('id-1')).toEqual([
       'server-state',
-      'task-template',
+      'task-plan',
       'id-1',
     ]);
-    expect(taskTemplateQueryKeys.list('id-1', { page: 1, limit: 20 })).toEqual([
+    expect(taskPlanQueryKeys.list('id-1', { page: 1, limit: 20 })).toEqual([
       'server-state',
-      'task-template',
+      'task-plan',
       'id-1',
       'list',
       { page: 1, limit: 20 },
     ]);
-    expect(taskTemplateQueryKeys.detail('id-1', 't-1')).toEqual([
+    expect(taskPlanQueryKeys.detail('id-1', 't-1')).toEqual([
       'server-state',
-      'task-template',
+      'task-plan',
       'id-1',
       'detail',
       't-1',
@@ -124,18 +124,18 @@ describe('taskTemplateQueryKeys (plan §3.2 frozen shape)', () => {
   });
 
   it('keeps list and detail projections distinct', () => {
-    expect(taskTemplateQueryKeys.lists('id')).not.toEqual(taskTemplateQueryKeys.details('id'));
+    expect(taskPlanQueryKeys.lists('id')).not.toEqual(taskPlanQueryKeys.details('id'));
   });
 });
 
-describe('canonicalizeTaskTemplateListQuery', () => {
+describe('canonicalizeTaskPlanListQuery', () => {
   it('materializes pagination defaults and preserves explicit limit', () => {
-    expect(canonicalizeTaskTemplateListQuery()).toEqual({ page: 1, limit: 20 });
-    expect(canonicalizeTaskTemplateListQuery({ limit: 50 })).toEqual({ page: 1, limit: 50 });
+    expect(canonicalizeTaskPlanListQuery()).toEqual({ page: 1, limit: 20 });
+    expect(canonicalizeTaskPlanListQuery({ limit: 50 })).toEqual({ page: 1, limit: 50 });
   });
 
   it('normalizes status/labelIdsAll arrays (copy, dedupe, sort) and drops empty arrays', () => {
-    const canonical = canonicalizeTaskTemplateListQuery({
+    const canonical = canonicalizeTaskPlanListQuery({
       page: 1,
       limit: 20,
       status: ['Active', 'Active', 'Paused'],
@@ -144,13 +144,13 @@ describe('canonicalizeTaskTemplateListQuery', () => {
     expect(canonical.status).toEqual(['Active', 'Paused']);
     expect(canonical.labelIdsAll).toEqual(['a', 'b']);
 
-    const empty = canonicalizeTaskTemplateListQuery({ status: [], labelIdsAll: [] });
+    const empty = canonicalizeTaskPlanListQuery({ status: [], labelIdsAll: [] });
     expect(empty).not.toHaveProperty('status');
     expect(empty).not.toHaveProperty('labelIdsAll');
   });
 
   it('keeps scalar filters and puts arrays into the frozen field order', () => {
-    const canonical = canonicalizeTaskTemplateListQuery({
+    const canonical = canonicalizeTaskPlanListQuery({
       goalId: 'g-1',
       status: ['Active'],
       page: 2,
@@ -167,8 +167,8 @@ describe('canonicalizeTaskTemplateListQuery', () => {
   });
 
   it('produces equal keys for semantically equal requests regardless of array order', () => {
-    const a = canonicalizeTaskTemplateListQuery({ status: ['Active', 'Paused'] });
-    const b = canonicalizeTaskTemplateListQuery({ status: ['Paused', 'Active'] });
+    const a = canonicalizeTaskPlanListQuery({ status: ['Active', 'Paused'] });
+    const b = canonicalizeTaskPlanListQuery({ status: ['Paused', 'Active'] });
     expect(a).toEqual(b);
   });
 });

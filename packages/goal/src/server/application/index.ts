@@ -15,10 +15,12 @@ export {
   CreateGoalUseCase,
   GetGoalUseCase,
   ListGoalsUseCase,
+  GetGoalHomeSummaryUseCase,
   UpdateGoalUseCase,
   DeleteGoalUseCase,
   ArchiveGoalUseCase,
   ActivateGoalUseCase,
+  PlanGoalUseCase,
   AbandonGoalUseCase,
   CompleteGoalUseCase,
   PermanentlyDeleteGoalUseCase,
@@ -66,5 +68,38 @@ export {
 export * from './errors/weight-snapshot-errors';
 
 export type { GoalApplicationPort } from './goal.application.port';
+export type {
+  GoalPortabilityApplicationPort,
+  GoalPortabilityCreateInput,
+  GoalPortabilityRestoreInput,
+  GoalPortabilityRecordInput,
+  GoalPortabilityReviewInput,
+  GoalPortabilityKeyResultInput,
+  GoalPortabilityKeyResult,
+  GoalPortabilitySnapshot,
+} from './goal-portability.application.port';
 
 export { GoalReviewContextBuilder } from './services/goal-review-context-builder';
+
+export type { GoalRelationCleanupPort } from './ports/goal-relation-cleanup.port';
+
+export type {
+  GoalDeletionTransactionContext,
+  GoalDeletionTransactionRunner,
+} from './use-cases/commands/goal-deletion-support';
+
+export {
+  GoalWorkspaceQueryService,
+  type GoalWorkspaceQueryServiceDependencies,
+} from './services/goal-workspace-query.service';
+
+export type { GoalWorkspaceApplicationPort } from './goal-workspace.application.port';
+
+export type {
+  GoalWorkspaceTaskContextReadPort,
+  GoalWorkspaceKnowledgeRelationReadPort,
+  GoalWorkspaceKnowledgeProjection,
+  GoalWorkspaceKnowledgeContextReadPort,
+} from './ports/goal-workspace-read.ports';
+
+export { GoalPortableCapability, createGoalPortableCapability } from './goal-portability';

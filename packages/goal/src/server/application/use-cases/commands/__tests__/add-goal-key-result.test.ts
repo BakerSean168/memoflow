@@ -13,16 +13,8 @@ function createTestGoal(name = 'Test Goal'): Goal {
   return Goal.create({
     identityId: 'test-identity-id' as any,
     name,
-    description: null,
-    color: '#3B82F6',
-    feasibilityAnalysis: null,
-    motivation: null,
-    importance: 'MEDIUM' as any,
-    category: null,
-    tags: [],
+    summary: null,
     startDate: null,
-    targetDate: null,
-    parentGoalId: null,
     reminderConfig: null,
   });
 }
@@ -90,6 +82,7 @@ describe('AddGoalKeyResultUseCase', () => {
 
   it('should throw when goal is archived', async () => {
     const goal = createTestGoal();
+    goal.activate();
     goal.markAsCompleted();
     goal.archive();
     vi.mocked(goalRepo.findByIdForIdentity).mockResolvedValue(goal);
@@ -101,21 +94,29 @@ describe('AddGoalKeyResultUseCase', () => {
     const goal = createTestGoal();
     vi.mocked(goalRepo.findByIdForIdentity).mockResolvedValue(goal);
 
-    await expect(useCase.execute(goal.id, 'identity-1', aKeyResultInput({ weight: 0 }))).rejects.toThrow();
+    await expect(
+      useCase.execute(goal.id, 'identity-1', aKeyResultInput({ weight: 0 })),
+    ).rejects.toThrow();
   });
 
   it('should reject weight exceeding 5', async () => {
     const goal = createTestGoal();
     vi.mocked(goalRepo.findByIdForIdentity).mockResolvedValue(goal);
 
-    await expect(useCase.execute(goal.id, 'identity-1', aKeyResultInput({ weight: 6 }))).rejects.toThrow();
+    await expect(
+      useCase.execute(goal.id, 'identity-1', aKeyResultInput({ weight: 6 })),
+    ).rejects.toThrow();
   });
 
   it('returns the authoritative Goal mutation receipt on success', async () => {
     const goal = createTestGoal('Goal with KR');
     vi.mocked(goalRepo.findByIdForIdentity).mockResolvedValue(goal);
 
-    const result = await useCase.execute(goal.id, 'identity-1', aKeyResultInput({ title: 'My KR' }));
+    const result = await useCase.execute(
+      goal.id,
+      'identity-1',
+      aKeyResultInput({ title: 'My KR' }),
+    );
 
     expect(result).toBeOk();
     if (result.ok) {

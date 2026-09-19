@@ -9,14 +9,69 @@ tags:
   - vnext
 description: MemoFlow Reminder 向 AI-native Routine Coach 演进的产品定义、真实场景推演、领域模型、运行时与桌面交互设计
 created: 2026-08-25T17:13:00+08:00
-updated: 2026-09-08T09:00:00+08:00
+updated: 2026-09-19T00:00:00+00:00
 ---
 
 # Routine Coach vNext：习惯节律、健康干预与专注协议
 
+> **ADR-111 cutover policy (2026-09-09):** 当前没有需要保留的 MemoFlow 旧业务数据，也不要求兼容旧客户端/旧备份。本文历史推演中仅为旧数据保存设计的 migration/backfill/compatibility window 不再执行；目标模型和真实行为不变量继续有效。实施采用 direct canonical cutover + old-surface deletion + reset/reseed。
+
 > 本文记录 2026-08-25 对现有 Reminder 模块的重新定性与 vNext 设计讨论。
 >
-> **实现状态（2026-09-08）：Core vNext 目标态已经落地。物理包仍名为 `reminder`，`ReminderTemplate` 继续作为兼容写入入口，但写入会投影 canonical RoutineDefinition/ProfileMembership；`ControlMode`、single-group ownership 与独立 cron scanner 已退休。本文中“当前/需要退役”字样若出现在历史推演章节，应按本 checkpoint 理解为 2026-08-25 的迁移背景。**
+> **实现状态（2026-09-17，R4-2201C）：Routine vNext 已成为唯一 owner truth。物理包仍沿用历史名 `reminder`，但 `ReminderTemplate / ReminderGroup / ReminderInstance / ReminderResponse`、旧 `/reminders` transport/UI 与 Reminder operation owner 已按 ADR-111 破坏式退休；不存在兼容写入口、双写或 row converter。本文后续保留的旧模型对比仅作为 2026-08-25~09-08 的迁移背景。**
+
+## 2026-09-08 Model Convergence Freeze (historical design record)
+
+以下段落保留 2026-09-08 cutover 前的设计记录。当时的代码审查结论是 **Routine vNext 与 Legacy Reminder 两代模型仍并存**；R4-2201C 已在 2026-09-17 完成这次退役/收敛，因此本节的“目标/尚未实施”措辞不代表当前实现。
+
+最终产品/领域结构：
+
+```text
+RoutineDefinition
+├── RoutineTrigger
+│   ├── WallClock
+│   ├── Elapsed
+│   └── ActiveUsage
+├── InterventionPolicy
+└── Shared Labels (external projection)
+
+RoutineProfile <-> ProfileMembership <-> RoutineDefinition
+
+RoutineRuntimeContext
+RoutineTemporaryOverride
+
+RoutineOccurrence
+└── RoutineInteraction
+
+ProtocolDefinition
+└── ProtocolSession
+```
+
+边界：
+
+```text
+RoutineDefinition = 长期行为意图
+RoutineRuntime     = 当前上下文/累计/临时状态
+RoutineOccurrence  = 一次业务发生事实
+RoutineInteraction = 用户对该 occurrence 的响应
+Scheduler          = durable wall-clock wake-up / retry
+Notification       = Notification Fact + per-channel delivery
+Device Surface     = 实际设备呈现
+```
+
+Legacy `ReminderTemplate / ReminderGroup / ReminderHistory / ReminderResponse / ReminderInstance / ReminderOccurrence` 不再作为长期新能力承载面；ADR-111 下 current consumers 切到 Routine 后直接删除，不写旧 row converter，也不继续双写。
+
+详细决策：
+
+- ADR-076 — Routine Definition / Trigger Algebra / Legacy Reminder retirement；
+- ADR-077 — Routine Occurrence / Interaction / Reliability boundary；
+- ADR-078 — Profile / Eligibility / Runtime Context / Temporary Override；
+- ADR-079 — Intervention Policy / Notification / Device Surface boundary；
+- `docs/analysis/2026-09-08-reminder-routine-current-system-map.md` — 当前代码真值与迁移映射。
+
+> **历史记录：** 本轮只冻结模型与退役方向，不创建 Reminder active implementation plan。当前实现见 [Routine / Reminder 模块说明](./modules/reminder.md)。
+
+---
 
 ## 1. Executive Summary
 
@@ -757,7 +812,7 @@ Profile 是对现有 ReminderGroup 思想的升级，而不是简单重命名。
 
 ### 6.3 ProfileMembership
 
-当前 `ReminderTemplate.groupId` 是一对多：一个 Reminder 只能属于一个 Group。
+迁移前的 `ReminderTemplate.groupId` 是一对多：一个 Reminder 只能属于一个 Group。
 
 真实需求是多对多：
 
@@ -1136,7 +1191,7 @@ Routine Coach 的日常体验不能依赖主 Reminder 页面。
 职责：
 
 - AI 对话；
-- Dashboard；
+- Home owner-read composition；
 - Routine 方法库；
 - Profile 管理；
 - Protocol 配置；
@@ -1541,9 +1596,9 @@ vNext 原则：
 | smartFrequency auto adjustment       | 对重要节律过于激进                         | Insight + user-confirmed suggestion   |
 | Reminder 页面作为主要产品入口        | 不符合 AI-native / ambient usage           | 配置中心 + AI + popup/session surface |
 
-### 18.3 当前代码事实（2026-09-08）
+### 18.3 当前代码事实（2026-09-17）
 
-- `packages/reminder` 仍是物理包名，`ReminderTemplate` 是兼容写入入口；create/update 会投影 canonical `RoutineDefinition` 与 M:N `ProfileMembership`；
+- `packages/reminder` 仍是历史物理包名，但旧 Reminder 兼容写入口已由 R4-2201C 删除；canonical `RoutineDefinition`、M:N `ProfileMembership`、RoutineOccurrence/Interaction 是唯一真值；
 - Profile 只作为 Gate；`ControlMode` 与 single-group ownership 已删除；
 - WallClock 由 Scheduler 唯一 durable wake-up authority 驱动，旧 `ReminderSchedulerService` / cron scanner 已删除；
 - ActiveUsage runtime 与 activity sensor 在 Desktop 本地执行，端能力不伪造；
@@ -1737,18 +1792,18 @@ Renderer Window 只是 Runtime state 的投影。
 
 ---
 
-## 23. 与现有 Reminder 文档的关系
+## 23. 与现有 Routine 文档的关系
 
-- `docs/product/modules/reminder.md`：描述当前已经存在的 Reminder 模块实现事实；
-- 本文：描述 vNext 产品 North Star 和目标业务模型；
+- `docs/product/modules/reminder.md`：描述当前 Routine owner 与 runtime 实现事实；
+- 本文：保留产品语义、场景推演和历史收敛分析；
 - ADR-059：记录需要长期约束实现的架构决策；
-- 后续 Active Plan：在决定进入实现阶段后，再拆迁移 ticket，不在本文假装已经实施。
+- 本轮 convergence plan 已归档；后续新产品问题必须另行立项，不能把本节历史方案当作当前 active plan。
 
 ---
 
 ## 24. 下一阶段需要进一步决策的问题
 
-这些问题不会阻塞本文作为 North Star，但实施前需要收敛：
+这些问题不改变当前已实施的 Routine owner/runtime 边界；若未来扩展产品能力，实施前需要另行收敛：
 
 1. 产品最终中文名称：提醒 / 节律 / 习惯 / Routine / Focus；
 2. `packages/reminder` 是否最终物理重命名为 `packages/routine`，还是先保持 package 名兼容、仅迁领域模型；

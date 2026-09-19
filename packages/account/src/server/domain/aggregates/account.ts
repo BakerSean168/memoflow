@@ -7,13 +7,7 @@ import { AggregateRoot } from '@memoflow/utils/domain';
 // IdentityId from shared primitives (cross-module shared type)
 import { IdentityId } from '@memoflow/domain-shared/shared';
 
-import {
-  AccountProfile,
-  AccountSettings,
-  ContactEmail,
-  AccountStatus,
-  ContactPhone,
-} from '../value-objects';
+import { AccountProfile, AccountStatus } from '../value-objects';
 
 import type { AccountEventMap } from '@memoflow/contracts/account';
 
@@ -21,12 +15,8 @@ import type { AccountEventMap } from '@memoflow/contracts/account';
 export interface AccountState {
   id: IdentityId;
   profile: AccountProfile;
-  email: ContactEmail;
-  settings: AccountSettings;
   status: AccountStatus;
-  phone: ContactPhone | null;
-  version: number;
-  deletedAt: Instant | null;
+  closedAt: Instant | null;
   createdAt: Instant;
   updatedAt: Instant;
 }
@@ -44,23 +34,11 @@ export class Account extends AggregateRoot<IdentityId> {
   get profile(): AccountProfile {
     return this._props.profile;
   }
-  get email(): ContactEmail {
-    return this._props.email;
-  }
-  get settings(): AccountSettings {
-    return this._props.settings;
-  }
   get status(): AccountStatus {
     return this._props.status;
   }
-  get phone(): ContactPhone | null {
-    return this._props.phone;
-  }
-  get version(): number {
-    return this._props.version;
-  }
-  get deletedAt(): Instant | null {
-    const v = this._props.deletedAt;
+  get closedAt(): Instant | null {
+    const v = this._props.closedAt;
     if (v == null) return null;
     return v as Instant;
   }
@@ -75,24 +53,15 @@ export class Account extends AggregateRoot<IdentityId> {
 
   // ================= Factory Methods =================
 
-  public static create(params: { id: IdentityId; email: string }): Account {
-    const now = Date.now();
+  public static create(params: { id: IdentityId; nicknameSeed: string; now: Instant }): Account {
+    const now = params.now;
     const state: AccountState = {
       id: params.id,
       status: AccountStatus.Active,
-      profile: AccountProfile.createDefault(params.email),
-      settings: AccountSettings.createDefault(),
-      email: ContactEmail.create({
-        address: params.email,
-        isVerified: false,
-        verifiedAt: null,
-        isPrimary: true,
-      }),
-      phone: null,
-      version: 1,
+      profile: AccountProfile.createDefault(params.nicknameSeed),
       createdAt: now,
       updatedAt: now,
-      deletedAt: null,
+      closedAt: null,
     };
     const account = new Account(state);
 
@@ -111,13 +80,9 @@ export class Account extends AggregateRoot<IdentityId> {
 
   // ================= Business Operations =================
 
-  private refreshUpdatedAt(): void {
-    this._props.updatedAt = Date.now();
-  }
-
-  public updateProfile(profile: AccountProfile): void {
+  public updateProfile(profile: AccountProfile, now: Instant): void {
     this._props.profile = profile;
-    this.refreshUpdatedAt();
+    this._props.updatedAt = now;
 
     this.addDomainEvent<AccountEventMap['account:profile-updated']>('account:profile-updated', {
       identityId: this.id,
@@ -127,57 +92,21 @@ export class Account extends AggregateRoot<IdentityId> {
     });
   }
 
-  public updateSettings(settings: AccountSettings): void {
-    this._props.settings = settings;
-    this.refreshUpdatedAt();
-
-    this.addDomainEvent<AccountEventMap['account:settings-updated']>('account:settings-updated', {
-      identityId: this.id,
-      accountId: this.id,
-      account: this.toServerDTO(),
-      settingKeys: ['settings'],
-    });
-  }
-
-  /**
-   * Project verified login email from Cloud Auth onto ContactEmail.
-   * Cloud Auth is the source of truth for login email ownership.
-   */
-  public syncVerifiedEmail(address: string): void {
-    const next = ContactEmail.create({
-      address,
-      isVerified: true,
-      isPrimary: true,
-      verifiedAt: Date.now(),
-    });
-    // Idempotent when already verified with same address.
-    if (
-      this._props.email.address === next.address &&
-      this._props.email.isVerified
-    ) {
-      return;
-    }
-    this._props.email = next;
-    this.refreshUpdatedAt();
-  }
-
-    public close(): void {
-    if (this._props.status === AccountStatus.Deactivated) {
+  public close(now: Instant): void {
+    if (this._props.status === AccountStatus.Closed) {
       throw new Error('Account is already closed.');
     }
-    if (this._props.status === AccountStatus.Suspended) {
-      throw new Error('Cannot close a suspended account. Please contact support.');
-    }
 
-    this._props.status = AccountStatus.Deactivated;
-    this.refreshUpdatedAt();
+    this._props.status = AccountStatus.Closed;
+    this._props.closedAt = now;
+    this._props.updatedAt = now;
 
     this.addDomainEvent<AccountEventMap['account:closed']>('account:closed', {
       identityId: this.id,
       accountId: this.id,
       account: this.toServerDTO(),
       reason: 'User initiated closure',
-      closedAt: this.updatedAt,
+      closedAt: now,
     });
   }
 
@@ -188,13 +117,9 @@ export class Account extends AggregateRoot<IdentityId> {
       id: this.id,
       status: this._props.status,
       profile: this._props.profile.toDTO(),
-      settings: this._props.settings.toDTO(),
-      email: this._props.email.toDTO(),
-      phone: this._props.phone ? this._props.phone.toDTO() : null,
-      version: this._props.version,
       createdAt: this._props.createdAt,
       updatedAt: this._props.updatedAt,
-      deletedAt: this._props.deletedAt ? this._props.deletedAt : null,
+      closedAt: this._props.closedAt ? this._props.closedAt : null,
     };
   }
 
@@ -203,13 +128,9 @@ export class Account extends AggregateRoot<IdentityId> {
       id: this.id,
       status: this._props.status,
       profile: this._props.profile.toDTO(),
-      settings: this._props.settings.toDTO(),
-      email: this._props.email.toDTO(),
-      phone: this._props.phone ? this._props.phone.toDTO() : null,
-      version: this._props.version,
       createdAt: this._props.createdAt,
       updatedAt: this._props.updatedAt,
-      deletedAt: this._props.deletedAt ? this._props.deletedAt : null,
+      closedAt: this._props.closedAt ? this._props.closedAt : null,
     };
   }
 }

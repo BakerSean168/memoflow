@@ -2,6 +2,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
+import type { KnowledgeDocumentRef } from '@memoflow/contracts/repository';
 import { useAI } from './useAI';
 import { useGoal } from '../../goal/composables/useGoal';
 import { useRecentKnowledgeNotes } from '../../repository/composables/useRecentKnowledgeNotes';
@@ -19,6 +20,8 @@ import {
   bindChatViewLifecycle,
   getWorkflowStatusText,
   initializeChatView,
+  AIWorkflowRestoreError,
+  loadAuthoritativeWorkflowRun,
   maybeRenameConversation,
 } from './chatViewHelpers';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
@@ -56,7 +59,8 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   const recentKnowledgeNotes = useRecentKnowledgeNotes();
   const formatters = useAIFormatters();
 
-  async function requestOpenKnowledgeNote(noteId: string): Promise<void> {
+  async function requestOpenKnowledgeNote(note: string | KnowledgeDocumentRef): Promise<void> {
+    const noteId = typeof note === 'string' ? note : note.documentId;
     if (!noteId) return;
     await router.push({ path: '/repository', query: { note: noteId } });
   }
@@ -91,7 +95,6 @@ export function useAIChatView(options: UseAIChatViewOptions) {
         title: goal.name,
         status: String(goal.status),
         updatedAt: Number(goal.updatedAt ?? 0),
-        dueDate: goal.dueDate === null ? null : Number(goal.dueDate),
         progress: goal.overallProgress,
       })),
   );
@@ -100,7 +103,12 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     [...recentKnowledgeNotes.notes.value]
       .sort((left, right) => Number(right.updatedAt) - Number(left.updatedAt))
       .slice(0, 5)
-      .map((note) => ({ id: note.id, title: note.title, path: note.path, updatedAt: note.updatedAt })),
+      .map((note) => ({
+        id: note.id,
+        title: note.title,
+        path: note.path,
+        updatedAt: note.updatedAt,
+      })),
   );
 
   const providerList = computed<ProviderListItem[]>(() => providers.value);
@@ -198,29 +206,53 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     goalWorkflowRun: goalWorkflow.goalWorkflowRun,
     taskWorkflowRun: taskWorkflow.taskWorkflowRun,
     knowledgeCaptureRun: knowledgeCaptureWorkflow.knowledgeCaptureRun,
-    knowledgeAnswer: knowledgeQaWorkflow.knowledgeAnswer,
     clarificationAnswers: goalWorkflow.clarificationAnswers,
     editableGoal: goalWorkflow.editableGoal,
     editableKeyResults: goalWorkflow.editableKeyResults,
-    editableTaskTemplates: goalWorkflow.editableTaskTemplates,
-    editableReminders: goalWorkflow.editableReminders,
+    editableTasks: goalWorkflow.editableTasks,
+    editableKnowledge: goalWorkflow.editableKnowledge,
     showGoalDraftEditor: goalWorkflow.showGoalDraftEditor,
     resetWorkflowArtifacts,
   });
 
-  async function refreshRestoredWorkflowRuns() {
-    const goalRunId = goalWorkflow.goalWorkflowRun.value?.runId;
-    if (goalRunId) await goalWorkflow.syncGoalWorkflowRun(goalRunId);
-    const taskRunId = taskWorkflow.taskWorkflowRun.value?.runId;
-    if (taskRunId) await taskWorkflow.syncTaskWorkflowRun(taskRunId);
-    const captureRunId = knowledgeCaptureWorkflow.knowledgeCaptureRun.value?.runId;
-    if (captureRunId) await knowledgeCaptureWorkflow.syncKnowledgeCaptureRun(captureRunId);
-  }
-
   async function restoreWorkflowState(conversationId: string) {
-    persistence.restoreWorkflowState(conversationId);
-    await refreshRestoredWorkflowRuns();
-    persistence.persistWorkflowState(conversationId);
+    const persisted = persistence.restoreWorkflowState(conversationId);
+    if (!persisted) return;
+
+    try {
+      const run = await loadAuthoritativeWorkflowRun(
+        workflowRuntime,
+        conversationId,
+        persisted.activeRunId,
+      );
+      switch (run.kind) {
+        case 'goal.create':
+          toolMode.value = 'goal-create';
+          goalWorkflow.projectRun(run);
+          break;
+        case 'task.create':
+          toolMode.value = 'task-create';
+          taskWorkflow.projectRun(run);
+          break;
+        case 'knowledge.capture':
+          toolMode.value = 'knowledge-capture';
+          knowledgeCaptureWorkflow.projectRun(run);
+          break;
+      }
+      persistence.applyEditorOverlay(persisted.editorOverlay, run);
+      // Rebase or discard any stale overlay against the runtime revision.
+      persistence.persistWorkflowState(conversationId);
+    } catch (error) {
+      // Runtime failure is an explicit empty/blocked restore. The reset above
+      // ensures no stale local run or draft remains visible as authority.
+      if (
+        !(error instanceof AIWorkflowRestoreError) ||
+        error.code !== 'AI_WORKFLOW_RUNTIME_UNAVAILABLE'
+      ) {
+        persistence.clearWorkflowState(conversationId);
+      }
+      toast.error(t('aiAssistant.errors.workflowExecutionFailed'));
+    }
   }
 
   async function loadWorkspaceLists() {
@@ -242,7 +274,9 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       : t(`aiAssistant.chatPage.workflow.tools.${getToolLocaleKey(toolMode.value)}`),
   );
   const currentToolButtonLabel = computed(() =>
-    toolMode.value === 'chat' ? t('aiAssistant.chatPage.workflow.toolButton') : currentToolLabel.value,
+    toolMode.value === 'chat'
+      ? t('aiAssistant.chatPage.workflow.toolButton')
+      : currentToolLabel.value,
   );
 
   const workflowStatusText = computed(() =>
@@ -362,7 +396,9 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       recentKnowledgeNotesEmailVerificationRequired: computed(
         () => recentKnowledgeNotes.emailVerificationRequired.value,
       ),
-      recentKnowledgeNotesErrorMessageKey: computed(() => recentKnowledgeNotes.errorMessageKey.value),
+      recentKnowledgeNotesErrorMessageKey: computed(
+        () => recentKnowledgeNotes.errorMessageKey.value,
+      ),
       messagesViewport: chatSession.messagesViewport,
       lastRuntimeUsage: chatSession.lastRuntimeUsage,
       selectConversation,

@@ -31,7 +31,8 @@ const boundaryRequiredTargets = new Map([
 const governedRequiredTargets = ['test', 'test:watch', 'test:coverage'];
 const coverageConfigsByProject = new Map([
   ['goal', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
-  ['reminder', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
+  // R4-2201C: legacy Reminder CRUD use-case/mapper slices were physically retired; Routine uses the canonical suite.
+  ['reminder', ['vitest.config.ts']],
   // CLEAN-6304: Temporal Engine use cases moved to @memoflow/scheduler; Schedule keeps Calendar/Planner + mapper coverage only.
   ['schedule', ['vitest.config.ts', 'vitest.mappers.config.ts']],
   ['task', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
@@ -59,7 +60,7 @@ function relativeWorkspaceRoot(projectRoot) {
   );
 }
 
-function createBoundaryTargetTemplates(projectName) {
+function createBoundaryTargetPlans(projectName) {
   const templates = {
     api: {
       test: {
@@ -232,7 +233,7 @@ function createBoundaryTargetTemplates(projectName) {
   return templates[projectName] ?? null;
 }
 
-function createLocalVitestTargetTemplates(projectRoot, includeCoverage = false, projectName = '') {
+function createLocalVitestTargetPlans(projectRoot, includeCoverage = false, projectName = '') {
   const templates = {
     test: {
       executor: 'nx:run-commands',
@@ -314,11 +315,11 @@ async function syncTestTargetsGenerator(tree, schema = {}) {
       }
     }
 
-    const targetTemplates = createBoundaryTargetTemplates(projectName);
-    if (targetTemplates) {
-      for (const [targetName, targetTemplate] of Object.entries(targetTemplates)) {
-        if (!areTargetsEqual(targets[targetName], targetTemplate)) {
-          targets[targetName] = cloneTarget(targetTemplate);
+    const targetPlans = createBoundaryTargetPlans(projectName);
+    if (targetPlans) {
+      for (const [targetName, targetPlan] of Object.entries(targetPlans)) {
+        if (!areTargetsEqual(targets[targetName], targetPlan)) {
+          targets[targetName] = cloneTarget(targetPlan);
           changed = true;
         }
       }
@@ -333,19 +334,19 @@ async function syncTestTargetsGenerator(tree, schema = {}) {
         usesVitest(targets['test:coverage']));
 
     if (shouldNormalizeLocalVitestTargets) {
-      const localVitestTargets = createLocalVitestTargetTemplates(
+      const localVitestTargets = createLocalVitestTargetPlans(
         projectRoot,
         isGovernedDomainProject,
         projectName,
       );
-      for (const [targetName, targetTemplate] of Object.entries(localVitestTargets)) {
-        if (!areTargetsEqual(targets[targetName], targetTemplate)) {
-          targets[targetName] = cloneTarget(targetTemplate);
+      for (const [targetName, targetPlan] of Object.entries(localVitestTargets)) {
+        if (!areTargetsEqual(targets[targetName], targetPlan)) {
+          targets[targetName] = cloneTarget(targetPlan);
           changed = true;
         }
       }
     } else if (isGovernedDomainProject && hasLocalVitestConfig) {
-      const coverageTarget = createLocalVitestTargetTemplates(projectRoot, true, projectName)[
+      const coverageTarget = createLocalVitestTargetPlans(projectRoot, true, projectName)[
         'test:coverage'
       ];
       if (!areTargetsEqual(targets['test:coverage'], coverageTarget)) {

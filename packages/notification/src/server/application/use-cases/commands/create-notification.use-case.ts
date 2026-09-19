@@ -6,7 +6,6 @@ import type {
   NotificationNavigationIntentDTO,
   NotificationType,
   NotificationCategory,
-  RelatedEntityType,
   NotificationChannelType,
 } from '@memoflow/contracts/notification';
 import {
@@ -24,13 +23,14 @@ import type {
   NotificationOutboxDispatchPlan,
 } from '../../../domain/repositories';
 import { Notification } from '../../../domain/aggregates/notification';
-import { NotificationChannel } from '../../../domain/entities/notification-channel';
 import { NotificationPolicy, type NotificationDeliveryDecision } from '../../../domain/services/notification-policy';
+import { NotificationWorkflowCatalog } from '../../../domain/services/notification-workflow-catalog';
 import {
-  NotificationWorkflowCatalog,
-  defaultNotificationWorkflowKey,
-} from '../../../domain/services/notification-workflow-catalog';
+  SystemDeliveryGuard,
+  type SystemDeliveryGuardPort,
+} from '../../../domain/services/system-delivery-guard';
 import { toNotificationClientDTO } from './notification-dto-converters';
+import type { UserTimeContextPort } from '@memoflow/time';
 
 export class CreateNotificationUseCase {
   private readonly policy = new NotificationPolicy();
@@ -39,8 +39,10 @@ export class CreateNotificationUseCase {
     private readonly notificationRepository: INotificationRepository,
     private readonly preferenceRepository: INotificationPreferenceRepository,
     private readonly closureChecker: (identityId: string) => Promise<boolean>,
+    private readonly userTimeContextPort: UserTimeContextPort,
     private readonly clock: () => Date = () => new Date(),
     private readonly workflowCatalog: NotificationWorkflowCatalog = new NotificationWorkflowCatalog(),
+    private readonly systemDeliveryGuard: SystemDeliveryGuardPort = new SystemDeliveryGuard(),
   ) {
     if (!closureChecker) {
       throw new Error('[FAIL-CLOSED] CreateNotificationUseCase requires closureChecker');
@@ -54,11 +56,12 @@ export class CreateNotificationUseCase {
     idempotencyKey?: string;
     title: string;
     content: string;
-    type: NotificationType;
-    category: NotificationCategory;
+    /** Compatibility projection only. WorkflowDefinition owns canonical semantics. */
+    type?: NotificationType;
+    category?: NotificationCategory;
     importance?: ImportanceLevel;
     urgency?: UrgencyLevel;
-    relatedEntityType?: RelatedEntityType;
+    relatedEntityType?: string;
     relatedEntityId?: string;
     navigationIntent?: NotificationNavigationIntentDTO | null;
     actions?: NotificationActionDTO[];
@@ -72,7 +75,10 @@ export class CreateNotificationUseCase {
       return error('FORBIDDEN', 'Account is closed or closure in progress');
     }
 
-    const workflowKey = params.workflowKey?.trim() || defaultNotificationWorkflowKey(params.category);
+    const workflowKey = params.workflowKey?.trim();
+    if (!workflowKey) {
+      return error('VALIDATION_ERROR', 'workflowKey is required; category-based workflow inference is retired');
+    }
     const workflow = this.workflowCatalog.resolve(workflowKey, params.topic);
     const idempotencyKey = params.idempotencyKey?.trim() || `notification:${randomUUID()}`;
 
@@ -85,19 +91,23 @@ export class CreateNotificationUseCase {
     }
 
     const preference = await this.preferenceRepository.findByIdentityId(params.identityId);
+    // Resolve identity-scoped Product Time before any wall-clock suppression decision.
+    // QuietHours itself carries the selected IANA timezone, while this port is the
+    // canonical identity time seam and prevents host-local fallback from creeping in.
+    await this.userTimeContextPort.getUserTimeContext(params.identityId);
     const requestedChannels = [...new Set(params.channels ?? [ChannelType.InApp])];
     const now = this.clock();
     const notification = Notification.create({
       identityId: params.identityId as IdentityId,
       workflowKey: workflow.workflowKey,
-      topic: workflow.topic,
+      topic: workflow.topicKey ?? workflow.workflowKey,
       idempotencyKey,
       title: params.title,
       content: params.content,
-      type: params.type,
-      category: params.category,
-      importance: params.importance,
-      urgency: params.urgency,
+      type: workflow.legacyProjection.type,
+      category: workflow.legacyProjection.category,
+      importance: params.importance ?? workflow.presentationDefaults.importance,
+      urgency: params.urgency ?? workflow.presentationDefaults.urgency,
       relatedEntityType: params.relatedEntityType ?? null,
       relatedEntityId: params.relatedEntityId ?? null,
       navigationIntent: params.navigationIntent ?? null,
@@ -112,23 +122,38 @@ export class CreateNotificationUseCase {
     const deliveryDecisions: NotificationDeliveryDecision[] = [];
 
     for (const channelType of requestedChannels) {
-      const rateLimitUsage = preference?.rateLimit?.enabled
-        ? await this.notificationRepository.getDeliveryUsage(
-            params.identityId,
-            workflow.workflowKey,
-            channelType,
-            now,
-          )
-        : undefined;
-      const decision = this.policy.evaluate({
+      let decision = this.policy.evaluate({
         workflow,
         channel: channelType,
         preference,
-        doNotDisturb: preference?.doNotDisturb,
-        rateLimit: preference?.rateLimit,
-        rateLimitUsage,
+        quietHours: preference?.quietHours,
         now,
       });
+
+      if (
+        decision.outcome === NotificationDeliveryPlanOutcome.Enqueued
+        || decision.outcome === NotificationDeliveryPlanOutcome.Deferred
+      ) {
+        const usage = await this.notificationRepository.getDeliveryUsage(
+          params.identityId,
+          workflow.workflowKey,
+          channelType,
+          now,
+        );
+        const guardDecision = this.systemDeliveryGuard.evaluate({
+          workflowKey: workflow.workflowKey,
+          channel: channelType,
+          usage,
+        });
+        if (guardDecision) {
+          decision = {
+            channel: channelType,
+            outcome: guardDecision.outcome,
+            reason: guardDecision.reason,
+          };
+        }
+      }
+
       deliveryDecisions.push(decision);
 
       if (
@@ -142,13 +167,6 @@ export class CreateNotificationUseCase {
       if (decision.outcome === NotificationDeliveryPlanOutcome.Deferred && !decision.retryAt) {
         continue;
       }
-
-      const channel = NotificationChannel.create({
-        notificationId: notification.id,
-        channelType,
-        recipient: params.identityId,
-      });
-      notification.addChannel(channel);
 
       const occurrenceKey = `${idempotencyKey}:${channelType}`;
       const dispatchIdempotencyKey = buildIdempotencyKeyString({
@@ -165,13 +183,14 @@ export class CreateNotificationUseCase {
         payloadJson: JSON.stringify({
           notificationId: String(notification.id),
           workflowKey: workflow.workflowKey,
-          topic: workflow.topic,
+          topic: workflow.topicKey ?? workflow.workflowKey,
           title: params.title,
           content: params.content,
-          type: params.type,
-          category: params.category,
+          type: workflow.legacyProjection.type,
+          category: workflow.legacyProjection.category,
           channelType,
           navigationIntent: params.navigationIntent ?? null,
+          actions: params.actions ?? null,
         }),
         idempotencyKey: dispatchIdempotencyKey,
         ...(decision.outcome === NotificationDeliveryPlanOutcome.Deferred
@@ -183,9 +202,6 @@ export class CreateNotificationUseCase {
     try {
       await this.notificationRepository.save(notification, outboxDispatches, deliveryDecisions);
     } catch (cause) {
-      // The persistence unique key is the concurrency fence. A same-key writer may
-      // win after our initial read; re-read only when the caller supplied a stable
-      // Fact idempotency key, and never hide an unrelated persistence failure.
       if (params.idempotencyKey) {
         const racedExisting = await this.notificationRepository.findByIdempotencyKey(
           params.identityId,

@@ -1,33 +1,39 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { RecurrenceFrequency } from '@memoflow/contracts/task';
+import {
+  RecurrenceFrequency,
+  TaskRecurrenceEndKind,
+  type TaskRecurrence,
+} from '@memoflow/contracts/task';
 import type { RecurrenceEnginePort, RecurrenceSchedule } from '@memoflow/time';
-import { createTimeFacade } from '@memoflow/time';
-import { RecurrenceRule, TaskTimeConfig } from '../value-objects';
+import { asYmd, createTimeContext, createTimeFacade } from '@memoflow/time';
 import { createTaskRecurrenceDateAdapter } from './task-recurrence-date.adapter';
 
 const originalTimeZone = process.env.TZ;
+
+const UTC_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
+const TOKYO_CONTEXT = createTimeContext({ timeZone: 'Asia/Tokyo', weekStartsOn: 1 });
+const NEW_YORK_CONTEXT = createTimeContext({ timeZone: 'America/New_York', weekStartsOn: 1 });
+
 
 afterEach(() => {
   if (originalTimeZone === undefined) delete process.env.TZ;
   else process.env.TZ = originalTimeZone;
 });
 
-function rule(
+function recurrence(
   frequency: (typeof RecurrenceFrequency)[keyof typeof RecurrenceFrequency],
   overrides: Partial<{
     interval: number;
-    daysOfWeek: number[];
-    endDate: number | null;
-    occurrences: number | null;
+    byWeekday: number[];
+    end: TaskRecurrence['end'];
   }> = {},
-): RecurrenceRule {
-  return RecurrenceRule.create({
+): TaskRecurrence {
+  return {
     frequency,
     interval: overrides.interval ?? 1,
-    daysOfWeek: overrides.daysOfWeek ?? [],
-    endDate: overrides.endDate ?? null,
-    occurrences: overrides.occurrences ?? null,
-  });
+    byWeekday: overrides.byWeekday ?? [],
+    end: overrides.end ?? { kind: TaskRecurrenceEndKind.Never },
+  };
 }
 
 describe('Task recurrence adapter (TASK-2204)', () => {
@@ -44,20 +50,16 @@ describe('Task recurrence adapter (TASK-2204)', () => {
       },
     };
     const adapter = createTaskRecurrenceDateAdapter(engine);
-    const start = new Date(2026, 0, 5, 12, 0, 0).getTime();
-    const endDate = new Date(2026, 1, 28, 12, 0, 0).getTime();
-    const config = TaskTimeConfig.createAllDay(start);
-
     adapter.between(
-      rule(RecurrenceFrequency.Weekly, {
+      recurrence(RecurrenceFrequency.Weekly, {
         interval: 2,
-        daysOfWeek: [1, 5],
-        occurrences: null,
-        endDate,
+        byWeekday: [1, 5],
+        end: { kind: TaskRecurrenceEndKind.Until, date: asYmd('2026-02-28') },
       }),
-      config,
-      new Date(2026, 0, 1).getTime(),
-      new Date(2026, 2, 1).getTime(),
+      asYmd('2026-01-05'),
+      Date.UTC(2026, 0, 1),
+      Date.UTC(2026, 2, 1),
+      TOKYO_CONTEXT,
     );
 
     expect(schedules).toHaveLength(1);
@@ -70,7 +72,11 @@ describe('Task recurrence adapter (TASK-2204)', () => {
       byWeekday: [1, 5],
       count: null,
     });
-    expect(schedules[0].until).toBe(createTimeFacade().calendar.endOfDay(endDate));
+    expect(schedules[0].until).toBe(
+      createTimeFacade({ context: TOKYO_CONTEXT }).calendar.endOfDay(
+        Date.parse('2026-02-28T00:00:00.000Z'),
+      ),
+    );
   });
 
   it.each([
@@ -91,46 +97,51 @@ describe('Task recurrence adapter (TASK-2204)', () => {
       },
     };
     const adapter = createTaskRecurrenceDateAdapter(engine);
-    const start = Date.UTC(2026, 0, 1);
     const daysOfWeek = taskFrequency === RecurrenceFrequency.Weekly ? [1] : [];
     adapter.between(
-      rule(taskFrequency, { daysOfWeek, occurrences: 7 }),
-      TaskTimeConfig.createAllDay(start),
-      start,
+      recurrence(taskFrequency, {
+        byWeekday: daysOfWeek,
+        end: { kind: TaskRecurrenceEndKind.Count, count: 7 },
+      }),
+      asYmd('2026-01-01'),
+      Date.UTC(2026, 0, 1),
       Date.UTC(2026, 11, 31),
+      UTC_CONTEXT,
     );
     expect(captured?.frequency).toBe(engineFrequency);
     expect(captured?.count).toBe(7);
   });
 
-  it('rejects an unanchored recurring schedule instead of inventing a 1970 COUNT origin', () => {
+  it('uses the explicit canonical start date instead of legacy time configuration', () => {
     process.env.TZ = 'UTC';
     const adapter = createTaskRecurrenceDateAdapter();
-    const unanchored = TaskTimeConfig.create({
-      timeType: 'AllDay',
-      startDate: null,
-      timePoint: null,
-      timeRange: null,
-    });
-    expect(() =>
-      adapter.between(
-        rule(RecurrenceFrequency.Daily, { occurrences: 3 }),
-        unanchored,
-        Date.UTC(2026, 0, 1),
-        Date.UTC(2026, 0, 31),
-      ),
-    ).toThrow('Recurring Task requires an anchored local date');
+    const dates = adapter.between(
+      recurrence(RecurrenceFrequency.Daily, {
+        end: { kind: TaskRecurrenceEndKind.Count, count: 3 },
+      }),
+      asYmd('2026-01-10'),
+      Date.UTC(2026, 0, 1),
+      Date.UTC(2026, 0, 31),
+      UTC_CONTEXT,
+    );
+    expect(dates.map((instant) => new Date(instant).toISOString())).toEqual([
+      '2026-01-10T00:00:00.000Z',
+      '2026-01-11T00:00:00.000Z',
+      '2026-01-12T00:00:00.000Z',
+    ]);
   });
 
   it('enforces COUNT in the selected recurrence engine', () => {
     process.env.TZ = 'UTC';
     const adapter = createTaskRecurrenceDateAdapter();
-    const start = Date.UTC(2026, 0, 1);
     const dates = adapter.between(
-      rule(RecurrenceFrequency.Daily, { occurrences: 3 }),
-      TaskTimeConfig.createAllDay(start),
-      start,
+      recurrence(RecurrenceFrequency.Daily, {
+        end: { kind: TaskRecurrenceEndKind.Count, count: 3 },
+      }),
+      asYmd('2026-01-01'),
+      Date.UTC(2026, 0, 1),
       Date.UTC(2026, 0, 31, 23, 59, 59, 999),
+      UTC_CONTEXT,
     );
     expect(dates.map((instant) => new Date(instant).toISOString())).toEqual([
       '2026-01-01T00:00:00.000Z',
@@ -142,13 +153,15 @@ describe('Task recurrence adapter (TASK-2204)', () => {
   it('treats Task endDate as an inclusive local-day boundary', () => {
     process.env.TZ = 'Asia/Tokyo';
     const adapter = createTaskRecurrenceDateAdapter();
-    const start = new Date(2026, 0, 1, 0, 0, 0).getTime();
-    const endDate = new Date(2026, 0, 3, 12, 0, 0).getTime();
+    const time = createTimeFacade({ context: TOKYO_CONTEXT });
     const dates = adapter.between(
-      rule(RecurrenceFrequency.Daily, { endDate }),
-      TaskTimeConfig.createAllDay(start),
-      start,
-      new Date(2026, 0, 5, 23, 59, 59, 999).getTime(),
+      recurrence(RecurrenceFrequency.Daily, {
+        end: { kind: TaskRecurrenceEndKind.Until, date: asYmd('2026-01-03') },
+      }),
+      asYmd('2026-01-01'),
+      time.codec.startOfYmd(asYmd('2026-01-01')),
+      time.calendar.endOfDay(time.codec.startOfYmd(asYmd('2026-01-05'))),
+      TOKYO_CONTEXT,
     );
     expect(dates.map((instant) => new Date(instant).getDate())).toEqual([1, 2, 3]);
   });
@@ -156,12 +169,14 @@ describe('Task recurrence adapter (TASK-2204)', () => {
   it('keeps local calendar dates stable across New York fall DST', () => {
     process.env.TZ = 'America/New_York';
     const adapter = createTaskRecurrenceDateAdapter();
-    const start = new Date(2026, 9, 31, 12, 0, 0).getTime();
     const dates = adapter.between(
-      rule(RecurrenceFrequency.Daily, { occurrences: 3 }),
-      TaskTimeConfig.createAllDay(start),
-      new Date(2026, 9, 31, 0, 0, 0).getTime(),
-      new Date(2026, 10, 2, 23, 59, 59, 999).getTime(),
+      recurrence(RecurrenceFrequency.Daily, {
+        end: { kind: TaskRecurrenceEndKind.Count, count: 3 },
+      }),
+      asYmd('2026-10-31'),
+      Date.UTC(2026, 9, 31),
+      Date.UTC(2026, 10, 2, 23, 59, 59, 999),
+      NEW_YORK_CONTEXT,
     );
 
     expect(dates.map((instant) => new Date(instant).toISOString())).toEqual([
@@ -174,12 +189,14 @@ describe('Task recurrence adapter (TASK-2204)', () => {
   it('keeps local calendar dates stable across New York spring DST', () => {
     process.env.TZ = 'America/New_York';
     const adapter = createTaskRecurrenceDateAdapter();
-    const start = new Date(2026, 2, 7, 12, 0, 0).getTime();
     const dates = adapter.between(
-      rule(RecurrenceFrequency.Daily, { occurrences: 4 }),
-      TaskTimeConfig.createAllDay(start),
-      new Date(2026, 2, 7, 0, 0, 0).getTime(),
-      new Date(2026, 2, 10, 23, 59, 59, 999).getTime(),
+      recurrence(RecurrenceFrequency.Daily, {
+        end: { kind: TaskRecurrenceEndKind.Count, count: 4 },
+      }),
+      asYmd('2026-03-07'),
+      Date.UTC(2026, 2, 7),
+      Date.UTC(2026, 2, 10, 23, 59, 59, 999),
+      NEW_YORK_CONTEXT,
     );
 
     expect(dates.map((instant) => new Date(instant).toISOString())).toEqual([
@@ -189,4 +206,31 @@ describe('Task recurrence adapter (TASK-2204)', () => {
       '2026-03-10T04:00:00.000Z',
     ]);
   });
+  it('is host-timezone independent for the same explicit TimeContext', () => {
+    const adapter = createTaskRecurrenceDateAdapter();
+    const startDate = asYmd('2026-09-09');
+    const taskRecurrence = recurrence(RecurrenceFrequency.Daily, {
+      end: { kind: TaskRecurrenceEndKind.Count, count: 2 },
+    });
+    const from = Date.UTC(2026, 8, 8, 0, 0, 0);
+    const to = Date.UTC(2026, 8, 10, 23, 59, 59, 999);
+
+    process.env.TZ = 'UTC';
+    const fromUtcHost = adapter.between(taskRecurrence, startDate, from, to, TOKYO_CONTEXT);
+    process.env.TZ = 'America/Los_Angeles';
+    const fromLosAngelesHost = adapter.between(
+      taskRecurrence,
+      startDate,
+      from,
+      to,
+      TOKYO_CONTEXT,
+    );
+
+    expect(fromLosAngelesHost).toEqual(fromUtcHost);
+    expect(fromUtcHost.map((instant) => new Date(instant).toISOString())).toEqual([
+      '2026-09-08T15:00:00.000Z',
+      '2026-09-09T15:00:00.000Z',
+    ]);
+  });
+
 });

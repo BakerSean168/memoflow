@@ -73,39 +73,38 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { GoalClientDTO } from '@memoflow/contracts/goal';
+import { goalTimeframeLabel, isPastGoalTarget, type GoalClientDTO } from '@memoflow/contracts/goal';
 import { Badge, Button, Progress } from '@memoflow/ui-vue-shadcn';
-import { endOfDayMs, formatProductDate } from '../../../shared/utils/product-time';
+import { formatProductYmd, getProductTodayYmd } from '../../../shared/utils/product-time';
 import { getGoalOverallProgress } from '../utils/progress';
 
 const props = defineProps<{ goal: GoalClientDTO }>();
 const emit = defineEmits<{ view: []; edit: []; delete: [] }>();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const progress = computed(() => getGoalOverallProgress(props.goal));
-const isOverdue = computed(
+const isPastTarget = computed(
   () =>
-    props.goal.status === 'Active' &&
-    props.goal.dueDate != null &&
-    endOfDayMs(props.goal.dueDate) < Date.now(),
+    (props.goal.status === 'Planned' || props.goal.status === 'InProgress') &&
+    isPastGoalTarget(props.goal.target, getProductTodayYmd()),
 );
 const statusLabel = computed(() => {
-  if (isOverdue.value) return t('goal.list.overdue');
+  if (isPastTarget.value) return t('goal.list.pastTarget');
   if (props.goal.status === 'Completed') return t('goal.list.completed');
   if (props.goal.status === 'Abandoned') return t('goal.list.abandoned');
   return '';
 });
 const statusVariant = computed<'secondary' | 'destructive'>(() =>
-  isOverdue.value ? 'destructive' : 'secondary',
+  isPastTarget.value ? 'destructive' : 'secondary',
 );
 const dateRangeText = computed(() => {
-  if (props.goal.startDate != null && props.goal.dueDate != null) {
-    return `${formatProductDate(props.goal.startDate)} → ${formatProductDate(props.goal.dueDate)}`;
+  const target = props.goal.target ? goalTimeframeLabel(props.goal.target, locale.value) : '';
+  if (props.goal.startDate != null && target) {
+    return `${formatProductYmd(props.goal.startDate)} → ${target}`;
   }
-  if (props.goal.dueDate != null)
-    return `${t('goal.list.due')} ${formatProductDate(props.goal.dueDate)}`;
+  if (target) return `${t('goal.list.target')} ${target}`;
   if (props.goal.startDate != null)
-    return `${t('goal.list.from')} ${formatProductDate(props.goal.startDate)}`;
+    return `${t('goal.list.from')} ${formatProductYmd(props.goal.startDate)}`;
   return '';
 });
 </script>

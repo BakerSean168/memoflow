@@ -7,6 +7,8 @@
 
 // ===== Composables =====
 export { useGoal } from './composables';
+export { useGoalWorkspace } from './composables';
+export { useGoalHomeSummary } from './composables';
 export { useGoalTimeline } from './composables';
 export type { TimelineData, TimelineSnapshot } from './composables';
 export { formatTimelineTimestamp } from './composables';
@@ -19,7 +21,6 @@ export type { GoalState, GoalStoreType } from './stores/goal-store';
 export { goalRoutes } from './router';
 
 // ===== Widgets =====
-// export { registerGoalWidgets } from './widgets/register-goal-widgets';
 
 // ===== Components =====
 export * from './components';

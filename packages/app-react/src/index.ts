@@ -14,6 +14,7 @@
 export { RootLayout } from './root-layout';
 export { AppProviders } from './providers/app-providers';
 export { AppClientRegistryProvider } from './providers/app-client-registry-provider';
+export { AppPreferenceProvider, useAppPreferences } from './providers/app-preference-provider';
 export { AppSessionProvider } from './providers/app-session-provider';
 
 // ── Screens ──
@@ -30,9 +31,6 @@ export { GoalsScreen } from './screens/GoalsScreen';
 export { HomeScreen } from './screens/HomeScreen';
 export { NotificationDetailScreen } from './screens/NotificationDetailScreen';
 export { NotificationsScreen } from './screens/NotificationsScreen';
-export { ReminderDetailScreen } from './screens/ReminderDetailScreen';
-export { ReminderEditorScreen } from './screens/ReminderEditorScreen';
-export { RemindersScreen } from './screens/RemindersScreen';
 export { ScheduleCalendarScreen } from './screens/ScheduleCalendarScreen';
 export { ScheduleEventEditorScreen } from './screens/ScheduleEventEditorScreen';
 export { ScheduleScreen } from './screens/ScheduleScreen';

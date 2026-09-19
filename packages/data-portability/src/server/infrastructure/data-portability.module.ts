@@ -1,30 +1,26 @@
 import type {
-  ExportUserDataReq,
-  ImportUserDataReq,
+  PortableCapability,
+  PortableDataV3ImportRes,
 } from '@memoflow/contracts/data-portability';
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import { ResultCode, ResultErrorException } from '@memoflow/contracts/result';
 import type { DataPortabilityApplicationPort } from '../application';
-import type { DataPortabilityDependencies } from '../application/data-portability.dependencies';
-import type { DataPortabilityImportStore } from '../application/import-store/data-portability-import-store';
-import { ExportUserDataUseCase } from '../application/use-cases/export-user-data.use-case';
-import { ImportUserDataUseCase } from '../application/use-cases/import-user-data.use-case';
-import { createPowerSyncDataPortabilityDependencies } from './powersync/powersync-export-dependencies';
-import { createPowerSyncDataPortabilityImportStore } from './powersync/powersync-import-store';
+import { PortableCapabilityCoordinator } from '../application/portable-capability-coordinator';
+import type { PortableImportReceiptV3 } from '../application/portable-capability-coordinator';
+import { PortableCapabilityRegistry } from '../application/portable-capability';
 import { createLogger } from '@memoflow/utils/logger';
 
 const logger = createLogger('DataPortabilityModule');
 
 export interface DataPortabilityModuleDependencies {
-  readonly exportDependencies: DataPortabilityDependencies;
-  readonly importStore: DataPortabilityImportStore;
+  /** Owner-provided V3 capabilities registered in the production registry. */
+  readonly portableCapabilities?: readonly PortableCapability<unknown>[];
+  /** Version stamped into the orchestration envelope. */
+  readonly productVersion?: string;
+  readonly nowIsoString?: () => string;
+  readonly createBatchId?: () => string;
   readonly runtimeContributions?:
     | DataPortabilityModuleRuntimeContribution
     | readonly DataPortabilityModuleRuntimeContribution[];
-}
-
-export interface DataPortabilityModuleUseCases {
-  readonly exportUserData: ExportUserDataUseCase;
-  readonly importUserData: ImportUserDataUseCase;
 }
 
 export interface DataPortabilityModuleRuntimeContribution {
@@ -32,22 +28,17 @@ export interface DataPortabilityModuleRuntimeContribution {
   stop(): void;
 }
 
+export interface DataPortabilityModuleUseCases {
+  readonly portableCapabilityCoordinator: PortableCapabilityCoordinator;
+}
+
 export interface DataPortabilityModuleInstance {
-  readonly exportDependencies: DataPortabilityDependencies;
-  readonly importStore: DataPortabilityImportStore;
+  readonly portableCapabilityRegistry: PortableCapabilityRegistry;
+  readonly portableCapabilityCoordinator: PortableCapabilityCoordinator;
   readonly useCases: DataPortabilityModuleUseCases;
   readonly api: DataPortabilityApplicationPort;
   start(): void;
   dispose(): void;
-}
-
-export function createDataPortabilityUseCases(
-  dependencies: DataPortabilityModuleDependencies,
-): DataPortabilityModuleUseCases {
-  return {
-    exportUserData: new ExportUserDataUseCase(dependencies.exportDependencies),
-    importUserData: new ImportUserDataUseCase(dependencies.importStore),
-  };
 }
 
 function normalizeRuntimeContributions(
@@ -55,36 +46,88 @@ function normalizeRuntimeContributions(
     | DataPortabilityModuleRuntimeContribution
     | readonly DataPortabilityModuleRuntimeContribution[],
 ): readonly DataPortabilityModuleRuntimeContribution[] {
-  if (!runtimeContributions) {
-    return [];
-  }
-
+  if (!runtimeContributions) return [];
   return Array.isArray(runtimeContributions)
     ? Array.from(runtimeContributions)
     : [runtimeContributions as DataPortabilityModuleRuntimeContribution];
 }
 
+function toPortableValidationError(error: unknown): ResultErrorException {
+  if (error instanceof ResultErrorException) return error;
+  const message = error instanceof Error ? error.message : 'Portable V3 operation failed';
+  return new ResultErrorException(message, ResultCode.VALIDATION_ERROR, undefined, undefined, 400);
+}
+
+function createDefaultBatchId(): string {
+  return `portable-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+}
+
 /**
- * Canonical data portability composition root.
- * 规范化的 data portability 模块组合根。
+ * Canonical V3-only data portability composition root.
+ *
+ * Data Portability owns orchestration and transport-neutral lifecycle only.
+ * Owner capabilities own all portable payload semantics and persistence.
  */
 export function createDataPortabilityModule(
   dependencies: DataPortabilityModuleDependencies,
 ): DataPortabilityModuleInstance {
-  const useCases = createDataPortabilityUseCases(dependencies);
+  const portableCapabilityRegistry = new PortableCapabilityRegistry();
+  for (const capability of dependencies.portableCapabilities ?? []) {
+    portableCapabilityRegistry.register(capability);
+  }
+
+  const portableCapabilityCoordinator = new PortableCapabilityCoordinator(
+    portableCapabilityRegistry,
+    {
+      productVersion: dependencies.productVersion ?? 'unknown',
+      nowIsoString: dependencies.nowIsoString ?? (() => new Date().toISOString()),
+      createBatchId: dependencies.createBatchId ?? createDefaultBatchId,
+    },
+  );
+  const useCases = { portableCapabilityCoordinator };
   const runtimeContributions = normalizeRuntimeContributions(dependencies.runtimeContributions);
   let started = false;
 
-  return {
-    exportDependencies: dependencies.exportDependencies,
-    importStore: dependencies.importStore,
-    useCases,
-    api: {
-      exportUserData: (identityId, request) =>
-        useCases.exportUserData.execute(identityId, request.include),
-      importUserData: (identityId, request) =>
-        useCases.importUserData.execute(identityId, request.content, request.dryRun ?? false),
+  const api: DataPortabilityApplicationPort = {
+    async exportPortableDataV3(identityId, request) {
+      try {
+        const result = await portableCapabilityCoordinator.export(identityId, request.capabilities);
+        const exportedAt = result.envelope.exportedAt;
+        const timestamp = exportedAt.replace(/[:.]/g, '-').slice(0, 19);
+        return {
+          fileName: `memoflow-user-data-v3-${timestamp}.json`,
+          content: JSON.stringify(result.envelope, null, 2),
+          summary: { capabilityKeys: [...result.capabilityKeys], warnings: [] },
+        };
+      } catch (error) {
+        throw toPortableValidationError(error);
+      }
     },
+    async dryRunPortableDataV3(identityId, request) {
+      try {
+        return toTransportReceipt(
+          await portableCapabilityCoordinator.dryRun(request.content, identityId),
+        );
+      } catch (error) {
+        throw toPortableValidationError(error);
+      }
+    },
+    async applyPortableDataV3(identityId, request) {
+      try {
+        return toTransportReceipt(
+          await portableCapabilityCoordinator.apply(request.content, identityId),
+        );
+      } catch (error) {
+        throw toPortableValidationError(error);
+      }
+    },
+  };
+
+  return {
+    portableCapabilityRegistry,
+    portableCapabilityCoordinator,
+    useCases,
+    api,
     start(): void {
       if (started) return;
       const startedContributions: DataPortabilityModuleRuntimeContribution[] = [];
@@ -93,10 +136,6 @@ export function createDataPortabilityModule(
           runtime.start();
           startedContributions.push(runtime);
         } catch (error) {
-          // Partial-start rollback: stop the already-started contributions in
-          // REVERSE order (best-effort, logged), then rethrow the ORIGINAL
-          // error. `started` stays false, so a later dispose() is a no-op —
-          // start() owns its partial-start cleanup.
           for (const startedRuntime of [...startedContributions].reverse()) {
             try {
               startedRuntime.stop();
@@ -114,25 +153,27 @@ export function createDataPortabilityModule(
     },
     dispose(): void {
       if (!started) return;
-      for (const runtime of [...runtimeContributions].reverse()) {
-        runtime.stop();
-      }
+      for (const runtime of [...runtimeContributions].reverse()) runtime.stop();
       started = false;
     },
   };
 }
 
-export function createPowerSyncDataPortabilityModule(
-  db: IElectronDatabase,
-  options: {
-    readonly runtimeContributions?:
-      | DataPortabilityModuleRuntimeContribution
-      | readonly DataPortabilityModuleRuntimeContribution[];
-  } = {},
-): DataPortabilityModuleInstance {
-  return createDataPortabilityModule({
-    exportDependencies: createPowerSyncDataPortabilityDependencies(db),
-    importStore: createPowerSyncDataPortabilityImportStore(db),
-    runtimeContributions: options.runtimeContributions,
-  });
+function toTransportReceipt(receipt: PortableImportReceiptV3): PortableDataV3ImportRes {
+  return {
+    batchId: receipt.batchId,
+    dryRun: receipt.dryRun,
+    capabilities: receipt.capabilities.map((entry) => ({
+      key: entry.key,
+      schemaVersion: entry.schemaVersion,
+      created: entry.created,
+      updated: entry.updated,
+      skipped: entry.skipped,
+      warnings: [...entry.warnings],
+    })),
+    created: { ...receipt.created },
+    updated: { ...receipt.updated },
+    skipped: { ...receipt.skipped },
+    warnings: [...receipt.warnings],
+  };
 }

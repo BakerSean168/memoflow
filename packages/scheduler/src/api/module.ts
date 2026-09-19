@@ -20,7 +20,7 @@ export function createSchedulerApiModule(options: SchedulerApiModuleOptions): Sc
         await options.instance.start();
         const stackLen = context.router.stack.length;
         try {
-          context.router.use('/schedules', routes);
+          context.router.use('/scheduler', routes);
         } catch (error) {
           context.router.stack.length = stackLen;
           throw error;

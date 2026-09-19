@@ -36,6 +36,7 @@
  */
 
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { UserTimeContextPort } from '@memoflow/time';
 import {
   createDefaultElectronDesktopTransport,
   createNotificationDurableRuntime,
@@ -44,7 +45,10 @@ import {
   createPowerSyncClosureChecker,
   type ChannelCapabilitySpec,
   type INotificationRepository,
+  type NotificationOwnerCommandRegistry,
+  type NotificationPortableCapability,
   type NotificationRequestedWriterPort,
+  type NotificationInboxPort,
 } from '@memoflow/notification';
 import {
   createNotificationElectronModule,
@@ -58,10 +62,13 @@ import {
 export interface ComposeNotificationDesktopDependencies {
   /** PowerSync-backed desktop business database owned by the desktop main runtime. 桌面主进程持有的 PowerSync 桌面业务数据库。 */
   readonly db: IElectronDatabase;
+  readonly userTimeContextPort: UserTimeContextPort;
   /** Explicit channel capabilities selected by the host (InApp + Desktop). 宿主显式选择的 channel capabilities（InApp + Desktop）。 */
   readonly channelCapabilities: readonly ChannelCapabilitySpec[];
   /** Native Electron desktop transport (acks + native Notification side effect). 原生 Electron desktop transport（ack + 原生 Notification 副作用）。 */
   readonly desktopTransport?: unknown;
+  /** Late-bound device renderer used by the durable Desktop transport. */
+  readonly desktopRenderer?: (dto: unknown, context?: unknown) => boolean | Promise<boolean>;
 }
 
 /**
@@ -71,7 +78,7 @@ export interface ComposeNotificationDesktopDependencies {
 export interface ComposedNotificationDesktop {
   /** Already-bound IElectronModule-compatible handle. 已绑定的 IElectronModule 兼容 handle。 */
   readonly module: NotificationElectronModuleDef;
-  /** Repository view exposed to sibling modules (dashboard). 暴露给兄弟模块（dashboard）的仓储视图。 */
+  /** Repository view exposed to sibling modules. 暴露给兄弟模块的仓储视图。 */
   readonly repositories: {
     readonly notificationRepository: INotificationRepository;
     /** Durable NotificationRequested writer (NOTIF-3301) for business handlers. */
@@ -79,6 +86,11 @@ export interface ComposedNotificationDesktop {
   };
   /** Trusted writer for durable `notification.requested` envelopes (cross-module consumption). 可信的 durable `notification.requested` 信封写入器（跨模块消费）。 */
   readonly requestedWriter: NotificationRequestedWriterPort;
+  /** Late-bound owner command registry. */
+  readonly ownerCommandRegistry: NotificationOwnerCommandRegistry;
+  readonly portableFactCapability: NotificationPortableCapability;
+  /** Notification Fact/Inbox and typed action seam shared by transports. */
+  readonly inbox: NotificationInboxPort;
 }
 
 /**
@@ -122,21 +134,29 @@ export function composeNotification(
 ): ComposedNotificationDesktop {
   const repositories = createNotificationPowerSyncRepositories(dependencies.db);
 
+  const closureChecker = createPowerSyncClosureChecker(dependencies.db);
+
   const durableRuntime = createNotificationDurableRuntime({
     notificationRepository: repositories.notificationRepository,
+    preferenceRepository: repositories.notificationPreferenceRepository,
+    closureChecker,
+    userTimeContextPort: dependencies.userTimeContextPort,
     reliableAdapter: repositories.reliableAdapter,
     channelCapabilities: Array.from(dependencies.channelCapabilities),
     transport:
-      dependencies.desktopTransport ?? createDefaultElectronDesktopTransport(dependencies.db),
+      dependencies.desktopTransport ??
+      createDefaultElectronDesktopTransport({
+        db: dependencies.db,
+        renderer: dependencies.desktopRenderer,
+      }),
   });
-
-  const closureChecker = createPowerSyncClosureChecker(dependencies.db);
 
   const instance = createNotificationModule({
     notificationRepository: repositories.notificationRepository,
     preferenceRepository: repositories.notificationPreferenceRepository,
-    templateRepository: repositories.notificationTemplateRepository,
+    interactionRepository: repositories.notificationInteractionRepository,
     closureChecker,
+    userTimeContextPort: dependencies.userTimeContextPort,
     durableRuntime,
     runtimeContributions: [durableRuntime],
   });
@@ -148,5 +168,8 @@ export function composeNotification(
       requestedWriter: repositories.requestedWriter,
     },
     requestedWriter: repositories.requestedWriter,
+    ownerCommandRegistry: instance.ownerCommandRegistry,
+    portableFactCapability: instance.portableFactCapability,
+    inbox: instance.api,
   };
 }

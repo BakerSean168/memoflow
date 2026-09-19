@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 /**
  * Notification ownership surface (stage-6 residual 126):
  * Residual 178 collapses bare findById dual method.
- * get/mark-read/update/delete/batch paths must never authorize by bare
+ * get/mark-read/delete/batch paths must never authorize by bare
  * notification primary key alone.
  */
 describe('notification ownership surface', () => {
@@ -74,7 +74,9 @@ describe('notification ownership surface', () => {
     expect(maintenance).toContain('findByIdForIdentity(data.identityId, id)');
   });
 
-  it('module api wrappers pass identityId for owned mutations', () => {
+  it('module api retires arbitrary Fact update authority while preserving identity-scoped mutations', () => {
+    expect(module).not.toContain('UpdateNotificationUseCase');
+    expect(module).not.toContain('updateNotification:');
     expect(module).toContain('getNotification: async (id, identityId) =>');
     expect(module).toContain('deleteNotification: async (id, identityId) =>');
     expect(module).toContain('markAsRead: async (id, identityId) =>');

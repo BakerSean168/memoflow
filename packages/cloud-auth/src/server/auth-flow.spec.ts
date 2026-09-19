@@ -46,7 +46,7 @@ function createAuthFlowFixture() {
       findUnique: vi.fn(
         async ({ where, select }: { where: { id: string }; select?: Record<string, boolean> }) => {
           const user = users().find((candidate) => candidate.id === where.id);
-          return user ? selectRow({ status: 'active', disabledAt: null, ...user }, select) : null;
+          return user ? selectRow({ disabledAt: null, ...user }, select) : null;
         },
       ),
       delete: vi.fn(async ({ where }: { where: { id: string } }) => {
@@ -118,18 +118,24 @@ describe('email and password auth flow', () => {
     await expect(response.json()).resolves.toMatchObject({ code });
   });
 
-  it('rejects sign-up when the email already exists', async () => {
+  it('preserves Better Auth native duplicate-email signup privacy behavior', async () => {
     const fixture = createAuthFlowFixture();
     const body = { email: 'person@example.com', password: PASSWORD, name: 'Person' };
-    expect((await fixture.post('/sign-up/email', body)).status).toBe(200);
-
-    const duplicate = await fixture.post('/sign-up/email', {
-      ...body,
-      email: 'PERSON@example.com',
+    const now = new Date();
+    (fixture.memory.cloudAuthUser as MemoryRow[]).push({
+      id: 'existing-user',
+      name: 'Existing Person',
+      email: body.email,
+      emailVerified: false,
+      disabledAt: null,
+      createdAt: now,
+      updatedAt: now,
     });
 
-    expect(duplicate.status).toBe(409);
-    await expect(duplicate.json()).resolves.toMatchObject({ code: 'USER_ALREADY_EXISTS' });
+    const duplicate = await fixture.post('/sign-up/email', body);
+
+    expect(duplicate.status).toBe(200);
+    await expect(duplicate.json()).resolves.toMatchObject({ token: null });
   });
 
   it('issues an email-verification link after sign-up', async () => {
@@ -217,7 +223,6 @@ describe('email and password auth flow', () => {
       name: 'Legacy User',
       email,
       emailVerified: true,
-      status: 'active',
       disabledAt: null,
       createdAt: now,
       updatedAt: now,

@@ -1,22 +1,3 @@
-/**
- * Schedule Module - Aggregates
- * 调度模块 - 聚合根统一导出
- */
-
-// ============ CalendarEntry Aggregate ============
-export type {
-  CalendarEntryServerDTO,
-} from './calendar-entry-server';
-
-export type {
-  CalendarEntryClientDTO,
-} from './calendar-entry-client';
-
-// ============ ScheduleTask Aggregate ============
-export type {
-  ScheduleTaskServerDTO,
-} from './schedule-task-server';
-
-export type {
-  ScheduleTaskClientDTO,
-} from './schedule-task-client';
+/** CalendarEntry product aggregate contracts. */
+export type { CalendarEntryServerDTO } from './calendar-entry-server';
+export type { CalendarEntryClientDTO } from './calendar-entry-client';

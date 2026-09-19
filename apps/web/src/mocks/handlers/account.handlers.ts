@@ -33,7 +33,7 @@ export const accountHandlers = [
 
   // PATCH /api/v1/account — update account profile
   http.patch(BASE, async ({ request }) => {
-    const body = await request.json() as Record<string, unknown>;
+    const body = (await request.json()) as Record<string, unknown>;
     mockAccount = {
       ...mockAccount,
       profile: {
@@ -47,37 +47,6 @@ export const accountHandlers = [
       code: 200,
       message: 'Updated',
       data: mockAccount,
-      timestamp: Date.now(),
-    });
-  }),
-
-  // GET /api/v1/account/settings — get account settings
-  http.get(`${BASE}/settings`, () => {
-    return HttpResponse.json({
-      ok: true,
-      code: 200,
-      message: 'Success',
-      data: mockAccount.settings,
-      timestamp: Date.now(),
-    });
-  }),
-
-  // PATCH /api/v1/account/settings — update account settings
-  http.patch(`${BASE}/settings`, async ({ request }) => {
-    const body = await request.json() as Record<string, unknown>;
-    mockAccount = {
-      ...mockAccount,
-      settings: {
-        ...mockAccount.settings,
-        ...(body as object),
-      },
-      updatedAt: Date.now(),
-    };
-    return HttpResponse.json({
-      ok: true,
-      code: 200,
-      message: 'Updated',
-      data: mockAccount.settings,
       timestamp: Date.now(),
     });
   }),

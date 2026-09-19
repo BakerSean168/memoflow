@@ -1,69 +1,96 @@
+import type { Context } from '@memoflow/contracts/shared';
+import { CalendarEntryResponseSchema } from '@memoflow/contracts/schedule';
 import { unwrap } from '@memoflow/contracts/result';
-import type { IAIPlannerReadPort, AIPlannerTaskItem } from '@memoflow/ai';
+import {
+  projectPlannerCalendarEntry,
+  projectPlannerTaskOccurrence,
+  type IAIPlannerReadPort,
+  type PlannerProductTimePort,
+} from '@memoflow/ai';
 import { IdentityId } from '@memoflow/domain-shared/shared';
-import type { IScheduleRepository } from '@memoflow/schedule';
+import type { ScheduleEventApplicationPort } from '@memoflow/schedule';
+import { derivePlannerConflicts } from '@memoflow/schedule/client';
 import type { TaskApplicationPort } from '@memoflow/task';
+import { createTimeFacade, type UserTimeContextPort } from '@memoflow/time';
 
-/** Read-only Planner projection. Scheduler worker repositories are deliberately absent. */
+function ownerContext(identityId: string, startedAt: number): Context {
+  const requestId = `ai-planner:${identityId}:${startedAt}`;
+  return { identityId, requestId, traceId: requestId, startedAt, source: 'system' };
+}
+
+/** Planner adapter over Schedule/Task owner application reads only. */
 export class PlannerAIReadAdapter implements IAIPlannerReadPort {
   constructor(
-    private readonly scheduleRepository: IScheduleRepository,
+    private readonly scheduleEventApi: ScheduleEventApplicationPort,
     private readonly taskApplicationPort: TaskApplicationPort,
+    private readonly userTimeContextPort: UserTimeContextPort,
   ) {}
 
-  private async taskItems(identityId: string, startTime: number, endTime: number): Promise<AIPlannerTaskItem[]> {
-    const [instances, templates] = await Promise.all([
-      this.taskApplicationPort.getTaskInstancesByDateRange(identityId, startTime, endTime),
-      this.taskApplicationPort.listTaskTemplates({ identityId: IdentityId.of(identityId) }),
+  private async readProjections(
+    identityId: string,
+    range: { readonly start: number; readonly end: number },
+  ) {
+    const [scheduleResult, occurrenceResult, planResult, userTimeContext] = await Promise.all([
+      this.scheduleEventApi.listEvents(
+        {
+          identityId: IdentityId.of(identityId),
+          startTime: range.start,
+          endTime: range.end,
+        },
+        ownerContext(identityId, range.start),
+      ),
+      this.taskApplicationPort.getTaskOccurrencesByDateRange(identityId, range.start, range.end),
+      this.taskApplicationPort.listTaskPlans({ identityId: IdentityId.of(identityId) }),
+      this.userTimeContextPort.getUserTimeContext(identityId),
     ]);
-    const instanceData = unwrap(instances).data;
-    const templateData = unwrap(templates).templates;
-    const titles = new Map(templateData.map((template) => [String(template.id), template.name] as const));
-    return instanceData.map((instance) => ({
-      id: String(instance.id),
-      templateId: String(instance.templateId),
-      title: titles.get(String(instance.templateId)) ?? 'Untitled task',
-      instanceDate: instance.instanceDate,
-      dueDate: null,
-      status: String(instance.status),
-    }));
+
+    const scheduleEntries = CalendarEntryResponseSchema.array().parse(unwrap(scheduleResult));
+    const occurrences = unwrap(occurrenceResult).data;
+    const plans = unwrap(planResult).plans;
+    const planById = new Map(plans.map((plan) => [String(plan.id), plan] as const));
+    const time = createTimeFacade({ context: userTimeContext });
+    const productTime: PlannerProductTimePort = {
+      combine: (date, hm) => time.input.combine(date, hm),
+    };
+    return [
+      ...scheduleEntries.map(projectPlannerCalendarEntry),
+      ...occurrences.flatMap((occurrence) => {
+        const projection = projectPlannerTaskOccurrence(
+          occurrence,
+          planById.get(String(occurrence.planId)),
+          productTime,
+        );
+        return projection ? [projection] : [];
+      }),
+    ];
   }
 
   async getWindowSummary(input: Parameters<IAIPlannerReadPort['getWindowSummary']>[0]) {
-    const [calendar, tasks] = await Promise.all([
-      this.scheduleRepository.findByTimeRange(input.identityId, input.startTime, input.endTime),
-      this.taskItems(input.identityId, input.startTime, input.endTime),
-    ]);
+    const projections = await this.readProjections(input.identityId, input.range);
     return {
-      startTime: input.startTime,
-      endTime: input.endTime,
-      calendar: calendar.map((entry) => ({
-        id: String(entry.id),
-        title: entry.title,
-        startTime: entry.startTime,
-        endTime: entry.endTime,
-        hasConflict: entry.hasConflict,
-        conflictingEntryIds: entry.conflictingEntries ?? [],
-      })),
-      tasks,
+      range: input.range,
+      projections,
+      conflicts: derivePlannerConflicts(projections),
     };
   }
 
   async getConflicts(input: Parameters<IAIPlannerReadPort['getConflicts']>[0]) {
-    const entries = (await this.getWindowSummary(input)).calendar.filter((entry) => entry.hasConflict);
-    return {
-      startTime: input.startTime,
-      endTime: input.endTime,
-      entries,
-      conflictCount: entries.length,
-    };
+    const summary = await this.getWindowSummary(input);
+    return { range: input.range, conflicts: summary.conflicts };
   }
 
   async getUpcomingTasks(input: Parameters<IAIPlannerReadPort['getUpcomingTasks']>[0]) {
-    const items = await this.taskItems(input.identityId, input.startTime, input.endTime);
-    return items
-      .filter((item) => item.status !== 'Completed' && item.status !== 'Skipped' && item.status !== 'Missed')
-      .sort((a, b) => a.instanceDate - b.instanceDate)
+    const summary = await this.getWindowSummary(input);
+    return summary.projections
+      .filter(
+        (projection): projection is Extract<typeof projection, { sourceType: 'task' }> =>
+          projection.sourceType === 'task' &&
+          !['Completed', 'Skipped', 'Missed'].includes(projection.displayMetadata.status ?? ''),
+      )
+      .sort((left, right) => {
+        if (left.allDay !== right.allDay) return left.allDay ? -1 : 1;
+        return String(left.start).localeCompare(String(right.start));
+      })
       .slice(0, input.limit ?? 20);
   }
 }

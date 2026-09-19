@@ -27,20 +27,9 @@ import { column, Schema, Table } from '@powersync/common';
 const accounts = new Table({
   status: column.text,
   profile: column.text, // JSON
-  settings: column.text, // JSON
-  email_address: column.text,
-  email_is_verified: column.integer, // boolean
-  email_verified_at: column.text, // DateTime
-  email_is_primary: column.integer, // boolean
-  phone_country_code: column.text,
-  phone_number: column.text,
-  phone_full_number: column.text,
-  phone_is_verified: column.integer, // boolean
-  phone_verified_at: column.text, // DateTime
-  version: column.integer,
   created_at: column.text, // DateTime
   updated_at: column.text, // DateTime
-  deleted_at: column.text, // DateTime
+  closed_at: column.text, // DateTime
 });
 
 /**
@@ -92,10 +81,11 @@ const account_closure_requested = new Table(
 // Settings
 // ──────────────────────────────────────────────
 
-const user_settings = new Table({
+const user_preference_records = new Table({
   identity_id: column.text,
-  preferences: column.text, // JSON
-  version: column.integer,
+  namespace: column.text,
+  payload: column.text, // JSON
+  revision: column.integer,
   created_at: column.text,
   updated_at: column.text,
 });
@@ -107,12 +97,11 @@ const user_settings = new Table({
 const goals = new Table({
   identity_id: column.text,
   name: column.text,
-  description: column.text,
-  feasibility_analysis: column.text,
-  motivation: column.text,
+  summary: column.text,
   status: column.text,
   start_date: column.text,
-  due_date: column.text,
+  target_kind: column.text,
+  target_end_date: column.text,
   completed_at: column.text,
   archived_at: column.text,
   sort_order: column.integer,
@@ -129,10 +118,12 @@ const key_results = new Table({
   title: column.text,
   description: column.text,
   aggregation_method: column.text,
-  starting_value: column.real,
-  progress_baseline_value: column.real,
+  initial_value: column.real,
+  tracking_base_value: column.real,
   target_value: column.real,
   current_value: column.real,
+  target_kind: column.text,
+  target_end_date: column.text,
   unit: column.text,
   weight: column.real,
   order: column.integer,
@@ -182,7 +173,7 @@ const key_result_weight_snapshots = new Table({
 // Task
 // ──────────────────────────────────────────────
 
-const task_templates = new Table({
+const task_plans = new Table({
   identity_id: column.text,
   name: column.text,
   description: column.text,
@@ -193,24 +184,8 @@ const task_templates = new Table({
   archived_at: column.text,
   abandoned_reason: column.text,
   importance: column.text,
-  time_config_type: column.text,
-  time_config_start_time: column.text,
-  time_config_end_time: column.text,
-  time_config_duration_minutes: column.integer,
-  time_config_time_point: column.integer,
-  time_config_time_range_start: column.integer,
-  time_config_time_range_end: column.integer,
-  recurrence_rule_type: column.text,
-  recurrence_rule_interval: column.integer,
-  recurrence_rule_days_of_week: column.text,
-  recurrence_rule_end_date: column.text,
-  recurrence_rule_count: column.integer,
-  reminder_config_enabled: column.integer, // boolean
-  reminder_config_time_offset_minutes: column.integer,
-  reminder_config_unit: column.text,
-  reminder_config_channel: column.text,
-  last_generated_date: column.text,
-  generate_ahead_days: column.integer,
+  schedule: column.text, // JSON: TaskPlanSchedule
+  reminder_config: column.text, // JSON: TaskReminderConfig
   goal_id: column.text, // FK via key_result_id relation
   key_result_id: column.text, // FK
   goal_record_value: column.real,
@@ -222,63 +197,29 @@ const task_templates = new Table({
   deleted_at: column.text,
 });
 
-const task_instances = new Table({
-  template_id: column.text, // FK
+const task_occurrences = new Table({
+  plan_id: column.text, // FK to TaskPlan
   identity_id: column.text,
-  instance_date: column.text, // DateTime
-  occurrence_key: column.text, // Task vNext deterministic templateId:localDate identity
+  occurrence_key: column.text,
+  schedule_date: column.text, // Ymd
+  schedule_timing: column.text, // JSON: TaskTiming
+  importance_snapshot: column.text,
   status: column.text,
-  importance: column.text,
-  time_config: column.text, // JSON
-  actual_start_time: column.text,
-  actual_end_time: column.text,
-  comment: column.text,
+  actual_start_at: column.text,
+  result: column.text, // JSON: TaskOccurrenceResult
+  checklist_state: column.text, // JSON: TaskOccurrenceChecklistItem[]
   version: column.integer,
   created_at: column.text,
   updated_at: column.text,
   deleted_at: column.text,
 });
 
-const task_template_history = new Table({
+const task_plan_history = new Table({
   identity_id: column.text,
-  template_id: column.text, // FK
+  plan_id: column.text, // FK
   action: column.text,
   changes: column.text, // JSON
   created_at: column.text,
-});
-
-const task_statistics = new Table({
-  identity_id: column.text,
-  calculated_at: column.text,
-  template_total: column.integer,
-  template_active: column.integer,
-  template_paused: column.integer,
-  template_archived: column.integer,
-  template_one_time: column.integer,
-  template_recurring: column.integer,
-  instance_total: column.integer,
-  instance_today: column.integer,
-  instance_week: column.integer,
-  instance_month: column.integer,
-  instance_pending: column.integer,
-  instance_in_progress: column.integer,
-  instance_completed: column.integer,
-  instance_skipped: column.integer,
-  instance_missed: column.integer,
-  completion_today: column.integer,
-  completion_week: column.integer,
-  completion_month: column.integer,
-  completion_total: column.integer,
-  completion_avg_time: column.real,
-  completion_rate: column.real,
-  time_all_day: column.integer,
-  time_point: column.integer,
-  time_range: column.integer,
-  time_overdue: column.integer,
-  time_upcoming: column.integer,
-  distribution_by_importance: column.text, // JSON
-  distribution_by_urgency: column.text, // JSON
-  distribution_by_tag: column.text, // JSON
 });
 
 // ──────────────────────────────────────────────
@@ -302,8 +243,23 @@ const goal_labels = new Table({
 
 const task_labels = new Table({
   identity_id: column.text,
-  task_template_id: column.text,
+  task_plan_id: column.text,
   label_id: column.text,
+});
+
+// ──────────────────────────────────────────────
+// Shared Relations (ADR-069 / ADR-090)
+// ──────────────────────────────────────────────
+
+const relations = new Table({
+  identity_id: column.text,
+  subject_type: column.text,
+  subject_id: column.text,
+  relation_type: column.text,
+  object_type: column.text,
+  object_id: column.text,
+  created_at: column.text,
+  updated_at: column.text,
 });
 
 // ──────────────────────────────────────────────
@@ -314,57 +270,17 @@ const schedules = new Table({
   identity_id: column.text,
   title: column.text,
   description: column.text,
-  start_time: column.text,
-  end_time: column.text,
-  duration: column.integer,
-  has_conflict: column.integer, // boolean
-  conflicting_schedules: column.text, // JSON
-  priority: column.integer,
+  range_kind: column.text,
+  timed_start: column.text,
+  timed_end: column.text,
+  all_day_start: column.text,
+  all_day_end: column.text,
+  // Transitional P4-2301B projection cache only; not CalendarEntry aggregate truth.
   location: column.text,
   attendees: column.text, // JSON
   version: column.integer,
   created_at: column.text,
   updated_at: column.text,
-});
-
-const schedule_tasks = new Table({
-  identity_id: column.text,
-  name: column.text,
-  description: column.text,
-  source_module: column.text,
-  source_entity_id: column.text,
-  scheduling_key: column.text,
-  owner_type: column.text,
-  owner_id: column.text,
-  handler_key: column.text,
-  payload_version: column.integer,
-  source_revision: column.text,
-  status: column.text,
-  enabled: column.integer, // boolean
-  cron_expression: column.text,
-  timezone: column.text,
-  start_date: column.text,
-  end_date: column.text,
-  max_executions: column.integer,
-  next_run_at: column.text,
-  last_run_at: column.text,
-  execution_count: column.integer,
-  last_execution_status: column.text,
-  last_execution_duration: column.integer,
-  consecutive_failures: column.integer,
-  max_retries: column.integer,
-  initial_delay_ms: column.integer,
-  max_delay_ms: column.integer,
-  backoff_multiplier: column.real,
-  retryable_statuses: column.text, // JSON
-  payload: column.text, // JSON
-  tags: column.text, // JSON
-  priority: column.text,
-  timeout: column.integer,
-  version: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-  deleted_at: column.text,
 });
 
 const scheduling_reconcile_operations = new Table({
@@ -385,36 +301,49 @@ const scheduling_reconcile_operations = new Table({
   created_at: column.text,
 });
 
-const schedule_executions = new Table({
+const scheduled_invocations = new Table({
   identity_id: column.text,
-  task_id: column.text, // FK
-  execution_time: column.text,
+  owner_type: column.text,
+  owner_id: column.text,
+  scheduling_key: column.text,
+  handler_key: column.text,
+  payload_version: column.integer,
+  payload: column.text,
+  run_at: column.text,
+  source_revision: column.text,
+  retry_enabled: column.integer,
+  max_retries: column.integer,
+  initial_delay_ms: column.integer,
+  max_delay_ms: column.integer,
+  backoff_multiplier: column.real,
+  priority: column.text,
+  timeout_ms: column.integer,
   status: column.text,
-  duration: column.integer,
-  result: column.text, // JSON
-  error: column.text,
-  retry_count: column.integer,
+  attempt_count: column.integer,
+  next_attempt_at: column.text,
+  claim_token: column.text,
+  claim_expires_at: column.text,
+  fencing_token: column.integer,
+  name: column.text,
+  tags: column.text,
   created_at: column.text,
+  updated_at: column.text,
 });
 
-const schedule_statistics = new Table({
+const invocation_attempts = new Table({
   identity_id: column.text,
-  total_tasks: column.integer,
-  active_tasks: column.integer,
-  paused_tasks: column.integer,
-  completed_tasks: column.integer,
-  cancelled_tasks: column.integer,
-  failed_tasks: column.integer,
-  total_executions: column.integer,
-  successful_executions: column.integer,
-  failed_executions: column.integer,
-  skipped_executions: column.integer,
-  timeout_executions: column.integer,
-  avg_execution_duration: column.real,
-  min_execution_duration: column.real,
-  max_execution_duration: column.real,
-  module_statistics: column.text, // JSON
-  last_updated_at: column.text,
+  invocation_id: column.text,
+  attempt_number: column.integer,
+  started_at: column.text,
+  finished_at: column.text,
+  outcome: column.text,
+  result: column.text,
+  failure_code: column.text,
+  failure_message: column.text,
+  failure_retryable: column.integer,
+  worker_id: column.text,
+  claim_token: column.text,
+  fencing_token: column.integer,
   created_at: column.text,
 });
 
@@ -439,101 +368,6 @@ const schedule_domain_event_outbox = new Table(
 );
 
 // ──────────────────────────────────────────────
-// Reminder
-// ──────────────────────────────────────────────
-
-const reminder_templates = new Table({
-  identity_id: column.text,
-  name: column.text,
-  description: column.text,
-  type: column.text,
-  self_enabled: column.integer, // boolean
-  status: column.text,
-  importance_level: column.text,
-  tags: column.text, // JSON
-  color: column.text,
-  icon: column.text,
-  next_trigger_at: column.text,
-  version: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-  deleted_at: column.text,
-  trigger: column.text, // JSON
-  recurrence: column.text, // JSON
-  active_time: column.text, // JSON
-  active_hours: column.text, // JSON
-  notification_config: column.text, // JSON
-  stats: column.text, // JSON
-});
-
-const reminder_groups = new Table({
-  identity_id: column.text,
-  name: column.text,
-  description: column.text,
-  color: column.text,
-  icon: column.text,
-  enabled: column.integer, // boolean
-  status: column.text,
-  order: column.integer,
-  stats: column.text, // JSON
-  version: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-  deleted_at: column.text,
-});
-
-const reminder_instances = new Table({
-  template_id: column.text, // FK
-  identity_id: column.text,
-  trigger_at: column.text,
-  status: column.text,
-  result: column.text,
-  processed_at: column.text,
-  note: column.text,
-  payload: column.text, // JSON
-  created_at: column.text,
-  updated_at: column.text,
-});
-
-const reminder_history = new Table({
-  identity_id: column.text,
-  template_id: column.text, // FK
-  triggered_at: column.text,
-  result: column.text,
-  error: column.text,
-  notification_sent: column.integer, // boolean
-  notification_channel: column.text,
-  created_at: column.text,
-});
-
-const reminder_statistics = new Table({
-  identity_id: column.text,
-  template_stats: column.text, // JSON
-  group_stats: column.text, // JSON
-  trigger_stats: column.text, // JSON
-  calculated_at: column.text,
-});
-
-const reminder_responses = new Table({
-  identity_id: column.text,
-  template_id: column.text, // FK
-  action: column.text,
-  response_time: column.integer,
-  snooze_duration_seconds: column.integer,
-  timestamp: column.text,
-  created_at: column.text,
-});
-
-const user_reminder_preferences = new Table({
-  identity_id: column.text,
-  best_time_slots: column.text, // JSON
-  worst_time_slots: column.text, // JSON
-  global_reminder_enabled: column.integer, // boolean
-  created_at: column.text,
-  updated_at: column.text,
-});
-
-// ──────────────────────────────────────────────
 // Routine Coach vNext
 // ──────────────────────────────────────────────
 
@@ -553,29 +387,80 @@ const routine_profiles = new Table({
   name: column.text,
   description: column.text,
   enabled: column.integer,
-  active: column.integer,
   version: column.integer,
   created_at: column.text,
   updated_at: column.text,
 });
 
-const routine_profile_memberships = new Table({
+const routine_profile_memberships = new Table(
+  {
+    identity_id: column.text,
+    profile_id: column.text,
+    routine_id: column.text,
+    enabled: column.integer,
+    version: column.integer,
+    created_at: column.text,
+    updated_at: column.text,
+  },
+  { trackPrevious: { columns: ['profile_id', 'routine_id'] } },
+);
+
+const routine_occurrences = new Table({
   identity_id: column.text,
-  profile_id: column.text,
   routine_id: column.text,
-  enabled: column.integer,
-  version: column.integer,
+  source: column.text,
+  occurrence_key: column.text,
+  scheduled_for: column.text,
+  source_revision: column.text,
+  idempotency_key: column.text,
+  status: column.text,
+  trigger_kind: column.text,
+  became_due_at: column.text,
+  resolution_state: column.text,
+  resolved_at: column.text,
+  resolution_kind: column.text,
+  resolution_reason: column.text,
+  attempt: column.integer,
+  owner_token: column.text,
+  claim_id: column.text,
+  fencing_token: column.integer,
+  lease_expires_at: column.text,
+  last_error: column.text,
+  next_retry_at: column.text,
+  dead_letter_at: column.text,
+  correlation_id: column.text,
+  causation_id: column.text,
+  history_json: column.text,
+  next_occurrence_at: column.text,
   created_at: column.text,
   updated_at: column.text,
+  finished_at: column.text,
 });
 
-const routine_temporary_overrides = new Table({
+const routine_interactions = new Table({
+  idempotency_key: column.text,
   identity_id: column.text,
   routine_id: column.text,
-  override_json: column.text,
+  occurrence_key: column.text,
+  action: column.text,
+  acted_at: column.text,
+  response_latency_ms: column.integer,
+  snooze_duration_ms: column.integer,
+  metadata_json: column.text,
   created_at: column.text,
-  updated_at: column.text,
 });
+
+const routine_temporary_overrides = new Table(
+  {
+    identity_id: column.text,
+    routine_id: column.text,
+    override_json: column.text,
+    version: column.integer,
+    created_at: column.text,
+    updated_at: column.text,
+  },
+  { trackPrevious: { columns: ['routine_id'] } },
+);
 
 const routine_protocol_definitions = new Table({
   identity_id: column.text,
@@ -627,24 +512,8 @@ const notifications = new Table({
   created_at: column.text,
   updated_at: column.text,
   deleted_at: column.text,
+  archived_at: column.text,
   is_read: column.integer, // boolean
-});
-
-const notification_channels = new Table({
-  identity_id: column.text,
-  notification_id: column.text, // FK
-  channel_type: column.text,
-  status: column.text,
-  recipient: column.text,
-  max_retries: column.integer,
-  error: column.text,
-  response: column.text,
-  retry_count: column.integer,
-  attempts: column.integer,
-  sent_at: column.text,
-  failed_at: column.text,
-  created_at: column.text,
-  updated_at: column.text,
 });
 
 const notification_delivery_decisions = new Table({
@@ -718,100 +587,24 @@ const goal_operation_receipts = new Table(
   { localOnly: true },
 );
 
-const notification_history = new Table({
+const notification_interactions = new Table({
+  idempotency_key: column.text,
   identity_id: column.text,
-  notification_id: column.text, // FK
-  action: column.text,
-  details: column.text,
-  actor_id: column.text,
-  created_at: column.text,
+  notification_id: column.text,
+  action_key: column.text,
+  action_kind: column.text,
+  occurred_at: column.text,
+  command_receipt_id: column.text,
+  outcome: column.text,
+  correlation_id: column.text,
+  causation_id: column.text,
 });
 
 const notification_preferences = new Table({
   identity_id: column.text,
   global_channels: column.text, // JSON Partial<Record<channel, boolean>>
   workflow_overrides: column.text, // JSON workflowKey -> channel overrides
-  do_not_disturb: column.text, // JSON
-  rate_limit: column.text, // JSON
-  version: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-  deleted_at: column.text,
-});
-
-const notification_templates = new Table({
-  name: column.text,
-  display_name: column.text,
-  description: column.text,
-  type: column.text,
-  category: column.text,
-  title_template: column.text,
-  content_template: column.text,
-  variables: column.text, // JSON
-  default_actions: column.text, // JSON
-  is_system: column.integer, // boolean
-  is_active: column.integer, // boolean
-  created_at: column.text,
-  updated_at: column.text,
-});
-
-// ──────────────────────────────────────────────
-// Editor
-// ──────────────────────────────────────────────
-
-const editor_workspaces = new Table({
-  identity_id: column.text,
-  name: column.text,
-  description: column.text,
-  project_path: column.text,
-  project_type: column.text,
-  layout: column.text, // JSON
-  setting: column.text, // JSON
-  is_active: column.integer, // boolean
-  version: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-  accessed_at: column.text,
-  deleted_at: column.text,
-});
-
-const editor_workspace_sessions = new Table({
-  workspace_id: column.text, // FK
-  identity_id: column.text,
-  name: column.text,
-  layout: column.text, // JSON
-  is_active: column.integer, // boolean
-  version: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-  deleted_at: column.text,
-});
-
-const editor_workspace_session_groups = new Table({
-  session_id: column.text, // FK
-  workspace_id: column.text, // FK
-  identity_id: column.text,
-  group_index: column.integer,
-  name: column.text,
-  split_direction: column.text,
-  version: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-  deleted_at: column.text,
-});
-
-const editor_workspace_session_group_tabs = new Table({
-  group_id: column.text, // FK
-  session_id: column.text, // FK
-  workspace_id: column.text, // FK
-  identity_id: column.text,
-  resource_id: column.text,
-  tab_index: column.integer,
-  tab_type: column.text,
-  title: column.text,
-  view_state: column.text, // JSON
-  is_pinned: column.integer, // boolean
-  is_active: column.integer, // boolean
+  quiet_hours: column.text, // Product-Time aware JSON QuietHours
   version: column.integer,
   created_at: column.text,
   updated_at: column.text,
@@ -826,81 +619,64 @@ const ai_conversations = new Table({
   identity_id: column.text,
   name: column.text,
   status: column.text,
-  message_count: column.integer,
-  last_message_at: column.text,
   version: column.integer,
   created_at: column.text,
   updated_at: column.text,
   deleted_at: column.text,
 });
 
-const ai_messages = new Table({
-  identity_id: column.text,
-  conversation_id: column.text, // FK
-  role: column.text,
-  content: column.text,
-  token_usage: column.text, // JSON
-  created_at: column.text,
-});
 
-const ai_generation_tasks = new Table({
+const ai_execution_records = new Table({
   identity_id: column.text,
-  task_type: column.text,
-  status: column.text,
+  operation: column.text,
+  outcome: column.text,
   conversation_id: column.text,
   run_id: column.text,
   request_id: column.text,
   trace_id: column.text,
-  provider_id: column.text,
-  model: column.text,
+  provider_connection_id: column.text,
+  model_id: column.text,
+  error_category: column.text,
+  safe_error: column.text,
   estimated_cost_usd: column.real,
-  input: column.text, // JSON
-  result: column.text, // JSON
-  error: column.text,
-  retry_count: column.integer,
-  token_usage: column.text, // JSON
-  processing_ms: column.integer,
-  version: column.integer,
+  token_usage: column.text,
+  latency_ms: column.integer,
   created_at: column.text,
-  updated_at: column.text,
   completed_at: column.text,
-  deleted_at: column.text,
 });
 
-const ai_usage_quotas = new Table({
-  identity_id: column.text,
-  quota_limit: column.integer,
-  current_usage: column.integer,
-  reset_period: column.text,
-  last_reset_at: column.text,
-  next_reset_at: column.text,
-  version: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-  deleted_at: column.text,
-});
-
-const ai_provider_configs = new Table({
-  identity_id: column.text,
-  name: column.text,
-  provider_type: column.text,
-  base_url: column.text,
-  api_key_encrypted: column.text,
-  default_model: column.text,
-  available_models: column.text, // JSON
-  is_active: column.integer, // boolean
-  is_default: column.integer, // boolean
-  priority: column.integer,
-  version: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-  deleted_at: column.text,
-});
 
 /**
- * Desktop-only Provider onboarding state. Credentials are encrypted with the
- * same local provider vault and never enter the PowerSync upload queue.
- * The final Provider write consumes this row in the same SQLite transaction.
+ * Desktop provider connections are host-local while credentials are host-local.
+ * Syncing an opaque credentialRef without the corresponding SecretVault entry
+ * would create a dangling cross-host connection, so cross-device provider
+ * connection sync stays disabled until an explicit credential-sync policy exists.
+ */
+const ai_provider_configs = new Table(
+  {
+    identity_id: column.text,
+    name: column.text,
+    provider_definition_id: column.text,
+    base_url: column.text,
+    credential_ref: column.text,
+    default_model: column.text,
+    available_models: column.text, // JSON
+    is_active: column.integer, // boolean
+    is_default: column.integer, // boolean
+    priority: column.integer,
+    version: column.integer,
+    created_at: column.text,
+    updated_at: column.text,
+    deleted_at: column.text,
+  },
+  { localOnly: true },
+);
+
+/**
+ * Desktop-only Provider onboarding state. The session carries only an opaque
+ * credential reference; encrypted material lives in the separate local-only
+ * SecretVault table and never enters the PowerSync upload queue. The final
+ * Provider write consumes this row in the same SQLite transaction.
  */
 const ai_provider_onboarding_sessions = new Table(
   {
@@ -908,7 +684,7 @@ const ai_provider_onboarding_sessions = new Table(
     catalog_id: column.text,
     base_url: column.text,
     target_provider_id: column.text,
-    credential_encrypted: column.text,
+    credential_ref: column.text,
     credential_status: column.text,
     discovery_status: column.text,
     models_json: column.text,
@@ -921,10 +697,55 @@ const ai_provider_onboarding_sessions = new Table(
   { localOnly: true },
 );
 
+/**
+ * Desktop SecretVault storage. The table is localOnly by construction: its
+ * encrypted values never enter the PowerSync upload queue or sync rules.
+ */
+const ai_provider_secrets = new Table(
+  {
+    identity_id: column.text,
+    encrypted_value: column.text,
+    expires_at: column.integer,
+    revoked_at: column.integer,
+    created_at: column.integer,
+    updated_at: column.integer,
+  },
+  { localOnly: true },
+);
+
+/**
+ * Device-local rebuildable AI index over the active knowledge source.
+ * It is deliberately not synced: Web/API use the Prisma index table while
+ * Desktop rebuilds this cache from the Local Vault.
+ */
+const ai_knowledge_index_entries_local = new Table(
+  {
+    identity_id: column.text,
+    repository_id: column.text,
+    knowledge_space_id: column.text,
+    knowledge_document_id: column.text,
+    source_path: column.text,
+    title: column.text,
+    mime_type: column.text,
+    source_content_hash: column.text,
+    source_version: column.text,
+    status: column.text,
+    summary: column.text,
+    keywords_json: column.text,
+    embedding_json: column.text,
+    chunks_json: column.text,
+    metadata_json: column.text,
+    error: column.text,
+    indexed_at: column.integer,
+    last_requested_at: column.integer,
+  },
+  { localOnly: true },
+);
+
 const task_goal_outbox = new Table({
   identity_id: column.text,
-  task_instance_id: column.text,
-  task_template_id: column.text,
+  task_occurrence_id: column.text,
+  task_plan_id: column.text,
   goal_id: column.text,
   key_result_id: column.text,
   payload: column.text,
@@ -935,123 +756,6 @@ const task_goal_outbox = new Table({
   dispatched_at: column.text,
   created_at: column.text,
   updated_at: column.text,
-});
-
-const dashboard_configs = new Table({
-  identity_id: column.text,
-  widget_config: column.text, // JSON
-  created_at: column.text,
-  updated_at: column.text,
-});
-
-// ──────────────────────────────────────────────
-// Repository
-// ──────────────────────────────────────────────
-
-const repositories = new Table({
-  identity_id: column.text,
-  name: column.text,
-  type: column.text,
-  path: column.text,
-  description: column.text,
-  config: column.text, // JSON
-  stats: column.text, // JSON
-  related_goals: column.text,
-  status: column.text,
-  git: column.text,
-  sync_status: column.text,
-  last_accessed_at: column.text,
-  version: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-  deleted_at: column.text,
-});
-
-const repository_explorers = new Table({
-  repository_id: column.text, // FK
-  identity_id: column.text,
-  name: column.text,
-  description: column.text,
-  current_path: column.text,
-  filters: column.text, // JSON
-  view_config: column.text, // JSON
-  pinned_paths: column.text, // JSON
-  recent_paths: column.text, // JSON
-  last_scan_at: column.text,
-  created_at: column.text,
-  updated_at: column.text,
-});
-
-const repository_statistics = new Table({
-  identity_id: column.text,
-  total_repositories: column.integer,
-  active_repositories: column.integer,
-  archived_repositories: column.integer,
-  total_resources: column.integer,
-  total_files: column.integer,
-  total_folders: column.integer,
-  git_enabled_repos: column.integer,
-  total_commits: column.integer,
-  total_references: column.integer,
-  total_linked_contents: column.integer,
-  total_size_bytes: column.integer, // BigInt → integer
-  last_updated_at: column.text,
-  created_at: column.text,
-});
-
-const folders = new Table({
-  identity_id: column.text,
-  repository_id: column.text, // FK
-  parent_id: column.text, // FK (self)
-  name: column.text,
-  path: column.text,
-  order: column.integer,
-  is_expanded: column.integer, // boolean
-  metadata: column.text, // JSON
-  created_at: column.text,
-  updated_at: column.text,
-});
-
-const resources = new Table({
-  identity_id: column.text,
-  repository_id: column.text, // FK
-  folder_id: column.text, // FK
-  name: column.text,
-  type: column.text,
-  path: column.text,
-  size: column.integer,
-  content: column.text,
-  metadata: column.text, // JSON
-  stats: column.text, // JSON
-  description: column.text,
-  author: column.text,
-  version: column.integer,
-  tags: column.text, // JSON
-  category: column.text,
-  status: column.text,
-  created_at: column.text,
-  updated_at: column.text,
-  modified_at: column.text,
-  deleted_at: column.text,
-});
-
-const repository_resources = new Table({
-  identity_id: column.text,
-  repository_id: column.text, // FK
-  name: column.text,
-  type: column.text,
-  path: column.text,
-  size: column.integer,
-  description: column.text,
-  author: column.text,
-  version: column.text,
-  tags: column.text, // JSON
-  category: column.text,
-  status: column.text,
-  metadata: column.text, // JSON
-  created_at: column.text,
-  updated_at: column.text,
-  modified_at: column.text,
 });
 
 // ──────────────────────────────────────────────
@@ -1096,7 +800,7 @@ export const PowerSyncAppSchema = new Schema({
   profile_adoption_journal,
   account_profile_sync_outbox,
   account_closure_requested,
-  user_settings,
+  user_preference_records,
   // Goal
   goals,
   key_results,
@@ -1107,62 +811,41 @@ export const PowerSyncAppSchema = new Schema({
   labels,
   goal_labels,
   task_labels,
+  relations,
   // Task
-  task_templates,
-  task_instances,
-  task_template_history,
-  task_statistics,
+  task_plans,
+  task_occurrences,
+  task_plan_history,
   // Schedule
   schedules,
-  schedule_tasks,
   scheduling_reconcile_operations,
-  schedule_executions,
-  schedule_statistics,
+  scheduled_invocations,
+  invocation_attempts,
   schedule_domain_event_outbox,
   // Reminder
-  reminder_templates,
-  reminder_groups,
-  reminder_instances,
-  reminder_history,
-  reminder_statistics,
-  reminder_responses,
-  user_reminder_preferences,
   routine_definitions,
   routine_profiles,
   routine_profile_memberships,
+  routine_occurrences,
+  routine_interactions,
   routine_temporary_overrides,
   routine_protocol_definitions,
   routine_protocol_sessions,
   // Notification
   notifications,
-  notification_channels,
   notification_delivery_decisions,
   notification_dispatch_outbox,
   desktop_delivery_acks,
-  notification_history,
+  notification_interactions,
   notification_preferences,
-  notification_templates,
-  // Editor
-  editor_workspaces,
-  editor_workspace_sessions,
-  editor_workspace_session_groups,
-  editor_workspace_session_group_tabs,
   // AI
   ai_conversations,
-  ai_messages,
-  ai_generation_tasks,
-  ai_usage_quotas,
+  ai_execution_records,
   ai_provider_configs,
   ai_provider_onboarding_sessions,
+  ai_provider_secrets,
+  ai_knowledge_index_entries_local,
   task_goal_outbox,
-  dashboard_configs,
-  // Repository
-  repositories,
-  repository_explorers,
-  repository_statistics,
-  folders,
-  resources,
-  repository_resources,
   // Governance
   rules,
   rule_revisions,

@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import type {
-  IAIExecutionLogPort,
+  IAIExecutionRecordPort,
   KnowledgeSourceNote,
   KnowledgeIndexedNote,
 } from '../../ports';
@@ -20,8 +20,8 @@ export interface SyncKnowledgeNotesResult {
   reusedCount: number;
   failedCount: number;
   results: Array<{
-    resourceId: string;
-    resourcePath: string;
+    knowledgeDocumentId: string;
+    sourcePath: string;
     status: 'indexed' | 'reused' | 'failed';
     error?: string;
   }>;
@@ -32,17 +32,19 @@ export interface SyncKnowledgeNoteByIdResult {
   sync: SyncKnowledgeNotesResult | null;
 }
 
-export function mergeUniqueNotes(
-  resources: KnowledgeSourceNote[],
-): KnowledgeSourceNote[] {
+export function mergeUniqueNotes(resources: KnowledgeSourceNote[]): KnowledgeSourceNote[] {
   const seen = new Set<string>();
   const merged: KnowledgeSourceNote[] = [];
 
   for (const resource of resources) {
-    if (seen.has(resource.resourceId)) {
+    if (!resource.knowledgeDocumentId) {
       continue;
     }
-    seen.add(resource.resourceId);
+    const key = `${resource.knowledgeSpaceId}\0${resource.knowledgeDocumentId}`;
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
     merged.push(resource);
   }
 
@@ -50,6 +52,9 @@ export function mergeUniqueNotes(
 }
 
 export function resolveSourceContentHash(resource: KnowledgeSourceNote): string {
+  if (resource.sourceContentHash.length > 0) {
+    return resource.sourceContentHash;
+  }
   const metadataHash = resource.metadata?.['contentDigest'];
   if (typeof metadataHash === 'string' && metadataHash.length > 0) {
     return metadataHash;
@@ -59,19 +64,19 @@ export function resolveSourceContentHash(resource: KnowledgeSourceNote): string 
 }
 
 export async function recordExecution(
-  executionLogPort: IAIExecutionLogPort | undefined,
-  input: Parameters<NonNullable<IAIExecutionLogPort['record']>>[0],
+  executionRecordPort: IAIExecutionRecordPort | undefined,
+  input: Parameters<NonNullable<IAIExecutionRecordPort['record']>>[0],
 ): Promise<void> {
-  if (!executionLogPort) {
+  if (!executionRecordPort) {
     return;
   }
 
   try {
-    await executionLogPort.record(input);
+    await executionRecordPort.record(input);
   } catch (error) {
     logger.warn('Failed to record knowledge indexing execution log', {
       error,
-      taskType: input.taskType,
+      operation: input.operation,
     });
   }
 }

@@ -1,4 +1,5 @@
 import type { KnowledgeCaptureExecutionFailure } from '@memoflow/contracts/ai';
+import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import type { Result } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 
@@ -15,16 +16,17 @@ import type { ExecutionContext } from '@memoflow/contracts/shared';
  * `(workflowRunId, revision)` so a double-approve / retry replays the same
  * durable write rather than creating a duplicate note.
  */
-export interface SaveKnowledgeNoteResult {
-  readonly noteId: string;
+export interface CreateConfirmedKnowledgeNoteResult {
+  readonly noteId: KnowledgeDocumentId;
   readonly notePath: string;
   readonly noteName: string;
 }
 
 export interface KnowledgeCaptureMutationPort {
-  saveKnowledgeNote(input: {
+  createConfirmedKnowledgeNote(input: {
     readonly workflowRunId: string;
     readonly revision: number;
+    readonly knowledgeDocumentId: KnowledgeDocumentId;
     /** Vault-relative target subpath (never an absolute Desktop path). */
     readonly path: string;
     readonly fileName: string;
@@ -32,7 +34,7 @@ export interface KnowledgeCaptureMutationPort {
     readonly content: string;
     readonly requestId: string;
     readonly context: ExecutionContext;
-  }): Promise<Result<SaveKnowledgeNoteResult>>;
+  }): Promise<Result<CreateConfirmedKnowledgeNoteResult>>;
 }
 
 export interface ApplyKnowledgeNoteInput {

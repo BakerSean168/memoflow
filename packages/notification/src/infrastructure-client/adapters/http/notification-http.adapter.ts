@@ -53,6 +53,18 @@ export class NotificationHttpAdapter implements INotificationApiClient {
     return this.httpClient.patch(`${this.baseUrl}/${id}/read`);
   }
 
+  async markAsUnread(id: string): Promise<Result<NotificationClientDTO>> {
+    return this.httpClient.post(`${this.baseUrl}/${id}/unread`);
+  }
+
+  async archiveNotification(id: string): Promise<Result<NotificationClientDTO>> {
+    return this.httpClient.post(`${this.baseUrl}/${id}/archive`);
+  }
+
+  async restoreNotification(id: string): Promise<Result<NotificationClientDTO>> {
+    return this.httpClient.post(`${this.baseUrl}/${id}/restore`);
+  }
+
   async markAllAsRead(): Promise<Result<{ count: number }>> {
     return this.httpClient.patch(`${this.baseUrl}/read-all`);
   }

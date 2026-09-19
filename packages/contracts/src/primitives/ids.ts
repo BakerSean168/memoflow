@@ -19,43 +19,28 @@ export type GoalId = string & { readonly __brand: 'GoalId' };
 export type KeyResultId = string & { readonly __brand: 'KeyResultId' };
 
 /** 任务模板 ID */
-export type TaskTemplateId = string & { readonly __brand: 'TaskTemplateId' };
+export type TaskPlanId = string & { readonly __brand: 'TaskPlanId' };
 
 /** 任务实例 ID */
-export type TaskInstanceId = string & { readonly __brand: 'TaskInstanceId' };
-
-/** 提醒模板 ID */
-export type ReminderTemplateId = string & { readonly __brand: 'ReminderTemplateId' };
-
-/** 提醒分组 ID */
-export type ReminderGroupId = string & { readonly __brand: 'ReminderGroupId' };
+export type TaskOccurrenceId = string & { readonly __brand: 'TaskOccurrenceId' };
 
 /** Routine Profile ID */
 export type RoutineProfileId = string & { readonly __brand: 'RoutineProfileId' };
 
-/** 提醒实例 ID */
-export type ReminderInstanceId = string & { readonly __brand: 'ReminderInstanceId' };
-
-/** 提醒历史 ID */
-export type ReminderHistoryId = string & { readonly __brand: 'ReminderHistoryId' };
-
-/** 提醒响应 ID */
-export type ReminderResponseId = string & { readonly __brand: 'ReminderResponseId' };
-
-/** 用户提醒偏好 ID */
-export type UserReminderPreferencesId = string & { readonly __brand: 'UserReminderPreferencesId' };
-
 /** 日程 ID */
 export type ScheduleId = string & { readonly __brand: 'ScheduleId' };
 
-/** 日程任务 ID */
-export type ScheduleTaskId = string & { readonly __brand: 'ScheduleTaskId' };
+/** Stable managed knowledge document ID carried by Markdown frontmatter. */
+export type KnowledgeDocumentId = string & { readonly __brand: 'KnowledgeDocumentId' };
 
-/** 日程执行 ID */
-export type ScheduleExecutionId = string & { readonly __brand: 'ScheduleExecutionId' };
+/** Knowledge logical space ID */
+export type KnowledgeSpaceId = string & { readonly __brand: 'KnowledgeSpaceId' };
 
-/** 日程统计 ID */
-export type ScheduleStatisticId = string & { readonly __brand: 'ScheduleStatisticId' };
+/** Desktop Local Vault binding ID */
+export type LocalVaultBindingId = string & { readonly __brand: 'LocalVaultBindingId' };
+
+/** Cloud/remote knowledge source binding ID */
+export type KnowledgeRemoteBindingId = string & { readonly __brand: 'KnowledgeRemoteBindingId' };
 
 /** 仓库 ID */
 export type RepositoryId = string & { readonly __brand: 'RepositoryId' };
@@ -89,26 +74,15 @@ export type SettingGroupId = string & { readonly __brand: 'SettingGroupId' };
 /** 通知 ID */
 export type NotificationId = string & { readonly __brand: 'NotificationId' };
 
-/** 通知渠道 ID */
-export type NotificationChannelId = string & { readonly __brand: 'NotificationChannelId' };
 
 /** 通知偏好 ID */
 export type NotificationPreferenceId = string & { readonly __brand: 'NotificationPreferenceId' };
 
-/** 通知模板 ID */
-export type NotificationTemplateId = string & { readonly __brand: 'NotificationTemplateId' };
-
-/** 通知历史 ID */
-export type NotificationHistoryId = string & { readonly __brand: 'NotificationHistoryId' };
+/** Notification interaction fact ID */
+export type NotificationInteractionId = string & { readonly __brand: 'NotificationInteractionId' };
 
 /** AI 对话 ID */
 export type AiConversationId = string & { readonly __brand: 'AiConversationId' };
-
-/** AI 消息 ID */
-export type AiMessageId = string & { readonly __brand: 'AiMessageId' };
-
-/** AI 生成任务 ID */
-export type AiGenerationTaskId = string & { readonly __brand: 'AiGenerationTaskId' };
 
 /** 同步配置 ID */
 export type SyncProfileId = string & { readonly __brand: 'SyncProfileId' };
@@ -137,17 +111,14 @@ export type GoalReviewId = string & { readonly __brand: 'GoalReviewId' };
 /** 关键结果权重快照 ID */
 export type KeyResultWeightSnapshotId = string & { readonly __brand: 'KeyResultWeightSnapshotId' };
 
-/** 仪表盘 ID */
-export type DashboardId = string & { readonly __brand: 'DashboardId' };
-
-/** 仪表盘小部件 ID */
-export type WidgetId = string & { readonly __brand: 'WidgetId' };
-
 /** AI Provider 配置 ID */
 export type AiProviderConfigId = string & { readonly __brand: 'AiProviderConfigId' };
 
-/** AI 使用配额 ID */
-export type AiUsageQuotaId = string & { readonly __brand: 'AiUsageQuotaId' };
+/** AI Provider connection ID (the persisted user-owned provider connection). */
+export type AiProviderConnectionId = AiProviderConfigId;
+
+/** Opaque reference into the host-owned provider SecretVault. */
+export type AIProviderCredentialRef = string & { readonly __brand: 'AIProviderCredentialRef' };
 
 /** 治理规则 ID */
 export type RuleId = string & { readonly __brand: 'RuleId' };
@@ -181,24 +152,20 @@ export const ID_PREFIXES = {
   KeyResultWeightSnapshotId: 'IKeyResultWeightSnapshotId',
 
   // === Task ===
-  TaskTemplateId: 'ITaskTemplateId',
-  TaskInstanceId: 'ITaskInstanceId',
+  TaskPlanId: 'ITaskPlanId',
+  TaskOccurrenceId: 'ITaskOccurrenceId',
 
-  // === Reminder ===
-  ReminderTemplateId: 'IReminderTemplateId',
-  ReminderGroupId: 'IReminderGroupId',
+  // === Routine ===
   RoutineProfileId: 'IRoutineProfileId',
-  ReminderInstanceId: 'IReminderInstanceId',
-  ReminderHistoryId: 'IReminderHistoryId',
-  ReminderResponseId: 'IReminderResponseId',
 
   // === Schedule ===
   ScheduleId: 'IScheduleId',
-  ScheduleTaskId: 'IScheduleTaskId',
-  ScheduleExecutionId: 'IScheduleExecutionId',
-  ScheduleStatisticId: 'IScheduleStatisticId',
 
-  // === Repository ===
+  // === Knowledge / Repository ===
+  KnowledgeDocumentId: 'kdoc',
+  KnowledgeSpaceId: 'KnowledgeSpaceId',
+  LocalVaultBindingId: 'LocalVaultBindingId',
+  KnowledgeRemoteBindingId: 'KnowledgeRemoteBindingId',
   RepositoryId: 'IRepositoryId',
   ResourceId: 'IResourceId',
   FolderId: 'IFolderId',
@@ -210,17 +177,12 @@ export const ID_PREFIXES = {
 
   // === Notification ===
   NotificationId: 'INotificationId',
-  NotificationChannelId: 'INotificationChannelId',
   NotificationPreferenceId: 'INotificationPreferenceId',
-  NotificationTemplateId: 'INotificationTemplateId',
-  NotificationHistoryId: 'NotificationHistoryId',
+  NotificationInteractionId: 'NotificationInteractionId',
 
   // === AI ===
   AiConversationId: 'IAiConversationId',
-  AiMessageId: 'IAiMessageId',
-  AiGenerationTaskId: 'IAiGenerationTaskId',
   AiProviderConfigId: 'IAiProviderConfigId',
-  AiUsageQuotaId: 'IAiUsageQuotaId',
 
   // === Governance ===
   RuleId: 'RuleId',

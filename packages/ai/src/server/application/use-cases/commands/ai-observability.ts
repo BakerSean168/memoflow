@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import type { AIExecutionLogInput, AICostEstimate, ChatExecutionUsage } from '../../ports';
+import type { AIExecutionRecordInput, AICostEstimate, ChatExecutionUsage } from '../../ports';
 import { AIExecutionError, isAIExecutionError } from '../../../../shared/ai-execution-error';
 
 interface AIPricingRule {
@@ -69,12 +69,12 @@ export function attachRequestIdToError(error: unknown, requestId: string): Error
   return new AIExecutionError('internal', 'AI execution failed', { requestId, cause: error });
 }
 
-export function withAICostEstimate(input: AIExecutionLogInput): AIExecutionLogInput {
-  if (input.costEstimate || !input.model || !input.tokenUsage) {
+export function withAICostEstimate(input: AIExecutionRecordInput): AIExecutionRecordInput {
+  if (input.costEstimate || !input.modelId || !input.tokenUsage) {
     return input;
   }
 
-  const costEstimate = estimateAIExecutionCost(input.model, input.tokenUsage);
+  const costEstimate = estimateAIExecutionCost(input.modelId, input.tokenUsage);
   if (!costEstimate) {
     return input;
   }

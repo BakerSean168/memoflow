@@ -1,23 +1,54 @@
 import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { RecurrenceFrequency, RecurrenceWeekday } from '@memoflow/time';
 
-export type AIRoutineMethodId =
-  | 'stand-and-move'
-  | '20-20-20'
-  | 'drink-water'
-  | 'sleep-wind-down'
-  | '50-10-protocol'
-  | 'pomodoro';
+export type AIProtocolMethodId = '50-10-protocol' | 'pomodoro';
 
-export type AIProtocolMethodId = Extract<AIRoutineMethodId, '50-10-protocol' | 'pomodoro'>;
+export interface AIWallClockTriggerInput {
+  readonly type: 'WallClock';
+  readonly timingOwner: 'scheduler';
+  readonly localTime: string;
+  readonly timeZone: string;
+  readonly recurrence: {
+    readonly startDate: string;
+    readonly frequency: RecurrenceFrequency;
+    readonly interval?: number;
+    readonly byWeekday?: readonly RecurrenceWeekday[];
+    readonly count?: number | null;
+    readonly until?: number | null;
+  };
+}
+
+export interface AIElapsedTriggerInput {
+  readonly type: 'Elapsed';
+  readonly timingOwner: 'local-runtime';
+  readonly durationMs: number;
+  readonly anchor?: 'routine-activation' | 'profile-activation' | 'last-satisfied';
+}
+
+export interface AIActiveUsageTriggerInput {
+  readonly type: 'ActiveUsage';
+  readonly timingOwner: 'local-runtime';
+  readonly requiredActiveMs: number;
+  readonly anchor?: 'profile-activation' | 'last-satisfied';
+  readonly naturalBreakCredit?: {
+    readonly idleDurationMs: number;
+    readonly effect?: 'satisfy-and-reset';
+  } | null;
+  readonly protocolBreakCredit?: {
+    readonly kind: 'Stand' | 'Eye' | 'Movement';
+    readonly minimumBreakMs: number;
+  } | null;
+}
+
+export type AIRoutineTriggerInput =
+  AIWallClockTriggerInput | AIElapsedTriggerInput | AIActiveUsageTriggerInput;
 
 export interface AIRoutineCreateInput {
   readonly context: ExecutionContext;
-  readonly title: string;
+  readonly routineId?: string;
+  readonly name: string;
   readonly description?: string;
-  readonly methodId?: AIRoutineMethodId;
-  readonly trigger?:
-    | { readonly type: 'Interval'; readonly intervalMinutes: number }
-    | { readonly type: 'FixedTime'; readonly fixedTime: string };
+  readonly trigger: AIRoutineTriggerInput;
   readonly profileIds?: readonly string[];
 }
 

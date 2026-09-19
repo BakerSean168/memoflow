@@ -14,8 +14,7 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import type { INotificationRepository } from '../../domain/repositories';
-import type { INotificationPreferenceRepository } from '../../domain/repositories';
-import type { INotificationTemplateRepository } from '../../domain/repositories';
+import type { INotificationPreferenceRepository, INotificationInteractionRepository } from '../../domain/repositories';
 import type { NotificationDurableRuntimePort } from '../runtime/notification.runtime';
 import {
   createNotificationModule,
@@ -46,7 +45,8 @@ function makeDeps(
   return {
     notificationRepository: {} as unknown as INotificationRepository,
     preferenceRepository: {} as unknown as INotificationPreferenceRepository,
-    templateRepository: {} as unknown as INotificationTemplateRepository,
+    interactionRepository: {} as unknown as INotificationInteractionRepository,
+    userTimeContextPort: { getUserTimeContext: vi.fn() } as never,
     closureChecker: async (): Promise<boolean> => false,
     durableRuntime: {} as unknown as NotificationDurableRuntimePort,
     runtimeContributions,

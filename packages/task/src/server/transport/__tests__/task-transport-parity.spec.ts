@@ -2,8 +2,8 @@
  * Task transport parity spec (Phase 4).
  *
  * Every Task mutation ledger row is fed the SAME canonical fixture through the
- * PRODUCTION route registrations (registerTaskTemplateRoutes /
- * registerTaskInstanceRoutes) and the
+ * PRODUCTION route registrations (registerTaskPlanRoutes /
+ * registerTaskOccurrenceRoutes) and the
  * PRODUCTION IPC registrations (createTaskElectronModule). Both hosts consume
  * the same `TaskApplicationPort` stub, so parity is proven by construction:
  * production projectors + production controllers call the same port method
@@ -12,7 +12,7 @@
  * before the controller on both transports.
  *
  * 每个 Task mutation ledger 行都用同一 canonical fixture 走生产 route 注册
- * （registerTaskTemplateRoutes / registerTaskInstanceRoutes）与生产 IPC 注册
+ * （registerTaskPlanRoutes / registerTaskOccurrenceRoutes）与生产 IPC 注册
  * （createTaskElectronModule）。
  * 两条宿主消费同一个 `TaskApplicationPort` stub，因此 parity 由构造保证：生产
  * projector + 生产 controller 以等价输入调用同一 port 方法，HTTP/IPC envelope
@@ -26,10 +26,10 @@ import { TaskGoalBindingTrigger } from '@memoflow/contracts/task';
 import type { ExecutionContext, RequestContext } from '@memoflow/contracts/shared';
 import type { TaskApplicationPort } from '../../application';
 import { createTaskTransportHandlers } from '..';
-import { TaskTemplateController } from '../task-template.controller';
-import { TaskInstanceController } from '../task-instance.controller';
-import { registerTaskTemplateRoutes } from '../../../api/routes/task-template.routes';
-import { registerTaskInstanceRoutes } from '../../../api/routes/task-instance.routes';
+import { TaskPlanController } from '../task-plan.controller';
+import { TaskOccurrenceController } from '../task-occurrence.controller';
+import { registerTaskPlanRoutes } from '../../../api/routes/task-plan.routes';
+import { registerTaskOccurrenceRoutes } from '../../../api/routes/task-occurrence.routes';
 import { createTaskElectronModule } from '../../../electron';
 
 const mocks = vi.hoisted(() => {
@@ -66,8 +66,8 @@ const fixtureContext: ExecutionContext = {
   deviceId: 'desktop-app',
 };
 
-const TEMPLATE_ID = 'ITaskTemplateId_550e8400-e29b-41d4-a716-446655440000';
-const INSTANCE_ID = 'ITaskInstanceId_550e8400-e29b-41d4-a716-446655440001';
+const TEMPLATE_ID = 'ITaskPlanId_550e8400-e29b-41d4-a716-446655440000';
+const INSTANCE_ID = 'ITaskOccurrenceId_550e8400-e29b-41d4-a716-446655440001';
 const GOAL_ID = 'IGoalId_550e8400-e29b-41d4-a716-446655440003';
 const KR_ID = 'IKeyResultId_550e8400-e29b-41d4-a716-446655440004';
 
@@ -77,30 +77,31 @@ const FAKE_INSTANCE = { id: INSTANCE_ID, status: 'Scheduled' };
 function createPortStub(): TaskApplicationPort {
   const fn = (value: unknown) => vi.fn(async () => ({ ok: true as const, data: value }));
   return {
-    createTaskTemplate: fn(FAKE_TEMPLATE),
-    updateTaskTemplate: fn(FAKE_TEMPLATE),
-    deleteTaskTemplate: fn(null),
-    activateTaskTemplate: fn({ template: FAKE_TEMPLATE }),
-    pauseTaskTemplate: fn({ template: FAKE_TEMPLATE }),
-    archiveTaskTemplate: fn(FAKE_TEMPLATE),
+    createTaskPlan: fn(FAKE_TEMPLATE),
+    updateTaskPlan: fn(FAKE_TEMPLATE),
+    deleteTaskPlan: fn(null),
+    activateTaskPlan: fn({ plan: FAKE_TEMPLATE }),
+    pauseTaskPlan: fn({ plan: FAKE_TEMPLATE }),
+    archiveTaskPlan: fn(FAKE_TEMPLATE),
     abandonTaskPlan: fn(FAKE_TEMPLATE),
-    generateTaskInstances: fn([FAKE_INSTANCE]),
+    generateTaskOccurrences: fn([FAKE_INSTANCE]),
     bindTaskToGoal: fn(FAKE_TEMPLATE),
     unbindTaskFromGoal: fn(FAKE_TEMPLATE),
-    completeTaskInstance: fn({ instance: FAKE_INSTANCE }),
-    uncompleteTaskInstance: fn({ instance: FAKE_INSTANCE }),
-    skipTaskInstance: fn({ instance: FAKE_INSTANCE }),
-    markTaskInstanceMissed: fn({ instance: FAKE_INSTANCE }),
-    startTaskInstance: fn(FAKE_INSTANCE),
-    deleteTaskInstance: fn(null),
-    rescheduleTaskInstance: fn(FAKE_INSTANCE),
-    getTaskTemplate: vi.fn(),
-    listTaskTemplates: vi.fn(),
-    listTaskInstancesByTemplate: vi.fn(),
-    getTaskInstance: vi.fn(),
-    listTaskInstancesByAccount: vi.fn(),
-    listTaskInstancesByStatus: vi.fn(),
-    getTaskInstancesByDateRange: vi.fn(),
+    completeTaskOccurrence: fn({ occurrence: FAKE_INSTANCE }),
+    uncompleteTaskOccurrence: fn({ occurrence: FAKE_INSTANCE }),
+    skipTaskOccurrence: fn({ occurrence: FAKE_INSTANCE }),
+    markTaskOccurrenceMissed: fn({ occurrence: FAKE_INSTANCE }),
+    startTaskOccurrence: fn(FAKE_INSTANCE),
+    deleteTaskOccurrence: fn(null),
+    rescheduleTaskOccurrence: fn(FAKE_INSTANCE),
+    setTaskOccurrenceChecklistItem: fn({ occurrence: FAKE_INSTANCE }),
+    getTaskPlan: vi.fn(),
+    listTaskPlans: vi.fn(),
+    listTaskOccurrencesByPlan: vi.fn(),
+    getTaskOccurrence: vi.fn(),
+    listTaskOccurrencesByAccount: vi.fn(),
+    listTaskOccurrencesByStatus: vi.fn(),
+    getTaskOccurrencesByDateRange: vi.fn(),
   } as unknown as TaskApplicationPort;
 }
 
@@ -138,7 +139,7 @@ interface RowSpec {
   readonly httpKey: string;
   /** Production IPC channel name. */
   readonly ipcChannel: string;
-  /** HTTP success status for the valid fixture (template create is 201). */
+  /** HTTP success status for the valid fixture (plan create is 201). */
   readonly successStatus?: number;
   /** Raw wire request fixture (body/params/query). */
   readonly httpReq: HttpFixture;
@@ -156,8 +157,7 @@ interface RowSpec {
 
 const validCreateTemplate = {
   name: 'My Task',
-  taskType: 'OneTime',
-  timeConfig: { timeType: 'AllDay', startDate: null, timePoint: null },
+  schedule: { kind: 'OneTime', date: '2026-09-08', timing: { kind: 'AllDay' } },
   importance: 'Moderate',
 };
 const malformedCreateTemplate = { name: '' };
@@ -185,19 +185,29 @@ const malformedComplete = { rating: 99 };
 const validSkip = { reason: 'Too tired' };
 const malformedSkip = { reason: 42 };
 
+const validChecklistItem = {
+  definitionId: 'check-1',
+  completed: true,
+  expectedVersion: 3,
+};
+const malformedChecklistItem = {
+  definitionId: '',
+  completed: 'yes',
+  expectedVersion: 0,
+};
+
 const validReschedule = {
-  newTime: {
-    timeType: 'TimePoint' as const,
-    startDate: 1_787_860_800_000,
-    timePoint: 16 * 60,
-    timeRange: null,
+  scheduleSnapshot: {
+    date: '2026-08-28',
+    timing: { kind: 'At' as const, time: '16:00' },
   },
   expectedVersion: 3,
 };
 const malformedReschedule = {
+  // TASK-7306 anti-resurrection: the old TaskTimeConfig command shape is rejected.
   newTime: {
     timeType: 'TimePoint' as const,
-    startDate: null,
+    startDate: 1_787_860_800_000,
     timePoint: 16 * 60,
     timeRange: null,
   },
@@ -216,11 +226,11 @@ describe('task transport parity (Phase 4) — production registrations', () => {
 
   function buildHttp(port: TaskApplicationPort) {
     const handlers = createTaskTransportHandlers(port);
-    const templateController = new TaskTemplateController(handlers.template);
-    const instanceController = new TaskInstanceController(handlers.instance);
+    const templateController = new TaskPlanController(handlers.plan);
+    const instanceController = new TaskOccurrenceController(handlers.occurrence);
     const routers = [
-      ['template', registerTaskTemplateRoutes(templateController, middleware, null)],
-      ['instance', registerTaskInstanceRoutes(instanceController, middleware, null)],
+      ['plan', registerTaskPlanRoutes(templateController, middleware, null)],
+      ['occurrence', registerTaskOccurrenceRoutes(instanceController, middleware, null)],
     ] as const;
     const map = new Map<string, (req: unknown, res: unknown) => Promise<unknown>>();
     for (const [ns, router] of routers) {
@@ -299,13 +309,13 @@ describe('task transport parity (Phase 4) — production registrations', () => {
     expect(badIpcResult.error?.details).toEqual(badHttpRes.body.error.details);
   }
 
-  describe('task template mutations', () => {
+  describe('task plan mutations', () => {
     it.each<[string, RowSpec]>([
       [
-        'template create',
+        'plan create',
         {
-          httpKey: 'template POST /',
-          ipcChannel: TaskChannels.TEMPLATE_CREATE,
+          httpKey: 'plan POST /',
+          ipcChannel: TaskChannels.PLAN_CREATE,
           successStatus: 201,
           httpReq: { body: validCreateTemplate },
           ipcArgs: validCreateTemplate,
@@ -313,7 +323,7 @@ describe('task transport parity (Phase 4) — production registrations', () => {
           malformedHttpReq: { body: malformedCreateTemplate },
           malformedIpcArgs: malformedCreateTemplate,
           assertPort: (port) => {
-            const mock = port.createTaskTemplate as ReturnType<typeof vi.fn>;
+            const mock = port.createTaskPlan as ReturnType<typeof vi.fn>;
             expect(mock).toHaveBeenCalledTimes(2);
             for (const call of mock.mock.calls) {
               expect(call[0].name).toEqual(validCreateTemplate.name);
@@ -323,17 +333,17 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'template update',
+        'plan update',
         {
-          httpKey: 'template PUT /:id',
-          ipcChannel: TaskChannels.TEMPLATE_UPDATE,
+          httpKey: 'plan PUT /:id',
+          ipcChannel: TaskChannels.PLAN_UPDATE,
           httpReq: { params: { id: TEMPLATE_ID }, body: validUpdateTemplate },
           ipcArgs: { id: TEMPLATE_ID, request: validUpdateTemplate },
           validInvocation: { params: { id: TEMPLATE_ID }, body: validUpdateTemplate },
           malformedHttpReq: { params: { id: TEMPLATE_ID }, body: malformedUpdateTemplate },
           malformedIpcArgs: { id: TEMPLATE_ID, request: malformedUpdateTemplate },
           assertPort: (port) => {
-            const mock = port.updateTaskTemplate as ReturnType<typeof vi.fn>;
+            const mock = port.updateTaskPlan as ReturnType<typeof vi.fn>;
             expect(mock).toHaveBeenCalledTimes(2);
             for (const call of mock.mock.calls) {
               expect(call[0]).toBe(TEMPLATE_ID);
@@ -344,17 +354,17 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'template delete',
+        'plan delete',
         {
-          httpKey: 'template DELETE /:id',
-          ipcChannel: TaskChannels.TEMPLATE_DELETE,
+          httpKey: 'plan DELETE /:id',
+          ipcChannel: TaskChannels.PLAN_DELETE,
           httpReq: { params: { id: TEMPLATE_ID } },
           ipcArgs: { id: TEMPLATE_ID },
           validInvocation: { params: { id: TEMPLATE_ID } },
           malformedHttpReq: { params: { id: 'bad' } },
           malformedIpcArgs: { id: 'bad' },
           assertPort: (port) => {
-            const mock = port.deleteTaskTemplate as ReturnType<typeof vi.fn>;
+            const mock = port.deleteTaskPlan as ReturnType<typeof vi.fn>;
             expect(mock).toHaveBeenCalledTimes(2);
             for (const call of mock.mock.calls) {
               expect(call[0]).toBe(TEMPLATE_ID);
@@ -363,17 +373,17 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'template activate',
+        'plan activate',
         {
-          httpKey: 'template POST /:id/activate',
-          ipcChannel: TaskChannels.TEMPLATE_ACTIVATE,
+          httpKey: 'plan POST /:id/activate',
+          ipcChannel: TaskChannels.PLAN_ACTIVATE,
           httpReq: { params: { id: TEMPLATE_ID } },
           ipcArgs: { id: TEMPLATE_ID },
           validInvocation: { params: { id: TEMPLATE_ID } },
           malformedHttpReq: { params: { id: 'bad' } },
           malformedIpcArgs: { id: 'bad' },
           assertPort: (port) => {
-            const mock = port.activateTaskTemplate as ReturnType<typeof vi.fn>;
+            const mock = port.activateTaskPlan as ReturnType<typeof vi.fn>;
             expect(mock).toHaveBeenCalledTimes(2);
             for (const call of mock.mock.calls) {
               expect(call[0]).toBe(TEMPLATE_ID);
@@ -382,17 +392,17 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'template pause',
+        'plan pause',
         {
-          httpKey: 'template POST /:id/pause',
-          ipcChannel: TaskChannels.TEMPLATE_PAUSE,
+          httpKey: 'plan POST /:id/pause',
+          ipcChannel: TaskChannels.PLAN_PAUSE,
           httpReq: { params: { id: TEMPLATE_ID } },
           ipcArgs: { id: TEMPLATE_ID },
           validInvocation: { params: { id: TEMPLATE_ID } },
           malformedHttpReq: { params: { id: 'bad' } },
           malformedIpcArgs: { id: 'bad' },
           assertPort: (port) => {
-            const mock = port.pauseTaskTemplate as ReturnType<typeof vi.fn>;
+            const mock = port.pauseTaskPlan as ReturnType<typeof vi.fn>;
             expect(mock).toHaveBeenCalledTimes(2);
             for (const call of mock.mock.calls) {
               expect(call[0]).toBe(TEMPLATE_ID);
@@ -401,17 +411,17 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'template archive',
+        'plan archive',
         {
-          httpKey: 'template POST /:id/archive',
-          ipcChannel: TaskChannels.TEMPLATE_ARCHIVE,
+          httpKey: 'plan POST /:id/archive',
+          ipcChannel: TaskChannels.PLAN_ARCHIVE,
           httpReq: { params: { id: TEMPLATE_ID } },
           ipcArgs: { id: TEMPLATE_ID },
           validInvocation: { params: { id: TEMPLATE_ID } },
           malformedHttpReq: { params: { id: 'bad' } },
           malformedIpcArgs: { id: 'bad' },
           assertPort: (port) => {
-            const mock = port.archiveTaskTemplate as ReturnType<typeof vi.fn>;
+            const mock = port.archiveTaskPlan as ReturnType<typeof vi.fn>;
             expect(mock).toHaveBeenCalledTimes(2);
             for (const call of mock.mock.calls) {
               expect(call[0]).toBe(TEMPLATE_ID);
@@ -420,10 +430,10 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'template abandon',
+        'plan abandon',
         {
-          httpKey: 'template POST /:id/abandon',
-          ipcChannel: TaskChannels.TEMPLATE_ABANDON,
+          httpKey: 'plan POST /:id/abandon',
+          ipcChannel: TaskChannels.PLAN_ABANDON,
           httpReq: { params: { id: TEMPLATE_ID }, body: { reason: 'User stopped' } },
           ipcArgs: { id: TEMPLATE_ID, request: { reason: 'User stopped' } },
           validInvocation: { params: { id: TEMPLATE_ID }, body: { reason: 'User stopped' } },
@@ -441,17 +451,17 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'template generate-instances',
+        'plan generate-occurrences',
         {
-          httpKey: 'template POST /:id/generate-instances',
-          ipcChannel: TaskChannels.TEMPLATE_GENERATE_INSTANCES,
+          httpKey: 'plan POST /:id/generate-occurrences',
+          ipcChannel: TaskChannels.PLAN_GENERATE_OCCURRENCES,
           httpReq: { params: { id: TEMPLATE_ID }, body: validGenerate },
-          ipcArgs: { templateId: TEMPLATE_ID, request: validGenerate },
+          ipcArgs: { planId: TEMPLATE_ID, request: validGenerate },
           validInvocation: { params: { id: TEMPLATE_ID }, body: validGenerate },
           malformedHttpReq: { params: { id: TEMPLATE_ID }, body: malformedGenerate },
-          malformedIpcArgs: { templateId: TEMPLATE_ID, request: malformedGenerate },
+          malformedIpcArgs: { planId: TEMPLATE_ID, request: malformedGenerate },
           assertPort: (port) => {
-            const mock = port.generateTaskInstances as ReturnType<typeof vi.fn>;
+            const mock = port.generateTaskOccurrences as ReturnType<typeof vi.fn>;
             expect(mock).toHaveBeenCalledTimes(2);
             for (const call of mock.mock.calls) {
               expect(call[0]).toBe(TEMPLATE_ID);
@@ -461,15 +471,15 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'template bind-goal',
+        'plan bind-goal',
         {
-          httpKey: 'template POST /:id/bind-goal',
-          ipcChannel: TaskChannels.TEMPLATE_BIND_GOAL,
+          httpKey: 'plan POST /:id/bind-goal',
+          ipcChannel: TaskChannels.PLAN_BIND_GOAL,
           httpReq: { params: { id: TEMPLATE_ID }, body: validBindGoal },
-          ipcArgs: { templateId: TEMPLATE_ID, request: validBindGoal },
+          ipcArgs: { planId: TEMPLATE_ID, request: validBindGoal },
           validInvocation: { params: { id: TEMPLATE_ID }, body: validBindGoal },
           malformedHttpReq: { params: { id: TEMPLATE_ID }, body: malformedBindGoal },
-          malformedIpcArgs: { templateId: TEMPLATE_ID, request: malformedBindGoal },
+          malformedIpcArgs: { planId: TEMPLATE_ID, request: malformedBindGoal },
           assertPort: (port) => {
             const mock = port.bindTaskToGoal as ReturnType<typeof vi.fn>;
             expect(mock).toHaveBeenCalledTimes(2);
@@ -481,15 +491,15 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'template unbind-goal',
+        'plan unbind-goal',
         {
-          httpKey: 'template POST /:id/unbind-goal',
-          ipcChannel: TaskChannels.TEMPLATE_UNBIND_GOAL,
+          httpKey: 'plan POST /:id/unbind-goal',
+          ipcChannel: TaskChannels.PLAN_UNBIND_GOAL,
           httpReq: { params: { id: TEMPLATE_ID } },
-          ipcArgs: { templateId: TEMPLATE_ID },
+          ipcArgs: { planId: TEMPLATE_ID },
           validInvocation: { params: { id: TEMPLATE_ID } },
           malformedHttpReq: { params: { id: 'bad' } },
-          malformedIpcArgs: { templateId: 'bad' },
+          malformedIpcArgs: { planId: 'bad' },
           assertPort: (port) => {
             const mock = port.unbindTaskFromGoal as ReturnType<typeof vi.fn>;
             expect(mock).toHaveBeenCalledTimes(2);
@@ -508,20 +518,20 @@ describe('task transport parity (Phase 4) — production registrations', () => {
     );
   });
 
-  describe('task instance mutations', () => {
+  describe('task occurrence mutations', () => {
     it.each<[string, RowSpec]>([
       [
-        'instance complete',
+        'occurrence complete',
         {
-          httpKey: 'instance POST /:id/complete',
-          ipcChannel: TaskChannels.INSTANCE_COMPLETE,
+          httpKey: 'occurrence POST /:id/complete',
+          ipcChannel: TaskChannels.OCCURRENCE_COMPLETE,
           httpReq: { params: { id: INSTANCE_ID }, body: validComplete },
           ipcArgs: { id: INSTANCE_ID, request: validComplete },
           validInvocation: { params: { id: INSTANCE_ID }, body: validComplete },
           malformedHttpReq: { params: { id: INSTANCE_ID }, body: malformedComplete },
           malformedIpcArgs: { id: INSTANCE_ID, request: malformedComplete },
           assertPort: (port) => {
-            const mock = port.completeTaskInstance as ReturnType<typeof vi.fn>;
+            const mock = port.completeTaskOccurrence as ReturnType<typeof vi.fn>;
             expect(mock).toHaveBeenCalledTimes(2);
             for (const call of mock.mock.calls) {
               expect(call[0]).toBe(INSTANCE_ID);
@@ -531,17 +541,17 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'instance skip',
+        'occurrence skip',
         {
-          httpKey: 'instance POST /:id/skip',
-          ipcChannel: TaskChannels.INSTANCE_SKIP,
+          httpKey: 'occurrence POST /:id/skip',
+          ipcChannel: TaskChannels.OCCURRENCE_SKIP,
           httpReq: { params: { id: INSTANCE_ID }, body: validSkip },
           ipcArgs: { id: INSTANCE_ID, request: validSkip },
           validInvocation: { params: { id: INSTANCE_ID }, body: validSkip },
           malformedHttpReq: { params: { id: INSTANCE_ID }, body: malformedSkip },
           malformedIpcArgs: { id: INSTANCE_ID, request: malformedSkip },
           assertPort: (port) => {
-            const mock = port.skipTaskInstance as ReturnType<typeof vi.fn>;
+            const mock = port.skipTaskOccurrence as ReturnType<typeof vi.fn>;
             expect(mock).toHaveBeenCalledTimes(2);
             for (const call of mock.mock.calls) {
               expect(call[0]).toBe(INSTANCE_ID);
@@ -551,17 +561,17 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'instance start',
+        'occurrence start',
         {
-          httpKey: 'instance POST /:id/start',
-          ipcChannel: TaskChannels.INSTANCE_CREATE,
+          httpKey: 'occurrence POST /:id/start',
+          ipcChannel: TaskChannels.OCCURRENCE_CREATE,
           httpReq: { params: { id: INSTANCE_ID } },
           ipcArgs: { id: INSTANCE_ID },
           validInvocation: { params: { id: INSTANCE_ID } },
           malformedHttpReq: { params: { id: 'bad' } },
           malformedIpcArgs: { id: 'bad' },
           assertPort: (port) => {
-            const mock = port.startTaskInstance as ReturnType<typeof vi.fn>;
+            const mock = port.startTaskOccurrence as ReturnType<typeof vi.fn>;
             expect(mock).toHaveBeenCalledTimes(2);
             for (const call of mock.mock.calls) {
               expect(call[0]).toBe(INSTANCE_ID);
@@ -570,17 +580,17 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'instance delete',
+        'occurrence delete',
         {
-          httpKey: 'instance DELETE /:id',
-          ipcChannel: TaskChannels.INSTANCE_DELETE,
+          httpKey: 'occurrence DELETE /:id',
+          ipcChannel: TaskChannels.OCCURRENCE_DELETE,
           httpReq: { params: { id: INSTANCE_ID } },
           ipcArgs: { id: INSTANCE_ID },
           validInvocation: { params: { id: INSTANCE_ID } },
           malformedHttpReq: { params: { id: 'bad' } },
           malformedIpcArgs: { id: 'bad' },
           assertPort: (port) => {
-            const mock = port.deleteTaskInstance as ReturnType<typeof vi.fn>;
+            const mock = port.deleteTaskOccurrence as ReturnType<typeof vi.fn>;
             expect(mock).toHaveBeenCalledTimes(2);
             for (const call of mock.mock.calls) {
               expect(call[0]).toBe(INSTANCE_ID);
@@ -589,17 +599,17 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'instance uncomplete',
+        'occurrence uncomplete',
         {
-          httpKey: 'instance POST /:id/uncomplete',
-          ipcChannel: TaskChannels.INSTANCE_UNCOMPLETE,
+          httpKey: 'occurrence POST /:id/uncomplete',
+          ipcChannel: TaskChannels.OCCURRENCE_UNCOMPLETE,
           httpReq: { params: { id: INSTANCE_ID } },
           ipcArgs: { id: INSTANCE_ID },
           validInvocation: { params: { id: INSTANCE_ID } },
           malformedHttpReq: { params: { id: 'bad' } },
           malformedIpcArgs: { id: 'bad' },
           assertPort: (port) => {
-            const mock = port.uncompleteTaskInstance as ReturnType<typeof vi.fn>;
+            const mock = port.uncompleteTaskOccurrence as ReturnType<typeof vi.fn>;
             expect(mock).toHaveBeenCalledTimes(2);
             for (const call of mock.mock.calls) {
               expect(call[0]).toBe(INSTANCE_ID);
@@ -608,17 +618,38 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'instance reschedule',
+        'occurrence checklist-set',
         {
-          httpKey: 'instance POST /:id/reschedule',
-          ipcChannel: TaskChannels.INSTANCE_RESCHEDULE,
+          httpKey: 'occurrence POST /:id/checklist',
+          ipcChannel: TaskChannels.OCCURRENCE_CHECKLIST_SET,
+          httpReq: { params: { id: INSTANCE_ID }, body: validChecklistItem },
+          ipcArgs: { id: INSTANCE_ID, request: validChecklistItem },
+          validInvocation: { params: { id: INSTANCE_ID }, body: validChecklistItem },
+          malformedHttpReq: { params: { id: INSTANCE_ID }, body: malformedChecklistItem },
+          malformedIpcArgs: { id: INSTANCE_ID, request: malformedChecklistItem },
+          assertPort: (port) => {
+            const mock = port.setTaskOccurrenceChecklistItem as ReturnType<typeof vi.fn>;
+            expect(mock).toHaveBeenCalledTimes(2);
+            for (const call of mock.mock.calls) {
+              expect(call[0]).toBe(INSTANCE_ID);
+              expect(call[1]).toBe('identity-1');
+              expect(call[2]).toEqual(validChecklistItem);
+            }
+          },
+        },
+      ],
+      [
+        'occurrence reschedule',
+        {
+          httpKey: 'occurrence POST /:id/reschedule',
+          ipcChannel: TaskChannels.OCCURRENCE_RESCHEDULE,
           httpReq: { params: { id: INSTANCE_ID }, body: validReschedule },
-          ipcArgs: { instanceId: INSTANCE_ID, ...validReschedule },
+          ipcArgs: { occurrenceId: INSTANCE_ID, ...validReschedule },
           validInvocation: { params: { id: INSTANCE_ID }, body: validReschedule },
           malformedHttpReq: { params: { id: INSTANCE_ID }, body: malformedReschedule },
-          malformedIpcArgs: { instanceId: INSTANCE_ID, ...malformedReschedule },
+          malformedIpcArgs: { occurrenceId: INSTANCE_ID, ...malformedReschedule },
           assertPort: (port) => {
-            const mock = port.rescheduleTaskInstance as ReturnType<typeof vi.fn>;
+            const mock = port.rescheduleTaskOccurrence as ReturnType<typeof vi.fn>;
             expect(mock).toHaveBeenCalledTimes(2);
             for (const call of mock.mock.calls) {
               expect(call[0]).toBe(INSTANCE_ID);
@@ -629,10 +660,10 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'instance mark-missed',
+        'occurrence mark-missed',
         {
-          httpKey: 'instance POST /:id/missed',
-          ipcChannel: TaskChannels.INSTANCE_MARK_MISSED,
+          httpKey: 'occurrence POST /:id/missed',
+          ipcChannel: TaskChannels.OCCURRENCE_MARK_MISSED,
           httpReq: { params: { id: INSTANCE_ID }, body: { reason: 'No completion evidence' } },
           ipcArgs: { id: INSTANCE_ID, request: { reason: 'No completion evidence' } },
           validInvocation: {
@@ -642,7 +673,7 @@ describe('task transport parity (Phase 4) — production registrations', () => {
           malformedHttpReq: { params: { id: 'bad' }, body: {} },
           malformedIpcArgs: { id: 'bad', request: {} },
           assertPort: (port) => {
-            const mock = port.markTaskInstanceMissed as ReturnType<typeof vi.fn>;
+            const mock = port.markTaskOccurrenceMissed as ReturnType<typeof vi.fn>;
             expect(mock).toHaveBeenCalledTimes(2);
             for (const call of mock.mock.calls) {
               expect(call[0]).toBe(INSTANCE_ID);

@@ -9,7 +9,6 @@ function createCloudAuthForExpressTest(closureChecker?: (identityId: string) => 
     email: 'closed-user@example.com',
     name: 'Closed User',
     emailVerified: true,
-    status: 'disabled',
     disabledAt: new Date(),
   };
 
@@ -18,7 +17,6 @@ function createCloudAuthForExpressTest(closureChecker?: (identityId: string) => 
     email: 'active-user@example.com',
     name: 'Active User',
     emailVerified: true,
-    status: 'active',
     disabledAt: null,
   };
 

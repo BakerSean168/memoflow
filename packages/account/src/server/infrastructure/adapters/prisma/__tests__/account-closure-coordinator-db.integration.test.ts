@@ -12,24 +12,26 @@ import { Account } from '../../../../domain/aggregates/account';
 // consumers into AccountClosedWorker. scope:account may not depend on other
 // feature scopes; the boundary exemption is test-only and documented here.
 // eslint-disable-next-line @nx/enforce-module-boundaries
-import { ReminderAccountClosedConsumer } from '@memoflow/reminder/server';
+import { RoutineAccountClosedConsumer } from '@memoflow/reminder/server';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import { NotificationAccountClosedConsumer } from '@memoflow/notification/server';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import { RepositoryAccountClosedConsumer } from '@memoflow/repository/server';
 import type { CloudAuthRevocationPort } from '../../../../application/ports/cloud-auth-revocation.port';
+import { asInstant, createSystemClock, createTimeContext } from '@memoflow/time';
 
 describe('Account Closure Coordinator & Worker Real DB Concurrency Integration Tests', () => {
   const closureOpRepo = new PrismaAccountClosureOperationRepository(prisma);
   const accountRepo = new PrismaAccountRepository(prisma);
   const eventPublisher = new AccountClosureOutboxEventPublisher(prisma);
-  const revocationPort = new PrismaCloudAuthRevocationAdapter(prisma);
+  const revocationPort = new PrismaCloudAuthRevocationAdapter(prisma, createSystemClock());
 
   const coordinator = new AccountClosureCoordinator({
     accountRepository: accountRepo,
     closureOperationRepository: closureOpRepo,
     revocationPort,
     eventPublisher,
+    clock: createSystemClock(),
   });
 
   it('dual concurrency: two concurrent callers with same identity & key -> only one owner completes saga', async () => {
@@ -48,7 +50,9 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
 
     const account = Account.create({
       id: IdentityId.of(identityId),
-      email: `conc-${identityId}@example.com`,
+      nicknameSeed: `conc-${identityId}@example.com`,
+
+      now: asInstant(1_700_000_000_000),
     });
     await accountRepo.save(account);
 
@@ -71,6 +75,53 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
     expect(finalOp?.ownerToken).not.toBeNull();
   });
 
+  it('closure revokes auth state, persists disabledAt, and closes Account', async () => {
+    const identityId = IdentityId.generate().toString();
+    const idempotencyKey = `closure-auth-projection-${Date.now()}`;
+    await prisma.cloudAuthUser.create({
+      data: {
+        id: identityId,
+        email: `closure-auth-${identityId}@example.com`,
+        name: 'Closure Auth Projection User',
+        emailVerified: true,
+      },
+    });
+    await prisma.cloudAuthSession.create({
+      data: {
+        userId: identityId,
+        token: `closure-auth-token-${identityId}`,
+        expiresAt: new Date('2030-01-01T00:00:00.000Z'),
+      },
+    });
+    await prisma.cloudAuthDeviceCode.create({
+      data: {
+        deviceCode: `closure-device-${identityId}`,
+        userCode: `CLOSE${identityId.slice(-6)}`,
+        userId: identityId,
+        expiresAt: new Date('2030-01-01T00:00:00.000Z'),
+        status: 'pending',
+      },
+    });
+    const account = Account.create({
+      id: IdentityId.of(identityId),
+      nicknameSeed: `closure-auth-${identityId}@example.com`,
+      now: asInstant(1_700_000_000_000),
+    });
+    await accountRepo.save(account);
+
+    const receipt = await coordinator.execute(identityId, idempotencyKey, {
+      reason: 'Auth projection closure',
+    });
+
+    expect(receipt.status).toBe('succeeded');
+    expect(await prisma.cloudAuthSession.count({ where: { userId: identityId } })).toBe(0);
+    expect(await prisma.cloudAuthDeviceCode.count({ where: { userId: identityId } })).toBe(0);
+    const authUser = await prisma.cloudAuthUser.findUniqueOrThrow({ where: { id: identityId } });
+    expect(authUser.disabledAt).not.toBeNull();
+    const closedAccount = await prisma.account.findUniqueOrThrow({ where: { id: identityId } });
+    expect(closedAccount.status).toBe('Closed');
+  });
+
   it('dual coordinator real slow side-effect: Coordinator A slow revoke across lease -> Coordinator B takes over, revoke count = 1, Coordinator A write fenced out', async () => {
     const identityId = IdentityId.generate().toString();
     const idempotencyKey = `dual-coord-slow-${Date.now()}`;
@@ -86,7 +137,9 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
 
     const account = Account.create({
       id: IdentityId.of(identityId),
-      email: `dual-coord-${identityId}@example.com`,
+      nicknameSeed: `dual-coord-${identityId}@example.com`,
+
+      now: asInstant(1_700_000_000_000),
     });
     await accountRepo.save(account);
 
@@ -121,6 +174,7 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
       eventPublisher,
       leaseDurationMs: 3000,
       enableHeartbeat: true,
+      clock: createSystemClock(),
     });
 
     const coordB = new AccountClosureCoordinator({
@@ -130,6 +184,7 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
       eventPublisher,
       leaseDurationMs: 3000,
       enableHeartbeat: true,
+      clock: createSystemClock(),
     });
 
     const promiseA = coordA.execute(identityId, idempotencyKey, { reason: 'Dual coord A' });
@@ -172,48 +227,24 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
 
     const account = Account.create({
       id: IdentityId.of(identityId),
-      email: `worker-${identityId}@example.com`,
+      nicknameSeed: `worker-${identityId}@example.com`,
+
+      now: asInstant(1_700_000_000_000),
     });
     await accountRepo.save(account);
 
-    // Insert pending reminder template & occurrence
-    const reminderId = crypto.randomUUID();
-    await prisma.reminderTemplate.create({
-      data: {
-        id: reminderId,
-        identityId,
-        name: 'Pending Reminder',
-        status: 'active',
-        type: 'Recurring',
-        selfEnabled: true,
-        importanceLevel: 'Normal',
-        tags: '[]',
-        trigger: 'cron',
-        activeTime: '{}',
-        notificationConfig: '{}',
-        stats: '{}',
-      },
-    });
-
-    await prisma.reminderOccurrence.create({
-      data: {
-        id: crypto.randomUUID(),
-        occurrenceKey: `notif_${reminderId}:1`,
-        idempotencyKey: `v1:7:${identityId}:notif_${reminderId}:1`,
-        status: 'pending',
-        template: { connect: { id: reminderId } },
-        account: { connect: { id: identityId } },
-      },
-    });
+    // Routine/Notification consumers are mocked here; no owner-domain seed is required.
 
     // Execute closure coordinator
-    const receipt = await coordinator.execute(identityId, idempotencyKey, { reason: 'Worker test' });
+    const receipt = await coordinator.execute(identityId, idempotencyKey, {
+      reason: 'Worker test',
+    });
     expect(receipt.status).toBe('succeeded');
 
     // Run worker to process outbox
     const seenEvents: string[] = [];
     const worker = new AccountClosedWorker(prisma, {
-      reminderConsumer: {
+      routineConsumer: {
         handleAccountClosed: async (event, eventId) => {
           seenEvents.push(eventId);
         },
@@ -244,36 +275,21 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
 
     const account = Account.create({
       id: IdentityId.of(identityId),
-      email: `dualworker-${identityId}@example.com`,
+      nicknameSeed: `dualworker-${identityId}@example.com`,
+
+      now: asInstant(1_700_000_000_000),
     });
     await accountRepo.save(account);
 
-    const reminderId = crypto.randomUUID();
-    await prisma.reminderTemplate.create({
+    const routineId = crypto.randomUUID();
+    await prisma.routineDefinition.create({
       data: {
-        id: reminderId,
+        id: routineId,
         identityId,
-        name: 'Pending Reminder Dual Worker',
-        status: 'active',
-        type: 'Recurring',
-        selfEnabled: true,
-        importanceLevel: 'Normal',
-        tags: '[]',
-        trigger: 'cron',
-        activeTime: '{}',
-        notificationConfig: '{}',
-        stats: '{}',
-      },
-    });
-    const occurrenceId = crypto.randomUUID();
-    await prisma.reminderOccurrence.create({
-      data: {
-        id: occurrenceId,
-        occurrenceKey: `notif_${reminderId}:1`,
-        idempotencyKey: `v1:7:${identityId}:notif_${reminderId}:1`,
-        status: 'pending',
-        template: { connect: { id: reminderId } },
-        account: { connect: { id: identityId } },
+        name: 'Pending Routine Dual Worker',
+        enabled: true,
+        triggerJson: JSON.stringify({ kind: 'WallClock', timeZone: 'UTC', time: '10:00' }),
+        version: 1,
       },
     });
 
@@ -307,33 +323,29 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
       },
     });
 
-    const repoId = crypto.randomUUID();
-    await prisma.repository.create({
-      data: {
-        id: repoId,
-        identityId,
-        name: 'Test Repo',
-        type: 'knowledge',
-        path: `/tmp/test-repo-${repoId}`,
-        status: 'ACTIVE',
-      },
-    });
+    const externalRepositoryId = crypto.randomUUID();
     const writeReqId = crypto.randomUUID();
-    await prisma.knowledgeRepositoryConnection.create({
+    const knowledgeSpaceId = `KnowledgeSpaceId_${crypto.randomUUID()}`;
+    const knowledgeBindingId = `KnowledgeRemoteBindingId_${crypto.randomUUID()}`;
+    await prisma.knowledgeSpace.create({ data: { id: knowledgeSpaceId } });
+    await prisma.knowledgeRemoteBinding.create({
       data: {
-        id: repoId,
+        id: knowledgeBindingId,
+        knowledgeSpaceId,
         identityId,
-        githubUserId: `github-user-${repoId}`,
-        githubRepositoryId: `gh-repo-${repoId}`,
-        githubRepositoryFullName: `user/test-repo-${repoId}`,
-        installationId: `install-${repoId}`,
+        provider: 'GitHub',
+        installationId: `install-${externalRepositoryId}`,
+        repositoryId: `gh-repo-${externalRepositoryId}`,
+        repositoryFullNameSnapshot: `user/test-repo-${externalRepositoryId}`,
+        connectedAt: new Date(),
       },
     });
     await prisma.knowledgeWriteRequest.create({
       data: {
         id: writeReqId,
         identityId,
-        connectionId: repoId,
+        bindingId: knowledgeBindingId,
+        knowledgeDocumentId: `kdoc_${crypto.randomUUID()}`,
         requestId: `req-${writeReqId}`,
         requestHash: `hash-${writeReqId}`,
         relativePath: 'notes/readme.md',
@@ -353,16 +365,16 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
       },
     });
 
-    const realReminderConsumer = new ReminderAccountClosedConsumer(prisma);
+    const realRoutineConsumer = new RoutineAccountClosedConsumer(prisma);
     const realNotificationConsumer = new NotificationAccountClosedConsumer(prisma);
     const realRepositoryConsumer = new RepositoryAccountClosedConsumer(prisma);
 
     const worker1 = new AccountClosedWorker(prisma, {
       leaseDurationMs: 1500,
       enableHeartbeat: false,
-      reminderConsumer: {
+      routineConsumer: {
         handleAccountClosed: async (event, evtId) => {
-          await realReminderConsumer.handleAccountClosed(event as any, evtId);
+          await realRoutineConsumer.handleAccountClosed(event as any, evtId);
           // Sleep 2000ms > 1500ms lease duration to simulate slow consumer
           await new Promise((resolve) => setTimeout(resolve, 2000));
         },
@@ -382,9 +394,9 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
     const worker2 = new AccountClosedWorker(prisma, {
       leaseDurationMs: 1500,
       enableHeartbeat: true,
-      reminderConsumer: {
+      routineConsumer: {
         handleAccountClosed: async (event, evtId) => {
-          await realReminderConsumer.handleAccountClosed(event as any, evtId);
+          await realRoutineConsumer.handleAccountClosed(event as any, evtId);
         },
       },
       notificationConsumer: {
@@ -409,14 +421,14 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
 
     await promiseWorker1;
 
-    const occurrence = await prisma.reminderOccurrence.findUnique({ where: { id: occurrenceId } });
-    const notifOutbox = await prisma.notificationDispatchOutbox.findUnique({ where: { id: notifOutboxId } });
-    const repo = await prisma.repository.findUnique({ where: { id: repoId } });
+    const routine = await prisma.routineDefinition.findUnique({ where: { id: routineId } });
+    const notifOutbox = await prisma.notificationDispatchOutbox.findUnique({
+      where: { id: notifOutboxId },
+    });
     const writeReq = await prisma.knowledgeWriteRequest.findUnique({ where: { id: writeReqId } });
 
-    expect(occurrence?.status).toBe('cancelled');
+    expect(routine?.enabled).toBe(false);
     expect(notifOutbox?.status).toBe('cancelled');
-    expect(repo?.status).toBe('ARCHIVED');
     expect(writeReq?.status).toBe('CANCELLED');
 
     const receipts = await prisma.inboxReceipt.findMany({
@@ -426,8 +438,8 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
     const consumerNames = receipts.map((r) => r.consumer).sort();
     expect(consumerNames).toEqual([
       'notification-account-closed',
-      'reminder-account-closed',
       'repository-account-closed',
+      'routine-account-closed',
     ]);
 
     const finalOutbox = await prisma.outboxMessage.findUnique({ where: { id: outboxId } });
@@ -593,7 +605,9 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
 
     const account = Account.create({
       id: IdentityId.of(identityId),
-      email: `crash-${identityId}@example.com`,
+      nicknameSeed: `crash-${identityId}@example.com`,
+
+      now: asInstant(1_700_000_000_000),
     });
     await accountRepo.save(account);
 
@@ -615,7 +629,9 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
     });
 
     // New instance starts and executes coordinator with same identity & key
-    const receipt = await coordinator.execute(identityId, idempotencyKey, { reason: 'Crash recovery' });
+    const receipt = await coordinator.execute(identityId, idempotencyKey, {
+      reason: 'Crash recovery',
+    });
     expect(receipt.status).toBe('succeeded');
     expect(receipt.phase).toBe('closed');
 
@@ -657,6 +673,10 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
 
     const { createAccountPrismaModule } = await import('../../../prisma');
     const moduleInstance = createAccountPrismaModule(prisma, {
+      clock: createSystemClock(),
+      userTimeContextPort: {
+        getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+      },
       cloudAuth: {
         revokeAllSessions: async () => ({ revokedSessions: 0 }),
         deleteUserData: async () => ({ deletedRecords: 0 }),
@@ -754,6 +774,9 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
     };
     const moduleInstance = createAccountModule({
       accountRepository: new PrismaAccountRepository(prisma),
+      userTimeContextPort: {
+        getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+      },
       closureOperationRepository: closureOpRepo,
       revocationPort: {
         revokeAllSessions: async () => ({ revokedSessions: 0, success: true }),
@@ -796,6 +819,9 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
     };
     const moduleInstance = createAccountModule({
       accountRepository: new PrismaAccountRepository(prisma),
+      userTimeContextPort: {
+        getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+      },
       closureOperationRepository: closureOpRepo,
       revocationPort: {
         revokeAllSessions: async () => ({ revokedSessions: 0, success: true }),

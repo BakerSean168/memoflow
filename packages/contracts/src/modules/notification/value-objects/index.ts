@@ -7,6 +7,9 @@
 export type {
   NotificationAction,
   NotificationActionDTO,
+  NotificationActionIntent,
+  NotificationEntityRef,
+  NotificationNavigationIntent,
 } from './notification-action';
 
 // ============ NotificationMetadata ============
@@ -22,29 +25,13 @@ export type {
   CategoryPreferenceDTO,
 } from './category-preference';
 
-// ============ DoNotDisturbConfig ============
+// ============ QuietHours ============
 export type {
-  DoNotDisturbConfig,
-  DoNotDisturbConfigDTO,
-} from './do-not-disturb-config';
-
-// ============ RateLimit ============
-export type {
-  RateLimit,
-  RateLimitDTO,
-} from './rate-limit';
-
-// ============ ChannelError ============
-export type {
-  ChannelError,
-  ChannelErrorDTO,
-} from './channel-error';
-
-// ============ ChannelResponse ============
-export type {
-  ChannelResponse,
-  ChannelResponseDTO,
-} from './channel-response';
+  QuietHours,
+  QuietHoursDTO,
+  QuietHoursWindow,
+  NotificationWeekday,
+} from './quiet-hours';
 
 // ============ Enum Value Objects ============
 export { NotificationType } from './notification-type';
@@ -54,9 +41,12 @@ export { NotificationCategory } from './notification-category';
 export {
   NotificationPreferenceControl,
   NotificationDndBehavior,
+  NotificationTone,
 } from './notification-workflow';
 export type {
   NotificationWorkflowChannelCapabilityDTO,
+  NotificationWorkflowPresentationDefaultsDTO,
+  NotificationWorkflowLegacyProjectionDTO,
   NotificationWorkflowDefinitionDTO,
   NotificationGlobalChannelPreferencesDTO,
   NotificationWorkflowChannelOverrideDTO,
@@ -73,24 +63,7 @@ export type {
   NotificationDeliveryPlanDTO,
 } from './delivery-plan';
 
-export { RelatedEntityType } from './related-entity-type';
-
 export { NotificationChannelType } from './notification-channel-type';
 
-export { ChannelStatus } from './channel-status';
-
-export { NotificationActionType } from './notification-action-type';
 
 export { ContentType } from './content-type';
-
-
-// Residual 659: dead template/snooze VO duals retired.
-// Live template shape is template-config VO + aggregate Client/Server DTOs.
-
-export type {
-  TemplateContent,
-  EmailTemplateContent,
-  PushTemplateContent,
-  ChannelConfig,
-  NotificationTemplateConfigServerDTO,
-} from './notification-template-config';

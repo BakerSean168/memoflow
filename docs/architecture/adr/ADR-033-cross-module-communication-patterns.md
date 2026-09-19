@@ -86,7 +86,7 @@
 
 ## Migration & Enforcement
 
-- **删除 mitt-RPC**：见 `docs/plan/active/2026-07-10-event-bus-and-governance-hardening.md` 阶段一 H1。
+- **删除 mitt-RPC**：见 `docs/plan/archive/2026-07-10-event-bus-and-governance-hardening.md` 阶段一 H1。
 - **Goal↔Task 联动重构**：见同计划 M6。反应逻辑搬入 Goal 包 `application-server/event-handlers`（替换现有空壳桩 `registerGoalEventListeners`），事件 payload 由 Task 侧填齐所需信息，`apps/api` 与 `apps/desktop` 两宿主分别挂载。
 - **未来所有 AI ↔ 其他模块、Setting ↔ 其他模块** 的联动一律遵循本 ADR。
 - **治理**：`raw-event-bus-audit.mjs` 已确保 `send`/`on` 走 typed seam；后续可增加 audit 检查"是否在业务代码中出现 `.invoke(` / `.handle(` 且不属于 IPC/HTTP adapter"。
@@ -104,4 +104,4 @@
 - ADR-025 Module Composition Pattern
 - ADR-030 Standard Result Pattern
 - ADR-031 Server Feature Standard Shape
-- `docs/plan/active/2026-07-10-event-bus-and-governance-hardening.md`
+- `docs/plan/archive/2026-07-10-event-bus-and-governance-hardening.md`

@@ -163,13 +163,6 @@
         "packages/ui-vue-shadcn/src/*",
         "packages/ui-vue-shadcn/src/*/index.ts"
       ],
-      "@memoflow/dashboard": [
-        "packages/dashboard/src/index.ts"
-      ],
-      "@memoflow/dashboard/*": [
-        "packages/dashboard/src/*/index.ts",
-        "packages/dashboard/src/*.ts"
-      ],
       "@memoflow/label": [
         "packages/label/src/index.ts"
       ],
@@ -191,6 +184,13 @@
       ],
       "@memoflow/scheduler/*": [
         "packages/scheduler/src/*/index.ts"
+      ],
+      "@memoflow/relation": [
+        "packages/relation/src/index.ts"
+      ],
+      "@memoflow/relation/*": [
+        "packages/relation/src/*/index.ts",
+        "packages/relation/src/*.ts"
       ]
     }
   }

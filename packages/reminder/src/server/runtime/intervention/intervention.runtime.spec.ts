@@ -116,6 +116,39 @@ describe('InterventionRuntime (ROUTINE-4103)', () => {
     );
   });
 
+  it('re-opens the same occurrence exactly when a snooze expires', () => {
+    const { runtime, key } = due();
+    const snoozed = runtime.execute(key, {
+      action: 'snooze',
+      durationMs: minute,
+      at: t0,
+    });
+
+    expect(runtime.listActive()).toEqual([expect.objectContaining({ occurrenceKey: key, state: 'Snoozed' })]);
+    expect(runtime.advance(key, Number(t0) + minute - 1)).toMatchObject({
+      applied: false,
+      state: 'Snoozed',
+      version: snoozed.version,
+    });
+
+    const resumed = runtime.advance(key, Number(t0) + minute);
+    expect(resumed).toMatchObject({
+      occurrenceKey: key,
+      state: 'Gentle',
+      applied: true,
+      version: snoozed.version + 1,
+      transitions: [
+        expect.objectContaining({
+          from: 'Snoozed',
+          to: 'Gentle',
+          reason: 'snooze-expired',
+          at: Number(t0) + minute,
+        }),
+      ],
+      snapshot: { snoozeUntil: null },
+    });
+  });
+
   it('permits complete/natural-stop/snooze/dismiss from every presented phase and rejects pre-due commands', () => {
     const phaseTimes = [
       ['Gentle', Number(t0)],

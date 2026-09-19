@@ -8,14 +8,14 @@
  * (base contribution + event-listener wrapper), and assembles the
  * transport-neutral `GoalModuleInstance`. The instance is then bound to an
  * `IElectronModule`-compatible handle via `createGoalElectronModule`, and the
- * host-facing repository view is returned so dashboard/AI consumers read data
+ * host-facing repository view is returned so AI consumers read data
  * through explicit instance-bound ports.
  *
  * 这是目标在 desktop lane 的组合根。桌面主进程运行时拥有按 profile 划分的
  * PowerSync 数据库（IElectronDatabase），因此由它选择 PowerSync 持久化适配器、
  * 构建模块自有的运行时贡献（基础贡献 + 事件监听器包装），并装配与传输无关的
  * `GoalModuleInstance`。实例随后通过 `createGoalElectronModule` 绑定为兼容
- * `IElectronModule` 的 handle，同时返回宿主向 repository view，使 dashboard/AI
+ * `IElectronModule` 的 handle，同时返回宿主向 repository view，使 AI
  * 消费者通过显式的 instance-bound port 读取数据。
  *
  * The same transport-neutral createGoalModule() / GoalApplicationPort is reused
@@ -58,16 +58,20 @@ import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import {
   createGoalEventListenersRuntime,
   createGoalModule,
+  createGoalPortableCapability,
   createGoalPowerSyncRepositories,
+  createGoalPowerSyncDeletionTransactionRunner,
   createGoalRuntimeContribution,
   normalizeGoalRuntimeContributions,
   type GoalApplicationPort,
   type GoalRuntimeContributionsInput,
+  type PowerSyncGoalRelationCleanupFactory,
   type IGoalRecordRepository,
   type IGoalRepository,
 } from '@memoflow/goal';
 import { createGoalElectronModule, type GoalElectronModuleDef } from '@memoflow/goal/electron';
 import type { GoalDependencyReadPort } from '@memoflow/contracts/reliable-messaging';
+import type { UserTimeContextPort } from '@memoflow/time';
 
 /**
  * Dependencies the goal composer needs from the desktop host runtime.
@@ -78,6 +82,9 @@ export interface ComposeGoalDependencies {
   readonly db: IElectronDatabase;
   /** Host-provided Task→Goal dependency read port (PowerSyncTaskBindingReadPort). 宿主提供的 Task→Goal 依赖读取端口。 */
   readonly taskBindingReadPort: GoalDependencyReadPort;
+  readonly userTimeContextPort: UserTimeContextPort;
+  /** Shared Relation transaction-scoped cleanup adapter. */
+  readonly relationCleanupFactory: PowerSyncGoalRelationCleanupFactory;
   /** Extra runtime contributions from the host (e.g. schedule projection). 宿主提供的额外运行时贡献。 */
   readonly runtimeContributions?: GoalRuntimeContributionsInput;
 }
@@ -88,11 +95,11 @@ export interface ComposeGoalDependencies {
  *
  * The module is the IElectronModule-compatible handle to register once; the
  * repositories are the exact instances the module owns, exposed so desktop
- * consumers (dashboard/AI) read through explicit ports instead of package
+ * consumers (AI) read through explicit ports instead of package
  * globals.
  *
  * module 是需要恰好注册一次的、兼容 IElectronModule 的 handle；repositories 是
- * 模块拥有的确切实例，暴露给 desktop 消费者（dashboard/AI），使其通过显式 port
+ * 模块拥有的确切实例，暴露给 desktop 消费者（AI），使其通过显式 port
  * 读取数据，而不是依赖包级全局变量。
  */
 export interface ComposeGoalResult {
@@ -100,7 +107,9 @@ export interface ComposeGoalResult {
   readonly module: GoalElectronModuleDef;
   /** Canonical transport-neutral application port from the SAME module instance. */
   readonly applicationPort: GoalApplicationPort;
-  /** Instance-bound repository view for desktop consumers (dashboard/AI). 供 desktop 消费者（dashboard/AI）使用的 instance-bound repository view。 */
+  /** Owner-provided V3 data portability capability from the same module instance. */
+  readonly portableCapability: ReturnType<typeof createGoalPortableCapability>;
+  /** Instance-bound repository view for desktop AI consumers. 供 desktop AI 消费者使用的 instance-bound repository view。 */
   readonly repositories: {
     readonly goalRepository: IGoalRepository;
     readonly goalRecordRepository: IGoalRecordRepository;
@@ -142,11 +151,8 @@ export interface ComposeGoalResult {
  * @returns ComposeGoalResult — the bound Electron module handle plus repository view.
  */
 export function composeGoal(dependencies: ComposeGoalDependencies): ComposeGoalResult {
-  const {
-    goalRepository,
-    goalRecordRepository,
-    goalWriteTransactionRunner,
-  } = createGoalPowerSyncRepositories(dependencies.db);
+  const { goalRepository, goalRecordRepository, goalWriteTransactionRunner } =
+    createGoalPowerSyncRepositories(dependencies.db);
 
   const listenerRuntime = createGoalEventListenersRuntime({
     goalRepository,
@@ -164,13 +170,19 @@ export function composeGoal(dependencies: ComposeGoalDependencies): ComposeGoalR
     goalRepository,
     goalRecordRepository,
     goalWriteTransactionRunner,
+    goalDeletionTransactionRunner: createGoalPowerSyncDeletionTransactionRunner(
+      dependencies.db,
+      dependencies.relationCleanupFactory,
+    ),
     taskBindingReadPort: dependencies.taskBindingReadPort,
+    userTimeContextPort: dependencies.userTimeContextPort,
     runtimeContributions,
   });
 
   return {
     module: createGoalElectronModule({ instance }),
     applicationPort: instance.api,
+    portableCapability: createGoalPortableCapability(instance.api, instance.portability),
     repositories: {
       goalRepository,
       goalRecordRepository,

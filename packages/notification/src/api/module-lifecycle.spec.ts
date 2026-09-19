@@ -34,19 +34,23 @@ function createFakeInstance() {
     getPreferences: vi.fn(),
     updatePreferences: vi.fn(),
   };
+  const portableCapability = {
+    key: 'notification-delivery-preferences',
+    schemaVersion: 3,
+  } as never;
   const start = vi.fn();
   const dispose = vi.fn();
   const instance: NotificationModuleInstance = {
     notificationRepository: {} as never,
     preferenceRepository: {} as never,
-    templateRepository: {} as never,
+    portableCapability,
     useCases: {} as never,
     api,
     durableRuntime: {} as never,
     start,
     dispose,
   } as NotificationModuleInstance;
-  return { instance, api, start, dispose };
+  return { instance, api, portableCapability, start, dispose };
 }
 
 function createFakeContext(): NotificationApiModuleContext {
@@ -92,6 +96,11 @@ describe('createNotificationApiModule lifecycle', () => {
     ).toBeGreaterThan(0);
 
     expect(fake.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('exposes the owner portability capability without recomposition', () => {
+    const moduleDef = createNotificationApiModule({ instance: fake.instance });
+    expect(moduleDef.portableCapability).toBe(fake.portableCapability);
   });
 
   it('does not expose channelCapabilities / transports / closureChecker in options', () => {

@@ -12,9 +12,7 @@ function createOriginalGoalFixture(overrides?: Record<string, any>) {
   return {
     id: 'original-id',
     name: overrides?.name ?? 'Original Goal',
-    description: overrides?.description ?? 'Original desc',
-    feasibilityAnalysis: overrides?.feasibilityAnalysis ?? 'Feasible',
-    motivation: overrides?.motivation ?? 'Original motivation',
+    summary: overrides?.summary ?? 'Original summary',
   } as any;
 }
 
@@ -65,10 +63,7 @@ describe('CloneGoalUseCase', () => {
   });
 
   it('inherits canonical Direction context without retired taxonomy', async () => {
-    const goal = createOriginalGoalFixture({
-      feasibilityAnalysis: 'Feasible path',
-      motivation: 'Graduate on time',
-    });
+    const goal = createOriginalGoalFixture({ summary: 'Graduate with a feasible delivery path' });
     const goalRepo = createMockRepo<IGoalRepository>({
       findByIdForIdentity: vi.fn().mockResolvedValue(goal),
     });
@@ -78,8 +73,7 @@ describe('CloneGoalUseCase', () => {
     await useCase.execute('original-id', {}, aContext());
 
     const createPayload = vi.mocked(createGoal.execute).mock.calls[0][0];
-    expect(createPayload.feasibilityAnalysis).toBe('Feasible path');
-    expect(createPayload.motivation).toBe('Graduate on time');
+    expect(createPayload.summary).toBe('Graduate with a feasible delivery path');
     expect('importance' in createPayload).toBe(false);
     expect('category' in createPayload).toBe(false);
     expect('tags' in createPayload).toBe(false);
@@ -114,8 +108,8 @@ describe('CloneGoalUseCase', () => {
     expect(createGoal.execute).toHaveBeenCalledWith(expect.anything(), cx);
   });
 
-  it('uses original description when clone params omit it', async () => {
-    const goal = createOriginalGoalFixture({ description: 'Original desc' });
+  it('uses original summary when clone params omit it', async () => {
+    const goal = createOriginalGoalFixture({ summary: 'Original summary' });
     const goalRepo = createMockRepo<IGoalRepository>({
       findByIdForIdentity: vi.fn().mockResolvedValue(goal),
     });
@@ -125,6 +119,6 @@ describe('CloneGoalUseCase', () => {
     await useCase.execute('original-id', {}, aContext());
 
     const createPayload = vi.mocked(createGoal.execute).mock.calls[0][0];
-    expect(createPayload.description).toBe('Original desc');
+    expect(createPayload.summary).toBe('Original summary');
   });
 });

@@ -10,6 +10,8 @@
 >
 > **⚠️ 路由/DTO 退役（2026-07-21）**：`/note/:id`、`EditorLinearView`、`ResourceClientDTO` 与旧 Repository CRUD 已从运行时删除；AI 打开笔记改为 repository projection / Local Vault 工作区。以 product 模块文档与 ADR-034 为准。
 >
+> **⚠️ Dashboard 退役（HOME-1805，2026-09-18）**：本文的 Dashboard 章节、组件名和 `/dashboard` 文字是历史设计输入，不是当前实施依据。Standalone Dashboard package、route/redirect、DTO/config、Prisma/PowerSync surfaces 已删除；当前概览由 Home/AI owner read models 组合，禁止恢复兼容入口或影子 DTO。
+>
 > 状态：~~实施方案~~ → 内容级参考。上游分析见 `docs/UI_REDESIGN_BRIEF.md`（下称 Brief），本文不重复分析，只给可执行的页面级方案。
 > 生成日期：2026-07-11。范围：`packages/app-vue`（Web 与 Desktop 共用前端层）。
 > 原则：**不追求花哨视觉；优先信息层级、业务清晰度、可维护性**。全部改动为现有能力的重排与减法，不新增业务功能（唯一例外：日程事件"查看详情"留位，Brief §8-P3 已定性为必须补的缺口）。
@@ -25,7 +27,7 @@
 
 | 壳                             | 适用页面                                              | 结构                                                                                                         | 现成基础                                                                                   |
 | ------------------------------ | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
-| **ListPageShell（列表壳）**    | 仪表盘、目标列表、任务、提醒、通知、治理              | `LinearPageHeader`（sticky：标题 + 描述 + 右置操作）→ 可选 FilterBar 行 → 内容 `max-w-7xl mx-auto px-6 py-6` | `custom/linear/LinearPageHeader.vue` 已存在（`px-6 py-3 border-b sticky top-0`），直接采用 |
+| **ListPageShell（列表壳）**    | Home owner widgets、目标列表、任务、提醒、通知、治理 | `LinearPageHeader`（sticky：标题 + 描述 + 右置操作）→ 可选 FilterBar 行 → 内容 `max-w-7xl mx-auto px-6 py-6` | `custom/linear/LinearPageHeader.vue` 已存在（`px-6 py-3 border-b sticky top-0`），直接采用 |
 | **DetailPageShell（详情壳）**  | 目标详情、KR 详情、复盘、任务详情、规则详情/编辑/历史 | 返回按钮 + 标题 + 状态徽章 + 右置操作 → 内容 `max-w-4xl`                                                     | 从 `GoalDetailView` / `TaskDetailView` 现有头部抽取                                        |
 | **WorkspaceShell（工作区壳）** | AI 首页、日程日历、笔记工作区（`/repository`；`/note/:id` 已退役） | 全宽无 max-w；`ResizablePanel` 分栏；模块第二侧栏统一 `w-64` 可折叠                                          | repository 的 ResizablePanel collapse 模式推广到 goal/reminder                             |
 
@@ -40,7 +42,7 @@
 目标形态（Brief §9，入口 12 → 8）：
 
 ```
-工作台   ◆ 首页(AI)   ◆ 仪表盘
+工作台   ◆ 首页(AI)（owner-composed Home）
 计划     ◆ 目标
 执行     ◆ 日程   ◆ 任务   ◆ 提醒
 知识     ◆ 笔记   ◆ 规范
@@ -174,7 +176,7 @@
 
 ---
 
-## 2. 仪表盘 `/dashboard`（`views/DashboardView.vue`）
+## 2. 仪表盘（历史快照；HOME-1805 已退役）
 
 **1) 页面目标**：从"第二首页"降级为**完整统计与回顾页**——今日概览的高频职责已由 AI 首页右栏承接（§1），本页保留全量统计、趋势与活动回顾。导航中留在"工作台"分组第二位。
 
@@ -484,7 +486,7 @@ FilterBar：[全部|进行中|已暂停|已归档](计数Tabs) [关系过滤▾]
 
 > **⚠️ 运行时 supersede（2026-07-21；残留 301）**：`RepositoryWorkspaceView.vue` 已从运行时删除。
 > 当前 `/repository` 入口为 `RepositoryEntryView` → `KnowledgeProjectionWorkspaceView`（GitHub 投影）/
-> `LocalVaultWorkspaceView`（Desktop 本地 Vault）；confirmed-create-only；AI 着陆 `/repository?note=`。
+> `LocalVaultWorkspaceView`（Desktop 本地 Vault）；controlled confirmed-create / explicit metadata adoption；AI 着陆 `/repository?note=`。
 > 以下布局/动作描述保留为 UI redesign 历史方案，**不得**当作当前实现清单。真值见 product 模块文档与 ADR-034。
 >
 > 本页原执行 Brief §13.3 **阶段 0（UI 收缩）**。说明：Brief §4.7 的"不可删除交互状态"以自建编辑器为长期方向为前提；§13 已拍板 Obsidian vault 方向（2026-07-11），两处冲突**以 §13 / ADR-034 为准**。
@@ -730,7 +732,7 @@ RuleCard 列表（code + title + RuleStatusBadge + severity）
 | 页面                 | 主操作                                | 关键次操作                              |
 | -------------------- | ------------------------------------- | --------------------------------------- |
 | `/` AI 工作台        | 发送消息                              | 工作流决策、切换会话                    |
-| `/dashboard`         | 点击 widget 项处理                    | 刷新、展开趋势                          |
+| ~~`/dashboard`~~（已退役，无兼容入口） | — | 当前由 Home/AI owner widgets 组合 |
 | `/goals`             | 新建目标                              | 视图/文件夹切换、对比(⋯)、专注          |
 | `/goals/:id`         | 记录进度                              | 添加 KR、创建复盘、编辑(⋯)              |
 | `/tasks`             | 新建任务                              | 过滤、视图切换、暂停/恢复、全部删除(⋯⚠) |
@@ -746,7 +748,7 @@ RuleCard 列表（code + title + RuleStatusBadge + severity）
 
 | 类别         | 项                                                                                                                | 出处               |
 | ------------ | ----------------------------------------------------------------------------------------------------------------- | ------------------ |
-| 重复入口     | 导航项 `/ai/chat`（路由改 redirect）；dashboard 快捷操作条；reminder 头部分组徽章条                               | §0.2 / §2 / §8     |
+| 重复入口     | 导航项 `/ai/chat`（路由改 redirect）；历史 Dashboard 快捷操作条；reminder 头部分组徽章条 | §0.2 / §2 / §8     |
 | 调试残留     | AI legacy workflow 按钮组；`/goals/rules-demo` 无守卫                                                             | §1 / §3            |
 | 孤儿文件     | `FocusModeView` / `FocusCycle` / `WeightSnapshotView` / `ScheduleWeekView`                                        | §0.5               |
 | 阶段 0 退役  | `TabManager` / `EditorSplitView` / `SelfContainedExportDialog` / `BatchImportDialog`                              | §9                 |

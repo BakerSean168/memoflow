@@ -60,6 +60,7 @@
 import type { ServerModuleHandle, ServerTransportModuleContext } from '@memoflow/contracts/shared';
 import { createLogger } from '@memoflow/utils/logger';
 import type { SettingModuleInstance } from '../server/infrastructure';
+import type { UserTimeContextPort } from '@memoflow/time';
 import { registerSettingRoutes } from './routes';
 
 const logger = createLogger('SettingApi');
@@ -87,7 +88,11 @@ export type SettingApiModuleContext = ServerTransportModuleContext;
  * Setting API module handle extending the shared lifecycle contract.
  * Setting API 模块 handle，继承共享生命周期契约。
  */
-export interface SettingApiModuleDef extends ServerModuleHandle<SettingApiModuleContext> {}
+export interface SettingApiModuleDef extends ServerModuleHandle<SettingApiModuleContext> {
+  readonly userTimeContextPort: UserTimeContextPort;
+  /** Owner-provided preferences@3 portability capability for host registry composition. */
+  readonly portableCapability: SettingModuleInstance['portableCapability'];
+}
 
 /**
  * Options carrying the already-assembled setting instance.
@@ -119,6 +124,8 @@ export function createSettingApiModule(options: SettingApiModuleOptions): Settin
 
   return {
     name: 'Setting',
+    userTimeContextPort: options.instance.userTimeContextPort,
+    portableCapability: options.instance.portableCapability,
 
     register(context) {
       if (state !== 'created') {

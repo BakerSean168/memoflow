@@ -10,7 +10,7 @@
  * ```typescript
  * // ✅ 推荐：从子路径导入（极致 Tree-Shaking）
  * import { GoalServerDTO, GoalStatus } from '@memoflow/contracts/goal';
- * import { TaskTemplateServer, TaskType } from '@memoflow/contracts/task';
+ * import { TaskPlanServer } from '@memoflow/contracts/task';
  * import { HttpResponse, ResultCode } from '@memoflow/contracts/result';
  *
  * // ✅ 命名空间导入（避免命名冲突）
@@ -22,14 +22,12 @@
  * - @memoflow/contracts/task       - 任务模块
  * - @memoflow/contracts/goal       - 目标模块
  * - @memoflow/contracts/governance - 治理模块
- * - @memoflow/contracts/reminder   - 提醒模块
  * - @memoflow/contracts/repository - 仓库模块
  * - @memoflow/contracts/account    - 账户模块
  * - @memoflow/contracts/schedule   - 调度模块
  * - @memoflow/contracts/setting    - 设置模块
  * - @memoflow/contracts/notification - 通知模块
  * - @memoflow/contracts/ai         - AI模块
- * - @memoflow/contracts/dashboard  - 仪表盘模块
  * - @memoflow/contracts/result     - Result Pattern (新，推荐)
  * - @memoflow/contracts/shared     - 共享类型
  */
@@ -38,7 +36,7 @@
 // Primitives
 // ============================================================
 export { brandedId } from './primitives';
-export type { IdentityId } from './primitives';
+export type { IdentityId, TimeZoneId } from './primitives';
 
 // ============================================================
 // Operations (W7 统一 operation timeline / replay / audit)

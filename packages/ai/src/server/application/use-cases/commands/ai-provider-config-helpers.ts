@@ -4,19 +4,17 @@ import {
   type TestAIProviderReq,
 } from '@memoflow/contracts/ai';
 import type { IAIProviderConfigRepository } from '../../../domain/repositories/i-ai-provider-config-repository';
+import type { IAIProviderSecretVault } from '../../ports/provider-secret-vault.port';
 import { toChatExecutionProviderConfig } from './ai-provider-resolution';
 
 export function toClientDTO(provider: AIProviderConfigServerDTO): AIProviderConfigClientDTO {
-  const plainApiKey = provider.apiKey;
-
   return {
     id: provider.id,
     identityId: provider.identityId,
     name: provider.name,
-    providerType: provider.providerType,
+    providerDefinitionId: provider.providerDefinitionId,
     baseUrl: provider.baseUrl,
-    apiKeyMasked:
-      plainApiKey.length > 8 ? `${plainApiKey.slice(0, 3)}****${plainApiKey.slice(-4)}` : '****',
+    credentialRef: provider.credentialRef,
     defaultModel: provider.defaultModel,
     isActive: provider.isActive,
     isDefault: provider.isDefault,
@@ -30,6 +28,7 @@ export function toClientDTO(provider: AIProviderConfigServerDTO): AIProviderConf
 
 export async function resolveProviderConfigForConnectionTest(
   providerConfigRepository: IAIProviderConfigRepository,
+  secretVault: IAIProviderSecretVault,
   identityId: string,
   request: TestAIProviderReq,
 ) {
@@ -41,7 +40,12 @@ export async function resolveProviderConfigForConnectionTest(
     throw new Error('Provider not found');
   }
 
-  return toChatExecutionProviderConfig(provider, {
+  const credential = await secretVault.resolve({
+    identityId,
+    credentialRef: provider.credentialRef,
+  });
+
+  return toChatExecutionProviderConfig(provider, credential.value, {
     temperature: 0.2,
   });
 }

@@ -32,7 +32,8 @@ export {
   type RepositoryPrismaRepositorySet,
   type RepositoryPrismaRuntimeContributions,
   type GithubAppConfig,
-  type IKnowledgeRepositoryConnectionRepository,
+  type IKnowledgeRemoteBindingRepository,
+  type IKnowledgeDocumentIdentityRepository,
   type IGithubWebhookDeliveryRepository,
   type IKnowledgeNoteProjectionRepository,
   type IKnowledgeWriteRequestRepository,
@@ -46,3 +47,5 @@ export {
   type IKnowledgeNoteCommitService,
 } from './server';
 export type { RepositoryApplicationPort } from './server';
+export { KnowledgeDocumentRefResolverService } from './server/application';
+export { KnowledgeDocumentWorkspaceResolverService } from './server/application';

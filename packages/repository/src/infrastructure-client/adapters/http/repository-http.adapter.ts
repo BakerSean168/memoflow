@@ -9,7 +9,7 @@ import { fail, type Result } from '@memoflow/contracts/result';
 import type { IResultHttpClient } from '@memoflow/http-client';
 import type { IRepositoryApiClient } from '../types';
 import type {
-  LocalVaultBindingClientDTO,
+  LocalVaultBindingSnapshotDTO,
   SelectLocalVaultReq,
   ScanLocalVaultRes,
   ReadLocalVaultNoteReq,
@@ -22,7 +22,7 @@ import type {
   CompleteKnowledgeRepositoryInstallationReq,
   CompleteKnowledgeRepositoryInstallationRes,
   CreateKnowledgeRepositoryConnectionReq,
-  KnowledgeRepositoryConnectionClientDTO,
+  KnowledgeRemoteBindingClientDTO,
   KnowledgeRepositoryInstallationTokenRes,
   KnowledgeRepositoryInstallationIntentStatusResponse,
   KnowledgeRepositoryReconciliationPreview,
@@ -36,6 +36,8 @@ import type {
   SyncKnowledgeRepositoryRes,
   CreateConfirmedKnowledgeNoteReq,
   CreateConfirmedKnowledgeNoteResponse,
+  AdoptKnowledgeDocumentReq,
+  AdoptKnowledgeDocumentResponse,
   KnowledgeNoteProjectionClientDTO,
   KnowledgeNoteProjectionListResponse,
   ListKnowledgeNoteProjectionsReq,
@@ -99,9 +101,18 @@ export class RepositoryHttpAdapter implements IRepositoryApiClient {
     return this.httpClient.get(`${this.baseUrl}/knowledge-connections`);
   }
 
+  async refreshKnowledgeRepositoryObservation(
+    connectionId: string,
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>> {
+    return this.httpClient.post(
+      `${this.baseUrl}/knowledge-connections/${encodeURIComponent(connectionId)}/refresh-observation`,
+      {},
+    );
+  }
+
   async connectKnowledgeRepository(
     request: CreateKnowledgeRepositoryConnectionReq,
-  ): Promise<Result<KnowledgeRepositoryConnectionClientDTO>> {
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>> {
     return this.httpClient.post(`${this.baseUrl}/knowledge-connections`, request);
   }
 
@@ -197,6 +208,12 @@ export class RepositoryHttpAdapter implements IRepositoryApiClient {
     return this.httpClient.post(`${this.baseUrl}/knowledge-notes`, request);
   }
 
+  async adoptKnowledgeDocument(
+    request: AdoptKnowledgeDocumentReq,
+  ): Promise<Result<AdoptKnowledgeDocumentResponse>> {
+    return this.httpClient.post(`${this.baseUrl}/knowledge-notes/adopt`, request);
+  }
+
   async listKnowledgeWriteRequests(
     request: ListKnowledgeWriteRequestsReq = { limit: 50 },
   ): Promise<Result<ListKnowledgeWriteRequestsRes>> {
@@ -224,13 +241,13 @@ export class RepositoryHttpAdapter implements IRepositoryApiClient {
     });
   }
 
-  async getLocalVaultBinding(): Promise<Result<LocalVaultBindingClientDTO | null>> {
+  async getLocalVaultBinding(): Promise<Result<LocalVaultBindingSnapshotDTO | null>> {
     return this.localVaultUnavailable();
   }
 
   async selectLocalVault(
     _request: SelectLocalVaultReq = {},
-  ): Promise<Result<LocalVaultBindingClientDTO | null>> {
+  ): Promise<Result<LocalVaultBindingSnapshotDTO | null>> {
     return this.localVaultUnavailable();
   }
 

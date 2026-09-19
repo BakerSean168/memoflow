@@ -49,7 +49,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import {
-  RoutineChannels,
+  RoutineWindowChannels,
   type InterventionWindowCommand,
   type InterventionWindowProjection,
 } from '@memoflow/contracts/electron';
@@ -109,7 +109,7 @@ async function sendCommand(command: InterventionWindowCommand): Promise<void> {
   const bridge = getElectronBridge();
   if (!bridge) return;
   projection.value = unwrapProjection(
-    await bridge.invoke(RoutineChannels.INTERVENTION_WINDOW_COMMAND, command),
+    await bridge.invoke(RoutineWindowChannels.INTERVENTION_WINDOW_COMMAND, command),
   );
   now.value = Date.now();
 }
@@ -123,9 +123,9 @@ onMounted(async () => {
   const bridge = getElectronBridge();
   if (bridge) {
     projection.value = unwrapProjection(
-      await bridge.invoke(RoutineChannels.INTERVENTION_WINDOW_GET),
+      await bridge.invoke(RoutineWindowChannels.INTERVENTION_WINDOW_GET),
     );
-    bridge.on(RoutineChannels.INTERVENTION_WINDOW_PROJECTION, onProjection);
+    bridge.on(RoutineWindowChannels.INTERVENTION_WINDOW_PROJECTION, onProjection);
   }
   timer = setInterval(() => {
     now.value = Date.now();
@@ -135,7 +135,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   if (timer) clearInterval(timer);
   timer = null;
-  getElectronBridge()?.off(RoutineChannels.INTERVENTION_WINDOW_PROJECTION, onProjection);
+  getElectronBridge()?.off(RoutineWindowChannels.INTERVENTION_WINDOW_PROJECTION, onProjection);
 });
 </script>
 

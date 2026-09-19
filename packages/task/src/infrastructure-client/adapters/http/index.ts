@@ -6,25 +6,25 @@
  */
 
 import type { IResultHttpClient } from '@memoflow/http-client';
-import { TaskTemplateHttpAdapter } from './task-template-http.adapter';
-import { TaskInstanceHttpAdapter } from './task-instance-http.adapter';
+import { TaskPlanHttpAdapter } from './task-plan-http.adapter';
+import { TaskOccurrenceHttpAdapter } from './task-occurrence-http.adapter';
 
 // Re-export adapters
-export { TaskTemplateHttpAdapter } from './task-template-http.adapter';
-export { TaskInstanceHttpAdapter } from './task-instance-http.adapter';
-export { createTaskTemplateHttpAdapter } from './task-template-http.adapter';
-export { createTaskInstanceHttpAdapter } from './task-instance-http.adapter';
+export { TaskPlanHttpAdapter } from './task-plan-http.adapter';
+export { TaskOccurrenceHttpAdapter } from './task-occurrence-http.adapter';
+export { createTaskPlanHttpAdapter } from './task-plan-http.adapter';
+export { createTaskOccurrenceHttpAdapter } from './task-occurrence-http.adapter';
 
 /**
  * All HTTP adapters for the Task module
  */
 export interface TaskHttpAdapters {
-  template: TaskTemplateHttpAdapter;
-  instance: TaskInstanceHttpAdapter;
+  plan: TaskPlanHttpAdapter;
+  occurrence: TaskOccurrenceHttpAdapter;
 }
 
 /**
- * Create all Task HTTP adapters from a single IResultHttpClient instance.
+ * Create all Task HTTP adapters from a single IResultHttpClient occurrence.
  * The concrete implementation (e.g. ResultHttpClient) is created at the App layer.
  *
  * @example
@@ -37,7 +37,7 @@ export interface TaskHttpAdapters {
  */
 export function createTaskHttpAdapters(httpClient: IResultHttpClient): TaskHttpAdapters {
   return {
-    template: new TaskTemplateHttpAdapter(httpClient),
-    instance: new TaskInstanceHttpAdapter(httpClient),
+    plan: new TaskPlanHttpAdapter(httpClient),
+    occurrence: new TaskOccurrenceHttpAdapter(httpClient),
   };
 }

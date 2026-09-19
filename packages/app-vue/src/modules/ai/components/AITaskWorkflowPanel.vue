@@ -23,10 +23,24 @@
       <h2 v-if="reviewDraft" class="text-lg font-semibold text-foreground">
         {{ reviewDraft.task.title }}
       </h2>
+      <p v-if="reviewDraft" class="text-sm text-muted-foreground">
+        {{ reviewDraft.task.schedule.kind }}
+        <span v-if="reviewDraft.task.goalBinding">
+          · {{ reviewDraft.task.goalBinding.goalId }}
+          <span v-if="reviewDraft.task.goalBinding.keyResultId">
+            → {{ reviewDraft.task.goalBinding.keyResultId }}
+          </span>
+        </span>
+      </p>
       <p v-if="reviewDraft" class="whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
         {{ reviewDraft.rationale }}
       </p>
     </div>
+    <AITaskDraftEditor
+      v-if="reviewDraft && showTaskDraftEditor && editableTask"
+      :task="editableTask"
+      @update-task="$emit('update-task', $event)"
+    />
     <div v-if="reviewDraft?.warnings.length" class="space-y-2">
       <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
         {{ t('aiAssistant.dialogs.agent.warnings') }}
@@ -53,7 +67,7 @@
       </p>
       <p
         v-for="(failure, index) in taskWorkflowRun.suspension.failures"
-        :key="`${failure.operation}-${failure.index ?? 'root'}-${failure.code}-${index}`"
+        :key="`${failure.operation}-${failure.code}-${index}`"
         class="text-sm text-destructive"
       >
         {{ failure.operation }} · {{ publicFailureMessage(failure) }}
@@ -73,8 +87,8 @@
     >
       <p class="text-sm text-muted-foreground">{{ taskWorkflowRun.result.status }}</p>
       <p class="text-sm text-muted-foreground">
-        {{ taskWorkflowRun.result.taskTemplateId || '—' }} ·
-        {{ taskWorkflowRun.result.taskIds.length }} tasks
+        {{ Object.values(taskWorkflowRun.result.referenceMap)[0] || '—' }} ·
+        {{ Object.keys(taskWorkflowRun.result.referenceMap).length }} task
       </p>
     </div>
     <div v-if="taskWorkflowRun.status === 'suspended' && reviewDraft" class="flex gap-2">
@@ -93,9 +107,14 @@
 import { computed } from 'vue';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import { useI18n } from 'vue-i18n';
-import type { AIWorkflowExecutionFailure, AIWorkflowRunView } from '@memoflow/contracts/ai';
+import type {
+  AIWorkflowExecutionFailure,
+  AIWorkflowRunView,
+  TaskPlanTask,
+} from '@memoflow/contracts/ai';
 import type { WorkflowMode } from '../composables/types';
 import AIRuntimeUsageBadge from './AIRuntimeUsageBadge.vue';
+import AITaskDraftEditor from './AITaskDraftEditor.vue';
 import { getAIWorkflowFailureMessage } from '../composables/error';
 
 const { t } = useI18n();
@@ -104,12 +123,15 @@ const publicFailureMessage = (failure: AIWorkflowExecutionFailure) =>
 const props = defineProps<{
   toolMode: WorkflowMode;
   taskWorkflowRun: Extract<AIWorkflowRunView, { kind: 'task.create' }> | null;
+  editableTask: TaskPlanTask | null;
+  showTaskDraftEditor: boolean;
 }>();
 defineEmits<{
   confirm: [];
   cancel: [];
   retry: [];
   'edit-started': [];
+  'update-task': [task: TaskPlanTask];
   'update-clarification-answer': [index: number, value: string];
 }>();
 const reviewDraft = computed(() =>

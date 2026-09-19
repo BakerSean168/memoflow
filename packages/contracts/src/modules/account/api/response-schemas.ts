@@ -5,12 +5,10 @@
  */
 
 import { z } from 'zod';
-import { brandedId } from '../../../primitives';
+import { brandedId, YmdSchema } from '../../../primitives';
 import type { IdentityId } from '../value-objects/identity-id';
 import { AccountStatus } from '../value-objects/account-status';
 import { GenderType } from '../value-objects/gender-type';
-import { ThemeType } from '../value-objects/theme-type';
-import { LanguageCode } from '../value-objects/language-code';
 
 /**
  * Account Response Schema
@@ -18,6 +16,18 @@ import { LanguageCode } from '../value-objects/language-code';
  * Residual 825: AccountClientDTO dual retired — sole AccountResponseSchema + z.infer
  * (semantic type is z.infer alias in aggregates/account-client.ts).
  */
+/**
+ * Safe cloud-auth identity projection for Account views.
+ * Authentication/session capability stays owned by Cloud Auth; this projection
+ * deliberately excludes session ids, tokens and provider credentials.
+ */
+export const CloudIdentitySummarySchema = z.object({
+  identityId: brandedId<IdentityId>(),
+  email: z.string().email(),
+  emailVerified: z.boolean(),
+});
+export type CloudIdentitySummary = z.infer<typeof CloudIdentitySummarySchema>;
+
 export const AccountResponseSchema = z.object({
   id: brandedId<IdentityId>(),
   status: z.enum(AccountStatus),
@@ -27,41 +37,19 @@ export const AccountResponseSchema = z.object({
     avatarUrl: z.string().nullable(),
     bio: z.string().nullable(),
     gender: z.enum(GenderType),
-    birthday: z.union([z.string(), z.number(), z.null()]), // Ymd string or legacy epoch ms
+    birthday: YmdSchema.nullable(),
   }),
-  settings: z.object({
-    theme: z.enum(ThemeType),
-    language: z.enum(LanguageCode),
-    timezone: z.string(),
-    notificationEnabled: z.boolean(),
-  }),
-  email: z.object({
-    address: z.string().email(),
-    isVerified: z.boolean(),
-    verifiedAt: z.union([z.number(), z.null()]),
-    isPrimary: z.boolean(),
-  }),
-  phone: z
-    .object({
-      countryCode: z.string(),
-      number: z.string(),
-      fullNumber: z.string(),
-      isVerified: z.boolean(),
-      verifiedAt: z.union([z.number(), z.null()]),
-    })
-    .nullable(),
-  version: z.number(),
   createdAt: z.number(),
   updatedAt: z.number(),
-  deletedAt: z.union([z.number(), z.null()]),
+  closedAt: z.union([z.number(), z.null()]),
 });
 
 /**
- * Availability Response Schema
- *
- * Residual 767: sole availability response shape (CheckAvailabilityRes is z.infer alias).
+ * Composed Account read model. Product profile/lifecycle remains under
+ * `account`; login identity is projected separately from Cloud Auth.
  */
-export const AvailabilityResponseSchema = z.object({
-  available: z.boolean(),
-  suggestion: z.string().optional(),
+export const AccountViewSchema = z.object({
+  account: AccountResponseSchema,
+  cloudIdentity: CloudIdentitySummarySchema.nullable(),
 });
+export type AccountView = z.infer<typeof AccountViewSchema>;

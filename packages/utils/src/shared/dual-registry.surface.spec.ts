@@ -12,7 +12,12 @@ import { escapeHtml } from './escape-html';
 import { parseBoolean, parseNumber, parseString } from './parse-query-value';
 import { withCause, parseJson, parseJsonSafe } from './persistence';
 import { detectBrowserLocale, normalizeLocale, normalizeTheme } from './presentation-preference';
-import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildReminderStartTimestamp, normalizeReminderTimeOfDay } from './reminder-time-of-day';
+import {
+  DEFAULT_REMINDER_TIME_OF_DAY,
+  REMINDER_TIME_OF_DAY_PATTERN,
+  buildReminderStartTimestamp,
+  normalizeReminderTimeOfDay,
+} from './reminder-time-of-day';
 
 // --- AI-VNEXT-07: retired Goal automation helper surface ---
 {
@@ -27,8 +32,14 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
     const retiredPaths = [
       resolve(sharedDir, 'build-recurrence-rule.ts'),
       resolve(sharedDir, 'build-reminder-template-input.ts'),
-      resolve(sharedDir, '../../../../apps/api/src/modules/ai/backend-automation-tool-executor.adapter.ts'),
-      resolve(sharedDir, '../../../../apps/desktop/src/main/modules/ai/desktop-automation-tool-executor.adapter.ts'),
+      resolve(
+        sharedDir,
+        '../../../../apps/api/src/modules/ai/backend-automation-tool-executor.adapter.ts',
+      ),
+      resolve(
+        sharedDir,
+        '../../../../apps/desktop/src/main/modules/ai/desktop-automation-tool-executor.adapter.ts',
+      ),
     ];
 
     it('keeps the retired helper and AgentHost executor surfaces deleted', () => {
@@ -65,10 +76,6 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
         resolve(sharedDir, '../../../database/scripts/verify-ai-knowledge-index.ts'),
         'utf8',
       ),
-      prepareEditor: readFileSync(
-        resolve(sharedDir, '../../../database/scripts/prepare-editor-workspace-natural-key.ts'),
-        'utf8',
-      ),
     } as const;
 
     it('owns residual 999 sole errorMessage body and shared barrel export', () => {
@@ -79,7 +86,7 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
       expect(index).toContain("export * from './error-message'");
     });
 
-    it('four database CLI scripts import sole without local dual bodies', () => {
+    it('database CLI scripts import sole without local dual bodies', () => {
       for (const [label, source] of Object.entries(scripts)) {
         expect(source, label).toContain('Residual 1019');
         expect(source, label).toContain(
@@ -127,17 +134,11 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
       '../../../ai/src/server/infrastructure/runtime/ai-runtime.ts',
     );
     const localVault = readFileSync(
-      resolve(
-        sharedDir,
-        '../../../app-vue/src/modules/repository/composables/useLocalVault.ts',
-      ),
+      resolve(sharedDir, '../../../app-vue/src/modules/repository/composables/useLocalVault.ts'),
       'utf8',
     );
     const databaseScript = readFileSync(
-      resolve(
-        sharedDir,
-        '../../../database/scripts/prepare-ai-knowledge-index-pgvector.ts',
-      ),
+      resolve(sharedDir, '../../../database/scripts/prepare-ai-knowledge-index-pgvector.ts'),
       'utf8',
     );
 
@@ -172,13 +173,6 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
           'verify-ai-knowledge-index',
           readFileSync(
             resolve(sharedDir, '../../../database/scripts/verify-ai-knowledge-index.ts'),
-            'utf8',
-          ),
-        ],
-        [
-          'prepare-editor-workspace-natural-key',
-          readFileSync(
-            resolve(sharedDir, '../../../database/scripts/prepare-editor-workspace-natural-key.ts'),
             'utf8',
           ),
         ],
@@ -231,7 +225,7 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
       expect(sole).toContain(".replace(/&/g, '&amp;')");
       expect(sole).toContain(".replace(/</g, '&lt;')");
       expect(sole).toContain(".replace(/>/g, '&gt;')");
-      expect(sole).toContain('.replace(/"/g, \'&quot;\')');
+      expect(sole).toContain(".replace(/\"/g, '&quot;')");
       expect(sole).toContain(".replace(/'/g, '&#39;')");
       expect(index).toContain("export * from './escape-html'");
     });
@@ -336,13 +330,6 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
       ),
       'utf8',
     );
-    const template = readFileSync(
-      resolve(
-        sharedDir,
-        '../../../notification/src/server/infrastructure/adapters/prisma/notification-template-prisma.repository.ts',
-      ),
-      'utf8',
-    );
     const powersync = readFileSync(
       resolve(
         sharedDir,
@@ -359,11 +346,10 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
       expect(index).toContain("export * from './persistence'");
     });
 
-    it('notification prisma mappers/repos import sole without local dual bodies', () => {
+    it('notification prisma mappers import sole without local dual bodies', () => {
       for (const [label, source] of [
         ['preference-mapper', preference],
         ['notification-mapper', notification],
-        ['template-repo', template],
       ] as const) {
         expect(source, label).toContain("import { parseJsonSafe } from '@memoflow/utils/shared'");
         expect(source, label).not.toMatch(/function parseJsonSafe\b/);
@@ -398,7 +384,7 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
    * Soft residual 1038: tip focused suite numbers track Residual 1038 evidence tip (309/1339).
    * Soft residual 989: parseString/parseNumber already sole for notification + reminder.
    * Soft residual 985: goal parseBoolean remains true/false-only keep-boundary.
-   * Soft residual: scheduler parseBoolean remains keep-boundary (boolean literal + empty shapes).
+   * S4-2302B: Scheduler diagnostics query validation is contract-owned by Zod; no local parseBoolean body remains.
    * Does not flip §13.2 checkboxes.
    */
   describe('parseQueryBoolean dual retired (residual 1021)', () => {
@@ -436,11 +422,10 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
       expect(notification).toContain('parseBoolean(req.query?.isRead)');
     });
 
-    it('scheduler + goal remain keep-boundary vs this query boolean sole', () => {
-      expect(schedule).toMatch(/function parseBoolean\b/);
-      expect(schedule).toContain('value === true');
-      expect(schedule).toContain("value === ''");
-      expect(schedule).not.toContain('@memoflow/utils/shared');
+    it('scheduler uses contract-owned diagnostics query validation while goal keeps its local boolean boundary', () => {
+      expect(schedule).toContain('ScheduledInvocationDiagnosticQuerySchema');
+      expect(schedule).toContain('ScheduledInvocationDiagnosticQuerySchema.parse(req.query ?? {})');
+      expect(schedule).not.toMatch(/function parseBoolean\b/);
       expect(goalSole).toContain('Residual 985');
       expect(goalSole).toMatch(/export function parseBoolean\b/);
       expect(goalSole).not.toContain("'1'");
@@ -462,7 +447,7 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
 // --- merged from parse-query-value-dual.surface.spec.ts ---
 {
   /**
-   * Residual 989: parseString + parseNumber dual retired (notification + reminder API routes).
+   * Residual 989: parseString + parseNumber dual retired onto the shared query-value helper.
    * Residual 1021: parseBoolean dual retired for notification query filters.
    * Sole body in @memoflow/utils/shared/parse-query-value.
    * Soft residual 1038: tip focused suite numbers track Residual 1038 evidence tip (309/1339).
@@ -482,10 +467,6 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
       resolve(sharedDir, '../../../notification/src/api/routes.ts'),
       'utf8',
     );
-    const reminder = readFileSync(
-      resolve(sharedDir, '../../../reminder/src/api/routes/reminder-template.routes.ts'),
-      'utf8',
-    );
     const schedule = readFileSync(
       resolve(sharedDir, '../../../scheduler/src/api/routes.ts'),
       'utf8',
@@ -503,7 +484,7 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
       expect(index).toContain("export * from './parse-query-value'");
     });
 
-    it('notification + reminder routes import sole without local dual bodies', () => {
+    it('notification routes import sole without local dual bodies', () => {
       expect(notification).toContain('Residual 989');
       expect(notification).toContain('Residual 1021');
       expect(notification).toContain(
@@ -515,22 +496,14 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
       expect(notification).toContain('parseString(');
       expect(notification).toContain('parseNumber(');
       expect(notification).toContain('parseBoolean(');
-
-      expect(reminder).toContain('Residual 989');
-      expect(reminder).toContain(
-        "import { parseNumber, parseString } from '@memoflow/utils/shared'",
-      );
-      expect(reminder).not.toMatch(/function parseString\b/);
-      expect(reminder).not.toMatch(/function parseNumber\b/);
-      expect(reminder).toContain('parseString(');
-      expect(reminder).toContain('parseNumber(');
     });
 
-    it('scheduler route parsers remain keep-boundary (not this sole dual body)', () => {
-      expect(schedule).toMatch(/function parseString\b/);
-      expect(schedule).toMatch(/function parseNumber\b/);
-      expect(schedule).toContain("value === ''");
-      expect(schedule).not.toContain('@memoflow/utils/shared');
+    it('scheduler diagnostics routes use contract-owned query parsing without local parser bodies', () => {
+      expect(schedule).toContain('ScheduledInvocationDiagnosticQuerySchema');
+      expect(schedule).toContain('ScheduledInvocationDiagnosticQuerySchema.parse(req.query ?? {})');
+      expect(schedule).not.toMatch(/function parseString\b/);
+      expect(schedule).not.toMatch(/function parseNumber\b/);
+      expect(schedule).not.toMatch(/function parseBoolean\b/);
     });
 
     it('parses first query string entry and finite numbers', () => {
@@ -565,7 +538,7 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
    * governance-route-shared re-exports utils sole; parseStringArray remains package-local.
    * Soft residual 1069: governance parseStringArray keep-boundary surface (no force-merge).
    * Soft residual 1038: tip focused suite numbers track Residual 1038 evidence tip (309/1339).
-   * Soft residual: scheduler route parsers remain keep-boundary (empty-string shapes).
+   * S4-2302B: Scheduler diagnostics query parsing is contract-owned; local route parser bodies are retired.
    * Soft residual 1021: notification parseBoolean sole family.
    * Does not flip §13.2 checkboxes.
    */
@@ -581,10 +554,7 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
       'utf8',
     );
     const revisions = readFileSync(
-      resolve(
-        sharedDir,
-        '../../../governance/src/api/routes/governance-rule-revisions.routes.ts',
-      ),
+      resolve(sharedDir, '../../../governance/src/api/routes/governance-rule-revisions.routes.ts'),
       'utf8',
     );
     const schedule = readFileSync(
@@ -602,7 +572,9 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
 
     it('governance-route-shared re-exports utils sole without local dual bodies', () => {
       expect(govShared).toContain('Residual 1023');
-      expect(govShared).toContain("export { parseNumber, parseString } from '@memoflow/utils/shared'");
+      expect(govShared).toContain(
+        "export { parseNumber, parseString } from '@memoflow/utils/shared'",
+      );
       expect(govShared).not.toMatch(/export function parseString\b/);
       expect(govShared).not.toMatch(/export function parseNumber\b/);
       expect(govShared).toMatch(/export function parseStringArray\b/);
@@ -620,10 +592,10 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
       expect(revisions).not.toMatch(/function parseNumber\b/);
     });
 
-    it('scheduler remains keep-boundary; sole still parses arrays and finite numbers', () => {
-      expect(schedule).toMatch(/function parseString\b/);
-      expect(schedule).toContain("value === ''");
-      expect(schedule).not.toContain('@memoflow/utils/shared');
+    it('scheduler uses contract-owned diagnostics parsing; sole still parses arrays and finite numbers', () => {
+      expect(schedule).toContain('ScheduledInvocationDiagnosticQuerySchema');
+      expect(schedule).not.toMatch(/function parseString\b/);
+      expect(schedule).not.toMatch(/function parseNumber\b/);
       expect(parseString(['a', 'b'])).toBe('a');
       expect(parseNumber('12')).toBe(12);
       expect(parseNumber('nope')).toBeUndefined();
@@ -746,21 +718,21 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
     const index = readFileSync(resolve(sharedDir, 'index.ts'), 'utf8');
     const retiredAutomationPaths = [
       resolve(sharedDir, 'build-reminder-template-input.ts'),
-      resolve(sharedDir, '../../../../apps/api/src/modules/ai/backend-automation-tool-executor.adapter.ts'),
-      resolve(sharedDir, '../../../../apps/desktop/src/main/modules/ai/desktop-automation-tool-executor.adapter.ts'),
-    ];
-    const goalWorkflow = readFileSync(
       resolve(
         sharedDir,
-        '../../../app-vue/src/modules/ai/composables/useAIGoalWorkflow.ts',
+        '../../../../apps/api/src/modules/ai/backend-automation-tool-executor.adapter.ts',
       ),
+      resolve(
+        sharedDir,
+        '../../../../apps/desktop/src/main/modules/ai/desktop-automation-tool-executor.adapter.ts',
+      ),
+    ];
+    const goalWorkflow = readFileSync(
+      resolve(sharedDir, '../../../app-vue/src/modules/ai/composables/useAIGoalWorkflow.ts'),
       'utf8',
     );
     const workflowPersistence = readFileSync(
-      resolve(
-        sharedDir,
-        '../../../app-vue/src/modules/ai/composables/useAIWorkflowPersistence.ts',
-      ),
+      resolve(sharedDir, '../../../app-vue/src/modules/ai/composables/useAIWorkflowPersistence.ts'),
       'utf8',
     );
 
@@ -777,14 +749,13 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
       for (const path of retiredAutomationPaths) expect(existsSync(path), path).toBe(false);
     });
 
-    it('app-vue goal workflow + persistence import sole without local dual pattern bodies', () => {
+    it('keeps Goal vNext free of local reminder-time helper duplicates', () => {
       for (const [label, source] of [
         ['useAIGoalWorkflow', goalWorkflow],
         ['useAIWorkflowPersistence', workflowPersistence],
       ] as const) {
-        expect(source, label).toContain("from '@memoflow/utils/shared'");
-        expect(source, label).toContain('normalizeReminderTimeOfDay');
         expect(source, label).not.toMatch(/function normalizeReminderTimeOfDay\b/);
+        expect(source, label).not.toMatch(/function buildReminderStartTimestamp\b/);
         expect(source, label).not.toMatch(/const DEFAULT_REMINDER_TIME_OF_DAY\b/);
         expect(source, label).not.toMatch(/const REMINDER_TIME_OF_DAY_PATTERN\b/);
       }

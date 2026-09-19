@@ -58,4 +58,11 @@ describe('Mastra vNext architecture lock', () => {
     expect(runtime).not.toContain('event.error.message');
     expect(runtime).not.toMatch(/data:\s*\{[^}]*apiKey/s);
   });
+
+  it('keeps Mastra runtime failure projection independent from server transport', () => {
+    const runtime = readFileSync(join(ROOT, 'runtime/mastra-ai.runtime.ts'), 'utf8');
+
+    expect(runtime).toContain("from '../../../shared/ai-public-failure'");
+    expect(runtime).not.toMatch(/from\s+['"][^'"]*transport(?:\/[^'"]*)?['"]/);
+  });
 });

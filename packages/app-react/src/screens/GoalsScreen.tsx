@@ -17,14 +17,15 @@ import {
 
 const FILTERS: Array<{ label: string; value: GoalStatusFilter }> = [
   { label: 'All', value: 'all' },
-  { label: 'Active', value: GoalStatus.Active },
+  { label: 'Planned', value: GoalStatus.Planned },
+  { label: 'In progress', value: GoalStatus.InProgress },
   { label: 'Completed', value: GoalStatus.Completed },
   { label: 'Abandoned', value: GoalStatus.Abandoned },
 ];
 
 const SORT_OPTIONS: Array<{ label: string; field: GoalSortField }> = [
   { label: 'Progress', field: 'progress' },
-  { label: 'Due date', field: 'dueDate' },
+  { label: 'Target', field: 'target' },
   { label: 'Updated', field: 'updatedAt' },
 ];
 
@@ -92,7 +93,7 @@ export function GoalsScreen() {
             <PrimaryTextField
               autoCapitalize="none"
               autoCorrect={false}
-              hint="Search by name, description, or labels."
+              hint="Search by name, summary, or labels."
               onChangeText={setSearchQuery}
               placeholder="Search goals"
               value={searchQuery}
@@ -133,7 +134,9 @@ export function GoalsScreen() {
 
           {error ? (
             <SectionCard title="Goal load failed" description="Unable to load goals.">
-              <ThemedText type="small" themeColor="warning">{error}</ThemedText>
+              <ThemedText type="small" themeColor="warning">
+                {error}
+              </ThemedText>
               <PrimaryButton label="Retry" onPress={refresh} variant="secondary" />
             </SectionCard>
           ) : null}

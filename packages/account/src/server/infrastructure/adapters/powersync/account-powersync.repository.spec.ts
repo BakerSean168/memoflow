@@ -2,10 +2,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { IdentityId } from '@memoflow/domain-shared/shared';
 import { eventBus } from '@memoflow/utils/domain';
 import { Account } from '../../../domain';
-import {
-  PowerSyncAccountRepository,
-  type Transactional,
-} from './account-powersync.repository';
+import { asInstant } from '@memoflow/time';
+import { PowerSyncAccountRepository, type Transactional } from './account-powersync.repository';
 
 function createQueryable() {
   return {
@@ -30,7 +28,8 @@ describe('PowerSyncAccountRepository', () => {
     const dispatchSpy = vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
     const account = Account.create({
       id: IdentityId.generate(),
-      email: 'transaction@example.com',
+      nicknameSeed: 'Transaction User',
+      now: asInstant(1_700_000_000_000),
     });
     const repository = new PowerSyncAccountRepository(defaultDb);
 

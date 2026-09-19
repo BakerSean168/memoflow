@@ -11,7 +11,7 @@ const source = readFileSync(
 describe('Task vNext panel adaptation', () => {
   it('keeps one primary create action and uses container CSS rather than business branching', () => {
     expect(source).toContain('data-primary-action="create-task"');
-    expect(source).toContain('data-testid="create-task-template-button"');
+    expect(source).toContain('data-testid="create-task-plan-button"');
     expect(source).toContain('@2xl/panel');
     expect(source).not.toContain('usePanelWidth');
     expect(source).not.toContain('isNarrow');

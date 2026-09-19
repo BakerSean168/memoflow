@@ -1,13 +1,18 @@
 /**
  * Planner/Calendar composition root.
  *
- * Temporal Engine worker state, queueing and ScheduleTask use cases live in
+ * Temporal Engine worker state, invocation attempts, and queueing live in
  * @memoflow/scheduler. This module owns CalendarEntry product state plus the
  * Calendar reliability workers (rebuild/outbox delivery).
  */
 
 import type { IScheduleRepository } from '../domain';
-import type { ScheduleApplicationPort, ScheduleEventApplicationPort } from '../application';
+import {
+  createSchedulePortableCapability,
+  type ScheduleApplicationPort,
+  type ScheduleEventApplicationPort,
+  type SchedulePortableCapability,
+} from '../application';
 import { ScheduleEventApplicationService } from '../application/services/schedule-event-application-service';
 import { ScheduleConflictDetectionService } from '../application/services/schedule-conflict-detection-service';
 import { ScheduleConflictResolutionService } from '../application/services/schedule-conflict-resolution-service';
@@ -40,8 +45,7 @@ export interface ScheduleModuleRuntimeContribution {
 }
 
 export type ScheduleRuntimeContributionsInput =
-  | ScheduleModuleRuntimeContribution
-  | readonly ScheduleModuleRuntimeContribution[];
+  ScheduleModuleRuntimeContribution | readonly ScheduleModuleRuntimeContribution[];
 
 export interface ScheduleModuleDependencies {
   readonly scheduleRepository: IScheduleRepository;
@@ -64,6 +68,7 @@ export interface ScheduleModuleUseCases {
 
 export interface ScheduleModuleInstance {
   readonly scheduleRepository: IScheduleRepository;
+  readonly portableCapability: SchedulePortableCapability;
   readonly useCases: ScheduleModuleUseCases;
   readonly api: ScheduleApplicationPort;
   readonly eventApi: ScheduleEventApplicationPort;
@@ -76,11 +81,9 @@ function toCreateSchedulePayload(data: CreateScheduleRequest, identityId: string
   return {
     identityId,
     title: data.name,
-    startTime: data.startTime,
-    endTime: data.endTime,
+    range: data.range,
     description: data.description,
     location: data.location,
-    priority: data.priority,
     attendees: data.attendees,
   };
 }
@@ -88,11 +91,9 @@ function toCreateSchedulePayload(data: CreateScheduleRequest, identityId: string
 function toUpdateSchedulePayload(data: UpdateScheduleRequest) {
   return {
     title: data.name,
-    startTime: data.startTime,
-    endTime: data.endTime,
+    range: data.range,
     description: data.description,
     location: data.location,
-    priority: data.priority,
     attendees: data.attendees,
     expectedVersion: data.expectedVersion,
   };
@@ -102,7 +103,9 @@ export function createScheduleUseCases(
   dependencies: ScheduleModuleDependencies,
 ): ScheduleModuleUseCases {
   const scheduleEventService = new ScheduleEventApplicationService(dependencies.scheduleRepository);
-  const conflictDetectionService = new ScheduleConflictDetectionService(dependencies.scheduleRepository);
+  const conflictDetectionService = new ScheduleConflictDetectionService(
+    dependencies.scheduleRepository,
+  );
   return {
     scheduleEventService,
     conflictDetectionService,
@@ -218,7 +221,10 @@ export function createScheduleModule(
   const eventApi: ScheduleEventApplicationPort = {
     createEvent: async (data, ctx) =>
       resultify(
-        () => useCases.scheduleEventService.createSchedule(toCreateSchedulePayload(data, ctx.identityId)),
+        () =>
+          useCases.scheduleEventService.createSchedule(
+            toCreateSchedulePayload(data, ctx.identityId),
+          ),
         'Failed to create schedule event',
       ),
     getEvent: async (id, ctx) =>
@@ -229,6 +235,11 @@ export function createScheduleModule(
         }
         return event;
       }, 'Failed to get schedule event'),
+    listAllEvents: async (ctx) =>
+      resultify(
+        () => useCases.scheduleEventService.getSchedulesByAccount(ctx.identityId),
+        'Failed to list schedule events',
+      ),
     listEvents: async (query, _ctx) =>
       resultify(
         () =>
@@ -278,6 +289,7 @@ export function createScheduleModule(
 
   return {
     scheduleRepository,
+    portableCapability: createSchedulePortableCapability(scheduleRepository),
     useCases,
     api,
     eventApi,
@@ -321,7 +333,15 @@ function mapRebuildOutboxToTimelineEntry(item: ScheduleRebuildOutboxDTO): Operat
 
 function normalizeRebuildStatus(
   status: string,
-): 'pending' | 'running' | 'succeeded' | 'skipped' | 'failed' | 'retryable' | 'dead_letter' | 'cancelled' {
+):
+  | 'pending'
+  | 'running'
+  | 'succeeded'
+  | 'skipped'
+  | 'failed'
+  | 'retryable'
+  | 'dead_letter'
+  | 'cancelled' {
   switch (status) {
     case 'processing':
       return 'running';

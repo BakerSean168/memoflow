@@ -4,4 +4,9 @@ export { AIEvaluationReportController } from './ai-evaluation-report.controller'
 export { AIProviderConfigController } from './ai-provider-config.controller';
 export { AIChatController } from './ai-chat.controller';
 export { AIKnowledgeQueryController } from './ai-knowledge-query.controller';
-export { toAIControllerFailure } from './ai-controller-errors';
+export {
+  toAIControllerFailure,
+  toAITransportFailure,
+  type AITransportFailure,
+  type AITransportFailureOptions,
+} from './ai-controller-errors';

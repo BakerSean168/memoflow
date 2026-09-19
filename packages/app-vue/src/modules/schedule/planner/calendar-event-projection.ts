@@ -1,4 +1,4 @@
-import type { GoalClientDTO } from '@memoflow/contracts/goal';
+import { goalTimeframeEndBoundary, type GoalClientDTO } from '@memoflow/contracts/goal';
 import type {
   CalendarEntryClientDTO,
   CalendarEventProjection,
@@ -7,19 +7,16 @@ import type {
   ScheduleCalendarEventProjection,
   TaskCalendarEventProjection,
 } from '@memoflow/contracts/schedule';
-import type { TaskInstanceClientDTO, TaskTemplateClientDTO } from '@memoflow/contracts/task';
-import { asInstant, defaultTime, type Instant, type Ymd } from '@memoflow/time';
-
-const MINUTE_MS = 60_000;
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
+import type { Instant, Ymd } from '@memoflow/time';
+import { getProductTime } from '../../../shared/utils/product-time';
 
 export interface PlannerProductTimePort {
-  toYmd(instant: Instant): Ymd;
-  startOfDay(instant: Instant): Instant;
+  combine(date: Ymd, hm: string): Instant | null;
 }
 
 export const defaultPlannerProductTimePort: PlannerProductTimePort = {
-  toYmd: (instant) => defaultTime.calendar.toYmd(instant),
-  startOfDay: (instant) => defaultTime.calendar.startOfDay(instant),
+  combine: (date, hm) => getProductTime().input.combine(date, hm) as Instant | null,
 };
 
 export interface RoutineWallClockPlannerOccurrence {
@@ -37,116 +34,133 @@ export interface RoutineWallClockPlannerOccurrence {
 
 export interface PlannerReadProjectionInput {
   readonly calendarEntries: readonly CalendarEntryClientDTO[];
-  readonly taskOccurrences: readonly TaskInstanceClientDTO[];
-  readonly taskTemplates: readonly TaskTemplateClientDTO[];
+  readonly taskOccurrences: readonly TaskOccurrenceClientDTO[];
+  readonly taskPlans: readonly TaskPlanClientDTO[];
   readonly goals: readonly GoalClientDTO[];
   readonly routineOccurrences: readonly RoutineWallClockPlannerOccurrence[];
   readonly time?: PlannerProductTimePort;
 }
 
-function addMinutes(start: Instant, minutes: number): Instant {
-  return asInstant(Number(start) + minutes * MINUTE_MS);
-}
-
 export function projectCalendarEntry(
   entry: CalendarEntryClientDTO,
 ): ScheduleCalendarEventProjection {
-  return {
+  const range = entry.range;
+  const shared = {
     identityId: String(entry.identityId),
-    sourceType: 'schedule',
+    sourceType: 'schedule' as const,
     sourceId: String(entry.id),
-    start: asInstant(Number(entry.startTime)),
-    end: asInstant(Number(entry.endTime)),
-    allDay: false,
     title: entry.title,
+    occupancy: range.kind === 'Timed' ? ('blocking' as const) : ('non-blocking' as const),
     displayMetadata: {
-      semantic: 'calendar-entry',
+      semantic: 'calendar-entry' as const,
       subtitle: entry.location ?? null,
-      tone: entry.hasConflict ? 'warning' : 'accent',
-      hasConflict: entry.hasConflict,
+      tone: 'accent' as const,
     },
     editableCapabilities: { move: true, resize: true },
     ownerCommandTarget: {
-      ownerType: 'schedule.calendar-entry',
+      ownerType: 'schedule.calendar-entry' as const,
       ownerId: String(entry.id),
     },
     revision: entry.version,
   };
+
+  return range.kind === 'Timed'
+    ? { ...shared, allDay: false, start: range.start, end: range.end }
+    : { ...shared, allDay: true, start: range.start, end: range.end };
+}
+
+function taskResultSubtitle(result: TaskOccurrenceClientDTO['result']): string | null {
+  if (result == null) return null;
+  return result.kind === 'Completed' ? (result.note ?? null) : (result.reason ?? null);
+}
+
+function requireTaskWallClockInstant(
+  occurrence: TaskOccurrenceClientDTO,
+  time: PlannerProductTimePort,
+  hm: string,
+): Instant {
+  const resolved = time.combine(occurrence.scheduleSnapshot.date, hm);
+  if (resolved == null) {
+    throw new TypeError(
+      `Task occurrence '${occurrence.id}' wall-clock time '${occurrence.scheduleSnapshot.date} ${hm}' does not resolve`,
+    );
+  }
+  return resolved;
 }
 
 export function projectTaskOccurrence(
-  occurrence: TaskInstanceClientDTO,
-  template: TaskTemplateClientDTO | undefined,
+  occurrence: TaskOccurrenceClientDTO,
+  template: TaskPlanClientDTO | undefined,
   time: PlannerProductTimePort = defaultPlannerProductTimePort,
 ): TaskCalendarEventProjection | null {
   if (occurrence.deletedAt != null) return null;
 
-  const anchor = asInstant(Number(occurrence.instanceDate));
   const editable = occurrence.status === 'Pending' || occurrence.status === 'InProgress';
+  const timing = occurrence.scheduleSnapshot.timing;
   const base = {
     identityId: String(occurrence.identityId),
     sourceType: 'task' as const,
     sourceId: String(occurrence.id),
     title: template?.name ?? String(occurrence.id),
+    occupancy:
+      timing.kind === 'Window'
+        ? ('blocking' as const)
+        : timing.kind === 'AllDay'
+          ? ('non-blocking' as const)
+          : ('marker' as const),
     displayMetadata: {
       semantic: 'task-occurrence' as const,
-      subtitle: occurrence.comment,
+      subtitle: taskResultSubtitle(occurrence.result),
       tone: occurrence.isOverdue ? ('warning' as const) : ('default' as const),
       status: occurrence.status,
     },
     editableCapabilities: { move: editable, resize: false },
     ownerCommandTarget: {
-      ownerType: 'task.instance' as const,
+      ownerType: 'task.occurrence' as const,
       ownerId: String(occurrence.id),
     },
     revision: occurrence.version,
   };
 
-  if (occurrence.timeConfig.timeType === 'AllDay') {
+  if (timing.kind === 'AllDay') {
     return {
       ...base,
       allDay: true,
-      start: time.toYmd(anchor),
+      start: occurrence.scheduleSnapshot.date,
       end: null,
     };
   }
 
-  const dayStart = time.startOfDay(anchor);
-  if (occurrence.timeConfig.timeType === 'TimePoint') {
-    if (occurrence.timeConfig.timePoint == null) {
-      throw new TypeError(`Task occurrence '${occurrence.id}' is TimePoint without timePoint`);
-    }
+  if (timing.kind === 'At') {
     return {
       ...base,
       allDay: false,
-      start: addMinutes(dayStart, occurrence.timeConfig.timePoint),
+      start: requireTaskWallClockInstant(occurrence, time, timing.time),
       end: null,
     };
   }
 
-  const range = occurrence.timeConfig.timeRange;
-  if (!range || range.start >= range.end) {
-    throw new TypeError(`Task occurrence '${occurrence.id}' has an invalid TimeRange`);
-  }
   return {
     ...base,
     allDay: false,
-    start: addMinutes(dayStart, range.start),
-    end: addMinutes(dayStart, range.end),
+    start: requireTaskWallClockInstant(occurrence, time, timing.start),
+    end: requireTaskWallClockInstant(occurrence, time, timing.end),
   };
 }
 
 export function projectGoalDates(
   goal: GoalClientDTO,
-  time: PlannerProductTimePort = defaultPlannerProductTimePort,
+  _time: PlannerProductTimePort = defaultPlannerProductTimePort,
 ): GoalCalendarEventProjection[] {
   if (goal.deletedAt != null) return [];
 
-  const editable = goal.status === 'Active' && goal.archivedAt == null;
+  const editable =
+    (goal.status === 'Planned' || goal.status === 'InProgress') && goal.archivedAt == null;
   const base = {
     identityId: String(goal.identityId),
     sourceType: 'goal' as const,
     title: goal.name,
+    occupancy: 'marker' as const,
     editableCapabilities: { move: editable, resize: false },
     ownerCommandTarget: { ownerType: 'goal.goal' as const, ownerId: String(goal.id) },
     revision: goal.version,
@@ -158,7 +172,7 @@ export function projectGoalDates(
       ...base,
       sourceId: `${String(goal.id)}:start-date`,
       allDay: true,
-      start: time.toYmd(asInstant(Number(goal.startDate))),
+      start: goal.startDate,
       end: null,
       displayMetadata: {
         semantic: 'goal-start',
@@ -169,17 +183,19 @@ export function projectGoalDates(
     });
   }
 
-  if (goal.dueDate != null) {
+  if (goal.target != null) {
+    const targetEditable = editable && goal.target.kind === 'day';
     events.push({
       ...base,
-      sourceId: `${String(goal.id)}:due-date`,
+      sourceId: `${String(goal.id)}:target`,
       allDay: true,
-      start: time.toYmd(asInstant(Number(goal.dueDate))),
+      start: goalTimeframeEndBoundary(goal.target),
       end: null,
+      editableCapabilities: { move: targetEditable, resize: false },
       displayMetadata: {
-        semantic: 'goal-deadline',
+        semantic: 'goal-target',
         subtitle: null,
-        tone: editable ? 'default' : 'muted',
+        tone: targetEditable ? 'default' : 'muted',
         status: goal.status,
       },
     });
@@ -199,6 +215,7 @@ export function projectRoutineWallClockOccurrence(
     end: occurrence.endAt ?? null,
     allDay: false,
     title: occurrence.title,
+    occupancy: 'marker',
     displayMetadata: {
       semantic: 'routine-wall-clock',
       subtitle: occurrence.subtitle ?? null,
@@ -221,15 +238,13 @@ export function projectPlannerReadModel(
   input: PlannerReadProjectionInput,
 ): CalendarEventProjection[] {
   const time = input.time ?? defaultPlannerProductTimePort;
-  const templateById = new Map(
-    input.taskTemplates.map((template) => [String(template.id), template]),
-  );
+  const templateById = new Map(input.taskPlans.map((template) => [String(template.id), template]));
   const projected: CalendarEventProjection[] = [
     ...input.calendarEntries.map(projectCalendarEntry),
     ...input.taskOccurrences.flatMap((occurrence) => {
       const event = projectTaskOccurrence(
         occurrence,
-        templateById.get(String(occurrence.templateId)),
+        templateById.get(String(occurrence.planId)),
         time,
       );
       return event ? [event] : [];

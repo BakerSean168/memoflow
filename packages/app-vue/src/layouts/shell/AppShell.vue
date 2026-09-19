@@ -34,7 +34,6 @@ import WindowHeader, { type WindowHeaderCapsule } from './WindowHeader.vue';
 import GoalCapsulePreview from './previews/GoalCapsulePreview.vue';
 import TaskCapsulePreview from './previews/TaskCapsulePreview.vue';
 import NoteCapsulePreview from './previews/NoteCapsulePreview.vue';
-import ReminderCapsulePreview from './previews/ReminderCapsulePreview.vue';
 import ScheduleCapsulePreview from './previews/ScheduleCapsulePreview.vue';
 import NotificationCapsulePreview from '../../modules/notification/components/NotificationCapsulePreview.vue';
 import ConversationSidebar from './ConversationSidebar.vue';
@@ -68,6 +67,7 @@ import {
   MODULE_CAPSULES_KEY,
 } from '../../di/keys';
 import { defaultModuleCapsules } from '../../di/navigation';
+import { getProductTime } from '../../shared/utils/product-time';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -208,7 +208,6 @@ const conversations = computed<ConversationSummary[]>(
 
 function conversationTimestamp(item: ConversationSummary): number {
   const raw =
-    (item as { lastMessageAt?: unknown }).lastMessageAt ??
     (item as { updatedAt?: unknown }).updatedAt ??
     (item as { createdAt?: unknown }).createdAt ??
     0;
@@ -218,10 +217,9 @@ function conversationTimestamp(item: ConversationSummary): number {
 
 /** 今天 / 近 7 天 / 更早（本地时区自然日边界，V2 §5）。 */
 const conversationGroups = computed(() => {
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
-  const todayMs = startOfToday.getTime();
-  const weekMs = todayMs - 6 * 24 * 60 * 60 * 1000;
+  const time = getProductTime();
+  const todayMs = Number(time.calendar.startOfDay(Date.now()));
+  const weekMs = Number(time.calendar.addDays(todayMs, -6));
 
   const buckets: Record<'today' | 'last7Days' | 'earlier', { id: string; title: string }[]> = {
     today: [],
@@ -620,7 +618,7 @@ function openHeaderNotePreview(closePreview: () => void, noteId: string): void {
   });
 }
 
-function openPanelRoute(_module: 'goal' | 'task' | 'reminder', path: string) {
+function openPanelRoute(_module: 'goal' | 'task', path: string) {
   void router.push(path).catch(() => {});
 }
 
@@ -731,12 +729,6 @@ function panelCacheKey(
           @select="openHeaderNotePreview(closePreview, $event)"
         />
       </template>
-      <template #capsule-preview-reminder="{ closePreview }">
-        <ReminderCapsulePreview
-          @view-all="openHeaderPreviewModule(closePreview, { id: 'reminder', route: '/reminders' })"
-          @select="openHeaderPreviewModule(closePreview, { id: 'reminder', route: '/reminders' })"
-        />
-      </template>
       <template #capsule-preview-schedule="{ closePreview }">
         <ScheduleCapsulePreview
           @view-all="openHeaderPreviewModule(closePreview, { id: 'schedule', route: '/schedule' })"
@@ -784,7 +776,6 @@ function panelCacheKey(
           @open-search="handleNewConversation"
           @open-settings="openSettings"
           @open-account="openAccount"
-          @open-help="openSettings('/settings?tab=advanced')"
           @open-cloud-connection="openCloudConnection"
           @logout="() => void handleLogout()"
           @start-resize="startSidebarResize"

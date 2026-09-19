@@ -6,7 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@memoflow/ui-vue-shadcn';
 import { Badge } from '@memoflow/ui-vue-shadcn';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import { GenderType, type AccountProfileDTO } from '@memoflow/contracts/account';
-import { formatProductDate, getProductTime } from '../../../shared/utils/product-time';
+import { getProductTime } from '../../../shared/utils/product-time';
 
 interface ProfileCardProps {
   profile: AccountProfileDTO;
@@ -49,13 +49,10 @@ const genderText = computed(() => {
   }
 });
 
-/** ADR-037: birthday is Ymd (or legacy epoch); display via product-time. */
-const formatBirthday = (birthday: string | number | null) => {
-  if (birthday == null || birthday === '') return t('account.gender.notSet');
-  if (typeof birthday === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(birthday)) {
-    return getProductTime().format.ymdDisplay(birthday);
-  }
-  return formatProductDate(birthday, t('account.gender.notSet'));
+/** Birthday is a date-only Ymd value; never reinterpret it as an Instant. */
+const formatBirthday = (birthday: AccountProfileDTO['birthday']) => {
+  if (birthday == null) return t('account.gender.notSet');
+  return getProductTime().format.ymdDisplay(birthday);
 };
 
 const handleEdit = () => {

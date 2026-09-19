@@ -16,72 +16,71 @@ import express, {
 import { randomUUID } from 'node:crypto';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
 import { vi } from 'vitest';
-import { TaskTemplateController } from '../server/transport/task-template.controller';
-import { TaskInstanceController } from '../server/transport/task-instance.controller';
+import { createTimeContext } from '@memoflow/time';
+import { TaskPlanController } from '../server/transport/task-plan.controller';
+import { TaskOccurrenceController } from '../server/transport/task-occurrence.controller';
 import {
   createTaskModule,
   type TaskModuleDependencies,
 } from '../server/infrastructure/task.module';
 import { createTaskTransportHandlers } from '../server/transport';
 import { registerTaskRoutes } from '../api/routes';
-import type { ITaskTemplateRepository } from '../server/domain/repositories/i-task-template-repository';
-import type { ITaskInstanceRepository } from '../server/domain/repositories/i-task-instance-repository';
+import type { ITaskPlanRepository } from '../server/domain/repositories/i-task-plan-repository';
+import type { ITaskOccurrenceRepository } from '../server/domain/repositories/i-task-occurrence-repository';
 
 export const JWT_SECRET = 'smoke-test-jwt-secret-key-at-least-32-chars';
 export const TEST_IDENTITY_ID = 'IdentityId_550e8400-e29b-41d4-a716-446655440001';
 
 export interface TaskSmokeApp {
   app: Express;
-  templateRepo: ITaskTemplateRepository;
-  instanceRepo: ITaskInstanceRepository;
+  templateRepo: ITaskPlanRepository;
+  instanceRepo: ITaskOccurrenceRepository;
   token: string;
 }
 
-export function createMockTemplateRepo(): ITaskTemplateRepository {
+export function createMockTemplateRepo(): ITaskPlanRepository {
   return {
     save: vi.fn().mockResolvedValue(undefined),
     findByIdForIdentity: vi.fn().mockResolvedValue(null),
-    findByIdWithChildren: vi.fn().mockResolvedValue(null),
     findByIdentityId: vi.fn().mockResolvedValue([]),
     findByStatus: vi.fn().mockResolvedValue([]),
     findActiveTemplates: vi.fn().mockResolvedValue([]),
     findByGoalId: vi.fn().mockResolvedValue([]),
     findByLabelIdsAll: vi.fn().mockResolvedValue([]),
     replaceLabels: vi.fn().mockResolvedValue([]),
-    findNeedGenerateInstances: vi.fn().mockResolvedValue([]),
+    findActiveRecurringPlansForMaterialization: vi.fn().mockResolvedValue([]),
     delete: vi.fn().mockResolvedValue(undefined),
     softDelete: vi.fn().mockResolvedValue(undefined),
     restore: vi.fn().mockResolvedValue(undefined),
     findOneTimeTasks: vi.fn().mockResolvedValue([]),
     findRecurringTasks: vi.fn().mockResolvedValue([]),
-    findOverdueTasks: vi.fn().mockResolvedValue([]),
-    findByKeyResultId: vi.fn().mockResolvedValue([]),
-    findUpcomingTasks: vi.fn().mockResolvedValue([]),
-    findTodayTasks: vi.fn().mockResolvedValue([]),
+    findByGoalAndKeyResultId: vi.fn().mockResolvedValue([]),
     countTasks: vi.fn().mockResolvedValue(0),
     saveBatch: vi.fn().mockResolvedValue(undefined),
     deleteBatch: vi.fn().mockResolvedValue(undefined),
-    findAllTemplateRefs: vi.fn(async () => []),
+    findAllPlanRefs: vi.fn(async () => []),
   };
 }
 
-export function createMockInstanceRepo(): ITaskInstanceRepository {
+export function createMockInstanceRepo(): ITaskOccurrenceRepository {
   return {
     save: vi.fn().mockResolvedValue(undefined),
     saveMany: vi.fn().mockResolvedValue(undefined),
     findByIdForIdentity: vi.fn().mockResolvedValue(null),
-    findByTemplateId: vi.fn().mockResolvedValue([]),
+    findByPlanId: vi.fn().mockResolvedValue([]),
     findByIdentityId: vi.fn().mockResolvedValue([]),
     findByDateRange: vi.fn().mockResolvedValue([]),
     findByStatus: vi.fn().mockResolvedValue([]),
-    findOverdueInstances: vi.fn().mockResolvedValue([]),
+    findOverdueOccurrences: vi.fn().mockResolvedValue([]),
     delete: vi.fn().mockResolvedValue(undefined),
     deleteMany: vi.fn().mockResolvedValue(undefined),
-    deleteByTemplateId: vi.fn().mockResolvedValue(undefined),
-    countFutureInstances: vi.fn().mockResolvedValue(0),
-    findByTemplateIdAndDateRange: vi.fn().mockResolvedValue([]),
-    getTemplateStats: vi.fn().mockResolvedValue({}),
-    deleteIncompleteInstancesFrom: vi.fn().mockResolvedValue(0),
+    deleteByPlanId: vi.fn().mockResolvedValue(undefined),
+    countFutureOccurrences: vi.fn().mockResolvedValue(0),
+    findByPlanIdAndDateRange: vi.fn().mockResolvedValue([]),
+    getPlanStats: vi.fn().mockResolvedValue({}),
+    getStatusCountsForPlan: vi.fn().mockResolvedValue({ total: 0, completed: 0, missed: 0, skipped: 0, pending: 0, inProgress: 0 }),
+    findRecentByPlan: vi.fn().mockResolvedValue([]),
+    deleteIncompleteOccurrencesFrom: vi.fn().mockResolvedValue(0),
   };
 }
 
@@ -109,16 +108,19 @@ export function createTaskSmokeApp(): TaskSmokeApp {
   const templateRepo = createMockTemplateRepo();
   const instanceRepo = createMockInstanceRepo();
   const taskModule = createTaskModule({
-    taskTemplateRepository: templateRepo,
-    taskInstanceRepository: instanceRepo,
+    taskPlanRepository: templateRepo,
+    taskOccurrenceRepository: instanceRepo,
     taskWriteTransactionRunner: {
-      run: (work) => work({ templateRepository: templateRepo, instanceRepository: instanceRepo }),
+      run: (work) => work({ planRepository: templateRepo, occurrenceRepository: instanceRepo }),
+    },
+    userTimeContextPort: {
+      getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
     },
   } satisfies TaskModuleDependencies);
   const handlers = createTaskTransportHandlers(taskModule.api);
 
-  const templateController = new TaskTemplateController(handlers.template);
-  const instanceController = new TaskInstanceController(handlers.instance);
+  const templateController = new TaskPlanController(handlers.plan);
+  const instanceController = new TaskOccurrenceController(handlers.occurrence);
 
   const app = express();
   app.use(express.json());

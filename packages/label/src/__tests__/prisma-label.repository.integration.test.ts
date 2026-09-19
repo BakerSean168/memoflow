@@ -1,81 +1,108 @@
-import { afterAll, beforeEach, describe, expect, it } from 'vitest'
-import { cleanAll, disconnectPrisma, getPrisma, seedAccount } from '@memoflow/test-utils/setup/integration-helpers'
-import { LabelService } from '../application/label-service'
-import { PrismaLabelRepository } from '../infrastructure/prisma/prisma-label.repository'
+import {
+  cleanAll,
+  disconnectPrisma,
+  getPrisma,
+  seedAccount,
+} from '@memoflow/test-utils/setup/integration-helpers';
+import { afterAll, beforeEach, describe, expect, it } from 'vitest';
+import { LabelService } from '../application/label-service';
+import { PrismaLabelRepository } from '../infrastructure/prisma/prisma-label.repository';
 
-async function seedGoalAndTask(identityId: string, suffix: string) {
-  const prisma = await getPrisma()
-  const goalId = `goal-${suffix}`
-  const taskTemplateId = `task-${suffix}`
-  await prisma.goal.create({ data: { id: goalId, identityId, name: `Goal ${suffix}` } })
-  await prisma.taskTemplate.create({
-    data: { id: taskTemplateId, identityId, name: `Task ${suffix}`, status: 'Active' },
-  })
-  return { goalId, taskTemplateId }
-}
-
-describe('PrismaLabelRepository integration', () => {
+describe('PrismaLabelRepository registry integration', () => {
   afterAll(async () => {
-    await cleanAll()
-    await disconnectPrisma()
-  })
+    await cleanAll();
+    await disconnectPrisma();
+  });
 
   beforeEach(async () => {
-    await cleanAll()
-  })
+    await cleanAll();
+  });
 
-  it('shares one identity-owned label across Goal and Task and supports AND filtering', async () => {
-    const identityId = 'label-int-primary'
-    await seedAccount({ id: identityId })
-    const { goalId, taskTemplateId } = await seedGoalAndTask(identityId, 'primary')
-    const repository = new PrismaLabelRepository(await getPrisma())
-    let nextId = 0
-    const service = new LabelService(repository, { idFactory: () => `label-${++nextId}` })
+  it('keeps CRUD/search/rename identity-scoped with normalized substring search and stable ordering', async () => {
+    const identityId = 'label-int-registry';
+    const otherIdentityId = 'label-int-registry-other';
+    await seedAccount({ id: identityId });
+    await seedAccount({ id: otherIdentityId });
+    const repository = new PrismaLabelRepository(await getPrisma());
+    let nextId = 0;
+    const service = new LabelService(repository, {
+      idFactory: () => `label-reg-${++nextId}`,
+      clock: { now: () => 1000 + nextId },
+    });
+    const otherService = new LabelService(repository, {
+      clock: { now: () => 2000 },
+      idFactory: () => 'label-other-work',
+    });
 
-    const work = await service.create({ identityId, name: '#工作' })
-    const deep = await service.create({ identityId, name: 'Deep Work' })
-
-    await service.setGoalLabels({ identityId, goalId, labelIds: [work.id, deep.id] })
-    await service.setTaskLabels({ identityId, taskTemplateId, labelIds: [work.id, deep.id] })
-
-    expect(await repository.listGoalLabels(identityId, goalId)).toEqual(
-      expect.arrayContaining([expect.objectContaining({ id: work.id }), expect.objectContaining({ id: deep.id })]),
-    )
-    expect(await repository.listTaskLabels(identityId, taskTemplateId)).toEqual(
-      expect.arrayContaining([expect.objectContaining({ id: work.id }), expect.objectContaining({ id: deep.id })]),
-    )
-    expect(await repository.findGoalIdsMatchingAllLabels(identityId, [work.id, deep.id])).toEqual([goalId])
-    expect(await repository.findTaskTemplateIdsMatchingAllLabels(identityId, [work.id, deep.id])).toEqual([taskTemplateId])
-    const goalBatch = await repository.listGoalLabelsByGoalIds(identityId, [goalId])
-    const taskBatch = await repository.listTaskLabelsByTaskTemplateIds(identityId, [taskTemplateId])
-    expect(goalBatch.get(goalId)?.map((label) => label.id).sort()).toEqual([deep.id, work.id].sort())
-    expect(taskBatch.get(taskTemplateId)?.map((label) => label.id).sort()).toEqual([deep.id, work.id].sort())
-  })
-
-  it('enforces normalized identity-scoped uniqueness in the database', async () => {
-    const identityId = 'label-int-normalization'
-    await seedAccount({ id: identityId })
-    const repository = new PrismaLabelRepository(await getPrisma())
-    let nextId = 0
-    const service = new LabelService(repository, { idFactory: () => `label-norm-${++nextId}` })
-
-    await service.create({ identityId, name: '  ＷＯＲＫ  ' })
-    await expect(service.create({ identityId, name: 'work' })).rejects.toThrow()
-  })
-
-  it('rejects cross-identity label assignment atomically', async () => {
-    const ownerIdentity = 'label-int-owner'
-    const foreignIdentity = 'label-int-foreign'
-    await seedAccount({ id: ownerIdentity })
-    await seedAccount({ id: foreignIdentity })
-    const { goalId } = await seedGoalAndTask(ownerIdentity, 'owner')
-    const repository = new PrismaLabelRepository(await getPrisma())
-    const foreignService = new LabelService(repository, { idFactory: () => 'label-foreign' })
-    const foreign = await foreignService.create({ identityId: foreignIdentity, name: 'Foreign' })
+    const work = await service.create({ identityId, name: 'Work' });
+    const workout = await service.create({ identityId, name: 'Workout' });
+    const home = await service.create({ identityId, name: 'Home', color: '#AABBCC' });
+    expect(home.color).toBe('#aabbcc');
+    await otherService.create({ identityId: otherIdentityId, name: 'Work' });
 
     await expect(
-      repository.replaceGoalLabels(ownerIdentity, goalId, [foreign.id]),
-    ).rejects.toThrow('do not belong to the identity')
-    expect(await repository.listGoalLabels(ownerIdentity, goalId)).toEqual([])
-  })
-})
+      service.update({
+        identityId,
+        labelId: home.id,
+        name: ' Personal ',
+        color: '#ABCDEF',
+      }),
+    ).resolves.toMatchObject({
+      id: home.id,
+      name: 'Personal',
+      normalizedName: 'personal',
+      color: '#abcdef',
+      updatedAt: 1003,
+    });
+
+    const searched = await service.list({ identityId, search: '  ＷＯＲＫ ', limit: 50 });
+    expect(searched.map((item) => item.id)).toEqual([work.id, workout.id]);
+    expect(searched.every((item) => item.identityId === identityId)).toBe(true);
+    await expect(repository.findById(otherIdentityId, work.id)).resolves.toBeNull();
+
+    await expect(service.delete({ identityId, labelId: work.id })).resolves.toBe(true);
+    await expect(service.delete({ identityId, labelId: work.id })).resolves.toBe(false);
+    await expect(repository.findById(identityId, work.id)).resolves.toBeNull();
+  });
+
+  it('enforces normalized-name uniqueness per identity while allowing the same name in another identity', async () => {
+    const identityId = 'label-int-normalization';
+    const otherIdentityId = 'label-int-normalization-other';
+    await seedAccount({ id: identityId });
+    await seedAccount({ id: otherIdentityId });
+    const repository = new PrismaLabelRepository(await getPrisma());
+    let nextId = 0;
+    const service = new LabelService(repository, {
+      clock: { now: () => 3000 + nextId },
+      idFactory: () => `label-norm-${++nextId}`,
+    });
+
+    await service.create({ identityId, name: '  ＷＯＲＫ  ' });
+    await expect(service.create({ identityId, name: 'work' })).rejects.toThrow();
+    await expect(
+      service.create({ identityId: otherIdentityId, name: 'work' }),
+    ).resolves.toMatchObject({
+      identityId: otherIdentityId,
+      normalizedName: 'work',
+    });
+  });
+
+  it('batch-loads exact normalized names without list-scan limits and deduplicates lookup keys', async () => {
+    const identityId = 'label-int-batch';
+    await seedAccount({ id: identityId });
+    const repository = new PrismaLabelRepository(await getPrisma());
+    let nextId = 0;
+    const service = new LabelService(repository, {
+      clock: { now: () => 4000 + nextId },
+      idFactory: () => `label-batch-${++nextId}`,
+    });
+    const work = await service.create({ identityId, name: 'Work' });
+    const health = await service.create({ identityId, name: 'Health' });
+    await service.create({ identityId, name: 'Other' });
+
+    const found = await repository.findByNormalizedNames(identityId, ['work', 'health', 'work']);
+
+    expect(found.map((item) => item.id).sort()).toEqual([health.id, work.id].sort());
+    await expect(repository.findByNormalizedNames(identityId, [])).resolves.toEqual([]);
+  });
+});

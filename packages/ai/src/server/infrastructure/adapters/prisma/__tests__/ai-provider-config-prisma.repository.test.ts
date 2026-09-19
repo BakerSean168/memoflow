@@ -1,14 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { AIProviderType, type AIProviderConfigServerDTO } from '@memoflow/contracts/ai';
+import type { AIProviderConfigServerDTO } from '@memoflow/contracts/ai';
 import type { PrismaClient } from '@memoflow/database';
 
 import { AIProviderConfigPrismaRepository } from '../ai-provider-config-prisma.repository';
-import { AISecretCipher } from '../../../security/ai-secret-cipher';
 
 describe('AIProviderConfigPrismaRepository', () => {
-  it('decrypts api keys when reading and stores encrypted values when writing', async () => {
-    const cipher = new AISecretCipher('test-secret');
+  it('reads and writes only the opaque credential reference', async () => {
     const aiProviderConfig = {
       findUnique: vi.fn(async () => ({ identityId: 'identity-1' })),
       updateMany: vi.fn(async () => ({ count: 1 })),
@@ -17,9 +15,9 @@ describe('AIProviderConfigPrismaRepository', () => {
         id: 'provider-1',
         identityId: 'identity-1',
         name: 'Main provider',
-        providerType: AIProviderType.OpenAICompatible,
+        providerDefinitionId: 'openai',
         baseUrl: 'https://api.openai.com/v1',
-        apiKeyEncrypted: cipher.encrypt('plain-secret'),
+        credentialRef: 'credential-test',
         defaultModel: 'gpt-4o-mini',
         availableModels: '[]',
         isActive: true,
@@ -42,20 +40,19 @@ describe('AIProviderConfigPrismaRepository', () => {
 
     const repository = new AIProviderConfigPrismaRepository(
       prisma as unknown as PrismaClient,
-      cipher,
     );
 
     const provider = await repository.findByIdForIdentity('identity-1', 'provider-1');
 
-    expect(provider?.apiKey).toBe('plain-secret');
+    expect(provider?.credentialRef).toBe('credential-test');
 
     await repository.save({
       id: 'provider-1' as AIProviderConfigServerDTO['id'],
       identityId: 'identity-1' as AIProviderConfigServerDTO['identityId'],
       name: 'Main provider',
-      providerType: AIProviderType.OpenAICompatible,
+      providerDefinitionId: 'openai',
       baseUrl: 'https://api.openai.com/v1',
-      apiKey: 'plain-secret',
+      credentialRef: 'credential-test' as AIProviderConfigServerDTO['credentialRef'],
       defaultModel: 'gpt-4o-mini',
       isActive: true,
       isDefault: true,
@@ -69,10 +66,10 @@ describe('AIProviderConfigPrismaRepository', () => {
     expect(prisma.aiProviderConfig.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
         create: expect.objectContaining({
-          apiKeyEncrypted: expect.stringMatching(/^enc_v3:primary:/),
+          credentialRef: 'credential-test',
         }),
         update: expect.objectContaining({
-          apiKeyEncrypted: expect.stringMatching(/^enc_v3:primary:/),
+          credentialRef: 'credential-test',
         }),
       }),
     );
@@ -84,7 +81,7 @@ describe('AIProviderConfigPrismaRepository', () => {
     expect(upsertInput.update).not.toHaveProperty('availableModels');
   });
 
-  it('constructs without a cipher/key and only fails fast when a secret is actually encrypted', async () => {
+  it('constructs without a cipher/key because repositories never resolve credentials', async () => {
     const originalKey = process.env.AI_PROVIDER_ENCRYPTION_KEY;
     delete process.env.AI_PROVIDER_ENCRYPTION_KEY;
     try {
@@ -108,25 +105,22 @@ describe('AIProviderConfigPrismaRepository', () => {
       const repository = new AIProviderConfigPrismaRepository(prisma as unknown as PrismaClient);
       await expect(repository.findByIdForIdentity('identity-1', 'provider-1')).resolves.toBeNull();
 
-      // Only when we actually persist a secret does the missing key fail fast.
-      await expect(
-        repository.save({
+      await expect(repository.save({
           id: 'provider-1' as AIProviderConfigServerDTO['id'],
           identityId: 'identity-1' as AIProviderConfigServerDTO['identityId'],
           name: 'Main provider',
-          providerType: AIProviderType.OpenAICompatible,
+          providerDefinitionId: 'openai',
           baseUrl: 'https://api.openai.com/v1',
-          apiKey: 'plain-secret',
+          credentialRef: 'credential-test' as AIProviderConfigServerDTO['credentialRef'],
           defaultModel: 'gpt-4o-mini',
-              isActive: true,
+          isActive: true,
           isDefault: true,
           priority: 100,
           version: 1,
           createdAt: Date.now(),
           updatedAt: Date.now(),
           deletedAt: null,
-        }),
-      ).rejects.toThrow(/AI_PROVIDER_ENCRYPTION_KEY/);
+        })).resolves.toBe('SAVED');
     } finally {
       if (originalKey === undefined) {
         delete process.env.AI_PROVIDER_ENCRYPTION_KEY;
@@ -137,7 +131,6 @@ describe('AIProviderConfigPrismaRepository', () => {
   });
 
   it('selects a default through one transaction and never clears it for an unavailable provider', async () => {
-    const cipher = new AISecretCipher('test-secret');
     const aiProviderConfig = {
       findFirst: vi.fn(async () => ({ id: 'provider-2' })),
       updateMany: vi.fn(async () => ({ count: 1 })),
@@ -150,10 +143,7 @@ describe('AIProviderConfigPrismaRepository', () => {
       aiProviderConfig,
       $transaction: vi.fn(async (callback) => callback(transactionClient)),
     };
-    const repository = new AIProviderConfigPrismaRepository(
-      prisma as unknown as PrismaClient,
-      cipher,
-    );
+    const repository = new AIProviderConfigPrismaRepository(prisma as unknown as PrismaClient);
 
     await expect(repository.setDefaultForIdentity('identity-1', 'provider-2')).resolves.toBe('SET');
     expect(prisma.$transaction).toHaveBeenCalledTimes(1);
@@ -170,7 +160,6 @@ describe('AIProviderConfigPrismaRepository', () => {
   });
 
   it('uses a blocking identity lock so competing selections serialize instead of failing', async () => {
-    const cipher = new AISecretCipher('test-secret');
     const aiProviderConfig = {
       findFirst: vi.fn(async () => ({ id: 'provider-2' })),
       updateMany: vi.fn(async () => ({ count: 1 })),
@@ -182,10 +171,7 @@ describe('AIProviderConfigPrismaRepository', () => {
     const prisma = {
       $transaction: vi.fn(async (callback) => callback(transactionClient)),
     };
-    const repository = new AIProviderConfigPrismaRepository(
-      prisma as unknown as PrismaClient,
-      cipher,
-    );
+    const repository = new AIProviderConfigPrismaRepository(prisma as unknown as PrismaClient);
 
     await expect(repository.setDefaultForIdentity('identity-1', 'provider-2')).resolves.toBe('SET');
     expect(transactionClient.$queryRawUnsafe).toHaveBeenCalledWith(
@@ -197,7 +183,6 @@ describe('AIProviderConfigPrismaRepository', () => {
   });
 
   it('rolls back clearing the old default when selecting the new default fails', async () => {
-    const cipher = new AISecretCipher('test-secret');
     const persisted = { provider1: true, provider2: false };
     const prisma = {
       $transaction: vi.fn(async (callback) => {
@@ -222,10 +207,7 @@ describe('AIProviderConfigPrismaRepository', () => {
         return result;
       }),
     };
-    const repository = new AIProviderConfigPrismaRepository(
-      prisma as unknown as PrismaClient,
-      cipher,
-    );
+    const repository = new AIProviderConfigPrismaRepository(prisma as unknown as PrismaClient);
 
     await expect(repository.setDefaultForIdentity('identity-1', 'provider-2')).rejects.toThrow(
       'injected write failure',

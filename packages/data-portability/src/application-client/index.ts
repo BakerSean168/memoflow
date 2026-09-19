@@ -7,10 +7,10 @@ import type { IResultHttpClient } from '@memoflow/http-client';
 import type {
   ExportServerHeldDataDisclosureReq,
   ExportServerHeldDataDisclosureRes,
-  ExportUserDataReq,
-  ExportUserDataRes,
-  ImportUserDataReq,
-  ImportUserDataRes,
+  ExportPortableDataV3Req,
+  ExportPortableDataV3Res,
+  PortableDataV3ImportReq,
+  PortableDataV3ImportRes,
 } from '@memoflow/contracts/data-portability';
 import type { IDataPortabilityApiClient } from './ports/data-portability-api-client.port';
 import { createDataPortabilityHttpAdapter } from '../infrastructure-client';
@@ -25,13 +25,16 @@ export type DataPortabilityClientPort = IDataPortabilityApiClient;
 
 export class DataPortabilityClientService implements IDataPortabilityApiClient {
   constructor(private readonly apiClient: IDataPortabilityApiClient) {
-    this.exportUserData = this.exportUserData.bind(this);
+    this.exportPortableDataV3 = this.exportPortableDataV3.bind(this);
     this.exportServerHeldDataDisclosure = this.exportServerHeldDataDisclosure.bind(this);
-    this.importUserData = this.importUserData.bind(this);
+    this.dryRunPortableDataV3 = this.dryRunPortableDataV3.bind(this);
+    this.applyPortableDataV3 = this.applyPortableDataV3.bind(this);
   }
 
-  exportUserData(data: ExportUserDataReq): Promise<Result<ExportUserDataRes>> {
-    return this.apiClient.exportUserData(data);
+  exportPortableDataV3(
+    data: ExportPortableDataV3Req,
+  ): Promise<Result<ExportPortableDataV3Res>> {
+    return this.apiClient.exportPortableDataV3(data);
   }
 
   exportServerHeldDataDisclosure(
@@ -40,8 +43,16 @@ export class DataPortabilityClientService implements IDataPortabilityApiClient {
     return this.apiClient.exportServerHeldDataDisclosure(data);
   }
 
-  importUserData(data: ImportUserDataReq): Promise<Result<ImportUserDataRes>> {
-    return this.apiClient.importUserData(data);
+  dryRunPortableDataV3(
+    data: PortableDataV3ImportReq,
+  ): Promise<Result<PortableDataV3ImportRes>> {
+    return this.apiClient.dryRunPortableDataV3(data);
+  }
+
+  applyPortableDataV3(
+    data: PortableDataV3ImportReq,
+  ): Promise<Result<PortableDataV3ImportRes>> {
+    return this.apiClient.applyPortableDataV3(data);
   }
 }
 

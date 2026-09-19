@@ -4,9 +4,7 @@ import type {
   AIProviderReplacementCommitOutcome,
   IAIProviderOnboardingCommitPort,
 } from '../../../application/ports/provider-onboarding-commit.port';
-import type { IAIProviderSecretVault } from '../../../application/ports/provider-secret-vault.port';
-import { AISecretCipher } from '../../security/ai-secret-cipher';
-import { PowerSyncAIProviderConfigMapper } from './mappers';
+import type { AIProviderConnectionServerDTO } from '@memoflow/contracts/ai';
 
 interface OnboardingCommitRow {
   identity_id: string;
@@ -14,6 +12,23 @@ interface OnboardingCommitRow {
   target_provider_id: string | null;
   expires_at: number;
   consumed_at: number | null;
+}
+
+interface ProviderPersistenceRow {
+  id: string;
+  identity_id: string;
+  name: string;
+  provider_definition_id: string;
+  base_url: string;
+  credential_ref: string;
+  default_model: string | null;
+  is_active: number;
+  is_default: number;
+  priority: number;
+  version: number;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
 }
 
 class ReplacementRollback extends Error {
@@ -30,24 +45,13 @@ class ReplacementRollback extends Error {
  * rolls the one-time consume back too.
  */
 export class PowerSyncAIProviderOnboardingCommitAdapter implements IAIProviderOnboardingCommitPort {
-  private cipher: IAIProviderSecretVault | null;
-
-  constructor(
-    private readonly db: IElectronDatabase,
-    secretCipher?: IAIProviderSecretVault,
-  ) {
-    this.cipher = secretCipher ?? null;
-  }
-
-  private get secretCipher(): IAIProviderSecretVault {
-    return (this.cipher ??= AISecretCipher.fromEnv());
-  }
+  constructor(private readonly db: IElectronDatabase) {}
 
   async commit(
     input: Parameters<IAIProviderOnboardingCommitPort['commit']>[0],
   ): Promise<AIProviderOnboardingCommitOutcome> {
     if (String(input.provider.identityId) !== input.identityId) return 'SESSION_UNAVAILABLE';
-    const row = PowerSyncAIProviderConfigMapper.toPersistence(input.provider, this.secretCipher);
+    const row = toPersistence(input.provider);
 
     try {
       return await this.db.writeTransaction(async (tx) => {
@@ -93,9 +97,16 @@ export class PowerSyncAIProviderOnboardingCommitAdapter implements IAIProviderOn
           );
         }
 
+        const credential = await tx.execute(
+          `UPDATE ai_provider_secrets SET expires_at = NULL, updated_at = ?
+           WHERE id = ? AND identity_id = ? AND revoked_at IS NULL`,
+          [input.now, row.credential_ref, input.identityId],
+        );
+        if (credential.rowsAffected !== 1) throw new Error('AI provider credential is unavailable');
+
         await tx.execute(
           `INSERT INTO ai_provider_configs (
-            id, identity_id, name, provider_type, base_url, api_key_encrypted,
+            id, identity_id, name, provider_definition_id, base_url, credential_ref,
             default_model, is_active, is_default, priority,
             version, created_at, updated_at, deleted_at
           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -103,9 +114,9 @@ export class PowerSyncAIProviderOnboardingCommitAdapter implements IAIProviderOn
             row.id,
             row.identity_id,
             row.name,
-            row.provider_type,
+            row.provider_definition_id,
             row.base_url,
-            row.api_key_encrypted,
+            row.credential_ref,
             row.default_model,
             row.is_active,
             row.is_default,
@@ -154,8 +165,8 @@ export class PowerSyncAIProviderOnboardingCommitAdapter implements IAIProviderOn
           return 'SESSION_UNAVAILABLE' as const;
         }
 
-        const current = await tx.getOptional<{ id: string; version: number }>(
-          `SELECT id, version FROM ai_provider_configs
+        const current = await tx.getOptional<{ id: string; version: number; credential_ref: string }>(
+          `SELECT id, version, credential_ref FROM ai_provider_configs
            WHERE id = ? AND identity_id = ? AND deleted_at IS NULL
            LIMIT 1`,
           [input.targetProviderId, input.identityId],
@@ -181,11 +192,11 @@ export class PowerSyncAIProviderOnboardingCommitAdapter implements IAIProviderOn
 
         const updated = await tx.execute(
           `UPDATE ai_provider_configs
-           SET base_url = ?, api_key_encrypted = ?, default_model = ?, version = ?, updated_at = ?
+           SET base_url = ?, credential_ref = ?, default_model = ?, version = ?, updated_at = ?
            WHERE id = ? AND identity_id = ? AND version = ? AND deleted_at IS NULL`,
           [
             input.replacement.baseUrl,
-            this.secretCipher.encrypt(input.replacement.apiKey),
+            input.replacement.credentialRef,
             input.replacement.defaultModel,
             input.replacement.version,
             input.replacement.updatedAt,
@@ -197,6 +208,19 @@ export class PowerSyncAIProviderOnboardingCommitAdapter implements IAIProviderOn
         if (updated.rowsAffected !== 1) {
           throw new ReplacementRollback('CONFLICT');
         }
+        const credential = await tx.execute(
+          `UPDATE ai_provider_secrets SET expires_at = NULL, updated_at = ?
+           WHERE id = ? AND identity_id = ? AND revoked_at IS NULL`,
+          [input.now, input.replacement.credentialRef, input.identityId],
+        );
+        if (credential.rowsAffected !== 1) throw new Error('AI provider credential is unavailable');
+
+        const revoked = await tx.execute(
+          `UPDATE ai_provider_secrets SET revoked_at = ?, updated_at = ?
+           WHERE id = ? AND identity_id = ? AND revoked_at IS NULL`,
+          [input.now, input.now, input.previousCredentialRef, input.identityId],
+        );
+        if (revoked.rowsAffected !== 1) throw new Error('AI provider credential is unavailable');
 
         return 'REPLACED' as const;
       });
@@ -216,4 +240,23 @@ function isUniqueConstraintError(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false;
   const code = (error as { code?: unknown }).code;
   return typeof code === 'string' && SQLITE_UNIQUE_CONSTRAINT_CODES.has(code);
+}
+
+function toPersistence(config: AIProviderConnectionServerDTO): ProviderPersistenceRow {
+  return {
+    id: String(config.id),
+    identity_id: String(config.identityId),
+    name: config.name,
+    provider_definition_id: config.providerDefinitionId,
+    base_url: config.baseUrl,
+    credential_ref: String(config.credentialRef),
+    default_model: config.defaultModel,
+    is_active: config.isActive ? 1 : 0,
+    is_default: config.isDefault ? 1 : 0,
+    priority: config.priority,
+    version: config.version,
+    created_at: new Date(config.createdAt).toISOString(),
+    updated_at: new Date(config.updatedAt).toISOString(),
+    deleted_at: config.deletedAt ? new Date(config.deletedAt).toISOString() : null,
+  };
 }

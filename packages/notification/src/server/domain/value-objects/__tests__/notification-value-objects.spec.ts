@@ -1,22 +1,18 @@
+import { describe, expect, it } from 'vitest';
 import {
   CategoryPreference,
-  ChannelError,
-  ChannelStatus,
-  ChannelResponse,
   ContentType,
-  DoNotDisturbConfig,
   NotificationAction,
-  NotificationActionType,
   NotificationCategory,
   NotificationChannelType,
   NotificationMetadata,
   NotificationType,
-  RateLimit,
-  RelatedEntityType,
+  QuietHours,
 } from '..';
+import { asHm, requireTimeZoneId } from '@memoflow/time';
 
 describe('notification shared value objects', () => {
-  it('handles category preferences and quiet hours', () => {
+  it('handles category preferences without owning delivery execution state', () => {
     const preference = CategoryPreference.createDefault()
       .updateChannels({ email: true })
       .setImportance(['Critical']);
@@ -24,182 +20,279 @@ describe('notification shared value objects', () => {
     expect(preference.enabled).toBe(true);
     expect(preference.channels.email).toBe(true);
     expect(preference.importance).toEqual(['Critical']);
-    expect(preference.hasAnyChannel).toBe(true);
-    expect(preference.isEffective).toBe(true);
     expect(CategoryPreference.fromDTO(preference.toDTO()).toDTO()).toEqual(preference.toDTO());
-
-    const disabled = preference.setEnabled(false).updateChannels({
-      inApp: false,
-      email: false,
-      push: false,
-      sms: false,
-    });
-    expect(disabled.hasAnyChannel).toBe(false);
-    expect(disabled.isEffective).toBe(false);
-    expect(() => CategoryPreference.create({ enabled: true, importance: ['Critical'] } as never))
-      .toThrow('Channels configuration is required');
-
-    const quiet = DoNotDisturbConfig.createNightMode()
-      .setTimeRange('21:00', '06:00')
-      .setDaysOfWeek([1, 2, 3, 4, 5]);
-
-    expect(quiet.enabled).toBe(true);
-    expect(quiet.daysOfWeek).toEqual([1, 2, 3, 4, 5]);
-    expect(quiet.isWeekdaysOnly).toBe(true);
-    expect(quiet.isWeekendsOnly).toBe(false);
-    expect(quiet.isEveryDay).toBe(false);
-    expect(quiet.isActiveAt(new Date('2026-04-27T22:15:00'))).toBe(true);
-    expect(quiet.isActiveAt(new Date('2026-04-27T12:00:00'))).toBe(false);
-    expect(DoNotDisturbConfig.createDefault().isEveryDay).toBe(true);
-    expect(DoNotDisturbConfig.createDefault().setEnabled(false).isActiveAt(new Date())).toBe(false);
-    expect(
-      DoNotDisturbConfig.create({
-        enabled: true,
-        startTime: '09:00',
-        endTime: '17:00',
-        daysOfWeek: [0, 6],
-      }).isWeekendsOnly,
-    ).toBe(true);
-    expect(
-      () =>
-        DoNotDisturbConfig.create({
-          enabled: true,
-          startTime: '25:00',
-          endTime: '08:00',
-          daysOfWeek: [1],
-        }),
-    ).toThrow('Invalid startTime format');
-    expect(
-      () =>
-        DoNotDisturbConfig.create({
-          enabled: true,
-          startTime: '08:00',
-          endTime: '09:00',
-          daysOfWeek: [7],
-        }),
-    ).toThrow('daysOfWeek values must be 0-6');
   });
 
-  it('serializes metadata, limits, actions, and channel payloads', () => {
-    const metadata = NotificationMetadata.createDefault()
-      .setIcon('bell')
-      .setColor('#fff')
-      .setBadge(3);
-    expect(metadata.hasIcon).toBe(true);
-    expect(metadata.hasImage).toBe(false);
-    expect(metadata.hasSound).toBe(false);
+  it('evaluates QuietHours from its explicit IANA timezone, independent of host timezone', () => {
+    const quiet = QuietHours.create({
+      enabled: true,
+      timeZone: requireTimeZoneId('America/New_York'),
+      weeklyWindows: [{ daysOfWeek: [6], start: asHm('22:00'), end: asHm('08:00') }],
+    });
+    // Saturday 2030-03-09 23:00 EST. The window ends Sunday 08:00 EDT after DST jumps.
+    const activeAt = new Date('2030-03-10T04:00:00.000Z');
+
+    const previousHostTz = process.env.TZ;
+    try {
+      process.env.TZ = 'UTC';
+      const utcHostActive = quiet.isActiveAt(activeAt);
+      const utcHostEnd = quiet.nextInactiveAt(activeAt);
+
+      process.env.TZ = 'Asia/Tokyo';
+      const tokyoHostActive = quiet.isActiveAt(activeAt);
+      const tokyoHostEnd = quiet.nextInactiveAt(activeAt);
+
+      expect(utcHostActive).toBe(true);
+      expect(tokyoHostActive).toBe(true);
+      expect(utcHostEnd?.toISOString()).toBe('2030-03-10T12:00:00.000Z');
+      expect(tokyoHostEnd?.toISOString()).toBe(utcHostEnd?.toISOString());
+    } finally {
+      if (previousHostTz === undefined) delete process.env.TZ;
+      else process.env.TZ = previousHostTz;
+    }
+  });
+
+  it('uses the start weekday for the after-midnight half of a weekly window', () => {
+    const quiet = QuietHours.create({
+      enabled: true,
+      timeZone: requireTimeZoneId('Asia/Tokyo'),
+      weeklyWindows: [{ daysOfWeek: [1], start: asHm('23:00'), end: asHm('07:00') }],
+    });
+
+    expect(quiet.isActiveAt(new Date('2026-08-24T15:30:00.000Z'))).toBe(true); // Tue 00:30 JST, Monday window.
+    expect(quiet.isActiveAt(new Date('2026-08-25T15:30:00.000Z'))).toBe(false); // Wed 00:30 JST.
+  });
+
+  it('serializes metadata and typed actions without generic ApiCall/Custom payloads', () => {
+    const metadata = NotificationMetadata.createDefault().setIcon('bell').setColor('#fff').setBadge(3);
     expect(NotificationMetadata.fromDTO(metadata.toDTO()).toDTO()).toEqual(metadata.toDTO());
 
-    const limit = RateLimit.createDefault().setLimits(5, 10);
-    expect(limit.enabled).toBe(true);
-    expect(limit.wouldExceed(5, 0)).toBe(true);
-    expect(limit.wouldExceed(0, 10)).toBe(true);
-    expect(limit.setEnabled(false).wouldExceed(100, 100)).toBe(false);
-    expect(RateLimit.fromDTO(limit.toDTO()).toDTO()).toEqual(limit.toDTO());
-    expect(RateLimit.createUnlimited().isUnlimited).toBe(true);
-    expect(() => RateLimit.create({ enabled: true, maxPerHour: -1, maxPerDay: 5 })).toThrow(
-      'maxPerHour must be non-negative',
-    );
-    expect(() => RateLimit.create({ enabled: true, maxPerHour: 10, maxPerDay: -1 })).toThrow(
-      'maxPerDay must be non-negative',
-    );
-    expect(() => RateLimit.create({ enabled: true, maxPerHour: 10, maxPerDay: 5 })).toThrow(
-      'maxPerHour cannot exceed maxPerDay',
-    );
-
-    const error = ChannelError.of('TIMEOUT', 'retry later', { retryAfter: 10 });
-    expect(error.code).toBe('TIMEOUT');
-    expect(error.message).toBe('retry later');
-    expect(error.hasDetails).toBe(true);
-    expect(error.isRetryable).toBe(true);
-    expect(ChannelError.fromDTO(error.toDTO()).toDTO()).toEqual(error.toDTO());
-    expect(() => ChannelError.create({ code: '', message: 'x' })).toThrow('Error code is required');
-    expect(() => ChannelError.create({ code: 'X', message: '' })).toThrow('Error message is required');
-
-    const response = ChannelResponse.success('msg-1', { ok: true });
-    expect(response.messageId).toBe('msg-1');
-    expect(response.statusCode).toBe(200);
-    expect(response.isSuccess).toBe(true);
-    expect(response.hasMessageId).toBe(true);
-    expect(response.hasData).toBe(true);
-    expect(ChannelResponse.fromDTO(response.toDTO()).toDTO()).toEqual(response.toDTO());
-    expect(ChannelResponse.create({ messageId: null, statusCode: null }).isSuccess).toBe(false);
-    expect(ChannelResponse.failed(500).hasMessageId).toBe(false);
-    expect(ChannelResponse.failed(500).hasData).toBe(false);
-
-    const action = NotificationAction.of('open', 'Open', NotificationActionType.Navigate, {
-      href: '/x',
+    const navigate = NotificationAction.create({
+      kind: 'navigate',
+      actionKey: 'open',
+      labelKey: 'notification.action.open',
+      destination: { route: '/tasks/1', params: { from: 'notification' } },
     });
-    expect(action.id).toBe('open');
-    expect(action.label).toBe('Open');
-    expect(action.type).toBe(NotificationActionType.Navigate);
-    expect(action.payload).toEqual({ href: '/x' });
-    expect(NotificationAction.fromDTO(action.toDTO()).toDTO()).toEqual(action.toDTO());
-    expect(() =>
-      NotificationAction.create({
-        id: '',
-        label: 'Open',
-        type: NotificationActionType.Navigate,
-      }),
-    ).toThrow('Action ID is required');
-    expect(() =>
-      NotificationAction.create({
-        id: 'open',
-        label: '',
-        type: NotificationActionType.Navigate,
-      }),
-    ).toThrow('Action label is required');
+    expect(NotificationAction.fromDTO(navigate.toDTO()).toDTO()).toEqual(navigate.toDTO());
+
+    const owner = NotificationAction.create({
+      kind: 'owner-command',
+      actionKey: 'complete',
+      labelKey: 'routine.action.complete',
+      owner: { type: 'routine-occurrence', id: 'occ-1' },
+      commandKey: 'routine.complete',
+      input: { routineId: 'routine-1', occurrenceKey: 'occ-1' },
+    });
+    expect(owner.kind).toBe('owner-command');
+
+    expect(() => NotificationAction.create({
+      kind: 'owner-command',
+      actionKey: 'bad',
+      labelKey: 'bad',
+      owner: { type: 'routine-occurrence', id: 'occ-1' },
+      commandKey: 'routine.complete',
+      input: (() => undefined) as never,
+    })).toThrow('Owner command input must be a JSON value');
   });
 
-  it('covers delivery-channel status, content, and routing enum helpers', () => {
-    expect(ChannelStatus.getAll()).toEqual([
-      ChannelStatus.Pending,
-      ChannelStatus.Sent,
-      ChannelStatus.Delivered,
-      ChannelStatus.Failed,
-      ChannelStatus.Cancelled,
-    ]);
-    expect(ChannelStatus.of('Pending')).toBe(ChannelStatus.Pending);
-    expect(ChannelStatus.isSuccessful(ChannelStatus.Delivered)).toBe(true);
-    expect(ChannelStatus.isFailed(ChannelStatus.Failed)).toBe(true);
-    expect(ChannelStatus.isProcessing(ChannelStatus.Sent)).toBe(true);
-    expect(() => ChannelStatus.of('Unknown')).toThrow('Invalid ChannelStatus');
+  it('covers category preference validation, immutability, and effectiveness helpers', () => {
+    const disabled = CategoryPreference.createDefault()
+      .setEnabled(false)
+      .updateChannels({ inApp: false, email: false, push: false, sms: false });
 
+    expect(disabled.enabled).toBe(false);
+    expect(disabled.hasAnyChannel).toBe(false);
+    expect(disabled.isEffective).toBe(false);
+    expect(disabled.channels).toEqual({ inApp: false, email: false, push: false, sms: false });
+    expect(disabled.importance).toEqual(['Important', 'Moderate']);
+    expect(CategoryPreference.createDefault().isEffective).toBe(true);
+    expect(() => CategoryPreference.create({
+      enabled: true,
+      channels: null as never,
+      importance: [],
+    })).toThrow('Channels configuration is required');
+  });
+
+  it('covers enum helper validation and semantic classifiers', () => {
     expect(ContentType.getAll()).toContain(ContentType.Article);
     expect(ContentType.of('Video')).toBe(ContentType.Video);
+    expect(ContentType.isValid('Image')).toBe(true);
+    expect(ContentType.isValid('nope')).toBe(false);
     expect(ContentType.isMedia(ContentType.Video)).toBe(true);
+    expect(ContentType.isMedia(ContentType.Image)).toBe(true);
+    expect(ContentType.isMedia(ContentType.Article)).toBe(false);
     expect(ContentType.isDocumentation(ContentType.Article)).toBe(true);
-    expect(() => ContentType.of('Bad')).toThrow('Invalid ContentType');
-
-    expect(NotificationActionType.getAll()).toContain(NotificationActionType.Custom);
-    expect(NotificationActionType.of('ApiCall')).toBe(NotificationActionType.ApiCall);
-    expect(NotificationActionType.isNavigation(NotificationActionType.Navigate)).toBe(true);
-    expect(NotificationActionType.isApiCall(NotificationActionType.ApiCall)).toBe(true);
-    expect(NotificationActionType.needsProcessing(NotificationActionType.Custom)).toBe(true);
-    expect(() => NotificationActionType.of('Bad')).toThrow('Invalid NotificationActionType');
+    expect(ContentType.isDocumentation(ContentType.Resource)).toBe(true);
+    expect(ContentType.isDocumentation(ContentType.Video)).toBe(false);
+    expect(() => ContentType.of('nope')).toThrow('Invalid ContentType');
 
     expect(NotificationCategory.getAll()).toContain(NotificationCategory.System);
     expect(NotificationCategory.of('Task')).toBe(NotificationCategory.Task);
+    expect(NotificationCategory.isValid('Goal')).toBe(true);
+    expect(NotificationCategory.isValid('nope')).toBe(false);
     expect(NotificationCategory.isSystemCategory(NotificationCategory.System)).toBe(true);
-    expect(NotificationCategory.isBusiness(NotificationCategory.Goal)).toBe(true);
-    expect(() => NotificationCategory.of('Bad')).toThrow('Invalid NotificationCategory');
+    expect(NotificationCategory.isSystemCategory(NotificationCategory.Task)).toBe(false);
+    expect(NotificationCategory.isBusiness(NotificationCategory.Task)).toBe(true);
+    expect(NotificationCategory.isBusiness(NotificationCategory.System)).toBe(false);
+    expect(NotificationCategory.isBusiness(NotificationCategory.Other)).toBe(false);
+    expect(() => NotificationCategory.of('nope')).toThrow('Invalid NotificationCategory');
 
     expect(NotificationChannelType.getAll()).toContain(NotificationChannelType.Webhook);
-    expect(NotificationChannelType.of('Email')).toBe(NotificationChannelType.Email);
-    expect(NotificationChannelType.isRealtime(NotificationChannelType.Push)).toBe(true);
+    expect(NotificationChannelType.of('Desktop')).toBe(NotificationChannelType.Desktop);
+    expect(NotificationChannelType.isValid('Email')).toBe(true);
+    expect(NotificationChannelType.isValid('nope')).toBe(false);
+    for (const realtime of [
+      NotificationChannelType.InApp,
+      NotificationChannelType.Push,
+      NotificationChannelType.Sms,
+      NotificationChannelType.Desktop,
+    ]) {
+      expect(NotificationChannelType.isRealtime(realtime)).toBe(true);
+    }
+    expect(NotificationChannelType.isRealtime(NotificationChannelType.Email)).toBe(false);
+    expect(NotificationChannelType.isAsync(NotificationChannelType.Email)).toBe(true);
     expect(NotificationChannelType.isAsync(NotificationChannelType.Webhook)).toBe(true);
-    expect(() => NotificationChannelType.of('Bad')).toThrow('Invalid NotificationChannelType');
+    expect(NotificationChannelType.isAsync(NotificationChannelType.InApp)).toBe(false);
+    expect(() => NotificationChannelType.of('nope')).toThrow('Invalid NotificationChannelType');
 
     expect(NotificationType.getAll()).toContain(NotificationType.Social);
-    expect(NotificationType.of('Error')).toBe(NotificationType.Error);
+    expect(NotificationType.of('System')).toBe(NotificationType.System);
+    expect(NotificationType.isValid('Error')).toBe(true);
+    expect(NotificationType.isValid('nope')).toBe(false);
     expect(NotificationType.isSystemType(NotificationType.System)).toBe(true);
+    expect(NotificationType.isSystemType(NotificationType.Info)).toBe(false);
     expect(NotificationType.isError(NotificationType.Error)).toBe(true);
-    expect(() => NotificationType.of('Bad')).toThrow('Invalid NotificationType');
+    expect(NotificationType.isError(NotificationType.Info)).toBe(false);
+    expect(() => NotificationType.of('nope')).toThrow('Invalid NotificationType');
 
-    expect(RelatedEntityType.getAll()).toContain(RelatedEntityType.Reminder);
-    expect(RelatedEntityType.of('Goal')).toBe(RelatedEntityType.Goal);
-    expect(RelatedEntityType.isTimeRelated(RelatedEntityType.Schedule)).toBe(true);
-    expect(RelatedEntityType.isGoalRelated(RelatedEntityType.Goal)).toBe(true);
-    expect(() => RelatedEntityType.of('Bad')).toThrow('Invalid RelatedEntityType');
+  });
+
+  it('covers NotificationMetadata getters, derived flags, and immutable setters', () => {
+    const metadata = NotificationMetadata.create({
+      icon: 'bell',
+      image: 'hero.png',
+      color: '#123456',
+      sound: 'ding',
+      badge: 4,
+      data: { source: 'test' },
+    });
+
+    expect(metadata.icon).toBe('bell');
+    expect(metadata.image).toBe('hero.png');
+    expect(metadata.color).toBe('#123456');
+    expect(metadata.sound).toBe('ding');
+    expect(metadata.badge).toBe(4);
+    expect(metadata.data).toEqual({ source: 'test' });
+    expect(metadata.hasIcon).toBe(true);
+    expect(metadata.hasImage).toBe(true);
+    expect(metadata.hasSound).toBe(true);
+    expect(metadata.setIcon(null).hasIcon).toBe(false);
+    expect(metadata.setColor(null).color).toBeNull();
+    expect(metadata.setBadge(null).badge).toBeNull();
+    expect(metadata.toDTO()).toEqual({
+      icon: 'bell',
+      image: 'hero.png',
+      color: '#123456',
+      sound: 'ding',
+      badge: 4,
+      data: { source: 'test' },
+    });
+  });
+
+  it('rejects malformed typed notification actions and covers archive/navigate cloning', () => {
+    expect(() => NotificationAction.create({
+      kind: 'archive',
+      actionKey: ' ',
+      labelKey: 'archive',
+    })).toThrow('Action actionKey is required');
+    expect(() => NotificationAction.create({
+      kind: 'archive',
+      actionKey: 'archive',
+      labelKey: ' ',
+    })).toThrow('Action labelKey is required');
+    expect(() => NotificationAction.create({
+      kind: 'navigate',
+      actionKey: 'open',
+      labelKey: 'open',
+      destination: { route: ' ' },
+    })).toThrow('Navigate destination.route is required');
+    expect(() => NotificationAction.create({
+      kind: 'owner-command',
+      actionKey: 'run',
+      labelKey: 'run',
+      owner: { type: '', id: 'owner-1' },
+      commandKey: 'run',
+    })).toThrow('Owner command owner reference is required');
+    expect(() => NotificationAction.create({
+      kind: 'owner-command',
+      actionKey: 'run',
+      labelKey: 'run',
+      owner: { type: 'routine', id: 'owner-1' },
+      commandKey: ' ',
+    })).toThrow('Owner command commandKey is required');
+
+    const archive = NotificationAction.create({
+      kind: 'archive',
+      actionKey: 'archive',
+      labelKey: 'archive',
+    });
+    expect(archive.actionKey).toBe('archive');
+    expect(archive.labelKey).toBe('archive');
+    expect(archive.toDTO()).toEqual({ kind: 'archive', actionKey: 'archive', labelKey: 'archive' });
+
+    const navigate = NotificationAction.create({
+      kind: 'navigate',
+      actionKey: 'open',
+      labelKey: 'open',
+      destination: { route: '/inbox' },
+    });
+    const dto = navigate.toDTO();
+    expect(dto.kind).toBe('navigate');
+    if (dto.kind === 'navigate') expect(dto.destination.params).toBeUndefined();
+  });
+
+  it('validates QuietHours configuration and covers daytime/disabled boundaries', () => {
+    const utc = requireTimeZoneId('UTC');
+    const disabled = QuietHours.disabled(utc);
+    expect(disabled.isActiveAt(new Date('2026-09-17T12:00:00.000Z'))).toBe(false);
+    expect(disabled.nextInactiveAt(new Date('2026-09-17T12:00:00.000Z'))).toBeNull();
+    expect(QuietHours.fromDTO(disabled.toDTO()).toDTO()).toEqual(disabled.toDTO());
+
+    const daytime = QuietHours.create({
+      enabled: true,
+      timeZone: utc,
+      weeklyWindows: [{ daysOfWeek: [4], start: asHm('09:00'), end: asHm('17:00') }],
+    });
+    expect(daytime.isActiveAt(new Date('2026-09-17T10:00:00.000Z'))).toBe(true);
+    expect(daytime.nextInactiveAt(new Date('2026-09-17T10:00:00.000Z'))?.toISOString())
+      .toBe('2026-09-17T17:00:00.000Z');
+    expect(daytime.isActiveAt(new Date('2026-09-17T18:00:00.000Z'))).toBe(false);
+    expect(daytime.nextInactiveAt(new Date('2026-09-17T18:00:00.000Z'))).toBeNull();
+
+    expect(() => QuietHours.create({
+      enabled: true,
+      timeZone: 'Not/AZone' as never,
+      weeklyWindows: [],
+    })).toThrow('Invalid QuietHours timeZone');
+    expect(() => QuietHours.create({
+      enabled: true,
+      timeZone: utc,
+      weeklyWindows: [{ daysOfWeek: [], start: asHm('09:00'), end: asHm('10:00') }],
+    })).toThrow('requires at least one weekday');
+    expect(() => QuietHours.create({
+      enabled: true,
+      timeZone: utc,
+      weeklyWindows: [{ daysOfWeek: [4], start: '9:00' as never, end: asHm('10:00') }],
+    })).toThrow('must use HH:mm');
+    expect(() => QuietHours.create({
+      enabled: true,
+      timeZone: utc,
+      weeklyWindows: [{ daysOfWeek: [4], start: asHm('09:00'), end: asHm('09:00') }],
+    })).toThrow('must differ');
+    expect(() => QuietHours.create({
+      enabled: true,
+      timeZone: utc,
+      weeklyWindows: [{ daysOfWeek: [7 as never], start: asHm('09:00'), end: asHm('10:00') }],
+    })).toThrow('weekday must be 0-6');
   });
 });

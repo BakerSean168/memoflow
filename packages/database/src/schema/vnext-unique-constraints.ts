@@ -17,6 +17,7 @@ const EMPTY_TABLE_ADDABLE_TEXT_COLUMNS = new Set([
   'owner_id',
   'scheduling_key',
   'occurrence_key',
+  'plan_id',
 ]);
 
 const UNIQUE_CONSTRAINTS: readonly UniqueConstraintSpec[] = [
@@ -37,19 +38,19 @@ const UNIQUE_CONSTRAINTS: readonly UniqueConstraintSpec[] = [
     indexName: 'notifications_identity_id_idempotency_key_key',
   },
   {
-    table: 'schedule_tasks',
+    table: 'scheduled_invocations',
     columns: ['identity_id', 'owner_type', 'owner_id', 'scheduling_key'],
-    indexName: 'schedule_tasks_owner_scheduling_key_unique',
+    indexName: 'scheduled_invocations_owner_key_unique',
   },
   {
-    table: 'task_instances',
-    columns: ['template_id', 'occurrence_key'],
-    indexName: 'task_instances_template_id_occurrence_key_key',
+    table: 'task_occurrences',
+    columns: ['plan_id', 'occurrence_key'],
+    indexName: 'task_occurrences_plan_id_occurrence_key_key',
   },
   {
-    table: 'task_templates',
+    table: 'task_plans',
     columns: ['id', 'identity_id'],
-    indexName: 'task_templates_id_identity_id_key',
+    indexName: 'task_plans_id_identity_id_key',
   },
 ] as const;
 

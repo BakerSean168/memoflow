@@ -17,6 +17,7 @@ import type {
   KnowledgeCapturePlannerPort,
 } from '../agents/knowledge-capture.planner';
 import { ApplyKnowledgeNoteService } from './apply-knowledge-note.service';
+import { knowledgeCaptureDocumentId } from './deterministic-entity-id';
 
 export const KNOWLEDGE_CAPTURE_WORKFLOW_ID = 'knowledge-capture';
 export const KNOWLEDGE_CAPTURE_LIFECYCLE_STEP_ID = 'knowledge-capture-lifecycle';
@@ -24,14 +25,7 @@ const MAX_CLARIFICATION_ROUNDS = 3;
 
 export const KnowledgeCaptureWorkflowStateSchema = z
   .object({
-    phase: z.enum([
-      'planning',
-      'clarification',
-      'review',
-      'recovery',
-      'completed',
-      'cancelled',
-    ]),
+    phase: z.enum(['planning', 'clarification', 'review', 'recovery', 'completed', 'cancelled']),
     input: KnowledgeCaptureWorkflowInputSchema,
     clarification: KnowledgeClarificationStateSchema,
     pendingQuestions: z.array(z.string().min(1)).max(3),
@@ -85,7 +79,10 @@ function mergeStructuredPatch(base: unknown, patch: unknown): unknown {
   return result;
 }
 
-function applyStructuredDraftPatch(draft: KnowledgeDraft, patch: Record<string, unknown>): KnowledgeDraft {
+function applyStructuredDraftPatch(
+  draft: KnowledgeDraft,
+  patch: Record<string, unknown>,
+): KnowledgeDraft {
   for (const key of Object.keys(patch)) {
     if (!allowedDraftPatchKeys.has(key)) {
       throw new Error(`Unsupported knowledge draft patch field: ${key}`);
@@ -202,6 +199,7 @@ export function createKnowledgeCaptureWorkflow(input: {
 
         const draft = KnowledgeDraftSchema.parse({
           ...stripRevision(decision.candidateDraft),
+          knowledgeDocumentId: knowledgeCaptureDocumentId({ workflowRunId: runId }),
           revision: targetRevision,
         });
         return suspendReview(draft);
@@ -258,9 +256,7 @@ export function createKnowledgeCaptureWorkflow(input: {
 
       if (!resumeData) {
         if (current.phase !== 'planning') {
-          throw new Error(
-            `knowledge.capture cannot start lifecycle from phase ${current.phase}`,
-          );
+          throw new Error(`knowledge.capture cannot start lifecycle from phase ${current.phase}`);
         }
         return planAndSuspend({
           mode: current.planningMode,
@@ -335,7 +331,8 @@ export function createKnowledgeCaptureWorkflow(input: {
 
       if (current.phase === 'recovery') {
         const priorReceipt = current.priorReceipt;
-        if (!priorReceipt) throw new Error('knowledge.capture recovery phase is missing its receipt');
+        if (!priorReceipt)
+          throw new Error('knowledge.capture recovery phase is missing its receipt');
         if (resumeData.type === 'retry') {
           if (!priorReceipt.retryable) {
             throw new Error('knowledge.capture recovery has no retryable mutations');

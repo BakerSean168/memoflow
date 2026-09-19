@@ -24,7 +24,7 @@ import {
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type {
   AIUsageSummary,
-  IAIExecutionLogPort,
+  IAIExecutionRecordPort,
   IAIUsageReadPort,
   IAIRoutineCommandPort,
   IAIPlannerReadPort,
@@ -38,6 +38,7 @@ import {
 } from '../agents';
 import { createMemoFlowProductTools } from '../tools/product-tools';
 import type { MastraModelResolver } from '../models';
+import { setAIContextRequestContext, type AIContextAssemblerPort } from '../context';
 import {
   ApplyGoalPlanService,
   GOAL_CREATE_LIFECYCLE_STEP_ID,
@@ -63,13 +64,14 @@ import {
 } from '../workflows';
 import { AsyncEventQueue } from './async-event-queue';
 import {
-  createAssistantExecutionLog,
+  createAssistantExecutionRecord,
   projectAssistantUsage,
   type AssistantUsageSnapshot,
 } from './assistant-observability';
 import { AssistantHistoryService } from './assistant-history.service';
-import type { AssistantTranscriptBootstrapSource } from './assistant-transcript-bootstrap.port';
+import type { AssistantConversationShellSource } from './assistant-conversation-shell.port';
 import type { AIWorkflowRuntimePort } from './workflow-runtime.port';
+import { toAIPublicFailure } from '../../../shared/ai-public-failure';
 
 function messageText(
   event: Extract<AgentControllerEvent, { type: 'message_update' | 'message_end' }>,
@@ -84,42 +86,35 @@ function messageText(
     .join('');
 }
 
-function normalizeRuntimeErrorCode(value: unknown): string {
-  const normalized = String(value ?? 'MASTRA_RUNTIME_ERROR')
-    .trim()
-    .toUpperCase()
-    .replace(/[^A-Z0-9_]+/g, '_')
-    .replace(/^_+|_+$/g, '');
-  return normalized || 'MASTRA_RUNTIME_ERROR';
-}
-
-function publicRuntimeError(errorType?: unknown): { code: string; message: string } {
-  return {
-    code: normalizeRuntimeErrorCode(errorType),
-    // Do not serialize provider/model/tool raw errors. They may contain request
-    // URLs, headers, response bodies, or credentials. Detailed errors belong in
-    // server-side observability only.
-    message: 'AI runtime request failed',
-  };
+function publicRuntimeError(error?: unknown): { code: string; message: string } {
+  const failure = toAIPublicFailure(error, {
+    fallbackCode: 'AI_RUNTIME_TRANSPORT_ERROR',
+    fallbackMessage: 'AI runtime request failed',
+  });
+  return { code: failure.code, message: failure.message };
 }
 
 export interface MastraAIRuntimeDependencies {
   readonly storage: MastraCompositeStore;
   readonly modelResolver: MastraModelResolver;
-  readonly transcriptBootstrapSource: AssistantTranscriptBootstrapSource;
+  readonly conversationShellSource: AssistantConversationShellSource;
   /** Host-bound canonical Goal/Task/Reminder application mutations for ADR-052. */
   readonly goalPlanMutationPort: GoalPlanMutationPort;
   /** Host-bound canonical Task application mutation for the task.create workflow. */
   readonly taskPlanMutationPort: TaskPlanMutationPort;
   /** Host-bound canonical knowledge-note persistence mutation for knowledge.capture. */
   readonly knowledgeCaptureMutationPort: KnowledgeCaptureMutationPort;
+  /** Existing Knowledge read owner reused by GoalPlan V2 for search/reuse evidence. */
+  readonly knowledgeSourcePort: import('../../application/ports').IKnowledgeSourcePort;
   /** Canonical runtime observability sink; host-owned and persistence-agnostic. */
-  readonly executionLogPort?: IAIExecutionLogPort;
+  readonly executionRecordPort?: IAIExecutionRecordPort;
   /** Durable indexed usage projection for run/thread queries and workflow views. */
   readonly usageReadPort?: IAIUsageReadPort;
   readonly routineCommandPort: IAIRoutineCommandPort;
   readonly plannerReadPort: IAIPlannerReadPort;
   readonly notificationReadPort: IAINotificationReadPort;
+  /** Invocation-scoped context projection; resolves canonical Product Time and budgets inputs. */
+  readonly contextAssembler: AIContextAssemblerPort;
 }
 
 type ActiveRun = {
@@ -149,7 +144,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       storage: deps.storage,
       options: { lastMessages: 40 },
     });
-    this.history = new AssistantHistoryService(this.memory, deps.transcriptBootstrapSource);
+    this.history = new AssistantHistoryService(this.memory, deps.conversationShellSource);
     this.assistant = createMemoFlowAssistant({
       modelResolver: deps.modelResolver,
       memory: this.memory,
@@ -159,19 +154,29 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       plannerReadPort: deps.plannerReadPort,
       notificationReadPort: deps.notificationReadPort,
     });
-    this.goalPlanner = new GoalPlannerWorker(deps.modelResolver, deps.executionLogPort);
+    this.goalPlanner = new GoalPlannerWorker(
+      deps.modelResolver,
+      deps.knowledgeSourcePort,
+      deps.executionRecordPort,
+      deps.contextAssembler,
+    );
     this.goalCreateWorkflow = createGoalCreateWorkflow({
       planner: this.goalPlanner,
       applyService: new ApplyGoalPlanService(deps.goalPlanMutationPort),
     });
-    this.taskPlanner = new TaskPlannerWorker(deps.modelResolver, deps.executionLogPort);
+    this.taskPlanner = new TaskPlannerWorker(
+      deps.modelResolver,
+      deps.executionRecordPort,
+      deps.contextAssembler,
+    );
     this.taskCreateWorkflow = createTaskCreateWorkflow({
       planner: this.taskPlanner,
       applyService: new ApplyTaskPlanService(deps.taskPlanMutationPort),
     });
     this.knowledgeCapturePlanner = new KnowledgeCapturePlannerWorker(
       deps.modelResolver,
-      deps.executionLogPort,
+      deps.executionRecordPort,
+      deps.contextAssembler,
     );
     this.knowledgeCaptureWorkflow = createKnowledgeCaptureWorkflow({
       planner: this.knowledgeCapturePlanner,
@@ -182,12 +187,14 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       storage: deps.storage,
       memory: this.memory,
       agent: this.assistant,
-      modes: [{
-        id: 'assistant',
-        name: 'Assistant',
-        tools: productTools,
-        availableTools: Object.keys(productTools),
-      }],
+      modes: [
+        {
+          id: 'assistant',
+          name: 'Assistant',
+          tools: productTools,
+          availableTools: Object.keys(productTools),
+        },
+      ],
       defaultModeId: 'assistant',
       disableBuiltinTools: [
         'ask_user',
@@ -239,7 +246,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     await this.disposePromise;
   }
 
-  private workflowRequestContext(
+  private async workflowRequestContext(
     context: ExecutionContext,
     input: {
       conversationId: string;
@@ -247,7 +254,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       providerId?: string;
       modelId?: string;
     },
-  ): RequestContext {
+  ): Promise<RequestContext> {
     const requestContext = new RequestContext();
     requestContext.setRaw('identityId', context.identityId);
     requestContext.setRaw('locale', input.locale ?? 'zh-CN');
@@ -536,7 +543,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         await run.start({
           inputData: goalInput,
           initialState: initialGoalCreateWorkflowState(goalInput),
-          requestContext: this.workflowRequestContext(input.context, goalInput),
+          requestContext: await this.workflowRequestContext(input.context, goalInput),
         });
       } catch (cause) {
         const persisted = await this.get({
@@ -559,7 +566,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         await run.start({
           inputData: taskInput,
           initialState: initialTaskCreateWorkflowState(taskInput),
-          requestContext: this.workflowRequestContext(input.context, taskInput),
+          requestContext: await this.workflowRequestContext(input.context, taskInput),
         });
       } catch (cause) {
         const persisted = await this.get({
@@ -581,7 +588,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       await run.start({
         inputData: knowledgeInput,
         initialState: initialKnowledgeCaptureWorkflowState(knowledgeInput),
-        requestContext: this.workflowRequestContext(input.context, knowledgeInput),
+        requestContext: await this.workflowRequestContext(input.context, knowledgeInput),
       });
     } catch (cause) {
       const persisted = await this.get({
@@ -674,7 +681,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       await run.resume({
         step: lifecycleStepId,
         resumeData: input.request.command,
-        requestContext: this.workflowRequestContext(input.context, workflowInput),
+        requestContext: await this.workflowRequestContext(input.context, workflowInput),
       });
     } catch (cause) {
       const persisted = await this.get({
@@ -757,14 +764,20 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       runId: input.runId,
     });
     if (goalRow) {
-      return this.attachWorkflowUsage(this.projectGoalCreateRun(goalRow, input.identityId), input.identityId);
+      return this.attachWorkflowUsage(
+        this.projectGoalCreateRun(goalRow, input.identityId),
+        input.identityId,
+      );
     }
     const taskRow = await store.getWorkflowRunById({
       workflowName: TASK_CREATE_WORKFLOW_ID,
       runId: input.runId,
     });
     if (taskRow) {
-      return this.attachWorkflowUsage(this.projectTaskCreateRun(taskRow, input.identityId), input.identityId);
+      return this.attachWorkflowUsage(
+        this.projectTaskCreateRun(taskRow, input.identityId),
+        input.identityId,
+      );
     }
     const knowledgeRow = await store.getWorkflowRunById({
       workflowName: KNOWLEDGE_CAPTURE_WORKFLOW_ID,
@@ -891,6 +904,11 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       identityId: input.identityId,
       providerId: input.providerId,
       modelId: input.modelId,
+      executionRequirement: {
+        chat: 'required',
+        streaming: 'required',
+        toolCalling: 'required',
+      },
     });
     const requestContext = new RequestContext();
     requestContext.setRaw('identityId', input.identityId);
@@ -900,6 +918,23 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     if (input.context) requestContext.setRaw('executionContext', input.context);
     requestContext.setRaw(MASTRA_RESOURCE_ID_KEY, input.identityId);
     requestContext.setRaw(MASTRA_THREAD_ID_KEY, input.conversationId);
+    const contextEnvelope = await this.deps.contextAssembler.assemble({
+      invocation: {
+        identityId: input.identityId,
+        conversationId: input.conversationId,
+        surface: 'assistant',
+        locale: input.locale ?? 'zh-CN',
+      },
+      userInput: { content: input.content },
+      selectedEntities: [
+        {
+          entityType: 'conversation',
+          id: input.conversationId,
+          source: 'assistant.session',
+        },
+      ],
+    });
+    setAIContextRequestContext(requestContext, contextEnvelope);
 
     const session = await this.controller.createSession({
       id: `conversation:${input.conversationId}`,
@@ -955,18 +990,15 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         emit(type, { reason: 'aborted' });
       }
 
-      if (this.deps.executionLogPort) {
+      if (this.deps.executionRecordPort) {
         observabilityWrites.push(
-          this.deps.executionLogPort.record(
-            createAssistantExecutionLog({
+          this.deps.executionRecordPort.record(
+            createAssistantExecutionRecord({
               identityId: input.identityId,
               ...(input.context ? { context: input.context } : {}),
               conversationId: input.conversationId,
-              contentLength: input.content.length,
               model: resolvedModel,
               runId: currentRunId(),
-              ...(assistantMessageId ? { assistantMessageId } : {}),
-              responseLength: lastText.length,
               outcome: type,
               ...(lastUsage ? { usage: lastUsage } : {}),
               ...(lastRuntimeError?.code ? { runtimeErrorCode: lastRuntimeError.code } : {}),
@@ -1017,7 +1049,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         return;
       }
       if (event.type === 'error') {
-        lastRuntimeError = publicRuntimeError(event.errorType);
+        lastRuntimeError = publicRuntimeError(event.error);
         return;
       }
       if (event.type === 'agent_end') {
@@ -1029,8 +1061,8 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
 
     const abort = () => session.abortRun();
     input.signal?.addEventListener('abort', abort, { once: true });
-    void session.sendMessage({ content: input.content, requestContext }).catch(() => {
-      lastRuntimeError = publicRuntimeError();
+    void session.sendMessage({ content: input.content, requestContext }).catch((error) => {
+      lastRuntimeError = publicRuntimeError(error);
       settle('assistant.run.failed');
     });
 

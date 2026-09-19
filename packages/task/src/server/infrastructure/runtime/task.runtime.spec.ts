@@ -39,22 +39,22 @@ describe('createTaskRuntimeContribution', () => {
     expect(taskEventBus.on).toHaveBeenCalledTimes(4);
     expect(taskEventBus.on).toHaveBeenNthCalledWith(
       1,
-      'task:instance-generated',
+      'task:occurrence-generated',
       expect.any(Function),
     );
     expect(taskEventBus.on).toHaveBeenNthCalledWith(
       2,
-      'task:instance-completed',
+      'task:occurrence-completed',
       expect.any(Function),
     );
     expect(taskEventBus.on).toHaveBeenNthCalledWith(
       3,
-      'task:instance-skipped',
+      'task:occurrence-skipped',
       expect.any(Function),
     );
     expect(taskEventBus.on).toHaveBeenNthCalledWith(
       4,
-      'task:instance-deleted',
+      'task:occurrence-deleted',
       expect.any(Function),
     );
   });
@@ -77,22 +77,22 @@ describe('createTaskRuntimeContribution', () => {
     expect(taskEventBus.off).toHaveBeenCalledTimes(4);
     expect(taskEventBus.off).toHaveBeenNthCalledWith(
       1,
-      'task:instance-generated',
+      'task:occurrence-generated',
       expect.any(Function),
     );
     expect(taskEventBus.off).toHaveBeenNthCalledWith(
       2,
-      'task:instance-completed',
+      'task:occurrence-completed',
       expect.any(Function),
     );
     expect(taskEventBus.off).toHaveBeenNthCalledWith(
       3,
-      'task:instance-skipped',
+      'task:occurrence-skipped',
       expect.any(Function),
     );
     expect(taskEventBus.off).toHaveBeenNthCalledWith(
       4,
-      'task:instance-deleted',
+      'task:occurrence-deleted',
       expect.any(Function),
     );
   });

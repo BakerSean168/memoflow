@@ -1,4 +1,5 @@
 import { expect, test, type Page, type Route } from '@playwright/test';
+import type { AIWorkflowRunView, GoalPlanDraft } from '@memoflow/contracts/ai';
 import { TIMEOUT_CONFIG } from '../config';
 import { registerAndLogin } from '../helpers/testHelpers';
 
@@ -37,7 +38,7 @@ test.describe('Local Docker core product Phase E', () => {
           }),
         );
         localStorage.setItem(
-          'ai:conversation-workflow-map',
+          'ai:conversation-workflow-map:v3',
           JSON.stringify({ [seededConversationId]: seededWorkflow }),
         );
         localStorage.removeItem('ai:last-model-key');
@@ -124,7 +125,10 @@ test.describe('Local Docker core product Phase E', () => {
       contentType: 'image/png',
     });
 
-    await page.getByTestId('goal-dialog').getByRole('button', { name: '取消', exact: true }).click();
+    await page
+      .getByTestId('goal-dialog')
+      .getByRole('button', { name: '取消', exact: true })
+      .click();
     expect(pageErrors).toEqual([]);
     expect(consoleErrors).toEqual([]);
   });
@@ -223,9 +227,9 @@ async function installConfiguredModelMock(page: Page): Promise<void> {
           id: providerId,
           identityId: 'IdentityId_550e8400-e29b-41d4-a716-446655440000',
           name: 'Phase E OpenAI',
-          providerType: 'openai_compatible',
+          providerDefinitionId: 'openai',
           baseUrl: 'https://api.openai.com/v1',
-          apiKeyMasked: 'sk-****phase-e',
+          credentialRef: 'credential-phase-e',
           defaultModel: modelId,
           availableModels: [{ id: modelId, name: modelId }],
           isActive: true,
@@ -264,10 +268,7 @@ async function expectNoHorizontalOverflow(page: Page): Promise<void> {
 
 type ApprovalFixture = ReturnType<typeof createApprovalFixture>;
 
-async function installApprovalRestoreMocks(
-  page: Page,
-  fixture: ApprovalFixture,
-): Promise<void> {
+async function installApprovalRestoreMocks(page: Page, fixture: ApprovalFixture): Promise<void> {
   const { conversationId, runView } = fixture;
   const conversation = {
     id: conversationId,
@@ -302,35 +303,37 @@ async function installApprovalRestoreMocks(
 
 function createApprovalFixture(input: { conversationId: string; runId: string }) {
   const now = Date.now();
-  const draft = {
+  const draft: GoalPlanDraft = {
     revision: 1,
     goal: {
+      draftRef: 'goal',
       name: 'Phase E 待审批目标',
-      description: '验证 clean shell 自动恢复 canonical Mastra goal.create workflow。',
-      motivation: '验证 runtime-owned durable workflow refresh restore。',
-      feasibilityAnalysis: '用户确认后由产品 application port 执行业务写入。',
-      startDate: now,
-      dueDate: now + 7 * 24 * 60 * 60 * 1000,
+      summary: '验证 clean shell 自动恢复 canonical Mastra goal.create workflow。',
+      status: 'Planned',
+      startDate: '2026-09-19',
+      target: { kind: 'day', date: '2026-09-26' },
+      labels: [],
     },
     keyResults: [
       {
+        draftRef: 'kr:phase-e-approval',
         title: '完成 Phase E workflow 审批',
         description: '从 durable run 恢复并显示待确认草稿。',
-        calculationMethod: 'Sum',
-        startingValue: 0,
-        progressBaselineValue: null,
+        aggregationMethod: 'Sum',
+        initialValue: 0,
         currentValue: 0,
         targetValue: 1,
+        target: null,
         unit: 'workflow',
         weight: 3,
       },
     ],
-    taskTemplates: [],
-    reminders: [],
+    tasks: [],
+    knowledge: [],
     rationale: 'Phase E validates the canonical Mastra workflow surface.',
     warnings: [],
   };
-  const runView = {
+  const runView: AIWorkflowRunView = {
     runId: input.runId,
     conversationId: input.conversationId,
     kind: 'goal.create',
@@ -349,30 +352,7 @@ function createApprovalFixture(input: { conversationId: string; runId: string })
     conversationId: input.conversationId,
     runId: input.runId,
     runView,
-    workflowEntry: {
-      mode: 'goal-create',
-      goalWorkflowStage: 'confirm',
-      goalWorkflowRun: runView,
-      taskWorkflowRun: null,
-      knowledgeCaptureRun: null,
-      knowledgeAnswer: null,
-      clarificationAnswers: [],
-      editableGoal: {
-        name: '',
-        description: '',
-        category: '',
-        importance: 'Moderate',
-        motivation: '',
-        feasibilityAnalysis: '',
-        tags: [],
-        startDate: null,
-        targetDate: null,
-      },
-      editableKeyResults: [],
-      editableTaskTemplates: [],
-      editableReminders: [],
-      showGoalDraftEditor: false,
-    },
+    workflowEntry: { activeRunId: input.runId },
   };
 }
 

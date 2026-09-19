@@ -7,7 +7,7 @@
  *
  * 【包含内容】
  * - 聚合根（Aggregates）：Notification, NotificationPreference
- * - 实体（Entities）：NotificationChannel
+ * - 实体（Entities）：当前无独立 delivery-channel entity；channel 仅作为投递维度值对象
  * - 值对象（Value Objects）：从 server/domain/value-objects 导入
  *
  * 【依赖规则】

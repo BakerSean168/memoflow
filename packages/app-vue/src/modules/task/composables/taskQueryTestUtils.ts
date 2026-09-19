@@ -28,9 +28,9 @@ const i18n = createI18n({
           loadTemplatesFailed: 'Could not load task templates',
           createFailed: 'Could not create task template',
           createSuccess: 'Task template created',
-          createTemplateWithTodayInstanceSuccess:
+          createPlanWithTodayInstanceSuccess:
             "Task template created and today's instance generated ({count})",
-          createTemplateWithoutTodayInstanceSuccess:
+          createPlanWithoutTodayInstanceSuccess:
             "Task template created without today's instance ({count})",
           createQuickTaskWithTodayInstanceSuccess: 'Quick task created for today ({count})',
           createQuickTaskWithoutTodayInstanceSuccess:

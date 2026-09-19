@@ -1,16 +1,19 @@
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
+import { KnowledgeDocumentIdSchema } from '@memoflow/contracts/repository';
 import type { ReindexKnowledgeReq, ReindexKnowledgeRes } from '@memoflow/contracts/ai';
 import { createLogger } from '@memoflow/utils/logger';
 
 import type { IAIProviderConfigRepository } from '../../../domain/repositories/i-ai-provider-config-repository';
+import type { IAIProviderSecretVault } from '../../ports';
 import type { ReindexAllKnowledgeUseCase } from './reindex-all-knowledge.use-case';
 import type { SyncNoteByIdUseCase } from './sync-note-by-id.use-case';
 import type { SyncKnowledgeNotesResult } from './ai-knowledge-index-helpers';
 import { attachRequestIdToError } from './ai-observability';
 import {
   resolveActiveProviderConfig,
+  resolveProviderCredential,
   toChatExecutionProviderConfig,
 } from './ai-provider-resolution';
 
@@ -24,6 +27,7 @@ export class ReindexKnowledgeUseCase {
     private readonly providerConfigRepository: IAIProviderConfigRepository,
     private readonly knowledgeIndexService: ReindexAllKnowledgeUseCase,
     private readonly syncNoteById?: SyncNoteByIdUseCase,
+    private readonly secretVault?: IAIProviderSecretVault,
   ) {}
 
   async execute(
@@ -39,11 +43,17 @@ export class ReindexKnowledgeUseCase {
           this.providerConfigRepository,
           cx.identityId,
         );
-        executionProviderConfig = toChatExecutionProviderConfig(provider, {
+        if (!this.secretVault) throw new Error('AI provider SecretVault is unavailable');
+        const credential = await resolveProviderCredential(
+          this.secretVault,
+          cx.identityId,
+          provider,
+        );
+        executionProviderConfig = toChatExecutionProviderConfig(provider, credential, {
           temperature: 0.2,
         });
       } catch (providerError) {
-        if (!request.resourceIds) {
+        if (!request.knowledgeDocumentIds) {
           throw providerError;
         }
         executionProviderConfig = undefined;
@@ -53,15 +63,18 @@ export class ReindexKnowledgeUseCase {
         requestId,
         providerConfig: executionProviderConfig,
       };
-      const sync = request.resourceIds
-        ? await this.syncRequestedNotes(request.resourceIds, cx, options)
+      const sync = request.knowledgeDocumentIds
+        ? await this.syncRequestedNotes(request.knowledgeDocumentIds, cx, options)
         : await this.knowledgeIndexService.execute(cx, request.limit ?? 200, options);
 
       return ok({
         indexedCount: sync.indexedCount,
         reusedCount: sync.reusedCount,
         failedCount: sync.failedCount,
-        results: sync.results,
+        results: sync.results.map((result) => ({
+          ...result,
+          knowledgeDocumentId: KnowledgeDocumentIdSchema.parse(result.knowledgeDocumentId),
+        })),
       });
     } catch (err) {
       logger.error('Knowledge reindex failed', {
@@ -75,7 +88,7 @@ export class ReindexKnowledgeUseCase {
   }
 
   private async syncRequestedNotes(
-    resourceIds: string[],
+    knowledgeDocumentIds: string[],
     cx: ExecutionContext,
     options: Parameters<SyncNoteByIdUseCase['execute']>[2],
   ): Promise<SyncKnowledgeNotesResult> {
@@ -91,13 +104,13 @@ export class ReindexKnowledgeUseCase {
       results: [],
     };
 
-    for (const resourceId of [...new Set(resourceIds)]) {
-      const result = await this.syncNoteById.execute(resourceId, cx, options);
+    for (const knowledgeDocumentId of [...new Set(knowledgeDocumentIds)]) {
+      const result = await this.syncNoteById.execute(knowledgeDocumentId, cx, options);
       if (!result.note || !result.sync) {
         merged.failedCount += 1;
         merged.results.push({
-          resourceId,
-          resourcePath: resourceId,
+          knowledgeDocumentId,
+          sourcePath: knowledgeDocumentId,
           status: 'failed',
           error: 'Knowledge note not found',
         });

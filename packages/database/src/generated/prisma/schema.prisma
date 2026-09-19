@@ -21,242 +21,129 @@ datasource db {
 // ==========================================
 
 model Account {
-  id               String    @id // same as CloudAuthUser.id for cloud accounts
-  status           String    @default("ACTIVE") // AccountStatus: ACTIVE | INACTIVE | SUSPENDED | DELETED
+  id        String    @id // same as CloudAuthUser.id for cloud accounts
+  status    String    @default("Active") // AccountStatus: Active | Closed
   // profile
-  profile          Json
-  // settings
-  settings         Json
-  // email object value
-  emailAddress     String    @unique @map("email_address") // jdoe@example.com
-  emailIsVerified  Boolean   @default(false) @map("email_is_verified")
-  emailVerifiedAt  DateTime? @map("email_verified_at")
-  emailIsPrimary   Boolean   @default(false) @map("email_is_primary")
-  // phone object value
-  phoneCountryCode String?   @map("phone_country_code") // +86
-  phoneNumber      String?   @map("phone_number") // 13800138000
-  phoneFullNumber  String?   @map("phone_full_number") // +8613800138000 (E.164格式)
-  phoneIsVerified  Boolean?  @default(false) @map("phone_is_verified")
-  phoneVerifiedAt  DateTime? @map("phone_verified_at")
-  version          Int       @default(1)
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
-  deletedAt        DateTime? @map("deleted_at")
+  profile   Json
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  closedAt  DateTime? @map("closed_at")
 
   // 关联关系
   cloudUser CloudAuthUser @relation(fields: [id], references: [id], onDelete: Cascade)
 
   // 关联的业务模块
-  editorWorkspaces                EditorWorkspace[]
-  editorWorkspaceSessions         EditorWorkspaceSession[]
-  editorWorkspaceSessionGroups    EditorWorkspaceSessionGroup[]
-  editorWorkspaceSessionGroupTabs EditorWorkspaceSessionGroupTab[]
-  goals                           Goal[]
-  labels                          Label[]
-  goalLabels                      GoalLabel[]
-  taskLabels                      TaskLabel[]
-  reminderGroups                  ReminderGroup[]
-  reminderTemplates               ReminderTemplate[]
-  reminderInstances               ReminderInstance[]
-  reminderStatistics              ReminderStatistic?
-  routineDefinitions              RoutineDefinition[]
-  routineTemporaryOverrides       RoutineTemporaryOverride[]
-  routineProfiles                 RoutineProfile[]
-  routineProfileMemberships       RoutineProfileMembership[]
-  routineProtocolDefinitions      RoutineProtocolDefinition[]
-  routineProtocolSessions         RoutineProtocolSession[]
-  userReminderPreferences         UserReminderPreference?
-  repositories                    Repository[]
-  repositoryExplorers             RepositoryExplorer[]
-  repositoryStatistics            RepositoryStatistic?
-  schedules                       Schedule[]
-  scheduleTasks                   ScheduleTask[]
-  schedulingReconcileOperations   SchedulingReconcileOperation[]
-  scheduleStatistics              ScheduleStatistic?
-  habits                          Habit[]
-  relations                       Relation[]
-  walletAccounts                  WalletAccount[]
-  walletTransactions              WalletTransaction[]              @relation("AccountWalletTransactions")
-  activityLedger                  ActivityLedger[]
-  taskTemplates                   TaskTemplate[]
-  taskInstances                   TaskInstance[]
-  taskStatistics                  TaskStatistic?
-  userSettings                    UserSetting?
-  notifications                   Notification[]
-  aiConversations                 AiConversation[]
-  aiGenerationTasks               AiGenerationTask[]
-  aiKnowledgeIndexEntries         AiKnowledgeIndexEntry[]
-  aiUsageQuotas                   AiUsageQuota?
-  aiProviderConfigs               AiProviderConfig[]
-  aiProviderOnboardingSessions    AiProviderOnboardingSession[]
-  dashboardConfigs                DashboardConfig?
+  goals                         Goal[]
+  labels                        Label[]
+  goalLabels                    GoalLabel[]
+  taskLabels                    TaskLabel[]
+  routineDefinitions            RoutineDefinition[]
+  routineTemporaryOverrides     RoutineTemporaryOverride[]
+  routineProfiles               RoutineProfile[]
+  routineProfileMemberships     RoutineProfileMembership[]
+  routineProtocolDefinitions    RoutineProtocolDefinition[]
+  routineProtocolSessions       RoutineProtocolSession[]
+  schedules                     Schedule[]
+  schedulingReconcileOperations SchedulingReconcileOperation[]
+  scheduledInvocations          ScheduledInvocation[]
+  invocationAttempts            InvocationAttempt[]
+  habits                        Habit[]
+  relations                     Relation[]
+  walletAccounts                WalletAccount[]
+  walletTransactions            WalletTransaction[]            @relation("AccountWalletTransactions")
+  taskPlans                     TaskPlan[]
+  taskOccurrences               TaskOccurrence[]
+  userPreferenceRecords         UserPreferenceRecord[]
+  notifications                 Notification[]
+  aiConversations               AiConversation[]
+  aiExecutionRecords            AiExecutionRecord[]
+  aiKnowledgeIndexEntries       AiKnowledgeIndexEntry[]
+  aiProviderConfigs             AiProviderConfig[]
+  aiProviderOnboardingSessions  AiProviderOnboardingSession[]
+  aiProviderSecrets             AiProviderSecret[]
 
   // PowerSync: denormalized identity relations
-  taskTemplateHistory                    TaskTemplateHistory[]                   @relation("AccountTaskTemplateHistory")
-  scheduleExecutions                     ScheduleExecution[]                     @relation("AccountScheduleExecutions")
-  reminderHistory                        ReminderHistory[]                       @relation("AccountReminderHistory")
-  reminderResponses                      ReminderResponse[]                      @relation("AccountReminderResponses")
-  reminderOccurrences                    ReminderOccurrence[]                    @relation("AccountReminderOccurrences")
+  taskPlanHistory                        TaskPlanHistory[]                       @relation("AccountTaskPlanHistory")
   routineOccurrences                     RoutineOccurrence[]                     @relation("AccountRoutineOccurrences")
-  notificationChannels                   NotificationChannel[]                   @relation("AccountNotificationChannels")
-  notificationHistory                    NotificationHistory[]                   @relation("AccountNotificationHistory")
+  routineInteractions                    RoutineInteraction[]
+  notificationInteractions               NotificationInteraction[]               @relation("AccountNotificationInteractions")
   notificationDispatchOutboxes           NotificationDispatchOutbox[]            @relation("AccountNotificationDispatchOutboxes")
-  aiMessages                             AiMessage[]                             @relation("AccountAiMessages")
-  folders                                Folder[]                                @relation("AccountFolders")
-  resources                              Resource[]                              @relation("AccountResources")
-  repositoryResources                    RepositoryResource[]                    @relation("AccountRepositoryResources")
-  knowledgeRepositoryConnections         KnowledgeRepositoryConnection[]
+  knowledgeRemoteBindings                KnowledgeRemoteBinding[]
   knowledgeRepositoryInstallationIntents KnowledgeRepositoryInstallationIntent[]
   knowledgeWriteRequests                 KnowledgeWriteRequest[]
 
-  @@index([emailAddress])
-  @@index([phoneFullNumber])
   @@map("accounts")
 }
 
 // ==========================================
-// Activity Ledger (R6)
-// 全业务事件的可解释活动账本（Dashboard 读模型之源）
-// ==========================================
-
-model ActivityLedger {
-  id            String   @id
-  identityId    String   @map("identity_id")
-  actorId       String   @map("actor_id")
-  subjectType   String   @map("subject_type") /// goal | task | reminder | schedule | habit | knowledge
-  subjectId     String   @map("subject_id")
-  action        String   @map("action") /// created | completed | updated | response | executed | ...
-  title         String? /// 归档标题快照（跨 DST/归档实体仍显示准确标题）
-  correlationId String?  @map("correlation_id")
-  beforeSummary String?  @map("before_summary")
-  afterSummary  String?  @map("after_summary")
-  sourceEvent   String   @map("source_event")
-  occurredAt    DateTime @map("occurred_at")
-  createdAt     DateTime @default(now()) @map("created_at")
-
-  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
-
-  @@index([identityId, occurredAt])
-  @@index([identityId, subjectType, subjectId])
-  @@map("activity_ledger")
-}
-
-// ==========================================
 // AI Module
-// AI 对话、消息、生成任务、配额、Provider 配置
+// AI 对话 shell、执行记录、Provider 配置
 // ==========================================
 
 model AiConversation {
-  id            String    @id
-  identityId    String    @map("identity_id")
-  name          String
-  status        String // ACTIVE, CLOSED, ARCHIVED
-  messageCount  Int       @default(0) @map("message_count")
-  lastMessageAt DateTime? @map("last_message_at")
-  version       Int       @default(1)
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
-  deletedAt     DateTime? @map("deleted_at")
+  id         String    @id
+  identityId String    @map("identity_id")
+  name       String
+  status     String // ACTIVE, ARCHIVED
+  version    Int       @default(1)
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
 
-  account  Account     @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  messages AiMessage[]
+  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
 
   @@index([identityId])
   @@index([status])
   @@index([createdAt])
-  @@index([lastMessageAt])
   @@map("ai_conversations")
 }
 
-model AiMessage {
-  id             String   @id
-  identityId     String   @map("identity_id")
-  conversationId String   @map("conversation_id")
-  role           String // USER, ASSISTANT, SYSTEM
-  content        String   @db.Text
-  tokenUsage     String?  @map("token_usage") // JSON
-  createdAt      DateTime @default(now()) @map("created_at")
-
-  identity     Account        @relation("AccountAiMessages", fields: [identityId], references: [id])
-  conversation AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@index([conversationId])
-  @@index([createdAt])
-  @@map("ai_messages")
-}
-
-model AiGenerationTask {
-  id               String    @id
-  identityId       String    @map("identity_id")
-  taskType         String    @map("task_type") // GOAL_KEY_RESULTS, TASK_TEMPLATES, etc.
-  status           String // PENDING, PROCESSING, COMPLETED, FAILED
-  conversationId   String?   @map("conversation_id")
-  runId            String?   @map("run_id")
-  requestId        String?   @map("request_id")
-  traceId          String?   @map("trace_id")
-  providerId       String?   @map("provider_id")
-  model            String?
-  estimatedCostUsd Float?    @map("estimated_cost_usd")
-  input            String    @db.Text // JSON string
-  result           String?   @db.Text // JSON string
-  error            String?   @db.Text
-  retryCount       Int       @default(0) @map("retry_count")
-  tokenUsage       String?   @map("token_usage") // JSON
-  processingMs     Int?      @map("processing_ms")
-  version          Int       @default(1)
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
-  completedAt      DateTime? @map("completed_at")
-  deletedAt        DateTime? @map("deleted_at")
+model AiExecutionRecord {
+  id                   String   @id
+  identityId           String   @map("identity_id")
+  operation            String
+  outcome              String
+  conversationId       String?  @map("conversation_id")
+  runId                String?  @map("run_id")
+  requestId            String?  @map("request_id")
+  traceId              String?  @map("trace_id")
+  providerConnectionId String?  @map("provider_connection_id")
+  modelId              String?  @map("model_id")
+  errorCategory        String?  @map("error_category")
+  safeError            String?  @map("safe_error") @db.Text
+  estimatedCostUsd     Float?   @map("estimated_cost_usd")
+  tokenUsage           String?  @map("token_usage")
+  latencyMs            Int?     @map("latency_ms")
+  createdAt            DateTime @default(now()) @map("created_at")
+  completedAt          DateTime @default(now()) @map("completed_at")
 
   account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
 
   @@index([identityId])
-  @@index([taskType])
-  @@index([status])
+  @@index([operation])
+  @@index([outcome])
   @@index([createdAt])
   @@index([identityId, conversationId, createdAt])
   @@index([identityId, runId, createdAt])
-  @@map("ai_generation_tasks")
-}
-
-model AiUsageQuota {
-  id           String    @id
-  identityId   String    @unique @map("identity_id")
-  quotaLimit   Int       @default(50) @map("quota_limit")
-  currentUsage Int       @default(0) @map("current_usage")
-  resetPeriod  String    @default("DAILY") @map("reset_period") // DAILY, WEEKLY, MONTHLY
-  lastResetAt  DateTime  @default(now()) @map("last_reset_at")
-  nextResetAt  DateTime  @map("next_reset_at")
-  version      Int       @default(1)
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
-  deletedAt    DateTime? @map("deleted_at")
-
-  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@index([nextResetAt])
-  @@map("ai_usage_quotas")
+  @@map("ai_execution_records")
 }
 
 model AiProviderConfig {
-  id              String    @id
-  identityId      String    @map("identity_id")
-  name            String // 配置名称
-  providerType    String    @map("provider_type") // OPENAI, QINIU, ANTHROPIC, CUSTOM_OPENAI_COMPATIBLE
-  baseUrl         String    @map("base_url") // API 基础地址
-  apiKeyEncrypted String    @map("api_key_encrypted") // AES-256-GCM 加密的 API Key
-  defaultModel    String?   @map("default_model")
-  availableModels String    @default("[]") @map("available_models") // 可用模型列表 JSON
-  isActive        Boolean   @default(true) @map("is_active")
-  isDefault       Boolean   @default(false) @map("is_default")
-  priority        Int       @default(100) // 优先级
-  version         Int       @default(1)
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
-  deletedAt       DateTime? @map("deleted_at")
+  id                   String    @id
+  identityId           String    @map("identity_id")
+  name                 String // 配置名称
+  providerDefinitionId String    @map("provider_definition_id")
+  baseUrl              String    @map("base_url") // API 基础地址
+  credentialRef        String    @map("credential_ref") // Opaque SecretVault reference
+  defaultModel         String?   @map("default_model")
+  availableModels      String    @default("[]") @map("available_models") // 可用模型列表 JSON
+  isActive             Boolean   @default(true) @map("is_active")
+  isDefault            Boolean   @default(false) @map("is_default")
+  priority             Int       @default(100) // 优先级
+  version              Int       @default(1)
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+  deletedAt            DateTime? @map("deleted_at")
 
   account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
 
@@ -269,20 +156,20 @@ model AiProviderConfig {
 }
 
 model AiProviderOnboardingSession {
-  id                  String    @id
-  identityId          String    @map("identity_id")
-  catalogId           String    @map("catalog_id")
-  baseUrl             String    @map("base_url")
-  targetProviderId    String?   @map("target_provider_id")
-  credentialEncrypted String    @map("credential_encrypted")
-  credentialStatus    String    @map("credential_status")
-  discoveryStatus     String    @map("discovery_status")
-  modelsJson          String    @default("[]") @map("models_json")
-  verifiedModelIds    String    @default("[]") @map("verified_model_ids")
-  expiresAt           DateTime  @map("expires_at")
-  consumedAt          DateTime? @map("consumed_at")
-  createdAt           DateTime  @default(now()) @map("created_at")
-  updatedAt           DateTime  @updatedAt @map("updated_at")
+  id               String    @id
+  identityId       String    @map("identity_id")
+  catalogId        String    @map("catalog_id")
+  baseUrl          String    @map("base_url")
+  targetProviderId String?   @map("target_provider_id")
+  credentialRef    String    @map("credential_ref")
+  credentialStatus String    @map("credential_status")
+  discoveryStatus  String    @map("discovery_status")
+  modelsJson       String    @default("[]") @map("models_json")
+  verifiedModelIds String    @default("[]") @map("verified_model_ids")
+  expiresAt        DateTime  @map("expires_at")
+  consumedAt       DateTime? @map("consumed_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
 
   account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
 
@@ -292,69 +179,60 @@ model AiProviderOnboardingSession {
   @@map("ai_provider_onboarding_sessions")
 }
 
-model KnowledgeGenerationTask {
-  id                   String    @id
-  identityId           String    @map("identity_id")
-  topic                String
-  resourceCount        Int       @default(5) @map("resource_count")
-  targetAudience       String?   @map("target_audience")
-  folderPath           String    @map("folder_path")
-  status               String // PENDING, GENERATING, COMPLETED, FAILED
-  progress             Int       @default(0) // 0-100
-  generatedResourceIds String[]  @map("generated_resource_ids")
-  error                String?   @db.Text
-  createdAt            DateTime  @default(now()) @map("created_at")
-  completedAt          DateTime? @map("completed_at")
-
-  @@index([identityId])
-  @@index([status])
-  @@index([createdAt])
-  @@map("knowledge_generation_tasks")
-}
-
-model AiKnowledgeIndexEntry {
-  id              String                     @id
-  identityId      String                     @map("identity_id")
-  repositoryId    String                     @map("repository_id")
-  resourceId      String                     @unique @map("resource_id")
-  resourcePath    String                     @map("resource_path")
-  title           String?
-  mimeType        String                     @map("mime_type")
-  contentHash     String                     @map("content_hash")
-  status          String
-  summary         String?                    @db.Text
-  keywords        Json                       @default("[]")
-  embedding       Json?
-  retrievalVector Unsupported("vector(48)")? @map("retrieval_vector")
-  chunks          Json?
-  metadata        Json                       @default("{}")
-  error           String?                    @db.Text
-  indexedAt       DateTime                   @map("indexed_at")
-  lastRequestedAt DateTime?                  @map("last_requested_at")
-  createdAt       DateTime                   @default(now()) @map("created_at")
-  updatedAt       DateTime                   @updatedAt @map("updated_at")
-  deletedAt       DateTime?                  @map("deleted_at")
+/**
+ * Host-owned provider SecretVault storage. This table is deliberately not a
+ * PowerSync table and has no relation to portable provider connection state.
+ */
+model AiProviderSecret {
+  id             String    @id // opaque credential ref
+  identityId     String    @map("identity_id")
+  encryptedValue String    @map("encrypted_value")
+  expiresAt      DateTime? @map("expires_at")
+  revokedAt      DateTime? @map("revoked_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
 
   account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
 
   @@index([identityId])
+  @@index([identityId, expiresAt])
+  @@map("ai_provider_secrets")
+}
+
+model AiKnowledgeIndexEntry {
+  id                  String                     @id
+  identityId          String                     @map("identity_id")
+  repositoryId        String                     @map("repository_id")
+  knowledgeSpaceId    String                     @map("knowledge_space_id")
+  knowledgeDocumentId String                     @map("knowledge_document_id")
+  sourcePath          String                     @map("source_path")
+  title               String?
+  mimeType            String                     @map("mime_type")
+  sourceContentHash   String                     @map("source_content_hash")
+  sourceVersion       String?                    @map("source_version")
+  status              String
+  summary             String?                    @db.Text
+  keywords            Json                       @default("[]")
+  embedding           Json?
+  retrievalVector     Unsupported("vector(48)")? @map("retrieval_vector")
+  chunks              Json?
+  metadata            Json                       @default("{}")
+  error               String?                    @db.Text
+  indexedAt           DateTime                   @map("indexed_at")
+  lastRequestedAt     DateTime?                  @map("last_requested_at")
+  createdAt           DateTime                   @default(now()) @map("created_at")
+  updatedAt           DateTime                   @updatedAt @map("updated_at")
+  deletedAt           DateTime?                  @map("deleted_at")
+
+  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
+
+  @@unique([knowledgeSpaceId, knowledgeDocumentId])
+  @@index([identityId])
+  @@index([knowledgeSpaceId, knowledgeDocumentId])
   @@index([repositoryId])
   @@index([status])
   @@index([lastRequestedAt])
   @@map("ai_knowledge_index_entries")
-}
-
-model DashboardConfig {
-  id           Int      @id @default(autoincrement())
-  identityId   String   @unique @map("identity_id")
-  widgetConfig Json     @map("widget_config")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-
-  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@map("dashboard_configs")
 }
 
 // Better Auth cloud identity source.
@@ -366,7 +244,6 @@ model CloudAuthUser {
   email         String    @unique
   emailVerified Boolean   @default(false) @map("email_verified")
   image         String?
-  status        String    @default("active")
   disabledAt    DateTime? @map("disabled_at")
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
@@ -450,123 +327,27 @@ model CloudAuthDeviceCode {
 }
 
 // ==========================================
-// Editor Module
-// 编辑器工作区、会话、标签页
-// ==========================================
-
-model EditorWorkspace {
-  id          String    @id
-  identityId  String    @map("identity_id")
-  name        String
-  description String?
-  projectPath String    @map("project_path")
-  projectType String    @map("project_type")
-  layout      Json
-  setting     Json
-  isActive    Boolean   @default(true) @map("is_active")
-  version     Int       @default(1)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  accessedAt  DateTime  @default(now()) @map("accessed_at")
-  deletedAt   DateTime? @map("deleted_at")
-
-  sessions EditorWorkspaceSession[]
-  account  Account                  @relation(fields: [identityId], references: [id], onDelete: Cascade)
-
-  @@unique([identityId, projectPath])
-  @@index([isActive])
-  @@map("editor_workspaces")
-}
-
-model EditorWorkspaceSession {
-  id          String    @id
-  workspaceId String    @map("workspace_id")
-  identityId  String    @map("identity_id")
-  name        String
-  layout      Json
-  isActive    Boolean   @default(true) @map("is_active")
-  version     Int       @default(1)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  deletedAt   DateTime? @map("deleted_at")
-
-  groups    EditorWorkspaceSessionGroup[]
-  account   Account                       @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  workspace EditorWorkspace               @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-
-  @@index([workspaceId])
-  @@map("editor_workspace_sessions")
-}
-
-model EditorWorkspaceSessionGroup {
-  id             String    @id
-  sessionId      String    @map("session_id")
-  workspaceId    String    @map("workspace_id")
-  identityId     String    @map("identity_id")
-  groupIndex     Int       @map("group_index")
-  name           String?
-  splitDirection String    @map("split_direction")
-  version        Int       @default(1)
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
-  deletedAt      DateTime? @map("deleted_at")
-
-  tabs    EditorWorkspaceSessionGroupTab[]
-  account Account                          @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  session EditorWorkspaceSession           @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-
-  @@index([workspaceId])
-  @@map("editor_workspace_session_groups")
-}
-
-model EditorWorkspaceSessionGroupTab {
-  id          String    @id
-  groupId     String    @map("group_id")
-  sessionId   String    @map("session_id")
-  workspaceId String    @map("workspace_id")
-  identityId  String    @map("identity_id")
-  resourceId  String?   @map("resource_id")
-  tabIndex    Int       @map("tab_index")
-  tabType     String    @map("tab_type")
-  title       String
-  viewState   Json      @map("view_state")
-  isPinned    Boolean   @default(false) @map("is_pinned")
-  isActive    Boolean   @default(false) @map("is_active")
-  version     Int       @default(1)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  deletedAt   DateTime? @map("deleted_at")
-
-  account Account                     @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  group   EditorWorkspaceSessionGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
-
-  @@index([workspaceId])
-  @@map("editor_workspace_session_group_tabs")
-}
-
-// ==========================================
 // Goal Module — Core vNext
 // Goal = Direction + Measurement
 // ==========================================
 
 model Goal {
-  id                  String    @id
-  identityId          String    @map("identity_id")
-  name                String
-  description         String?
-  feasibilityAnalysis String?   @map("feasibility_analysis")
-  motivation          String?
-  status              String    @default("Active")
-  startDate           DateTime? @map("start_date")
-  dueDate             DateTime? @map("due_date")
-  completedAt         DateTime? @map("completed_at")
-  archivedAt          DateTime? @map("archived_at")
-  sortOrder           Int       @default(0) @map("sort_order")
-  reminderConfig      String?   @map("reminder_config")
-  version             Int       @default(1)
-  createdAt           DateTime  @default(now()) @map("created_at")
-  updatedAt           DateTime  @updatedAt @map("updated_at")
-  deletedAt           DateTime? @map("deleted_at")
+  id             String    @id
+  identityId     String    @map("identity_id")
+  name           String
+  summary        String?
+  status         String    @default("Planned")
+  startDate      String?   @map("start_date")
+  targetKind     String?   @map("target_kind")
+  targetEndDate  String?   @map("target_end_date")
+  completedAt    DateTime? @map("completed_at")
+  archivedAt     DateTime? @map("archived_at")
+  sortOrder      Int       @default(0) @map("sort_order")
+  reminderConfig String?   @map("reminder_config")
+  version        Int       @default(1)
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  deletedAt      DateTime? @map("deleted_at")
 
   account                  Account                   @relation(fields: [identityId], references: [id], onDelete: Cascade)
   keyResults               KeyResult[]               @relation("GoalKeyResults")
@@ -576,31 +357,33 @@ model Goal {
 
   @@unique([id, identityId])
   @@index([identityId, status])
-  @@index([identityId, dueDate])
-  @@index([dueDate])
+  @@index([identityId, targetEndDate])
+  @@index([targetEndDate])
   @@index([deletedAt])
   @@map("goals")
 }
 
 model KeyResult {
-  id                    String   @id
-  identityId            String   @map("identity_id")
-  goalId                String   @map("goal_id")
-  title                 String
-  description           String?
-  aggregationMethod     String   @map("aggregation_method")
-  startingValue         Float    @default(0) @map("starting_value")
-  progressBaselineValue Float?   @map("progress_baseline_value")
-  targetValue           Float    @map("target_value")
-  currentValue          Float    @default(0) @map("current_value")
-  unit                  String?
-  weight                Int      @default(1)
-  order                 Int      @default(0)
-  createdAt             DateTime @default(now()) @map("created_at")
-  updatedAt             DateTime @updatedAt @map("updated_at")
+  id                String   @id
+  identityId        String   @map("identity_id")
+  goalId            String   @map("goal_id")
+  title             String
+  description       String?
+  aggregationMethod String   @map("aggregation_method")
+  initialValue      Float    @default(0) @map("initial_value")
+  trackingBaseValue Float    @default(0) @map("tracking_base_value")
+  targetValue       Float    @map("target_value")
+  currentValue      Float    @default(0) @map("current_value")
+  targetKind        String?  @map("target_kind")
+  targetEndDate     String?  @map("target_end_date")
+  unit              String?
+  weight            Int      @default(1)
+  order             Int      @default(0)
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
 
   goal                     Goal                      @relation("GoalKeyResults", fields: [goalId, identityId], references: [id, identityId], onDelete: Cascade)
-  linkedTaskTemplates      TaskTemplate[]            @relation("KeyResultTaskTemplates")
+  linkedTaskPlans          TaskPlan[]                @relation("KeyResultTaskPlans")
   records                  GoalRecord[]
   keyResultWeightSnapshots KeyResultWeightSnapshot[]
 
@@ -843,22 +626,22 @@ model GoalLabel {
 }
 
 model TaskLabel {
-  identityId     String @map("identity_id")
-  taskTemplateId String @map("task_template_id")
-  labelId        String @map("label_id")
+  identityId String @map("identity_id")
+  taskPlanId String @map("task_plan_id")
+  labelId    String @map("label_id")
 
-  account      Account      @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  taskTemplate TaskTemplate @relation(fields: [taskTemplateId, identityId], references: [id, identityId], onDelete: Cascade)
-  label        Label        @relation(fields: [labelId, identityId], references: [id, identityId], onDelete: Cascade)
+  account  Account  @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  taskPlan TaskPlan @relation(fields: [taskPlanId, identityId], references: [id, identityId], onDelete: Cascade)
+  label    Label    @relation(fields: [labelId, identityId], references: [id, identityId], onDelete: Cascade)
 
-  @@id([identityId, taskTemplateId, labelId])
-  @@index([identityId, labelId, taskTemplateId])
+  @@id([identityId, taskPlanId, labelId])
+  @@index([identityId, labelId, taskPlanId])
   @@map("task_labels")
 }
 
 // ==========================================
 // Notification Module
-// 通知聚合根、渠道、历史、偏好、模板
+// 通知 Fact、Inbox、交互与投递执行
 // ==========================================
 
 model Notification {
@@ -886,57 +669,39 @@ model Notification {
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
   deletedAt         DateTime? @map("deleted_at")
+  archivedAt        DateTime? @map("archived_at")
   isRead            Boolean   @default(false) @map("is_read")
 
-  channels          NotificationChannel[]
-  history           NotificationHistory[]
+  interactions      NotificationInteraction[]
   dispatchOutboxes  NotificationDispatchOutbox[]
   deliveryDecisions NotificationDeliveryDecisionRecord[]
   account           Account                              @relation(fields: [identityId], references: [id], onDelete: Cascade)
 
   @@unique([identityId, idempotencyKey])
   @@index([identityId, workflowKey])
+  @@index([identityId, archivedAt, createdAt])
   @@map("notifications")
 }
 
-model NotificationChannel {
-  id             String    @id
-  identityId     String    @map("identity_id")
-  notificationId String    @map("notification_id")
-  channelType    String    @map("channel_type")
-  status         String
-  recipient      String?
-  maxRetries     Int       @default(3) @map("max_retries")
-  error          String?
-  response       String?
-  retryCount     Int       @default(0) @map("retry_count")
-  sentAt         DateTime? @map("sent_at")
-  failedAt       DateTime? @map("failed_at")
-  attempts       Int       @default(0)
+model NotificationInteraction {
+  id               String   @id
+  idempotencyKey   String   @unique @map("idempotency_key")
+  identityId       String   @map("identity_id")
+  notificationId   String   @map("notification_id")
+  actionKey        String   @map("action_key")
+  actionKind       String   @map("action_kind")
+  occurredAt       DateTime @map("occurred_at")
+  commandReceiptId String?  @map("command_receipt_id")
+  outcome          String
+  correlationId    String?  @map("correlation_id")
+  causationId      String?  @map("causation_id")
 
-  identity     Account      @relation("AccountNotificationChannels", fields: [identityId], references: [id])
+  identity     Account      @relation("AccountNotificationInteractions", fields: [identityId], references: [id], onDelete: Cascade)
   notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
 
-  @@index([identityId])
-  @@index([notificationId])
-  @@map("notification_channels")
-}
-
-model NotificationHistory {
-  id             String   @id
-  identityId     String   @map("identity_id")
-  notificationId String   @map("notification_id")
-  action         String
-  details        String?
-  actorId        String?  @map("actor_id")
-  createdAt      DateTime @default(now()) @map("created_at")
-
-  identity     Account      @relation("AccountNotificationHistory", fields: [identityId], references: [id])
-  notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@index([notificationId])
-  @@map("notification_history")
+  @@index([identityId, occurredAt])
+  @@index([notificationId, occurredAt])
+  @@map("notification_interactions")
 }
 
 model NotificationDeliveryDecisionRecord {
@@ -963,8 +728,7 @@ model NotificationPreference {
   identityId        String    @unique @map("identity_id")
   globalChannels    String    @default("{}") @map("global_channels")
   workflowOverrides String    @default("{}") @map("workflow_overrides")
-  doNotDisturb      String?   @map("do_not_disturb")
-  rateLimit         String?   @map("rate_limit")
+  quietHours        String?   @map("quiet_hours")
   version           Int       @default(1)
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
@@ -972,26 +736,6 @@ model NotificationPreference {
 
   @@index([identityId])
   @@map("notification_preferences")
-}
-
-model NotificationTemplate {
-  id              String   @id
-  name            String   @unique
-  displayName     String   @map("display_name")
-  description     String?
-  type            String
-  category        String
-  titleTemplate   String   @map("title_template")
-  contentTemplate String   @map("content_template")
-  variables       String?
-  defaultActions  String?  @map("default_actions")
-  isSystem        Boolean  @default(false) @map("is_system")
-  isActive        Boolean  @default(true) @map("is_active")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
-
-  @@index([name])
-  @@map("notification_templates")
 }
 
 /// NotificationDispatchOutbox 投递意图/Outbox（W2: LeaseClaim 与 durable receipt）
@@ -1033,13 +777,13 @@ model NotificationDispatchOutbox {
 
 // ==========================================
 // Relation Module (R5)
-// 跨模块 SubjectRef 关系：Note/Goal/Task/Reminder/Habit 双向连接
+// 跨模块 SubjectRef 关系：Note/Goal/Task/Habit/Wallet 双向连接
 // ==========================================
 
 model Relation {
   id           String   @id
   identityId   String   @map("identity_id")
-  subjectType  String   @map("subject_type") /// note | goal | task | reminder | habit
+  subjectType  String   @map("subject_type") /// note | goal | task | habit | wallet
   subjectId    String   @map("subject_id")
   relationType String   @map("relation_type") /// references | related | depends_on | contributes_to
   objectType   String   @map("object_type")
@@ -1148,7 +892,7 @@ model AccountClosureOperation {
 }
 
 /// 运维审计日志 (W7)：记录谁何时对哪个 operation 做了什么（query / replay）。
-/// 跨模块共享：Reminder / Notification / Schedule rebuild / Account closure / Knowledge projection
+/// 跨模块共享：Notification / Schedule rebuild / Account closure / Knowledge projection
 /// 的最小权限查询与 replay 操作都必须写审计记录，禁止静默操作。
 model OperationAuditLog {
   id              String   @id @default(uuid())
@@ -1166,202 +910,7 @@ model OperationAuditLog {
 }
 
 // ==========================================
-// Reminder Module
-// 提醒模板、实例、分组、历史、统计、响应
-// ==========================================
-
-model ReminderTemplate {
-  id                 String    @id
-  identityId         String    @map("identity_id")
-  name               String
-  description        String?
-  type               String
-  selfEnabled        Boolean   @map("self_enabled")
-  status             String
-  importanceLevel    String    @map("importance_level")
-  tags               String
-  color              String?
-  icon               String?
-  nextTriggerAt      DateTime? @map("next_trigger_at")
-  version            Int       @default(1)
-  createdAt          DateTime  @default(now()) @map("created_at")
-  updatedAt          DateTime  @updatedAt @map("updated_at")
-  deletedAt          DateTime? @map("deleted_at")
-  trigger            String
-  recurrence         String?
-  activeTime         String    @map("active_time")
-  activeHours        String?   @map("active_hours")
-  notificationConfig String    @map("notification_config")
-  stats              String
-
-  history     ReminderHistory[]
-  instances   ReminderInstance[]
-  responses   ReminderResponse[]
-  occurrences ReminderOccurrence[]
-  account     Account              @relation(fields: [identityId], references: [id], onDelete: Cascade)
-
-  @@index([status])
-  @@map("reminder_templates")
-}
-
-model ReminderGroup {
-  id          String    @id
-  identityId  String    @map("identity_id")
-  name        String
-  description String?
-  color       String?
-  icon        String?
-  enabled     Boolean
-  status      String
-  order       Int
-  stats       String
-  version     Int       @default(1)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  deletedAt   DateTime? @map("deleted_at")
-
-  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@map("reminder_groups")
-}
-
-model ReminderInstance {
-  id          String    @id
-  templateId  String    @map("template_id")
-  identityId  String    @map("identity_id")
-  triggerAt   DateTime  @map("trigger_at")
-  status      String
-  result      String?
-  processedAt DateTime? @map("processed_at")
-  note        String?
-  payload     String?
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-
-  account  Account          @relation(fields: [identityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  template ReminderTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
-
-  @@index([triggerAt])
-  @@map("reminder_instances")
-}
-
-model ReminderHistory {
-  id                  String   @id
-  identityId          String   @map("identity_id")
-  templateId          String   @map("template_id")
-  triggeredAt         DateTime @map("triggered_at")
-  result              String
-  error               String?
-  notificationSent    Boolean  @map("notification_sent")
-  notificationChannel String?
-  createdAt           DateTime @default(now()) @map("created_at")
-
-  identity Account          @relation("AccountReminderHistory", fields: [identityId], references: [id])
-  template ReminderTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@index([templateId])
-  @@map("reminder_history")
-}
-
-model ReminderStatistic {
-  id            String   @id
-  identityId    String   @unique @map("identity_id")
-  templateStats String   @map("template_stats")
-  groupStats    String   @map("group_stats")
-  triggerStats  String   @map("trigger_stats")
-  calculatedAt  DateTime @map("calculated_at")
-
-  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@map("reminder_statistics")
-}
-
-model ReminderResponse {
-  id                    String   @id @default(uuid())
-  identityId            String   @map("identity_id")
-  templateId            String   @map("template_id")
-  action                String // clicked, ignored, snoozed, dismissed, completed
-  responseTime          Int?     @map("response_time") // actual response latency, seconds
-  snoozeDurationSeconds Int?     @map("snooze_duration_seconds") // requested snooze delay, seconds
-  timestamp             DateTime
-  createdAt             DateTime @default(now()) @map("created_at")
-
-  identity Account          @relation("AccountReminderResponses", fields: [identityId], references: [id])
-  template ReminderTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@index([templateId, timestamp(sort: Desc)])
-  @@map("reminder_responses")
-}
-
-/// UserReminderPreference 聚合根 - 用户提醒偏好
-/// 存储用户的最佳/最差响应时间段与全局提醒总开关
-model UserReminderPreference {
-  // ============ 主键与外键 ============
-  id         String @id
-  identityId String @unique @map("identity_id")
-
-  // ============ 时间段偏好 ============
-  bestTimeSlots  String @map("best_time_slots") /// JSON: TimeSlotDTO[]
-  worstTimeSlots String @map("worst_time_slots") /// JSON: TimeSlotDTO[]
-
-  // ============ 全局提醒 ============
-  globalReminderEnabled Boolean @default(true) @map("global_reminder_enabled")
-
-  // ============ 审计 ============
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  // ============ 关系映射 ============
-  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
-
-  // ============ 索引优化 ============
-  @@index([identityId])
-  @@map("user_reminder_preferences")
-}
-
-/// ReminderOccurrence 触发实例/投递意图（W1: LeaseClaim 与 durable receipt）
-model ReminderOccurrence {
-  id                  String    @id
-  identityId          String    @map("identity_id")
-  templateId          String    @map("template_id")
-  source              String    @default("reminder")
-  occurrenceKey       String    @map("occurrence_key")
-  idempotencyKey      String    @unique @map("idempotency_key")
-  status              String
-  attempt             Int       @default(0)
-  ownerToken          String?   @map("owner_token")
-  claimId             String?   @map("claim_id")
-  fencingToken        Int       @default(0) @map("fencing_token")
-  leaseExpiresAt      DateTime? @map("lease_expires_at")
-  lastHeartbeatAt     DateTime? @map("last_heartbeat_at")
-  heartbeatIntervalMs Int?      @map("heartbeat_interval_ms")
-  lastError           String?   @map("last_error")
-  nextRetryAt         DateTime? @map("next_retry_at")
-  deadLetterAt        DateTime? @map("dead_letter_at")
-  correlationId       String?   @map("correlation_id")
-  causationId         String?   @map("causation_id")
-  attemptsHistoryJson String?   @map("attempts_history_json")
-  createdAt           DateTime  @default(now()) @map("created_at")
-  updatedAt           DateTime  @updatedAt @map("updated_at")
-  finishedAt          DateTime? @map("finished_at")
-
-  template ReminderTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
-  account  Account          @relation("AccountReminderOccurrences", fields: [identityId], references: [id])
-
-  @@unique([templateId, occurrenceKey])
-  @@index([identityId])
-  @@index([status])
-  @@index([leaseExpiresAt])
-  @@map("reminder_occurrences")
-}
-
-// ==========================================
-// Routine Coach vNext — first-class domain truth
-// Legacy Reminder runtime tables above remain for reliability/cutover.
+// Routine Coach vNext — canonical domain truth
 // ==========================================
 
 model RoutineDefinition {
@@ -1378,6 +927,7 @@ model RoutineDefinition {
   account           Account                    @relation(fields: [identityId], references: [id], onDelete: Cascade)
   memberships       RoutineProfileMembership[]
   occurrences       RoutineOccurrence[]
+  interactions      RoutineInteraction[]
   temporaryOverride RoutineTemporaryOverride?
 
   @@unique([identityId, id])
@@ -1391,7 +941,6 @@ model RoutineProfile {
   name        String
   description String?
   enabled     Boolean  @default(true)
-  active      Boolean  @default(false)
   version     Int      @default(1)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
@@ -1400,7 +949,7 @@ model RoutineProfile {
   memberships RoutineProfileMembership[]
 
   @@unique([identityId, id])
-  @@index([identityId, enabled, active])
+  @@index([identityId, enabled])
   @@map("routine_profiles")
 }
 
@@ -1462,7 +1011,7 @@ model RoutineProtocolSession {
 }
 
 /// RoutineOccurrence durable occurrence fence for the ROUTINE-3401 wall-clock lane.
-/// Mirrors the protected ReminderOccurrence lease-claim contract (ADR-059 §10)
+/// Uses the protected Routine lease-claim/fencing contract (ADR-077)
 /// keyed by the canonical occurrenceKey so crash/retry replay is idempotent.
 model RoutineOccurrence {
   id               String    @id
@@ -1470,10 +1019,18 @@ model RoutineOccurrence {
   routineId        String    @map("routine_id")
   source           String    @default("routine")
   occurrenceKey    String    @map("occurrence_key")
-  scheduledFor     DateTime  @map("scheduled_for")
+  scheduledFor     DateTime? @map("scheduled_for")
   sourceRevision   String?   @map("source_revision")
   idempotencyKey   String    @unique @map("idempotency_key")
+  /// Infrastructure execution status retained during the ADR-077 reliability cutover.
   status           String
+  /// Routine-owned business truth. Scheduler success must not imply satisfaction.
+  triggerKind      String    @default("WallClock") @map("trigger_kind")
+  becameDueAt      DateTime  @default(now()) @map("became_due_at")
+  resolutionState  String    @default("Open") @map("resolution_state")
+  resolvedAt       DateTime? @map("resolved_at")
+  resolutionKind   String?   @map("resolution_kind")
+  resolutionReason String?   @map("resolution_reason")
   attempt          Int       @default(0)
   ownerToken       String?   @map("owner_token")
   claimId          String?   @map("claim_id")
@@ -1490,8 +1047,9 @@ model RoutineOccurrence {
   updatedAt        DateTime  @updatedAt @map("updated_at")
   finishedAt       DateTime? @map("finished_at")
 
-  routine RoutineDefinition @relation(fields: [routineId, identityId], references: [id, identityId], onDelete: Cascade)
-  account Account           @relation("AccountRoutineOccurrences", fields: [identityId], references: [id])
+  routine      RoutineDefinition    @relation(fields: [routineId, identityId], references: [id, identityId], onDelete: Cascade)
+  account      Account              @relation("AccountRoutineOccurrences", fields: [identityId], references: [id])
+  interactions RoutineInteraction[]
 
   @@unique([identityId, routineId, occurrenceKey])
   @@index([identityId])
@@ -1504,10 +1062,33 @@ model RoutineOccurrence {
 /// Temporary override is runtime state kept separate from long-lived trigger
 /// config so a snooze never rewrites `trigger_json` (ADR-059 §6). One row per
 /// routine; the decoded payload uses the W2 trigger-parity codec.
+model RoutineInteraction {
+  id                String   @id
+  idempotencyKey    String   @unique @map("idempotency_key")
+  identityId        String   @map("identity_id")
+  routineId         String   @map("routine_id")
+  occurrenceKey     String   @map("occurrence_key")
+  action            String
+  actedAt           DateTime @map("acted_at")
+  responseLatencyMs Int?     @map("response_latency_ms")
+  snoozeDurationMs  Int?     @map("snooze_duration_ms")
+  metadataJson      String?  @map("metadata_json")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  account    Account            @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  routine    RoutineDefinition  @relation(fields: [routineId, identityId], references: [id, identityId], onDelete: Cascade)
+  occurrence RoutineOccurrence? @relation(fields: [identityId, routineId, occurrenceKey], references: [identityId, routineId, occurrenceKey], onDelete: Cascade)
+
+  @@index([identityId, routineId, actedAt])
+  @@index([identityId, occurrenceKey])
+  @@map("routine_interactions")
+}
+
 model RoutineTemporaryOverride {
   identityId   String   @map("identity_id")
   routineId    String   @map("routine_id")
   overrideJson String   @map("override_json")
+  version      Int      @default(1)
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
@@ -1517,221 +1098,6 @@ model RoutineTemporaryOverride {
   @@id([identityId, routineId])
   @@unique([routineId, identityId])
   @@map("routine_temporary_overrides")
-}
-
-// ==========================================
-// Repository Module
-// 仓库聚合根、资源、文件夹、浏览器、统计
-// ==========================================
-
-model Repository {
-  id             String    @id
-  identityId     String    @map("identity_id")
-  name           String
-  type           String
-  path           String
-  description    String?
-  config         Json      @default("{}") // RepositoryConfig JSONB
-  stats          Json      @default("{}") // RepositoryStats JSONB
-  relatedGoals   String?   @map("related_goals")
-  status         String    @default("ACTIVE") // ACTIVE | ARCHIVED | DELETED
-  git            String?
-  syncStatus     String?   @map("sync_status")
-  lastAccessedAt DateTime? @map("last_accessed_at")
-  version        Int       @default(1)
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
-  deletedAt      DateTime? @map("deleted_at")
-
-  account             Account              @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  explorers           RepositoryExplorer[]
-  repositoryResources RepositoryResource[]
-  resources           Resource[]
-  folders             Folder[]
-
-  @@unique([identityId, path])
-  @@index([type])
-  @@index([status])
-  @@map("repositories")
-}
-
-model Folder {
-  id           String   @id
-  identityId   String   @map("identity_id")
-  repositoryId String   @map("repository_id")
-  parentId     String?  @map("parent_id")
-  name         String
-  path         String // Auto-generated: /parent/name
-  order        Int      @default(0)
-  isExpanded   Boolean  @default(true) @map("is_expanded")
-  metadata     Json     @default("{}") // FolderMetadata JSONB
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-
-  identity   Account    @relation("AccountFolders", fields: [identityId], references: [id])
-  repository Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
-  parent     Folder?    @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
-  children   Folder[]   @relation("FolderHierarchy")
-
-  @@unique([repositoryId, parentId, name])
-  @@index([identityId])
-  @@index([repositoryId])
-  @@index([parentId])
-  @@index([path])
-  @@map("folders")
-}
-
-model Resource {
-  id           String    @id
-  identityId   String    @map("identity_id")
-  repositoryId String    @map("repository_id")
-  folderId     String?   @map("folder_id")
-  name         String
-  type         String // markdown | image | video | audio | pdf | link | code | other
-  path         String
-  size         Int       @default(0)
-  content      String?   @db.Text
-  metadata     Json      @default("{}") // ResourceMetadata
-  stats        Json      @default("{}") // ResourceStats
-  description  String?
-  author       String?
-  version      String?
-  tags         String    @default("[]") // JSON array
-  category     String?
-  status       String    @default("ACTIVE") // ACTIVE | ARCHIVED | DELETED | DRAFT
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
-  modifiedAt   DateTime? @map("modified_at")
-  deletedAt    DateTime? @map("deleted_at")
-
-  identity   Account    @relation("AccountResources", fields: [identityId], references: [id])
-  repository Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@index([repositoryId])
-  @@index([folderId])
-  @@index([type])
-  @@index([status])
-  @@index([category])
-  @@index([createdAt])
-  @@map("resources")
-}
-
-model RepositoryResource {
-  id           String    @id
-  identityId   String    @map("identity_id")
-  repositoryId String    @map("repository_id")
-  name         String
-  type         String
-  path         String
-  size         Int?
-  description  String?
-  author       String?
-  version      String?
-  tags         String?
-  category     String?
-  status       String    @default("active")
-  metadata     String?
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
-  modifiedAt   DateTime? @map("modified_at")
-
-  linkedContents LinkedContent[]
-  identity       Account             @relation("AccountRepositoryResources", fields: [identityId], references: [id])
-  repository     Repository          @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
-  sourceRefs     ResourceReference[] @relation("SourceResourceRefs")
-  targetRefs     ResourceReference[] @relation("TargetResourceRefs")
-
-  @@unique([repositoryId, path])
-  @@index([identityId])
-  @@index([type])
-  @@map("repository_resources")
-}
-
-model LinkedContent {
-  id            String    @id
-  resourceId    String    @map("resource_id")
-  title         String
-  url           String
-  contentType   String    @map("content_type")
-  description   String?
-  thumbnail     String?
-  author        String?
-  publishedAt   DateTime? @map("published_at")
-  isAccessible  Boolean   @default(true) @map("is_accessible")
-  lastCheckedAt DateTime? @map("last_checked_at")
-  cachedAt      DateTime? @map("cached_at")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
-
-  repositoryResource RepositoryResource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
-
-  @@index([url])
-  @@map("linked_contents")
-}
-
-model ResourceReference {
-  id               String    @id
-  sourceResourceId String    @map("source_resource_id")
-  targetResourceId String    @map("target_resource_id")
-  referenceType    String    @map("reference_type")
-  description      String?
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
-  lastVerifiedAt   DateTime? @map("last_verified_at")
-
-  sourceResource RepositoryResource @relation("SourceResourceRefs", fields: [sourceResourceId], references: [id], onDelete: Cascade)
-  targetResource RepositoryResource @relation("TargetResourceRefs", fields: [targetResourceId], references: [id], onDelete: Cascade)
-
-  @@unique([sourceResourceId, targetResourceId, referenceType])
-  @@index([targetResourceId])
-  @@map("resource_references")
-}
-
-model RepositoryExplorer {
-  id           String    @id
-  repositoryId String    @map("repository_id")
-  identityId   String    @map("identity_id")
-  name         String
-  description  String?
-  currentPath  String    @map("current_path")
-  filters      String?
-  viewConfig   String?   @map("view_config")
-  pinnedPaths  String?   @map("pinned_paths")
-  recentPaths  String?   @map("recent_paths")
-  lastScanAt   DateTime? @map("last_scan_at")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
-
-  account    Account    @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  repository Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
-
-  @@unique([repositoryId, identityId])
-  @@index([repositoryId])
-  @@map("repository_explorers")
-}
-
-model RepositoryStatistic {
-  id                   Int      @id @default(autoincrement())
-  identityId           String   @unique @map("identity_id")
-  totalRepositories    Int      @default(0) @map("total_repositories")
-  activeRepositories   Int      @default(0) @map("active_repositories")
-  archivedRepositories Int      @default(0) @map("archived_repositories")
-  totalResources       Int      @default(0) @map("total_resources")
-  totalFiles           Int      @default(0) @map("total_files")
-  totalFolders         Int      @default(0) @map("total_folders")
-  gitEnabledRepos      Int      @default(0) @map("git_enabled_repos")
-  totalCommits         Int      @default(0) @map("total_commits")
-  totalReferences      Int      @default(0) @map("total_references")
-  totalLinkedContents  Int      @default(0) @map("total_linked_contents")
-  totalSizeBytes       BigInt   @default(0) @map("total_size_bytes")
-  lastUpdatedAt        DateTime @default(now()) @map("last_updated_at")
-  createdAt            DateTime @default(now()) @map("created_at")
-
-  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@map("repository_statistics")
 }
 
 /// Short-lived, identity-bound GitHub App installation orchestration intent.
@@ -1762,45 +1128,123 @@ model KnowledgeRepositoryInstallationIntent {
   @@map("knowledge_repository_installation_intents")
 }
 
-/// GitHub App installation bound to one explicitly selected knowledge repository.
-/// This authorization is independent from AuthOAuthBinding login credentials.
-model KnowledgeRepositoryConnection {
-  id                       String    @id
-  identityId               String    @map("identity_id")
-  githubUserId             String    @map("github_user_id")
-  githubRepositoryId       String    @map("github_repository_id")
-  githubRepositoryFullName String    @map("github_repository_full_name")
-  installationId           String    @map("installation_id")
-  defaultBranch            String    @default("main") @map("default_branch")
-  isPrivate                Boolean   @default(true) @map("is_private")
-  status                   String    @default("PENDING_INSTALL")
-  lastSyncedCommitSha      String?   @map("last_synced_commit_sha")
-  lastProjectedCommitSha   String?   @map("last_projected_commit_sha")
-  lastErrorCode            String?   @map("last_error_code")
-  lastErrorMessage         String?   @map("last_error_message")
-  version                  Int       @default(1)
-  createdAt                DateTime  @default(now()) @map("created_at")
-  updatedAt                DateTime  @updatedAt @map("updated_at")
-  deletedAt                DateTime? @map("deleted_at")
+/// Stable logical knowledge space shared by local/remote bindings.
+model KnowledgeSpace {
+  id        String   @id
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
+  remoteBindings     KnowledgeRemoteBinding[]
+  documentIdentities KnowledgeDocumentIdentity[]
+
+  @@map("knowledge_spaces")
+}
+
+/// ADR-090 durable identity registry. `id` is a technical row key; the product key is
+/// `(knowledgeSpaceId, knowledgeDocumentId)` and the external identity is carried by Markdown.
+model KnowledgeDocumentIdentity {
+  id                  String   @id @default(uuid())
+  knowledgeSpaceId    String   @map("knowledge_space_id")
+  knowledgeDocumentId String   @map("knowledge_document_id")
+  origin              String
+  originRequestId     String?  @map("origin_request_id")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  knowledgeSpace KnowledgeSpace @relation(fields: [knowledgeSpaceId], references: [id], onDelete: Cascade)
+
+  @@unique([knowledgeSpaceId, knowledgeDocumentId])
+  @@index([knowledgeSpaceId])
+  @@map("knowledge_document_identities")
+}
+
+/// ADR-089 durable user choice: one GitHub repository is bound to a KnowledgeSpace.
+/// Provider health, sync history safety and projection state live in separate models.
+model KnowledgeRemoteBinding {
+  id                         String    @id
+  knowledgeSpaceId           String    @map("knowledge_space_id")
+  identityId                 String    @map("identity_id")
+  provider                   String    @default("GitHub")
+  installationId             String    @map("installation_id")
+  repositoryId               String    @map("repository_id")
+  repositoryFullNameSnapshot String    @map("repository_full_name_snapshot")
+  connectedAt                DateTime  @map("connected_at")
+  disconnectedAt             DateTime? @map("disconnected_at")
+  version                    Int       @default(1)
+
+  knowledgeSpace          KnowledgeSpace                    @relation(fields: [knowledgeSpaceId], references: [id], onDelete: Cascade)
   account                 Account                           @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  observation             RemoteRepositoryObservation?
+  historyFence            RemoteHistoryFence?
+  projectionCheckpoint    KnowledgeProjectionCheckpoint?
   webhookDeliveries       GithubWebhookDelivery[]
   noteProjections         KnowledgeNoteProjection[]
   attachmentProjections   KnowledgeAttachmentProjection[]
   attachmentContentCaches KnowledgeAttachmentContentCache[]
   writeRequests           KnowledgeWriteRequest[]
 
-  @@unique([identityId, githubRepositoryId])
-  @@unique([githubRepositoryId])
-  @@index([identityId, status])
+  @@unique([identityId, repositoryId])
+  @@unique([repositoryId])
+  @@index([identityId, disconnectedAt])
+  @@index([knowledgeSpaceId, disconnectedAt])
   @@index([installationId])
-  @@map("knowledge_repository_connections")
+  @@map("knowledge_remote_bindings")
+}
+
+/// Latest provider observation. Provider loss never disconnects the durable binding.
+model RemoteRepositoryObservation {
+  bindingId             String   @id @map("binding_id")
+  observedAt            DateTime @map("observed_at")
+  accountId             String   @map("account_id")
+  repositoryFullName    String   @map("repository_full_name")
+  defaultBranch         String   @map("default_branch")
+  isPrivate             Boolean  @map("is_private")
+  archived              Boolean
+  disabled              Boolean
+  contentsPermission    String   @map("contents_permission")
+  installationSuspended Boolean  @map("installation_suspended")
+  eligibilityState      String   @map("eligibility_state")
+  blockReason           String?  @map("block_reason")
+
+  binding KnowledgeRemoteBinding @relation(fields: [bindingId], references: [id], onDelete: Cascade)
+
+  @@index([eligibilityState])
+  @@map("remote_repository_observations")
+}
+
+/// Remote Git history safety cursor confirmed by the Desktop Git runtime + server preflight.
+model RemoteHistoryFence {
+  bindingId                  String   @id @map("binding_id")
+  defaultBranch              String   @map("default_branch")
+  lastConfirmedRemoteHeadSha String   @map("last_confirmed_remote_head_sha")
+  confirmedAt                DateTime @map("confirmed_at")
+
+  binding KnowledgeRemoteBinding @relation(fields: [bindingId], references: [id], onDelete: Cascade)
+
+  @@map("remote_history_fences")
+}
+
+/// Server projection cursor/failure axis, independent from binding/provider state.
+model KnowledgeProjectionCheckpoint {
+  bindingId          String    @id @map("binding_id")
+  branch             String
+  projectedCommitSha String?   @map("projected_commit_sha")
+  state              String
+  failureCode        String?   @map("failure_code")
+  failureMessage     String?   @map("failure_message")
+  lastAttemptAt      DateTime? @map("last_attempt_at")
+  projectedAt        DateTime? @map("projected_at")
+
+  binding KnowledgeRemoteBinding @relation(fields: [bindingId], references: [id], onDelete: Cascade)
+
+  @@index([state])
+  @@map("knowledge_projection_checkpoints")
 }
 
 /// Deduplication and processing cursor for GitHub webhook deliveries.
 model GithubWebhookDelivery {
   id           String    @id
-  connectionId String    @map("connection_id")
+  bindingId    String    @map("binding_id")
   deliveryId   String    @unique @map("delivery_id")
   eventName    String    @map("event_name")
   beforeSha    String?   @map("before_sha")
@@ -1811,39 +1255,39 @@ model GithubWebhookDelivery {
   receivedAt   DateTime  @default(now()) @map("received_at")
   processedAt  DateTime? @map("processed_at")
 
-  connection KnowledgeRepositoryConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  binding KnowledgeRemoteBinding @relation(fields: [bindingId], references: [id], onDelete: Cascade)
 
-  @@index([connectionId, status])
+  @@index([bindingId, status])
   @@map("github_webhook_deliveries")
 }
 
 /// Rebuildable read model derived only from the connected repository default branch.
 model KnowledgeNoteProjection {
-  id              String    @id
-  connectionId    String    @map("connection_id")
-  relativePath    String    @map("relative_path")
-  commitSha       String    @map("commit_sha")
-  blobSha         String    @map("blob_sha")
-  contentHash     String    @map("content_hash")
-  frontmatter     Json      @default("{}")
-  markdownContent String    @map("markdown_content") @db.Text
-  indexStatus     String    @default("PENDING") @map("index_status")
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
-  deletedAt       DateTime? @map("deleted_at")
+  id                  String    @id
+  bindingId           String    @map("binding_id")
+  knowledgeDocumentId String?   @map("knowledge_document_id")
+  relativePath        String    @map("relative_path")
+  commitSha           String    @map("commit_sha")
+  blobSha             String    @map("blob_sha")
+  contentHash         String    @map("content_hash")
+  frontmatter         Json      @default("{}")
+  markdownContent     String    @map("markdown_content") @db.Text
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  deletedAt           DateTime? @map("deleted_at")
 
-  connection KnowledgeRepositoryConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  binding KnowledgeRemoteBinding @relation(fields: [bindingId], references: [id], onDelete: Cascade)
 
-  @@unique([connectionId, relativePath])
-  @@index([connectionId, commitSha])
+  @@unique([bindingId, relativePath])
+  @@index([bindingId, commitSha])
+  @@index([knowledgeDocumentId])
   @@index([contentHash])
-  @@index([indexStatus])
   @@map("knowledge_note_projections")
 }
 
 model KnowledgeAttachmentProjection {
   id           String    @id
-  connectionId String    @map("connection_id")
+  bindingId    String    @map("binding_id")
   relativePath String    @map("relative_path")
   commitSha    String    @map("commit_sha")
   blobSha      String    @map("blob_sha")
@@ -1853,26 +1297,26 @@ model KnowledgeAttachmentProjection {
   updatedAt    DateTime  @updatedAt @map("updated_at")
   deletedAt    DateTime? @map("deleted_at")
 
-  connection KnowledgeRepositoryConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  binding KnowledgeRemoteBinding @relation(fields: [bindingId], references: [id], onDelete: Cascade)
 
-  @@unique([connectionId, relativePath])
-  @@index([connectionId, commitSha])
+  @@unique([bindingId, relativePath])
+  @@index([bindingId, commitSha])
   @@index([blobSha])
   @@map("knowledge_attachment_projections")
 }
 
 /// Short-lived shared cache for immutable GitHub attachment bytes.
 model KnowledgeAttachmentContentCache {
-  connectionId String   @map("connection_id")
+  bindingId    String   @map("binding_id")
   blobSha      String   @map("blob_sha")
   byteSize     Int      @map("byte_size")
   contentBytes Bytes    @map("content_bytes")
   cachedAt     DateTime @default(now()) @map("cached_at")
   expiresAt    DateTime @map("expires_at")
 
-  connection KnowledgeRepositoryConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  binding KnowledgeRemoteBinding @relation(fields: [bindingId], references: [id], onDelete: Cascade)
 
-  @@id([connectionId, blobSha])
+  @@id([bindingId, blobSha])
   @@index([expiresAt])
   @@map("knowledge_attachment_content_cache")
 }
@@ -1885,7 +1329,8 @@ model KnowledgeAttachmentContentCache {
 model KnowledgeWriteRequest {
   id                     String    @id
   identityId             String    @map("identity_id")
-  connectionId           String    @map("connection_id")
+  bindingId              String    @map("binding_id")
+  knowledgeDocumentId    String    @map("knowledge_document_id")
   requestId              String    @map("request_id")
   requestHash            String    @map("request_hash")
   relativePath           String    @map("relative_path")
@@ -1904,11 +1349,12 @@ model KnowledgeWriteRequest {
   updatedAt              DateTime  @updatedAt @map("updated_at")
   completedAt            DateTime? @map("completed_at")
 
-  account    Account                       @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  connection KnowledgeRepositoryConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  account Account                @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  binding KnowledgeRemoteBinding @relation(fields: [bindingId], references: [id], onDelete: Cascade)
 
   @@unique([identityId, requestId])
-  @@index([connectionId, status])
+  @@index([bindingId, status])
+  @@index([knowledgeDocumentId])
   @@map("knowledge_write_requests")
 }
 
@@ -1927,84 +1373,99 @@ model KnowledgeRepositoryLease {
 
 // ==========================================
 // Schedule Module
-// 日程聚合根、调度任务、调度作业、执行、统计
+// CalendarEntry product truth + canonical Temporal Engine runtime
 // ==========================================
 
 model Schedule {
-  id                   String   @id
-  identityId           String   @map("identity_id")
-  title                String
-  description          String?
-  startTime            DateTime @map("start_time")
-  endTime              DateTime @map("end_time")
-  duration             Int
-  hasConflict          Boolean  @default(false) @map("has_conflict")
-  conflictingSchedules String?  @map("conflicting_schedules")
-  priority             Int?
-  location             String?
-  attendees            String?
-  createdAt            DateTime @default(now()) @map("created_at")
-  version              Int      @default(1)
-  updatedAt            DateTime @updatedAt @map("updated_at")
+  id          String    @id
+  identityId  String    @map("identity_id")
+  title       String
+  description String?
+  // ADR-080 canonical CalendarEntry range truth. Timed and AllDay are mutually exclusive by domain invariant.
+  rangeKind   String    @map("range_kind")
+  timedStart  DateTime? @map("timed_start")
+  timedEnd    DateTime? @map("timed_end")
+  allDayStart String?   @map("all_day_start")
+  allDayEnd   String?   @map("all_day_end")
+  location    String?
+  attendees   String?
+  createdAt   DateTime  @default(now()) @map("created_at")
+  version     Int       @default(1)
+  updatedAt   DateTime  @updatedAt @map("updated_at")
 
   account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
 
-  @@index([startTime, endTime])
+  @@index([identityId, rangeKind, timedStart, timedEnd], map: "schedules_timed_range_idx")
+  @@index([identityId, rangeKind, allDayStart, allDayEnd], map: "schedules_all_day_range_idx")
   @@map("schedules")
 }
 
-model ScheduleTask {
-  id                    String    @id
-  identityId            String    @map("identity_id")
-  name                  String
-  description           String?
-  sourceModule          String    @map("source_module")
-  sourceEntityId        String    @map("source_entity_id")
-  // ADR-061 neutral scheduling identity. Legacy projector rows remain NULL until migrated.
-  schedulingKey         String?   @map("scheduling_key")
-  ownerType             String?   @map("owner_type")
-  ownerId               String?   @map("owner_id")
-  handlerKey            String?   @map("handler_key")
-  payloadVersion        Int?      @map("payload_version")
-  sourceRevision        String?   @map("source_revision")
-  status                String
-  enabled               Boolean
-  cronExpression        String?   @map("cron_expression")
-  timezone              String
-  startDate             DateTime? @map("start_date")
-  endDate               DateTime? @map("end_date")
-  maxExecutions         Int?      @map("max_executions")
-  nextRunAt             DateTime? @map("next_run_at")
-  lastRunAt             DateTime? @map("last_run_at")
-  executionCount        Int       @default(0) @map("execution_count")
-  lastExecutionStatus   String?   @map("last_execution_status")
-  lastExecutionDuration Int?      @map("last_execution_duration")
-  consecutiveFailures   Int       @default(0) @map("consecutive_failures")
-  maxRetries            Int       @map("max_retries")
-  initialDelayMs        Int       @map("initial_delay_ms")
-  maxDelayMs            Int       @map("max_delay_ms")
-  backoffMultiplier     Float     @map("backoff_multiplier")
-  retryableStatuses     String    @default("[]") @map("retryable_statuses")
-  payload               String?
-  tags                  String    @default("[]")
-  priority              String
-  timeout               Int?
-  version               Int       @default(1)
-  createdAt             DateTime  @default(now()) @map("created_at")
-  updatedAt             DateTime  @updatedAt @map("updated_at")
-  deletedAt             DateTime? @map("deleted_at")
+/// Durable evidence for one owner-level desired-state reconcile.
+/// Successful rows are written inside the same transaction as ScheduledInvocation reconcile.
 
-  executions ScheduleExecution[]
-  account    Account             @relation(fields: [identityId], references: [id], onDelete: Cascade)
+model ScheduledInvocation {
+  id                String    @id
+  identityId        String    @map("identity_id")
+  ownerType         String    @map("owner_type")
+  ownerId           String    @map("owner_id")
+  schedulingKey     String    @map("scheduling_key")
+  handlerKey        String    @map("handler_key")
+  payloadVersion    Int       @map("payload_version")
+  payload           Json
+  runAt             DateTime  @map("run_at")
+  sourceRevision    Json?     @map("source_revision")
+  retryEnabled      Boolean   @default(true) @map("retry_enabled")
+  maxRetries        Int       @map("max_retries")
+  initialDelayMs    Int       @map("initial_delay_ms")
+  maxDelayMs        Int       @map("max_delay_ms")
+  backoffMultiplier Float     @map("backoff_multiplier")
+  priority          String
+  timeoutMs         Int?      @map("timeout_ms")
+  status            String
+  attemptCount      Int       @default(0) @map("attempt_count")
+  nextAttemptAt     DateTime? @map("next_attempt_at")
+  claimToken        String?   @map("claim_token")
+  claimExpiresAt    DateTime? @map("claim_expires_at")
+  fencingToken      Int       @default(0) @map("fencing_token")
+  name              String?
+  tags              Json
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
 
-  @@unique([identityId, ownerType, ownerId, schedulingKey], map: "schedule_tasks_owner_scheduling_key_unique")
-  @@index([status])
-  @@index([identityId, ownerType, ownerId], map: "schedule_tasks_owner_lookup_idx")
-  @@map("schedule_tasks")
+  account  Account             @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  attempts InvocationAttempt[]
+
+  @@unique([identityId, ownerType, ownerId, schedulingKey], map: "scheduled_invocations_owner_key_unique")
+  @@index([identityId, status, nextAttemptAt], map: "scheduled_invocations_due_idx")
+  @@index([identityId, ownerType, ownerId], map: "scheduled_invocations_owner_idx")
+  @@map("scheduled_invocations")
 }
 
-/// Durable evidence for one owner-level desired-state reconcile.
-/// Successful rows are written inside the same transaction as ScheduleTask upsert/delete.
+model InvocationAttempt {
+  id               String    @id
+  identityId       String    @map("identity_id")
+  invocationId     String    @map("invocation_id")
+  attemptNumber    Int       @map("attempt_number")
+  startedAt        DateTime  @map("started_at")
+  finishedAt       DateTime? @map("finished_at")
+  outcome          String
+  result           Json?
+  failureCode      String?   @map("failure_code")
+  failureMessage   String?   @map("failure_message")
+  failureRetryable Boolean?  @map("failure_retryable")
+  workerId         String?   @map("worker_id")
+  claimToken       String?   @map("claim_token")
+  fencingToken     Int?      @map("fencing_token")
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  account    Account             @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  invocation ScheduledInvocation @relation(fields: [invocationId], references: [id], onDelete: Cascade)
+
+  @@unique([invocationId, attemptNumber], map: "invocation_attempts_number_unique")
+  @@index([identityId, invocationId, createdAt], map: "invocation_attempts_lookup_idx")
+  @@map("invocation_attempts")
+}
+
 model SchedulingReconcileOperation {
   operationId      String   @id @map("operation_id")
   identityId       String   @map("identity_id")
@@ -2029,56 +1490,9 @@ model SchedulingReconcileOperation {
   @@map("scheduling_reconcile_operations")
 }
 
-model ScheduleExecution {
-  id            String   @id
-  identityId    String   @map("identity_id")
-  taskId        String   @map("task_id")
-  executionTime DateTime @map("execution_time")
-  status        String
-  duration      Int?
-  result        String?
-  error         String?
-  retryCount    Int      @default(0) @map("retry_count")
-  createdAt     DateTime @default(now()) @map("created_at")
-
-  identity Account      @relation("AccountScheduleExecutions", fields: [identityId], references: [id])
-  task     ScheduleTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@index([taskId])
-  @@map("schedule_executions")
-}
-
-model ScheduleStatistic {
-  id                   Int      @id @default(autoincrement())
-  identityId           String   @unique @map("identity_id")
-  totalTasks           Int      @map("total_tasks")
-  activeTasks          Int      @map("active_tasks")
-  pausedTasks          Int      @map("paused_tasks")
-  completedTasks       Int      @map("completed_tasks")
-  cancelledTasks       Int      @map("cancelled_tasks")
-  failedTasks          Int      @map("failed_tasks")
-  totalExecutions      Int      @map("total_executions")
-  successfulExecutions Int      @map("successful_executions")
-  failedExecutions     Int      @map("failed_executions")
-  skippedExecutions    Int      @map("skipped_executions")
-  timeoutExecutions    Int      @map("timeout_executions")
-  avgExecutionDuration Float    @map("avg_execution_duration")
-  minExecutionDuration Float    @map("min_execution_duration")
-  maxExecutionDuration Float    @map("max_execution_duration")
-  moduleStatistics     String   @default("{}") @map("module_statistics")
-  lastUpdatedAt        DateTime @map("last_updated_at")
-  createdAt            DateTime @default(now()) @map("created_at")
-
-  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@map("schedule_statistics")
-}
-
 /// R3a：调度器宿主互斥租约（DB lease/heartbeat）。
 /// 共享数据库的多个宿主（API 多实例、同库进程）通过本表互斥：
-/// 只有成功 acquire 的宿主启动 ScheduleTaskQueue；其余宿主只消费读模型。
+/// 只有成功 acquire 的宿主启动 ScheduledInvocationQueue；其余宿主只消费读模型。
 model ScheduleLease {
   id         String   @id
   leaseKey   String   @unique @map("lease_key")
@@ -2165,21 +1579,24 @@ model ScheduleEventDeliveryLog {
 
 // ==========================================
 // Setting Module
-// User settings with JSONB preferences storage
+// Canonical user preferences: namespace-scoped persistence
 // ==========================================
 
-model UserSetting {
-  id          String   @id @default(uuid())
-  identityId  String   @unique @map("identity_id")
-  preferences Json     @default("{}")
-  version     Int      @default(1)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+// Canonical Setting vNext preferences. Namespace rows are the sync/CAS unit.
+model UserPreferenceRecord {
+  id         String   @id @default(uuid())
+  identityId String   @map("identity_id")
+  namespace  String
+  payload    Json
+  revision   Int      @default(1)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
 
+  @@unique([identityId, namespace])
   @@index([identityId])
-  @@map("user_settings")
+  @@map("user_preference_records")
 }
 
 // ==========================================
@@ -2187,9 +1604,9 @@ model UserSetting {
 // 任务计划、实例、历史、统计
 // ==========================================
 
-/// TaskTemplate 聚合根 - 任务模板
+/// TaskPlan 聚合根 - 任务模板
 /// 管理任务的完整定义，包括时间配置、重复规则、提醒、Goal绑定等
-model TaskTemplate {
+model TaskPlan {
   // ============ 主键与外键 ============
   id         String @id
   identityId String @map("identity_id")
@@ -2205,31 +1622,9 @@ model TaskTemplate {
   abandonedReason  String?   @map("abandoned_reason")
   importance       String    @default("moderate") /// ImportanceLevel
 
-  // ============ 时间配置（展开值对象） ============
-  timeConfigType            String?   @map("time_config_type")
-  timeConfigStartTime       DateTime? @map("time_config_start_time")
-  timeConfigEndTime         DateTime? @map("time_config_end_time")
-  timeConfigDurationMinutes Int?      @map("time_config_duration_minutes")
-  timeConfigTimePoint       Int?      @map("time_config_time_point") /// 时间点（分钟数，如 540 = 9:00）
-  timeConfigTimeRangeStart  Int?      @map("time_config_time_range_start") /// 时间段开始（分钟数）
-  timeConfigTimeRangeEnd    Int?      @map("time_config_time_range_end") /// 时间段结束（分钟数）
-
-  // ============ 重复规则（展开值对象） ============
-  recurrenceRuleType       String?   @map("recurrence_rule_type")
-  recurrenceRuleInterval   Int?      @map("recurrence_rule_interval")
-  recurrenceRuleDaysOfWeek String?   @map("recurrence_rule_days_of_week")
-  recurrenceRuleEndDate    DateTime? @map("recurrence_rule_end_date")
-  recurrenceRuleCount      Int?      @map("recurrence_rule_count")
-
-  // ============ 提醒配置（展开值对象） ============
-  reminderConfigEnabled           Boolean? @map("reminder_config_enabled")
-  reminderConfigTimeOffsetMinutes Int?     @map("reminder_config_time_offset_minutes")
-  reminderConfigUnit              String?  @map("reminder_config_unit")
-  reminderConfigChannel           String?  @map("reminder_config_channel")
-
-  // ============ 循环任务生成 ============
-  lastGeneratedDate DateTime? @map("last_generated_date")
-  generateAheadDays Int?      @map("generate_ahead_days")
+  // ============ Canonical scheduling/reminder truth ============
+  schedule       Json /// TaskPlanSchedule canonical JSON
+  reminderConfig String? @map("reminder_config") /// JSON: TaskReminderConfig
 
   // ============ Goal 绑定（展开的关系值对象） ============
   goalId              String? @map("goal_id")
@@ -2248,12 +1643,12 @@ model TaskTemplate {
 
   // ============ 关系映射 ============
   account   Account    @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  keyResult KeyResult? @relation("KeyResultTaskTemplates", fields: [keyResultId, goalId, identityId], references: [id, goalId, identityId], onDelete: Restrict)
+  keyResult KeyResult? @relation("KeyResultTaskPlans", fields: [keyResultId, goalId, identityId], references: [id, goalId, identityId], onDelete: Restrict)
 
   // 实例
-  instances  TaskInstance[]
-  history    TaskTemplateHistory[]
-  labelLinks TaskLabel[]
+  occurrences TaskOccurrence[]
+  history     TaskPlanHistory[]
+  labelLinks  TaskLabel[]
 
   // ============ 索引优化 ============
   @@unique([id, identityId])
@@ -2263,129 +1658,77 @@ model TaskTemplate {
   @@index([identityId, goalId, deletedAt])
   @@index([identityId, keyResultId, deletedAt])
   @@index([deletedAt])
-  @@map("task_templates")
+  @@map("task_plans")
 }
 
-/// TaskInstance 聚合根 - 任务实例
+/// TaskOccurrence 聚合根 - 任务实例
 /// 从模板生成的具体任务实例，包含执行状态和时间追踪
-model TaskInstance {
-  // ============ 主键与外键 ============
-  id         String @id
-  templateId String @map("template_id")
-  identityId String @map("identity_id")
+model TaskOccurrence {
+  id                 String    @id
+  planId             String    @map("plan_id")
+  identityId         String    @map("identity_id")
+  occurrenceKey      String    @map("occurrence_key")
+  scheduleDate       String    @map("schedule_date") /// Ymd (YYYY-MM-DD)
+  scheduleTiming     String    @map("schedule_timing") /// JSON: TaskTiming
+  importanceSnapshot String    @default("Moderate") @map("importance_snapshot")
+  status             String /// TaskOccurrenceStatus
+  actualStartAt      DateTime? @map("actual_start_at")
+  result             String? /// JSON: TaskOccurrenceResult
+  checklistState     String    @default("[]") @map("checklist_state") /// JSON: TaskOccurrenceChecklistItem[]
+  version            Int       @default(1)
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+  deletedAt          DateTime? @map("deleted_at")
 
-  // ============ 实例基本信息 ============
-  instanceDate  DateTime @map("instance_date")
-  occurrenceKey String?  @map("occurrence_key") /// R2-1 幂等键 templateId:localDate
-  status        String /// TaskInstanceStatus
-  importance    String   @default("moderate") /// ImportanceLevel
+  account Account  @relation(fields: [identityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  plan    TaskPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
 
-  // ============ 时间追踪 ============
-  timeConfig      String    @map("time_config") /// JSON: TaskTimeConfigDTO
-  actualStartTime DateTime? @map("actual_start_time")
-  actualEndTime   DateTime? @map("actual_end_time")
-
-  // ============ 备注 ============
-  comment String? /// 实例备注
-
-  // ============ 版本与审计 ============
-  version   Int       @default(1)
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  deletedAt DateTime? @map("deleted_at")
-
-  // ============ 关系映射 ============
-  account  Account      @relation(fields: [identityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  template TaskTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
-
-  // R2-1：同一模板同一天最多一个实例（幂等键，防双宿主/并发重复生成）。
-  @@unique([templateId, occurrenceKey])
-  // ============ 索引优化 ============
-  @@index([templateId, instanceDate])
+  @@unique([planId, occurrenceKey])
+  @@index([planId, scheduleDate])
   @@index([identityId, status])
-  @@index([identityId, instanceDate])
-  @@map("task_instances")
+  @@index([identityId, scheduleDate])
+  @@map("task_occurrences")
 }
 
 /// Durable delivery log for completed tasks that contribute Goal progress.
 /// It is intentionally task-specific rather than a generic application outbox.
 model TaskGoalOutbox {
-  eventId        String    @id @map("event_id")
-  identityId     String    @map("identity_id")
-  taskInstanceId String    @map("task_instance_id")
-  taskTemplateId String    @map("task_template_id")
-  goalId         String    @map("goal_id")
-  keyResultId    String    @map("key_result_id")
-  payload        String
-  action         String    @default("complete")
-  status         String    @default("PENDING")
-  attempts       Int       @default(0)
-  availableAt    DateTime  @default(now()) @map("available_at")
-  lastError      String?   @map("last_error")
-  dispatchedAt   DateTime? @map("dispatched_at")
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
+  eventId          String    @id @map("event_id")
+  identityId       String    @map("identity_id")
+  taskOccurrenceId String    @map("task_occurrence_id")
+  taskPlanId       String    @map("task_plan_id")
+  goalId           String    @map("goal_id")
+  keyResultId      String    @map("key_result_id")
+  payload          String
+  action           String    @default("complete")
+  status           String    @default("PENDING")
+  attempts         Int       @default(0)
+  availableAt      DateTime  @default(now()) @map("available_at")
+  lastError        String?   @map("last_error")
+  dispatchedAt     DateTime? @map("dispatched_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
 
   @@index([identityId, status, availableAt])
   @@index([status, availableAt])
-  @@index([taskInstanceId])
+  @@index([taskOccurrenceId])
   @@map("task_goal_outbox")
 }
 
-model TaskTemplateHistory {
+model TaskPlanHistory {
   id         String   @id
   identityId String   @map("identity_id")
-  templateId String   @map("template_id")
+  planId     String   @map("plan_id")
   action     String
   changes    String?
   createdAt  DateTime @default(now()) @map("created_at")
 
-  identity Account      @relation("AccountTaskTemplateHistory", fields: [identityId], references: [id])
-  template TaskTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  identity Account  @relation("AccountTaskPlanHistory", fields: [identityId], references: [id])
+  plan     TaskPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
 
   @@index([identityId])
-  @@index([templateId])
-  @@map("task_template_history")
-}
-
-model TaskStatistic {
-  id                       String   @id
-  identityId               String   @unique @map("identity_id")
-  calculatedAt             DateTime @map("calculated_at")
-  templateTotal            Int      @map("template_total")
-  templateActive           Int      @map("template_active")
-  templatePaused           Int      @map("template_paused")
-  templateArchived         Int      @map("template_archived")
-  templateOneTime          Int      @map("template_one_time")
-  templateRecurring        Int      @map("template_recurring")
-  instanceTotal            Int      @map("instance_total")
-  instanceToday            Int      @map("instance_today")
-  instanceWeek             Int      @map("instance_week")
-  instanceMonth            Int      @map("instance_month")
-  instancePending          Int      @map("instance_pending")
-  instanceInProgress       Int      @map("instance_in_progress")
-  instanceCompleted        Int      @map("instance_completed")
-  instanceSkipped          Int      @map("instance_skipped")
-  instanceMissed           Int      @map("instance_missed")
-  completionToday          Int      @map("completion_today")
-  completionWeek           Int      @map("completion_week")
-  completionMonth          Int      @map("completion_month")
-  completionTotal          Int      @map("completion_total")
-  completionAvgTime        Float?   @map("completion_avg_time")
-  completionRate           Float    @map("completion_rate")
-  timeAllDay               Int      @map("time_all_day")
-  timePoint                Int      @map("time_point")
-  timeRange                Int      @map("time_range")
-  timeOverdue              Int      @map("time_overdue")
-  timeUpcoming             Int      @map("time_upcoming")
-  distributionByImportance String   @map("distribution_by_importance")
-  distributionByUrgency    String   @map("distribution_by_urgency")
-  distributionByTag        String   @map("distribution_by_tag")
-
-  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@map("task_statistics")
+  @@index([planId])
+  @@map("task_plan_history")
 }
 
 // ==========================================

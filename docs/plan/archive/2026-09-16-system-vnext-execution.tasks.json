@@ -1,0 +1,1955 @@
+{
+  "schema_version": 1,
+  "graph_id": "memoflow-system-vnext-2026-09-16",
+  "revision": 3,
+  "title": "MemoFlow system-wide vNext execution graph",
+  "status": "archived",
+  "archived_at": "2026-09-19T00:00:00+00:00",
+  "closure_evidence": "docs/analysis/2026-09-19-sys-3004-documentation-truth-closure.md",
+  "objective": "Complete the remaining Phase 4-7 system-wide vNext convergence as one coherent destructive cutover: Routine, Planner/Scheduler and Notification become canonical owner models; Home/Dashboard and AI align to those owners; Data Portability becomes V3-only; legacy schema is deleted; final whole-system review and exact-head validation close PR #340 without restoring compatibility models.",
+  "planned_by": "chatgpt-web",
+  "context_refs": [
+    "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md",
+    "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md",
+    "docs/architecture/adr/ADR-106-owner-driven-data-portability-v3.md",
+    "docs/architecture/adr/ADR-111-zero-legacy-data-destructive-cutover-policy.md"
+  ],
+  "architecture_decisions": [
+    "Each product fact has one authoritative owner; read models may compose owners but must not become write authorities.",
+    "ADR-111 zero-legacy-data policy applies: coordinated cutovers delete retired models directly rather than adding row converters or permanent compatibility layers.",
+    "TaskGraph is planning truth and ForgeFlow threads are execution truth; workers do not write live execution status back into this graph or the system-wide plan.",
+    "Prisma and PowerSync canonical schema parity must land in the same coherent destructive batch when persistence changes.",
+    "SchedulingPort/reconcile, lease/fencing/idempotency/restart recovery, Product Time, stable KnowledgeDocumentId, Goal vNext and Task vNext are protected foundations.",
+    "Parallel execution is bounded by semantic mutation ownership; generated test inventory conflicts are reconciled at integration and are not separate domain ownership."
+  ],
+  "protected_contracts": [
+    "Do not resurrect ReminderTemplate/Group/Instance/Response, ScheduleTask/config/source-module, Notification template/channel aggregate truth, Dashboard domain truth, or AI legacy persistence after their cutover tasks retire them.",
+    "Routine remains the owner of Routine definition/profile/runtime/occurrence/intervention semantics; Scheduler never becomes the Routine owner.",
+    "Scheduler preserves SchedulingPort/reconcile plus durable invocation claim, retry, fencing, idempotency and restart behavior while changing its persistence model.",
+    "Notification Fact/Inbox is distinct from delivery execution truth; delivery attempts/outbox/receipts do not become root Fact status.",
+    "Product Time is the only timezone/locale/week-start authority; no host-local Date fallback may be introduced.",
+    "Goal, Task, Label, Account/Setting and Knowledge owner contracts that already passed exact-head closure remain stable unless a task explicitly consumes them without changing ownership.",
+    "Every accepted task requires focused verification plus repository-required exact-head CI and independent review before it is considered dependency-complete."
+  ],
+  "non_goals": [
+    "Do not preserve old production data; rollback is source/deployment rollback plus reset/reseed.",
+    "Do not invent new generic analytics, settings, workflow or repository domains to avoid deleting legacy models.",
+    "Do not combine unrelated cosmetic refactors, dependency upgrades or formatting sweeps with convergence tasks.",
+    "Do not enable ForgeFlow AI decomposition; ChatGPT Web remains the planner for this graph."
+  ],
+  "acceptance_criteria": [
+    "Every task is accepted on an exact reviewed head and integrated onto feat/system-wide-vnext-convergence.",
+    "All Phase 4 owner cutovers are complete before Phase 5 owner consumers are considered stable.",
+    "Portable V3 covers every surviving portable product fact before V2 deletion.",
+    "The whole-schema legacy sweep leaves no unowned legacy persistence or public compatibility surface except explicitly documented permanent governance state.",
+    "Final repository-wide docs, governance, typecheck, lint, test, build, affected integration/E2E, Prisma/PowerSync parity, local product journeys and AI eval replay are green before archive."
+  ],
+  "tasks": [
+    {
+      "id": "R4-2201A",
+      "title": "Cut Routine writes to the canonical owner model",
+      "goal": "Make RoutineDefinition/Profile/Trigger/RuntimeContext/TemporaryOverride the sole Routine product write authority across API, Desktop, AI and current UI entrypoints without yet deleting occurrence reliability or legacy persistence tables.",
+      "why_now": "The Routine foundation already exists, but legacy ReminderTemplate/Group write paths still prevent safe destructive retirement and block downstream notification/intervention convergence.",
+      "risk": "high",
+      "scope": [
+        "packages/reminder Routine owner application/domain surfaces and API/Desktop composition.",
+        "Current Routine UI/AI command entrypoints that still write legacy ReminderTemplate/Group state.",
+        "Characterization tests proving no approved product command writes the legacy Reminder model."
+      ],
+      "out_of_scope": [
+        "RoutineOccurrence/Interaction reliability rewrite.",
+        "Deleting legacy Reminder persistence tables.",
+        "Changing SchedulingPort or Notification requested-writer contracts."
+      ],
+      "context_refs": [
+        "docs/architecture/adr/ADR-076-routine-definition-trigger-and-legacy-reminder-retirement.md",
+        "docs/architecture/adr/ADR-078-routine-profile-eligibility-runtime-context-and-overrides.md",
+        "docs/product/routine-coach-vnext.md"
+      ],
+      "protected_contracts": [
+        "SchedulingPort/reconcile remains the scheduling seam.",
+        "NotificationRequested writer remains the notification seam.",
+        "RuntimeContext is not persisted back into long-lived RoutineProfile definition truth."
+      ],
+      "implementation_steps": [
+        "Inventory remaining production writes to ReminderTemplate/Group used for Routine behavior and add focused anti-resurrection tests.",
+        "Route each approved Routine create/update/profile/override command through Routine owner application services and canonical persistence adapters.",
+        "Remove only the superseded product write adapters/exports; keep reliability state needed by later occurrence cutover.",
+        "Verify API and Desktop compose the same owner semantics and no hidden legacy writer remains in the changed surface."
+      ],
+      "integration_notes": [
+        "Do not edit Scheduler shared contracts in this task.",
+        "Do not widen into Notification delivery/intervention semantics; R4-2201B and N4-2402B own those boundaries."
+      ],
+      "acceptance_criteria": [
+        "Approved Routine create/profile/override flows persist only canonical Routine owner state.",
+        "Production scans for legacy ReminderTemplate/Group Routine write authority are zero-hit or explicitly characterized read-only compatibility awaiting R4-2201C.",
+        "Reminder focused tests, API/Desktop composition tests and required checks pass."
+      ],
+      "verification_commands": [
+        "pnpm nx run reminder:test",
+        "pnpm nx run reminder:typecheck",
+        "pnpm nx run api:typecheck",
+        "pnpm nx run desktop:typecheck",
+        "pnpm governance:check"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "domain:routine",
+        "contract:routine-command",
+        "composition:routine-hosts"
+      ],
+      "preferred_implementation_route_id": "openswe-current"
+    },
+    {
+      "id": "R4-2201B",
+      "title": "Converge Routine occurrence and interaction truth",
+      "goal": "Make RoutineOccurrence and RoutineInteraction the durable Routine execution/response truth while preserving existing lease, fencing, idempotency and restart behavior.",
+      "why_now": "Legacy Reminder occurrence/response state cannot be deleted until Routine owns equivalent durable execution and user-interaction semantics.",
+      "risk": "high",
+      "scope": [
+        "Routine occurrence persistence and execution state.",
+        "Routine interaction/response facts and ActiveUsage/WallClock/Elapsed runtime integration.",
+        "Prisma/PowerSync parity for new Routine execution facts."
+      ],
+      "out_of_scope": [
+        "Deleting all legacy Reminder tables.",
+        "Notification delivery-channel retirement.",
+        "Planner CalendarEntry model changes."
+      ],
+      "context_refs": [
+        "docs/architecture/adr/ADR-077-routine-occurrence-interaction-and-reliability-boundary.md",
+        "docs/architecture/adr/ADR-079-routine-intervention-policy-notification-and-surface-boundary.md",
+        "docs/product/routine-coach-vnext.md"
+      ],
+      "protected_contracts": [
+        "Occurrence replay is idempotent and fenced.",
+        "Crash/restart recovery remains deterministic.",
+        "Routine interaction facts are not Notification delivery state."
+      ],
+      "implementation_steps": [
+        "Characterize current Reminder occurrence/response reliability behavior that Routine must preserve.",
+        "Complete canonical RoutineOccurrence and RoutineInteraction persistence/ports for Prisma and PowerSync.",
+        "Cut WallClock/Elapsed/ActiveUsage execution and intervention response paths onto Routine-owned occurrence/interaction truth.",
+        "Remove duplicated Routine execution truth only after focused recovery and replay tests pass."
+      ],
+      "integration_notes": [
+        "N4-2402B may consume stable Routine intervention seams after this task but must not mutate Routine ownership.",
+        "Legacy Reminder storage remains until R4-2201C."
+      ],
+      "acceptance_criteria": [
+        "Routine execution and response flows no longer require legacy Reminder occurrence/response truth.",
+        "Prisma and PowerSync round-trip the same Routine occurrence/interaction semantics.",
+        "Lease/fencing/retry/restart characterization remains green."
+      ],
+      "verification_commands": [
+        "pnpm nx run reminder:test",
+        "pnpm nx run reminder:test:integration",
+        "pnpm nx run reminder:typecheck",
+        "pnpm nx run desktop:test:main",
+        "pnpm test:inventory:check"
+      ],
+      "depends_on": [
+        "R4-2201A"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "domain:routine",
+        "schema:routine-runtime",
+        "contract:routine-interaction"
+      ]
+    },
+    {
+      "id": "S4-2302A",
+      "title": "Establish ScheduledInvocation and InvocationAttempt runtime",
+      "goal": "Move Scheduler runtime truth to ScheduledInvocation plus InvocationAttempt while preserving SchedulingPort/reconcile, claim, retry, fencing, idempotency and restart recovery.",
+      "why_now": "Planner and Routine can only retire legacy scheduling storage safely once the durable Scheduler runtime model is canonical.",
+      "risk": "high",
+      "scope": [
+        "packages/scheduler durable invocation/attempt domain, persistence and worker state machine.",
+        "Schedule-to-Scheduler diagnostics and ownership fences required by ADR-081..083.",
+        "Prisma/PowerSync parity for Scheduler runtime truth where applicable."
+      ],
+      "out_of_scope": [
+        "Planner CalendarEntry range redesign.",
+        "Deleting legacy ScheduleTask/config/source-module.",
+        "Routine owner model changes."
+      ],
+      "context_refs": [
+        "docs/architecture/adr/ADR-081-scheduled-invocation-model-and-legacy-schedule-task-retirement.md",
+        "docs/architecture/adr/ADR-082-scheduler-invocation-attempt-and-runtime-state-machine.md",
+        "docs/architecture/adr/ADR-083-schedule-scheduler-contract-diagnostics-and-persistence-boundary.md"
+      ],
+      "protected_contracts": [
+        "SchedulingPort/reconcile remains the owner boundary.",
+        "Claim/lease/fencing/idempotency/retry/restart behavior must not regress.",
+        "Scheduler does not become owner of Goal, Task or Routine definitions."
+      ],
+      "implementation_steps": [
+        "Freeze current Scheduler reliability behavior with focused state-machine/recovery tests.",
+        "Implement canonical ScheduledInvocation and InvocationAttempt ownership and persistence.",
+        "Cut worker execution/retry/heartbeat/recovery to the new runtime truth behind the existing SchedulingPort/reconcile contract.",
+        "Keep legacy ScheduleTask/config only as read compatibility until Planner cutover proves it is removable."
+      ],
+      "integration_notes": [
+        "P4-2301A is intentionally serialized after this task because both touch shared schedule contracts.",
+        "Notification work may run in parallel."
+      ],
+      "acceptance_criteria": [
+        "New invocations execute, retry and recover from restart without legacy runtime truth.",
+        "Fencing rejects stale owners and idempotency prevents duplicate effect.",
+        "Scheduler integration tests and required checks pass."
+      ],
+      "verification_commands": [
+        "pnpm nx run scheduler:test",
+        "pnpm nx run scheduler:test:integration",
+        "pnpm nx run scheduler:typecheck",
+        "pnpm nx run schedule:typecheck",
+        "pnpm governance:check"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "domain:scheduler-runtime",
+        "schema:scheduler-runtime",
+        "contract:schedule-shared"
+      ],
+      "preferred_implementation_route_id": "openswe-current"
+    },
+    {
+      "id": "N4-2401A",
+      "title": "Complete Notification Fact and Inbox lifecycle",
+      "goal": "Make Notification a durable immutable content Fact with Inbox presentation lifecycle readAt/archiveAt and no root delivery-status authority.",
+      "why_now": "PR #351 retired arbitrary Fact update authority; archive lifecycle and remaining Fact/Inbox semantics must now be completed before workflow/template and delivery retirement.",
+      "risk": "medium",
+      "scope": [
+        "Notification aggregate/DTO/persistence for immutable content, readAt and archiveAt.",
+        "Inbox query/mutation surfaces for read/unread/archive semantics.",
+        "Prisma/PowerSync parity and HTTP/IPC parity for Fact lifecycle."
+      ],
+      "out_of_scope": [
+        "WorkflowDefinition/template/category/type retirement.",
+        "NotificationChannel delivery retirement.",
+        "QuietHours and typed action interactions."
+      ],
+      "context_refs": [
+        "docs/architecture/adr/ADR-084-notification-fact-and-inbox-lifecycle.md",
+        "docs/architecture/adr/ADR-063-notification-fact-delivery-policy-and-device-surfaces.md"
+      ],
+      "protected_contracts": [
+        "Fact content remains immutable after creation.",
+        "Delivery outcome is never root Notification Fact status.",
+        "All identity-scoped lifecycle mutations remain ownership-checked."
+      ],
+      "implementation_steps": [
+        "Characterize current Inbox reads/read-unread/delete behavior after PR #351.",
+        "Add archiveAt lifecycle to canonical contracts, aggregate, Prisma and PowerSync without reintroducing arbitrary Fact mutation.",
+        "Wire HTTP/IPC/UI consumers to the same Fact lifecycle contract.",
+        "Add anti-resurrection tests for root delivery status and mutable content update."
+      ],
+      "integration_notes": [
+        "Keep delivery decision/outbox/channel execution truth unchanged for N4-2402A.",
+        "This task may run in parallel with Scheduler and Routine owner-write work."
+      ],
+      "acceptance_criteria": [
+        "Notification Fact supports create/read/unread/archive/delete through one canonical lifecycle.",
+        "No production arbitrary content update or root delivery-status path exists.",
+        "Notification unit/integration and transport parity checks pass."
+      ],
+      "verification_commands": [
+        "pnpm nx run notification:test",
+        "pnpm nx run notification:test:integration",
+        "pnpm nx run notification:typecheck",
+        "pnpm nx run api:typecheck",
+        "pnpm nx run desktop:typecheck"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "domain:notification-fact",
+        "contract:notification-fact",
+        "schema:notification-fact"
+      ],
+      "preferred_implementation_route_id": "openswe-current"
+    },
+    {
+      "id": "PORT-1610A",
+      "title": "Complete Portable V3 coverage for already-stable owners",
+      "goal": "Close V3 portability coverage gaps for Account/Setting/Label/Goal/Task owners whose canonical models are already exact-head stable, without touching Phase 4 owner contracts.",
+      "why_now": "This is independent work that can consume a fourth mutation slot safely while Routine/Scheduler/Notification converge, and Goal portability explicitly still leaves records/reviews on V2.",
+      "risk": "medium",
+      "scope": [
+        "Account profile, Setting preferences, Labels, Goal definitions/KRs/records/reviews and Task plans/occurrences required portable facts.",
+        "API/Desktop registration and V3 dry-run/apply/ref mapping for these stable owners.",
+        "Parity tests proving V3 preserves the product facts currently only covered by V2 for these owners."
+      ],
+      "out_of_scope": [
+        "Routine/Schedule/Notification V3 capabilities until Phase 4 closes.",
+        "V2 deletion.",
+        "AI legacy persistence portability decisions."
+      ],
+      "context_refs": [
+        "docs/architecture/adr/ADR-106-owner-driven-data-portability-v3.md",
+        "docs/analysis/2026-09-09-data-portability-current-system-map.md",
+        "docs/product/modules/data-portability.md"
+      ],
+      "protected_contracts": [
+        "Owner modules define portable payload semantics; Data Portability does not clone persistence shapes.",
+        "Stable portable references are deterministic and identity-scoped.",
+        "No Phase 4 owner contract/schema is changed in this task."
+      ],
+      "implementation_steps": [
+        "Inventory V2 product coverage for the already-stable owners against currently registered V3 capabilities.",
+        "Fill concrete missing V3 owner payload/application gaps, including Goal records/reviews where still V2-only.",
+        "Register the completed owner capabilities identically in API and Desktop.",
+        "Add V3 export/dry-run/apply/round-trip tests and document only real remaining owner gaps."
+      ],
+      "integration_notes": [
+        "Do not edit Routine, Schedule, Scheduler or Notification owner contracts.",
+        "PORT-1610B will add Phase 4 owners after P4-CLOSE."
+      ],
+      "acceptance_criteria": [
+        "Stable owners have V3 coverage for every product fact still required from V2.",
+        "API/Desktop capability registries are semantically identical.",
+        "V3 round-trip tests prove no stable-owner product coverage regression."
+      ],
+      "verification_commands": [
+        "pnpm nx run data-portability:test",
+        "pnpm nx run data-portability:typecheck",
+        "pnpm nx run goal:test",
+        "pnpm nx run task:test",
+        "pnpm governance:check"
+      ],
+      "depends_on": [],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "domain:data-portability",
+        "contract:portable-v3",
+        "portability:stable-owners"
+      ],
+      "preferred_implementation_route_id": "openswe-current"
+    },
+    {
+      "id": "P4-2301A",
+      "title": "Cut CalendarEntry to Timed and AllDay range truth",
+      "goal": "Make CalendarEntry range-based Timed/AllDay product truth canonical and remove duration/conflict/priority as stored authoritative Planner fields.",
+      "why_now": "Scheduler runtime must be stable first so Planner can change its product model without simultaneously rewriting execution semantics.",
+      "risk": "high",
+      "scope": [
+        "Schedule/Planner CalendarEntry contracts, domain and persistence.",
+        "Timed/AllDay range validation and Product Time semantics.",
+        "Prisma/PowerSync parity for CalendarEntry canonical fields."
+      ],
+      "out_of_scope": [
+        "Cross-source occupancy/conflict composition.",
+        "Deleting legacy ScheduleTask runtime structures.",
+        "Changing Scheduler invocation state machine."
+      ],
+      "context_refs": [
+        "docs/architecture/adr/ADR-080-planner-calendar-range-occupancy-and-conflict-model.md",
+        "docs/architecture/adr/ADR-093-user-preference-profile-and-product-time-context.md"
+      ],
+      "protected_contracts": [
+        "Product Time owns timezone/calendar interpretation.",
+        "Scheduler runtime remains behind SchedulingPort/reconcile.",
+        "Goal/Task/Routine owners remain sources, not duplicated Planner facts."
+      ],
+      "implementation_steps": [
+        "Characterize existing CalendarEntry create/edit/read and owner projection behavior.",
+        "Introduce canonical Timed/AllDay range contracts and persistence with strict validation.",
+        "Cut Planner create/edit/read surfaces to the range model and delete stored duration/conflict/priority truth where replaced.",
+        "Keep derived occupancy/conflict composition for P4-2301B."
+      ],
+      "integration_notes": [
+        "Serialized after S4-2302A because both own contract:schedule-shared.",
+        "Do not modify Scheduler invocation persistence."
+      ],
+      "acceptance_criteria": [
+        "CalendarEntry persists only canonical range truth for the changed fields.",
+        "Timed and AllDay semantics round-trip consistently across API/Desktop/PowerSync.",
+        "No host-local time fallback is introduced."
+      ],
+      "verification_commands": [
+        "pnpm nx run schedule:test",
+        "pnpm nx run schedule:test:integration",
+        "pnpm nx run schedule:typecheck",
+        "pnpm nx run app-vue:test",
+        "pnpm governance:check"
+      ],
+      "depends_on": [
+        "S4-2302A"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "domain:planner-calendar",
+        "schema:calendar-entry",
+        "contract:schedule-shared"
+      ]
+    },
+    {
+      "id": "P4-2301B",
+      "title": "Build occupancy/conflict read model and owner projections",
+      "goal": "Derive calendar occupancy and cross-source conflict reads from canonical Goal/Task/Routine projections without storing conflict as source truth.",
+      "why_now": "The range model must be accepted before derived occupancy and owner projections can converge around it.",
+      "risk": "medium",
+      "scope": [
+        "Occupancy projection and cross-source conflict read model.",
+        "Goal/Task/Routine projection adapters into Planner CalendarEntry ranges.",
+        "Planner UI/read contracts consuming derived conflict information."
+      ],
+      "out_of_scope": [
+        "Owner-domain write semantics for Goal/Task/Routine.",
+        "Scheduler invocation runtime.",
+        "Notification delivery behavior."
+      ],
+      "context_refs": [
+        "docs/architecture/adr/ADR-080-planner-calendar-range-occupancy-and-conflict-model.md",
+        "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md"
+      ],
+      "protected_contracts": [
+        "Conflict is a read-model result, never owner-domain persisted truth.",
+        "Owner projections are one-way reads; Planner does not gain Goal/Task/Routine write authority."
+      ],
+      "implementation_steps": [
+        "Implement a deterministic occupancy projection from canonical range sources.",
+        "Compose cross-source conflict reads without persisting conflict flags as truth.",
+        "Cut Goal/Task/Routine calendar projections and Planner UI to the new read model.",
+        "Delete superseded conflict/duration projection compatibility after parity tests pass."
+      ],
+      "integration_notes": [
+        "S4-2302B waits for this task before deleting legacy ScheduleTask/config/source-module."
+      ],
+      "acceptance_criteria": [
+        "Planner can render canonical Goal/Task/Routine occupancy and conflicts from derived reads.",
+        "No persisted conflict/priority compatibility truth remains in the migrated Planner surface.",
+        "Schedule and consumer focused tests pass."
+      ],
+      "verification_commands": [
+        "pnpm nx run schedule:test",
+        "pnpm nx run app-vue:test",
+        "pnpm nx run api:typecheck",
+        "pnpm nx run desktop:typecheck",
+        "pnpm test:inventory:check"
+      ],
+      "depends_on": [
+        "P4-2301A"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "domain:planner-calendar",
+        "readmodel:calendar-occupancy",
+        "contract:schedule-shared"
+      ]
+    },
+    {
+      "id": "S4-2302B",
+      "title": "Retire legacy ScheduleTask configuration and source modules",
+      "goal": "Destructively remove legacy ScheduleTask/config/source-module truth after Scheduler runtime and Planner range projections no longer consume it.",
+      "why_now": "Keeping the legacy scheduling model after both replacement boundaries are accepted would preserve a second truth and block whole-schema cleanup.",
+      "risk": "high",
+      "scope": [
+        "Legacy ScheduleTask/config/source-module contracts, persistence, API/IPC and PowerSync mappings.",
+        "Residual consumer cutover to SchedulingPort/reconcile and CalendarEntry ranges.",
+        "Fresh-schema/bootstrap and destructive reset validation."
+      ],
+      "out_of_scope": [
+        "Changing ScheduledInvocation/Attempt behavior.",
+        "Changing Planner range semantics.",
+        "Adding data migration."
+      ],
+      "context_refs": [
+        "docs/architecture/adr/ADR-081-scheduled-invocation-model-and-legacy-schedule-task-retirement.md",
+        "docs/architecture/adr/ADR-083-schedule-scheduler-contract-diagnostics-and-persistence-boundary.md",
+        "docs/architecture/adr/ADR-111-zero-legacy-data-destructive-cutover-policy.md"
+      ],
+      "protected_contracts": [
+        "Rollback is source rollback plus reset/reseed; no converter or dual write is introduced.",
+        "SchedulingPort/reconcile remains stable for owner modules."
+      ],
+      "implementation_steps": [
+        "Prove all production consumers have moved to ScheduledInvocation/Attempt or CalendarEntry range contracts.",
+        "Delete legacy ScheduleTask/config/source-module code and persistence in Prisma and PowerSync together.",
+        "Remove API/IPC/export mappings and compatibility tests that only preserve the retired model.",
+        "Run fresh bootstrap/reset plus Scheduler/Planner product journeys."
+      ],
+      "integration_notes": [
+        "R4-2201C waits for this task because legacy Reminder scheduling references must not survive destructive cutover."
+      ],
+      "acceptance_criteria": [
+        "Production code has no authoritative ScheduleTask/config/source-module path.",
+        "Fresh Prisma/PowerSync schemas contain only canonical scheduling truth.",
+        "Scheduler and Planner journeys pass on the destructive schema."
+      ],
+      "verification_commands": [
+        "pnpm nx run scheduler:test:integration",
+        "pnpm nx run schedule:test:integration",
+        "pnpm nx run api:typecheck",
+        "pnpm nx run desktop:db:reset:dry",
+        "pnpm governance:check"
+      ],
+      "depends_on": [
+        "S4-2302A",
+        "P4-2301B"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "domain:scheduler-runtime",
+        "schema:schedule-legacy",
+        "contract:schedule-shared",
+        "powersync:schedule"
+      ]
+    },
+    {
+      "id": "N4-2401B",
+      "title": "Converge notification workflow semantics and retire template duplication",
+      "goal": "Replace NotificationTemplate/category/type semantic duplication with canonical WorkflowDefinition-driven notification semantics while keeping Notification Fact immutable.",
+      "why_now": "Fact lifecycle must be stable before workflow semantics can be simplified without rewriting durable Inbox content.",
+      "risk": "medium",
+      "scope": [
+        "WorkflowDefinition registry and notification workflow metadata.",
+        "Template/category/type duplication retirement where ADR-085 defines replacement semantics.",
+        "Producer adapters that select canonical workflow semantics."
+      ],
+      "out_of_scope": [
+        "Delivery channel aggregate retirement.",
+        "QuietHours/system delivery guard.",
+        "Routine intervention ownership."
+      ],
+      "context_refs": [
+        "docs/architecture/adr/ADR-085-notification-workflow-semantics-and-template-retirement.md",
+        "docs/architecture/adr/ADR-084-notification-fact-and-inbox-lifecycle.md"
+      ],
+      "protected_contracts": [
+        "Existing durable Fact content does not mutate when workflow definitions change.",
+        "Workflow selection is typed and owner-scoped; no free-form template authority is reintroduced."
+      ],
+      "implementation_steps": [
+        "Characterize current producers/templates/categories/types and classify canonical workflow semantics.",
+        "Implement WorkflowDefinition registry/contracts and route producers through it.",
+        "Remove duplicated template/category/type authority made obsolete by the registry.",
+        "Add anti-resurrection and producer contract tests."
+      ],
+      "integration_notes": [
+        "N4-2402A consumes the canonical workflow semantics for delivery planning."
+      ],
+      "acceptance_criteria": [
+        "Notification producers resolve canonical workflow semantics without legacy template authority.",
+        "Retired template/category/type duplication is absent from production authority paths.",
+        "Notification and producer integration tests pass."
+      ],
+      "verification_commands": [
+        "pnpm nx run notification:test",
+        "pnpm nx run notification:test:integration",
+        "pnpm nx run api:typecheck",
+        "pnpm nx run desktop:typecheck",
+        "pnpm governance:check"
+      ],
+      "depends_on": [
+        "N4-2401A"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "domain:notification-fact",
+        "contract:notification-workflow",
+        "schema:notification-template-legacy"
+      ]
+    },
+    {
+      "id": "N4-2402A",
+      "title": "Retire NotificationChannel aggregate truth into delivery execution",
+      "goal": "Make delivery decision, dispatch outbox and receipt/ack execution facts canonical and remove NotificationChannel as aggregate/root delivery truth.",
+      "why_now": "Workflow semantics must be canonical before delivery plans can be simplified without preserving a second channel aggregate model.",
+      "risk": "high",
+      "scope": [
+        "Notification delivery plan/decision projection and dispatch outbox/receipt execution truth.",
+        "NotificationChannel aggregate/schema/contracts retirement.",
+        "Prisma/PowerSync/API/Desktop delivery parity."
+      ],
+      "out_of_scope": [
+        "Typed user action interactions.",
+        "QuietHours preference policy.",
+        "Routine intervention semantics."
+      ],
+      "context_refs": [
+        "docs/architecture/adr/ADR-086-notification-delivery-plan-projection-and-channel-retirement.md",
+        "docs/architecture/adr/ADR-063-notification-fact-delivery-policy-and-device-surfaces.md"
+      ],
+      "protected_contracts": [
+        "Fact/Inbox state is separate from delivery execution state.",
+        "Durable dispatch/outbox/receipt idempotency is preserved.",
+        "Desktop presentation preference remains device/profile scoped where defined."
+      ],
+      "implementation_steps": [
+        "Characterize channel aggregate consumers versus existing decision/outbox/receipt truth.",
+        "Move all delivery execution reads/writes to decision/outbox/receipt projections.",
+        "Delete NotificationChannel aggregate/persistence/contracts in Prisma and PowerSync together.",
+        "Validate dispatch replay, receipt/ack and SSE/Desktop delivery behavior."
+      ],
+      "integration_notes": [
+        "N4-2402B adds typed product interactions and QuietHours after delivery ownership is clean."
+      ],
+      "acceptance_criteria": [
+        "No production delivery authority depends on NotificationChannel aggregate state.",
+        "Dispatch/outbox/receipt behavior remains idempotent and observable.",
+        "Prisma/PowerSync and API/Desktop parity tests pass."
+      ],
+      "verification_commands": [
+        "pnpm nx run notification:test",
+        "pnpm nx run notification:test:integration",
+        "pnpm nx run api:test",
+        "pnpm nx run desktop:test:ipc",
+        "pnpm governance:check"
+      ],
+      "depends_on": [
+        "N4-2401B"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "domain:notification-delivery",
+        "schema:notification-delivery",
+        "contract:notification-delivery"
+      ]
+    },
+    {
+      "id": "N4-2402B",
+      "title": "Add typed interactions, QuietHours and product/operations port split",
+      "goal": "Finish Notification vNext with typed action intents and Interaction facts, Product-Time QuietHours/SystemDeliveryGuard policy, and explicit product versus operations ports.",
+      "why_now": "Delivery execution and Routine intervention boundaries must be stable before user interaction and suppression policy can be connected without cross-domain ownership leaks.",
+      "risk": "high",
+      "scope": [
+        "Typed notification action intents and user Interaction persistence.",
+        "QuietHours/SystemDeliveryGuard using canonical UserTimeContext/Product Time.",
+        "Product notification ports separated from dead-letter/receipt/audit operations ports."
+      ],
+      "out_of_scope": [
+        "Changing Routine intervention domain state.",
+        "Reintroducing template/channel aggregate truth.",
+        "Dashboard/AI consumer cleanup."
+      ],
+      "context_refs": [
+        "docs/architecture/adr/ADR-087-notification-interaction-and-typed-action-intents.md",
+        "docs/architecture/adr/ADR-088-notification-preference-quiet-hours-realtime-and-operations-boundary.md",
+        "docs/architecture/adr/ADR-079-routine-intervention-policy-notification-and-surface-boundary.md"
+      ],
+      "protected_contracts": [
+        "QuietHours uses Product Time and identity-scoped preferences, never host-local time.",
+        "Routine intervention state stays Routine-owned; Notification only consumes explicit intents/events.",
+        "Operations/audit capabilities do not leak into normal product ports."
+      ],
+      "implementation_steps": [
+        "Implement typed action intent contracts and durable Interaction facts with identity ownership.",
+        "Implement QuietHours/SystemDeliveryGuard against UserTimeContext and canonical delivery preferences.",
+        "Split product-facing notification port from dead-letter/receipt/audit operations capability.",
+        "Cut UI/API/Desktop consumers and Routine integration to the typed boundaries."
+      ],
+      "integration_notes": [
+        "This task waits for R4-2201B so it consumes, rather than rewrites, Routine interaction semantics."
+      ],
+      "acceptance_criteria": [
+        "Typed actions/Interaction round-trip without free-form mutation authority.",
+        "QuietHours decisions are deterministic across timezone/DST tests.",
+        "Product and operations ports have no capability leakage and integrations remain green."
+      ],
+      "verification_commands": [
+        "pnpm nx run notification:test",
+        "pnpm nx run notification:test:integration",
+        "pnpm nx run reminder:test",
+        "pnpm nx run api:typecheck",
+        "pnpm nx run desktop:typecheck"
+      ],
+      "depends_on": [
+        "N4-2402A",
+        "R4-2201B"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "domain:notification-interaction",
+        "contract:notification-preference",
+        "policy:quiet-hours"
+      ]
+    },
+    {
+      "id": "R4-2201C",
+      "title": "Destructively retire legacy Reminder model",
+      "goal": "Delete ReminderTemplate/Group/Instance/Response storage, contracts and transports after Routine, Scheduler and Notification replacement paths are accepted.",
+      "why_now": "All replacement owner/runtime boundaries must be proven before the no-return legacy Reminder deletion batch.",
+      "risk": "high",
+      "scope": [
+        "Legacy Reminder contracts/domain/application/persistence/API/IPC/UI compatibility surfaces.",
+        "Prisma/PowerSync destructive schema parity and fresh reset/bootstrap.",
+        "Residual scans and governance rules preventing legacy Reminder resurrection."
+      ],
+      "out_of_scope": [
+        "Changing canonical Routine semantics.",
+        "Adding row migration or dual write.",
+        "Dashboard/AI cleanup."
+      ],
+      "context_refs": [
+        "docs/architecture/adr/ADR-076-routine-definition-trigger-and-legacy-reminder-retirement.md",
+        "docs/architecture/adr/ADR-111-zero-legacy-data-destructive-cutover-policy.md"
+      ],
+      "protected_contracts": [
+        "Routine owner model, Scheduler runtime and Notification typed boundaries are already accepted inputs to this task.",
+        "No data converter or compatibility persistence is introduced."
+      ],
+      "implementation_steps": [
+        "Prove production consumers no longer require legacy ReminderTemplate/Group/Instance/Response authority.",
+        "Delete legacy Reminder production code, contracts, transports and persistence in one coherent batch.",
+        "Regenerate Prisma/PowerSync artifacts and remove obsolete portability/upload mappings.",
+        "Run fresh local reset/bootstrap and Routine/Scheduler/Notification journeys plus residue governance."
+      ],
+      "integration_notes": [
+        "This is the final destructive Routine/Reminder batch before Phase 4 closure."
+      ],
+      "acceptance_criteria": [
+        "Legacy Reminder product models have zero production authority and zero canonical schema rows.",
+        "Fresh environments start successfully with only Routine vNext truth.",
+        "Routine, Scheduler and Notification journeys pass after deletion."
+      ],
+      "verification_commands": [
+        "pnpm nx run reminder:test:integration",
+        "pnpm nx run api:typecheck",
+        "pnpm nx run desktop:db:reset:dry",
+        "pnpm test:inventory",
+        "pnpm governance:check"
+      ],
+      "depends_on": [
+        "R4-2201B",
+        "S4-2302B",
+        "N4-2402B"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "domain:routine",
+        "schema:reminder-legacy",
+        "contract:reminder-legacy",
+        "powersync:reminder"
+      ]
+    },
+    {
+      "id": "P4-CLOSE",
+      "title": "Close Phase 4 owner convergence",
+      "goal": "Review the integrated Routine/Planner/Scheduler/Notification batch, reconcile generated artifacts and system-plan evidence, and prove Phase 4 is a coherent owner model before Phase 5 starts.",
+      "why_now": "Individual green PRs are not enough; the combined destructive cutovers need one integration review before AI/Home consumers are allowed to depend on them.",
+      "risk": "medium",
+      "scope": [
+        "Cross-domain ownership/residue review for Phase 4.",
+        "Canonical plan evidence for completed Phase 4 tickets.",
+        "Integrated focused/full affected validation and test inventory reconciliation."
+      ],
+      "out_of_scope": [
+        "New Phase 5 features.",
+        "Refactoring accepted owner semantics without a verified finding."
+      ],
+      "context_refs": [
+        "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md"
+      ],
+      "protected_contracts": [
+        "Only verified integration findings may reopen an accepted owner task.",
+        "Execution status remains in ForgeFlow; plan edits record durable architecture/evidence only."
+      ],
+      "implementation_steps": [
+        "Re-run retired-vocabulary and forbidden-import scans across Phase 4 production surfaces.",
+        "Review integrated contracts/persistence/host composition for single ownership and cross-domain boundary leaks.",
+        "Repair only verified Phase 4 integration findings and reconcile generated inventory/artifacts.",
+        "Update system-wide plan Phase 4 evidence and run the required integrated gates."
+      ],
+      "integration_notes": [
+        "Phase 5 and Phase 4-owner portability tasks depend on this closure."
+      ],
+      "acceptance_criteria": [
+        "Phase 4 integrated review has no P0/P1/P2 findings.",
+        "Retired legacy owner vocabulary is absent except documented non-authoritative history/tests.",
+        "Required integrated CI is green on the accepted exact head."
+      ],
+      "verification_commands": [
+        "pnpm test:inventory",
+        "pnpm docs:check",
+        "pnpm governance:check",
+        "pnpm typecheck",
+        "pnpm nx affected -t test",
+        "pnpm nx affected -t build"
+      ],
+      "depends_on": [
+        "R4-2201C",
+        "P4-2301B",
+        "S4-2302B",
+        "N4-2402B"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "integration:phase4",
+        "docs:system-vnext-plan",
+        "governance:phase4"
+      ]
+    },
+    {
+      "id": "PORT-1610B",
+      "title": "Register complete V3 capabilities for Phase 4 owners",
+      "goal": "Add complete owner-driven V3 portability for surviving Routine, Schedule/Planner and Notification facts after their canonical contracts are frozen.",
+      "why_now": "Phase 4 owners must be stable before their portable payloads can be made durable without cloning transient migration shapes.",
+      "risk": "medium",
+      "scope": [
+        "Routine, Schedule/Planner and Notification surviving portable facts.",
+        "API/Desktop V3 capability registration and dependency/ref ordering.",
+        "V3 round-trip coverage for these owners."
+      ],
+      "out_of_scope": [
+        "V2 deletion.",
+        "Dashboard or AI legacy persistence.",
+        "Changing Phase 4 owner contracts."
+      ],
+      "context_refs": [
+        "docs/architecture/adr/ADR-106-owner-driven-data-portability-v3.md",
+        "docs/product/modules/data-portability.md"
+      ],
+      "protected_contracts": [
+        "Portable payload semantics are owner-defined and validated.",
+        "Device-only/transient runtime state is excluded unless explicitly portable by owner ADR."
+      ],
+      "implementation_steps": [
+        "Map surviving Phase 4 product facts to owner V3 capabilities and dependencies.",
+        "Implement missing owner export/dry-run/apply capabilities without persistence-shaped cloning.",
+        "Register capabilities in API and Desktop with deterministic reference ordering.",
+        "Add round-trip and invalid-reference tests."
+      ],
+      "integration_notes": [
+        "Combines with PORT-1610A to provide full stable owner coverage before PORT-1611."
+      ],
+      "acceptance_criteria": [
+        "All surviving Phase 4 portable facts have owner V3 coverage.",
+        "API/Desktop registrations match and invalid refs fail closed.",
+        "V3 round-trip coverage is green."
+      ],
+      "verification_commands": [
+        "pnpm nx run data-portability:test",
+        "pnpm nx run data-portability:typecheck",
+        "pnpm nx run reminder:test",
+        "pnpm nx run schedule:test",
+        "pnpm nx run notification:test"
+      ],
+      "depends_on": [
+        "PORT-1610A",
+        "P4-CLOSE"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "domain:data-portability",
+        "contract:portable-v3",
+        "portability:phase4-owners"
+      ]
+    },
+    {
+      "id": "HOME-1801",
+      "title": "Add Goal-owned progress summary for Home",
+      "goal": "Expose the minimum Goal-owned progress summary needed by TodayOverview and Goal capsule preview using Goal vNext lifecycle/target semantics.",
+      "why_now": "Dashboard cannot be retired until Home reads the required Goal summary from the Goal owner rather than Dashboard projections.",
+      "risk": "low",
+      "scope": [
+        "Goal read-side summary contract/service and Home consumer adapter.",
+        "Goal vNext lifecycle/target semantics only."
+      ],
+      "out_of_scope": [
+        "Dashboard deletion.",
+        "Task/Knowledge analytics aggregation.",
+        "Any dueDate compatibility field."
+      ],
+      "context_refs": [
+        "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md"
+      ],
+      "protected_contracts": [
+        "Goal remains the progress/lifecycle owner.",
+        "No Goal dueDate compatibility is introduced."
+      ],
+      "implementation_steps": [
+        "Characterize TodayOverview/Goal capsule data actually consumed from Dashboard.",
+        "Add the narrow Goal-owned progress summary read model.",
+        "Wire Home/Goal capsule reads to the owner contract with focused UI tests."
+      ],
+      "integration_notes": [
+        "HOME-1802 removes remaining Home Dashboard client usage after this read seam exists."
+      ],
+      "acceptance_criteria": [
+        "Home can render required Goal progress without Dashboard data.",
+        "No new generic dashboard/analytics contract is introduced."
+      ],
+      "verification_commands": [
+        "pnpm nx run goal:test",
+        "pnpm nx run app-vue:test",
+        "pnpm nx run app-vue:typecheck"
+      ],
+      "depends_on": [
+        "P4-CLOSE"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "readmodel:goal-home",
+        "ui:home"
+      ]
+    },
+    {
+      "id": "HOME-1802",
+      "title": "Replace Home Dashboard client with owner reads",
+      "goal": "Remove useDashboard from TodayOverview and Goal capsule by composing direct owner read services.",
+      "why_now": "The Goal summary seam now exists, so Home can stop depending on the Dashboard domain before Dashboard is deleted.",
+      "risk": "medium",
+      "scope": [
+        "Home/TodayOverview/Goal capsule owner-read composition.",
+        "Removal of useDashboard from those product paths."
+      ],
+      "out_of_scope": [
+        "AI ControlledAnalyticsReadAdapter.",
+        "Dashboard package/schema deletion."
+      ],
+      "context_refs": [
+        "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md"
+      ],
+      "protected_contracts": [
+        "Home is a composition surface, not a new owner domain."
+      ],
+      "implementation_steps": [
+        "Map each remaining Home Dashboard field to its authoritative owner read.",
+        "Replace useDashboard consumption with owner services and preserve loading/error degradation.",
+        "Delete Home-only Dashboard adapters after UI parity tests pass."
+      ],
+      "integration_notes": [
+        "HOME-1804 uses the remaining Dashboard usage inventory after Home and AI are detached."
+      ],
+      "acceptance_criteria": [
+        "TodayOverview and Goal capsule render without Dashboard client/service.",
+        "Owner failures degrade locally without creating cached Dashboard truth."
+      ],
+      "verification_commands": [
+        "pnpm nx run app-vue:test",
+        "pnpm nx run app-vue:typecheck",
+        "pnpm nx run web:typecheck"
+      ],
+      "depends_on": [
+        "HOME-1801"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "ui:home",
+        "consumer:dashboard-home"
+      ]
+    },
+    {
+      "id": "AI-9602",
+      "title": "Characterize AI runtime authority",
+      "goal": "Prove Mastra/thread/workflow state authority and determine which legacy AiMessage transcript persistence is non-authoritative before deletion.",
+      "why_now": "Conversation-shell cleanup and later AI legacy table deletion depend on evidence about restart/hydration authority rather than assumptions.",
+      "risk": "medium",
+      "scope": [
+        "AI runtime/thread/workflow authority characterization and restart fixtures.",
+        "Legacy AiMessage transcript consumer inventory."
+      ],
+      "out_of_scope": [
+        "Deleting AI persistence.",
+        "Provider/model capability redesign.",
+        "Owner workflow DTO changes."
+      ],
+      "context_refs": [
+        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md",
+        "docs/architecture/adr/ADR-096-assistant-conversation-shell-and-mastra-runtime-state-boundary.md"
+      ],
+      "protected_contracts": [
+        "Mastra durable workflow/HITL/restart semantics remain authoritative where characterized.",
+        "No product transcript data is deleted in this task."
+      ],
+      "implementation_steps": [
+        "Trace conversation/thread/workflow hydration and persistence across API/Desktop reconnect/restart.",
+        "Add fixtures proving authoritative state recovery and classify legacy AiMessage consumers.",
+        "Record deletion prerequisites for AI-9610 without implementing deletion."
+      ],
+      "integration_notes": [
+        "AI-9603 consumes this characterization."
+      ],
+      "acceptance_criteria": [
+        "Runtime authority is proven by tests for restart/reconnect/HITL state.",
+        "Every legacy AiMessage consumer is classified as required or deletable with evidence."
+      ],
+      "verification_commands": [
+        "pnpm nx run ai:test",
+        "pnpm nx run ai:typecheck",
+        "pnpm nx run api:typecheck",
+        "pnpm nx run desktop:typecheck"
+      ],
+      "depends_on": [
+        "P4-CLOSE"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "domain:ai-conversation-runtime",
+        "runtime:mastra-authority"
+      ]
+    },
+    {
+      "id": "AI-9603",
+      "title": "Converge AssistantConversationShell and remove durable UI workflow shadow",
+      "goal": "Make Mastra/runtime state the sole durable conversation/workflow authority and remove UI-owned durable workflow shadow state.",
+      "why_now": "AI-9602 has proven the recovery boundary, so UI state can be reduced without losing restart semantics.",
+      "risk": "medium",
+      "scope": [
+        "Conversation shell session/thread/workflow state and UI hydration.",
+        "Removal of durable UI workflow shadow state proven redundant."
+      ],
+      "out_of_scope": [
+        "Provider/model resolution.",
+        "Owner-domain workflow semantics."
+      ],
+      "context_refs": [
+        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md",
+        "docs/architecture/adr/ADR-096-assistant-conversation-shell-and-mastra-runtime-state-boundary.md"
+      ],
+      "protected_contracts": [
+        "Reconnect/restart hydrates authoritative Mastra state.",
+        "Streaming event ordering and interrupt/resume behavior remain stable."
+      ],
+      "implementation_steps": [
+        "Cut shell hydration/rendering to authoritative runtime state.",
+        "Delete redundant durable UI workflow copies and synchronization code.",
+        "Add reconnect/restart/interrupt-resume UI-runtime integration tests."
+      ],
+      "integration_notes": [
+        "AI-9611 may split capabilities only after this shell boundary is stable."
+      ],
+      "acceptance_criteria": [
+        "No second durable UI workflow authority remains.",
+        "Reconnect/restart/interrupt-resume behavior passes end to end."
+      ],
+      "verification_commands": [
+        "pnpm nx run ai:test",
+        "pnpm nx run app-vue:test",
+        "pnpm nx run api:typecheck",
+        "pnpm nx run desktop:typecheck"
+      ],
+      "depends_on": [
+        "AI-9602"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "domain:ai-conversation-runtime",
+        "ui:ai-conversation-shell"
+      ]
+    },
+    {
+      "id": "AI-9604",
+      "title": "Establish ProviderDefinition Connection and SecretVault seam",
+      "goal": "Separate provider metadata, user connection configuration and secret storage into explicit AI provider ownership boundaries.",
+      "why_now": "Model capability resolution and legacy provider persistence cleanup require a stable provider seam first.",
+      "risk": "medium",
+      "scope": [
+        "AI provider definition/connection/secret contracts and host adapters.",
+        "API/Desktop provider configuration ownership."
+      ],
+      "out_of_scope": [
+        "Model capability resolution.",
+        "Legacy execution/message table deletion."
+      ],
+      "context_refs": [
+        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"
+      ],
+      "protected_contracts": [
+        "Secrets are never stored in portable/provider definition payloads.",
+        "API/Desktop expose the same provider semantics with host-appropriate SecretVault adapters."
+      ],
+      "implementation_steps": [
+        "Characterize current provider metadata/config/secret persistence and API/Desktop consumers.",
+        "Introduce explicit ProviderDefinition/Connection/SecretVault contracts and adapters.",
+        "Cut provider onboarding/configuration consumers to the new seam and remove duplicated ownership."
+      ],
+      "integration_notes": [
+        "AI-9605 builds model capability resolution on this seam."
+      ],
+      "acceptance_criteria": [
+        "Provider metadata, connection state and secrets have distinct owners and storage contracts.",
+        "No secret leaks into portable/public provider payloads."
+      ],
+      "verification_commands": [
+        "pnpm nx run ai:test",
+        "pnpm nx run ai:typecheck",
+        "pnpm nx run api:typecheck",
+        "pnpm nx run desktop:typecheck"
+      ],
+      "depends_on": [
+        "P4-CLOSE"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "domain:ai-provider",
+        "contract:ai-provider-secret"
+      ]
+    },
+    {
+      "id": "AI-9605",
+      "title": "Converge model catalog capability-aware resolution",
+      "goal": "Resolve models by ModelCatalog capability and ExecutionRequirement rather than provider-specific ad hoc selection.",
+      "why_now": "Provider ownership must be stable before model selection can be made capability-aware without duplicating connection logic.",
+      "risk": "medium",
+      "scope": [
+        "ModelCatalog/capability/ExecutionRequirement contracts and resolver.",
+        "Runtime model selection call sites."
+      ],
+      "out_of_scope": [
+        "Changing provider secret ownership.",
+        "Owner workflow DTOs."
+      ],
+      "context_refs": [
+        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"
+      ],
+      "protected_contracts": [
+        "Provider secrets/connections remain behind AI-9604 seams.",
+        "Model resolution fails closed when required capability is unavailable."
+      ],
+      "implementation_steps": [
+        "Define canonical model capabilities and execution requirements used by current workflows.",
+        "Implement capability-aware resolver over ProviderDefinition/Connection.",
+        "Cut runtime callers to the resolver and remove provider-specific selection branches."
+      ],
+      "integration_notes": [
+        "AI-9610 waits for this task before deleting legacy provider/execution persistence."
+      ],
+      "acceptance_criteria": [
+        "Current AI workflows resolve compatible models through one capability-aware path.",
+        "Unsupported capability requirements fail with explicit errors rather than silent fallback."
+      ],
+      "verification_commands": [
+        "pnpm nx run ai:test",
+        "pnpm nx run ai:typecheck",
+        "pnpm nx run ai:eval:replay"
+      ],
+      "depends_on": [
+        "AI-9604"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "domain:ai-model-resolution",
+        "contract:ai-model-capability"
+      ]
+    },
+    {
+      "id": "AI-9606",
+      "title": "Establish AIContextAssembler with Product Time and trust budget",
+      "goal": "Create one bounded context assembly boundary for Product Time, trust/provenance and token budget across AI workflows.",
+      "why_now": "Owner workflow/tool convergence needs a stable context boundary so each adapter does not reinvent time, trust and token-budget behavior.",
+      "risk": "medium",
+      "scope": [
+        "AIContextAssembler contracts and runtime composition.",
+        "UserTimeContext/Product Time, trust/provenance and token-budget inputs."
+      ],
+      "out_of_scope": [
+        "Goal/Task/Routine tool DTO changes.",
+        "Knowledge index identity cutover."
+      ],
+      "context_refs": [
+        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md",
+        "docs/architecture/adr/ADR-098-ai-context-knowledge-index-and-owner-contract-boundary.md"
+      ],
+      "protected_contracts": [
+        "Product Time remains the only temporal context authority.",
+        "Context assembly is bounded and provenance-aware; owner services remain data authorities."
+      ],
+      "implementation_steps": [
+        "Inventory duplicated AI context/time/trust/token assembly across current workflows.",
+        "Implement AIContextAssembler with explicit bounded inputs and budgets.",
+        "Cut runtime/workflows to the assembler without broadening owner read capabilities."
+      ],
+      "integration_notes": [
+        "AI-9607, AI-9608 and AI-9609 depend on this boundary."
+      ],
+      "acceptance_criteria": [
+        "AI workflows receive Product Time/trust/budget context through one tested assembler.",
+        "No host-local time fallback or owner bypass is introduced."
+      ],
+      "verification_commands": [
+        "pnpm nx run ai:test",
+        "pnpm nx run ai:typecheck",
+        "pnpm nx run api:typecheck",
+        "pnpm nx run desktop:typecheck"
+      ],
+      "depends_on": [
+        "P4-CLOSE"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "domain:ai-context",
+        "contract:ai-context-assembler"
+      ]
+    },
+    {
+      "id": "AI-9607",
+      "title": "Cut AI Knowledge index to stable KnowledgeDocumentId",
+      "goal": "Make stable KnowledgeDocumentId the sole AI index/citation identity and remove index-status dual truth.",
+      "why_now": "Context assembly is stable and Knowledge identity already exists, so path-derived or duplicated index truth can now be retired safely.",
+      "risk": "medium",
+      "scope": [
+        "AI knowledge index/citation identity and status ownership.",
+        "API/Desktop Knowledge index adapters using stable document identity."
+      ],
+      "out_of_scope": [
+        "Repairing old indexed rows or path-derived relations.",
+        "Changing Knowledge owner document semantics."
+      ],
+      "context_refs": [
+        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md",
+        "docs/architecture/adr/ADR-098-ai-context-knowledge-index-and-owner-contract-boundary.md"
+      ],
+      "protected_contracts": [
+        "KnowledgeDocumentId is stable across rename/move.",
+        "Knowledge remains the document identity owner."
+      ],
+      "implementation_steps": [
+        "Characterize index/citation consumers and duplicate index-status sources.",
+        "Cut index/citation persistence and adapters to stable KnowledgeDocumentId.",
+        "Delete duplicated index-status truth and path-derived identity branches."
+      ],
+      "integration_notes": [
+        "AI-9611 waits for this stable capability boundary."
+      ],
+      "acceptance_criteria": [
+        "All AI index/citation paths use stable KnowledgeDocumentId.",
+        "No second durable index-status authority remains."
+      ],
+      "verification_commands": [
+        "pnpm nx run ai:test",
+        "pnpm nx run ai:typecheck",
+        "pnpm nx run repository:test"
+      ],
+      "depends_on": [
+        "AI-9606"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "domain:ai-knowledge-index",
+        "contract:knowledge-document-id"
+      ]
+    },
+    {
+      "id": "AI-9608",
+      "title": "Align Goal Task Knowledge AI workflows to owner contracts",
+      "goal": "Converge Goal/Task/Knowledge workflow drafts and application adapters to the already-canonical owner-domain target contracts.",
+      "why_now": "Goal and Task are closed and AI context assembly is stable, so workflow adapters can stop carrying temporary convergence shapes.",
+      "risk": "medium",
+      "scope": [
+        "GoalPlan/Task/Knowledge workflow draft/application adapters and structured tool contracts.",
+        "API/Desktop parity for those owner workflows."
+      ],
+      "out_of_scope": [
+        "Routine/Planner/Notification AI tools.",
+        "Changing Goal/Task/Knowledge owner semantics."
+      ],
+      "context_refs": [
+        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"
+      ],
+      "protected_contracts": [
+        "Goal, Task and Knowledge owners validate and execute mutations; AI does not become a persistence owner.",
+        "GoalPlanDraft V2 deterministic/resumable semantics remain intact."
+      ],
+      "implementation_steps": [
+        "Inventory temporary AI workflow fields/adapters no longer matching canonical owner contracts.",
+        "Cut structured drafts/tools/application adapters to owner DTOs and remove compatibility translations.",
+        "Verify API/Desktop parity and resumable workflow behavior."
+      ],
+      "integration_notes": [
+        "AI-9610 consumer audit waits for these adapters to stop using legacy AI models."
+      ],
+      "acceptance_criteria": [
+        "Goal/Task/Knowledge AI workflows use canonical owner contracts without compatibility shapes.",
+        "Workflow retry/resume remains deterministic."
+      ],
+      "verification_commands": [
+        "pnpm nx run ai:test",
+        "pnpm nx run goal:test",
+        "pnpm nx run task:test",
+        "pnpm nx run api:typecheck",
+        "pnpm nx run desktop:typecheck"
+      ],
+      "depends_on": [
+        "AI-9606"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "domain:ai-owner-workflows",
+        "contract:goal-task-knowledge-ai"
+      ]
+    },
+    {
+      "id": "AI-9609",
+      "title": "Align Routine Planner Notification AI tools to owner contracts",
+      "goal": "Cut Routine/Planner/Notification AI tools and reads to the accepted Phase 4 owner contracts and remove legacy Reminder/Schedule/Notification compatibility adapters.",
+      "why_now": "These owner contracts must be frozen by Phase 4 closure before AI can consume them safely.",
+      "risk": "medium",
+      "scope": [
+        "AI Routine commands, Planner reads and Notification reads/actions.",
+        "API/Desktop owner adapters for Phase 4 domains."
+      ],
+      "out_of_scope": [
+        "Changing Phase 4 owner contracts.",
+        "AI provider/model redesign."
+      ],
+      "context_refs": [
+        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"
+      ],
+      "protected_contracts": [
+        "AI invokes owner commands/reads and never writes owner persistence directly.",
+        "Product Time and AIContextAssembler are used consistently."
+      ],
+      "implementation_steps": [
+        "Inventory Phase 4 AI adapters against accepted owner contracts.",
+        "Cut Routine/Planner/Notification tools and reads to canonical owner ports.",
+        "Delete legacy Reminder/Schedule/Notification AI translations and update structured tests."
+      ],
+      "integration_notes": [
+        "AI-9610 waits for this consumer cleanup before legacy AI persistence deletion."
+      ],
+      "acceptance_criteria": [
+        "AI tools consume only accepted Phase 4 owner ports and DTOs.",
+        "No legacy Phase 4 compatibility vocabulary remains in production AI adapters."
+      ],
+      "verification_commands": [
+        "pnpm nx run ai:test",
+        "pnpm nx run reminder:test",
+        "pnpm nx run schedule:test",
+        "pnpm nx run notification:test",
+        "pnpm nx run ai:eval:replay"
+      ],
+      "depends_on": [
+        "P4-CLOSE",
+        "AI-9606"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "domain:ai-owner-workflows",
+        "contract:routine-planner-notification-ai"
+      ]
+    },
+    {
+      "id": "HOME-1803",
+      "title": "Replace AI Dashboard analytics dependency",
+      "goal": "Compose ControlledAnalyticsReadAdapter and Desktop equivalent from explicit owner read ports and remove DashboardData casts.",
+      "why_now": "AI context/read boundaries are stable enough to remove Dashboard as an analytics authority while Home cleanup proceeds independently.",
+      "risk": "medium",
+      "scope": [
+        "AI analytics read adapters and host composition.",
+        "Explicit Goal/Task/Knowledge/activity read ports replacing DashboardData."
+      ],
+      "out_of_scope": [
+        "Generic analytics domain creation.",
+        "Dashboard package deletion.",
+        "Owner mutation contracts."
+      ],
+      "context_refs": [
+        "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md",
+        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"
+      ],
+      "protected_contracts": [
+        "AI analytics are read-only composition over owner services.",
+        "No DashboardData compatibility cast remains as a hidden owner."
+      ],
+      "implementation_steps": [
+        "Map ControlledAnalyticsReadAdapter fields to explicit owner read ports.",
+        "Refactor API/Desktop composition to inject owner reads directly.",
+        "Delete DashboardData casts/adapters and validate AI analytics behavior."
+      ],
+      "integration_notes": [
+        "HOME-1804 can decide ActivityLedger only after Home and AI Dashboard consumers are detached."
+      ],
+      "acceptance_criteria": [
+        "AI analytics reads no longer import or cast DashboardData.",
+        "API/Desktop compose the same explicit owner read semantics."
+      ],
+      "verification_commands": [
+        "pnpm nx run ai:test",
+        "pnpm nx run api:typecheck",
+        "pnpm nx run desktop:typecheck",
+        "pnpm nx run dashboard:test"
+      ],
+      "depends_on": [
+        "HOME-1801",
+        "AI-9606"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "consumer:dashboard-ai",
+        "domain:ai-analytics-read"
+      ]
+    },
+    {
+      "id": "HOME-1804",
+      "title": "Resolve ActivityLedger ownership by current product evidence",
+      "goal": "Either narrow ActivityLedger to a real ActivityFeed capability with an identified owner or delete it when no current product value remains.",
+      "why_now": "After Home and AI stop using Dashboard, remaining ActivityLedger consumers can be evaluated without conflating them with Dashboard compatibility.",
+      "risk": "medium",
+      "scope": [
+        "Current ActivityLedger recorder/table/consumers and their demonstrated product value.",
+        "Narrow ActivityFeed extraction or complete deletion based on evidence."
+      ],
+      "out_of_scope": [
+        "Inventing generic analytics/event-sourcing infrastructure.",
+        "Dashboard deletion until the decision is implemented."
+      ],
+      "context_refs": [
+        "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md"
+      ],
+      "protected_contracts": [
+        "No new generic analytics domain is created.",
+        "Decision must be supported by live product consumers/tests, not historical intent."
+      ],
+      "implementation_steps": [
+        "Inventory all production ActivityLedger writes/reads after HOME-1802/HOME-1803.",
+        "Choose narrow ActivityFeed only if a current product path requires it; otherwise delete recorder/table/contracts.",
+        "Implement the selected bounded path and add governance preventing generic Dashboard resurrection."
+      ],
+      "integration_notes": [
+        "HOME-1805 uses the resolved result to hard-delete Dashboard."
+      ],
+      "acceptance_criteria": [
+        "ActivityLedger is either deleted or replaced by a narrow, evidenced owner capability.",
+        "No generic Dashboard analytics authority remains."
+      ],
+      "verification_commands": [
+        "pnpm nx run dashboard:test",
+        "pnpm nx run app-vue:test",
+        "pnpm nx run ai:test",
+        "pnpm governance:check"
+      ],
+      "depends_on": [
+        "HOME-1802",
+        "HOME-1803"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "domain:dashboard-legacy",
+        "schema:activity-ledger"
+      ]
+    },
+    {
+      "id": "HOME-1805",
+      "title": "Hard-delete Dashboard",
+      "goal": "Remove Dashboard package/contracts/API/IPC/Vue module/DashboardConfig/PowerSync mappings and the /dashboard compatibility route after all consumers are replaced.",
+      "why_now": "Dashboard has no remaining authoritative consumer after Home, AI and ActivityLedger resolution, so retaining it would preserve legacy ownership.",
+      "risk": "high",
+      "scope": [
+        "Dashboard production package/contracts/transports/UI/routes/schema/PowerSync mappings.",
+        "Residual import/route/governance cleanup."
+      ],
+      "out_of_scope": [
+        "Rebuilding Dashboard under another name.",
+        "Owner read-model redesign already completed by prior tasks."
+      ],
+      "context_refs": [
+        "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md",
+        "docs/architecture/adr/ADR-111-zero-legacy-data-destructive-cutover-policy.md"
+      ],
+      "protected_contracts": [
+        "Home and AI owner reads already provide required product behavior.",
+        "No compatibility redirect/client/package remains after deletion."
+      ],
+      "implementation_steps": [
+        "Prove no production consumer requires Dashboard APIs/contracts.",
+        "Delete Dashboard package/contracts/API/IPC/Vue module and compatibility route.",
+        "Delete DashboardConfig/schema/PowerSync mappings and regenerate affected artifacts.",
+        "Run route/import/schema residue scans and product smoke tests."
+      ],
+      "integration_notes": [
+        "PORT-1611 waits for this task so no deleted Dashboard fact is preserved by V2 portability."
+      ],
+      "acceptance_criteria": [
+        "Dashboard has zero production package/route/schema/PowerSync authority.",
+        "Home and AI product journeys remain green without redirects or casts."
+      ],
+      "verification_commands": [
+        "pnpm nx run app-vue:test",
+        "pnpm nx run ai:test",
+        "pnpm typecheck",
+        "pnpm test:inventory",
+        "pnpm governance:check"
+      ],
+      "depends_on": [
+        "HOME-1804"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "domain:dashboard-legacy",
+        "schema:dashboard",
+        "ui:dashboard"
+      ]
+    },
+    {
+      "id": "AI-9610",
+      "title": "Converge AIExecutionRecord and delete proven legacy AI models",
+      "goal": "Rename/converge execution logging to AIExecutionRecord and destructively delete obsolete quota/generation/message persistence whose consumers were proven removable.",
+      "why_now": "Provider/model and owner-workflow consumers must be cut over before legacy AI persistence can be deleted without data/behavior loss.",
+      "risk": "high",
+      "scope": [
+        "AI execution record model and current observability consumers.",
+        "Legacy quota/generation/message persistence approved by AI-9602/9608/9609 consumer audit.",
+        "Prisma/PowerSync destructive parity and host composition."
+      ],
+      "out_of_scope": [
+        "Deleting any legacy AI model still proven necessary by characterization.",
+        "Interface splitting reserved for AI-9611."
+      ],
+      "context_refs": [
+        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md",
+        "docs/architecture/adr/ADR-111-zero-legacy-data-destructive-cutover-policy.md"
+      ],
+      "protected_contracts": [
+        "Mastra/runtime conversation authority proven in AI-9602 is preserved.",
+        "No data migration/dual write is added under ADR-111."
+      ],
+      "implementation_steps": [
+        "Reconcile legacy AI persistence consumers against AI-9602/9608/9609 evidence.",
+        "Converge execution log semantics/naming to AIExecutionRecord.",
+        "Delete only proven-obsolete quota/generation/message models and mappings in Prisma/PowerSync together.",
+        "Run restart/workflow/eval/observability regression suites."
+      ],
+      "integration_notes": [
+        "AI-9611 can simplify application capabilities after legacy persistence is gone."
+      ],
+      "acceptance_criteria": [
+        "No proven-obsolete AI persistence model remains in production authority paths.",
+        "AIExecutionRecord is the canonical execution observability fact.",
+        "AI eval and workflow restart behavior remain green."
+      ],
+      "verification_commands": [
+        "pnpm nx run ai:test",
+        "pnpm nx run ai:eval:replay",
+        "pnpm nx run api:typecheck",
+        "pnpm nx run desktop:typecheck",
+        "pnpm governance:check"
+      ],
+      "depends_on": [
+        "AI-9605",
+        "AI-9608",
+        "AI-9609"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "domain:ai-execution-record",
+        "schema:ai-legacy"
+      ]
+    },
+    {
+      "id": "AI-9611",
+      "title": "Split broad AI application capabilities at proven consumer boundaries",
+      "goal": "Narrow over-broad AI application capabilities only where current consumers demonstrate stable separate responsibilities.",
+      "why_now": "Conversation/provider/index/execution boundaries are now stable, avoiding churn from splitting facades during migration.",
+      "risk": "medium",
+      "scope": [
+        "AI application capability/facade boundaries with proven distinct consumers.",
+        "Host composition and tests for the narrowed seams."
+      ],
+      "out_of_scope": [
+        "Speculative micro-interfaces with no consumer evidence.",
+        "Changing owner-domain contracts."
+      ],
+      "context_refs": [
+        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"
+      ],
+      "protected_contracts": [
+        "Capability splits follow real consumer boundaries and do not duplicate runtime ownership."
+      ],
+      "implementation_steps": [
+        "Inventory broad AI facades after migration and group methods by actual consumer responsibility.",
+        "Split only proven seams and update API/Desktop composition.",
+        "Delete obsolete broad interfaces and add boundary/governance tests."
+      ],
+      "integration_notes": [
+        "AI-9612 reviews the final AI surface after this cleanup."
+      ],
+      "acceptance_criteria": [
+        "AI application capabilities match real consumer boundaries without duplicated orchestration.",
+        "No speculative or legacy broad facade remains where a narrower seam is proven."
+      ],
+      "verification_commands": [
+        "pnpm nx run ai:test",
+        "pnpm nx run ai:typecheck",
+        "pnpm nx run api:typecheck",
+        "pnpm nx run desktop:typecheck",
+        "pnpm governance:check"
+      ],
+      "depends_on": [
+        "AI-9603",
+        "AI-9604",
+        "AI-9607",
+        "AI-9610"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "domain:ai-application-boundary",
+        "composition:ai-hosts"
+      ]
+    },
+    {
+      "id": "AI-9612",
+      "title": "Close AI vNext with five-layer review and eval hardening",
+      "goal": "Review the complete AI convergence for contract, vertical, behavioral, engineering and documentation correctness and close all findings before Phase 6 deletion.",
+      "why_now": "AI owner/runtime/provider/index migrations are complete and need one integrated gate before portability V2 and schema legacy cleanup remove fallbacks.",
+      "risk": "medium",
+      "scope": [
+        "AI five-layer review, failure/retry/HITL/restart hardening, eval replay and docs truth.",
+        "Focused repair of verified AI findings."
+      ],
+      "out_of_scope": [
+        "New AI product features.",
+        "Unrelated model/provider experimentation."
+      ],
+      "context_refs": [
+        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"
+      ],
+      "protected_contracts": [
+        "P0/P1/P2 findings must be repaired before closure.",
+        "Exact-head review and required CI are mandatory."
+      ],
+      "implementation_steps": [
+        "Run contract/vertical/behavior/engineering/docs review across final AI runtime and hosts.",
+        "Exercise retry, cancel, HITL interrupt/resume, reconnect/restart and provider failure paths.",
+        "Repair verified findings and rerun focused then full AI gates.",
+        "Update AI convergence plan evidence only after exact-head closure."
+      ],
+      "integration_notes": [
+        "PORT-1611 and CLEAN-2601 depend on final AI closure."
+      ],
+      "acceptance_criteria": [
+        "AI five-layer review has no P0/P1/P2 findings.",
+        "AI eval replay and runtime failure-path tests pass.",
+        "AI plan/docs match actual implemented authority."
+      ],
+      "verification_commands": [
+        "pnpm nx run ai:test",
+        "pnpm nx run ai:eval:replay",
+        "pnpm nx run ai:typecheck",
+        "pnpm nx run ai:build",
+        "pnpm docs:check",
+        "pnpm governance:check"
+      ],
+      "depends_on": [
+        "AI-9603",
+        "AI-9605",
+        "AI-9607",
+        "AI-9608",
+        "AI-9609",
+        "AI-9611"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "integration:ai-vnext",
+        "docs:ai-vnext-plan",
+        "governance:ai"
+      ]
+    },
+    {
+      "id": "PORT-1611",
+      "title": "Cut Data Portability to V3-only",
+      "goal": "Delete remaining V1/V2 portability readers, writers, importers, projections and compatibility fixtures after every surviving owner has complete V3 coverage.",
+      "why_now": "Stable owner and Phase 4 capabilities exist, Dashboard is gone and AI is closed, so V2 no longer needs to preserve product coverage.",
+      "risk": "high",
+      "scope": [
+        "Data Portability V1/V2 contracts/runtime/importers/projections/mini repositories/fixtures.",
+        "V3-only API/Desktop export/dry-run/apply surface and governance."
+      ],
+      "out_of_scope": [
+        "Changing owner product semantics.",
+        "Whole-schema non-portability legacy sweep."
+      ],
+      "context_refs": [
+        "docs/architecture/adr/ADR-106-owner-driven-data-portability-v3.md",
+        "docs/architecture/adr/ADR-111-zero-legacy-data-destructive-cutover-policy.md",
+        "docs/product/modules/data-portability.md"
+      ],
+      "protected_contracts": [
+        "V3 must preserve every surviving portable product fact before V2 deletion.",
+        "Server-held disclosure remains disclosure-only and cannot become importable user data."
+      ],
+      "implementation_steps": [
+        "Compare final V3 capability coverage against V2 export/import product facts.",
+        "Delete V1/V2 runtime/readers/writers/importers/projections and compatibility fixtures.",
+        "Cut API/Desktop clients/transports to V3-only and add anti-resurrection governance.",
+        "Run full V3 round-trip, dependency/ref, malformed import and disclosure boundary tests."
+      ],
+      "integration_notes": [
+        "CLEAN-2601 follows with whole-schema legacy deletion outside portability."
+      ],
+      "acceptance_criteria": [
+        "Only V3 owner capabilities remain as import/export product surface.",
+        "No surviving product fact loses portability coverage.",
+        "V1/V2 production imports and persistence-shaped projections are zero-hit."
+      ],
+      "verification_commands": [
+        "pnpm nx run data-portability:test",
+        "pnpm nx run data-portability:typecheck",
+        "pnpm nx run api:typecheck",
+        "pnpm nx run desktop:typecheck",
+        "pnpm governance:check"
+      ],
+      "depends_on": [
+        "PORT-1610B",
+        "HOME-1805",
+        "AI-9612"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "domain:data-portability",
+        "contract:portable-v3",
+        "legacy:portability-v1-v2"
+      ]
+    },
+    {
+      "id": "CLEAN-2601",
+      "title": "Run the whole-schema legacy destructive sweep",
+      "goal": "Delete all remaining approved legacy persistence and orphan contracts after owner/portability cutovers, with Prisma and PowerSync parity in one batch.",
+      "why_now": "All surviving owners and portability are canonical; remaining legacy schema is now pure deletion debt and must not survive into final review.",
+      "risk": "high",
+      "scope": [
+        "Old Repository/Folder/Resource tables approved for deletion.",
+        "Residual Reminder/ScheduleTask/Statistic/NotificationTemplate-History-Channel/AI legacy/Account settings-contact/Dashboard-Editor schema identified by the canonical plan.",
+        "Prisma generated schema, PowerSync schema/table mapping and fresh bootstrap/reset."
+      ],
+      "out_of_scope": [
+        "Governance reference-feature schema.",
+        "Adding migrations/converters for deleted old data.",
+        "Changing surviving owner semantics."
+      ],
+      "context_refs": [
+        "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md",
+        "docs/architecture/adr/ADR-111-zero-legacy-data-destructive-cutover-policy.md",
+        "docs/analysis/2026-09-19-clean-2601-whole-schema-sweep-evidence.md"
+      ],
+      "protected_contracts": [
+        "Governance schema is permanent reference-feature state and is not a deletion candidate.",
+        "Prisma and PowerSync parity is mandatory in the same commit batch.",
+        "Fresh reset/reseed replaces data migration."
+      ],
+      "implementation_steps": [
+        "Generate a concrete residue ledger from canonical plan deletion candidates and actual schema/code references.",
+        "Delete only entries whose owner cutovers are accepted, across Prisma/PowerSync/contracts/mappings together.",
+        "Regenerate artifacts and remove orphan APIs/IPC/imports/tests that only preserve deleted schema.",
+        "Run fresh database bootstrap/reset plus full ownership/residue governance."
+      ],
+      "integration_notes": [
+        "SYS-3001 begins only after this destructive schema baseline is accepted.",
+        "Implementation evidence is recorded at docs/analysis/2026-09-19-clean-2601-whole-schema-sweep-evidence.md; independent acceptance remains with ChatGPT Web."
+      ],
+      "acceptance_criteria": [
+        "No approved legacy schema/model remains in canonical Prisma or PowerSync.",
+        "No orphan production import/route/IPC mapping references deleted models.",
+        "Fresh API/Desktop database initialization and required product smoke paths pass."
+      ],
+      "verification_commands": [
+        "pnpm test:inventory",
+        "pnpm governance:check",
+        "pnpm typecheck",
+        "pnpm test",
+        "pnpm build",
+        "pnpm nx run desktop:db:reset:dry"
+      ],
+      "depends_on": [
+        "PORT-1611"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "schema:whole-system-legacy",
+        "powersync:whole-system-legacy",
+        "governance:legacy-residue"
+      ]
+    },
+    {
+      "id": "SYS-3001",
+      "title": "Re-run cross-domain ownership and retired-vocabulary review",
+      "goal": "Audit the actual post-cleanup code against the ownership matrix and produce a zero-ambiguity residue/finding ledger.",
+      "why_now": "The final schema and owner boundaries are now present; review must examine actual code rather than target documents.",
+      "risk": "medium",
+      "scope": [
+        "Cross-domain ownership, forbidden imports, retired vocabulary and exception ledger.",
+        "Focused repair of verified ownership/residue defects."
+      ],
+      "out_of_scope": [
+        "New product features.",
+        "Reopening accepted architecture without evidence."
+      ],
+      "context_refs": [
+        "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md"
+      ],
+      "protected_contracts": [
+        "Every exception requires explicit owner, reason and retire-by; permanent exceptions require architecture justification."
+      ],
+      "implementation_steps": [
+        "Re-run ownership matrix and retired-vocabulary scans against production code/schema.",
+        "Classify findings by root cause/severity and repair bounded P0/P1/P2 ownership defects.",
+        "Record only justified exceptions with owner/reason/retire-by."
+      ],
+      "integration_notes": [
+        "SYS-3002 performs the broader five-layer review after ownership is clean."
+      ],
+      "acceptance_criteria": [
+        "Ownership/residue ledger has no unresolved P0/P1/P2 issue.",
+        "All remaining exceptions are explicit and justified."
+      ],
+      "verification_commands": [
+        "pnpm governance:check",
+        "pnpm docs:check",
+        "pnpm typecheck"
+      ],
+      "depends_on": [
+        "CLEAN-2601"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "review:cross-domain-ownership",
+        "governance:system"
+      ]
+    },
+    {
+      "id": "SYS-3002",
+      "title": "Run five-layer whole-system batch review",
+      "goal": "Review contract correctness, vertical completeness, behavior, engineering quality and plan truth across the integrated vNext system and repair every P0/P1/P2 finding.",
+      "why_now": "Ownership is clean; the system now needs behavioral/integration review before expensive final validation and release closure.",
+      "risk": "medium",
+      "scope": [
+        "Five-layer review across affected product/runtime paths.",
+        "Focused repair passes for verified findings."
+      ],
+      "out_of_scope": [
+        "Feature expansion or unrelated polish."
+      ],
+      "context_refs": [
+        "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md"
+      ],
+      "protected_contracts": [
+        "Green build alone does not close behavioral findings.",
+        "P0/P1/P2 findings require repair and re-review."
+      ],
+      "implementation_steps": [
+        "Review contracts/routes/events/identity and schema seams.",
+        "Trace critical vertical user/runtime paths and failure/retry/cancel/restart behavior.",
+        "Review typing/validation/observability/diff hygiene and documentation truth.",
+        "Execute focused repair passes and re-review adjacent paths."
+      ],
+      "integration_notes": [
+        "SYS-3003 runs final full validation only after findings are closed."
+      ],
+      "acceptance_criteria": [
+        "Five-layer review ledger has no unresolved P0/P1/P2 findings.",
+        "Every repair has regression evidence and adjacent-path re-review."
+      ],
+      "verification_commands": [
+        "pnpm governance:check",
+        "pnpm typecheck",
+        "pnpm lint",
+        "pnpm nx affected -t test",
+        "pnpm nx affected -t build"
+      ],
+      "depends_on": [
+        "SYS-3001"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "review:whole-system",
+        "repair:whole-system"
+      ]
+    },
+    {
+      "id": "SYS-3003",
+      "title": "Run final full validation and product journeys",
+      "goal": "Prove the final exact integrated code with repository-wide gates, integration/E2E, Prisma/PowerSync reset/bootstrap, local product journeys and AI eval replay.",
+      "why_now": "All review findings are closed, so final validation measures the intended release state rather than intermediate migration code.",
+      "risk": "medium",
+      "scope": [
+        "Repository-wide required validation.",
+        "Affected integration/E2E, local Docker product journeys, database reset/bootstrap and AI eval replay."
+      ],
+      "out_of_scope": [
+        "Unrelated optimization or feature changes unless validation finds a blocker."
+      ],
+      "context_refs": [
+        "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md"
+      ],
+      "protected_contracts": [
+        "Validation failures are repaired at root cause and rerun; gates are not weakened or skipped."
+      ],
+      "implementation_steps": [
+        "Run inventory/docs/governance/typecheck/lint/test/build from a clean exact head.",
+        "Run affected integration/E2E and fresh Prisma/PowerSync bootstrap/reset checks.",
+        "Run local Docker critical product journeys and AI eval replay.",
+        "Repair any blocker and repeat exact-head validation."
+      ],
+      "integration_notes": [
+        "SYS-3004 archives plans only after this exact-head validation is green."
+      ],
+      "acceptance_criteria": [
+        "All required repository and integration gates are green on one exact head.",
+        "Fresh database and local product journeys pass without legacy compatibility state.",
+        "AI eval replay is green."
+      ],
+      "verification_commands": [
+        "pnpm test:inventory",
+        "pnpm docs:check",
+        "pnpm governance:check",
+        "pnpm typecheck",
+        "pnpm lint",
+        "pnpm test",
+        "pnpm build",
+        "pnpm nx run ai:eval:replay"
+      ],
+      "depends_on": [
+        "SYS-3002"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "validation:whole-system"
+      ]
+    },
+    {
+      "id": "SYS-3004",
+      "title": "Make documentation truth canonical and archive convergence plans",
+      "goal": "Update current product/module documentation to the implemented vNext system, remove obsolete target notices, archive completed plans and leave PR #340 ready for final integration to main.",
+      "why_now": "Only a fully validated exact head should become documentation truth and close the long-running convergence plan.",
+      "risk": "low",
+      "scope": [
+        "Current product/module docs, ADR status references, active-plan archive and final PR evidence.",
+        "Removal of obsolete target/compatibility notices whose code is already gone."
+      ],
+      "out_of_scope": [
+        "Changing validated product behavior.",
+        "New roadmap work."
+      ],
+      "context_refs": [
+        "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md",
+        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"
+      ],
+      "protected_contracts": [
+        "Documentation must describe actual code, not aspirational target state.",
+        "The system-wide plan archives only after exact-head required CI/review evidence is green."
+      ],
+      "implementation_steps": [
+        "Update current module/product docs to final ownership and persistence semantics.",
+        "Remove obsolete target/compatibility notices and archive completed module plans.",
+        "Record exact-head validation/review evidence and archive the system-wide/AI active plans.",
+        "Run final docs/governance checks and ensure PR #340 diff is release-reviewable."
+      ],
+      "integration_notes": [
+        "This is the terminal TaskGraph task."
+      ],
+      "acceptance_criteria": [
+        "Current docs match implemented code and no active plan falsely describes completed target work.",
+        "System-wide and AI convergence plans are archived with exact-head evidence.",
+        "PR #340 is ready for final merge decision to main."
+      ],
+      "verification_commands": [
+        "pnpm docs:check",
+        "pnpm governance:check",
+        "git diff --check"
+      ],
+      "depends_on": [
+        "SYS-3003"
+      ],
+      "conflicts_with": [],
+      "mutation_keys": [
+        "docs:system-vnext-final",
+        "plan:archive-vnext"
+      ]
+    }
+  ]
+}

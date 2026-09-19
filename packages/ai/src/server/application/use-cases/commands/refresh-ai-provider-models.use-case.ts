@@ -4,7 +4,7 @@ import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { AIProviderModelCatalogSnapshot } from '@memoflow/contracts/ai';
 import { createLogger } from '@memoflow/utils/logger';
 import type { IAIProviderConfigRepository } from '../../../domain/repositories/i-ai-provider-config-repository';
-import type { IAIProviderModelCatalogPort } from '../../ports';
+import type { IAIProviderModelCatalogPort, IAIProviderSecretVault } from '../../ports';
 
 const logger = createLogger('RefreshAIProviderModelsUseCase');
 
@@ -18,6 +18,7 @@ export class RefreshAIProviderModelsUseCase {
   constructor(
     private readonly providerConfigRepository: IAIProviderConfigRepository,
     private readonly providerModelCatalogPort: IAIProviderModelCatalogPort,
+    private readonly secretVault: IAIProviderSecretVault,
   ) {}
 
   async execute(
@@ -39,9 +40,13 @@ export class RefreshAIProviderModelsUseCase {
       currentDefaultModel: provider.defaultModel,
     });
 
+    const credential = await this.secretVault.resolve({
+      identityId: cx.identityId,
+      credentialRef: provider.credentialRef,
+    });
     const models = await this.providerModelCatalogPort.listModels({
       baseUrl: provider.baseUrl,
-      apiKey: provider.apiKey,
+      apiKey: credential.value,
     });
     const fetchedAt = Date.now();
 

@@ -5,7 +5,7 @@ import type { QueryKnowledgeReq, QueryKnowledgeRes } from '@memoflow/contracts/a
 import { createLogger } from '@memoflow/utils/logger';
 
 import type { IAIProviderConfigRepository } from '../../../domain/repositories/i-ai-provider-config-repository';
-import type { IAIExecutionLogPort, IKnowledgeQueryPort } from '../../ports';
+import type { IAIExecutionRecordPort, IAIProviderSecretVault, IKnowledgeQueryPort } from '../../ports';
 import type { SyncRelevantKnowledgeUseCase } from './sync-relevant-knowledge.use-case';
 import {
   attachRequestIdToError,
@@ -14,6 +14,7 @@ import {
 } from './ai-observability';
 import {
   resolveActiveProviderConfig,
+  resolveProviderCredential,
   toChatExecutionProviderConfig,
 } from './ai-provider-resolution';
 
@@ -27,7 +28,8 @@ export class QueryKnowledgeUseCase {
     private readonly providerConfigRepository: IAIProviderConfigRepository,
     private readonly knowledgeIndexService: SyncRelevantKnowledgeUseCase,
     private readonly knowledgeQueryPort: IKnowledgeQueryPort,
-    private readonly executionLogPort?: IAIExecutionLogPort,
+    private readonly executionRecordPort?: IAIExecutionRecordPort,
+    private readonly secretVault?: IAIProviderSecretVault,
   ) {}
 
   async execute(
@@ -37,9 +39,8 @@ export class QueryKnowledgeUseCase {
     const startedAt = Date.now();
     const requestId = cx.requestId;
     let providerMetadata: {
-      providerId?: string;
-      providerName?: string;
-      model?: string;
+      providerConnectionId?: string;
+      modelId?: string;
     } = {};
 
     try {
@@ -48,13 +49,13 @@ export class QueryKnowledgeUseCase {
         cx.identityId,
         request.providerId,
       );
-      const executionProviderConfig = toChatExecutionProviderConfig(provider, {
+      const credential = await resolveProviderCredential(this.requireSecretVault(), cx.identityId, provider);
+      const executionProviderConfig = toChatExecutionProviderConfig(provider, credential, {
         temperature: 0.2,
       });
       providerMetadata = {
-        providerId: provider.id,
-        providerName: provider.name,
-        model: executionProviderConfig.model,
+        providerConnectionId: String(provider.id),
+        modelId: executionProviderConfig.model,
       };
       const sync = await this.knowledgeIndexService.execute(
         request.query,
@@ -82,22 +83,12 @@ export class QueryKnowledgeUseCase {
 
         await this.recordExecution({
           identityId: cx.identityId,
-          taskType: 'KNOWLEDGE_QUERY',
-          status: 'COMPLETED',
+          operation: 'knowledge.query',
+          outcome: 'succeeded',
           requestId,
           ...providerMetadata,
-          input: {
-            query: request.query,
-            selectedProviderId: request.providerId,
-            maxResources: request.maxResources,
-          },
-          result: {
-            matchedResourceCount: emptyResult.matchedResourceCount,
-            citationCount: emptyResult.citations.length,
-            answer: emptyResult.answer,
-          },
           tokenUsage: emptyResult.tokenUsage,
-          processingMs: emptyResult.processingTimeMs,
+          latencyMs: emptyResult.processingTimeMs,
         });
         return ok(emptyResult);
       }
@@ -122,39 +113,24 @@ export class QueryKnowledgeUseCase {
 
       await this.recordExecution({
         identityId: cx.identityId,
-        taskType: 'KNOWLEDGE_QUERY',
-        status: 'COMPLETED',
+        operation: 'knowledge.query',
+        outcome: 'succeeded',
         requestId,
         ...providerMetadata,
-        input: {
-          query: request.query,
-          selectedProviderId: request.providerId,
-          maxResources: request.maxResources,
-        },
-        result: {
-          matchedResourceCount: response.matchedResourceCount,
-          citationCount: response.citations.length,
-          answer: response.answer,
-        },
         tokenUsage: response.tokenUsage,
-        processingMs: response.processingTimeMs,
+        latencyMs: response.processingTimeMs,
       });
       return ok(response);
     } catch (err) {
       await this.recordExecution({
         identityId: cx.identityId,
-        taskType: 'KNOWLEDGE_QUERY',
-        status: 'FAILED',
+        operation: 'knowledge.query',
+        outcome: 'failed',
         requestId,
         ...providerMetadata,
         errorCategory: classifyAIExecutionError(err),
-        input: {
-          query: request.query,
-          selectedProviderId: request.providerId,
-          maxResources: request.maxResources,
-        },
-        error: err instanceof Error ? err.message : 'Knowledge query failed',
-        processingMs: Date.now() - startedAt,
+        safeError: 'Knowledge query failed',
+        latencyMs: Date.now() - startedAt,
       });
       logger.error('Knowledge query failed', {
         error: err,
@@ -167,19 +143,24 @@ export class QueryKnowledgeUseCase {
   }
 
   private async recordExecution(
-    input: Parameters<NonNullable<IAIExecutionLogPort['record']>>[0],
+    input: Parameters<NonNullable<IAIExecutionRecordPort['record']>>[0],
   ): Promise<void> {
-    if (!this.executionLogPort) {
+    if (!this.executionRecordPort) {
       return;
     }
 
     try {
-      await this.executionLogPort.record(withAICostEstimate(input));
+      await this.executionRecordPort.record(withAICostEstimate(input));
     } catch (err) {
       logger.warn('Failed to record knowledge query execution log', {
         error: err,
         identityId: input.identityId,
       });
     }
+  }
+
+  private requireSecretVault(): IAIProviderSecretVault {
+    if (!this.secretVault) throw new Error('AI provider SecretVault is unavailable');
+    return this.secretVault;
   }
 }

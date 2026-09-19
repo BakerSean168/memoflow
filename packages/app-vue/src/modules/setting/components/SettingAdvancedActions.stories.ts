@@ -1,66 +1,41 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import SettingAdvancedActions from './SettingAdvancedActions.vue';
 
-const now = Date.now();
-
-const mockBackups = [
-  { key: 'backup-1', label: 'Auto Backup', time: now - 86400000 },
-  { key: 'backup-2', label: 'Pre-migration Backup', time: now - 7 * 86400000 },
-  { key: 'backup-3', label: 'Manual Backup', time: now - 30 * 86400000 },
-];
-
-const mockSyncStatus = {
-  lastSyncedAt: now - 3600000,
-  versionCount: 42,
-  hasConflicts: false,
-};
-
 const meta = {
-  title: 'Business/Setting/SettingAdvancedActions',
+  title: 'Business/Setting/DataTransferActions',
   component: SettingAdvancedActions,
   tags: ['autodocs'],
-  argTypes: {
-    syncing: { control: 'boolean' },
-  },
   args: {
-    backups: mockBackups,
-    syncStatus: mockSyncStatus,
-    syncing: false,
+    exportingData: false,
+    importingData: false,
+    dataPortabilityAvailable: true,
+    serverDataDisclosureAvailable: true,
+    exportingServerDataDisclosure: false,
+    dataPortabilityResult: null,
   },
 } satisfies Meta<typeof SettingAdvancedActions>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const Default: Story = {};
+
+export const PreferenceOnly: Story = {
   args: {
-    backups: mockBackups,
-    syncStatus: mockSyncStatus,
+    dataPortabilityAvailable: false,
+    serverDataDisclosureAvailable: false,
   },
 };
 
-export const Syncing: Story = {
+export const Exporting: Story = {
   args: {
-    backups: mockBackups,
-    syncStatus: mockSyncStatus,
-    syncing: true,
+    exportingData: true,
+    exportingServerDataDisclosure: true,
   },
 };
 
-export const NoBackups: Story = {
+export const WithResult: Story = {
   args: {
-    backups: [],
-    syncStatus: null,
-  },
-};
-
-export const WithConflicts: Story = {
-  args: {
-    backups: mockBackups,
-    syncStatus: {
-      lastSyncedAt: now - 7200000,
-      versionCount: 38,
-      hasConflicts: true,
-    },
+    dataPortabilityResult: 'Exported goals: 2, tasks: 8',
   },
 };

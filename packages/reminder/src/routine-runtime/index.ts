@@ -32,6 +32,17 @@ export {
   type ProtocolSessionStore,
 } from '../server/domain/ports';
 export {
+  createElapsedRuntime,
+  type CreateElapsedRuntimeOptions,
+  type ElapsedGateState,
+  type ElapsedOccurrenceDue,
+  type ElapsedRoutineRegistration,
+  type ElapsedRuntime,
+  type ElapsedRuntimeSnapshot,
+  type ElapsedSatisfactionReceipt,
+} from '../server/runtime/elapsed';
+
+export {
   createActiveUsageRuntime,
   type ActiveUsageAccumulatorSnapshot,
   type ActiveUsageGateState,
@@ -75,10 +86,18 @@ export {
   type ProtocolBreakCreditRuntime,
 } from '../server/runtime/protocol-break-credit';
 export {
+  createInMemoryRoutineRuntimeContextStore,
+} from '../server/runtime/routine-runtime-context';
+export type {
+  RoutineRuntimeContextStore,
+  RoutineRuntimeContextUpdateReceipt,
+} from '../server/domain/ports';
+export {
   createRoutineCoachCommandService,
   type CreateRoutineCoachCommandServiceOptions,
   type RoutineCoachCommandPort,
-  type RoutineProfileActivationReceipt,
+  type RoutineDefinitionReceipt,
+  type RoutineRuntimeContextReceipt,
   type RoutineProtocolMethodId,
   type RoutineProtocolSessionReceipt,
   type RoutineTemporaryOverrideReceipt,

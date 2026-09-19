@@ -1,18 +1,37 @@
+import type { AIProviderCredentialRef } from '@memoflow/contracts/primitives';
+
+/** Plaintext is intentionally shaped as an edge-only value, not a DTO field. */
+export interface ResolvedAIProviderCredential {
+  readonly value: string;
+}
+
+export interface StoreAIProviderCredentialInput {
+  readonly identityId: string;
+  readonly value: string;
+  readonly expiresAt?: number | null;
+}
+
+export interface ResolveAIProviderCredentialInput {
+  readonly identityId: string;
+  readonly credentialRef: AIProviderCredentialRef;
+  readonly now?: number;
+}
+
+export interface ReplaceAIProviderCredentialInput extends ResolveAIProviderCredentialInput {
+  readonly value: string;
+}
+
 /**
- * Provider secret vault boundary.
+ * Host-owned secret storage boundary.
  *
- * The AI application/infrastructure layers only need authenticated encryption
- * and decryption of provider credentials. Key source, rotation, KMS, and storage
- * details stay behind this port so repositories never depend on a concrete env
- * cipher implementation.
+ * Connections and onboarding sessions carry only `credentialRef`. Plaintext is
+ * returned only to the request/probe/model execution edge and is never exposed
+ * by a repository or ordinary provider DTO.
  */
 export interface IAIProviderSecretVault {
-  /** Encrypt plaintext for durable/ephemeral server-side storage. */
-  encrypt(value: string): string;
-  /** Decrypt a previously encrypted value. Plaintext seed values may pass through. */
-  decrypt(value: string): string;
-  /** Whether a ciphertext should be rewritten with the active key/version. */
-  needsRewrap(value: string): boolean;
-  /** Decrypt then re-encrypt with the active key/version. */
-  rewrap(value: string): string;
+  store(input: StoreAIProviderCredentialInput): Promise<AIProviderCredentialRef>;
+  resolve(input: ResolveAIProviderCredentialInput): Promise<ResolvedAIProviderCredential>;
+  replace(input: ReplaceAIProviderCredentialInput): Promise<void>;
+  /** Revocation is idempotent for an owned reference, so retries are safe. */
+  revoke(input: ResolveAIProviderCredentialInput): Promise<void>;
 }

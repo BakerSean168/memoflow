@@ -12,8 +12,7 @@
  * 【INotificationRepository】
  * - 通知持久化：创建、查询、标记已读/删除通知
  * 
- * 【INotificationTemplateRepository】
- * - 通知模板持久化：管理可重用的通知模板
+ * 【I * - 通知模板持久化：管理可重用的通知模板
  * 
  * 【INotificationPreferenceRepository】
  * - 用户通知偏好持久化：管理用户的通知接收配置
@@ -24,5 +23,8 @@ export type {
   NotificationDeliveryUsage,
   NotificationOutboxDispatchPlan,
 } from './i-notification-repository';
-export type { INotificationTemplateRepository } from './i-notification-template-repository';
 export type { INotificationPreferenceRepository } from './i-notification-preference-repository';
+export type {
+  INotificationInteractionRepository,
+  RecordNotificationInteractionInput,
+} from './i-notification-interaction-repository';

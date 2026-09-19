@@ -8,9 +8,14 @@
 
 import type { InjectionKey, Ref, ShallowRef } from 'vue';
 import type { CloudAuthDesktopClientPort } from '@memoflow/contracts';
-import type { DesktopAccessSnapshot } from '@memoflow/contracts/electron';
+import type {
+  DesktopAccessSnapshot,
+  DesktopNotificationPreference,
+  DesktopNotificationPreferencePatch,
+} from '@memoflow/contracts/electron';
 import type { ElectronBridge } from '@memoflow/ipc-client';
 import type { AIRuntimeSurface } from '@memoflow/contracts/ai';
+import type { Result } from '@memoflow/contracts/result';
 import type { DesktopAuthApi } from '../shared/utils/desktop-auth-recovery';
 import type {
   IAccountService,
@@ -19,7 +24,6 @@ import type {
   ILabelService,
   ITaskService,
   IScheduleService,
-  IReminderService,
   IRepositoryService,
   INotificationService,
   ISettingService,
@@ -29,7 +33,6 @@ import type {
   IRuntimeUsageService,
   IWorkflowRuntimeService,
   IRuleService,
-  IDashboardService,
   ModuleCapsule,
 } from './types';
 
@@ -42,10 +45,18 @@ export const GOAL_SERVICE_KEY: InjectionKey<IGoalService> = Symbol('GoalService'
 export const LABEL_SERVICE_KEY: InjectionKey<ILabelService> = Symbol('LabelService');
 export const TASK_SERVICE_KEY: InjectionKey<ITaskService> = Symbol('TaskService');
 export const SCHEDULE_SERVICE_KEY: InjectionKey<IScheduleService> = Symbol('ScheduleService');
-export const REMINDER_SERVICE_KEY: InjectionKey<IReminderService> = Symbol('ReminderService');
 export const REPOSITORY_SERVICE_KEY: InjectionKey<IRepositoryService> = Symbol('RepositoryService');
 export const NOTIFICATION_SERVICE_KEY: InjectionKey<INotificationService> =
   Symbol('NotificationService');
+export interface DesktopNotificationDevicePreferencePort {
+  get(): Promise<Result<DesktopNotificationPreference>>;
+  update(
+    patch: DesktopNotificationPreferencePatch,
+  ): Promise<Result<DesktopNotificationPreference>>;
+  reset(): Promise<Result<DesktopNotificationPreference>>;
+}
+export const DESKTOP_NOTIFICATION_DEVICE_PREFERENCE_KEY: InjectionKey<DesktopNotificationDevicePreferencePort> =
+  Symbol('DesktopNotificationDevicePreference');
 export const SETTING_SERVICE_KEY: InjectionKey<ISettingService> = Symbol('SettingService');
 export const DATA_PORTABILITY_SERVICE_KEY: InjectionKey<IDataPortabilityService> =
   Symbol('DataPortabilityService');
@@ -56,8 +67,6 @@ export const AI_RUNTIME_USAGE_KEY: InjectionKey<IRuntimeUsageService> = Symbol('
 export const AI_WORKFLOW_RUNTIME_KEY: InjectionKey<IWorkflowRuntimeService> =
   Symbol('AIWorkflowRuntime');
 export const RULE_SERVICE_KEY: InjectionKey<IRuleService> = Symbol('RuleService');
-export const DASHBOARD_SERVICE_KEY: InjectionKey<IDashboardService> = Symbol('DashboardService');
-
 // ── UI / Navigation Keys ──
 /**
  * V2 shell: ordered list of module capsules rendered in WindowHeader.
