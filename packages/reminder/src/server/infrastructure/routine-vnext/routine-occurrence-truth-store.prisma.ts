@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
-import type { Prisma, PrismaClient, RoutineInteraction, RoutineOccurrence } from '@memoflow/database';
+import { Prisma } from '@memoflow/database';
+import type { PrismaClient, RoutineInteraction, RoutineOccurrence } from '@memoflow/database';
 import { buildIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
 import { asInstant } from '@memoflow/time';
 import type {
@@ -302,10 +303,12 @@ export class PrismaRoutineOccurrenceTruthStore implements RoutineOccurrenceTruth
 
     return this.prisma.$transaction(async (tx) => {
       const candidateInteractionId = `RoutineInteraction_${randomUUID()}`;
-      const interaction = await tx.routineInteraction.upsert({
-        where: { idempotencyKey },
-        update: {},
-        create: {
+      // Prisma's upsert can still race on this unique key with the PostgreSQL
+      // adapter, surfacing P2002 instead of converging the losing transaction.
+      // createMany(skipDuplicates) maps to INSERT ... ON CONFLICT DO NOTHING:
+      // PostgreSQL waits for an uncommitted winner, then reports count=0.
+      const inserted = await tx.routineInteraction.createMany({
+        data: [{
           id: candidateInteractionId,
           idempotencyKey,
           identityId: input.identityId,
@@ -316,14 +319,18 @@ export class PrismaRoutineOccurrenceTruthStore implements RoutineOccurrenceTruth
           responseLatencyMs,
           snoozeDurationMs,
           metadataJson: input.metadata == null ? null : JSON.stringify(input.metadata),
-        },
+        }],
+        skipDuplicates: true,
       });
-      const replayed = interaction.id !== candidateInteractionId;
+      const interaction = await tx.routineInteraction.findUniqueOrThrow({
+        where: { idempotencyKey },
+      });
+      const replayed = inserted.count === 0;
       if (replayed) {
         assertInteractionReplayMatches(interaction, input, snoozeDurationMs);
-        // The idempotency upsert is the concurrency fence. Read occurrence truth
-        // after crossing it so a duplicate command cannot return the pre-commit
-        // Open snapshot from the winning transaction.
+        // Read occurrence truth after crossing the fence. The explicit
+        // READ COMMITTED transaction isolation gives this statement a fresh
+        // snapshot after the conflicting insert has waited for its winner.
         const occurrence = await requireOccurrence(tx, input);
         return {
           interaction: mapInteraction(interaction),
@@ -362,6 +369,8 @@ export class PrismaRoutineOccurrenceTruthStore implements RoutineOccurrenceTruth
         occurrence: mapOccurrence(occurrence),
         replayed: false,
       };
+    }, {
+      isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
     });
   }
 
