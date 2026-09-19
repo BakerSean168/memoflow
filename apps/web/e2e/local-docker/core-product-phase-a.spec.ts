@@ -4,6 +4,10 @@ import { registerAndLogin } from '../helpers/testHelpers';
 
 const password = 'Test123456!';
 
+// New accounts use the canonical UTC Product Time default. Keep this suite's
+// browser calendar aligned with the server projection used by local Docker.
+test.use({ timezoneId: 'UTC' });
+
 type GoalFixture = {
   id: string;
   name: string;
@@ -108,6 +112,8 @@ test.describe('Local Docker core product Phase A', () => {
     await expect(page.getByTestId('task-plan-dialog')).toBeVisible();
     await page.getByTestId('task-plan-title-input').fill(taskName);
     await page.getByTestId('task-plan-description-input').fill(taskDescription);
+    await page.getByTestId('task-goal-chip').click();
+    await expect(page.getByTestId('task-plan-property-editor')).toBeVisible();
 
     const toggle = page.getByTestId('task-goal-binding-toggle');
     const fixtures = [primary, alternate];
@@ -122,9 +128,7 @@ test.describe('Local Docker core product Phase A', () => {
       await selectBinding(page, fixtures[index % fixtures.length]);
 
       await expect(page.getByTestId('task-plan-title-input')).toHaveValue(taskName);
-      await expect(page.getByTestId('task-plan-description-input')).toHaveValue(
-        taskDescription,
-      );
+      await expect(page.getByTestId('task-plan-description-input')).toHaveValue(taskDescription);
       await expect(page.getByText(/Cannot read properties of null/i)).toHaveCount(0);
     }
 
@@ -176,7 +180,9 @@ test.describe('Local Docker core product Phase A', () => {
       timeout: TIMEOUT_CONFIG.NAVIGATION,
     });
     await expect(page.getByTestId('task-plan-overview')).toContainText('已绑定 Goal');
-    await expect(page.getByTestId('task-plan-settings')).toContainText('已配置 Goal 贡献');
+    await expect(page.getByTestId('task-plan-workspace-properties')).toContainText(
+      '已配置 Goal 贡献',
+    );
 
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await showTodayOverview(page);
@@ -298,6 +304,8 @@ async function createTaskPlanWithContext(
     .getByTestId('task-plan-description-input')
     .fill('GOAL-7205 context-only runtime proof.');
 
+  await page.getByTestId('task-goal-chip').click();
+  await expect(page.getByTestId('task-plan-property-editor')).toBeVisible();
   const toggle = page.getByTestId('task-goal-binding-toggle');
   await toggle.click();
   await expect(toggle).toHaveAttribute('data-state', 'checked');
@@ -359,10 +367,9 @@ async function expectGoalContribution(
     .poll(
       async () => {
         const keyResults = await expectApiData<{ data: KeyResultProjection[]; total: number }>(
-          await page.request.get(
-            `${API_CONFIG.FULL_URL}/goals/${fixture.id}/key-results`,
-            { headers },
-          ),
+          await page.request.get(`${API_CONFIG.FULL_URL}/goals/${fixture.id}/key-results`, {
+            headers,
+          }),
         );
         const records = await expectApiData<{ data: unknown[]; total: number }>(
           await page.request.get(
@@ -372,8 +379,8 @@ async function expectGoalContribution(
         );
         return {
           currentValue:
-            keyResults.data.find((item) => item.id === fixture.keyResultId)?.progress.currentValue ??
-            null,
+            keyResults.data.find((item) => item.id === fixture.keyResultId)?.progress
+              .currentValue ?? null,
           recordCount: records.total,
         };
       },

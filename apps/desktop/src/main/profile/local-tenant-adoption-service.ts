@@ -43,7 +43,6 @@ export class LocalTenantAdoptionService {
            id,
            status,
            profile,
-           version,
            created_at,
            updated_at,
            closed_at
@@ -51,7 +50,6 @@ export class LocalTenantAdoptionService {
          SELECT ?,
                 status,
                 profile,
-                version,
                 created_at,
                 ?,
                 closed_at

@@ -10,13 +10,18 @@ import { useSchedule } from './useSchedule';
 import { useTask } from '../../task/composables/useTask';
 import { GOAL_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
+import type { GoalClientDTO } from '@memoflow/contracts/goal';
 import type {
   TaskOccurrenceClientDTO,
   TaskOccurrenceStatus,
   TaskPlanClientDTO,
 } from '@memoflow/contracts/task';
 import type { CalendarEventProjection } from '@memoflow/contracts/schedule';
-import { derivePlannerConflicts, plannerConflictSourceKeys, plannerProjectionKey } from '@memoflow/schedule/client';
+import {
+  derivePlannerConflicts,
+  plannerConflictSourceKeys,
+  plannerProjectionKey,
+} from '@memoflow/schedule/client';
 import {
   endOfDayMs,
   getProductTime,
@@ -28,6 +33,9 @@ import {
   projectTaskOccurrence,
   type PlannerProductTimePort,
 } from '../planner';
+
+const PLANNER_GOAL_PAGE_SIZE = 100;
+type PlannerGoalEntity = { toDTO(): GoalClientDTO };
 
 // ============ 统一内部事件类型 ============
 
@@ -218,7 +226,9 @@ export function useCalendarView() {
   const task = useTask();
   const goalService = useStrictInject(GOAL_SERVICE_KEY, 'GoalService');
   const plannerGoals = ref<Parameters<typeof projectPlannerReadModel>[0]['goals']>([]);
-  const plannerRoutineOccurrences = ref<Parameters<typeof projectPlannerReadModel>[0]['routineOccurrences']>([]);
+  const plannerRoutineOccurrences = ref<
+    Parameters<typeof projectPlannerReadModel>[0]['routineOccurrences']
+  >([]);
   const plannerOwnerReadsLoading = ref(false);
 
   /** Currently displayed time window (set when calendar navigation changes) */
@@ -267,8 +277,27 @@ export function useCalendarView() {
   async function fetchPlannerOwnerMarkers(startTime: number, endTime: number) {
     plannerOwnerReadsLoading.value = true;
     try {
-      const goalResult = await goalService.listGoals({ systemView: 'all', page: 1, pageSize: 500 });
-      plannerGoals.value = goalResult.ok ? goalResult.data.goals.map((goal) => goal.toDTO()) : [];
+      const collectedGoals: PlannerGoalEntity[] = [];
+      let page = 1;
+      let hasMore = true;
+
+      while (hasMore) {
+        const goalResult = await goalService.listGoals({
+          systemView: 'all',
+          page,
+          pageSize: PLANNER_GOAL_PAGE_SIZE,
+        });
+        if (!goalResult.ok) {
+          plannerGoals.value = [];
+          return;
+        }
+
+        collectedGoals.push(...goalResult.data.goals);
+        hasMore = Boolean(goalResult.data.pagination?.hasMore);
+        page += 1;
+      }
+
+      plannerGoals.value = collectedGoals.map((goal) => goal.toDTO());
       // R4-2201C: legacy Reminder markers are retired. Phase 5 will
       // reconnect Planner to the canonical Routine occurrence read model.
       plannerRoutineOccurrences.value = [];

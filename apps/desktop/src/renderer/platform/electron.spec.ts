@@ -2,23 +2,28 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createTestPinia } from '@memoflow/test-utils';
 import { RendererEventChannels } from '@memoflow/contracts/electron';
 import type { ServerStateInvalidation } from '@memoflow/app-vue';
+import { initElectronFeatures } from './electron';
 
-const handlers = new Map<string, Array<(...args: unknown[]) => void>>();
-const bridge = {
-  on: vi.fn((channel: string, cb: (...args: unknown[]) => void) => {
-    handlers.set(channel, [...(handlers.get(channel) ?? []), cb]);
-  }),
-  off: vi.fn(),
-  invoke: vi.fn(async () => undefined),
-};
+const { handlers, bridge, invalidate, runtime } = vi.hoisted(() => {
+  const handlers = new Map<string, Array<(...args: unknown[]) => void>>();
+  const bridge = {
+    on: vi.fn((channel: string, cb: (...args: unknown[]) => void) => {
+      handlers.set(channel, [...(handlers.get(channel) ?? []), cb]);
+    }),
+    off: vi.fn(),
+    invoke: vi.fn(async () => undefined),
+  };
 
-const invalidate = vi.fn(async (_intent: ServerStateInvalidation) => undefined);
-const runtime = {
-  queryClient: {},
-  dispatcher: { invalidate },
-  dispose: vi.fn(),
-  clearIdentity: vi.fn(),
-};
+  const invalidate = vi.fn(async (_intent: unknown) => undefined);
+  const runtime = {
+    queryClient: {},
+    dispatcher: { invalidate },
+    dispose: vi.fn(),
+    clearIdentity: vi.fn(),
+  };
+
+  return { handlers, bridge, invalidate, runtime };
+});
 
 vi.mock('./electron-bridge', () => ({
   getElectronBridge: () => bridge,
@@ -84,8 +89,7 @@ describe('initElectronFeatures DB_CHANGED pilot routing (Step 3)', () => {
     vi.unstubAllGlobals();
   });
 
-  it('routes pilot tables to the dispatcher and keeps non-pilot modules on the legacy path', async () => {
-    const { initElectronFeatures } = await import('./electron');
+  it('routes pilot tables to the dispatcher and keeps non-pilot modules on the legacy path', () => {
     initElectronFeatures({} as never);
 
     emitDbChanged(['notifications', 'task_plans', 'rules', 'goals']);
@@ -110,8 +114,7 @@ describe('initElectronFeatures DB_CHANGED pilot routing (Step 3)', () => {
     });
   }, 60_000);
 
-  it('emits no pilot intents for a non-pilot table batch', async () => {
-    const { initElectronFeatures } = await import('./electron');
+  it('emits no pilot intents for a non-pilot table batch', () => {
     initElectronFeatures({} as never);
 
     emitDbChanged(['schedules']);
@@ -119,8 +122,7 @@ describe('initElectronFeatures DB_CHANGED pilot routing (Step 3)', () => {
     expect(dispatchedIntents()).toHaveLength(0);
   }, 60_000);
 
-  it('ignores DB_CHANGED payloads without tables', async () => {
-    const { initElectronFeatures } = await import('./electron');
+  it('ignores DB_CHANGED payloads without tables', () => {
     initElectronFeatures({} as never);
 
     for (const cb of handlers.get(RendererEventChannels.DB_CHANGED) ?? []) {
