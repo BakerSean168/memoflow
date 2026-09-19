@@ -32,9 +32,9 @@ MemoFlow（Memory Flow）需要把用户知识资产接入 AI、目标和行动�
 实现状态（相对本 ADR 目标决策，2026-07-22 对齐代码）：
 
 - **已落地**：Desktop profile-owned 本地 Obsidian Vault（选择/扫描/搜索/预览/`obsidian://` 打开/确认后写入）；GitHub 登录与 GitHub App 知识仓库授权解耦；private 仓库连接、首次对账、Git 同步（禁 force-push、冲突暂停）、webhook 投影、Web 确认后新建笔记、AI 确认写入提案契约；旧数据库 Repository/Folder/Resource CRUD 与 `@memoflow/editor` 运行时已从 host 摘除；用户设置不再保留退役的 in-app editor 偏好分类。
-- **仍部分 / 外部阻塞**：三入口与 Agent Host 完整跨端 E2E（含真实 OAuth/GitHub fixture 与 multi-engine Turn Engine）；Mobile 投影浏览；全量 PR 门禁一揽子验收。详见 active plan §13.2。
+- **仍部分 / 外部阻塞**：真实 OAuth/GitHub fixture E2E 与 Mobile 投影浏览仍需要对应外部凭据/产品覆盖；这些不是当前 Knowledge owner/projection cutover 的未完成 active plan。
 
-本 ADR 仍记录目标决策；完成定义与 PR readiness 以 active plan 证据为准，不因本段对齐而宣称计划完成。
+本 ADR 保留历史决策与外部验证限制；当前实现状态以 `docs/product/modules/repository.md`、ADR-089~091 与 SYS-3003/SYS-3004 evidence 为准。
 
 ## 2. 决策
 

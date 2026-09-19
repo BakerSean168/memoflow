@@ -7,7 +7,7 @@ updated: 2026-09-10T00:55:00+08:00
 
 # ADR-104: Account Profile, Lifecycle and Cloud Identity Projection
 
-**状态：** 已实施（ACC-1401～1407 已收口；AUTH-1501/AUTH-1502 未开始）
+**状态：** 已实施（ACC-1401～1407、AUTH-1501/AUTH-1502，2026-09-19）
 **日期：** 2026-09-09
 **依赖：** ADR-039, ADR-092, ADR-093, ADR-100
 

@@ -6,7 +6,7 @@ tags:
   - foundation
 description: Product Time foundation 当前能力与 Time vNext 收敛边界
 created: 2026-09-09T00:00:00+08:00
-updated: 2026-09-14T13:12:43+08:00
+updated: 2026-09-19T00:00:00+00:00
 ---
 
 # Time Foundation 模块说明
@@ -61,8 +61,8 @@ host-local calendar
 TimeZoneId string
   -> validated/branded TimeZoneId
 
-Instant | number canonical APIs
-  -> Instant canonical + boundary compatibility
+  Instant canonical APIs
+  -> no legacy number/date compatibility surface
 ```
 
 TIME-1201～1206 已全部实施：canonical Calendar/Input/Codec 使用显式 TimeContext 与共享 wall-clock resolver；Format 按 locale + IANA timezone + semantic date/time style 渲染；跨模块 UserTimeContext 注入已完成，legacy Date/number/mixed TimeStyle surface 已删除并由 governance 防回归。

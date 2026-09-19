@@ -28,4 +28,4 @@ updated: 2026-09-18T00:00:00+00:00
 - [`docs/analysis/2026-09-09-data-portability-current-system-map.md`](../../analysis/2026-09-09-data-portability-current-system-map.md)
 - [`docs/architecture/adr/ADR-106-owner-driven-data-portability-v3.md`](../../architecture/adr/ADR-106-owner-driven-data-portability-v3.md)
 - [`docs/architecture/adr/ADR-111-zero-legacy-data-destructive-cutover-policy.md`](../../architecture/adr/ADR-111-zero-legacy-data-destructive-cutover-policy.md)
-- [`docs/plan/active/2026-09-09-system-wide-vnext-model-convergence-implementation.md`](../../plan/active/2026-09-09-system-wide-vnext-model-convergence-implementation.md)
+- [`docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md`](../../plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md)

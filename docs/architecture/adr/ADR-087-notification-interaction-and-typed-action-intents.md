@@ -12,7 +12,7 @@ updated: 2026-09-08T22:00:00+08:00
 
 # ADR-087: Notification Interaction 与 Typed Action Intents
 
-**状态：** 已采纳（待实施）  
+**状态：** 已采纳并实施（N4-2403，2026-09-17）
 **日期：** 2026-09-08  
 **影响范围：** notification、contracts、app-vue、desktop、Task/Goal/Routine application ports  
 **关联：** ADR-077、ADR-079、ADR-084~086、ADR-088

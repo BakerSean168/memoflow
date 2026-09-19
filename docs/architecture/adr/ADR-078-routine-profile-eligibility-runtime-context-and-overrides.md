@@ -13,7 +13,7 @@ updated: 2026-09-08T20:20:00+08:00
 
 # ADR-078: Routine Profile、Eligibility、Runtime Context 与 Temporary Override
 
-**状态：** 已采纳（待实施）  
+**状态：** 已采纳并实施（R4-2201C，2026-09-17）
 **日期：** 2026-09-08  
 **影响范围：** reminder/routine、desktop runtime、contracts、database、PowerSync、AI tools  
 **修订：** ADR-059 Profile Gate / Runtime Overlay 语义  

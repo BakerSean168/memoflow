@@ -10,10 +10,12 @@ tags:
   - vnext
 description: MemoFlow Scheduling / Planner / Routine / Notification vNext 的统一产品语义、端到端用户场景与 North Star 架构
 created: 2026-08-25T17:49:00+08:00
-updated: 2026-09-17T22:45:00+08:00
+updated: 2026-09-19T00:00:00+00:00
 ---
 
 # Scheduling / Planner / Routine / Notification vNext
+
+> **当前 as-built 状态（2026-09-19）：** Routine、Planner/Scheduler 与 Notification 的 Phase 4 owner cutovers 已完成；本页场景和架构推演以 `modules/reminder.md`、`modules/schedule.md` 与 `modules/notification.md` 的当前实现为准，未来能力明确标注为 future/non-goal。
 
 ## 2026-09-08 Schedule / Scheduler Model Convergence Freeze
 

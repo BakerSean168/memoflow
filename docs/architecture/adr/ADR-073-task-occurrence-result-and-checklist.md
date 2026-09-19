@@ -11,7 +11,7 @@ updated: 2026-09-08T19:10:00+08:00
 
 # ADR-073: Task Occurrence Result 与 Checklist
 
-**状态：** 已采纳（实施中）
+**状态：** 已采纳并实施（TASK-7303，2026-09-19）
 **日期：** 2026-09-08
 
 ## 1. Result union

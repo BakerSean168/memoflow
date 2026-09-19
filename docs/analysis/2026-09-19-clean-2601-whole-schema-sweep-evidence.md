@@ -12,9 +12,9 @@ PR, merge, or SYS-3001+ work was performed.
 ## Governing inputs and deletion gate
 
 The exact task is `CLEAN-2601` in
-`docs/plan/active/2026-09-16-system-vnext-execution.tasks.json`. The Phase 6
+`docs/plan/archive/2026-09-16-system-vnext-execution.tasks.json`. The Phase 6
 deletion list is in
-`docs/plan/active/2026-09-09-system-wide-vnext-model-convergence-implementation.md`.
+`docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md`.
 The cutover is governed by
 `docs/architecture/adr/ADR-111-zero-legacy-data-destructive-cutover-policy.md`:
 rollback is source/deployment rollback plus fresh database reset/reseed, with

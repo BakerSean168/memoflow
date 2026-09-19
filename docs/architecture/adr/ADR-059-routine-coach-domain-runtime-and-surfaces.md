@@ -31,7 +31,7 @@ Routine Coach 核心目标态已经落地：RoutineDefinition、M:N ProfileMembe
 - ADR-078：Profile / Eligibility / RuntimeContext / TemporaryOverride；
 - ADR-079：Intervention Policy / Notification / Device Surface。
 
-这些新增决策**尚未实施**；不得把“Core vNext 基础目标态已落地”解释为 legacy Reminder 已经完全删除。
+这些新增决策已由 R4-2201C/Phase 4 实施；当前 Routine owner/runtime 与 legacy Reminder 退役状态以 ADR-076~079 和 `docs/product/modules/reminder.md` 为准。
 
 ### 2026-09-17 Phase 4 checkpoint
 

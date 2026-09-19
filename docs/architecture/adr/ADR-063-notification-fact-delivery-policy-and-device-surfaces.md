@@ -25,7 +25,7 @@ updated: 2026-09-17T22:45:00+08:00
 
 ### 2026-09-08 Routine ownership refinement
 
-ADR-079 进一步明确：legacy `ReminderNotificationConfig` 不应继续成为 RoutineDefinition 的长期字段。Routine 只拥有 intervention/presentation intent；Notification 继续拥有 channels、DND、rate limit、delivery；Desktop/Device Surface 拥有 sound/vibration/OS permission/实际 surface。该 Routine 侧退役尚未实施，不改变本 ADR 已落地的 Notification ownership。
+ADR-079 进一步明确：legacy `ReminderNotificationConfig` 不应继续成为 RoutineDefinition 的长期字段。Routine 只拥有 intervention/presentation intent；Notification 继续拥有 channels、DND、rate limit、delivery；Desktop/Device Surface 拥有 sound/vibration/OS permission/实际 surface。该 Routine 侧退役已由 R4-2201C 实施，不改变本 ADR 已落地的 Notification ownership。
 
 ### 2026-09-08 Notification model convergence follow-up
 

@@ -13,7 +13,7 @@ updated: 2026-09-08T20:45:00+08:00
 
 # ADR-080: Planner Calendar Range、Occupancy 与 Conflict Model
 
-**状态：** 已采纳（待实施）  
+**状态：** 已采纳并实施（P4-2301A/B，2026-09-17）
 **日期：** 2026-09-08  
 **影响范围：** schedule、contracts、database、PowerSync、app-vue Planner、Goal/Task/Routine calendar projection  
 **修订：** 在 ADR-060 已完成 Schedule/Scheduler bounded-context 分离的基础上，继续收敛 Planner 产品模型  

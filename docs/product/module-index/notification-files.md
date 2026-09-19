@@ -16,7 +16,7 @@ updated: 2026-09-17T17:28:00+08:00
 
 | 文件                                                                                                                          | 说明                                                                                       |
 | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| [`docs/product/notification-vnext.md`](../notification-vnext.md)                                                              | Notification vNext North Star：Fact / Workflow / Delivery / Interaction / Preference / Ops |
+| [`docs/product/notification-vnext.md`](../notification-vnext.md)                                                              | Notification current Fact / Workflow / Delivery / Interaction / Preference / Ops model |
 | [`docs/analysis/2026-09-08-notification-current-system-map.md`](../../analysis/2026-09-08-notification-current-system-map.md) | 当前代码真值、legacy residue 与 current-to-target matrix                                   |
 | [`ADR-084`](../../architecture/adr/ADR-084-notification-fact-and-inbox-lifecycle.md)                                          | NotificationFact 与 Inbox lifecycle                                                        |
 | [`ADR-085`](../../architecture/adr/ADR-085-notification-workflow-semantics-and-template-retirement.md)                        | Workflow semantic registry 与 Template 退役                                                |

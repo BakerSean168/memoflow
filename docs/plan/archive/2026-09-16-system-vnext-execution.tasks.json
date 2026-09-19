@@ -3,11 +3,14 @@
   "graph_id": "memoflow-system-vnext-2026-09-16",
   "revision": 3,
   "title": "MemoFlow system-wide vNext execution graph",
+  "status": "archived",
+  "archived_at": "2026-09-19T00:00:00+00:00",
+  "closure_evidence": "docs/analysis/2026-09-19-sys-3004-documentation-truth-closure.md",
   "objective": "Complete the remaining Phase 4-7 system-wide vNext convergence as one coherent destructive cutover: Routine, Planner/Scheduler and Notification become canonical owner models; Home/Dashboard and AI align to those owners; Data Portability becomes V3-only; legacy schema is deleted; final whole-system review and exact-head validation close PR #340 without restoring compatibility models.",
   "planned_by": "chatgpt-web",
   "context_refs": [
-    "docs/plan/active/2026-09-09-system-wide-vnext-model-convergence-implementation.md",
-    "docs/plan/active/2026-09-09-ai-vnext-model-convergence.md",
+    "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md",
+    "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md",
     "docs/architecture/adr/ADR-106-owner-driven-data-portability-v3.md",
     "docs/architecture/adr/ADR-111-zero-legacy-data-destructive-cutover-policy.md"
   ],
@@ -402,7 +405,7 @@
       ],
       "context_refs": [
         "docs/architecture/adr/ADR-080-planner-calendar-range-occupancy-and-conflict-model.md",
-        "docs/plan/active/2026-09-09-system-wide-vnext-model-convergence-implementation.md"
+        "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md"
       ],
       "protected_contracts": [
         "Conflict is a read-model result, never owner-domain persisted truth.",
@@ -740,7 +743,7 @@
         "Refactoring accepted owner semantics without a verified finding."
       ],
       "context_refs": [
-        "docs/plan/active/2026-09-09-system-wide-vnext-model-convergence-implementation.md"
+        "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md"
       ],
       "protected_contracts": [
         "Only verified integration findings may reopen an accepted owner task.",
@@ -853,7 +856,7 @@
         "Any dueDate compatibility field."
       ],
       "context_refs": [
-        "docs/plan/active/2026-09-09-system-wide-vnext-model-convergence-implementation.md"
+        "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md"
       ],
       "protected_contracts": [
         "Goal remains the progress/lifecycle owner.",
@@ -900,7 +903,7 @@
         "Dashboard package/schema deletion."
       ],
       "context_refs": [
-        "docs/plan/active/2026-09-09-system-wide-vnext-model-convergence-implementation.md"
+        "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md"
       ],
       "protected_contracts": [
         "Home is a composition surface, not a new owner domain."
@@ -947,7 +950,7 @@
         "Owner workflow DTO changes."
       ],
       "context_refs": [
-        "docs/plan/active/2026-09-09-ai-vnext-model-convergence.md",
+        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md",
         "docs/architecture/adr/ADR-096-assistant-conversation-shell-and-mastra-runtime-state-boundary.md"
       ],
       "protected_contracts": [
@@ -996,7 +999,7 @@
         "Owner-domain workflow semantics."
       ],
       "context_refs": [
-        "docs/plan/active/2026-09-09-ai-vnext-model-convergence.md",
+        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md",
         "docs/architecture/adr/ADR-096-assistant-conversation-shell-and-mastra-runtime-state-boundary.md"
       ],
       "protected_contracts": [
@@ -1045,7 +1048,7 @@
         "Legacy execution/message table deletion."
       ],
       "context_refs": [
-        "docs/plan/active/2026-09-09-ai-vnext-model-convergence.md"
+        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"
       ],
       "protected_contracts": [
         "Secrets are never stored in portable/provider definition payloads.",
@@ -1093,7 +1096,7 @@
         "Owner workflow DTOs."
       ],
       "context_refs": [
-        "docs/plan/active/2026-09-09-ai-vnext-model-convergence.md"
+        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"
       ],
       "protected_contracts": [
         "Provider secrets/connections remain behind AI-9604 seams.",
@@ -1140,7 +1143,7 @@
         "Knowledge index identity cutover."
       ],
       "context_refs": [
-        "docs/plan/active/2026-09-09-ai-vnext-model-convergence.md",
+        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md",
         "docs/architecture/adr/ADR-098-ai-context-knowledge-index-and-owner-contract-boundary.md"
       ],
       "protected_contracts": [
@@ -1189,7 +1192,7 @@
         "Changing Knowledge owner document semantics."
       ],
       "context_refs": [
-        "docs/plan/active/2026-09-09-ai-vnext-model-convergence.md",
+        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md",
         "docs/architecture/adr/ADR-098-ai-context-knowledge-index-and-owner-contract-boundary.md"
       ],
       "protected_contracts": [
@@ -1237,7 +1240,7 @@
         "Changing Goal/Task/Knowledge owner semantics."
       ],
       "context_refs": [
-        "docs/plan/active/2026-09-09-ai-vnext-model-convergence.md"
+        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"
       ],
       "protected_contracts": [
         "Goal, Task and Knowledge owners validate and execute mutations; AI does not become a persistence owner.",
@@ -1286,7 +1289,7 @@
         "AI provider/model redesign."
       ],
       "context_refs": [
-        "docs/plan/active/2026-09-09-ai-vnext-model-convergence.md"
+        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"
       ],
       "protected_contracts": [
         "AI invokes owner commands/reads and never writes owner persistence directly.",
@@ -1337,8 +1340,8 @@
         "Owner mutation contracts."
       ],
       "context_refs": [
-        "docs/plan/active/2026-09-09-system-wide-vnext-model-convergence-implementation.md",
-        "docs/plan/active/2026-09-09-ai-vnext-model-convergence.md"
+        "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md",
+        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"
       ],
       "protected_contracts": [
         "AI analytics are read-only composition over owner services.",
@@ -1387,7 +1390,7 @@
         "Dashboard deletion until the decision is implemented."
       ],
       "context_refs": [
-        "docs/plan/active/2026-09-09-system-wide-vnext-model-convergence-implementation.md"
+        "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md"
       ],
       "protected_contracts": [
         "No new generic analytics domain is created.",
@@ -1436,7 +1439,7 @@
         "Owner read-model redesign already completed by prior tasks."
       ],
       "context_refs": [
-        "docs/plan/active/2026-09-09-system-wide-vnext-model-convergence-implementation.md",
+        "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md",
         "docs/architecture/adr/ADR-111-zero-legacy-data-destructive-cutover-policy.md"
       ],
       "protected_contracts": [
@@ -1489,7 +1492,7 @@
         "Interface splitting reserved for AI-9611."
       ],
       "context_refs": [
-        "docs/plan/active/2026-09-09-ai-vnext-model-convergence.md",
+        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md",
         "docs/architecture/adr/ADR-111-zero-legacy-data-destructive-cutover-policy.md"
       ],
       "protected_contracts": [
@@ -1543,7 +1546,7 @@
         "Changing owner-domain contracts."
       ],
       "context_refs": [
-        "docs/plan/active/2026-09-09-ai-vnext-model-convergence.md"
+        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"
       ],
       "protected_contracts": [
         "Capability splits follow real consumer boundaries and do not duplicate runtime ownership."
@@ -1594,7 +1597,7 @@
         "Unrelated model/provider experimentation."
       ],
       "context_refs": [
-        "docs/plan/active/2026-09-09-ai-vnext-model-convergence.md"
+        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"
       ],
       "protected_contracts": [
         "P0/P1/P2 findings must be repaired before closure.",
@@ -1710,7 +1713,7 @@
         "Changing surviving owner semantics."
       ],
       "context_refs": [
-        "docs/plan/active/2026-09-09-system-wide-vnext-model-convergence-implementation.md",
+        "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md",
         "docs/architecture/adr/ADR-111-zero-legacy-data-destructive-cutover-policy.md",
         "docs/analysis/2026-09-19-clean-2601-whole-schema-sweep-evidence.md"
       ],
@@ -1767,7 +1770,7 @@
         "Reopening accepted architecture without evidence."
       ],
       "context_refs": [
-        "docs/plan/active/2026-09-09-system-wide-vnext-model-convergence-implementation.md"
+        "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md"
       ],
       "protected_contracts": [
         "Every exception requires explicit owner, reason and retire-by; permanent exceptions require architecture justification."
@@ -1812,7 +1815,7 @@
         "Feature expansion or unrelated polish."
       ],
       "context_refs": [
-        "docs/plan/active/2026-09-09-system-wide-vnext-model-convergence-implementation.md"
+        "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md"
       ],
       "protected_contracts": [
         "Green build alone does not close behavioral findings.",
@@ -1861,7 +1864,7 @@
         "Unrelated optimization or feature changes unless validation finds a blocker."
       ],
       "context_refs": [
-        "docs/plan/active/2026-09-09-system-wide-vnext-model-convergence-implementation.md"
+        "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md"
       ],
       "protected_contracts": [
         "Validation failures are repaired at root cause and rerun; gates are not weakened or skipped."
@@ -1913,8 +1916,8 @@
         "New roadmap work."
       ],
       "context_refs": [
-        "docs/plan/active/2026-09-09-system-wide-vnext-model-convergence-implementation.md",
-        "docs/plan/active/2026-09-09-ai-vnext-model-convergence.md"
+        "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md",
+        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"
       ],
       "protected_contracts": [
         "Documentation must describe actual code, not aspirational target state.",

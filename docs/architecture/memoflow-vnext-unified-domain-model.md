@@ -2,10 +2,12 @@
 tags: [architecture, vnext, domain-model, north-star]
 description: MemoFlow 全产品 vNext 统一领域模型与依赖方向
 created: 2026-09-09T00:31:00+08:00
-updated: 2026-09-09T00:31:00+08:00
+updated: 2026-09-19T00:00:00+00:00
 ---
 
 # MemoFlow vNext Unified Domain Model
+
+> **Current as-built closure（2026-09-19）：** 本图描述已集成的 owner topology，而不是未实施的目标架构。Routine、Planner/Scheduler、Notification、Home composition、AI owner ports、V3 portability、Account/Auth、Knowledge projection 与 legacy retirement 均以 accepted exact-head code/verification 为当前真值；未来扩展只在对应模块的 future/non-goal 段落中表达。
 
 ## 1. North Star
 

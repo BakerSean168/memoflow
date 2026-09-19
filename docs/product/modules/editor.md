@@ -31,7 +31,7 @@ updated: 2026-09-11T00:00:00
 - app-vue 顶层 `editor` locale 与设置页退役 Editor 分组文案已删除；用户 preferences 中残留的 `editor` schema 也直接删除，不再保留 portable 兼容。
 - Web 与 Desktop 预览统一使用关闭原始 HTML 并经过 sanitizer 的安全 Markdown 渲染边界。
 
-## 3. 已采纳目标态
+## 3. 当前保留边界与历史收缩
 
 ### 保留
 
@@ -67,7 +67,7 @@ Web 不直接修改 read model。用户确认新笔记后，Repository 服务通
 ## 5. 当前差距
 
 - Mobile 尚未实现基于服务端 GitHub 投影的浏览、搜索和预览。
-- 统一 Agent Host 的完整 Capability、Context、Tool Policy 与 Proposal contract 由 ADR-035 及对应 active plan 继续收口。
+- AI proposal/capability/context contract 由当前 AI owner ports 与 ADR-035 边界承载；本模块不依赖未完成的 active plan。
 - 真实 GitHub fixture E2E 与完整 Web/Desktop prod-like 验收仍受外部凭据和当前 Docker 存储容量限制。
 
 ## 6. 风险点

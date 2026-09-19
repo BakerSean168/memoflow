@@ -13,7 +13,7 @@ updated: 2026-09-08T23:26:00+08:00
 
 # ADR-092: Settings Hub 与 Preference Ownership Boundary
 
-**状态：** 已采纳（待实施）
+**状态：** 已采纳并实施（SETTING-9203～9209，2026-09-18）
 **日期：** 2026-09-08
 **影响范围：** Setting、Account、Notification、AI、Repository/Knowledge、Desktop、Data Portability、Web/Mobile Settings UI
 

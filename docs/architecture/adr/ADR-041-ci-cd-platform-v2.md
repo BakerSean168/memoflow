@@ -176,7 +176,7 @@ audit，以及一次 production promotion dry-run，才能把单次 fresh-run �
 ## References
 
 - [CI/CD Platform V2 目标架构](../ci-cd-platform-v2.md)
-- [CI/CD Platform V2 一次性重构计划](../../plan/active/2026-08-05-ci-cd-platform-v2-refactor.md)
+- [CI/CD Platform V2 一次性重构计划](../../plan/archive/2026-08-05-ci-cd-platform-v2-refactor.md)
 - [ADR-040: Test System V2](./ADR-040-test-system-v2.md)
 - [CI 测试与反馈性能](../../test/ci-validation.md)
 - [Release 工作流](../../guides/development/release-workflow.md)

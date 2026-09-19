@@ -12,7 +12,7 @@ updated: 2026-09-09T00:00:00+08:00
 
 # ADR-100: Product Time Context 与 Timezone-aware Calendar
 
-**状态：** 已采纳（待实施）
+**状态：** 已采纳并实施（TIME-1201～1206，2026-09-17）
 **日期：** 2026-09-09
 **修订：** ADR-037 的 `TimeStyle.timeZone` 实现边界；ADR-093 的 UserTimeContext consumer contract
 

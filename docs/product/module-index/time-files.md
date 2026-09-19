@@ -5,7 +5,7 @@ tags:
   - time
 description: Time foundation 当前生产文件与 vNext 文档索引
 created: 2026-09-09T00:00:00+08:00
-updated: 2026-09-09T00:00:00+08:00
+updated: 2026-09-19T00:00:00+00:00
 ---
 
 # Time Foundation 文件索引
@@ -22,7 +22,7 @@ updated: 2026-09-09T00:00:00+08:00
 | format                     | `packages/time/src/format/**`                                    |
 | input                      | `packages/time/src/input/input.ts`                               |
 | timezone/context           | `packages/time/src/timezone/time-zone.ts`                        |
-| legacy style adapter       | `packages/time/src/style/legacy-time-style-adapter.ts`           |
+| presentation style         | `packages/time/src/style/default-style.ts`                       |
 | engine                     | `packages/time/src/engine/date-fns-engine.ts`                    |
 | recurrence                 | `packages/time/src/recurrence/**`                                |
 | governance                 | `tools/governance/time-registry.json`                            |

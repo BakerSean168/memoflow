@@ -5,12 +5,12 @@ tags:
   - goal
 description: Goal vNext 当前功能、产品语义与模块边界
 created: 2026-06-02T00:00:00
-updated: 2026-09-12T21:49:00+08:00
+updated: 2026-09-19T00:00:00+00:00
 ---
 
 # Goal 模块说明
 
-> **当前收敛状态（2026-09-12）：** GOAL-7202~7209 已落地：Goal identity/lifecycle、planning time、KR Measurement V3、Task context 三态、Shared Relation + stable Knowledge identity、Goal Workspace、durable GoalPlanDraft V2、property-chip create/edit、五精度 Target picker 与 React/Mobile parity 均已实现。GOAL-7210 已完成 destructive truth cleanup：旧 GoalTemplate/standalone AI-KR 轨道已删除，anti-resurrection governance 已扩展到 AI/persistence/portability surfaces，同时 Task deadline 语义保持不变。剩余 `GOAL-7211` 只负责最终五层审查、exact-head CI/build 与归档交付。
+> **当前收敛状态（2026-09-19）：** GOAL-7202~7211 已完成：Goal identity/lifecycle、planning time、KR Measurement V3、Task context 三态、Shared Relation + stable Knowledge identity、Goal Workspace、durable GoalPlanDraft V2、property-chip create/edit、五精度 Target picker、React/Mobile parity、destructive truth cleanup 与最终五层审查/归档均已闭环。旧 GoalTemplate/standalone AI-KR 轨道不得恢复，Task deadline 语义保持不变。详见 [Goal vNext archived plan](../../plan/archive/2026-09-08-goal-vnext-model-convergence.md)。
 
 ## 1. 功能定位
 

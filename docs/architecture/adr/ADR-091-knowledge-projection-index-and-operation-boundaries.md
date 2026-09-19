@@ -14,7 +14,7 @@ updated: 2026-09-08T21:25:00+08:00
 
 # ADR-091: Knowledge Projection、AI Index 与 Operation Boundary
 
-**状态：** 已采纳（待实施）
+**状态：** 已采纳并实施（KNOW-2003，2026-09-19）
 **日期：** 2026-09-08
 **影响范围：** Repository/Knowledge、AI、Web confirmed create、GitHub webhook/reconciliation、Application Ports、Operations、Legacy Repository tables
 

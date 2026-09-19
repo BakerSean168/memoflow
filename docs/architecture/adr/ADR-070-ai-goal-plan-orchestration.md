@@ -17,7 +17,7 @@ updated: 2026-09-09T00:00:00+08:00
 
 > **2026-09-09 AI model convergence follow-up：** 本 ADR 的 GoalPlanDraft V2、多实体 `draftRef`/mapping、HITL 与 owner application port 原则继续作为 Goal planning 真值；stable `draftRef` idempotency、Task canonical schedule、Knowledge stable document identity、Routine target vocabulary 与 execution-record boundary 由 ADR-098/099 继续收敛。
 
-**状态：** 已采纳，待实施
+**状态：** 已采纳并实施（GOAL-7208，AI-9608，2026-09-19）
 **日期：** 2026-09-08
 **影响范围：** AI/Mastra workflow、Goal、Task、Repository/Knowledge、Relation、Labels、Reminder、contracts、Web/Desktop AI preview
 **修订：** ADR-052 的 GoalPlanDraft schema 与 ApplyGoalPlan 范围；ADR-052 的 durable workflow / HITL / owner application port 原则继续有效

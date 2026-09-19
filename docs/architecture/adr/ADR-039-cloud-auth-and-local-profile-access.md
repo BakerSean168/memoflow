@@ -65,7 +65,7 @@ MemoFlow Desktop 同时存在本地 Profile 访问、访客身份、离线恢复
 
 ## References
 
-- [Desktop Profile 与云端认证一次性重写](../../plan/active/2026-08-02-desktop-profile-and-cloud-auth-rewrite.md)
+- [Desktop Profile 与云端认证一次性重写](../../plan/archive/2026-08-02-desktop-profile-and-cloud-auth-rewrite.md)
 - [ADR-036](./ADR-036-auth-account-boundary-and-verification.md)
 - [Better Auth](https://www.better-auth.com/)
 

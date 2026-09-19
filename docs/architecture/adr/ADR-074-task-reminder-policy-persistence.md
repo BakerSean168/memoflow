@@ -11,7 +11,7 @@ updated: 2026-09-08T19:15:00+08:00
 
 # ADR-074: Task Reminder Policy 与 Persistence Parity
 
-**状态：** 已采纳（实施中）
+**状态：** 已采纳并实施（TASK-7304，2026-09-19）
 **日期：** 2026-09-08
 **关联：** ADR-061、ADR-062、ADR-063
 

@@ -8,7 +8,7 @@ tags:
   - vnext
 description: Knowledge Repository vNext North Star：KnowledgeSpace、Local/Remote Binding、稳定文档身份、Projection、AI Index 与可靠写入边界
 created: 2026-09-08T21:25:00+08:00
-updated: 2026-09-11T00:02:00+08:00
+updated: 2026-09-19T00:00:00+00:00
 ---
 
 # Knowledge Repository vNext
@@ -25,7 +25,7 @@ updated: 2026-09-11T00:02:00+08:00
 
 Repository vNext 不重新建立数据库式 Repository/Folder/Resource 编辑器，而是在已经完成的 ADR-034 local-first 架构上，把绑定、健康状态、同步、文档身份、投影、AI 索引和可靠操作彻底分轨。
 
-> **实施 checkpoint（2026-09-11）：** ADR-089 已完整实施。Local Vault 使用 profile-owned binding + `LocalVaultHealth`；Remote 使用 `KnowledgeRemoteBinding + RemoteRepositoryObservation + RemoteHistoryFence + KnowledgeProjectionCheckpoint`，普通 list 不再调用 Provider，显式 refresh/security preflight 才观察 GitHub。Desktop Local/Remote 通过同一 `KnowledgeSpaceId` 配对，Provider loss 不会删除 binding。KNOW-2002 已实施 ADR-090：confirmed create 与显式 CAS metadata adoption 使用 `memoflow_id: kdoc_<opaque UUID>`，unmanaged Markdown 不会被静默改写，rename/move 与 AI/Local Vault/PowerSync 都复用 stable ID。ADR-091 single projection engine 仍未实施，本文对应章节仍是下一阶段目标态。
+> **当前 implementation checkpoint（2026-09-19）：** ADR-089、KNOW-2002/ADR-090 与 KNOW-2003/ADR-091 均已实施。Local Vault 使用 profile-owned binding + `LocalVaultHealth`；Remote 使用 `KnowledgeRemoteBinding + RemoteRepositoryObservation + RemoteHistoryFence + KnowledgeProjectionCheckpoint`，普通 list 不再调用 Provider，显式 refresh/security preflight 才观察 GitHub。Desktop Local/Remote 通过同一 `KnowledgeSpaceId` 配对，Provider loss 不会删除 binding。Confirmed create 与显式 CAS metadata adoption 使用 `memoflow_id: kdoc_<opaque UUID>`，unmanaged Markdown 不会被静默改写，rename/move 与 AI/Local Vault/PowerSync 都复用 stable ID。`KnowledgeProjectionEngine` 统一 confirmed create、webhook 与 reconciliation projection apply；本文的历史 target 讨论不代表未完成代码。
 
 ## 2. Product Constitution
 
@@ -512,7 +512,7 @@ KnowledgeOperationsPort
 
 Webhook ingress、projection worker 是内部 integration capability，不作为普通 UI application surface。
 
-## 16. Legacy Repository Retirement
+## 16. Legacy Repository Retirement (completed)
 
 以下旧模型不回归运行时：
 
@@ -527,7 +527,7 @@ RepositoryExplorer
 RepositoryStatistic
 ```
 
-ADR-111 下不再作为 data-portability / historical backup boundary 保留。current consumers 清零后直接删除：
+ADR-111 下不再作为 data-portability / historical backup boundary 保留；current consumers 已清零并直接删除：
 
 ```text
 portable export/import
@@ -597,7 +597,7 @@ Repository Aggregate
 - silent bulk mutation 全 Vault frontmatter；
 - 把 GitHub private repo 宣称为 E2E encrypted storage；
 - 立即重命名 package；
-- 立即删除 legacy Prisma backup tables。
+- 保留或恢复 legacy Prisma backup tables。
 
 ## 20. Design package and implementation gate
 
@@ -608,4 +608,4 @@ Repository Aggregate
 3. [ADR-090](../architecture/adr/ADR-090-stable-knowledge-document-identity.md)
 4. [ADR-091](../architecture/adr/ADR-091-knowledge-projection-index-and-operation-boundaries.md)
 
-**当前 checkpoint：** ADR-089 与 ADR-090/KNOW-2002 已实施；ADR-091/KNOW-2003 是下一阶段工作。Goal/Task durable relation 仍等待后续 ticket 的 stable `KnowledgeDocumentRef` 接入。
+**当前 checkpoint：** ADR-089、ADR-090/KNOW-2002 与 ADR-091/KNOW-2003 已实施；Goal/Task durable relation 使用 stable `KnowledgeDocumentRef`，并通过 Shared Relation owner boundary 接入。真实 GitHub fixture E2E 与 Mobile 只读 surface 仍是外部凭据/后续产品覆盖项，不是 projection-engine convergence blocker。

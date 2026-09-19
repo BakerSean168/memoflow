@@ -57,9 +57,9 @@ updated: 2026-09-17T22:45:00+08:00
 
 详细文件清单见 [日程 / Scheduler 文件索引](../module-index/schedule-files.md)。
 
-## 6. 当前问题
+## 6. 当前差距
 
-- Planner 仍需继续完善跨 owner projection 的交互一致性与完整 acceptance journey。
+- 跨 owner projection 的交互一致性与完整 acceptance journey 仍是产品体验改进项，不改变当前 owner/persistence contract。
 - Scheduler 目前仍是自研 Temporal Engine；是否采用 pg-boss 尚未决定，必须通过 `POC-6401` 比较 claim/retry/DLQ/heartbeat/transaction enqueue/multi-worker/PowerSync 等约束。
 - 数据库与 contracts 仍保留历史 `schedule_*` 命名；这不等于 package ownership 仍混合。若未来重命名，应独立决策，避免把 schema churn 与 runtime 行为变化混在一起。
 
