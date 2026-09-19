@@ -16,6 +16,9 @@
       "@memoflow/database": [
         "../database/src/index.ts"
       ],
+      "@memoflow/database/prisma": [
+        "../database/src/generated/prisma/client.d.ts"
+      ],
       "@memoflow/http-client": [
         "../http-client/src/index.ts"
       ],
