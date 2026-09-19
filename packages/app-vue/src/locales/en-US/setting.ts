@@ -191,8 +191,6 @@ export default {
     "maxImageWidth": "Max Image Width",
     "maxImageWidthDescription": "Images wider than this will be automatically scaled down",
     "maxImageWidthPlaceholder": "Select width",
-    "resourceManagement": "Resource Management",
-    "resourceStorageInfo": "Resources (images, audio, video, etc.) are stored in the {dir} directory of the repository",
     "embedModeLink": "Link Reference (Recommended)",
     "embedModeBase64": "Base64 Embed",
     "embedModeAuto": "Auto (Embed small images)",

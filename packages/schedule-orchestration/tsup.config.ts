@@ -38,11 +38,6 @@ export default {
       '../../packages/reminder/dist/*/index.d.ts',
       '../../packages/reminder/dist/*.d.ts',
     ],
-    '@memoflow/schedule': ['../../packages/schedule/dist/index.d.ts'],
-    '@memoflow/schedule/*': [
-      '../../packages/schedule/dist/*/index.d.ts',
-      '../../packages/schedule/dist/*.d.ts',
-    ],
     '@memoflow/task': ['../../packages/task/dist/index.d.ts'],
     '@memoflow/task/schedule-execution': [
       '../../packages/task/dist/schedule-execution/index.d.ts',

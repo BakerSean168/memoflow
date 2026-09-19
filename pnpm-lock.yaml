@@ -1049,9 +1049,6 @@ importers:
 
   packages/account:
     dependencies:
-      '@memoflow/cloud-auth':
-        specifier: workspace:*
-        version: link:../cloud-auth
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -1067,18 +1064,9 @@ importers:
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client
-      '@memoflow/notification':
-        specifier: workspace:*
-        version: link:../notification
       '@memoflow/patterns':
         specifier: workspace:*
         version: link:../patterns
-      '@memoflow/reminder':
-        specifier: workspace:*
-        version: link:../reminder
-      '@memoflow/repository':
-        specifier: workspace:*
-        version: link:../repository
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time
@@ -1095,6 +1083,15 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
+      '@memoflow/notification':
+        specifier: workspace:*
+        version: link:../notification
+      '@memoflow/reminder':
+        specifier: workspace:*
+        version: link:../reminder
+      '@memoflow/repository':
+        specifier: workspace:*
+        version: link:../repository
       '@types/express':
         specifier: ^5.0.0
         version: 5.0.6
@@ -1131,12 +1128,6 @@ importers:
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client
-      '@memoflow/repository':
-        specifier: workspace:*
-        version: link:../repository
-      '@memoflow/setting':
-        specifier: workspace:*
-        version: link:../setting
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time
@@ -1186,15 +1177,9 @@ importers:
       '@memoflow/notification':
         specifier: workspace:*
         version: link:../notification
-      '@memoflow/repository':
-        specifier: workspace:*
-        version: link:../repository
       '@memoflow/schedule':
         specifier: workspace:*
         version: link:../schedule
-      '@memoflow/scheduler':
-        specifier: workspace:*
-        version: link:../scheduler
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../setting
@@ -1253,9 +1238,6 @@ importers:
       '@memoflow/assets':
         specifier: workspace:*
         version: link:../assets
-      '@memoflow/cloud-auth':
-        specifier: workspace:*
-        version: link:../cloud-auth
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -1454,42 +1436,18 @@ importers:
 
   packages/data-portability:
     dependencies:
-      '@memoflow/ai':
-        specifier: workspace:*
-        version: link:../ai
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
       '@memoflow/database':
         specifier: workspace:*
         version: link:../database
-      '@memoflow/domain-shared':
-        specifier: workspace:*
-        version: link:../domain-shared
-      '@memoflow/goal':
-        specifier: workspace:*
-        version: link:../goal
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client
-      '@memoflow/notification':
-        specifier: workspace:*
-        version: link:../notification
-      '@memoflow/repository':
-        specifier: workspace:*
-        version: link:../repository
-      '@memoflow/schedule':
-        specifier: workspace:*
-        version: link:../schedule
-      '@memoflow/setting':
-        specifier: workspace:*
-        version: link:../setting
-      '@memoflow/task':
-        specifier: workspace:*
-        version: link:../task
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
@@ -1580,12 +1538,6 @@ importers:
       '@memoflow/patterns':
         specifier: workspace:*
         version: link:../patterns
-      '@memoflow/schedule':
-        specifier: workspace:*
-        version: link:../schedule
-      '@memoflow/task':
-        specifier: workspace:*
-        version: link:../task
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time
@@ -1720,12 +1672,6 @@ importers:
       '@memoflow/patterns':
         specifier: workspace:*
         version: link:../patterns
-      '@memoflow/powersync-schema':
-        specifier: workspace:*
-        version: link:../powersync-schema
-      '@memoflow/scheduler':
-        specifier: workspace:*
-        version: link:../scheduler
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
@@ -1736,6 +1682,12 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
+      '@memoflow/powersync-schema':
+        specifier: workspace:*
+        version: link:../powersync-schema
+      '@memoflow/scheduler':
+        specifier: workspace:*
+        version: link:../scheduler
       '@types/express':
         specifier: ^5.0.0
         version: 5.0.6
@@ -1814,12 +1766,6 @@ importers:
       '@memoflow/database':
         specifier: workspace:*
         version: link:../database
-      '@memoflow/patterns':
-        specifier: workspace:*
-        version: link:../patterns
-      '@memoflow/schedule':
-        specifier: workspace:*
-        version: link:../schedule
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time
@@ -1928,9 +1874,6 @@ importers:
       '@memoflow/reminder':
         specifier: workspace:*
         version: link:../reminder
-      '@memoflow/schedule':
-        specifier: workspace:*
-        version: link:../schedule
       '@memoflow/scheduler':
         specifier: workspace:*
         version: link:../scheduler
@@ -2048,9 +1991,6 @@ importers:
       '@memoflow/patterns':
         specifier: workspace:*
         version: link:../patterns
-      '@memoflow/schedule':
-        specifier: workspace:*
-        version: link:../schedule
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time

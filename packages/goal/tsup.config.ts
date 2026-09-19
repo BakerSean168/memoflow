@@ -23,7 +23,6 @@ export default defineConfig({
     '@memoflow/database',
     '@memoflow/domain-shared',
     '@memoflow/domain-shared/shared',
-    '@memoflow/schedule',
     '@memoflow/patterns',
     'express',
     'zod',

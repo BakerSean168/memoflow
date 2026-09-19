@@ -297,7 +297,6 @@ export default {
         fetchResource: 'Fetch Note',
         findRelatedNotes: 'Find Related Notes',
         updateKnowledgeNote: 'Update Knowledge Note',
-        reindexResource: 'Reindex Resource',
       },
       diagnosticWorkflowStepTiming: 'Workflow step timing',
       diagnosticWorkflowStepStarted: 'Workflow step started',

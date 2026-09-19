@@ -12,8 +12,6 @@ export default {
   "duplicate": "复制",
   "archive": "归档",
   "restore": "恢复",
-  "editFolder": "编辑文件夹",
-  "deleteFolder": "删除文件夹",
   "createGoal": "创建目标",
   "addRecord": "添加记录",
   "pause": "暂停",

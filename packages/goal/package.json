@@ -51,8 +51,6 @@
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",
     "@memoflow/patterns": "workspace:*",
-    "@memoflow/schedule": "workspace:*",
-    "@memoflow/task": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/utils": "workspace:*",
     "express": "^5.2.1",

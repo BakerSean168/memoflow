@@ -39,13 +39,12 @@
     "express": "^5.2.1",
     "tslib": "^2.3.0",
     "zod": "^4.4.3",
-    "@memoflow/time": "workspace:*",
-    "@memoflow/cloud-auth": "workspace:*",
-    "@memoflow/reminder": "workspace:*",
-    "@memoflow/notification": "workspace:*",
-    "@memoflow/repository": "workspace:*"
+    "@memoflow/time": "workspace:*"
   },
   "devDependencies": {
+    "@memoflow/notification": "workspace:*",
+    "@memoflow/reminder": "workspace:*",
+    "@memoflow/repository": "workspace:*",
     "@types/express": "^5.0.0"
   }
 }

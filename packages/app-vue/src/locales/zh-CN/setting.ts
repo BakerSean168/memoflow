@@ -191,8 +191,6 @@ export default {
     "maxImageWidth": "最大图片宽度",
     "maxImageWidthDescription": "超过此宽度的图片将自动缩放",
     "maxImageWidthPlaceholder": "选择宽度",
-    "resourceManagement": "资源管理",
-    "resourceStorageInfo": "资源（图片、音频、视频等）存储在仓储的 {dir} 目录下",
     "embedModeLink": "链接引用 (推荐)",
     "embedModeBase64": "Base64 嵌入",
     "embedModeAuto": "自动 (小图片嵌入)",
