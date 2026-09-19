@@ -15,7 +15,7 @@ updated: 2026-09-10T15:45:00+09:00
 
 # ADR-095: Preference Persistence、Sync、Migration 与 Portability
 
-**状态：** 已采纳并完成 Setting 主体实施（SETTING-9202~9209；PORT-1603 负责跨模块 V2 envelope 最终退休）
+**状态：** 已采纳并完成 Setting 主体实施（SETTING-9202~9209）；PORT-1611 已完成跨模块 V3-only cutover
 **日期：** 2026-09-08
 **影响范围：** Setting/Preferences、Database、PowerSync、HTTP/IPC、Data Portability、Account、Notification、Desktop
 
@@ -400,7 +400,7 @@ payload = UserPreferenceProfile
 
 该 capability 通过 API/Electron Setting host handle 暴露给 Data Portability composition root。Data Portability 只负责编排、版本检查、引用映射与 receipt 聚合，不读取 Setting repository 内部模型。
 
-完整 Data Portability V3 cutover 仍需其他 surviving owner capabilities；在此之前不得为了提前删除 V2 而减少当前 full-backup 的业务覆盖。最终 V2 删除点由 PORT-1603 管理。
+完整 Data Portability V3 cutover 已由 PORT-1611 完成。Setting 只提供 `preferences@3` owner capability；跨模块 V3 registry 负责其余 owner 的编排，旧 V1/V2 backup 不受支持。
 
 ## 14. Existing data policy
 
@@ -439,29 +439,20 @@ Device Notification 不再通过这个 cloud event 更新本地样式。
 
 ## 17. Data Portability boundary
 
-当前 PortableUserData 已经把：
+PORT-1611 已完成 Data Portability 的 V3-only destructive cutover。当前
+Setting 只提供 `preferences@3` owner capability；Data Portability 只编排
+owner capability registry，不再维护 `PortableUserData`、`ExportUserData`、
+Setting importer 或跨模块 persistence projection。
 
 ```text
-settings
-notificationPreference
-userReminderPreference
-...
+PortableBackupEnvelopeV3
+  -> preferences@3 (Setting owner)
+  -> account-profile@3 (Account owner, depends on preferences)
+  -> remaining owner capabilities in deterministic registry order
 ```
 
-分开，这个方向保留并强化。
-
-目标 Data Portability：
-
-```text
-ExportUserData
-  -> Preference owner projection
-  -> Notification owner projection
-  -> Account owner projection
-  -> Knowledge owner projection
-  -> ...
-```
-
-Import 也调用 owner importer，不让 Setting importer 代写别的模块表。
+所有 import 都经过 owner schema/version validation；Setting importer 不代写其他
+模块表。旧 V1/V2 backup 在 product boundary fail closed 且没有 parser/migrator。
 
 ## 18. Rollback / containment
 

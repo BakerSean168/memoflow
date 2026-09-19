@@ -60,8 +60,8 @@ updated: 2026-09-14T11:48:17+08:00
 | [`packages/contracts/src/modules/setting/preferences/portable-v3.ts`](../../../packages/contracts/src/modules/setting/preferences/portable-v3.ts) | preference V3 document/receipt |
 | [`packages/contracts/src/modules/setting/protocol/setting-rpc-map.ts`](../../../packages/contracts/src/modules/setting/protocol/setting-rpc-map.ts) | seven-channel canonical RPC map |
 | [`packages/contracts/src/modules/setting/protocol/setting-event-map.ts`](../../../packages/contracts/src/modules/setting/protocol/setting-event-map.ts) | surviving Setting event map |
-| [`packages/data-portability/src/server/application/use-cases/projections/setting.projection.ts`](../../../packages/data-portability/src/server/application/use-cases/projections/setting.projection.ts) | temporary V2 envelope adapter backed by canonical preferences |
-| [`packages/data-portability/src/server/application/use-cases/importers/settings.importer.ts`](../../../packages/data-portability/src/server/application/use-cases/importers/settings.importer.ts) | V2 envelope import adapter writing canonical namespace records |
+| [`packages/contracts/src/modules/data-portability/api/portable-v3.dto.ts`](../../../packages/contracts/src/modules/data-portability/api/portable-v3.dto.ts) | V3 transport envelope/receipt contract |
+| [`packages/data-portability/src/server/application/portable-capability-coordinator.ts`](../../../packages/data-portability/src/server/application/portable-capability-coordinator.ts) | owner-driven V3 orchestration |
 
 ## 关键测试
 
@@ -72,7 +72,7 @@ updated: 2026-09-14T11:48:17+08:00
 | [`packages/setting/src/electron/index-lifecycle.spec.ts`](../../../packages/setting/src/electron/index-lifecycle.spec.ts) | canonical IPC + lifecycle |
 | [`packages/setting/src/server/preferences/user-preference-service.spec.ts`](../../../packages/setting/src/server/preferences/user-preference-service.spec.ts) | CAS/default/reset behavior |
 | [`packages/setting/src/server/preferences/preference-portability.spec.ts`](../../../packages/setting/src/server/preferences/preference-portability.spec.ts) | `preferences@3` behavior |
-| [`packages/data-portability/src/server/infrastructure/powersync/__tests__/powersync-round-trip.test.ts`](../../../packages/data-portability/src/server/infrastructure/powersync/__tests__/powersync-round-trip.test.ts) | full backup round-trip through canonical Setting records |
+| [`packages/data-portability/src/server/application/use-cases/__tests__/portable-capability-coordinator.test.ts`](../../../packages/data-portability/src/server/application/use-cases/__tests__/portable-capability-coordinator.test.ts) | V3 dependency, dry-run, reference and preflight behavior |
 
 ## Canonical / execution truth
 

@@ -180,12 +180,6 @@ updated: 2026-09-18T17:21:00+08:00
 | `retired` | `packages/contracts/src/shared/dtos/shared-dtos-dual.surface.spec.ts` |
 | `retired` | `packages/contracts/src/shared/dual-registry.surface.spec.ts` |
 | `retired` | `packages/data-portability/src/application-client/data-portability-client-port-dual.surface.spec.ts` |
-| `retired` | `packages/data-portability/src/server/application/use-cases/projections/goal-editor-resolve-ref-dual.surface.spec.ts` |
-| `keep_boundary` | `packages/data-portability/src/server/application/use-cases/projections/parse-json-field-keep-boundary.surface.spec.ts` |
-| `retired` | `packages/data-portability/src/server/application/use-cases/projections/resolve-export-ref-dual.surface.spec.ts` |
-| `keep_boundary` | `packages/data-portability/src/server/application/use-cases/projections/to-boolean-keep-boundary.surface.spec.ts` |
-| `keep_boundary` | `packages/data-portability/src/server/application/use-cases/projections/to-date-keep-boundary.surface.spec.ts` |
-| `keep_boundary` | `packages/data-portability/src/server/application/use-cases/projections/to-timestamp-keep-boundary.surface.spec.ts` |
 | `retired` | `packages/goal/src/__tests__/dual-registry.surface.spec.ts` |
 | `keep_boundary` | `packages/goal/src/api/routes/goal-parse-number-string-array-keep-boundary.surface.spec.ts` |
 | `retired` | `packages/goal/src/api/routes/parse-boolean-dual.surface.spec.ts` |

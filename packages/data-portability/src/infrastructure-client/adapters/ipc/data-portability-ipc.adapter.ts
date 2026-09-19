@@ -11,16 +11,18 @@ import type { IResultIpcClient, IDataPortabilityApiClient } from '../types';
 import type {
   ExportServerHeldDataDisclosureReq,
   ExportServerHeldDataDisclosureRes,
-  ExportUserDataReq,
-  ExportUserDataRes,
-  ImportUserDataReq,
-  ImportUserDataRes,
+  ExportPortableDataV3Req,
+  ExportPortableDataV3Res,
+  PortableDataV3ImportReq,
+  PortableDataV3ImportRes,
 } from '@memoflow/contracts/data-portability';
 
 export class DataPortabilityIpcAdapter implements IDataPortabilityApiClient {
   constructor(private readonly ipcClient: IResultIpcClient) {}
 
-  async exportUserData(data: ExportUserDataReq): Promise<Result<ExportUserDataRes>> {
+  async exportPortableDataV3(
+    data: ExportPortableDataV3Req,
+  ): Promise<Result<ExportPortableDataV3Res>> {
     return this.ipcClient.invoke(DataPortabilityChannels.EXPORT, data);
   }
 
@@ -33,7 +35,15 @@ export class DataPortabilityIpcAdapter implements IDataPortabilityApiClient {
     });
   }
 
-  async importUserData(data: ImportUserDataReq): Promise<Result<ImportUserDataRes>> {
-    return this.ipcClient.invoke(DataPortabilityChannels.IMPORT, data);
+  async dryRunPortableDataV3(
+    data: PortableDataV3ImportReq,
+  ): Promise<Result<PortableDataV3ImportRes>> {
+    return this.ipcClient.invoke(DataPortabilityChannels.DRY_RUN, data);
+  }
+
+  async applyPortableDataV3(
+    data: PortableDataV3ImportReq,
+  ): Promise<Result<PortableDataV3ImportRes>> {
+    return this.ipcClient.invoke(DataPortabilityChannels.APPLY, data);
   }
 }

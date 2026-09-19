@@ -75,9 +75,10 @@ describe('Task vNext simplified domain surface', () => {
       'utf8',
     );
     const portableTask = readFileSync(
-      resolve(taskRoot, '../contracts/src/modules/data-portability/dtos/portable-tasks.dto.ts'),
+      resolve(taskRoot, 'src/server/application/task-portability.ts'),
       'utf8',
     );
+    const portableTaskContract = readFileSync(resolve(contractsTask, 'portable-v3.ts'), 'utf8');
 
     for (const source of [
       templateState,
@@ -85,6 +86,7 @@ describe('Task vNext simplified domain surface', () => {
       clientContract,
       responseSchema,
       portableTask,
+      portableTaskContract,
     ]) {
       expect(source).not.toMatch(/lastGeneratedDate|generateAheadDays/);
     }

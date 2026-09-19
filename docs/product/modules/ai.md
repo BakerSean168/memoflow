@@ -80,7 +80,7 @@ Planner 工具读取 Calendar/Task owner projection；Notification 工具读取 
 
 API 与 Desktop 各自在 composition root 注入 Goal/Task/Reminder owner mutation ports、Routine command port、Planner read port、Notification read port、Repository/Knowledge ports 与 LabelService。AI package 不 deep-import Prisma/PowerSync provider 实现，也不创建第二套业务 repository。
 
-HTTP 与 Electron IPC 共用相同的 runtime failure projection：capability、configuration、provider availability、model availability、timeout、cancel 与 validation 均以稳定 code 对外；provider/Mastra 原始错误只留在内部诊断边界。Data Portability 的 owner-driven V3 capability `ai-conversations@3` 只导出/导入 Conversation shell 的 `name` 与 canonical `status`；不把 Mastra transcript、provider secret、execution record 或 AI index cache 伪装成第二份产品 truth。当前 V2 backup path 仍暂时携带同一 shell metadata，仅作为 PORT-1611 切除产品 surface 前的过渡实现，PORT-1611 尚未完成。
+HTTP 与 Electron IPC 共用相同的 runtime failure projection：capability、configuration、provider availability、model availability、timeout、cancel 与 validation 均以稳定 code 对外；provider/Mastra 原始错误只留在内部诊断边界。Data Portability 的 owner-driven V3 capability `ai-conversations@3` 只导出/导入 Conversation shell 的 `name` 与 canonical `status`；不把 Mastra transcript、provider secret、execution record 或 AI index cache 伪装成第二份产品 truth。PORT-1611 后旧 V1/V2 backup path 已删除，AI shell 只通过 owner V3 capability 参与 export/dry-run/apply。
 
 ## 8. 相关资产
 

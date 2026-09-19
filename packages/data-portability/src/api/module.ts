@@ -10,16 +10,16 @@
  * 它只负责把已装配好的 `DataPortabilityModuleInstance` 挂到 Express 路由上，
  * 并托管该实例的 start/dispose 生命周期。
  *
- * The host (apps/api) is responsible for composition: it selects the Prisma
- * adapters, builds the full export dependency set, the import store and the
- * server-held data disclosure application port, calls
- * `createDataPortabilityModule(...)`, and passes the resulting instance in
- * through `DataPortabilityApiModuleOptions`. The server-held disclosure port
- * is a transport-level route dependency carried as an explicit option (it is
+ * The host (apps/api) is responsible for composition: it registers the
+ * owner-provided V3 capabilities, creates the separate server-held data
+ * disclosure application port, calls `createDataPortabilityModule(...)`, and
+ * passes the resulting instance in through
+ * `DataPortabilityApiModuleOptions`. The server-held disclosure port is a
+ * transport-level route dependency carried as an explicit option (it is
  * host-created, never inferred here).
  *
- * 宿主（apps/api）负责组合：选择 Prisma 适配器、构建完整导出依赖集合、
- * 导入存储与 server-held data disclosure 应用 port、调用
+ * 宿主（apps/api）负责组合：注册 owner 提供的 V3 capability、创建独立的
+ * server-held data disclosure 应用 port、调用
  * `createDataPortabilityModule(...)`，再把组装结果通过
  * `DataPortabilityApiModuleOptions` 传入。server-held disclosure port 是
  * 路由层的传输依赖，作为显式选项携带（由宿主创建，绝不在本模块推断）。

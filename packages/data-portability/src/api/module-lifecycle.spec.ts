@@ -33,22 +33,33 @@ function createDisclosureApiStub(): ServerHeldDataDisclosureApplicationPort {
 
 function createFakeInstance() {
   const api = {
-    exportUserData: vi.fn().mockResolvedValue({
+    exportPortableDataV3: vi.fn().mockResolvedValue({
       fileName: 'export.json',
       content: '{}',
-      summary: { entityCounts: {}, cachedAttachmentBytes: 0, notes: [] },
+      summary: { capabilityKeys: [], warnings: [] },
     }),
-    importUserData: vi.fn().mockResolvedValue({
-      imported: 0,
-      errors: [],
-      summary: { entityCounts: {}, cachedAttachmentBytes: 0, notes: [] },
+    dryRunPortableDataV3: vi.fn().mockResolvedValue({
+      batchId: 'batch-1',
+      dryRun: true,
+      capabilities: [],
+      created: {},
+      updated: {},
+      skipped: {},
+      warnings: [],
+    }),
+    applyPortableDataV3: vi.fn().mockResolvedValue({
+      batchId: 'batch-1',
+      dryRun: false,
+      capabilities: [],
+      created: {},
+      updated: {},
+      skipped: {},
+      warnings: [],
     }),
   };
   const start = vi.fn();
   const dispose = vi.fn();
   const instance: DataPortabilityModuleInstance = {
-    exportDependencies: {} as never,
-    importStore: {} as never,
     useCases: {} as never,
     api,
     start,

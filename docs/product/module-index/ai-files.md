@@ -93,7 +93,7 @@ AI-9612 后，MemoFlow 的核心 AI execution runtime 已收敛为 **TypeScript 
 | [`packages/contracts/src/modules/ai/protocol/ai-rpc-map.ts`](../../../packages/contracts/src/modules/ai/protocol/ai-rpc-map.ts)                                     | AI RPC map                                           |
 | [`packages/database/prisma/schema/ai.prisma`](../../../packages/database/prisma/schema/ai.prisma)                                                                   | 当前 AI product persistence schema                   |
 | [`packages/powersync-schema/src/index.ts`](../../../packages/powersync-schema/src/index.ts)                                                                         | API/Desktop AI schema parity（含 `ai_execution_records`，无 `ai_messages`）                    |
-| [`packages/data-portability/src/server/application/use-cases/importers/ai.importer.ts`](../../../packages/data-portability/src/server/application/use-cases/importers/ai.importer.ts) | Conversation shell-only portability importer                         |
+| [`packages/ai/src/server/application/ai-conversation-portability.ts`](../../../packages/ai/src/server/application/ai-conversation-portability.ts) | owner-provided `ai-conversations@3` capability |
 | [`packages/ai/src/server/infrastructure/adapters/prisma/ai-execution-record-prisma.adapter.ts`](../../../packages/ai/src/server/infrastructure/adapters/prisma/ai-execution-record-prisma.adapter.ts) | bounded execution observability projection                              |
 
 ## Convergence and closure docs（已实施）

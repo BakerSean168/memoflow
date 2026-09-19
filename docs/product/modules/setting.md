@@ -5,12 +5,12 @@ tags:
   - setting
 description: 设置模块当前 canonical Setting vNext 功能资产与 owner 边界说明
 created: 2026-06-02T00:00:00
-updated: 2026-09-14T11:48:17+08:00
+updated: 2026-09-18T00:00:00+00:00
 ---
 
 # 设置模块说明
 
-> **vNext implementation notice（2026-09-10）**：`SETTING-9203~9209` 已完成 Setting vNext 主体 cutover。legacy `UserSetting` aggregate、`user_settings` Prisma/PowerSync table、category DTO/schema/mocks/events、旧 HTTP/IPC RPC 与前端 giant-tree store/composable 已删除。当前 cloud preference sole truth 是 namespace-scoped `presentation | regional` + real revision/CAS；Settings Hub 是 6-group owner capability composition；standalone portability 是 `preferences@3` V3-only。Data Portability V2 外层 full-backup envelope 暂时保留 `settings` singleton 以维持当前完整备份覆盖，但其 payload/读写已经完全由 canonical UserPreferenceProfile / `user_preference_records` 驱动，最终由 PORT-1603 删除 V2 envelope。
+> **vNext implementation notice（2026-09-18）**：`SETTING-9203~9209` 与 PORT-1611 已完成 Setting/Data Portability destructive cutover。legacy `UserSetting` aggregate、`user_settings` Prisma/PowerSync table、category DTO/schema/mocks/events、旧 HTTP/IPC RPC 与前端 giant-tree store/composable 已删除。当前 cloud preference sole truth 是 namespace-scoped `presentation | regional` + real revision/CAS；Settings Hub 是 6-group owner capability composition；跨模块 Data Portability 只注册 `preferences@3`，旧 V1/V2 full-backup envelope 不受支持。
 
 ## 1. 当前功能定位
 
@@ -131,7 +131,7 @@ preferences.regional
 
 明确不包含 `identityId`、persistence id/revision、device-local preference、NotificationPreference、AI/Knowledge 或 UserFiles path。Import 使用 strict V3 decoder + Setting-owned `PreferencePortableService`，通过当前 namespace revision/CAS 写入并返回 receipt；旧 v1/v2 Settings backup、`merge/overwrite` 选项均按 ADR-111 明确 unsupported。
 
-Setting 同时提供 `preferences@3` 的 typed `PreferencePortableCapability`，供 system-wide Data Portability V3 registry 使用；full Data Portability 仍由跨 owner orchestrator 负责，当前完整 V3 cutover 要等其他 surviving owners 的 capability 到齐后再删除 V2 路径。
+Setting 同时提供 `preferences@3` 的 typed `PreferencePortableCapability`，供 system-wide Data Portability V3 registry 使用；跨 owner orchestrator 负责 envelope、dependency order、dry-run/apply 与 receipt，Setting 不拥有中央 portability schema。
 
 ## 8. 当前 presentation bootstrap
 
@@ -196,7 +196,7 @@ usage analytics consent         -> future explicit Consent owner
 
 `SETTING-9203~9209` 已解决：Account/Notification shadow、fake categories、Desktop device-local ownership、Settings Hub composition、V3 preference portability，以及 legacy giant-tree persistence/protocol/client 的最终删除。
 
-Setting implementation and local five-layer review are closed; it now awaits the first exact-head delivery gate before archive. 跨模块 Data Portability 仍需继续注册其他 surviving owner capabilities；`PORT-1603` remains independent cross-module portability work. 在 PORT-1603 前，V2 full-backup envelope 的 `settings` singleton 仍存在，但它现在只是 canonical `UserPreferenceProfile` adapter，读写 `user_preference_records`，不再依赖任何 legacy Setting model/table。
+Setting implementation and local five-layer review are closed. PORT-1611 now provides the complete V3-only cross-owner product surface; `preferences@3` remains the sole Setting portability owner and old backups are explicitly unsupported.
 
 实施真值见 [Setting vNext archived plan](../../plan/archive/2026-09-08-setting-vnext-model-convergence.md)，并受 ADR-111 zero-legacy-data destructive cutover policy 约束。
 

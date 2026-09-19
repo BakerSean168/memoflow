@@ -1,20 +1,20 @@
 import { test, expect, type Page } from '@playwright/test';
-import { UserDataExportEnvelopeV2Schema } from '@memoflow/contracts/data-portability';
-import { API_CONFIG } from '../config';
+import { PortableBackupEnvelopeV3Schema } from '@memoflow/contracts/data-portability';
+import { API_CONFIG, TIMEOUT_CONFIG } from '../config';
 import { registerAndLogin } from '../helpers/testHelpers';
 
-const VALID_DATA_KEYS = [
-  'settings',
-  'notificationPreference',
-  'userReminderPreference',
+const V3_CAPABILITY_KEYS = [
+  'account-profile',
+  'preferences',
+  'notification-delivery-preferences',
+  'routines',
+  'schedules',
+  'notifications',
+  'labels',
   'goals',
   'tasks',
-  'reminders',
-  'repositories',
-  'schedules',
-  'editor',
-  'ai',
-];
+  'ai-conversations',
+] as const;
 
 const BANNED_CONTENT_PATTERNS = [
   'identityId',
@@ -39,15 +39,9 @@ interface ExportResult {
   data?: {
     fileName: string;
     content: string;
-    summary: {
-      entityCounts: Record<string, number>;
-      warnings: string[];
-    };
+    summary: { capabilityKeys: string[]; warnings: string[] };
   };
-  error?: {
-    code: string;
-    message: string;
-  };
+  error?: { code: string; message: string };
 }
 
 interface ImportResult {
@@ -55,52 +49,57 @@ interface ImportResult {
   data?: {
     batchId: string;
     dryRun: boolean;
+    capabilities: Array<{
+      key: string;
+      schemaVersion: number;
+      created: number;
+      updated: number;
+      skipped: number;
+      warnings: string[];
+    }>;
     created: Record<string, number>;
-    updatedSingletons: Record<string, number>;
+    updated: Record<string, number>;
     skipped: Record<string, number>;
     warnings: string[];
   };
-  error?: {
-    code: string;
-    message: string;
-  };
+  error?: { code: string; message: string };
 }
 
-async function callExportAPI(page: Page, include?: string[]): Promise<ExportResult> {
+async function callExportAPI(page: Page, capabilities?: string[]): Promise<ExportResult> {
   return page.evaluate(
     async (args) => {
       const res = await fetch(`${args.apiBase}/data-portability/export`, {
         method: 'POST',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ include: args.include }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ capabilities: args.capabilities }),
       });
       return res.json();
     },
-    { apiBase: API_CONFIG.API_PREFIX, include },
+    { apiBase: API_CONFIG.API_PREFIX, capabilities },
   );
 }
 
-async function callImportAPI(page: Page, content: string, dryRun = false): Promise<ImportResult> {
+async function callImportAPI(
+  page: Page,
+  operation: 'dry-run' | 'apply',
+  content: string,
+): Promise<ImportResult> {
   return page.evaluate(
     async (args) => {
-      const res = await fetch(`${args.apiBase}/data-portability/import`, {
+      const res = await fetch(`${args.apiBase}/data-portability/${args.operation}`, {
         method: 'POST',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ content: args.content, dryRun: args.dryRun }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: args.content }),
       });
       return res.json();
     },
-    { apiBase: API_CONFIG.API_PREFIX, content, dryRun },
+    { apiBase: API_CONFIG.API_PREFIX, operation, content },
   );
 }
 
-test.describe('Data Portability', () => {
+test.describe('Data Portability V3', () => {
   let testEmail: string;
 
   test.beforeEach(async ({ page }) => {
@@ -112,121 +111,131 @@ test.describe('Data Portability', () => {
     });
   });
 
-  test('[P1] export returns valid envelope with expected structure', async ({ page }) => {
+  test('[P1] export returns registered capabilities with materialized owner state', async ({
+    page,
+  }) => {
+    // NotificationPreference is optional owner state; materialize it through the public settings
+    // surface before asserting that its registered capability has an exported payload.
+    await materializeNotificationPreference(page);
+
     const result = await callExportAPI(page);
 
     expect(result.ok).toBe(true);
     expect(result.data).toBeDefined();
-
     const { fileName, content, summary } = result.data!;
-    expect(fileName).toMatch(/\.json$/);
-    expect(typeof content).toBe('string');
-    expect(summary).toHaveProperty('entityCounts');
-    expect(summary).toHaveProperty('warnings');
-    expect(Array.isArray(summary.warnings)).toBe(true);
+    expect(fileName).toMatch(/memoflow-user-data-v3-.*\.json$/);
+    expect(summary).toEqual({
+      capabilityKeys: expect.arrayContaining([...V3_CAPABILITY_KEYS]),
+      warnings: [],
+    });
 
-    const envelope = UserDataExportEnvelopeV2Schema.parse(JSON.parse(content));
-    expect(envelope.kind).toBe('memoflow.user-data-export');
-    expect(envelope.schemaVersion).toBe(2);
-    expect(envelope).toHaveProperty('exportedAt');
-    expect(envelope).toHaveProperty('data');
-    expect(typeof envelope.data).toBe('object');
+    const envelope = PortableBackupEnvelopeV3Schema.parse(JSON.parse(content));
+    expect(envelope.format).toBe('memoflow.user-data-export');
+    expect(envelope.schemaVersion).toBe(3);
+    expect(envelope.capabilities.map((capability) => capability.key)).toEqual(
+      summary.capabilityKeys,
+    );
+    expect(envelope.capabilities.every((capability) => capability.schemaVersion === 3)).toBe(true);
   });
 
-  test('[P1] export envelope data keys are valid modules', async ({ page }) => {
-    const result = await callExportAPI(page);
+  test('[P1] export only accepts V3 capability filters', async ({ page }) => {
+    const result = await callExportAPI(page, ['preferences']);
     expect(result.ok).toBe(true);
 
-    const envelope = JSON.parse(result.data!.content);
-    const dataKeys = Object.keys(envelope.data);
-
-    for (const key of dataKeys) {
-      expect(VALID_DATA_KEYS).toContain(key);
-    }
+    const envelope = PortableBackupEnvelopeV3Schema.parse(JSON.parse(result.data!.content));
+    expect(envelope.capabilities.map((capability) => capability.key)).toEqual(['preferences']);
+    expect(result.data!.summary.capabilityKeys).toEqual(['preferences']);
   });
 
   test('[P1] export does not contain banned identity or credential fields', async ({ page }) => {
     const result = await callExportAPI(page);
     expect(result.ok).toBe(true);
-
-    const content = result.data!.content;
     for (const pattern of BANNED_CONTENT_PATTERNS) {
-      expect(content).not.toContain(pattern);
+      expect(result.data!.content).not.toContain(pattern);
     }
   });
 
-  test('[P1] export with include filter returns only requested modules', async ({ page }) => {
-    const result = await callExportAPI(page, ['settings']);
-    expect(result.ok).toBe(true);
-
-    const envelope = JSON.parse(result.data!.content);
-    expect(envelope.data).toHaveProperty('settings');
-    expect(envelope.data).not.toHaveProperty('goals');
-    expect(envelope.data).not.toHaveProperty('tasks');
-    expect(envelope.data).not.toHaveProperty('reminders');
-    expect(envelope.data).not.toHaveProperty('repositories');
-  });
-
-  test('[P1] import succeeds with valid export content', async ({ page }) => {
+  test('[P1] V3 export supports dry-run then apply round-trip', async ({ page }) => {
     const exportResult = await callExportAPI(page);
     expect(exportResult.ok).toBe(true);
 
-    const importResult = await callImportAPI(page, exportResult.data!.content, false);
+    const dryRunResult = await callImportAPI(page, 'dry-run', exportResult.data!.content);
+    expect(dryRunResult.ok).toBe(true);
+    expect(dryRunResult.data!.dryRun).toBe(true);
+    expect(typeof dryRunResult.data!.batchId).toBe('string');
 
-    expect(importResult.ok).toBe(true);
-    expect(importResult.data).toBeDefined();
-    expect(importResult.data!.dryRun).toBe(false);
-    expect(typeof importResult.data!.batchId).toBe('string');
-    expect(typeof importResult.data!.created).toBe('object');
-    expect(typeof importResult.data!.updatedSingletons).toBe('object');
-    expect(Array.isArray(importResult.data!.warnings)).toBe(true);
+    const applyResult = await callImportAPI(page, 'apply', exportResult.data!.content);
+    expect(applyResult.ok).toBe(true);
+    expect(applyResult.data!.dryRun).toBe(false);
+    expect(typeof applyResult.data!.created).toBe('object');
+    expect(typeof applyResult.data!.updated).toBe('object');
+    expect(Array.isArray(applyResult.data!.capabilities)).toBe(true);
   });
 
-  test('[P1] import appends data on repeated imports', async ({ page }) => {
-    const exportResult = await callExportAPI(page);
-    expect(exportResult.ok).toBe(true);
-    const content = exportResult.data!.content;
-
-    await callImportAPI(page, content, false);
-    const secondImport = await callImportAPI(page, content, false);
-
-    expect(secondImport.ok).toBe(true);
-
-    const totalCreated = Object.values(secondImport.data!.created).reduce((sum, n) => sum + n, 0);
-    expect(totalCreated).toBeGreaterThanOrEqual(0);
-  });
-
-  test('[P2] import dryRun does not persist data', async ({ page }) => {
+  test('[P2] dry-run does not persist data', async ({ page }) => {
     const exportBefore = await callExportAPI(page);
     expect(exportBefore.ok).toBe(true);
-    const countsBefore = exportBefore.data!.summary.entityCounts;
+    const before = PortableBackupEnvelopeV3Schema.parse(JSON.parse(exportBefore.data!.content));
 
-    const dryRunResult = await callImportAPI(page, exportBefore.data!.content, true);
+    const dryRunResult = await callImportAPI(page, 'dry-run', exportBefore.data!.content);
     expect(dryRunResult.ok).toBe(true);
     expect(dryRunResult.data!.dryRun).toBe(true);
 
     const exportAfter = await callExportAPI(page);
     expect(exportAfter.ok).toBe(true);
-
-    expect(exportAfter.data!.summary.entityCounts).toEqual(countsBefore);
+    const after = PortableBackupEnvelopeV3Schema.parse(JSON.parse(exportAfter.data!.content));
+    expect(after.capabilities).toEqual(before.capabilities);
   });
 
-  test('[P2] import rejects content with banned identity fields', async ({ page }) => {
+  test('[P2] rejects server-held and unsupported legacy backup envelopes', async ({ page }) => {
+    const disclosure = await callImportAPI(
+      page,
+      'dry-run',
+      JSON.stringify({ kind: 'memoflow.server-held-data-disclosure', schemaVersion: 1 }),
+    );
+    expect(disclosure.ok).toBe(false);
+
+    const legacy = await callImportAPI(
+      page,
+      'dry-run',
+      JSON.stringify({ kind: 'memoflow.user-data-export', schemaVersion: 2, data: {} }),
+    );
+    expect(legacy.ok).toBe(false);
+    expect(legacy.error?.message).toContain('only V3 is supported');
+  });
+
+  test('[P2] rejects V3 payloads containing identity fields', async ({ page }) => {
     const exportResult = await callExportAPI(page);
     expect(exportResult.ok).toBe(true);
+    const envelope = JSON.parse(exportResult.data!.content) as {
+      capabilities: Array<{ payload: Record<string, unknown> }>;
+    };
+    envelope.capabilities[0].payload.identityId = 'stolen-identity';
 
-    const envelope = JSON.parse(exportResult.data!.content);
-    const firstRepo =
-      envelope.data?.repositories?.repositories?.[0] ?? envelope.data?.goals?.items?.[0];
-    if (firstRepo) {
-      firstRepo.identityId = 'stolen-identity';
-    } else {
-      envelope.data.settings = { ...envelope.data.settings, identityId: 'stolen-identity' };
-    }
-
-    const importResult = await callImportAPI(page, JSON.stringify(envelope), false);
-
+    const importResult = await callImportAPI(page, 'dry-run', JSON.stringify(envelope));
     expect(importResult.ok).toBe(false);
-    expect(importResult.error).toBeDefined();
   });
 });
+
+async function materializeNotificationPreference(page: Page): Promise<void> {
+  await page.getByTestId('settings-tab-notifications').click();
+  await expect(page.getByTestId('notification-delivery-card')).toBeVisible({
+    timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+  });
+
+  const notificationToggle = page.getByTestId('notification-global-inApp');
+  const initialState = await notificationToggle.getAttribute('aria-checked');
+  const updatedState = initialState === 'true' ? 'false' : 'true';
+  const updateResponse = page.waitForResponse(
+    (response) =>
+      response.url().endsWith('/api/v1/notifications/preferences') &&
+      response.request().method() === 'PUT' &&
+      response.ok(),
+  );
+
+  await notificationToggle.click();
+  await updateResponse;
+  await expect(notificationToggle).toHaveAttribute('aria-checked', updatedState, {
+    timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+  });
+}

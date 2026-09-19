@@ -49,7 +49,7 @@ Task / Goal / Routine / other producer
 - SSE cursor/reconnect/catch-up；
 - Prisma / PowerSync 两条可靠持久化 lane；
 - operations receipt/timeline/audit；
-- owner-driven Data Portability V3 seam：`notification-delivery-preferences@3` 已由 Notification module instance 创建并经 API/Desktop handle 暴露，生产 Data Portability registry 已注册；当前仅 portable 稳定的 global/workflow delivery choices，产品 export/import 入口仍为 V2。
+- owner-driven Data Portability V3 seam：`notification-delivery-preferences@3` 与 `notifications@3` 已由 Notification owner 创建并经 API/Desktop handle 暴露，生产 Data Portability registry 已注册；当前只 portable 稳定的用户 delivery choices、Fact/Inbox lifecycle 与 typed presentation hints，产品 export/dry-run/apply 入口已统一为 V3-only。
 
 ## 3. 2026-09-08 vNext Model Convergence
 

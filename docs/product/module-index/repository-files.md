@@ -86,18 +86,18 @@ updated: 2026-09-11T00:02:00+08:00
 | [`packages/contracts/src/modules/repository/protocol/repository-event-map.ts`](../../../packages/contracts/src/modules/repository/protocol/repository-event-map.ts) | 仅 `repository:note:mutated`                                 |
 | [`packages/contracts/src/electron/ipc-channels.ts`](../../../packages/contracts/src/electron/ipc-channels.ts)                                                       | `RepositoryChannels`：knowledge connection + Local Vault     |
 
-## Repository 可重新导入业务备份（非运行时编辑）
+## Repository facts and server-held disclosure
 
-旧 Repository/Resource/Folder 当前仍服务 portable 备份再导入，不构成运行时 Markdown 编辑通道。
-Editor workspace persistence 已由 `EDITOR-1702` 删除，不再属于此备份边界。独立服务端持有数据披露见
-`memoflow.server-held-data-disclosure`。
+旧 Repository/Resource/Folder persistence-shaped portability projection 已由 PORT-1611
+退休，不构成可恢复 business backup。Knowledge server-held observations、projections 和
+cached bytes 只通过 `memoflow.server-held-data-disclosure` transparency export 披露，
+不可导入。Editor workspace persistence 已由 `EDITOR-1702` 删除。
 
 | 文件                                                                                                                                                                                                          | 说明                                                |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
 | [`packages/powersync-schema/src/index.ts`](../../../packages/powersync-schema/src/index.ts)                                                                                                                   | PowerSync Repository/resource 相关表；无 `editor_*` |
-| [`packages/data-portability/src/server/application/use-cases/projections/repository.projection.ts`](../../../packages/data-portability/src/server/application/use-cases/projections/repository.projection.ts) | portable repository/resource 导出                   |
-| [`packages/data-portability/src/server/application/use-cases/importers/`](../../../packages/data-portability/src/server/application/use-cases/importers/)                                                     | portable 导入（Repository 等存活模块）              |
-| [`packages/contracts/src/modules/data-portability/`](../../../packages/contracts/src/modules/data-portability/)                                                                                               | portable 契约（含 server-held-data-disclosure）     |
+| [`packages/data-portability/src/server/application/use-cases/export-server-held-data-disclosure.use-case.ts`](../../../packages/data-portability/src/server/application/use-cases/export-server-held-data-disclosure.use-case.ts) | disclosure-only export |
+| [`packages/contracts/src/modules/data-portability/dtos/server-held-data-disclosure.dto.ts`](../../../packages/contracts/src/modules/data-portability/dtos/server-held-data-disclosure.dto.ts) | disclosure envelope contract |
 
 ## 测试入口
 

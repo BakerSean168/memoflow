@@ -42,7 +42,7 @@ describe('useDataPortability server-held disclosure surface', () => {
     // Method body must not route through ipcClient.invoke for disclosure.
     const method = ipcAdapter.slice(
       ipcAdapter.indexOf('async exportServerHeldDataDisclosure'),
-      ipcAdapter.indexOf('async importUserData'),
+      ipcAdapter.indexOf('async dryRunPortableDataV3'),
     );
     expect(method).not.toContain('this.ipcClient.invoke');
   });

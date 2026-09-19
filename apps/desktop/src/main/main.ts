@@ -560,7 +560,6 @@ async function registerBusinessModules(
   });
 
   const dataPortabilityElectronModule = composeDataPortability({
-    db,
     portableCapabilities: [
       accountComposed.portableCapability,
       settingElectronModule.portableCapability,
