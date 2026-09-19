@@ -19,11 +19,6 @@
       "@memoflow/contracts/shared": ["../contracts/src/shared/index.ts"],
       "@memoflow/contracts/operations": ["../contracts/src/modules/operations/index.ts"],
       "@memoflow/utils": ["../utils/src/index.ts"],
-      "@memoflow/cloud-auth": ["../cloud-auth/src/index.ts"],
-      "@memoflow/cloud-auth/server": ["../cloud-auth/src/server/index.ts"],
-      "@memoflow/reminder/server": ["../reminder/src/server/index.ts"],
-      "@memoflow/notification/server": ["../notification/src/server/index.ts"],
-      "@memoflow/repository/server": ["../repository/src/server/index.ts"],
       "@memoflow/utils/result": ["../utils/src/result/index.ts"],
       "@memoflow/patterns": ["../patterns/src/index.ts"],
       "@memoflow/patterns/operations": ["../patterns/src/operations/index.ts"]

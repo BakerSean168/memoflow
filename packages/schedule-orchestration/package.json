@@ -16,7 +16,6 @@
     "@memoflow/contracts": "workspace:*",
     "@memoflow/goal": "workspace:*",
     "@memoflow/reminder": "workspace:*",
-    "@memoflow/schedule": "workspace:*",
     "@memoflow/scheduler": "workspace:*",
     "@memoflow/task": "workspace:*",
     "@memoflow/utils": "workspace:*"

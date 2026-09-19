@@ -89,7 +89,6 @@
     "@memoflow/account": "workspace:*",
     "@memoflow/ai": "workspace:*",
     "@memoflow/assets": "workspace:*",
-    "@memoflow/cloud-auth": "workspace:*",
     "@memoflow/contracts": "workspace:*",
     "@memoflow/data-portability": "workspace:*",
     "@memoflow/goal": "workspace:*",

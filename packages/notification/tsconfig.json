@@ -57,9 +57,6 @@
       ],
       "@memoflow/patterns/operations": [
         "../patterns/src/operations/index.ts"
-      ],
-      "@memoflow/powersync-schema": [
-        "../powersync-schema/src/index.ts"
       ]
     }
   },

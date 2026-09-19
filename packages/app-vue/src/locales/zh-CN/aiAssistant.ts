@@ -277,7 +277,6 @@ export default {
         fetchResource: '读取笔记',
         findRelatedNotes: '查找相关笔记',
         updateKnowledgeNote: '更新知识笔记',
-        reindexResource: '重建资源索引',
       },
       diagnosticWorkflowStepTiming: '工作流步骤耗时',
       diagnosticWorkflowStepStarted: '工作流步骤开始',

@@ -12,8 +12,6 @@ export default {
   "duplicate": "Duplicate",
   "archive": "Archive",
   "restore": "Restore",
-  "editFolder": "Edit Folder",
-  "deleteFolder": "Delete Folder",
   "createGoal": "Create Goal",
   "addRecord": "Add Record",
   "pause": "Pause",

@@ -10392,6 +10392,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/governance/__tests__/cross-domain-ownership.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "tools/governance/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/governance/__tests__/failure-contract-inventory.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -10858,7 +10866,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "vitest",
-      "fileCount": 19
+      "fileCount": 20
     },
     {
       "id": "apps/api/vitest.integration.config.ts",
@@ -11736,6 +11744,6 @@
     "boundary-main": 6,
     "e2e": 57,
     "perf": 1,
-    "governance": 57
+    "governance": 58
   }
 }

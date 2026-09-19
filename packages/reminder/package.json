@@ -47,8 +47,6 @@
   "dependencies": {
     "@memoflow/contracts": "workspace:*",
     "@memoflow/database": "workspace:*",
-    "@memoflow/patterns": "workspace:*",
-    "@memoflow/schedule": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/utils": "workspace:*",
     "zod": "^4.4.3"

@@ -20,8 +20,6 @@ export default defineConfig({
     '@memoflow/utils',
     '@memoflow/contracts',
     '@memoflow/database',
-    '@memoflow/schedule',
-    '@memoflow/patterns',
     'zod',
   ],
 });
