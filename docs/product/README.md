@@ -4,7 +4,7 @@ tags:
   - index
 description: 业务功能资产文档入口
 created: 2026-06-02T00:00:00
-updated: 2026-08-25T17:13:00+08:00
+updated: 2026-09-19T00:00:00+00:00
 ---
 
 # 业务功能资产
@@ -22,8 +22,8 @@ updated: 2026-08-25T17:13:00+08:00
 - [任务模块文件索引](./module-index/task-files.md)：任务模块相关页面、接口、领域代码、数据结构和测试入口。
 - [日程模块说明](./modules/schedule.md)：日程模块当前功能、用户路径、业务规则和风险点。
 - [日程模块文件索引](./module-index/schedule-files.md)：日程模块相关页面、接口、领域代码、数据结构和测试入口。
-- [提醒模块说明](./modules/reminder.md)：Reminder 当前实现资产、用户路径、业务规则和风险点；迁移期间作为现状基线。
-- [Routine Coach vNext](./routine-coach-vnext.md)：Reminder 向 AI-native 习惯节律 / 健康干预 / 专注协议领域演进的 North Star、真实场景推演与目标模型。
+- [提醒模块说明](./modules/reminder.md)：Routine Coach 当前 canonical owner、确定性 runtime、Scheduler 与 Notification 边界。
+- [Routine Coach vNext](./routine-coach-vnext.md)：Routine 的当前 as-built 模型、历史收敛分析与明确标注的未来产品问题。
 - [提醒模块文件索引](./module-index/reminder-files.md)：提醒模块相关页面、接口、领域代码、数据结构和测试入口。
 - [通知模块说明](./modules/notification.md)：通知模块当前功能、用户路径、业务规则和风险点。
 - [通知模块文件索引](./module-index/notification-files.md)：通知模块相关页面、接口、领域代码、数据结构和测试入口。

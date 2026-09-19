@@ -7,7 +7,7 @@ tags:
   - local-first
 description: Better Auth 云端认证与 Desktop 本地 Profile Access 的当前产品边界
 created: 2026-06-02T00:00:00
-updated: 2026-08-03T00:00:00+08:00
+updated: 2026-09-19T00:00:00+00:00
 ---
 
 # 云端认证与本地 Profile Access
@@ -15,6 +15,8 @@ updated: 2026-08-03T00:00:00+08:00
 > **ADR-111 cutover policy (2026-09-09):** 当前没有需要保留的 MemoFlow 旧业务数据，也不要求兼容旧客户端/旧备份。本文历史推演中仅为旧数据保存设计的 migration/backfill/compatibility window 不再执行；目标模型和真实行为不变量继续有效。实施采用 direct canonical cutover + old-surface deletion + reset/reseed。
 
 > **2026-09-09 vNext notice:** ADR-105 保留 Better Auth 单一云端认证权威，并进一步固定 Account lifecycle / Auth enforcement / Desktop Profile Access 三轴边界。
+
+> **当前 closure（2026-09-19）：** AUTH-1501/1502 已完成。Better Auth、Account `Active | Closed` lifecycle 与 Desktop Profile Access 的边界是当前实现；本页不描述待实施的认证迁移。
 
 ## 1. 模块边界
 

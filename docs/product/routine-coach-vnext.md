@@ -9,7 +9,7 @@ tags:
   - vnext
 description: MemoFlow Reminder 向 AI-native Routine Coach 演进的产品定义、真实场景推演、领域模型、运行时与桌面交互设计
 created: 2026-08-25T17:13:00+08:00
-updated: 2026-09-17T20:20:00+08:00
+updated: 2026-09-19T00:00:00+00:00
 ---
 
 # Routine Coach vNext：习惯节律、健康干预与专注协议
@@ -20,9 +20,9 @@ updated: 2026-09-17T20:20:00+08:00
 >
 > **实现状态（2026-09-17，R4-2201C）：Routine vNext 已成为唯一 owner truth。物理包仍沿用历史名 `reminder`，但 `ReminderTemplate / ReminderGroup / ReminderInstance / ReminderResponse`、旧 `/reminders` transport/UI 与 Reminder operation owner 已按 ADR-111 破坏式退休；不存在兼容写入口、双写或 row converter。本文后续保留的旧模型对比仅作为 2026-08-25~09-08 的迁移背景。**
 
-## 2026-09-08 Model Convergence Freeze
+## 2026-09-08 Model Convergence Freeze (historical design record)
 
-在 Core vNext 基础能力落地后重新审查当前代码，确认 **Routine vNext 与 Legacy Reminder 两代模型仍并存**。因此本轮进一步冻结最终领域目标，但**尚未实施这次退役/收敛**。
+以下段落保留 2026-09-08 cutover 前的设计记录。当时的代码审查结论是 **Routine vNext 与 Legacy Reminder 两代模型仍并存**；R4-2201C 已在 2026-09-17 完成这次退役/收敛，因此本节的“目标/尚未实施”措辞不代表当前实现。
 
 最终产品/领域结构：
 
@@ -69,7 +69,7 @@ Legacy `ReminderTemplate / ReminderGroup / ReminderHistory / ReminderResponse / 
 - ADR-079 — Intervention Policy / Notification / Device Surface boundary；
 - `docs/analysis/2026-09-08-reminder-routine-current-system-map.md` — 当前代码真值与迁移映射。
 
-> 本轮只冻结模型与退役方向，不创建 Reminder active implementation plan。
+> **历史记录：** 本轮只冻结模型与退役方向，不创建 Reminder active implementation plan。当前实现见 [Routine / Reminder 模块说明](./modules/reminder.md)。
 
 ---
 
@@ -1792,18 +1792,18 @@ Renderer Window 只是 Runtime state 的投影。
 
 ---
 
-## 23. 与现有 Reminder 文档的关系
+## 23. 与现有 Routine 文档的关系
 
-- `docs/product/modules/reminder.md`：描述当前已经存在的 Reminder 模块实现事实；
-- 本文：描述 vNext 产品 North Star 和目标业务模型；
+- `docs/product/modules/reminder.md`：描述当前 Routine owner 与 runtime 实现事实；
+- 本文：保留产品语义、场景推演和历史收敛分析；
 - ADR-059：记录需要长期约束实现的架构决策；
-- 后续 Active Plan：在决定进入实现阶段后，再拆迁移 ticket，不在本文假装已经实施。
+- 本轮 convergence plan 已归档；后续新产品问题必须另行立项，不能把本节历史方案当作当前 active plan。
 
 ---
 
 ## 24. 下一阶段需要进一步决策的问题
 
-这些问题不会阻塞本文作为 North Star，但实施前需要收敛：
+这些问题不改变当前已实施的 Routine owner/runtime 边界；若未来扩展产品能力，实施前需要另行收敛：
 
 1. 产品最终中文名称：提醒 / 节律 / 习惯 / Routine / Focus；
 2. `packages/reminder` 是否最终物理重命名为 `packages/routine`，还是先保持 package 名兼容、仅迁领域模型；

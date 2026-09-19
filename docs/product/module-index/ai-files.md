@@ -103,7 +103,7 @@ AI-9612 后，MemoFlow 的核心 AI execution runtime 已收敛为 **TypeScript 
 | [`docs/analysis/2026-09-09-ai-vnext-model-convergence-current-system-map.md`](../../analysis/2026-09-09-ai-vnext-model-convergence-current-system-map.md)                 | AI vNext as-built ownership、runtime、provider、workflow 与 persistence 证据地图              |
 | [`docs/analysis/2026-09-09-ai-vnext-model-convergence-reference-and-reuse-ledger.md`](../../analysis/2026-09-09-ai-vnext-model-convergence-reference-and-reuse-ledger.md) | Mastra/Time/Knowledge/owner-domain 直接复用、薄 adapter 与禁止自研清单                         |
 | [`docs/architecture/ai-vnext-model-convergence.md`](../../architecture/ai-vnext-model-convergence.md)                                                                     | AI vNext Model Convergence 北极星架构                                                          |
-| [`docs/plan/active/2026-09-09-ai-vnext-model-convergence.md`](../../plan/active/2026-09-09-ai-vnext-model-convergence.md)                                                 | AI-9601～9612 实施顺序、accepted status 与 closure gate                                       |
+| [`docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md`](../../plan/archive/2026-09-09-ai-vnext-model-convergence.md)                                                 | AI-9601～9612 实施顺序、accepted status 与 closure gate                                       |
 | [`docs/analysis/2026-09-18-ai-9612-vnext-closure-evidence.md`](../../analysis/2026-09-18-ai-9612-vnext-closure-evidence.md)                                             | AI-9612 五层 exact-head findings/disposition 与 gates evidence                               |
 
 这组文档现在记录已实施的 convergence truth 与 AI-9612 closure evidence；不构成 PORT-1611 的启动授权。

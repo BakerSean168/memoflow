@@ -12,7 +12,7 @@ updated: 2026-09-08T20:45:00+08:00
 
 # ADR-081: ScheduledInvocation Model 与 Legacy ScheduleTask 退役
 
-**状态：** 已采纳（待实施）  
+**状态：** 已采纳并实施（S4-2302B，2026-09-17）
 **日期：** 2026-09-08  
 **影响范围：** scheduler、contracts、database、PowerSync、schedule-orchestration、API/Desktop diagnostics  
 **修订：** ADR-061 的 neutral `ScheduledIntent + SchedulingPort.reconcile` contract 保持，本文负责让 Scheduler 内部模型与该 contract 收敛  

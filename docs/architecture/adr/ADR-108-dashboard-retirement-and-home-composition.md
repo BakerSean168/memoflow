@@ -2,7 +2,7 @@
 tags: [adr, dashboard, home, read-model, retirement]
 description: 退休 Dashboard bounded context，将首页收敛为 owner-read-model UI composition
 created: 2026-09-09T00:31:00+08:00
-updated: 2026-09-18T13:20:00+08:00
+updated: 2026-09-19T00:00:00+00:00
 ---
 
 # ADR-108: Dashboard Retirement and Home Composition
@@ -44,7 +44,7 @@ HOME-1805 已完成迁移：Home/Goal capsule 通过 Goal-owned summary/read por
 
 ### 6. HOME-1804 resolution: no durable ActivityFeed authority
 
-HOME-1804 的当前产品证据表明：Desktop 从未需要独立 durable activity table，API AI 所需的 recent activity 也可以从 Goal/Task/Schedule owner facts 生成相同 bounded projection。旧 ledger 的其余 consumer 都属于待退役 Dashboard。
+HOME-1804 的当前产品证据表明：Desktop 从未需要独立 durable activity table，API AI 所需的 recent activity 也可以从 Goal/Task/Schedule owner facts 生成相同 bounded projection。旧 ledger consumer 已清零；当前 recent activity 只来自 owner-derived bounded projections。
 
 因此决定直接删除 recorder/table，并让 API 与 Desktop 都走 owner-derived recent activity。**不创建 `ActivityFeed` bounded context、通用 analytics domain 或 event-sourcing authority。**
 

@@ -13,7 +13,7 @@ updated: 2026-09-08T20:20:00+08:00
 
 # ADR-077: Routine Occurrence、Interaction 与 Reliability Boundary
 
-**状态：** 已采纳（待实施）  
+**状态：** 已采纳并实施（R4-2201C，2026-09-17）
 **日期：** 2026-09-08  
 **影响范围：** reminder/routine、scheduler、notification、database、PowerSync、analytics  
 **修订：** ADR-059 §10、ADR-062 §5~~8  

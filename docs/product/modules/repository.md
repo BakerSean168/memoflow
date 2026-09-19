@@ -5,7 +5,7 @@ tags:
   - repository
 description: 资源库模块当前实现、本地 Vault、可选 GitHub 同步与跨端边界
 created: 2026-06-02T00:00:00
-updated: 2026-09-11T00:02:00+08:00
+updated: 2026-09-19T00:00:00+00:00
 ---
 
 # 资源库模块说明
@@ -16,9 +16,9 @@ updated: 2026-09-11T00:02:00+08:00
 
 [ADR-034](../../architecture/adr/ADR-034-obsidian-vault-repository.md) 已采纳：本地 Vault 优先；GitHub 登录与仓库授权解耦；用户需要同步时再连接 GitHub；绑定后 Web 可以安全地快捷创建新笔记。
 
-## 1.1 vNext 已采纳建模方向（实施中）
+## 1.1 当前 canonical 建模
 
-2026-09-08 已完成 Repository/Knowledge vNext 建模冻结；2026-09-11 已开始按 ADR-089 destructive cutover。vNext 不恢复旧 Repository/Folder/Resource Aggregate，而是收敛为：
+Repository/Knowledge vNext 已完成 ADR-089~091 destructive cutover；当前不恢复旧 Repository/Folder/Resource Aggregate，而是收敛为：
 
 ```text
 KnowledgeSpace
@@ -47,7 +47,7 @@ KnowledgeSpace
 - [ADR-090](../../architecture/adr/ADR-090-stable-knowledge-document-identity.md)
 - [ADR-091](../../architecture/adr/ADR-091-knowledge-projection-index-and-operation-boundaries.md)
 
-**当前实施状态：** ADR-089 已完成 Local/Remote 全部四轴 cutover；ADR-090 stable document identity 已由 KNOW-2002 实施；ADR-091 single projection engine 仍未完成。
+**当前实施状态：** ADR-089、ADR-090/KNOW-2002 与 ADR-091/KNOW-2003 均已实施；`KnowledgeProjectionEngine` 是 confirmed create、webhook 与 reconciliation 共用的 projection owner。
 
 ### 1.2 2026-09-11 Local Vault checkpoint
 
@@ -108,12 +108,12 @@ Prisma 已删除 `knowledge_repository_connections` canonical model，改为五�
   Webhook/write history 与 RAG index，不包含 MemoFlow 管理的可重放 GitHub 授权。
 - Web 已收缩为投影浏览、搜索、安全 Markdown 预览、关系查看和确认后创建新 Markdown 文件，不开放已有笔记全文编辑。
 - 旧数据库 Repository/Folder/Resource CRUD、Editor content API、Desktop legacy IPC、Vue `/note/:id` 与 Mobile
-  Repository/note-editor 路由均已从 host 运行时移除；旧数据只保留在可重新导入备份边界内。
+  Repository/note-editor 路由均已从 host 运行时移除；旧 backup/import compatibility surface 不受支持。
 - 断开仓库默认保留可重建云端数据；用户可显式选择永久清理 MemoFlow 投影/cache/ledger/RAG，且两种模式都不删除
   本地 Vault 或 GitHub repository。
 - 真实 Git 服务边界验收已覆盖；真实 GitHub fixture E2E 仍需在具备受控 GitHub App 凭据的环境执行。
 
-## 3. 已采纳目标态
+## 3. 当前产品边界
 
 ### 本地 Desktop
 
@@ -183,8 +183,9 @@ Web create
 - 默认断开是可恢复撤销：停止同步并隐藏连接，但保留服务端可重建投影和索引。
 - 勾选“删除 MemoFlow 云端投影与 AI 索引”后，服务端按当前 identity 在单事务中永久清理连接及所有派生数据。
 - 本地 Vault、本地 Git 历史和 GitHub repository 在两种模式下都保留。
-- 设置页“导出可重新导入的数据”生成 `memoflow.user-data-export` JSON，只用于业务数据 append-create-like
-  导入；它不是 Vault/GitHub 导出，也不是服务端持有数据披露。
+- Data owner 的可导入备份使用 owner-driven `PortableBackupEnvelopeV3`（文件名形如
+  `memoflow-user-data-v3-*.json`）；Repository/Knowledge 不注册 portable capability。该备份不包含
+  Vault/GitHub 内容、授权或服务端 projection，也不是服务端持有数据披露。
 - GitHub authorization、installation token 和派生投影不得进入可导入文件。权威 Markdown/附件应从 Vault 或 GitHub
   repository 导出/clone。
 - Web 的“服务端持有数据披露”生成 `memoflow.server-held-data-disclosure` JSON；它按认证 identity 包含
@@ -198,11 +199,11 @@ Web create
 
 ## 8. 当前差距
 
-Repository/Knowledge vNext 已完成 ADR-089 的 Local/Remote binding 四轴迁移与 ADR-090 stable document identity；single projection engine（ADR-091）仍未完成。
+Repository/Knowledge vNext 已完成 ADR-089~091 的 Local/Remote binding、stable document identity 与 single projection engine 收敛。
 
 - 真实 GitHub App fixture E2E 仍依赖外部凭据与受控 private repository。
 - Mobile 尚未接入服务端 GitHub 投影的只读浏览、搜索与预览。
-- 统一 Agent Host 的完整 proposal/capability/tool-policy 协议由 ADR-035 和对应 active plan 继续收口。
+- Agent proposal/capability/tool-policy 继续遵守 ADR-035 与当前 AI owner-port contract；本模块不再引用一个未完成的 active plan 作为实现前提。
 
 ## 9. 风险点
 

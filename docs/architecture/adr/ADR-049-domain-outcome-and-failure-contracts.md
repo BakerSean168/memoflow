@@ -13,7 +13,7 @@ updated: 2026-08-17
 
 # ADR-049: Domain Outcomes and Failure Contracts / 领域结果与失败契约
 
-**状态**：已采纳（ACR-R03 设计 Gate 通过，实施中）
+**状态**：已采纳并实施（ACR-R03 设计 Gate 与 #234～#241 closure）
 
 **日期**：2026-08-17
 

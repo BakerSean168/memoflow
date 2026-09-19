@@ -15,17 +15,17 @@ updated: 2026-09-11T00:02:00+08:00
 > 旧数据库 Repository/Folder/Resource CRUD 与 Editor 运行时入口已退役。索引只列 knowledge
 > connection、投影、Web confirmed create、Desktop Local Vault / Git 同步，以及尚存 Repository 备份边界。Editor persistence 已由 EDITOR-1702 删除。
 
-## vNext 建模文档（已采纳，实施中）
+## vNext 建模文档（已采纳并实施）
 
 | 文件                                                                                                                                                      | 说明                                                                          |
 | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| [`docs/product/knowledge-repository-vnext.md`](../knowledge-repository-vnext.md)                                                                          | KnowledgeSpace / Binding / Stable Document / Projection / AI Index North Star |
+| [`docs/product/knowledge-repository-vnext.md`](../knowledge-repository-vnext.md)                                                                          | KnowledgeSpace / Binding / Stable Document / Projection / AI Index current as-built model and rationale |
 | [`docs/analysis/2026-09-08-knowledge-repository-vnext-current-system-map.md`](../../analysis/2026-09-08-knowledge-repository-vnext-current-system-map.md) | 当前代码事实与目标差距                                                        |
 | [`ADR-089`](../../architecture/adr/ADR-089-knowledge-space-source-binding-and-health-boundaries.md)                                                       | Local/Remote Binding、Health/Observation、Sync/Projection cursor 分离         |
 | [`ADR-090`](../../architecture/adr/ADR-090-stable-knowledge-document-identity.md)                                                                         | 稳定 `KnowledgeDocumentId` 与 path-independent durable reference              |
 | [`ADR-091`](../../architecture/adr/ADR-091-knowledge-projection-index-and-operation-boundaries.md)                                                        | 单一 ProjectionEngine、AI Index ownership、可靠 Operation 与 capability ports |
 
-> 2026-09-11：ADR-089 已完成 Local/Remote 全切换；Remote persistence 为 Binding/Observation/HistoryFence/ProjectionCheckpoint 四轴，普通 list 为纯读。ADR-090 已由 KNOW-2002 实施；ADR-091/KNOW-2003 仍待实施。
+> 2026-09-19：ADR-089 已完成 Local/Remote 全切换；Remote persistence 为 Binding/Observation/HistoryFence/ProjectionCheckpoint 四轴，普通 list 为纯读。ADR-090/KNOW-2002 与 ADR-091/KNOW-2003 均已实施，`KnowledgeProjectionEngine` 是当前单一 projection owner。
 
 ## 前端页面与路由
 
@@ -119,7 +119,7 @@ cached bytes 只通过 `memoflow.server-held-data-disclosure` transparency expor
 
 - Goal/Task durable Knowledge relation 不得指向 `connectionId + relativePath` 派生的 projection id；必须等待 ADR-090 stable `KnowledgeDocumentId`。
 - AI indexing 状态最终由 AI owner；迁移期间不得新增 Repository `indexStatus` 的新消费者。
-- Web confirmed commit / webhook / reconciliation 不得继续扩散第三套 projection apply 逻辑；目标是 ADR-091 单一 ProjectionEngine。
+- Web confirmed commit / webhook / reconciliation 继续共用 ADR-091 单一 `KnowledgeProjectionEngine`；新增 projection writer 必须经过 ownership review。
 - 不要恢复 `/note/:id`、Editor API/Electron、或 Repository/Folder/Resource CRUD 运行时入口。
 - 不要把 portable `resources` 备份与 `memoflow.server-held-data-disclosure` 混为同一导出通道；Editor 不得重新进入 portability。
 - Web Markdown 必须继续走 sanitizer；禁止重新启用原始 HTML。

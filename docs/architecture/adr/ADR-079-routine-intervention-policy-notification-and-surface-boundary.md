@@ -13,7 +13,7 @@ updated: 2026-09-08T20:20:00+08:00
 
 # ADR-079: Routine Intervention Policy、Notification 与 Device Surface 边界
 
-**状态：** 已采纳（待实施）  
+**状态：** 已采纳并实施（R4-2201C，2026-09-17）
 **日期：** 2026-09-08  
 **影响范围：** reminder/routine、notification、desktop、contracts、AI tools  
 **修订：** ADR-059 Intervention Surface；ADR-063 Notification delivery boundary  

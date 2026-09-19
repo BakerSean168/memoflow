@@ -1,7 +1,9 @@
 ---
 tags:
   - plan
-  - active
+  - archive
+  - status
+  - archived
   - ai
   - mastra
   - provider
@@ -11,10 +13,13 @@ tags:
   - refactor
 description: AI vNext Model Convergence — Conversation/Mastra 状态所有权、Provider Secret/Model Capability、Context/Knowledge、Workflow Draft/Apply、ExecutionRecord 单轨收敛实施计划
 created: 2026-09-09T00:00:00+08:00
-updated: 2026-09-18T00:00:00+00:00
+updated: 2026-09-19T00:00:00+00:00
+archived: 2026-09-19T00:00:00+00:00
 ---
 
-# AI vNext Model Convergence
+# AI vNext Model Convergence — Archived Plan
+
+> **Archive closure (2026-09-19):** `AI-9601～9612` 已全部 accepted；AI-9612 five-layer review 为 P0/P1/P2 = 0。最终 exact-head validation 见 [`SYS-3003 evidence`](../../analysis/2026-09-19-sys-3003-final-validation.md)，已在 PR #385 合并 commit `37c24c79bb631997e06434d999b9912765ea047f` 集成。系统级文档闭环、当前 PR #340 观察状态与本计划归档理由见 [`SYS-3004 closure evidence`](../../analysis/2026-09-19-sys-3004-documentation-truth-closure.md)。本文保留原实施上下文，不再是 active execution authority。
 
 > **System-wide execution-order notice (2026-09-09):** 本文继续作为模块内部 ticket/验收细节真值；跨模块执行顺序、共享 schema 单写者与 destructive cutover gate 由 [`2026-09-09-system-wide-vnext-model-convergence-implementation.md`](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) 统一协调。
 >
@@ -31,7 +36,7 @@ updated: 2026-09-18T00:00:00+00:00
 Runtime recovery/HITL/idempotency/security tests remain protected because they are behavioral invariants, not legacy-data compatibility.
 
 **状态：AI-9612 ACCEPTED — five-layer review closed with zero unresolved P0/P1/P2**
-**实施分支：** `delegated/ai-9612-vnext-closure-luna`；AI-9612 closure commit is ready for ChatGPT Web final acceptance
+**实施分支：** `delegated/ai-9612-vnext-closure-luna`；AI-9612 closure 已由 ChatGPT Web 接受并集成
 **当前源码 truth：** `packages/ai` + `packages/contracts/ai` + Mastra runtime + Prisma/PowerSync + Vue AI workspace + shell-only Data Portability
 **目标 ADR：** ADR-096～099
 **继续有效：** ADR-050、051、052、070
@@ -1169,7 +1174,7 @@ AI-9612  ACCEPTED — five-layer review closed; zero unresolved P0/P1/P2
 
 > **AI-9602～AI-9612 已进入 canonical convergence；AI-9612 closure evidence 记录了 exact-head
 > findings/disposition、failure hardening 与全部 required gates。PORT-1611 的 Data Portability
-> V3-only cutover 已在独立闭环证据中完成；其余全库 legacy schema sweep 仍属于 CLEAN-2601。**
+> V3-only cutover 与 CLEAN-2601 whole-schema legacy sweep 均已完成。**
 
 2026-08 的 Mastra-native runtime implementation 已经完成；本计划只针对 2026-09 新冻结的 product model alignment。
 

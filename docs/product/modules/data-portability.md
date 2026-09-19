@@ -74,5 +74,6 @@ bytes，但这些事实不会进入任何 V3 import/apply path。
 - [ADR-111](../../architecture/adr/ADR-111-zero-legacy-data-destructive-cutover-policy.md)
 - [PORT-1611 closure evidence](../../analysis/2026-09-18-port-1611-v3-only-cutover-evidence.md)
 
-CLEAN-2601 负责剩余 whole-schema legacy deletion；本模块不借 PORT-1611 删除无关的
-旧表、owner domain object 或 schema residue。
+CLEAN-2601 已完成 whole-schema legacy deletion；本模块仍不借 PORT-1611 删除无关的
+旧表、owner domain object 或 schema residue。当前 V3-only capability registry 与 disclosure
+边界已是 canonical portability truth。

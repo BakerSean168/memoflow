@@ -13,7 +13,7 @@ updated: 2026-09-08T17:55:00+08:00
 
 # ADR-067: Goal vNext Product Model、Lifecycle 与 Target Timeframe
 
-**状态：** 已采纳，待实施
+**状态：** 已采纳并实施（GOAL-7202～7211，2026-09-19）
 **日期：** 2026-09-08
 **影响范围：** Goal domain、contracts、database、PowerSync、AI Goal draft、Goal UI、product docs
 **关联：** ADR-037、ADR-052、ADR-053、ADR-054、ADR-055、ADR-056、ADR-068、ADR-069、ADR-070

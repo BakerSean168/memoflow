@@ -32,7 +32,7 @@ CLEAN-6304 已完成语义与物理拆分：`@memoflow/schedule` 只拥有 Plann
 - ADR-082：当前 invocation state 与 `InvocationAttempt` 历史事实分离，严格区分 `runAt` 与 retry `nextAttemptAt`。
 - ADR-083：Schedule/Scheduler contracts、diagnostics 与 persistence language 最终分区。
 
-因此本 ADR 的“已实施”只表示 **Schedule/Planner 与 Scheduler/Temporal Engine 的 ownership/package boundary 已完成**；ADR-080~083 的模型收敛仍是已采纳、待实施。
+因此本 ADR 的“已实施”表示 **Schedule/Planner 与 Scheduler/Temporal Engine 的 ownership/package boundary 已完成**；ADR-080~083 的模型收敛也已在 Phase 4 exact-head closure 中实施。
 
 ## 1. 背景
 

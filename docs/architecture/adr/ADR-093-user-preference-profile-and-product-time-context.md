@@ -14,7 +14,7 @@ updated: 2026-09-09T12:00:00+08:00
 
 # ADR-093: User Preference Profile 与 Product Time Context
 
-**状态：** 已采纳（SETTING-9202 foundation 已实施；consumer cutover 待 SETTING-9203）
+**状态：** 已采纳并实施（SETTING-9202～9203，2026-09-18）
 **日期：** 2026-09-08
 **影响范围：** Setting/Preferences、Account、Time、Task、Routine、Reminder、Planner、Scheduler、Notification、Web/Desktop/Mobile presentation
 

@@ -1,11 +1,21 @@
-# MemoFlow System vNext Phase 5 — Home / Dashboard Retirement, AI Alignment, and Phase-4 Owner Portability
+---
+tags: [plan, archive, status, archived, vnext, phase-5]
+description: MemoFlow System vNext Phase 5 Home/Dashboard retirement, AI alignment and owner portability execution record
+created: 2026-09-18T00:00:00+00:00
+updated: 2026-09-19T00:00:00+00:00
+archived: 2026-09-19T00:00:00+00:00
+---
 
-Status: **ACTIVE — delegated implementation control plane**
+# MemoFlow System vNext Phase 5 — Archived Execution Record
+
+> **Archive closure (2026-09-19):** `HOME-1801..1805`、`AI-9602..9612` 与 `PORT-1610B` 已接受；Phase 6 `PORT-1611` 也已完成 V3-only cutover and whole-schema cleanup. Exact-head validation and final documentation truth are recorded in [`SYS-3003 evidence`](../../analysis/2026-09-19-sys-3003-final-validation.md) and [`SYS-3004 closure evidence`](../../analysis/2026-09-19-sys-3004-documentation-truth-closure.md). This execution record is archived and no longer an active control plane.
+
+Status: **ARCHIVED — implementation accepted**
 Created: 2026-09-18
 Canonical integration branch: `feat/system-wide-vnext-convergence`
 Phase-5 start head: `4d9098e6757102f57a70fc9a1d66dd8710fae941` (`P4-CLOSE` merged)
 Execution mode: **DELEGATED** — ChatGPT Web plans/reviews/accepts; Codex CLI using `gpt-5.6-luna` implements.
-Source of task truth: `docs/plan/active/2026-09-16-system-vnext-execution.tasks.json`.
+Source of task truth: `docs/plan/archive/2026-09-16-system-vnext-execution.tasks.json`.
 
 ---
 

@@ -13,12 +13,13 @@ updated: 2026-09-19T00:00:00+00:00
 
 ## 当前计划
 
-当前有 2 个仍在推进中的 active plan。
+当前没有仍在推进中的 active plan。SYS-3004 已完成本轮 active-plan 审计；所有四个完成的 convergence plan/task graph 已移入 archive。
 
 | 计划                                                                                                      | 当前状态                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [AI vNext Model Convergence](./2026-09-09-ai-vnext-model-convergence.md)                                  | **ACTIVE / implementation accepted** — Mastra 单一 runtime、Conversation shell、Provider Secret/Model Capability、AI Context、Knowledge stable identity、Workflow Draft/Apply、ExecutionRecord 已实现；`AI-9612` five-layer closure 已接受，剩余系统级收口由 system-wide plan 跟踪。                                                                                                                                                                                                                                                                                   |
-| [System-wide vNext Model Convergence](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) | **ACTIVE / canonical execution order** — ADR-067～111 统一 ownership review 已通过；ADR-111 明确零旧数据 destructive cutover，协调所有 module subplan 的依赖、共享 schema 单写者、直接删除与最终 exact-head closure。                                                                                                                                                                                                                                                                                                                         |
+| —                                                                                                         | **无 active plan** — 当前文档真值由已归档的系统级/AI/Phase 5/task graph closure evidence 与代码、测试、治理门禁共同定义；新的工作应先建立新的 plan。 |
+
+本轮最终证据：[SYS-3004 documentation truth closure](../../analysis/2026-09-19-sys-3004-documentation-truth-closure.md)。
 
 ## 本轮已归档（2026-09-14）
 

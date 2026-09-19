@@ -112,7 +112,7 @@ updated: 2026-09-17T10:57:00+08:00
 
 | 文档 | 说明 |
 | --- | --- |
-| [`docs/product/schedule-planner-scheduler-vnext.md`](../schedule-planner-scheduler-vnext.md) | Planner/Calendar 与 Scheduler/Temporal Engine North Star |
+| [`docs/product/schedule-planner-scheduler-vnext.md`](../schedule-planner-scheduler-vnext.md) | Planner/Calendar 与 Scheduler/Temporal Engine current topology and rationale |
 | [`docs/architecture/adr/ADR-080-planner-calendar-range-occupancy-and-conflict-model.md`](../../architecture/adr/ADR-080-planner-calendar-range-occupancy-and-conflict-model.md) | Calendar Range / Occupancy / Conflict |
 | [`docs/architecture/adr/ADR-081-scheduled-invocation-model-and-legacy-schedule-task-retirement.md`](../../architecture/adr/ADR-081-scheduled-invocation-model-and-legacy-schedule-task-retirement.md) | ScheduledInvocation / ScheduleTask retirement |
 | [`docs/architecture/adr/ADR-082-scheduler-invocation-attempt-and-runtime-state-machine.md`](../../architecture/adr/ADR-082-scheduler-invocation-attempt-and-runtime-state-machine.md) | InvocationAttempt / runtime state machine |

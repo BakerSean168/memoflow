@@ -96,6 +96,6 @@ HTTP 与 Electron IPC 共用相同的 runtime failure projection：capability、
 - [AI vNext Model Convergence architecture](../../architecture/ai-vnext-model-convergence.md)
 - [AI vNext current-system map](../../analysis/2026-09-09-ai-vnext-model-convergence-current-system-map.md)
 - [AI vNext reference/reuse ledger](../../analysis/2026-09-09-ai-vnext-model-convergence-reference-and-reuse-ledger.md)
-- [AI vNext active plan](../../plan/active/2026-09-09-ai-vnext-model-convergence.md)
+- [AI vNext archived plan](../../plan/archive/2026-09-09-ai-vnext-model-convergence.md)
 - [AI-9612 five-layer closure evidence](../../analysis/2026-09-18-ai-9612-vnext-closure-evidence.md)
 - [Core vNext HARD-7104 evidence](../../analysis/2026-09-08-hard-7104-documentation-truth-closure.md)

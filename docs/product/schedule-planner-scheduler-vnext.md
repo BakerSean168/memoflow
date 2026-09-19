@@ -7,12 +7,14 @@ tags:
   - vnext
 description: Schedule/Planner 与 Scheduler/Temporal Engine 的 vNext 产品模型、跨模块时间语义、Planner occupancy/conflict 和内部 invocation North Star
 created: 2026-09-08T20:45:00+08:00
-updated: 2026-09-08T20:45:00+08:00
+updated: 2026-09-19T00:00:00+00:00
 ---
 
 # Schedule / Planner + Scheduler / Temporal Engine vNext
 
 > **ADR-111 cutover policy (2026-09-09):** 当前没有需要保留的 MemoFlow 旧业务数据，也不要求兼容旧客户端/旧备份。本文历史推演中仅为旧数据保存设计的 migration/backfill/compatibility window 不再执行；目标模型和真实行为不变量继续有效。实施采用 direct canonical cutover + old-surface deletion + reset/reseed。
+
+> **当前 implementation checkpoint（2026-09-19）：** ADR-080~083 已在 Phase 4 exact-head closure 中实施。Planner 当前使用 `CalendarEntryRange(Timed | AllDay)`、occupancy/conflict projection 与 owner commands；Scheduler 当前使用 `ScheduledInvocation + InvocationAttempt`、SchedulingPort/reconcile、lease/claim/retry/recovery 与 diagnostics-only transport。下文保留的 North Star/retirement map 解释这些边界的理由，不表示仍存在 legacy compatibility path。
 
 ## 1. 一句话模型
 
@@ -26,7 +28,7 @@ Scheduler
 
 两者共享时间基础设施，但不共享业务 ownership。
 
-## 2. 产品 North Star
+## 2. 当前产品拓扑
 
 ```text
                          MemoFlow Time Workspace
@@ -128,7 +130,7 @@ Routine reminder            -> marker
 
 因此 conflict 不能只检查手工 CalendarEntry。
 
-目标：
+当前语义：
 
 ```text
 all Planner projections
@@ -314,7 +316,7 @@ nextAttemptAt  = technical retry wake-up
 
 ## 13. Scheduler State
 
-目标技术状态：
+当前技术状态：
 
 ```text
 pending
@@ -356,7 +358,7 @@ payload schema versioning
 Prisma/PowerSync parity
 ```
 
-目标是换掉旧语言，不是重写可靠性基础设施。
+当前实现已换掉旧语言，同时保留可靠性基础设施；这不是一个待实施的迁移目标。
 
 ## 15. Scheduler Diagnostics
 
@@ -383,7 +385,7 @@ retry internals
 worker job mutation
 ```
 
-## 16. Legacy Retirement Map
+## 16. Legacy Retirement Map (completed historical mapping)
 
 ```text
 ScheduleTask            -> ScheduledInvocation

@@ -14,7 +14,7 @@ updated: 2026-08-15T00:00:00+08:00
 
 > 状态：**已接受（试点范围）**。适用于 Governance、Notification 与 Task templates 三个 pilot 模块
 > （governance 按 AGENT.md「治理模块先行」铁律作为第一个试点）；
-> 不构成全仓标准。全仓推广需先满足 `docs/plan/active/2026-08-15-refarch-phase5-query-cache-pilot.md` §5.7
+> 不构成全仓标准。全仓推广需先满足 `docs/plan/archive/2026-08-15-refarch-phase5-query-cache-pilot.md` §5.7
 > 的 go/no-go（含 Web e2e、Desktop renderer smoke、offline/restart/reconnect 实测）。
 
 ## 背景

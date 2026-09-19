@@ -13,7 +13,7 @@ updated: 2026-09-08T20:45:00+08:00
 
 # ADR-082: Scheduler Invocation Attempt 与 Runtime State Machine
 
-**状态：** 已采纳（待实施）  
+**状态：** 已采纳并实施（S4-2302B，2026-09-17）
 **日期：** 2026-09-08  
 **影响范围：** scheduler runtime、contracts、database、PowerSync、diagnostics、operations  
 **修订：** ADR-081 ScheduledInvocation 的执行状态与历史事实细化  

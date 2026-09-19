@@ -12,7 +12,7 @@ updated: 2026-09-08T22:00:00+08:00
 
 # ADR-084: Notification Fact 与 Inbox Lifecycle
 
-**状态：** 已采纳（待实施）  
+**状态：** 已采纳并实施（N4-2401，2026-09-17）
 **日期：** 2026-09-08  
 **影响范围：** notification、contracts、database、app-vue、app-react/mobile、api、desktop  
 **关联：** ADR-063、ADR-079、ADR-085~088

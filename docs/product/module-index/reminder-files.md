@@ -5,7 +5,7 @@ tags:
   - routine
 description: Routine vNext 运行时、调度与持久化文件索引
 created: 2026-06-02T00:00:00
-updated: 2026-09-17T20:10:00+08:00
+updated: 2026-09-19T00:00:00+00:00
 ---
 
 # Routine vNext 文件索引
@@ -77,4 +77,4 @@ updated: 2026-09-17T20:10:00+08:00
 - Routine 是唯一 owner truth；不得重新引入旧 Reminder 模型、旧 `/reminders` 产品入口或旧 Reminder IPC channels。
 - WallClock 统一走 Scheduler `ScheduledInvocation`；Elapsed / ActiveUsage / Protocol 由 Routine runtime 自有状态机负责。
 - Notification 只持有 Fact/Interaction/Delivery truth；Routine 动作通过 typed owner-command 回到 Routine application port。
-- Home / Planner 对 Routine 的新读模型在 Phase 5 接入；R4-2201C 不以保留旧 Reminder read model 的方式过渡。
+- Home / Planner 已通过 owner-read composition 接入 Routine projection；不保留旧 Reminder read model，也不创建 Routine 之外的第二真值源。

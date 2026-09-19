@@ -13,7 +13,7 @@ updated: 2026-09-08T20:45:00+08:00
 
 # ADR-083: Schedule / Scheduler Contract、Diagnostics 与 Persistence Boundary
 
-**状态：** 已采纳（待实施）  
+**状态：** 已采纳并实施（S4-2302B，2026-09-17）
 **日期：** 2026-09-08  
 **影响范围：** contracts、schedule、scheduler、database、PowerSync、API、Desktop、app-react diagnostics、governance  
 **修订：** ADR-060 的物理 package 分离进一步推进到 contract/diagnostics/persistence language  

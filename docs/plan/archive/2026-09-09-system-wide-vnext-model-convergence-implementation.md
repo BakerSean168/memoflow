@@ -1,11 +1,14 @@
 ---
-tags: [plan, active, vnext, system-wide, convergence]
+tags: [plan, archive, status, archived, vnext, system-wide, convergence]
 description: MemoFlow 全模块模型收敛唯一执行顺序、destructive cutover、验证与最终删除计划
 created: 2026-09-09T00:31:00+08:00
 updated: 2026-09-19T00:00:00+00:00
+archived: 2026-09-19T00:00:00+00:00
 ---
 
-# MemoFlow System-wide vNext Model Convergence — Implementation Plan
+# MemoFlow System-wide vNext Model Convergence — Archived Implementation Plan
+
+> **Archive closure (2026-09-19):** SYS-3001 ownership review、SYS-3002 five-layer review、SYS-3003 exact-head validation 与 SYS-3004 documentation/archive closure 已完成。SYS-3003 evidence 在 PR #385 merge commit `37c24c79bb631997e06434d999b9912765ea047f` 上接受；SYS-3004 closure evidence 记录当前 PR #340 仍 open/unmerged 的观察状态及本地文档验证。本文保留执行顺序与历史 disposition，不再是 active execution authority。
 
 > **Execution-order authority:** 本文是本轮系统级重构的唯一执行顺序真值。Goal/Task/Setting/AI/Time+Label 既有 active plans 继续提供模块内部实施细节，但不得绕过本文依赖顺序并行写同一 contract/schema。
 >
@@ -700,7 +703,7 @@ Re-run the ownership matrix against actual code. Search for all retired vocabula
 
 Repair all P0/P1/P2 before delivery.
 
-**状态：IMPLEMENTATION COMPLETE — 2026-09-19;** review evidence is recorded in [`2026-09-19-sys-3002-five-layer-review.md`](../../analysis/2026-09-19-sys-3002-five-layer-review.md). Verified P1/P2 findings were repaired with regression evidence; no unresolved P0/P1/P2 remains. SYS-3003 and SYS-3004 are intentionally not started by this worker.
+**状态：IMPLEMENTATION COMPLETE — 2026-09-19;** review evidence is recorded in [`2026-09-19-sys-3002-five-layer-review.md`](../../analysis/2026-09-19-sys-3002-five-layer-review.md). Verified P1/P2 findings were repaired with regression evidence; no unresolved P0/P1/P2 remains. The linked evidence captured SYS-3003/3004 as not yet started at that historical observation; the final statuses are recorded in [`SYS-3004 closure evidence`](../../analysis/2026-09-19-sys-3004-documentation-truth-closure.md).
 
 ## SYS-3003 — Full validation
 
@@ -748,8 +751,8 @@ Plus affected integration/E2E, PowerSync parity, fresh Prisma bootstrap/reset ch
 - Prisma and PowerSync canonical parity must land in the same coherent batch;
 - if a vertical journey fails after cutover, revert the coherent batch and recreate persistence from the prior source revision; never revive a second permanent truth.
 
-## 7. Current closure state
+## 7. Final closure state
 
-The earlier ticket list in this section has been superseded by the accepted canonical head. CLEAN-2601 and SYS-3001 are accepted; SYS-3002 is implementation-complete with its five-layer evidence and minimum scoped gates recorded in the linked analysis document. SYS-3003 (full validation) and SYS-3004 (documentation/archive closure) remain explicitly pending and were not started by this worker.
+The earlier ticket list in this section is historical. CLEAN-2601 and SYS-3001 are accepted; SYS-3002 is implementation-complete; SYS-3003 full validation is recorded in the exact-head evidence; and SYS-3004 documentation/archive closure is recorded in the linked final evidence. No convergence plan remains active.
 
 `SETTING-9209`'s former V2 `settings` singleton was replaced at the product boundary by the owner-driven `preferences@3` capability. No `user_settings` compatibility adapter or V2 transport remains.

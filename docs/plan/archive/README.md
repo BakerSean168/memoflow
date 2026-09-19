@@ -4,7 +4,7 @@ tags:
   - archive
 description: 归档计划目录
 created: 2026-04-26T00:00:00
-updated: 2026-09-14T11:10:04+08:00
+updated: 2026-09-19T00:00:00+00:00
 ---
 
 # Archived Plans
@@ -24,6 +24,13 @@ updated: 2026-09-14T11:10:04+08:00
 - [2026 Q3（7–9 月）](./2026-Q3.md)
 
 ## 本轮归档
+
+| 日期       | 计划                                                                                                      | 结果                                                                                                                                                                                                 |
+| ---------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-09-19 | [System-wide vNext Model Convergence](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) | SYS-3001/3002/3003/3004 完成；SYS-3003 exact-head evidence 在 PR #385 merge commit `37c24c79bb631997e06434d999b9912765ea047f` 上接受；SYS-3004 文档/归档闭环见 final evidence。PR #340 exact-head CI run `35445635678` green but 仍 open/unmerged。 |
+| 2026-09-19 | [AI vNext Model Convergence](./2026-09-09-ai-vnext-model-convergence.md)                                  | AI-9601～9612 accepted；AI-9612 five-layer review P0/P1/P2 = 0，Mastra/owner-port/portable-shell canonical truth 已进入系统级 exact-head closure。 |
+| 2026-09-19 | [Phase 5 Home / Dashboard / AI / Portability](./2026-09-18-phase5-home-dashboard-ai-portability-implementation.md) | HOME-1801..1805、AI-9602..9612、PORT-1610B 已接受；Phase 6 PORT-1611 与 whole-schema cleanup 也已完成。 |
+| 2026-09-19 | [System vNext execution graph](./2026-09-16-system-vnext-execution.tasks.json)                             | Task graph terminal task SYS-3004 completed; graph status is `archived`, with exact validation and documentation closure evidence linked from the graph. |
 
 | 日期       | 计划                                                                                                     | 结果                                                                                                                                                                                            |
 | ---------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

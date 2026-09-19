@@ -15,7 +15,7 @@ updated: 2026-09-08T23:26:00+08:00
 
 # ADR-094: Device Preference、Feature Policy 与 Consent Boundary
 
-**状态：** 已采纳（Device Preference boundary 已实现；CommandRegistry/DeviceKeymap 保留为 future seam）
+**状态：** 已采纳并实施（Device Preference boundary；CommandRegistry/DeviceKeymap 保留为 future seam）
 **日期：** 2026-09-08
 **影响范围：** Setting UI、Desktop、Notification、Shortcut/Command、Feature/Labs、Privacy/Telemetry、Data Portability
 

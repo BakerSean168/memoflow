@@ -13,7 +13,7 @@ updated: 2026-09-08T20:20:00+08:00
 
 # ADR-076: Routine Definition、Trigger Algebra 与 Legacy Reminder 退役
 
-**状态：** 已采纳（待实施）  
+**状态：** 已采纳并实施（R4-2201C，2026-09-17）
 **日期：** 2026-09-08  
 **影响范围：** reminder/routine、contracts、database、PowerSync、app-vue、app-react、AI tools、data portability  
 **修订：** ADR-059 的 Routine 领域模型细化；ADR-062 的 wall-clock ownership 保持不变  

@@ -14,7 +14,7 @@ updated: 2026-09-08T17:55:00+08:00
 
 # ADR-069: Goal Workspace 与跨模块 Context Read Model
 
-**状态：** 已采纳，待实施
+**状态：** 已采纳并实施（GOAL-7205～7207，2026-09-19）
 **日期：** 2026-09-08
 **影响范围：** Goal、Task、Repository/Knowledge、Relation、contracts、API/Desktop composition、PowerSync、Goal Detail UI
 **修订：** ADR-053 的 Goal Detail 只读上下文细节；ADR-056 的 `keyResultId` 必选约束
