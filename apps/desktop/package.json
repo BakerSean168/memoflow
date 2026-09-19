@@ -6,13 +6,13 @@
     "name": "bakersean",
     "email": "lulouhao@stu.sicau.edu.cn"
   },
-  "description": "\u77e5\u884c (MemoFlow) desktop application",
+  "description": "知行 (MemoFlow) desktop application",
   "homepage": "https://github.com/BakerSean168/memoflow",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/BakerSean168/memoflow.git"
   },
-  "version": "0.14.1",
+  "version": "0.15.0",
   "type": "commonjs",
   "dependencies": {
     "@memoflow/account": "workspace:*",
