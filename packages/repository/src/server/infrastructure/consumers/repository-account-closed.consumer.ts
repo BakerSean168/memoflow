@@ -38,18 +38,6 @@ export class RepositoryAccountClosedConsumer {
         },
       });
 
-      // Archive active repositories for identity
-      await tx.repository.updateMany({
-        where: {
-          identityId: event.identityId,
-          status: 'ACTIVE',
-        },
-        data: {
-          status: 'ARCHIVED',
-          updatedAt: new Date(),
-        },
-      });
-
       // Record durable InboxReceipt
       await tx.inboxReceipt.create({
         data: {

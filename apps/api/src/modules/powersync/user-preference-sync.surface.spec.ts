@@ -14,6 +14,31 @@ describe('canonical preference PowerSync control-plane surface', () => {
     );
   });
 
+  it('locks retired persistence tables out of the PowerSync mapping and stream', () => {
+    const syncConfig = readFileSync(resolve(repoRoot, 'docker/powersync/sync-config.yaml'), 'utf8');
+    const retiredTables = [
+      'repositories',
+      'repository_explorers',
+      'repository_statistics',
+      'folders',
+      'resources',
+      'repository_resources',
+      'linked_contents',
+      'resource_references',
+      'reminder_templates',
+      'notification_templates',
+      'notification_channels',
+      'notification_history',
+      'user_settings',
+    ];
+
+    for (const table of retiredTables) {
+      expect(IDENTITY_ID_TABLES.has(table)).toBe(false);
+      expect(getPrismaDelegate({}, table)).toBeNull();
+      expect(syncConfig).not.toContain(`SELECT * FROM ${table}`);
+    }
+  });
+
   it('maps the table to Prisma and normalizes its JSON payload', () => {
     const delegate = {
       upsert: vi.fn(),

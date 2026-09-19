@@ -15,9 +15,6 @@ export const JSON_FIELDS_BY_TABLE: Record<string, ReadonlySet<string>> = {
   accounts: new Set(['profile']),
   user_preference_records: new Set(['payload']),
   goals: new Set(['tags']),
-  repositories: new Set(['config', 'stats']),
-  folders: new Set(['metadata']),
-  resources: new Set(['metadata', 'stats']),
   ai_knowledge_index_entries: new Set(['keywords', 'embedding', 'chunks', 'metadata']),
 };
 
@@ -26,7 +23,6 @@ export const BOOLEAN_FIELDS_BY_TABLE: Record<string, ReadonlySet<string>> = {
   routine_profiles: new Set(['enabled']),
   routine_profile_memberships: new Set(['enabled']),
   notifications: new Set(['is_read']),
-  folders: new Set(['is_expanded']),
 };
 
 function snakeToCamel(key: string): string {

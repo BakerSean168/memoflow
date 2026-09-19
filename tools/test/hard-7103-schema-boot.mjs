@@ -26,18 +26,65 @@ const requiredTables = [
   'invocation_attempts',
   'scheduling_reconcile_operations',
   'schedule_leases',
-  'reminder_templates',
-  'reminder_occurrences',
+  'labels',
+  'goal_labels',
+  'task_labels',
+  'task_plan_history',
   'routine_definitions',
   'routine_profiles',
   'routine_profile_memberships',
+  'routine_occurrences',
+  'routine_interactions',
+  'routine_protocol_definitions',
   'routine_protocol_sessions',
   'routine_temporary_overrides',
   'notifications',
-  'notification_channels',
   'notification_delivery_decisions',
   'notification_dispatch_outbox',
+  'notification_interactions',
+  'notification_preferences',
+  'ai_conversations',
+  'ai_execution_records',
   'reliable_outbox_messages',
+];
+
+const forbiddenTables = [
+  'repositories',
+  'repository_explorers',
+  'repository_statistics',
+  'folders',
+  'resources',
+  'repository_resources',
+  'linked_contents',
+  'resource_references',
+  'reminder_templates',
+  'reminder_groups',
+  'reminder_instances',
+  'reminder_statistics',
+  'user_reminder_preferences',
+  'reminder_history',
+  'reminder_responses',
+  'reminder_occurrences',
+  'schedule_tasks',
+  'schedule_executions',
+  'schedule_statistics',
+  'task_templates',
+  'task_instances',
+  'task_statistics',
+  'task_template_history',
+  'notification_templates',
+  'notification_history',
+  'notification_channels',
+  'ai_messages',
+  'ai_generation_tasks',
+  'ai_usage_quotas',
+  'knowledge_generation_tasks',
+  'user_settings',
+  'dashboard_configs',
+  'editor_workspaces',
+  'editor_workspace_sessions',
+  'editor_workspace_session_groups',
+  'editor_workspace_session_group_tabs',
 ];
 
 const admin = new Client({ connectionString: adminUrl });
@@ -76,6 +123,10 @@ try {
     const names = new Set(tables.rows.map((row) => row.tablename));
     const missing = requiredTables.filter((table) => !names.has(table));
     if (missing.length > 0) throw new Error(`production-like boot missing tables: ${missing.join(', ')}`);
+    const forbidden = forbiddenTables.filter((table) => names.has(table));
+    if (forbidden.length > 0) {
+      throw new Error(`production-like boot retained retired tables: ${forbidden.join(', ')}`);
+    }
 
     const uniqueSchedulingKey = await db.query(`
       SELECT 1
@@ -126,7 +177,7 @@ try {
     }
 
     console.log(
-      `[hard-7103-schema-boot] passed: fresh database booted through database:prisma-push; ${tables.rowCount} public tables; ${requiredTables.length} core tables + pgvector + vNext uniqueness fences + Task Goal-binding v3 fence verified.`,
+      `[hard-7103-schema-boot] passed: fresh database booted through database:prisma-push; ${tables.rowCount} public tables; ${requiredTables.length} canonical tables + retired-table absence + pgvector + vNext uniqueness fences + Task Goal-binding v3 fence verified.`,
     );
   } finally {
     await db.end();

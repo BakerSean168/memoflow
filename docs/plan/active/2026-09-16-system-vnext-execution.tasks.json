@@ -1711,7 +1711,8 @@
       ],
       "context_refs": [
         "docs/plan/active/2026-09-09-system-wide-vnext-model-convergence-implementation.md",
-        "docs/architecture/adr/ADR-111-zero-legacy-data-destructive-cutover-policy.md"
+        "docs/architecture/adr/ADR-111-zero-legacy-data-destructive-cutover-policy.md",
+        "docs/analysis/2026-09-19-clean-2601-whole-schema-sweep-evidence.md"
       ],
       "protected_contracts": [
         "Governance schema is permanent reference-feature state and is not a deletion candidate.",
@@ -1725,7 +1726,8 @@
         "Run fresh database bootstrap/reset plus full ownership/residue governance."
       ],
       "integration_notes": [
-        "SYS-3001 begins only after this destructive schema baseline is accepted."
+        "SYS-3001 begins only after this destructive schema baseline is accepted.",
+        "Implementation evidence is recorded at docs/analysis/2026-09-19-clean-2601-whole-schema-sweep-evidence.md; independent acceptance remains with ChatGPT Web."
       ],
       "acceptance_criteria": [
         "No approved legacy schema/model remains in canonical Prisma or PowerSync.",

@@ -1,9 +1,9 @@
 /**
  * Repository Prisma adapters (knowledge runtime).
  *
- * Legacy Folder/Resource/Repository/Bookmark Prisma adapters were removed with
- * the Obsidian vault migration. Portable backup uses data-portability Prisma
- * writes against table schemas, not these domain repositories.
+ * Pre-Knowledge persistence adapters were removed with the Obsidian vault
+ * migration. Portable backup uses data-portability Prisma writes against
+ * table schemas, not these domain repositories.
  */
 
 export {

@@ -5822,6 +5822,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/database/src/schema/repository-vnext-retirement.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/database/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/database/src/schema/scheduler-vnext-retirement.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11032,7 +11040,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 12
+      "fileCount": 13
     },
     {
       "id": "packages/domain-shared/vitest.config.ts",
@@ -11721,7 +11729,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1016,
+    "unit": 1017,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

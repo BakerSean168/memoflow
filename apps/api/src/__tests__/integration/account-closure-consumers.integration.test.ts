@@ -96,18 +96,7 @@ describe('API host account-closed consumer chain', () => {
       },
     });
 
-    // Seed pending repository work
-    const repoId = crypto.randomUUID();
-    await prisma.repository.create({
-      data: {
-        id: repoId,
-        identityId,
-        name: 'Test Repo',
-        type: 'git',
-        path: '/test/repo',
-        status: 'ACTIVE',
-      },
-    });
+    // Seed pending Knowledge-owner work
     const connId = `KnowledgeRemoteBindingId_${crypto.randomUUID()}`;
     const knowledgeSpaceId = `KnowledgeSpaceId_${crypto.randomUUID()}`;
     await prisma.knowledgeSpace.create({ data: { id: knowledgeSpaceId } });
@@ -161,9 +150,7 @@ describe('API host account-closed consumer chain', () => {
     const dispatches = await prisma.notificationDispatchOutbox.findMany({ where: { identityId } });
     expect(dispatches.every((disp) => disp.status === 'cancelled')).toBe(true);
 
-    // Repository pending write request cancelled and repository archived
-    const repository = await prisma.repository.findUnique({ where: { id: repoId } });
-    expect(repository?.status).toBe('ARCHIVED');
+    // Knowledge-owner pending write request cancelled
     const writeReq = await prisma.knowledgeWriteRequest.findUnique({ where: { id: writeReqId } });
     expect(writeReq?.status).toBe('CANCELLED');
 

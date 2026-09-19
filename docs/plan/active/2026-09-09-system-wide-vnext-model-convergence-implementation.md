@@ -662,6 +662,8 @@ The Stage A ledger proves every surviving portable product fact has an owner cap
 
 ## CLEAN-2601 — Whole-schema legacy sweep
 
+**状态：IMPLEMENTED — 2026-09-19; final-head evidence captured; pending independent acceptance**
+
 Delete only after capability cutovers:
 
 - old Repository/Folder/Resource tables;
@@ -673,6 +675,10 @@ Delete only after capability cutovers:
 - any orphan Dashboard/Editor schema. Governance schema is permanent reference-feature state and is not a deletion candidate.
 
 Prisma + PowerSync parity is mandatory in the same batch.
+
+Implementation evidence: `docs/analysis/2026-09-19-clean-2601-whole-schema-sweep-evidence.md`.
+The exact-head gates are green, Governance remains permanent reference-feature
+state, and SYS-3001+ has not started.
 
 ---
 
