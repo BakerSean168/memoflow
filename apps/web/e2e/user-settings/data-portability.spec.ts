@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { PortableBackupEnvelopeV3Schema } from '@memoflow/contracts/data-portability';
-import { API_CONFIG } from '../config';
+import { API_CONFIG, TIMEOUT_CONFIG } from '../config';
 import { registerAndLogin } from '../helpers/testHelpers';
 
 const V3_CAPABILITY_KEYS = [
@@ -111,7 +111,13 @@ test.describe('Data Portability V3', () => {
     });
   });
 
-  test('[P1] export returns a valid V3 envelope with registered capabilities', async ({ page }) => {
+  test('[P1] export returns registered capabilities with materialized owner state', async ({
+    page,
+  }) => {
+    // NotificationPreference is optional owner state; materialize it through the public settings
+    // surface before asserting that its registered capability has an exported payload.
+    await materializeNotificationPreference(page);
+
     const result = await callExportAPI(page);
 
     expect(result.ok).toBe(true);
@@ -210,3 +216,26 @@ test.describe('Data Portability V3', () => {
     expect(importResult.ok).toBe(false);
   });
 });
+
+async function materializeNotificationPreference(page: Page): Promise<void> {
+  await page.getByTestId('settings-tab-notifications').click();
+  await expect(page.getByTestId('notification-delivery-card')).toBeVisible({
+    timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+  });
+
+  const notificationToggle = page.getByTestId('notification-global-inApp');
+  const initialState = await notificationToggle.getAttribute('aria-checked');
+  const updatedState = initialState === 'true' ? 'false' : 'true';
+  const updateResponse = page.waitForResponse(
+    (response) =>
+      response.url().endsWith('/api/v1/notifications/preferences') &&
+      response.request().method() === 'PUT' &&
+      response.ok(),
+  );
+
+  await notificationToggle.click();
+  await updateResponse;
+  await expect(notificationToggle).toHaveAttribute('aria-checked', updatedState, {
+    timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+  });
+}
