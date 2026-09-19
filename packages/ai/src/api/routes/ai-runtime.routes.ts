@@ -1,5 +1,6 @@
 import { Router, type Request, type RequestHandler, type Response } from 'express';
 import {
+  AssistantRuntimeCancelResultSchema,
   AssistantRuntimeClientCommandSchema,
   AssistantRuntimeConversationDeleteResultSchema,
   AssistantRuntimeEventSchema,
@@ -237,7 +238,9 @@ export function registerAIRuntimeRoutes(
     }
 
     const cancelled = runtime.cancelRun({ identityId, runId: parsed.data.runId });
-    res.status(200).json(responseBuilder.success({ cancelled }));
+    res
+      .status(200)
+      .json(responseBuilder.success(AssistantRuntimeCancelResultSchema.parse({ cancelled })));
   });
 
   router.post('/usage', auth, async (req, res) => {

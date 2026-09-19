@@ -88,6 +88,11 @@ export type AssistantRuntimeConversationDeleteResult = z.infer<
   typeof AssistantRuntimeConversationDeleteResultSchema
 >;
 
+export const AssistantRuntimeCancelResultSchema = z
+  .object({ cancelled: z.boolean() })
+  .strict();
+export type AssistantRuntimeCancelResult = z.infer<typeof AssistantRuntimeCancelResultSchema>;
+
 const RuntimeEventBaseShape = {
   eventId: z.string().min(1),
   runId: z.string().min(1),

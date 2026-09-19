@@ -69,6 +69,7 @@ import {
   type IElectronModuleContext,
 } from '@memoflow/contracts/electron';
 import {
+  AssistantRuntimeCancelResultSchema,
   AssistantRuntimeClientCommandSchema,
   AssistantRuntimeConversationDeleteResultSchema,
   AssistantRuntimeEventSchema,
@@ -430,7 +431,7 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
               identityId: requestContext.identityId,
               runId: parsed.data.runId,
             });
-            return ok({ cancelled });
+            return ok(AssistantRuntimeCancelResultSchema.parse({ cancelled }));
           }),
         );
         installed.push(AIChannels.RUNTIME_ASSISTANT_CANCEL);

@@ -8,6 +8,7 @@ import type {
   ApplyKnowledgeNoteInput,
   KnowledgeCaptureMutationPort,
 } from './knowledge-note-mutation.port';
+import { toWorkflowFailure } from './workflow-failure';
 
 const RETRYABLE_LEGACY_CODES = new Set([
   'DATABASE_ERROR',
@@ -29,10 +30,11 @@ function retryableFailure(error: ResultError): boolean {
 function failure(
   error: Pick<ResultError, 'code' | 'message' | 'failure'>,
 ): KnowledgeCaptureExecutionFailure {
+  const safeFailure = toWorkflowFailure(error);
   return {
     operation: 'knowledge_note',
-    code: String(error.code),
-    message: error.message,
+    code: safeFailure.code,
+    message: safeFailure.message,
     retryable: retryableFailure(error as ResultError),
   };
 }

@@ -160,6 +160,15 @@ describe('AssistantRuntimeHttpClient', () => {
       runId: 'run-1',
     });
   });
+
+  it('fails closed when the HTTP cancel result violates the runtime contract', async () => {
+    const post = vi.fn().mockResolvedValue(ok({ cancelled: 'yes' }));
+    const client = new AssistantRuntimeHttpClient(httpStub({ post }));
+
+    await expect(client.cancelRun('run-1')).rejects.toMatchObject({
+      code: 'AI_RUNTIME_PROTOCOL_ERROR',
+    });
+  });
 });
 
 describe('AssistantRuntimeIpcClient', () => {
@@ -249,6 +258,15 @@ describe('AssistantRuntimeIpcClient', () => {
     expect(invoke).toHaveBeenCalledWith(AIChannels.RUNTIME_ASSISTANT_CANCEL, {
       type: 'cancel_run',
       runId: 'run-1',
+    });
+  });
+
+  it('fails closed when the IPC cancel result violates the runtime contract', async () => {
+    const invoke = vi.fn(async () => ok({ cancelled: 'yes' }));
+    const client = new AssistantRuntimeIpcClient({ invoke } as never);
+
+    await expect(client.cancelRun('run-1')).rejects.toMatchObject({
+      code: 'AI_RUNTIME_PROTOCOL_ERROR',
     });
   });
 });

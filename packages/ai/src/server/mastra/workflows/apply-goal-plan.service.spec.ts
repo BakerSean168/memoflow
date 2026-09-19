@@ -259,6 +259,8 @@ describe('ApplyGoalPlanService V2', () => {
       expect.objectContaining({
         operation: 'task_create',
         draftRef: 'task:company-research',
+        code: 'SERVICE_UNAVAILABLE',
+        message: 'AI service is unavailable',
         retryable: true,
       }),
     ]);
@@ -378,7 +380,9 @@ describe('ApplyGoalPlanService V2', () => {
 
   it('does not let a temporary label resolution failure escape the durable workflow', async () => {
     const port = mutationPort();
-    port.resolveLabels.mockRejectedValue(new Error('label service offline'));
+    port.resolveLabels.mockRejectedValue(
+      new Error('postgres://secret-internal-host/labels?token=internal-secret'),
+    );
 
     const receipt = await new ApplyGoalPlanService(port).apply({
       workflowRunId: 'workflow-1',
@@ -391,7 +395,10 @@ describe('ApplyGoalPlanService V2', () => {
       operation: 'label_resolve',
       draftRef: 'goal',
       code: 'INTERNAL_ERROR',
+      message: 'AI workflow operation failed',
     });
+    expect(receipt.failures[0]?.message).not.toContain('secret-internal-host');
+    expect(receipt.failures[0]?.message).not.toContain('internal-secret');
   });
 
   it('makes duplicate approve idempotent for the same draft receipt', async () => {
