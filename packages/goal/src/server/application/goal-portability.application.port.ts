@@ -61,6 +61,7 @@ export interface GoalPortabilitySnapshot {
   identityId: GoalServerDTO['identityId'];
   name: GoalServerDTO['name'];
   summary: GoalServerDTO['summary'];
+  description: GoalServerDTO['description'];
   status: GoalServerDTO['status'];
   version: number;
   completedAt: GoalServerDTO['completedAt'];
@@ -87,6 +88,7 @@ export function createGoalPortabilitySnapshot(
     identityId: server.identityId,
     name: server.name,
     summary: server.summary,
+    description: server.description,
     status: server.status,
     version: server.version,
     completedAt: server.completedAt,

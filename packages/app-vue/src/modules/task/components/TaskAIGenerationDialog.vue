@@ -1,13 +1,10 @@
 <template>
   <Dialog :open="modelValue" @update:open="$emit('update:modelValue', $event)">
-    <DialogContent class="max-w-[800px]">
-      <DialogHeader>
-        <DialogTitle class="text-xl"> ✨ {{ t('task.aiGeneration.title') }} </DialogTitle>
-      </DialogHeader>
+    <ProductDialogShell :open="modelValue" test-id="task-ai-generation-dialog" size="lg">
+      <template #icon><Sparkles class="mt-0.5 h-5 w-5 text-primary" /></template>
+      <template #title>{{ t('task.aiGeneration.title') }}</template>
 
-      <Separator />
-
-      <div class="p-6">
+      <div>
         <div v-if="loading" class="text-center py-8">
           <Loader2 class="h-16 w-16 animate-spin text-primary mx-auto mb-4" />
           <p class="text-lg font-semibold">
@@ -92,10 +89,8 @@
         </div>
       </div>
 
-      <Separator />
-
-      <DialogFooter class="px-6 py-4">
-        <Button variant="ghost" @click="onCancel" :disabled="importing">{{
+      <template #footer>
+        <Button variant="ghost" :disabled="importing" @click="onCancel">{{
           t('task.aiGeneration.cancel')
         }}</Button>
         <Button
@@ -103,11 +98,11 @@
           :disabled="selectedCount === 0 || importing"
           @click="onConfirmImport"
         >
-          <Loader2 v-if="importing" class="h-4 w-4 mr-1 animate-spin" />
+          <Loader2 v-if="importing" class="mr-1 h-4 w-4 animate-spin" />
           {{ t('task.aiGeneration.importSelected') }} ({{ selectedCount }})
         </Button>
-      </DialogFooter>
-    </DialogContent>
+      </template>
+    </ProductDialogShell>
   </Dialog>
 </template>
 
@@ -117,17 +112,12 @@ import { useI18n } from 'vue-i18n';
 import type { EditableTaskUI, UIPriority } from './types';
 import {
   Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
   Alert,
   AlertDescription,
   Badge,
   Button,
   Input,
   Textarea,
-  Separator,
   Progress,
   Checkbox,
   Select,
@@ -136,7 +126,8 @@ import {
   SelectContent,
   SelectItem,
 } from '@memoflow/ui-vue-shadcn';
-import { Loader2, CheckCircle, Clock } from '@lucide/vue';
+import { CheckCircle, Clock, Loader2, Sparkles } from '@lucide/vue';
+import { ProductDialogShell } from '../../../shared/components';
 
 const props = defineProps<{
   modelValue: boolean;

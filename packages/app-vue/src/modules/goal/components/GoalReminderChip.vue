@@ -1,17 +1,10 @@
 <template>
   <Popover>
     <PopoverTrigger as-child>
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        class="h-8 max-w-full justify-start gap-1.5 rounded-full px-3 font-normal"
-        :disabled="disabled"
-        data-testid="goal-reminder-chip"
-      >
-        <Bell class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-        <span class="truncate">{{ summary }}</span>
-      </Button>
+      <ProductPropertyChip :disabled="disabled" data-testid="goal-reminder-chip">
+        <template #icon><Bell class="h-3.5 w-3.5" /></template>
+        {{ summary }}
+      </ProductPropertyChip>
     </PopoverTrigger>
     <PopoverContent align="start" class="w-80 max-w-[calc(100vw-2rem)] space-y-4 p-3">
       <div>
@@ -110,6 +103,7 @@ import {
   PopoverTrigger,
   Switch,
 } from '@memoflow/ui-vue-shadcn';
+import { ProductPropertyChip } from '../../../shared/components';
 
 const props = withDefaults(
   defineProps<{

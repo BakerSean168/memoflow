@@ -65,6 +65,7 @@ function goalFromDTO(dto: GoalClientDTO): Goal {
     identityId: IdentityId.of(dto.identityId),
     name: dto.name,
     summary: dto.summary,
+    description: dto.description,
     status: dto.status,
     startDate: dto.startDate ?? null,
     target: dto.target ?? null,

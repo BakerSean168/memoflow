@@ -21,7 +21,7 @@ const GoalNameSchema = z
   .string()
   .trim()
   .min(1, '目标名称不能为空')
-  .max(256, '目标名称不能超过 256 字符');
+  .max(80, '目标名称不能超过 80 字符');
 
 // Residual 753: request reminder-config reuses residual 741 VO schemas.
 // Request-only refinements (value.min(0), triggers.max(10)) without dual bodies.
@@ -45,7 +45,8 @@ export const CreateGoalSchema = z
   .object({
     id: brandedId<GoalId>().optional(),
     name: GoalNameSchema,
-    summary: z.string().trim().max(500, '目标摘要不能超过 500 字符').optional(),
+    summary: z.string().trim().max(255, '目标摘要不能超过 255 字符').optional(),
+    description: z.string().max(10000, '目标描述不能超过 10000 字符').optional(),
     startDate: YmdSchema.optional(),
     target: GoalTimeframeSchema.optional(),
     labelIds: z.array(z.string().min(1)).max(50).optional(),
@@ -68,7 +69,8 @@ export const UpdateGoalSchema = z
   .object({
     expectedVersion: z.number().int().min(1),
     name: GoalNameSchema.optional(),
-    summary: z.string().trim().max(500, '目标摘要不能超过 500 字符').nullable().optional(),
+    summary: z.string().trim().max(255, '目标摘要不能超过 255 字符').nullable().optional(),
+    description: z.string().max(10000, '目标描述不能超过 10000 字符').nullable().optional(),
     startDate: YmdSchema.nullable().optional(),
     target: GoalTimeframeSchema.nullable().optional(),
     labelIds: z.array(z.string().min(1)).max(50).optional(),
@@ -162,7 +164,8 @@ export type GetGoalAggregateReq = void;
 export const CloneGoalSchema = z
   .object({
     name: GoalNameSchema.optional(),
-    summary: z.string().trim().max(500, '目标摘要不能超过 500 字符').optional(),
+    summary: z.string().trim().max(255, '目标摘要不能超过 255 字符').optional(),
+    description: z.string().max(10000, '目标描述不能超过 10000 字符').optional(),
     includeKeyResults: z.boolean().optional(),
     includeRecords: z.boolean().optional(),
   })

@@ -17,30 +17,33 @@
       </SheetHeader>
 
       <div v-if="event" class="mt-4 space-y-4">
-        <div class="space-y-1">
-          <p class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            {{ t('schedule.eventDetail.time') }}
-          </p>
-          <p class="text-sm text-foreground">
-            {{ event.displayMode === 'all-day' ? t('schedule.eventDetail.allDay') : timeRange }}
-          </p>
-        </div>
-
-        <div class="space-y-1">
-          <p class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            {{ t('schedule.eventDetail.source') }}
-          </p>
-          <span
-            class="inline-block rounded px-1.5 py-0.5 text-[11px] font-medium"
-            :class="{
-              'bg-primary/10 text-primary': event.source === 'schedule',
-              'bg-success/15 text-success': event.source === 'goal',
-              'bg-info/15 text-info': event.source === 'task',
-            }"
-          >
-            {{ calendarEventSourceLabel(event.source, t) }}
-          </span>
-        </div>
+        <dl class="divide-y border-y border-border/70" data-testid="event-detail-properties">
+          <div class="grid grid-cols-[6rem_minmax(0,1fr)] gap-3 py-3">
+            <dt class="text-xs font-medium text-muted-foreground">
+              {{ t('schedule.eventDetail.time') }}
+            </dt>
+            <dd class="text-sm text-foreground">
+              {{ event.displayMode === 'all-day' ? t('schedule.eventDetail.allDay') : timeRange }}
+            </dd>
+          </div>
+          <div class="grid grid-cols-[6rem_minmax(0,1fr)] gap-3 py-3">
+            <dt class="text-xs font-medium text-muted-foreground">
+              {{ t('schedule.eventDetail.source') }}
+            </dt>
+            <dd>
+              <span
+                class="inline-block rounded px-1.5 py-0.5 text-[11px] font-medium"
+                :class="{
+                  'bg-primary/10 text-primary': event.source === 'schedule',
+                  'bg-success/15 text-success': event.source === 'goal',
+                  'bg-info/15 text-info': event.source === 'task',
+                }"
+              >
+                {{ calendarEventSourceLabel(event.source, t) }}
+              </span>
+            </dd>
+          </div>
+        </dl>
 
         <Alert v-if="event.hasConflict" class="border-warning/40 bg-warning/10">
           <AlertTriangle class="h-4 w-4 text-warning" />

@@ -17,17 +17,18 @@ describe('date input Product Time boundary (residual 1225)', () => {
     resolve(dir, '../../../../app-react/src/screens/GoalEditorScreen.tsx'),
     'utf8',
   );
+  const datePicker = readFileSync(resolve(dir, '../components/ProductDatePicker.vue'), 'utf8');
   const calendarSelect = readFileSync(resolve(dir, 'handle-calendar-select.ts'), 'utf8');
   const parseCalendar = readFileSync(resolve(dir, 'parse-to-date.ts'), 'utf8');
-  const formatDisplay = readFileSync(resolve(dir, 'format-display-date.ts'), 'utf8');
 
-  it('keeps app-vue Task date parsing on canonical Ymd calendar adapters', () => {
-    expect(vue).toContain('parseToCalendarDate');
-    expect(vue).toContain('handleCalendarSelect');
+  it('keeps app-vue Task date parsing on the shared canonical Ymd calendar adapter', () => {
+    expect(vue).toContain('ProductDatePicker');
+    expect(datePicker).toContain('parseToCalendarDate');
+    expect(datePicker).toContain('handleCalendarSelect');
     expect(parseCalendar).toContain('ymdToCalendarDateValue');
     expect(parseCalendar).toContain('requireYmd');
     expect(calendarSelect).toContain('calendarDateValueToYmd');
-    for (const source of [vue, parseCalendar, calendarSelect]) {
+    for (const source of [vue, datePicker, parseCalendar, calendarSelect]) {
       expect(source).not.toContain('Date.parse');
       expect(source).not.toContain('getTimezoneOffset');
       expect(source).not.toContain('toISOString().slice');
@@ -45,8 +46,8 @@ describe('date input Product Time boundary (residual 1225)', () => {
   });
 
   it('keeps date formatting on the shared Product Time formatter', () => {
-    expect(vue).toContain('formatDisplayDate');
-    expect(formatDisplay).toContain("from '@memoflow/time'");
+    expect(vue).toContain('ProductDatePicker');
+    expect(datePicker).toContain('formatProductYmd');
     expect(react).toContain('goalTimeframeInputValue');
     expect(react).not.toMatch(/function toDateInput\b/);
   });

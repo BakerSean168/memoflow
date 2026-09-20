@@ -195,6 +195,68 @@ describe('GoalModuleLayout', () => {
     expect(goalMocks.fetchGoals).not.toHaveBeenCalled();
   });
 
+  it('clears the route-owned create dialog on cancel and can reopen it', async () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/goals', name: 'goal-list', component: RouteContentProbe }],
+    });
+    await router.push('/goals?status=active');
+    await router.isReady();
+
+    const wrapper = mount(GoalModuleLayout, {
+      global: {
+        plugins: [router, i18n],
+        stubs: {
+          GoalPageToolbar: ToolbarStub,
+          GoalDialog: GoalDialogStub,
+        },
+      },
+    });
+
+    await wrapper.get('[data-testid="create-goal-entry"]').trigger('click');
+    await vi.waitFor(() => expect(router.currentRoute.value.query.dialog).toBe('goal'));
+
+    wrapper.findComponent(GoalDialogStub).vm.$emit('update:open', false);
+    await vi.waitFor(() => {
+      expect(router.currentRoute.value.query.dialog).toBeUndefined();
+      expect(router.currentRoute.value.query.goalId).toBeUndefined();
+      expect(router.currentRoute.value.query.status).toBe('active');
+    });
+
+    await wrapper.get('[data-testid="create-goal-entry"]').trigger('click');
+    await vi.waitFor(() => expect(router.currentRoute.value.query.dialog).toBe('goal'));
+  });
+
+  it('preserves unrelated route filters when a Goal save closes the dialog', async () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/goals', name: 'goal-list', component: RouteContentProbe }],
+    });
+    await router.push('/goals?status=active&label=work&dialog=goal');
+    await router.isReady();
+
+    const wrapper = mount(GoalModuleLayout, {
+      global: {
+        plugins: [router, i18n],
+        stubs: {
+          GoalPageToolbar: ToolbarStub,
+          GoalDialog: GoalDialogStub,
+        },
+      },
+    });
+
+    await vi.waitFor(() => expect(wrapper.findComponent(GoalDialogStub).props('open')).toBe(true));
+    wrapper.findComponent(GoalDialogStub).vm.$emit('created');
+
+    await vi.waitFor(() => {
+      expect(router.currentRoute.value.query.dialog).toBeUndefined();
+      expect(router.currentRoute.value.query.goalId).toBeUndefined();
+      expect(router.currentRoute.value.query.status).toBe('active');
+      expect(router.currentRoute.value.query.label).toBe('work');
+    });
+    expect(goalMocks.fetchGoals).toHaveBeenCalled();
+  });
+
   it('publishes the goal dialog draft status to the shell', async () => {
     const router = createRouter({
       history: createMemoryHistory(),

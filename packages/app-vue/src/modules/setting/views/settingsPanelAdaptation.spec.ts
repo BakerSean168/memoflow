@@ -1,91 +1,36 @@
-/**
- * Settings scene adaptation (STATE D)
- *
- * Settings is no longer a BusinessPanel tab. Narrow/wide follows the settings
- * content container (<1024 = top tabs, >=1024 = sidebar).
- */
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { defineComponent, h, nextTick, ref } from 'vue';
-import { mount } from '@vue/test-utils';
 
-function mountSettingsSceneAdaptationProbe(initialWidth: number) {
-  const width = ref(initialWidth);
+const view = readFileSync(resolve(import.meta.dirname, 'UserSettingsView.vue'), 'utf8');
+const navigation = readFileSync(
+  resolve(import.meta.dirname, '../components/SettingsNavigation.vue'),
+  'utf8',
+);
 
-  const Probe = defineComponent({
-    setup() {
-      const SETTINGS_NARROW_VIEWPORT = 1024;
-      const isNarrow = () => width.value < SETTINGS_NARROW_VIEWPORT;
-      const activeTab = ref<'appearance' | 'account'>('appearance');
-
-      return () =>
-        h('div', { 'data-testid': 'settings-panel-layout' }, [
-          h(
-            'nav',
-            {
-              'data-testid': isNarrow() ? 'settings-group-tabs' : 'settings-group-sidebar',
-            },
-            [
-              h(
-                'button',
-                {
-                  'data-testid': 'settings-tab-appearance',
-                  onClick: () => {
-                    activeTab.value = 'appearance';
-                  },
-                },
-                'appearance',
-              ),
-              h(
-                'button',
-                {
-                  'data-testid': 'settings-tab-account',
-                  onClick: () => {
-                    activeTab.value = 'account';
-                  },
-                },
-                'account',
-              ),
-            ],
-          ),
-          h('div', { 'data-testid': 'settings-active-tab' }, activeTab.value),
-        ]);
-    },
+describe('Settings scene three-state responsive contract', () => {
+  it('keeps the full category sidebar only on wide settings surfaces', () => {
+    expect(view).toContain('v-if="!isNarrow && shellStore.settingsNavigationOpen"');
+    expect(view).toContain('data-testid="settings-group-sidebar"');
+    expect(view).not.toContain('settings-group-tabs');
   });
 
-  const wrapper = mount(Probe);
-  return {
-    wrapper,
-    setWidth: async (value: number) => {
-      width.value = value;
-      await nextTick();
-      // Force re-render by remounting is heavier; probe re-reads width on each render via forceUpdate
-      wrapper.vm.$.update();
-      await nextTick();
-    },
-  };
-}
+  it('shows a compact local Settings header when the category sidebar is hidden by width', () => {
+    expect(view).toContain('v-if="isNarrow"');
+    expect(view).toContain('data-testid="settings-compact-header"');
+    expect(view).toContain('data-testid="settings-compact-back"');
+  });
 
-describe('Settings scene adaptation (STATE D / content container)', () => {
-  it('uses top group tabs in narrow content and sidebar groups when wide', async () => {
-    // jsdom default innerWidth is 1024; probe uses injected width ref instead.
-    const { wrapper, setWidth } = mountSettingsSceneAdaptationProbe(900);
+  it('uses a left Sheet drawer on narrow surfaces and shares the same navigation renderer', () => {
+    expect(view).toContain('side="left"');
+    expect(view).toContain('data-testid="settings-navigation-drawer"');
+    expect(view.match(/<SettingsNavigation/g)).toHaveLength(2);
+    expect(navigation).toContain('data-testid="settings-return-to-app"');
+    expect(navigation).toContain('LinearSidebarItem');
+  });
 
-    expect(wrapper.find('[data-testid="settings-group-tabs"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="settings-group-sidebar"]').exists()).toBe(false);
-    expect(wrapper.find('[data-testid="settings-tab-appearance"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="settings-tab-account"]').exists()).toBe(true);
-
-    await wrapper.get('[data-testid="settings-tab-account"]').trigger('click');
-    await nextTick();
-    expect(wrapper.get('[data-testid="settings-active-tab"]').text()).toBe('account');
-
-    await setWidth(1200);
-    // Because h() closed over isNarrow() at first render, remount for wide check
-    wrapper.unmount();
-    const wide = mountSettingsSceneAdaptationProbe(1200);
-    expect(wide.wrapper.find('[data-testid="settings-group-tabs"]').exists()).toBe(false);
-    expect(wide.wrapper.find('[data-testid="settings-group-sidebar"]').exists()).toBe(true);
-    expect(wide.wrapper.find('[data-testid="settings-tab-account"]').exists()).toBe(true);
-    wide.wrapper.unmount();
+  it('makes the settings content area the sole vertical scroll owner', () => {
+    expect(view).toContain('data-testid="settings-content-scroll"');
+    expect(view).toContain('min-h-0 flex-1 overflow-y-auto');
   });
 });

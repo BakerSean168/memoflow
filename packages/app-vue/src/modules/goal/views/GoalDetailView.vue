@@ -3,26 +3,32 @@
     class="flex h-full min-h-0 flex-col overflow-hidden bg-background"
     data-testid="goal-detail-view"
   >
-    <header class="flex min-h-14 items-center gap-2 border-b px-4">
-      <Button variant="ghost" size="sm" @click="router.push({ name: 'goal-list' })">
-        <ArrowLeft class="mr-1 h-4 w-4" />
-        {{ t('common.back') }}
-      </Button>
-      <div v-if="goal" class="min-w-0">
-        <h1 class="truncate font-semibold" data-testid="goal-detail-title">{{ goal.name }}</h1>
-      </div>
-      <div v-if="goal" class="ml-auto flex flex-wrap justify-end gap-1">
-        <Button variant="ghost" size="sm" @click="editOpen = true">{{ t('common.edit') }}</Button>
-        <Button size="sm" @click="openCreateKr">{{ t('goal.detail.addKR') }}</Button>
-        <Button
-          variant="outline"
-          size="sm"
-          @click="router.push({ name: 'goal-review-create', params: { goalId: goal.id } })"
-        >
-          {{ t('goal.detail.review') }}
+    <ModuleHeader data-testid="goal-detail-toolbar">
+      <template #leading>
+        <Button variant="ghost" size="sm" @click="router.push({ name: 'goal-list' })">
+          <ArrowLeft class="mr-1 h-4 w-4" />
+          {{ t('common.back') }}
         </Button>
-      </div>
-    </header>
+        <div v-if="goal" class="min-w-0">
+          <h1 class="truncate text-sm font-semibold" data-testid="goal-detail-title">
+            {{ goal.name }}
+          </h1>
+        </div>
+      </template>
+      <template #actions>
+        <template v-if="goal">
+          <Button variant="ghost" size="sm" @click="editOpen = true">{{ t('common.edit') }}</Button>
+          <Button
+            variant="outline"
+            size="sm"
+            @click="router.push({ name: 'goal-review-create', params: { goalId: goal.id } })"
+          >
+            {{ t('goal.detail.review') }}
+          </Button>
+          <Button size="sm" @click="openCreateKr">{{ t('goal.detail.addKR') }}</Button>
+        </template>
+      </template>
+    </ModuleHeader>
 
     <div
       v-if="isLoading && !workspace"
@@ -37,16 +43,27 @@
       {{ error }}
     </div>
 
-    <div v-else-if="goal && workspace" class="min-h-0 flex-1 overflow-auto p-4">
-      <div class="mx-auto max-w-4xl space-y-6">
+    <div
+      v-else-if="goal && workspace"
+      class="min-h-0 flex-1 overflow-auto px-3 py-3 @md/panel:px-5 @md/panel:py-4"
+    >
+      <div class="mx-auto max-w-5xl space-y-6">
         <article
-          class="space-y-5 rounded-xl border bg-card p-5"
+          class="space-y-5 border-b border-border/70 pb-5"
           data-testid="goal-workspace-header"
         >
-          <div>
+          <div data-testid="goal-detail-identity">
             <h2 class="text-2xl font-semibold tracking-tight">{{ goal.name }}</h2>
             <p v-if="goal.summary" class="mt-1 text-sm text-muted-foreground">{{ goal.summary }}</p>
           </div>
+
+          <p
+            v-if="goal.description"
+            class="whitespace-pre-wrap text-sm leading-6 text-foreground/85"
+            data-testid="goal-detail-description"
+          >
+            {{ goal.description }}
+          </p>
 
           <div class="flex flex-wrap items-center gap-2" data-testid="goal-detail-property-chips">
             <Badge variant="secondary" data-testid="goal-status" :data-goal-status="goal.status">
@@ -77,7 +94,7 @@
             <Progress :model-value="goal.overallProgress" />
           </div>
 
-          <div v-if="!goal.archivedAt" class="flex flex-wrap gap-2 border-t pt-4">
+          <div v-if="!goal.archivedAt" class="flex flex-wrap gap-2 pt-1">
             <Button
               v-if="goal.status === 'Planned'"
               size="sm"
@@ -154,7 +171,7 @@
             <span class="text-xs text-muted-foreground">{{ keyResults.length }}</span>
           </div>
 
-          <div v-if="keyResults.length" class="divide-y rounded-xl border bg-card">
+          <div v-if="keyResults.length" class="divide-y border-y border-border/70">
             <article v-for="kr in keyResults" :key="kr.id" class="p-4">
               <button
                 type="button"
@@ -237,7 +254,7 @@
           </div>
           <div
             v-else-if="workspace.taskContext.preview.length"
-            class="divide-y rounded-xl border bg-card"
+            class="divide-y border-y border-border/70"
           >
             <button
               v-for="task in workspace.taskContext.preview"
@@ -283,7 +300,7 @@
           </div>
           <div
             v-else-if="workspace.knowledgeContext.preview.length"
-            class="divide-y rounded-xl border bg-card"
+            class="divide-y border-y border-border/70"
           >
             <button
               v-for="note in workspace.knowledgeContext.preview"
@@ -320,7 +337,7 @@
           data-testid="goal-workspace-progress"
         >
           <h2 class="font-semibold">{{ t('goal.list.recentProgress') }}</h2>
-          <div class="divide-y rounded-xl border bg-card">
+          <div class="divide-y border-y border-border/70">
             <div v-for="record in workspace.recentProgress" :key="record.id" class="px-4 py-3">
               <div class="flex items-center justify-between gap-3">
                 <p class="text-sm font-medium">{{ keyResultName(record.keyResultId) }}</p>
@@ -341,7 +358,7 @@
             <h2 class="font-semibold">{{ t('goal.list.reviews') }}</h2>
             <span class="text-xs text-muted-foreground">{{ workspace.recentReviews.length }}</span>
           </div>
-          <div v-if="workspace.recentReviews.length" class="divide-y rounded-xl border bg-card">
+          <div v-if="workspace.recentReviews.length" class="divide-y border-y border-border/70">
             <button
               v-for="review in workspace.recentReviews"
               :key="review.id"
@@ -387,6 +404,7 @@ import {
   type KeyResultClientDTO,
 } from '@memoflow/contracts/goal';
 import { presentErrorMessage } from '@memoflow/http-client';
+import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
 import { GoalDialog, KeyResultDialog } from '../components';
 import {
   formatProductDate,

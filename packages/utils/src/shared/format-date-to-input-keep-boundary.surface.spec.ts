@@ -29,6 +29,10 @@ describe('formatDateToInput dual retired (residual 1210)', () => {
     ),
     'utf8',
   );
+  const productDatePicker = readFileSync(
+    resolve(dir, '../../../app-vue/src/shared/components/ProductDatePicker.vue'),
+    'utf8',
+  );
 
   it('owns Residual 1210 retirement: utils no longer exports formatDateToInput', () => {
     expect(utilsIndex).not.toMatch(/export \{[^}]*formatDateToInput/);
@@ -44,13 +48,16 @@ describe('formatDateToInput dual retired (residual 1210)', () => {
 
   it('app-vue task form keeps canonical Ymd dates at the schedule boundary', () => {
     expect(vue).toContain('TaskPlanScheduleSchema');
-    expect(vue).toContain('formatDisplayDate');
-    expect(vue).toContain('parseToCalendarDate');
-    expect(vue).toContain('handleCalendarSelect');
-    expect(vue).not.toContain('formatDateToInput');
-    expect(vue).not.toContain('getProductTime');
-    expect(vue).not.toContain('new Date(');
-    expect(vue).not.toContain('toISOString');
+    expect(vue).toContain('ProductDatePicker');
+    expect(productDatePicker).toContain('formatProductYmd');
+    expect(productDatePicker).toContain('parseToCalendarDate');
+    expect(productDatePicker).toContain('handleCalendarSelect');
+    for (const source of [vue, productDatePicker]) {
+      expect(source).not.toContain('formatDateToInput');
+      expect(source).not.toContain('getProductTime');
+      expect(source).not.toContain('new Date(');
+      expect(source).not.toContain('toISOString');
+    }
   });
 
   it('runtime: documents that schedule dates remain canonical Ymd values', () => {

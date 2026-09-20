@@ -6,9 +6,11 @@ import { productionLocaleMessages } from '../../../locales/production-messages';
 import GoalListView from './GoalListView.vue';
 
 const routerPush = vi.hoisted(() => vi.fn());
+const routerReplace = vi.hoisted(() => vi.fn());
 
 vi.mock('vue-router', () => ({
-  useRouter: () => ({ push: routerPush }),
+  useRoute: () => ({ query: {}, path: '/goals', hash: '' }),
+  useRouter: () => ({ push: routerPush, replace: routerReplace }),
 }));
 
 vi.mock('../composables/useGoal', () => ({

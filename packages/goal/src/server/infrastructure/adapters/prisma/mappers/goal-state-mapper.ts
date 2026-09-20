@@ -33,6 +33,7 @@ export interface RawGoalData {
   identityId: string;
   name: string;
   summary: string | null;
+  description: string | null;
   status: string;
   startDate: string | null;
   targetKind: string | null;
@@ -135,6 +136,7 @@ export function rawDataToGoalState(raw: RawGoalData): GoalState {
     identityId: IdentityId.of(raw.identityId),
     name: raw.name,
     summary: raw.summary ?? null,
+    description: raw.description ?? null,
     status: raw.status as GoalStatus,
     startDate: decodeGoalStartDate(raw.startDate),
     target: decodeGoalTimeframe(raw.targetKind, raw.targetEndDate),

@@ -6,11 +6,12 @@
       :data-notification-id="notification.id"
       :data-read-state="notification.isRead ? 'read' : 'unread'"
       :data-notification-type="notification.type"
+      data-density="compact"
       :class="[
-        'flex w-full gap-3 border-b border-l-4 p-4 text-left cursor-pointer transition-all last:border-b-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
+        'group flex w-full gap-3 border-b px-3 py-3 text-left transition-colors last:border-b-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
         notification.isRead
-          ? 'border-l-transparent bg-background/70 opacity-75 hover:bg-muted/40 hover:opacity-100'
-          : 'border-l-info bg-info/12 shadow-sm hover:bg-info/16',
+          ? 'bg-background text-muted-foreground hover:bg-muted/30'
+          : 'bg-muted/20 text-foreground hover:bg-muted/35',
       ]"
       :aria-label="notification.title"
       @click="$emit('click', notification)"
@@ -18,22 +19,19 @@
       <!-- Icon -->
       <div
         :class="[
-          'flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all',
+          'mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md',
           typeColorClass,
-          notification.isRead ? 'opacity-55 saturate-50' : 'ring-4 ring-info/12 shadow-sm',
+          notification.isRead ? 'opacity-60' : '',
         ]"
       >
-        <component :is="typeIcon" class="h-5 w-5 text-white" />
+        <component :is="typeIcon" class="h-4 w-4" />
       </div>
 
       <!-- Content -->
       <div class="flex-1 min-w-0">
         <div class="flex items-center gap-2 mb-1">
           <!-- Unread indicator dot -->
-          <span
-            v-if="!notification.isRead"
-            class="h-2.5 w-2.5 shrink-0 rounded-full bg-info shadow-[0_0_0_4px_hsl(var(--info)/0.16)]"
-          />
+          <span v-if="!notification.isRead" class="h-1.5 w-1.5 shrink-0 rounded-full bg-info" />
           <span
             :class="[
               'text-sm transition-colors',
@@ -56,14 +54,14 @@
 
         <p
           :class="[
-            'text-sm line-clamp-2 transition-colors',
+            'line-clamp-2 text-sm leading-5 transition-colors',
             notification.isRead ? 'text-muted-foreground/80' : 'text-foreground/80',
           ]"
         >
           {{ notification.content }}
         </p>
 
-        <div class="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+        <div class="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
           <Badge variant="outline" class="font-normal">{{ presentation.categoryLabel }}</Badge>
           <span class="truncate">{{ presentation.workflowLabel }}</span>
           <span v-if="presentation.relatedEntityLabel">
@@ -160,16 +158,16 @@ const typeIconMap: Record<string, unknown> = {
 };
 
 const typeColorClassMap: Record<string, string> = {
-  SYSTEM: 'bg-info',
-  TASK: 'bg-success',
-  GOAL: 'bg-warning',
-  REMINDER: 'bg-purple-500',
-  SCHEDULE: 'bg-cyan-500',
+  SYSTEM: 'bg-info/10 text-info',
+  TASK: 'bg-success/10 text-success',
+  GOAL: 'bg-warning/10 text-warning',
+  REMINDER: 'bg-purple-500/10 text-purple-500',
+  SCHEDULE: 'bg-cyan-500/10 text-cyan-500',
 };
 
 const typeIcon = computed(() => typeIconMap[props.notification.type] || Bell);
 const typeColorClass = computed(
-  () => typeColorClassMap[props.notification.type] || 'bg-muted-foreground',
+  () => typeColorClassMap[props.notification.type] || 'bg-muted text-muted-foreground',
 );
 
 const priorityVariant = computed(() => {

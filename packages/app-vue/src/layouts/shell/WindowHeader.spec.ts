@@ -94,10 +94,13 @@ describe('WindowHeader workspace navigation', () => {
       'settings',
     );
     expect(wrapper.find('[data-testid="shell-primary-capsules"]').exists()).toBe(false);
-    expect(wrapper.text()).toContain('Settings');
+    expect(wrapper.get('[data-testid="settings-window-header-title"]').text()).toContain(
+      'Settings',
+    );
+    expect(wrapper.get('[data-testid="shell-sidebar-toggle"]').exists()).toBe(true);
 
-    await wrapper.get('[data-testid="settings-return-to-app"]').trigger('click');
-    expect(wrapper.emitted('return-to-app')).toHaveLength(1);
+    await wrapper.get('[data-testid="shell-sidebar-toggle"]').trigger('click');
+    expect(wrapper.emitted('toggle-sidebar')).toHaveLength(1);
   });
 
   it('exposes a dynamic right-panel toggle without changing sidebar state', async () => {

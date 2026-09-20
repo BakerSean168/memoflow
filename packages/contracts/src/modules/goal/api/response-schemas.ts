@@ -101,8 +101,9 @@ export type GoalLabelProjection = z.infer<typeof GoalLabelProjectionSchema>;
 export const GoalClientDTOSchema = z.object({
   id: brandedId<GoalId>(),
   identityId: brandedId<IdentityId>(),
-  name: z.string(),
-  summary: z.string().max(500).nullable(),
+  name: z.string().max(80),
+  summary: z.string().max(255).nullable(),
+  description: z.string().max(10000).nullable().default(null),
   status: z.enum(GoalStatus),
   startDate: YmdSchema.nullable(),
   target: GoalTimeframeSchema.nullable(),

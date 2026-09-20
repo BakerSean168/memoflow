@@ -23,6 +23,7 @@ export interface GoalState {
   identityId: IdentityId;
   name: string;
   summary: string | null;
+  description: string | null;
   status: GoalStatus;
   startDate: Ymd | null;
   target: GoalTimeframe | null;
@@ -61,6 +62,10 @@ export class Goal extends AggregateRoot<GoalId> {
 
   get summary(): string | null {
     return this._props.summary;
+  }
+
+  get description(): string | null {
+    return this._props.description;
   }
 
   get status(): GoalStatus {
@@ -144,6 +149,7 @@ export class Goal extends AggregateRoot<GoalId> {
         identityId: String(this._props.identityId) as GoalClientDTO['identityId'],
         name: this._props.name,
         summary: this._props.summary,
+        description: this._props.description,
         status: this._props.status,
         startDate: this._props.startDate ?? null,
         target: this._props.target ?? null,

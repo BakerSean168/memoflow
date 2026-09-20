@@ -90,12 +90,11 @@ describe('GOAL-7202 canonical lifecycle', () => {
     expect('targetDate' in goal.toServerDTO()).toBe(false);
   });
 
-  it('publishes only name + summary as Goal identity text and no retired taxonomy fields', () => {
+  it('publishes name + summary + description as Goal identity text and no retired taxonomy fields', () => {
     const dto = createGoal().toServerDTO();
     expect(dto.name).toBe('Graduate');
     expect(dto.summary).toBe('Finish the degree');
     for (const field of [
-      'description',
       'motivation',
       'feasibilityAnalysis',
       'color',

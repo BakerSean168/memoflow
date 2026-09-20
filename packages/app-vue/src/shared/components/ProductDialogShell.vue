@@ -2,24 +2,34 @@
   <DialogContent
     :class="
       cn(
-        'flex max-h-[min(90vh,760px)] min-h-0 flex-col gap-0 overflow-hidden rounded-lg p-0',
+        'flex max-h-[min(90vh,760px)] min-h-0 flex-col gap-0 overflow-hidden rounded-xl border-border/80 bg-card p-0',
         sizeClass,
         contentClass,
       )
     "
     :data-testid="testId"
     @open-auto-focus="handleOpenAutoFocus"
+    @interact-outside="handleInteractOutside"
   >
     <DialogHeader class="shrink-0 border-b px-6 py-5 text-left">
-      <div class="flex min-w-0 items-start gap-3">
-        <slot name="icon" />
-        <div class="min-w-0 space-y-1">
-          <DialogTitle class="text-lg font-semibold">
-            <slot name="title" />
-          </DialogTitle>
-          <DialogDescription class="text-sm text-muted-foreground">
-            <slot name="description" />
-          </DialogDescription>
+      <div class="flex min-w-0 items-start justify-between gap-4">
+        <div class="flex min-w-0 items-start gap-3">
+          <slot name="icon" />
+          <div class="min-w-0 space-y-1">
+            <DialogTitle class="text-lg font-semibold">
+              <slot name="title" />
+            </DialogTitle>
+            <DialogDescription class="text-sm text-muted-foreground">
+              <slot name="description" />
+            </DialogDescription>
+          </div>
+        </div>
+        <div
+          v-if="$slots.actions"
+          class="mr-7 flex shrink-0 items-center gap-2"
+          data-testid="product-dialog-header-actions"
+        >
+          <slot name="actions" />
         </div>
       </div>
     </DialogHeader>
@@ -34,7 +44,7 @@
     </div>
 
     <DialogFooter
-      class="sticky bottom-0 z-10 shrink-0 gap-2 border-t bg-background px-6 py-4 sm:gap-2"
+      class="sticky bottom-0 z-10 shrink-0 gap-2 border-t bg-card px-6 py-4 sm:gap-2"
       data-testid="product-dialog-footer"
     >
       <slot name="footer" />
@@ -61,12 +71,14 @@ const props = withDefaults(
     contentClass?: HTMLAttributes['class'];
     bodyClass?: HTMLAttributes['class'];
     initialFocusSelector?: string;
+    preventInteractOutside?: boolean;
   }>(),
   {
     size: 'md',
     contentClass: undefined,
     bodyClass: undefined,
     initialFocusSelector: undefined,
+    preventInteractOutside: false,
   },
 );
 
@@ -84,6 +96,12 @@ function handleOpenAutoFocus(event: Event): void {
 
   event.preventDefault();
   scheduleInitialFocus();
+}
+
+function handleInteractOutside(event: Event): void {
+  if (props.preventInteractOutside) {
+    event.preventDefault();
+  }
 }
 
 function scheduleInitialFocus(): void {

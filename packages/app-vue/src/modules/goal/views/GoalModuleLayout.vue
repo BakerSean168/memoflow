@@ -18,7 +18,8 @@
     <main class="flex min-w-0 flex-1 flex-col overflow-hidden">
       <router-view />
       <GoalDialog
-        v-model:open="dialogOpen"
+        :open="dialogOpen"
+        @update:open="handleDialogOpenUpdate"
         :mode="dialogMode"
         :goal="editingGoal"
         @dirty-change="goalDialogDirty = $event"
@@ -41,9 +42,11 @@ import GoalPageToolbar from '../components/GoalPageToolbar.vue';
 import { useGoal } from '../composables/useGoal';
 import { useLabelCatalog } from '../../../shared/composables/useLabelCatalog';
 import { usePanelSurfaceStatus } from '../../../layouts/shell/usePanelSurfaceStatus';
+import { useRouteDialogState } from '../../../shared/composables/useRouteDialogState';
 
 const route = useRoute();
 const router = useRouter();
+const routeDialog = useRouteDialogState({ dialogValue: 'goal', identityQueryKeys: ['goalId'] });
 const { t } = useI18n();
 const {
   goals,
@@ -75,7 +78,13 @@ const views = computed(() => [
 ]);
 
 function openCreate() {
-  void router.push({ name: 'goal-list', query: { dialog: 'goal' } });
+  void routeDialog.open({ name: 'goal-list' });
+}
+function handleDialogOpenUpdate(open: boolean) {
+  if (open) return;
+  dialogOpen.value = false;
+  goalDialogDirty.value = false;
+  void routeDialog.close();
 }
 function openCreateWithAI() {
   dialogOpen.value = false;
@@ -109,13 +118,13 @@ async function syncDialogFromRoute() {
     ? { ...aggregate.goal, keyResults: aggregate.keyResults, reviews: aggregate.reviews }
     : null;
   dialogOpen.value = editingGoal.value !== null;
-  if (!editingGoal.value) await router.replace({ name: 'goal-list' });
+  if (!editingGoal.value) await routeDialog.close();
 }
 
 async function handleSaved() {
   goalDialogDirty.value = false;
   await fetchGoals();
-  await router.replace({ name: 'goal-list' });
+  await routeDialog.close();
 }
 
 function handleDatabaseTablesChanged(event: Event) {

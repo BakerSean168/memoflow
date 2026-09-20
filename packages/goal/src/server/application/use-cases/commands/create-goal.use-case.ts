@@ -116,6 +116,7 @@ export class CreateGoalUseCase implements GoalPortabilityApplicationPort {
         identityId: IdentityId.of(cx.identityId),
         name: input.name,
         summary: input.summary ?? null,
+        description: input.description ?? null,
         startDate: input.startDate ?? null,
         target: input.target ?? null,
         reminderConfig: input.reminderConfig
@@ -213,6 +214,7 @@ export class CreateGoalUseCase implements GoalPortabilityApplicationPort {
         identityId: IdentityId.of(cx.identityId),
         name: input.name,
         summary: input.summary ?? null,
+        description: input.description ?? null,
         startDate: input.startDate ?? null,
         target: input.target ?? null,
         reminderConfig: input.reminderConfig

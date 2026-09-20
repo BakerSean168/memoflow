@@ -1,0 +1,661 @@
+---
+tags:
+  - plan
+  - archive
+  - ui
+  - form
+  - linear
+  - product
+description: MemoFlow 表单与核心业务界面的 Linear-inspired 渐进披露、视觉密度与交互一致性精修计划
+created: 2026-09-20T00:20:00+08:00
+updated: 2026-09-20T15:02:00+08:00
+status: archived
+---
+
+# MemoFlow UI Form Polish & Product Surface Refinement
+
+> **归档闭环（2026-09-20）**：UFP-1001～1006 与 UFP-2001～2007 已完成。实现 head `4b1bdd837dc9616f71641e040af56155ccd65975` 的 PR #389 CI run `35495233782` 全绿；本地 exact-product Local Docker 22/22、Tailnet Phase-D 1/1 验收通过。本文件归档后只保留历史真值，不再承载 active task。
+
+## 1. 背景与目标
+
+Goal vNext 已经证明一条更适合 MemoFlow 的产品表单路径：
+
+```text
+Identity first
++ lightweight property chips
++ progressive disclosure
++ owner-specific detail editors
+```
+
+这套方向参考 Linear 的高密度 property row / progressive disclosure，但不复制团队项目管理属性。当前代码已经存在三种成熟度不同的形态：
+
+1. **Goal**：Name + Summary + Status / Start / Target / Labels / Reminder / Notes property chips，当前最接近 North Star。
+2. **Task**：已经是 property-chip first，但 Basic Info 仍保留传统 section/label/form 视觉，且 chip 样式与 Goal 重复实现。
+3. **Schedule**：仍是传统长表单，一次性铺开标题、描述、全天、起止日期、起止时间、冲突检测、地点、参与者，是本轮最明显的 UI 密度问题。
+
+本轮目标不是“把所有输入框都改成圆角胶囊”，而是建立一套可推广的 **MemoFlow Product Form Language**：
+
+- 高频、强语义文本永远首先出现；
+- 结构化属性使用紧凑 property chips；
+- 低频属性默认收起，点击后局部编辑；
+- 同一时刻最多展开一个主要属性编辑器；
+- 长内容、复杂子对象保留独立 section / drawer / workspace，不塞进 property row；
+- 所有 create/edit dialog 统一 draft/error/loading/focus/scroll/footer 行为；
+- UI 收敛不改变领域 owner、contract 与持久化真值。
+
+## 2. 当前代码审计
+
+### 2.1 Goal
+
+当前：
+
+```text
+GoalDialog
+├─ Name
+├─ Summary
+├─ property chips
+│  ├─ Status
+│  ├─ Start
+│  ├─ Target
+│  ├─ Labels
+│  ├─ Reminder
+│  └─ Notes
+└─ Key Results
+```
+
+问题：
+
+- property chip 的视觉 class 仍在 Goal / Task 各自重复；
+- Name 仍有传统 Label + bordered Input，Summary 仍是普通 Input，视觉层级还可进一步接近“identity editor”；
+- status/read-only chip 与可交互 chip 没有共享的产品级 primitive。
+
+### 2.2 Task
+
+当前已经通过 `TASK-7307` 实现：
+
+```text
+Task title + description
+[Schedule] [Recurrence] [Goal] [Reminder] [Checklist] [Properties]
+                  ↓
+            one inline editor
+```
+
+问题：
+
+- `BasicInfoSection` 仍展示“基本信息”标题、Info icon、Label、传统输入框网格；
+- property chip button 样式与 Goal 重复；
+- property editor panel 有正确的 progressive disclosure，但视觉语言尚未抽为共享 primitive。
+
+### 2.3 Schedule
+
+当前 `CreateScheduleDialog` 是传统长表单：
+
+```text
+Title
+Description
+All day
+Start date | Start time
+End date   | End time
+Auto detect conflicts
+Location
+Attendees
+```
+
+问题：
+
+- 低频属性永久占据空间；
+- date/time 是一个完整 grid，而不是“当前值摘要 + 点开编辑”；
+- dialog 没有使用 `ProductDialogShell`；
+- 与 Goal / Task 的 create/edit 心智模型不一致；
+- 组件自己维护滚动容器/footer，而共享 shell 已经提供统一解法。
+
+### 2.4 其他 UI
+
+- Account/Profile 等仍有传统 Form，但并非所有表单都适合 property chips。
+- Settings/provider onboarding 已经有“先选择，再展开配置”的渐进披露思路，应保留业务语义而非机械统一。
+- 页面级 `LinearPageHeader / LinearListItem / LinearSidebarItem / LinearPanel` 已存在，可作为后续整体页面精修的基础。
+
+## 3. MemoFlow Product Form Language
+
+### 3.1 Identity zone
+
+创建对象时首屏只展示最重要的 identity：
+
+```text
+Large title input
+Lightweight summary / description
+```
+
+原则：
+
+- title/name 强视觉；
+- summary/description 弱视觉；
+- 不用“基本信息”卡片包裹 identity；
+- label 可以视觉隐藏，但必须保留 accessible name；
+- validation 在用户交互后就地出现，不用常驻说明块占据高度。
+
+### 3.2 Property row
+
+适合 chip 的属性必须同时满足：
+
+- 值可以被短文本摘要；
+- 用户不需要持续看到完整编辑器；
+- 点开编辑不会破坏上下文；
+- 它是对象的 property，而不是一个复杂子工作流。
+
+统一高度：32px；允许 wrap；图标 14px；文本以摘要值优先。
+
+### 3.3 Property editor
+
+点击 chip 后：
+
+- inline panel / popover 展开；
+- 同一 group 一次只展开一个；
+- 再次点击同一个 chip 关闭；
+- panel 使用轻背景 + 细边框，不再套第二层重型 card；
+- 完成修改后 chip 自身立即投影摘要值。
+
+### 3.4 Advanced / complex content
+
+以下内容不强行 chip 化：
+
+- KR editor；
+- Task checklist items；
+- Reminder multi-trigger editor；
+- Provider secret / OAuth；
+- Knowledge document；
+- 长文本正文。
+
+它们可以由 chip 作为入口，但内部仍使用适合业务的 editor。
+
+### 3.5 Dialog shell
+
+所有主业务 create/edit dialog 优先使用 `ProductDialogShell`：
+
+- canonical header；
+- single scroll owner；
+- sticky footer；
+- stable initial focus；
+- draft-preserving error state；
+- responsive max height。
+
+## 4. 共享 UI primitive
+
+### UFP-1001 — Product property primitives
+
+新增：
+
+- `ProductPropertyChip.vue`
+  - interactive / active / disabled；
+  - slot icon；
+  - 单行摘要；
+  - canonical 32px radius/density/focus；
+  - `aria-pressed` 只在提供 active 时出现；
+  - attrs/test id 正常透传。
+
+本轮先不创建过度抽象的万能 Form DSL。只有当第二个以上 editor panel 出现完全相同结构时，才抽 `ProductPropertyPanel`。
+
+**Acceptance**：Goal、Task、Schedule 不再复制 `h-8 rounded-full px-3 font-normal` chip class。
+
+## 5. 第一批实施
+
+### UFP-1002 — Goal visual polish
+
+- property chips 切到共享 `ProductPropertyChip`；
+- Name 改为 identity-style 大输入，不再显示传统 form label；
+- Summary 改为轻量 summary 输入；
+- 保留现有 Status / Start / Target / Labels / Reminder / Notes 语义与测试契约；
+- 不改变 Goal contract / lifecycle / GoalTimeframe。
+
+### UFP-1003 — Task visual polish
+
+- property chips 切到共享 `ProductPropertyChip`；
+- `BasicInfoSection` 去掉“基本信息”section chrome 与 Info icon；
+- Title / Description 改成 identity-style；
+- 保留 Schedule / Recurrence / Goal / Reminder / Checklist / Properties progressive disclosure；
+- 不改变 `TaskPlanViewModel` 与 TASK-7307 contract。
+
+### UFP-1004 — Schedule property-chip conversion
+
+重写 `CreateScheduleDialog` presentation，不改请求 contract：
+
+```text
+Title
+Description
+
+[When] [Location] [Attendees] [Conflict check]
+
+<only one expanded property editor>
+
+Cancel / Create
+```
+
+`When` editor 内保留：
+
+- All day switch；
+- Start date / time；
+- End date / time。
+
+Location / Attendees / Conflict 分别由自己的 chip 打开 editor。
+
+要求：
+
+- 使用 `ProductDialogShell`；
+- 保持失败时不关闭、不丢 draft；
+- 保持成功才 reset；
+- 保持 timed / all-day range contract；
+- conflict detection 在 AllDay 时仍不提交为 true；
+- 编辑既有 CalendarEntry 时值完整回填。
+
+## 6. 第二批实施
+
+### UFP-1005 — Secondary form inventory + selective migration
+
+逐项审查：
+
+- Account Profile；
+- Label create/edit；
+- Repository dialogs；
+- Provider onboarding；
+- cloud/profile connection；
+- remaining schedule/admin dialogs。
+
+每个表单先分类：
+
+```text
+A. compact property editor -> migrate
+B. wizard/onboarding -> keep staged flow
+C. long-content editor -> keep full editor
+D. destructive/security flow -> keep explicit traditional confirmation
+```
+
+禁止为了视觉一致而牺牲任务语义。
+
+### UFP-1006 — Page-level surface polish
+
+在表单语言稳定后再推广页面：
+
+- 页面 header density；
+- toolbar 主次动作；
+- list row hover/selection；
+- empty/loading/error states；
+- detail page property rows；
+- sidebar section spacing；
+- 减少重复 card-in-card 与边框层级；
+- 窄面板/桌面宽屏矩阵。
+
+优先复用现有 `LinearPageHeader / LinearListItem / LinearSidebarItem / LinearPanel`。
+
+## 7. 验证策略
+
+### Unit / surface
+
+- shared chip component behavior；
+- Goal dialog convergence lock；
+- Task property-chip anti-resurrection lock；
+- Schedule dialog submission lifecycle；
+- Schedule 新 property-chip surface lock。
+
+### Type / lint / build
+
+```text
+pnpm nx run app-vue:test
+pnpm nx run app-vue:typecheck
+pnpm nx run app-vue:lint
+pnpm nx run app-vue:build
+```
+
+### Product validation
+
+第一批完成后在 local Docker 验证：
+
+1. Goal create/edit；
+2. Task create/edit；
+3. Schedule create/edit；
+4. narrow business panel；
+5. keyboard-only create flow；
+6. failed submit preserves draft；
+7. no nested-scroll/footer clipping。
+
+## 8. 非目标
+
+本轮不做：
+
+- 改 Goal / Task / Schedule domain model；
+- 引入另一个 UI framework；
+- 为了模仿 Linear 增加 MemoFlow 不需要的团队属性；
+- 把所有 settings/security forms 强行 property-chip 化；
+- 重新设计移动端完整信息架构。
+
+## 9. 执行顺序
+
+```text
+UFP-1001 shared primitive
+      ↓
+UFP-1002 Goal polish ─┐
+UFP-1003 Task polish ─┼─ parallel-safe at component level
+      ↓               │
+UFP-1004 Schedule ────┘
+      ↓
+focused tests + typecheck + lint + build
+      ↓
+local Docker product validation
+      ↓
+UFP-1005 secondary forms
+      ↓
+UFP-1006 page-level polish
+      ↓
+final UI/a11y/product review
+```
+
+## 10. 当前状态
+
+- [x] Current UI audit
+- [x] Product Form Language documented
+- [x] UFP-1001 shared property primitive
+- [x] UFP-1002 Goal polish
+- [x] UFP-1003 Task polish
+- [x] UFP-1004 Schedule property-chip conversion
+- [x] Focused validation
+- [x] Local Docker validation
+- [x] UFP-1005 secondary form inventory
+- [x] UFP-1005 selective migration
+- [x] UFP-1006 page-level refinement — accepted scope completed through the V2 convergence pass
+
+## 11. First implementation checkpoint — 2026-09-20
+
+UFP-1001～1004 已完成第一轮实现：
+
+- 新增共享 `ProductPropertyChip`，统一 32px property trigger、active/disabled/focus/a11y 语义；
+- Goal 的 Start / Target / Labels / Reminder / Notes 入口收敛到共享紧凑视觉，Name + Summary 改为 identity-first editor；
+- Task 六个 property chips 使用同一 primitive，`BasicInfoSection` 删除传统 section chrome，Title/Description 改为 identity-first editor；
+- Schedule 创建/编辑从常驻长表单改为 `ProductDialogShell + identity + When/Location/Attendees/Conflict property row`，同一时间只展开一个 editor；
+- 所有 identity 输入保留明确 keyboard focus presentation，不以“无边框”牺牲可访问性；
+- Goal / Task / Schedule domain/DTO/submission contract 均未修改。
+
+验证证据：
+
+- focused UI/anti-resurrection：6 files / 22 tests PASS；
+- App-Vue full suite：200 files / 796 tests PASS；
+- App-Vue typecheck PASS；lint 0 errors（8 个既有 warnings，无本轮新增）；build PASS；
+- Web typecheck + production build PASS；
+- Desktop typecheck + production build PASS；
+- `docs:check` PASS；`governance:check` PASS；
+- `git diff --check` PASS。
+
+UFP-1005 inventory 已落到 `docs/analysis/2026-09-20-ui-form-and-surface-refinement-inventory.md`，并开始 selective migration：GoalRecord 改为共享 shell + quick-value property triggers；Task AI generation 与 Template selection 统一到 `ProductDialogShell`，但保留它们本来的 complex-editor / selection-grid 语义。Template selection 原有 outside-interaction lock 通过 `preventInteractOutside` 进入共享 shell，并有行为测试防止迁移时回归。
+
+交互预览已部署为独立 Web preview，复用既有 SYS-3003 validation backend，不替代 canonical staging：`https://gcp-dev-01.taile92a8e.ts.net:20300/`。Web 与经 Nginx proxy 的 `/api/auth/capabilities` 均返回 HTTP 200，preview container healthy。完整 fresh local-Docker acceptance 仍保留为后续 gate。
+
+下一步继续 UFP-1005 remainder，再进入 UFP-1006 页面级 density/toolbar/list/detail polish。
+
+## 12. Second implementation checkpoint — 2026-09-20
+
+UFP-1005 selective migration 已收口：
+
+- `KnowledgeProjectionWorkspaceView` 的 create/review 与 adoption staged dialogs 已迁移到 `ProductDialogShell`，保留 staged review / immutable confirmation 语义；
+- 当前 production Vue surface 中仍直接使用 `DialogContent` 的业务组件只剩：
+  - `AISettings.vue`：provider onboarding 本身拥有 picker → credentials → model 的专用 staged header，因此保留自定义 shell；
+  - `KnowledgeRepositorySettings.vue`：disconnect / purge 属于 destructive confirmation，保留显式传统确认；
+  - `goal/components/dag/ExportDialog.vue`：当前没有 production consumer，不为无调用 surface 做视觉迁移。
+
+UFP-1006 已进入页面级第一批：
+
+- Goal Detail 改用统一 `ModuleHeader`，identity / progress / lifecycle 从重型 card 降为扁平 detail surface；Key Result / Task / Knowledge / Progress / Review previews 去掉重复 card chrome；
+- Task Detail 的 recurrence / schedule / reminder / Goal binding 从四张 card 收敛为紧凑 property rows，execution summary / linked notes 同步降低边框层级；
+- Notification inbox row 改为 compact density，去掉高饱和 `border-left + ring + shadow` 未读表现，保留清晰但更克制的 unread hierarchy；
+- Settings 宽屏 sidebar 复用共享 `LinearSidebarItem`，窄屏继续保持横向 tabs；
+- Schedule `DayDetailSheet` 改为 compact divided rows，`EventDetailSheet` 的 time / source 改为统一 property rows，与新版 create form 的 property language 对齐。
+
+CI 反馈闭环：首个 PR head 的 Governance 失败并非产品代码失败，而是新增 test files 后 `tools/test-system-v2/test-inventory.json` 未刷新。已运行 `pnpm test:inventory` 更新到 **1187 files / 1020 unit tests in inventory**，随后 `test-system-v2:test:inventory` check PASS。
+
+本 checkpoint 新增 `product-surface-polish.surface.spec.ts`，锁定 Goal / Task / Schedule / Notification / Settings 的页面级 density 与 anti-resurrection 约束。
+
+当前 exact-tree 验证：
+
+- App-Vue full suite：**201 files / 802 tests PASS**；
+- App-Vue typecheck / lint / build PASS（lint 仍为 0 errors / 8 个既有 warnings）；
+- Web typecheck / production build PASS；
+- Desktop typecheck / production build PASS；
+- `docs:check` / `governance:check` PASS；
+- test inventory：**1187 files**，`test-system-v2:test:inventory` PASS；
+- `git diff --check` PASS。
+
+## 13. UI Refinement V2 — confirmed product decisions
+
+The second review round turns the broad UI polish effort into six concrete product contracts. These decisions are now implementation truth for the remaining active plan.
+
+### UFP-2001 — Settings responsive scene shell
+
+Settings must reuse the existing application `WindowHeader`; it must not invent a second top-level header.
+
+**Wide state**
+
+```text
+WindowHeader
+[sidebar toggle] [back] [forward] ...
+────────────────────────────────────
+Settings sidebar | settings content
+```
+
+- full category navigation is visible on the left;
+- `Back to app` moves into the Settings sidebar;
+- content owns its own vertical scroll;
+- the existing workspace top bar remains the one canonical top bar.
+
+**Narrow state**
+
+```text
+WindowHeader
+[sidebar toggle] [back] [forward] ...
+────────────────────────────────────
+← Settings
+────────────────────────────────────
+settings content
+```
+
+- category sidebar is fully hidden, not converted to a horizontal tab strip or icon rail;
+- content area gets a lightweight local `← Settings` header;
+- the top-bar sidebar button opens the navigation drawer.
+
+**Drawer state**
+
+- left Sheet/Drawer with overlay;
+- same category navigation component as the wide sidebar;
+- `Back to app` remains inside the drawer;
+- selecting a category closes the drawer on narrow widths;
+- `prefers-reduced-motion` must be respected.
+
+Implementation principle: navigation items are one shared renderer consumed by persistent sidebar and drawer; do not fork two different settings menus.
+
+### UFP-2002 — Route-owned Goal modal lifecycle
+
+`?dialog=goal` is the canonical source of truth. Local dialog state may project it but must never diverge from it.
+
+- open create → push `dialog=goal`;
+- open edit → push `dialog=goal&goalId=...`;
+- Cancel / X / ESC / outside close / successful save → **replace** current URL with `dialog` and `goalId` removed;
+- unrelated query filters are preserved;
+- browser back/forward continues to project route state;
+- after cancel, browser Back must **not** resurrect the just-closed dialog;
+- repeatedly pressing Create Goal after cancel must always work.
+
+A reusable route-dialog helper is preferred over another one-off watcher.
+
+### UFP-2003 — Product identity editor primitive
+
+Add reusable `ProductAutoTextarea` + limit feedback behavior.
+
+Requirements:
+
+- semantic `<textarea>` underneath, but `resize: none`; no browser resize handle;
+- auto-grow by content, natural wrapping, no horizontal scrolling;
+- no border, no focus ring, no focus background change; focus is communicated by the text caret;
+- IME/composition safe for Chinese input;
+- when input/paste would exceed the configured limit, truncate to the limit and emit `limit-exceeded`;
+- data never enters an invalid over-limit state;
+- transient inline error appears for ~2.5s and reappears on every new overflow attempt.
+
+Goal product limits become canonical contracts:
+
+- `Goal.name`: max **80**;
+- `Goal.summary`: max **255**.
+
+The server/domain/contract must use the same limits; this is not a Web-only constraint.
+
+### UFP-2004 — Goal description + Linear-style dialog anatomy
+
+Add a first-class `Goal.description` field, initially plain multiline text.
+
+- max 10,000 characters;
+- Goal owns the text; Knowledge Notes remain separate relation-owned content;
+- no Markdown toolbar / rich-text / note mention in this phase;
+- Notes remains a related-content property entry, not a substitute for description.
+
+Goal create/edit body becomes:
+
+```text
+Goal name
+Short summary
+[Status] [Start] [Target] [Labels] [Reminder] [Notes]
+────────────────────────────────────────────
+Description / goal brief
+
+Key Results                              [+]
+<compact rows or animated inline editor>
+```
+
+`Create with AI` belongs in the dialog header action area.
+
+### UFP-2005 — Product dialog composition + motion
+
+Upgrade `ProductDialogShell` as composition infrastructure rather than building a giant generic form dialog.
+
+Target primitives:
+
+```text
+ProductDialogShell
+├─ header leading/title/description/actions
+├─ scroll-owned body
+├─ sticky footer
+├─ ProductIdentityEditor / ProductAutoTextarea
+├─ ProductPropertyBar / ProductPropertyChip
+└─ ProductExpandableSection
+```
+
+Key Result add/edit uses `ProductExpandableSection`:
+
+- ~200ms ease-out expand/collapse;
+- height + opacity + subtle translateY;
+- reduced-motion fallback;
+- one compact bordered KR container with `+` trigger;
+- no abrupt `v-if` panel insertion.
+
+### UFP-2006 — Shared Linear-style date/time primitives
+
+Build a shared calendar core and adapters rather than keeping native date inputs.
+
+```text
+ProductCalendarPickerCore
+├─ ProductDatePicker
+└─ ProductTimeframePicker
+```
+
+Initial explicit parser coverage:
+
+- `2027-05-20`
+- `2027/05/20`
+- `May 2027`
+- `2027 May`
+- `Q4 2027` / `2027 Q4`
+- `2027`
+- `2027年5月`
+- `2027年Q4`
+- `2027年`
+
+No fuzzy natural-language / AI date interpretation in this phase.
+
+### UFP-2007 — Dark theme semantic-token convergence
+
+Dark theme is the first visual acceptance target.
+
+Do not hard-code Linear-like hex values in individual feature components. Introduce/adjust semantic layers such as:
+
+```text
+background
+surface
+surface-raised
+surface-overlay
+hover
+selected
+border-subtle
+border
+border-strong
+foreground
+foreground-muted
+foreground-subtle
+primary
+primary-hover
+```
+
+The visual target is the supplied Linear references: stronger neutral separation, clearer text hierarchy, restrained borders, and blue-violet primary accent. Light theme must remain functional but is not the first pixel-level acceptance target.
+
+## 14. V2 implementation order
+
+```text
+UFP-2002 route modal correctness ─┐
+UFP-2003 identity primitive ──────┼─ foundation / correctness first
+UFP-2005 dialog slots + motion ───┘
+                ↓
+UFP-2001 Settings three-state responsive shell
+                ↓
+UFP-2004 Goal description + final dialog anatomy
+                ↓
+UFP-2006 shared date/time picker
+                ↓
+UFP-2007 dark semantic theme tokens
+                ↓
+Goal/Task/Schedule visual replay + local-Docker acceptance
+```
+
+The order intentionally fixes route correctness and shared primitives before large visual rewrites, so subsequent screens converge on reusable infrastructure instead of duplicating one-off CSS.
+
+## 15. V2 status
+
+- [x] Product decisions confirmed with reference screenshots
+- [x] V2 implementation contract documented
+- [x] UFP-2002 route-owned Goal modal lifecycle
+- [x] UFP-2003 ProductAutoTextarea + transient limit feedback
+- [x] Goal 80 / 255 canonical contract limits
+- [x] UFP-2005 ProductDialogShell header actions + expandable section
+- [x] UFP-2001 Settings wide / hidden / drawer states
+- [x] UFP-2004 Goal.description end-to-end persistence and UI
+- [x] UFP-2006 shared date/time picker
+- [x] UFP-2007 dark semantic-token convergence
+- [x] exact-tree test/build/governance validation
+- [x] refresh Tailnet UI preview and visual acceptance
+
+## 16. V2 closure checkpoint — 2026-09-20
+
+The V2 refinement pass is implementation-complete on the current working tree.
+
+Product and architecture closure:
+
+- Settings now has one canonical `WindowHeader`, one shared `SettingsNavigation` renderer, persistent wide navigation, narrow local header, and Sheet-based navigation drawer; the shell toggle controls the Settings navigation state without introducing a second top-level header.
+- Goal create/edit is route-owned through `useRouteDialogState`; close/save removes only dialog identity query keys with `replace`, preserves unrelated filters, and has regression coverage for browser Back not resurrecting a cancelled dialog.
+- `ProductAutoTextarea` owns auto-grow, composition-safe truncation, and repeated transient limit feedback. Goal name/summary limits are aligned to 80/255 in UI, contracts, and domain validation.
+- `Goal.description` is a first-class nullable Goal-owned field from DTO/domain through Prisma, PowerSync, portability, Web/Desktop projection, migration, and create/edit UI; Knowledge Notes remain separate relation-owned content.
+- `ProductDialogShell` exposes header actions + scroll-owned body + sticky footer, and `ProductExpandableSection` provides the reduced-motion-safe Key Result expansion primitive.
+- `ProductDatePicker` / `ProductTimeframePicker` plus the explicit Product Time parser are shared by Goal, Task, and Schedule. The picker query inputs have explicit accessible names, and local-Docker keyboard/a11y replay locks the shared interaction contract.
+- Dark semantic tokens are converged in `ui-core` rather than copied as feature-level hard-coded palette values.
+
+Exact-tree verification evidence:
+
+- App-Vue full suite: **207 files / 831 tests PASS**.
+- App-Vue typecheck / lint / production build PASS; lint remains **0 errors / 8 pre-existing warnings**.
+- Web typecheck + production build PASS.
+- Desktop typecheck + production build PASS.
+- Contracts / Goal / Database / PowerSync-schema suites PASS; focused semantic-token and shared picker suites PASS.
+- Full fresh local-Docker product acceptance on isolated ports `20400–20411`: **22 / 22 Playwright tests PASS**, including auth, Goal lifecycle, shared form keyboard/a11y flow, workflow/draft preservation, narrow layout, and browser-request runtime evidence.
+- Tailnet preview refreshed at `https://gcp-dev-01.taile92a8e.ts.net:20300/` from the exact current UI image; container health, Web, and proxied `/api/auth/capabilities` all return HTTP 200. Tailnet Chromium Phase-D form/Settings replay passes **1 / 1** with screenshot capture, dialog geometry assertions, keyboard traversal, and zero serious/critical Axe violations.
+- `test:inventory`, `docs:check`, `governance:check`, and `git diff --check` are the final documentation/governance gate for this checkpoint.

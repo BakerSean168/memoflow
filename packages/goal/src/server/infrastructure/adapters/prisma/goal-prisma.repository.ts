@@ -255,6 +255,7 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
           identityId: dto.identityId as string,
           name: dto.name,
           summary: dto.summary,
+          description: dto.description,
           status: dto.status,
           startDate: dto.startDate,
           targetKind: target.targetKind,
@@ -269,6 +270,7 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
         update: {
           name: dto.name,
           summary: dto.summary,
+          description: dto.description,
           status: dto.status,
           startDate: dto.startDate,
           targetKind: target.targetKind,
@@ -431,6 +433,7 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
       data: {
         name: dto.name,
         summary: dto.summary,
+        description: dto.description,
         status: dto.status,
         startDate: dto.startDate,
         targetKind: target.targetKind,

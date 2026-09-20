@@ -38,6 +38,42 @@ describe('CreateScheduleDialog submission lifecycle', () => {
     document.body.innerHTML = '';
   });
 
+  it('uses compact property chips and expands only one property editor at a time', async () => {
+    const wrapper = mount(CreateScheduleDialog, {
+      props: { modelValue: true, onSubmit: vi.fn().mockResolvedValue(true) },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    await nextTick();
+
+    const chips = document.querySelector('[data-testid="schedule-property-chips"]');
+    expect(chips).not.toBeNull();
+    expect(document.querySelector('[data-testid="schedule-property-editor"]')).toBeNull();
+
+    const whenChip = new DOMWrapper(
+      document.querySelector<HTMLButtonElement>('[data-testid="schedule-when-chip"]')!,
+    );
+    const locationChip = new DOMWrapper(
+      document.querySelector<HTMLButtonElement>('[data-testid="schedule-location-chip"]')!,
+    );
+
+    await whenChip.trigger('click');
+    await nextTick();
+    expect(whenChip.attributes('aria-pressed')).toBe('true');
+    expect(document.querySelectorAll('[data-testid="schedule-property-editor"]')).toHaveLength(1);
+    expect(document.querySelector('#all-day')).not.toBeNull();
+
+    await locationChip.trigger('click');
+    await nextTick();
+    expect(whenChip.attributes('aria-pressed')).toBe('false');
+    expect(locationChip.attributes('aria-pressed')).toBe('true');
+    expect(document.querySelectorAll('[data-testid="schedule-property-editor"]')).toHaveLength(1);
+    expect(document.querySelector('#location')).not.toBeNull();
+    expect(document.querySelector('#all-day')).toBeNull();
+
+    wrapper.unmount();
+  }, 20_000);
+
   it('blocks duplicate submission and preserves the draft when saving fails', async () => {
     let resolveSubmit!: (value: boolean) => void;
     const onSubmit = vi.fn(

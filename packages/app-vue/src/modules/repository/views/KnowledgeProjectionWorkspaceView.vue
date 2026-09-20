@@ -284,21 +284,22 @@
     </template>
 
     <Dialog v-model:open="createDialogOpen">
-      <DialogContent class="sm:max-w-2xl" data-testid="knowledge-projection-create-dialog">
-        <DialogHeader>
-          <DialogTitle>{{
-            stage === 'draft'
-              ? t('repository.projection.createTitle')
-              : t('repository.projection.confirmTitle')
-          }}</DialogTitle>
-          <DialogDescription>
-            {{
-              stage === 'draft'
-                ? t('repository.projection.createDescription')
-                : t('repository.projection.confirmDescription')
-            }}
-          </DialogDescription>
-        </DialogHeader>
+      <ProductDialogShell
+        :open="createDialogOpen"
+        test-id="knowledge-projection-create-dialog"
+        size="md"
+        initial-focus-selector="#projection-note-title"
+      >
+        <template #title>{{
+          stage === 'draft'
+            ? t('repository.projection.createTitle')
+            : t('repository.projection.confirmTitle')
+        }}</template>
+        <template #description>{{
+          stage === 'draft'
+            ? t('repository.projection.createDescription')
+            : t('repository.projection.confirmDescription')
+        }}</template>
 
         <div v-if="stage === 'draft'" class="space-y-4">
           <div class="grid gap-2 @sm/panel:grid-cols-2">
@@ -379,8 +380,8 @@
         >
           {{ createError }}
         </p>
-        <DialogFooter>
-          <Button variant="outline" :disabled="creating" @click="closeCreateDialog">{{
+        <template #footer>
+          <Button variant="ghost" :disabled="creating" @click="closeCreateDialog">{{
             t('common.cancel')
           }}</Button>
           <Button
@@ -410,16 +411,18 @@
             <GitCommitHorizontal v-else class="mr-2 h-4 w-4" />
             {{ t('repository.projection.confirmAction') }}
           </Button>
-        </DialogFooter>
-      </DialogContent>
+        </template>
+      </ProductDialogShell>
     </Dialog>
 
     <Dialog v-model:open="adoptionDialogOpen">
-      <DialogContent class="sm:max-w-lg" data-testid="knowledge-projection-adopt-dialog">
-        <DialogHeader>
-          <DialogTitle>{{ t('repository.projection.adoptTitle') }}</DialogTitle>
-          <DialogDescription>{{ t('repository.projection.adoptDescription') }}</DialogDescription>
-        </DialogHeader>
+      <ProductDialogShell
+        :open="adoptionDialogOpen"
+        test-id="knowledge-projection-adopt-dialog"
+        size="sm"
+      >
+        <template #title>{{ t('repository.projection.adoptTitle') }}</template>
+        <template #description>{{ t('repository.projection.adoptDescription') }}</template>
 
         <div v-if="adoptionProposal" class="space-y-3 text-sm">
           <div class="rounded-md border bg-muted/20 p-3">
@@ -445,8 +448,8 @@
         >
           {{ adoptionError }}
         </p>
-        <DialogFooter>
-          <Button variant="outline" :disabled="adopting" @click="closeAdoptionDialog">
+        <template #footer>
+          <Button variant="ghost" :disabled="adopting" @click="closeAdoptionDialog">
             {{ t('common.cancel') }}
           </Button>
           <Button
@@ -458,8 +461,8 @@
             <GitCommitHorizontal v-else class="mr-2 h-4 w-4" />
             {{ t('repository.projection.adoptConfirmAction') }}
           </Button>
-        </DialogFooter>
-      </DialogContent>
+        </template>
+      </ProductDialogShell>
     </Dialog>
   </div>
 </template>
@@ -484,19 +487,7 @@ import {
   Search,
   X,
 } from '@lucide/vue';
-import {
-  Badge,
-  Button,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  Input,
-  Label,
-  Textarea,
-} from '@memoflow/ui-vue-shadcn';
+import { Badge, Button, Dialog, Input, Label, Textarea } from '@memoflow/ui-vue-shadcn';
 import {
   CreateConfirmedKnowledgeNoteSchema,
   AdoptKnowledgeDocumentSchema,
@@ -506,6 +497,7 @@ import {
   type KnowledgeNoteProjectionClientDTO,
   type KnowledgeRemoteBindingClientDTO,
 } from '@memoflow/contracts/repository';
+import { ProductDialogShell } from '../../../shared/components';
 import { renderSafeMarkdown } from '../../../shared/utils/safe-markdown';
 import { REPOSITORY_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';

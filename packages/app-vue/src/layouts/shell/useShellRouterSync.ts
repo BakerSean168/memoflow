@@ -16,7 +16,7 @@
  * 这样业务视图的路由离开守卫（编辑器未保存守卫等）可以照常拦截。
  */
 import { onMounted, onUnmounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter, type Router } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import type { RouteLocationNormalizedGeneric } from 'vue-router';
@@ -34,6 +34,52 @@ export { isStandaloneSettingsPath } from './shell-scene';
 
 /** 分栏放不下的窗口宽度阈值：新开面板自动升专注态（V2 §1.1 / §7）。 */
 export const AUTO_FOCUS_VIEWPORT = 1024;
+
+export async function returnFromSettingsScene(
+  router: Router,
+  store: ReturnType<typeof useAppShellStore>,
+  currentFullPath: string,
+): Promise<void> {
+  const origin = store.settingsOrigin;
+  store.clearSettingsOrigin();
+  store.setSettingsNavigationOpen(false);
+
+  if (!origin) {
+    if (store.activeTab) {
+      await router.push(store.activeTab.route).catch(() => {});
+      return;
+    }
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back();
+      return;
+    }
+    await router.push('/').catch(() => {});
+    return;
+  }
+
+  store.setLayout(origin.layout, origin.layoutReason === 'user' ? 'user' : 'default');
+
+  if (origin.tabId && store.tabs.some((tab) => tab.id === origin.tabId)) {
+    store.activateTab(origin.tabId);
+  } else if (origin.panelSurface === 'home' && !store.activeTab) {
+    store.showHome();
+  }
+
+  if (origin.panelSurface === 'home') {
+    store.showHome();
+  } else if (origin.panelSurface === 'workflow' && !store.workflowAvailable && !store.activeTab) {
+    store.showHome();
+  }
+
+  const target = store.panelSurface === 'home' ? '/' : (store.activeTab?.route ?? '/');
+  if (currentFullPath !== target) {
+    await router.replace(target).catch(() => {});
+  }
+
+  if (origin.panelSurface === 'workflow' && store.workflowAvailable) {
+    store.requestWorkflowSurface('explicit');
+  }
+}
 
 /** 路由前缀 → 业务模块归属（V2 §3 模块矩阵；Settings 已移出）。 */
 const MODULE_PREFIXES: Array<[prefix: string, module: ShellModule]> = [
@@ -296,51 +342,7 @@ export function useShellRouterSync() {
 
   /** 从设置返回应用：优先恢复 origin（进入设置前的 route/tab/surface/layout）。 */
   async function returnFromSettings(): Promise<void> {
-    const origin = store.settingsOrigin;
-    store.clearSettingsOrigin();
-
-    // 深链/刷新直接落在设置页：没有 origin，回 active tab，否则 back / '/'。
-    if (!origin) {
-      if (store.activeTab) {
-        await router.push(store.activeTab.route).catch(() => {});
-        return;
-      }
-      if (typeof window !== 'undefined' && window.history.length > 1) {
-        router.back();
-        return;
-      }
-      await router.push('/').catch(() => {});
-      return;
-    }
-
-    // 恢复 layout；surface 先按非 workflow 恢复（避免 replace 触发 afterEach
-    // 的 syncRouteToStore 把 surface 重置回 business/home）。
-    store.setLayout(origin.layout, origin.layoutReason === 'user' ? 'user' : 'default');
-
-    // origin 的 Tab 仍存在 → 激活它；否则回 active tab；都没有 → Home。
-    if (origin.tabId && store.tabs.some((tab) => tab.id === origin.tabId)) {
-      store.activateTab(origin.tabId);
-    } else if (origin.panelSurface === 'home' && !store.activeTab) {
-      store.showHome();
-    }
-
-    if (origin.panelSurface === 'home') {
-      store.showHome();
-    } else if (origin.panelSurface === 'workflow' && !store.workflowAvailable && !store.activeTab) {
-      store.showHome();
-    }
-
-    // 用 replace 落回 origin route，避免 [settings, origin, settings] 循环历史。
-    const target = store.panelSurface === 'home' ? '/' : store.activeTab?.route ?? '/';
-    if (route.fullPath !== target) {
-      await router.replace(target).catch(() => {});
-    }
-
-    // workflow origin：导航稳定后再恢复 workflow surface，避免被 afterEach 覆盖
-    // （review P1：requestWorkflowSurface 后 replace 会经 syncRouteToStore 重置）。
-    if (origin.panelSurface === 'workflow' && store.workflowAvailable) {
-      store.requestWorkflowSurface('explicit');
-    }
+    await returnFromSettingsScene(router, store, route.fullPath);
   }
 
   /** 回 STATE A（新对话 / 关面板后的地面态）。 */

@@ -40,6 +40,9 @@ export default {
   "refresh": "刷新",
   "collapse": "收起",
   "expand": "展开",
+  "productDateInputPlaceholder": "试试：2027/05/20、2027年5月、2027年Q4",
+  "productDateInputHint": "支持日期、月份、季度和年份等明确格式；精确日期字段会取所选周期的第一天。",
+  "productDateInputInvalid": "请输入可识别的日期格式。",
   "colors": {
     "red": "红色",
     "orange": "橙色",

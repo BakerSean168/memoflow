@@ -23507,6 +23507,7 @@ export namespace Prisma {
     identityId: string | null
     name: string | null
     summary: string | null
+    description: string | null
     status: string | null
     startDate: string | null
     targetKind: string | null
@@ -23526,6 +23527,7 @@ export namespace Prisma {
     identityId: string | null
     name: string | null
     summary: string | null
+    description: string | null
     status: string | null
     startDate: string | null
     targetKind: string | null
@@ -23545,6 +23547,7 @@ export namespace Prisma {
     identityId: number
     name: number
     summary: number
+    description: number
     status: number
     startDate: number
     targetKind: number
@@ -23576,6 +23579,7 @@ export namespace Prisma {
     identityId?: true
     name?: true
     summary?: true
+    description?: true
     status?: true
     startDate?: true
     targetKind?: true
@@ -23595,6 +23599,7 @@ export namespace Prisma {
     identityId?: true
     name?: true
     summary?: true
+    description?: true
     status?: true
     startDate?: true
     targetKind?: true
@@ -23614,6 +23619,7 @@ export namespace Prisma {
     identityId?: true
     name?: true
     summary?: true
+    description?: true
     status?: true
     startDate?: true
     targetKind?: true
@@ -23720,6 +23726,7 @@ export namespace Prisma {
     identityId: string
     name: string
     summary: string | null
+    description: string | null
     status: string
     startDate: string | null
     targetKind: string | null
@@ -23758,6 +23765,7 @@ export namespace Prisma {
     identityId?: boolean
     name?: boolean
     summary?: boolean
+    description?: boolean
     status?: boolean
     startDate?: boolean
     targetKind?: boolean
@@ -23783,6 +23791,7 @@ export namespace Prisma {
     identityId?: boolean
     name?: boolean
     summary?: boolean
+    description?: boolean
     status?: boolean
     startDate?: boolean
     targetKind?: boolean
@@ -23803,6 +23812,7 @@ export namespace Prisma {
     identityId?: boolean
     name?: boolean
     summary?: boolean
+    description?: boolean
     status?: boolean
     startDate?: boolean
     targetKind?: boolean
@@ -23823,6 +23833,7 @@ export namespace Prisma {
     identityId?: boolean
     name?: boolean
     summary?: boolean
+    description?: boolean
     status?: boolean
     startDate?: boolean
     targetKind?: boolean
@@ -23837,7 +23848,7 @@ export namespace Prisma {
     deletedAt?: boolean
   }
 
-  export type GoalOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "summary" | "status" | "startDate" | "targetKind" | "targetEndDate" | "completedAt" | "archivedAt" | "sortOrder" | "reminderConfig" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["goal"]>
+  export type GoalOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "summary" | "description" | "status" | "startDate" | "targetKind" | "targetEndDate" | "completedAt" | "archivedAt" | "sortOrder" | "reminderConfig" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["goal"]>
   export type GoalInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
     keyResults?: boolean | Goal$keyResultsArgs<ExtArgs>
@@ -23867,6 +23878,7 @@ export namespace Prisma {
       identityId: string
       name: string
       summary: string | null
+      description: string | null
       status: string
       startDate: string | null
       targetKind: string | null
@@ -24311,6 +24323,7 @@ export namespace Prisma {
     readonly identityId: FieldRef<"Goal", 'String'>
     readonly name: FieldRef<"Goal", 'String'>
     readonly summary: FieldRef<"Goal", 'String'>
+    readonly description: FieldRef<"Goal", 'String'>
     readonly status: FieldRef<"Goal", 'String'>
     readonly startDate: FieldRef<"Goal", 'String'>
     readonly targetKind: FieldRef<"Goal", 'String'>
@@ -96449,6 +96462,7 @@ export namespace Prisma {
     identityId: 'identityId',
     name: 'name',
     summary: 'summary',
+    description: 'description',
     status: 'status',
     startDate: 'startDate',
     targetKind: 'targetKind',
@@ -98834,6 +98848,7 @@ export namespace Prisma {
     identityId?: StringFilter<"Goal"> | string
     name?: StringFilter<"Goal"> | string
     summary?: StringNullableFilter<"Goal"> | string | null
+    description?: StringNullableFilter<"Goal"> | string | null
     status?: StringFilter<"Goal"> | string
     startDate?: StringNullableFilter<"Goal"> | string | null
     targetKind?: StringNullableFilter<"Goal"> | string | null
@@ -98858,6 +98873,7 @@ export namespace Prisma {
     identityId?: SortOrder
     name?: SortOrder
     summary?: SortOrderInput | SortOrder
+    description?: SortOrderInput | SortOrder
     status?: SortOrder
     startDate?: SortOrderInput | SortOrder
     targetKind?: SortOrderInput | SortOrder
@@ -98886,6 +98902,7 @@ export namespace Prisma {
     identityId?: StringFilter<"Goal"> | string
     name?: StringFilter<"Goal"> | string
     summary?: StringNullableFilter<"Goal"> | string | null
+    description?: StringNullableFilter<"Goal"> | string | null
     status?: StringFilter<"Goal"> | string
     startDate?: StringNullableFilter<"Goal"> | string | null
     targetKind?: StringNullableFilter<"Goal"> | string | null
@@ -98910,6 +98927,7 @@ export namespace Prisma {
     identityId?: SortOrder
     name?: SortOrder
     summary?: SortOrderInput | SortOrder
+    description?: SortOrderInput | SortOrder
     status?: SortOrder
     startDate?: SortOrderInput | SortOrder
     targetKind?: SortOrderInput | SortOrder
@@ -98937,6 +98955,7 @@ export namespace Prisma {
     identityId?: StringWithAggregatesFilter<"Goal"> | string
     name?: StringWithAggregatesFilter<"Goal"> | string
     summary?: StringNullableWithAggregatesFilter<"Goal"> | string | null
+    description?: StringNullableWithAggregatesFilter<"Goal"> | string | null
     status?: StringWithAggregatesFilter<"Goal"> | string
     startDate?: StringNullableWithAggregatesFilter<"Goal"> | string | null
     targetKind?: StringNullableWithAggregatesFilter<"Goal"> | string | null
@@ -105740,6 +105759,7 @@ export namespace Prisma {
     id: string
     name: string
     summary?: string | null
+    description?: string | null
     status?: string
     startDate?: string | null
     targetKind?: string | null
@@ -105764,6 +105784,7 @@ export namespace Prisma {
     identityId: string
     name: string
     summary?: string | null
+    description?: string | null
     status?: string
     startDate?: string | null
     targetKind?: string | null
@@ -105786,6 +105807,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
@@ -105810,6 +105832,7 @@ export namespace Prisma {
     identityId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
@@ -105833,6 +105856,7 @@ export namespace Prisma {
     identityId: string
     name: string
     summary?: string | null
+    description?: string | null
     status?: string
     startDate?: string | null
     targetKind?: string | null
@@ -105851,6 +105875,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
@@ -105870,6 +105895,7 @@ export namespace Prisma {
     identityId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
@@ -113281,6 +113307,7 @@ export namespace Prisma {
     identityId?: SortOrder
     name?: SortOrder
     summary?: SortOrder
+    description?: SortOrder
     status?: SortOrder
     startDate?: SortOrder
     targetKind?: SortOrder
@@ -113305,6 +113332,7 @@ export namespace Prisma {
     identityId?: SortOrder
     name?: SortOrder
     summary?: SortOrder
+    description?: SortOrder
     status?: SortOrder
     startDate?: SortOrder
     targetKind?: SortOrder
@@ -113324,6 +113352,7 @@ export namespace Prisma {
     identityId?: SortOrder
     name?: SortOrder
     summary?: SortOrder
+    description?: SortOrder
     status?: SortOrder
     startDate?: SortOrder
     targetKind?: SortOrder
@@ -121488,6 +121517,7 @@ export namespace Prisma {
     id: string
     name: string
     summary?: string | null
+    description?: string | null
     status?: string
     startDate?: string | null
     targetKind?: string | null
@@ -121510,6 +121540,7 @@ export namespace Prisma {
     id: string
     name: string
     summary?: string | null
+    description?: string | null
     status?: string
     startDate?: string | null
     targetKind?: string | null
@@ -123048,6 +123079,7 @@ export namespace Prisma {
     identityId?: StringFilter<"Goal"> | string
     name?: StringFilter<"Goal"> | string
     summary?: StringNullableFilter<"Goal"> | string | null
+    description?: StringNullableFilter<"Goal"> | string | null
     status?: StringFilter<"Goal"> | string
     startDate?: StringNullableFilter<"Goal"> | string | null
     targetKind?: StringNullableFilter<"Goal"> | string | null
@@ -126501,6 +126533,7 @@ export namespace Prisma {
     id: string
     name: string
     summary?: string | null
+    description?: string | null
     status?: string
     startDate?: string | null
     targetKind?: string | null
@@ -126524,6 +126557,7 @@ export namespace Prisma {
     identityId: string
     name: string
     summary?: string | null
+    description?: string | null
     status?: string
     startDate?: string | null
     targetKind?: string | null
@@ -126689,6 +126723,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
@@ -126712,6 +126747,7 @@ export namespace Prisma {
     identityId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
@@ -126899,6 +126935,7 @@ export namespace Prisma {
     id: string
     name: string
     summary?: string | null
+    description?: string | null
     status?: string
     startDate?: string | null
     targetKind?: string | null
@@ -126922,6 +126959,7 @@ export namespace Prisma {
     identityId: string
     name: string
     summary?: string | null
+    description?: string | null
     status?: string
     startDate?: string | null
     targetKind?: string | null
@@ -126959,6 +126997,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
@@ -126982,6 +127021,7 @@ export namespace Prisma {
     identityId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
@@ -127003,6 +127043,7 @@ export namespace Prisma {
     id: string
     name: string
     summary?: string | null
+    description?: string | null
     status?: string
     startDate?: string | null
     targetKind?: string | null
@@ -127026,6 +127067,7 @@ export namespace Prisma {
     identityId: string
     name: string
     summary?: string | null
+    description?: string | null
     status?: string
     startDate?: string | null
     targetKind?: string | null
@@ -127111,6 +127153,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
@@ -127134,6 +127177,7 @@ export namespace Prisma {
     identityId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
@@ -128258,6 +128302,7 @@ export namespace Prisma {
     id: string
     name: string
     summary?: string | null
+    description?: string | null
     status?: string
     startDate?: string | null
     targetKind?: string | null
@@ -128281,6 +128326,7 @@ export namespace Prisma {
     identityId: string
     name: string
     summary?: string | null
+    description?: string | null
     status?: string
     startDate?: string | null
     targetKind?: string | null
@@ -128444,6 +128490,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
@@ -128467,6 +128514,7 @@ export namespace Prisma {
     identityId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
@@ -137521,6 +137569,7 @@ export namespace Prisma {
     id: string
     name: string
     summary?: string | null
+    description?: string | null
     status?: string
     startDate?: string | null
     targetKind?: string | null
@@ -138061,6 +138110,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138083,6 +138133,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138105,6 +138156,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableStringFieldUpdateOperationsInput | string | null
     targetKind?: NullableStringFieldUpdateOperationsInput | string | null

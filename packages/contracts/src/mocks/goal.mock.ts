@@ -41,8 +41,9 @@ export function createMockGoal(overrides: Partial<GoalClientDTO> = {}): GoalClie
   return {
     id,
     identityId,
-    name: faker.lorem.words({ min: 2, max: 5 }),
-    summary: faker.datatype.boolean() ? faker.lorem.sentence().slice(0, 500) : null,
+    name: faker.lorem.words({ min: 2, max: 5 }).slice(0, 80),
+    summary: faker.datatype.boolean() ? faker.lorem.sentence().slice(0, 255) : null,
+    description: faker.datatype.boolean() ? faker.lorem.paragraph().slice(0, 10000) : null,
     status: faker.helpers.arrayElement([
       'Planned',
       'InProgress',

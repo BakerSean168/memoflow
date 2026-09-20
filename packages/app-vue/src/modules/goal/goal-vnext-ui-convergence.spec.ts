@@ -10,7 +10,7 @@ function source(relative: string): string {
 describe('GOAL-7209 UI convergence lock', () => {
   it('keeps manual Goal create compact and precision preserving', () => {
     const dialog = source('app-vue/src/modules/goal/components/dialogs/GoalDialog.vue');
-    const timeframe = source('app-vue/src/modules/goal/components/GoalTimeframePicker.vue');
+    const timeframe = source('app-vue/src/shared/components/ProductTimeframePicker.vue');
 
     expect(dialog).toContain('data-testid="goal-property-chips"');
     expect(dialog).toContain('GoalTimeframePicker');
@@ -26,6 +26,8 @@ describe('GOAL-7209 UI convergence lock', () => {
       expect(timeframe).toContain(`value="${kind}"`);
     }
     expect(timeframe).toContain('goalTimeframeLabel');
+    expect(timeframe).toContain('parseExplicitProductDateInput');
+    expect(timeframe).toContain('<Calendar');
     expect(timeframe).not.toContain('goalTimeframeEndBoundary');
   });
 

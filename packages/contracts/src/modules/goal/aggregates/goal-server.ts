@@ -22,6 +22,7 @@ export interface GoalServerDTO {
   identityId: IdentityId;
   name: string;
   summary: string | null;
+  description: string | null;
   status: GoalStatus;
   startDate: Ymd | null;
   target: GoalTimeframe | null;
