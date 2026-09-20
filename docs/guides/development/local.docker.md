@@ -11,7 +11,7 @@ updated: 2026-07-31T00:00:00
 
 # Local Docker 验证
 
-`docker-compose.local.yml` 是当前仓库做容器化改动、本地联调和发布前验收的默认入口。
+`docker-compose.local.yml` 是当前仓库做容器化改动、本地联调和发布前验收的默认入口。它固定使用 Compose project `memoflow-prod-like`，与 host-dev 的 `memoflow-host-dev` 隔离。
 
 它的定位不是“随便起一下服务”，而是：
 
@@ -36,7 +36,7 @@ updated: 2026-07-31T00:00:00
 推荐统一入口（会强制隔离 host 端口）：
 
 ```bash
-pnpm runtime:preflight:local-docker
+pnpm runtime:preflight:prod-like
 pnpm docker:local:up
 ```
 
@@ -52,7 +52,7 @@ docker image inspect memoflow-api:local --format '{{ index .Config.Labels "org.o
 VCS_REF=<git-sha> BUILD_DATE=<utc-iso-time> docker compose -f docker-compose.local.yml --env-file .env.production --env-file .env.production.local up -d --build
 ```
 
-> 若直接调用底层 compose 且 `.env.production.local` 把 `API_HOST_PORT` 设成 `3000`，会与宿主 Nx dev target / Playwright 抢口。
+> 若直接调用底层 compose 并覆盖 SSOT 端口，可能与 GCP Dev 上的其他环境/测试 lane 抢口。
 > `pnpm docker:local:*` 会按 SSOT 纠正冲突端口（见 [runtime-lanes.md](./runtime-lanes.md)）。
 
 默认本地访问端口：
@@ -63,7 +63,7 @@ VCS_REF=<git-sha> BUILD_DATE=<utc-iso-time> docker compose -f docker-compose.loc
 - PostgreSQL: `127.0.0.1:20210`
 - Redis: `127.0.0.1:20211`
 
-local-docker 的 API/Web/PowerSync host publish 默认只绑定 `127.0.0.1`，避免局域网/Tailnet 直接绕过 TLS 命中明文 HTTP。需要远程验证时，应在宿主机使用受信任 TLS terminator。GCP Dev 的 canonical 方式是 Tailscale Serve：
+prod-like 的 API/Web/PowerSync host publish 默认只绑定 `127.0.0.1`，避免局域网/Tailnet 直接绕过 TLS 命中明文 HTTP。需要远程验证时，应在宿主机使用受信任 TLS terminator。GCP Dev 的 canonical 方式是 Tailscale Serve：
 
 ```bash
 sudo tailscale serve --bg --https=20201 http://127.0.0.1:20201
@@ -101,15 +101,16 @@ pnpm docker:local:logs
 pnpm docker:local:down
 ```
 
-## 与 host-dev / e2e 的关系
+## 与 host-dev / staging / e2e 的关系
 
-| 车道         | API   | Web   | PG    | 说明                                                        |
-| ------------ | ----- | ----- | ----- | ----------------------------------------------------------- |
-| local-docker | 20201 | 20200 | 20210 | 本文件                                                      |
-| host-dev     | 3000  | 5173  | 5432  | `pnpm nx run-many -t serve --projects=api,web --parallel=2` |
-| e2e          | 3000  | 5173  | 5433  | Playwright                                                  |
+| 车道      | API   | Web   | PG    | 说明                                                        |
+| --------- | ----- | ----- | ----- | ----------------------------------------------------------- |
+| prod-like | 20201 | 20200 | 20210 | `docker-compose.local.yml`                                  |
+| host-dev  | 21001 | 21000 | 21010 | `pnpm nx run-many -t serve --projects=api,web --parallel=2` |
+| staging   | 20251 | 20250 | 20260 | canonical staging watcher                                   |
+| e2e       | 3000  | 5173  | 5433  | Playwright                                                  |
 
-完整互斥规则与排障见 [runtime-lanes.md](./runtime-lanes.md)。
+完整环境职责、端口 ownership 与排障见 [runtime-lanes.md](./runtime-lanes.md)。
 
 ## 事务邮件（console / 真发）
 
@@ -136,7 +137,7 @@ pnpm docker:local:down
 
 ## 发布级产品旅程证据
 
-核心产品旅程使用当前 local-docker profile 的实际端口运行：
+核心产品旅程使用当前 prod-like profile 的实际端口运行：
 
 ```bash
 pnpm nx run web:e2e:local-docker

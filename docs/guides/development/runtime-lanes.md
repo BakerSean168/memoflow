@@ -5,68 +5,84 @@ tags:
   - runtime
   - docker
   - e2e
-description: Named runtime lanes, host port contract, and mutual exclusion rules
+description: MemoFlow host-dev / prod-like / staging / prod runtime environments and supporting test lanes
 created: 2026-07-14T00:00:00
-updated: 2026-07-14T00:00:00
+updated: 2026-09-20T00:00:00
 ---
 
-# Runtime lanes（本机运行时车道）
+# Runtime environments（运行环境）
 
-本仓库同时支持多套本机拓扑。**端口混乱几乎都来自“以为在跑 A 车道，实际占用了 B 车道的端口”。**
+MemoFlow 的运行时首先按 **4 个环境** 建模：`host-dev`、`prod-like`、`staging`、`prod`。`e2e`、`dev-infra`、`test-infra` 是测试/基础设施辅助 lane，不是第五、第六套部署环境。
 
 单一真相源（SSOT）：
 
 - [`tools/runtime/profiles.json`](../../../tools/runtime/profiles.json)
 
-相关工具：
+## 四类环境
 
-- `pnpm runtime:preflight` / `pnpm runtime:preflight:e2e` / `:host-dev` / `:local-docker`
-- `pnpm docker:local:*`（强制使用 local-docker 隔离 host 端口）
-- 完整的本机开发、单服务替换和命令入口见
-  [`local-development.md`](./local-development.md)。
+| Environment | 目的                                       | Host / 访问方式                                                       | 端口契约                                                               |
+| ----------- | ------------------------------------------ | --------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `host-dev`  | 日常编码、Vite HMR、API watch              | GCP Dev；工作站通过 VS Code Remote/SSH port forwarding 访问           | Web `21000`、API `21001`、PowerSync `21002`、PG `21010`、Redis `21011` |
+| `prod-like` | 发布前完整 Docker / production-shaped 验收 | GCP Dev；`docker-compose.local.yml`；需要远程验收时用 Tailscale Serve | Web `20200`、API `20201`、PowerSync `20202`、PG `20210`、Redis `20211` |
+| `staging`   | 稳定集成环境、candidate exact-digest 验收  | GCP Dev staging watcher                                               | Web `20250`、API `20251`、PowerSync `20252`、PG `20260`、Redis `20261` |
+| `prod`      | 对用户提供正式服务                         | Alibaba production watcher + Caddy                                    | public HTTP `80` / HTTPS `443`；PG `5432`、Redis `6379` 仅 loopback    |
 
-## 车道一览
+端口块的目的不是替代容器内部标准端口。比如 host-dev PostgreSQL 在宿主机使用 `21010`，容器内部仍然是 `5432`；PowerSync 在宿主机使用 `21002`，容器内部仍然是 `8080`。
 
-| Profile        | 用途                | 主机端口（SSOT）                                 | 入口命令                           |
-| -------------- | ------------------- | ------------------------------------------------ | ---------------------------------- |
-| `host-dev`     | API+Web 热更新      | API `3000`，Web `5173`，PG `5432`                | Docker dev infra + Nx `run-many`   |
-| `e2e`          | Playwright 核心 e2e | API `3000`，Web `5173`，PG **`5433`**            | `pnpm docker:test:up` + `pnpm e2e` |
-| `local-docker` | 近生产全栈容器      | API **`20201`**，Web **`20200`**，PG **`20210`** | `pnpm docker:local:up`             |
-| `dev-infra`    | 仅开发依赖          | PG `5432`，Redis `6384`，PowerSync `8080`        | `pnpm docker:dev:up`               |
-| `test-infra`   | 仅测试库            | PG `5433`                                        | `pnpm docker:test:up`              |
+### 为什么 host-dev 不再使用 5173 / 3000
 
-## 互斥规则
+`5173`、`3000`、`8080` 是框架/服务常见默认端口。在共享 GCP Dev 上同时开发 MemoFlow、BodySense、Job Harness 等项目时，继续把这些默认值当长期契约会产生冲突。因此 MemoFlow host-dev 获得独立项目端口块 `21000-21019`，VS Code/SSH 转发也保持同号：
 
-- **`local-docker` 不得占用** `3000` / `5173` / `5432` / `5433` 等 host-dev/e2e 保留口。
-- **`e2e` 的 API 必须是** 工作区 `apps/api/dist` 且 `RUNTIME_LANE=e2e`；不能静默复用 Docker API。
-- Docker Desktop “服务都绿了” **不等于** Playwright 车道就绪。
-- 需要同时看容器全栈 + 本机热更时：local-docker 用 `53xxx/58xxx`，host-dev 继续 `3000/5173`。
+```text
+GCP Dev :21000 -> workstation localhost:21000  (Web)
+GCP Dev :21001 -> workstation localhost:21001  (API)
+GCP Dev :21002 -> workstation localhost:21002  (PowerSync, only when needed)
+```
+
+日常浏览器入口应是 `http://localhost:21000`，而不是 Tailscale `:20200`。`20200-20219` 完整保留给 `prod-like`。
+
+## Supporting lanes
+
+| Lane         | 用途                              | 端口                                         |
+| ------------ | --------------------------------- | -------------------------------------------- |
+| `e2e`        | Playwright 核心 e2e               | API `3000`、Web `5173`、PG `5433`            |
+| `dev-infra`  | `host-dev` 的 Docker 基础设施子集 | PowerSync `21002`、PG `21010`、Redis `21011` |
+| `test-infra` | e2e / integration 测试数据库      | PG `5433`                                    |
+
+Support lane 可以与四类环境共享其 owner 环境的端口（例如 `dev-infra` 与 `host-dev`），但不能被误当成独立部署环境。
 
 ## 命令速查
 
 ```bash
-# 看清所有车道与端口
-pnpm runtime:preflight
+# 查看所有环境 / lane 与端口
+pnpm runtime:preflight -- --list
 
-# 跑 e2e 前
-pnpm docker:test:up
-pnpm runtime:preflight:e2e
-pnpm e2e
-
-# 本机开发
+# host-dev
 pnpm docker:dev:up
 pnpm runtime:preflight:host-dev
 pnpm nx run-many -t serve --projects=api,web --parallel=2
 
-# 近生产容器验证（host 端口由工具强制隔离）
-pnpm runtime:preflight:local-docker
+# prod-like（底层命令仍使用历史 docker:local 命名）
+pnpm runtime:preflight:prod-like
 pnpm docker:local:up
-# Web http://localhost:20200  API http://localhost:20201
+
+# staging：只做观测/preflight；部署 authority 属于 staging watcher
+pnpm runtime:preflight:staging
+
+# prod：在 GCP Dev 只打印 topology；不会探测/修改 Alibaba runtime
+pnpm runtime:preflight:prod
+
+# e2e
+pnpm docker:test:up
+pnpm runtime:preflight:e2e
+pnpm e2e
 ```
 
-## GCP Dev 持久开发会话约定
+`runtime:preflight:local-docker` 暂时保留为 `runtime:preflight:prod-like` 的兼容别名；新文档与新自动化统一使用 `prod-like`。
 
-GCP Dev 的日常开发统一放在一个持久 `tmux` 会话中，避免 SSH/Agent 会话结束时把热更新进程一起终止：
+## GCP Dev 持久开发会话
+
+日常开发固定使用一个持久 tmux 会话：
 
 - session：`MemoFlow`
 - window：`dev`
@@ -77,53 +93,45 @@ GCP Dev 的日常开发统一放在一个持久 `tmux` 会话中，避免 SSH/Ag
 pnpm docker:dev:up && pnpm nx run-many -t serve --projects=api,web --parallel=2
 ```
 
-这个 window 拥有整个 `host-dev` lane：Docker 只承载 PostgreSQL / Redis / PowerSync，API 与 Web 直接在宿主机运行并保持热更新。`local-docker` 仍只用于近生产验收，不作为日常 Dev Web/API runtime。
+这个 window 只拥有 `host-dev`：Docker 承载 PostgreSQL / Redis / PowerSync，API 与 Web 在宿主机直接运行并热更新。连接 GCP Dev 的工作站通过 VS Code / SSH 转发 `21000`、`21001`，必要时再转发 `21002`。
+
+不要把 raw Vite host-dev 通过 `20200` 暴露给远程浏览器。高 RTT 下 Vite 原生 ESM 会产生大量 module waterfall；`20200` 也因此必须保持 `prod-like` 的稳定职责。
+
+## prod-like 与 `.env.production.local`
+
+- `docker-compose.local.yml` 是 `prod-like` 的实现，不是环境名称本身。 Compose project 固定为 `memoflow-prod-like`；host-dev infrastructure 固定为 `memoflow-host-dev`，避免 Docker 把另一环境的容器误判为 orphan。
+- 密钥与镜像 tag 可放在 `.env.production.local`。
+- Host 端口以 `tools/runtime/profiles.json` 为准；`pnpm docker:local:*` 会把默认端口强制收敛到 `20200-20211`。
+- 机器级 override 仍必须位于 gitignored `.env.prod-like.local` 且显式设置 `LOCAL_DOCKER_MACHINE_PORTS=true`；override 会检查是否撞到同一 host group 的 host-dev / staging / e2e 端口。
+
+GCP Dev 的共享环境不要再使用历史 `1213x` 私有覆盖。canonical prod-like 使用：
+
+```dotenv
+API_HOST_PORT=20201
+WEB_HOST_PORT=20200
+POWERSYNC_HOST_PORT=20202
+POSTGRES_HOST_PORT=20210
+REDIS_HOST_PORT=20211
+```
+
+## Staging 与 production authority
+
+`staging` 和 `prod` 都不是开发者手工 `docker compose up` 的临时环境：
+
+- `staging` 由 candidate/staging control artifact + staging watcher 在 GCP Dev 上维护；
+- `prod` 由 Published Release -> production-set -> `production-selected` control artifact -> Alibaba production watcher 维护；
+- runtime SSOT 记录它们的端口、URL 和 host ownership，但不会让 GCP Dev 的 preflight 去本地探测 Alibaba production 端口。
 
 ## Playwright 复用策略
 
-- **API 与 Web**：默认均 **不** `reuseExistingServer`，避免复用错误 lane 的 Docker API 或无 E2E env/proxy 的陈旧 Vite。
-- 仅当你明确知道当前 `:3000` 是 e2e API（`/healthz` 含 `"lane":"e2e"`），且 `:5173` 是使用当前 E2E env/proxy 启动的 Vite 时，可设 `E2E_REUSE_SERVERS=1`。
-- CI 永不复用 API 或 Web server。
-- `start-api-server` 若发现端口被非 e2e 占用，会 **直接失败并打印修复提示**。
-
-## local-docker 与 `.env.production.local`
-
-- 密钥与镜像 tag 仍可放在 `.env.production.local`。
-- **Host 端口以 SSOT 为准**：`pnpm docker:local:up` 会覆盖与 host-dev/e2e 冲突的 `*_HOST_PORT`（例如把 `API_HOST_PORT=3000` 强制回 `20201`）。
-- 推荐把本机 env 中的 host 端口改成与 SSOT 一致，避免下次手工 `docker compose ...` 时再次踩坑。
-
-### 可选的机器级端口覆盖
-
-需要避开本机其他项目时，可在 gitignored `.env.local` 中显式启用机器级覆盖：
-
-```dotenv
-LOCAL_DOCKER_MACHINE_PORTS=true
-LOCAL_DOCKER_SHARE_DEV_SECRETS=true
-API_HOST_PORT=12136
-WEB_HOST_PORT=12137
-POWERSYNC_HOST_PORT=12139
-POSTGRES_HOST_PORT=12140
-REDIS_HOST_PORT=12141
-```
-
-`pnpm docker:local:*` 会校验覆盖端口有效、互不重复且不占用其他 runtime lane
-的保留端口。未设置 `LOCAL_DOCKER_MACHINE_PORTS=true` 时仍严格使用共享 SSOT，
-因此个人端口不会影响其他开发者。
-
-需要在 Docker 服务与宿主 dev 服务之间逐个切换时，可同时设置
-`LOCAL_DOCKER_SHARE_DEV_SECRETS=true`。本地 Docker 的 API 将采用 `.env.development` 中的 JWT 开发密钥，使宿主 API 与剩余 Docker 服务保持相同的本地认证边界。该开关只适用于本机开发，不能用于生产部署。
-
-## 排障
-
-| 现象                                 | 原因                        | 处理                                                                       |
-| ------------------------------------ | --------------------------- | -------------------------------------------------------------------------- |
-| e2e 报 3000 被占用 / lane missing    | Docker 或 host-dev 占着 API | `pnpm docker:local:down` 或释放 3000；确认 local API 在 20201              |
-| 修了代码 e2e 仍旧行为 / 页面一直加载 | API 或 Web 旧进程被复用     | 默认已禁止两端复用；确认没有 `E2E_REUSE_SERVERS=1`，并释放 `3000` / `5173` |
-| 文档写 20201，浏览器却 3000          | env 把 host 端口改回经典口  | 使用 `pnpm docker:local:*`，或修正 env                                     |
-| e2e DB 连不上                        | 5433 未起                   | `pnpm docker:test:up`                                                      |
+- `e2e` 仍使用独立测试 lane；默认不复用错误的 host-dev/prod-like API。
+- 若 `:3000` 已有服务，必须确认 `/healthz` 的 `lane=e2e`，否则 Playwright fail closed。
+- host-dev 已迁到 `21000/21001`，因此不再与 e2e 的 `5173/3000` 发生日常端口冲突。
 
 ## 维护约定
 
-- 新增本机端口时，先改 `tools/runtime/profiles.json`，再改 compose / Playwright / 文档。
-- 不要在多个文件各自发明“默认 3000/8080”作为 local-docker 对外端口。
-- 相关实现：`tools/runtime/*`、`tools/docker/local-compose.mjs`、`apps/web/playwright.server.ts`、`apps/web/e2e/helpers/start-api-server.ts`。
+1. 新增/修改端口，先改 `tools/runtime/profiles.json`。
+2. 四类 primary environment 名称固定为 `host-dev` / `prod-like` / `staging` / `prod`。
+3. `docker-compose.local.yml`、Tailscale Serve、tmux、VS Code forwarding、文档不得各自发明端口。
+4. 跨项目共享 GCP Dev 时，每个项目分配自己的 host-dev port block；不要回退到框架默认 `5173/3000/8080` 作为长期契约。
+5. production 标准入口 `80/443` 属于独立 Alibaba host，不参与 GCP Dev 端口冲突计算。

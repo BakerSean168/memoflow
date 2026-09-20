@@ -13,6 +13,11 @@ const PROFILES_PATH = resolve(__dirname, 'profiles.json');
  * @typedef {object} RuntimeProfile
  * @property {string} title
  * @property {string} [description]
+ * @property {"environment" | "support"} [category]
+ * @property {string} [hostGroup]
+ * @property {string} [portBlock]
+ * @property {string} [composeProject]
+ * @property {boolean} [localProbe]
  * @property {Record<string, string>} [commands]
  * @property {Record<string, number>} ports
  * @property {Record<string, number>} [hostPortEnv]
@@ -25,7 +30,7 @@ const PROFILES_PATH = resolve(__dirname, 'profiles.json');
  * @typedef {object} RuntimeProfilesDocument
  * @property {number} version
  * @property {string} [description]
- * @property {Record<string, string[]>} reservedHostPorts
+ * @property {string[]} [primaryEnvironments]
  * @property {Record<string, RuntimeProfile>} profiles
  */
 
@@ -69,8 +74,11 @@ export function getPortsClaimedOutside(profileName) {
   /** @type {Map<number, string[]>} */
   const claimed = new Map();
 
+  const selected = getRuntimeProfile(profileName);
+  const selectedHostGroup = selected.hostGroup;
+
   for (const [name, profile] of Object.entries(doc.profiles)) {
-    if (name === profileName) {
+    if (name === profileName || profile.hostGroup !== selectedHostGroup) {
       continue;
     }
     for (const port of Object.values(profile.ports ?? {})) {
@@ -84,16 +92,16 @@ export function getPortsClaimedOutside(profileName) {
 }
 
 /**
- * Resolve local-docker host port env map from SSOT, with an explicit opt-in for
+ * Resolve prod-like host port env map from SSOT, with an explicit opt-in for
  * a gitignored machine-local override.
  * @param {Record<string, string | number | undefined>} hostPortEnv
  * @param {{ allowMachineOverride?: boolean }} [options]
  * @returns {{ ok: boolean, forced: Record<string, string>, warnings: string[], errors: string[] }}
  */
-export function resolveLocalDockerHostPorts(hostPortEnv = {}, options = {}) {
-  const profile = getRuntimeProfile('local-docker');
+export function resolveProdLikeHostPorts(hostPortEnv = {}, options = {}) {
+  const profile = getRuntimeProfile('prod-like');
   const expected = profile.hostPortEnv ?? {};
-  const claimedOutside = getPortsClaimedOutside('local-docker');
+  const claimedOutside = getPortsClaimedOutside('prod-like');
   const allowMachineOverride = options.allowMachineOverride === true;
 
   /** @type {Record<string, string>} */
@@ -149,7 +157,7 @@ export function resolveLocalDockerHostPorts(hostPortEnv = {}, options = {}) {
     const collides = Number.isFinite(numeric) && claimedOutside.has(numeric);
     const reason = collides
       ? `collides with reserved host port for [${claimedOutside.get(numeric)?.join(', ')}]`
-      : 'differs from SSOT local-docker contract';
+      : 'differs from SSOT prod-like contract';
 
     warnings.push(`${key}=${current} ${reason}; forcing SSOT ${expectedValue}`);
     forced[key] = expectedValue;
@@ -172,6 +180,10 @@ export function listProfileSummaries(profileName) {
   const lines = [
     `profile: ${profileName} — ${profile.title}`,
     profile.description ? `  ${profile.description}` : null,
+    profile.category ? `  category=${profile.category}` : null,
+    profile.hostGroup ? `  hostGroup=${profile.hostGroup}` : null,
+    profile.portBlock ? `  portBlock=${profile.portBlock}` : null,
+    profile.composeProject ? `  composeProject=${profile.composeProject}` : null,
   ].filter(Boolean);
 
   for (const [name, port] of Object.entries(profile.ports ?? {})) {
@@ -188,5 +200,8 @@ export function listProfileSummaries(profileName) {
   }
   return lines;
 }
+
+/** @deprecated Use resolveProdLikeHostPorts. */
+export const resolveLocalDockerHostPorts = resolveProdLikeHostPorts;
 
 export { PROFILES_PATH };

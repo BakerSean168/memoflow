@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { getRuntimeProfile, resolveLocalDockerHostPorts } from '../runtime/load-profiles.mjs';
+import { getRuntimeProfile, resolveProdLikeHostPorts } from '../runtime/load-profiles.mjs';
 import { detectHostEnvShadowing } from './env-shadow.mjs';
 
 export { detectHostEnvShadowing } from './env-shadow.mjs';
@@ -11,7 +11,8 @@ export { detectHostEnvShadowing } from './env-shadow.mjs';
 const workspaceRoot = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const baseEnvFile = '.env.production';
 const envFile = '.env.production.local';
-const machineEnvFile = '.env.local';
+const machineEnvFile = '.env.prod-like.local';
+const prodLikeProfile = getRuntimeProfile('prod-like');
 
 /**
  * Build Compose argv using the repository production defaults plus the optional
@@ -23,7 +24,15 @@ const machineEnvFile = '.env.local';
  */
 export function createLocalComposeArgs(options = {}) {
   const cwd = options.cwd ?? workspaceRoot;
-  const args = ['compose', '-f', 'docker-compose.local.yml', '--env-file', baseEnvFile];
+  const args = [
+    'compose',
+    '-p',
+    prodLikeProfile.composeProject,
+    '-f',
+    'docker-compose.local.yml',
+    '--env-file',
+    baseEnvFile,
+  ];
   if (existsSync(resolve(cwd, envFile))) {
     args.push('--env-file', envFile);
   }
@@ -221,7 +230,7 @@ export function resolveLocalDockerBrowserValidationOrigins({
 }
 
 /**
- * Force local-docker host ports from SSOT so local stack never steals host-dev/e2e ports.
+ * Force prod-like host ports from SSOT so local stack never steals host-dev/e2e ports.
  * Secrets and service env still come from .env.production.local.
  */
 function applyLocalDockerHostPortIsolation(
@@ -232,7 +241,7 @@ function applyLocalDockerHostPortIsolation(
 ) {
   /** @type {Record<string, string>} */
   const fromFile = {};
-  const profile = getRuntimeProfile('local-docker');
+  const profile = getRuntimeProfile('prod-like');
   const allowMachineOverride =
     machineEnvFileMap.get('LOCAL_DOCKER_MACHINE_PORTS')?.toLowerCase() === 'true';
 
@@ -246,7 +255,7 @@ function applyLocalDockerHostPortIsolation(
     }
   }
 
-  const resolved = resolveLocalDockerHostPorts(fromFile, { allowMachineOverride });
+  const resolved = resolveProdLikeHostPorts(fromFile, { allowMachineOverride });
   for (const warning of resolved.warnings) {
     if (!quiet) {
       console.warn(`[docker:local] ${warning}`);
@@ -295,7 +304,7 @@ function applyLocalDockerHostPortIsolation(
 }
 
 /**
- * Build process env for local-docker compose (secrets + PowerSync fallbacks + port isolation).
+ * Build process env for prod-like compose (secrets + PowerSync fallbacks + port isolation).
  * Exported so validate-local-deploy can run `compose ps/logs` with the same interpolation
  * as `pnpm docker:local:*` (bare `--env-file .env.production.local` lacks POWERSYNC_* keys).
  *

@@ -28,7 +28,7 @@ services:
       POSTGRES_PASSWORD: MemoFlow123
       POSTGRES_DB: MemoFlow
     ports:
-      - '5432:5432'
+      - '127.0.0.1:${POSTGRES_HOST_PORT:-21010}:5432'
     volumes:
       - postgres-dev-data:/var/lib/postgresql
     command:
@@ -43,13 +43,13 @@ services:
       start_period: 10s
     restart: unless-stopped
 
-  # 开发 Redis - 端口 6384，避免与系统 Redis 冲突
+  # 开发 Redis - host-dev 项目端口块 21000-21019
   redis-dev:
     profiles: [dev]
     image: redis:8-alpine
     container_name: MemoFlow-dev-redis
     ports:
-      - '6384:6379'
+      - '127.0.0.1:${REDIS_HOST_PORT:-21011}:6379'
     volumes:
       - redis-dev-data:/data
     command: redis-server --appendonly yes --requirepass MemoFlow123
@@ -67,7 +67,7 @@ services:
     image: journeyapps/powersync-service:1.25.0
     container_name: MemoFlow-dev-powersync
     ports:
-      - '8080:8080'
+      - '127.0.0.1:${POWERSYNC_HOST_PORT:-21002}:8080'
     depends_on:
       postgres-dev:
         condition: service_healthy
@@ -187,6 +187,4 @@ services:
 # =============================================================================
 volumes:
   postgres-dev-data:
-    name: MemoFlow-dev-db-data
   redis-dev-data:
-    name: MemoFlow-dev-redis-data

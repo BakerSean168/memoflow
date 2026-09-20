@@ -40,12 +40,12 @@ target，前置任务并不相同。本文建立唯一的日常使用心智。
 
 ### 2.1 单项目：直接运行 Nx target
 
-| 目的 | 规范命令 |
-| --- | --- |
-| 只启动 API | `pnpm nx run api:serve` |
-| 只启动 Web | `pnpm nx run web:serve` |
-| 安全启动 Desktop | `pnpm nx run desktop:serve-safe` |
-| 快速启动 Desktop | `pnpm nx run desktop:serve` |
+| 目的             | 规范命令                                        |
+| ---------------- | ----------------------------------------------- |
+| 只启动 API       | `pnpm nx run api:serve`                         |
+| 只启动 Web       | `pnpm nx run web:serve`                         |
+| 安全启动 Desktop | `pnpm nx run desktop:serve-safe`                |
+| 快速启动 Desktop | `pnpm nx run desktop:serve`                     |
 | Web staging 模式 | `pnpm nx run web:serve --configuration=staging` |
 
 开发启动不再经过根 `package.json` 的 `dev` / `dev:*` scripts 包装层。所有
@@ -172,34 +172,21 @@ Nx/Vite 插件会自动推断 `vite:dev` target。该 target 不是
 
 ## 4. 本机端口方案
 
-共享默认端口和 runtime lane 契约以
-[`runtime-lanes.md`](./runtime-lanes.md) 为准。
+运行环境与端口唯一契约见 [`runtime-lanes.md`](./runtime-lanes.md)。MemoFlow 在共享 GCP Dev 上不再把框架默认 `5173/3000/8080` 当作长期开发契约。
 
-当前工作站在 gitignored `.env.local` 中启用了机器级连续端口：
+四类环境中，与日常开发直接相关的两套 GCP Dev 端口为：
 
-| 服务 | 宿主端口 | Docker 内部端口 |
-| --- | ---: | ---: |
-| API | `12136` | `3000` |
-| Web / Desktop Vite | `12137` | Web `80` |
-| AI Service | `12138` | `8100` |
-| PowerSync | `12139` | `8080` |
-| PostgreSQL | `12140` | `5432` |
-| Redis | `12141` | `6379` |
+| 服务       | `host-dev` | `prod-like` |
+| ---------- | ---------: | ----------: |
+| Web        |    `21000` |     `20200` |
+| API        |    `21001` |     `20201` |
+| PowerSync  |    `21002` |     `20202` |
+| PostgreSQL |    `21010` |     `20210` |
+| Redis      |    `21011` |     `20211` |
 
-本机覆盖开关：
+`host-dev` 通过 VS Code Remote/SSH port forwarding 暴露给工作站，推荐保持同号映射；`prod-like` 由 `docker-compose.local.yml` 完整容器化运行。两套端口互不重叠，因此可以同时存在，不需要通过停止 Docker Web/API 来“替换”服务。
 
-```dotenv
-LOCAL_DOCKER_MACHINE_PORTS=true
-LOCAL_DOCKER_SHARE_DEV_SECRETS=true
-```
-
-规则：
-
-- `.env.local`、`.env.development.local` 均由 Git 忽略，不影响其他电脑。
-- `pnpm docker:local:*` 会验证端口有效、唯一且不占用共享保留端口。
-- Docker 与宿主 dev 使用同一组对外端口；替换服务前必须先停止对应容器。
-- Docker 内部服务名和内部端口不变。
-- Web 和 Desktop Vite 当前共享 `12137`，不能同时启动。
+`staging` 固定使用 `20250-20261`，`prod` 位于 Alibaba 独立主机并由 Caddy 使用公网 `80/443`。完整定义均来自 `tools/runtime/profiles.json`。
 
 ## 5. 开发模式
 
@@ -227,117 +214,87 @@ pnpm docker:local:logs
 访问：
 
 ```text
-Web        http://localhost:12137
-API        http://localhost:12136
-AI         http://localhost:12138
-PowerSync  http://localhost:12139
+Web        http://localhost:20200
+API        http://localhost:20201
+PowerSync  http://localhost:20202
 ```
 
-不要同时启动占用相同端口的宿主服务。
+prod-like 与 host-dev 已使用不同端口块，可以同时运行。
 
-## 5.2 模式 B：Desktop 热更新 + Docker 后端
+## 5.2 模式 B：GCP Dev host-dev（默认开发内环）
 
-Desktop Vite 使用与 Docker Web 相同的 `12137`，先停止 Web 容器：
+这是 Web/API 日常开发的默认方式。Docker 只启动基础设施，业务进程直接在宿主机运行并热更新：
 
 ```bash
-docker stop memoflow-web-1
+pnpm docker:dev:up
+pnpm nx run-many -t serve --projects=api,web --parallel=2
+```
+
+端口固定为：
+
+```text
+Web        21000
+API        21001
+PowerSync  21002
+PostgreSQL 21010
+Redis      21011
+```
+
+在 GCP Dev 上把它放进 `tmux` 的 `MemoFlow:dev` window；工作站通过 VS Code Remote/SSH 转发 `21000 -> localhost:21000`、`21001 -> localhost:21001`。浏览器访问 `http://localhost:21000`。
+
+`prod-like` 使用独立 `20200-20211`，因此不需要停止任何 prod-like Web/API 容器。
+
+## 5.3 模式 C：单独调试 Web 或 API
+
+基础设施仍由 host-dev Docker profile 提供：
+
+```bash
+pnpm docker:dev:up
+```
+
+只调 Web：
+
+```bash
+pnpm nx run web:serve
+# Web :21000，Vite proxy -> API :21001
+```
+
+只调 API：
+
+```bash
+pnpm nx run api:serve
+# API :21001；PG :21010；Redis :21011；PowerSync :21002
+```
+
+如果只启动 Web，必须保证 `21001` 已有正确的 host-dev API，或显式覆盖 `PROXY_TARGET_URL` 指向要联调的后端。不要临时改成未登记端口。
+
+## 5.4 模式 D：Desktop 开发
+
+首次/依赖变化后：
+
+```bash
+pnpm docker:dev:up
+pnpm nx run api:serve
 pnpm nx run desktop:serve-safe
 ```
 
-Desktop 通过以下地址使用 Docker 后端：
-
-```text
-MEMOFLOW_API_URL=http://localhost:12136/api/v1
-```
-
-环境准备完成后的后续启动可以使用：
+后续快速内环可以使用：
 
 ```bash
 pnpm nx run desktop:serve
 ```
 
-结束后恢复 Docker Web：
+Desktop 使用 host-dev API `http://localhost:21001`。如果 Desktop Vite 与 Web Vite 共用同一个开发端口，不要同时启动两者；这属于同一 `host-dev` 环境内部的 UI 入口选择，不应通过占用 `prod-like` 端口解决。
 
-```bash
-docker start memoflow-web-1
-```
+## 6. 环境切换规则
 
-该模式不需要启动宿主 API。
-
-## 5.3 模式 C：Web 热更新 + Docker 后端
-
-```bash
-docker stop memoflow-web-1
-pnpm nx run web:serve
-```
-
-Vite 运行在 `12137`，通过本地 proxy 访问 API `12136`。
-
-结束后：
-
-```bash
-docker start memoflow-web-1
-```
-
-## 5.4 模式 D：API 热更新 + Docker 基础设施
-
-停止 Docker API：
-
-```bash
-docker stop memoflow-api-1
-pnpm nx run api:serve
-```
-
-宿主 API 使用：
-
-```text
-API         12136
-PostgreSQL  12140
-Redis       12141
-PowerSync   12139
-```
-
-本机 Docker 和宿主 dev 的开发 JWT、PowerSync key 保持一致，因此宿主 API 可以复用剩余 Docker 服务。
-
-注意：Docker Web 的 Nginx 通过 Docker 网络服务名 `api` 访问 API。停止 API
-容器后，Docker Web 不能自动访问宿主 API。测试宿主 API 时应配合
-`pnpm nx run web:serve` 或 Desktop，而不是继续使用 Docker Web。
-
-结束后：
-
-```bash
-docker start memoflow-api-1
-```
-
-## 5.5 模式 E：宿主 API + Web
-
-使用 Nx 多项目命令：
-
-```bash
-docker stop memoflow-api-1 memoflow-web-1
-pnpm nx run-many -t serve --projects=api,web --parallel=2
-```
-
-该命令只包含 API + Web，不包含 Desktop。需要改变组合时直接
-修改 `--projects`，不新增根级快捷脚本。
-
-## 6. 单服务替换规则
-
-进行 Docker → 宿主替换时遵循：
-
-1. 确认准备开发的服务。
-2. 停止同端口 Docker 容器。
-3. 使用对应 `pnpm nx run <project>:serve` 启动宿主服务。
-4. 用健康端点确认当前端口来自宿主进程。
-5. 完成开发后停止宿主进程。
-6. `docker start` 恢复原容器。
-
-禁止：
-
-- 在端口冲突后临时随机改一个未记录端口。
-- 同时运行两个 API，让它们消费同一队列或执行同一 cron。
-- 认为 Docker Web 能自动代理到宿主 API。
-- 使用 `docker compose down -v` 作为普通服务切换手段。
+1. `host-dev` 是源码热更新环境；`prod-like` 是完整容器验收环境；不要互相替代。
+2. 两者端口块不同，可以同时运行。
+3. `staging` 由 staging watcher 持有，禁止为了开发手工覆盖其 `20250-20261`。
+4. `prod` 位于 Alibaba 独立主机，由 production watcher 持有，不能从 GCP Dev 手工 compose 替换。
+5. 端口变化必须先进入 `tools/runtime/profiles.json`，然后同步 compose/env/文档。
+6. 不得重新把 `5173`、`3000`、`8080` 当成 MemoFlow host-dev 的长期端口；它们只保留给工具默认或辅助测试 lane。
+7. 不要使用 `docker compose down -v` 作为普通开发环境切换手段。
 
 ## 7. 常用命令速查
 
@@ -385,13 +342,13 @@ pnpm nx affected -t test
 
 ## 8. 排障
 
-| 现象 | 原因 | 处理 |
-| --- | --- | --- |
-| Desktop 报 `NODE_MODULE_VERSION` | 使用快速/推断入口，原生模块 ABI 未准备 | 停止 Desktop，运行 `pnpm nx run desktop:serve-safe` |
-| Desktop 注册请求访问 `localhost:3000` | 没有加载本机 override，或使用旧进程 | 重启 Desktop，确认 `MEMOFLOW_API_URL` |
-| `12137` 被占用 | Docker Web、Web Vite、Desktop Vite 中已有一个运行 | 停止对应进程/容器，不改临时端口 |
-| API 能连数据库但 publication 创建失败 | 连接了错误 PostgreSQL、权限不足或非 logical WAL | 确认数据库是 `12140` 的 local-docker Postgres |
-| Docker Web 在宿主 API 启动后仍报 502 | Nginx 仍查找 Docker 网络里的 `api` | 使用宿主 Web/Desktop，或恢复 Docker API |
+| 现象                                  | 原因                                           | 处理                                                |
+| ------------------------------------- | ---------------------------------------------- | --------------------------------------------------- |
+| Desktop 报 `NODE_MODULE_VERSION`      | 使用快速/推断入口，原生模块 ABI 未准备         | 停止 Desktop，运行 `pnpm nx run desktop:serve-safe` |
+| Desktop 请求仍访问 `localhost:3000`   | 旧进程/旧环境变量仍使用框架默认端口            | 重启 Desktop，确认 API 指向 `localhost:21001`       |
+| `21000` 被占用                        | Web Vite 与 Desktop Vite 同属 host-dev UI 入口 | 只保留一个 UI dev server，不改随机端口              |
+| API 能连数据库但 publication 创建失败 | 连错 PostgreSQL、权限不足或 logical WAL 未启用 | host-dev 检查 `21010`；prod-like 检查 `20210`       |
+| 浏览器访问 `:20200` 看不到源码热更新  | `20200` 属于 prod-like，不是 Vite host-dev     | VS Code/SSH 转发并访问 `http://localhost:21000`     |
 
 ### 8.1 Desktop 登录与访客模式同时报错：`better-sqlite3` ABI 不匹配
 
@@ -432,10 +389,10 @@ PowerSync SQLite 数据库；数据库初始化失败后，认证壳把底层异
 
 2026-07-29 在 Windows 开发环境中确认：
 
-| 运行时 | 版本 | `NODE_MODULE_VERSION` |
-| --- | --- | ---: |
-| 宿主 Node | `24.12.0` | `137` |
-| Electron | `43.1.0` | `148` |
+| 运行时    | 版本      | `NODE_MODULE_VERSION` |
+| --------- | --------- | --------------------: |
+| 宿主 Node | `24.12.0` |                 `137` |
+| Electron  | `43.1.0`  |                 `148` |
 
 当前 hoisted pnpm 工作区只有一个共享原生产物：
 
@@ -549,6 +506,6 @@ UI 应提示用户“本地数据库组件与当前 Electron 版本不兼容”�
 - 不新增 `pnpm nx <target> <project>` 示例。
 - 不把插件推断的 `vite:dev` 当成产品支持入口。
 - 新增服务或机器级端口时，先更新 `tools/runtime/profiles.json` 或机器级
-  `.env.local`，再更新本文。
+  `.env.development.local` / `.env.prod-like.local`，再更新本文。
 - 归档计划中的历史命令不做机械重写；当前指南、README 和执行计划必须遵循
   本规范。

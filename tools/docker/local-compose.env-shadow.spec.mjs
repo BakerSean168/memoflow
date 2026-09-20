@@ -22,6 +22,8 @@ describe('createLocalComposeArgs', () => {
       writeFileSync(join(cwd, '.env.production'), 'DB_NAME=MemoFlow\n');
       assert.deepEqual(createLocalComposeArgs({ cwd }), [
         'compose',
+        '-p',
+        'memoflow-prod-like',
         '-f',
         'docker-compose.local.yml',
         '--env-file',
@@ -39,6 +41,8 @@ describe('createLocalComposeArgs', () => {
       writeFileSync(join(cwd, '.env.production.local'), 'DB_PASSWORD=secret\n');
       assert.deepEqual(createLocalComposeArgs({ cwd }), [
         'compose',
+        '-p',
+        'memoflow-prod-like',
         '-f',
         'docker-compose.local.yml',
         '--env-file',
@@ -230,7 +234,9 @@ describe('API runtime image boundary', () => {
         dockerfile.indexOf('COPY apps/api ./apps/api'),
     );
     assert.ok(dockerfile.includes('pnpm --config.node-linker=isolated'));
-    assert.ok(dockerfile.includes('COPY packages/scheduler/package.json ./packages/scheduler/package.json'));
+    assert.ok(
+      dockerfile.includes('COPY packages/scheduler/package.json ./packages/scheduler/package.json'),
+    );
     assert.ok(dockerfile.includes('COPY packages/scheduler ./packages/scheduler'));
     assert.ok(
       dockerfile.indexOf('COPY packages/scheduler/package.json') <

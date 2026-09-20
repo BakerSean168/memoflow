@@ -25,7 +25,7 @@ Prepare Release 不再从原始 push 直接触发，而是在 `CI` 已成功后�
 运行仓库统一入口：
 
 ```bash
-pnpm runtime:preflight:local-docker
+pnpm runtime:preflight:prod-like
 pnpm docker:local:up
 ```
 
