@@ -35,6 +35,9 @@ describe('LabelPicker (UI-5101)', () => {
     expect(trigger.text()).toContain('Work');
     expect(trigger.text()).toContain('+2');
     expect(trigger.text()).not.toContain('Deep Work');
+    expect(trigger.classes()).toContain('rounded-md');
+    expect(trigger.classes()).toContain('bg-muted/40');
+    expect(trigger.classes()).not.toContain('rounded-full');
   });
 
   it('forwards controlled multi-select changes and create intent without mutating options', async () => {

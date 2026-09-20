@@ -18,16 +18,19 @@ import { useGoalStore } from '../stores/goal-store';
 import { GOAL_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import { sanitizeForIpc } from '../../../shared/utils/ipc';
-import type {
-  GoalClientDTO,
-  CreateGoalReq,
-  UpdateGoalReq,
-  GetGoalAggregateRes,
+import {
+  GoalStatus,
+  type GoalStatus as GoalStatusValue,
+  type GoalClientDTO,
+  type CreateGoalReq,
+  type UpdateGoalReq,
+  type GetGoalAggregateRes,
 } from '@memoflow/contracts/goal';
 import { executeGoalOperation, createGoalErrorHandler } from './goalOperations';
 import { useGoalFilters } from './useGoalFilters';
 import { useKeyResults } from './useKeyResults';
 import { useGoalRecords } from './useGoalRecords';
+import { isGoalStatusTransitionAllowed } from './goalStatusTransitions';
 
 type GoalEntityLike = { toDTO(): GoalClientDTO };
 
@@ -211,6 +214,45 @@ export function useGoal() {
     );
   }
 
+  async function transitionGoalStatus(goal: GoalClientDTO, targetStatus: GoalStatusValue) {
+    if (goal.status === targetStatus) return goal;
+    if (!isGoalStatusTransitionAllowed(goal.status, targetStatus)) return null;
+
+    const id = String(goal.id);
+    savingId.value = id;
+    store.setError(null);
+    try {
+      const fallbackKey =
+        targetStatus === GoalStatus.Planned
+          ? 'goal.error.planFailed'
+          : targetStatus === GoalStatus.InProgress
+            ? 'goal.error.activateFailed'
+            : targetStatus === GoalStatus.Completed
+              ? 'goal.error.completeFailed'
+              : 'goal.error.abandonFailed';
+      const receipt = await executeGoalOperation(
+        () =>
+          targetStatus === GoalStatus.Planned
+            ? service.planGoal(id, goal.version)
+            : targetStatus === GoalStatus.InProgress
+              ? service.activateGoal(id, goal.version)
+              : targetStatus === GoalStatus.Completed
+                ? service.completeGoal(id, goal.version)
+                : service.abandonGoal(id, goal.version),
+        {
+          ...opOpts,
+          fallbackKey,
+          scope: `transitionGoalStatus:${goal.status}->${targetStatus}`,
+        },
+      );
+      if (!receipt) return null;
+      store.applyGoalMutationReceipt(receipt);
+      return receipt.readModel;
+    } finally {
+      savingId.value = null;
+    }
+  }
+
   // ── Aggregate View ───────────────────────────────────────────────────
 
   async function getGoalAggregateView(goalId: string): Promise<GetGoalAggregateRes | null> {
@@ -262,6 +304,7 @@ export function useGoal() {
     activateGoal,
     completeGoal,
     abandonGoal,
+    transitionGoalStatus,
     // Aggregate view
     getGoalAggregateView,
     // Filters (delegated)

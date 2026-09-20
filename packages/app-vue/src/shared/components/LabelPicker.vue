@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { ChevronsUpDown } from '@lucide/vue';
+import { ChevronDown, ChevronsUpDown, Tag } from '@lucide/vue';
 import { Badge, Button, Popover, PopoverContent, PopoverTrigger } from '@memoflow/ui-vue-shadcn';
 import LabelCommandPanel from './LabelCommandPanel.vue';
 import type { LabelPickerOption } from './label-selection.types';
@@ -63,7 +63,11 @@ function updateSelection(value: string[]): void {
         type="button"
         variant="outline"
         class="min-w-0 justify-between gap-2"
-        :class="compact ? 'h-8 w-auto max-w-48 rounded-full px-3 font-normal' : 'w-full'"
+        :class="
+          compact
+            ? 'h-8 w-auto max-w-56 rounded-md border-transparent bg-muted/40 px-2.5 font-normal shadow-none hover:bg-muted/70'
+            : 'w-full'
+        "
         role="combobox"
         aria-haspopup="listbox"
         :aria-expanded="open"
@@ -71,7 +75,13 @@ function updateSelection(value: string[]): void {
         :disabled="disabled"
         data-testid="label-picker-trigger"
       >
-        <span v-if="!hasSelection" class="truncate text-muted-foreground">{{ placeholder }}</span>
+        <span
+          v-if="!hasSelection"
+          class="flex min-w-0 items-center gap-1.5 truncate text-muted-foreground"
+        >
+          <Tag v-if="compact" class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+          <span class="truncate">{{ placeholder }}</span>
+        </span>
         <span v-else class="flex min-w-0 flex-1 items-center gap-1 overflow-hidden text-left">
           <span
             v-for="option in visibleOptions"
@@ -80,7 +90,7 @@ function updateSelection(value: string[]): void {
           >
             <span
               v-if="option.color"
-              class="h-2 w-2 shrink-0 rounded-full border border-border"
+              class="h-2.5 w-2.5 shrink-0 rounded-[3px]"
               :style="{ backgroundColor: option.color }"
               aria-hidden="true"
             />
@@ -93,7 +103,8 @@ function updateSelection(value: string[]): void {
             +{{ hiddenCount }}
           </Badge>
         </span>
-        <ChevronsUpDown class="h-4 w-4 shrink-0 opacity-50" aria-hidden="true" />
+        <ChevronDown v-if="compact" class="h-3.5 w-3.5 shrink-0 opacity-60" aria-hidden="true" />
+        <ChevronsUpDown v-else class="h-4 w-4 shrink-0 opacity-50" aria-hidden="true" />
       </Button>
     </PopoverTrigger>
     <PopoverContent align="start" class="w-80 max-w-[calc(100vw-2rem)] p-0">
