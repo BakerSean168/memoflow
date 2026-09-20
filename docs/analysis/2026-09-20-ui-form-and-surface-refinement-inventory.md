@@ -6,7 +6,7 @@ tags:
   - product
 description: MemoFlow 当前 Vue 主产品表单/对话框与页面 surface 的实际代码盘点，以及 property language 迁移分类
 created: 2026-09-20T00:40:00+08:00
-updated: 2026-09-20T00:40:00+08:00
+updated: 2026-09-20T08:58:00+08:00
 ---
 
 # MemoFlow UI Form & Surface Refinement Inventory
@@ -95,3 +95,15 @@ Page identity -> Primary action -> Compact toolbar/filter -> Main content -> Con
 ```
 
 因此 UFP 后续审查以“信息层级、渐进披露、动作主次、滚动所有权、错误/草稿保留、可访问性”作为验收标准，而不是以“用了多少 chip”作为指标。
+
+## 6. Selective migration result
+
+实际完成迁移后，当前直接拥有 `DialogContent` 的业务组件只剩三类有意保留项：
+
+1. `AISettings.vue` — staged provider onboarding；
+2. `KnowledgeRepositorySettings.vue` — destructive disconnect/purge confirmation；
+3. `goal/components/dag/ExportDialog.vue` — 当前无 production consumer。
+
+`KnowledgeProjectionWorkspaceView` 的 create/review 与 adoption dialogs 已迁移 `ProductDialogShell`。因此后续不再以“消灭 raw DialogContent”为目标；新的 UI review 应聚焦 staged flow 自身的信息层级与页面级 density。
+
+页面级第一批已落到 Goal Detail、Task Detail、Notification inbox、Settings sidebar、Schedule day/event details，目标是减少 card-in-card 与高色度装饰，而不改变 owner、command 或 read-model。

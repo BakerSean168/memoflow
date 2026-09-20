@@ -83,7 +83,7 @@
         v-else-if="viewModel && currentTemplate"
         class="mx-auto flex w-full max-w-5xl flex-col gap-5"
       >
-        <article class="rounded-xl border bg-card p-5" data-testid="task-plan-overview">
+        <article class="border-b border-border/70 pb-5" data-testid="task-plan-overview">
           <div class="flex flex-wrap items-center gap-2">
             <Badge>{{ viewModel.statusText }}</Badge>
             <Badge variant="outline">{{ viewModel.importanceText }}</Badge>
@@ -118,74 +118,101 @@
               {{ t('task.detail.editSettings') }}
             </Button>
           </div>
-          <dl class="grid gap-3 @xl/panel:grid-cols-2 @3xl/panel:grid-cols-4">
-            <div class="rounded-xl border bg-card p-4">
-              <dt class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <dl class="divide-y border-y border-border/70" data-testid="task-detail-property-list">
+            <div class="grid gap-1 py-3 @xl/panel:grid-cols-[10rem_minmax(0,1fr)] @xl/panel:gap-5">
+              <dt class="text-xs font-medium text-muted-foreground">
                 {{ t('task.detail.recurrence') }}
               </dt>
-              <dd class="mt-2 text-sm font-medium">{{ viewModel.recurrenceText }}</dd>
-              <dd class="mt-1 text-xs text-muted-foreground">{{ recurrenceBoundaryText }}</dd>
-            </div>
-            <div class="rounded-xl border bg-card p-4">
-              <dt class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                {{ t('task.detail.schedule') }}
-              </dt>
-              <dd class="mt-2 text-sm font-medium">{{ scheduleText }}</dd>
-              <dd class="mt-1 text-xs text-muted-foreground">{{ planStartText }}</dd>
-            </div>
-            <div class="rounded-xl border bg-card p-4">
-              <dt class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                {{ t('task.detail.reminders') }}
-              </dt>
-              <dd class="mt-2 text-sm font-medium">{{ reminderText }}</dd>
-              <dd class="mt-1 text-xs text-muted-foreground">
-                {{ t('task.detail.reminderAuthority') }}
+              <dd>
+                <p class="text-sm font-medium">{{ viewModel.recurrenceText }}</p>
+                <p class="mt-0.5 text-xs text-muted-foreground">{{ recurrenceBoundaryText }}</p>
               </dd>
             </div>
-            <div class="rounded-xl border bg-card p-4">
-              <dt class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <div class="grid gap-1 py-3 @xl/panel:grid-cols-[10rem_minmax(0,1fr)] @xl/panel:gap-5">
+              <dt class="text-xs font-medium text-muted-foreground">
+                {{ t('task.detail.schedule') }}
+              </dt>
+              <dd>
+                <p class="text-sm font-medium">{{ scheduleText }}</p>
+                <p class="mt-0.5 text-xs text-muted-foreground">{{ planStartText }}</p>
+              </dd>
+            </div>
+            <div class="grid gap-1 py-3 @xl/panel:grid-cols-[10rem_minmax(0,1fr)] @xl/panel:gap-5">
+              <dt class="text-xs font-medium text-muted-foreground">
+                {{ t('task.detail.reminders') }}
+              </dt>
+              <dd>
+                <p class="text-sm font-medium">{{ reminderText }}</p>
+                <p class="mt-0.5 text-xs text-muted-foreground">
+                  {{ t('task.detail.reminderAuthority') }}
+                </p>
+              </dd>
+            </div>
+            <div class="grid gap-1 py-3 @xl/panel:grid-cols-[10rem_minmax(0,1fr)] @xl/panel:gap-5">
+              <dt class="text-xs font-medium text-muted-foreground">
                 {{ t('task.detail.goalBinding') }}
               </dt>
-              <dd class="mt-2 text-sm font-medium">{{ goalBindingText }}</dd>
-              <dd class="mt-1 text-xs text-muted-foreground">
-                {{ t('task.detail.goalBindingDescription') }}
+              <dd>
+                <p class="text-sm font-medium">{{ goalBindingText }}</p>
+                <p class="mt-0.5 text-xs text-muted-foreground">
+                  {{ t('task.detail.goalBindingDescription') }}
+                </p>
               </dd>
             </div>
           </dl>
         </section>
 
-        <section class="grid gap-3 @xl/panel:grid-cols-2" data-testid="task-detail-execution-summary">
-          <div class="rounded-xl border bg-card p-4">
+        <section
+          class="grid border-y border-border/70 @xl/panel:grid-cols-2 @xl/panel:divide-x"
+          data-testid="task-detail-execution-summary"
+        >
+          <div class="py-4 @xl/panel:pr-5">
             <h2 class="font-semibold">{{ t('task.detail.executionStats') }}</h2>
             <div class="mt-3 grid grid-cols-2 gap-3 text-sm">
               <span>{{ t('task.detail.totalInstances') }}: {{ executionSummary.total }}</span>
               <span>{{ t('task.detail.completed') }}: {{ executionSummary.completed }}</span>
-              <span>{{ t('task.detail.completionRate') }}: {{ executionSummary.completionRate }}%</span>
-              <span>{{ t('task.detail.openCount', { count: executionSummary.pending + executionSummary.inProgress }) }}</span>
-              <span>{{ t('task.detail.instanceStatusMissed') }}: {{ executionSummary.missed }}</span>
-              <span>{{ t('task.detail.instanceStatusSkipped') }}: {{ executionSummary.skipped }}</span>
+              <span
+                >{{ t('task.detail.completionRate') }}: {{ executionSummary.completionRate }}%</span
+              >
+              <span>{{
+                t('task.detail.openCount', {
+                  count: executionSummary.pending + executionSummary.inProgress,
+                })
+              }}</span>
+              <span
+                >{{ t('task.detail.instanceStatusMissed') }}: {{ executionSummary.missed }}</span
+              >
+              <span
+                >{{ t('task.detail.instanceStatusSkipped') }}: {{ executionSummary.skipped }}</span
+              >
             </div>
           </div>
-          <div class="rounded-xl border bg-card p-4">
+          <div class="border-t py-4 @xl/panel:border-t-0 @xl/panel:pl-5">
             <h2 class="font-semibold">{{ t('task.detail.goalBinding') }}</h2>
             <p class="mt-3 text-sm" data-testid="task-detail-goal-context">{{ goalContextText }}</p>
-            <p v-if="goalContextKeyResultText" class="mt-1 text-sm text-muted-foreground">{{ goalContextKeyResultText }}</p>
+            <p v-if="goalContextKeyResultText" class="mt-1 text-sm text-muted-foreground">
+              {{ goalContextKeyResultText }}
+            </p>
           </div>
         </section>
 
-        <section class="rounded-xl border bg-card p-4" data-testid="task-detail-linked-notes">
+        <section data-testid="task-detail-linked-notes">
           <h2 class="font-semibold">{{ t('task.detail.linkedNotes') }}</h2>
-          <div v-if="linkedNotes.length" class="mt-3 grid gap-2">
-            <div v-for="note in linkedNotes" :key="note.relationId" class="rounded-lg border p-3 text-sm">
+          <div v-if="linkedNotes.length" class="mt-3 divide-y border-y border-border/70">
+            <div v-for="note in linkedNotes" :key="note.relationId" class="py-3 text-sm">
               <template v-if="note.state === 'Resolved'">
                 <div class="font-medium">{{ note.title }}</div>
                 <div class="text-muted-foreground">{{ note.relativePath }}</div>
                 <p class="mt-1 text-muted-foreground">{{ note.excerpt }}</p>
               </template>
-              <span v-else class="text-muted-foreground">{{ t('task.detail.linkedNoteMissing') }}</span>
+              <span v-else class="text-muted-foreground">{{
+                t('task.detail.linkedNoteMissing')
+              }}</span>
             </div>
           </div>
-          <p v-else class="mt-2 text-sm text-muted-foreground">{{ t('task.detail.noLinkedNotes') }}</p>
+          <p v-else class="mt-2 text-sm text-muted-foreground">
+            {{ t('task.detail.noLinkedNotes') }}
+          </p>
         </section>
 
         <section
@@ -202,9 +229,15 @@
               </p>
             </div>
             <div class="flex items-center gap-2 text-xs text-muted-foreground">
-              <span>{{ t('task.detail.completedCount', { count: executionSummary.completed }) }}</span>
+              <span>{{
+                t('task.detail.completedCount', { count: executionSummary.completed })
+              }}</span>
               <span aria-hidden="true">·</span>
-              <span>{{ t('task.detail.openCount', { count: executionSummary.pending + executionSummary.inProgress }) }}</span>
+              <span>{{
+                t('task.detail.openCount', {
+                  count: executionSummary.pending + executionSummary.inProgress,
+                })
+              }}</span>
             </div>
           </div>
 
@@ -323,9 +356,18 @@ const templateOccurrences = computed(() => workspace.value?.recentOccurrences ??
 const sortedOccurrences = computed(() =>
   sortTaskOccurrences(templateOccurrences.value, 'time', () => viewModel.value?.title ?? ''),
 );
-const executionSummary = computed(() => workspace.value?.occurrenceSummary ?? {
-  total: 0, completed: 0, missed: 0, skipped: 0, pending: 0, inProgress: 0, completionRate: 0,
-});
+const executionSummary = computed(
+  () =>
+    workspace.value?.occurrenceSummary ?? {
+      total: 0,
+      completed: 0,
+      missed: 0,
+      skipped: 0,
+      pending: 0,
+      inProgress: 0,
+      completionRate: 0,
+    },
+);
 const linkedNotes = computed(() => workspace.value?.linkedNotes ?? []);
 const goalContextText = computed(() => {
   const context = workspace.value?.goalContext;
@@ -443,5 +485,4 @@ const setOccurrenceChecklistItem = (
     setOccurrenceChecklistItemMutation(id, { definitionId, completed, expectedVersion }),
   );
 const noop = () => undefined;
-
 </script>

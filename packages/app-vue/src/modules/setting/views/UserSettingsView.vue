@@ -9,6 +9,7 @@
 import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { LinearSidebarItem } from '@memoflow/ui-vue-shadcn';
 import UserPreferenceSettingsSection from '../components/UserPreferenceSettingsSection.vue';
 
 const AISettings = defineAsyncComponent(() => import('../components/AISettings.vue'));
@@ -107,22 +108,32 @@ onBeforeUnmount(() => {
           :data-testid="isNarrow ? 'settings-group-tabs' : 'settings-group-sidebar'"
           :aria-label="t('setting.title')"
         >
-          <button
-            v-for="group in groups"
-            :key="group.value"
-            :data-testid="`settings-tab-${group.value}`"
-            type="button"
-            :aria-current="activeTab === group.value ? 'page' : undefined"
-            class="whitespace-nowrap rounded-md px-3 py-2 text-left text-sm transition-colors"
-            :class="
-              activeTab === group.value
-                ? 'bg-secondary font-medium text-foreground'
-                : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
-            "
-            @click="selectGroup(group.value)"
-          >
-            {{ group.label }}
-          </button>
+          <template v-for="group in groups" :key="group.value">
+            <button
+              v-if="isNarrow"
+              :data-testid="`settings-tab-${group.value}`"
+              type="button"
+              :aria-current="activeTab === group.value ? 'page' : undefined"
+              class="whitespace-nowrap rounded-md px-3 py-2 text-left text-sm transition-colors"
+              :class="
+                activeTab === group.value
+                  ? 'bg-secondary font-medium text-foreground'
+                  : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+              "
+              @click="selectGroup(group.value)"
+            >
+              {{ group.label }}
+            </button>
+            <LinearSidebarItem
+              v-else
+              :label="group.label"
+              :active="activeTab === group.value"
+              :data-testid="`settings-tab-${group.value}`"
+              :aria-current="activeTab === group.value ? 'page' : undefined"
+              class="h-8"
+              @click="selectGroup(group.value)"
+            />
+          </template>
         </nav>
 
         <div class="min-w-0 max-w-3xl flex-1 space-y-8">

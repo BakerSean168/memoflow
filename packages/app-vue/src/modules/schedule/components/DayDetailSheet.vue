@@ -8,58 +8,66 @@
         </SheetDescription>
       </SheetHeader>
 
-      <div class="mt-4 space-y-2">
+      <div class="mt-4">
         <div v-if="events.length === 0" class="py-8 text-center text-sm text-muted-foreground">
           {{ t('schedule.dayDetail.noEvents') }}
         </div>
 
         <div
-          v-for="event in events"
-          :key="event.id"
-          class="flex items-start rounded-lg border transition-colors focus-within:ring-2 focus-within:ring-ring hover:bg-accent/50"
+          v-if="events.length > 0"
+          class="divide-y border-y border-border/70"
+          data-testid="schedule-day-event-list"
         >
-          <button
-            type="button"
-            :data-testid="`schedule-event-${event.id}`"
-            :aria-label="t('schedule.calendar.openEvent', { title: event.title })"
-            class="flex min-w-0 flex-1 items-start gap-3 rounded-lg p-3 text-left focus-visible:outline-none"
-            @click="emit('event-click', event)"
+          <div
+            v-for="event in events"
+            :key="event.id"
+            class="flex items-start transition-colors focus-within:bg-muted/30 focus-within:ring-2 focus-within:ring-inset focus-within:ring-ring hover:bg-muted/30"
           >
-            <span
-              class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full"
-              :class="{
-                'bg-primary': event.source === 'schedule',
-                'bg-success': event.source === 'goal',
-                'bg-info': event.source === 'task',
-              }"
-            />
-            <span class="min-w-0 flex-1">
-              <span class="block truncate text-sm font-medium">{{ event.title }}</span>
-              <span class="block text-xs text-muted-foreground">{{ formatTimeRange(event) }}</span>
+            <button
+              type="button"
+              :data-testid="`schedule-event-${event.id}`"
+              :aria-label="t('schedule.calendar.openEvent', { title: event.title })"
+              class="flex min-w-0 flex-1 items-start gap-3 p-3 text-left focus-visible:outline-none"
+              @click="emit('event-click', event)"
+            >
               <span
-                class="mt-1 inline-block rounded px-1.5 py-0.5 text-[10px] font-medium"
+                class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full"
                 :class="{
-                  'bg-primary/10 text-primary': event.source === 'schedule',
-                  'bg-success/15 text-success': event.source === 'goal',
-                  'bg-info/15 text-info': event.source === 'task',
+                  'bg-primary': event.source === 'schedule',
+                  'bg-success': event.source === 'goal',
+                  'bg-info': event.source === 'task',
                 }"
-              >
-                {{ calendarEventSourceLabel(event.source, t) }}
+              />
+              <span class="min-w-0 flex-1">
+                <span class="block truncate text-sm font-medium">{{ event.title }}</span>
+                <span class="block text-xs text-muted-foreground">{{
+                  formatTimeRange(event)
+                }}</span>
+                <span
+                  class="mt-1 inline-block rounded px-1.5 py-0.5 text-[10px] font-medium"
+                  :class="{
+                    'bg-primary/10 text-primary': event.source === 'schedule',
+                    'bg-success/15 text-success': event.source === 'goal',
+                    'bg-info/15 text-info': event.source === 'task',
+                  }"
+                >
+                  {{ calendarEventSourceLabel(event.source, t) }}
+                </span>
               </span>
-            </span>
-            <AlertCircle v-if="event.hasConflict" class="mt-0.5 h-4 w-4 shrink-0 text-warning" />
-          </button>
-          <!-- Complete button: only for task instances that are not yet completed -->
-          <button
-            v-if="event.source === 'task' && event.instanceStatus !== 'Completed'"
-            type="button"
-            :aria-label="t('task.action.complete')"
-            class="m-2 ml-0 shrink-0 rounded-full p-2 text-muted-foreground hover:bg-success/15 hover:text-success transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            :title="t('task.action.complete')"
-            @click="emit('complete-task', event.originalId)"
-          >
-            <CheckCircle2 class="h-4 w-4" />
-          </button>
+              <AlertCircle v-if="event.hasConflict" class="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+            </button>
+            <!-- Complete button: only for task instances that are not yet completed -->
+            <button
+              v-if="event.source === 'task' && event.instanceStatus !== 'Completed'"
+              type="button"
+              :aria-label="t('task.action.complete')"
+              class="m-2 ml-0 shrink-0 rounded-md p-2 text-muted-foreground transition-colors hover:bg-success/10 hover:text-success focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              :title="t('task.action.complete')"
+              @click="emit('complete-task', event.originalId)"
+            >
+              <CheckCircle2 class="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
 

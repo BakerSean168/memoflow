@@ -30,6 +30,14 @@ describe('MemoFlow product form language', () => {
     }
   });
 
+  it('keeps active Repository projection dialogs on the shared product dialog shell', () => {
+    const repository = read('modules/repository/views/KnowledgeProjectionWorkspaceView.vue');
+    expect(repository).toContain('test-id="knowledge-projection-create-dialog"');
+    expect(repository).toContain('test-id="knowledge-projection-adopt-dialog"');
+    expect(repository).toContain('ProductDialogShell');
+    expect(repository).not.toContain('<DialogContent');
+  });
+
   it('keeps Schedule progressive-disclosure instead of restoring the long always-open form', () => {
     const schedule = read('modules/schedule/components/CreateScheduleDialog.vue');
     expect(schedule).toContain(

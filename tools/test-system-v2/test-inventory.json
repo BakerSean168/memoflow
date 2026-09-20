@@ -4622,7 +4622,31 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/shared/components/ProductPropertyChip.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/shared/components/RadioGroupAccessibility.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/product-form-language.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/product-surface-polish.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -11013,7 +11037,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 198
+      "fileCount": 201
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -11737,7 +11761,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1017,
+    "unit": 1020,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

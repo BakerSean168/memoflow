@@ -8,7 +8,7 @@ tags:
   - product
 description: MemoFlow 表单与核心业务界面的 Linear-inspired 渐进披露、视觉密度与交互一致性精修计划
 created: 2026-09-20T00:20:00+08:00
-updated: 2026-09-20T00:49:00+08:00
+updated: 2026-09-20T08:58:00+08:00
 status: active
 ---
 
@@ -357,8 +357,8 @@ final UI/a11y/product review
 - [x] Focused validation
 - [ ] Local Docker validation
 - [x] UFP-1005 secondary form inventory
-- [ ] UFP-1005 selective migration remainder
-- [ ] UFP-1006 page-level refinement
+- [x] UFP-1005 selective migration
+- [ ] UFP-1006 page-level refinement — first batch implemented
 
 ## 11. First implementation checkpoint — 2026-09-20
 
@@ -386,3 +386,35 @@ UFP-1005 inventory 已落到 `docs/analysis/2026-09-20-ui-form-and-surface-refin
 交互预览已部署为独立 Web preview，复用既有 SYS-3003 validation backend，不替代 canonical staging：`https://gcp-dev-01.taile92a8e.ts.net:20300/`。Web 与经 Nginx proxy 的 `/api/auth/capabilities` 均返回 HTTP 200，preview container healthy。完整 fresh local-Docker acceptance 仍保留为后续 gate。
 
 下一步继续 UFP-1005 remainder，再进入 UFP-1006 页面级 density/toolbar/list/detail polish。
+
+## 12. Second implementation checkpoint — 2026-09-20
+
+UFP-1005 selective migration 已收口：
+
+- `KnowledgeProjectionWorkspaceView` 的 create/review 与 adoption staged dialogs 已迁移到 `ProductDialogShell`，保留 staged review / immutable confirmation 语义；
+- 当前 production Vue surface 中仍直接使用 `DialogContent` 的业务组件只剩：
+  - `AISettings.vue`：provider onboarding 本身拥有 picker → credentials → model 的专用 staged header，因此保留自定义 shell；
+  - `KnowledgeRepositorySettings.vue`：disconnect / purge 属于 destructive confirmation，保留显式传统确认；
+  - `goal/components/dag/ExportDialog.vue`：当前没有 production consumer，不为无调用 surface 做视觉迁移。
+
+UFP-1006 已进入页面级第一批：
+
+- Goal Detail 改用统一 `ModuleHeader`，identity / progress / lifecycle 从重型 card 降为扁平 detail surface；Key Result / Task / Knowledge / Progress / Review previews 去掉重复 card chrome；
+- Task Detail 的 recurrence / schedule / reminder / Goal binding 从四张 card 收敛为紧凑 property rows，execution summary / linked notes 同步降低边框层级；
+- Notification inbox row 改为 compact density，去掉高饱和 `border-left + ring + shadow` 未读表现，保留清晰但更克制的 unread hierarchy；
+- Settings 宽屏 sidebar 复用共享 `LinearSidebarItem`，窄屏继续保持横向 tabs；
+- Schedule `DayDetailSheet` 改为 compact divided rows，`EventDetailSheet` 的 time / source 改为统一 property rows，与新版 create form 的 property language 对齐。
+
+CI 反馈闭环：首个 PR head 的 Governance 失败并非产品代码失败，而是新增 test files 后 `tools/test-system-v2/test-inventory.json` 未刷新。已运行 `pnpm test:inventory` 更新到 **1187 files / 1020 unit tests in inventory**，随后 `test-system-v2:test:inventory` check PASS。
+
+本 checkpoint 新增 `product-surface-polish.surface.spec.ts`，锁定 Goal / Task / Schedule / Notification / Settings 的页面级 density 与 anti-resurrection 约束。
+
+当前 exact-tree 验证：
+
+- App-Vue full suite：**201 files / 802 tests PASS**；
+- App-Vue typecheck / lint / build PASS（lint 仍为 0 errors / 8 个既有 warnings）；
+- Web typecheck / production build PASS；
+- Desktop typecheck / production build PASS；
+- `docs:check` / `governance:check` PASS；
+- test inventory：**1187 files**，`test-system-v2:test:inventory` PASS；
+- `git diff --check` PASS。
