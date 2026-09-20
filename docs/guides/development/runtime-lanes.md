@@ -64,6 +64,21 @@ pnpm docker:local:up
 # Web http://localhost:20200  API http://localhost:20201
 ```
 
+## GCP Dev 持久开发会话约定
+
+GCP Dev 的日常开发统一放在一个持久 `tmux` 会话中，避免 SSH/Agent 会话结束时把热更新进程一起终止：
+
+- session：`MemoFlow`
+- window：`dev`
+- cwd：`/home/dev/projects/memoflow`
+- window 内运行：
+
+```bash
+pnpm docker:dev:up && pnpm nx run-many -t serve --projects=api,web --parallel=2
+```
+
+这个 window 拥有整个 `host-dev` lane：Docker 只承载 PostgreSQL / Redis / PowerSync，API 与 Web 直接在宿主机运行并保持热更新。`local-docker` 仍只用于近生产验收，不作为日常 Dev Web/API runtime。
+
 ## Playwright 复用策略
 
 - **API 与 Web**：默认均 **不** `reuseExistingServer`，避免复用错误 lane 的 Docker API 或无 E2E env/proxy 的陈旧 Vite。

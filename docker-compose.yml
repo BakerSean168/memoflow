@@ -72,11 +72,21 @@ services:
       postgres-dev:
         condition: service_healthy
     volumes:
-      - ./docker/powersync/powersync.yaml:/config/powersync.yaml
+      - ./docker/powersync/powersync.yaml:/config/powersync.yaml:ro
+      - ./docker/powersync/sync-config.yaml:/config/sync-config.yaml:ro
     command: ['start', '-c', '/config/powersync.yaml']
     environment:
-      PS_SOURCE_URI: postgresql://MemoFlow:MemoFlow123@postgres-dev:5432/MemoFlow
-      PS_STORAGE_URI: postgresql://MemoFlow:MemoFlow123@postgres-dev:5432/MemoFlow
+      PS_PORT: 8080
+      PS_SOURCE_HOSTNAME: postgres-dev
+      PS_SOURCE_PORT: 5432
+      PS_SOURCE_DATABASE: MemoFlow
+      PS_SOURCE_USERNAME: MemoFlow
+      PS_SOURCE_PASSWORD: MemoFlow123
+      PS_STORAGE_HOSTNAME: postgres-dev
+      PS_STORAGE_PORT: 5432
+      PS_STORAGE_DATABASE: MemoFlow
+      PS_STORAGE_USERNAME: MemoFlow
+      PS_STORAGE_PASSWORD: MemoFlow123
       PS_JWK_N: ${POWERSYNC_PUBLIC_KEY_N:-iPsCAeT3UnpBpzEuLxRxsnj3GCGLp8UQrv5_WGLGR4Q0nw8OX_wmYGb4pGIzcnYsjM_JkmzZZxxtdS_lT6pWcQs9UdZbSxb1XDD_nRjohdrFvFEjGrATte05qm1Aj2VzmJnowh1tBC_QhVpljjQLBhfbQupgB4H-nuD4HKuzCYQ2-lo-zr2zRVQM9MBsuSFgijPHdHdejKqCKje4VIFjz-zxygoUvxtct3Fcloz06wtURLu5qSwHVAKOgwyHz008iSEZdvm7FfK0M931PH8iZKMb_2OIXDgc_vfIcXw5fadGo3qCgb0hFTE5WK3kHYlRxTCKDPCdznsdW_ZwIwXGvQ}
       PS_JWK_E: ${POWERSYNC_PUBLIC_KEY_E:-AQAB}
       PS_JWK_KID: ${POWERSYNC_KEY_ID:-powersync-dev-d90f228f}
