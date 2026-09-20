@@ -332,6 +332,7 @@ export default {
     "export": "Export"
   },
   "dialog": {
+    "status": "Status",
     "editGoal": "Edit Goal",
     "titleCreate": "Create goal",
     "titleEdit": "Edit goal",
@@ -351,12 +352,10 @@ export default {
     "summaryPlaceholder": "What this goal is trying to achieve",
     "timeline": "Timeline",
     "startDate": "Start date",
-    "vNextDescription": "Define a clear outcome, its timing, and how you will measure progress.",
     "labels": "Labels",
     "labelsPlaceholder": "Add labels",
     "createLabel": "Create label",
     "keyResults": "Key results",
-    "keyResultsHint": "Use key results to measure whether this goal is actually being achieved.",
     "krTargetTimeframe": "Target timeframe (optional)",
     "krCurrentTarget": "Current target",
     "krInitialTargetConflict": "Initial value must differ from target value.",
@@ -412,7 +411,6 @@ export default {
     "krUnitPlaceholder": "e.g. %, $, users",
     "krDeletedHint": "This key result will be deleted on save.",
     "krEmptyTitle": "No key results yet",
-    "krEmptyDesc": "Add key results to measure progress toward this goal.",
     "inlineKrTitle": "First key result",
     "inlineKrDescription": "Add a measurable outcome here. Detailed calculation settings remain available below.",
     "inlineKrPlaceholder": "What measurable result will show success?",

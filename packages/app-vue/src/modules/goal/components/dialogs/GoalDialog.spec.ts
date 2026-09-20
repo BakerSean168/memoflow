@@ -8,13 +8,16 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { productionLocaleMessages } from '../../../../locales/production-messages';
 import { createMockGoal } from '@memoflow/contracts/mocks';
+import { GoalStatus } from '@memoflow/contracts/goal';
 import { LabelPicker } from '../../../../shared/components';
 import GoalTimeframePicker from '../GoalTimeframePicker.vue';
+import GoalStatusPicker from '../GoalStatusPicker.vue';
 import GoalDialog from './GoalDialog.vue';
 
 const mocks = vi.hoisted(() => ({
   createGoal: vi.fn(),
   updateGoal: vi.fn(),
+  transitionGoalStatus: vi.fn(async (goal) => goal),
   createLabel: vi.fn(),
 }));
 
@@ -24,6 +27,7 @@ vi.mock('../../composables/useGoal', async () => {
     useGoal: () => ({
       createGoal: mocks.createGoal,
       updateGoal: mocks.updateGoal,
+      transitionGoalStatus: mocks.transitionGoalStatus,
       isSaving: ref(false),
     }),
   };
@@ -61,6 +65,7 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
   afterEach(() => {
     document.body.innerHTML = '';
     vi.clearAllMocks();
+    mocks.transitionGoalStatus.mockImplementation(async (goal) => goal);
   });
 
   it('edits only vNext Direction + Measurement fields without retired taxonomy or motivation forms', () => {
@@ -73,7 +78,11 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     expect(source).toContain('keyResults');
     expect(source).toContain('ProductDialogShell');
     expect(source).toContain('ProductAutoTextarea');
-    expect(source).toContain('ProductExpandableSection');
+    expect(source).toContain('GoalKeyResultDraftEditor');
+    expect(source).toContain('GoalStatusPicker');
+    expect(source).not.toContain('goal.dialog.vNextDescription');
+    expect(source).not.toContain('goal.dialog.keyResultsHint');
+    expect(source).not.toContain('goal.dialog.krEmptyDesc');
     expect(source).toContain('draft.description');
     for (const retired of [
       'dueDate',
@@ -184,6 +193,39 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
         target: { kind: 'day', date: '2027-11-15' },
       }),
     );
+    wrapper.unmount();
+  });
+
+  it('persists an edited lifecycle status through legal domain transitions', async () => {
+    const goal = createMockGoal({
+      name: 'Status editable',
+      status: GoalStatus.Planned,
+      version: 9,
+      keyResults: [],
+    });
+    const updated = createMockGoal({ ...goal, name: 'Status editable', version: 10 });
+    const completed = createMockGoal({
+      ...updated,
+      status: GoalStatus.InProgress,
+      version: 11,
+    });
+    mocks.updateGoal.mockResolvedValue(updated);
+    mocks.transitionGoalStatus.mockResolvedValue(completed);
+
+    const wrapper = mount(GoalDialog, {
+      props: { open: true, mode: 'edit', goal },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    await nextTick();
+
+    wrapper.getComponent(GoalStatusPicker).vm.$emit('update:modelValue', GoalStatus.InProgress);
+    await nextTick();
+    await dom('save-goal-button').trigger('click');
+    await flushPromises();
+
+    expect(mocks.transitionGoalStatus).toHaveBeenCalledWith(updated, GoalStatus.InProgress);
+    expect(wrapper.emitted('updated')?.at(-1)).toEqual([completed]);
     wrapper.unmount();
   });
 

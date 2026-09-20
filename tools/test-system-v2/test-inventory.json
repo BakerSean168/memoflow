@@ -3762,6 +3762,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/goal/composables/goal-status-transitions.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/goal/composables/useGoal.label-filter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11101,7 +11109,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 207
+      "fileCount": 208
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -11825,7 +11833,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1028,
+    "unit": 1029,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

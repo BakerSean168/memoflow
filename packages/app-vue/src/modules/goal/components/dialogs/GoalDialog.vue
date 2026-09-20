@@ -9,7 +9,6 @@
       <template #title>
         {{ mode === 'edit' ? t('goal.dialog.editGoal') : t('goal.dialog.createGoal') }}
       </template>
-      <template #description>{{ t('goal.dialog.vNextDescription') }}</template>
       <template #actions>
         <Button
           v-if="mode === 'create'"
@@ -88,12 +87,11 @@
           </div>
 
           <div class="flex flex-wrap items-center gap-2" data-testid="goal-property-chips">
-            <span
-              class="inline-flex h-8 items-center rounded-full border bg-background px-3 text-sm"
-              data-testid="goal-status-chip"
-            >
-              {{ goalStatusLabel }}
-            </span>
+            <GoalStatusPicker
+              v-model="draft.status"
+              :base-status="persistedStatus"
+              :disabled="isSaving"
+            />
             <ProductDatePicker
               v-model="startDateModel"
               :label="t('goal.dialog.startDate')"
@@ -201,218 +199,11 @@
           </Transition>
         </section>
 
-        <section data-testid="goal-key-results-editor">
-          <ProductExpandableSection :open="krEditorOpen" @update:open="handleKrSectionOpen">
-            <template #trigger>
-              <button
-                type="button"
-                class="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/30"
-                data-testid="add-key-result-entry"
-              >
-                <div>
-                  <p class="text-sm font-medium">{{ t('goal.dialog.keyResults') }}</p>
-                  <p class="mt-0.5 text-xs text-muted-foreground">
-                    {{ t('goal.dialog.keyResultsHint') }}
-                  </p>
-                </div>
-                <Plus
-                  class="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 motion-reduce:transition-none"
-                  :class="krEditorOpen ? 'rotate-45' : ''"
-                />
-              </button>
-            </template>
-
-            <template #static>
-              <div
-                v-if="draft.keyResults.length === 0"
-                class="border-t border-border/70 px-4 py-3 text-xs text-muted-foreground"
-                data-testid="goal-key-results-empty"
-              >
-                {{ t('goal.dialog.krEmptyDesc') }}
-              </div>
-
-              <div v-else class="divide-y border-t border-border/70">
-                <div
-                  v-for="(keyResult, index) in draft.keyResults"
-                  :key="keyResult.id ?? `new-${index}`"
-                  class="flex items-center gap-3 px-3 py-3"
-                  data-testid="goal-key-result-draft-row"
-                >
-                  <button
-                    type="button"
-                    class="min-w-0 flex-1 text-left"
-                    @click="openEditKeyResult(index)"
-                  >
-                    <p class="truncate text-sm font-medium">{{ keyResult.title }}</p>
-                    <p class="mt-0.5 text-xs text-muted-foreground">
-                      {{ keyResult.currentValue ?? keyResult.initialValue }} →
-                      {{ keyResult.targetValue }}
-                      <span v-if="keyResult.unit"> {{ keyResult.unit }}</span>
-                    </p>
-                  </button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-xs"
-                    :aria-label="t('common.edit')"
-                    :disabled="krEditorOpen"
-                    @click="openEditKeyResult(index)"
-                  >
-                    <Pencil class="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-xs"
-                    class="text-destructive hover:text-destructive"
-                    :aria-label="t('common.delete')"
-                    :disabled="krEditorOpen"
-                    @click="removeKeyResult(index)"
-                  >
-                    <Trash2 class="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              </div>
-            </template>
-
-            <div class="space-y-4 bg-muted/10 p-4" data-testid="key-result-draft-form">
-              <div class="space-y-2">
-                <Label for="draft-kr-title">{{ t('goal.dialog.krTitle') }}</Label>
-                <Input
-                  id="draft-kr-title"
-                  v-model="krForm.title"
-                  data-testid="draft-kr-title-input"
-                  maxlength="200"
-                />
-              </div>
-
-              <div class="grid gap-3 sm:grid-cols-3">
-                <div class="space-y-2">
-                  <Label for="draft-kr-initial">{{ t('goal.dialog.krInitialValue') }}</Label>
-                  <Input
-                    id="draft-kr-initial"
-                    v-model.number="krForm.initialValue"
-                    type="number"
-                    data-testid="draft-kr-initial-input"
-                  />
-                </div>
-                <div class="space-y-2">
-                  <Label for="draft-kr-current">{{ t('goal.dialog.krCurrentValue') }}</Label>
-                  <Input
-                    id="draft-kr-current"
-                    v-model.number="krForm.currentValue"
-                    type="number"
-                    data-testid="draft-kr-current-input"
-                  />
-                </div>
-                <div class="space-y-2">
-                  <Label for="draft-kr-target">{{ t('goal.dialog.krTargetValue') }}</Label>
-                  <Input
-                    id="draft-kr-target"
-                    v-model.number="krForm.targetValue"
-                    type="number"
-                    data-testid="draft-kr-target-input"
-                  />
-                </div>
-              </div>
-
-              <div class="grid gap-3 sm:grid-cols-2">
-                <div class="space-y-2">
-                  <Label for="draft-kr-unit">{{ t('goal.dialog.krUnit') }}</Label>
-                  <Input
-                    id="draft-kr-unit"
-                    v-model="krForm.unit"
-                    data-testid="draft-kr-unit-input"
-                    maxlength="20"
-                    :placeholder="t('goal.dialog.krUnitPlaceholder')"
-                  />
-                </div>
-                <div class="space-y-2">
-                  <Label>{{ t('goal.dialog.krTargetTimeframe') }}</Label>
-                  <GoalTimeframePicker
-                    v-model="krForm.target"
-                    test-id="draft-kr-target-timeframe"
-                    :aria-label="t('goal.dialog.krTargetTimeframe')"
-                    :placeholder="t('goal.dialog.krTargetTimeframe')"
-                  />
-                </div>
-              </div>
-
-              <Collapsible v-model:open="krAdvancedOpen">
-                <CollapsibleTrigger as-child>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    class="px-0 text-muted-foreground"
-                  >
-                    <ChevronRight
-                      class="mr-1 h-4 w-4 transition-transform"
-                      :class="krAdvancedOpen ? 'rotate-90' : ''"
-                    />
-                    {{ t('goal.dialog.krAdvanced') }}
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent class="mt-2 grid gap-3 sm:grid-cols-2">
-                  <div class="space-y-2 sm:col-span-2">
-                    <Label for="draft-kr-description">{{ t('goal.dialog.description') }}</Label>
-                    <Textarea
-                      id="draft-kr-description"
-                      v-model="krForm.description"
-                      maxlength="2000"
-                    />
-                  </div>
-                  <div class="space-y-2">
-                    <Label>{{ t('goal.dialog.krCalculationMethod') }}</Label>
-                    <Select v-model="krForm.calculationMethod">
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem
-                          v-for="method in calculationMethods"
-                          :key="method"
-                          :value="method"
-                        >
-                          {{ calculationMethodLabel(method) }}
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div class="space-y-2">
-                    <Label for="draft-kr-weight">{{ t('goal.dialog.krWeightLabel') }}</Label>
-                    <Input
-                      id="draft-kr-weight"
-                      v-model.number="krForm.weight"
-                      type="number"
-                      min="1"
-                      max="5"
-                    />
-                    <p class="text-[11px] text-muted-foreground">
-                      {{ t('goal.dialog.krWeightHint') }}
-                    </p>
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-
-              <p v-if="krFormError" role="alert" class="text-xs text-destructive">
-                {{ krFormError }}
-              </p>
-              <div class="flex justify-end gap-2">
-                <Button type="button" variant="ghost" size="sm" @click="cancelKeyResultEdit">
-                  {{ t('common.cancel') }}
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  data-testid="save-key-result-draft"
-                  :disabled="!canSaveKeyResult"
-                  @click="saveKeyResultDraft"
-                >
-                  {{ editingKrIndex === null ? t('goal.dialog.addKeyResult') : t('common.save') }}
-                </Button>
-              </div>
-            </div>
-          </ProductExpandableSection>
-        </section>
+        <GoalKeyResultDraftEditor
+          v-model="draft.keyResults"
+          :disabled="isSaving"
+          @editing-change="krEditorOpen = $event"
+        />
       </form>
 
       <template #footer>
@@ -435,10 +226,11 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { ChevronRight, NotebookText, Pencil, Plus, Sparkles, Trash2 } from '@lucide/vue';
+import { NotebookText, Sparkles } from '@lucide/vue';
 import {
-  KeyResultCalculationMethod,
+  GoalStatus,
   ReminderTriggerType,
+  type GoalStatus as GoalStatusValue,
   type GoalReminderConfigDTO,
   type GoalClientDTO,
   type GoalTimeframe,
@@ -447,32 +239,23 @@ import {
 } from '@memoflow/contracts/goal';
 import {
   Button,
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
   Dialog,
-  Input,
   Label,
   Popover,
   PopoverContent,
   PopoverTrigger,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Textarea,
 } from '@memoflow/ui-vue-shadcn';
 import {
   LabelPicker,
   ProductAutoTextarea,
   ProductDatePicker,
   ProductDialogShell,
-  ProductExpandableSection,
   ProductPropertyChip,
 } from '../../../../shared/components';
 import GoalReminderChip from '../GoalReminderChip.vue';
 import GoalTimeframePicker from '../GoalTimeframePicker.vue';
+import GoalStatusPicker from '../GoalStatusPicker.vue';
+import GoalKeyResultDraftEditor from '../GoalKeyResultDraftEditor.vue';
 import {
   fromProductYmdInputValue,
   toProductYmdInputValue,
@@ -482,7 +265,6 @@ import { useGoal } from '../../composables/useGoal';
 import { useTransientFeedback } from '../../../../shared/composables/useTransientFeedback';
 
 type DraftKeyResult = NonNullable<UpdateGoalReq['keyResults']>[number];
-type KrId = DraftKeyResult['id'];
 
 const props = withDefaults(
   defineProps<{ open: boolean; mode?: 'create' | 'edit'; goal?: GoalClientDTO | null }>(),
@@ -498,13 +280,14 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const { createGoal, updateGoal, isSaving } = useGoal();
+const { createGoal, updateGoal, transitionGoalStatus, isSaving } = useGoal();
 const { options: labelOptions, isLoading: labelsLoading, createLabel } = useLabelCatalog();
 
 const draft = reactive({
   name: '',
   summary: '',
   description: '',
+  status: GoalStatus.Planned as GoalStatusValue,
   startDate: '',
   target: null as GoalTimeframe | null,
   reminderConfig: null as GoalReminderConfigDTO | null,
@@ -518,42 +301,7 @@ const nameLimitFeedback = useTransientFeedback();
 const summaryLimitFeedback = useTransientFeedback();
 const descriptionLimitFeedback = useTransientFeedback();
 const krEditorOpen = ref(false);
-const editingKrIndex = ref<number | null>(null);
-const krAdvancedOpen = ref(false);
-const krFormError = ref<string | null>(null);
-const calculationMethods = Object.values(KeyResultCalculationMethod);
-const krForm = reactive({
-  id: undefined as KrId | undefined,
-  title: '',
-  description: '',
-  initialValue: 0,
-  currentValue: 0,
-  targetValue: '' as number | '',
-  target: null as GoalTimeframe | null,
-  calculationMethod: KeyResultCalculationMethod.Sum as KeyResultCalculationMethod,
-  unit: '',
-  weight: 3,
-});
-
-const canSaveKeyResult = computed(
-  () =>
-    krForm.title.trim().length > 0 &&
-    krForm.targetValue !== '' &&
-    Number.isFinite(Number(krForm.initialValue)) &&
-    Number.isFinite(Number(krForm.currentValue)) &&
-    Number.isFinite(Number(krForm.targetValue)),
-);
-
-const goalStatusLabel = computed(() => {
-  const status = props.mode === 'edit' && props.goal ? props.goal.status : 'Planned';
-  const labels: Record<string, string> = {
-    Planned: t('goal.list.statusPlanned'),
-    InProgress: t('goal.list.statusInProgress'),
-    Completed: t('goal.list.statusCompleted'),
-    Abandoned: t('goal.list.statusAbandoned'),
-  };
-  return labels[status] ?? status;
-});
+const persistedStatus = computed(() => props.goal?.status ?? GoalStatus.Planned);
 const startDateModel = computed({
   get: () => fromProductYmdInputValue(draft.startDate) ?? null,
   set: (value) => {
@@ -582,6 +330,7 @@ function reset(): void {
   draft.name = props.goal?.name ?? '';
   draft.summary = props.goal?.summary ?? '';
   draft.description = props.goal?.description ?? '';
+  draft.status = props.goal?.status ?? GoalStatus.Planned;
   draft.startDate = toProductYmdInputValue(props.goal?.startDate);
   draft.target = props.goal?.target ? { ...props.goal.target } : null;
   draft.reminderConfig = props.goal?.reminderConfig
@@ -597,7 +346,7 @@ function reset(): void {
   nameLimitFeedback.hide();
   summaryLimitFeedback.hide();
   descriptionLimitFeedback.hide();
-  cancelKeyResultEdit();
+  krEditorOpen.value = false;
   initialSnapshot.value = snapshotDraft();
   emit('dirty-change', false);
 }
@@ -626,103 +375,6 @@ async function createAndSelectLabel(name: string): Promise<void> {
   } catch {
     labelCreateError.value = t('common.operationFailed');
   }
-}
-
-function resetKrForm(): void {
-  krForm.id = undefined;
-  krForm.title = '';
-  krForm.description = '';
-  krForm.initialValue = 0;
-  krForm.currentValue = 0;
-  krForm.targetValue = '';
-  krForm.target = null;
-  krForm.calculationMethod = KeyResultCalculationMethod.Sum;
-  krForm.unit = '';
-  krForm.weight = 3;
-  krFormError.value = null;
-  krAdvancedOpen.value = false;
-}
-function handleKrSectionOpen(open: boolean): void {
-  if (open) {
-    if (!krEditorOpen.value) openAddKeyResult();
-    return;
-  }
-  if (krEditorOpen.value) cancelKeyResultEdit();
-}
-function openAddKeyResult(): void {
-  resetKrForm();
-  editingKrIndex.value = null;
-  krEditorOpen.value = true;
-}
-function openEditKeyResult(index: number): void {
-  if (krEditorOpen.value) return;
-  const keyResult = draft.keyResults[index];
-  if (!keyResult) return;
-  resetKrForm();
-  editingKrIndex.value = index;
-  krForm.id = keyResult.id;
-  krForm.title = keyResult.title;
-  krForm.description = keyResult.description ?? '';
-  krForm.initialValue = keyResult.initialValue;
-  krForm.currentValue = keyResult.currentValue ?? keyResult.initialValue;
-  krForm.targetValue = keyResult.targetValue;
-  krForm.target = keyResult.target ? { ...keyResult.target } : null;
-  krForm.calculationMethod = keyResult.calculationMethod;
-  krForm.unit = keyResult.unit ?? '';
-  krForm.weight = keyResult.weight;
-  krEditorOpen.value = true;
-}
-function cancelKeyResultEdit(): void {
-  krEditorOpen.value = false;
-  editingKrIndex.value = null;
-  resetKrForm();
-}
-function validateKrMeasurement(): boolean {
-  krFormError.value = null;
-  const initial = Number(krForm.initialValue);
-  const current = Number(krForm.currentValue);
-  const target = Number(krForm.targetValue);
-  if (![initial, current, target].every(Number.isFinite)) {
-    krFormError.value = t('common.operationFailed');
-    return false;
-  }
-  if (initial === target) {
-    krFormError.value = t('goal.dialog.krInitialTargetConflict');
-    return false;
-  }
-  return true;
-}
-function saveKeyResultDraft(): void {
-  if (!canSaveKeyResult.value || !validateKrMeasurement()) return;
-  const current = Number(krForm.currentValue);
-  const keyResult: DraftKeyResult = {
-    ...(krForm.id ? { id: krForm.id } : {}),
-    title: krForm.title.trim(),
-    description: krForm.description.trim() || null,
-    calculationMethod: krForm.calculationMethod,
-    initialValue: Number(krForm.initialValue),
-    currentValue: current,
-    targetValue: Number(krForm.targetValue),
-    target: krForm.target,
-    unit: krForm.unit.trim() || null,
-    weight: Math.max(1, Math.min(5, Math.round(Number(krForm.weight) || 3))),
-  };
-  if (editingKrIndex.value === null) draft.keyResults.push(keyResult);
-  else draft.keyResults.splice(editingKrIndex.value, 1, keyResult);
-  cancelKeyResultEdit();
-}
-function removeKeyResult(index: number): void {
-  draft.keyResults.splice(index, 1);
-}
-function calculationMethodLabel(method: KeyResultCalculationMethod): string {
-  const labels: Record<KeyResultCalculationMethod, string> = {
-    Sum: t('goal.dialog.krCalculationSum'),
-    Average: t('goal.dialog.krCalculationAverage'),
-    Max: t('goal.dialog.krCalculationMax'),
-    Min: t('goal.dialog.krCalculationMin'),
-    Last: t('goal.dialog.krCalculationLast'),
-  };
-  return labels[method];
 }
 
 function validateReminderConfig(): boolean {
@@ -771,10 +423,15 @@ async function save(): Promise<void> {
       keyResults,
     };
     const saved = await updateGoal(String(props.goal.id), req);
-    if (saved) {
+    if (!saved) return;
+    const finalGoal = await transitionGoalStatus(saved, draft.status);
+    if (!finalGoal) {
       emit('updated', saved);
       setOpen(false);
+      return;
     }
+    emit('updated', finalGoal);
+    setOpen(false);
     return;
   }
 
@@ -784,9 +441,14 @@ async function save(): Promise<void> {
     initialKeyResults: keyResults.map(({ id: _id, ...item }) => item),
   };
   const saved = await createGoal(req);
-  if (saved) {
+  if (!saved) return;
+  const finalGoal = await transitionGoalStatus(saved, draft.status);
+  if (!finalGoal) {
     emit('created', saved);
     setOpen(false);
+    return;
   }
+  emit('created', finalGoal);
+  setOpen(false);
 }
 </script>

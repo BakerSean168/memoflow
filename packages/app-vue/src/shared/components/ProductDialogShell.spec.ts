@@ -101,6 +101,25 @@ describe('ProductDialogShell', () => {
     wrapper.unmount();
   });
 
+  it('does not reserve a description row when a dialog has no explanatory copy', async () => {
+    const Host = defineComponent({
+      components: { AppDialog, ProductDialogShell },
+      template: `
+        <AppDialog :open="true">
+          <ProductDialogShell :open="true" test-id="title-only-dialog">
+            <template #title>Create goal</template>
+            <div>Body</div>
+            <template #footer><button>Save</button></template>
+          </ProductDialogShell>
+        </AppDialog>
+      `,
+    });
+    const wrapper = mount(Host, { attachTo: document.body });
+    await flushPromises();
+    expect(document.body.querySelector('[data-testid="product-dialog-description"]')).toBeNull();
+    wrapper.unmount();
+  });
+
   it('can preserve selection-style dialogs by preventing outside interaction', async () => {
     const Host = defineComponent({
       components: { AppDialog, ProductDialogShell },

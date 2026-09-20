@@ -332,6 +332,7 @@ export default {
     "export": "导出"
   },
   "dialog": {
+    "status": "状态",
     "editGoal": "编辑目标",
     "titleCreate": "创建目标",
     "titleEdit": "编辑目标",
@@ -351,12 +352,10 @@ export default {
     "summaryPlaceholder": "一句话说明这个目标要实现什么",
     "timeline": "时间线",
     "startDate": "开始日期",
-    "vNextDescription": "用清晰结果、时间与关键结果定义这个目标。",
     "labels": "标签",
     "labelsPlaceholder": "添加标签",
     "createLabel": "创建标签",
     "keyResults": "关键结果",
-    "keyResultsHint": "关键结果用来衡量这个目标是否真正达成。",
     "krTargetTimeframe": "目标时间（可选）",
     "krCurrentTarget": "当前目标",
     "krInitialTargetConflict": "初始值不能与目标值相同。",
@@ -412,7 +411,6 @@ export default {
     "krUnitPlaceholder": "例如 %, ¥, 用户数",
     "krDeletedHint": "此关键结果将在保存时删除。",
     "krEmptyTitle": "暂无关键结果",
-    "krEmptyDesc": "添加关键结果以衡量此目标的进展。",
     "inlineKrTitle": "第一个关键结果",
     "inlineKrDescription": "在这里添加可衡量结果；详细计算设置仍可通过下方入口配置。",
     "inlineKrPlaceholder": "什么可衡量结果代表目标达成？",

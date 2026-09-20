@@ -15,12 +15,19 @@
       <div class="flex min-w-0 items-start justify-between gap-4">
         <div class="flex min-w-0 items-start gap-3">
           <slot name="icon" />
-          <div class="min-w-0 space-y-1">
+          <div class="min-w-0" :class="$slots.description ? 'space-y-1' : ''">
             <DialogTitle class="text-lg font-semibold">
               <slot name="title" />
             </DialogTitle>
-            <DialogDescription class="text-sm text-muted-foreground">
+            <DialogDescription
+              v-if="$slots.description"
+              class="text-sm text-muted-foreground"
+              data-testid="product-dialog-description"
+            >
               <slot name="description" />
+            </DialogDescription>
+            <DialogDescription v-else class="sr-only">
+              <slot name="title" />
             </DialogDescription>
           </div>
         </div>
