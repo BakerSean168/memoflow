@@ -217,7 +217,7 @@ migrator 需要 Prisma CLI 及其引擎、database Prisma schema/config 和初�
 推荐入口：
 
 ```bash
-pnpm runtime:preflight:local-docker
+pnpm runtime:preflight:prod-like
 pnpm docker:local:up
 ```
 

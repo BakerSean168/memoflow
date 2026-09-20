@@ -27,12 +27,12 @@ D:\home\projects\memoflow-tree2\    # 长期开发槽位 2
 
 ### 端口分配
 
-| 服务 | main | tree1 | tree2 |
-|---|---|---|---|
-| API | 3000 | 3010 | 3020 |
-| Web (Vite) | 5173 | 5183 | 5193 |
+| 服务       | main | tree1 | tree2 |
+| ---------- | ---- | ----- | ----- |
+| API        | 3000 | 3010  | 3020  |
+| Web (Vite) | 5173 | 5183  | 5193  |
 
-端口配置在各 worktree 的 `.env.local` 中；Web Vite 端口通过 `VITE_DEV_PORT` 覆盖，API/基础设施端口遵循 runtime profile。
+端口契约来自 `tools/runtime/profiles.json`；host-dev 使用项目端口块，prod-like 的机器级 override 仅放在 `.env.prod-like.local`。
 
 ### 在槽位内开发
 

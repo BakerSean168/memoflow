@@ -3,7 +3,7 @@
  *
  * Usage:
  *   node ./tools/runtime/preflight.mjs --profile e2e
- *   node ./tools/runtime/preflight.mjs --profile local-docker
+ *   node ./tools/runtime/preflight.mjs --profile prod-like
  *   node ./tools/runtime/preflight.mjs --profile host-dev
  *   node ./tools/runtime/preflight.mjs --list
  */
@@ -14,7 +14,7 @@ import {
   getRuntimeProfile,
   listProfileSummaries,
   loadRuntimeProfiles,
-  resolveLocalDockerHostPorts,
+  resolveProdLikeHostPorts,
 } from './load-profiles.mjs';
 
 /**
@@ -136,16 +136,23 @@ async function runPreflight(profileName, options) {
 
   info.push(...listProfileSummaries(profileName));
 
-  if (profileName === 'local-docker') {
+  if (profileName === 'prod-like') {
     const envMap = readEnvFileMap(resolve(process.cwd(), '.env.production.local'));
+    const machineEnvMap = readEnvFileMap(resolve(process.cwd(), '.env.prod-like.local'));
     /** @type {Record<string, string>} */
     const hostPortEnv = {};
     for (const key of Object.keys(profile.hostPortEnv ?? {})) {
       if (envMap.has(key)) {
         hostPortEnv[key] = envMap.get(key) ?? '';
       }
+      if (machineEnvMap.has(key)) {
+        hostPortEnv[key] = machineEnvMap.get(key) ?? '';
+      }
     }
-    const resolved = resolveLocalDockerHostPorts(hostPortEnv);
+    const resolved = resolveProdLikeHostPorts(hostPortEnv, {
+      allowMachineOverride:
+        machineEnvMap.get('LOCAL_DOCKER_MACHINE_PORTS')?.toLowerCase() === 'true',
+    });
     warnings.push(...resolved.warnings);
     errors.push(...resolved.errors);
     info.push('  resolved host ports:');
@@ -154,8 +161,16 @@ async function runPreflight(profileName, options) {
     }
   }
 
-  // Probe configured ports.
+  // Probe configured ports when the profile lives on this host. Production is
+  // described here for topology/URL truth but is owned by the Alibaba watcher.
+  if (profile.localProbe === false) {
+    info.push('  local probes skipped: runtime is owned by a different host group');
+  }
+
   for (const [name, port] of Object.entries(profile.ports ?? {})) {
+    if (profile.localProbe === false) {
+      continue;
+    }
     const openLocal = await isPortOpen(port, '127.0.0.1');
     const openLocalhost = name === 'api' ? await isPortOpen(port, 'localhost') : openLocal;
     const open = openLocal || openLocalhost;
@@ -163,21 +178,18 @@ async function runPreflight(profileName, options) {
 
     if (profileName === 'e2e') {
       if (name === 'postgres' && !open) {
-        warnings.push(
-          `Test DB port ${port} is closed. Start with: pnpm docker:test:up`,
-        );
+        warnings.push(`Test DB port ${port} is closed. Start with: pnpm docker:test:up`);
       }
       if (name === 'api' && open) {
         const health = await fetchJson(`http://127.0.0.1:${port}/healthz`);
-        const lane =
-          health.body && typeof health.body === 'object' ? health.body.lane : undefined;
+        const lane = health.body && typeof health.body === 'object' ? health.body.lane : undefined;
         if (health.ok && lane === 'e2e') {
           info.push(`  api identity: lane=e2e (safe to reuse if E2E_REUSE_SERVERS=1)`);
         } else if (health.ok) {
           errors.push(
             `Port ${port} answers /healthz but lane=${lane ?? '(missing)'}. ` +
-              `Likely Docker local-docker or host-dev API. Playwright must not reuse it. ` +
-              `Fix: pnpm docker:local:down (if local stack uses :3000) or free the port, then re-run e2e.`,
+              `Likely Docker prod-like or host-dev API. Playwright must not reuse it. ` +
+              `Fix: stop the conflicting runtime or free the port, then re-run e2e.`,
           );
         } else {
           warnings.push(
@@ -186,14 +198,15 @@ async function runPreflight(profileName, options) {
         }
       }
       if (name === 'web' && open) {
-        info.push('  web port is open; Playwright may reuse Vite when reuseExistingServer allows it');
+        info.push(
+          '  web port is open; Playwright may reuse Vite when reuseExistingServer allows it',
+        );
       }
     }
 
     if (profileName === 'host-dev' && name === 'api' && open) {
       const health = await fetchJson(`http://127.0.0.1:${port}/healthz`);
-      const lane =
-        health.body && typeof health.body === 'object' ? health.body.lane : undefined;
+      const lane = health.body && typeof health.body === 'object' ? health.body.lane : undefined;
       if (health.ok && lane === 'e2e') {
         warnings.push(
           `API :${port} reports lane=e2e (Playwright leftover). Prefer stopping it before host-dev work.`,
@@ -201,22 +214,22 @@ async function runPreflight(profileName, options) {
       }
     }
 
-    if (profileName === 'local-docker') {
-      // For local-docker we only require isolation of host ports, not that stack is already up.
+    if (profileName === 'prod-like') {
+      // For prod-like we only require isolation of host ports, not that stack is already up.
       if (name === 'api' || name === 'web' || name === 'postgres') {
         // no-op probes already logged
       }
     }
   }
 
-  // Mutex soft check: local-docker API port vs classic 3000 when local-docker profile is requested.
+  // Report prod-like presence while host-dev/e2e is active; distinct port blocks make coexistence safe.
   if (profileName === 'e2e' || profileName === 'host-dev') {
-    const localDocker = getRuntimeProfile('local-docker');
-    const localApiPort = localDocker.ports.api;
+    const prodLike = getRuntimeProfile('prod-like');
+    const localApiPort = prodLike.ports.api;
     const localApiOpen = await isPortOpen(localApiPort);
     if (localApiOpen) {
       info.push(
-        `  note: local-docker API :${localApiPort} is up (ok; isolated from :3000)`,
+        `  note: prod-like API :${localApiPort} is up (ok; isolated by its own port block)`,
       );
     }
   }
@@ -239,12 +252,22 @@ async function main() {
     if (!args.profile && !args.list) {
       console.log('Runtime profiles (SSOT: tools/runtime/profiles.json)\n');
     }
-    for (const name of Object.keys(doc.profiles)) {
+    const primary = doc.primaryEnvironments ?? [];
+    if (primary.length) {
+      console.log(`Primary environments: ${primary.join(', ')}\n`);
+    }
+    const ordered = [
+      ...primary,
+      ...Object.keys(doc.profiles).filter((name) => !primary.includes(name)),
+    ];
+    for (const name of ordered) {
       console.log(listProfileSummaries(name).join('\n'));
       console.log('');
     }
     if (!args.profile) {
-      console.log('Usage: node ./tools/runtime/preflight.mjs --profile <e2e|host-dev|local-docker|dev-infra|test-infra> [--strict]');
+      console.log(
+        'Usage: node ./tools/runtime/preflight.mjs --profile <host-dev|prod-like|staging|prod|e2e|dev-infra|test-infra> [--strict]',
+      );
       process.exit(args.list ? 0 : 0);
     }
   }

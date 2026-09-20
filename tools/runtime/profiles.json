@@ -1,63 +1,120 @@
 {
-  "$schema": "./profiles.schema.json",
-  "version": 1,
-  "description": "Single source of truth for MemoFlow local runtime host ports and lane rules. Compose defaults, preflight, Playwright, and docs must not invent conflicting host ports.",
-  "reservedHostPorts": {
-    "3000": [
-      "host-dev",
-      "e2e"
-    ],
-    "5173": [
-      "host-dev",
-      "e2e"
-    ],
-    "5432": [
-      "host-dev",
-      "dev-infra"
-    ],
-    "5433": [
-      "e2e",
-      "test-infra"
-    ],
-    "6384": [
-      "host-dev",
-      "dev-infra"
-    ],
-    "8080": [
-      "host-dev",
-      "dev-infra"
-    ],
-    "8081": [
-      "host-dev"
-    ]
-  },
+  "version": 2,
+  "description": "Single source of truth for MemoFlow runtime environments and host-port ownership. The four primary environments are host-dev, prod-like, staging, and prod; e2e/dev-infra/test-infra are supporting lanes, not deployment environments.",
+  "primaryEnvironments": ["host-dev", "prod-like", "staging", "prod"],
   "profiles": {
     "host-dev": {
+      "category": "environment",
+      "hostGroup": "gcp-dev",
+      "portBlock": "21000-21019",
       "title": "Host development (hot reload)",
-      "description": "Nx run-many for API+Web; docker:dev:up for infra only.",
+      "description": "API + Web run directly on GCP Dev with hot reload; Docker carries only PostgreSQL, Redis, and PowerSync. Access from the workstation through VS Code/SSH port forwarding.",
       "commands": {
         "infra": "pnpm docker:dev:up",
         "app": "pnpm nx run-many -t serve --projects=api,web --parallel=2"
       },
       "ports": {
-        "api": 3000,
-        "web": 5173,
-        "postgres": 5432,
-        "redis": 6384,
-        "powersync": 8080
+        "web": 21000,
+        "api": 21001,
+        "powersync": 21002,
+        "postgres": 21010,
+        "redis": 21011
+      },
+      "hostPortEnv": {
+        "WEB_HOST_PORT": 21000,
+        "API_HOST_PORT": 21001,
+        "POWERSYNC_HOST_PORT": 21002,
+        "POSTGRES_HOST_PORT": 21010,
+        "REDIS_HOST_PORT": 21011
       },
       "urls": {
-        "api": "http://localhost:3000",
-        "web": "http://localhost:5173",
-        "powersync": "http://localhost:8080"
+        "web": "http://localhost:21000",
+        "api": "http://localhost:21001",
+        "powersync": "http://localhost:21002"
       },
-      "mutexWith": [
-        "local-docker"
-      ]
+      "composeProject": "memoflow-host-dev"
+    },
+    "prod-like": {
+      "category": "environment",
+      "hostGroup": "gcp-dev",
+      "portBlock": "20200-20219",
+      "title": "Local prod-like Docker stack",
+      "description": "Full production-shaped Docker stack on GCP Dev for deployment-level acceptance. Implemented by docker-compose.local.yml and pnpm docker:local:*.",
+      "commands": {
+        "app": "pnpm docker:local:up"
+      },
+      "ports": {
+        "web": 20200,
+        "api": 20201,
+        "powersync": 20202,
+        "postgres": 20210,
+        "redis": 20211
+      },
+      "hostPortEnv": {
+        "WEB_HOST_PORT": 20200,
+        "API_HOST_PORT": 20201,
+        "POWERSYNC_HOST_PORT": 20202,
+        "POSTGRES_HOST_PORT": 20210,
+        "REDIS_HOST_PORT": 20211
+      },
+      "urls": {
+        "web": "http://localhost:20200",
+        "api": "http://localhost:20201",
+        "powersync": "http://localhost:20202"
+      },
+      "composeProject": "memoflow-prod-like"
+    },
+    "staging": {
+      "category": "environment",
+      "hostGroup": "gcp-dev",
+      "portBlock": "20250-20269",
+      "title": "Canonical staging",
+      "description": "Watcher-owned exact-digest staging runtime on GCP Dev. This is a stable integration environment, not a hot-reload development surface.",
+      "ports": {
+        "web": 20250,
+        "api": 20251,
+        "powersync": 20252,
+        "postgres": 20260,
+        "redis": 20261
+      },
+      "hostPortEnv": {
+        "WEB_HOST_PORT": 20250,
+        "API_HOST_PORT": 20251,
+        "POWERSYNC_HOST_PORT": 20252,
+        "POSTGRES_HOST_PORT": 20260,
+        "REDIS_HOST_PORT": 20261
+      },
+      "urls": {
+        "web": "https://gcp-dev-01.taile92a8e.ts.net:20250",
+        "api": "https://gcp-dev-01.taile92a8e.ts.net:20251",
+        "powersync": "https://gcp-dev-01.taile92a8e.ts.net:20252"
+      },
+      "composeProject": "memoflow-staging"
+    },
+    "prod": {
+      "category": "environment",
+      "hostGroup": "alibaba-production",
+      "title": "Canonical production",
+      "description": "Alibaba production selected from a Published Release and reconciled by the production watcher. Caddy owns public 80/443; PostgreSQL and Redis remain loopback-only host bindings.",
+      "localProbe": false,
+      "ports": {
+        "http": 80,
+        "https": 443,
+        "postgres": 5432,
+        "redis": 6379
+      },
+      "urls": {
+        "web": "https://memoflow.bakersean.top",
+        "api": "https://memoflowapi.bakersean.top",
+        "powersync": "https://memoflowsync.bakersean.top"
+      },
+      "composeProject": "memoflow"
     },
     "e2e": {
+      "category": "support",
+      "hostGroup": "gcp-dev",
       "title": "Playwright core e2e",
-      "description": "Playwright owns API dist + Vite. Requires test DB on 5433. Do not reuse Docker API on :3000.",
+      "description": "Playwright-owned test lane. It is not one of the four deployment environments.",
       "commands": {
         "infra": "pnpm docker:test:up",
         "app": "pnpm e2e"
@@ -71,56 +128,27 @@
         "api": "http://localhost:3000",
         "web": "http://127.0.0.1:5173"
       },
-      "runtimeLane": "e2e",
-      "mutexWith": [
-        "local-docker"
-      ]
-    },
-    "local-docker": {
-      "title": "Local prod-like Docker stack",
-      "description": "docker-compose.local.yml full stack. Host ports MUST stay isolated from host-dev/e2e.",
-      "commands": {
-        "app": "pnpm docker:local:up"
-      },
-      "ports": {
-        "api": 20201,
-        "web": 20200,
-        "powersync": 20202,
-        "postgres": 20210,
-        "redis": 20211
-      },
-      "hostPortEnv": {
-        "API_HOST_PORT": 20201,
-        "WEB_HOST_PORT": 20200,
-        "POWERSYNC_HOST_PORT": 20202,
-        "POSTGRES_HOST_PORT": 20210,
-        "REDIS_HOST_PORT": 20211
-      },
-      "urls": {
-        "api": "http://localhost:20201",
-        "web": "http://localhost:20200",
-        "powersync": "http://localhost:20202"
-      },
-      "mutexWith": [
-        "host-dev",
-        "e2e"
-      ]
+      "runtimeLane": "e2e"
     },
     "dev-infra": {
-      "title": "Dev infrastructure only",
-      "description": "docker compose --profile dev (postgres/redis/powersync).",
+      "category": "support",
+      "hostGroup": "gcp-dev",
+      "title": "Host-dev infrastructure only",
+      "description": "Docker dependencies owned by host-dev: PostgreSQL, Redis, and PowerSync.",
       "commands": {
         "infra": "pnpm docker:dev:up"
       },
       "ports": {
-        "postgres": 5432,
-        "redis": 6384,
-        "powersync": 8080
+        "powersync": 21002,
+        "postgres": 21010,
+        "redis": 21011
       }
     },
     "test-infra": {
+      "category": "support",
+      "hostGroup": "gcp-dev",
       "title": "Test infrastructure only",
-      "description": "docker compose --profile test (e2e/integration DB).",
+      "description": "Docker test database used by the Playwright/integration lane.",
       "commands": {
         "infra": "pnpm docker:test:up"
       },
