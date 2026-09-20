@@ -40,6 +40,9 @@ export default {
   "refresh": "Refresh",
   "collapse": "Collapse",
   "expand": "Expand",
+  "productDateInputPlaceholder": "Try: 2027/05/20, May 2027, Q4 2027",
+  "productDateInputHint": "Supports explicit dates, months, quarters, and years; exact-date fields use the first day of a coarse period.",
+  "productDateInputInvalid": "Enter a supported date format.",
   "colors": {
     "red": "Red",
     "orange": "Orange",

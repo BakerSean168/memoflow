@@ -57,6 +57,14 @@
             <p v-if="goal.summary" class="mt-1 text-sm text-muted-foreground">{{ goal.summary }}</p>
           </div>
 
+          <p
+            v-if="goal.description"
+            class="whitespace-pre-wrap text-sm leading-6 text-foreground/85"
+            data-testid="goal-detail-description"
+          >
+            {{ goal.description }}
+          </p>
+
           <div class="flex flex-wrap items-center gap-2" data-testid="goal-detail-property-chips">
             <Badge variant="secondary" data-testid="goal-status" :data-goal-status="goal.status">
               {{ statusLabel(goal.status) }}

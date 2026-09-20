@@ -36,6 +36,7 @@ export class PowerSyncGoalMapper {
       identityId: String(row.identity_id),
       name: String(row.name),
       summary: row.summary ? String(row.summary) : null,
+      description: row.description ? String(row.description) : null,
       status: String(row.status),
       startDate: row.start_date ? String(row.start_date) : null,
       targetKind: row.target_kind ? String(row.target_kind) : null,

@@ -77,6 +77,30 @@ describe('ProductDialogShell', () => {
 
     wrapper.unmount();
   });
+  it('renders reusable header actions separately from the title', async () => {
+    const Host = defineComponent({
+      components: { AppDialog, ProductDialogShell },
+      template: `
+        <AppDialog :open="true">
+          <ProductDialogShell :open="true" test-id="header-actions-dialog">
+            <template #title>Create goal</template>
+            <template #description>Describe the goal</template>
+            <template #actions><button data-testid="ai-action">Create with AI</button></template>
+            <div>Body</div>
+            <template #footer><button>Save</button></template>
+          </ProductDialogShell>
+        </AppDialog>
+      `,
+    });
+    const wrapper = mount(Host, { attachTo: document.body });
+    await flushPromises();
+    expect(
+      document.body.querySelector('[data-testid="product-dialog-header-actions"]'),
+    ).not.toBeNull();
+    expect(document.body.querySelector('[data-testid="ai-action"]')).not.toBeNull();
+    wrapper.unmount();
+  });
+
   it('can preserve selection-style dialogs by preventing outside interaction', async () => {
     const Host = defineComponent({
       components: { AppDialog, ProductDialogShell },

@@ -336,6 +336,7 @@ model Goal {
   identityId     String    @map("identity_id")
   name           String
   summary        String?
+  description    String?
   status         String    @default("Planned")
   startDate      String?   @map("start_date")
   targetKind     String?   @map("target_kind")

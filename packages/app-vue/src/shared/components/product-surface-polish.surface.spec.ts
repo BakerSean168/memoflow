@@ -36,10 +36,25 @@ describe('MemoFlow product surface polish', () => {
     expect(detail).toContain('data-testid="event-detail-properties"');
   });
 
-  it('uses the shared Linear sidebar item for wide settings navigation', () => {
+  it('uses one shared settings navigation renderer across wide sidebar and narrow drawer', () => {
     const settings = read('modules/setting/views/UserSettingsView.vue');
-    expect(settings).toContain('LinearSidebarItem');
-    expect(settings).toContain('v-if="isNarrow"');
-    expect(settings).toContain('v-else');
+    const navigation = read('modules/setting/components/SettingsNavigation.vue');
+    expect(settings).toContain('settings-group-sidebar');
+    expect(settings).toContain('settings-navigation-drawer');
+    expect(settings).not.toContain('settings-group-tabs');
+    expect(navigation).toContain('LinearSidebarItem');
+    expect(navigation).toContain('settings-return-to-app');
+  });
+
+  it('reuses the product date picker across Goal, Task, and Schedule instead of native date inputs', () => {
+    const goal = read('modules/goal/components/dialogs/GoalDialog.vue');
+    const task = read('modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue');
+    const schedule = read('modules/schedule/components/CreateScheduleDialog.vue');
+    expect(goal).toContain('ProductDatePicker');
+    expect(task).toContain('ProductDatePicker');
+    expect(schedule.match(/ProductDatePicker/g)?.length).toBeGreaterThanOrEqual(2);
+    expect(goal).not.toContain('type="date"');
+    expect(task).not.toContain('type="date"');
+    expect(schedule).not.toContain('type="date"');
   });
 });

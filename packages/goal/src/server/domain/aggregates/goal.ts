@@ -78,6 +78,7 @@ export interface GoalState {
   identityId: IdentityId;
   name: string;
   summary: string | null;
+  description: string | null;
   status: GoalStatus;
   startDate: Ymd | null;
   target: GoalTimeframe | null;
@@ -121,6 +122,7 @@ export class Goal extends AggregateRoot<GoalId> {
       identityId: params.identityId,
       name: params.name,
       summary: params.summary ?? null,
+      description: params.description ?? null,
       status: params.status,
       startDate: params.startDate ?? null,
       target: params.target ?? null,
@@ -156,6 +158,10 @@ export class Goal extends AggregateRoot<GoalId> {
 
   get summary(): string | null {
     return this._props.summary;
+  }
+
+  get description(): string | null {
+    return this._props.description;
   }
 
   get status(): GoalStatus {
@@ -247,13 +253,14 @@ export class Goal extends AggregateRoot<GoalId> {
    *
    * @param params 创建参数
    * @throws {GoalNameRequiredError} 当名称为空时
-   * @throws {GoalNameTooLongError} 当名称超过200字符时
+   * @throws {GoalNameTooLongError} 当名称超过80字符时
    */
   public static create(params: {
     id?: GoalId;
     identityId: IdentityId;
     name: string;
-    summary: string | null;
+    summary?: string | null;
+    description?: string | null;
     startDate: Ymd | null;
     target: GoalTimeframe | null;
     reminderConfig: GoalReminderConfig | null;
@@ -262,6 +269,8 @@ export class Goal extends AggregateRoot<GoalId> {
       throw new GoalNameRequiredError();
     }
     Goal.validateTitle(params.name);
+    Goal.validateSummary(params.summary ?? null);
+    Goal.validateDescription(params.description ?? null);
     Goal.validatePlanningWindow(params.startDate, params.target);
 
     const now = Date.now();
@@ -270,6 +279,7 @@ export class Goal extends AggregateRoot<GoalId> {
       identityId: params.identityId,
       name: params.name.trim(),
       summary: params.summary?.trim() || null,
+      description: params.description?.trim() || null,
       status: GoalStatus.Planned,
       startDate: params.startDate ?? null,
       target: params.target ?? null,
@@ -315,9 +325,13 @@ export class Goal extends AggregateRoot<GoalId> {
    * @throws {GoalDeletedError} 当目标已删除时
    * @throws {GoalArchivedError} 当目标已归档时
    * @throws {GoalNameRequiredError} 当名称为空时
-   * @throws {GoalNameTooLongError} 当名称超过200字符时
+   * @throws {GoalNameTooLongError} 当名称超过80字符时
    */
-  public updateBasicInfo(params: { name?: string; summary?: string | null }): void {
+  public updateBasicInfo(params: {
+    name?: string;
+    summary?: string | null;
+    description?: string | null;
+  }): void {
     this.ensureModifiable();
     let hasChanges = false;
     if (params.name !== undefined && params.name !== this._props.name) {
@@ -330,6 +344,14 @@ export class Goal extends AggregateRoot<GoalId> {
       Goal.validateSummary(summary);
       if (summary !== this._props.summary) {
         this._props.summary = summary;
+        hasChanges = true;
+      }
+    }
+    if (params.description !== undefined) {
+      const description = params.description?.trim() || null;
+      Goal.validateDescription(description);
+      if (description !== this._props.description) {
+        this._props.description = description;
         hasChanges = true;
       }
     }
@@ -957,6 +979,7 @@ export class Goal extends AggregateRoot<GoalId> {
       identityId: this._props.identityId,
       name: this._props.name,
       summary: this._props.summary,
+      description: this._props.description,
       status: this._props.status,
       startDate: this._props.startDate,
       target: this._props.target,
@@ -1002,6 +1025,7 @@ export class Goal extends AggregateRoot<GoalId> {
       identityId: this._props.identityId,
       name: this._props.name,
       summary: this._props.summary,
+      description: this._props.description,
       status: this._props.status,
       startDate: this._props.startDate ?? null,
       target: this._props.target ?? null,
@@ -1048,22 +1072,28 @@ export class Goal extends AggregateRoot<GoalId> {
   /**
    * 验证目标标题
    * @throws {GoalNameRequiredError} 当标题为空时
-   * @throws {GoalNameTooLongError} 当标题超过200字符时
+   * @throws {GoalNameTooLongError} 当标题超过80字符时
    */
   public static validateTitle(title: string): void {
     const trimmed = title.trim();
     if (trimmed.length === 0) {
       throw new GoalNameRequiredError();
     }
-    if (trimmed.length > 200) {
-      throw new GoalNameTooLongError(200);
+    if (trimmed.length > 80) {
+      throw new GoalNameTooLongError(80);
     }
   }
 
   /** Validate the short Goal identity summary. */
   public static validateSummary(summary: string | null): void {
-    if (summary !== null && summary.length > 500) {
-      throw new Error('Goal summary must not exceed 500 characters');
+    if (summary !== null && summary.length > 255) {
+      throw new Error('Goal summary must not exceed 255 characters');
+    }
+  }
+
+  public static validateDescription(description: string | null): void {
+    if (description !== null && description.length > 10000) {
+      throw new Error('Goal description must not exceed 10000 characters');
     }
   }
 

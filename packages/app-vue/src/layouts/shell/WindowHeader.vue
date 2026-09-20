@@ -12,7 +12,7 @@
  * 交互逻辑不接业务数据，只 emit 给 AppShell。
  *
  * 契约：复合入口主按钮/预览按钮分别是 `capsule-nav-*` / `capsule-preview-*`；
- * Settings 模式复用同一顶栏承载「返回应用 + 设置」标题，避免叠两层 48px header。
+ * Settings 模式复用同一顶栏的侧栏/历史控制，只替换中间场景内容。
  */
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -72,7 +72,6 @@ const emit = defineEmits<{
   (e: 'toggle-right-panel'): void;
   (e: 'go-back'): void;
   (e: 'go-forward'): void;
-  (e: 'return-to-app'): void;
   (e: 'open-module', payload: { id: string; route: string }): void;
   (e: 'window-minimize'): void;
   (e: 'window-toggle-maximize'): void;
@@ -96,54 +95,39 @@ const utilityCapsules = computed(() =>
     data-testid="window-header"
     :data-header-mode="props.mode ?? 'workspace'"
   >
-    <!-- 左：workspace 导航；settings 则直接承载独立场景页头，避免双 header 空白。 -->
+    <!-- 左：所有场景共享侧栏 + history 控件；Settings 只替换中间内容。 -->
     <div class="flex shrink-0 items-center gap-2">
-      <template v-if="props.mode === 'settings'">
+      <button
+        type="button"
+        class="rounded p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+        :title="sidebarCollapsed ? t('common.expand') : t('common.collapse')"
+        :aria-label="sidebarCollapsed ? t('common.expand') : t('common.collapse')"
+        data-testid="shell-sidebar-toggle"
+        @click="emit('toggle-sidebar')"
+      >
+        <PanelLeftClose v-if="!sidebarCollapsed" class="h-4 w-4" />
+        <PanelLeft v-else class="h-4 w-4" />
+      </button>
+      <div class="flex items-center gap-1">
         <button
           type="button"
-          data-testid="settings-return-to-app"
-          class="flex shrink-0 items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          @click="emit('return-to-app')"
+          class="rounded p-1 text-muted-foreground/60 transition-colors hover:bg-accent hover:text-foreground"
+          :title="t('shell.back')"
+          :aria-label="t('shell.back')"
+          @click="emit('go-back')"
         >
-          <ArrowLeft class="h-4 w-4" />
-          <span>{{ t('shell.settings.returnToApp') }}</span>
+          <ArrowLeft class="h-3.5 w-3.5" />
         </button>
-        <span class="h-4 w-px bg-border" aria-hidden="true" />
-        <h1 class="truncate text-sm font-semibold">{{ t('setting.title') }}</h1>
-      </template>
-
-      <template v-else>
         <button
           type="button"
-          class="rounded p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-          :title="sidebarCollapsed ? t('common.expand') : t('common.collapse')"
-          :aria-label="sidebarCollapsed ? t('common.expand') : t('common.collapse')"
-          @click="emit('toggle-sidebar')"
+          class="rounded p-1 text-muted-foreground/60 transition-colors hover:bg-accent hover:text-foreground"
+          :title="t('shell.forward')"
+          :aria-label="t('shell.forward')"
+          @click="emit('go-forward')"
         >
-          <PanelLeftClose v-if="!sidebarCollapsed" class="h-4 w-4" />
-          <PanelLeft v-else class="h-4 w-4" />
+          <ArrowRight class="h-3.5 w-3.5" />
         </button>
-        <div class="flex items-center gap-1">
-          <button
-            type="button"
-            class="rounded p-1 text-muted-foreground/60 transition-colors hover:bg-accent hover:text-foreground"
-            :title="t('shell.back')"
-            :aria-label="t('shell.back')"
-            @click="emit('go-back')"
-          >
-            <ArrowLeft class="h-3.5 w-3.5" />
-          </button>
-          <button
-            type="button"
-            class="rounded p-1 text-muted-foreground/60 transition-colors hover:bg-accent hover:text-foreground"
-            :title="t('shell.forward')"
-            :aria-label="t('shell.forward')"
-            @click="emit('go-forward')"
-          >
-            <ArrowRight class="h-3.5 w-3.5" />
-          </button>
-        </div>
-      </template>
+      </div>
     </div>
 
     <div
@@ -171,6 +155,15 @@ const utilityCapsules = computed(() =>
           <slot :name="`capsule-preview-${entry.id}`" :close-preview="closePreview" />
         </ModuleCapsule>
       </nav>
+    </div>
+    <div
+      v-else
+      class="window-header__drag-surface flex min-w-0 flex-1 items-center justify-center"
+      data-testid="settings-window-header-title"
+    >
+      <span class="truncate rounded-md bg-muted/50 px-3 py-1 text-xs font-medium text-foreground">{{
+        t('setting.title')
+      }}</span>
     </div>
 
     <!-- 右：日程/通知入口、面板与桌面窗控。 -->

@@ -28,8 +28,8 @@ describe('UserSettingsView owner composition', () => {
   it('keeps the protected deep-link and test-id contract', () => {
     expect(source).toContain('const GROUP_VALUES: SettingsGroup[] = GROUP_DEFINITIONS.map');
     expect(source).toContain('route.query.tab');
-    expect(source).toContain('`settings-tab-${group.value}`');
-    expect(source).toMatch(/:aria-current="activeTab === group\.value \? 'page' : undefined"/);
+    expect(source).toContain('SettingsNavigation');
+    expect(source).toContain('route.query.tab');
   });
 
   it('owns navigation only instead of global owner loading or shadow mutation state', () => {
@@ -49,10 +49,14 @@ describe('UserSettingsView owner composition', () => {
     expect(source).toContain("import('../components/NotificationSettings.vue')");
     expect(source).toContain("import('../components/AccountSettingsSection.vue')");
     expect(source).toContain("import('../components/DataSettingsSection.vue')");
-    expect(source).toContain('<UserPreferenceSettingsSection v-if="activeTab === \'appearance\'" />');
+    expect(source).toContain(
+      '<UserPreferenceSettingsSection v-if="activeTab === \'appearance\'" />',
+    );
   });
 
-  it('keeps the wide navigation sticky relative to the settings content container', () => {
-    expect(source).toMatch(/'sticky top-0 w-48 flex-col self-start overflow-visible'/);
+  it('uses the shared navigation for wide sidebar and narrow drawer instead of top tabs', () => {
+    expect(source).toContain('settings-group-sidebar');
+    expect(source).toContain('settings-navigation-drawer');
+    expect(source).not.toContain('settings-group-tabs');
   });
 });

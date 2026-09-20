@@ -98,6 +98,7 @@ const goals = new Table({
   identity_id: column.text,
   name: column.text,
   summary: column.text,
+  description: column.text,
   status: column.text,
   start_date: column.text,
   target_kind: column.text,
@@ -625,7 +626,6 @@ const ai_conversations = new Table({
   deleted_at: column.text,
 });
 
-
 const ai_execution_records = new Table({
   identity_id: column.text,
   operation: column.text,
@@ -644,7 +644,6 @@ const ai_execution_records = new Table({
   created_at: column.text,
   completed_at: column.text,
 });
-
 
 /**
  * Desktop provider connections are host-local while credentials are host-local.

@@ -51,6 +51,12 @@ describe('PowerSyncAppSchema', () => {
     expect(getColumnType('relations', 'object_id')).toBe('TEXT');
   });
 
+  it('syncs the first-class Goal description with the Goal root', () => {
+    expect(getColumnType('goals', 'name')).toBe('TEXT');
+    expect(getColumnType('goals', 'summary')).toBe('TEXT');
+    expect(getColumnType('goals', 'description')).toBe('TEXT');
+  });
+
   it('preserves critical task relation and schedule column types', () => {
     expect(getColumnType('task_plans', 'goal_id')).toBe('TEXT');
     expect(getColumnType('task_plans', 'key_result_id')).toBe('TEXT');

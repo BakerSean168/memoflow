@@ -124,6 +124,8 @@ interface AppShellState {
    * 返回设置时优先恢复；origin 失效时才回 active tab，再回 `/`。
    */
   settingsOrigin: ShellOrigin | null;
+  /** Settings-scene category navigation; transient and never persisted. */
+  settingsNavigationOpen: boolean;
 }
 
 const BUSINESS_MODULES = new Set<ShellModule>([
@@ -165,6 +167,7 @@ export const useAppShellStore = defineStore('app-shell', {
     panelWidth: null,
     panelWidthSource: 'responsive',
     settingsOrigin: null,
+    settingsNavigationOpen: false,
   }),
 
   getters: {
@@ -463,6 +466,14 @@ export const useAppShellStore = defineStore('app-shell', {
 
     setSidebarCollapsed(collapsed: boolean): void {
       this.sidebarCollapsed = collapsed;
+    },
+
+    toggleSettingsNavigation(): void {
+      this.settingsNavigationOpen = !this.settingsNavigationOpen;
+    },
+
+    setSettingsNavigationOpen(open: boolean): void {
+      this.settingsNavigationOpen = open;
     },
 
     setSidebarWidth(width: number, maxWidth = Number.POSITIVE_INFINITY): void {

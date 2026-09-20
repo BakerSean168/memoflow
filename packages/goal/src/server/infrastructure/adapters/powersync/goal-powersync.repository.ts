@@ -223,6 +223,7 @@ export class GoalPowerSyncRepository
            SET identity_id = ?,
                name = ?,
                summary = ?,
+               description = ?,
                status = ?,
                start_date = ?,
                target_kind = ?,
@@ -239,6 +240,7 @@ export class GoalPowerSyncRepository
             dto.identityId,
             dto.name,
             dto.summary,
+            dto.description,
             dto.status,
             dto.startDate,
             target.targetKind,
@@ -256,15 +258,16 @@ export class GoalPowerSyncRepository
       } else {
         await tx.execute(
           `INSERT INTO goals (
-             id, identity_id, name, summary, status,
+             id, identity_id, name, summary, description, status,
              start_date, target_kind, target_end_date, completed_at, archived_at, sort_order, reminder_config,
              version, created_at, updated_at, deleted_at
-           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             dto.id,
             dto.identityId,
             dto.name,
             dto.summary,
+            dto.description,
             dto.status,
             dto.startDate,
             target.targetKind,
@@ -327,12 +330,13 @@ export class GoalPowerSyncRepository
     const dto = goal.toServerDTO(false);
     const target = encodeGoalTimeframe(dto.target);
     const result = await this.db.execute(
-      `UPDATE goals SET name = ?, summary = ?, status = ?, start_date = ?, target_kind = ?, target_end_date = ?, completed_at = ?, archived_at = ?,
+      `UPDATE goals SET name = ?, summary = ?, description = ?, status = ?, start_date = ?, target_kind = ?, target_end_date = ?, completed_at = ?, archived_at = ?,
        reminder_config = ?, version = ?, updated_at = ?, deleted_at = ?
        WHERE id = ? AND identity_id = ? AND version = ?`,
       [
         dto.name,
         dto.summary,
+        dto.description,
         dto.status,
         dto.startDate,
         target.targetKind,

@@ -4614,6 +4614,22 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/shared/components/ProductAutoTextarea.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductDatePicker.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/shared/components/ProductDialogShell.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4622,7 +4638,23 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/shared/components/ProductExpandableSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/shared/components/ProductPropertyChip.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductTimeframePicker.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4671,6 +4703,14 @@
     },
     {
       "path": "packages/app-vue/src/shared/composables/useLabelCatalog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/shared/composables/useRouteDialogState.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4815,6 +4855,14 @@
     },
     {
       "path": "packages/app-vue/src/shared/utils/parse-date-input-keep-boundary.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/shared/utils/parse-explicit-product-date.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -5815,6 +5863,14 @@
     },
     {
       "path": "packages/database/src/schema/cloud-auth-user-access-projection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/database/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/database/src/schema/goal-description.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/database/vitest.config.ts"
@@ -10024,6 +10080,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/ui-core/src/styles/theme.semantic-tokens.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ui-core/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/ui-vue-shadcn/src/components/custom/form/date-time/date-time-fields.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11037,7 +11101,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 201
+      "fileCount": 207
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -11072,7 +11136,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 13
+      "fileCount": 14
     },
     {
       "id": "packages/domain-shared/vitest.config.ts",
@@ -11205,7 +11269,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 1
+      "fileCount": 2
     },
     {
       "id": "packages/ui-vue-shadcn/vitest.config.ts",
@@ -11761,7 +11825,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1020,
+    "unit": 1028,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

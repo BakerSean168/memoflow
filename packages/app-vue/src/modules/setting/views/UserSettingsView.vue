@@ -9,8 +9,12 @@
 import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { LinearSidebarItem } from '@memoflow/ui-vue-shadcn';
+import { ArrowLeft } from '@lucide/vue';
+import { Button, Sheet, SheetContent, SheetDescription, SheetTitle } from '@memoflow/ui-vue-shadcn';
 import UserPreferenceSettingsSection from '../components/UserPreferenceSettingsSection.vue';
+import SettingsNavigation from '../components/SettingsNavigation.vue';
+import { useAppShellStore } from '../../../layouts/shell/useAppShellStore';
+import { returnFromSettingsScene } from '../../../layouts/shell/useShellRouterSync';
 
 const AISettings = defineAsyncComponent(() => import('../components/AISettings.vue'));
 const KnowledgeRepositorySettings = defineAsyncComponent(
@@ -29,6 +33,7 @@ const DataSettingsSection = defineAsyncComponent(
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
+const shellStore = useAppShellStore();
 const SETTINGS_NARROW_VIEWPORT = 1024;
 const contentWidth = ref(
   typeof window !== 'undefined' ? window.innerWidth : SETTINGS_NARROW_VIEWPORT,
@@ -66,12 +71,20 @@ watch(
   },
 );
 
-function selectGroup(group: SettingsGroup): void {
-  activeTab.value = group;
-  if (route.query.tab !== group) {
-    void router.replace({ query: { ...route.query, tab: group } });
+function selectGroup(group: SettingsGroup | string): void {
+  const normalized = normalizeGroup(group);
+  activeTab.value = normalized;
+  if (route.query.tab !== normalized) {
+    void router.replace({ query: { ...route.query, tab: normalized } });
   }
+  if (isNarrow.value) shellStore.setSettingsNavigationOpen(false);
 }
+
+function returnToApp(): void {
+  void returnFromSettingsScene(router, shellStore, route.fullPath);
+}
+
+watch(isNarrow, (narrow) => shellStore.setSettingsNavigationOpen(!narrow), { immediate: true });
 
 onMounted(() => {
   if (typeof ResizeObserver !== 'undefined' && settingsContentRef.value) {
@@ -91,60 +104,74 @@ onBeforeUnmount(() => {
 <template>
   <div
     ref="settingsContentRef"
-    class="min-h-full min-w-0 overflow-hidden bg-background"
+    class="flex h-full min-h-0 min-w-0 overflow-hidden bg-background"
     data-testid="user-settings-view"
   >
-    <div class="mx-auto max-w-5xl px-6 py-8">
-      <div
-        class="flex min-h-0 gap-6"
-        :class="isNarrow ? 'flex-col' : 'flex-row'"
-        data-testid="settings-panel-layout"
-      >
-        <nav
-          class="flex shrink-0 gap-1"
-          :class="
-            isNarrow ? 'overflow-x-auto' : 'sticky top-0 w-48 flex-col self-start overflow-visible'
-          "
-          :data-testid="isNarrow ? 'settings-group-tabs' : 'settings-group-sidebar'"
-          :aria-label="t('setting.title')"
-        >
-          <template v-for="group in groups" :key="group.value">
-            <button
-              v-if="isNarrow"
-              :data-testid="`settings-tab-${group.value}`"
-              type="button"
-              :aria-current="activeTab === group.value ? 'page' : undefined"
-              class="whitespace-nowrap rounded-md px-3 py-2 text-left text-sm transition-colors"
-              :class="
-                activeTab === group.value
-                  ? 'bg-secondary font-medium text-foreground'
-                  : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
-              "
-              @click="selectGroup(group.value)"
-            >
-              {{ group.label }}
-            </button>
-            <LinearSidebarItem
-              v-else
-              :label="group.label"
-              :active="activeTab === group.value"
-              :data-testid="`settings-tab-${group.value}`"
-              :aria-current="activeTab === group.value ? 'page' : undefined"
-              class="h-8"
-              @click="selectGroup(group.value)"
-            />
-          </template>
-        </nav>
+    <aside
+      v-if="!isNarrow && shellStore.settingsNavigationOpen"
+      class="h-full w-60 shrink-0 border-r border-sidebar-border"
+      data-testid="settings-group-sidebar"
+    >
+      <SettingsNavigation
+        :items="groups"
+        :active="activeTab"
+        @select="selectGroup"
+        @return-to-app="returnToApp"
+      />
+    </aside>
 
-        <div class="min-w-0 max-w-3xl flex-1 space-y-8">
-          <UserPreferenceSettingsSection v-if="activeTab === 'appearance'" />
-          <AISettings v-else-if="activeTab === 'ai'" />
-          <KnowledgeRepositorySettings v-else-if="activeTab === 'repository'" />
-          <NotificationSettings v-else-if="activeTab === 'notifications'" />
-          <AccountSettingsSection v-else-if="activeTab === 'account'" />
-          <DataSettingsSection v-else-if="activeTab === 'data'" />
+    <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      <header
+        v-if="isNarrow"
+        class="flex h-12 shrink-0 items-center border-b border-border px-3"
+        data-testid="settings-compact-header"
+      >
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          class="gap-2 px-2"
+          data-testid="settings-compact-back"
+          @click="returnToApp"
+        >
+          <ArrowLeft class="h-4 w-4" />
+          <span class="font-semibold">{{ t('setting.title') }}</span>
+        </Button>
+      </header>
+
+      <main class="min-h-0 flex-1 overflow-y-auto" data-testid="settings-content-scroll">
+        <div class="mx-auto w-full max-w-4xl px-5 py-8 sm:px-8 sm:py-10">
+          <div class="min-w-0 space-y-8">
+            <UserPreferenceSettingsSection v-if="activeTab === 'appearance'" />
+            <AISettings v-else-if="activeTab === 'ai'" />
+            <KnowledgeRepositorySettings v-else-if="activeTab === 'repository'" />
+            <NotificationSettings v-else-if="activeTab === 'notifications'" />
+            <AccountSettingsSection v-else-if="activeTab === 'account'" />
+            <DataSettingsSection v-else-if="activeTab === 'data'" />
+          </div>
         </div>
-      </div>
+      </main>
     </div>
+
+    <Sheet
+      v-if="isNarrow"
+      :open="shellStore.settingsNavigationOpen"
+      @update:open="shellStore.setSettingsNavigationOpen($event)"
+    >
+      <SheetContent
+        side="left"
+        class="w-[min(20rem,88vw)] border-r border-sidebar-border bg-sidebar p-0"
+        data-testid="settings-navigation-drawer"
+      >
+        <SheetTitle class="sr-only">{{ t('setting.title') }}</SheetTitle>
+        <SheetDescription class="sr-only">{{ t('setting.title') }}</SheetDescription>
+        <SettingsNavigation
+          :items="groups"
+          :active="activeTab"
+          @select="selectGroup"
+          @return-to-app="returnToApp"
+        />
+      </SheetContent>
+    </Sheet>
   </div>
 </template>

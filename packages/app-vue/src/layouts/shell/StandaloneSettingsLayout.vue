@@ -14,7 +14,7 @@
     data-testid="standalone-settings-layout"
     data-shell-scene="settings"
   >
-    <main class="min-h-0 min-w-0 flex-1 overflow-auto">
+    <main class="min-h-0 min-w-0 flex-1 overflow-hidden">
       <slot />
     </main>
   </div>

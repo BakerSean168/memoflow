@@ -68,6 +68,7 @@ export class UpdateGoalUseCase {
     goal.updateBasicInfo({
       name: input.name,
       summary: input.summary,
+      description: input.description,
     });
 
     // 4. Update calendar-native planning time without inventing a deadline.

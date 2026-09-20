@@ -72,6 +72,9 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     expect(source).toContain('initialKeyResults');
     expect(source).toContain('keyResults');
     expect(source).toContain('ProductDialogShell');
+    expect(source).toContain('ProductAutoTextarea');
+    expect(source).toContain('ProductExpandableSection');
+    expect(source).toContain('draft.description');
     for (const retired of [
       'dueDate',
       'folderId',
@@ -83,6 +86,32 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     ]) {
       expect(source).not.toContain(retired);
     }
+  });
+
+  it('keeps Goal identity fields borderless, wrapping, and hard-truncated to product limits', async () => {
+    const wrapper = mount(GoalDialog, {
+      props: { open: true, mode: 'create' },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    await nextTick();
+
+    const name = dom('goal-name-input');
+    await name.setValue('x'.repeat(81));
+    await nextTick();
+    expect((name.element as HTMLTextAreaElement).value).toHaveLength(80);
+    expect(document.querySelector('[data-testid="goal-name-limit-error"]')).not.toBeNull();
+
+    const summary = dom('goal-summary-input');
+    await summary.setValue('y'.repeat(256));
+    await nextTick();
+    expect((summary.element as HTMLTextAreaElement).value).toHaveLength(255);
+    expect(document.querySelector('[data-testid="goal-summary-limit-error"]')).not.toBeNull();
+
+    expect(name.classes()).toContain('resize-none');
+    expect(name.classes()).toContain('border-0');
+    expect(name.classes()).toContain('focus-visible:ring-0');
+    wrapper.unmount();
   });
 
   it('preserves a broader target precision when edit does not change the precision picker', async () => {
@@ -177,6 +206,9 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     await nextTick();
 
     await dom('goal-name-input').setValue('Ship MemoFlow vNext');
+    await dom('goal-description-input').setValue(
+      'Why this goal matters and how success will be judged.',
+    );
     wrapper.getComponent(LabelPicker).vm.$emit('create', 'Work');
     await flushPromises();
 
@@ -196,6 +228,7 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     expect(mocks.createGoal).toHaveBeenCalledWith({
       name: 'Ship MemoFlow vNext',
       summary: undefined,
+      description: 'Why this goal matters and how success will be judged.',
       startDate: undefined,
       target: undefined,
       labelIds: ['label-work'],

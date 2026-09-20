@@ -8,7 +8,7 @@ tags:
   - product
 description: MemoFlow 表单与核心业务界面的 Linear-inspired 渐进披露、视觉密度与交互一致性精修计划
 created: 2026-09-20T00:20:00+08:00
-updated: 2026-09-20T08:58:00+08:00
+updated: 2026-09-20T12:05:00+08:00
 status: active
 ---
 
@@ -355,10 +355,10 @@ final UI/a11y/product review
 - [x] UFP-1003 Task polish
 - [x] UFP-1004 Schedule property-chip conversion
 - [x] Focused validation
-- [ ] Local Docker validation
+- [x] Local Docker validation
 - [x] UFP-1005 secondary form inventory
 - [x] UFP-1005 selective migration
-- [ ] UFP-1006 page-level refinement — first batch implemented
+- [x] UFP-1006 page-level refinement — accepted scope completed through the V2 convergence pass
 
 ## 11. First implementation checkpoint — 2026-09-20
 
@@ -418,3 +418,242 @@ CI 反馈闭环：首个 PR head 的 Governance 失败并非产品代码失败�
 - `docs:check` / `governance:check` PASS；
 - test inventory：**1187 files**，`test-system-v2:test:inventory` PASS；
 - `git diff --check` PASS。
+
+## 13. UI Refinement V2 — confirmed product decisions
+
+The second review round turns the broad UI polish effort into six concrete product contracts. These decisions are now implementation truth for the remaining active plan.
+
+### UFP-2001 — Settings responsive scene shell
+
+Settings must reuse the existing application `WindowHeader`; it must not invent a second top-level header.
+
+**Wide state**
+
+```text
+WindowHeader
+[sidebar toggle] [back] [forward] ...
+────────────────────────────────────
+Settings sidebar | settings content
+```
+
+- full category navigation is visible on the left;
+- `Back to app` moves into the Settings sidebar;
+- content owns its own vertical scroll;
+- the existing workspace top bar remains the one canonical top bar.
+
+**Narrow state**
+
+```text
+WindowHeader
+[sidebar toggle] [back] [forward] ...
+────────────────────────────────────
+← Settings
+────────────────────────────────────
+settings content
+```
+
+- category sidebar is fully hidden, not converted to a horizontal tab strip or icon rail;
+- content area gets a lightweight local `← Settings` header;
+- the top-bar sidebar button opens the navigation drawer.
+
+**Drawer state**
+
+- left Sheet/Drawer with overlay;
+- same category navigation component as the wide sidebar;
+- `Back to app` remains inside the drawer;
+- selecting a category closes the drawer on narrow widths;
+- `prefers-reduced-motion` must be respected.
+
+Implementation principle: navigation items are one shared renderer consumed by persistent sidebar and drawer; do not fork two different settings menus.
+
+### UFP-2002 — Route-owned Goal modal lifecycle
+
+`?dialog=goal` is the canonical source of truth. Local dialog state may project it but must never diverge from it.
+
+- open create → push `dialog=goal`;
+- open edit → push `dialog=goal&goalId=...`;
+- Cancel / X / ESC / outside close / successful save → **replace** current URL with `dialog` and `goalId` removed;
+- unrelated query filters are preserved;
+- browser back/forward continues to project route state;
+- after cancel, browser Back must **not** resurrect the just-closed dialog;
+- repeatedly pressing Create Goal after cancel must always work.
+
+A reusable route-dialog helper is preferred over another one-off watcher.
+
+### UFP-2003 — Product identity editor primitive
+
+Add reusable `ProductAutoTextarea` + limit feedback behavior.
+
+Requirements:
+
+- semantic `<textarea>` underneath, but `resize: none`; no browser resize handle;
+- auto-grow by content, natural wrapping, no horizontal scrolling;
+- no border, no focus ring, no focus background change; focus is communicated by the text caret;
+- IME/composition safe for Chinese input;
+- when input/paste would exceed the configured limit, truncate to the limit and emit `limit-exceeded`;
+- data never enters an invalid over-limit state;
+- transient inline error appears for ~2.5s and reappears on every new overflow attempt.
+
+Goal product limits become canonical contracts:
+
+- `Goal.name`: max **80**;
+- `Goal.summary`: max **255**.
+
+The server/domain/contract must use the same limits; this is not a Web-only constraint.
+
+### UFP-2004 — Goal description + Linear-style dialog anatomy
+
+Add a first-class `Goal.description` field, initially plain multiline text.
+
+- max 10,000 characters;
+- Goal owns the text; Knowledge Notes remain separate relation-owned content;
+- no Markdown toolbar / rich-text / note mention in this phase;
+- Notes remains a related-content property entry, not a substitute for description.
+
+Goal create/edit body becomes:
+
+```text
+Goal name
+Short summary
+[Status] [Start] [Target] [Labels] [Reminder] [Notes]
+────────────────────────────────────────────
+Description / goal brief
+
+Key Results                              [+]
+<compact rows or animated inline editor>
+```
+
+`Create with AI` belongs in the dialog header action area.
+
+### UFP-2005 — Product dialog composition + motion
+
+Upgrade `ProductDialogShell` as composition infrastructure rather than building a giant generic form dialog.
+
+Target primitives:
+
+```text
+ProductDialogShell
+├─ header leading/title/description/actions
+├─ scroll-owned body
+├─ sticky footer
+├─ ProductIdentityEditor / ProductAutoTextarea
+├─ ProductPropertyBar / ProductPropertyChip
+└─ ProductExpandableSection
+```
+
+Key Result add/edit uses `ProductExpandableSection`:
+
+- ~200ms ease-out expand/collapse;
+- height + opacity + subtle translateY;
+- reduced-motion fallback;
+- one compact bordered KR container with `+` trigger;
+- no abrupt `v-if` panel insertion.
+
+### UFP-2006 — Shared Linear-style date/time primitives
+
+Build a shared calendar core and adapters rather than keeping native date inputs.
+
+```text
+ProductCalendarPickerCore
+├─ ProductDatePicker
+└─ ProductTimeframePicker
+```
+
+Initial explicit parser coverage:
+
+- `2027-05-20`
+- `2027/05/20`
+- `May 2027`
+- `2027 May`
+- `Q4 2027` / `2027 Q4`
+- `2027`
+- `2027年5月`
+- `2027年Q4`
+- `2027年`
+
+No fuzzy natural-language / AI date interpretation in this phase.
+
+### UFP-2007 — Dark theme semantic-token convergence
+
+Dark theme is the first visual acceptance target.
+
+Do not hard-code Linear-like hex values in individual feature components. Introduce/adjust semantic layers such as:
+
+```text
+background
+surface
+surface-raised
+surface-overlay
+hover
+selected
+border-subtle
+border
+border-strong
+foreground
+foreground-muted
+foreground-subtle
+primary
+primary-hover
+```
+
+The visual target is the supplied Linear references: stronger neutral separation, clearer text hierarchy, restrained borders, and blue-violet primary accent. Light theme must remain functional but is not the first pixel-level acceptance target.
+
+## 14. V2 implementation order
+
+```text
+UFP-2002 route modal correctness ─┐
+UFP-2003 identity primitive ──────┼─ foundation / correctness first
+UFP-2005 dialog slots + motion ───┘
+                ↓
+UFP-2001 Settings three-state responsive shell
+                ↓
+UFP-2004 Goal description + final dialog anatomy
+                ↓
+UFP-2006 shared date/time picker
+                ↓
+UFP-2007 dark semantic theme tokens
+                ↓
+Goal/Task/Schedule visual replay + local-Docker acceptance
+```
+
+The order intentionally fixes route correctness and shared primitives before large visual rewrites, so subsequent screens converge on reusable infrastructure instead of duplicating one-off CSS.
+
+## 15. V2 status
+
+- [x] Product decisions confirmed with reference screenshots
+- [x] V2 implementation contract documented
+- [x] UFP-2002 route-owned Goal modal lifecycle
+- [x] UFP-2003 ProductAutoTextarea + transient limit feedback
+- [x] Goal 80 / 255 canonical contract limits
+- [x] UFP-2005 ProductDialogShell header actions + expandable section
+- [x] UFP-2001 Settings wide / hidden / drawer states
+- [x] UFP-2004 Goal.description end-to-end persistence and UI
+- [x] UFP-2006 shared date/time picker
+- [x] UFP-2007 dark semantic-token convergence
+- [x] exact-tree test/build/governance validation
+- [x] refresh Tailnet UI preview and visual acceptance
+
+## 16. V2 closure checkpoint — 2026-09-20
+
+The V2 refinement pass is implementation-complete on the current working tree.
+
+Product and architecture closure:
+
+- Settings now has one canonical `WindowHeader`, one shared `SettingsNavigation` renderer, persistent wide navigation, narrow local header, and Sheet-based navigation drawer; the shell toggle controls the Settings navigation state without introducing a second top-level header.
+- Goal create/edit is route-owned through `useRouteDialogState`; close/save removes only dialog identity query keys with `replace`, preserves unrelated filters, and has regression coverage for browser Back not resurrecting a cancelled dialog.
+- `ProductAutoTextarea` owns auto-grow, composition-safe truncation, and repeated transient limit feedback. Goal name/summary limits are aligned to 80/255 in UI, contracts, and domain validation.
+- `Goal.description` is a first-class nullable Goal-owned field from DTO/domain through Prisma, PowerSync, portability, Web/Desktop projection, migration, and create/edit UI; Knowledge Notes remain separate relation-owned content.
+- `ProductDialogShell` exposes header actions + scroll-owned body + sticky footer, and `ProductExpandableSection` provides the reduced-motion-safe Key Result expansion primitive.
+- `ProductDatePicker` / `ProductTimeframePicker` plus the explicit Product Time parser are shared by Goal, Task, and Schedule. The picker query inputs have explicit accessible names, and local-Docker keyboard/a11y replay locks the shared interaction contract.
+- Dark semantic tokens are converged in `ui-core` rather than copied as feature-level hard-coded palette values.
+
+Exact-tree verification evidence:
+
+- App-Vue full suite: **207 files / 831 tests PASS**.
+- App-Vue typecheck / lint / production build PASS; lint remains **0 errors / 8 pre-existing warnings**.
+- Web typecheck + production build PASS.
+- Desktop typecheck + production build PASS.
+- Contracts / Goal / Database / PowerSync-schema suites PASS; focused semantic-token and shared picker suites PASS.
+- Full fresh local-Docker product acceptance on isolated ports `20400–20411`: **22 / 22 Playwright tests PASS**, including auth, Goal lifecycle, shared form keyboard/a11y flow, workflow/draft preservation, narrow layout, and browser-request runtime evidence.
+- Tailnet preview refreshed at `https://gcp-dev-01.taile92a8e.ts.net:20300/` from the exact current UI image; container health, Web, and proxied `/api/auth/capabilities` all return HTTP 200. Tailnet Chromium Phase-D form/Settings replay passes **1 / 1** with screenshot capture, dialog geometry assertions, keyboard traversal, and zero serious/critical Axe violations.
+- `test:inventory`, `docs:check`, `governance:check`, and `git diff --check` are the final documentation/governance gate for this checkpoint.

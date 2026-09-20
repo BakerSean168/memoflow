@@ -7,350 +7,411 @@
       initial-focus-selector="[data-testid='goal-name-input']"
     >
       <template #title>
-        <div class="flex min-w-0 items-center justify-between gap-3">
-          <span>{{
-            mode === 'edit' ? t('goal.dialog.editGoal') : t('goal.dialog.createGoal')
-          }}</span>
-          <Button
-            v-if="mode === 'create'"
-            type="button"
-            variant="ghost"
-            size="sm"
-            data-testid="goal-create-with-ai"
-            @click="emit('create-with-ai')"
-          >
-            <Sparkles class="mr-1 h-4 w-4" />
-            {{ t('goal.dialog.createWithAI') }}
-          </Button>
-        </div>
+        {{ mode === 'edit' ? t('goal.dialog.editGoal') : t('goal.dialog.createGoal') }}
       </template>
       <template #description>{{ t('goal.dialog.vNextDescription') }}</template>
+      <template #actions>
+        <Button
+          v-if="mode === 'create'"
+          type="button"
+          variant="ghost"
+          size="sm"
+          data-testid="goal-create-with-ai"
+          @click="emit('create-with-ai')"
+        >
+          <Sparkles class="mr-1 h-4 w-4" />
+          {{ t('goal.dialog.createWithAI') }}
+        </Button>
+      </template>
 
       <form id="goal-form" class="space-y-6" @submit.prevent="save">
-        <div class="border-b pb-4">
-          <Label for="goal-name" class="sr-only">{{ t('goal.dialog.goalTitle') }}</Label>
-          <Input
-            id="goal-name"
-            v-model="draft.name"
-            data-testid="goal-name-input"
-            class="h-11 border-0 bg-transparent px-0 text-lg font-semibold shadow-none focus-visible:bg-muted/40 focus-visible:ring-1 focus-visible:ring-ring/30"
-            maxlength="256"
-            :placeholder="t('goal.dialog.goalTitlePlaceholder')"
-          />
-          <Label for="goal-summary" class="sr-only">{{ t('goal.dialog.summary') }}</Label>
-          <Input
-            id="goal-summary"
-            v-model="draft.summary"
-            data-testid="goal-summary-input"
-            class="h-9 border-0 bg-transparent px-0 text-sm text-muted-foreground shadow-none focus-visible:bg-muted/40 focus-visible:ring-1 focus-visible:ring-ring/30"
-            maxlength="500"
-            :placeholder="t('goal.dialog.summaryPlaceholder')"
-          />
-        </div>
-
-        <div class="flex flex-wrap items-center gap-2" data-testid="goal-property-chips">
-          <span
-            class="inline-flex h-8 items-center rounded-full border bg-background px-3 text-sm"
-            data-testid="goal-status-chip"
-          >
-            {{ goalStatusLabel }}
-          </span>
-
-          <Popover>
-            <PopoverTrigger as-child>
-              <ProductPropertyChip data-testid="goal-start-chip">
-                <template #icon><CalendarDays class="h-3.5 w-3.5" /></template>
-                {{ startChipLabel }}
-              </ProductPropertyChip>
-            </PopoverTrigger>
-            <PopoverContent align="start" class="w-auto space-y-2 p-3">
-              <Label for="goal-start-date">{{ t('goal.dialog.startDate') }}</Label>
-              <Input id="goal-start-date" v-model="draft.startDate" type="date" />
-              <Button
-                v-if="draft.startDate"
-                type="button"
-                size="sm"
-                variant="ghost"
-                @click="draft.startDate = ''"
+        <section
+          class="space-y-4 border-b border-border/70 pb-5"
+          data-testid="goal-identity-section"
+        >
+          <div>
+            <Label for="goal-name" class="sr-only">{{ t('goal.dialog.goalTitle') }}</Label>
+            <ProductAutoTextarea
+              id="goal-name"
+              v-model="draft.name"
+              :max-length="80"
+              :rows="1"
+              data-testid="goal-name-input"
+              class="min-h-10 text-xl font-semibold leading-tight text-foreground sm:text-2xl"
+              :placeholder="t('goal.dialog.goalTitlePlaceholder')"
+              @limit-exceeded="nameLimitFeedback.show()"
+            />
+            <Transition
+              enter-active-class="transition-opacity duration-150"
+              leave-active-class="transition-opacity duration-150"
+              enter-from-class="opacity-0"
+              leave-to-class="opacity-0"
+            >
+              <p
+                v-if="nameLimitFeedback.visible.value"
+                class="mt-1 text-xs text-destructive"
+                role="alert"
+                data-testid="goal-name-limit-error"
               >
-                {{ t('common.clear') }}
-              </Button>
-            </PopoverContent>
-          </Popover>
-
-          <GoalTimeframePicker
-            v-model="draft.target"
-            test-id="goal-target-chip"
-            :aria-label="t('goal.dialog.target')"
-            :placeholder="t('goal.dialog.target')"
-          />
-
-          <LabelPicker
-            v-model="draft.labelIds"
-            :options="labelOptions"
-            :disabled="labelsLoading || isSaving"
-            :placeholder="t('goal.dialog.labels')"
-            :search-placeholder="t('goal.list.searchLabels')"
-            :empty-text="t('goal.list.noLabels')"
-            :create-label="t('goal.dialog.createLabel')"
-            :aria-label="t('goal.dialog.labels')"
-            compact
-            @create="createAndSelectLabel"
-          />
-
-          <GoalReminderChip
-            v-model="draft.reminderConfig"
-            :start-date="draft.startDate || null"
-            :target="draft.target"
-          />
-
-          <Popover>
-            <PopoverTrigger as-child>
-              <ProductPropertyChip data-testid="goal-notes-chip">
-                <template #icon><NotebookText class="h-3.5 w-3.5" /></template>
-                {{ t('goal.dialog.notes') }}
-              </ProductPropertyChip>
-            </PopoverTrigger>
-            <PopoverContent align="start" class="w-72 space-y-3 p-3">
-              <p class="text-sm text-muted-foreground">{{ t('goal.dialog.notesHint') }}</p>
-              <Button
-                v-if="mode === 'edit' && goal"
-                type="button"
-                variant="outline"
-                size="sm"
-                @click="emit('open-knowledge', String(goal.id))"
-              >
-                {{ t('goal.dialog.openKnowledge') }}
-              </Button>
-              <Button
-                v-else
-                type="button"
-                variant="outline"
-                size="sm"
-                @click="emit('create-with-ai')"
-              >
-                <Sparkles class="mr-1 h-4 w-4" />
-                {{ t('goal.dialog.createWithAI') }}
-              </Button>
-            </PopoverContent>
-          </Popover>
-        </div>
-
-        <p v-if="labelCreateError" role="alert" class="text-xs text-destructive">
-          {{ labelCreateError }}
-        </p>
-        <p v-if="formError" role="alert" class="text-xs text-destructive">
-          {{ formError }}
-        </p>
-
-        <section class="space-y-3" data-testid="goal-key-results-editor">
-          <div class="flex items-center justify-between gap-3">
-            <div>
-              <Label>{{ t('goal.dialog.keyResults') }}</Label>
-              <p class="mt-1 text-xs text-muted-foreground">
-                {{ t('goal.dialog.keyResultsHint') }}
+                {{ t('goal.dialog.nameLimitExceeded') }}
               </p>
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              data-testid="add-key-result-entry"
-              :disabled="krEditorOpen"
-              @click="openAddKeyResult"
-            >
-              <Plus class="mr-1 h-4 w-4" />
-              {{ t('goal.dialog.addKeyResult') }}
-            </Button>
+            </Transition>
           </div>
 
-          <div
-            v-if="draft.keyResults.length === 0 && !krEditorOpen"
-            class="rounded-lg border border-dashed px-4 py-6 text-center"
-            data-testid="goal-key-results-empty"
+          <div>
+            <Label for="goal-summary" class="sr-only">{{ t('goal.dialog.summary') }}</Label>
+            <ProductAutoTextarea
+              id="goal-summary"
+              v-model="draft.summary"
+              :max-length="255"
+              :rows="1"
+              data-testid="goal-summary-input"
+              class="min-h-8 text-sm leading-5 text-muted-foreground"
+              :placeholder="t('goal.dialog.summaryPlaceholder')"
+              @limit-exceeded="summaryLimitFeedback.show()"
+            />
+            <Transition
+              enter-active-class="transition-opacity duration-150"
+              leave-active-class="transition-opacity duration-150"
+              enter-from-class="opacity-0"
+              leave-to-class="opacity-0"
+            >
+              <p
+                v-if="summaryLimitFeedback.visible.value"
+                class="mt-1 text-xs text-destructive"
+                role="alert"
+                data-testid="goal-summary-limit-error"
+              >
+                {{ t('goal.dialog.summaryLimitExceeded') }}
+              </p>
+            </Transition>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2" data-testid="goal-property-chips">
+            <span
+              class="inline-flex h-8 items-center rounded-full border bg-background px-3 text-sm"
+              data-testid="goal-status-chip"
+            >
+              {{ goalStatusLabel }}
+            </span>
+            <ProductDatePicker
+              v-model="startDateModel"
+              :label="t('goal.dialog.startDate')"
+              :placeholder="t('goal.dialog.startDate')"
+              :input-placeholder="t('common.productDateInputPlaceholder')"
+              :format-hint="t('common.productDateInputHint')"
+              :invalid-text="t('common.productDateInputInvalid')"
+              :clear-label="t('common.clear')"
+              test-id="goal-start-chip"
+              :aria-label="t('goal.dialog.startDate')"
+            />
+
+            <GoalTimeframePicker
+              v-model="draft.target"
+              test-id="goal-target-chip"
+              :aria-label="t('goal.dialog.target')"
+              :placeholder="t('goal.dialog.target')"
+            />
+
+            <LabelPicker
+              v-model="draft.labelIds"
+              :options="labelOptions"
+              :disabled="labelsLoading || isSaving"
+              :placeholder="t('goal.dialog.labels')"
+              :search-placeholder="t('goal.list.searchLabels')"
+              :empty-text="t('goal.list.noLabels')"
+              :create-label="t('goal.dialog.createLabel')"
+              :aria-label="t('goal.dialog.labels')"
+              compact
+              @create="createAndSelectLabel"
+            />
+
+            <GoalReminderChip
+              v-model="draft.reminderConfig"
+              :start-date="draft.startDate || null"
+              :target="draft.target"
+            />
+
+            <Popover>
+              <PopoverTrigger as-child>
+                <ProductPropertyChip data-testid="goal-notes-chip">
+                  <template #icon><NotebookText class="h-3.5 w-3.5" /></template>
+                  {{ t('goal.dialog.notes') }}
+                </ProductPropertyChip>
+              </PopoverTrigger>
+              <PopoverContent align="start" class="w-72 space-y-3 p-3">
+                <p class="text-sm text-muted-foreground">{{ t('goal.dialog.notesHint') }}</p>
+                <Button
+                  v-if="mode === 'edit' && goal"
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  @click="emit('open-knowledge', String(goal.id))"
+                >
+                  {{ t('goal.dialog.openKnowledge') }}
+                </Button>
+                <Button
+                  v-else
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  @click="emit('create-with-ai')"
+                >
+                  <Sparkles class="mr-1 h-4 w-4" />
+                  {{ t('goal.dialog.createWithAI') }}
+                </Button>
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <p v-if="labelCreateError" role="alert" class="text-xs text-destructive">
+            {{ labelCreateError }}
+          </p>
+          <p v-if="formError" role="alert" class="text-xs text-destructive">
+            {{ formError }}
+          </p>
+        </section>
+
+        <section class="space-y-2" data-testid="goal-description-section">
+          <Label for="goal-description" class="sr-only">{{ t('goal.dialog.description') }}</Label>
+          <ProductAutoTextarea
+            id="goal-description"
+            v-model="draft.description"
+            :max-length="10000"
+            :rows="5"
+            data-testid="goal-description-input"
+            class="min-h-32 text-sm leading-6 text-foreground/90"
+            :placeholder="t('goal.dialog.descriptionLongPlaceholder')"
+            @limit-exceeded="descriptionLimitFeedback.show()"
+          />
+          <Transition
+            enter-active-class="transition-opacity duration-150"
+            leave-active-class="transition-opacity duration-150"
+            enter-from-class="opacity-0"
+            leave-to-class="opacity-0"
           >
-            <p class="text-sm font-medium">{{ t('goal.dialog.krEmptyTitle') }}</p>
-            <p class="mt-1 text-xs text-muted-foreground">{{ t('goal.dialog.krEmptyDesc') }}</p>
-          </div>
-
-          <div v-else-if="draft.keyResults.length > 0" class="divide-y rounded-lg border">
-            <div
-              v-for="(keyResult, index) in draft.keyResults"
-              :key="keyResult.id ?? `new-${index}`"
-              class="flex items-center gap-3 px-3 py-3"
-              data-testid="goal-key-result-draft-row"
+            <p
+              v-if="descriptionLimitFeedback.visible.value"
+              class="text-xs text-destructive"
+              role="alert"
+              data-testid="goal-description-limit-error"
             >
+              {{ t('goal.dialog.descriptionLimitExceeded') }}
+            </p>
+          </Transition>
+        </section>
+
+        <section data-testid="goal-key-results-editor">
+          <ProductExpandableSection :open="krEditorOpen" @update:open="handleKrSectionOpen">
+            <template #trigger>
               <button
                 type="button"
-                class="min-w-0 flex-1 text-left"
-                @click="openEditKeyResult(index)"
+                class="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/30"
+                data-testid="add-key-result-entry"
               >
-                <p class="truncate text-sm font-medium">{{ keyResult.title }}</p>
-                <p class="mt-0.5 text-xs text-muted-foreground">
-                  {{ keyResult.currentValue ?? keyResult.initialValue }} →
-                  {{ keyResult.targetValue }}
-                  <span v-if="keyResult.unit"> {{ keyResult.unit }}</span>
-                </p>
-              </button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                :aria-label="t('common.edit')"
-                :disabled="krEditorOpen"
-                @click="openEditKeyResult(index)"
-              >
-                <Pencil class="h-3.5 w-3.5" />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                class="text-destructive hover:text-destructive"
-                :aria-label="t('common.delete')"
-                :disabled="krEditorOpen"
-                @click="removeKeyResult(index)"
-              >
-                <Trash2 class="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          </div>
-
-          <div
-            v-if="krEditorOpen"
-            class="space-y-4 rounded-lg border bg-muted/20 p-4"
-            data-testid="key-result-draft-form"
-          >
-            <div class="space-y-2">
-              <Label for="draft-kr-title">{{ t('goal.dialog.krTitle') }}</Label>
-              <Input
-                id="draft-kr-title"
-                v-model="krForm.title"
-                data-testid="draft-kr-title-input"
-                maxlength="200"
-              />
-            </div>
-
-            <div class="grid gap-3 sm:grid-cols-3">
-              <div class="space-y-2">
-                <Label for="draft-kr-initial">{{ t('goal.dialog.krInitialValue') }}</Label>
-                <Input
-                  id="draft-kr-initial"
-                  v-model.number="krForm.initialValue"
-                  type="number"
-                  data-testid="draft-kr-initial-input"
-                />
-              </div>
-              <div class="space-y-2">
-                <Label for="draft-kr-current">{{ t('goal.dialog.krCurrentValue') }}</Label>
-                <Input
-                  id="draft-kr-current"
-                  v-model.number="krForm.currentValue"
-                  type="number"
-                  data-testid="draft-kr-current-input"
-                />
-              </div>
-              <div class="space-y-2">
-                <Label for="draft-kr-target">{{ t('goal.dialog.krTargetValue') }}</Label>
-                <Input
-                  id="draft-kr-target"
-                  v-model.number="krForm.targetValue"
-                  type="number"
-                  data-testid="draft-kr-target-input"
-                />
-              </div>
-            </div>
-
-            <div class="grid gap-3 sm:grid-cols-2">
-              <div class="space-y-2">
-                <Label for="draft-kr-unit">{{ t('goal.dialog.krUnit') }}</Label>
-                <Input
-                  id="draft-kr-unit"
-                  v-model="krForm.unit"
-                  data-testid="draft-kr-unit-input"
-                  maxlength="20"
-                  :placeholder="t('goal.dialog.krUnitPlaceholder')"
-                />
-              </div>
-              <div class="space-y-2">
-                <Label>{{ t('goal.dialog.krTargetTimeframe') }}</Label>
-                <GoalTimeframePicker
-                  v-model="krForm.target"
-                  test-id="draft-kr-target-timeframe"
-                  :aria-label="t('goal.dialog.krTargetTimeframe')"
-                  :placeholder="t('goal.dialog.krTargetTimeframe')"
-                />
-              </div>
-            </div>
-
-            <Collapsible v-model:open="krAdvancedOpen">
-              <CollapsibleTrigger as-child>
-                <Button type="button" variant="ghost" size="sm" class="px-0 text-muted-foreground">
-                  <ChevronRight
-                    class="mr-1 h-4 w-4 transition-transform"
-                    :class="krAdvancedOpen ? 'rotate-90' : ''"
-                  />
-                  {{ t('goal.dialog.krAdvanced') }}
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent class="mt-2 grid gap-3 sm:grid-cols-2">
-                <div class="space-y-2 sm:col-span-2">
-                  <Label for="draft-kr-description">{{ t('goal.dialog.description') }}</Label>
-                  <Textarea
-                    id="draft-kr-description"
-                    v-model="krForm.description"
-                    maxlength="2000"
-                  />
-                </div>
-                <div class="space-y-2">
-                  <Label>{{ t('goal.dialog.krCalculationMethod') }}</Label>
-                  <Select v-model="krForm.calculationMethod">
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem
-                        v-for="method in calculationMethods"
-                        :key="method"
-                        :value="method"
-                      >
-                        {{ calculationMethodLabel(method) }}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div class="space-y-2">
-                  <Label for="draft-kr-weight">{{ t('goal.dialog.krWeightLabel') }}</Label>
-                  <Input
-                    id="draft-kr-weight"
-                    v-model.number="krForm.weight"
-                    type="number"
-                    min="1"
-                    max="5"
-                  />
-                  <p class="text-[11px] text-muted-foreground">
-                    {{ t('goal.dialog.krWeightHint') }}
+                <div>
+                  <p class="text-sm font-medium">{{ t('goal.dialog.keyResults') }}</p>
+                  <p class="mt-0.5 text-xs text-muted-foreground">
+                    {{ t('goal.dialog.keyResultsHint') }}
                   </p>
                 </div>
-              </CollapsibleContent>
-            </Collapsible>
+                <Plus
+                  class="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 motion-reduce:transition-none"
+                  :class="krEditorOpen ? 'rotate-45' : ''"
+                />
+              </button>
+            </template>
 
-            <p v-if="krFormError" role="alert" class="text-xs text-destructive">
-              {{ krFormError }}
-            </p>
-            <div class="flex justify-end gap-2">
-              <Button type="button" variant="ghost" size="sm" @click="cancelKeyResultEdit">
-                {{ t('common.cancel') }}
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                data-testid="save-key-result-draft"
-                :disabled="!canSaveKeyResult"
-                @click="saveKeyResultDraft"
+            <template #static>
+              <div
+                v-if="draft.keyResults.length === 0"
+                class="border-t border-border/70 px-4 py-3 text-xs text-muted-foreground"
+                data-testid="goal-key-results-empty"
               >
-                {{ editingKrIndex === null ? t('goal.dialog.addKeyResult') : t('common.save') }}
-              </Button>
+                {{ t('goal.dialog.krEmptyDesc') }}
+              </div>
+
+              <div v-else class="divide-y border-t border-border/70">
+                <div
+                  v-for="(keyResult, index) in draft.keyResults"
+                  :key="keyResult.id ?? `new-${index}`"
+                  class="flex items-center gap-3 px-3 py-3"
+                  data-testid="goal-key-result-draft-row"
+                >
+                  <button
+                    type="button"
+                    class="min-w-0 flex-1 text-left"
+                    @click="openEditKeyResult(index)"
+                  >
+                    <p class="truncate text-sm font-medium">{{ keyResult.title }}</p>
+                    <p class="mt-0.5 text-xs text-muted-foreground">
+                      {{ keyResult.currentValue ?? keyResult.initialValue }} →
+                      {{ keyResult.targetValue }}
+                      <span v-if="keyResult.unit"> {{ keyResult.unit }}</span>
+                    </p>
+                  </button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    :aria-label="t('common.edit')"
+                    :disabled="krEditorOpen"
+                    @click="openEditKeyResult(index)"
+                  >
+                    <Pencil class="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    class="text-destructive hover:text-destructive"
+                    :aria-label="t('common.delete')"
+                    :disabled="krEditorOpen"
+                    @click="removeKeyResult(index)"
+                  >
+                    <Trash2 class="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            </template>
+
+            <div class="space-y-4 bg-muted/10 p-4" data-testid="key-result-draft-form">
+              <div class="space-y-2">
+                <Label for="draft-kr-title">{{ t('goal.dialog.krTitle') }}</Label>
+                <Input
+                  id="draft-kr-title"
+                  v-model="krForm.title"
+                  data-testid="draft-kr-title-input"
+                  maxlength="200"
+                />
+              </div>
+
+              <div class="grid gap-3 sm:grid-cols-3">
+                <div class="space-y-2">
+                  <Label for="draft-kr-initial">{{ t('goal.dialog.krInitialValue') }}</Label>
+                  <Input
+                    id="draft-kr-initial"
+                    v-model.number="krForm.initialValue"
+                    type="number"
+                    data-testid="draft-kr-initial-input"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <Label for="draft-kr-current">{{ t('goal.dialog.krCurrentValue') }}</Label>
+                  <Input
+                    id="draft-kr-current"
+                    v-model.number="krForm.currentValue"
+                    type="number"
+                    data-testid="draft-kr-current-input"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <Label for="draft-kr-target">{{ t('goal.dialog.krTargetValue') }}</Label>
+                  <Input
+                    id="draft-kr-target"
+                    v-model.number="krForm.targetValue"
+                    type="number"
+                    data-testid="draft-kr-target-input"
+                  />
+                </div>
+              </div>
+
+              <div class="grid gap-3 sm:grid-cols-2">
+                <div class="space-y-2">
+                  <Label for="draft-kr-unit">{{ t('goal.dialog.krUnit') }}</Label>
+                  <Input
+                    id="draft-kr-unit"
+                    v-model="krForm.unit"
+                    data-testid="draft-kr-unit-input"
+                    maxlength="20"
+                    :placeholder="t('goal.dialog.krUnitPlaceholder')"
+                  />
+                </div>
+                <div class="space-y-2">
+                  <Label>{{ t('goal.dialog.krTargetTimeframe') }}</Label>
+                  <GoalTimeframePicker
+                    v-model="krForm.target"
+                    test-id="draft-kr-target-timeframe"
+                    :aria-label="t('goal.dialog.krTargetTimeframe')"
+                    :placeholder="t('goal.dialog.krTargetTimeframe')"
+                  />
+                </div>
+              </div>
+
+              <Collapsible v-model:open="krAdvancedOpen">
+                <CollapsibleTrigger as-child>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    class="px-0 text-muted-foreground"
+                  >
+                    <ChevronRight
+                      class="mr-1 h-4 w-4 transition-transform"
+                      :class="krAdvancedOpen ? 'rotate-90' : ''"
+                    />
+                    {{ t('goal.dialog.krAdvanced') }}
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent class="mt-2 grid gap-3 sm:grid-cols-2">
+                  <div class="space-y-2 sm:col-span-2">
+                    <Label for="draft-kr-description">{{ t('goal.dialog.description') }}</Label>
+                    <Textarea
+                      id="draft-kr-description"
+                      v-model="krForm.description"
+                      maxlength="2000"
+                    />
+                  </div>
+                  <div class="space-y-2">
+                    <Label>{{ t('goal.dialog.krCalculationMethod') }}</Label>
+                    <Select v-model="krForm.calculationMethod">
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem
+                          v-for="method in calculationMethods"
+                          :key="method"
+                          :value="method"
+                        >
+                          {{ calculationMethodLabel(method) }}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div class="space-y-2">
+                    <Label for="draft-kr-weight">{{ t('goal.dialog.krWeightLabel') }}</Label>
+                    <Input
+                      id="draft-kr-weight"
+                      v-model.number="krForm.weight"
+                      type="number"
+                      min="1"
+                      max="5"
+                    />
+                    <p class="text-[11px] text-muted-foreground">
+                      {{ t('goal.dialog.krWeightHint') }}
+                    </p>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
+              <p v-if="krFormError" role="alert" class="text-xs text-destructive">
+                {{ krFormError }}
+              </p>
+              <div class="flex justify-end gap-2">
+                <Button type="button" variant="ghost" size="sm" @click="cancelKeyResultEdit">
+                  {{ t('common.cancel') }}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  data-testid="save-key-result-draft"
+                  :disabled="!canSaveKeyResult"
+                  @click="saveKeyResultDraft"
+                >
+                  {{ editingKrIndex === null ? t('goal.dialog.addKeyResult') : t('common.save') }}
+                </Button>
+              </div>
             </div>
-          </div>
+          </ProductExpandableSection>
         </section>
       </form>
 
@@ -374,15 +435,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import {
-  CalendarDays,
-  ChevronRight,
-  NotebookText,
-  Pencil,
-  Plus,
-  Sparkles,
-  Trash2,
-} from '@lucide/vue';
+import { ChevronRight, NotebookText, Pencil, Plus, Sparkles, Trash2 } from '@lucide/vue';
 import {
   KeyResultCalculationMethod,
   ReminderTriggerType,
@@ -412,7 +465,10 @@ import {
 } from '@memoflow/ui-vue-shadcn';
 import {
   LabelPicker,
+  ProductAutoTextarea,
+  ProductDatePicker,
   ProductDialogShell,
+  ProductExpandableSection,
   ProductPropertyChip,
 } from '../../../../shared/components';
 import GoalReminderChip from '../GoalReminderChip.vue';
@@ -423,6 +479,7 @@ import {
 } from '../../../../shared/utils/product-time';
 import { useLabelCatalog } from '../../../../shared/composables/useLabelCatalog';
 import { useGoal } from '../../composables/useGoal';
+import { useTransientFeedback } from '../../../../shared/composables/useTransientFeedback';
 
 type DraftKeyResult = NonNullable<UpdateGoalReq['keyResults']>[number];
 type KrId = DraftKeyResult['id'];
@@ -447,6 +504,7 @@ const { options: labelOptions, isLoading: labelsLoading, createLabel } = useLabe
 const draft = reactive({
   name: '',
   summary: '',
+  description: '',
   startDate: '',
   target: null as GoalTimeframe | null,
   reminderConfig: null as GoalReminderConfigDTO | null,
@@ -456,6 +514,9 @@ const draft = reactive({
 const initialSnapshot = ref('');
 const labelCreateError = ref<string | null>(null);
 const formError = ref<string | null>(null);
+const nameLimitFeedback = useTransientFeedback();
+const summaryLimitFeedback = useTransientFeedback();
+const descriptionLimitFeedback = useTransientFeedback();
 const krEditorOpen = ref(false);
 const editingKrIndex = ref<number | null>(null);
 const krAdvancedOpen = ref(false);
@@ -493,11 +554,12 @@ const goalStatusLabel = computed(() => {
   };
   return labels[status] ?? status;
 });
-const startChipLabel = computed(() =>
-  draft.startDate
-    ? `${t('goal.dialog.startDate')}: ${draft.startDate}`
-    : t('goal.dialog.startDate'),
-);
+const startDateModel = computed({
+  get: () => fromProductYmdInputValue(draft.startDate) ?? null,
+  set: (value) => {
+    draft.startDate = value ?? '';
+  },
+});
 
 function snapshotDraft(): string {
   return JSON.stringify(draft);
@@ -519,6 +581,7 @@ function mapKeyResult(goalKr: NonNullable<GoalClientDTO['keyResults']>[number]):
 function reset(): void {
   draft.name = props.goal?.name ?? '';
   draft.summary = props.goal?.summary ?? '';
+  draft.description = props.goal?.description ?? '';
   draft.startDate = toProductYmdInputValue(props.goal?.startDate);
   draft.target = props.goal?.target ? { ...props.goal.target } : null;
   draft.reminderConfig = props.goal?.reminderConfig
@@ -531,6 +594,9 @@ function reset(): void {
   draft.keyResults = props.goal?.keyResults?.map(mapKeyResult) ?? [];
   labelCreateError.value = null;
   formError.value = null;
+  nameLimitFeedback.hide();
+  summaryLimitFeedback.hide();
+  descriptionLimitFeedback.hide();
   cancelKeyResultEdit();
   initialSnapshot.value = snapshotDraft();
   emit('dirty-change', false);
@@ -575,6 +641,13 @@ function resetKrForm(): void {
   krForm.weight = 3;
   krFormError.value = null;
   krAdvancedOpen.value = false;
+}
+function handleKrSectionOpen(open: boolean): void {
+  if (open) {
+    if (!krEditorOpen.value) openAddKeyResult();
+    return;
+  }
+  if (krEditorOpen.value) cancelKeyResultEdit();
 }
 function openAddKeyResult(): void {
   resetKrForm();
@@ -680,6 +753,7 @@ async function save(): Promise<void> {
   const common = {
     name: draft.name.trim(),
     summary: draft.summary.trim() || undefined,
+    description: draft.description.trim() || undefined,
     startDate: startDate ?? undefined,
     target: draft.target ?? undefined,
     labelIds,
@@ -690,6 +764,7 @@ async function save(): Promise<void> {
       expectedVersion: props.goal.version,
       ...common,
       summary: common.summary ?? null,
+      description: common.description ?? null,
       startDate: common.startDate ?? null,
       target: common.target ?? null,
       reminderConfig: draft.reminderConfig,

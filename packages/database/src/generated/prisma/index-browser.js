@@ -295,6 +295,7 @@ exports.Prisma.GoalScalarFieldEnum = {
   identityId: 'identityId',
   name: 'name',
   summary: 'summary',
+  description: 'description',
   status: 'status',
   startDate: 'startDate',
   targetKind: 'targetKind',

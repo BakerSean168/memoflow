@@ -642,10 +642,6 @@ async function handleLogout() {
   await logout?.();
 }
 
-function returnFromSettings() {
-  void sync.returnFromSettings();
-}
-
 /**
  * KeepAlive 缓存键 = 拥有该路由的 Tab id + 壳实际渲染的首个路由身份。
  * - Tab 维度：同模块多 Tab 各自保活（两个 note Tab 互不串状态）；
@@ -694,18 +690,17 @@ function panelCacheKey(
     <!-- 顶部窗口栏：工作区 launcher + 日程入口 + 窗控 -->
     <WindowHeader
       :mode="isSettingsScene ? 'settings' : 'workspace'"
-      :sidebar-collapsed="sidebarCollapsed"
+      :sidebar-collapsed="isSettingsScene ? !store.settingsNavigationOpen : sidebarCollapsed"
       :right-panel-open="rightPanelOpen"
       :workflow-attention-count="workflowAttentionCount"
       :is-desktop="isDesktop"
       :is-mac="isMac"
       :window-controls="windowControls.windowControlsState"
       :capsules="headerCapsules"
-      @toggle-sidebar="store.toggleSidebar()"
+      @toggle-sidebar="isSettingsScene ? store.toggleSettingsNavigation() : store.toggleSidebar()"
       @toggle-right-panel="() => void sync.togglePanel()"
       @go-back="router.back()"
       @go-forward="router.forward()"
-      @return-to-app="returnFromSettings"
       @open-module="openHeaderModule"
       @window-minimize="windowControls.minimizeWindow()"
       @window-toggle-maximize="windowControls.toggleMaximize()"

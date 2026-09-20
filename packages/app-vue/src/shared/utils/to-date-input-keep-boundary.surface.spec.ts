@@ -16,6 +16,10 @@ describe('date input product-time boundary', () => {
     resolve(dir, '../../modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue'),
     'utf8',
   );
+  const productDatePicker = readFileSync(
+    resolve(dir, '../components/ProductDatePicker.vue'),
+    'utf8',
+  );
 
   it('keeps Goal start dates on Product Time and broad targets on GoalTimeframe', () => {
     expect(goalDialog).toContain('GoalTimeframePicker');
@@ -34,8 +38,9 @@ describe('date input product-time boundary', () => {
 
   it('keeps Task date input on the canonical Ymd calendar boundary', () => {
     expect(vueTask).toContain('TaskPlanScheduleSchema');
-    expect(vueTask).toContain('parseToCalendarDate');
-    expect(vueTask).toContain('handleCalendarSelect');
+    expect(vueTask).toContain('ProductDatePicker');
+    expect(productDatePicker).toContain('parseToCalendarDate');
+    expect(productDatePicker).toContain('handleCalendarSelect');
     expect(vueTask).not.toContain('new Date(');
     expect(vueTask).not.toContain('getTimezoneOffset');
     expect(vueTask).not.toContain('toISOString().slice');

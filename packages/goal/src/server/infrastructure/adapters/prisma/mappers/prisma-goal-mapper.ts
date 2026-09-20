@@ -54,6 +54,7 @@ export class PrismaGoalMapper {
       identityId: row.identityId,
       name: row.name,
       summary: row.summary ?? null,
+      description: row.description ?? null,
       status: row.status,
       startDate: row.startDate ?? null,
       targetKind: row.targetKind ?? null,

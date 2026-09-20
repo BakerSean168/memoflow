@@ -105,34 +105,18 @@
               <div class="grid gap-4 sm:grid-cols-2">
                 <div class="space-y-2">
                   <Label for="startDate">{{ t('schedule.createDialog.fieldStartDate') }}</Label>
-                  <Popover>
-                    <PopoverTrigger as-child>
-                      <Button
-                        variant="outline"
-                        class="w-full justify-start text-left font-normal"
-                        :class="{ 'text-muted-foreground': !formData.startDate }"
-                      >
-                        <CalendarIcon class="mr-2 h-4 w-4" />
-                        {{
-                          formData.startDate
-                            ? formatDisplayDate(formData.startDate, locale)
-                            : t('schedule.createDialog.fieldStartDate')
-                        }}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent class="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        :selected="parseToCalendarDate(formData.startDate)"
-                        @update:model-value="
-                          (d: unknown) =>
-                            handleCalendarSelect(d, (v) => {
-                              formData.startDate = v;
-                            })
-                        "
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <ProductDatePicker
+                    v-model="startDateModel"
+                    variant="field"
+                    :label="t('schedule.createDialog.fieldStartDate')"
+                    :placeholder="t('schedule.createDialog.fieldStartDate')"
+                    :input-placeholder="t('common.productDateInputPlaceholder')"
+                    :format-hint="t('common.productDateInputHint')"
+                    :invalid-text="t('common.productDateInputInvalid')"
+                    :clear-label="t('common.clear')"
+                    test-id="schedule-start-date"
+                    :aria-label="t('schedule.createDialog.fieldStartDate')"
+                  />
                   <div v-if="!formData.allDay" class="flex items-center gap-2">
                     <Select
                       :model-value="startHour"
@@ -176,34 +160,18 @@
 
                 <div class="space-y-2">
                   <Label for="endDate">{{ t('schedule.createDialog.fieldEndDate') }}</Label>
-                  <Popover>
-                    <PopoverTrigger as-child>
-                      <Button
-                        variant="outline"
-                        class="w-full justify-start text-left font-normal"
-                        :class="{ 'text-muted-foreground': !formData.endDate }"
-                      >
-                        <CalendarIcon class="mr-2 h-4 w-4" />
-                        {{
-                          formData.endDate
-                            ? formatDisplayDate(formData.endDate, locale)
-                            : t('schedule.createDialog.fieldEndDate')
-                        }}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent class="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        :selected="parseToCalendarDate(formData.endDate)"
-                        @update:model-value="
-                          (d: unknown) =>
-                            handleCalendarSelect(d, (v) => {
-                              formData.endDate = v;
-                            })
-                        "
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <ProductDatePicker
+                    v-model="endDateModel"
+                    variant="field"
+                    :label="t('schedule.createDialog.fieldEndDate')"
+                    :placeholder="t('schedule.createDialog.fieldEndDate')"
+                    :input-placeholder="t('common.productDateInputPlaceholder')"
+                    :format-hint="t('common.productDateInputHint')"
+                    :invalid-text="t('common.productDateInputInvalid')"
+                    :clear-label="t('common.clear')"
+                    test-id="schedule-end-date"
+                    :aria-label="t('schedule.createDialog.fieldEndDate')"
+                  />
                   <div v-if="!formData.allDay" class="flex items-center gap-2">
                     <Select
                       :model-value="endHour"
@@ -352,28 +320,19 @@ import {
   SelectValue,
   Badge,
   Switch,
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  Calendar,
 } from '@memoflow/ui-vue-shadcn';
-import {
-  CalendarClock,
-  MapPin,
-  ShieldCheck,
-  Users,
-  X,
-  Loader2,
-  Calendar as CalendarIcon,
-} from '@lucide/vue';
+import { CalendarClock, MapPin, ShieldCheck, Users, X, Loader2 } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
-import { ProductDialogShell, ProductPropertyChip } from '../../../shared/components';
-import { parseToCalendarDate } from '../../../shared/utils/parse-to-date';
-import { handleCalendarSelect } from '../../../shared/utils/handle-calendar-select';
+import {
+  ProductDatePicker,
+  ProductDialogShell,
+  ProductPropertyChip,
+} from '../../../shared/components';
 import { formatDisplayDate } from '../../../shared/utils/format-display-date';
 import { padTwoDigits } from '../../../shared/utils/pad-two-digits';
 import { getProductTime } from '../../../shared/utils/product-time';
 import type { CalendarEntryClientDTO, CreateScheduleRequest } from '@memoflow/contracts/schedule';
+import { requireYmd, type Ymd } from '@memoflow/contracts/primitives';
 
 interface Props {
   modelValue: boolean;
@@ -467,6 +426,19 @@ const formData = reactive({
   location: '',
   attendees: [] as string[],
   autoDetectConflicts: true,
+});
+
+const startDateModel = computed<Ymd | null>({
+  get: () => (formData.startDate ? requireYmd(formData.startDate) : null),
+  set: (value) => {
+    formData.startDate = value ?? '';
+  },
+});
+const endDateModel = computed<Ymd | null>({
+  get: () => (formData.endDate ? requireYmd(formData.endDate) : null),
+  set: (value) => {
+    formData.endDate = value ?? '';
+  },
 });
 
 // Initialize hour/minute refs from initial formData values

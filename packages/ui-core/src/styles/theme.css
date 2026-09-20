@@ -143,6 +143,18 @@
     --input: 240 5.9% 90%;
     --ring: 240 5.9% 10%;
 
+    /* Product surface ramp. Feature UI consumes semantic layers, never palette literals. */
+    --surface: 0 0% 99%;
+    --surface-raised: 0 0% 100%;
+    --surface-overlay: 0 0% 100%;
+    --hover: 240 4.8% 95.9%;
+    --selected: 240 4.8% 93%;
+    --border-subtle: 240 5.9% 93%;
+    --border-strong: 240 5.9% 80%;
+    --foreground-muted: 240 3.8% 44%;
+    --foreground-subtle: 240 3.8% 58%;
+    --primary-hover: 240 5.9% 18%;
+
     --radius: 0.375rem;
 
     --chart-1: 12 76% 61%;
@@ -162,16 +174,16 @@
   }
 
   .dark {
-    --background: 240 10% 8%;
-    --foreground: 0 0% 98%;
+    --background: 0 0% 5.5%;
+    --foreground: 0 0% 96%;
 
-    --card: 240 10% 8%;
-    --card-foreground: 0 0% 98%;
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 96%;
 
-    --popover: 240 10% 8%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 11%;
+    --popover-foreground: 0 0% 96%;
 
-    --primary: 234 60% 60%;
+    --primary: 237 80% 68%;
     --primary-foreground: 0 0% 100%;
 
     --success: 151 49% 51%;
@@ -183,21 +195,33 @@
     --info: 212 100% 68%;
     --info-foreground: 222 47% 11%;
 
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 0 0% 13%;
+    --secondary-foreground: 0 0% 96%;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 62%;
 
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 0 0% 14%;
+    --accent-foreground: 0 0% 96%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 72% 58%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 5.9% 14%;
-    --input: 240 3.7% 15.9%;
-    --ring: 234 60% 60%;
+    --border: 0 0% 17%;
+    --input: 0 0% 18%;
+    --ring: 237 80% 68%;
+
+    /* Linear-inspired neutral hierarchy for dark product surfaces. */
+    --surface: 0 0% 8%;
+    --surface-raised: 0 0% 10%;
+    --surface-overlay: 0 0% 12%;
+    --hover: 0 0% 14%;
+    --selected: 0 0% 16%;
+    --border-subtle: 0 0% 13%;
+    --border-strong: 0 0% 23%;
+    --foreground-muted: 0 0% 66%;
+    --foreground-subtle: 0 0% 50%;
+    --primary-hover: 237 82% 73%;
 
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
@@ -205,14 +229,14 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
 
-    --sidebar: 240 10% 8%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 234 60% 60%;
+    --sidebar: 0 0% 6.5%;
+    --sidebar-foreground: 0 0% 76%;
+    --sidebar-primary: 237 80% 68%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 5.9% 14%;
-    --sidebar-ring: 234 60% 60%;
+    --sidebar-accent: 0 0% 14%;
+    --sidebar-accent-foreground: 0 0% 96%;
+    --sidebar-border: 0 0% 15%;
+    --sidebar-ring: 237 80% 68%;
   }
 
   * {

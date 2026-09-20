@@ -120,8 +120,9 @@ export type GoalPortableReviewV3 = z.infer<typeof GoalPortableReviewV3Schema>;
 export const GoalPortableDefinitionV3Schema = z
   .object({
     ref: GoalPortableReferenceV3Schema,
-    name: z.string().trim().min(1).max(200),
-    summary: z.string().max(500).nullable(),
+    name: z.string().trim().min(1).max(80),
+    summary: z.string().max(255).nullable(),
+    description: z.string().max(10000).nullable().default(null),
     status: z.enum(GoalStatus),
     startDate: YmdSchema.nullable(),
     target: GoalTimeframeSchema.nullable(),

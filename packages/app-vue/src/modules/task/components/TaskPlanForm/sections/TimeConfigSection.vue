@@ -51,47 +51,19 @@
           <Label for="task-start-date" class="mb-1.5 block">{{
             t('task.timeConfig.startDate')
           }}</Label>
-          <Button
-            v-if="isEditMode"
-            id="task-start-date"
+          <ProductDatePicker
+            v-model="startDateModel"
+            variant="field"
+            :label="t('task.timeConfig.startDate')"
+            :placeholder="t('task.timeConfig.startDate')"
+            :input-placeholder="t('common.productDateInputPlaceholder')"
+            :format-hint="t('common.productDateInputHint')"
+            :invalid-text="t('common.productDateInputInvalid')"
+            :clear-label="t('common.clear')"
+            test-id="task-start-date"
             :aria-label="t('task.timeConfig.startDate')"
-            variant="outline"
-            class="w-full justify-start text-left font-normal"
-            :class="{ 'text-muted-foreground': !startDate }"
-            disabled
-          >
-            <CalendarIcon class="mr-2 h-4 w-4" />
-            {{ startDate ? formatDisplayDate(startDate, locale) : t('task.timeConfig.startDate') }}
-          </Button>
-          <Popover v-else>
-            <PopoverTrigger as-child>
-              <Button
-                id="task-start-date"
-                :aria-label="t('task.timeConfig.startDate')"
-                variant="outline"
-                class="w-full justify-start text-left font-normal"
-                :class="{ 'text-muted-foreground': !startDate }"
-              >
-                <CalendarIcon class="mr-2 h-4 w-4" />
-                {{
-                  startDate ? formatDisplayDate(startDate, locale) : t('task.timeConfig.startDate')
-                }}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent class="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                :selected="parseToCalendarDate(startDate)"
-                @update:model-value="
-                  (d: unknown) =>
-                    handleCalendarSelect(d, (v) => {
-                      startDate = v;
-                      handleDateChange();
-                    })
-                "
-              />
-            </PopoverContent>
-          </Popover>
+            :disabled="isEditMode"
+          />
           <p v-if="isEditMode" class="mt-1 text-xs text-muted-foreground">
             {{ t('task.timeConfig.startDateFixedHint') }}
           </p>
@@ -245,30 +217,24 @@ import { TaskPlanScheduleSchema, TaskTimingSchema } from '@memoflow/contracts/ta
 import type { TaskPlanSchedule, TaskTiming } from '@memoflow/contracts/task';
 import type { TaskPlanViewModel } from '../../types';
 import {
-  Button,
   Label,
   RadioGroup,
   RadioGroupItem,
   Alert,
   AlertDescription,
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  Calendar,
   Select,
   SelectTrigger,
   SelectValue,
   SelectContent,
   SelectItem,
 } from '@memoflow/ui-vue-shadcn';
-import { Calendar as CalendarIcon, Clock3 } from '@lucide/vue';
+import { Clock3 } from '@lucide/vue';
 import { translateResultError } from '../../../../../shared/utils/translate-result-error';
-import { parseToCalendarDate } from '../../../../../shared/utils/parse-to-date';
-import { handleCalendarSelect } from '../../../../../shared/utils/handle-calendar-select';
-import { formatDisplayDate } from '../../../../../shared/utils/format-display-date';
 import { padTwoDigits } from '../../../../../shared/utils/pad-two-digits';
+import { ProductDatePicker } from '../../../../../shared/components';
+import { requireYmd, type Ymd } from '@memoflow/contracts/primitives';
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 
 const TaskTimeType = {
   AllDay: 'AllDay',
@@ -295,6 +261,13 @@ const hourOptions = Array.from({ length: 24 }, (_, i) => padTwoDigits(i));
 const minuteOptions = Array.from({ length: 60 }, (_, i) => padTwoDigits(i));
 const timeType = ref<TaskTimeType>(TaskTimeType.AllDay);
 const startDate = ref('');
+const startDateModel = computed<Ymd | null>({
+  get: () => (startDate.value ? requireYmd(startDate.value) : null),
+  set: (value) => {
+    startDate.value = value ?? '';
+    handleDateChange();
+  },
+});
 type ValidationErrorState =
   { kind: 'translation'; key: string } | { kind: 'result'; cause: unknown };
 const validationErrorState = shallowRef<ValidationErrorState | null>(null);

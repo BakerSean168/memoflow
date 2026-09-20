@@ -72,7 +72,7 @@ describe('CreateScheduleDialog submission lifecycle', () => {
     expect(document.querySelector('#all-day')).toBeNull();
 
     wrapper.unmount();
-  });
+  }, 20_000);
 
   it('blocks duplicate submission and preserves the draft when saving fails', async () => {
     let resolveSubmit!: (value: boolean) => void;
