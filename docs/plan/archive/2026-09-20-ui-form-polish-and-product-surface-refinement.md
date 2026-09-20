@@ -1,18 +1,20 @@
 ---
 tags:
   - plan
-  - active
+  - archive
   - ui
   - form
   - linear
   - product
 description: MemoFlow 表单与核心业务界面的 Linear-inspired 渐进披露、视觉密度与交互一致性精修计划
 created: 2026-09-20T00:20:00+08:00
-updated: 2026-09-20T12:05:00+08:00
-status: active
+updated: 2026-09-20T15:02:00+08:00
+status: archived
 ---
 
 # MemoFlow UI Form Polish & Product Surface Refinement
+
+> **归档闭环（2026-09-20）**：UFP-1001～1006 与 UFP-2001～2007 已完成。实现 head `4b1bdd837dc9616f71641e040af56155ccd65975` 的 PR #389 CI run `35495233782` 全绿；本地 exact-product Local Docker 22/22、Tailnet Phase-D 1/1 验收通过。本文件归档后只保留历史真值，不再承载 active task。
 
 ## 1. 背景与目标
 
