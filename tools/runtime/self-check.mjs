@@ -29,11 +29,11 @@ assert.deepEqual(doc.primaryEnvironments, ['host-dev', 'prod-like', 'staging', '
 const hostDev = getRuntimeProfile('host-dev');
 assert.equal(hostDev.hostGroup, 'gcp-dev');
 assert.equal(hostDev.composeProject, 'memoflow-host-dev');
-assert.equal(hostDev.ports.web, 21000);
-assert.equal(hostDev.ports.api, 21001);
-assert.equal(hostDev.ports.powersync, 21002);
-assert.equal(hostDev.ports.postgres, 21010);
-assert.equal(hostDev.ports.redis, 21011);
+assert.equal(hostDev.ports.web, 20220);
+assert.equal(hostDev.ports.api, 20221);
+assert.equal(hostDev.ports.powersync, 20222);
+assert.equal(hostDev.ports.postgres, 20230);
+assert.equal(hostDev.ports.redis, 20231);
 
 const sharedEnv = readEnv('.env');
 assert.equal(sharedEnv.has('API_PORT'), false, 'root .env must not shadow environment API_PORT');

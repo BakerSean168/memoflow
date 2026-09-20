@@ -172,17 +172,17 @@ Nx/Vite 插件会自动推断 `vite:dev` target。该 target 不是
 
 ## 4. 本机端口方案
 
-运行环境与端口唯一契约见 [`runtime-lanes.md`](./runtime-lanes.md)。MemoFlow 在共享 GCP Dev 上不再把框架默认 `5173/3000/8080` 当作长期开发契约。
+运行环境与端口唯一契约见 [`runtime-lanes.md`](./runtime-lanes.md)。MemoFlow 在共享 GCP Dev 上遵循 `my-infrastructure` 的全局 100-port 项目块：MemoFlow=`20200-20299`，并且不再把框架默认 `5173/3000/8080` 当作长期开发契约。
 
 四类环境中，与日常开发直接相关的两套 GCP Dev 端口为：
 
 | 服务       | `host-dev` | `prod-like` |
 | ---------- | ---------: | ----------: |
-| Web        |    `21000` |     `20200` |
-| API        |    `21001` |     `20201` |
-| PowerSync  |    `21002` |     `20202` |
-| PostgreSQL |    `21010` |     `20210` |
-| Redis      |    `21011` |     `20211` |
+| Web        |    `20220` |     `20200` |
+| API        |    `20221` |     `20201` |
+| PowerSync  |    `20222` |     `20202` |
+| PostgreSQL |    `20230` |     `20210` |
+| Redis      |    `20231` |     `20211` |
 
 `host-dev` 通过 VS Code Remote/SSH port forwarding 暴露给工作站，推荐保持同号映射；`prod-like` 由 `docker-compose.local.yml` 完整容器化运行。两套端口互不重叠，因此可以同时存在，不需要通过停止 Docker Web/API 来“替换”服务。
 
@@ -233,14 +233,14 @@ pnpm nx run-many -t serve --projects=api,web --parallel=2
 端口固定为：
 
 ```text
-Web        21000
-API        21001
-PowerSync  21002
-PostgreSQL 21010
-Redis      21011
+Web        20220
+API        20221
+PowerSync  20222
+PostgreSQL 20230
+Redis      20231
 ```
 
-在 GCP Dev 上把它放进 `tmux` 的 `MemoFlow:dev` window；工作站通过 VS Code Remote/SSH 转发 `21000 -> localhost:21000`、`21001 -> localhost:21001`。浏览器访问 `http://localhost:21000`。
+在 GCP Dev 上把它放进 `tmux` 的 `MemoFlow:dev` window；工作站通过 VS Code Remote/SSH 转发 `20220 -> localhost:20220`、`20221 -> localhost:20221`。浏览器访问 `http://localhost:20220`。
 
 `prod-like` 使用独立 `20200-20211`，因此不需要停止任何 prod-like Web/API 容器。
 
@@ -256,17 +256,17 @@ pnpm docker:dev:up
 
 ```bash
 pnpm nx run web:serve
-# Web :21000，Vite proxy -> API :21001
+# Web :20220，Vite proxy -> API :20221
 ```
 
 只调 API：
 
 ```bash
 pnpm nx run api:serve
-# API :21001；PG :21010；Redis :21011；PowerSync :21002
+# API :20221；PG :20230；Redis :20231；PowerSync :20222
 ```
 
-如果只启动 Web，必须保证 `21001` 已有正确的 host-dev API，或显式覆盖 `PROXY_TARGET_URL` 指向要联调的后端。不要临时改成未登记端口。
+如果只启动 Web，必须保证 `20221` 已有正确的 host-dev API，或显式覆盖 `PROXY_TARGET_URL` 指向要联调的后端。不要临时改成未登记端口。
 
 ## 5.4 模式 D：Desktop 开发
 
@@ -284,7 +284,7 @@ pnpm nx run desktop:serve-safe
 pnpm nx run desktop:serve
 ```
 
-Desktop 使用 host-dev API `http://localhost:21001`。如果 Desktop Vite 与 Web Vite 共用同一个开发端口，不要同时启动两者；这属于同一 `host-dev` 环境内部的 UI 入口选择，不应通过占用 `prod-like` 端口解决。
+Desktop 使用 host-dev API `http://localhost:20221`。如果 Desktop Vite 与 Web Vite 共用同一个开发端口，不要同时启动两者；这属于同一 `host-dev` 环境内部的 UI 入口选择，不应通过占用 `prod-like` 端口解决。
 
 ## 6. 环境切换规则
 
@@ -345,10 +345,10 @@ pnpm nx affected -t test
 | 现象                                  | 原因                                           | 处理                                                |
 | ------------------------------------- | ---------------------------------------------- | --------------------------------------------------- |
 | Desktop 报 `NODE_MODULE_VERSION`      | 使用快速/推断入口，原生模块 ABI 未准备         | 停止 Desktop，运行 `pnpm nx run desktop:serve-safe` |
-| Desktop 请求仍访问 `localhost:3000`   | 旧进程/旧环境变量仍使用框架默认端口            | 重启 Desktop，确认 API 指向 `localhost:21001`       |
-| `21000` 被占用                        | Web Vite 与 Desktop Vite 同属 host-dev UI 入口 | 只保留一个 UI dev server，不改随机端口              |
-| API 能连数据库但 publication 创建失败 | 连错 PostgreSQL、权限不足或 logical WAL 未启用 | host-dev 检查 `21010`；prod-like 检查 `20210`       |
-| 浏览器访问 `:20200` 看不到源码热更新  | `20200` 属于 prod-like，不是 Vite host-dev     | VS Code/SSH 转发并访问 `http://localhost:21000`     |
+| Desktop 请求仍访问 `localhost:3000`   | 旧进程/旧环境变量仍使用框架默认端口            | 重启 Desktop，确认 API 指向 `localhost:20221`       |
+| `20220` 被占用                        | Web Vite 与 Desktop Vite 同属 host-dev UI 入口 | 只保留一个 UI dev server，不改随机端口              |
+| API 能连数据库但 publication 创建失败 | 连错 PostgreSQL、权限不足或 logical WAL 未启用 | host-dev 检查 `20230`；prod-like 检查 `20210`       |
+| 浏览器访问 `:20200` 看不到源码热更新  | `20200` 属于 prod-like，不是 Vite host-dev     | VS Code/SSH 转发并访问 `http://localhost:20220`     |
 
 ### 8.1 Desktop 登录与访客模式同时报错：`better-sqlite3` ABI 不匹配
 

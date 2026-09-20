@@ -20,33 +20,35 @@ MemoFlow 的运行时首先按 **4 个环境** 建模：`host-dev`、`prod-like`
 
 ## 四类环境
 
+全局项目端口分配的上层 SSOT 位于 `my-infrastructure/registry.yaml` 与 `projects/memoflow.yaml`：MemoFlow 拥有 `20200-20299` 整个 100-port block。本仓库的 `tools/runtime/profiles.json` 只细化 MemoFlow 自己在该 block 内的环境/服务端口。
+
 | Environment | 目的                                       | Host / 访问方式                                                       | 端口契约                                                               |
 | ----------- | ------------------------------------------ | --------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `host-dev`  | 日常编码、Vite HMR、API watch              | GCP Dev；工作站通过 VS Code Remote/SSH port forwarding 访问           | Web `21000`、API `21001`、PowerSync `21002`、PG `21010`、Redis `21011` |
+| `host-dev`  | 日常编码、Vite HMR、API watch              | GCP Dev；工作站通过 VS Code Remote/SSH port forwarding 访问           | Web `20220`、API `20221`、PowerSync `20222`、PG `20230`、Redis `20231` |
 | `prod-like` | 发布前完整 Docker / production-shaped 验收 | GCP Dev；`docker-compose.local.yml`；需要远程验收时用 Tailscale Serve | Web `20200`、API `20201`、PowerSync `20202`、PG `20210`、Redis `20211` |
 | `staging`   | 稳定集成环境、candidate exact-digest 验收  | GCP Dev staging watcher                                               | Web `20250`、API `20251`、PowerSync `20252`、PG `20260`、Redis `20261` |
 | `prod`      | 对用户提供正式服务                         | Alibaba production watcher + Caddy                                    | public HTTP `80` / HTTPS `443`；PG `5432`、Redis `6379` 仅 loopback    |
 
-端口块的目的不是替代容器内部标准端口。比如 host-dev PostgreSQL 在宿主机使用 `21010`，容器内部仍然是 `5432`；PowerSync 在宿主机使用 `21002`，容器内部仍然是 `8080`。
+端口块的目的不是替代容器内部标准端口。比如 host-dev PostgreSQL 在宿主机使用 `20230`，容器内部仍然是 `5432`；PowerSync 在宿主机使用 `20222`，容器内部仍然是 `8080`。
 
 ### 为什么 host-dev 不再使用 5173 / 3000
 
-`5173`、`3000`、`8080` 是框架/服务常见默认端口。在共享 GCP Dev 上同时开发 MemoFlow、BodySense、Job Harness 等项目时，继续把这些默认值当长期契约会产生冲突。因此 MemoFlow host-dev 获得独立项目端口块 `21000-21019`，VS Code/SSH 转发也保持同号：
+`5173`、`3000`、`8080` 是框架/服务常见默认端口。在共享 GCP Dev 上同时开发 MemoFlow、BodySense、Job Harness 等项目时，继续把这些默认值当长期契约会产生冲突。因此 MemoFlow 按全局基础设施注册表占用项目块 `20200-20299`，其中 host-dev 固定使用环境 slot `20220-20239`，VS Code/SSH 转发也保持同号：
 
 ```text
-GCP Dev :21000 -> workstation localhost:21000  (Web)
-GCP Dev :21001 -> workstation localhost:21001  (API)
-GCP Dev :21002 -> workstation localhost:21002  (PowerSync, only when needed)
+GCP Dev :20220 -> workstation localhost:20220  (Web)
+GCP Dev :20221 -> workstation localhost:20221  (API)
+GCP Dev :20222 -> workstation localhost:20222  (PowerSync, only when needed)
 ```
 
-日常浏览器入口应是 `http://localhost:21000`，而不是 Tailscale `:20200`。`20200-20219` 完整保留给 `prod-like`。
+日常浏览器入口应是 `http://localhost:20220`，而不是 Tailscale `:20200`。`20200-20219` 保留给 `prod-like`；`20250-20269` 保留给 `staging`。
 
 ## Supporting lanes
 
 | Lane         | 用途                              | 端口                                         |
 | ------------ | --------------------------------- | -------------------------------------------- |
 | `e2e`        | Playwright 核心 e2e               | API `3000`、Web `5173`、PG `5433`            |
-| `dev-infra`  | `host-dev` 的 Docker 基础设施子集 | PowerSync `21002`、PG `21010`、Redis `21011` |
+| `dev-infra`  | `host-dev` 的 Docker 基础设施子集 | PowerSync `20222`、PG `20230`、Redis `20231` |
 | `test-infra` | e2e / integration 测试数据库      | PG `5433`                                    |
 
 Support lane 可以与四类环境共享其 owner 环境的端口（例如 `dev-infra` 与 `host-dev`），但不能被误当成独立部署环境。
@@ -93,7 +95,7 @@ pnpm e2e
 pnpm docker:dev:up && pnpm nx run-many -t serve --projects=api,web --parallel=2
 ```
 
-这个 window 只拥有 `host-dev`：Docker 承载 PostgreSQL / Redis / PowerSync，API 与 Web 在宿主机直接运行并热更新。连接 GCP Dev 的工作站通过 VS Code / SSH 转发 `21000`、`21001`，必要时再转发 `21002`。
+这个 window 只拥有 `host-dev`：Docker 承载 PostgreSQL / Redis / PowerSync，API 与 Web 在宿主机直接运行并热更新。连接 GCP Dev 的工作站通过 VS Code / SSH 转发 `20220`、`20221`，必要时再转发 `20222`。
 
 不要把 raw Vite host-dev 通过 `20200` 暴露给远程浏览器。高 RTT 下 Vite 原生 ESM 会产生大量 module waterfall；`20200` 也因此必须保持 `prod-like` 的稳定职责。
 
@@ -126,7 +128,7 @@ REDIS_HOST_PORT=20211
 
 - `e2e` 仍使用独立测试 lane；默认不复用错误的 host-dev/prod-like API。
 - 若 `:3000` 已有服务，必须确认 `/healthz` 的 `lane=e2e`，否则 Playwright fail closed。
-- host-dev 已迁到 `21000/21001`，因此不再与 e2e 的 `5173/3000` 发生日常端口冲突。
+- host-dev 已迁到 `20220/20221`，因此不再与 e2e 的 `5173/3000` 发生日常端口冲突。
 
 ## 维护约定
 

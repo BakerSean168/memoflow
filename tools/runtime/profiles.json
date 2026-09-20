@@ -6,7 +6,7 @@
     "host-dev": {
       "category": "environment",
       "hostGroup": "gcp-dev",
-      "portBlock": "21000-21019",
+      "portBlock": "20220-20239",
       "title": "Host development (hot reload)",
       "description": "API + Web run directly on GCP Dev with hot reload; Docker carries only PostgreSQL, Redis, and PowerSync. Access from the workstation through VS Code/SSH port forwarding.",
       "commands": {
@@ -14,23 +14,23 @@
         "app": "pnpm nx run-many -t serve --projects=api,web --parallel=2"
       },
       "ports": {
-        "web": 21000,
-        "api": 21001,
-        "powersync": 21002,
-        "postgres": 21010,
-        "redis": 21011
+        "web": 20220,
+        "api": 20221,
+        "powersync": 20222,
+        "postgres": 20230,
+        "redis": 20231
       },
       "hostPortEnv": {
-        "WEB_HOST_PORT": 21000,
-        "API_HOST_PORT": 21001,
-        "POWERSYNC_HOST_PORT": 21002,
-        "POSTGRES_HOST_PORT": 21010,
-        "REDIS_HOST_PORT": 21011
+        "WEB_HOST_PORT": 20220,
+        "API_HOST_PORT": 20221,
+        "POWERSYNC_HOST_PORT": 20222,
+        "POSTGRES_HOST_PORT": 20230,
+        "REDIS_HOST_PORT": 20231
       },
       "urls": {
-        "web": "http://localhost:21000",
-        "api": "http://localhost:21001",
-        "powersync": "http://localhost:21002"
+        "web": "http://localhost:20220",
+        "api": "http://localhost:20221",
+        "powersync": "http://localhost:20222"
       },
       "composeProject": "memoflow-host-dev"
     },
@@ -139,9 +139,9 @@
         "infra": "pnpm docker:dev:up"
       },
       "ports": {
-        "powersync": 21002,
-        "postgres": 21010,
-        "redis": 21011
+        "powersync": 20222,
+        "postgres": 20230,
+        "redis": 20231
       }
     },
     "test-infra": {
