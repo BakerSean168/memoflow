@@ -74,6 +74,34 @@ describe('CreateScheduleDialog submission lifecycle', () => {
     wrapper.unmount();
   }, 20_000);
 
+  it('rolls the default end date forward when the one-hour draft crosses local midnight', async () => {
+    vi.setSystemTime(new Date(2026, 7, 14, 23, 30, 0));
+    const onSubmit = vi.fn().mockResolvedValue(true);
+    const wrapper = mount(CreateScheduleDialog, {
+      props: { modelValue: true, onSubmit },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    await nextTick();
+
+    await new DOMWrapper(
+      document.querySelector<HTMLInputElement>('[data-testid="schedule-title-input"]')!,
+    ).setValue('Cross-midnight review');
+    await new DOMWrapper(
+      document.querySelector<HTMLButtonElement>('[data-testid="schedule-save-button"]')!,
+    ).trigger('click');
+    await nextTick();
+    await nextTick();
+
+    expect(onSubmit).toHaveBeenCalledOnce();
+    const request = onSubmit.mock.calls[0]?.[0];
+    expect(request?.range.kind).toBe('Timed');
+    if (request?.range.kind === 'Timed') {
+      expect(request.range.end).toBeGreaterThan(request.range.start);
+    }
+    wrapper.unmount();
+  }, 20_000);
+
   it('blocks duplicate submission and preserves the draft when saving fails', async () => {
     let resolveSubmit!: (value: boolean) => void;
     const onSubmit = vi.fn(

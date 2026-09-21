@@ -106,7 +106,7 @@ pnpm docker:local:down
 | 车道      | API   | Web   | PG    | 说明                                                        |
 | --------- | ----- | ----- | ----- | ----------------------------------------------------------- |
 | prod-like | 20201 | 20200 | 20210 | `docker-compose.local.yml`                                  |
-| host-dev  | 21001 | 21000 | 21010 | `pnpm nx run-many -t serve --projects=api,web --parallel=2` |
+| host-dev  | 20221 | 20220 | 20230 | `pnpm nx run-many -t serve --projects=api,web --parallel=2` |
 | staging   | 20251 | 20250 | 20260 | canonical staging watcher                                   |
 | e2e       | 3000  | 5173  | 5433  | Playwright                                                  |
 

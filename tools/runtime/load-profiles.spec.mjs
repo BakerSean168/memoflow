@@ -31,7 +31,7 @@ test('rejects duplicate or reserved machine-local ports', () => {
     {
       ...machinePorts,
       WEB_HOST_PORT: '12136',
-      REDIS_HOST_PORT: '21001',
+      REDIS_HOST_PORT: '20221',
     },
     { allowMachineOverride: true },
   );

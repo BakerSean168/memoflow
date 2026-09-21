@@ -402,26 +402,30 @@ const activeProperty = ref<ScheduleProperty | null>(null);
 const isEditing = ref(false);
 const newAttendee = ref('');
 
-function nowDateStr(): string {
+const DEFAULT_TIMED_DURATION_MS = 60 * 60 * 1000;
+
+function defaultTimedRangeFields(): {
+  startDate: string;
+  startTime: string;
+  endDate: string;
+  endTime: string;
+} {
   const time = getProductTime();
-  return String(time.calendar.toYmd(time.now()));
-}
-function nowTimeStr(): string {
-  const time = getProductTime();
-  return String(time.input.timeValue(time.now()));
-}
-function oneHourLaterTimeStr(): string {
-  const time = getProductTime();
-  return String(time.input.timeValue(time.now() + 60 * 60 * 1000));
+  const start = time.now();
+  const end = start + DEFAULT_TIMED_DURATION_MS;
+  return {
+    startDate: String(time.calendar.toYmd(start)),
+    startTime: String(time.input.timeValue(start)),
+    endDate: String(time.calendar.toYmd(end)),
+    endTime: String(time.input.timeValue(end)),
+  };
 }
 
+const initialTimedRange = defaultTimedRangeFields();
 const formData = reactive({
   title: '',
   description: '',
-  startDate: nowDateStr(),
-  startTime: nowTimeStr(),
-  endDate: nowDateStr(),
-  endTime: oneHourLaterTimeStr(),
+  ...initialTimedRange,
   allDay: false,
   location: '',
   attendees: [] as string[],
@@ -480,10 +484,11 @@ function toggleProperty(property: ScheduleProperty): void {
 function resetForm() {
   formData.title = '';
   formData.description = '';
-  formData.startDate = nowDateStr();
-  formData.startTime = nowTimeStr();
-  formData.endDate = nowDateStr();
-  formData.endTime = oneHourLaterTimeStr();
+  const defaultRange = defaultTimedRangeFields();
+  formData.startDate = defaultRange.startDate;
+  formData.startTime = defaultRange.startTime;
+  formData.endDate = defaultRange.endDate;
+  formData.endTime = defaultRange.endTime;
   formData.allDay = false;
   formData.location = '';
   formData.attendees = [];
@@ -603,10 +608,11 @@ watch(
     if (!value) {
       resetForm();
     } else if (!props.schedule) {
-      formData.startDate = nowDateStr();
-      formData.startTime = nowTimeStr();
-      formData.endDate = nowDateStr();
-      formData.endTime = oneHourLaterTimeStr();
+      const defaultRange = defaultTimedRangeFields();
+      formData.startDate = defaultRange.startDate;
+      formData.startTime = defaultRange.startTime;
+      formData.endDate = defaultRange.endDate;
+      formData.endTime = defaultRange.endTime;
       formData.allDay = false;
       syncTimeRefs();
     }
