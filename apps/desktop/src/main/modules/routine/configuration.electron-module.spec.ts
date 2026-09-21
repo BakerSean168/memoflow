@@ -28,6 +28,7 @@ describe('Routine Configuration Electron module', () => {
     };
     const queryPort = {
       getConfigurationSnapshot: vi.fn().mockResolvedValue(snapshot),
+      getUpcomingOccurrences: vi.fn().mockResolvedValue({ occurrences: [] }),
     } as unknown as RoutineConfigurationQueryPort;
     const commandPort = {} as RoutineCoachCommandPort;
     const module = createRoutineConfigurationElectronModule({ commandPort, queryPort });
@@ -40,6 +41,17 @@ describe('Routine Configuration Electron module', () => {
     const result = await handlers.get(RoutineChannels.CONFIGURATION_GET)?.({});
     expect(queryPort.getConfigurationSnapshot).toHaveBeenCalledWith('identity-1');
     expect(result).toEqual({ ok: true, data: snapshot });
+
+    const upcoming = await handlers.get(RoutineChannels.UPCOMING_GET)?.(
+      {},
+      { start: 100, end: 200, limit: 10 },
+    );
+    expect(queryPort.getUpcomingOccurrences).toHaveBeenCalledWith('identity-1', {
+      start: 100,
+      end: 200,
+      limit: 10,
+    });
+    expect(upcoming).toEqual({ ok: true, data: { occurrences: [] } });
 
     module.destroy?.();
     expect(handlers.has(RoutineChannels.CONFIGURATION_GET)).toBe(false);

@@ -8,7 +8,7 @@
 import { computed, ref } from 'vue';
 import { useSchedule } from './useSchedule';
 import { useTask } from '../../task/composables/useTask';
-import { GOAL_SERVICE_KEY } from '../../../di/keys';
+import { GOAL_SERVICE_KEY, ROUTINE_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import type { GoalClientDTO } from '@memoflow/contracts/goal';
 import type {
@@ -17,6 +17,7 @@ import type {
   TaskPlanClientDTO,
 } from '@memoflow/contracts/task';
 import type { CalendarEventProjection } from '@memoflow/contracts/schedule';
+import { asInstant } from '@memoflow/time';
 import {
   derivePlannerConflicts,
   plannerConflictSourceKeys,
@@ -225,6 +226,7 @@ export function useCalendarView() {
   const schedule = useSchedule();
   const task = useTask();
   const goalService = useStrictInject(GOAL_SERVICE_KEY, 'GoalService');
+  const routineService = useStrictInject(ROUTINE_SERVICE_KEY, 'RoutineService');
   const plannerGoals = ref<Parameters<typeof projectPlannerReadModel>[0]['goals']>([]);
   const plannerRoutineOccurrences = ref<
     Parameters<typeof projectPlannerReadModel>[0]['routineOccurrences']
@@ -277,9 +279,15 @@ export function useCalendarView() {
   async function fetchPlannerOwnerMarkers(startTime: number, endTime: number) {
     plannerOwnerReadsLoading.value = true;
     try {
+      const routinePromise = routineService.getUpcomingOccurrences({
+        start: startTime,
+        end: endTime,
+        limit: 500,
+      });
       const collectedGoals: PlannerGoalEntity[] = [];
       let page = 1;
       let hasMore = true;
+      let goalsAvailable = true;
 
       while (hasMore) {
         const goalResult = await goalService.listGoals({
@@ -288,8 +296,8 @@ export function useCalendarView() {
           pageSize: PLANNER_GOAL_PAGE_SIZE,
         });
         if (!goalResult.ok) {
-          plannerGoals.value = [];
-          return;
+          goalsAvailable = false;
+          break;
         }
 
         collectedGoals.push(...goalResult.data.goals);
@@ -297,10 +305,21 @@ export function useCalendarView() {
         page += 1;
       }
 
-      plannerGoals.value = collectedGoals.map((goal) => goal.toDTO());
-      // R4-2201C: legacy Reminder markers are retired. Phase 5 will
-      // reconnect Planner to the canonical Routine occurrence read model.
-      plannerRoutineOccurrences.value = [];
+      plannerGoals.value = goalsAvailable ? collectedGoals.map((goal) => goal.toDTO()) : [];
+      const routineResult = await routinePromise;
+      plannerRoutineOccurrences.value = routineResult.ok
+        ? routineResult.data.occurrences.map((occurrence) => ({
+            identityId: occurrence.identityId,
+            routineId: occurrence.routineId,
+            occurrenceKey: occurrence.occurrenceKey,
+            title: occurrence.title,
+            subtitle: occurrence.description,
+            occurrenceAt: asInstant(occurrence.occurrenceAt),
+            endAt: occurrence.endAt == null ? null : asInstant(occurrence.endAt),
+            revision: occurrence.revision,
+            editable: false,
+          }))
+        : [];
     } finally {
       plannerOwnerReadsLoading.value = false;
     }

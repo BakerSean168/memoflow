@@ -12,6 +12,7 @@ import {
   DeleteRoutineProfileRequestSchema,
   DeleteRoutineRequestSchema,
   ReplaceRoutineProfilesRequestSchema,
+  RoutineUpcomingQuerySchema,
   SetRoutineMembershipEnabledRequestSchema,
   SetRoutineProfileActiveRequestSchema,
   SetRoutineTemporaryOverrideRequestSchema,
@@ -61,6 +62,7 @@ export function createRoutineConfigurationElectronModule(
   let registered = false;
   const channels = [
     RoutineChannels.CONFIGURATION_GET,
+    RoutineChannels.UPCOMING_GET,
     RoutineChannels.CREATE,
     RoutineChannels.UPDATE,
     RoutineChannels.DELETE,
@@ -100,6 +102,18 @@ export function createRoutineConfigurationElectronModule(
         }),
       );
 
+      ipcMain.handle(RoutineChannels.UPCOMING_GET, (_event, request: unknown) =>
+        withAuthenticatedIdentity(context, async (identityId) => {
+          const parsed = RoutineUpcomingQuerySchema.safeParse(request);
+          if (!parsed.success) return invalid('Invalid Routine upcoming query');
+          try {
+            return ok(await options.queryPort.getUpcomingOccurrences(identityId, parsed.data));
+          } catch (error) {
+            return failed(error);
+          }
+        }),
+      );
+
       ipcMain.handle(RoutineChannels.CREATE, (_event, request: unknown) =>
         withAuthenticatedIdentity(context, async (identityId) => {
           const parsed = CreateRoutineRequestSchema.safeParse(request);
@@ -117,42 +131,38 @@ export function createRoutineConfigurationElectronModule(
         }),
       );
 
-      ipcMain.handle(
-        RoutineChannels.UPDATE,
-        (_event, routineId: string, request: unknown) =>
-          withAuthenticatedIdentity(context, async (identityId) => {
-            const parsed = UpdateRoutineRequestSchema.safeParse(request);
-            if (!parsed.success) return invalid('Invalid Routine update');
-            return mutate(async () => {
-              const receipt = await options.commandPort.updateRoutine({
-                identityId,
-                routineId,
-                expectedVersion: parsed.data.expectedVersion,
-                name: parsed.data.name,
-                description: parsed.data.description,
-                enabled: parsed.data.enabled,
-                trigger: parsed.data.trigger as RoutineTrigger | null | undefined,
-              });
-              return { id: receipt.routineId, version: receipt.version };
+      ipcMain.handle(RoutineChannels.UPDATE, (_event, routineId: string, request: unknown) =>
+        withAuthenticatedIdentity(context, async (identityId) => {
+          const parsed = UpdateRoutineRequestSchema.safeParse(request);
+          if (!parsed.success) return invalid('Invalid Routine update');
+          return mutate(async () => {
+            const receipt = await options.commandPort.updateRoutine({
+              identityId,
+              routineId,
+              expectedVersion: parsed.data.expectedVersion,
+              name: parsed.data.name,
+              description: parsed.data.description,
+              enabled: parsed.data.enabled,
+              trigger: parsed.data.trigger as RoutineTrigger | null | undefined,
             });
-          }),
+            return { id: receipt.routineId, version: receipt.version };
+          });
+        }),
       );
 
-      ipcMain.handle(
-        RoutineChannels.DELETE,
-        (_event, routineId: string, request: unknown = {}) =>
-          withAuthenticatedIdentity(context, async (identityId) => {
-            const parsed = DeleteRoutineRequestSchema.safeParse(request);
-            if (!parsed.success) return invalid('Invalid Routine delete');
-            return mutate(async () => {
-              const receipt = await options.commandPort.deleteRoutine({
-                identityId,
-                routineId,
-                expectedVersion: parsed.data.expectedVersion,
-              });
-              return { id: receipt.routineId };
+      ipcMain.handle(RoutineChannels.DELETE, (_event, routineId: string, request: unknown = {}) =>
+        withAuthenticatedIdentity(context, async (identityId) => {
+          const parsed = DeleteRoutineRequestSchema.safeParse(request);
+          if (!parsed.success) return invalid('Invalid Routine delete');
+          return mutate(async () => {
+            const receipt = await options.commandPort.deleteRoutine({
+              identityId,
+              routineId,
+              expectedVersion: parsed.data.expectedVersion,
             });
-          }),
+            return { id: receipt.routineId };
+          });
+        }),
       );
 
       ipcMain.handle(RoutineChannels.PROFILE_CREATE, (_event, request: unknown) =>
@@ -254,22 +264,20 @@ export function createRoutineConfigurationElectronModule(
           }),
       );
 
-      ipcMain.handle(
-        RoutineChannels.OVERRIDE_SET,
-        (_event, routineId: string, request: unknown) =>
-          withAuthenticatedIdentity(context, async (identityId) => {
-            const parsed = SetRoutineTemporaryOverrideRequestSchema.safeParse(request);
-            if (!parsed.success) return invalid('Invalid Routine override');
-            return mutate(async () => {
-              const receipt = await options.commandPort.setTemporaryOverride({
-                identityId,
-                routineId,
-                ...parsed.data,
-                source: parsed.data.source ?? 'user',
-              });
-              return { id: receipt.routineId };
+      ipcMain.handle(RoutineChannels.OVERRIDE_SET, (_event, routineId: string, request: unknown) =>
+        withAuthenticatedIdentity(context, async (identityId) => {
+          const parsed = SetRoutineTemporaryOverrideRequestSchema.safeParse(request);
+          if (!parsed.success) return invalid('Invalid Routine override');
+          return mutate(async () => {
+            const receipt = await options.commandPort.setTemporaryOverride({
+              identityId,
+              routineId,
+              ...parsed.data,
+              source: parsed.data.source ?? 'user',
             });
-          }),
+            return { id: receipt.routineId };
+          });
+        }),
       );
 
       ipcMain.handle(

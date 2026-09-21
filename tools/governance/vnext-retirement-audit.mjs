@@ -20,10 +20,15 @@ if (manifestErrors.length > 0) {
 const violations = findVnextRetirementViolations(ROOT, manifest);
 if (violations.length > 0) {
   console.error(
-    `[vnext-retirement-audit] failed with ${violations.length} reintroduced retired surface(s):`,
+    `[vnext-retirement-audit] failed with ${violations.length} retirement contract violation(s):`,
   );
   for (const violation of violations) {
-    console.error(`  ${violation.id}: ${violation.relativePath} (${violation.decision})`);
+    const detail = violation.missingRequired
+      ? 'required replacement missing'
+      : 'retired surface present';
+    console.error(
+      `  ${violation.id}: ${violation.relativePath} [${detail}] (${violation.decision})`,
+    );
   }
   process.exit(1);
 }

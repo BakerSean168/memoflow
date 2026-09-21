@@ -60,7 +60,16 @@
       "id": "legacy-reminder-model",
       "status": "active",
       "decision": "ADR-076..079 / ROUTINE-2201",
-      "forbiddenPaths": ["packages/reminder/src/server/domain/aggregates/reminder-template.ts"]
+      "forbiddenPaths": ["packages/reminder/src/server/domain/aggregates/reminder-template.ts"],
+      "requiredPaths": [
+        "packages/contracts/src/modules/routine/index.ts",
+        "packages/reminder/src/client/index.ts",
+        "packages/app-vue/src/modules/routine/index.ts",
+        "packages/app-vue/src/modules/routine/router/index.ts",
+        "packages/app-vue/src/modules/routine/components/RoutineUpcomingWidget.vue",
+        "apps/api/src/modules/routine/module.ts",
+        "apps/desktop/src/main/modules/routine/configuration.electron-module.ts"
+      ]
     },
     {
       "id": "legacy-schedule-task-model",

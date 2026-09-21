@@ -1,6 +1,7 @@
 export default {
   title: 'Routine',
-  description: 'Manage recurring routines, triggers, and contexts. Execution stays with Scheduler or the desktop runtime.',
+  description:
+    'Manage recurring routines, triggers, and contexts. Execution stays with Scheduler or the desktop runtime.',
   create: 'New Routine',
   edit: 'Edit Routine',
   delete: 'Delete Routine',
@@ -8,6 +9,11 @@ export default {
   loading: 'Loading Routine configuration…',
   emptyTitle: 'No routines yet',
   emptyDescription: 'Create a Routine or start from the method library.',
+  home: {
+    title: 'Today routines',
+    viewAll: 'View all',
+    empty: 'No remaining WallClock routines today',
+  },
   overview: {
     routines: 'Routines',
     enabled: 'Enabled',
@@ -30,10 +36,12 @@ export default {
   },
   method: {
     title: 'Method library',
-    description: 'Start from the small curated MemoFlow method catalog and create canonical Routine configuration.',
+    description:
+      'Start from the small curated MemoFlow method catalog and create canonical Routine configuration.',
     use: 'Use method',
     protocol: 'Focus Protocol',
-    protocolHint: 'This method runs through ProtocolSession and does not create an ordinary Routine.',
+    protocolHint:
+      'This method runs through ProtocolSession and does not create an ordinary Routine.',
   },
   card: {
     noTrigger: 'No trigger configured',

@@ -105,6 +105,33 @@ export const RoutineConfigurationSnapshotSchema = z.object({
   overrides: z.array(RoutineTemporaryOverrideSchema),
 });
 
+export const RoutineUpcomingQuerySchema = z
+  .object({
+    start: z.number().finite().nonnegative(),
+    end: z.number().finite().nonnegative(),
+    limit: z.number().int().positive().max(500).default(200),
+  })
+  .refine((value) => value.end >= value.start, {
+    message: 'Routine upcoming range end must be greater than or equal to start',
+    path: ['end'],
+  });
+
+export const RoutineUpcomingOccurrenceSchema = z.object({
+  identityId: z.string().trim().min(1),
+  routineId: z.string().trim().min(1),
+  occurrenceKey: z.string().trim().min(1),
+  title: z.string().trim().min(1),
+  description: z.string().nullable(),
+  occurrenceAt: z.number().finite().nonnegative(),
+  endAt: z.number().finite().nonnegative().nullable(),
+  revision: z.number().int().positive(),
+  editable: z.literal(false),
+});
+
+export const RoutineUpcomingResponseSchema = z.object({
+  occurrences: z.array(RoutineUpcomingOccurrenceSchema),
+});
+
 export const CreateRoutineRequestSchema = z.object({
   name: z.string().trim().min(1).max(200),
   description: z.string().nullable().optional(),
@@ -148,9 +175,7 @@ export const UpdateRoutineProfileRequestSchema = z
   })
   .refine(
     (value) =>
-      value.name !== undefined ||
-      value.description !== undefined ||
-      value.enabled !== undefined,
+      value.name !== undefined || value.description !== undefined || value.enabled !== undefined,
     { message: 'At least one Routine profile field must be updated' },
   );
 
@@ -184,9 +209,7 @@ export const SetRoutineTemporaryOverrideRequestSchema = z
   })
   .refine(
     (value) =>
-      value.snoozeUntil != null ||
-      value.suppressUntil != null ||
-      value.overrideIntervalMs != null,
+      value.snoozeUntil != null || value.suppressUntil != null || value.overrideIntervalMs != null,
     { message: 'Temporary override must define at least one effect' },
   );
 
@@ -206,6 +229,9 @@ export type RoutineMembershipDto = z.infer<typeof RoutineMembershipSchema>;
 export type RoutineTemporaryOverrideDto = z.infer<typeof RoutineTemporaryOverrideSchema>;
 export type RoutineRuntimeContextDto = z.infer<typeof RoutineRuntimeContextSchema>;
 export type RoutineConfigurationSnapshot = z.infer<typeof RoutineConfigurationSnapshotSchema>;
+export type RoutineUpcomingQuery = z.infer<typeof RoutineUpcomingQuerySchema>;
+export type RoutineUpcomingOccurrence = z.infer<typeof RoutineUpcomingOccurrenceSchema>;
+export type RoutineUpcomingResponse = z.infer<typeof RoutineUpcomingResponseSchema>;
 export type CreateRoutineRequest = z.infer<typeof CreateRoutineRequestSchema>;
 export type UpdateRoutineRequest = z.infer<typeof UpdateRoutineRequestSchema>;
 export type DeleteRoutineRequest = z.infer<typeof DeleteRoutineRequestSchema>;

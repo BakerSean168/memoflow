@@ -8,6 +8,11 @@ export default {
   loading: '正在加载 Routine 配置…',
   emptyTitle: '还没有 Routine',
   emptyDescription: '创建一个 Routine，或从方法库快速开始。',
+  home: {
+    title: '今日 Routine',
+    viewAll: '查看全部',
+    empty: '今天没有剩余的固定时间 Routine',
+  },
   overview: {
     routines: 'Routine',
     enabled: '已启用',

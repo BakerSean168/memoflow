@@ -209,9 +209,7 @@ const conversations = computed<ConversationSummary[]>(
 
 function conversationTimestamp(item: ConversationSummary): number {
   const raw =
-    (item as { updatedAt?: unknown }).updatedAt ??
-    (item as { createdAt?: unknown }).createdAt ??
-    0;
+    (item as { updatedAt?: unknown }).updatedAt ?? (item as { createdAt?: unknown }).createdAt ?? 0;
   const value = Number(raw);
   return Number.isFinite(value) ? value : 0;
 }
@@ -619,7 +617,7 @@ function openHeaderNotePreview(closePreview: () => void, noteId: string): void {
   });
 }
 
-function openPanelRoute(_module: 'goal' | 'task', path: string) {
+function openPanelRoute(_module: 'goal' | 'task' | 'routine', path: string) {
   void router.push(path).catch(() => {});
 }
 

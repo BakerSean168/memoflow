@@ -13,12 +13,14 @@ updated: 2026-09-21T19:45:00+08:00
 
 ## 当前计划
 
-当前无 active plan。
+| 计划                                                                               | 状态                                                                                                |
+| ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| [Routine Adjacent Surface Repair](./2026-09-21-routine-adjacent-surface-repair.md) | IN PROGRESS — Home/Planner Routine owner read、Planner Goal wiring、positive replacement governance |
 
 ## 本轮已归档（2026-09-21）
 
-| 计划 | 结果 |
-| --- | --- |
+| 计划                                                                                                                     | 结果                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [Routine vNext Configuration Center 回归修复](../archive/2026-09-21-routine-configuration-center-regression-recovery.md) | canonical `/routines` vertical slice、Routine client/HTTP/IPC、Vue Configuration Center、顶部 capsule、Profile/Membership/Trigger/Method Library/Temporary Override 全部恢复；legacy `/reminders` 继续 retired。实现 head `5bd206b767d`；affected lint/typecheck/test、build、governance/docs/inventory 与 fresh prod-like Docker 全绿。authenticated browser CRUD 因执行环境安全检查未直接运行，归档文档已记录替代证据与偏差。 |
 
 ## 本轮已归档（2026-09-20）

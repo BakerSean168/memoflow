@@ -8,6 +8,8 @@ import type {
   ReplaceRoutineProfilesRequest,
   RoutineConfigurationSnapshot,
   RoutineMutationReceipt,
+  RoutineUpcomingQuery,
+  RoutineUpcomingResponse,
   SetRoutineMembershipEnabledRequest,
   SetRoutineProfileActiveRequest,
   SetRoutineTemporaryOverrideRequest,
@@ -20,6 +22,7 @@ import type { IResultIpcClient } from '@memoflow/ipc-client';
 
 export interface RoutineClientPort {
   getConfigurationSnapshot(): Promise<Result<RoutineConfigurationSnapshot>>;
+  getUpcomingOccurrences(input: RoutineUpcomingQuery): Promise<Result<RoutineUpcomingResponse>>;
   createRoutine(input: CreateRoutineRequest): Promise<Result<RoutineMutationReceipt>>;
   updateRoutine(
     routineId: string,
@@ -70,6 +73,10 @@ export class RoutineHttpClient implements RoutineClientPort {
     return this.http.get(this.baseUrl + '/configuration');
   }
 
+  getUpcomingOccurrences(input: RoutineUpcomingQuery): Promise<Result<RoutineUpcomingResponse>> {
+    return this.http.get(this.baseUrl + '/upcoming', { params: input });
+  }
+
   createRoutine(input: CreateRoutineRequest): Promise<Result<RoutineMutationReceipt>> {
     return this.http.post(this.baseUrl, input);
   }
@@ -118,10 +125,7 @@ export class RoutineHttpClient implements RoutineClientPort {
     profileId: string,
     input: SetRoutineMembershipEnabledRequest,
   ): Promise<Result<RoutineMutationReceipt>> {
-    return this.http.patch(
-      this.baseUrl + '/' + routineId + '/profiles/' + profileId,
-      input,
-    );
+    return this.http.patch(this.baseUrl + '/' + routineId + '/profiles/' + profileId, input);
   }
 
   setProfileActive(
@@ -151,6 +155,10 @@ export class RoutineIpcClient implements RoutineClientPort {
 
   getConfigurationSnapshot(): Promise<Result<RoutineConfigurationSnapshot>> {
     return this.ipc.invoke(RoutineChannels.CONFIGURATION_GET);
+  }
+
+  getUpcomingOccurrences(input: RoutineUpcomingQuery): Promise<Result<RoutineUpcomingResponse>> {
+    return this.ipc.invoke(RoutineChannels.UPCOMING_GET, input);
   }
 
   createRoutine(input: CreateRoutineRequest): Promise<Result<RoutineMutationReceipt>> {
@@ -201,12 +209,7 @@ export class RoutineIpcClient implements RoutineClientPort {
     profileId: string,
     input: SetRoutineMembershipEnabledRequest,
   ): Promise<Result<RoutineMutationReceipt>> {
-    return this.ipc.invoke(
-      RoutineChannels.MEMBERSHIP_SET_ENABLED,
-      routineId,
-      profileId,
-      input,
-    );
+    return this.ipc.invoke(RoutineChannels.MEMBERSHIP_SET_ENABLED, routineId, profileId, input);
   }
 
   setProfileActive(
