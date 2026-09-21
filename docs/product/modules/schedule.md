@@ -5,7 +5,7 @@ tags:
   - schedule
 description: Planner / Calendar 产品模块与 Scheduler 边界说明
 created: 2026-06-02T00:00:00
-updated: 2026-09-17T22:45:00+08:00
+updated: 2026-09-21T20:45:00+08:00
 ---
 
 # 日程模块说明
@@ -23,7 +23,8 @@ updated: 2026-09-17T22:45:00+08:00
 ### Planner / Calendar (`@memoflow/schedule`)
 
 - CalendarEntry 创建、更新、删除与按时间范围查询；
-- 日 / 周 / 月统一 Planner 视图，聚合 CalendarEntry 与 owner-domain 时间 projection；
+- 日 / 周 / 月统一 Planner 视图，聚合 CalendarEntry、TaskOccurrence、Goal dates 与 Routine WallClock owner-domain projection；
+- Routine WallClock Scheduler 与 Planner/Home owner read 共用 persisted Profile/Membership gate；Routine/Profile/Membership/override durable mutation 会触发 owner re-projection，启动 repair sweep 仍作为 lost-event fallback；
 - 冲突检测、冲突解决、拖动/缩放到 owner command 的路由；
 - Prisma / PowerSync Calendar repository；
 - rebuild outbox、domain-event publisher、delivery-log consumer，以及带审计的 rebuild timeline / replay；
@@ -39,7 +40,7 @@ updated: 2026-09-17T22:45:00+08:00
 
 ## 3. 用户路径
 
-- **Planner 路径：** 用户进入日程页，在日/周/月视图查看统一事件；CalendarEntry 可直接编辑，Task / Goal / Routine 事件通过各自 owner command 修改。
+- **Planner 路径：** 用户进入日程页，在日/周/月视图查看统一事件；CalendarEntry 与 Task 可编辑，Goal 的可移动日期通过 Goal owner command 修改；Routine WallClock marker 来自 Routine owner read，当前保持 read-only，直到存在 canonical single-occurrence override/reschedule command。
 - **Calendar Entry 路径：** 用户创建或编辑时间块，系统执行冲突检测并给出解决路径。
 - **Worker diagnostics：** 仅在需要诊断后台触发状态时读取 Scheduler worker 状态；用户不能直接通过产品 UI 暂停/完成/删除 raw ScheduledInvocation。
 - **移动端：** Calendar/Planner 产品路径继续使用 `ScheduleClientPort`；需要 worker diagnostics 的 React surface 使用独立 `SchedulerClientPort`。
@@ -59,7 +60,7 @@ updated: 2026-09-17T22:45:00+08:00
 
 ## 6. 当前差距
 
-- 跨 owner projection 的交互一致性与完整 acceptance journey 仍是产品体验改进项，不改变当前 owner/persistence contract。
+- 跨 owner projection 已具备 Goal owner mutation 与 Routine live read；完整浏览器 acceptance journey、Routine 单次 occurrence override/reschedule 仍是后续产品体验项，不改变当前 owner/persistence contract。
 - Scheduler 目前仍是自研 Temporal Engine；是否采用 pg-boss 尚未决定，必须通过 `POC-6401` 比较 claim/retry/DLQ/heartbeat/transaction enqueue/multi-worker/PowerSync 等约束。
 - 数据库与 contracts 仍保留历史 `schedule_*` 命名；这不等于 package ownership 仍混合。若未来重命名，应独立决策，避免把 schema churn 与 runtime 行为变化混在一起。
 

@@ -9,13 +9,18 @@ import {
 import type { RoutineOccurrenceNotificationWriterPort } from '../../domain/ports/routine-occurrence-notification-writer.port';
 import type { RoutineOccurrenceStore } from '../../domain/ports/routine-occurrence-store.port';
 import type { RoutineTemporaryOverrideStore } from '../../domain/ports/routine-temporary-override-store.port';
-import type { RoutineOccurrenceCommittedEvent, RoutineScheduleStateReader } from './routine-schedule-projection-source';
+import type {
+  RoutineOccurrenceCommittedEvent,
+  RoutineScheduleStateReader,
+} from './routine-schedule-projection-source';
 
 export const ROUTINE_OCCURRENCE_LEASE_MS = 30_000;
 
 /** Durable execution fence for one canonical wall-clock occurrence. */
 export interface RoutineScheduleExecutionSource {
-  executeRoutineOccurrence(input: RoutineScheduleExecutionInput): Promise<RoutineScheduleExecutionOutcome>;
+  executeRoutineOccurrence(
+    input: RoutineScheduleExecutionInput,
+  ): Promise<RoutineScheduleExecutionOutcome>;
 }
 
 export interface RoutineScheduleExecutionInput {
@@ -36,10 +41,7 @@ export type RoutineScheduleExecutionOutcome =
   | {
       readonly kind: 'skipped';
       readonly reason:
-        | 'routine-unavailable'
-        | 'no-eligible-occurrence'
-        | 'revision-drifted'
-        | 'already-finalized';
+        'routine-unavailable' | 'no-eligible-occurrence' | 'revision-drifted' | 'already-finalized';
       readonly occurrenceId: string | null;
     }
   | { readonly kind: 'retryable'; readonly error: string }
@@ -75,7 +77,7 @@ export function createRoutineWallClockExecutionSource(
       }
 
       const trigger = toDurableWallClock(snapshot.definition);
-      if (!snapshot.definition.enabled || !trigger) {
+      if (!snapshot.definition.enabled || !snapshot.durableProfileGateOpen || !trigger) {
         return { kind: 'skipped', reason: 'routine-unavailable', occurrenceId: null };
       }
 
@@ -93,7 +95,11 @@ export function createRoutineWallClockExecutionSource(
         after: input.scheduledFor - 1,
         temporaryOverride: snapshot.temporaryOverride,
       });
-      if (!eligible || Number(eligible.occurrenceAt) !== input.scheduledFor || eligible.occurrenceKey !== input.occurrenceKey) {
+      if (
+        !eligible ||
+        Number(eligible.occurrenceAt) !== input.scheduledFor ||
+        eligible.occurrenceKey !== input.occurrenceKey
+      ) {
         return { kind: 'skipped', reason: 'no-eligible-occurrence', occurrenceId: null };
       }
 
@@ -114,7 +120,8 @@ export function createRoutineWallClockExecutionSource(
         scheduledFor: input.scheduledFor,
         sourceRevision: input.sourceRevision,
         title: `例行提醒：${snapshot.definition.name}`,
-        content: snapshot.definition.description ?? `已到「${snapshot.definition.name}」的执行时间。`,
+        content:
+          snapshot.definition.description ?? `已到「${snapshot.definition.name}」的执行时间。`,
       };
 
       if (lease.alreadyFinalized) {
@@ -189,10 +196,9 @@ export function createRoutineWallClockExecutionSource(
             { transaction },
           );
 
-          await deps.notificationWriter.enqueueRoutineOccurrenceRequested(
-            notificationRequest,
-            { transaction },
-          );
+          await deps.notificationWriter.enqueueRoutineOccurrenceRequested(notificationRequest, {
+            transaction,
+          });
         });
       } catch (error) {
         if (error instanceof LeaseFencingException) {

@@ -25,6 +25,12 @@ export function validateVnextRetirementManifest(manifest) {
     if (!Array.isArray(entry?.forbiddenPaths) || entry.forbiddenPaths.length === 0) {
       errors.push(`${prefix}.forbiddenPaths must be a non-empty array`);
     }
+    if (
+      entry?.requiredPaths !== undefined &&
+      (!Array.isArray(entry.requiredPaths) || entry.requiredPaths.length === 0)
+    ) {
+      errors.push(`${prefix}.requiredPaths must be a non-empty array when provided`);
+    }
   }
   return errors;
 }
@@ -36,6 +42,16 @@ export function findVnextRetirementViolations(root, manifest) {
     for (const relativePath of entry.forbiddenPaths ?? []) {
       if (existsSync(path.join(root, relativePath))) {
         violations.push({ id: entry.id, decision: entry.decision, relativePath });
+      }
+    }
+    for (const relativePath of entry.requiredPaths ?? []) {
+      if (!existsSync(path.join(root, relativePath))) {
+        violations.push({
+          id: entry.id,
+          decision: entry.decision,
+          relativePath,
+          missingRequired: true,
+        });
       }
     }
   }

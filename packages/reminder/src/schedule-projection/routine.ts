@@ -11,18 +11,13 @@ export {
   createRoutineScheduleProjectionEventHandlers,
   createRoutineScheduleProjectionSource,
 } from '../server/infrastructure/routine-schedule/routine-schedule-projection-source';
-export {
-  ROUTINE_SCHEDULING_OWNER_TYPE,
-} from '../server/infrastructure/routine-schedule/routine-schedule-contract';
-export {
-  createRoutinePrismaScheduleProjectionSource,
-} from '../server/infrastructure/routine-schedule/routine-schedule-projection-source.prisma';
-export {
-  createPrismaRoutineScheduleStateReader,
-} from '../server/infrastructure/routine-schedule/routine-schedule-state-reader.prisma';
+export { ROUTINE_SCHEDULING_OWNER_TYPE } from '../server/infrastructure/routine-schedule/routine-schedule-contract';
+export { createRoutinePrismaScheduleProjectionSource } from '../server/infrastructure/routine-schedule/routine-schedule-projection-source.prisma';
+export { createPrismaRoutineScheduleStateReader } from '../server/infrastructure/routine-schedule/routine-schedule-state-reader.prisma';
 export type {
   RoutineOccurrenceCommittedEvent,
   RoutineOverrideChangedEvent,
+  RoutineScheduleChangedEvent,
   RoutineScheduleProjectionEventMap,
   RoutineScheduleProjectionHandlers,
   RoutineScheduleProjectionPlan,

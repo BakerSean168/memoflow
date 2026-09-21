@@ -85,9 +85,7 @@ export {
   type ProtocolBreakCreditReport,
   type ProtocolBreakCreditRuntime,
 } from '../server/runtime/protocol-break-credit';
-export {
-  createInMemoryRoutineRuntimeContextStore,
-} from '../server/runtime/routine-runtime-context';
+export { createInMemoryRoutineRuntimeContextStore } from '../server/runtime/routine-runtime-context';
 export type {
   RoutineRuntimeContextStore,
   RoutineRuntimeContextUpdateReceipt,
@@ -107,4 +105,7 @@ export {
   type CreateRoutineConfigurationQueryServiceOptions,
   type RoutineConfigurationQueryPort,
 } from '../server/application/services/routine-configuration-query.service';
-export { createRoutineOverrideChangedNotifier } from '../server/infrastructure/routine-schedule/routine-override-change-notifier';
+export {
+  createRoutineOverrideChangedNotifier,
+  createRoutineScheduleChangedNotifier,
+} from '../server/infrastructure/routine-schedule/routine-override-change-notifier';

@@ -21,7 +21,10 @@ import { PrismaRoutineTemporaryOverrideStore } from '../routine-temporary-overri
 import { PrismaRoutineOccurrenceTruthStore } from '../../routine-vnext/routine-occurrence-truth-store.prisma';
 import { FIXTURE_F, fixtureOccurrenceKey, fixtureTrigger } from './test-support';
 
-async function seedRoutineDefinition(prisma: Awaited<ReturnType<typeof getPrisma>>, identityId: string) {
+async function seedRoutineDefinition(
+  prisma: Awaited<ReturnType<typeof getPrisma>>,
+  identityId: string,
+) {
   await prisma.routineDefinition.create({
     data: {
       id: FIXTURE_F.routineId,
@@ -72,40 +75,42 @@ describe('ROUTINE-3401 Prisma durable adapters integration', () => {
     expect(lease.ownerToken).toBeTruthy();
     expect(lease.fencingToken).toBe(1);
 
-    const [commitReceipt, notificationReceipt] = await store.withOccurrenceTransaction(async (tx) => {
-      const commit = await store.completeOccurrence(
-        {
-          occurrenceId: lease.occurrenceId,
-          fencingToken: lease.fencingToken,
-          ownerToken: lease.ownerToken,
-          status: 'succeeded',
-          history: {
-            routineId: FIXTURE_F.routineId,
+    const [commitReceipt, notificationReceipt] = await store.withOccurrenceTransaction(
+      async (tx) => {
+        const commit = await store.completeOccurrence(
+          {
+            occurrenceId: lease.occurrenceId,
+            fencingToken: lease.fencingToken,
+            ownerToken: lease.ownerToken,
+            status: 'succeeded',
+            history: {
+              routineId: FIXTURE_F.routineId,
+              identityId,
+              occurrenceKey,
+              scheduledFor: FIXTURE_F.firstOccurrenceAt,
+              triggeredAt: claimedAt,
+              result: 'success',
+              reason: null,
+            },
+            nextOccurrenceAt: FIXTURE_F.nextOccurrenceAt,
+          },
+          { transaction: tx },
+        );
+        const requested = await writer.enqueueRoutineOccurrenceRequested(
+          {
             identityId,
+            routineId: FIXTURE_F.routineId,
             occurrenceKey,
             scheduledFor: FIXTURE_F.firstOccurrenceAt,
-            triggeredAt: claimedAt,
-            result: 'success',
-            reason: null,
+            sourceRevision: FIXTURE_F.version,
+            title: '晚间熄灯',
+            content: '屋内灯光关闭，进入休息时间。',
           },
-          nextOccurrenceAt: FIXTURE_F.nextOccurrenceAt,
-        },
-        { transaction: tx },
-      );
-      const requested = await writer.enqueueRoutineOccurrenceRequested(
-        {
-          identityId,
-          routineId: FIXTURE_F.routineId,
-          occurrenceKey,
-          scheduledFor: FIXTURE_F.firstOccurrenceAt,
-          sourceRevision: FIXTURE_F.version,
-          title: '晚间熄灯',
-          content: '屋内灯光关闭，进入休息时间。',
-        },
-        { transaction: tx },
-      );
-      return [commit, requested] as const;
-    });
+          { transaction: tx },
+        );
+        return [commit, requested] as const;
+      },
+    );
 
     expect(commitReceipt.status).toBe('succeeded');
 
@@ -296,11 +301,15 @@ describe('ROUTINE-3401 Prisma durable adapters integration', () => {
     });
     expect(replay.replayed).toBe(true);
     expect(await prisma.routineInteraction.count()).toBe(1);
-    expect((await truth.findOccurrence({
-      identityId,
-      routineId: FIXTURE_F.routineId,
-      occurrenceKey: occurrence.occurrenceKey,
-    }))?.resolutionState).toBe('Satisfied');
+    expect(
+      (
+        await truth.findOccurrence({
+          identityId,
+          routineId: FIXTURE_F.routineId,
+          occurrenceKey: occurrence.occurrenceKey,
+        })
+      )?.resolutionState,
+    ).toBe('Satisfied');
   });
 
   it('coalesces concurrent duplicate interaction commands behind the idempotency fence', async () => {
@@ -344,11 +353,15 @@ describe('ROUTINE-3401 Prisma durable adapters integration', () => {
       'ExplicitComplete',
     ]);
     expect(await prisma.routineInteraction.count()).toBe(1);
-    expect((await truth.findOccurrence({
-      identityId,
-      routineId: FIXTURE_F.routineId,
-      occurrenceKey: occurrence.occurrenceKey,
-    }))?.resolutionState).toBe('Satisfied');
+    expect(
+      (
+        await truth.findOccurrence({
+          identityId,
+          routineId: FIXTURE_F.routineId,
+          occurrenceKey: occurrence.occurrenceKey,
+        })
+      )?.resolutionState,
+    ).toBe('Satisfied');
   });
 
   it('coalesces higher-contention duplicate interaction commands behind the idempotency fence', async () => {
@@ -495,6 +508,63 @@ describe('ROUTINE-3401 Prisma durable adapters integration', () => {
         { routineId: 'RoutineId_local-trigger-repair', identityId },
       ]),
     );
+  });
+
+  it('re-reads durable Profile/Membership gates for WallClock projection', async () => {
+    const prisma = await getPrisma();
+    const identityId = IdentityId.generate();
+    await seedAccount({ id: identityId });
+    await seedRoutineDefinition(prisma, identityId);
+    await prisma.routineProfile.create({
+      data: { id: 'profile-work', identityId, name: 'Work', enabled: false },
+    });
+    await prisma.routineProfileMembership.create({
+      data: {
+        identityId,
+        profileId: 'profile-work',
+        routineId: FIXTURE_F.routineId,
+        enabled: true,
+      },
+    });
+
+    const reader = createPrismaRoutineScheduleStateReader(prisma);
+    const source = createRoutinePrismaScheduleProjectionSource(prisma, {
+      now: () => Date.parse('2026-08-25T07:00:00.000Z'),
+    });
+
+    expect(
+      (await reader.readRoutineScheduleSnapshot(FIXTURE_F.routineId, identityId))
+        ?.durableProfileGateOpen,
+    ).toBe(false);
+    expect((await source.buildRoutinePlan(FIXTURE_F.routineId, identityId)).desired).toEqual([]);
+
+    await prisma.routineProfile.update({
+      where: { id: 'profile-work' },
+      data: { enabled: true },
+    });
+    expect(
+      (await reader.readRoutineScheduleSnapshot(FIXTURE_F.routineId, identityId))
+        ?.durableProfileGateOpen,
+    ).toBe(true);
+    expect((await source.buildRoutinePlan(FIXTURE_F.routineId, identityId)).desired).toHaveLength(
+      1,
+    );
+
+    await prisma.routineProfileMembership.update({
+      where: {
+        identityId_profileId_routineId: {
+          identityId,
+          profileId: 'profile-work',
+          routineId: FIXTURE_F.routineId,
+        },
+      },
+      data: { enabled: false },
+    });
+    expect(
+      (await reader.readRoutineScheduleSnapshot(FIXTURE_F.routineId, identityId))
+        ?.durableProfileGateOpen,
+    ).toBe(false);
+    expect((await source.buildRoutinePlan(FIXTURE_F.routineId, identityId)).desired).toEqual([]);
   });
 
   it('honors a durably persisted snooze in the production projection (Fixture F)', async () => {

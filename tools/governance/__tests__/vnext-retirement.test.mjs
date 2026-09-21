@@ -78,4 +78,34 @@ describe('vNext retirement governance', () => {
     expect(errors.some((error) => error.includes('duplicates dup'))).toBe(true);
     expect(errors.some((error) => error.includes('status must be active or staged'))).toBe(true);
   });
+
+  it('fails an active lock when a required canonical replacement surface is missing', () => {
+    const root = tempRoot();
+    mkdirSync(path.join(root, 'packages/current'), { recursive: true });
+    const manifest = {
+      version: 1,
+      entries: [
+        {
+          id: 'replacement',
+          status: 'active',
+          decision: 'ADR-test',
+          forbiddenPaths: ['packages/legacy'],
+          requiredPaths: ['packages/current/index.ts'],
+        },
+      ],
+    };
+
+    expect(validateVnextRetirementManifest(manifest)).toEqual([]);
+    expect(findVnextRetirementViolations(root, manifest)).toEqual([
+      {
+        id: 'replacement',
+        decision: 'ADR-test',
+        relativePath: 'packages/current/index.ts',
+        missingRequired: true,
+      },
+    ]);
+
+    writeFileSync(path.join(root, 'packages/current/index.ts'), 'export {};');
+    expect(findVnextRetirementViolations(root, manifest)).toEqual([]);
+  });
 });

@@ -49,6 +49,17 @@ const GoalProgressWidgetStub = defineComponent({
   },
 });
 
+const RoutineUpcomingWidgetStub = defineComponent({
+  name: 'RoutineUpcomingWidget',
+  emits: ['view-all'],
+  setup(_, { emit }) {
+    return () =>
+      h('div', { 'data-testid': 'routine-upcoming-widget' }, [
+        h('button', { onClick: () => emit('view-all') }, 'routines'),
+      ]);
+  },
+});
+
 const i18n = createI18n({
   legacy: false,
   locale: 'en-US',
@@ -74,6 +85,7 @@ function mountPanel(active: boolean) {
       stubs: {
         DailyTodoWidget: DailyTodoWidgetStub,
         GoalProgressWidget: GoalProgressWidgetStub,
+        RoutineUpcomingWidget: RoutineUpcomingWidgetStub,
       },
     },
   });
@@ -99,12 +111,13 @@ describe('TodayOverviewPanel', () => {
     expect(wrapper.get('[data-testid="today-overview-widgets"]').exists()).toBe(true);
   });
 
-  it('routes direct actions and widget navigation through the shell', async () => {
+  it('routes Task, Routine, and Goal owner surfaces through the shell', async () => {
     const wrapper = mountPanel(true);
 
     await wrapper.get('[data-testid="today-overview-create-goal"]').trigger('click');
     await wrapper.get('[data-testid="today-overview-create-task"]').trigger('click');
     await wrapper.get('[data-testid="daily-todo-widget"] button').trigger('click');
+    await wrapper.get('[data-testid="routine-upcoming-widget"] button').trigger('click');
     await wrapper.get('[data-testid="goal-progress-widget"] button:nth-child(1)').trigger('click');
     await wrapper.get('[data-testid="goal-progress-widget"] button:nth-child(2)').trigger('click');
 
@@ -112,6 +125,7 @@ describe('TodayOverviewPanel', () => {
       ['goal', '/goals?dialog=goal'],
       ['task', '/tasks?dialog=quick-task'],
       ['task', '/tasks'],
+      ['routine', '/routines'],
       ['goal', '/goals'],
       ['goal', '/goals/goal-1'],
     ]);

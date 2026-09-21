@@ -5,27 +5,36 @@ import type {
   RoutineProfileDto,
   RoutineTemporaryOverrideDto,
   RoutineTriggerDto,
+  RoutineUpcomingQuery,
+  RoutineUpcomingResponse,
 } from '@memoflow/contracts/routine';
+import { asInstant, createRecurrenceEngine, type RecurrenceEnginePort } from '@memoflow/time';
 import type {
   RoutineProfileStore,
   RoutineRuntimeContextStore,
   RoutineTemporaryOverrideStore,
 } from '../../domain/ports';
-import type {
-  ProfileMembership,
-  RoutineDefinition,
-  RoutineProfile,
-  RoutineTemporaryOverride,
+import {
+  computeRoutineNextEligibleOccurrence,
+  type ProfileMembership,
+  type RoutineDefinition,
+  type RoutineProfile,
+  type RoutineTemporaryOverride,
 } from '../../domain/routine';
 
 export interface RoutineConfigurationQueryPort {
   getConfigurationSnapshot(identityId: string): Promise<RoutineConfigurationSnapshot>;
+  getUpcomingOccurrences(
+    identityId: string,
+    query: RoutineUpcomingQuery,
+  ): Promise<RoutineUpcomingResponse>;
 }
 
 export interface CreateRoutineConfigurationQueryServiceOptions {
   readonly routineProfileStore: RoutineProfileStore;
   readonly runtimeContextStore: RoutineRuntimeContextStore;
   readonly temporaryOverrideStore: RoutineTemporaryOverrideStore;
+  readonly recurrenceEngine?: RecurrenceEnginePort;
   /** True only when this host owns the local Elapsed/ActiveUsage runtime. */
   readonly localRuntimeAvailable?: boolean;
 }
@@ -45,7 +54,10 @@ function definitionDto(definition: RoutineDefinition): RoutineDefinitionDto {
   };
 }
 
-function profileDto(profile: RoutineProfile, activeProfileIds: ReadonlySet<string>): RoutineProfileDto {
+function profileDto(
+  profile: RoutineProfile,
+  activeProfileIds: ReadonlySet<string>,
+): RoutineProfileDto {
   return {
     id: profile.id,
     name: profile.name,
@@ -82,10 +94,12 @@ function overrideDto(
   };
 }
 
-/** Read-only projection for the Routine Configuration Center. */
+/** Read-only projection for the Routine Configuration Center and adjacent product surfaces. */
 export function createRoutineConfigurationQueryService(
   options: CreateRoutineConfigurationQueryServiceOptions,
 ): RoutineConfigurationQueryPort {
+  const recurrenceEngine = options.recurrenceEngine ?? createRecurrenceEngine();
+
   return {
     async getConfigurationSnapshot(identityId) {
       const definitions = await options.routineProfileStore.listDefinitions({ identityId });
@@ -113,6 +127,77 @@ export function createRoutineConfigurationQueryService(
         capabilities: { localRuntime: options.localRuntimeAvailable ?? false },
         overrides,
       };
+    },
+
+    async getUpcomingOccurrences(identityId, query) {
+      const definitions = await options.routineProfileStore.listDefinitions({ identityId });
+      const memberships = await options.routineProfileStore.listMembershipsForRoutines({
+        identityId,
+        routineIds: definitions.map((definition) => definition.id),
+      });
+      const profileIds = Array.from(new Set(memberships.map((membership) => membership.profileId)));
+      const profiles = await options.routineProfileStore.findProfilesByIds({
+        identityId,
+        profileIds,
+      });
+      const profilesById = new Map(profiles.map((profile) => [profile.id, profile]));
+      const membershipsByRoutine = new Map<string, ProfileMembership[]>();
+      for (const membership of memberships) {
+        const paths = membershipsByRoutine.get(membership.routineId) ?? [];
+        paths.push(membership);
+        membershipsByRoutine.set(membership.routineId, paths);
+      }
+      const occurrences: RoutineUpcomingResponse['occurrences'] = [];
+
+      for (const definition of definitions) {
+        if (!definition.enabled || definition.trigger?.type !== 'WallClock') continue;
+        const paths = membershipsByRoutine.get(definition.id) ?? [];
+        const durableProfileGateOpen =
+          paths.length === 0 ||
+          paths.some(
+            (membership) =>
+              membership.enabled && (profilesById.get(membership.profileId)?.enabled ?? false),
+          );
+        if (!durableProfileGateOpen) continue;
+        const temporaryOverride = await options.temporaryOverrideStore.findRoutineTemporaryOverride(
+          {
+            identityId,
+            routineId: definition.id,
+          },
+        );
+        let cursor = asInstant(query.start > 0 ? query.start - 1 : query.start);
+
+        for (let count = 0; count < query.limit; count += 1) {
+          const occurrence = computeRoutineNextEligibleOccurrence({
+            routineId: definition.id,
+            engine: recurrenceEngine,
+            trigger: definition.trigger,
+            after: cursor,
+            temporaryOverride,
+          });
+          if (!occurrence || Number(occurrence.occurrenceAt) > query.end) break;
+
+          occurrences.push({
+            identityId,
+            routineId: definition.id,
+            occurrenceKey: occurrence.occurrenceKey,
+            title: definition.name,
+            description: definition.description,
+            occurrenceAt: Number(occurrence.occurrenceAt),
+            endAt: null,
+            revision: definition.version,
+            editable: false,
+          });
+          cursor = occurrence.occurrenceAt;
+        }
+      }
+
+      occurrences.sort((left, right) =>
+        left.occurrenceAt === right.occurrenceAt
+          ? left.occurrenceKey.localeCompare(right.occurrenceKey)
+          : left.occurrenceAt - right.occurrenceAt,
+      );
+      return { occurrences: occurrences.slice(0, query.limit) };
     },
   };
 }

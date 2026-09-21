@@ -10,6 +10,7 @@ import {
   createRoutineCoachCommandService,
   createRoutineConfigurationQueryService,
   createRoutineOverrideChangedNotifier,
+  createRoutineScheduleChangedNotifier,
   type RoutineConfigurationQueryPort,
 } from '@memoflow/reminder/routine-runtime';
 
@@ -33,6 +34,7 @@ export function composeRoutine(dependencies: ComposeRoutineDependencies): Compos
     occurrenceTruthStore: repositories.routineOccurrenceTruthStore,
     protocolSessionStore: repositories.protocolSessionStore,
     onOverrideChanged: createRoutineOverrideChangedNotifier(),
+    onScheduleChanged: createRoutineScheduleChangedNotifier(),
   });
   const routineQueryPort = createRoutineConfigurationQueryService({
     routineProfileStore: repositories.routineProfileStore,

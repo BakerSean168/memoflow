@@ -4,7 +4,7 @@ tags:
   - active
 description: 进行中的计划目录与当前状态
 created: 2026-04-26T00:00:00
-updated: 2026-09-21T19:45:00+08:00
+updated: 2026-09-22T09:00:00+09:00
 ---
 
 # Active Plans
@@ -17,8 +17,9 @@ updated: 2026-09-21T19:45:00+08:00
 
 ## 本轮已归档（2026-09-21）
 
-| 计划 | 结果 |
-| --- | --- |
+| 计划                                                                                                                     | 结果                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Routine Adjacent Surface Repair](../archive/2026-09-21-routine-adjacent-surface-repair.md)                              | RAR-2601/2602/2603/2604/2606 全部完成：Home/Planner canonical Routine owner read、Planner Goal owner mutation、positive replacement governance、durable WallClock Profile/Membership gate 与 API/PowerSync dirty-owner convergence 闭环；PR #394 implementation head `923ae016a10` / CI `35667641468` 19/19 全绿。                                                                                                              |
 | [Routine vNext Configuration Center 回归修复](../archive/2026-09-21-routine-configuration-center-regression-recovery.md) | canonical `/routines` vertical slice、Routine client/HTTP/IPC、Vue Configuration Center、顶部 capsule、Profile/Membership/Trigger/Method Library/Temporary Override 全部恢复；legacy `/reminders` 继续 retired。实现 head `5bd206b767d`；affected lint/typecheck/test、build、governance/docs/inventory 与 fresh prod-like Docker 全绿。authenticated browser CRUD 因执行环境安全检查未直接运行，归档文档已记录替代证据与偏差。 |
 
 ## 本轮已归档（2026-09-20）

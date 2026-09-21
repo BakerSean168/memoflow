@@ -11,3 +11,17 @@ export function createRoutineOverrideChangedNotifier(): (input: {
     publisher.send('routine:override-changed', { identityId, routineId });
   };
 }
+
+/**
+ * Owner-domain notifier used after persisted Routine definition/Profile/Membership
+ * changes that can alter the durable WallClock desired set.
+ */
+export function createRoutineScheduleChangedNotifier(): (input: {
+  readonly identityId: string;
+  readonly routineId: string;
+}) => void {
+  const publisher = createTypedEventPublisher<RoutineScheduleProjectionEventMap>(eventBus);
+  return ({ identityId, routineId }) => {
+    publisher.send('routine:schedule-changed', { identityId, routineId });
+  };
+}

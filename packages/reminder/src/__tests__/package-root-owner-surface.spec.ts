@@ -28,6 +28,21 @@ const ROOT_IMPORT_BUDGET_MS = 60_000;
 describe('@memoflow/reminder R4-2201C owner surface', () => {
   let rootExportNames: readonly string[];
 
+  const routineProjection = readFileSync(
+    resolve(
+      __dirname,
+      '../server/infrastructure/routine-schedule/routine-schedule-projection-source.ts',
+    ),
+    'utf8',
+  );
+  const routineExecution = readFileSync(
+    resolve(
+      __dirname,
+      '../server/infrastructure/routine-schedule/routine-schedule-execution-source.ts',
+    ),
+    'utf8',
+  );
+
   beforeAll(async () => {
     rootExportNames = Object.keys(await import('../index'));
   }, ROOT_IMPORT_BUDGET_MS);
@@ -40,6 +55,27 @@ describe('@memoflow/reminder R4-2201C owner surface', () => {
       expect(server).not.toMatch(new RegExp(`\\b${name}\\b`));
       expect(rootExportNames).not.toContain(name);
     }
+  });
+
+  it('keeps Routine schedule projection identity-scoped through the canonical state reader', () => {
+    expect(routineProjection).toMatch(
+      /buildRoutinePlan\s*\(\s*routineId:\s*string,\s*identityId:\s*string\s*\):\s*Promise<RoutineScheduleProjectionPlan>/s,
+    );
+    expect(routineProjection).toContain('readonly owner: SchedulingOwner;');
+    expect(routineProjection).toContain('readRoutineScheduleSnapshot(routineId, identityId)');
+    expect(routineProjection).toContain('buildRoutineWallClockOwner(routineId, identityId)');
+    expect(routineProjection).not.toContain('ReminderTemplate');
+    expect(routineProjection).not.toContain('reminderTemplateRepository');
+  });
+
+  it('keeps Routine scheduled execution identity-bound without Reminder repositories', () => {
+    expect(routineExecution).toMatch(
+      /readRoutineScheduleSnapshot\s*\(\s*input\.routineId,\s*input\.identityId,?\s*\)/s,
+    );
+    expect(routineExecution).toContain('readonly routineId: string;');
+    expect(routineExecution).toContain('readonly identityId: string;');
+    expect(routineExecution).not.toContain('ReminderTemplate');
+    expect(routineExecution).not.toContain('reminderTemplateRepository');
   });
 
   it('keeps canonical Routine owner entrypoints', () => {

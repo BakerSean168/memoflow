@@ -5,13 +5,14 @@ import { Button } from '@memoflow/ui-vue-shadcn';
 import { Plus, Target } from '@lucide/vue';
 import DailyTodoWidget from '../../modules/task/components/widgets/DailyTodoWidget.vue';
 import GoalProgressWidget from '../../modules/goal/components/widgets/GoalProgressWidget.vue';
+import RoutineUpcomingWidget from '../../modules/routine/components/RoutineUpcomingWidget.vue';
 import { useGoalHomeSummary } from '../../modules/goal/composables/useGoalHomeSummary';
 import { getProductTime, productTimeRevision } from '../../shared/utils/product-time';
 
 const props = defineProps<{ active: boolean }>();
 
 const emit = defineEmits<{
-  (e: 'open-route', module: 'goal' | 'task', route: string): void;
+  (e: 'open-route', module: 'goal' | 'task' | 'routine', route: string): void;
 }>();
 
 const { t } = useI18n();
@@ -94,6 +95,11 @@ onBeforeUnmount(() => {
         :active="active"
         @view-all="emit('open-route', 'task', '/tasks')"
         @completed="refreshAfterTaskCompletion"
+      />
+      <RoutineUpcomingWidget
+        class="min-h-[9rem]"
+        :active="active"
+        @view-all="emit('open-route', 'routine', '/routines')"
       />
       <GoalProgressWidget
         class="min-h-[9rem]"

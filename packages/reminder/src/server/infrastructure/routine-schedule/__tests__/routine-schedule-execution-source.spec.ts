@@ -1,10 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { LeaseFencingException } from '@memoflow/contracts/reliable-messaging';
 import { createRecurrenceEngine } from '@memoflow/time';
-import {
-  createSnoozeOverride,
-  type RoutineTemporaryOverride,
-} from '../../../domain/routine';
+import { createSnoozeOverride, type RoutineTemporaryOverride } from '../../../domain/routine';
 import {
   createRoutineWallClockExecutionSource,
   ROUTINE_OCCURRENCE_LEASE_MS,
@@ -12,19 +9,17 @@ import {
   type RoutineScheduleExecutionInput,
   type RoutineScheduleExecutionSource,
 } from '../routine-schedule-execution-source';
-import {
-  createInMemoryRoutineOccurrenceStore,
-} from '../routine-occurrence-store.in-memory';
+import { createInMemoryRoutineOccurrenceStore } from '../routine-occurrence-store.in-memory';
 import {
   createInMemoryRoutineNotificationWriter,
   type RoutineOccurrenceNotificationWriterPort,
 } from '../routine-occurrence-notification-writer';
-import type {
-  RoutineOccurrenceStore,
-} from '../../../domain/ports/routine-occurrence-store.port';
+import type { RoutineOccurrenceStore } from '../../../domain/ports/routine-occurrence-store.port';
 import { FIXTURE_F, buildFixtureFRoutine, fixtureOccurrenceKey } from './test-support';
 
-function createExecutionInput(overrides?: Partial<RoutineScheduleExecutionInput>): RoutineScheduleExecutionInput {
+function createExecutionInput(
+  overrides?: Partial<RoutineScheduleExecutionInput>,
+): RoutineScheduleExecutionInput {
   return {
     identityId: FIXTURE_F.identityId,
     routineId: FIXTURE_F.routineId,
@@ -39,12 +34,18 @@ interface Deployment {
   source: RoutineScheduleExecutionSource;
   store: RoutineOccurrenceStore;
   writer: ReturnType<typeof createInMemoryRoutineNotificationWriter>;
-  published: Array<{ routineId: string; identityId: string; occurrenceKey: string; scheduledFor: number }>;
+  published: Array<{
+    routineId: string;
+    identityId: string;
+    occurrenceKey: string;
+    scheduledFor: number;
+  }>;
   nowMs: () => number;
   setNow: (ms: number) => void;
 }
 
 function createDeployment(options?: {
+  durableProfileGateOpen?: boolean;
   snapshot?: ReturnType<typeof buildFixtureFRoutine> | null;
   temporaryOverride?: RoutineTemporaryOverride | null;
   writer?: RoutineOccurrenceNotificationWriterPort;
@@ -57,12 +58,15 @@ function createDeployment(options?: {
       const definition =
         options?.snapshot === undefined ? buildFixtureFRoutine() : options.snapshot;
       if (definition == null) return null;
-      return { definition, temporaryOverride: options?.temporaryOverride ?? null };
+      return {
+        definition,
+        durableProfileGateOpen: options?.durableProfileGateOpen ?? true,
+        temporaryOverride: options?.temporaryOverride ?? null,
+      };
     },
   };
   const store = createInMemoryRoutineOccurrenceStore({ now: () => nowMs });
-  const writer =
-    options?.writer ?? createInMemoryRoutineNotificationWriter({ now: () => nowMs });
+  const writer = options?.writer ?? createInMemoryRoutineNotificationWriter({ now: () => nowMs });
   const published: Deployment['published'] = [];
   const source = createRoutineWallClockExecutionSource({
     reader,
@@ -250,8 +254,17 @@ describe('createRoutineWallClockExecutionSource (ROUTINE-3401)', () => {
     expect(deps.published).toHaveLength(0);
   });
 
+  it('skips a stale durable invocation when Profile/Membership gates are now closed', async () => {
+    const deps = createDeployment({ durableProfileGateOpen: false });
+    const outcome = await deps.source.executeRoutineOccurrence(createExecutionInput());
+
+    expect(outcome).toEqual({ kind: 'skipped', reason: 'routine-unavailable', occurrenceId: null });
+  });
+
   it('skips cleanly on revision drift', async () => {
-    const deps = createDeployment({ snapshot: buildFixtureFRoutine({ version: FIXTURE_F.version + 1 }) });
+    const deps = createDeployment({
+      snapshot: buildFixtureFRoutine({ version: FIXTURE_F.version + 1 }),
+    });
     const outcome = await deps.source.executeRoutineOccurrence(
       createExecutionInput({ sourceRevision: FIXTURE_F.version }),
     );
@@ -270,7 +283,11 @@ describe('createRoutineWallClockExecutionSource (ROUTINE-3401)', () => {
       now: FIXTURE_F.firstOccurrenceAt + 1,
     });
     const outcome = await deps.source.executeRoutineOccurrence(createExecutionInput());
-    expect(outcome).toEqual({ kind: 'skipped', reason: 'no-eligible-occurrence', occurrenceId: null });
+    expect(outcome).toEqual({
+      kind: 'skipped',
+      reason: 'no-eligible-occurrence',
+      occurrenceId: null,
+    });
     expect(deps.writer.rows).toHaveLength(0);
   });
 

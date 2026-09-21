@@ -3,7 +3,8 @@ import type { PrismaClient } from '@memoflow/database';
 
 const mocks = vi.hoisted(() => {
   const runtimeContextStore = { tag: 'runtime-context' };
-  const notifier = vi.fn();
+  const overrideNotifier = vi.fn();
+  const scheduleNotifier = vi.fn();
   const commandPort = { tag: 'routine-command-port' };
   const queryPort = { tag: 'routine-query-port' };
   const portableCapability = { tag: 'routine-portable-capability' };
@@ -15,7 +16,8 @@ const mocks = vi.hoisted(() => {
   };
   return {
     runtimeContextStore,
-    notifier,
+    overrideNotifier,
+    scheduleNotifier,
     commandPort,
     queryPort,
     portableCapability,
@@ -23,7 +25,8 @@ const mocks = vi.hoisted(() => {
     createRoutinePrismaRepositories: vi.fn(() => repositories),
     createRoutinePortableCapability: vi.fn(() => portableCapability),
     createInMemoryRoutineRuntimeContextStore: vi.fn(() => runtimeContextStore),
-    createRoutineOverrideChangedNotifier: vi.fn(() => notifier),
+    createRoutineOverrideChangedNotifier: vi.fn(() => overrideNotifier),
+    createRoutineScheduleChangedNotifier: vi.fn(() => scheduleNotifier),
     createRoutineCoachCommandService: vi.fn(() => commandPort),
     createRoutineConfigurationQueryService: vi.fn(() => queryPort),
   };
@@ -37,6 +40,7 @@ vi.mock('@memoflow/reminder', () => ({
 vi.mock('@memoflow/reminder/routine-runtime', () => ({
   createInMemoryRoutineRuntimeContextStore: mocks.createInMemoryRoutineRuntimeContextStore,
   createRoutineOverrideChangedNotifier: mocks.createRoutineOverrideChangedNotifier,
+  createRoutineScheduleChangedNotifier: mocks.createRoutineScheduleChangedNotifier,
   createRoutineCoachCommandService: mocks.createRoutineCoachCommandService,
   createRoutineConfigurationQueryService: mocks.createRoutineConfigurationQueryService,
 }));
@@ -59,7 +63,8 @@ describe('composeRoutine', () => {
       temporaryOverrideStore: mocks.repositories.routineTemporaryOverrideStore,
       occurrenceTruthStore: mocks.repositories.routineOccurrenceTruthStore,
       protocolSessionStore: mocks.repositories.protocolSessionStore,
-      onOverrideChanged: mocks.notifier,
+      onOverrideChanged: mocks.overrideNotifier,
+      onScheduleChanged: mocks.scheduleNotifier,
     });
     expect(mocks.createRoutineConfigurationQueryService).toHaveBeenCalledWith({
       routineProfileStore: mocks.repositories.routineProfileStore,

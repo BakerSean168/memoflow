@@ -183,6 +183,30 @@ describe('routine projection runtime -> SchedulingPort (ROUTINE-3401)', () => {
     await runtime.stop();
   });
 
+  it('reconciles immediately when canonical Routine schedule truth changes', async () => {
+    const routineEvents = createRoutineEventsHarness();
+    const scheduling = createSchedulingPortHarness();
+    const source = sourceWithPlan();
+    const runtime = createRoutineProjectionRuntime({
+      source,
+      schedulingPort: scheduling.port,
+      routineEvents: routineEvents.subscriber,
+    });
+
+    await runtime.start();
+    await routineEvents.emit('routine:schedule-changed', {
+      routineId: 'RoutineId_fixture-f',
+      identityId: 'IdentityId_fixture-f',
+    });
+
+    expect(source.buildRoutinePlan).toHaveBeenCalledWith(
+      'RoutineId_fixture-f',
+      'IdentityId_fixture-f',
+    );
+    expect(scheduling.reconciles).toEqual([{ owner: owner(), desired: [intent()] }]);
+    await runtime.stop();
+  });
+
   it('registers only the incremental fast path; durable scans are centralized', async () => {
     const routineEvents = createRoutineEventsHarness();
     const scheduling = createSchedulingPortHarness();

@@ -41,6 +41,19 @@ export interface CrudBatchResult {
 
 interface CrudTransactionDatabase {
   $transaction<T>(callback: (tx: CrudDelegateContainer) => Promise<T>): Promise<T>;
+  routineProfileMembership?: {
+    findMany(args: {
+      where: { identityId: string; profileId: { in: string[] } };
+      select: { routineId: true };
+    }): Promise<Array<{ routineId: string }>>;
+  };
+}
+
+export interface CrudBatchHooks {
+  readonly onRoutineScheduleChanged?: (input: {
+    readonly identityId: string;
+    readonly routineId: string;
+  }) => void | Promise<void>;
 }
 
 /**
@@ -50,12 +63,32 @@ export async function executeCrudBatch(
   db: CrudTransactionDatabase,
   identityId: string,
   transactions: CrudTransaction[],
+  hooks: CrudBatchHooks = {},
 ): Promise<CrudBatchResult> {
   const txCount = transactions.length;
   const opCount = transactions.reduce(
     (count, tx) => count + (tx.ops?.length ?? tx.crud?.length ?? 0),
     0,
   );
+
+  const dirtyRoutineIds = new Set<string>();
+  const dirtyProfileIds = new Set<string>();
+
+  for (const transaction of transactions) {
+    for (const operation of transaction.ops || transaction.crud || []) {
+      collectRoutineScheduleDirtyOwner(operation, dirtyRoutineIds, dirtyProfileIds);
+    }
+  }
+
+  // Resolve existing Profile -> Routine edges before mutation. This preserves
+  // dirty-owner knowledge even when a profile DELETE cascades its memberships.
+  if (dirtyProfileIds.size > 0 && db.routineProfileMembership) {
+    const rows = await db.routineProfileMembership.findMany({
+      where: { identityId, profileId: { in: [...dirtyProfileIds] } },
+      select: { routineId: true },
+    });
+    for (const row of rows) dirtyRoutineIds.add(row.routineId);
+  }
 
   logger.info('PowerSync CRUD batch received', {
     identityId,
@@ -128,5 +161,37 @@ export async function executeCrudBatch(
     }
   });
 
+  if (hooks.onRoutineScheduleChanged) {
+    for (const routineId of [...dirtyRoutineIds].sort()) {
+      await hooks.onRoutineScheduleChanged({ identityId, routineId });
+    }
+  }
+
   return { transactionCount: txCount, operationCount: opCount };
+}
+
+function collectRoutineScheduleDirtyOwner(
+  operation: CrudOperation,
+  routineIds: Set<string>,
+  profileIds: Set<string>,
+): void {
+  if (operation.type === 'routine_definitions') {
+    routineIds.add(operation.id);
+    return;
+  }
+  if (operation.type === 'routine_profiles') {
+    profileIds.add(operation.id);
+    return;
+  }
+  if (
+    operation.type !== 'routine_profile_memberships' &&
+    operation.type !== 'routine_temporary_overrides'
+  ) {
+    return;
+  }
+
+  const data = normalizeCrudData(operation.type, operation.data);
+  const old = normalizeCrudData(operation.type, operation.old);
+  const routineId = old.routineId ?? data.routineId;
+  if (typeof routineId === 'string' && routineId.trim()) routineIds.add(routineId);
 }

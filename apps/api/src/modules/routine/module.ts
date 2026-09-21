@@ -6,6 +6,7 @@ import {
   DeleteRoutineProfileRequestSchema,
   DeleteRoutineRequestSchema,
   ReplaceRoutineProfilesRequestSchema,
+  RoutineUpcomingQuerySchema,
   SetRoutineMembershipEnabledRequestSchema,
   SetRoutineProfileActiveRequestSchema,
   SetRoutineTemporaryOverrideRequestSchema,
@@ -83,6 +84,33 @@ export function composeRoutineApiModule(options: ComposeRoutineApiModuleOptions)
           return res
             .status(200)
             .json(auth.response.success(await options.queryPort.getConfigurationSnapshot(auth.id)));
+        } catch (error) {
+          return handleRoutineError(auth.response, res, error);
+        }
+      });
+
+      routineRouter.get('/upcoming', context.middleware.auth, async (req, res) => {
+        const request = req as AuthenticatedRequest;
+        const auth = authIdentity(request, res);
+        if (!auth) return;
+        const parsed = RoutineUpcomingQuerySchema.safeParse({
+          start: Number(req.query.start),
+          end: Number(req.query.end),
+          limit: req.query.limit == null ? undefined : Number(req.query.limit),
+        });
+        if (!parsed.success) {
+          return res
+            .status(422)
+            .json(auth.response.validationError(validationDetails(parsed.error.issues)));
+        }
+        try {
+          return res
+            .status(200)
+            .json(
+              auth.response.success(
+                await options.queryPort.getUpcomingOccurrences(auth.id, parsed.data),
+              ),
+            );
         } catch (error) {
           return handleRoutineError(auth.response, res, error);
         }

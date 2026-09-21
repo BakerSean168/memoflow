@@ -144,6 +144,8 @@ import EventDetailSheet from '../components/EventDetailSheet.vue';
 import { toLocalDateKey, useCalendarView } from '../composables/useCalendarView';
 import { useSchedule } from '../composables/useSchedule';
 import { useTask } from '../../task/composables/useTask';
+import { GOAL_SERVICE_KEY } from '../../../di/keys';
+import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import { usePanelSurfaceStatus } from '../../../layouts/shell/usePanelSurfaceStatus';
 import type { PanelSurfaceStatus } from '../../../layouts/shell/useAppShellStore';
 import type { CalendarEventItem } from '../composables/useCalendarView';
@@ -159,10 +161,12 @@ const { projections, conflicts, events, isLoading, fetchForRange, windowStart, w
   useCalendarView();
 const schedule = useSchedule();
 const task = useTask();
+const goal = useStrictInject(GOAL_SERVICE_KEY, 'GoalService');
 
 const ownerCommands = createPlannerOwnerCommandRouter({
   schedule: { updateSchedule: schedule.updateCalendarEntry },
   task: { rescheduleOccurrence: task.rescheduleOccurrence },
+  goal: { updateGoal: goal.updateGoal.bind(goal) },
 });
 
 const plannerCalendarRef = ref<InstanceType<typeof PlannerCalendar> | null>(null);

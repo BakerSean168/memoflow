@@ -45,6 +45,7 @@ describe('Routine API module', () => {
     };
     const queryPort = {
       getConfigurationSnapshot: vi.fn().mockResolvedValue(snapshot),
+      getUpcomingOccurrences: vi.fn().mockResolvedValue({ occurrences: [] }),
     } as unknown as RoutineConfigurationQueryPort;
     const commandPort = {} as RoutineCoachCommandPort;
     const app = await createHttpHarness({ commandPort, queryPort });
@@ -53,6 +54,15 @@ describe('Routine API module', () => {
     expect(response.status).toBe(200);
     expect(response.body.data).toEqual(snapshot);
     expect(queryPort.getConfigurationSnapshot).toHaveBeenCalledWith('identity-1');
+
+    const upcoming = await request(app).get('/api/routines/upcoming?start=100&end=200&limit=10');
+    expect(upcoming.status).toBe(200);
+    expect(upcoming.body.data).toEqual({ occurrences: [] });
+    expect(queryPort.getUpcomingOccurrences).toHaveBeenCalledWith('identity-1', {
+      start: 100,
+      end: 200,
+      limit: 10,
+    });
 
     const legacy = await request(app).get('/api/reminders');
     expect(legacy.status).toBe(404);
@@ -172,10 +182,12 @@ describe('Routine API module', () => {
     ).toBe(200);
     expect(
       (
-        await request(app).put('/api/routines/routine-1/profiles').send({
-          expectedVersion: 2,
-          profileIds: ['profile-1'],
-        })
+        await request(app)
+          .put('/api/routines/routine-1/profiles')
+          .send({
+            expectedVersion: 2,
+            profileIds: ['profile-1'],
+          })
       ).status,
     ).toBe(200);
     expect(
@@ -197,9 +209,9 @@ describe('Routine API module', () => {
         })
       ).status,
     ).toBe(200);
-    expect(
-      (await request(app).delete('/api/routines/routine-1/override').send({})).status,
-    ).toBe(200);
+    expect((await request(app).delete('/api/routines/routine-1/override').send({})).status).toBe(
+      200,
+    );
 
     expect(
       (

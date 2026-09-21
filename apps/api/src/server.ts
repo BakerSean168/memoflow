@@ -81,6 +81,7 @@ import { createRoutinePrismaScheduleProjectionSource } from '@memoflow/reminder/
 import { composeTask } from './runtime/compose-task';
 import { composeTaskWorkspaceApiModule } from './modules/task/task-workspace.module.js';
 import { composeRoutineApiModule } from './modules/routine/module.js';
+import { createRoutineScheduleChangedNotifier } from '@memoflow/reminder/routine-runtime';
 // 基础设施模块（直接在 API 内部定义）
 import { composePowerSyncApiModule } from './modules/powersync/module.js';
 import { composeLabelApiModule } from './modules/label/module.js';
@@ -353,7 +354,10 @@ async function bootstrap(): Promise<void> {
   // App-local infrastructure modules: DB-backed dependencies are bound by the
   // runtime composer/factory closure BEFORE registration; register() only
   // mounts routes against the transport-only context.
-  const powerSyncApiModule = composePowerSyncApiModule({ db: prisma });
+  const powerSyncApiModule = composePowerSyncApiModule({
+    db: prisma,
+    onRoutineScheduleChanged: createRoutineScheduleChangedNotifier(),
+  });
   const labelApiModule = composeLabelApiModule({ service: labelService });
   const goalKnowledgeApiModule = composeGoalKnowledgeApiModule({ service: goalKnowledgeService });
   const goalWorkspaceApiModule = composeGoalWorkspaceApiModule({ port: goalWorkspaceService });
