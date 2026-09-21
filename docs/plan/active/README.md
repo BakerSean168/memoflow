@@ -4,7 +4,7 @@ tags:
   - active
 description: 进行中的计划目录与当前状态
 created: 2026-04-26T00:00:00
-updated: 2026-09-20T15:02:00+08:00
+updated: 2026-09-21T19:45:00+08:00
 ---
 
 # Active Plans
@@ -13,9 +13,13 @@ updated: 2026-09-20T15:02:00+08:00
 
 ## 当前计划
 
-| 计划 | 状态 |
+当前无 active plan。
+
+## 本轮已归档（2026-09-21）
+
+| 计划 | 结果 |
 | --- | --- |
-| [Routine vNext Configuration Center 回归修复](./2026-09-21-routine-configuration-center-regression-recovery.md) | **ACTIVE** — 修复 R4-2201C 破坏式退休误删 replacement UI 的回归；恢复 canonical `/routines`、Routine client/transport、Vue Configuration Center 与顶部 capsule，禁止复活 legacy `/reminders`。 |
+| [Routine vNext Configuration Center 回归修复](../archive/2026-09-21-routine-configuration-center-regression-recovery.md) | canonical `/routines` vertical slice、Routine client/HTTP/IPC、Vue Configuration Center、顶部 capsule、Profile/Membership/Trigger/Method Library/Temporary Override 全部恢复；legacy `/reminders` 继续 retired。实现 head `5bd206b767d`；affected lint/typecheck/test、build、governance/docs/inventory 与 fresh prod-like Docker 全绿。authenticated browser CRUD 因执行环境安全检查未直接运行，归档文档已记录替代证据与偏差。 |
 
 ## 本轮已归档（2026-09-20）
 

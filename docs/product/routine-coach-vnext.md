@@ -9,7 +9,7 @@ tags:
   - vnext
 description: MemoFlow Reminder 向 AI-native Routine Coach 演进的产品定义、真实场景推演、领域模型、运行时与桌面交互设计
 created: 2026-08-25T17:13:00+08:00
-updated: 2026-09-19T00:00:00+00:00
+updated: 2026-09-21T19:45:00+08:00
 ---
 
 # Routine Coach vNext：习惯节律、健康干预与专注协议
@@ -19,6 +19,8 @@ updated: 2026-09-19T00:00:00+00:00
 > 本文记录 2026-08-25 对现有 Reminder 模块的重新定性与 vNext 设计讨论。
 >
 > **实现状态（2026-09-17，R4-2201C）：Routine vNext 已成为唯一 owner truth。物理包仍沿用历史名 `reminder`，但 `ReminderTemplate / ReminderGroup / ReminderInstance / ReminderResponse`、旧 `/reminders` transport/UI 与 Reminder operation owner 已按 ADR-111 破坏式退休；不存在兼容写入口、双写或 row converter。本文后续保留的旧模型对比仅作为 2026-08-25~09-08 的迁移背景。**
+>
+> **产品 surface 恢复（2026-09-21）：R4-2201C 同时误删的 Routine Configuration Center 已以 canonical `/routines` vertical slice 恢复（实现 head `5bd206b767d`）。Web/Desktop 共用 `RoutineClientPort` 与 owner query/command service；顶部 Routine capsule、Profile/Membership、三类 Trigger、Method Library、Temporary Override 已恢复。旧 `/reminders` 仍保持 retired，不存在 legacy Reminder CRUD 复活。Web 不拥有本地 ActivitySensor，因此 `localRuntime=false` 且拒绝 profile runtime-active mutation；Desktop 保留真实本地 runtime 能力。**
 
 ## 2026-09-08 Model Convergence Freeze (historical design record)
 

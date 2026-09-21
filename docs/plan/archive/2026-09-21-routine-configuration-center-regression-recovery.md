@@ -1,25 +1,52 @@
 ---
 tags:
   - plan
-  - active
+  - archive
   - routine
   - ui
   - regression
 description: Routine vNext configuration center / shell entry destructive-cutover regression recovery plan
 created: 2026-09-21T13:20:00+08:00
-updated: 2026-09-21T13:20:00+08:00
+updated: 2026-09-21T19:45:00+08:00
 ---
 
 # Routine vNext Configuration Center 回归修复
 
 ## 0. 状态
 
-- **状态**：ACTIVE
+- **状态**：DONE / ARCHIVED
 - **目标分支**：chatgpt/routine-ui-regression-fix
 - **基线**：main@c97ce1eec67
+- **实现 head**：5bd206b767da2541bcd0facfcb7aa01283ae505b
 - **问题类型**：destructive cutover regression / product surface loss
 - **产品 owner**：Routine vNext
 - **明确禁止**：恢复 legacy ReminderTemplate / ReminderGroup / ReminderInstance / ReminderResponse 或 /reminders 产品写路径
+
+### 0.1 完成证据（2026-09-21）
+
+本轮已恢复 canonical Routine vertical slice，而不是复活 legacy Reminder：
+
+- `@memoflow/contracts/routine`：Routine Definition / Profile / Membership / RuntimeContext / TemporaryOverride / Trigger transport contract；
+- `@memoflow/reminder/client`：Web HTTP + Desktop IPC 的统一 `RoutineClientPort`；
+- API：`/api/routines`、`/api/routine-profiles` canonical routes；认证 identity 由 host 注入；
+- Desktop：Routine configuration IPC + mutation 后本地 runtime refresh；
+- Vue：`ROUTINE_SERVICE_KEY`、`/routines` router、Routine Configuration Center、Profile、Method Library、三类 trigger editor、temporary override；
+- Shell：Routine capsule 恢复，顺序为 `Goal → Task → Routine → Note → Schedule → Notification`；旧 `/reminders` 仍保持 retired；
+- Web 明确声明 `localRuntime=false`，并拒绝 profile runtime-active mutation（HTTP 409），避免制造无法驱动真实执行的 API 进程内状态；Desktop 保留真实 local-runtime active-state 能力。
+
+验证证据：
+
+- `pnpm nx affected -t lint --base=main --head=HEAD`：41 projects green（仅历史 warning，无 error）；
+- `pnpm nx affected -t typecheck --base=main --head=HEAD`：37 projects + 31 dependency tasks green；
+- `pnpm nx affected -t test --base=main --head=HEAD`：36 projects + 6 dependency tasks green；其中 app-vue 实跑 210 files / 840 tests 全绿；
+- focused Routine/API/IPC/client/query/UI/i18n tests 全绿；
+- `reminder:build`、`app-vue:build`、`web:build`、`desktop:build`、`api:build` 全绿；
+- `docs:check`、`governance:check`、`test:inventory:check`、package export audit 全绿；
+- prod-like Docker：API / Web / PowerSync / PostgreSQL / Redis 全部 healthy；
+- OCI freshness：`memoflow-api:local`、`memoflow-web:local` revision 都精确等于 `5bd206b767da2541bcd0facfcb7aa01283ae505b`，无 freshness warning；
+- runtime smoke：`GET http://127.0.0.1:20200/routines` → 200；未认证 `GET /api/routines/configuration` → 401（证明 canonical route 已注册且受 auth 保护，而非 404）。
+
+**RUI-2502 验证偏差：** 当前执行环境的安全检查阻止读取/提交本地 E2E 凭据以及构造认证口令，因此没有执行真实登录后的 browser CRUD journey。该项以 owner-backed command/query tests、HTTP route integration、Desktop IPC contract、Vue mount smoke 与 fresh prod-like Docker route smoke 组合替代；不将其描述为 authenticated E2E。
 
 ## 1. 问题定义
 
@@ -520,29 +547,29 @@ E2E 按受影响环境选择 local-docker / shell / desktop smoke；不以单元
 
 ### P0
 
-- [ ] 顶部出现 Routine
-- [ ] 点击后真实进入 /routines
-- [ ] 页面不是静态 placeholder
-- [ ] Web / Desktop 都能读取 canonical Routine owner truth
-- [ ] Create/update/delete 不写 legacy Reminder
-- [ ] /reminders 仍 retired
+- [x] 顶部出现 Routine
+- [x] 点击后真实进入 /routines
+- [x] 页面不是静态 placeholder
+- [x] Web / Desktop 都能读取 canonical Routine owner truth
+- [x] Create/update/delete 不写 legacy Reminder
+- [x] /reminders 仍 retired
 
 ### P1
 
-- [ ] Profile membership 可管理
-- [ ] Profile active state 可管理
-- [ ] 三类 canonical trigger 可表达
-- [ ] Method Library 可用于创建配置
-- [ ] temporary override 有真实 owner-backed 状态
-- [ ] panel / focus shell 行为与 Goal/Task/Note 一致
+- [x] Profile membership 可管理
+- [x] Profile active state 可管理（Desktop local runtime；Web capability 明确禁用）
+- [x] 三类 canonical trigger 可表达
+- [x] Method Library 可用于创建配置
+- [x] temporary override 有真实 owner-backed 状态
+- [x] panel / focus shell 行为与 Goal/Task/Note 一致
 
 ### Quality
 
-- [ ] focused tests green
-- [ ] typecheck green
-- [ ] governance/docs/test-inventory green
-- [ ] affected builds green
-- [ ] diff review P0/P1 = 0
+- [x] focused tests green
+- [x] typecheck green
+- [x] governance/docs/test-inventory green
+- [x] affected builds green
+- [x] diff review P0/P1 = 0
 
 ## 11. 明确不做
 
