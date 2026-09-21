@@ -59,6 +59,11 @@ export interface ComposePowerSyncApiModuleOptions {
    * 可选的 PowerSync 配置覆盖；默认使用已验证的 env 配置。
    */
   readonly config?: PowerSyncRuntimeConfig;
+  /** Post-commit dirty-owner hook for Routine WallClock schedule convergence. */
+  readonly onRoutineScheduleChanged?: (input: {
+    readonly identityId: string;
+    readonly routineId: string;
+  }) => void | Promise<void>;
 }
 
 /**
@@ -235,7 +240,9 @@ export function composePowerSyncApiModule(options: ComposePowerSyncApiModuleOpti
               .json(responseBuilder.badRequest('Missing or invalid transactions array'));
           }
 
-          const result = await executeCrudBatch(db, identityId, transactions);
+          const result = await executeCrudBatch(db, identityId, transactions, {
+            onRoutineScheduleChanged: options.onRoutineScheduleChanged,
+          });
           return res.json(responseBuilder.success(result));
         } catch (error) {
           if (error instanceof PowerSyncPreferenceConflictError) {

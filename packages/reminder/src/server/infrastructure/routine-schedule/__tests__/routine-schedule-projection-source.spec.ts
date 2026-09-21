@@ -28,7 +28,9 @@ function createReader(options?: {
   snapshot?: RoutineScheduleSnapshot | null;
 }): RoutineScheduleStateReader {
   const snapshot: RoutineScheduleSnapshot | null =
-    options?.snapshot === undefined ? { definition: buildFixtureFRoutine() } : (options.snapshot ?? null);
+    options?.snapshot === undefined
+      ? { definition: buildFixtureFRoutine(), durableProfileGateOpen: true }
+      : (options.snapshot ?? null);
   return {
     async readRoutineScheduleSnapshot() {
       return snapshot;
@@ -75,9 +77,24 @@ describe('createRoutineScheduleProjectionSource (ROUTINE-3401)', () => {
     });
   });
 
+  it('projects nothing when every durable Profile/Membership path is gated off', async () => {
+    const source = createSource(
+      createReader({
+        snapshot: { definition: buildFixtureFRoutine(), durableProfileGateOpen: false },
+      }),
+    );
+    const plan = await source.buildRoutinePlan(FIXTURE_F.routineId, FIXTURE_F.identityId);
+    expect(plan.desired).toEqual([]);
+  });
+
   it('projects nothing for a disabled routine (owner key stays canonical)', async () => {
     const source = createSource(
-      createReader({ snapshot: { definition: buildFixtureFRoutine({ enabled: false }) } }),
+      createReader({
+        snapshot: {
+          definition: buildFixtureFRoutine({ enabled: false }),
+          durableProfileGateOpen: true,
+        },
+      }),
     );
     const plan = await source.buildRoutinePlan(FIXTURE_F.routineId, FIXTURE_F.identityId);
     expect(plan.desired).toEqual([]);
@@ -88,7 +105,10 @@ describe('createRoutineScheduleProjectionSource (ROUTINE-3401)', () => {
     const source = createSource(
       createReader({
         snapshot: {
-          definition: buildFixtureFRoutine({ trigger: createElapsedTrigger({ durationMs: 60_000 }) }),
+          definition: buildFixtureFRoutine({
+            trigger: createElapsedTrigger({ durationMs: 60_000 }),
+          }),
+          durableProfileGateOpen: true,
         },
       }),
     );
@@ -107,6 +127,7 @@ describe('createRoutineScheduleProjectionSource (ROUTINE-3401)', () => {
       createReader({
         snapshot: {
           definition: buildFixtureFRoutine({ trigger: fixtureTrigger({ count: 1 }) }),
+          durableProfileGateOpen: true,
         },
       }),
       { now: Date.parse('2026-08-26T00:00:00.000Z') },
@@ -119,7 +140,11 @@ describe('createRoutineScheduleProjectionSource (ROUTINE-3401)', () => {
     const snooze = createSnoozeFixture();
     const source = createSource(
       createReader({
-        snapshot: { definition: buildFixtureFRoutine(), temporaryOverride: snooze },
+        snapshot: {
+          definition: buildFixtureFRoutine(),
+          durableProfileGateOpen: true,
+          temporaryOverride: snooze,
+        },
       }),
     );
 
@@ -140,6 +165,7 @@ describe('createRoutineScheduleProjectionSource (ROUTINE-3401)', () => {
       createReader({
         snapshot: {
           definition: buildFixtureFRoutine({ trigger: fixtureTrigger({ count: 3 }) }),
+          durableProfileGateOpen: true,
           temporaryOverride: createTemporaryOverride({
             suppressUntil: Date.parse('2026-08-28T00:00:00.000Z'),
             expiresAt: Date.parse('2026-08-28T00:00:00.000Z'),
@@ -159,6 +185,7 @@ describe('createRoutineScheduleProjectionSource (ROUTINE-3401)', () => {
       createReader({
         snapshot: {
           definition: buildFixtureFRoutine(),
+          durableProfileGateOpen: true,
           temporaryOverride: createTemporaryOverride({
             snoozeUntil: Date.parse('2026-08-24T16:00:00.000Z'),
             expiresAt: Date.parse('2026-08-24T23:00:00.000Z'),

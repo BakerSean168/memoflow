@@ -24,6 +24,7 @@ updated: 2026-09-21T20:45:00+08:00
 
 - CalendarEntry 创建、更新、删除与按时间范围查询；
 - 日 / 周 / 月统一 Planner 视图，聚合 CalendarEntry、TaskOccurrence、Goal dates 与 Routine WallClock owner-domain projection；
+- Routine WallClock Scheduler 与 Planner/Home owner read 共用 persisted Profile/Membership gate；Routine/Profile/Membership/override durable mutation 会触发 owner re-projection，启动 repair sweep 仍作为 lost-event fallback；
 - 冲突检测、冲突解决、拖动/缩放到 owner command 的路由；
 - Prisma / PowerSync Calendar repository；
 - rebuild outbox、domain-event publisher、delivery-log consumer，以及带审计的 rebuild timeline / replay；

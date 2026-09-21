@@ -17,6 +17,11 @@ import {
 /** Runtime snapshot consumed by the durable projection lane. */
 export interface RoutineScheduleSnapshot {
   readonly definition: RoutineDefinition;
+  /**
+   * Durable cloud-side Profile/Membership gate. Host-local `profile active`
+   * RuntimeContext is deliberately excluded from Scheduler authority.
+   */
+  readonly durableProfileGateOpen: boolean;
   /** Durable snooze/suppress runtime state served by the state reader. */
   readonly temporaryOverride?: RoutineTemporaryOverride | null;
 }
@@ -41,10 +46,7 @@ export interface RoutineScheduleProjectionPlan {
 }
 
 export interface RoutineScheduleProjectionSource {
-  buildRoutinePlan(
-    routineId: string,
-    identityId: string,
-  ): Promise<RoutineScheduleProjectionPlan>;
+  buildRoutinePlan(routineId: string, identityId: string): Promise<RoutineScheduleProjectionPlan>;
   buildRoutineOwner(routineId: string, identityId: string): SchedulingOwner;
   listRoutineRefs(): Promise<Array<{ routineId: string; identityId: string }>>;
 }
@@ -67,6 +69,12 @@ export interface RoutineOverrideChangedEvent {
   readonly identityId: string;
 }
 
+/** Durable owner truth changed and the Scheduler projection must be rebuilt. */
+export interface RoutineScheduleChangedEvent {
+  readonly routineId: string;
+  readonly identityId: string;
+}
+
 /**
  * NOTE: this stays a TYPE LITERAL, not an interface. `TypedEventMap` constrains
  * the keyed payload map to `Record<string, unknown>`, and only a type literal
@@ -77,17 +85,21 @@ export interface RoutineOverrideChangedEvent {
 export type RoutineScheduleProjectionEventMap = {
   readonly 'routine:occurrence-committed': RoutineOccurrenceCommittedEvent;
   readonly 'routine:override-changed': RoutineOverrideChangedEvent;
+  readonly 'routine:schedule-changed': RoutineScheduleChangedEvent;
 };
 
 export const routineScheduleProjectionEventNames = [
   'routine:occurrence-committed',
   'routine:override-changed',
+  'routine:schedule-changed',
 ] as const satisfies readonly (keyof RoutineScheduleProjectionEventMap)[];
 
 export function createRoutineScheduleProjectionEventHandlers(
   projector: RoutineScheduleProjectionHandlers,
 ): {
-  [K in keyof RoutineScheduleProjectionEventMap]: (event: RoutineScheduleProjectionEventMap[K]) => Promise<void>;
+  [K in keyof RoutineScheduleProjectionEventMap]: (
+    event: RoutineScheduleProjectionEventMap[K],
+  ) => Promise<void>;
 } {
   return {
     'routine:occurrence-committed': async (event) => {
@@ -97,6 +109,9 @@ export function createRoutineScheduleProjectionEventHandlers(
     // reappear (expiry) in place — rebuild the full plan so the neutral
     // Scheduler converges without waiting for the next occurrence commit.
     'routine:override-changed': async (event) => {
+      await projector.upsertRoutine(event.routineId, event.identityId);
+    },
+    'routine:schedule-changed': async (event) => {
       await projector.upsertRoutine(event.routineId, event.identityId);
     },
   };
@@ -137,7 +152,7 @@ export function createRoutineScheduleProjectionSource(deps: {
 
       const { definition } = snapshot;
       const canonicalOwner = buildRoutineWallClockOwner(definition.id, definition.identityId);
-      if (!definition.enabled) {
+      if (!definition.enabled || !snapshot.durableProfileGateOpen) {
         return { owner: canonicalOwner, desired: [] };
       }
 

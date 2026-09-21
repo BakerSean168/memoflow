@@ -2,7 +2,7 @@
 tags: [plan, active, routine, planner, home, governance]
 description: Routine destructive-cutover adjacent surface repair: Home/Planner owner reads, Planner Goal command wiring, positive replacement locks
 created: 2026-09-21T20:10:00+08:00
-updated: 2026-09-21T20:10:00+08:00
+updated: 2026-09-21T22:50:00+08:00
 ---
 
 # Routine Adjacent Surface Repair
@@ -32,6 +32,12 @@ Goal date projections advertise `move`, and the owner router implements Goal mut
 ### RAR-2604 — Retirement governance is negative-only (P2)
 
 `vnext-retirement-audit` prevents retired paths from returning but cannot require the canonical replacement route/client/surface/projection to remain present.
+
+### RAR-2606 — WallClock durable Profile/Membership gate + re-projection lost in cutover (P1)
+
+Pre-cutover Reminder scheduling re-read canonical Profile/M:N membership eligibility and reprojected when eligibility changed. R4-2201C removed that lane without transferring the durable gate/change signal into canonical Routine scheduling. Current RoutineScheduleStateReader only reads definition + temporary override, and Routine CRUD lacks a schedule-dirty signal.
+
+The repair restores only **durable cloud scheduling gates** (`RoutineDefinition.enabled`, `RoutineProfile.enabled`, `ProfileMembership.enabled`, temporary override). `profile active` stays host-local RuntimeContext and is not fabricated on the API host. PowerSync uploads publish post-commit dirty owners so Desktop-originated durable changes reproject without waiting for API restart.
 
 ## 2. Target architecture
 
@@ -80,6 +86,10 @@ Inject `GOAL_SERVICE_KEY` into `ScheduleCalendarView` and supply `updateGoal` to
 
 Extend retirement manifest/audit with optional `requiredPaths`. Lock the canonical Routine contracts/client/route/module/Home widget so destructive cleanup cannot pass by deleting both legacy and replacement surfaces.
 
+### RAR-2606 — Durable WallClock eligibility + dirty-owner convergence
+
+Restore the persistent Profile/Membership gate in RoutineScheduleSnapshot and re-check it at execution time. Publish `routine:schedule-changed` after API owner commands and after committed PowerSync CRUD uploads; do not use host-local profile-active state as cloud scheduling authority.
+
 ### RAR-2605 — Current-truth docs + closure
 
 Update feature map, Routine module doc and Schedule module doc; run focused -> affected -> governance/docs/build validation, then archive this plan.
@@ -91,3 +101,4 @@ Update feature map, Routine module doc and Schedule module doc; run focused -> a
 - Legal Goal date drag has an actual Goal owner command dependency.
 - `vnext-retirement-audit` fails when an active entry's required replacement path is missing.
 - Legacy Reminder surfaces remain absent.
+- Durable WallClock projection/execution is suppressed when every persisted ProfileMembership path is disabled, and API/PowerSync mutations reproject the affected owner.

@@ -13,6 +13,7 @@ declare module '@memoflow/contracts/shared' {
   interface AppEventRegistryExtensions {
     'routine:occurrence-committed': import('../server/infrastructure/routine-schedule/routine-schedule-projection-source').RoutineOccurrenceCommittedEvent;
     'routine:override-changed': import('../server/infrastructure/routine-schedule/routine-schedule-projection-source').RoutineOverrideChangedEvent;
+    'routine:schedule-changed': import('../server/infrastructure/routine-schedule/routine-schedule-projection-source').RoutineScheduleChangedEvent;
   }
 }
 

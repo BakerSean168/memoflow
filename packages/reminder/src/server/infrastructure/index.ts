@@ -1,8 +1,5 @@
 /** Canonical Routine vNext server infrastructure surface. */
-export {
-  createRoutinePrismaRepositories,
-  type RoutinePrismaRepositorySet,
-} from './prisma';
+export { createRoutinePrismaRepositories, type RoutinePrismaRepositorySet } from './prisma';
 export {
   createRoutinePowerSyncRepositories,
   createPowerSyncClosureChecker,
@@ -25,6 +22,8 @@ export {
   createRoutineScheduleProjectionSource,
   routineScheduleProjectionEventNames,
   type RoutineOccurrenceCommittedEvent,
+  type RoutineOverrideChangedEvent,
+  type RoutineScheduleChangedEvent,
   type RoutineScheduleProjectionEventMap,
   type RoutineScheduleProjectionHandlers,
   type RoutineScheduleProjectionPlan,

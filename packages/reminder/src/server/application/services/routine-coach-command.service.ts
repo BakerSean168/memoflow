@@ -223,6 +223,10 @@ export interface CreateRoutineCoachCommandServiceOptions {
     readonly identityId: string;
     readonly routineId: string;
   }) => void | Promise<void>;
+  readonly onScheduleChanged?: (input: {
+    readonly identityId: string;
+    readonly routineId: string;
+  }) => void | Promise<void>;
   readonly onProfileActiveChanged?: (input: {
     readonly identityId: string;
     readonly profileId: string;
@@ -277,6 +281,9 @@ export function createRoutineCoachCommandService(
   const notifyOverrideChanged = async (identityId: string, routineId: string) => {
     await options.onOverrideChanged?.({ identityId, routineId });
   };
+  const notifyScheduleChanged = async (identityId: string, routineId: string) => {
+    await options.onScheduleChanged?.({ identityId, routineId });
+  };
 
   return {
     async createRoutine(input) {
@@ -324,6 +331,7 @@ export function createRoutineCoachCommandService(
         ) {
           throw routineConflict(`Routine '${routine.id}' already exists with different data`);
         }
+        await notifyScheduleChanged(existing.identityId, existing.id);
         return {
           routineId: existing.id,
           identityId: existing.identityId,
@@ -335,6 +343,7 @@ export function createRoutineCoachCommandService(
         definition: routine,
         memberships,
       });
+      await notifyScheduleChanged(routine.identityId, routine.id);
       return {
         routineId: routine.id,
         identityId: routine.identityId,
@@ -364,6 +373,7 @@ export function createRoutineCoachCommandService(
         definition: routine,
         expectedVersion: input.expectedVersion,
       });
+      await notifyScheduleChanged(routine.identityId, routine.id);
       return {
         routineId: routine.id,
         identityId: routine.identityId,
@@ -374,6 +384,7 @@ export function createRoutineCoachCommandService(
 
     async deleteRoutine(input) {
       await options.routineProfileStore.deleteDefinition(input);
+      await notifyScheduleChanged(input.identityId, input.routineId);
       return { identityId: input.identityId, routineId: input.routineId };
     },
 
@@ -432,6 +443,13 @@ export function createRoutineCoachCommandService(
         profile,
         expectedVersion: input.expectedVersion,
       });
+      const affectedMemberships = await options.routineProfileStore.listMembershipsForProfile({
+        identityId: profile.identityId,
+        profileId: profile.id,
+      });
+      for (const membership of affectedMemberships) {
+        await notifyScheduleChanged(profile.identityId, membership.routineId);
+      }
       return {
         profileId: profile.id,
         identityId: profile.identityId,
@@ -491,6 +509,7 @@ export function createRoutineCoachCommandService(
         memberships,
         expectedVersion: input.expectedVersion,
       });
+      await notifyScheduleChanged(input.identityId, input.routineId);
       return {
         identityId: input.identityId,
         routineId: input.routineId,
@@ -505,12 +524,14 @@ export function createRoutineCoachCommandService(
         routineId: input.routineId,
       });
       const membership = memberships.find((entry) => entry.profileId === input.profileId);
-      if (!membership) throw routineNotFound(`Routine membership '${input.profileId}' was not found`);
+      if (!membership)
+        throw routineNotFound(`Routine membership '${input.profileId}' was not found`);
       if (membership.version !== input.expectedVersion)
         throw routineConflict('Routine membership version conflict');
       if (input.enabled) membership.enable(new Date(input.at ?? now()));
       else membership.disable(new Date(input.at ?? now()));
       await options.routineProfileStore.upsertMembership(membership, input.expectedVersion);
+      await notifyScheduleChanged(input.identityId, input.routineId);
       return {
         identityId: input.identityId,
         routineId: input.routineId,

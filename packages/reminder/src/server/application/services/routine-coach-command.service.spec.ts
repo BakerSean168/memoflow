@@ -22,6 +22,9 @@ function profileStore(): RoutineProfileStore {
     upsertDefinition: vi.fn(async (value) => {
       definitions.set(value.id, value);
     }),
+    updateDefinition: vi.fn(async ({ definition }) => {
+      definitions.set(definition.id, definition);
+    }),
     createDefinitionWithMemberships: vi.fn(async ({ definition, memberships: nextMemberships }) => {
       definitions.set(definition.id, definition);
       for (const membership of nextMemberships) {
@@ -37,6 +40,9 @@ function profileStore(): RoutineProfileStore {
     }),
     upsertProfile: vi.fn(async (value) => {
       profiles.set(value.id, value);
+    }),
+    updateProfile: vi.fn(async ({ profile }) => {
+      profiles.set(profile.id, profile);
     }),
     findProfile: vi.fn(async ({ identityId, profileId }) => {
       const profile = profiles.get(profileId);
@@ -74,10 +80,21 @@ function profileStore(): RoutineProfileStore {
     deleteMembership: vi.fn(async ({ identityId, profileId, routineId }) => {
       membershipRows.delete(`${identityId}:${profileId}:${routineId}`);
     }),
-    replaceRoutineMemberships: vi.fn(),
+    replaceRoutineMemberships: vi.fn(async ({ identityId, routineId, memberships }) => {
+      for (const [key, membership] of membershipRows) {
+        if (membership.identityId === identityId && membership.routineId === routineId) {
+          membershipRows.delete(key);
+        }
+      }
+      for (const membership of memberships) {
+        membershipRows.set(
+          `${membership.identityId}:${membership.profileId}:${membership.routineId}`,
+          membership,
+        );
+      }
+    }),
   };
 }
-
 
 function occurrenceTruthStore(): RoutineOccurrenceTruthStore {
   return {
@@ -203,6 +220,45 @@ describe('RoutineCoachCommandService', () => {
     expect(
       await profiles.listMembershipsForRoutine({ identityId: 'i-1', routineId: receipt.routineId }),
     ).toEqual([]);
+  });
+
+  it('notifies durable WallClock projection owners after definition and Profile gate changes', async () => {
+    const profiles = profileStore();
+    const work = RoutineProfile.create({ id: 'work', identityId: 'i-1', name: 'Work' });
+    await profiles.upsertProfile(work);
+    const scheduleChanged = vi.fn();
+    const service = createRoutineCoachCommandService({
+      routineProfileStore: profiles,
+      runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
+      temporaryOverrideStore: overrideStore(),
+      occurrenceTruthStore: occurrenceTruthStore(),
+      protocolSessionStore: createInMemoryProtocolSessionStore(),
+      onScheduleChanged: scheduleChanged,
+    });
+
+    const created = await service.createRoutine({
+      identityId: 'i-1',
+      routineId: 'r-1',
+      name: 'Move',
+      profileIds: ['work'],
+    });
+    await service.updateRoutine({
+      identityId: 'i-1',
+      routineId: 'r-1',
+      expectedVersion: created.version,
+      enabled: false,
+    });
+    await service.updateProfile({
+      identityId: 'i-1',
+      profileId: 'work',
+      expectedVersion: work.version,
+      enabled: false,
+    });
+
+    expect(scheduleChanged).toHaveBeenCalledTimes(3);
+    expect(scheduleChanged).toHaveBeenNthCalledWith(1, { identityId: 'i-1', routineId: 'r-1' });
+    expect(scheduleChanged).toHaveBeenNthCalledWith(2, { identityId: 'i-1', routineId: 'r-1' });
+    expect(scheduleChanged).toHaveBeenNthCalledWith(3, { identityId: 'i-1', routineId: 'r-1' });
   });
 
   it('activates a profile without mutating memberships and notifies the runtime', async () => {

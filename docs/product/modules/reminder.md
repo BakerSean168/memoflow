@@ -22,6 +22,7 @@ Legacy `ReminderTemplate / ReminderGroup / ReminderInstance / ReminderResponse`�
 - RoutineDefinition / RoutineProfile owner commands 与确定性 runtime；
 - canonical `/routines` Configuration Center 与 Web HTTP/Desktop IPC 共用 `RoutineClientPort`；
 - owner-backed `RoutineUpcomingOccurrence` range projection，供 Home 与 Planner 读取 WallClock occurrence，不读取 raw Scheduler invocation；
+- WallClock durable scheduling/read projection 重新读取 `RoutineDefinition.enabled + RoutineProfile.enabled + ProfileMembership.enabled + TemporaryOverride`；`profile active` 保持 Desktop host-local RuntimeContext，不作为 Web/API cloud Scheduler authority；
 - RoutineProfile + M:N ProfileMembership；Profile 只作为 Gate，不接管成员自身状态；
 - WallClock trigger：由 Scheduler 作为唯一 durable wake-up authority；
 - ActiveUsage trigger：Desktop 本地 activity sensor/runtime 驱动，端能力显式区分；

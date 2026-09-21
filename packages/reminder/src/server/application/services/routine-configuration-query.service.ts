@@ -131,10 +131,34 @@ export function createRoutineConfigurationQueryService(
 
     async getUpcomingOccurrences(identityId, query) {
       const definitions = await options.routineProfileStore.listDefinitions({ identityId });
+      const memberships = await options.routineProfileStore.listMembershipsForRoutines({
+        identityId,
+        routineIds: definitions.map((definition) => definition.id),
+      });
+      const profileIds = Array.from(new Set(memberships.map((membership) => membership.profileId)));
+      const profiles = await options.routineProfileStore.findProfilesByIds({
+        identityId,
+        profileIds,
+      });
+      const profilesById = new Map(profiles.map((profile) => [profile.id, profile]));
+      const membershipsByRoutine = new Map<string, ProfileMembership[]>();
+      for (const membership of memberships) {
+        const paths = membershipsByRoutine.get(membership.routineId) ?? [];
+        paths.push(membership);
+        membershipsByRoutine.set(membership.routineId, paths);
+      }
       const occurrences: RoutineUpcomingResponse['occurrences'] = [];
 
       for (const definition of definitions) {
         if (!definition.enabled || definition.trigger?.type !== 'WallClock') continue;
+        const paths = membershipsByRoutine.get(definition.id) ?? [];
+        const durableProfileGateOpen =
+          paths.length === 0 ||
+          paths.some(
+            (membership) =>
+              membership.enabled && (profilesById.get(membership.profileId)?.enabled ?? false),
+          );
+        if (!durableProfileGateOpen) continue;
         const temporaryOverride = await options.temporaryOverrideStore.findRoutineTemporaryOverride(
           {
             identityId,
