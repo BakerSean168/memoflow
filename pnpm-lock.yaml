@@ -979,6 +979,9 @@ importers:
       '@memoflow/notification':
         specifier: workspace:*
         version: link:../../packages/notification
+      '@memoflow/reminder':
+        specifier: workspace:*
+        version: link:../../packages/reminder
       '@memoflow/repository':
         specifier: workspace:*
         version: link:../../packages/repository
@@ -1262,6 +1265,9 @@ importers:
       '@memoflow/notification':
         specifier: workspace:*
         version: link:../notification
+      '@memoflow/reminder':
+        specifier: workspace:*
+        version: link:../reminder
       '@memoflow/repository':
         specifier: workspace:*
         version: link:../repository
@@ -1766,6 +1772,12 @@ importers:
       '@memoflow/database':
         specifier: workspace:*
         version: link:../database
+      '@memoflow/http-client':
+        specifier: workspace:*
+        version: link:../http-client
+      '@memoflow/ipc-client':
+        specifier: workspace:*
+        version: link:../ipc-client
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time

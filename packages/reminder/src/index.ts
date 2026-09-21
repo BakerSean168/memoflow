@@ -17,9 +17,11 @@ export {
 } from './server';
 export {
   createRoutineCoachCommandService,
+  createRoutineConfigurationQueryService,
   registerRoutineNotificationOwnerCommands,
   type CreateRoutineCoachCommandServiceOptions,
   type RoutineCoachCommandPort,
+  type RoutineConfigurationQueryPort,
   type RoutineDefinitionReceipt,
   type RoutineMembershipReceipt,
   type RoutineNotificationOwnerCommandRegistry,

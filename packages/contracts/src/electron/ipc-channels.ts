@@ -310,13 +310,21 @@ export const WindowChannels = {
 
 /** Routine-owned dedicated-window IPC. */
 export const RoutineChannels = {
+  CONFIGURATION_GET: 'routine:configuration:get',
   LIST: 'routine:list',
   GET: 'routine:get',
   CREATE: 'routine:create',
   UPDATE: 'routine:update',
   DELETE: 'routine:delete',
   TOGGLE_ENABLED: 'routine:toggle-enabled',
+  PROFILE_CREATE: 'routine:profile:create',
+  PROFILE_UPDATE: 'routine:profile:update',
+  PROFILE_DELETE: 'routine:profile:delete',
+  PROFILE_SET_ACTIVE: 'routine:profile:set-active',
   REPLACE_PROFILES: 'routine:replace-profiles',
+  MEMBERSHIP_SET_ENABLED: 'routine:membership:set-enabled',
+  OVERRIDE_SET: 'routine:override:set',
+  OVERRIDE_CLEAR: 'routine:override:clear',
   UPCOMING_GET: 'routine:upcoming:get',
   TODAY_SCHEDULE_GET: 'routine:today-schedule:get',
   PREFERENCES_GET: 'routine:preferences:get',

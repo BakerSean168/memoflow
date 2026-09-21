@@ -9,6 +9,7 @@ import aiAssistant from './aiAssistant';
 import goal from './goal';
 import task from './task';
 import schedule from './schedule';
+import routine from './routine';
 import notification from './notification';
 import repository from './repository';
 import governance from './governance';
@@ -26,6 +27,7 @@ export default {
   goal,
   task,
   schedule,
+  routine,
   notification,
   repository,
   governance,

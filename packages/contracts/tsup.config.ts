@@ -27,6 +27,7 @@ export default createTsupConfig({
     'src/modules/schedule/index.ts',
     'src/modules/setting/index.ts',
     'src/modules/notification/index.ts',
+    'src/modules/routine/index.ts',
     'src/modules/operations/index.ts',
     'src/modules/reliable-messaging/index.ts',
     'src/modules/ai/index.ts',

@@ -288,6 +288,16 @@
       ]
     },
     {
+      "path": "apps/api/src/modules/routine/module.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/outbox/prisma-outbox-writer.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -1017,6 +1027,14 @@
     },
     {
       "path": "apps/desktop/src/main/modules/repository/knowledge-repository-remote.gateway.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/routine/configuration.electron-module.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -3294,6 +3312,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/di/navigation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/di/service-client-port-facade-keep-boundary.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4057,6 +4083,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/repository/views/notePanelAdaptation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/routine/views/RoutineConfigurationView.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -7902,6 +7936,16 @@
       ]
     },
     {
+      "path": "packages/reminder/src/client/client.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/reminder/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/reminder/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/reminder/src/method-library/method-library.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -7923,6 +7967,16 @@
     },
     {
       "path": "packages/reminder/src/server/application/services/routine-coach-command.service.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/reminder/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/reminder/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/reminder/src/server/application/services/routine-configuration-query.service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/reminder/vitest.config.ts"
@@ -10710,7 +10764,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 71
+      "fileCount": 72
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -10787,7 +10841,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 26
+      "fileCount": 28
     },
     {
       "id": "packages/schedule/vitest.config.ts",
@@ -11067,14 +11121,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 71
+      "fileCount": 72
     },
     {
       "id": "apps/desktop/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 69
+      "fileCount": 70
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -11109,7 +11163,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 208
+      "fileCount": 210
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -11221,7 +11275,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 26
+      "fileCount": 28
     },
     {
       "id": "packages/repository/vitest.config.ts",
@@ -11319,6 +11373,7 @@
       "apps/api/src/modules/powersync/user-preference-crud-executor.spec.ts",
       "apps/api/src/modules/powersync/user-preference-sync.surface.spec.ts",
       "apps/api/src/modules/relation/module.spec.ts",
+      "apps/api/src/modules/routine/module.spec.ts",
       "apps/api/src/outbox/prisma-outbox-writer.spec.ts",
       "apps/api/src/runtime/compose-account.spec.ts",
       "apps/api/src/runtime/compose-account.surface.spec.ts",
@@ -11668,9 +11723,11 @@
       "packages/notification/src/server/transport/__tests__/notification-transport-parity.spec.ts",
       "packages/notification/src/server/transport/notification-usecases-export.surface.spec.ts",
       "packages/reminder/src/__tests__/package-root-owner-surface.spec.ts",
+      "packages/reminder/src/client/client.spec.ts",
       "packages/reminder/src/method-library/method-library.spec.ts",
       "packages/reminder/src/server/application/routine-portability.spec.ts",
       "packages/reminder/src/server/application/services/routine-coach-command.service.spec.ts",
+      "packages/reminder/src/server/application/services/routine-configuration-query.service.spec.ts",
       "packages/reminder/src/server/domain/routine/__tests__/next-eligible-occurrence.spec.ts",
       "packages/reminder/src/server/domain/routine/__tests__/protocol.spec.ts",
       "packages/reminder/src/server/domain/routine/__tests__/routine-profile.spec.ts",
@@ -11833,7 +11890,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1029,
+    "unit": 1035,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,

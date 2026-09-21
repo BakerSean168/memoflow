@@ -32,9 +32,11 @@ import {
   type ActiveUsageRoutineRegistration,
   type RoutineActivitySensorRuntime,
   createRoutineCoachCommandService,
+  createRoutineConfigurationQueryService,
   createRoutineOverrideChangedNotifier,
   createInMemoryRoutineRuntimeContextStore,
   type RoutineCoachCommandPort,
+  type RoutineConfigurationQueryPort,
 } from '@memoflow/reminder/routine-runtime';
 import type { IdleSensorPort } from '@memoflow/reminder/routine-runtime';
 import { WindowsIdleSensorAdapter } from '../modules/routine/windows-idle-sensor.adapter';
@@ -64,6 +66,8 @@ const DEFAULT_DESKTOP_INTERVENTION_POLICY: InterventionPolicy = {
 export interface ComposedRoutineDesktop {
   /** Routine Coach owner-domain command seam for approved AI/product orchestration. */
   readonly routineCommandPort: RoutineCoachCommandPort;
+  /** Owner-backed read projection for the renderer configuration center. */
+  readonly routineQueryPort: RoutineConfigurationQueryPort;
   readonly portableCapability: ReturnType<typeof createRoutinePortableCapability>;
   /** Per-profile local Routine intervention truth shared by occurrence coordinators and InterventionWindow. */
   readonly interventionRuntime: InterventionRuntime;
@@ -131,6 +135,13 @@ export function composeRoutine(
     onProfileActiveChanged: async ({ identityId }) => {
       if (identityId === dependencies.identityId) await refreshLocalRoutineRegistrations();
     },
+  });
+
+  const routineQueryPort = createRoutineConfigurationQueryService({
+    routineProfileStore: repositories.routineProfileStore,
+    runtimeContextStore,
+    temporaryOverrideStore: repositories.routineTemporaryOverrideStore,
+    localRuntimeAvailable: true,
   });
 
   const interventionRuntime = createInterventionRuntime();
@@ -330,6 +341,7 @@ export function composeRoutine(
 
   return {
     routineCommandPort,
+    routineQueryPort,
     portableCapability: createRoutinePortableCapability(repositories),
     interventionRuntime,
     protocolBreakCreditRuntime,

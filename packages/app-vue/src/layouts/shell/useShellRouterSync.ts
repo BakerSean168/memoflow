@@ -85,6 +85,7 @@ export async function returnFromSettingsScene(
 const MODULE_PREFIXES: Array<[prefix: string, module: ShellModule]> = [
   ['/goals', 'goal'],
   ['/tasks', 'task'],
+  ['/routines', 'routine'],
   ['/repository', 'note'],
   ['/governance', 'note'],
   ['/notifications', 'notification'],
@@ -96,6 +97,7 @@ const MODULE_PREFIXES: Array<[prefix: string, module: ShellModule]> = [
 export const MODULE_TITLE_KEYS: Record<ShellModule, string> = {
   goal: 'nav.capsule.goal',
   task: 'nav.capsule.task',
+  routine: 'nav.capsule.routine',
   note: 'nav.capsule.note',
   notification: 'nav.capsule.notification',
   schedule: 'nav.schedule',

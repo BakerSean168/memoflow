@@ -1,4 +1,5 @@
 import type { Instant } from '@memoflow/time';
+import { ResultCode, ResultErrorException } from '@memoflow/contracts/result';
 import { findRoutineMethod, type RoutineMethodId } from '../../../method-library';
 import {
   ProfileMembership,
@@ -26,6 +27,14 @@ import {
   createProtocolSessionRuntime,
   type ProtocolPhaseTransitionReceipt,
 } from '../../runtime/protocol';
+
+function routineNotFound(message: string): ResultErrorException {
+  return new ResultErrorException(message, ResultCode.NOT_FOUND, undefined, undefined, 404);
+}
+
+function routineConflict(message: string): ResultErrorException {
+  return new ResultErrorException(message, ResultCode.CONFLICT, undefined, undefined, 409);
+}
 
 export type RoutineProtocolMethodId = Extract<RoutineMethodId, '50-10-protocol' | 'pomodoro'>;
 
@@ -282,7 +291,7 @@ export function createRoutineCoachCommandService(
         profileIds,
       });
       if (profiles.length !== profileIds.length) {
-        throw new Error('One or more Routine profiles were not found');
+        throw routineNotFound('One or more Routine profiles were not found');
       }
       const routine = RoutineDefinition.create({
         id: input.routineId,
@@ -313,7 +322,7 @@ export function createRoutineCoachCommandService(
           existing.enabled !== routine.enabled ||
           JSON.stringify(existing.trigger) !== JSON.stringify(routine.trigger)
         ) {
-          throw new Error(`Routine '${routine.id}' already exists with different data`);
+          throw routineConflict(`Routine '${routine.id}' already exists with different data`);
         }
         return {
           routineId: existing.id,
@@ -339,9 +348,9 @@ export function createRoutineCoachCommandService(
         identityId: input.identityId,
         routineId: input.routineId,
       });
-      if (!routine) throw new Error(`Routine '${input.routineId}' was not found`);
+      if (!routine) throw routineNotFound(`Routine '${input.routineId}' was not found`);
       if (routine.version !== input.expectedVersion)
-        throw new Error(`Routine '${input.routineId}' version conflict`);
+        throw routineConflict(`Routine '${input.routineId}' version conflict`);
       routine.update(
         {
           name: input.name,
@@ -389,7 +398,7 @@ export function createRoutineCoachCommandService(
           existing.description !== profile.description ||
           existing.enabled !== profile.enabled
         ) {
-          throw new Error(`Profile '${profile.id}' already exists with different data`);
+          throw routineConflict(`Profile '${profile.id}' already exists with different data`);
         }
         return {
           profileId: existing.id,
@@ -412,9 +421,9 @@ export function createRoutineCoachCommandService(
         identityId: input.identityId,
         profileId: input.profileId,
       });
-      if (!profile) throw new Error(`Profile '${input.profileId}' was not found`);
+      if (!profile) throw routineNotFound(`Profile '${input.profileId}' was not found`);
       if (profile.version !== input.expectedVersion)
-        throw new Error(`Profile '${input.profileId}' version conflict`);
+        throw routineConflict(`Profile '${input.profileId}' version conflict`);
       profile.update(
         { name: input.name, description: input.description, enabled: input.enabled },
         new Date(input.at ?? now()),
@@ -437,7 +446,7 @@ export function createRoutineCoachCommandService(
         profileId: input.profileId,
       });
       if (memberships.length > 0)
-        throw new Error(`Profile '${input.profileId}' still has Routine memberships`);
+        throw routineConflict(`Profile '${input.profileId}' still has Routine memberships`);
       await options.routineProfileStore.deleteProfile(input);
       return { identityId: input.identityId, profileId: input.profileId };
     },
@@ -447,9 +456,9 @@ export function createRoutineCoachCommandService(
         identityId: input.identityId,
         routineId: input.routineId,
       });
-      if (!routine) throw new Error(`Routine '${input.routineId}' was not found`);
+      if (!routine) throw routineNotFound(`Routine '${input.routineId}' was not found`);
       if (routine.version !== input.expectedVersion)
-        throw new Error(`Routine '${input.routineId}' version conflict`);
+        throw routineConflict(`Routine '${input.routineId}' version conflict`);
       const profileIds = [...input.profileIds];
       if (new Set(profileIds).size !== profileIds.length)
         throw new TypeError('Duplicate Routine profile membership');
@@ -458,7 +467,7 @@ export function createRoutineCoachCommandService(
         profileIds,
       });
       if (profiles.length !== profileIds.length)
-        throw new Error('One or more Routine profiles were not found');
+        throw routineNotFound('One or more Routine profiles were not found');
       const existing = await options.routineProfileStore.listMembershipsForRoutine({
         identityId: input.identityId,
         routineId: input.routineId,
@@ -496,9 +505,9 @@ export function createRoutineCoachCommandService(
         routineId: input.routineId,
       });
       const membership = memberships.find((entry) => entry.profileId === input.profileId);
-      if (!membership) throw new Error(`Routine membership '${input.profileId}' was not found`);
+      if (!membership) throw routineNotFound(`Routine membership '${input.profileId}' was not found`);
       if (membership.version !== input.expectedVersion)
-        throw new Error('Routine membership version conflict');
+        throw routineConflict('Routine membership version conflict');
       if (input.enabled) membership.enable(new Date(input.at ?? now()));
       else membership.disable(new Date(input.at ?? now()));
       await options.routineProfileStore.upsertMembership(membership, input.expectedVersion);
@@ -516,7 +525,7 @@ export function createRoutineCoachCommandService(
         identityId: input.identityId,
         profileId: input.profileId,
       });
-      if (!profile) throw new Error(`Routine profile '${input.profileId}' was not found`);
+      if (!profile) throw routineNotFound(`Routine profile '${input.profileId}' was not found`);
       const receipt = options.runtimeContextStore.setProfileActive({
         identityId: profile.identityId,
         profileId: profile.id,
@@ -536,7 +545,7 @@ export function createRoutineCoachCommandService(
         identityId: input.identityId,
         routineId: input.routineId,
       });
-      if (!routine) throw new Error(`Routine '${input.routineId}' was not found`);
+      if (!routine) throw routineNotFound(`Routine '${input.routineId}' was not found`);
       const override = createTemporaryOverride({
         snoozeUntil: input.snoozeUntil,
         suppressUntil: input.suppressUntil,
@@ -574,7 +583,7 @@ export function createRoutineCoachCommandService(
         occurrenceKey: input.occurrenceKey,
       });
       if (!occurrence) {
-        throw new Error(`Routine occurrence '${input.occurrenceKey}' was not found`);
+        throw routineNotFound(`Routine occurrence '${input.occurrenceKey}' was not found`);
       }
       const actedAt = input.at ?? now();
       const action =
@@ -702,7 +711,7 @@ export function createRoutineCoachCommandService(
         sessionId: input.sessionId,
       });
       if (!persisted)
-        throw new Error(`Protocol session '${input.sessionId}' disappeared after transition`);
+        throw routineNotFound(`Protocol session '${input.sessionId}' disappeared after transition`);
       return protocolReceipt(persisted, transition);
     },
   };

@@ -62,6 +62,7 @@ import { composeAccount } from './runtime/compose-account';
 import { composeNotification } from './runtime/compose-notification';
 import { composeRoutine } from './runtime/compose-routine';
 import { registerRoutineNotificationOwnerCommands } from '@memoflow/reminder';
+import { createRoutineConfigurationElectronModule } from './modules/routine/configuration.electron-module';
 import { PowerSyncProtocolSessionStore } from '@memoflow/reminder/server';
 import { createProtocolSessionRuntime } from '@memoflow/reminder/routine-runtime';
 import {
@@ -226,6 +227,11 @@ async function registerBusinessModules(
     notificationComposed.ownerCommandRegistry,
     routineComposed.routineCommandPort,
   );
+  const routineConfigurationElectronModule = createRoutineConfigurationElectronModule({
+    commandPort: routineComposed.routineCommandPort,
+    queryPort: routineComposed.routineQueryPort,
+    afterMutation: routineComposed.refreshLocalRoutineRegistrations,
+  });
   // Project the durable vNext Routine snapshot before sensors start so the first
   // activity transition cannot race ahead of registration. ROUTINE-5301 can
   // reuse the same refresh seam after configuration mutations.
@@ -640,6 +646,7 @@ async function registerBusinessModules(
     .register(accountComposed.module)
     .register(settingElectronModule)
     .register(notificationComposed.module)
+    .register(routineConfigurationElectronModule)
     .register(dataPortabilityElectronModule)
     // Feature modules
     .register(goalComposed.module)

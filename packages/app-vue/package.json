@@ -54,6 +54,10 @@
       "types": "./dist/modules/schedule/index.d.ts",
       "import": "./dist/modules/schedule/index.js"
     },
+    "./modules/routine": {
+      "types": "./dist/modules/routine/index.d.ts",
+      "import": "./dist/modules/routine/index.js"
+    },
     "./modules/notification": {
       "types": "./dist/modules/notification/index.d.ts",
       "import": "./dist/modules/notification/index.js"
@@ -98,6 +102,7 @@
     "@memoflow/label": "workspace:*",
     "@memoflow/notification": "workspace:*",
     "@memoflow/repository": "workspace:*",
+    "@memoflow/reminder": "workspace:*",
     "@memoflow/schedule": "workspace:*",
     "@memoflow/setting": "workspace:*",
     "@memoflow/task": "workspace:*",

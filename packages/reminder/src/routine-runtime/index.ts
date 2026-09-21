@@ -102,4 +102,9 @@ export {
   type RoutineProtocolSessionReceipt,
   type RoutineTemporaryOverrideReceipt,
 } from '../server/application/services/routine-coach-command.service';
+export {
+  createRoutineConfigurationQueryService,
+  type CreateRoutineConfigurationQueryServiceOptions,
+  type RoutineConfigurationQueryPort,
+} from '../server/application/services/routine-configuration-query.service';
 export { createRoutineOverrideChangedNotifier } from '../server/infrastructure/routine-schedule/routine-override-change-notifier';

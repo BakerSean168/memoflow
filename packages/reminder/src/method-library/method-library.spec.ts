@@ -14,7 +14,7 @@ describe('Routine method library (ROUTINE-5302)', () => {
 
   it('records runtime ownership, editable parameters, intervention default, and source note', () => {
     for (const method of ROUTINE_METHOD_CATALOG) {
-      expect(['WallClock', 'Protocol']).toContain(method.runtimeRequirement);
+      expect(['WallClock', 'Elapsed', 'Protocol']).toContain(method.runtimeRequirement);
       expect(method.editableParameters.length).toBeGreaterThan(0);
       expect(['Gentle', 'Guided']).toContain(method.interventionDefault);
       expect(method.sourceNote.length).toBeGreaterThan(20);
@@ -31,12 +31,14 @@ describe('Routine method library (ROUTINE-5302)', () => {
     });
   });
 
-  it('projects WallClock methods into canonical Routine trigger presets', () => {
+  it('projects ambient methods into canonical Routine trigger presets', () => {
     expect(getRoutineMethodTemplatePreset('20-20-20')).toMatchObject({
-      trigger: { type: 'Interval', intervalMinutes: 20 },
+      trigger: { type: 'Elapsed', durationMinutes: 20 },
     });
+    expect(findRoutineMethod('20-20-20').runtimeRequirement).toBe('Elapsed');
     expect(getRoutineMethodTemplatePreset('sleep-wind-down')).toMatchObject({
-      trigger: { type: 'FixedTime', fixedTime: '22:30' },
+      trigger: { type: 'WallClock', localTime: '22:30' },
     });
+    expect(findRoutineMethod('sleep-wind-down').runtimeRequirement).toBe('WallClock');
   });
 });
