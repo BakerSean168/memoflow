@@ -178,6 +178,16 @@
       ]
     },
     {
+      "path": "apps/api/src/modules/powersync/crud-executor.routine-schedule.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/modules/powersync/crud-normalization.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4083,6 +4093,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/repository/views/notePanelAdaptation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/routine/components/RoutineUpcomingWidget.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -10764,7 +10782,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 72
+      "fileCount": 73
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -11121,7 +11139,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 72
+      "fileCount": 73
     },
     {
       "id": "apps/desktop/vitest.config.ts",
@@ -11163,7 +11181,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 210
+      "fileCount": 211
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -11362,6 +11380,7 @@
       "apps/api/src/modules/ai/routine-command.adapter.spec.ts",
       "apps/api/src/modules/goal/goal-workspace.module.spec.ts",
       "apps/api/src/modules/label/module.spec.ts",
+      "apps/api/src/modules/powersync/crud-executor.routine-schedule.spec.ts",
       "apps/api/src/modules/powersync/crud-normalization.spec.ts",
       "apps/api/src/modules/powersync/module.spec.ts",
       "apps/api/src/modules/powersync/parse-json-like-string-keep-boundary.surface.spec.ts",
@@ -11890,7 +11909,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1035,
+    "unit": 1037,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 8,
