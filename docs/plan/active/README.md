@@ -13,7 +13,9 @@ updated: 2026-09-20T15:02:00+08:00
 
 ## 当前计划
 
-当前没有 active plan。新的实施计划建立后再登记到本目录。
+| 计划 | 状态 |
+| --- | --- |
+| [Routine vNext Configuration Center 回归修复](./2026-09-21-routine-configuration-center-regression-recovery.md) | **ACTIVE** — 修复 R4-2201C 破坏式退休误删 replacement UI 的回归；恢复 canonical `/routines`、Routine client/transport、Vue Configuration Center 与顶部 capsule，禁止复活 legacy `/reminders`。 |
 
 ## 本轮已归档（2026-09-20）
 
