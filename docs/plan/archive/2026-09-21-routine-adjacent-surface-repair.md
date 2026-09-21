@@ -1,15 +1,15 @@
 ---
-tags: [plan, active, routine, planner, home, governance]
+tags: [plan, archive, routine, planner, home, governance]
 description: Routine destructive-cutover adjacent surface repair: Home/Planner owner reads, Planner Goal command wiring, positive replacement locks
 created: 2026-09-21T20:10:00+08:00
-updated: 2026-09-21T22:50:00+08:00
+updated: 2026-09-22T08:55:00+09:00
 ---
 
 # Routine Adjacent Surface Repair
 
 ## 0. Status
 
-- **Status:** IN PROGRESS
+- **Status:** DONE
 - **Branch:** `chatgpt/routine-adjacent-surface-repair`
 - **Baseline:** `main@a0317498d17`
 - **Root cause:** R4-2201C correctly retired legacy Reminder surfaces but left cross-owner replacement wiring incomplete.
@@ -102,3 +102,47 @@ Update feature map, Routine module doc and Schedule module doc; run focused -> a
 - `vnext-retirement-audit` fails when an active entry's required replacement path is missing.
 - Legacy Reminder surfaces remain absent.
 - Durable WallClock projection/execution is suppressed when every persisted ProfileMembership path is disabled, and API/PowerSync mutations reproject the affected owner.
+
+## 6. Closure evidence
+
+### 6.1 Implementation
+
+- `852ab9e324d` — restore adjacent Routine owner projections, Planner Goal owner command wiring, and positive replacement governance.
+- `c586ee21317` — restore durable WallClock Profile/Membership eligibility and dirty-owner convergence.
+- `fffabd10819` — refresh Test System V2 inventory after adding coverage.
+- `923ae016a10` — move cross-project Routine ownership surface assertions back to the Routine owner package and make them formatting/cache safe.
+
+### 6.2 Local verification
+
+- focused owner/query/transport/Home/Planner/governance regression tests: green.
+- Reminder unit: 28 files / 149 tests green.
+- Reminder Prisma integration: 3 files / 16 tests green.
+- Schedule Orchestration: 7 files / 33 tests green.
+- API: 73 files / 342 tests green.
+- App Vue: 211 files / 843 tests green.
+- Desktop: 70 files / 355 tests green.
+- Web: 17 files / 71 tests green.
+- Goal cold unit: 86 files / 491 tests green.
+- Goal/Reminder cold coverage targets: green.
+- affected lint/typecheck/test, builds, `docs:check`, `governance:check`, and test inventory: green.
+
+### 6.3 Remote exact-head CI
+
+PR #394 implementation head `923ae016a1046d64334534bb2b487aec5f68b1ca` completed CI run `35667641468` with all 19 checks green, including Unit Tests, Coverage Oracle, Integration/Boundary/Performance Oracles, four Web Flow shards, Web Flow Oracle, and Delivery Observation.
+
+Earlier CI runs surfaced two delivery-system gaps that were repaired before closure:
+
+1. the new PowerSync test file required Test System V2 inventory refresh;
+2. `packages/goal` contained a cross-project `fs.readFileSync` assertion over Routine source formatting, which bypassed Nx dependency/cache tracking and failed only on a cold CI runner. The Routine ownership assertions now live in `packages/reminder` and match semantics instead of exact whitespace.
+
+### 6.4 Final architecture state
+
+- legacy `/reminders` and ReminderTemplate/Group/Instance/Response remain retired;
+- Home and Planner consume the canonical Routine owner read;
+- Planner Goal movement reaches the Goal owner command;
+- durable WallClock scheduling/read/execution share persisted Profile/Membership eligibility;
+- API and PowerSync writes trigger Routine dirty-owner re-projection;
+- host-local Profile active state is not promoted into cloud scheduling authority;
+- retirement governance now protects both old-truth absence and required replacement presence.
+
+The plan is archived after the implementation exact-head CI gate. The archive-only head must pass CI once more before PR #394 is merged.
