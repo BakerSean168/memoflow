@@ -4,6 +4,7 @@ export default {
   "goals": "目标",
   "tasks": "任务",
   "schedule": "日程",
+  "routines": "Routine",
   "reminders": "提醒",
   "notifications": "通知",
   "repositories": "笔记",
@@ -20,6 +21,7 @@ export default {
   "capsule": {
     "goal": "目标",
     "task": "任务",
+    "routine": "Routine",
     "note": "笔记",
     "reminder": "提醒",
     "notification": "通知"

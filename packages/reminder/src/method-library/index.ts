@@ -18,7 +18,7 @@ export const ROUTINE_METHOD_IDS = [
 
 export type RoutineMethodId = (typeof ROUTINE_METHOD_IDS)[number];
 export type RoutineMethodType = 'ambient-routine' | 'focus-protocol';
-export type RoutineMethodRuntimeRequirement = 'WallClock' | 'Protocol';
+export type RoutineMethodRuntimeRequirement = 'WallClock' | 'Elapsed' | 'Protocol';
 export type RoutineMethodInterventionDefault = 'Gentle' | 'Guided';
 export type RoutineMethodEditableParameter =
   | 'intervalMinutes'
@@ -49,8 +49,8 @@ export interface RoutineMethodTemplatePreset {
   readonly title: string;
   readonly description: string;
   readonly trigger:
-    | { readonly type: 'Interval'; readonly intervalMinutes: number }
-    | { readonly type: 'FixedTime'; readonly fixedTime: string };
+    | { readonly type: 'Elapsed'; readonly durationMinutes: number }
+    | { readonly type: 'WallClock'; readonly localTime: string };
   readonly importanceLevel: 'Moderate' | 'Important';
   readonly icon: string;
   readonly tags: readonly string[];
@@ -69,8 +69,8 @@ export interface RoutineMethodRecord {
   readonly templatePreset: RoutineMethodTemplatePreset | null;
 }
 
-function ambient(input: Omit<RoutineMethodRecord, 'methodType' | 'runtimeRequirement'>): RoutineMethodRecord {
-  return Object.freeze({ ...input, methodType: 'ambient-routine', runtimeRequirement: 'WallClock' });
+function ambient(input: Omit<RoutineMethodRecord, 'methodType'>): RoutineMethodRecord {
+  return Object.freeze({ ...input, methodType: 'ambient-routine' });
 }
 
 function protocol(input: Omit<RoutineMethodRecord, 'methodType' | 'runtimeRequirement' | 'templatePreset'>): RoutineMethodRecord {
@@ -87,6 +87,7 @@ export const ROUTINE_METHOD_CATALOG: readonly RoutineMethodRecord[] = Object.fre
     id: 'stand-and-move',
     name: 'Stand & Move',
     summary: 'Interrupt long sitting periods with a short stand-and-move prompt.',
+    runtimeRequirement: 'Elapsed',
     interventionDefault: 'Gentle',
     recommendedParameters: { intervalMinutes: 50 },
     editableParameters: ['intervalMinutes', 'activeHours'],
@@ -94,7 +95,7 @@ export const ROUTINE_METHOD_CATALOG: readonly RoutineMethodRecord[] = Object.fre
     templatePreset: {
       title: 'Stand & Move',
       description: 'Stand up, change posture, and move briefly before returning to work.',
-      trigger: { type: 'Interval', intervalMinutes: 50 },
+      trigger: { type: 'Elapsed', durationMinutes: 50 },
       importanceLevel: 'Moderate',
       icon: 'mdi-walk',
       tags: ['movement', 'break'],
@@ -104,6 +105,7 @@ export const ROUTINE_METHOD_CATALOG: readonly RoutineMethodRecord[] = Object.fre
     id: '20-20-20',
     name: '20-20-20',
     summary: 'Every 20 minutes, look at something farther away for a short visual break.',
+    runtimeRequirement: 'Elapsed',
     interventionDefault: 'Gentle',
     recommendedParameters: { intervalMinutes: 20 },
     editableParameters: ['intervalMinutes', 'activeHours'],
@@ -111,7 +113,7 @@ export const ROUTINE_METHOD_CATALOG: readonly RoutineMethodRecord[] = Object.fre
     templatePreset: {
       title: '20-20-20 eye break',
       description: 'Pause close-up work and look farther away for a short visual reset.',
-      trigger: { type: 'Interval', intervalMinutes: 20 },
+      trigger: { type: 'Elapsed', durationMinutes: 20 },
       importanceLevel: 'Moderate',
       icon: 'mdi-eye-outline',
       tags: ['vision', 'break'],
@@ -121,6 +123,7 @@ export const ROUTINE_METHOD_CATALOG: readonly RoutineMethodRecord[] = Object.fre
     id: 'drink-water',
     name: 'Drink Water',
     summary: 'Use a low-friction periodic prompt to remember hydration during the day.',
+    runtimeRequirement: 'Elapsed',
     interventionDefault: 'Gentle',
     recommendedParameters: { intervalMinutes: 60 },
     editableParameters: ['intervalMinutes', 'activeHours'],
@@ -128,7 +131,7 @@ export const ROUTINE_METHOD_CATALOG: readonly RoutineMethodRecord[] = Object.fre
     templatePreset: {
       title: 'Drink Water',
       description: 'Take a hydration break when it fits your current context.',
-      trigger: { type: 'Interval', intervalMinutes: 60 },
+      trigger: { type: 'Elapsed', durationMinutes: 60 },
       importanceLevel: 'Moderate',
       icon: 'mdi-cup-water',
       tags: ['hydration'],
@@ -138,6 +141,7 @@ export const ROUTINE_METHOD_CATALOG: readonly RoutineMethodRecord[] = Object.fre
     id: 'sleep-wind-down',
     name: 'Sleep Wind-down',
     summary: 'Create a fixed evening cue for a repeatable pre-sleep wind-down routine.',
+    runtimeRequirement: 'WallClock',
     interventionDefault: 'Gentle',
     recommendedParameters: { fixedTime: '22:30' },
     editableParameters: ['fixedTime'],
@@ -145,7 +149,7 @@ export const ROUTINE_METHOD_CATALOG: readonly RoutineMethodRecord[] = Object.fre
     templatePreset: {
       title: 'Sleep Wind-down',
       description: 'Start the evening wind-down routine and reduce stimulating activities.',
-      trigger: { type: 'FixedTime', fixedTime: '22:30' },
+      trigger: { type: 'WallClock', localTime: '22:30' },
       importanceLevel: 'Important',
       icon: 'mdi-weather-night',
       tags: ['sleep'],

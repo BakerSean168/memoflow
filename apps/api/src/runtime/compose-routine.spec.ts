@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => {
   const runtimeContextStore = { tag: 'runtime-context' };
   const notifier = vi.fn();
   const commandPort = { tag: 'routine-command-port' };
+  const queryPort = { tag: 'routine-query-port' };
   const portableCapability = { tag: 'routine-portable-capability' };
   const repositories = {
     routineProfileStore: { tag: 'profile-store' },
@@ -16,6 +17,7 @@ const mocks = vi.hoisted(() => {
     runtimeContextStore,
     notifier,
     commandPort,
+    queryPort,
     portableCapability,
     repositories,
     createRoutinePrismaRepositories: vi.fn(() => repositories),
@@ -23,6 +25,7 @@ const mocks = vi.hoisted(() => {
     createInMemoryRoutineRuntimeContextStore: vi.fn(() => runtimeContextStore),
     createRoutineOverrideChangedNotifier: vi.fn(() => notifier),
     createRoutineCoachCommandService: vi.fn(() => commandPort),
+    createRoutineConfigurationQueryService: vi.fn(() => queryPort),
   };
 });
 
@@ -35,6 +38,7 @@ vi.mock('@memoflow/reminder/routine-runtime', () => ({
   createInMemoryRoutineRuntimeContextStore: mocks.createInMemoryRoutineRuntimeContextStore,
   createRoutineOverrideChangedNotifier: mocks.createRoutineOverrideChangedNotifier,
   createRoutineCoachCommandService: mocks.createRoutineCoachCommandService,
+  createRoutineConfigurationQueryService: mocks.createRoutineConfigurationQueryService,
 }));
 
 import { composeRoutine } from './compose-routine';
@@ -57,9 +61,16 @@ describe('composeRoutine', () => {
       protocolSessionStore: mocks.repositories.protocolSessionStore,
       onOverrideChanged: mocks.notifier,
     });
+    expect(mocks.createRoutineConfigurationQueryService).toHaveBeenCalledWith({
+      routineProfileStore: mocks.repositories.routineProfileStore,
+      runtimeContextStore: mocks.runtimeContextStore,
+      temporaryOverrideStore: mocks.repositories.routineTemporaryOverrideStore,
+      localRuntimeAvailable: false,
+    });
     expect(mocks.createRoutinePortableCapability).toHaveBeenCalledWith(mocks.repositories);
     expect(composed).toEqual({
       routineCommandPort: mocks.commandPort,
+      routineQueryPort: mocks.queryPort,
       portableCapability: mocks.portableCapability,
     });
   });

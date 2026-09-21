@@ -9,6 +9,7 @@ export default defineConfig({
     'src/schedule-projection/index.ts',
     'src/schedule-projection/routine.ts',
     'src/routine-runtime/index.ts',
+    'src/client/index.ts',
     'src/method-library/index.ts',
   ],
   format: ['esm'],
@@ -20,6 +21,8 @@ export default defineConfig({
     '@memoflow/utils',
     '@memoflow/contracts',
     '@memoflow/database',
+    '@memoflow/http-client',
+    '@memoflow/ipc-client',
     'zod',
   ],
 });

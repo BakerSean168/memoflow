@@ -8,7 +8,9 @@ import {
 import {
   createInMemoryRoutineRuntimeContextStore,
   createRoutineCoachCommandService,
+  createRoutineConfigurationQueryService,
   createRoutineOverrideChangedNotifier,
+  type RoutineConfigurationQueryPort,
 } from '@memoflow/reminder/routine-runtime';
 
 export interface ComposeRoutineDependencies {
@@ -17,6 +19,7 @@ export interface ComposeRoutineDependencies {
 
 export interface ComposedRoutine {
   readonly routineCommandPort: RoutineCoachCommandPort;
+  readonly routineQueryPort: RoutineConfigurationQueryPort;
   readonly portableCapability: ReturnType<typeof createRoutinePortableCapability>;
 }
 
@@ -31,8 +34,15 @@ export function composeRoutine(dependencies: ComposeRoutineDependencies): Compos
     protocolSessionStore: repositories.protocolSessionStore,
     onOverrideChanged: createRoutineOverrideChangedNotifier(),
   });
+  const routineQueryPort = createRoutineConfigurationQueryService({
+    routineProfileStore: repositories.routineProfileStore,
+    runtimeContextStore,
+    temporaryOverrideStore: repositories.routineTemporaryOverrideStore,
+    localRuntimeAvailable: false,
+  });
   return {
     routineCommandPort,
+    routineQueryPort,
     portableCapability: createRoutinePortableCapability(repositories),
   };
 }

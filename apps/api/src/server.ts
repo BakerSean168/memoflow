@@ -80,6 +80,7 @@ import { createRoutinePrismaScheduleExecutionDeps } from '@memoflow/reminder/sch
 import { createRoutinePrismaScheduleProjectionSource } from '@memoflow/reminder/schedule-projection';
 import { composeTask } from './runtime/compose-task';
 import { composeTaskWorkspaceApiModule } from './modules/task/task-workspace.module.js';
+import { composeRoutineApiModule } from './modules/routine/module.js';
 // 基础设施模块（直接在 API 内部定义）
 import { composePowerSyncApiModule } from './modules/powersync/module.js';
 import { composeLabelApiModule } from './modules/label/module.js';
@@ -213,6 +214,10 @@ async function bootstrap(): Promise<void> {
     notificationApiModule.ownerCommandRegistry,
     routineComposed.routineCommandPort,
   );
+  const routineApiModule = composeRoutineApiModule({
+    commandPort: routineComposed.routineCommandPort,
+    queryPort: routineComposed.routineQueryPort,
+  });
   const repositoryApiModule = composeRepository({
     db: prisma,
     storageBaseDir: repositoryStorageBaseDir,
@@ -366,6 +371,7 @@ async function bootstrap(): Promise<void> {
     .register(governanceApiModule) // ✅ 治理模块 (runtime composer)
     .register(accountApiModule.module) // ✅ 账户模块 (runtime composer)
     .register(notificationApiModule.module) // ✅ 通知模块 (runtime composer)
+    .register(routineApiModule) // ✅ Routine vNext configuration transport
     .register(repositoryApiModule) // ✅ 仓库模块 (runtime composer)
     .register(scheduleApiModule.calendarModule) // ✅ Calendar/Planner
     .register(scheduleApiModule.schedulerModule) // ✅ Temporal Engine diagnostics/runtime

@@ -95,6 +95,9 @@
       "@memoflow/notification/client": [
         "../../packages/notification/dist/client/index.d.ts"
       ],
+      "@memoflow/reminder/client": [
+        "../../packages/reminder/dist/client/index.d.ts"
+      ],
       "@memoflow/task/client": [
         "../../packages/task/dist/client/index.d.ts"
       ],

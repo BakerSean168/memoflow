@@ -33,6 +33,8 @@ describe('moduleForPath (V2 §3 module matrix + settings scene D)', () => {
     expect(moduleForPath('/goals/g-1/key-results/kr-1')).toBe('goal');
     expect(moduleForPath('/tasks')).toBe('task');
     expect(moduleForPath('/tasks/t-1')).toBe('task');
+    expect(moduleForPath('/routines')).toBe('routine');
+    expect(moduleForPath('/routines/r-1')).toBe('routine');
     expect(moduleForPath('/repository')).toBe('note');
     // retired /note/:id editor route no longer maps into the shell
     expect(moduleForPath('/note/n-1')).toBeNull();
@@ -135,6 +137,7 @@ async function mountRouterSync(initialPath: string) {
       { path: '/goals/g-1', component: { template: '<div />' } },
       { path: '/goals/g-2', component: { template: '<div />' } },
       { path: '/tasks', component: { template: '<div />' } },
+      { path: '/routines', component: { template: '<div />' } },
       {
         path: '/settings',
         component: { template: '<div />' },

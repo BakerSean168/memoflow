@@ -4,6 +4,7 @@ export default {
   "goals": "Goals",
   "tasks": "Tasks",
   "schedule": "Schedule",
+  "routines": "Routines",
   "reminders": "Reminders",
   "notifications": "Notifications",
   "repositories": "Notes",
@@ -20,6 +21,7 @@ export default {
   "capsule": {
     "goal": "Goals",
     "task": "Tasks",
+    "routine": "Routines",
     "note": "Notes",
     "reminder": "Reminders",
     "notification": "Notifications"

@@ -33,6 +33,7 @@ import type { ConversationSummary } from '../../modules/ai/composables/types';
 import WindowHeader, { type WindowHeaderCapsule } from './WindowHeader.vue';
 import GoalCapsulePreview from './previews/GoalCapsulePreview.vue';
 import TaskCapsulePreview from './previews/TaskCapsulePreview.vue';
+import RoutineCapsulePreview from '../../modules/routine/components/RoutineCapsulePreview.vue';
 import NoteCapsulePreview from './previews/NoteCapsulePreview.vue';
 import ScheduleCapsulePreview from './previews/ScheduleCapsulePreview.vue';
 import NotificationCapsulePreview from '../../modules/notification/components/NotificationCapsulePreview.vue';
@@ -716,6 +717,11 @@ function panelCacheKey(
         <TaskCapsulePreview
           @view-all="openHeaderPreviewModule(closePreview, { id: 'task', route: '/tasks' })"
           @select="openHeaderTaskPreview(closePreview, $event)"
+        />
+      </template>
+      <template #capsule-preview-routine="{ closePreview }">
+        <RoutineCapsulePreview
+          @view-all="openHeaderPreviewModule(closePreview, { id: 'routine', route: '/routines' })"
         />
       </template>
       <template #capsule-preview-note="{ closePreview }">

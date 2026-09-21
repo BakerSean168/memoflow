@@ -45,6 +45,9 @@
       "@memoflow/notification/client": [
         "../notification/dist/client/index.d.ts"
       ],
+      "@memoflow/reminder/client": [
+        "../reminder/dist/client/index.d.ts"
+      ],
       "@memoflow/task/client": [
         "../task/dist/client/index.d.ts"
       ],

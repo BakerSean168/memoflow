@@ -10,7 +10,7 @@
  * @module di/navigation
  */
 
-import { Bell, Calendar, FileText, ListTodo, Target } from '@lucide/vue';
+import { Bell, Calendar, FileText, ListTodo, Repeat2, Target } from '@lucide/vue';
 import type { ModuleCapsule } from './types';
 
 /**
@@ -26,6 +26,7 @@ import type { ModuleCapsule } from './types';
 export const defaultModuleCapsules: ModuleCapsule[] = [
   { id: 'goal', title: 'nav.capsule.goal', icon: Target, route: '/goals' },
   { id: 'task', title: 'nav.capsule.task', icon: ListTodo, route: '/tasks' },
+  { id: 'routine', title: 'nav.capsule.routine', icon: Repeat2, route: '/routines' },
   { id: 'note', title: 'nav.capsule.note', icon: FileText, route: '/repository' },
   { id: 'schedule', title: 'nav.schedule', icon: Calendar, route: '/schedule' },
   {

@@ -24,6 +24,7 @@ const webDevWorkspaceEntries = [
   ['@memoflow/schedule/client', 'packages/schedule/src/client/index.ts'],
   ['@memoflow/notification/client', 'packages/notification/src/client/index.ts'],
   ['@memoflow/repository/client', 'packages/repository/src/client/index.ts'],
+  ['@memoflow/reminder/client', 'packages/reminder/src/client/index.ts'],
   ['@memoflow/task/client', 'packages/task/src/client/index.ts'],
   ['@memoflow/ai/client', 'packages/ai/src/client/index.ts'],
 ] as const;

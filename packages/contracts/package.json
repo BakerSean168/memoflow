@@ -61,6 +61,10 @@
       "types": "./dist/modules/notification/index.d.ts",
       "import": "./dist/modules/notification/index.js"
     },
+    "./routine": {
+      "types": "./dist/modules/routine/index.d.ts",
+      "import": "./dist/modules/routine/index.js"
+    },
     "./ai": {
       "types": "./dist/modules/ai/index.d.ts",
       "import": "./dist/modules/ai/index.js"

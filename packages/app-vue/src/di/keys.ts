@@ -25,6 +25,7 @@ import type {
   ITaskService,
   IScheduleService,
   IRepositoryService,
+  IRoutineService,
   INotificationService,
   ISettingService,
   IDataPortabilityService,
@@ -46,6 +47,7 @@ export const LABEL_SERVICE_KEY: InjectionKey<ILabelService> = Symbol('LabelServi
 export const TASK_SERVICE_KEY: InjectionKey<ITaskService> = Symbol('TaskService');
 export const SCHEDULE_SERVICE_KEY: InjectionKey<IScheduleService> = Symbol('ScheduleService');
 export const REPOSITORY_SERVICE_KEY: InjectionKey<IRepositoryService> = Symbol('RepositoryService');
+export const ROUTINE_SERVICE_KEY: InjectionKey<IRoutineService> = Symbol('RoutineService');
 export const NOTIFICATION_SERVICE_KEY: InjectionKey<INotificationService> =
   Symbol('NotificationService');
 export interface DesktopNotificationDevicePreferencePort {

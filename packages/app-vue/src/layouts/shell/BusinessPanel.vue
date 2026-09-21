@@ -21,6 +21,7 @@ import {
   ListTodo,
   Maximize2,
   Minimize2,
+  Repeat2,
   Target,
   Workflow,
   X,
@@ -76,6 +77,7 @@ onBeforeUnmount(() => {
 const moduleIcons: Record<ShellModule, Component> = {
   goal: Target,
   task: ListTodo,
+  routine: Repeat2,
   note: FileText,
   notification: Bell,
   schedule: Calendar,

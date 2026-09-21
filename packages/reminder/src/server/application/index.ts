@@ -12,6 +12,11 @@ export {
   type RoutineTemporaryOverrideReceipt,
 } from './services/routine-coach-command.service';
 export {
+  createRoutineConfigurationQueryService,
+  type CreateRoutineConfigurationQueryServiceOptions,
+  type RoutineConfigurationQueryPort,
+} from './services/routine-configuration-query.service';
+export {
   registerRoutineNotificationOwnerCommands,
   type RoutineNotificationOwnerCommandRegistry,
 } from './services/routine-notification-owner-command.adapter';
