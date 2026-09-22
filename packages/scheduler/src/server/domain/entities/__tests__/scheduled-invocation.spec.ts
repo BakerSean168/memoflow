@@ -19,7 +19,9 @@ const retryPolicy: ScheduledInvocationRetryPolicy = {
   backoffMultiplier: 2,
 };
 
-function createInvocation(overrides: Partial<Parameters<typeof ScheduledInvocation.create>[0]> = {}) {
+function createInvocation(
+  overrides: Partial<Parameters<typeof ScheduledInvocation.create>[0]> = {},
+) {
   return ScheduledInvocation.create({
     id: 'invocation-1',
     identityId: 'identity-1',
@@ -52,7 +54,11 @@ describe('ScheduledInvocation', () => {
 
     expect(invocation.id).toBe('invocation-1');
     expect(invocation.identityId).toBe('identity-1');
-    expect(invocation.owner).toEqual({ identityId: 'identity-1', type: 'routine', id: 'routine-1' });
+    expect(invocation.owner).toEqual({
+      identityId: 'identity-1',
+      type: 'routine',
+      id: 'routine-1',
+    });
     expect(invocation.ownerType).toBe('routine');
     expect(invocation.ownerId).toBe('routine-1');
     expect(invocation.schedulingKey).toBe('routine:1');
@@ -166,6 +172,60 @@ describe('ScheduledInvocation', () => {
       updatedAt: 250,
     });
   });
+
+  it('re-arms a superseded invocation when the same stable identity becomes desired again', () => {
+    const invocation = ScheduledInvocation.load({
+      ...createInvocation().toState(),
+      status: 'superseded',
+      attemptCount: 2,
+      fencingToken: 4,
+    });
+
+    invocation.applyDesired({
+      handlerKey: 'routine.execute',
+      payloadVersion: 1,
+      payload: { routineId: 'routine-1', revision: 2 },
+      runAt: 2_000,
+      sourceRevision: 8,
+      retryPolicy,
+      priority: 'normal',
+      timeoutMs: 10_000,
+      name: 'Routine execution',
+      tags: ['routine'],
+      now: 300,
+    });
+
+    expect(invocation.toState()).toMatchObject({
+      status: 'pending',
+      runAt: 2_000,
+      sourceRevision: 8,
+      attemptCount: 2,
+      fencingToken: 4,
+      nextAttemptAt: null,
+      claimToken: null,
+      claimExpiresAt: null,
+      updatedAt: 300,
+    });
+  });
+
+  it.each<ScheduledInvocationStatus>(['succeeded', 'skipped', 'failed', 'dead_letter'])(
+    'rejects desired-state resurrection of execution-terminal status %s',
+    (status) => {
+      const invocation = ScheduledInvocation.load({ ...createInvocation().toState(), status });
+
+      expect(() =>
+        invocation.applyDesired({
+          handlerKey: 'routine.execute.v2',
+          payloadVersion: 2,
+          payload: { changed: true },
+          runAt: 4_000,
+          retryPolicy,
+          priority: 'normal',
+          now: 400,
+        }),
+      ).toThrow(new ScheduledInvocationTransitionError(status, 'pending'));
+    },
+  );
 
   it('preserves a live claim while applying desired changes to a running invocation', () => {
     const invocation = runningInvocation();

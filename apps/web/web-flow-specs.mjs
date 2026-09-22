@@ -12,6 +12,7 @@ export const WEB_FLOW_SPECS = Object.freeze([
   'note/note-workspace.spec.ts',
   'notification/notification-center.spec.ts',
   'notification/notification-inbox-loop.spec.ts',
+  'routine/routine-configuration.spec.ts',
   'schedule/schedule-calendar.spec.ts',
   'schedule/planner-task-revert.spec.ts',
   'task/task-plan-crud.spec.ts',

@@ -4,7 +4,7 @@ tags:
   - active
 description: 进行中的计划目录与当前状态
 created: 2026-04-26T00:00:00
-updated: 2026-09-22T09:00:00+09:00
+updated: 2026-09-22T16:42:00+08:00
 ---
 
 # Active Plans
@@ -14,6 +14,12 @@ updated: 2026-09-22T09:00:00+09:00
 ## 当前计划
 
 当前无 active plan。
+
+## 本轮已归档（2026-09-22）
+
+| 计划                                                                                                            | 结果                                                                                                                                                                                                         |
+| --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [Routine Authenticated Product Journey Closure](../archive/2026-09-22-routine-authenticated-product-journey.md) | RAE-2701～2704 完成：真实 self-register authenticated `/routines` CRUD Playwright 1/1；Scheduler `superseded` stable-key re-entry 修复；focused Scheduler 32/32，inventory/docs/governance/diff gates 全绿。 |
 
 ## 本轮已归档（2026-09-21）
 

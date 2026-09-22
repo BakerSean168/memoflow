@@ -27,6 +27,7 @@
             <select
               id="routine-trigger-type"
               v-model="triggerType"
+              data-testid="routine-trigger-type"
               class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
               :disabled="saving"
             >
@@ -177,6 +178,7 @@
                 v-model="selectedProfileIds"
                 type="checkbox"
                 :value="profile.id"
+                :data-testid="`routine-profile-membership-${profile.id}`"
                 :disabled="saving"
                 class="h-4 w-4 rounded border-input"
               />
@@ -189,7 +191,7 @@
       </form>
 
       <template #footer>
-        <Button type="button" variant="ghost" :disabled="saving" @click="emit('update:open', false)">
+        <Button type="button" variant="ghost" data-testid="routine-editor-cancel" :disabled="saving" @click="emit('update:open', false)">
           {{ t('routine.form.cancel') }}
         </Button>
         <Button

@@ -46,7 +46,7 @@ updated: 2026-09-21T19:45:00+08:00
 - OCI freshness：`memoflow-api:local`、`memoflow-web:local` revision 都精确等于 `5bd206b767da2541bcd0facfcb7aa01283ae505b`，无 freshness warning；
 - runtime smoke：`GET http://127.0.0.1:20200/routines` → 200；未认证 `GET /api/routines/configuration` → 401（证明 canonical route 已注册且受 auth 保护，而非 404）。
 
-**RUI-2502 验证偏差：** 当前执行环境的安全检查阻止读取/提交本地 E2E 凭据以及构造认证口令，因此没有执行真实登录后的 browser CRUD journey。该项以 owner-backed command/query tests、HTTP route integration、Desktop IPC contract、Vue mount smoke 与 fresh prod-like Docker route smoke 组合替代；不将其描述为 authenticated E2E。
+**RUI-2502 验证偏差（已于 2026-09-22 闭合）：** 本计划归档时，当前执行环境的安全检查阻止读取/提交本地 E2E 凭据以及构造认证口令，因此没有执行真实登录后的 browser CRUD journey；当时仅以 owner-backed command/query tests、HTTP route integration、Desktop IPC contract、Vue mount smoke 与 fresh prod-like Docker route smoke 组合替代。后续 [Routine Authenticated Product Journey Closure](./2026-09-22-routine-authenticated-product-journey.md) 复用仓库现有 self-register + captured-email verification E2E harness，在不使用真实用户凭据的前提下完成 canonical Web `/routines` authenticated CRUD journey，并同时修复该 journey 暴露的 Scheduler `superseded` stable-key re-entry 缺陷。
 
 ## 1. 问题定义
 

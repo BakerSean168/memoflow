@@ -10,7 +10,7 @@
         </div>
       </template>
       <template #actions>
-        <Button variant="outline" size="sm" class="h-8" @click="openCreateProfile">
+        <Button variant="outline" size="sm" class="h-8" data-testid="routine-create-profile-button" @click="openCreateProfile">
           <Layers3 class="mr-1.5 h-4 w-4" />
           <span class="hidden @xl/panel:inline">{{ t('routine.profile.create') }}</span>
         </Button>
@@ -83,6 +83,7 @@
                 <div
                   v-for="profile in snapshot.profiles"
                   :key="profile.id"
+                  :data-testid="`routine-profile-${profile.id}`"
                   class="group rounded-lg border border-transparent"
                   :class="selectedProfileId === profile.id ? 'border-border bg-accent/70' : ''"
                 >
@@ -101,18 +102,20 @@
                   <div class="flex items-center justify-between gap-2 px-3 pb-2">
                     <Switch
                       :model-value="profile.active"
+                      :data-testid="`routine-profile-active-${profile.id}`"
                       :aria-label="profile.active ? t('routine.profile.active') : t('routine.profile.inactive')"
                       :disabled="mutating || !profile.enabled || !snapshot.capabilities.localRuntime"
                       :title="snapshot.capabilities.localRuntime ? undefined : t('routine.trigger.desktopRuntime')"
                       @update:model-value="toggleProfileActive(profile, $event)"
                     />
                     <div class="flex items-center gap-1 opacity-60 group-hover:opacity-100">
-                      <Button variant="ghost" size="icon-sm" :aria-label="t('routine.profile.edit')" @click.stop="openEditProfile(profile)">
+                      <Button variant="ghost" size="icon-sm" :data-testid="`routine-profile-edit-${profile.id}`" :aria-label="t('routine.profile.edit')" @click.stop="openEditProfile(profile)">
                         <Pencil class="h-3.5 w-3.5" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon-sm"
+                        :data-testid="`routine-profile-delete-${profile.id}`"
                         :aria-label="t('routine.delete')"
                         :disabled="mutating || routineCountForProfile(profile.id) > 0"
                         @click.stop="removeProfile(profile)"
@@ -173,6 +176,7 @@
                     </div>
                     <Switch
                       :model-value="routine.enabled"
+                      :data-testid="`routine-toggle-${routine.id}`"
                       :aria-label="routine.name"
                       :disabled="mutating"
                       @update:model-value="toggleRoutine(routine, $event)"
@@ -199,11 +203,11 @@
                       <Clock3 class="mr-1.5 h-3.5 w-3.5" />
                       {{ t('routine.card.snooze30') }}
                     </Button>
-                    <Button variant="outline" size="sm" :disabled="mutating" @click="openEditRoutine(routine)">
+                    <Button variant="outline" size="sm" :data-testid="`routine-edit-${routine.id}`" :disabled="mutating" @click="openEditRoutine(routine)">
                       <Pencil class="mr-1.5 h-3.5 w-3.5" />
                       {{ t('routine.edit') }}
                     </Button>
-                    <Button variant="ghost" size="sm" :disabled="mutating" @click="removeRoutine(routine)">
+                    <Button variant="ghost" size="sm" :data-testid="`routine-delete-${routine.id}`" :disabled="mutating" @click="removeRoutine(routine)">
                       <Trash2 class="mr-1.5 h-3.5 w-3.5" />
                       {{ t('routine.delete') }}
                     </Button>
@@ -228,6 +232,7 @@
                   <article
                     v-for="method in ROUTINE_METHOD_CATALOG"
                     :key="method.id"
+                    :data-testid="`routine-method-${method.id}`"
                     class="rounded-xl border border-border bg-card p-4"
                   >
                     <div class="flex items-start justify-between gap-3">
@@ -244,6 +249,7 @@
                         v-if="method.templatePreset"
                         variant="outline"
                         size="sm"
+                        :data-testid="`routine-method-use-${method.id}`"
                         @click="openCreateRoutine(method)"
                       >
                         {{ t('routine.method.use') }}

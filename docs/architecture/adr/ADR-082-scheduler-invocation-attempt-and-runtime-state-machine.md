@@ -97,7 +97,7 @@ type ScheduledInvocationStatus =
 | `dead_letter` | 重试耗尽或故障政策要求进入 dead letter，terminal       |
 | `superseded`  | owner reconcile 已声明该旧 desired invocation 不再有效 |
 
-`superseded` 是否物理保留为 row 或只写 operation/audit receipt 可在实施阶段决定，但对 diagnostics/历史语义必须可解释。
+`superseded` 是否物理保留为 row 或只写 operation/audit receipt 可在实施阶段决定，但对 diagnostics/历史语义必须可解释。当前实现物理保留该 row；它对 worker execution 是静止终态，但不是 owner reconcile 的永久墓碑：如果同一个 stable `schedulingKey` 后续重新进入 owner 的 desired set（例如 Routine disable → enable、temporary override clear），Scheduler 必须将该 row 重新 arm 为 `pending`，同时保留既有 attempt/fencing 序列；`succeeded / skipped / failed / dead_letter` 仍不可被 reconcile 复活。
 
 ## 4. State Machine
 
