@@ -25,4 +25,4 @@ export {
   assertUniqueSchedulingKeys,
 } from './validation';
 export { DuplicateScheduledHandlerError, ScheduledHandlerRegistry } from './handler-registry';
-export { SchedulingReconcileError } from './errors';
+export { PersistedSchedulingKeyCollisionError, SchedulingReconcileError } from './errors';

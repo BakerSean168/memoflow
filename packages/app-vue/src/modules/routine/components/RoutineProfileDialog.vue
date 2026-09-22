@@ -51,6 +51,7 @@
         <Button
           type="submit"
           form="routine-profile-form"
+          data-testid="routine-profile-save"
           :disabled="!name.trim() || saving"
           :loading="saving"
         >

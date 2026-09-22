@@ -4,7 +4,7 @@ tags:
   - archive
 description: 归档计划目录
 created: 2026-04-26T00:00:00
-updated: 2026-09-21T19:45:00+08:00
+updated: 2026-09-22T16:42:00+08:00
 ---
 
 # Archived Plans
@@ -27,6 +27,7 @@ updated: 2026-09-21T19:45:00+08:00
 
 | 日期       | 计划                                                                                                               | 结果                                                                                                                                                                                                                                                    |
 | ---------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-09-22 | [Routine Authenticated Product Journey Closure](./2026-09-22-routine-authenticated-product-journey.md) | RAE-2701～2704 完成：真实 self-register authenticated `/routines` CRUD Playwright 1/1；Scheduler `superseded` stable-key re-entry 与 `PERSISTED_KEY_COLLISION` failure classification 修复；focused Scheduler 32/32，inventory/docs/governance/diff gates 全绿。 |
 | 2026-09-21 | [Routine vNext Configuration Center 回归修复](./2026-09-21-routine-configuration-center-regression-recovery.md)   | canonical `/routines` vertical slice、Routine client/HTTP/IPC、Vue Configuration Center 与顶部 capsule 恢复；legacy `/reminders` 继续 retired。实现 head `5bd206b767d`；affected lint/typecheck/test、build、governance/docs/inventory 与 fresh prod-like Docker 全绿；authenticated browser CRUD 偏差已记录。 |
 | 2026-09-20 | [UI Form Polish & Product Surface Refinement](./2026-09-20-ui-form-polish-and-product-surface-refinement.md)       | UFP-1001～1006、UFP-2001～2007 全部完成；实现 head `4b1bdd837dc` 的 PR #389 CI run `35495233782` 全绿；Local Docker 22/22、Tailnet Phase-D 1/1，Product Form Language / Settings / Goal description / shared Product Time / dark semantic tokens 闭环。 |
 | 2026-09-19 | [System-wide vNext Model Convergence](./2026-09-09-system-wide-vnext-model-convergence-implementation.md)          | SYS-3001/3002/3003/3004 完成；SYS-3003 exact-head evidence 在 PR #385 merge commit `37c24c79bb631997e06434d999b9912765ea047f` 上接受；SYS-3004 文档/归档闭环见 final evidence。PR #340 exact-head CI run `35445635678` green but 仍 open/unmerged。     |

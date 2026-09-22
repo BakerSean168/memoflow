@@ -150,6 +150,18 @@ export class ScheduledInvocation {
     tags?: readonly string[];
     now?: number;
   }): void {
+    if (
+      this.status === 'succeeded' ||
+      this.status === 'skipped' ||
+      this.status === 'failed' ||
+      this.status === 'dead_letter'
+    ) {
+      throw new ScheduledInvocationTransitionError(this.status, 'pending');
+    }
+
+    // `superseded` is only an owner-reconcile tombstone. If that stable
+    // business identity becomes desired again, re-arm it while preserving
+    // attempt/fencing history; execution-terminal outcomes remain immutable.
     this.state = {
       ...this.state,
       handlerKey: params.handlerKey,

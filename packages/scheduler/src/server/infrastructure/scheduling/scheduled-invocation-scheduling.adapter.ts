@@ -9,6 +9,7 @@ import type {
 } from '../../../scheduling';
 import {
   DuplicateSchedulingKeyError,
+  PersistedSchedulingKeyCollisionError,
   SchedulingReconcileError,
   assertSchedulingOwner,
   assertUniqueSchedulingKeys,
@@ -155,6 +156,9 @@ function reconcileFailureCode(error: unknown): {
   if (error instanceof DuplicateSchedulingKeyError) {
     return { code: 'DUPLICATE_SCHEDULING_KEY', retryable: false };
   }
+  if (error instanceof PersistedSchedulingKeyCollisionError) {
+    return { code: 'PERSISTED_KEY_COLLISION', retryable: false };
+  }
   if (error instanceof TypeError) return { code: 'INVALID_INTENT', retryable: false };
   return { code: 'TRANSACTION_FAILED', retryable: true };
 }
@@ -246,7 +250,8 @@ export class ScheduledInvocationSchedulingAdapter implements SchedulingPort {
               createdCount += 1;
               continue;
             }
-            if (stateFingerprint(current) === fingerprint(intent)) {
+            const reappearedAfterSupersede = current.status === 'superseded';
+            if (!reappearedAfterSupersede && stateFingerprint(current) === fingerprint(intent)) {
               unchangedCount += 1;
               continue;
             }
@@ -254,12 +259,9 @@ export class ScheduledInvocationSchedulingAdapter implements SchedulingPort {
               current.status === 'succeeded' ||
               current.status === 'skipped' ||
               current.status === 'failed' ||
-              current.status === 'dead_letter' ||
-              current.status === 'superseded'
+              current.status === 'dead_letter'
             ) {
-              throw new Error(
-                `Terminal schedulingKey ${intent.schedulingKey} cannot be reused for a changed intent; use a new occurrence key.`,
-              );
+              throw new PersistedSchedulingKeyCollisionError(intent.schedulingKey);
             }
             const updated = ScheduledInvocation.load(current);
             updated.applyDesired({
