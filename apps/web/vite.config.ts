@@ -1,5 +1,5 @@
 /// <reference types="vitest" />
-import { defineConfig, loadEnv, type ProxyOptions } from 'vite';
+import { defineConfig, loadEnv, type HotUpdateOptions, type Plugin, type ProxyOptions } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import tailwindcss from '@tailwindcss/vite';
 import path from 'node:path';
@@ -9,6 +9,40 @@ import {
   createUiVueSourceAliasEntries,
   createWorkspaceSourceAliasEntries,
 } from '../../vite.workspace-aliases';
+
+/**
+ * `@tailwindcss/vite` 4.3.x expects the classic Vite dev-server `server` object in
+ * its `hotUpdate` hook. Bundled dev intentionally invokes that hook with a
+ * smaller context, so the upstream hook currently throws before Vite can apply
+ * its own bundled HMR update. Skip only that classic-server invalidation helper
+ * in bundled dev; Tailwind's transform hook still participates in each bundled
+ * regeneration. Remove this adapter once the upstream plugin supports bundled
+ * dev natively.
+ */
+function createTailwindPlugins(useBundledDev: boolean): Plugin[] {
+  const plugins = tailwindcss();
+  if (!useBundledDev) return plugins;
+
+  return plugins.map((plugin) => {
+    if (plugin.name !== '@tailwindcss/vite:generate:serve' || typeof plugin.hotUpdate !== 'function') {
+      return plugin;
+    }
+
+    const upstreamHotUpdate = plugin.hotUpdate;
+    return {
+      ...plugin,
+      hotUpdate(options) {
+        if (!(options as Partial<HotUpdateOptions>).server) return;
+        return upstreamHotUpdate.call(this, options);
+      },
+    };
+  });
+}
+
+const webBundledDevWorkspaceEntries = [
+  ['@memoflow/http-client', 'packages/http-client/src/index.ts'],
+  ['@memoflow/utils/shared', 'packages/utils/src/shared/index.ts'],
+] as const;
 
 const webDevWorkspaceEntries = [
   ['@memoflow/app-vue/modules/authentication', 'packages/app-vue/src/modules/authentication/index.ts'],
@@ -54,11 +88,26 @@ export default defineConfig(({ mode, command }) => {
 
   // Dev mode: serve command or non-production mode
   const isDev = command === 'serve' || mode !== 'production';
+  // Vite's bundled dev mode keeps HMR while collapsing the browser-facing native-ESM
+  // request graph. MemoFlow enables it for the persistent GCP host-dev lane, where the
+  // browser normally reaches Vite through SSH/Tailscale and RTT magnifies module
+  // waterfalls. Playwright keeps the classic unbundled server for deterministic CI.
+  const useBundledDev =
+    command === 'serve' &&
+    mode === 'development' &&
+    env.MEMOFLOW_VITE_BUNDLED_DEV === 'true' &&
+    process.env.NODE_ENV !== 'test';
 
   const directWorkspaceAliases = createWorkspaceSourceAliasEntries(
     workspaceRoot,
     webDevWorkspaceEntries,
   );
+  // Bundled Dev currently preserves a small set of linked workspace dist exports as
+  // browser-facing bare specifiers. Pin only the observed browser-runtime entries to
+  // source until Vite/Rolldown closes the linked-package gap.
+  const bundledDevWorkspaceAliases = useBundledDev
+    ? createWorkspaceSourceAliasEntries(workspaceRoot, webBundledDevWorkspaceEntries)
+    : [];
 
   const sharedWorkspaceAliases = [
     ...createAssetsAliasEntries(workspaceRoot),
@@ -71,6 +120,7 @@ export default defineConfig(({ mode, command }) => {
 
   const resolveAliases = [
     ...directWorkspaceAliases,
+    ...bundledDevWorkspaceAliases,
     ...sharedWorkspaceAliases,
     ...envSpecificAliases,
     {
@@ -106,6 +156,9 @@ export default defineConfig(({ mode, command }) => {
 
   return {
     assetsInclude: ['**/*.icns'],
+    experimental: {
+      bundledDev: useBundledDev,
+    },
     worker: {
       format: 'es',
     },
@@ -125,8 +178,9 @@ export default defineConfig(({ mode, command }) => {
           },
         },
       }),
-      // Tailwind CSS 4 plugin — handles CSS-first configuration
-      tailwindcss(),
+      // Tailwind CSS 4 plugin — handles CSS-first configuration. The small
+      // adapter above is bundled-dev-only and leaves classic dev/build untouched.
+      ...createTailwindPlugins(useBundledDev),
     ].filter(Boolean),
     server: {
       port: Number(env.VITE_DEV_PORT) || 5173,
