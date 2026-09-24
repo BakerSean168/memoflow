@@ -24,7 +24,7 @@ MemoFlow 的运行时首先按 **4 个环境** 建模：`host-dev`、`prod-like`
 
 | Environment | 目的                                       | Host / 访问方式                                                       | 端口契约                                                               |
 | ----------- | ------------------------------------------ | --------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `host-dev`  | 日常编码、Vite HMR、API watch              | GCP Dev；工作站通过 VS Code Remote/SSH port forwarding 访问           | Web `20220`、API `20221`、PowerSync `20222`、PG `20230`、Redis `20231` |
+| `host-dev`  | 日常编码、Vite Bundled Dev HMR、API watch  | GCP Dev；工作站通过 VS Code Remote/SSH port forwarding 访问           | Web `20220`、API `20221`、PowerSync `20222`、PG `20230`、Redis `20231` |
 | `prod-like` | 发布前完整 Docker / production-shaped 验收 | GCP Dev；`docker-compose.local.yml`；需要远程验收时用 Tailscale Serve | Web `20200`、API `20201`、PowerSync `20202`、PG `20210`、Redis `20211` |
 | `staging`   | 稳定集成环境、candidate exact-digest 验收  | GCP Dev staging watcher                                               | Web `20250`、API `20251`、PowerSync `20252`、PG `20260`、Redis `20261` |
 | `prod`      | 对用户提供正式服务                         | Alibaba production watcher + Caddy                                    | public HTTP `80` / HTTPS `443`；PG `5432`、Redis `6379` 仅 loopback    |
@@ -97,7 +97,13 @@ pnpm docker:dev:up && pnpm nx run-many -t serve --projects=api,web --parallel=2
 
 这个 window 只拥有 `host-dev`：Docker 承载 PostgreSQL / Redis / PowerSync，API 与 Web 在宿主机直接运行并热更新。连接 GCP Dev 的工作站通过 VS Code / SSH 转发 `20220`、`20221`，必要时再转发 `20222`。
 
-不要把 raw Vite host-dev 通过 `20200` 暴露给远程浏览器。高 RTT 下 Vite 原生 ESM 会产生大量 module waterfall；`20200` 也因此必须保持 `prod-like` 的稳定职责。
+Web `20220` 默认启用 Vite Bundled Dev（`MEMOFLOW_VITE_BUNDLED_DEV=true`）。它仍保留 Vite/HMR 开发语义，但把浏览器侧的大型 native-ESM module waterfall 收敛为少量 bundled dev assets，更适合 GCP Dev -> 工作站这种高 RTT 链路。需要诊断 Vite/plugin 兼容问题时，可在 gitignored `.env.development.local` 中设置 `MEMOFLOW_VITE_BUNDLED_DEV=false` 临时回退 classic native-ESM dev server；Playwright/test lane 也固定保持 classic 模式，避免实验能力改变 CI 语义。
+
+`@tailwindcss/vite` 4.3.x 的 classic `hotUpdate` hook 仍假设存在 `ViteDevServer.server` 上下文，而 Bundled Dev 当前提供更小的 HMR context。Web Vite config 仅在 Bundled Dev 下跳过该 classic-server invalidation helper；Tailwind transform 仍参与 bundled regeneration。该兼容层必须保持局部，并在上游原生支持 Bundled Dev 后删除。
+
+当前 Vite/Rolldown Bundled Dev 还会把少量链接工作区 dist export 保留成浏览器无法解析的 bare specifier；目前实测涉及 `@memoflow/http-client` 与 `@memoflow/utils/shared`。因此仅 Bundled Dev lane 将这两个浏览器运行时入口 source-alias 到对应 `src` entry。classic dev、Playwright 与 production build 不采用这些兼容 alias；上游修复后应删除。
+
+不要把 host-dev 借用 `20200` 暴露给远程浏览器；`20200-20219` 始终属于 `prod-like`。host-dev 的 canonical 工作站入口保持 SSH/VS Code 同号转发后的 `http://localhost:20220`。
 
 ## prod-like 与 `.env.production.local`
 

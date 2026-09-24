@@ -242,6 +242,8 @@ Redis      20231
 
 在 GCP Dev 上把它放进 `tmux` 的 `MemoFlow:dev` window；工作站通过 VS Code Remote/SSH 转发 `20220 -> localhost:20220`、`20221 -> localhost:20221`。浏览器访问 `http://localhost:20220`。
 
+Web `20220` 默认使用 Vite Bundled Dev。它针对远程工作站访问把 native-ESM 的大量模块请求收敛成少量 bundled assets，同时继续保留 Vue/Tailwind HMR；测试 lane 不启用该实验模式。若需要排查 Bundled Dev/plugin 本身，可在 `.env.development.local` 中临时设置 `MEMOFLOW_VITE_BUNDLED_DEV=false` 回退 classic Vite。当前 `@tailwindcss/vite` 4.3.x 的 `hotUpdate` 仍依赖 classic dev-server context，因此 Web Vite config 有一个仅 Bundled Dev 生效的局部兼容 adapter；不要把它扩散到业务代码。
+
 `prod-like` 使用独立 `20200-20211`，因此不需要停止任何 prod-like Web/API 容器。
 
 ## 5.3 模式 C：单独调试 Web 或 API
