@@ -13,7 +13,7 @@ describe('@memoflow/time runtime dependency boundary', () => {
       readFileSync(resolve(process.cwd(), 'package.json'), 'utf8'),
     ) as PackageManifest;
 
-    expect(manifest.dependencies?.['@internationalized/date']).toBe('3.11.0');
+    expect(manifest.dependencies?.['@internationalized/date']).toBe('3.12.4');
     expect(manifest.devDependencies?.['@internationalized/date']).toBeUndefined();
     expect(manifest.dependencies?.['@date-fns/tz']).toBe('1.5.0');
     expect(manifest.devDependencies?.['@date-fns/tz']).toBeUndefined();

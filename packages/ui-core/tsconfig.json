@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig.workspace-src.json",
   "compilerOptions": {
-
     "rootDir": "./src",
     "declaration": true,
     "declarationMap": true,

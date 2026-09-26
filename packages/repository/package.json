@@ -41,8 +41,8 @@
     "@memoflow/utils": "workspace:*",
     "express": "^5.2.1",
     "gray-matter": "4.0.3",
-    "multer": "2.0.2",
-    "zod": "^4.4.3",
+    "multer": "2.4.0",
+    "zod": "^4.6.5",
     "@memoflow/patterns": "workspace:*"
   },
   "devDependencies": {

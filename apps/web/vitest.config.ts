@@ -2,12 +2,12 @@
 import vue from '@vitejs/plugin-vue';
 import { defineConfig } from 'vitest/config';
 import path from 'node:path';
-import { createSharedConfig } from '../../vitest.shared';
-import { createUiVueSourceAliasEntries } from '../../vite.workspace-aliases';
+import { createSharedConfig } from '../../vitest.shared.ts';
+import { createUiVueSourceAliasEntries } from '../../vite.workspace-aliases.ts';
 
-const workspaceRoot = path.resolve(__dirname, '../..');
+const workspaceRoot = path.resolve(import.meta.dirname, '../..');
 const sharedConfig = createSharedConfig({
-  projectRoot: __dirname,
+  projectRoot: import.meta.dirname,
   environment: 'happy-dom',
   aliasEntries: createUiVueSourceAliasEntries(workspaceRoot),
   aliases: {
@@ -33,7 +33,7 @@ const sharedConfig = createSharedConfig({
 
 export default defineConfig({
   ...sharedConfig,
-  root: __dirname,
+  root: import.meta.dirname,
   plugins: [
     vue({
       template: {

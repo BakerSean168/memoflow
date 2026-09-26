@@ -141,7 +141,7 @@ export function createApiServer() {
   return {
     // Ensure the local test database is ready before booting the built API entrypoint.
     // Probe + RUNTIME_LANE=e2e happen inside start-api-server.ts so wrong owners fail loudly.
-    command: 'pnpm exec tsx ./e2e/helpers/start-api-server.ts',
+    command: 'corepack pnpm exec tsx ./e2e/helpers/start-api-server.ts',
     cwd: '.',
     url: `${apiOrigin}/healthz`,
     env: {
@@ -188,7 +188,7 @@ export function createRealOAuthApiServer() {
   const { clientId, clientSecret } = loadGithubOAuthCredentialsFromLocalEnv();
 
   return {
-    command: 'pnpm exec tsx ./e2e/helpers/start-api-server.ts',
+    command: 'corepack pnpm exec tsx ./e2e/helpers/start-api-server.ts',
     cwd: '.',
     url: `${apiOrigin}/healthz`,
     env: {
@@ -218,7 +218,7 @@ export function createPowerSyncTestServer() {
   const port = process.env.TEST_POWERSYNC_PORT ?? '58082';
 
   return {
-    command: 'pnpm exec tsx ./e2e/helpers/start-powersync-test-service.ts',
+    command: 'corepack pnpm exec tsx ./e2e/helpers/start-powersync-test-service.ts',
     cwd: '.',
     url: `http://127.0.0.1:${port}/probes/liveness`,
     env: {
@@ -255,7 +255,7 @@ export function createWebServer(url = `${getE2EWebOrigin()}/auth`) {
 export function createOpenAICompatibleMockServer() {
   const origin = getE2EOpenAIMockOrigin();
   return {
-    command: 'pnpm exec tsx ./e2e/helpers/start-openai-compatible-mock.ts',
+    command: 'corepack pnpm exec tsx ./e2e/helpers/start-openai-compatible-mock.ts',
     cwd: '.',
     url: `${origin}/healthz`,
     env: {

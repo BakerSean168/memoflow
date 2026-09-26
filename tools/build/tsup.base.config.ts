@@ -37,19 +37,13 @@ interface CreateTsupConfigOptions {
   extraOptions?: Partial<Options>;
 }
 
-interface LocalOnlyDtsPathOptions {
-  baseUrl?: string;
-}
-
 export function createLocalOnlyDtsPaths(
   additionalPaths: Record<string, string[]> = {},
-  options: LocalOnlyDtsPathOptions = {},
 ): NonNullable<Options['dts']> {
-  const { baseUrl } = options;
-
   return {
     compilerOptions: {
-      ...(baseUrl ? { baseUrl } : {}),
+      // tsup 8.5 injects baseUrl into its TS6 declaration worker internally.
+      ignoreDeprecations: '6.0',
       paths: {
         '@/*': ['./src/*'],
         ...additionalPaths,

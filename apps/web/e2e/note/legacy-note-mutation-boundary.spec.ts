@@ -1,4 +1,4 @@
-import { expect, test, type APIRequestContext } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { API_CONFIG } from '../config';
 import { registerAndLogin } from '../helpers/testHelpers';
 

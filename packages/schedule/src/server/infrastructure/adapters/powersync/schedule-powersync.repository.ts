@@ -166,7 +166,7 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
       if (expectedVersion !== undefined) args.push(expectedVersion);
       const res = await this.db.execute(sql, args);
 
-      if (expectedVersion !== undefined && res.rowsAffected === 0) {
+      if (expectedVersion !== undefined && res.rowsAffected !== 1) {
         const current = await this.db.getOptional<{ version: number }>(
           'SELECT version FROM schedules WHERE id = ? AND identity_id = ? LIMIT 1',
           [data.id, data.identityId],
@@ -488,7 +488,7 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
          WHERE id = ? AND claim_token = ? AND status = 'processing'`,
         [nowIso, nowIso, id, claimToken],
       );
-      if (res.rowsAffected === 0) {
+      if (res.rowsAffected !== 1) {
         throw new LeaseLostError(
           `Rebuild outbox item ${id} is no longer owned by this claim token (lease lost)`,
         );
@@ -504,7 +504,7 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
          WHERE id = ? AND claim_token = ? AND status = 'processing'`,
         [nextAttempts, error, nowIso, id, claimToken],
       );
-      if (res.rowsAffected === 0) {
+      if (res.rowsAffected !== 1) {
         throw new LeaseLostError(
           `Rebuild outbox item ${id} is no longer owned by this claim token (lease lost)`,
         );
@@ -518,7 +518,7 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
          WHERE id = ? AND claim_token = ? AND status = 'processing'`,
         [nextAttempts, nextAttemptIso, error, nowIso, id, claimToken],
       );
-      if (res.rowsAffected === 0) {
+      if (res.rowsAffected !== 1) {
         throw new LeaseLostError(
           `Rebuild outbox item ${id} is no longer owned by this claim token (lease lost)`,
         );
@@ -672,7 +672,7 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
          WHERE id = ? AND claim_token = ? AND status = 'processing'`,
         [nowIso, nowIso, id, claimToken],
       );
-      if (res.rowsAffected === 0) {
+      if (res.rowsAffected !== 1) {
         throw new LeaseLostError(
           `Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`,
         );
@@ -688,7 +688,7 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
          WHERE id = ? AND claim_token = ? AND status = 'processing'`,
         [nextAttempts, error, nowIso, id, claimToken],
       );
-      if (res.rowsAffected === 0) {
+      if (res.rowsAffected !== 1) {
         throw new LeaseLostError(
           `Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`,
         );
@@ -702,7 +702,7 @@ export class PowerSyncScheduleRepository implements IScheduleRepository {
          WHERE id = ? AND claim_token = ? AND status = 'processing'`,
         [nextAttempts, nextAttemptIso, error, nowIso, id, claimToken],
       );
-      if (res.rowsAffected === 0) {
+      if (res.rowsAffected !== 1) {
         throw new LeaseLostError(
           `Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`,
         );

@@ -1,9 +1,9 @@
 /// <reference types="vitest" />
 import { defineConfig, mergeConfig } from 'vitest/config';
-import { createSharedConfig, createSliceCoverage } from '../../vitest.shared';
+import { createSharedConfig, createSliceCoverage } from '../../vitest.shared.ts';
 
 const baseConfig = createSharedConfig({
-  projectRoot: __dirname,
+  projectRoot: import.meta.dirname,
   reportName: 'task-use-cases',
   environment: 'node',
   testInclude: [
@@ -16,9 +16,9 @@ export default mergeConfig(
   defineConfig({
     test: {
       name: 'task-use-cases',
-      root: __dirname,
+      root: import.meta.dirname,
       coverage: createSliceCoverage({
-        projectRoot: __dirname,
+        projectRoot: import.meta.dirname,
         roots: ['src/server/application/use-cases'],
         reportsDirectory: 'coverage/packages/task/server-application-use-cases',
         thresholds: {

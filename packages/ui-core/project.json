@@ -3,11 +3,17 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "packages/ui-core/src",
-  "tags": ["scope:ui", "type:core", "layer:ui"],
+  "tags": [
+    "scope:ui",
+    "type:core",
+    "layer:ui"
+  ],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/packages/ui-core/dist"],
+      "outputs": [
+        "{workspaceRoot}/packages/ui-core/dist"
+      ],
       "options": {
         "parallel": false,
         "commands": [
@@ -33,8 +39,13 @@
     },
     "test": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "inputs": ["default", "^production"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
+      "inputs": [
+        "default",
+        "^production"
+      ],
       "cache": true,
       "options": {
         "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
@@ -45,15 +56,15 @@
       "executor": "nx:run-commands",
       "cache": true,
       "options": {
-        "command": "node ../../node_modules/typescript/bin/tsc --noEmit -p tsconfig.json",
+        "command": "tsc --noEmit -p tsconfig.json",
         "cwd": "packages/ui-core"
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/ui-core/**/*.ts"]
+        "args": [
+          "**/*.ts"
+        ]
       }
     },
     "test:watch": {

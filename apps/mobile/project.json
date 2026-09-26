@@ -43,7 +43,7 @@
     "typecheck": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "pnpm exec tsc --noEmit",
+        "command": "node ./node_modules/typescript/bin/tsc --noEmit",
         "cwd": "apps/mobile"
       }
     },

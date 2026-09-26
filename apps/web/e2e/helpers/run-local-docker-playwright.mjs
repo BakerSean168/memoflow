@@ -1,3 +1,10 @@
+/*
+ * Repo-level local-docker orchestration intentionally consumes workspace tools
+ * that are not publishable Nx libraries. Keep this script colocated with the
+ * Playwright lane while exempting those two infrastructure imports from the
+ * project-to-project module-boundary rule.
+ */
+/* eslint-disable @nx/enforce-module-boundaries */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { dirname, resolve } from 'node:path';

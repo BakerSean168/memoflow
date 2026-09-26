@@ -3,20 +3,28 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/migrator/src",
   "projectType": "application",
-  "tags": ["scope:migrator", "type:app", "platform:server", "layer:app"],
+  "tags": [
+    "scope:migrator",
+    "type:app",
+    "platform:server",
+    "layer:app"
+  ],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": ["{projectRoot}/dist"],
+      "outputs": [
+        "{projectRoot}/dist"
+      ],
       "options": {
         "cwd": "apps/migrator",
         "command": "tsup"
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
       "options": {
-        "lintFilePatterns": ["apps/migrator/**/*.ts"]
+        "args": [
+          "**/*.ts"
+        ]
       }
     },
     "typecheck": {
@@ -28,8 +36,13 @@
     },
     "test": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "inputs": ["default", "^production"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
+      "inputs": [
+        "default",
+        "^production"
+      ],
       "cache": true,
       "options": {
         "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",

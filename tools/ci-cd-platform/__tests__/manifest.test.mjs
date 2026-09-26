@@ -119,6 +119,7 @@ test('scope discovery invokes the installed Nx CLI directly instead of racing pn
     'show',
     'projects',
     '--with-target=test:integration',
+    '--json',
   ]);
   assert.ok(!invocation.args.includes('pnpm'));
   assert.equal(invocation.bootstrap, path.join(root, 'tools/ci/node-process-bootstrap.cjs'));
@@ -131,5 +132,5 @@ test('scope discovery invokes the installed Nx CLI directly instead of racing pn
       NODE_OPTIONS: `${process.env.NODE_OPTIONS ?? ''} --require=${invocation.bootstrap}`.trim(),
     },
   });
-  assert.match(stdout, /^api$/mu);
+  assert.ok(JSON.parse(stdout).includes('api'));
 });

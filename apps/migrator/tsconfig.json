@@ -1,8 +1,8 @@
 {
   "extends": "../../tsconfig.workspace-dist.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "noEmit": true,
+    "allowImportingTsExtensions": true,
     "types": ["node", "vitest/globals"]
   },
   "include": ["src/**/*.ts", "tsup.config.ts", "vitest.config.ts"]

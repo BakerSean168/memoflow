@@ -595,6 +595,7 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
       `DELETE FROM notifications WHERE deleted_at IS NULL AND expires_at IS NOT NULL AND expires_at < ?`,
       [before],
     );
+    if (result.rowsAffected === undefined) throw new Error('Expired notification cleanup did not report affected rows.');
     return result.rowsAffected;
   }
 
@@ -604,6 +605,7 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
       `DELETE FROM notifications WHERE deleted_at IS NOT NULL AND deleted_at < ?`,
       [before],
     );
+    if (result.rowsAffected === undefined) throw new Error('Deleted notification cleanup did not report affected rows.');
     return result.rowsAffected;
   }
 }

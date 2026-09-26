@@ -3,22 +3,30 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/goal/src",
   "projectType": "library",
-  "tags": ["scope:goal", "type:lib", "layer:domain"],
+  "tags": [
+    "scope:goal",
+    "type:lib",
+    "layer:domain"
+  ],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": ["{projectRoot}/dist"],
+      "outputs": [
+        "{projectRoot}/dist"
+      ],
+      "dependsOn": [
+        "^build"
+      ],
       "options": {
-        "command": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && node ../../node_modules/tsup/dist/cli-default.js --clean=false && node ../../node_modules/typescript/bin/tsc -p tsconfig.build.json --emitDeclarationOnly",
+        "command": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && node ../../node_modules/tsup/dist/cli-default.js --clean=false && tsc -p tsconfig.build.json --emitDeclarationOnly",
         "cwd": "packages/goal"
-      },
-      "dependsOn": ["^build"]
+      }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/goal/**/*.{ts,js}"]
+        "args": [
+          "**/*.{ts,js}"
+        ]
       }
     },
     "typecheck": {
@@ -30,8 +38,13 @@
     },
     "test": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "inputs": ["default", "^production"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
+      "inputs": [
+        "default",
+        "^production"
+      ],
       "cache": true,
       "options": {
         "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
@@ -48,8 +61,13 @@
     },
     "test:integration": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "inputs": ["default", "^production"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
+      "inputs": [
+        "default",
+        "^production"
+      ],
       "cache": false,
       "options": {
         "command": "vitest run --config vitest.integration.config.ts",
@@ -58,8 +76,13 @@
     },
     "test:coverage": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "inputs": ["default", "^production"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
+      "inputs": [
+        "default",
+        "^production"
+      ],
       "cache": true,
       "options": {
         "commands": [

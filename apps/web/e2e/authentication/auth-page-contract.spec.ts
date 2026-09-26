@@ -151,14 +151,14 @@ test.describe('Web authentication page contract', () => {
 });
 
 async function gotoCleanAuthPage(page: Page): Promise<void> {
+  // Playwright creates a fresh BrowserContext for every test in this project, so
+  // local/session storage already starts empty. Avoid a second immediate reload:
+  // with Vite's native-ESM E2E server that aborts the first module graph while it
+  // is still warming and can turn a normal cold start into a 30s+ splash stall.
+  await page.context().clearCookies();
   await page.goto(WEB_CONFIG.getFullUrl(WEB_CONFIG.LOGIN_PATH), {
     waitUntil: 'domcontentloaded',
     timeout: TIMEOUT_CONFIG.NAVIGATION,
   });
-  await page.evaluate(() => {
-    localStorage.clear();
-    sessionStorage.clear();
-  });
-  await page.reload({ waitUntil: 'domcontentloaded', timeout: TIMEOUT_CONFIG.NAVIGATION });
   await ensureLoginScene(page);
 }

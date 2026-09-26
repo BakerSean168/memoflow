@@ -2,7 +2,6 @@
   // 继承基础配置
   "extends": "../../tsconfig.workspace-src.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "moduleResolution": "Bundler",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "types": ["node", "vite/client"],

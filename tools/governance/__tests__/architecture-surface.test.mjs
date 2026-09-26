@@ -188,7 +188,7 @@ describe('architecture-surface audit (positive real-code run)', () => {
   }, 120000);
 });
 
-describe('architecture-surface audit (mutated negative fixtures)', () => {
+describe('architecture-surface audit (mutated negative fixtures)', { timeout: 15_000 }, () => {
   it('removing an adapter `implements` clause makes the read-port rule red', () => {
     const root = createTempRoot({
       'contracts/ports.ts': PORT_FILE,

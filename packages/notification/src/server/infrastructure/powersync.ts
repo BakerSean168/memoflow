@@ -225,8 +225,8 @@ export class PowerSyncDesktopTransportAckStore implements DesktopTransportAckSto
       ],
     );
 
-    if (result.rowsAffected === 0) {
-      throw new Error(`Failed to save desktop delivery ack for idempotencyKey '${idempotencyKey}': 0 rows affected`);
+    if (result.rowsAffected !== 1) {
+      throw new Error(`Failed to save desktop delivery ack for idempotencyKey '${idempotencyKey}': expected one row affected`);
     }
   }
 }

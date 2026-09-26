@@ -1,5 +1,5 @@
 export interface IElectronDatabaseQueryResult {
-  rowsAffected: number;
+  rowsAffected?: number;
 }
 
 export interface IElectronDatabaseTransaction {

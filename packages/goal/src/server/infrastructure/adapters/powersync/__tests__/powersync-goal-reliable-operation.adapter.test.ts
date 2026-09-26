@@ -1,11 +1,17 @@
 import { describe, it, expect } from 'vitest';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import Database from 'better-sqlite3';
 import type {
   IElectronDatabase,
   IElectronDatabaseQueryResult,
   IElectronDatabaseTransaction,
 } from '@memoflow/contracts/electron';
+import { CompleteGoalUseCase } from '../../../../application/use-cases/commands/complete-goal.use-case';
+import { GoalPolicy } from '../../../../domain';
+import { GoalPowerSyncRepository } from '../goal-powersync.repository';
 import { PowerSyncGoalReliableOperationAdapter } from '../powersync-goal-reliable-operation.adapter';
+import { PowerSyncGoalWriteTransactionRunner } from '../powersync-goal-write-transaction-runner';
 
 let dbFileCounter = 0;
 
@@ -77,8 +83,6 @@ function createReceiptInput(key: string) {
 
 describe('PowerSyncGoalReliableOperationAdapter (real SQLite)', () => {
   it('persists receipt across a REAL close/reopen of the database file (process restart)', async () => {
-    const { tmpdir } = await import('node:os');
-    const { join } = await import('node:path');
     const filePath = join(tmpdir(), `goal-receipt-${Date.now()}-${dbFileCounter++}.sqlite`);
 
     // First process: write the receipt, then close the connection
@@ -176,10 +180,6 @@ describe('PowerSyncGoalWriteTransactionRunner receipt rollback (W4 P1-1)', () =>
   )`;
 
   it('rolls back the Goal CAS save when the receipt write fails', async () => {
-    const { tmpdir } = await import('node:os');
-    const { join } = await import('node:path');
-    const { PowerSyncGoalWriteTransactionRunner } =
-      await import('../powersync-goal-write-transaction-runner');
     const filePath = join(tmpdir(), `goal-runner-${Date.now()}.sqlite`);
     const db = createTestSqliteDatabase(filePath);
     await db.execute(GOALS_SQL);
@@ -207,15 +207,8 @@ describe('PowerSyncGoalWriteTransactionRunner receipt rollback (W4 P1-1)', () =>
        BEGIN SELECT RAISE(ABORT, 'receipt write failure simulation'); END`,
     );
 
-    const { CompleteGoalUseCase } =
-      await import('../../../../application/use-cases/commands/complete-goal.use-case');
-    const { GoalPowerSyncRepository } = await import('../goal-powersync.repository');
     const repo = new GoalPowerSyncRepository(db as never);
-    const useCase = new CompleteGoalUseCase(
-      repo,
-      new (await import('../../../../domain')).GoalPolicy(),
-      runner,
-    );
+    const useCase = new CompleteGoalUseCase(repo, new GoalPolicy(), runner);
 
     // The complete flow must fail: the receipt write aborts the transaction
     await expect(useCase.execute(goalId, identityId, 1)).rejects.toThrow();

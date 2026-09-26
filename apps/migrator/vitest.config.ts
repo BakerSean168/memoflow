@@ -1,9 +1,9 @@
 import { defineConfig } from 'vitest/config';
-import { createVitestReportConfig } from '../../vitest.shared';
+import { createVitestReportConfig } from '../../vitest.shared.ts';
 
 export default defineConfig({
   test: {
-    ...createVitestReportConfig(__dirname, 'migrator'),
+    ...createVitestReportConfig(import.meta.dirname, 'migrator'),
     include: ['src/**/*.test.ts'],
     environment: 'node',
   },

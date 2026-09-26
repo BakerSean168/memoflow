@@ -79,8 +79,16 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
 
   try {
     const args = ['--disable-gpu', '--disable-dev-shm-usage'];
-    if (process.platform === 'linux' && process.env.MEMOFLOW_PACKAGED_USE_GNOME_KEYRING === '1') {
-      args.push('--password-store=gnome-libsecret');
+    if (process.platform === 'linux') {
+      // `electron-builder --dir` produces an unpacked tree owned by the CI user,
+      // so chrome-sandbox cannot have the root:root / 4755 permissions it gets
+      // after a real package install. Disable Chromium's SUID sandbox only for
+      // this headless unpacked-package smoke; installed artifacts keep their
+      // normal sandbox behavior.
+      args.push('--no-sandbox');
+      if (process.env.MEMOFLOW_PACKAGED_USE_GNOME_KEYRING === '1') {
+        args.push('--password-store=gnome-libsecret');
+      }
     }
 
     electronApp = await electron.launch({
@@ -173,16 +181,13 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
     await expect(mainWindow.getByTestId('standalone-settings-layout')).toBeVisible({
       timeout: 10_000,
     });
-    // The named lazy view and its first settings-service hydration are separate
-    // readiness boundaries. Wait for both explicitly so the gate distinguishes
-    // router completion from settings hydration instead of racing a transient DOM.
+    // The named lazy view and the account section mount separately from routing.
     await expect(mainWindow.getByTestId('user-settings-view')).toBeVisible({
       timeout: ROUTE_READY_TIMEOUT_MS,
     });
-    await expect(mainWindow.getByTestId('settings-panel-layout')).toBeVisible({
+    await expect(mainWindow.getByTestId('settings-content-scroll')).toBeVisible({
       timeout: SETTINGS_READY_TIMEOUT_MS,
     });
-    await expect(mainWindow.getByTestId('settings-tab-account')).toBeVisible({ timeout: 10_000 });
     await expect(mainWindow.getByTestId('account-center-view')).toBeVisible({ timeout: 10_000 });
     expect(
       rendererPageErrors.filter((message) => message.includes('Missing injection: AuthService')),

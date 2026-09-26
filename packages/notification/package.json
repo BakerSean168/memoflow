@@ -49,7 +49,7 @@
     "@memoflow/patterns": "workspace:*",
     "@memoflow/utils": "workspace:*",
     "express": "^5.2.1",
-    "zod": "^4.4.3"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@memoflow/powersync-schema": "workspace:*",

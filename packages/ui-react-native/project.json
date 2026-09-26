@@ -3,13 +3,18 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "packages/ui-react-native/src",
-  "tags": ["scope:ui", "type:lib", "type:react-native", "layer:ui"],
+  "tags": [
+    "scope:ui",
+    "type:lib",
+    "type:react-native",
+    "layer:ui"
+  ],
   "targets": {
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/ui-react-native/**/*.{ts,tsx}"]
+        "args": [
+          "**/*.{ts,tsx}"
+        ]
       }
     },
     "typecheck": {

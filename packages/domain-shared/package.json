@@ -33,7 +33,7 @@
   "devDependencies": {
     "@types/node": "24.13.3",
     "tsup": "^8.0.0",
-    "typescript": "~6.0.3"
+    "typescript": "npm:@typescript/typescript6@6.0.2"
   },
   "peerDependencies": {}
 }

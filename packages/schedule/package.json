@@ -36,9 +36,9 @@
     "@memoflow/ipc-client": "workspace:*",
     "@memoflow/patterns": "workspace:*",
     "@memoflow/utils": "workspace:*",
-    "cron-parser": "^5.4.0",
+    "cron-parser": "^5.10.1",
     "express": "^5.2.1",
-    "zod": "^4.4.3"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@memoflow/test-utils": "workspace:*",

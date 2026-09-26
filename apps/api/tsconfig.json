@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig.workspace-src.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "composite": false,
     "declaration": false,
     "declarationMap": false,

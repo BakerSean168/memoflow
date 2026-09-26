@@ -1,44 +1,44 @@
 /// <reference types="vitest" />
 import path from 'node:path';
 import { defineConfig, mergeConfig } from 'vitest/config';
-import { createSharedConfig } from '../../vitest.shared';
+import { createSharedConfig } from '../../vitest.shared.ts';
 
 export default mergeConfig(
   createSharedConfig({
-    projectRoot: __dirname,
+    projectRoot: import.meta.dirname,
     environment: 'node',
     aliasEntries: [
       {
         find: /^@memoflow\/task\/schedule-projection$/,
         replacement: path.resolve(
-          __dirname,
+          import.meta.dirname,
           '../task/src/server/infrastructure/schedule-projection-source.ts',
         ),
       },
       {
         find: /^@memoflow\/goal\/schedule-projection$/,
         replacement: path.resolve(
-          __dirname,
+          import.meta.dirname,
           '../goal/src/server/infrastructure/schedule-projection-source.ts',
         ),
       },
       {
         find: /^@memoflow\/reminder\/schedule-projection$/,
         replacement: path.resolve(
-          __dirname,
+          import.meta.dirname,
           '../reminder/src/server/infrastructure/schedule-projection-source.ts',
         ),
       },
       {
         find: /^@\/server\/(.+)/,
-        replacement: path.resolve(__dirname, '../schedule/src/server/$1'),
+        replacement: path.resolve(import.meta.dirname, '../schedule/src/server/$1'),
       },
     ],
   }),
   defineConfig({
     test: {
       name: 'schedule-orchestration',
-      root: __dirname,
+      root: import.meta.dirname,
       testTimeout: 10000,
       pool: 'forks',
     },

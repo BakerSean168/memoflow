@@ -6,7 +6,7 @@ if [[ "$(uname -s)" != "Linux" ]]; then
   exit 2
 fi
 : "${MEMOFLOW_PACKAGED_EXECUTABLE:?MEMOFLOW_PACKAGED_EXECUTABLE must point to the packaged MemoFlow executable}"
-for command in dbus-run-session gnome-keyring-daemon gdbus secret-tool timeout xvfb-run pnpm; do
+for command in dbus-run-session gnome-keyring-daemon gdbus secret-tool timeout xvfb-run node; do
   command -v "$command" >/dev/null 2>&1 || { echo "Missing required Linux packaged-smoke dependency: $command" >&2; exit 2; }
 done
 
@@ -91,5 +91,10 @@ timeout --signal=TERM --kill-after=15s 210s \
   unset sentinel_key sentinel_value resolved_value
 
   cd "$MEMOFLOW_WORKSPACE_ROOT"
-  timeout --signal=TERM --kill-after=15s 150s pnpm nx run desktop:test:packaged-smoke --outputStyle=static
+  # Invoke the workspace Nx CLI directly. Changing HOME is required for keyring
+  # isolation, but asking pnpm to spawn Nx makes pnpm treat that HOME change as
+  # a package-store migration and attempt to reinstall node_modules.
+  timeout --signal=TERM --kill-after=15s 150s \
+    node "$MEMOFLOW_WORKSPACE_ROOT/node_modules/nx/dist/bin/nx.js" \
+    run desktop:test:packaged-smoke --outputStyle=static
 '

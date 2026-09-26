@@ -3,20 +3,26 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "packages/contracts/src",
-  "tags": ["scope:shared", "type:lib", "layer:shared"],
+  "tags": [
+    "scope:shared",
+    "type:lib",
+    "layer:shared"
+  ],
   "targets": {
     "typecheck": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "node ./node_modules/typescript/bin/tsc --build packages/contracts/tsconfig.json"
+        "command": "tsc --build packages/contracts/tsconfig.json"
       }
     },
     "build": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/packages/contracts/dist"],
+      "outputs": [
+        "{workspaceRoot}/packages/contracts/dist"
+      ],
       "cache": true,
       "options": {
-        "command": "node ../../node_modules/tsup/dist/cli-default.js && node ../../node_modules/typescript/bin/tsc -p tsconfig.build.json",
+        "command": "node ../../node_modules/tsup/dist/cli-default.js && tsc -p tsconfig.build.json",
         "cwd": "packages/contracts"
       }
     },
@@ -28,17 +34,24 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/contracts/**/*.{ts,js}"]
+        "args": [
+          "**/*.{ts,js}"
+        ]
       }
     },
     "test": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "inputs": ["default", "^production"],
-      "dependsOn": ["build"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
+      "inputs": [
+        "default",
+        "^production"
+      ],
+      "dependsOn": [
+        "build"
+      ],
       "cache": true,
       "options": {
         "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",

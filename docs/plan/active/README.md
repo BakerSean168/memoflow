@@ -4,7 +4,7 @@ tags:
   - active
 description: 进行中的计划目录与当前状态
 created: 2026-04-26T00:00:00
-updated: 2026-09-22T16:42:00+08:00
+updated: 2026-09-25T23:50:00+08:00
 ---
 
 # Active Plans
@@ -13,7 +13,13 @@ updated: 2026-09-22T16:42:00+08:00
 
 ## 当前计划
 
-当前无 active plan。
+No active plans.
+
+## 本轮已归档（2026-09-25）
+
+| 计划 | 结果 |
+| --- | --- |
+| [MemoFlow Tech Stack Modernization — 2026-09-24](../archive/2026-09-24-tech-stack-modernization.md) | 41 projects / 150 Nx tasks、Desktop package 79 runtime packages、Linux packaged smoke 1/1、Web auth 5/5、Expo export、Prisma/governance/docs/diff gates 全绿。 |
 
 ## 本轮已归档（2026-09-22）
 

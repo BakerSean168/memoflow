@@ -7,7 +7,7 @@ import {
   domainResolveAtAlias,
 } from '../../vitest.workspace-helpers';
 import { createIntegrationTestEnv } from '../test-utils/src/setup/database';
-import { createVitestReportConfig } from '../../vitest.shared';
+import { createVitestReportConfig } from '../../vitest.shared.ts';
 
 export default defineConfig({
   plugins: [contractsDeepImportResolver, domainResolveAtAlias],
@@ -16,8 +16,8 @@ export default defineConfig({
   },
   test: {
     name: 'schedule-integration',
-    ...createVitestReportConfig(__dirname, 'schedule-integration'),
-    root: __dirname,
+    ...createVitestReportConfig(import.meta.dirname, 'schedule-integration'),
+    root: import.meta.dirname,
     globals: true,
     environment: 'node',
     include: [
@@ -30,7 +30,7 @@ export default defineConfig({
     testTimeout: 30000,
     passWithNoTests: false,
     env: createIntegrationTestEnv(),
-    globalSetup: [path.resolve(__dirname, '../test-utils/src/setup/integration-global-setup.ts')], // Residual 1037 sole
+    globalSetup: [path.resolve(import.meta.dirname, '../test-utils/src/setup/integration-global-setup.ts')], // Residual 1037 sole
     fileParallelism: false,
     sequence: {
       groupOrder: 1,

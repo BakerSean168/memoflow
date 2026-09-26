@@ -117,7 +117,7 @@ export class UserPreferencePowerSyncRepository implements IUserPreferenceReposit
     if (result.rowsAffected === 1) {
       return { kind: 'updated', document };
     }
-    if (result.rowsAffected > 1) {
+    if ((result.rowsAffected ?? 0) > 1) {
       throw new Error(
         `Preference CAS updated ${String(result.rowsAffected)} rows for a unique namespace key`,
       );

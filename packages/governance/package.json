@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "description": "治理模块 - MemoFlow 架构规则与代码标准的活文档库",
   "type": "module",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -34,7 +36,7 @@
     "express": "^5.2.1",
     "tslib": "^2.3.0",
     "@memoflow/patterns": "workspace:*",
-    "zod": "^4.4.3"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/express": "^5.0.0"

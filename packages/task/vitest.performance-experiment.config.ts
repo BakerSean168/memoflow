@@ -1,5 +1,5 @@
 import { defineConfig, mergeConfig, type UserConfig } from 'vitest/config';
-import { createSharedConfig } from '../../vitest.shared';
+import { createSharedConfig } from '../../vitest.shared.ts';
 import { taskPerformanceAliases } from './vitest.performance.config';
 
 const experimentIncludes = [
@@ -9,13 +9,13 @@ const experimentIncludes = [
 
 export default mergeConfig(
   createSharedConfig({
-    projectRoot: __dirname,
+    projectRoot: import.meta.dirname,
     environment: 'node',
     testInclude: experimentIncludes,
     aliases: taskPerformanceAliases,
   }) as UserConfig,
   defineConfig({
-    root: __dirname,
+    root: import.meta.dirname,
     test: {
       name: 'task-performance-experiment',
       include: experimentIncludes,

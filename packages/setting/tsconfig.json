@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig.workspace-src.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "lib": ["ES2020"],
     "types": ["node", "vitest/globals"],
     "paths": {

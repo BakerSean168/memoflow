@@ -9,21 +9,25 @@ minimumReleaseAge: 0
 
 overrides:
   '@electron/rebuild': 4.2.0
+  '@internationalized/date': 3.12.4
   '@types/node': 24.13.3
-  '@typescript-eslint/eslint-plugin': 8.63.0
-  '@typescript-eslint/parser': 8.63.0
-  '@typescript-eslint/project-service': 8.63.0
-  '@typescript-eslint/scope-manager': 8.63.0
-  '@typescript-eslint/tsconfig-utils': 8.63.0
-  '@typescript-eslint/type-utils': 8.63.0
-  '@typescript-eslint/types': 8.63.0
-  '@typescript-eslint/typescript-estree': 8.63.0
-  '@typescript-eslint/utils': 8.63.0
-  '@typescript-eslint/visitor-keys': 8.63.0
-  jiti: 2.4.2
+  '@typescript-eslint/eslint-plugin': 8.70.1
+  '@typescript-eslint/parser': 8.70.1
+  '@typescript-eslint/project-service': 8.70.1
+  '@typescript-eslint/scope-manager': 8.70.1
+  '@typescript-eslint/tsconfig-utils': 8.70.1
+  '@typescript-eslint/type-utils': 8.70.1
+  '@typescript-eslint/types': 8.70.1
+  '@typescript-eslint/typescript-estree': 8.70.1
+  '@typescript-eslint/utils': 8.70.1
+  '@typescript-eslint/visitor-keys': 8.70.1
+  jiti: 2.7.0
   node-abi: 4.33.0
-  vite: 8.3.0
-  vue-eslint-parser: 10.3.0
+  # Vite 8.3.1's experimental Bundled Dev client is built against the 1.2.9
+  # factory protocol; Rolldown 1.2.10 emits an incompatible lazy-factory call.
+  rolldown: 1.2.9
+  vite: 8.3.1
+  vue-eslint-parser: 10.4.1
 
 allowBuilds:
   '@journeyapps/wa-sqlite': false

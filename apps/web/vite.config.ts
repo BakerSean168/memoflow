@@ -8,7 +8,7 @@ import {
   createContractsAliasEntries,
   createUiVueSourceAliasEntries,
   createWorkspaceSourceAliasEntries,
-} from '../../vite.workspace-aliases';
+} from '../../vite.workspace-aliases.ts';
 
 /**
  * `@tailwindcss/vite` 4.3.x expects the classic Vite dev-server `server` object in
@@ -45,6 +45,11 @@ const webBundledDevWorkspaceEntries = [
 ] as const;
 
 const webDevWorkspaceEntries = [
+  // Keep narrow app-vue subpath aliases ahead of the package-root alias. A string
+  // root alias also matches `/...` suffixes, so without this entry
+  // `@memoflow/app-vue/di` would become `src/index.ts/di` and the auth bootstrap
+  // would either fail production build or pull the full app-vue barrel in dev.
+  ['@memoflow/app-vue/di', 'packages/app-vue/src/di/index.ts'],
   ['@memoflow/app-vue/modules/authentication', 'packages/app-vue/src/modules/authentication/index.ts'],
   ['@memoflow/app-vue/web-core', 'packages/app-vue/src/web-core.ts'],
   ['@memoflow/app-vue/web-shell-core', 'packages/app-vue/src/web-shell-core.ts'],
@@ -81,9 +86,11 @@ const webDevWorkspaceEntries = [
  * No tailwind.config.js needed — all configuration is CSS-based.
  */
 
+const configDir = import.meta.dirname;
+
 export default defineConfig(({ mode, command }) => {
   // Load env files from workspace root (centralized .env files)
-  const workspaceRoot = path.resolve(__dirname, '../..');
+  const workspaceRoot = path.resolve(configDir, '../..');
   const env = loadEnv(mode, workspaceRoot, '');
 
   // Dev mode: serve command or non-production mode
@@ -125,7 +132,7 @@ export default defineConfig(({ mode, command }) => {
     ...envSpecificAliases,
     {
       find: '@',
-      replacement: path.resolve(__dirname, './src'),
+      replacement: path.resolve(configDir, './src'),
     },
   ];
 
@@ -163,7 +170,7 @@ export default defineConfig(({ mode, command }) => {
       format: 'es',
     },
     // Keep app root, but read env files from workspace root
-    root: __dirname,
+    root: configDir,
     envDir: workspaceRoot,
     envPrefix: 'VITE_',
     resolve: {
@@ -205,6 +212,7 @@ export default defineConfig(({ mode, command }) => {
     },
     build: {
       target: 'esnext',
+      outDir: path.resolve(workspaceRoot, 'dist/apps/web'),
       sourcemap: isDev,
       emptyOutDir: true,
     },

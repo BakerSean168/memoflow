@@ -7,7 +7,7 @@ import {
   domainResolveAtAlias,
 } from '../../vitest.workspace-helpers';
 import { createIntegrationTestEnv } from '../test-utils/src/setup/database';
-import { createVitestReportConfig } from '../../vitest.shared';
+import { createVitestReportConfig } from '../../vitest.shared.ts';
 
 export default defineConfig({
   plugins: [contractsDeepImportResolver, domainResolveAtAlias],
@@ -16,8 +16,8 @@ export default defineConfig({
   },
   test: {
     name: 'scheduler-pgboss-poc',
-    ...createVitestReportConfig(__dirname, 'scheduler-pgboss-poc'),
-    root: __dirname,
+    ...createVitestReportConfig(import.meta.dirname, 'scheduler-pgboss-poc'),
+    root: import.meta.dirname,
     globals: true,
     environment: 'node',
     include: ['poc/pg-boss/pg-boss-scheduling.poc.ts'],
@@ -26,7 +26,7 @@ export default defineConfig({
     hookTimeout: 45_000,
     passWithNoTests: false,
     env: createIntegrationTestEnv(),
-    globalSetup: [path.resolve(__dirname, '../test-utils/src/setup/integration-global-setup.ts')],
+    globalSetup: [path.resolve(import.meta.dirname, '../test-utils/src/setup/integration-global-setup.ts')],
     fileParallelism: false,
     pool: 'forks',
     maxWorkers: 1,

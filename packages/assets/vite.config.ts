@@ -4,6 +4,8 @@ import { resolve } from 'path';
 import { copyFileSync, mkdirSync, readdirSync, statSync } from 'fs';
 import dts from 'vite-plugin-dts';
 
+const configDir = import.meta.dirname;
+
 // 复制目录的辅助函数
 function copyDir(src: string, dest: string) {
   mkdirSync(dest, { recursive: true });
@@ -26,18 +28,18 @@ function copyAssetsPlugin() {
     closeBundle() {
       // 复制 logos
       copyDir(
-        resolve(__dirname, 'src/images/logos'),
-        resolve(__dirname, 'dist/images/logos')
+        resolve(configDir, 'src/images/logos'),
+        resolve(configDir, 'dist/images/logos')
       );
       // 复制 avatars
       copyDir(
-        resolve(__dirname, 'src/images/avatars'),
-        resolve(__dirname, 'dist/images/avatars')
+        resolve(configDir, 'src/images/avatars'),
+        resolve(configDir, 'dist/images/avatars')
       );
       // 复制 audio notifications
       copyDir(
-        resolve(__dirname, 'src/audio/notifications'),
-        resolve(__dirname, 'dist/audio/notifications')
+        resolve(configDir, 'src/audio/notifications'),
+        resolve(configDir, 'dist/audio/notifications')
       );
       console.log('✅ Static assets copied to dist');
     },
@@ -48,7 +50,7 @@ export default defineConfig({
   assetsInclude: ['**/*.icns'],
   resolve: {
     alias: process.env.VITEST ? [
-      { find: /\.icns$/, replacement: resolve(__dirname, 'src/images/logos/MemoFlow.svg') }
+      { find: /\.icns$/, replacement: resolve(configDir, 'src/images/logos/MemoFlow.svg') }
     ] : []
   },
   plugins: [
@@ -72,9 +74,9 @@ export default defineConfig({
   build: {
     lib: {
       entry: {
-        index: resolve(__dirname, 'src/index.ts'),
-        'images/index': resolve(__dirname, 'src/images/index.ts'),
-        'audio/index': resolve(__dirname, 'src/audio/index.ts'),
+        index: resolve(configDir, 'src/index.ts'),
+        'images/index': resolve(configDir, 'src/images/index.ts'),
+        'audio/index': resolve(configDir, 'src/audio/index.ts'),
       },
       formats: ['es'],
       fileName: (format, entryName) => `${entryName}.js`,

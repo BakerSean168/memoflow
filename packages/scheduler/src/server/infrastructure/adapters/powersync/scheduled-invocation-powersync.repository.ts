@@ -93,6 +93,7 @@ export class PowerSyncScheduledInvocationRepository implements IScheduledInvocat
   }
   async recoverExpiredClaims(now: number, limit?: number): Promise<number> {
     const result = await this.q.execute(`UPDATE scheduled_invocations SET status = CASE WHEN retry_enabled = 1 AND attempt_count <= max_retries THEN 'retry_wait' ELSE 'dead_letter' END, next_attempt_at = CASE WHEN retry_enabled = 1 AND attempt_count <= max_retries THEN ? ELSE NULL END, claim_token = NULL, claim_expires_at = NULL WHERE status = 'running' AND claim_expires_at < ?${limit === undefined ? '' : ' LIMIT ' + Math.max(1, Math.floor(limit))}`, [new Date(now).toISOString(), new Date(now).toISOString()]);
+    if (result.rowsAffected === undefined) throw new Error('Expired claim recovery did not report affected rows.');
     return result.rowsAffected;
   }
   async appendSchedulingReconcileReceipt(receipt: SchedulingReconcileReceipt): Promise<void> {

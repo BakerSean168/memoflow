@@ -1,6 +1,6 @@
 /// <reference types="vitest" />
 import { defineConfig, mergeConfig, type UserConfig } from 'vitest/config';
-import { createSharedConfig } from '../../vitest.shared';
+import { createSharedConfig } from '../../vitest.shared.ts';
 
 export const taskPerformanceAliases = {
   '@memoflow/contracts/task': '../contracts/src/modules/task/index.ts',
@@ -22,14 +22,14 @@ const benchmarkIncludes = [
 ];
 
 const sharedConfig = createSharedConfig({
-  projectRoot: __dirname,
+  projectRoot: import.meta.dirname,
   environment: 'node',
   testInclude: benchmarkIncludes,
   aliases: taskPerformanceAliases,
 }) as UserConfig;
 
 const projectConfig = defineConfig({
-  root: __dirname,
+  root: import.meta.dirname,
   test: {
     name: 'task-performance',
     // Keep the performance suite opt-in and deterministic. Bench files are

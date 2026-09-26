@@ -32,4 +32,18 @@ describe('serializeCrudTransaction', () => {
       },
     ]);
   });
+
+  it('rejects malformed SDK JSON instead of forwarding an untyped payload', () => {
+    const transaction = {
+      crud: [
+        {
+          toJSON: vi.fn(() => ({ op: 'PUT', id: 'goal-1' })),
+        },
+      ],
+    } as never;
+
+    expect(() => serializeCrudTransaction(transaction)).toThrow(
+      'PowerSync CRUD entry serialized without a table type',
+    );
+  });
 });

@@ -3,12 +3,20 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "packages/domain-shared/src",
-  "tags": ["scope:shared", "type:lib", "layer:shared"],
-  "implicitDependencies": ["contracts"],
+  "tags": [
+    "scope:shared",
+    "type:lib",
+    "layer:shared"
+  ],
+  "implicitDependencies": [
+    "contracts"
+  ],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/packages/domain-shared/dist"],
+      "outputs": [
+        "{workspaceRoot}/packages/domain-shared/dist"
+      ],
       "options": {
         "command": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && node ../../node_modules/tsup/dist/cli-default.js --clean=false",
         "cwd": "packages/domain-shared"
@@ -22,23 +30,28 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/domain-shared/**/*.{ts,js}"]
+        "args": [
+          "**/*.{ts,js}"
+        ]
       }
     },
     "typecheck": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "node ../../node_modules/typescript/bin/tsc --noEmit -p tsconfig.typecheck.json",
+        "command": "tsc --noEmit -p tsconfig.typecheck.json",
         "cwd": "packages/domain-shared"
       }
     },
     "test": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "inputs": ["default", "^production"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
+      "inputs": [
+        "default",
+        "^production"
+      ],
       "cache": true,
       "options": {
         "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
@@ -55,8 +68,13 @@
     },
     "test:coverage": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "inputs": ["default", "^production"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
+      "inputs": [
+        "default",
+        "^production"
+      ],
       "cache": true,
       "options": {
         "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts --coverage",

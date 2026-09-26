@@ -1,7 +1,7 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vitest/config';
 import path from 'node:path';
-import { createVitestReportConfig } from '../../vitest.shared';
+import { createVitestReportConfig } from '../../vitest.shared.ts';
 import {
   domainResolveAtAlias,
   taskDeepImportResolver,
@@ -14,26 +14,26 @@ export default defineConfig({
     alias: [
       {
         find: /^@\/(.+)/,
-        replacement: path.resolve(__dirname, '../../packages/task/src/$1'),
+        replacement: path.resolve(import.meta.dirname, '../../packages/task/src/$1'),
       },
       {
         // The smoke lane does not prebuild workspace package dist outputs. Keep
         // its AI imports on explicit public source subpaths so it exercises the
         // current API surface without introducing a catch-all private-path alias.
         find: /^@memoflow\/ai\/api$/,
-        replacement: path.resolve(__dirname, '../../packages/ai/src/api/index.ts'),
+        replacement: path.resolve(import.meta.dirname, '../../packages/ai/src/api/index.ts'),
       },
       {
         find: /^@memoflow\/ai\/testing$/,
-        replacement: path.resolve(__dirname, '../../packages/ai/src/testing/index.ts'),
+        replacement: path.resolve(import.meta.dirname, '../../packages/ai/src/testing/index.ts'),
       },
       ...taskResolveAliases,
     ],
   },
   test: {
     name: 'api-smoke',
-    ...createVitestReportConfig(__dirname, 'api-smoke'),
-    root: __dirname,
+    ...createVitestReportConfig(import.meta.dirname, 'api-smoke'),
+    root: import.meta.dirname,
     globals: true,
     environment: 'node',
     include: ['src/__tests__/smoke/**/*.{test,spec}.{js,ts}'],

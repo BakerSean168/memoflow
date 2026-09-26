@@ -58,11 +58,28 @@ const MANIFEST = JSON.parse(
 const violations = [];
 const auditedPaths = [];
 
+const SKIPPED_SCAN_DIRECTORIES = new Set([
+  'node_modules',
+  'dist',
+  'generated',
+  '__tests__',
+  '.git',
+  '.nx',
+  '.tmp',
+  'coverage',
+  'test-results',
+  'playwright-report',
+]);
+
 /** Walks a directory collecting files matching a predicate.
- *  遍历目录，收集匹配谓词的文件。 */
+ *  Traversal prunes generated/cache/test-output trees before recursion so the
+ *  repo-wide production audit does not spend time enumerating ignored content.
+ *  遍历目录，收集匹配谓词的文件；在递归前剪枝生成物、缓存与测试输出目录。 */
 function walkFiles(dir, predicate, out = []) {
   if (!existsSync(dir)) return out;
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (entry.isDirectory() && SKIPPED_SCAN_DIRECTORIES.has(entry.name)) continue;
+
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
       walkFiles(full, predicate, out);
