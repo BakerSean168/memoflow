@@ -32,6 +32,9 @@ describe('web Vite development configuration', () => {
       });
 
       expect(config.experimental?.bundledDev).toBe(true);
+      expect(config.build?.rolldownOptions).toMatchObject({
+        experimental: { devMode: { lazy: false } },
+      });
       expect(config.resolve?.alias).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
@@ -47,6 +50,34 @@ describe('web Vite development configuration', () => {
     } finally {
       if (previousNodeEnv === undefined) delete process.env.NODE_ENV;
       else process.env.NODE_ENV = previousNodeEnv;
+    }
+  });
+
+  it('can opt back into bundled-dev lazy compilation for local A/B diagnostics', async () => {
+    expect(typeof viteConfig).toBe('function');
+    if (typeof viteConfig !== 'function') return;
+
+    const previousNodeEnv = process.env.NODE_ENV;
+    const previousLazy = process.env.MEMOFLOW_VITE_BUNDLED_DEV_LAZY;
+    process.env.NODE_ENV = 'development';
+    process.env.MEMOFLOW_VITE_BUNDLED_DEV_LAZY = 'true';
+    try {
+      const config = await viteConfig({
+        command: 'serve',
+        mode: 'development',
+        isSsrBuild: false,
+        isPreview: false,
+      });
+
+      expect(config.experimental?.bundledDev).toBe(true);
+      expect(config.build?.rolldownOptions).toMatchObject({
+        experimental: { devMode: { lazy: true } },
+      });
+    } finally {
+      if (previousNodeEnv === undefined) delete process.env.NODE_ENV;
+      else process.env.NODE_ENV = previousNodeEnv;
+      if (previousLazy === undefined) delete process.env.MEMOFLOW_VITE_BUNDLED_DEV_LAZY;
+      else process.env.MEMOFLOW_VITE_BUNDLED_DEV_LAZY = previousLazy;
     }
   });
 

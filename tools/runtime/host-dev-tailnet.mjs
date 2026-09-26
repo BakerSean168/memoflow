@@ -20,6 +20,15 @@ function run(command, args) {
   if (typeof result.status === 'number' && result.status !== 0) process.exit(result.status);
 }
 
+function runBestEffort(command, args) {
+  const result = spawnSync(command, args, {
+    cwd: workspaceRoot,
+    stdio: 'ignore',
+    env: process.env,
+  });
+  if (result.error) throw result.error;
+}
+
 function tailnetIdentity() {
   const raw = execFileSync('tailscale', ['status', '--json'], {
     cwd: workspaceRoot,
@@ -67,6 +76,7 @@ function updateLocalEnv(values) {
 }
 
 function printStatus(publicOrigin) {
+  console.log('[host-dev:tailnet] ingress: Tailscale TLS termination + raw TCP forwarding');
   console.log(`[host-dev:tailnet] public Web/HMR: ${publicOrigin}`);
   console.log(`[host-dev:tailnet] browser API/Auth: ${publicOrigin}/api`);
   console.log(`[host-dev:tailnet] upstream Web: http://127.0.0.1:${profile.ports.web}`);
@@ -84,20 +94,26 @@ if (action === 'up' || action === 'status') {
       AUTH_BASE_URL: `${publicOrigin}/api/auth`,
       CORS_ORIGIN: mergeCorsOrigins(publicOrigin),
     });
+    // Migrate older host-dev ingress away from Tailscale's HTTP reverse proxy.
+    // Bundled Dev serves large/lazy JS payloads and HMR; terminating TLS and then
+    // forwarding raw TCP avoids HTTP/2 reverse-proxy buffering/backpressure while
+    // keeping the exact same MagicDNS HTTPS origin for the browser.
+    runBestEffort('tailscale', ['serve', `--https=${profile.ports.web}`, 'off']);
     run('tailscale', [
       'serve',
       '--bg',
       '--yes',
-      `--https=${profile.ports.web}`,
-      `http://127.0.0.1:${profile.ports.web}`,
+      `--tls-terminated-tcp=${profile.ports.web}`,
+      `tcp://127.0.0.1:${profile.ports.web}`,
     ]);
   }
 
   printStatus(publicOrigin);
   run('tailscale', ['serve', 'status']);
 } else if (action === 'down') {
-  run('tailscale', ['serve', `--https=${profile.ports.web}`, 'off']);
-  console.log(`[host-dev:tailnet] disabled HTTPS ingress on :${profile.ports.web}`);
+  runBestEffort('tailscale', ['serve', `--https=${profile.ports.web}`, 'off']);
+  runBestEffort('tailscale', ['serve', `--tls-terminated-tcp=${profile.ports.web}`, 'off']);
+  console.log(`[host-dev:tailnet] disabled Tailnet ingress on :${profile.ports.web}`);
 } else {
   console.error(`Unsupported host-dev Tailnet command: ${action}. Use up, status, or down.`);
   process.exit(2);

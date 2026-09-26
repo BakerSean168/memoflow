@@ -104,6 +104,11 @@ export default defineConfig(({ mode, command }) => {
     mode === 'development' &&
     env.MEMOFLOW_VITE_BUNDLED_DEV === 'true' &&
     process.env.NODE_ENV !== 'test';
+  // Rolldown's bundled dev defaults to lazy compilation. That is useful on a
+  // local LAN, but each dynamic-import boundary becomes a request/compile round
+  // trip over remote development links. Keep it explicitly tunable so the GCP
+  // host-dev lane can prefer one stable upfront bundle instead.
+  const useBundledDevLazy = env.MEMOFLOW_VITE_BUNDLED_DEV_LAZY !== 'false';
 
   const directWorkspaceAliases = createWorkspaceSourceAliasEntries(
     workspaceRoot,
@@ -232,6 +237,15 @@ export default defineConfig(({ mode, command }) => {
       outDir: path.resolve(workspaceRoot, 'dist/apps/web'),
       sourcemap: isDev,
       emptyOutDir: true,
+      rolldownOptions: useBundledDev
+        ? {
+            experimental: {
+              devMode: {
+                lazy: useBundledDevLazy,
+              },
+            },
+          }
+        : undefined,
     },
     test: {
       globals: true,

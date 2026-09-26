@@ -40,12 +40,12 @@ MemoFlow 的运行时首先按 **4 个环境** 建模：`host-dev`、`prod-like`
 ```text
 workstation browser
   -> https://<gcp-dev MagicDNS>:20220
-  -> Tailscale Serve TLS termination
+  -> Tailscale Serve TLS termination + raw TCP forwarding
   -> 127.0.0.1:20220 (Vite Bundled Dev + HMR)
   -> /api proxy -> 127.0.0.1:20221
 ```
 
-运行 `corepack pnpm run runtime:tailnet:host-dev` 会读取当前节点的 Tailscale MagicDNS 名称、配置 `20220 -> 127.0.0.1:20220` 的 HTTPS Serve，并把 `MEMOFLOW_WEB_URL`、`AUTH_BASE_URL`、`CORS_ORIGIN` 写入 gitignored `.env.development.local`。因此浏览器无需直接访问 `20221`，也无需日常维护 SSH 端口转发。VS Code/SSH 同号 forwarding 仍作为 Tailnet 不可用时的 fallback。
+运行 `corepack pnpm run runtime:tailnet:host-dev` 会读取当前节点的 Tailscale MagicDNS 名称、配置 `20220 -> 127.0.0.1:20220` 的 **TLS-terminated TCP** Serve，并把 `MEMOFLOW_WEB_URL`、`AUTH_BASE_URL`、`CORS_ORIGIN` 写入 gitignored `.env.development.local`。这里刻意不用 Tailscale HTTP reverse proxy：Vite Bundled Dev 的 lazy payload/HMR 在 HTTP/2 proxy 层出现过明显 buffering/backpressure；TLS 在 Tailnet 边界终止后直接转发 raw TCP，可以保持相同的 `https://<MagicDNS>:20220` 浏览器入口，同时让 Vite 自己处理 HTTP/WebSocket。浏览器无需直接访问 `20221`，也无需日常维护 SSH 端口转发。VS Code/SSH 同号 forwarding 仍作为 Tailnet 不可用时的 fallback。
 
 `20200-20219` 保留给 `prod-like`；`20250-20269` 保留给 `staging`。
 
@@ -105,7 +105,7 @@ corepack pnpm run dev:host
 
 这个 window 只拥有 `host-dev`：Docker 承载 PostgreSQL / Redis / PowerSync，API 与 Web 在宿主机直接运行并热更新。工作站默认通过 Tailnet HTTPS 访问 MagicDNS `:20220`；Vite 在 GCP 内部把 `/api` 代理到 `20221`，因此浏览器不需要单独暴露 API 端口。
 
-Web `20220` 默认启用 Vite Bundled Dev（`MEMOFLOW_VITE_BUNDLED_DEV=true`）。它仍保留 Vite/HMR 开发语义，但把浏览器侧的大型 native-ESM module waterfall 收敛为少量 bundled dev assets，更适合 GCP Dev -> 工作站这种高 RTT 链路。需要诊断 Vite/plugin 兼容问题时，可在 gitignored `.env.development.local` 中设置 `MEMOFLOW_VITE_BUNDLED_DEV=false` 临时回退 classic native-ESM dev server；Playwright/test lane 也固定保持 classic 模式，避免实验能力改变 CI 语义。
+Web `20220` 默认启用 Vite Bundled Dev（`MEMOFLOW_VITE_BUNDLED_DEV=true`），并在 remote host-dev 中关闭 Rolldown lazy compilation（`MEMOFLOW_VITE_BUNDLED_DEV_LAZY=false`）。这样动态 import 不再逐个触发 `/@vite/lazy` 跨 Tailnet 请求，而是把成本前移到服务端稳定 bundle；实测更适合 GCP Dev -> 工作站这种高 RTT 链路，同时继续保留 Vite/HMR 开发语义。需要 A/B lazy 行为时，可在 gitignored `.env.development.local` 中临时设 `MEMOFLOW_VITE_BUNDLED_DEV_LAZY=true`；需要诊断 Bundled Dev/plugin 兼容问题时，则设 `MEMOFLOW_VITE_BUNDLED_DEV=false` 回退 classic native-ESM dev server。Playwright/test lane 固定保持 classic 模式，避免实验能力改变 CI 语义。
 
 `@tailwindcss/vite` 4.3.x 的 classic `hotUpdate` hook 仍假设存在 `ViteDevServer.server` 上下文，而 Bundled Dev 当前提供更小的 HMR context。Web Vite config 仅在 Bundled Dev 下跳过该 classic-server invalidation helper；Tailwind transform 仍参与 bundled regeneration。该兼容层必须保持局部，并在上游原生支持 Bundled Dev 后删除。
 
