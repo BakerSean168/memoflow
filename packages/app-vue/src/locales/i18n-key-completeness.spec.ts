@@ -116,6 +116,13 @@ describe('i18n key completeness (production locales)', () => {
     expect(isPresent(resolveMessage(broken, probe))).toBe(false);
   });
 
+  it('keeps the zh-CN Routine surface translated instead of leaking the English product noun', () => {
+    expect(zhCN.nav.routines).toBe('例程');
+    expect(zhCN.nav.capsule.routine).toBe('例程');
+    expect(zhCN.routine.home.title).toBe('今日例程');
+    expect(JSON.stringify(zhCN.routine)).not.toContain('Routine');
+  });
+
   it('covers findings P0 keys in both locales', () => {
     const findingsKeys = [
       'goal.list.noGoalsFound',

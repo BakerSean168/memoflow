@@ -103,6 +103,11 @@ const SLOT_OPTIONS: Record<TimeDisplaySlot, Intl.DateTimeFormatOptions> = {
     month: 'short',
     day: 'numeric',
   },
+  monthDayWeekday: {
+    weekday: 'short',
+    month: 'long',
+    day: 'numeric',
+  },
 };
 
 /** Named product display slots are semantic Intl presets, never persisted pattern tokens. */

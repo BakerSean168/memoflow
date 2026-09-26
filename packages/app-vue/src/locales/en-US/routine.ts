@@ -15,6 +15,7 @@ export default {
     empty: 'No remaining WallClock routines today',
   },
   overview: {
+    ariaLabel: 'Routine overview',
     routines: 'Routines',
     enabled: 'Enabled',
     profiles: 'Profiles',

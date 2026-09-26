@@ -41,7 +41,10 @@
         </div>
 
         <template v-else>
-          <section class="grid gap-3 @xl/panel:grid-cols-2 @4xl/panel:grid-cols-4" aria-label="Routine overview">
+          <section
+            class="grid gap-3 @xl/panel:grid-cols-2 @4xl/panel:grid-cols-4"
+            :aria-label="t('routine.overview.ariaLabel')"
+          >
             <div class="rounded-xl border border-border bg-card p-4">
               <p class="text-xs text-muted-foreground">{{ t('routine.overview.routines') }}</p>
               <p class="mt-1 text-2xl font-semibold">{{ snapshot.definitions.length }}</p>

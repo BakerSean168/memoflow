@@ -60,24 +60,35 @@ const RoutineUpcomingWidgetStub = defineComponent({
   },
 });
 
-const i18n = createI18n({
-  legacy: false,
-  locale: 'en-US',
-  messages: {
-    'en-US': {
-      shell: {
-        home: {
-          title: 'Today',
-          directActions: 'Quick actions',
-          newGoal: 'New goal',
-          quickTask: 'Quick task',
-        },
+const messages = {
+  'en-US': {
+    shell: {
+      home: {
+        title: 'Today',
+        directActions: 'Quick actions',
+        newGoal: 'New goal',
+        quickTask: 'Quick task',
       },
     },
   },
-});
+  'zh-CN': {
+    shell: {
+      home: {
+        title: '今日概览',
+        directActions: '直接开始',
+        newGoal: '新建目标',
+        quickTask: '快速任务',
+      },
+    },
+  },
+} as const;
 
-function mountPanel(active: boolean) {
+function mountPanel(active: boolean, locale: 'en-US' | 'zh-CN' = 'en-US') {
+  const i18n = createI18n({
+    legacy: false,
+    locale,
+    messages,
+  });
   return mount(TodayOverviewPanel, {
     props: { active },
     global: {
@@ -98,6 +109,17 @@ describe('TodayOverviewPanel', () => {
 
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  it('formats the home date with the active UI locale', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-26T12:00:00.000Z'));
+
+    const zh = mountPanel(true, 'zh-CN');
+    expect(zh.get('[data-testid="today-overview-date"]').text()).toBe('9月26日周六');
+
+    const en = mountPanel(true, 'en-US');
+    expect(en.get('[data-testid="today-overview-date"]').text()).toBe('Sat, September 26');
   });
 
   it('loads Goal-owned Home progress only when the Home surface becomes active', async () => {

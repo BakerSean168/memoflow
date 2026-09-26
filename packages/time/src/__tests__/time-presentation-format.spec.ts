@@ -55,6 +55,8 @@ describe('TIME-1204 locale/timezone-aware presentation', () => {
     expect(zh.format.ymdDisplay('2026-01-07')).toContain('1月');
     expect(en.format.slot('periodWeekDay', instant)).toBe('Thursday');
     expect(zh.format.slot('periodWeekDay', instant)).toContain('星期');
+    expect(en.format.slot('monthDayWeekday', instant)).toBe('Thu, January 1');
+    expect(zh.format.slot('monthDayWeekday', instant)).toBe('1月1日周四');
   });
 
   it('uses localized relative time and the same absolute formatter past the relative window', () => {
