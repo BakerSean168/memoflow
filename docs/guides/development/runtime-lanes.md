@@ -47,6 +47,8 @@ workstation browser
 
 运行 `corepack pnpm run runtime:tailnet:host-dev` 会读取当前节点的 Tailscale MagicDNS 名称、配置 `20220 -> 127.0.0.1:20220` 的 **TLS-terminated TCP** Serve，并把 `MEMOFLOW_WEB_URL`、`AUTH_BASE_URL`、`CORS_ORIGIN` 写入 gitignored `.env.development.local`。这里刻意不用 Tailscale HTTP reverse proxy：Vite Bundled Dev 的 lazy payload/HMR 在 HTTP/2 proxy 层出现过明显 buffering/backpressure；TLS 在 Tailnet 边界终止后直接转发 raw TCP，可以保持相同的 `https://<MagicDNS>:20220` 浏览器入口，同时让 Vite 自己处理 HTTP/WebSocket。浏览器无需直接访问 `20221`，也无需日常维护 SSH 端口转发。VS Code/SSH 同号 forwarding 仍作为 Tailnet 不可用时的 fallback。
 
+GitHub 身份 OAuth 需要 provider callback 与 GitHub App registration 中登记的 URL 精确匹配。当前共享 `MemoFlow Dev Test` App 的 canonical callback 保留为 prod-like API 的 `https://<MagicDNS>:20201/api/auth/callback/github`；host-dev 启动时会额外写入 `GITHUB_OAUTH_REDIRECT_URI`，并只在 Tailscale Serve `:20201` 上增加这个**精确 callback path**到 `127.0.0.1:20221` 的桥接。`:20201` 的 `/` 仍继续代理 prod-like API，不会把整条 prod-like auth surface 劫持给 host-dev。
+
 `20200-20219` 保留给 `prod-like`；`20250-20269` 保留给 `staging`。
 
 ## Supporting lanes

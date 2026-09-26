@@ -8,6 +8,8 @@ import { getRuntimeProfile } from './load-profiles.mjs';
 const workspaceRoot = resolve(import.meta.dirname, '../..');
 const localEnvPath = resolve(workspaceRoot, '.env.development.local');
 const profile = getRuntimeProfile('host-dev');
+const oauthIngressProfile = getRuntimeProfile('prod-like');
+const githubCallbackPath = '/api/auth/callback/github';
 const action = process.argv[2] ?? 'up';
 
 function run(command, args) {
@@ -75,24 +77,30 @@ function updateLocalEnv(values) {
   writeFileSync(localEnvPath, `${updated.join('\n').replace(/\n+$/u, '')}\n`);
 }
 
-function printStatus(publicOrigin) {
+function printStatus(publicOrigin, githubRedirectURI) {
   console.log('[host-dev:tailnet] ingress: Tailscale TLS termination + raw TCP forwarding');
   console.log(`[host-dev:tailnet] public Web/HMR: ${publicOrigin}`);
   console.log(`[host-dev:tailnet] browser API/Auth: ${publicOrigin}/api`);
   console.log(`[host-dev:tailnet] upstream Web: http://127.0.0.1:${profile.ports.web}`);
   console.log(`[host-dev:tailnet] Vite API proxy: http://127.0.0.1:${profile.ports.api}`);
+  console.log(`[host-dev:tailnet] GitHub OAuth callback: ${githubRedirectURI}`);
+  console.log(
+    `[host-dev:tailnet] callback bridge: :${oauthIngressProfile.ports.api}${githubCallbackPath} -> 127.0.0.1:${profile.ports.api}${githubCallbackPath}`,
+  );
   console.log(`[host-dev:tailnet] machine env: ${localEnvPath}`);
 }
 
 if (action === 'up' || action === 'status') {
   const { dnsName } = tailnetIdentity();
   const publicOrigin = `https://${dnsName}:${profile.ports.web}`;
+  const githubRedirectURI = `https://${dnsName}:${oauthIngressProfile.ports.api}${githubCallbackPath}`;
 
   if (action === 'up') {
     updateLocalEnv({
       MEMOFLOW_WEB_URL: publicOrigin,
       AUTH_BASE_URL: `${publicOrigin}/api/auth`,
       CORS_ORIGIN: mergeCorsOrigins(publicOrigin),
+      GITHUB_OAUTH_REDIRECT_URI: githubRedirectURI,
     });
     // Migrate older host-dev ingress away from Tailscale's HTTP reverse proxy.
     // Bundled Dev serves large/lazy JS payloads and HMR; terminating TLS and then
@@ -106,14 +114,34 @@ if (action === 'up' || action === 'status') {
       `--tls-terminated-tcp=${profile.ports.web}`,
       `tcp://127.0.0.1:${profile.ports.web}`,
     ]);
+
+    // The shared MemoFlow Dev Test GitHub App already owns the canonical
+    // prod-like callback on :20201. Preserve that registered external URL and
+    // route only the exact callback path to the host-dev API. The root :20201
+    // handler remains untouched, so prod-like traffic continues normally.
+    run('tailscale', [
+      'serve',
+      '--bg',
+      '--yes',
+      `--https=${oauthIngressProfile.ports.api}`,
+      `--set-path=${githubCallbackPath}`,
+      `http://127.0.0.1:${profile.ports.api}${githubCallbackPath}`,
+    ]);
   }
 
-  printStatus(publicOrigin);
+  printStatus(publicOrigin, githubRedirectURI);
   run('tailscale', ['serve', 'status']);
 } else if (action === 'down') {
   runBestEffort('tailscale', ['serve', `--https=${profile.ports.web}`, 'off']);
   runBestEffort('tailscale', ['serve', `--tls-terminated-tcp=${profile.ports.web}`, 'off']);
+  runBestEffort('tailscale', [
+    'serve',
+    `--https=${oauthIngressProfile.ports.api}`,
+    `--set-path=${githubCallbackPath}`,
+    'off',
+  ]);
   console.log(`[host-dev:tailnet] disabled Tailnet ingress on :${profile.ports.web}`);
+  console.log(`[host-dev:tailnet] removed host-dev GitHub callback bridge from :${oauthIngressProfile.ports.api}`);
 } else {
   console.error(`Unsupported host-dev Tailnet command: ${action}. Use up, status, or down.`);
   process.exit(2);

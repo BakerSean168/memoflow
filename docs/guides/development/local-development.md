@@ -241,6 +241,8 @@ Redis      20231
 
 在 GCP Dev 上把它放进 `tmux` 的 `MemoFlow:dev` window。首次或 MagicDNS 变化后运行 `corepack pnpm run runtime:tailnet:host-dev`；该命令配置 Tailscale Serve 的 **TLS-terminated TCP** `20220 -> 127.0.0.1:20220`，并生成 gitignored `.env.development.local` 中的 Tailnet Web/Auth/CORS origin。浏览器仍直接访问 `https://<gcp-dev MagicDNS>:20220`，但中间不经过 Tailscale HTTP reverse proxy；Vite 自己处理 HTTP/WebSocket，`/api` 再由 Vite 在 GCP 内部代理到 `127.0.0.1:20221`，无需转发 API 端口。
 
+GitHub 登录仍复用 `MemoFlow Dev Test` GitHub App 已登记的 canonical callback `https://<gcp-dev MagicDNS>:20201/api/auth/callback/github`。host-dev Tailnet 脚本会把该值写入 `GITHUB_OAUTH_REDIRECT_URI`，并仅为 `:20201/api/auth/callback/github` 建立到 host-dev API `127.0.0.1:20221/api/auth/callback/github` 的 path bridge；`:20201` 其余路径继续属于 prod-like API。这样无需为了每个 worktree 再修改 GitHub App registration，也不会扩大 OAuth callback wildcard。
+
 Web `20220` 默认使用 Vite Bundled Dev，并将 `MEMOFLOW_VITE_BUNDLED_DEV_LAZY=false` 作为 remote host-dev 基线：动态 import 不再逐个触发 `/@vite/lazy` 的跨 Tailnet 编译往返，而是在服务端优先形成稳定 bundle，同时继续保留 Vue/Tailwind HMR。需要做本地 A/B 时可在 `.env.development.local` 临时设 `MEMOFLOW_VITE_BUNDLED_DEV_LAZY=true`；若需要排查 Bundled Dev/plugin 本身，则设 `MEMOFLOW_VITE_BUNDLED_DEV=false` 回退 classic Vite。测试 lane 不启用 bundled dev。当前 `@tailwindcss/vite` 4.3.x 的 `hotUpdate` 仍依赖 classic dev-server context，因此 Web Vite config 有一个仅 Bundled Dev 生效的局部兼容 adapter；不要把它扩散到业务代码。
 
 `prod-like` 使用独立 `20200-20211`，因此不需要停止任何 prod-like Web/API 容器。

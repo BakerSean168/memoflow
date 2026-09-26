@@ -38,6 +38,10 @@ describe('getGithubOAuthConfig e2e-mock keep-boundary (residual 1333)', () => {
     vi.stubEnv('RUNTIME_LANE', 'host-dev');
     vi.stubEnv('GITHUB_OAUTH_CLIENT_ID', 'Iv23li-real-client-id');
     vi.stubEnv('GITHUB_OAUTH_CLIENT_SECRET', 'real-client-secret');
+    vi.stubEnv(
+      'GITHUB_OAUTH_REDIRECT_URI',
+      'https://gcp-dev-01.example.ts.net:20201/api/auth/callback/github',
+    );
     vi.stubEnv('JWT_SECRET', 'test-jwt-secret-not-for-production-min-32');
     vi.stubEnv('DATABASE_URL', 'postgresql://test_user:test_pass@127.0.0.1:5433/memoflow_test');
 
@@ -47,6 +51,9 @@ describe('getGithubOAuthConfig e2e-mock keep-boundary (residual 1333)', () => {
     expect(config?.clientId).not.toBe('e2e-mock');
     expect(config?.clientId).toBeTruthy();
     expect(config?.clientSecret).toBeTruthy();
+    expect(config?.redirectURI).toBe(
+      'https://gcp-dev-01.example.ts.net:20201/api/auth/callback/github',
+    );
   });
 
   it('returns null on host-dev when only client id is set (residual 1338)', async () => {

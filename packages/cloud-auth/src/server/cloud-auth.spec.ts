@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createCloudAuth, type CloudPrincipal } from './cloud-auth.js';
 
-function createFixture() {
+function createFixture(options: {
+  github?: { clientId: string; clientSecret: string; redirectURI?: string };
+} = {}) {
   const createDeviceCode = vi.fn(async ({ data }: { data: Record<string, unknown> }) => ({
     id: 'device-record-1',
     ...data,
@@ -31,6 +33,15 @@ function createFixture() {
     user,
   };
   const database = {
+    cloudAuthVerification: {
+      create: vi.fn(async ({ data }: { data: Record<string, unknown> }) => ({
+        id: 'verification-record-1',
+        ...data,
+      })),
+      findFirst: vi.fn().mockResolvedValue(null),
+      update: vi.fn().mockResolvedValue(null),
+      deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
+    },
     cloudAuthDeviceCode: {
       create: createDeviceCode,
       findFirst: findDeviceCode,
@@ -47,6 +58,7 @@ function createFixture() {
     baseUrl: 'https://api.memo.test/api/auth',
     deviceVerificationUrl: 'https://app.memo.test/auth/device',
     trustedOrigins: ['https://app.memo.test'],
+    github: options.github,
     userProvisioner: { provision: vi.fn() },
     emailDelivery: { send: vi.fn() },
   });
@@ -71,6 +83,35 @@ describe('cloud auth contract', () => {
     expect(principal).not.toHaveProperty('profileId');
     expect(principal).not.toHaveProperty('profileUnlocked');
     expect(principal).not.toHaveProperty('guest');
+  });
+
+  it('uses an explicit GitHub provider redirect URI without changing the auth base URL', async () => {
+    const { auth } = createFixture({
+      github: {
+        clientId: 'Iv23li-test-client-id',
+        clientSecret: 'test-client-secret',
+        redirectURI: 'https://oauth.memo.test:20201/api/auth/callback/github',
+      },
+    });
+
+    const response = await auth.handler(
+      new Request('https://api.memo.test/api/auth/sign-in/social', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          provider: 'github',
+          callbackURL: 'https://app.memo.test/',
+        }),
+      }),
+    );
+    const payload = (await response.json()) as { url?: string };
+
+    expect(response.status).toBe(200);
+    const providerUrl = new URL(payload.url ?? '');
+    expect(providerUrl.hostname).toBe('github.com');
+    expect(providerUrl.searchParams.get('redirect_uri')).toBe(
+      'https://oauth.memo.test:20201/api/auth/callback/github',
+    );
   });
 
   it('issues a short-lived device authorization for the Desktop public client', async () => {
