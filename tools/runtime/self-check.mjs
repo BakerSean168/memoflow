@@ -34,6 +34,15 @@ assert.equal(hostDev.ports.api, 20221);
 assert.equal(hostDev.ports.powersync, 20222);
 assert.equal(hostDev.ports.postgres, 20230);
 assert.equal(hostDev.ports.redis, 20231);
+assert.equal(hostDev.commands.start, 'corepack pnpm run dev:host');
+assert.equal(hostDev.commands.tailnet, 'corepack pnpm run runtime:tailnet:host-dev');
+
+const apiProject = JSON.parse(readFileSync('apps/api/project.json', 'utf8'));
+assert.equal(
+  apiProject.targets?.serve?.continuous,
+  true,
+  'api:serve must stay continuous so host-dev can run API + Web together',
+);
 
 const sharedEnv = readEnv('.env');
 assert.equal(sharedEnv.has('API_PORT'), false, 'root .env must not shadow environment API_PORT');

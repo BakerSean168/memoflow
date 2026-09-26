@@ -50,6 +50,28 @@ describe('web Vite development configuration', () => {
     }
   });
 
+  it('allows the configured MagicDNS development host without disabling host checks', async () => {
+    expect(typeof viteConfig).toBe('function');
+    if (typeof viteConfig !== 'function') return;
+
+    const previousWebUrl = process.env.MEMOFLOW_WEB_URL;
+    process.env.MEMOFLOW_WEB_URL = 'https://gcp-dev-01.example.ts.net:20220';
+    try {
+      const config = await viteConfig({
+        command: 'serve',
+        mode: 'development',
+        isSsrBuild: false,
+        isPreview: false,
+      });
+
+      expect(config.server?.allowedHosts).toEqual(['gcp-dev-01.example.ts.net']);
+      expect(config.server?.strictPort).toBe(true);
+    } finally {
+      if (previousWebUrl === undefined) delete process.env.MEMOFLOW_WEB_URL;
+      else process.env.MEMOFLOW_WEB_URL = previousWebUrl;
+    }
+  });
+
   it('guards Tailwind classic hot-update handling in bundled dev', async () => {
     expect(typeof viteConfig).toBe('function');
     if (typeof viteConfig !== 'function') return;

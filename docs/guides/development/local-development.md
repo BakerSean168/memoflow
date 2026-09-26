@@ -184,7 +184,7 @@ Nx/Vite 插件会自动推断 `vite:dev` target。该 target 不是
 | PostgreSQL |    `20230` |     `20210` |
 | Redis      |    `20231` |     `20211` |
 
-`host-dev` 通过 VS Code Remote/SSH port forwarding 暴露给工作站，推荐保持同号映射；`prod-like` 由 `docker-compose.local.yml` 完整容器化运行。两套端口互不重叠，因此可以同时存在，不需要通过停止 Docker Web/API 来“替换”服务。
+`host-dev` 默认通过 Tailscale Serve + MagicDNS HTTPS 暴露给工作站；VS Code Remote/SSH port forwarding 仅作为 fallback。`prod-like` 由 `docker-compose.local.yml` 完整容器化运行。两套端口互不重叠，因此可以同时存在，不需要通过停止 Docker Web/API 来“替换”服务。
 
 `staging` 固定使用 `20250-20261`，`prod` 位于 Alibaba 独立主机并由 Caddy 使用公网 `80/443`。完整定义均来自 `tools/runtime/profiles.json`。
 
@@ -223,11 +223,10 @@ prod-like 与 host-dev 已使用不同端口块，可以同时运行。
 
 ## 5.2 模式 B：GCP Dev host-dev（默认开发内环）
 
-这是 Web/API 日常开发的默认方式。Docker 只启动基础设施，业务进程直接在宿主机运行并热更新：
+这是 Web/API 日常开发的默认方式。Docker 只启动基础设施，业务进程直接在宿主机运行并热更新；推荐用一条命令同时准备 Tailnet HTTPS ingress：
 
 ```bash
-pnpm docker:dev:up
-pnpm nx run-many -t serve --projects=api,web --parallel=2
+corepack pnpm run dev:host
 ```
 
 端口固定为：
@@ -240,7 +239,7 @@ PostgreSQL 20230
 Redis      20231
 ```
 
-在 GCP Dev 上把它放进 `tmux` 的 `MemoFlow:dev` window；工作站通过 VS Code Remote/SSH 转发 `20220 -> localhost:20220`、`20221 -> localhost:20221`。浏览器访问 `http://localhost:20220`。
+在 GCP Dev 上把它放进 `tmux` 的 `MemoFlow:dev` window。首次或 MagicDNS 变化后运行 `corepack pnpm run runtime:tailnet:host-dev`；该命令配置 Tailscale Serve `20220 -> 127.0.0.1:20220`，并生成 gitignored `.env.development.local` 中的 Tailnet Web/Auth/CORS origin。浏览器直接访问 `https://<gcp-dev MagicDNS>:20220`；`/api` 由 Vite 在 GCP 内部代理到 `127.0.0.1:20221`，无需转发 API 端口。
 
 Web `20220` 默认使用 Vite Bundled Dev。它针对远程工作站访问把 native-ESM 的大量模块请求收敛成少量 bundled assets，同时继续保留 Vue/Tailwind HMR；测试 lane 不启用该实验模式。若需要排查 Bundled Dev/plugin 本身，可在 `.env.development.local` 中临时设置 `MEMOFLOW_VITE_BUNDLED_DEV=false` 回退 classic Vite。当前 `@tailwindcss/vite` 4.3.x 的 `hotUpdate` 仍依赖 classic dev-server context，因此 Web Vite config 有一个仅 Bundled Dev 生效的局部兼容 adapter；不要把它扩散到业务代码。
 

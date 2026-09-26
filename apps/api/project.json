@@ -11,6 +11,7 @@
   "targets": {
     "serve": {
       "executor": "nx:run-commands",
+      "continuous": true,
       "options": {
         "command": "node ../../node_modules/tsx/dist/cli.mjs watch src/main.ts",
         "cwd": "apps/api"

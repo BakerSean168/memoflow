@@ -24,7 +24,7 @@ MemoFlow 的运行时首先按 **4 个环境** 建模：`host-dev`、`prod-like`
 
 | Environment | 目的                                       | Host / 访问方式                                                       | 端口契约                                                               |
 | ----------- | ------------------------------------------ | --------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `host-dev`  | 日常编码、Vite Bundled Dev HMR、API watch  | GCP Dev；工作站通过 VS Code Remote/SSH port forwarding 访问           | Web `20220`、API `20221`、PowerSync `20222`、PG `20230`、Redis `20231` |
+| `host-dev`  | 日常编码、Vite Bundled Dev HMR、API watch  | GCP Dev；工作站默认通过 Tailscale Serve + MagicDNS HTTPS 访问         | Web `20220`、API `20221`、PowerSync `20222`、PG `20230`、Redis `20231` |
 | `prod-like` | 发布前完整 Docker / production-shaped 验收 | GCP Dev；`docker-compose.local.yml`；需要远程验收时用 Tailscale Serve | Web `20200`、API `20201`、PowerSync `20202`、PG `20210`、Redis `20211` |
 | `staging`   | 稳定集成环境、candidate exact-digest 验收  | GCP Dev staging watcher                                               | Web `20250`、API `20251`、PowerSync `20252`、PG `20260`、Redis `20261` |
 | `prod`      | 对用户提供正式服务                         | Alibaba production watcher + Caddy                                    | public HTTP `80` / HTTPS `443`；PG `5432`、Redis `6379` 仅 loopback    |
@@ -33,15 +33,21 @@ MemoFlow 的运行时首先按 **4 个环境** 建模：`host-dev`、`prod-like`
 
 ### 为什么 host-dev 不再使用 5173 / 3000
 
-`5173`、`3000`、`8080` 是框架/服务常见默认端口。在共享 GCP Dev 上同时开发 MemoFlow、BodySense、Job Harness 等项目时，继续把这些默认值当长期契约会产生冲突。因此 MemoFlow 按全局基础设施注册表占用项目块 `20200-20299`，其中 host-dev 固定使用环境 slot `20220-20239`，VS Code/SSH 转发也保持同号：
+`5173`、`3000`、`8080` 是框架/服务常见默认端口。在共享 GCP Dev 上同时开发 MemoFlow、BodySense、Job Harness 等项目时，继续把这些默认值当长期契约会产生冲突。因此 MemoFlow 按全局基础设施注册表占用项目块 `20200-20299`，其中 host-dev 固定使用环境 slot `20220-20239`。
+
+日常远程开发默认只暴露 Web `20220`：
 
 ```text
-GCP Dev :20220 -> workstation localhost:20220  (Web)
-GCP Dev :20221 -> workstation localhost:20221  (API)
-GCP Dev :20222 -> workstation localhost:20222  (PowerSync, only when needed)
+workstation browser
+  -> https://<gcp-dev MagicDNS>:20220
+  -> Tailscale Serve TLS termination
+  -> 127.0.0.1:20220 (Vite Bundled Dev + HMR)
+  -> /api proxy -> 127.0.0.1:20221
 ```
 
-日常浏览器入口应是 `http://localhost:20220`，而不是 Tailscale `:20200`。`20200-20219` 保留给 `prod-like`；`20250-20269` 保留给 `staging`。
+运行 `corepack pnpm run runtime:tailnet:host-dev` 会读取当前节点的 Tailscale MagicDNS 名称、配置 `20220 -> 127.0.0.1:20220` 的 HTTPS Serve，并把 `MEMOFLOW_WEB_URL`、`AUTH_BASE_URL`、`CORS_ORIGIN` 写入 gitignored `.env.development.local`。因此浏览器无需直接访问 `20221`，也无需日常维护 SSH 端口转发。VS Code/SSH 同号 forwarding 仍作为 Tailnet 不可用时的 fallback。
+
+`20200-20219` 保留给 `prod-like`；`20250-20269` 保留给 `staging`。
 
 ## Supporting lanes
 
@@ -59,10 +65,12 @@ Support lane 可以与四类环境共享其 owner 环境的端口（例如 `dev-
 # 查看所有环境 / lane 与端口
 pnpm runtime:preflight -- --list
 
-# host-dev
-pnpm docker:dev:up
-pnpm runtime:preflight:host-dev
-pnpm nx run-many -t serve --projects=api,web --parallel=2
+# host-dev（推荐，一条命令启动 infra + Tailnet ingress + API/Web HMR）
+corepack pnpm run dev:host
+
+# 只检查当前 lane / ingress 状态
+corepack pnpm run runtime:preflight:host-dev
+corepack pnpm run runtime:tailnet:host-dev:status
 
 # prod-like（底层命令仍使用历史 docker:local 命名）
 pnpm runtime:preflight:prod-like
@@ -92,10 +100,10 @@ pnpm e2e
 - window 内运行：
 
 ```bash
-pnpm docker:dev:up && pnpm nx run-many -t serve --projects=api,web --parallel=2
+corepack pnpm run dev:host
 ```
 
-这个 window 只拥有 `host-dev`：Docker 承载 PostgreSQL / Redis / PowerSync，API 与 Web 在宿主机直接运行并热更新。连接 GCP Dev 的工作站通过 VS Code / SSH 转发 `20220`、`20221`，必要时再转发 `20222`。
+这个 window 只拥有 `host-dev`：Docker 承载 PostgreSQL / Redis / PowerSync，API 与 Web 在宿主机直接运行并热更新。工作站默认通过 Tailnet HTTPS 访问 MagicDNS `:20220`；Vite 在 GCP 内部把 `/api` 代理到 `20221`，因此浏览器不需要单独暴露 API 端口。
 
 Web `20220` 默认启用 Vite Bundled Dev（`MEMOFLOW_VITE_BUNDLED_DEV=true`）。它仍保留 Vite/HMR 开发语义，但把浏览器侧的大型 native-ESM module waterfall 收敛为少量 bundled dev assets，更适合 GCP Dev -> 工作站这种高 RTT 链路。需要诊断 Vite/plugin 兼容问题时，可在 gitignored `.env.development.local` 中设置 `MEMOFLOW_VITE_BUNDLED_DEV=false` 临时回退 classic native-ESM dev server；Playwright/test lane 也固定保持 classic 模式，避免实验能力改变 CI 语义。
 
@@ -103,7 +111,7 @@ Web `20220` 默认启用 Vite Bundled Dev（`MEMOFLOW_VITE_BUNDLED_DEV=true`）�
 
 当前 Vite/Rolldown Bundled Dev 还会把少量链接工作区 dist export 保留成浏览器无法解析的 bare specifier；目前实测涉及 `@memoflow/http-client` 与 `@memoflow/utils/shared`。因此仅 Bundled Dev lane 将这两个浏览器运行时入口 source-alias 到对应 `src` entry。classic dev、Playwright 与 production build 不采用这些兼容 alias；上游修复后应删除。
 
-不要把 host-dev 借用 `20200` 暴露给远程浏览器；`20200-20219` 始终属于 `prod-like`。host-dev 的 canonical 工作站入口保持 SSH/VS Code 同号转发后的 `http://localhost:20220`。
+不要把 host-dev 借用 `20200` 暴露给远程浏览器；`20200-20219` 始终属于 `prod-like`。host-dev 的 canonical 工作站入口是 `https://<gcp-dev MagicDNS>:20220`；SSH/VS Code 同号转发后的 `http://localhost:20220` 只作为 fallback。
 
 ## prod-like 与 `.env.production.local`
 

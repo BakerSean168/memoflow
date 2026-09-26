@@ -136,6 +136,18 @@ async function runPreflight(profileName, options) {
 
   info.push(...listProfileSummaries(profileName));
 
+  if (profileName === 'host-dev') {
+    const localDevEnv = readEnvFileMap(resolve(process.cwd(), '.env.development.local'));
+    const workstationWebUrl = localDevEnv.get('MEMOFLOW_WEB_URL');
+    if (workstationWebUrl) {
+      info.push(`  workstation.web=${workstationWebUrl}`);
+    } else {
+      warnings.push(
+        'Tailnet workstation URL is not configured. Run: corepack pnpm run runtime:tailnet:host-dev',
+      );
+    }
+  }
+
   if (profileName === 'prod-like') {
     const envMap = readEnvFileMap(resolve(process.cwd(), '.env.production.local'));
     const machineEnvMap = readEnvFileMap(resolve(process.cwd(), '.env.prod-like.local'));

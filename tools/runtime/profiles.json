@@ -8,10 +8,12 @@
       "hostGroup": "gcp-dev",
       "portBlock": "20220-20239",
       "title": "Host development (hot reload)",
-      "description": "API + Web run directly on GCP Dev with hot reload; Docker carries only PostgreSQL, Redis, and PowerSync. Access from the workstation through VS Code/SSH port forwarding.",
+      "description": "API + Web run directly on GCP Dev with hot reload; Docker carries only PostgreSQL, Redis, and PowerSync. Canonical workstation ingress is HTTPS through Tailscale Serve + MagicDNS; SSH port forwarding remains a fallback.",
       "commands": {
-        "infra": "pnpm docker:dev:up",
-        "app": "pnpm nx run-many -t serve --projects=api,web --parallel=2"
+        "start": "corepack pnpm run dev:host",
+        "infra": "corepack pnpm run docker:dev:up",
+        "tailnet": "corepack pnpm run runtime:tailnet:host-dev",
+        "app": "corepack pnpm exec nx run-many -t serve --projects=api,web --parallel=2"
       },
       "ports": {
         "web": 20220,
