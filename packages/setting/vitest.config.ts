@@ -1,12 +1,12 @@
 /// <reference types="vitest" />
 import path from 'node:path';
-import { createPackageVitestConfig } from '../../vitest.shared';
+import { createPackageVitestConfig } from '../../vitest.shared.ts';
 
-const workspaceRoot = path.resolve(__dirname, '../..');
+const workspaceRoot = path.resolve(import.meta.dirname, '../..');
 const contractsRoot = path.resolve(workspaceRoot, 'packages/contracts/src');
 
 export default createPackageVitestConfig({
-  projectRoot: __dirname,
+  projectRoot: import.meta.dirname,
   environment: 'node',
   name: 'setting',
   governedCoverage: true,

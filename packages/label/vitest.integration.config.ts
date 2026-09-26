@@ -7,15 +7,15 @@ import {
   domainResolveAtAlias,
 } from '../../vitest.workspace-helpers'
 import { createIntegrationTestEnv } from '../test-utils/src/setup/database'
-import { createVitestReportConfig } from '../../vitest.shared'
+import { createVitestReportConfig } from '../../vitest.shared.ts'
 
 export default defineConfig({
   plugins: [contractsDeepImportResolver, domainResolveAtAlias],
   resolve: { alias: createPackageResolveAliases('label') },
   test: {
     name: 'label-integration',
-    ...createVitestReportConfig(__dirname, 'label-integration'),
-    root: __dirname,
+    ...createVitestReportConfig(import.meta.dirname, 'label-integration'),
+    root: import.meta.dirname,
     globals: true,
     environment: 'node',
     include: ['src/**/*.integration.test.ts', 'src/**/*.integration.spec.ts'],
@@ -23,7 +23,7 @@ export default defineConfig({
     testTimeout: 30000,
     passWithNoTests: false,
     env: createIntegrationTestEnv(),
-    globalSetup: [path.resolve(__dirname, '../test-utils/src/setup/integration-global-setup.ts')],
+    globalSetup: [path.resolve(import.meta.dirname, '../test-utils/src/setup/integration-global-setup.ts')],
     fileParallelism: false,
     pool: 'forks',
     maxWorkers: 1,

@@ -726,7 +726,7 @@ export class PowerSyncNotificationReliableAdapter implements NotificationReliabl
       [nextRetryIso, nowIso, existing.id, identityId, nowIso],
     );
 
-    if (updateResult.rowsAffected === 0) {
+    if (updateResult.rowsAffected !== 1) {
       const current = await this.db.getOptional<PowerSyncOutboxRow>(
         `SELECT * FROM notification_dispatch_outbox WHERE id = ? LIMIT 1`,
         [existing.id],
@@ -881,7 +881,7 @@ export class PowerSyncNotificationReliableAdapter implements NotificationReliabl
       ],
     );
 
-    return result.rowsAffected === 0 ? 'conflict' : 'ok';
+    return result.rowsAffected === 1 ? 'ok' : 'conflict';
   }
 
   idempotencyKeyFor(identityId: string, occurrenceKey: string): string {

@@ -3,155 +3,155 @@
   "compilerOptions": {
     "paths": {
       "@memoflow/database": [
-        "packages/database/dist/index.d.ts"
+        "./packages/database/dist/index.d.ts"
       ],
       "@memoflow/database/prisma": [
-        "packages/database/dist/generated/prisma/client.d.ts"
+        "./packages/database/dist/generated/prisma/client.d.ts"
       ],
       "@memoflow/powersync-schema": [
-        "packages/powersync-schema/dist/index.d.ts"
+        "./packages/powersync-schema/dist/index.d.ts"
       ],
       "@memoflow/patterns": [
-        "packages/patterns/dist/index.d.ts"
+        "./packages/patterns/dist/index.d.ts"
       ],
       "@memoflow/utils": [
-        "packages/utils/dist/index.d.ts"
+        "./packages/utils/dist/index.d.ts"
       ],
       "@memoflow/utils/*": [
-        "packages/utils/dist/*/index.d.ts",
-        "packages/utils/dist/*.d.ts"
+        "./packages/utils/dist/*/index.d.ts",
+        "./packages/utils/dist/*.d.ts"
       ],
       "@memoflow/contracts": [
-        "packages/contracts/dist/index.d.ts"
+        "./packages/contracts/dist/index.d.ts"
       ],
       "@memoflow/contracts/*": [
-        "packages/contracts/dist/modules/*/index.d.ts",
-        "packages/contracts/dist/*/index.d.ts"
+        "./packages/contracts/dist/modules/*/index.d.ts",
+        "./packages/contracts/dist/*/index.d.ts"
       ],
       "@memoflow/assets": [
-        "packages/assets/dist/index.d.ts"
+        "./packages/assets/dist/index.d.ts"
       ],
       "@memoflow/assets/*": [
-        "packages/assets/dist/*/index.d.ts",
-        "packages/assets/dist/*.d.ts"
+        "./packages/assets/dist/*/index.d.ts",
+        "./packages/assets/dist/*.d.ts"
       ],
       "@memoflow/domain-shared": [
-        "packages/domain-shared/dist/index.d.ts"
+        "./packages/domain-shared/dist/index.d.ts"
       ],
       "@memoflow/domain-shared/*": [
-        "packages/domain-shared/dist/*/index.d.ts"
+        "./packages/domain-shared/dist/*/index.d.ts"
       ],
       "@memoflow/governance": [
-        "packages/governance/dist/index.d.ts"
+        "./packages/governance/dist/index.d.ts"
       ],
       "@memoflow/governance/*": [
-        "packages/governance/dist/*/index.d.ts"
+        "./packages/governance/dist/*/index.d.ts"
       ],
       "@memoflow/account": [
-        "packages/account/dist/index.d.ts"
+        "./packages/account/dist/index.d.ts"
       ],
       "@memoflow/account/*": [
-        "packages/account/dist/*/index.d.ts"
+        "./packages/account/dist/*/index.d.ts"
       ],
       "@memoflow/cloud-auth": [
-        "packages/cloud-auth/dist/index.d.ts"
+        "./packages/cloud-auth/dist/index.d.ts"
       ],
       "@memoflow/cloud-auth/*": [
-        "packages/cloud-auth/dist/*/index.d.ts"
+        "./packages/cloud-auth/dist/*/index.d.ts"
       ],
       "@memoflow/goal": [
-        "packages/goal/dist/index.d.ts"
+        "./packages/goal/dist/index.d.ts"
       ],
       "@memoflow/goal/*": [
-        "packages/goal/dist/*/index.d.ts"
+        "./packages/goal/dist/*/index.d.ts"
       ],
       "@memoflow/task": [
-        "packages/task/dist/index.d.ts"
+        "./packages/task/dist/index.d.ts"
       ],
       "@memoflow/task/*": [
-        "packages/task/dist/*/index.d.ts"
+        "./packages/task/dist/*/index.d.ts"
       ],
       "@memoflow/repository": [
-        "packages/repository/dist/index.d.ts"
+        "./packages/repository/dist/index.d.ts"
       ],
       "@memoflow/repository/*": [
-        "packages/repository/dist/*/index.d.ts"
+        "./packages/repository/dist/*/index.d.ts"
       ],
       "@memoflow/reminder": [
-        "packages/reminder/dist/index.d.ts"
+        "./packages/reminder/dist/index.d.ts"
       ],
       "@memoflow/reminder/*": [
-        "packages/reminder/dist/*/index.d.ts"
+        "./packages/reminder/dist/*/index.d.ts"
       ],
       "@memoflow/notification": [
-        "packages/notification/dist/index.d.ts"
+        "./packages/notification/dist/index.d.ts"
       ],
       "@memoflow/notification/*": [
-        "packages/notification/dist/*/index.d.ts"
+        "./packages/notification/dist/*/index.d.ts"
       ],
       "@memoflow/schedule": [
-        "packages/schedule/dist/index.d.ts"
+        "./packages/schedule/dist/index.d.ts"
       ],
       "@memoflow/schedule/*": [
-        "packages/schedule/dist/*/index.d.ts"
+        "./packages/schedule/dist/*/index.d.ts"
       ],
       "@memoflow/setting": [
-        "packages/setting/dist/index.d.ts"
+        "./packages/setting/dist/index.d.ts"
       ],
       "@memoflow/setting/*": [
-        "packages/setting/dist/*/index.d.ts"
+        "./packages/setting/dist/*/index.d.ts"
       ],
       "@memoflow/ai": [
-        "packages/ai/dist/index.d.ts"
+        "./packages/ai/dist/index.d.ts"
       ],
       "@memoflow/ai/*": [
-        "packages/ai/dist/*/index.d.ts",
-        "packages/ai/dist/*.d.ts"
+        "./packages/ai/dist/*/index.d.ts",
+        "./packages/ai/dist/*.d.ts"
       ],
       "@memoflow/http-client": [
-        "packages/http-client/dist/index.d.ts"
+        "./packages/http-client/dist/index.d.ts"
       ],
       "@memoflow/ipc-client": [
-        "packages/ipc-client/dist/index.d.ts"
+        "./packages/ipc-client/dist/index.d.ts"
       ],
       "@memoflow/ui-core": [
-        "packages/ui-core/dist/index.d.ts"
+        "./packages/ui-core/dist/index.d.ts"
       ],
       "@memoflow/ui-core/*": [
-        "packages/ui-core/dist/*",
-        "packages/ui-core/dist/*/index.d.ts"
+        "./packages/ui-core/dist/*",
+        "./packages/ui-core/dist/*/index.d.ts"
       ],
       "@memoflow/ui-react-native": [
-        "packages/ui-react-native/dist/index.d.ts"
+        "./packages/ui-react-native/dist/index.d.ts"
       ],
       "@memoflow/app-react": [
-        "packages/app-react/dist/index.d.ts"
+        "./packages/app-react/dist/index.d.ts"
       ],
       "@memoflow/app-vue": [
-        "packages/app-vue/dist/index.d.ts"
+        "./packages/app-vue/dist/index.d.ts"
       ],
       "@memoflow/ui-vue-shadcn": [
-        "packages/ui-vue-shadcn/dist/index.d.ts"
+        "./packages/ui-vue-shadcn/dist/index.d.ts"
       ],
       "@memoflow/ui-vue-shadcn/*": [
-        "packages/ui-vue-shadcn/dist/*",
-        "packages/ui-vue-shadcn/dist/*/index.d.ts"
+        "./packages/ui-vue-shadcn/dist/*",
+        "./packages/ui-vue-shadcn/dist/*/index.d.ts"
       ],
       "@memoflow/test-utils": [
-        "packages/test-utils/src/index.ts"
+        "./packages/test-utils/src/index.ts"
       ],
       "@memoflow/test-utils/*": [
-        "packages/test-utils/src/*",
-        "packages/test-utils/src/*.ts"
+        "./packages/test-utils/src/*",
+        "./packages/test-utils/src/*.ts"
       ],
       "@api/shared": [
-        "apps/api/src/shared/index.ts"
+        "./apps/api/src/shared/index.ts"
       ],
       "@memoflow/scheduler": [
-        "packages/scheduler/dist/index.d.ts"
+        "./packages/scheduler/dist/index.d.ts"
       ],
       "@memoflow/scheduler/*": [
-        "packages/scheduler/dist/*/index.d.ts"
+        "./packages/scheduler/dist/*/index.d.ts"
       ]
     }
   }

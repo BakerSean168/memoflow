@@ -3,17 +3,25 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "packages/schedule-orchestration/src",
-  "tags": ["scope:shared", "type:lib", "layer:domain"],
+  "tags": [
+    "scope:shared",
+    "type:lib",
+    "layer:domain"
+  ],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/packages/schedule-orchestration/dist"],
+      "outputs": [
+        "{workspaceRoot}/packages/schedule-orchestration/dist"
+      ],
+      "cache": true,
+      "dependsOn": [
+        "^build"
+      ],
       "options": {
         "command": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsup --clean=false",
         "cwd": "packages/schedule-orchestration"
-      },
-      "cache": true,
-      "dependsOn": ["^build"]
+      }
     },
     "typecheck": {
       "executor": "nx:run-commands",
@@ -23,16 +31,21 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/schedule-orchestration/**/*.{ts,js}"]
+        "args": [
+          "**/*.{ts,js}"
+        ]
       }
     },
     "test": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "inputs": ["default", "^production"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
+      "inputs": [
+        "default",
+        "^production"
+      ],
       "cache": true,
       "options": {
         "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",

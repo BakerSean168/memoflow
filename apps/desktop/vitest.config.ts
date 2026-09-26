@@ -1,11 +1,11 @@
 import vue from '@vitejs/plugin-vue';
 import { defineConfig } from 'vitest/config';
-import { createSharedConfig } from '../../vitest.shared';
+import { createSharedConfig } from '../../vitest.shared.ts';
 import {
   createAppVueSourceAliasEntries,
   createWorkspaceSourceAliasEntries,
   createUiVueSourceAliasEntries,
-} from '../../vite.workspace-aliases';
+} from '../../vite.workspace-aliases.ts';
 
 // Desktop renderer tests import many workspace packages through their source
 // entrypoints so Electron-specific adapters stay aligned with local edits.
@@ -41,21 +41,21 @@ const desktopTestWorkspaceEntries = [
   ['@memoflow/cloud-auth', 'packages/cloud-auth/src/index.ts'],
 ] as const;
 const sharedConfig = createSharedConfig({
-  projectRoot: __dirname,
+  projectRoot: import.meta.dirname,
   // The desktop app pulls in Electron-facing modules and workspace aliases
   // that behave more predictably under the Node test environment.
   environment: 'node',
   aliasEntries: [
     { find: /^electron$/, replacement: './test-support/electron.stub.ts' },
-    ...createAppVueSourceAliasEntries(__dirname + '/../..'),
-    ...createUiVueSourceAliasEntries(__dirname + '/../..'),
-    ...createWorkspaceSourceAliasEntries(__dirname + '/../..', desktopTestWorkspaceEntries),
+    ...createAppVueSourceAliasEntries(import.meta.dirname + '/../..'),
+    ...createUiVueSourceAliasEntries(import.meta.dirname + '/../..'),
+    ...createWorkspaceSourceAliasEntries(import.meta.dirname + '/../..', desktopTestWorkspaceEntries),
   ],
 }) as Record<string, unknown>;
 
 export default defineConfig({
   ...sharedConfig,
-  root: __dirname,
+  root: import.meta.dirname,
   plugins: [
     vue({
       template: {

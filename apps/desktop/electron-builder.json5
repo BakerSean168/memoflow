@@ -14,7 +14,7 @@
     "node_modules/file-uri-to-path/**/*",
     "node_modules/undici/**/*"
   ],
-  "electronVersion": "43.1.0",
+  "electronVersion": "44.4.5",
   "productName": "MemoFlow",
   "executableName": "memoflow",
   "extraMetadata": {
@@ -29,6 +29,11 @@
     "dist-renderer/**/*",
     "dist-electron/**/*",
     "package.json",
+    {
+      "from": "node_modules/is-stream",
+      "to": "node_modules/winston/node_modules/is-stream",
+      "filter": ["**/*"]
+    },
     {
       "from": "../../packages/database",
       "to": "node_modules/@memoflow/database",

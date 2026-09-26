@@ -79,7 +79,7 @@ async function prepareAuthPage(page: Page): Promise<void> {
       '#email, #reg-email, [data-testid="register-submit-button"], button:has-text("Sign In")',
     )
     .first()
-    .waitFor({ state: 'visible', timeout: TIMEOUT_CONFIG.NAVIGATION });
+    .waitFor({ state: 'visible', timeout: TIMEOUT_CONFIG.AUTH_BOOTSTRAP });
   await page.waitForTimeout(TIMEOUT_CONFIG.SHORT_WAIT);
 }
 
@@ -96,10 +96,10 @@ export async function ensureRegisterScene(page: Page): Promise<void> {
   const registerLink = page.getByRole('button', { name: AUTH_SCENE_LINK_TEXT.register });
   const visibleScene = await Promise.race([
     registerEmailField
-      .waitFor({ state: 'visible', timeout: TIMEOUT_CONFIG.ELEMENT_WAIT })
+      .waitFor({ state: 'visible', timeout: TIMEOUT_CONFIG.AUTH_BOOTSTRAP })
       .then(() => 'register' as const),
     registerLink
-      .waitFor({ state: 'visible', timeout: TIMEOUT_CONFIG.ELEMENT_WAIT })
+      .waitFor({ state: 'visible', timeout: TIMEOUT_CONFIG.AUTH_BOOTSTRAP })
       .then(() => 'login' as const),
   ]);
   if (visibleScene === 'register') {
@@ -122,10 +122,10 @@ export async function ensureLoginScene(page: Page): Promise<void> {
   const loginLink = page.getByRole('button', { name: AUTH_SCENE_LINK_TEXT.login });
   const visibleScene = await Promise.race([
     loginEmailField
-      .waitFor({ state: 'visible', timeout: TIMEOUT_CONFIG.ELEMENT_WAIT })
+      .waitFor({ state: 'visible', timeout: TIMEOUT_CONFIG.AUTH_BOOTSTRAP })
       .then(() => 'login' as const),
     loginLink
-      .waitFor({ state: 'visible', timeout: TIMEOUT_CONFIG.ELEMENT_WAIT })
+      .waitFor({ state: 'visible', timeout: TIMEOUT_CONFIG.AUTH_BOOTSTRAP })
       .then(() => 'register' as const),
   ]);
   if (visibleScene === 'login') {

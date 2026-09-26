@@ -3,7 +3,11 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/test-utils/src",
   "projectType": "library",
-  "tags": ["scope:test-utils", "type:lib", "layer:testing"],
+  "tags": [
+    "scope:test-utils",
+    "type:lib",
+    "layer:testing"
+  ],
   "targets": {
     "build": {
       "executor": "nx:noop",
@@ -12,10 +16,10 @@
       "cache": false
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/test-utils/**/*.{ts,js}"]
+        "args": [
+          "**/*.{ts,js}"
+        ]
       }
     },
     "typecheck": {

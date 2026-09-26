@@ -1,9 +1,9 @@
 /// <reference types="vitest" />
 import { defineConfig, mergeConfig } from 'vitest/config';
-import { createSharedConfig, createSliceCoverage } from '../../vitest.shared';
+import { createSharedConfig, createSliceCoverage } from '../../vitest.shared.ts';
 
 const baseConfig = createSharedConfig({
-  projectRoot: __dirname,
+  projectRoot: import.meta.dirname,
   reportName: 'goal-mappers',
   environment: 'node',
   testInclude: [
@@ -16,9 +16,9 @@ export default mergeConfig(
   defineConfig({
     test: {
       name: 'goal-mappers',
-      root: __dirname,
+      root: import.meta.dirname,
       coverage: createSliceCoverage({
-        projectRoot: __dirname,
+        projectRoot: import.meta.dirname,
         roots: ['src/server/infrastructure/adapters/prisma/mappers'],
         reportsDirectory: 'coverage/packages/goal/server-infrastructure-adapters-prisma-mappers',
         thresholds: {

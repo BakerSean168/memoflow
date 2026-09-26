@@ -41,13 +41,12 @@
   },
   "dependencies": {
     "@memoflow/contracts": "workspace:*",
-    "@memoflow/database": "workspace:*",
     "@memoflow/utils": "workspace:*"
   },
   "devDependencies": {
-    "@nx/vite": "23.0.2",
+    "@nx/vite": "23.2.1",
     "tsup": "^8.5.0",
-    "vite": "8.3.0",
-    "vitest": "4.1.10"
+    "vite": "8.3.1",
+    "vitest": "4.1.11"
   }
 }

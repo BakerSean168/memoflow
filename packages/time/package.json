@@ -17,14 +17,14 @@
   },
   "dependencies": {
     "@date-fns/tz": "1.5.0",
-    "@internationalized/date": "3.11.0",
+    "@internationalized/date": "3.12.4",
     "@memoflow/contracts": "workspace:*",
-    "date-fns": "^4.1.0",
+    "date-fns": "^4.4.0",
     "rrule": "2.8.1"
   },
   "devDependencies": {
     "tsup": "^8.3.5",
-    "typescript": "~6.0.3",
-    "vitest": "^3.2.4"
+    "typescript": "npm:@typescript/typescript6@6.0.2",
+    "vitest": "^4.1.11"
   }
 }

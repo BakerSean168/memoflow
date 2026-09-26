@@ -3,13 +3,19 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "packages/app-react/src",
-  "tags": ["scope:app-react", "type:lib", "type:react", "platform:mobile", "layer:ui"],
+  "tags": [
+    "scope:app-react",
+    "type:lib",
+    "type:react",
+    "platform:mobile",
+    "layer:ui"
+  ],
   "targets": {
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/app-react/**/*.{ts,tsx}"]
+        "args": [
+          "**/*.{ts,tsx}"
+        ]
       }
     },
     "typecheck": {

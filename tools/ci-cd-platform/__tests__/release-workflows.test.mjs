@@ -479,7 +479,7 @@ test('Desktop release runtime gates execute before receipts and cannot be bypass
   );
   assert.match(
     helper,
-    /timeout --signal=TERM --kill-after=15s 150s pnpm nx run desktop:test:packaged-smoke/u,
+    /timeout --signal=TERM --kill-after=15s 150s[\s\S]*?node "\$MEMOFLOW_WORKSPACE_ROOT\/node_modules\/nx\/dist\/bin\/nx\.js"[\s\S]*?run desktop:test:packaged-smoke/u,
   );
   assert.match(helper, /gnome-keyring-daemon --login --components=secrets/u);
   assert.match(helper, /gnome-keyring-daemon --start --components=secrets/u);
@@ -492,7 +492,7 @@ test('Desktop release runtime gates execute before receipts and cannot be bypass
   assert.match(packagedSpec, /SETTINGS_READY_TIMEOUT_MS = 45_000/u);
   assert.match(packagedSpec, /toHaveAttribute\(\s*'data-shell-scene',\s*'settings'/u);
   assert.match(packagedSpec, /getByTestId\('user-settings-view'\)/u);
-  assert.match(packagedSpec, /getByTestId\('settings-panel-layout'\)/u);
+  assert.match(packagedSpec, /getByTestId\('settings-content-scroll'\)/u);
   assert.match(packagedSpec, /close-timeout/u);
   assert.match(packagedSpec, /kill\('SIGKILL'\)/u);
   assert.match(workflow, /runtime_executable_kind: installed-deb/u);

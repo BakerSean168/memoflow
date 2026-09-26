@@ -12,7 +12,7 @@ export function createNxShowProjectsInvocation(args, cwd) {
   const nxCli = require.resolve('nx/bin/nx.js', { paths: [root] });
   return {
     command: process.execPath,
-    args: [nxCli, 'show', 'projects', ...args],
+    args: [nxCli, 'show', 'projects', ...args, '--json'],
     bootstrap: path.join(root, 'tools/ci/node-process-bootstrap.cjs'),
   };
 }
@@ -28,11 +28,11 @@ async function nxProjects(args, cwd) {
         NODE_OPTIONS: `${process.env.NODE_OPTIONS ?? ''} --require=${invocation.bootstrap}`.trim(),
       },
     });
-    return stdout
-      .split(/\r?\n/u)
-      .map((value) => value.trim())
-      .filter(Boolean)
-      .sort();
+    const projects = JSON.parse(stdout);
+    if (!Array.isArray(projects) || !projects.every((project) => typeof project === 'string')) {
+      throw new Error('Nx returned an invalid project list');
+    }
+    return projects.sort();
   } catch (error) {
     const detail = [error?.stderr, error?.stdout]
       .filter((value) => typeof value === 'string' && value.trim())

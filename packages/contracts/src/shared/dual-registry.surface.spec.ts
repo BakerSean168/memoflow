@@ -207,6 +207,12 @@ import { describe, expect, it } from 'vitest';
     const out: string[] = [];
     const entries = await readdir(dir, { withFileTypes: true });
     for (const entry of entries) {
+      if (dir === root && !['apps', 'packages', 'scripts', 'tools'].includes(entry.name)) {
+        continue;
+      }
+      if (entry.name.startsWith('.')) {
+        continue;
+      }
       if (entry.name === 'node_modules' || entry.name === 'dist' || entry.name === '.git') {
         continue;
       }

@@ -26,13 +26,22 @@
   },
   "targetDefaults": {
     "build": {
-      "dependsOn": ["^build"],
-      "inputs": ["production", "^production"],
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ],
       "cache": true,
-      "syncGenerators": ["@memoflow/nx-test-system:sync-test-targets"]
+      "syncGenerators": [
+        "@memoflow/nx-test-system:sync-test-targets"
+      ]
     },
     "serve": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "cache": false
     },
     "test": {
@@ -42,11 +51,15 @@
         "{workspaceRoot}/tools/test/fixtures/label-normalization.json"
       ],
       "cache": true,
-      "syncGenerators": ["@memoflow/nx-test-system:sync-test-targets"]
+      "syncGenerators": [
+        "@memoflow/nx-test-system:sync-test-targets"
+      ]
     },
     "test:watch": {
       "cache": false,
-      "syncGenerators": ["@memoflow/nx-test-system:sync-test-targets"]
+      "syncGenerators": [
+        "@memoflow/nx-test-system:sync-test-targets"
+      ]
     },
     "test:coverage": {
       "inputs": [
@@ -55,45 +68,78 @@
         "{workspaceRoot}/tools/test/fixtures/label-normalization.json"
       ],
       "cache": true,
-      "syncGenerators": ["@memoflow/nx-test-system:sync-test-targets"]
+      "syncGenerators": [
+        "@memoflow/nx-test-system:sync-test-targets"
+      ]
     },
     "test:integration": {
-      "inputs": ["default", "^production"],
+      "inputs": [
+        "default",
+        "^production"
+      ],
       "cache": false,
       "parallelism": false
     },
     "test:smoke": {
-      "inputs": ["default", "^production"],
+      "inputs": [
+        "default",
+        "^production"
+      ],
       "cache": true
     },
     "test:perf": {
-      "inputs": ["default", "^production"],
+      "inputs": [
+        "default",
+        "^production"
+      ],
       "cache": false
     },
     "e2e": {
-      "inputs": ["default", "^production"],
+      "inputs": [
+        "default",
+        "^production"
+      ],
       "cache": false
     },
     "lint": {
-      "inputs": ["default", "{workspaceRoot}/eslint.config.ts"],
+      "inputs": [
+        "default",
+        "{workspaceRoot}/eslint.config.ts"
+      ],
       "cache": true,
-      "syncGenerators": ["@memoflow/nx-test-system:sync-test-targets"]
+      "syncGenerators": [
+        "@memoflow/nx-test-system:sync-test-targets"
+      ]
     },
     "@nx/js:tsc": {
       "cache": true,
-      "dependsOn": ["^build"],
-      "inputs": ["production", "^production"]
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ]
     },
     "typecheck": {
-      "dependsOn": ["^build"],
-      "inputs": ["production", "^production"],
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ],
       "cache": true,
-      "syncGenerators": ["@memoflow/nx-test-system:sync-test-targets"]
+      "syncGenerators": [
+        "@memoflow/nx-test-system:sync-test-targets"
+      ]
     }
   },
   "sync": {
     "applyChanges": true,
-    "globalGenerators": ["@memoflow/nx-test-system:sync-test-targets"]
+    "globalGenerators": [
+      "@memoflow/nx-test-system:sync-test-targets"
+    ]
   },
   "plugins": [
     {
@@ -114,7 +160,8 @@
         "typecheckTargetName": "typecheck",
         "buildDepsTargetName": "build-deps",
         "watchDepsTargetName": "watch-deps"
-      }
+      },
+      "exclude": ["apps/web/**/*"]
     },
     {
       "plugin": "@nx/vitest",
@@ -123,6 +170,18 @@
         "ciTargetName": "test-ci",
         "testMode": "watch"
       }
+    },
+    {
+      "plugin": "@nx/vite/plugin",
+      "options": {
+        "buildTargetName": "build",
+        "serveTargetName": "serve",
+        "devTargetName": "serve",
+        "previewTargetName": "preview",
+        "serveStaticTargetName": "serve-static",
+        "typecheckTargetName": "typecheck"
+      },
+      "include": ["apps/web/**/*"]
     }
   ],
   "release": {

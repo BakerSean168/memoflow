@@ -3,54 +3,41 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/web/src",
-  "tags": ["scope:web", "type:app", "layer:app"],
+  "tags": [
+    "scope:web",
+    "type:app",
+    "layer:app"
+  ],
   "targets": {
     "serve": {
-      "executor": "@nx/vite:dev-server",
-      "options": {
-        "buildTarget": "web:build",
-        "mode": "development"
-      },
       "configurations": {
         "local": {
-          "mode": "development",
-          "envFile": ".env.development.local"
+          "mode": "development"
         },
         "staging": {
-          "mode": "staging",
-          "envFile": ".env.staging"
+          "mode": "staging"
         }
       }
     },
     "build": {
-      "executor": "@nx/vite:build",
-      "outputs": ["{workspaceRoot}/dist/apps/web"],
-      "options": {
-        "outputPath": "dist/apps/web",
-        "configFile": "apps/web/vite.config.ts",
-        "skipTypeCheck": true
-      },
       "configurations": {
         "staging": {
-          "mode": "staging",
-          "envFile": ".env.staging"
+          "mode": "staging"
         },
         "production": {
-          "mode": "production",
-          "envFile": ".env.production"
+          "mode": "production"
         }
-      }
-    },
-    "preview": {
-      "executor": "@nx/vite:preview-server",
-      "options": {
-        "buildTarget": "web:build"
       }
     },
     "test": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "inputs": ["default", "^production"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
+      "inputs": [
+        "default",
+        "^production"
+      ],
       "cache": true,
       "options": {
         "command": "node ./node_modules/vitest/vitest.mjs run --config apps/web/vitest.config.ts"
@@ -64,15 +51,17 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["apps/web/**/*.{ts,tsx,js,jsx,vue}"]
+        "args": [
+          "**/*.{ts,tsx,js,jsx,vue}"
+        ]
       }
     },
     "typecheck": {
       "executor": "nx:run-commands",
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "options": {
         "command": "node ../../node_modules/vue-tsc/bin/vue-tsc.js --noEmit -p tsconfig.typecheck.json",
         "cwd": "apps/web"
@@ -161,7 +150,6 @@
         "command": "node ./apps/web/e2e/helpers/run-local-docker-playwright.mjs"
       }
     },
-
     "e2e:ai-workspace": {
       "executor": "nx:run-commands",
       "outputs": [

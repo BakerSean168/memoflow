@@ -99,7 +99,7 @@ export function createScheduleLeasePowerSyncRepository(
         'UPDATE schedule_leases SET expires_at = ?, updated_at = ? WHERE lease_key = ? AND owner_token = ? AND expires_at > ?',
         [expiresIso, nowIso, request.leaseKey, request.ownerToken, nowIso],
       );
-      return res.rowsAffected > 0;
+      return (res.rowsAffected ?? 0) > 0;
     },
 
     async release(leaseKey, ownerToken): Promise<void> {

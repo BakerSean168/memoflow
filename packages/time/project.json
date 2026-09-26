@@ -3,12 +3,20 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "packages/time/src",
-  "tags": ["scope:shared", "type:lib", "layer:shared"],
-  "implicitDependencies": ["contracts"],
+  "tags": [
+    "scope:shared",
+    "type:lib",
+    "layer:shared"
+  ],
+  "implicitDependencies": [
+    "contracts"
+  ],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/packages/time/dist"],
+      "outputs": [
+        "{workspaceRoot}/packages/time/dist"
+      ],
       "options": {
         "command": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && node ../../node_modules/tsup/dist/cli-default.js --clean=false && node --input-type=module -e \"await import('./dist/index.js')\"",
         "cwd": "packages/time"
@@ -22,24 +30,29 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/time/**/*.{ts,js}"]
+        "args": [
+          "**/*.{ts,js}"
+        ]
       }
     },
     "typecheck": {
       "executor": "nx:run-commands",
       "cache": true,
       "options": {
-        "command": "node ../../node_modules/typescript/bin/tsc --noEmit -p tsconfig.json",
+        "command": "tsc --noEmit -p tsconfig.json",
         "cwd": "packages/time"
       }
     },
     "test": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "inputs": ["default", "^production"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
+      "inputs": [
+        "default",
+        "^production"
+      ],
       "cache": true,
       "options": {
         "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",

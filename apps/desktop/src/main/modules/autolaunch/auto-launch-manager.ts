@@ -29,7 +29,7 @@ let AutoLaunchClass: AutoLaunchConstructor | null = null;
 export interface AutoLaunchConfig {
   /** The application name used for the registry entry (Windows/Linux). */
   name: string;
-  /** Whether to launch the application in hidden mode. */
+  /** Whether to launch the application in hidden mode on Windows/Linux. */
   isHidden?: boolean;
 }
 
@@ -124,7 +124,6 @@ export class AutoLaunchManager {
     if (process.platform === 'darwin') {
       app.setLoginItemSettings({
         openAtLogin: true,
-        openAsHidden: this.config.isHidden,
       });
       return true;
     }
@@ -191,16 +190,6 @@ export class AutoLaunchManager {
    */
   setHidden(isHidden: boolean): void {
     this.config.isHidden = isHidden;
-
-    if (process.platform === 'darwin') {
-      const settings = app.getLoginItemSettings();
-      if (settings.openAtLogin) {
-        app.setLoginItemSettings({
-          openAtLogin: true,
-          openAsHidden: isHidden,
-        });
-      }
-    }
   }
 }
 

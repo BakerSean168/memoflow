@@ -1,14 +1,14 @@
 import vue from '@vitejs/plugin-vue';
 import { defineConfig, mergeConfig } from 'vitest/config';
 import path from 'node:path';
-import { createSharedConfig } from '../../vitest.shared';
-import { createUiVueSourceAliasEntries } from '../../vite.workspace-aliases';
+import { createSharedConfig } from '../../vitest.shared.ts';
+import { createUiVueSourceAliasEntries } from '../../vite.workspace-aliases.ts';
 
-const workspaceRoot = path.resolve(__dirname, '../..');
+const workspaceRoot = path.resolve(import.meta.dirname, '../..');
 
 export default mergeConfig(
   createSharedConfig({
-    projectRoot: __dirname,
+    projectRoot: import.meta.dirname,
     environment: 'happy-dom',
     aliasEntries: createUiVueSourceAliasEntries(workspaceRoot),
     aliases: {
@@ -20,7 +20,7 @@ export default mergeConfig(
     },
   }),
   defineConfig({
-    root: __dirname,
+    root: import.meta.dirname,
     plugins: [vue()],
     test: {
       name: 'app-vue',

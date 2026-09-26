@@ -258,6 +258,21 @@ for (const asarPath of packagedAsars) {
     );
   }
 
+  // Winston 3 requires the CommonJS is-stream 2 API. electron-builder's
+  // hoister can otherwise place ESM-only is-stream 4 under Winston.
+  const winstonIsStreamPath = [
+    'node_modules/winston/node_modules/is-stream/package.json',
+    'node_modules/is-stream/package.json',
+  ].find((packagePath) => files.has(packagePath));
+  const winstonIsStreamVersion = winstonIsStreamPath
+    ? JSON.parse(asar.extractFile(asarPath, winstonIsStreamPath).toString()).version
+    : undefined;
+  if (!winstonIsStreamVersion?.startsWith('2.')) {
+    throw new Error(
+      `Packaged Winston requires is-stream 2, found ${winstonIsStreamVersion ?? 'none'} in ${asarPath}`,
+    );
+  }
+
   console.log(
     `[verify-packaged-runtime-deps] Verified ${seenPackages.size} runtime packages in ${asarPath}`,
   );

@@ -7,11 +7,7 @@
  * text and attribute escaping paths.
  */
 
-import MarkdownIt from 'markdown-it';
-import type StateBlock from 'markdown-it/lib/rules_block/state_block.mjs';
-import type StateCore from 'markdown-it/lib/rules_core/state_core.mjs';
-import type StateInline from 'markdown-it/lib/rules_inline/state_inline.mjs';
-import type Token from 'markdown-it/lib/token.mjs';
+import MarkdownIt, { type StateBlock, type StateCore, type StateInline, type Token } from 'markdown-it';
 // Residual 943: escapeHtml dual retired — @memoflow/utils/shared sole helper.
 import { escapeHtml } from '@memoflow/utils/shared';
 
@@ -208,7 +204,7 @@ function vaultHighlightRule(state: StateInline, silent: boolean): boolean {
     for (const token of highlighted) {
       token.level += levelOffset;
       state.tokens.push(token);
-      state.tokens_meta.push(null);
+      state.tokens_meta.push(undefined);
     }
     state.push('mark_close', 'mark', -1);
   }
@@ -232,7 +228,8 @@ function escapedHighlightRule(state: StateInline, silent: boolean): boolean {
 }
 
 function addClass(token: Token, className: string): void {
-  const classes = token.attrGet('class')?.split(/\s+/).filter(Boolean) ?? [];
+  const classValue = token.attrGet('class');
+  const classes = typeof classValue === 'string' ? classValue.split(/\s+/).filter(Boolean) : [];
   if (!classes.includes(className)) token.attrJoin('class', className);
 }
 
@@ -407,7 +404,8 @@ const defaultLinkOpen =
 
 md.renderer.rules.link_open = (tokens, idx, options, env, self) => {
   const token = tokens[idx];
-  const href = token.attrGet('href') ?? '';
+  const hrefValue = token.attrGet('href');
+  const href = typeof hrefValue === 'string' ? hrefValue : '';
   if (!isAllowedHref(href)) {
     token.attrSet('href', '#');
     token.attrJoin('class', 'unsafe-link');
@@ -434,4 +432,3 @@ export function renderSafeMarkdownExcerpt(source: string, maxChars = 500): strin
   if (!source) return '';
   return renderSafeMarkdown(source.slice(0, maxChars));
 }
-

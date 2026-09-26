@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig.workspace-src.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "moduleResolution": "Bundler",
     "lib": [
       "ES2020",

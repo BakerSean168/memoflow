@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig.workspace-src.json",
   "compilerOptions": {
-
     "composite": false,
     "incremental": false,
     "lib": ["ES2020", "DOM"],

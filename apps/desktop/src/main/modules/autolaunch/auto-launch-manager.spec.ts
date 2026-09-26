@@ -149,14 +149,13 @@ describe('AutoLaunchManager (macOS native login-item APIs)', () => {
     }
   });
 
-  it('enable sets openAtLogin true and openAsHidden from isHidden config', async () => {
+  it('enable sets openAtLogin true on macOS', async () => {
     setDarwin();
     try {
       const manager = new AutoLaunchManager({ isHidden: true });
       expect(await manager.enable()).toBe(true);
       expect(app.setLoginItemSettings).toHaveBeenCalledWith({
         openAtLogin: true,
-        openAsHidden: true,
       });
     } finally {
       restorePlatform();

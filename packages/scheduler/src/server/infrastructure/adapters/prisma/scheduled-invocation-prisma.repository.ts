@@ -1,4 +1,4 @@
-import { Prisma } from '@memoflow/database';
+import { Prisma } from '@memoflow/database/prisma';
 import type { PrismaClient } from '@memoflow/database';
 import type {
   InvocationAttempt as InvocationAttemptContract,

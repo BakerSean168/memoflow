@@ -3,7 +3,12 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/desktop/src",
-  "tags": ["scope:desktop", "type:app", "platform:electron", "layer:app"],
+  "tags": [
+    "scope:desktop",
+    "type:app",
+    "platform:electron",
+    "layer:app"
+  ],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
@@ -12,7 +17,10 @@
         "{workspaceRoot}/apps/desktop/dist-electron"
       ],
       "defaultConfiguration": "production",
-      "dependsOn": ["^build", "assets:build"],
+      "dependsOn": [
+        "^build",
+        "assets:build"
+      ],
       "options": {
         "command": "node ./scripts/verify-build-toolchain.mjs && vite build",
         "cwd": "apps/desktop"
@@ -44,13 +52,18 @@
     "prepare-dev": {
       "executor": "nx:noop",
       "outputs": [],
-      "dependsOn": ["^build", "native-rebuild"],
+      "dependsOn": [
+        "^build",
+        "native-rebuild"
+      ],
       "cache": false
     },
     "serve-safe": {
       "executor": "nx:run-commands",
       "defaultConfiguration": "development",
-      "dependsOn": ["prepare-dev"],
+      "dependsOn": [
+        "prepare-dev"
+      ],
       "options": {
         "command": "vite",
         "cwd": "apps/desktop"
@@ -64,7 +77,9 @@
     },
     "package": {
       "executor": "nx:run-commands",
-      "dependsOn": ["build"],
+      "dependsOn": [
+        "build"
+      ],
       "options": {
         "commands": [
           "node ./scripts/rebuild-native-dependencies.mjs",
@@ -85,7 +100,9 @@
     },
     "dist": {
       "executor": "nx:run-commands",
-      "dependsOn": ["build"],
+      "dependsOn": [
+        "build"
+      ],
       "options": {
         "commands": [
           "node ./scripts/rebuild-native-dependencies.mjs",
@@ -113,16 +130,21 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["apps/desktop/**/*.{ts,tsx,js,jsx,vue}"]
+        "args": [
+          "**/*.{ts,tsx,js,jsx,vue}"
+        ]
       }
     },
     "test": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "inputs": ["default", "^production"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
+      "inputs": [
+        "default",
+        "^production"
+      ],
       "cache": true,
       "options": {
         "command": "node ./node_modules/vitest/vitest.mjs run --config apps/desktop/vitest.config.ts"
@@ -137,7 +159,9 @@
     },
     "test:ipc": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/coverage/apps/desktop-ipc"],
+      "outputs": [
+        "{workspaceRoot}/coverage/apps/desktop-ipc"
+      ],
       "options": {
         "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.ipc.config.ts",
         "cwd": "apps/desktop"
@@ -153,7 +177,9 @@
     },
     "test:main": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/coverage/apps/desktop-main"],
+      "outputs": [
+        "{workspaceRoot}/coverage/apps/desktop-main"
+      ],
       "options": {
         "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.main.config.ts",
         "cwd": "apps/desktop"
@@ -178,7 +204,10 @@
     },
     "e2e": {
       "executor": "nx:run-commands",
-      "dependsOn": ["build", "native-rebuild"],
+      "dependsOn": [
+        "build",
+        "native-rebuild"
+      ],
       "cache": false,
       "options": {
         "command": "node ../../node_modules/@playwright/test/cli.js test --config playwright.config.ts",
@@ -267,7 +296,9 @@
     },
     "typecheck": {
       "executor": "nx:run-commands",
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "options": {
         "command": "tsc --noEmit -p tsconfig.typecheck.json",
         "cwd": "apps/desktop"

@@ -15,7 +15,7 @@ import {
   createContractsAliasEntries,
   createUiVueSourceAliasEntries,
   createWorkspaceSourceAliasEntries,
-} from '../../vite.workspace-aliases';
+} from '../../vite.workspace-aliases.ts';
 
 const desktopRendererDevWorkspaceEntries = [
   ['@memoflow/ai/client', 'packages/ai/src/client/index.ts'],
@@ -56,9 +56,11 @@ const workspacePkgs = [
 ];
 
 // https://vitejs.dev/config/
+const configDir = import.meta.dirname;
+
 export default defineConfig(({ command, mode }) => {
   const isDev = command === 'serve' || mode !== 'production';
-  const workspaceRoot = path.resolve(__dirname, '../..');
+  const workspaceRoot = path.resolve(configDir, '../..');
   const env = loadEnv(mode, workspaceRoot, '');
   Object.assign(process.env, env);
   const devWorkspaceAliases = isDev
@@ -77,19 +79,19 @@ export default defineConfig(({ command, mode }) => {
     ]),
     {
       find: '@main',
-      replacement: path.resolve(__dirname, './src/main'),
+      replacement: path.resolve(configDir, './src/main'),
     },
     {
       find: '@preload',
-      replacement: path.resolve(__dirname, './src/preload'),
+      replacement: path.resolve(configDir, './src/preload'),
     },
     {
       find: '@renderer',
-      replacement: path.resolve(__dirname, './src/renderer'),
+      replacement: path.resolve(configDir, './src/renderer'),
     },
     {
       find: '@',
-      replacement: path.resolve(__dirname, './src'),
+      replacement: path.resolve(configDir, './src'),
     },
     {
       find: 'crypto',
@@ -122,7 +124,7 @@ export default defineConfig(({ command, mode }) => {
     build: {
       outDir: 'dist-renderer',
       rolldownOptions: {
-        input: path.resolve(__dirname, 'index.html'),
+        input: path.resolve(configDir, 'index.html'),
         external: nativeModules,
       },
     },
@@ -146,21 +148,21 @@ export default defineConfig(({ command, mode }) => {
       tailwindcss(),
       electron({
         main: {
-          entry: path.resolve(__dirname, 'src/main/main.ts'),
+          entry: path.resolve(configDir, 'src/main/main.ts'),
           vite: {
             resolve: {
               alias: [
                 {
                   find: '@main',
-                  replacement: path.resolve(__dirname, './src/main'),
+                  replacement: path.resolve(configDir, './src/main'),
                 },
                 {
                   find: '@preload',
-                  replacement: path.resolve(__dirname, './src/preload'),
+                  replacement: path.resolve(configDir, './src/preload'),
                 },
                 {
                   find: '@renderer',
-                  replacement: path.resolve(__dirname, './src/renderer'),
+                  replacement: path.resolve(configDir, './src/renderer'),
                 },
               ],
             },
@@ -168,6 +170,8 @@ export default defineConfig(({ command, mode }) => {
               outDir: 'dist-electron',
               rolldownOptions: {
                 external: isElectronMainExternal,
+                // Rolldown 1.2.9 panics while tree shaking Mastra's filesystem re-export.
+                treeshake: false,
                 output: {
                   format: 'cjs',
                   entryFileNames: '[name].cjs',
@@ -183,7 +187,7 @@ export default defineConfig(({ command, mode }) => {
         },
         preload: {
           input: {
-            preload: path.resolve(__dirname, 'src/preload/preload.ts'),
+            preload: path.resolve(configDir, 'src/preload/preload.ts'),
           },
           vite: {
             build: {

@@ -2,66 +2,65 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "rootDir": "../..",
-    "baseUrl": "../..",
     "paths": {
-      "@/*": ["apps/api/src/*"],
-      "@memoflow/contracts": ["packages/contracts/src/index.ts"],
+      "@/*": ["../../apps/api/src/*"],
+      "@memoflow/contracts": ["../../packages/contracts/src/index.ts"],
       "@memoflow/contracts/*": [
-        "packages/contracts/src/modules/*/index.ts",
-        "packages/contracts/src/*/index.ts"
+        "../../packages/contracts/src/modules/*/index.ts",
+        "../../packages/contracts/src/*/index.ts"
       ],
-      "@memoflow/http-client": ["packages/http-client/src/index.ts"],
-      "@memoflow/utils": ["packages/utils/src/index.ts"],
-      "@memoflow/utils/*": ["packages/utils/src/*/index.ts", "packages/utils/src/*.ts"],
-      "@memoflow/task": ["packages/task/dist/index.d.ts"],
-      "@memoflow/task/schedule-execution": ["packages/task/dist/schedule-execution/index.d.ts"],
-      "@memoflow/task/schedule-projection": ["packages/task/dist/schedule-projection/index.d.ts"],
+      "@memoflow/http-client": ["../../packages/http-client/src/index.ts"],
+      "@memoflow/utils": ["../../packages/utils/src/index.ts"],
+      "@memoflow/utils/*": ["../../packages/utils/src/*/index.ts", "../../packages/utils/src/*.ts"],
+      "@memoflow/task": ["../../packages/task/dist/index.d.ts"],
+      "@memoflow/task/schedule-execution": ["../../packages/task/dist/schedule-execution/index.d.ts"],
+      "@memoflow/task/schedule-projection": ["../../packages/task/dist/schedule-projection/index.d.ts"],
       "@memoflow/task/*": [
-        "packages/task/dist/*/index.d.ts",
-        "packages/task/dist/*.d.ts"
+        "../../packages/task/dist/*/index.d.ts",
+        "../../packages/task/dist/*.d.ts"
       ],
-      "@memoflow/goal/schedule-execution": ["packages/goal/dist/schedule-execution/index.d.ts"],
-      "@memoflow/goal/schedule-projection": ["packages/goal/dist/schedule-projection/index.d.ts"],
+      "@memoflow/goal/schedule-execution": ["../../packages/goal/dist/schedule-execution/index.d.ts"],
+      "@memoflow/goal/schedule-projection": ["../../packages/goal/dist/schedule-projection/index.d.ts"],
       "@memoflow/reminder/schedule-execution": [
-        "packages/reminder/dist/schedule-execution/index.d.ts"
+        "../../packages/reminder/dist/schedule-execution/index.d.ts"
       ],
       "@memoflow/reminder/schedule-projection": [
-        "packages/reminder/dist/schedule-projection/index.d.ts"
+        "../../packages/reminder/dist/schedule-projection/index.d.ts"
       ],
-      "@memoflow/task/api": ["packages/task/dist/api/index.d.ts"],
-      "@memoflow/notification": ["packages/notification/dist/index.d.ts"],
+      "@memoflow/task/api": ["../../packages/task/dist/api/index.d.ts"],
+      "@memoflow/notification": ["../../packages/notification/dist/index.d.ts"],
       "@memoflow/notification/*": [
-        "packages/notification/dist/*/index.d.ts",
-        "packages/notification/dist/*.d.ts"
+        "../../packages/notification/dist/*/index.d.ts",
+        "../../packages/notification/dist/*.d.ts"
       ],
       "@memoflow/notification/schedule-execution": [
-        "packages/notification/dist/schedule-execution/index.d.ts"
+        "../../packages/notification/dist/schedule-execution/index.d.ts"
       ],
-      "@memoflow/notification/commands": ["packages/notification/dist/commands/index.d.ts"],
-      "@memoflow/powersync-schema": ["packages/powersync-schema/src/index.ts"],
-      "@memoflow/repository": ["packages/repository/dist/index.d.ts"],
+      "@memoflow/notification/commands": ["../../packages/notification/dist/commands/index.d.ts"],
+      "@memoflow/powersync-schema": ["../../packages/powersync-schema/src/index.ts"],
+      "@memoflow/repository": ["../../packages/repository/dist/index.d.ts"],
       "@memoflow/repository/*": [
-        "packages/repository/dist/*/index.d.ts",
-        "packages/repository/dist/*.d.ts"
+        "../../packages/repository/dist/*/index.d.ts",
+        "../../packages/repository/dist/*.d.ts"
       ],
-      "@memoflow/schedule": ["packages/schedule/dist/index.d.ts"],
+      "@memoflow/schedule": ["../../packages/schedule/dist/index.d.ts"],
       "@memoflow/schedule/*": [
-        "packages/schedule/dist/*/index.d.ts",
-        "packages/schedule/dist/*.d.ts"
+        "../../packages/schedule/dist/*/index.d.ts",
+        "../../packages/schedule/dist/*.d.ts"
       ],
-      "@memoflow/schedule/api": ["packages/schedule/dist/api/index.d.ts"],
-      "@memoflow/schedule-orchestration": ["packages/schedule-orchestration/src/index.ts"],
+      "@memoflow/schedule/api": ["../../packages/schedule/dist/api/index.d.ts"],
+      "@memoflow/schedule-orchestration": ["../../packages/schedule-orchestration/src/index.ts"],
       "@memoflow/schedule-orchestration/*": [
-        "packages/schedule-orchestration/src/*/index.ts",
-        "packages/schedule-orchestration/src/*.ts"
+        "../../packages/schedule-orchestration/src/*/index.ts",
+        "../../packages/schedule-orchestration/src/*.ts"
       ],
-      "@memoflow/test-utils": ["packages/test-utils/src/index.ts"],
-      "@memoflow/ai": ["packages/ai/dist/index.d.ts"],
-      "@memoflow/ai/*": ["packages/ai/dist/*/index.d.ts", "packages/ai/dist/*.d.ts"],
-      "@memoflow/ai/ports": ["packages/ai/dist/ports/index.d.ts"],
-      "@memoflow/goal/analytics": ["packages/goal/dist/analytics/index.d.ts"],
-      "@memoflow/task/analytics": ["packages/task/dist/analytics/index.d.ts"],
-      "@api/shared": ["apps/api/src/shared/index.ts"]
+      "@memoflow/test-utils": ["../../packages/test-utils/src/index.ts"],
+      "@memoflow/ai": ["../../packages/ai/dist/index.d.ts"],
+      "@memoflow/ai/*": ["../../packages/ai/dist/*/index.d.ts", "../../packages/ai/dist/*.d.ts"],
+      "@memoflow/ai/ports": ["../../packages/ai/dist/ports/index.d.ts"],
+      "@memoflow/goal/analytics": ["../../packages/goal/dist/analytics/index.d.ts"],
+      "@memoflow/task/analytics": ["../../packages/task/dist/analytics/index.d.ts"],
+      "@api/shared": ["../../apps/api/src/shared/index.ts"]
     }
   }
 }

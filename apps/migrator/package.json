@@ -9,12 +9,12 @@
   ],
   "dependencies": {
     "@memoflow/database": "workspace:*",
-    "prisma": "7.8.0"
+    "prisma": "7.10.0"
   },
   "devDependencies": {
     "@types/node": "24.13.3",
     "tsup": "^8.3.5",
-    "typescript": "~6.0.3",
-    "vitest": "4.1.10"
+    "typescript": "npm:@typescript/typescript6@6.0.2",
+    "vitest": "4.1.11"
   }
 }

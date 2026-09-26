@@ -13,7 +13,7 @@ export const domainResolveAtAlias = {
   ) {
     if (!source.startsWith('@/') || !importer) return null;
     const subpath = source.slice(2);
-    const packagesDir = path.resolve(__dirname, 'packages');
+    const packagesDir = path.resolve(import.meta.dirname, 'packages');
 
     const domainPackages = [
       'contracts',
@@ -65,7 +65,7 @@ export const taskDeepImportResolver = {
     const match = source.match(/^@memoflow\/task\/(.+)/);
     if (!match || !importer) return null;
     const subpath = match[1];
-    const taskSrc = path.resolve(__dirname, 'packages/task/src');
+    const taskSrc = path.resolve(import.meta.dirname, 'packages/task/src');
 
     const directFile = path.resolve(taskSrc, `${subpath}.ts`);
     const directResult = await this.resolve(directFile, importer, {
@@ -99,7 +99,7 @@ export const contractsDeepImportResolver = {
     const match = source.match(/^@memoflow\/contracts\/(.+)/);
     if (!match || !importer) return null;
     const subpath = match[1];
-    const contractsSrc = path.resolve(__dirname, 'packages/contracts/src');
+    const contractsSrc = path.resolve(import.meta.dirname, 'packages/contracts/src');
 
     const modulesIndex = path.resolve(contractsSrc, 'modules', subpath, 'index.ts');
     const modulesResult = await this.resolve(modulesIndex, importer, {
@@ -126,52 +126,52 @@ export const contractsDeepImportResolver = {
   },
 };
 
-const contractsSrc = path.resolve(__dirname, './packages/contracts/src');
+const contractsSrc = path.resolve(import.meta.dirname, './packages/contracts/src');
 
 export const domainResolveAliases = [
   {
     find: '@memoflow/database/prisma',
-    replacement: path.resolve(__dirname, './packages/database/src/generated/prisma/client.js'),
+    replacement: path.resolve(import.meta.dirname, './packages/database/src/generated/prisma/client.js'),
   },
   {
     find: '@memoflow/powersync-schema',
-    replacement: path.resolve(__dirname, './packages/powersync-schema/src/index.ts'),
+    replacement: path.resolve(import.meta.dirname, './packages/powersync-schema/src/index.ts'),
   },
   {
     find: '@memoflow/database',
-    replacement: path.resolve(__dirname, './packages/database/src/index.ts'),
+    replacement: path.resolve(import.meta.dirname, './packages/database/src/index.ts'),
   },
   {
     find: /^@memoflow\/domain-shared\/(.+)/,
-    replacement: path.resolve(__dirname, './packages/domain-shared/src/$1/index.ts'),
+    replacement: path.resolve(import.meta.dirname, './packages/domain-shared/src/$1/index.ts'),
   },
   {
     find: '@memoflow/domain-shared',
-    replacement: path.resolve(__dirname, './packages/domain-shared/src/index.ts'),
+    replacement: path.resolve(import.meta.dirname, './packages/domain-shared/src/index.ts'),
   },
   {
     find: /^@memoflow\/utils\/(.+)/,
-    replacement: path.resolve(__dirname, './packages/utils/src/$1/index.ts'),
+    replacement: path.resolve(import.meta.dirname, './packages/utils/src/$1/index.ts'),
   },
   {
     find: '@memoflow/utils',
-    replacement: path.resolve(__dirname, './packages/utils/src/index.ts'),
+    replacement: path.resolve(import.meta.dirname, './packages/utils/src/index.ts'),
   },
   {
     find: /^@memoflow\/patterns\/(.+)/,
-    replacement: path.resolve(__dirname, './packages/patterns/src/$1/index.ts'),
+    replacement: path.resolve(import.meta.dirname, './packages/patterns/src/$1/index.ts'),
   },
   {
     find: '@memoflow/patterns',
-    replacement: path.resolve(__dirname, './packages/patterns/src/index.ts'),
+    replacement: path.resolve(import.meta.dirname, './packages/patterns/src/index.ts'),
   },
   {
     find: /^@memoflow\/test-utils\/(.+)/,
-    replacement: path.resolve(__dirname, './packages/test-utils/src/$1'),
+    replacement: path.resolve(import.meta.dirname, './packages/test-utils/src/$1'),
   },
   {
     find: '@memoflow/test-utils',
-    replacement: path.resolve(__dirname, './packages/test-utils/src/index.ts'),
+    replacement: path.resolve(import.meta.dirname, './packages/test-utils/src/index.ts'),
   },
   {
     find: '@memoflow/contracts/result',
@@ -207,98 +207,98 @@ export const domainResolveAliases = [
   },
   {
     find: /^@memoflow\/time\/(.+)/,
-    replacement: path.resolve(__dirname, './packages/time/src/$1'),
+    replacement: path.resolve(import.meta.dirname, './packages/time/src/$1'),
   },
   {
     find: '@memoflow/time',
-    replacement: path.resolve(__dirname, './packages/time/src/index.ts'),
+    replacement: path.resolve(import.meta.dirname, './packages/time/src/index.ts'),
   },
   {
     find: /^@memoflow\/schedule\/(.+)/,
-    replacement: path.resolve(__dirname, './packages/schedule/src/$1'),
+    replacement: path.resolve(import.meta.dirname, './packages/schedule/src/$1'),
   },
   {
     find: '@memoflow/schedule',
-    replacement: path.resolve(__dirname, './packages/schedule/src/index.ts'),
+    replacement: path.resolve(import.meta.dirname, './packages/schedule/src/index.ts'),
   },
   {
     find: /^@memoflow\/scheduler\/(.+)/,
-    replacement: path.resolve(__dirname, './packages/scheduler/src/$1'),
+    replacement: path.resolve(import.meta.dirname, './packages/scheduler/src/$1'),
   },
   {
     find: '@memoflow/scheduler',
-    replacement: path.resolve(__dirname, './packages/scheduler/src/index.ts'),
+    replacement: path.resolve(import.meta.dirname, './packages/scheduler/src/index.ts'),
   },
   {
     find: /^@memoflow\/reminder\/(.+)/,
-    replacement: path.resolve(__dirname, './packages/reminder/src/$1'),
+    replacement: path.resolve(import.meta.dirname, './packages/reminder/src/$1'),
   },
   {
     find: '@memoflow/reminder',
-    replacement: path.resolve(__dirname, './packages/reminder/src/index.ts'),
+    replacement: path.resolve(import.meta.dirname, './packages/reminder/src/index.ts'),
   },
   {
     find: /^@memoflow\/notification\/(.+)/,
-    replacement: path.resolve(__dirname, './packages/notification/src/$1'),
+    replacement: path.resolve(import.meta.dirname, './packages/notification/src/$1'),
   },
   {
     find: '@memoflow/notification',
-    replacement: path.resolve(__dirname, './packages/notification/src/index.ts'),
+    replacement: path.resolve(import.meta.dirname, './packages/notification/src/index.ts'),
   },
   {
     find: /^@memoflow\/account\/(.+)/,
-    replacement: path.resolve(__dirname, './packages/account/src/$1'),
+    replacement: path.resolve(import.meta.dirname, './packages/account/src/$1'),
   },
   {
     find: '@memoflow/account',
-    replacement: path.resolve(__dirname, './packages/account/src/index.ts'),
+    replacement: path.resolve(import.meta.dirname, './packages/account/src/index.ts'),
   },
   {
     find: /^@memoflow\/repository\/(.+)/,
-    replacement: path.resolve(__dirname, './packages/repository/src/$1'),
+    replacement: path.resolve(import.meta.dirname, './packages/repository/src/$1'),
   },
   {
     find: '@memoflow/repository',
-    replacement: path.resolve(__dirname, './packages/repository/src/index.ts'),
+    replacement: path.resolve(import.meta.dirname, './packages/repository/src/index.ts'),
   },
   {
     find: /^@memoflow\/goal\/(.+)/,
-    replacement: path.resolve(__dirname, './packages/goal/src/$1/index.ts'),
+    replacement: path.resolve(import.meta.dirname, './packages/goal/src/$1/index.ts'),
   },
   {
     find: '@memoflow/goal',
-    replacement: path.resolve(__dirname, './packages/goal/src/index.ts'),
+    replacement: path.resolve(import.meta.dirname, './packages/goal/src/index.ts'),
   },
   {
     find: /^@memoflow\/task\/(.+)/,
-    replacement: path.resolve(__dirname, './packages/task/src/$1/index.ts'),
+    replacement: path.resolve(import.meta.dirname, './packages/task/src/$1/index.ts'),
   },
   {
     find: '@memoflow/task',
-    replacement: path.resolve(__dirname, './packages/task/src/index.ts'),
+    replacement: path.resolve(import.meta.dirname, './packages/task/src/index.ts'),
   },
   {
     find: /^@memoflow\/schedule-orchestration\/(.+)/,
-    replacement: path.resolve(__dirname, './packages/schedule-orchestration/src/$1'),
+    replacement: path.resolve(import.meta.dirname, './packages/schedule-orchestration/src/$1'),
   },
   {
     find: '@memoflow/schedule-orchestration',
-    replacement: path.resolve(__dirname, './packages/schedule-orchestration/src/index.ts'),
+    replacement: path.resolve(import.meta.dirname, './packages/schedule-orchestration/src/index.ts'),
   },
   {
     find: /^@memoflow\/cloud-auth\/(.+)/,
-    replacement: path.resolve(__dirname, './packages/cloud-auth/src/$1/index.ts'),
+    replacement: path.resolve(import.meta.dirname, './packages/cloud-auth/src/$1/index.ts'),
   },
   {
     find: '@memoflow/cloud-auth',
-    replacement: path.resolve(__dirname, './packages/cloud-auth/src/index.ts'),
+    replacement: path.resolve(import.meta.dirname, './packages/cloud-auth/src/index.ts'),
   },
 ];
 
 export const taskResolveAliases = [
   {
     find: /^@\/(.+)/,
-    replacement: path.resolve(__dirname, './packages/task/src/$1'),
+    replacement: path.resolve(import.meta.dirname, './packages/task/src/$1'),
   },
   ...domainResolveAliases,
 ];
@@ -310,7 +310,7 @@ export function createPackageResolveAliases(
   return [
     {
       find: /^@\/(.+)/,
-      replacement: path.resolve(__dirname, `./packages/${packageName}/src/$1`),
+      replacement: path.resolve(import.meta.dirname, `./packages/${packageName}/src/$1`),
     },
     ...extraAliases,
     ...domainResolveAliases,

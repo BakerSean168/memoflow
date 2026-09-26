@@ -1,19 +1,18 @@
 {
   "extends": "../../tsconfig.workspace-src.json",
   "compilerOptions": {
-    "baseUrl": "../..",
     "noEmit": true,
     "types": ["node", "vitest/globals"],
     "paths": {
-      "@memoflow/domain-shared": ["packages/domain-shared/src/index.ts"],
-      "@memoflow/domain-shared/*": ["packages/domain-shared/src/*/index.ts"],
-      "@memoflow/test-utils": ["packages/test-utils/src/index.ts"],
-      "@memoflow/utils": ["packages/utils/src/index.ts"],
-      "@memoflow/utils/*": ["packages/utils/src/*/index.ts", "packages/utils/src/*.ts"],
-      "@memoflow/contracts": ["packages/contracts/src/index.ts"],
+      "@memoflow/domain-shared": ["../../packages/domain-shared/src/index.ts"],
+      "@memoflow/domain-shared/*": ["../../packages/domain-shared/src/*/index.ts"],
+      "@memoflow/test-utils": ["../../packages/test-utils/src/index.ts"],
+      "@memoflow/utils": ["../../packages/utils/src/index.ts"],
+      "@memoflow/utils/*": ["../../packages/utils/src/*/index.ts", "../../packages/utils/src/*.ts"],
+      "@memoflow/contracts": ["../../packages/contracts/src/index.ts"],
       "@memoflow/contracts/*": [
-        "packages/contracts/src/modules/*/index.ts",
-        "packages/contracts/src/*/index.ts"
+        "../../packages/contracts/src/modules/*/index.ts",
+        "../../packages/contracts/src/*/index.ts"
       ]
     }
   },

@@ -1,9 +1,9 @@
 /// <reference types="vitest" />
 import { defineConfig, mergeConfig } from 'vitest/config';
-import { createSharedConfig } from '../../vitest.shared';
+import { createSharedConfig } from '../../vitest.shared.ts';
 
 const sharedConfig = createSharedConfig({
-  projectRoot: __dirname,
+  projectRoot: import.meta.dirname,
   environment: 'node',
   aliases: {
     '@memoflow/contracts/ai': '../../packages/contracts/src/modules/ai',
@@ -17,7 +17,7 @@ const sharedConfig = createSharedConfig({
 export default mergeConfig(
   sharedConfig,
   defineConfig({
-    root: __dirname,
+    root: import.meta.dirname,
     test: {
       name: 'api',
       environment: 'node',

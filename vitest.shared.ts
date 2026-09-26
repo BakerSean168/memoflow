@@ -3,7 +3,7 @@ import { defineConfig, mergeConfig } from 'vitest/config';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import type { Alias, UserConfig } from 'vite';
-import { createContractsAliasEntries } from './vite.workspace-aliases';
+import { createContractsAliasEntries } from './vite.workspace-aliases.ts';
 
 /**
  * Shared Vitest configuration for all projects
@@ -14,11 +14,11 @@ import { createContractsAliasEntries } from './vite.workspace-aliases';
  * @example
  * ```ts
  * import { defineConfig, mergeConfig } from 'vitest/config';
- * import { createSharedConfig } from '../../vitest.shared';
+ * import { createSharedConfig } from '../../vitest.shared.ts';
  *
  * export default mergeConfig(
  *   createSharedConfig({
- *     projectRoot: __dirname,
+ *     projectRoot: import.meta.dirname,
  *     environment: 'node',
  *   }),
  *   defineConfig({
@@ -200,7 +200,7 @@ export function createGovernedCoverage(
  * @example
  * ```ts
  * createSliceCoverage({
- *   projectRoot: __dirname,
+ *   projectRoot: import.meta.dirname,
  *   roots: ['src/server/application/use-cases'],
  *   thresholds: { statements: 70, lines: 70, functions: 70, branches: 60 },
  *   reportsDirectory: 'coverage/use-cases',

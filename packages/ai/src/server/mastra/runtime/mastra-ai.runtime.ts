@@ -74,7 +74,7 @@ import type { AIWorkflowRuntimePort } from './workflow-runtime.port';
 import { toAIPublicFailure } from '../../../shared/ai-public-failure';
 
 function messageText(
-  event: Extract<AgentControllerEvent, { type: 'message_update' | 'message_end' }>,
+  event: Extract<AgentControllerEvent, { type: 'message_start' }>,
 ): string {
   const parts = event.message.content.parts;
   return parts
@@ -948,7 +948,6 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     let runId = '';
     let sequence = 0;
     let lastText = '';
-    let lastDeltaLength = 0;
     let assistantMessageId: string | undefined;
     let lastRuntimeError: { code: string; message: string } | undefined;
     let lastUsage: AssistantUsageSnapshot | undefined;
@@ -1024,19 +1023,19 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         });
         return;
       }
-      if (event.type === 'message_update' && event.message.role === 'assistant') {
-        const text = messageText(event);
+      if (event.type === 'message_start' && event.message.role === 'assistant') {
         assistantMessageId = event.message.id;
-        if (text.length > lastDeltaLength) {
-          emit('assistant.message.delta', { content: text.slice(lastDeltaLength) });
-          lastDeltaLength = text.length;
-          lastText = text;
+        lastText = messageText(event);
+        if (lastText) {
+          emit('assistant.message.delta', { content: lastText });
         }
         return;
       }
-      if (event.type === 'message_end' && event.message.role === 'assistant') {
-        lastText = messageText(event);
-        assistantMessageId = event.message.id;
+      if (event.type === 'message_update' && event.id === assistantMessageId) {
+        if (event.event.type === 'text-delta') {
+          lastText += event.event.delta;
+          emit('assistant.message.delta', { content: event.event.delta });
+        }
         return;
       }
       if (event.type === 'usage_update') {

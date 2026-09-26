@@ -21,12 +21,11 @@
     "verbatimModuleSyntax": true,
     "useDefineForClassFields": true,
     "allowJs": false,
-    "baseUrl": ".",
+
     "paths": {
       "@memoflow/nx-test-system": [
-        "tools/nx-test-system/index.js"
+        "./tools/nx-test-system/index.js"
       ]
-    },
-    "ignoreDeprecations": "6.0"
+    }
   }
 }

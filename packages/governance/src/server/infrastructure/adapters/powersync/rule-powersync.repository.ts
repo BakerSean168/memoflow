@@ -308,7 +308,7 @@ export class PowerSyncRuleRepository implements IRuleRepository {
   async delete(id: RuleId): Promise<void> {
     try {
       const result = await this.db.execute(`DELETE FROM rules WHERE id = ?`, [id]);
-      if (result.rowsAffected === 0) {
+      if (result.rowsAffected !== 1) {
         throw toResultErrorException(
           { code: 'NOT_FOUND', message: `Rule with ID '${id}' not found` },
           404,

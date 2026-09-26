@@ -1,5 +1,5 @@
 export interface PowerSyncQueryResult {
-  rowsAffected: number;
+  rowsAffected?: number;
 }
 
 export interface PowerSyncLockContext {

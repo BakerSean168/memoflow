@@ -1,9 +1,9 @@
 /// <reference types="vitest" />
 import { defineConfig, mergeConfig } from 'vitest/config';
-import { createPackageVitestConfig } from '../../vitest.shared';
+import { createPackageVitestConfig } from '../../vitest.shared.ts';
 
 const baseConfig = createPackageVitestConfig({
-  projectRoot: __dirname,
+  projectRoot: import.meta.dirname,
   environment: 'node',
   name: 'reminder',
   governedCoverage: { extraRoots: ['src/server/domain/routine'] },

@@ -1,6 +1,16 @@
-import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { repositoryMockRoutes } from './repository.handlers';
 import { createHttpClientSpy } from './_shared/contract-test-helpers';
+
+const loadRepositoryClient = () => import('@memoflow/repository/client');
+type RepositoryClientModule = Awaited<ReturnType<typeof loadRepositoryClient>>;
+let repositoryClient: RepositoryClientModule;
+
+beforeAll(async () => {
+  repositoryClient = await loadRepositoryClient();
+}, 30_000);
 
 describe('repository handlers contracts', () => {
   it('exposes only knowledge repository route prefixes', () => {
@@ -18,10 +28,9 @@ describe('repository handlers contracts', () => {
     expect(repositoryMockRoutes).not.toHaveProperty('search');
   });
 
-  it('does not expose retired database Repository/Resource client methods', async () => {
-    const { RepositoryHttpAdapter } = await import('@memoflow/repository/client');
+  it('does not expose retired database Repository/Resource client methods', () => {
     const httpClient = createHttpClientSpy();
-    const adapter = new RepositoryHttpAdapter(httpClient) as Record<string, unknown>;
+    const adapter = new repositoryClient.RepositoryHttpAdapter(httpClient) as Record<string, unknown>;
 
     for (const method of [
       'getCurrentRepository',
@@ -43,9 +52,8 @@ describe('repository handlers contracts', () => {
   });
 
   it('uses knowledge connection and projection routes for the live surface', async () => {
-    const { RepositoryHttpAdapter } = await import('@memoflow/repository/client');
     const httpClient = createHttpClientSpy();
-    const adapter = new RepositoryHttpAdapter(httpClient);
+    const adapter = new repositoryClient.RepositoryHttpAdapter(httpClient);
 
     httpClient.get.mockResolvedValueOnce({ ok: true, data: { connections: [] } });
     httpClient.get.mockResolvedValueOnce({ ok: true, data: { notes: [] } });
@@ -63,12 +71,9 @@ describe('repository handlers contracts', () => {
       params: { limit: 20 },
     });
   });
-});
 
-  it('does not register legacy Resource/Folder/Bookmark dual-track MSW stubs', async () => {
-    const { readFileSync } = await import('node:fs');
-    const { resolve } = await import('node:path');
-    const source = readFileSync(resolve(__dirname, 'repository.handlers.ts'), 'utf8');
+  it('does not register legacy Resource/Folder/Bookmark dual-track MSW stubs', () => {
+    const source = readFileSync(resolve(import.meta.dirname, 'repository.handlers.ts'), 'utf8');
     expect(source).not.toContain('Legacy repository route is not mounted');
     expect(source).not.toContain('/resources');
     expect(source).not.toContain('/bookmarks');
@@ -78,4 +83,5 @@ describe('repository handlers contracts', () => {
     expect(source).toContain('knowledge-notes');
     expect(source).toContain('knowledge-attachments');
   });
+});
 

@@ -1,3 +1,8 @@
+/*
+ * This verifier must import the package through its published entry points;
+ * relative imports would bypass the export map and invalidate the test.
+ */
+/* eslint-disable @nx/enforce-module-boundaries */
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 

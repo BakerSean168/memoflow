@@ -55,7 +55,7 @@
     "@memoflow/ipc-client": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/utils": "workspace:*",
-    "zod": "^4.4.3"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@memoflow/test-utils": "workspace:*"

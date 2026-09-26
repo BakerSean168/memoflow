@@ -15,9 +15,11 @@
     "@react-navigation/native": "^7.1.33",
     "expo-status-bar": "~57.0.0",
     "react": "^19.2.0",
-    "react-native": "^0.86.0"
+    "react-native": "^0.86.3"
   },
   "devDependencies": {
-    "typescript": "~6.0.3"
+    "expo": "~57.0.25",
+    "expo-status-bar": "~57.0.1",
+    "typescript": "npm:@typescript/typescript6@6.0.2"
   }
 }

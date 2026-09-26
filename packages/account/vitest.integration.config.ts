@@ -6,7 +6,7 @@ import {
   createPackageResolveAliases,
   domainResolveAtAlias,
 } from '../../vitest.workspace-helpers';
-import { createVitestReportConfig } from '../../vitest.shared';
+import { createVitestReportConfig } from '../../vitest.shared.ts';
 import { createIntegrationTestEnv } from '../test-utils/src/setup/database';
 
 export default defineConfig({
@@ -16,12 +16,12 @@ export default defineConfig({
   },
   test: {
     name: 'account-integration',
-    ...createVitestReportConfig(__dirname, 'account-integration'),
-    root: __dirname,
+    ...createVitestReportConfig(import.meta.dirname, 'account-integration'),
+    root: import.meta.dirname,
     globals: true,
     environment: 'node',
     env: createIntegrationTestEnv(),
-    globalSetup: [path.resolve(__dirname, '../test-utils/src/setup/integration-global-setup.ts')],
+    globalSetup: [path.resolve(import.meta.dirname, '../test-utils/src/setup/integration-global-setup.ts')],
     include: [
       'src/**/*.integration.test.ts',
       'src/**/*.integration.spec.ts',

@@ -90,6 +90,12 @@ export const TIMEOUT_CONFIG = {
    * 页面导航超时
    */
   NAVIGATION: 30000,
+
+  /**
+   * Auth 应用冷启动超时。Vite classic E2E lane 首次展开大型 native-ESM 图时
+   * 可能明显慢于普通页面导航；这不是业务交互超时。
+   */
+  AUTH_BOOTSTRAP: 60000,
   
   /**
    * 元素等待超时
