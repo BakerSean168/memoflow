@@ -34,7 +34,7 @@ describe('Product date presentation boundary', () => {
   });
 
   it('renders Goal calendar dates and broad targets without local Date wrappers', () => {
-    expect(goalDetail).toContain('formatProductYmd');
+    expect(goalDetail).toContain('ProductDatePicker');
     expect(goalDetail).toContain('formatProductDate');
     expect(goalDetail).toContain('goalTimeframeLabel');
     expect(goalRow).toContain('formatProductYmd');

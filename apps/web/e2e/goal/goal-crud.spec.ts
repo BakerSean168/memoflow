@@ -71,7 +71,7 @@ test.describe('Goal vNext product surface', () => {
     await expect(page.getByTestId('goal-summary-input')).toHaveValue(updatedSummary);
   });
 
-  test('[P0] drives the explicit four-state Goal lifecycle from the detail surface', async ({
+  test('[P0] drives the explicit four-state Goal lifecycle from the inline status control', async ({
     page,
   }) => {
     const goalName = `E2E Goal Lifecycle ${Date.now()}`;
@@ -86,28 +86,28 @@ test.describe('Goal vNext product surface', () => {
     });
     await expect(page.getByTestId('goal-status')).toHaveAttribute('data-goal-status', 'Planned');
 
-    await page.getByTestId('goal-start-action').click();
+    await chooseGoalStatus(page, /^(In progress|进行中)$/);
     await expect(page.getByTestId('goal-status')).toHaveAttribute('data-goal-status', 'InProgress');
 
-    await page.getByTestId('goal-plan-action').click();
+    await chooseGoalStatus(page, /^(Planned|规划中)$/);
     await expect(page.getByTestId('goal-status')).toHaveAttribute('data-goal-status', 'Planned');
 
-    await page.getByTestId('goal-start-action').click();
+    await chooseGoalStatus(page, /^(In progress|进行中)$/);
     await expect(page.getByTestId('goal-status')).toHaveAttribute('data-goal-status', 'InProgress');
 
-    await page.getByTestId('goal-complete-action').click();
+    await chooseGoalStatus(page, /^(Completed|已完成)$/);
     await expect(page.getByTestId('goal-status')).toHaveAttribute('data-goal-status', 'Completed');
 
-    await page.getByTestId('goal-reopen-action').click();
+    await chooseGoalStatus(page, /^(In progress|进行中)$/);
     await expect(page.getByTestId('goal-status')).toHaveAttribute('data-goal-status', 'InProgress');
 
-    await page.getByTestId('goal-abandon-action').click();
+    await chooseGoalStatus(page, /^(Abandoned|已放弃)$/);
     const abandonDialog = page.getByRole('alertdialog');
     await expect(abandonDialog).toBeVisible();
     await abandonDialog.getByRole('button', { name: /^(Abandon|放弃)$/ }).click();
     await expect(page.getByTestId('goal-status')).toHaveAttribute('data-goal-status', 'Abandoned');
 
-    await page.getByTestId('goal-resume-action').click();
+    await chooseGoalStatus(page, /^(In progress|进行中)$/);
     await expect(page.getByTestId('goal-status')).toHaveAttribute('data-goal-status', 'InProgress');
   });
 
@@ -152,8 +152,34 @@ test.describe('Goal vNext product surface', () => {
     await expect(page.getByTestId('goal-detail-view')).toBeVisible({
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
-    await expect(page.getByTestId('goal-detail-title')).toHaveText(goalName);
-    await expect(page.getByTestId('goal-detail-view')).toContainText(goalSummary);
+    await expect(page.getByTestId('goal-detail-title')).toHaveValue(goalName);
+    await expect(page.getByTestId('goal-detail-summary')).toHaveValue(goalSummary);
+  });
+
+  test('[P0] edits Goal identity directly on the detail workspace without a global edit mode', async ({
+    page,
+  }) => {
+    const goalName = `E2E Inline Goal ${Date.now()}`;
+    const updatedName = `E2E Inline Updated ${Date.now()}`;
+    const createdRow = await createGoal(page, {
+      name: goalName,
+      summary: 'Inline editing contract.',
+    });
+
+    await createdRow.getByTestId('goal-row-title').click();
+    await expect(page.getByTestId('goal-detail-view')).toBeVisible({
+      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+    });
+    await expect(
+      page.getByTestId('goal-detail-toolbar').getByRole('button', { name: /^(Edit|编辑)$/ }),
+    ).toHaveCount(0);
+
+    const title = page.getByTestId('goal-detail-title');
+    await title.fill(updatedName);
+    await title.press('Enter');
+
+    await page.reload();
+    await expect(page.getByTestId('goal-detail-title')).toHaveValue(updatedName);
   });
 
   test('[P0] exposes only vNext system views and preserves Label filter state while resizing', async ({
@@ -293,6 +319,11 @@ async function openSystemViewMenu(page: Page): Promise<void> {
     .filter({ hasText: /Active|进行中/ })
     .first()
     .click();
+}
+
+async function chooseGoalStatus(page: Page, name: RegExp): Promise<void> {
+  await page.getByTestId('goal-status-picker').click();
+  await page.getByRole('menuitemradio', { name }).click();
 }
 
 function goalDialog(page: Page): Locator {

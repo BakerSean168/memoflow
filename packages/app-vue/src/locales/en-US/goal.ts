@@ -107,6 +107,7 @@ export default {
     "noKR": "No key results",
     "noKrTitle": "Add your first key result",
     "noKrDescription": "Key results quantify the goal — progress can only be recorded once one exists.",
+    "progressNeedsKr": "No key results are defined yet, so overall progress cannot be calculated.",
     "recordProgress": "Record Progress",
     "recordNeedsKr": "Add a key result first to record progress",
     "krCompleted": "KRs {done}/{total} done",

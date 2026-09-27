@@ -107,6 +107,7 @@ export default {
     "noKR": "暂无关键结果",
     "noKrTitle": "先添加一个关键结果",
     "noKrDescription": "关键结果是目标的量化抓手，添加后才能记录进度。",
+    "progressNeedsKr": "尚未定义关键结果，当前没有可计算的总体进度。",
     "recordProgress": "记录进度",
     "recordNeedsKr": "还没有关键结果，先添加关键结果才能记录进度",
     "krCompleted": "关键结果完成 {done}/{total}",

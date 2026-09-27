@@ -6,12 +6,18 @@ const appRoot = resolve(import.meta.dirname, '../..');
 const read = (relative: string) => readFileSync(resolve(appRoot, relative), 'utf8');
 
 describe('MemoFlow product surface polish', () => {
-  it('keeps Goal detail on the shared module header and a flat identity surface', () => {
+  it('keeps Goal detail on a direct-manipulation workspace instead of a global edit mode', () => {
     const goal = read('modules/goal/views/GoalDetailView.vue');
     expect(goal).toContain('<ModuleHeader data-testid="goal-detail-toolbar">');
     expect(goal).toContain('data-testid="goal-detail-identity"');
-    expect(goal).toContain('class="space-y-5 border-b border-border/70 pb-5"');
-    expect(goal).not.toContain('class="space-y-5 rounded-xl border bg-card p-5"');
+    expect(goal).toContain('class="space-y-4 border-b border-border/70 pb-5"');
+    expect(goal).toContain('<GoalStatusPicker');
+    expect(goal).toContain('<ProductDatePicker');
+    expect(goal).toContain('<GoalTimeframePicker');
+    expect(goal).toContain('<LabelPicker');
+    expect(goal).not.toContain('v-model:open="editOpen"');
+    expect(goal).not.toContain('data-testid="goal-start-action"');
+    expect(goal).not.toContain('data-testid="goal-abandon-action"');
   });
 
   it('presents Task plan properties as rows instead of four card tiles', () => {
