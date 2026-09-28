@@ -30,7 +30,7 @@ function intent(key = 'intent-1'): ScheduledIntent<GoalReminderScheduledPayload>
       goalTitle: 'Goal',
       triggerType: 'RemainingDays',
       triggerValue: 7,
-      startDate: null,
+      start: null,
       target: { kind: 'day', date: requireYmd('2030-01-20') },
       reminderTime: Date.UTC(2030, 0, 13, 0, 0),
     },

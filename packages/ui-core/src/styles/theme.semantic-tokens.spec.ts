@@ -26,6 +26,6 @@ describe('dark product surface semantic tokens', () => {
     expect(dark).toContain('--card: 0 0% 8%');
     expect(dark).toContain('--popover: 0 0% 11%');
     expect(dark).toContain('--border: 0 0% 17%');
-    expect(dark).toContain('--primary: 237 80% 68%');
+    expect(dark).toContain('--primary: 235 58% 60%');
   });
 });

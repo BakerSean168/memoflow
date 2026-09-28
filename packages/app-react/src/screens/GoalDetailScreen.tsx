@@ -9,7 +9,6 @@ import { useGoalService } from '../hooks/useGoalService';
 import { useGoalWorkspace } from '../hooks/useGoalWorkspace';
 import {
   formatProductDate,
-  formatProductYmd,
   getProductTime,
   getProductTodayYmd,
 } from '../utils/product-time';
@@ -132,9 +131,9 @@ export function GoalDetailScreen() {
                       : 'textSecondary'
                 }
               />
-              {goal.startDate ? (
+              {goal.start ? (
                 <StatusPill
-                  label={`Start ${formatProductYmd(goal.startDate)}`}
+                  label={`Start ${goalTimeframeLabel(goal.start, getProductTime().presentation.locale)}`}
                   tone="textSecondary"
                 />
               ) : null}

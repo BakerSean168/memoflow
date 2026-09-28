@@ -10,7 +10,6 @@ import { useGoalService } from '../hooks/useGoalService';
 import {
   goalTimeframeInputValue,
   parseGoalTimeframeInput,
-  parseProductYmdInput,
 } from '../utils/product-time';
 import {
   PageShell,
@@ -32,7 +31,7 @@ export function GoalEditorScreen() {
 
   const [name, setName] = useState('');
   const [summary, setSummary] = useState('');
-  const [startDate, setStartDate] = useState('');
+  const [startInput, setStartInput] = useState('');
   const [targetInput, setTargetInput] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,7 +40,7 @@ export function GoalEditorScreen() {
     if (!goal) return;
     setName(goal.name);
     setSummary(goal.summary ?? '');
-    setStartDate(goal.startDate ?? '');
+    setStartInput(goalTimeframeInputValue(goal.start));
     setTargetInput(goalTimeframeInputValue(goal.target));
   }, [goal?.id]);
 
@@ -51,9 +50,9 @@ export function GoalEditorScreen() {
       return;
     }
 
-    const parsedStartDate = startDate.trim().length === 0 ? null : parseProductYmdInput(startDate);
-    if (startDate.trim().length > 0 && parsedStartDate === null) {
-      setError('Start date must use YYYY-MM-DD.');
+    const start = startInput.trim().length === 0 ? null : parseGoalTimeframeInput(startInput);
+    if (startInput.trim().length > 0 && start === null) {
+      setError('Start supports YYYY-MM-DD, YYYY-MM, Q4 2026, H1 2027, or YYYY.');
       return;
     }
 
@@ -71,13 +70,13 @@ export function GoalEditorScreen() {
           name: name.trim(),
           expectedVersion: goal?.version ?? 1,
           summary: summary.trim().length > 0 ? summary.trim() : null,
-          startDate: parsedStartDate,
+          start,
           target,
         } satisfies UpdateGoalReq)
       : await service.createGoal({
           name: name.trim(),
           summary: summary.trim().length > 0 ? summary.trim() : undefined,
-          ...(parsedStartDate ? { startDate: parsedStartDate } : {}),
+          ...(start ? { start } : {}),
           ...(target ? { target } : {}),
         } satisfies CreateGoalReq);
 
@@ -154,10 +153,10 @@ export function GoalEditorScreen() {
           </View>
           <PrimaryTextField
             label="Start"
-            value={startDate}
-            onChangeText={setStartDate}
-            placeholder="2026-09-12"
-            hint="Exact date, YYYY-MM-DD."
+            value={startInput}
+            onChangeText={setStartInput}
+            placeholder="2026-09"
+            hint="Use YYYY-MM-DD, YYYY-MM, Q4 2026, H1 2027, or YYYY. Precision is preserved."
           />
           <PrimaryTextField
             label="Target"
