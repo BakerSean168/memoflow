@@ -69,7 +69,7 @@ describe('PlannerOwnerCommandRouter (PLAN-4303)', () => {
     expect(outcome).toEqual({
       status: 'conflict',
       code: 'CONFLICT',
-      message: 'Task occurrence was changed elsewhere',
+      message: '资源冲突',
       reason: 'generic',
       ownerType: 'task.occurrence',
     });

@@ -1,6 +1,7 @@
 import type { GoalClientPort } from '@memoflow/goal/client';
 import type { ScheduleClientPort } from '@memoflow/schedule/client';
 import type { TaskClientPort } from '@memoflow/task/client';
+import { presentErrorMessage } from '@memoflow/http-client';
 import type { Result } from '@memoflow/contracts/result';
 import type { CalendarEventProjection, PlannerEventRange } from '@memoflow/contracts/schedule';
 import type { RescheduleTaskInput } from '@memoflow/contracts/task';
@@ -84,7 +85,6 @@ function isEditable(request: PlannerMutationRequest): boolean {
 function conflictReason(
   result: Extract<Result<unknown>, { ok: false }>,
   code: string,
-  message: string,
 ): PlannerMutationConflictReason {
   const detailCodes = new Set((result.error.details ?? []).map((detail) => detail.code));
 
@@ -95,8 +95,7 @@ function conflictReason(
   if (
     detailCodes.has('TASK_OCCURRENCE_VERSION_CONFLICT') ||
     code === 'VERSION_CONFLICT' ||
-    code === 'OPTIMISTIC_CONCURRENCY' ||
-    message.toLowerCase().includes('version conflict')
+    code === 'OPTIMISTIC_CONCURRENCY'
   ) {
     return 'stale-version';
   }
@@ -110,13 +109,13 @@ function resultOutcome(
 ): PlannerMutationOutcome {
   if (result.ok) return { status: 'applied', ownerType };
   const code = String(result.error.code ?? 'UNKNOWN_ERROR');
-  const message = String(result.error.message ?? '');
+  const message = presentErrorMessage(result.error);
   if (code === 'CONFLICT' || code === 'VERSION_CONFLICT' || code === 'OPTIMISTIC_CONCURRENCY') {
     return {
       status: 'conflict',
       code,
       message,
-      reason: conflictReason(result, code, message),
+      reason: conflictReason(result, code),
       ownerType,
     };
   }
