@@ -7,7 +7,7 @@
 
 import { z } from 'zod';
 import { LabelColorSchema } from '../../label';
-import { brandedId, YmdSchema } from '../../../primitives';
+import { brandedId } from '../../../primitives';
 import type {
   GoalId,
   GoalReviewId,

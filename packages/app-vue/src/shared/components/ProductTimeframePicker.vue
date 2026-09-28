@@ -137,15 +137,15 @@ const quarterValue = ref<1 | 2 | 3 | 4>(1);
 const halfValue = ref<1 | 2>(1);
 
 const productLocale = computed(() => {
-  productTimeRevision.value;
+  void productTimeRevision.value;
   return getProductTime().presentation.locale;
 });
 const weekStartsOn = computed(() => {
-  productTimeRevision.value;
+  void productTimeRevision.value;
   return getProductTime().context.weekStartsOn as WeekStartsOn;
 });
 const calendarReturnDate = computed(() => {
-  productTimeRevision.value;
+  void productTimeRevision.value;
   return parseToCalendarDate(getProductTodayYmd());
 });
 const calendarMinDate = computed(() =>

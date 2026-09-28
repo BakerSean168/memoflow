@@ -4,9 +4,6 @@ import {
   computeDurableElapsedNextOccurrence,
   computeRoutineNextEligibleOccurrence,
   requiresDurableScheduleProjection,
-  RoutineDefinition,
-  type ElapsedTrigger,
-  type WallClockTrigger,
 } from '../../domain/routine';
 import type { RoutineOccurrenceNotificationWriterPort } from '../../domain/ports/routine-occurrence-notification-writer.port';
 import { buildRoutineOccurrenceNotificationRequest } from './routine-occurrence-notification-writer';
