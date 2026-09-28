@@ -5,6 +5,7 @@ export {
   type RoutineCoachCommandPort,
   type RoutineDefinitionReceipt,
   type RoutineMembershipReceipt,
+  type RoutinePreferencesReceipt,
   type RoutineProfileReceipt,
   type RoutineProtocolMethodId,
   type RoutineProtocolSessionReceipt,

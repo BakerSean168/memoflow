@@ -52,6 +52,12 @@ export interface IKnowledgeRepositoryInstallationIntentRepository {
     routeKey: string,
     notBefore: number,
   ): Promise<KnowledgeRepositoryInstallationIntentRecord | null>;
+  findLatestRecoverableFinalized(
+    identityId: string,
+    routeKey: string,
+    clientKind: KnowledgeRepositoryInstallationClientKind,
+    notBefore: number,
+  ): Promise<KnowledgeRepositoryInstallationIntentRecord | null>;
   renewVerifiedForRetry(input: {
     identityId: string;
     intentId: string;

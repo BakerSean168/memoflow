@@ -23,6 +23,7 @@ import type { GovernanceClientPort } from '@memoflow/governance/client';
 import type { GoalClientPort } from '@memoflow/goal/client';
 import type { LabelClientPort } from '@memoflow/label/client';
 import type { NotificationClientPort } from '@memoflow/notification/client';
+import type { GoalKnowledgeClientPort } from '@memoflow/relation/client';
 import type { RepositoryClientPort } from '@memoflow/repository/client';
 import type { RoutineClientPort } from '@memoflow/reminder/client';
 import type { ScheduleClientPort } from '@memoflow/schedule/client';
@@ -44,6 +45,7 @@ export type IScheduleService = ScheduleClientPort;
 export type IRepositoryService = RepositoryClientPort;
 export type IRoutineService = RoutineClientPort;
 export type INotificationService = NotificationClientPort;
+export type IGoalKnowledgeService = GoalKnowledgeClientPort;
 export type ISettingService = SettingClientPort;
 export type IDataPortabilityService = DataPortabilityClientPort;
 export type IAIClient = AIClientPort;
@@ -76,6 +78,8 @@ export interface ModuleCapsule {
   icon: Component;
   /** Landing route opened in the business panel when the capsule is entered. */
   route: string;
+  /** Preferred quick-workspace width for the capsule popover. */
+  previewSize?: 'compact' | 'default' | 'wide';
   /**
    * Semantic token naming the source of a numeric badge (e.g.
    * 'notification.unread'). Resolved by the shell; unresolved tokens render

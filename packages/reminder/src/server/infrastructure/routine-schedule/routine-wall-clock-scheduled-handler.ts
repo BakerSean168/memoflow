@@ -28,6 +28,7 @@ export function createRoutineWallClockScheduledHandler(deps: {
           identityId: context.payload.identityId,
           routineId: context.payload.routineId,
           occurrenceKey: context.payload.occurrenceKey,
+          triggerKind: 'WallClock',
           scheduledFor: context.payload.scheduledFor,
           sourceRevision: context.payload.sourceRevision,
         });
@@ -53,7 +54,11 @@ export function createRoutineWallClockScheduledHandler(deps: {
           case 'retryable':
             return {
               status: 'retryable',
-              failure: { code: 'HANDLER_EXECUTION_FAILED', message: outcome.error, retryable: true },
+              failure: {
+                code: 'HANDLER_EXECUTION_FAILED',
+                message: outcome.error,
+                retryable: true,
+              },
             };
           case 'dead-letter':
             return {

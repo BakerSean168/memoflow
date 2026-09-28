@@ -8,7 +8,7 @@
  * 账户入口（诊断修订 §9）：头像打开账户菜单，不再直达 Settings。
  */
 import { useI18n } from 'vue-i18n';
-import { Search, SquarePen, X } from '@lucide/vue';
+import { MoreHorizontal, Search, SquarePen, Trash2 } from '@lucide/vue';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -72,14 +72,14 @@ const identityLabel = () => {
 <template>
   <aside
     data-testid="conversation-sidebar"
-    class="conversation-sidebar relative flex h-full flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground"
+    class="conversation-sidebar relative flex h-full flex-col border-r border-sidebar-border/60 bg-sidebar text-sidebar-foreground"
   >
     <!-- 头：品牌 + 搜索 -->
-    <div class="flex h-[50px] shrink-0 items-center justify-between px-4">
-      <span class="truncate text-sm font-bold">{{ APP_NAME_ZH }}</span>
+    <div class="flex h-12 shrink-0 items-center justify-between px-3.5">
+      <span class="truncate text-[13px] font-semibold tracking-[-0.01em]">{{ APP_NAME_ZH }}</span>
       <button
         type="button"
-        class="rounded p-1.5 text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground"
+        class="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground"
         :title="t('shell.search')"
         :aria-label="t('shell.search')"
         @click="emit('open-search')"
@@ -89,11 +89,11 @@ const identityLabel = () => {
     </div>
 
     <!-- 新对话 -->
-    <div class="shrink-0 px-2.5 py-2">
+    <div class="shrink-0 px-2 py-1.5">
       <button
         type="button"
         data-testid="shell-new-conversation"
-        class="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground"
+        class="flex h-9 w-full items-center gap-2.5 rounded-md px-2.5 text-left text-[13px] font-medium text-foreground transition-colors hover:bg-sidebar-accent"
         @click="emit('new-conversation')"
       >
         <SquarePen class="h-4 w-4" />
@@ -102,14 +102,12 @@ const identityLabel = () => {
     </div>
 
     <!-- 会话列表（按时间分组） -->
-    <nav class="flex-1 overflow-y-auto px-2 pb-4">
+    <nav class="flex-1 overflow-y-auto px-2 pb-4 pt-1">
       <p v-if="loading && groups.length === 0" class="px-3 py-2 text-xs text-muted-foreground/60">
         {{ t('common.loading') }}
       </p>
       <div v-for="group in groups" :key="group.labelKey" class="mb-3">
-        <p
-          class="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/45"
-        >
+        <p class="px-2.5 pb-1 pt-2 text-[11px] font-medium text-muted-foreground/55">
           {{ t(group.labelKey) }}
         </p>
         <div
@@ -118,37 +116,50 @@ const identityLabel = () => {
           class="group/item relative flex w-full items-center rounded-md transition-colors"
           :class="
             activeConversationId === item.id
-              ? 'bg-sidebar-accent text-foreground'
-              : 'text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground'
+              ? 'bg-sidebar-accent/80 text-foreground'
+              : 'text-muted-foreground hover:bg-sidebar-accent/55 hover:text-foreground'
           "
         >
           <button
             type="button"
-            class="min-w-0 flex-1 px-3 py-1.5 text-left text-[13px]"
+            class="min-w-0 flex-1 px-2.5 py-1.5 text-left text-[13px] leading-5"
             @click="emit('select-conversation', item.id)"
           >
             <span class="block truncate">{{ item.title }}</span>
           </button>
-          <button
-            type="button"
-            class="mr-1 shrink-0 rounded p-1 text-muted-foreground/60 opacity-0 transition-opacity hover:bg-sidebar-accent hover:text-foreground group-hover/item:opacity-100"
-            :aria-label="t('common.delete')"
-            @click.stop="emit('delete-conversation', item.id)"
-          >
-            <X class="h-3 w-3" />
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <button
+                type="button"
+                class="mr-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground/60 opacity-0 transition-[opacity,background-color,color] hover:bg-sidebar-accent hover:text-foreground focus-visible:opacity-100 group-hover/item:opacity-100"
+                :aria-label="t('common.more')"
+                @click.stop
+              >
+                <MoreHorizontal class="h-3.5 w-3.5" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" side="right" class="w-36">
+              <DropdownMenuItem
+                class="text-destructive focus:text-destructive"
+                @click="emit('delete-conversation', item.id)"
+              >
+                <Trash2 class="mr-2 h-3.5 w-3.5" />
+                {{ t('common.delete') }}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </nav>
 
     <!-- 底：账户菜单 -->
-    <div class="flex h-[52px] shrink-0 items-center border-t border-sidebar-border/40 px-3.5">
+    <div class="flex h-[50px] shrink-0 items-center border-t border-sidebar-border/30 px-3">
       <DropdownMenu>
         <DropdownMenuTrigger as-child>
           <button
             type="button"
             data-testid="shell-account-menu"
-            class="flex min-w-0 items-center gap-2.5 rounded p-1 transition-colors hover:bg-sidebar-accent"
+            class="flex min-w-0 items-center gap-2.5 rounded-md px-1.5 py-1 transition-colors hover:bg-sidebar-accent"
             :title="t('shell.account.menu')"
           >
             <span

@@ -51,7 +51,7 @@ function makeDraft(revision: number): GoalPlanDraft {
       name: 'Deep work',
       summary: 'Protect focused work time.',
       status: 'Planned',
-      startDate: '2026-09-12',
+      start: { kind: 'day', date: '2026-09-12' },
       target: { kind: 'month', year: 2026, month: 12 },
       labels: [],
     },

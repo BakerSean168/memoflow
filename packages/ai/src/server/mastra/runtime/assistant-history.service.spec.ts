@@ -7,19 +7,31 @@ import {
 import type { AssistantConversationShellSource } from './assistant-conversation-shell.port';
 
 function createMemoryHarness() {
-  let thread: { id: string; resourceId: string; title?: string; metadata?: Record<string, unknown> } | null = null;
+  let thread: {
+    id: string;
+    resourceId: string;
+    title?: string;
+    metadata?: Record<string, unknown>;
+  } | null = null;
   const messages = new Map<string, MastraDBMessage>();
   const memory = {
     getThreadById: vi.fn(async () => thread),
-    createThread: vi.fn(async (input: { resourceId: string; threadId?: string; title?: string; metadata?: Record<string, unknown> }) => {
-      thread = {
-        id: input.threadId ?? 'generated-thread',
-        resourceId: input.resourceId,
-        title: input.title,
-        metadata: input.metadata,
-      };
-      return thread;
-    }),
+    createThread: vi.fn(
+      async (input: {
+        resourceId: string;
+        threadId?: string;
+        title?: string;
+        metadata?: Record<string, unknown>;
+      }) => {
+        thread = {
+          id: input.threadId ?? 'generated-thread',
+          resourceId: input.resourceId,
+          title: input.title,
+          metadata: input.metadata,
+        };
+        return thread;
+      },
+    ),
     deleteThread: vi.fn(async () => {
       thread = null;
       messages.clear();
@@ -30,7 +42,9 @@ function createMemoryHarness() {
     memory,
     messages,
     getThread: () => thread,
-    setThread(next: typeof thread) { thread = next; },
+    setThread(next: typeof thread) {
+      thread = next;
+    },
   };
 }
 
@@ -65,7 +79,9 @@ describe('AssistantHistoryService', () => {
   it('deduplicates concurrent shell validation and thread creation', async () => {
     const harness = createMemoryHarness();
     let release!: () => void;
-    const gate = new Promise<void>((resolve) => { release = resolve; });
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
     const source: AssistantConversationShellSource = {
       loadShell: vi.fn(async () => {
         await gate;
@@ -87,7 +103,9 @@ describe('AssistantHistoryService', () => {
     const harness = createMemoryHarness();
     harness.setThread({ id: 'conversation-1', resourceId: 'identity-1', metadata: {} });
     const source: AssistantConversationShellSource = {
-      loadShell: vi.fn(async () => { throw new Error('shell must not be consulted'); }),
+      loadShell: vi.fn(async () => {
+        throw new Error('shell must not be consulted');
+      }),
     };
     const service = new AssistantHistoryService(harness.memory, source);
 
@@ -121,10 +139,47 @@ describe('AssistantHistoryService', () => {
           conversationId: 'conversation-1',
           role: 'assistant',
           content: 'runtime answer',
+          attachments: [],
           createdAt: 20,
         },
       ],
     });
+  });
+
+  it('projects file parts as bounded attachment metadata without returning file data', async () => {
+    const harness = createMemoryHarness();
+    harness.setThread({ id: 'conversation-1', resourceId: 'identity-1', metadata: {} });
+    harness.messages.set('m-file', {
+      id: 'm-file',
+      role: 'user',
+      createdAt: new Date(30),
+      threadId: 'conversation-1',
+      resourceId: 'identity-1',
+      type: 'text',
+      content: {
+        format: 2,
+        parts: [
+          { type: 'text', text: 'look at this' },
+          {
+            type: 'file',
+            mediaType: 'image/png',
+            url: 'data:image/png;base64,AAAA',
+            filename: 'screen.png',
+          },
+        ],
+      },
+    } as MastraDBMessage);
+    const service = new AssistantHistoryService(harness.memory, shellSource());
+
+    const result = await service.listMessages({
+      identityId: 'identity-1',
+      conversationId: 'conversation-1',
+    });
+    expect(result.messages[0]).toMatchObject({
+      id: 'm-file',
+      attachments: [{ mediaType: 'image/png', filename: 'screen.png' }],
+    });
+    expect(JSON.stringify(result)).not.toContain('data:image/png');
   });
 
   it('deletes only an owner-scoped Mastra thread', async () => {
@@ -133,7 +188,10 @@ describe('AssistantHistoryService', () => {
     const service = new AssistantHistoryService(harness.memory, shellSource());
 
     await expect(
-      service.deleteConversation({ identityId: 'identity-other', conversationId: 'conversation-1' }),
+      service.deleteConversation({
+        identityId: 'identity-other',
+        conversationId: 'conversation-1',
+      }),
     ).resolves.toBe(false);
     expect(harness.memory.deleteThread).not.toHaveBeenCalled();
 
@@ -145,7 +203,9 @@ describe('AssistantHistoryService', () => {
 
   it('fails closed for a missing shell or a foreign pre-existing thread', async () => {
     const harness = createMemoryHarness();
-    const missingSource: AssistantConversationShellSource = { loadShell: vi.fn().mockResolvedValue(null) };
+    const missingSource: AssistantConversationShellSource = {
+      loadShell: vi.fn().mockResolvedValue(null),
+    };
     const service = new AssistantHistoryService(harness.memory, missingSource);
     await expect(
       service.ensureConversation({ identityId: 'identity-1', conversationId: 'missing' }),

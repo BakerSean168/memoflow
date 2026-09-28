@@ -4,6 +4,7 @@ export default {
   "empty": "No notifications",
   "emptyDescription": "You are all caught up.",
   "allCaughtUp": "All caught up",
+  "unreadEmptyDescription": "There are no unread notifications. New reminders will appear here.",
   "item": {
     "priorityVital": "Urgent",
     "priorityImportant": "Important"
@@ -43,20 +44,31 @@ export default {
     "openRelated": "Open related item",
     "retry": "Try again",
     "enableNotification": "Enable notifications",
-    "dismiss": "Got it"
+    "dismiss": "Got it",
+    "complete": "Complete",
+    "snooze10m": "Remind in 10 min",
+    "archive": "Archive",
+    "more": "More actions"
   },
   "toast": {
     "allMarkedRead": "All notifications marked as read",
-    "deleted": "Notification deleted"
+    "deleted": "Notification deleted",
+    "routineCompleted": "Routine occurrence completed",
+    "routineSnoozed": "Reminder snoozed",
+    "archived": "Notification archived",
+    "actionCompleted": "Action completed",
+    "actionRejected": "This action cannot be completed"
   },
   "permission": {
     "warningTitle": "Notification Permission"
   },
   "error": {
     "fetchFailed": "Failed to load notifications",
+    "fetchFailedDescription": "Check your connection and try again.",
     "markReadFailed": "Failed to mark as read",
     "markAllReadFailed": "Failed to mark all as read",
     "deleteFailed": "Failed to delete notification",
+    "actionFailed": "Failed to execute notification action",
     "refreshStatsFailed": "Failed to refresh stats"
   },
   "sseMonitor": {

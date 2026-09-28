@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { PortableReferenceV3Schema } from '../data-portability/dtos/portable-v3.dto';
-import { YmdSchema } from '../../primitives';
 import { GoalReminderConfigDTOSchema } from './value-objects/goal-reminder-config';
 import { GoalStatus } from './value-objects/goal-status';
 import { GoalTimeframeSchema } from './value-objects/goal-timeframe';
@@ -117,14 +116,14 @@ export const GoalPortableReviewV3Schema = z
   .strict();
 export type GoalPortableReviewV3 = z.infer<typeof GoalPortableReviewV3Schema>;
 
-export const GoalPortableDefinitionV3Schema = z
+const GoalPortableDefinitionV3CanonicalSchema = z
   .object({
     ref: GoalPortableReferenceV3Schema,
     name: z.string().trim().min(1).max(80),
     summary: z.string().max(255).nullable(),
     description: z.string().max(10000).nullable().default(null),
     status: z.enum(GoalStatus),
-    startDate: YmdSchema.nullable(),
+    start: GoalTimeframeSchema.nullable(),
     target: GoalTimeframeSchema.nullable(),
     reminderConfig: GoalReminderConfigDTOSchema.nullable(),
     archived: z.boolean(),
@@ -141,6 +140,18 @@ export const GoalPortableDefinitionV3Schema = z
     reviews: z.array(GoalPortableReviewV3Schema),
   })
   .strict();
+
+export const GoalPortableDefinitionV3Schema = z.preprocess((input) => {
+  if (typeof input !== 'object' || input === null || Array.isArray(input)) return input;
+  const record = input as Record<string, unknown>;
+  if ('start' in record || !('startDate' in record)) return input;
+
+  const { startDate, ...rest } = record;
+  return {
+    ...rest,
+    start: startDate === null ? null : { kind: 'day', date: startDate },
+  };
+}, GoalPortableDefinitionV3CanonicalSchema);
 export type GoalPortableDefinitionV3 = z.infer<typeof GoalPortableDefinitionV3Schema>;
 
 export const GoalPortablePayloadV3Schema = z

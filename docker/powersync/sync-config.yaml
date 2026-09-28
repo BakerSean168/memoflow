@@ -27,6 +27,7 @@ streams:
       - SELECT * FROM scheduled_invocations WHERE identity_id = auth.user_id()
       - SELECT * FROM invocation_attempts WHERE identity_id = auth.user_id()
       - SELECT * FROM routine_definitions WHERE identity_id = auth.user_id()
+      - SELECT * FROM routine_preferences WHERE identity_id = auth.user_id()
       - SELECT * FROM routine_profiles WHERE identity_id = auth.user_id()
       - SELECT * FROM routine_profile_memberships WHERE identity_id = auth.user_id()
       - SELECT * FROM routine_occurrences WHERE identity_id = auth.user_id()

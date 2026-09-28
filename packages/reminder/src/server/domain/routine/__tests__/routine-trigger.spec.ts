@@ -101,13 +101,21 @@ describe('Routine canonical trigger model', () => {
     );
   });
 
-  it('encodes timing ownership so only WallClock can become a durable Schedule projection', () => {
+  it('derives timing ownership from trigger semantics', () => {
     const wallClock = createWallClockTrigger({
       localTime: '07:30',
       timeZone: 'Asia/Shanghai',
       recurrence: { startDate: '2026-08-25', frequency: 'daily' },
     });
-    const elapsed = createElapsedTrigger({ durationMs: 60 * 60_000 });
+    const lastSatisfiedElapsed = createElapsedTrigger({ durationMs: 60 * 60_000 });
+    const activationElapsed = createElapsedTrigger({
+      durationMs: 60 * 60_000,
+      anchor: 'routine-activation',
+    });
+    const profileElapsed = createElapsedTrigger({
+      durationMs: 60 * 60_000,
+      anchor: 'profile-activation',
+    });
     const activeUsage = createActiveUsageTrigger({
       requiredActiveMs: 40 * 60_000,
       naturalBreakCredit: { idleDurationMs: 5 * 60_000 },
@@ -115,8 +123,12 @@ describe('Routine canonical trigger model', () => {
 
     expect(timingOwnerOf(wallClock)).toBe('scheduler');
     expect(requiresDurableScheduleProjection(wallClock)).toBe(true);
-    expect(timingOwnerOf(elapsed)).toBe('local-runtime');
-    expect(requiresDurableScheduleProjection(elapsed)).toBe(false);
+    expect(timingOwnerOf(lastSatisfiedElapsed)).toBe('scheduler');
+    expect(requiresDurableScheduleProjection(lastSatisfiedElapsed)).toBe(true);
+    expect(timingOwnerOf(activationElapsed)).toBe('scheduler');
+    expect(requiresDurableScheduleProjection(activationElapsed)).toBe(true);
+    expect(timingOwnerOf(profileElapsed)).toBe('local-runtime');
+    expect(requiresDurableScheduleProjection(profileElapsed)).toBe(false);
     expect(timingOwnerOf(activeUsage)).toBe('local-runtime');
     expect(requiresDurableScheduleProjection(activeUsage)).toBe(false);
     expect(activeUsage.naturalBreakCredit).toEqual({
@@ -144,6 +156,28 @@ describe('Routine canonical trigger model', () => {
         protocolBreakCredit: { kind: 'Stand', minimumBreakMs: 0 },
       }),
     ).toThrow('protocolBreakCredit.minimumBreakMs');
+  });
+
+  it('keeps a durable activation boundary that only changes on enable transitions', () => {
+    const createdAt = new Date('2026-09-28T01:00:00.000Z');
+    const routine = RoutineDefinition.create({
+      id: 'move',
+      identityId: 'identity-1',
+      name: 'Move',
+      now: createdAt,
+    });
+
+    expect(routine.activatedAt).toEqual(createdAt);
+
+    routine.update({ name: 'Move gently' }, new Date('2026-09-28T01:05:00.000Z'));
+    expect(routine.activatedAt).toEqual(createdAt);
+
+    routine.disable(new Date('2026-09-28T01:10:00.000Z'));
+    expect(routine.activatedAt).toBeNull();
+
+    const reenabledAt = new Date('2026-09-28T01:15:00.000Z');
+    routine.enable(reenabledAt);
+    expect(routine.activatedAt).toEqual(reenabledAt);
   });
 
   it('stores the trigger on RoutineDefinition as domain truth', () => {
@@ -203,5 +237,4 @@ describe('Routine canonical trigger model', () => {
       }),
     ).toThrow('must define at least one temporary effect');
   });
-
 });

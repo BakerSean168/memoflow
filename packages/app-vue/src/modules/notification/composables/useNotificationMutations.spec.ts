@@ -35,6 +35,7 @@ function makeService(overrides: Record<string, ReturnType<typeof vi.fn>> = {}) {
     markAllAsRead: vi.fn(),
     deleteNotification: vi.fn(),
     batchDeleteNotifications: vi.fn(),
+    executeAction: vi.fn(),
     ...overrides,
   };
 }
@@ -188,6 +189,55 @@ describe('useNotificationMutations (plan §3.4 server-confirmed patch / invalida
       target: 'notification',
       identityScope: SCOPE,
       source: 'mutation',
+    });
+  });
+
+  it('executes a typed notification action through the client port and invalidates the fact', async () => {
+    const service = makeService({
+      executeAction: vi.fn().mockResolvedValue(
+        ok({
+          interaction: {
+            id: 'interaction-1',
+            idempotencyKey: 'notification:n-1:action:complete',
+            identityId: SCOPE,
+            notificationId: 'n-1',
+            actionKey: 'complete',
+            actionKind: 'owner-command',
+            occurredAt: 10,
+            commandReceiptId: 'routine-interaction-1',
+            outcome: 'accepted',
+          },
+          action: {
+            kind: 'owner-command',
+            actionKey: 'complete',
+            labelKey: 'routine.action.complete',
+            owner: { type: 'routine-occurrence', id: 'occurrence-1' },
+            commandKey: 'routine.complete',
+            input: { routineId: 'routine-1', occurrenceKey: 'occurrence-1' },
+          },
+        }),
+      ),
+    });
+    const { api, runtime } = mountNotificationComposable(() => useNotificationMutations(), {
+      service,
+    });
+    const invalidate = vi.spyOn(runtime.dispatcher, 'invalidate');
+
+    const result = await api.executeAction.mutateAsync({
+      notificationId: 'n-1',
+      actionKey: 'complete',
+    });
+
+    expect(result.interaction.outcome).toBe('accepted');
+    expect(service.executeAction).toHaveBeenCalledWith({
+      notificationId: 'n-1',
+      actionKey: 'complete',
+    });
+    expect(invalidate).toHaveBeenCalledWith({
+      target: 'notification',
+      identityScope: SCOPE,
+      source: 'mutation',
+      entityId: 'n-1',
     });
   });
 

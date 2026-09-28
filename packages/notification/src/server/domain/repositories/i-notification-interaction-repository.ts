@@ -19,6 +19,20 @@ export interface RecordNotificationInteractionInput {
 
 export interface INotificationInteractionRepository {
   record(input: RecordNotificationInteractionInput): Promise<NotificationInteractionDTO>;
-  findByIdempotencyKey(identityId: string, idempotencyKey: string): Promise<NotificationInteractionDTO | null>;
-  listByNotification(identityId: string, notificationId: string): Promise<NotificationInteractionDTO[]>;
+  findByIdempotencyKey(
+    identityId: string,
+    idempotencyKey: string,
+  ): Promise<NotificationInteractionDTO | null>;
+  listByNotification(
+    identityId: string,
+    notificationId: string,
+  ): Promise<NotificationInteractionDTO[]>;
+  /**
+   * Batch query used by Inbox projection to derive presentation action state
+   * without N+1 interaction lookups.
+   */
+  listByNotifications(
+    identityId: string,
+    notificationIds: readonly string[],
+  ): Promise<NotificationInteractionDTO[]>;
 }

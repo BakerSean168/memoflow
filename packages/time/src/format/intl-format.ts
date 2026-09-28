@@ -99,6 +99,10 @@ const SLOT_OPTIONS: Record<TimeDisplaySlot, Intl.DateTimeFormatOptions> = {
   periodWeekDay: {
     weekday: 'long',
   },
+  periodRangeDay: {
+    month: 'short',
+    day: 'numeric',
+  },
   chartMonthDay: {
     month: 'short',
     day: 'numeric',

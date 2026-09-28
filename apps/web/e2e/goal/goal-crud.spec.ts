@@ -71,7 +71,46 @@ test.describe('Goal vNext product surface', () => {
     await expect(page.getByTestId('goal-summary-input')).toHaveValue(updatedSummary);
   });
 
-  test('[P0] drives the explicit four-state Goal lifecycle from the detail surface', async ({
+  test('[P0] edits an existing Goal key result through the trajectory editor', async ({ page }) => {
+    const goalName = `E2E Goal Existing KR ${Date.now()}`;
+    const keyResultTitle = 'Reach 50 active users';
+
+    const createdRow = await createGoal(page, {
+      name: goalName,
+      summary: 'Existing Goal KR edit convergence.',
+      keyResult: {
+        title: keyResultTitle,
+        currentValue: '40',
+        targetValue: '50',
+        unit: 'users',
+      },
+    });
+    const goalId = await goalIdFromRow(createdRow);
+
+    await openGoalAction(page, goalId, 'edit');
+    const dialog = goalDialog(page);
+    await expect(dialog).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    await expect(dialog.getByTestId('goal-key-result-draft-row')).toContainText(keyResultTitle);
+
+    await dialog.getByTestId('goal-key-result-draft-row').getByRole('button').first().click();
+    await expect(dialog.getByTestId('kr-card-editor')).toBeVisible();
+    await expect(dialog.getByTestId('kr-trajectory-editor')).toBeVisible();
+    await expect(dialog.getByTestId('draft-kr-initial-input')).toHaveValue('0');
+    await expect(dialog.getByTestId('draft-kr-current-input')).toHaveValue('40');
+    await expect(dialog.getByTestId('draft-kr-target-input')).toHaveValue('50');
+
+    await dialog.getByTestId('draft-kr-current-input').fill('45');
+    await dialog.getByTestId('save-key-result-draft').click();
+    await goalSubmitButton(page).click();
+    await expect(dialog).toBeHidden({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+
+    await openGoalAction(page, goalId, 'edit');
+    await expect(dialog).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    await dialog.getByTestId('goal-key-result-draft-row').getByRole('button').first().click();
+    await expect(dialog.getByTestId('draft-kr-current-input')).toHaveValue('45');
+  });
+
+  test('[P0] drives the explicit four-state Goal lifecycle from the inline status control', async ({
     page,
   }) => {
     const goalName = `E2E Goal Lifecycle ${Date.now()}`;
@@ -80,34 +119,34 @@ test.describe('Goal vNext product surface', () => {
       summary: 'Lifecycle browser contract.',
     });
 
-    await createdRow.getByTestId('goal-row-title').click();
+    await openGoalDetail(createdRow);
     await expect(page.getByTestId('goal-detail-view')).toBeVisible({
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
     await expect(page.getByTestId('goal-status')).toHaveAttribute('data-goal-status', 'Planned');
 
-    await page.getByTestId('goal-start-action').click();
+    await chooseGoalStatus(page, /^(In progress|进行中)$/);
     await expect(page.getByTestId('goal-status')).toHaveAttribute('data-goal-status', 'InProgress');
 
-    await page.getByTestId('goal-plan-action').click();
+    await chooseGoalStatus(page, /^(Planned|规划中)$/);
     await expect(page.getByTestId('goal-status')).toHaveAttribute('data-goal-status', 'Planned');
 
-    await page.getByTestId('goal-start-action').click();
+    await chooseGoalStatus(page, /^(In progress|进行中)$/);
     await expect(page.getByTestId('goal-status')).toHaveAttribute('data-goal-status', 'InProgress');
 
-    await page.getByTestId('goal-complete-action').click();
+    await chooseGoalStatus(page, /^(Completed|已完成)$/);
     await expect(page.getByTestId('goal-status')).toHaveAttribute('data-goal-status', 'Completed');
 
-    await page.getByTestId('goal-reopen-action').click();
+    await chooseGoalStatus(page, /^(In progress|进行中)$/);
     await expect(page.getByTestId('goal-status')).toHaveAttribute('data-goal-status', 'InProgress');
 
-    await page.getByTestId('goal-abandon-action').click();
+    await chooseGoalStatus(page, /^(Abandoned|已放弃)$/);
     const abandonDialog = page.getByRole('alertdialog');
     await expect(abandonDialog).toBeVisible();
     await abandonDialog.getByRole('button', { name: /^(Abandon|放弃)$/ }).click();
     await expect(page.getByTestId('goal-status')).toHaveAttribute('data-goal-status', 'Abandoned');
 
-    await page.getByTestId('goal-resume-action').click();
+    await chooseGoalStatus(page, /^(In progress|进行中)$/);
     await expect(page.getByTestId('goal-status')).toHaveAttribute('data-goal-status', 'InProgress');
   });
 
@@ -134,6 +173,44 @@ test.describe('Goal vNext product surface', () => {
       .toBe(0);
   });
 
+  test('[P0] creates a Key Result from Goal detail through the trajectory editor', async ({
+    page,
+  }) => {
+    const goalName = `E2E Goal KR Detail ${Date.now()}`;
+    const keyResultTitle = `Reduce backlog ${Date.now()}`;
+
+    const createdRow = await createGoal(page, {
+      name: goalName,
+      summary: 'Standalone KR editor convergence.',
+    });
+    const goalId = await goalIdFromRow(createdRow);
+    await openGoalDetail(createdRow);
+
+    await page.waitForURL(new RegExp(`/goals/${goalId}$`), {
+      timeout: TIMEOUT_CONFIG.NAVIGATION,
+    });
+    await page.getByTestId('goal-add-key-result').click();
+
+    const dialog = page.getByTestId('key-result-dialog');
+    await expect(dialog).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    await expect(dialog.getByTestId('kr-card-editor')).toBeVisible();
+    await expect(dialog.getByTestId('kr-trajectory-editor')).toBeVisible();
+    await expect(dialog.getByTestId('draft-kr-target-input')).toHaveValue('');
+
+    await dialog.getByTestId('draft-kr-title-input').fill(keyResultTitle);
+    await dialog.getByTestId('draft-kr-initial-input').fill('100');
+    await dialog.getByTestId('draft-kr-current-input').fill('80');
+    await dialog.getByTestId('draft-kr-target-input').fill('40');
+    await dialog.getByTestId('draft-kr-unit-input').fill('tickets');
+    await dialog.getByTestId('save-key-result-button').click();
+
+    await expect(dialog).toBeHidden({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    const keyResultSection = page.getByTestId('goal-workspace-key-results');
+    await expect(keyResultSection).toContainText(keyResultTitle);
+    await expect(keyResultSection).toContainText('100 → 80 → 40');
+    await expect(keyResultSection).toContainText('tickets');
+  });
+
   test('[P1] opens goal detail from the progress-row title', async ({ page }) => {
     const goalName = `E2E Goal Detail ${Date.now()}`;
     const goalSummary = 'Goal detail view should show this summary.';
@@ -144,7 +221,7 @@ test.describe('Goal vNext product surface', () => {
     });
     const goalId = await goalIdFromRow(createdRow);
 
-    await createdRow.getByTestId('goal-row-title').click();
+    await openGoalDetail(createdRow);
 
     await page.waitForURL(new RegExp(`/goals/${goalId}$`), {
       timeout: TIMEOUT_CONFIG.NAVIGATION,
@@ -152,8 +229,8 @@ test.describe('Goal vNext product surface', () => {
     await expect(page.getByTestId('goal-detail-view')).toBeVisible({
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
-    await expect(page.getByTestId('goal-detail-title')).toHaveText(goalName);
-    await expect(page.getByTestId('goal-detail-view')).toContainText(goalSummary);
+    await expect(page.getByTestId('goal-detail-title')).toHaveValue(goalName);
+    await expect(page.getByTestId('goal-detail-summary')).toHaveValue(goalSummary);
   });
 
   test('[P0] exposes only vNext system views and preserves Label filter state while resizing', async ({
@@ -295,6 +372,11 @@ async function openSystemViewMenu(page: Page): Promise<void> {
     .click();
 }
 
+async function chooseGoalStatus(page: Page, name: RegExp): Promise<void> {
+  await page.getByTestId('goal-status-picker').click();
+  await page.getByRole('menuitemradio', { name }).click();
+}
+
 function goalDialog(page: Page): Locator {
   return page.getByTestId('goal-dialog');
 }
@@ -322,6 +404,11 @@ async function goalIdFromRow(goalRow: Locator): Promise<string> {
   return goalId!;
 }
 
+async function openGoalDetail(goalRow: Locator): Promise<void> {
+  await expect(goalRow).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+  await goalRow.getByRole('button').first().click();
+}
+
 async function openGoalAction(
   page: Page,
   goalId: string,
@@ -329,7 +416,9 @@ async function openGoalAction(
 ): Promise<void> {
   const row = goalRowById(page, goalId);
   await expect(row).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
-  await row
-    .getByRole('button', { name: action === 'edit' ? /^(编辑|Edit)$/ : /^(删除|Delete)$/ })
+  await row.hover();
+  await row.locator('..').getByTestId('goal-row-more-actions').click();
+  await page
+    .getByRole('menuitem', { name: action === 'edit' ? /^(编辑|Edit)$/ : /^(删除|Delete)$/ })
     .click();
 }

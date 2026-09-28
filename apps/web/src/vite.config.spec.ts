@@ -42,6 +42,10 @@ describe('web Vite development configuration', () => {
             replacement: expect.stringContaining('/packages/http-client/src/index.ts'),
           }),
           expect.objectContaining({
+            find: '@memoflow/time',
+            replacement: expect.stringContaining('/packages/time/src/index.ts'),
+          }),
+          expect.objectContaining({
             find: '@memoflow/utils/shared',
             replacement: expect.stringContaining('/packages/utils/src/shared/index.ts'),
           }),
@@ -161,6 +165,9 @@ describe('web Vite development configuration', () => {
       expect(config.experimental?.bundledDev).toBe(false);
       expect(config.resolve?.alias).not.toEqual(
         expect.arrayContaining([expect.objectContaining({ find: '@memoflow/http-client' })]),
+      );
+      expect(config.resolve?.alias).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ find: '@memoflow/time' })]),
       );
       expect(config.resolve?.alias).not.toEqual(
         expect.arrayContaining([expect.objectContaining({ find: '@memoflow/utils/shared' })]),

@@ -36,6 +36,7 @@ describe('goal shared value objects', () => {
     expect(() => GoalStatus.of('Bad')).toThrow('Invalid GoalStatus');
 
     expect(ReminderTriggerType.getAll()).toEqual([
+      ReminderTriggerType.AbsoluteAt,
       ReminderTriggerType.TimeProgressPercentage,
       ReminderTriggerType.RemainingDays,
     ]);

@@ -96,6 +96,23 @@ export function useNotificationMutations() {
     },
   });
 
+  const executeAction = useMutation({
+    mutationFn: async (input: { notificationId: string; actionKey: string }) =>
+      unwrap(await service.executeAction(input)),
+    onMutate: () => ({ identityScope: resolveIdentityScope() }),
+    onSettled: (_data, error, input, context) => {
+      if (error) handleError(error, 'notification.error.actionFailed');
+      void runtime.dispatcher.invalidate({
+        target: 'notification',
+        identityScope: context!.identityScope,
+        source: 'mutation',
+        entityId: input.notificationId,
+      });
+      // Routine owner-commands can change the next durable Elapsed schedule.
+      // The server owns that reconciliation; client only refreshes Notification fact state.
+    },
+  });
+
   const dismissAll = useMutation({
     mutationFn: async (ids: string[]) => {
       if (ids.length === 0) return { deleted: 0, failed: [] as string[] };
@@ -116,12 +133,14 @@ export function useNotificationMutations() {
     markAsRead,
     markAllAsRead,
     dismiss,
+    executeAction,
     dismissAll,
     isMutating: computed(
       () =>
         markAsRead.isPending.value ||
         markAllAsRead.isPending.value ||
         dismiss.isPending.value ||
+        executeAction.isPending.value ||
         dismissAll.isPending.value,
     ),
   };

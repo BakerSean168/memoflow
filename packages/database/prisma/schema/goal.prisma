@@ -10,6 +10,7 @@ model Goal {
   summary             String?
   description         String?
   status              String    @default("Planned")
+  startKind           String?   @map("start_kind")
   startDate           String?   @map("start_date")
   targetKind          String?   @map("target_kind")
   targetEndDate       String?   @map("target_end_date")

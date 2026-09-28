@@ -79,7 +79,8 @@ describe('ExecuteNotificationActionUseCase', () => {
         stored ??= interactionFrom(input);
         return stored;
       }),
-      listByNotification: vi.fn(async () => stored ? [stored] : []),
+      listByNotification: vi.fn(async () => (stored ? [stored] : [])),
+      listByNotifications: vi.fn(async () => (stored ? [stored] : [])),
     };
     registry = new NotificationOwnerCommandRegistry();
   });
@@ -91,7 +92,11 @@ describe('ExecuteNotificationActionUseCase', () => {
       registry,
       () => new Date('2026-09-17T00:00:00Z'),
     );
-    const result = await useCase.execute({ identityId, notificationId: String(notification.id), actionKey: 'open' });
+    const result = await useCase.execute({
+      identityId,
+      notificationId: String(notification.id),
+      actionKey: 'open',
+    });
     expect(result.ok).toBe(true);
     if (!result.ok) throw new Error('expected ok');
     expect(result.data.interaction).toMatchObject({
@@ -99,11 +104,16 @@ describe('ExecuteNotificationActionUseCase', () => {
       actionKind: 'navigate',
       outcome: 'accepted',
     });
-    expect(result.data.interaction.idempotencyKey).toBe(`notification:${notification.id}:action:open`);
+    expect(result.data.interaction.idempotencyKey).toBe(
+      `notification:${notification.id}:action:open`,
+    );
   });
 
   it('routes an owner command through the explicit allowlist and persists only provenance', async () => {
-    const execute = vi.fn(async () => ({ outcome: 'accepted' as const, commandReceiptId: 'routine-int-1' }));
+    const execute = vi.fn(async () => ({
+      outcome: 'accepted' as const,
+      commandReceiptId: 'routine-int-1',
+    }));
     registry.register({
       workflowKey: 'routine.intervention',
       ownerType: 'routine-occurrence',
@@ -124,16 +134,22 @@ describe('ExecuteNotificationActionUseCase', () => {
       actionKey: 'complete',
     });
     expect(result.ok).toBe(true);
-    expect(execute).toHaveBeenCalledWith(expect.objectContaining({
-      identityId,
-      commandKey: 'routine.complete',
-      idempotencyKey: `notification:${notification.id}:action:complete`,
-    }));
+    expect(execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        identityId,
+        commandKey: 'routine.complete',
+        idempotencyKey: `notification:${notification.id}:action:complete`,
+      }),
+    );
     expect(stored).toMatchObject({ outcome: 'accepted', commandReceiptId: 'routine-int-1' });
   });
 
   it('fails closed for an unregistered owner command and records rejection', async () => {
-    const useCase = new ExecuteNotificationActionUseCase(notificationRepository, interactionRepository, registry);
+    const useCase = new ExecuteNotificationActionUseCase(
+      notificationRepository,
+      interactionRepository,
+      registry,
+    );
     const result = await useCase.execute({
       identityId,
       notificationId: String(notification.id),
@@ -145,23 +161,42 @@ describe('ExecuteNotificationActionUseCase', () => {
   });
 
   it('replays the same mutation action from durable Interaction without invoking owner twice', async () => {
-    const execute = vi.fn(async () => ({ outcome: 'accepted' as const, commandReceiptId: 'routine-int-1' }));
+    const execute = vi.fn(async () => ({
+      outcome: 'accepted' as const,
+      commandReceiptId: 'routine-int-1',
+    }));
     registry.register({
       workflowKey: 'routine.intervention',
       ownerType: 'routine-occurrence',
       commandKey: 'routine.complete',
       execute,
     });
-    const useCase = new ExecuteNotificationActionUseCase(notificationRepository, interactionRepository, registry);
+    const useCase = new ExecuteNotificationActionUseCase(
+      notificationRepository,
+      interactionRepository,
+      registry,
+    );
 
-    await useCase.execute({ identityId, notificationId: String(notification.id), actionKey: 'complete' });
-    await useCase.execute({ identityId, notificationId: String(notification.id), actionKey: 'complete' });
+    await useCase.execute({
+      identityId,
+      notificationId: String(notification.id),
+      actionKey: 'complete',
+    });
+    await useCase.execute({
+      identityId,
+      notificationId: String(notification.id),
+      actionKey: 'complete',
+    });
     expect(execute).toHaveBeenCalledTimes(1);
     expect(interactionRepository.record).toHaveBeenCalledTimes(1);
   });
 
   it('archives through Notification owner lifecycle and records an Interaction fact', async () => {
-    const useCase = new ExecuteNotificationActionUseCase(notificationRepository, interactionRepository, registry);
+    const useCase = new ExecuteNotificationActionUseCase(
+      notificationRepository,
+      interactionRepository,
+      registry,
+    );
     const result = await useCase.execute({
       identityId,
       notificationId: String(notification.id),

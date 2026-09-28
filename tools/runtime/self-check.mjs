@@ -43,6 +43,20 @@ assert.equal(
   true,
   'api:serve must stay continuous so host-dev can run API + Web together',
 );
+const apiServeCommand = apiProject.targets?.serve?.options?.command ?? '';
+assert.match(
+  apiServeCommand,
+  /tsx\/dist\/cli\.mjs watch --tsconfig \.\.\/\.\.\/tsconfig\.workspace-src\.json/u,
+  'api:serve must resolve workspace packages from source so dependency dist rebuilds do not restart host-dev',
+);
+assert.ok(
+  apiServeCommand.includes("--exclude '../../packages/**/dist/**'"),
+  'api:serve must ignore workspace dist churn during dependency rebuild waves',
+);
+assert.ok(
+  apiServeCommand.includes("--exclude '../../packages/database/src/generated/**'"),
+  'api:serve must ignore partial Prisma client regeneration and restart only from stable source changes',
+);
 
 const sharedEnv = readEnv('.env');
 assert.equal(sharedEnv.has('API_PORT'), false, 'root .env must not shadow environment API_PORT');

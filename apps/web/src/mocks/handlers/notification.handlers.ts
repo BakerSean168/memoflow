@@ -78,6 +78,56 @@ export const notificationHandlers = [
     });
   }),
 
+  // POST /notifications/actions — execute a typed Notification action.
+  http.post(`${BASE}/actions`, async ({ request }) => {
+    const body = (await request.json()) as {
+      notificationId?: string;
+      actionKey?: string;
+    };
+    const notificationId = body.notificationId ?? 'notification-1';
+    const actionKey = body.actionKey ?? 'complete';
+    const isArchive = actionKey === 'archive';
+    const isSnooze = actionKey.startsWith('snooze');
+
+    return HttpResponse.json({
+      ok: true,
+      code: 200,
+      message: 'Action executed',
+      data: {
+        interaction: {
+          id: `interaction-${notificationId}-${actionKey}`,
+          idempotencyKey: `notification:${notificationId}:action:${actionKey}`,
+          identityId: 'mock-identity',
+          notificationId,
+          actionKey,
+          actionKind: isArchive ? 'archive' : 'owner-command',
+          occurredAt: Date.now(),
+          commandReceiptId: isArchive ? null : `routine-interaction-${actionKey}`,
+          outcome: 'accepted',
+        },
+        action: isArchive
+          ? {
+              kind: 'archive',
+              actionKey,
+              labelKey: 'notification.action.archive',
+            }
+          : {
+              kind: 'owner-command',
+              actionKey,
+              labelKey: isSnooze ? 'routine.action.snooze10m' : 'routine.action.complete',
+              owner: { type: 'routine-occurrence', id: 'mock-occurrence' },
+              commandKey: isSnooze ? 'routine.snooze' : 'routine.complete',
+              input: {
+                routineId: 'mock-routine',
+                occurrenceKey: 'mock-occurrence',
+                ...(isSnooze ? { durationMs: 600_000 } : {}),
+              },
+            },
+      },
+      timestamp: Date.now(),
+    });
+  }),
+
   // PATCH /notifications/:id/read — mark as read
   http.patch(`${BASE}/:id/read`, ({ params }) => {
     return HttpResponse.json({

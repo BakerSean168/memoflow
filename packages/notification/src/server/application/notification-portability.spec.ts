@@ -1,7 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type {
-  NotificationInteractionDTO,
-} from '@memoflow/contracts/notification';
+import type { NotificationInteractionDTO } from '@memoflow/contracts/notification';
 import type {
   PortableCapabilityExecutionContext,
   PortableReferencePort,
@@ -42,24 +40,30 @@ function context(references: PortableReferencePort): PortableCapabilityExecution
   return { identityId: 'identity-notification', batchId: 'batch-notification-v3', references };
 }
 
-function makeRepositories(initial: Notification[] = [], initialInteractions: NotificationInteractionDTO[] = []) {
+function makeRepositories(
+  initial: Notification[] = [],
+  initialInteractions: NotificationInteractionDTO[] = [],
+) {
   let notifications = [...initial];
   let interactions = [...initialInteractions];
   const notificationRepository = {
     findByIdentityId: vi.fn(async (identityId: string) =>
       notifications.filter((notification) => String(notification.identityId) === identityId),
     ),
-    findByIdForIdentity: vi.fn(async (identityId: string, id: string) =>
-      notifications.find(
-        (notification) =>
-          String(notification.identityId) === identityId && String(notification.id) === id,
-      ) ?? null,
+    findByIdForIdentity: vi.fn(
+      async (identityId: string, id: string) =>
+        notifications.find(
+          (notification) =>
+            String(notification.identityId) === identityId && String(notification.id) === id,
+        ) ?? null,
     ),
-    findByIdempotencyKey: vi.fn(async (identityId: string, idempotencyKey: string) =>
-      notifications.find(
-        (notification) =>
-          String(notification.identityId) === identityId && notification.idempotencyKey === idempotencyKey,
-      ) ?? null,
+    findByIdempotencyKey: vi.fn(
+      async (identityId: string, idempotencyKey: string) =>
+        notifications.find(
+          (notification) =>
+            String(notification.identityId) === identityId &&
+            notification.idempotencyKey === idempotencyKey,
+        ) ?? null,
     ),
     save: vi.fn(async (notification: Notification) => {
       notifications = [
@@ -86,17 +90,26 @@ function makeRepositories(initial: Notification[] = [], initialInteractions: Not
       interactions = [...interactions, interaction];
       return interaction;
     }),
-    findByIdempotencyKey: vi.fn(async (identityId: string, idempotencyKey: string) =>
-      interactions.find(
-        (interaction) =>
-          String(interaction.identityId) === identityId && interaction.idempotencyKey === idempotencyKey,
-      ) ?? null,
+    findByIdempotencyKey: vi.fn(
+      async (identityId: string, idempotencyKey: string) =>
+        interactions.find(
+          (interaction) =>
+            String(interaction.identityId) === identityId &&
+            interaction.idempotencyKey === idempotencyKey,
+        ) ?? null,
     ),
     listByNotification: vi.fn(async (identityId: string, notificationId: string) =>
       interactions.filter(
         (interaction) =>
           String(interaction.identityId) === identityId &&
           String(interaction.notificationId) === notificationId,
+      ),
+    ),
+    listByNotifications: vi.fn(async (identityId: string, notificationIds: readonly string[]) =>
+      interactions.filter(
+        (interaction) =>
+          String(interaction.identityId) === identityId &&
+          notificationIds.includes(String(interaction.notificationId)),
       ),
     ),
   };
@@ -174,7 +187,9 @@ describe('NotificationPortableCapability', () => {
       target.notificationRepository,
       target.interactionRepository,
     );
-    await expect(targetCapability.dryRun(payload, context(new FakeReferences()))).resolves.toMatchObject({
+    await expect(
+      targetCapability.dryRun(payload, context(new FakeReferences())),
+    ).resolves.toMatchObject({
       created: 2,
       skipped: 0,
     });
@@ -227,13 +242,15 @@ describe('NotificationPortableCapability', () => {
         },
       ],
     };
-    await expect(capability.dryRun(unknown as never, context(new FakeReferences()))).rejects.toThrow(
-      'unknown Fact',
-    );
+    await expect(
+      capability.dryRun(unknown as never, context(new FakeReferences())),
+    ).rejects.toThrow('unknown Fact');
 
     const wrongActionKind = {
       ...unknown,
-      interactions: [{ ...unknown.interactions[0], notificationRef: 'notifications:1', actionKind: 'navigate' }],
+      interactions: [
+        { ...unknown.interactions[0], notificationRef: 'notifications:1', actionKind: 'navigate' },
+      ],
     };
     await expect(
       capability.dryRun(wrongActionKind as never, context(new FakeReferences())),

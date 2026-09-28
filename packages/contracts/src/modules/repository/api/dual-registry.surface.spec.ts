@@ -139,8 +139,8 @@ import { describe, expect, it } from 'vitest';
 // --- merged from knowledge-list-projections-dual.surface.spec.ts ---
 {
   /**
-   * Residual 675: knowledge note/attachment list-filter dual bodies retired.
-   * Both list ops use ListKnowledgeProjectionsSchema only.
+   * Residual 675: shared projection-list fields stay centralized.
+   * Note-only durable-reference query fields extend the shared base without duplicating it.
    */
   describe('knowledge list projections filter dual retired (residual 675)', () => {
     const apiDir = __dirname;
@@ -157,13 +157,15 @@ import { describe, expect, it } from 'vitest';
       'utf8',
     );
 
-    it('exports a single shared list-knowledge projections filter schema', () => {
+    it('keeps common list fields shared while allowing note-only reference semantics', () => {
       expect(noteDto).toContain('Residual 675');
       expect(noteDto).toContain('export const ListKnowledgeProjectionsSchema');
       expect(noteDto).toContain(
-        'export type ListKnowledgeNoteProjectionsReq = z.infer<typeof ListKnowledgeProjectionsSchema>',
+        'export const ListKnowledgeNoteProjectionsSchema = ListKnowledgeProjectionsSchema.extend',
       );
-      expect(noteDto).not.toMatch(/export const ListKnowledgeNoteProjectionsSchema\b/);
+      expect(noteDto).toContain(
+        'export type ListKnowledgeNoteProjectionsReq = z.infer<typeof ListKnowledgeNoteProjectionsSchema>',
+      );
       expect(attachmentDto).toContain('Residual 675');
       expect(attachmentDto).toContain(
         'export type ListKnowledgeAttachmentProjectionsReq = z.infer<\n  typeof ListKnowledgeProjectionsSchema\n>',
@@ -174,12 +176,10 @@ import { describe, expect, it } from 'vitest';
       );
     });
 
-    it('controller parses shared list filter for notes and attachments', () => {
-      expect(controller).toContain('ListKnowledgeProjectionsSchema');
-      expect(controller).not.toContain('ListKnowledgeNoteProjectionsSchema');
+    it('controller uses the note extension only for notes and the shared base for attachments', () => {
+      expect(controller).toContain('ListKnowledgeNoteProjectionsSchema.safeParse');
+      expect(controller).toContain('ListKnowledgeProjectionsSchema.safeParse');
       expect(controller).not.toContain('ListKnowledgeAttachmentProjectionsSchema');
-      const parseHits = controller.split('ListKnowledgeProjectionsSchema.safeParse').length - 1;
-      expect(parseHits).toBeGreaterThanOrEqual(2);
     });
   });
 }

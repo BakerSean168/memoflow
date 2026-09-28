@@ -106,6 +106,37 @@ test.describe('Schedule calendar workspace', () => {
     );
   });
 
+  test('[P0] selects blank time without crashing the panel on FullCalendar mirror events', async ({
+    page,
+  }) => {
+    const pageErrors: string[] = [];
+    page.on('pageerror', (error) => pageErrors.push(error.message));
+
+    const plannerCalendar = page.getByTestId('schedule-fullcalendar');
+    await expect(plannerCalendar).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+
+    const lanes = plannerCalendar.locator('.planner-slot-lane');
+    await expect(lanes.first()).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    expect(await lanes.count()).toBeGreaterThan(4);
+
+    const start = await lanes.nth(4).boundingBox();
+    const end = await lanes.nth(6).boundingBox();
+    expect(start).not.toBeNull();
+    expect(end).not.toBeNull();
+
+    const x = start!.x + Math.max(16, start!.width * 0.35);
+    await page.mouse.move(x, start!.y + start!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(x, end!.y + end!.height / 2, { steps: 8 });
+    await page.mouse.up();
+
+    await expect(page.getByTestId('panel-error-fallback')).toBeHidden();
+    await expect(page.getByTestId('schedule-dialog')).toBeVisible({
+      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+    });
+    expect(pageErrors.some((message) => message.includes("reading 'sourceType'"))).toBe(false);
+  });
+
   test('[P0] creates a schedule from the only primary action', async ({ page }) => {
     const title = `E2E Schedule ${Date.now()}`;
 

@@ -22,6 +22,7 @@ const EMPTY_SNAPSHOT: RoutineConfigurationSnapshot = {
   definitions: [],
   profiles: [],
   memberships: [],
+  preferences: { globalEnabled: true, version: 0 },
   runtimeContext: { activeProfileIds: [] },
   capabilities: { localRuntime: false },
   overrides: [],
@@ -53,7 +54,9 @@ export function useRoutineConfiguration() {
     try {
       snapshot.value = unwrapResult(await service.getConfigurationSnapshot());
     } catch (cause) {
-      error.value = translateResultError(cause, t, { fallbackKey: 'routine.toast.operationFailed' });
+      error.value = translateResultError(cause, t, {
+        fallbackKey: 'routine.toast.operationFailed',
+      });
     } finally {
       loading.value = false;
     }
@@ -66,7 +69,9 @@ export function useRoutineConfiguration() {
       unwrapResult(await work());
       await load();
     } catch (cause) {
-      error.value = translateResultError(cause, t, { fallbackKey: 'routine.toast.operationFailed' });
+      error.value = translateResultError(cause, t, {
+        fallbackKey: 'routine.toast.operationFailed',
+      });
       throw cause;
     } finally {
       mutating.value = false;
@@ -81,6 +86,8 @@ export function useRoutineConfiguration() {
     enabledCount,
     activeProfileCount,
     load,
+    updatePreferences: (input: { globalEnabled: boolean; expectedVersion: number }) =>
+      mutate(() => service.updatePreferences(input)),
     createRoutine: (input: CreateRoutineRequest) => mutate(() => service.createRoutine(input)),
     updateRoutine: (routineId: string, input: UpdateRoutineRequest) =>
       mutate(() => service.updateRoutine(routineId, input)),

@@ -2,7 +2,6 @@
   <DropdownMenu>
     <DropdownMenuTrigger as-child>
       <ProductPropertyChip
-        class="rounded-md border-transparent bg-muted/40 shadow-none hover:bg-muted/70"
         :disabled="disabled"
         :aria-label="t('goal.dialog.status')"
         data-testid="goal-status-picker"
@@ -11,7 +10,6 @@
           <component :is="currentOption.icon" class="h-3.5 w-3.5" />
         </template>
         <span>{{ currentOption.label }}</span>
-        <ChevronDown class="h-3.5 w-3.5 shrink-0 opacity-60" aria-hidden="true" />
       </ProductPropertyChip>
     </DropdownMenuTrigger>
     <DropdownMenuContent align="start" class="w-44">
@@ -33,7 +31,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { ChevronDown, CircleCheck, CircleDashed, CircleDot, CircleOff } from '@lucide/vue';
+import { CircleCheck, CircleDashed, CircleDot, CircleOff } from '@lucide/vue';
 import { GoalStatus, type GoalStatus as GoalStatusValue } from '@memoflow/contracts/goal';
 import { editableGoalStatuses } from '../composables/goalStatusTransitions';
 import {

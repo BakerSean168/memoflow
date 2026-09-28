@@ -143,7 +143,7 @@ function assertExistingGoalMatchesPortableDefinition(
 
   if (existing.name !== goal.name) conflict('name');
   if (existing.summary !== goal.summary) conflict('summary');
-  if (existing.startDate !== goal.startDate) conflict('startDate');
+  if (stableJson(existing.start) !== stableJson(goal.start)) conflict('start');
   if (stableJson(existing.target) !== stableJson(goal.target)) conflict('target');
   if (stableJson(existing.reminderConfig) !== stableJson(goal.reminderConfig)) {
     conflict('reminderConfig');
@@ -387,7 +387,7 @@ export class GoalPortableCapability implements PortableCapability<GoalPortablePa
         summary: goal.summary,
         description: goal.description,
         status: goal.status,
-        startDate: goal.startDate,
+        start: goal.start,
         target: goal.target,
         reminderConfig: goal.reminderConfig,
         archived: goal.archivedAt !== null,
@@ -530,7 +530,7 @@ export class GoalPortableCapability implements PortableCapability<GoalPortablePa
         name: goal.name,
         summary: goal.summary ?? undefined,
         description: goal.description ?? undefined,
-        startDate: goal.startDate ?? undefined,
+        start: goal.start ?? undefined,
         target: goal.target ?? undefined,
         reminderConfig: goal.reminderConfig,
         labelIds,

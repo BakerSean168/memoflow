@@ -10,7 +10,11 @@ const NOW = 1_775_000_000_000;
 
 async function createIntent(
   repository: InMemoryKnowledgeRepositoryInstallationIntentRepository,
-  options: { identityId?: string; expiresAt?: number } = {},
+  options: {
+    identityId?: string;
+    expiresAt?: number;
+    clientKind?: 'web' | 'desktop';
+  } = {},
 ) {
   const state = createKnowledgeRepositoryInstallationState('staging');
   await repository.create({
@@ -18,7 +22,7 @@ async function createIntent(
     identityId: options.identityId ?? 'identity-1',
     stateHash: state.stateHash,
     routeKey: 'staging',
-    clientKind: 'desktop',
+    clientKind: options.clientKind ?? 'desktop',
     returnPath: '/settings?tab=repository',
     expiresAt: options.expiresAt ?? NOW + 600_000,
     createdAt: NOW,
@@ -172,6 +176,37 @@ describe('knowledge repository installation intent', () => {
     });
     await expect(
       repository.findLatestRecoverableVerified('identity-1', 'staging', NOW),
+    ).resolves.toBeNull();
+  });
+
+  it('finds only a recent finalized intent for the requested client kind', async () => {
+    const repository = new InMemoryKnowledgeRepositoryInstallationIntentRepository();
+    const state = await createIntent(repository, { clientKind: 'web' });
+    await repository.recordCallback({
+      stateHash: state.stateHash,
+      installationId: 'installation-1',
+      providerAccountId: 'github-account-1',
+      setupAction: 'update',
+      now: NOW + 1,
+    });
+
+    await expect(
+      repository.findLatestRecoverableFinalized('identity-1', 'staging', 'web', NOW),
+    ).resolves.toBeNull();
+
+    await repository.markFinalized({
+      identityId: 'identity-1',
+      intentId: 'intent-1',
+      installationId: 'installation-1',
+      providerAccountId: 'github-account-1',
+      now: NOW + 2,
+    });
+
+    await expect(
+      repository.findLatestRecoverableFinalized('identity-1', 'staging', 'web', NOW),
+    ).resolves.toMatchObject({ id: 'intent-1', clientKind: 'web', status: 'Finalized' });
+    await expect(
+      repository.findLatestRecoverableFinalized('identity-1', 'staging', 'desktop', NOW),
     ).resolves.toBeNull();
   });
 

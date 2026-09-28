@@ -21,6 +21,7 @@ model Account {
   goalLabels                      GoalLabel[]
   taskLabels                      TaskLabel[]
   routineDefinitions               RoutineDefinition[]
+  routinePreference                RoutinePreference?
   routineTemporaryOverrides          RoutineTemporaryOverride[]
   routineProfiles                  RoutineProfile[]
   routineProfileMemberships        RoutineProfileMembership[]

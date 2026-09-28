@@ -7,6 +7,7 @@ import {
   createAppRouter,
   useAuthenticationStore,
   applyThemeMode,
+  presentWebLiveNotification,
   usePresentationPreferenceStore,
 } from '@memoflow/app-vue/web-bootstrap';
 import {
@@ -21,7 +22,7 @@ import {
 import { progressStart, progressDone } from '@memoflow/ui-vue-shadcn/composables/useProgressBar';
 
 import App from '../App.vue';
-import { installAppServices } from '../platform/di-app';
+import { executeWebNotificationAction, installAppServices } from '../platform/di-app';
 import {
   getWebServerStateRuntime,
   installWebServerStateRuntime,
@@ -97,6 +98,20 @@ export async function bootstrapMainApp() {
       dispatcher: runtime.dispatcher,
       identityScope,
       url: `${window.location.origin}/api/v1/notifications/sse`,
+      presentInAppDispatch: (event) => {
+        presentWebLiveNotification(event, {
+          executeAction: executeWebNotificationAction,
+          onActionSettled: (request) => {
+            void runtime.dispatcher.invalidate({
+              target: 'notification',
+              identityScope: identityScope(),
+              source: 'mutation',
+              entityId: request.notificationId,
+            });
+          },
+          translate: translateMessageKey,
+        });
+      },
       cursorStore: {
         get: () => {
           try {

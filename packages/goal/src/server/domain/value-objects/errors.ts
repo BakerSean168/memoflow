@@ -16,15 +16,31 @@ export class GoalNameRequiredError extends ResultErrorException {
   }
 }
 
-/** Goal planning window is incoherent when it begins after the target timeframe ends. */
+/** Goal planning window is incoherent when its start boundary is after the target end boundary. */
 export class GoalInvalidPlanningWindowError extends ResultErrorException {
   constructor(
-    public readonly startDate: Ymd,
-    public readonly targetEndDate: Ymd,
+    public readonly startBoundary: Ymd,
+    public readonly targetEndBoundary: Ymd,
   ) {
     super(
-      `目标时间范围无效：开始日期 ${startDate} 晚于目标时间范围结束 ${targetEndDate}`,
+      `目标时间范围无效：开始周期边界 ${startBoundary} 晚于目标周期结束边界 ${targetEndBoundary}`,
       'goal_invalid_planning_window',
+      undefined,
+      undefined,
+      400,
+    );
+  }
+}
+
+/** A target-relative reminder must not resolve before the Goal planning window starts. */
+export class GoalInvalidReminderWindowError extends ResultErrorException {
+  constructor(
+    public readonly reminderBoundary: Ymd,
+    public readonly startBoundary: Ymd,
+  ) {
+    super(
+      `目标提醒时间无效：提醒日期 ${reminderBoundary} 早于目标开始边界 ${startBoundary}`,
+      'goal_invalid_reminder_window',
       undefined,
       undefined,
       400,

@@ -47,6 +47,12 @@ interface CrudTransactionDatabase {
       select: { routineId: true };
     }): Promise<Array<{ routineId: string }>>;
   };
+  routineDefinition?: {
+    findMany(args: {
+      where: { identityId: string };
+      select: { id: true };
+    }): Promise<Array<{ id: string }>>;
+  };
 }
 
 export interface CrudBatchHooks {
@@ -73,9 +79,11 @@ export async function executeCrudBatch(
 
   const dirtyRoutineIds = new Set<string>();
   const dirtyProfileIds = new Set<string>();
+  let dirtyAllRoutines = false;
 
   for (const transaction of transactions) {
     for (const operation of transaction.ops || transaction.crud || []) {
+      if (operation.type === 'routine_preferences') dirtyAllRoutines = true;
       collectRoutineScheduleDirtyOwner(operation, dirtyRoutineIds, dirtyProfileIds);
     }
   }
@@ -160,6 +168,14 @@ export async function executeCrudBatch(
       }
     }
   });
+
+  if (dirtyAllRoutines && db.routineDefinition) {
+    const rows = await db.routineDefinition.findMany({
+      where: { identityId },
+      select: { id: true },
+    });
+    for (const row of rows) dirtyRoutineIds.add(row.id);
+  }
 
   if (hooks.onRoutineScheduleChanged) {
     for (const routineId of [...dirtyRoutineIds].sort()) {

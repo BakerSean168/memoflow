@@ -120,6 +120,51 @@ describe('notification semantic controls', () => {
     expect(wrapper.text()).not.toContain('routine-internal-88');
   });
 
+  it('renders Routine owner commands as explicit quick actions without coupling them to read state', async () => {
+    const wrapper = mountItem({
+      title: 'Stand & Move',
+      content: 'Take a short movement break.',
+      workflowKey: 'routine.intervention',
+      category: 'Reminder',
+      type: 'REMINDER',
+      relatedEntityType: 'Routine',
+      relatedEntityId: 'routine-1',
+      actions: [
+        {
+          kind: 'owner-command',
+          actionKey: 'complete',
+          labelKey: 'routine.action.complete',
+          owner: { type: 'routine-occurrence', id: 'occurrence-1' },
+          commandKey: 'routine.complete',
+          input: { routineId: 'routine-1', occurrenceKey: 'occurrence-1' },
+        },
+        {
+          kind: 'owner-command',
+          actionKey: 'snooze-10m',
+          labelKey: 'routine.action.snooze10m',
+          owner: { type: 'routine-occurrence', id: 'occurrence-1' },
+          commandKey: 'routine.snooze',
+          input: {
+            routineId: 'routine-1',
+            occurrenceKey: 'occurrence-1',
+            durationMs: 600000,
+          },
+        },
+      ],
+    });
+
+    expect(wrapper.get('[data-testid="notification-action-complete"]').text()).toBe('Complete');
+    expect(wrapper.get('[data-testid="notification-action-snooze-10m"]').text()).toBe(
+      'Remind in 10 min',
+    );
+
+    await wrapper.get('[data-testid="notification-action-complete"]').trigger('click');
+    expect(wrapper.emitted('execute-action')).toEqual([
+      [{ notificationId: 'notification-1', actionKey: 'complete' }],
+    ]);
+    expect(wrapper.emitted('mark-read')).toBeUndefined();
+  });
+
   it('falls back to localized category wording for an unknown workflow', () => {
     const wrapper = mountItem({
       topic: 'worker.outbox.email.retry',

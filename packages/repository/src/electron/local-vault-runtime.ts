@@ -32,6 +32,14 @@ const MAX_SEARCH_RESULTS = 200;
 const IGNORED_DIRECTORIES = new Set(['.git', '.obsidian', '.trash', '.Trash', 'node_modules']);
 const SYNC_IGNORED_DIRECTORIES = new Set([...IGNORED_DIRECTORIES, '.memory-flow']);
 
+function normalizeSearchValue(value: string): string {
+  return value.normalize('NFKC').toLowerCase();
+}
+
+function tokenizeSearchQuery(query: string): string[] {
+  return [...new Set(query.normalize('NFKC').trim().split(/\s+/u).filter(Boolean))].slice(0, 8);
+}
+
 interface StoredBindingFile {
   schemaVersion: 2;
   binding: LocalVaultBindingClientDTO;
@@ -359,33 +367,86 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
     if (!query) return { query, results: [] };
     const limit = Math.min(Math.max(request.limit ?? 50, 1), MAX_SEARCH_RESULTS);
     const scanned = await this.scanVault();
-    const normalizedQuery = query.toLocaleLowerCase();
-    const results: SearchLocalVaultRes['results'] = [];
+    const normalizedQuery = normalizeSearchValue(query);
+    const terms = tokenizeSearchQuery(query).map(normalizeSearchValue);
+    const ranked: Array<{
+      result: SearchLocalVaultRes['results'][number];
+      score: number;
+      updatedAt: number;
+    }> = [];
 
     for (const summary of scanned.notes) {
-      if (results.length >= limit) break;
       const note = await this.readNote({ relativePath: summary.relativePath });
+      const normalizedTitle = normalizeSearchValue(summary.title);
+      const normalizedPath = normalizeSearchValue(summary.relativePath);
+      const normalizedContent = normalizeSearchValue(note.contentMarkdown);
+      if (
+        !terms.every(
+          (term) =>
+            normalizedTitle.includes(term) ||
+            normalizedPath.includes(term) ||
+            normalizedContent.includes(term),
+        )
+      ) {
+        continue;
+      }
+
       const matches: SearchLocalVaultRes['results'][number]['matches'] = [];
       for (const [index, line] of note.contentMarkdown.split(/\r?\n/).entries()) {
-        const startIndex = line.toLocaleLowerCase().indexOf(normalizedQuery);
-        if (startIndex >= 0) {
-          matches.push({
-            lineNumber: index + 1,
-            lineContent: line.slice(0, 500),
-            startIndex,
-            endIndex: startIndex + query.length,
-          });
-        }
+        const normalizedLine = normalizeSearchValue(line);
+        const phraseIndex = normalizedLine.indexOf(normalizedQuery);
+        const firstTermIndex = terms.reduce((best, term) => {
+          const candidate = normalizedLine.indexOf(term);
+          if (candidate < 0) return best;
+          return best < 0 ? candidate : Math.min(best, candidate);
+        }, -1);
+        const startIndex = phraseIndex >= 0 ? phraseIndex : firstTermIndex;
+        if (startIndex < 0) continue;
+        const matchedLength =
+          phraseIndex >= 0
+            ? query.length
+            : (terms.find((term) => normalizedLine.indexOf(term) === startIndex)?.length ?? 1);
+        matches.push({
+          lineNumber: index + 1,
+          lineContent: line.slice(0, 500),
+          startIndex,
+          endIndex: startIndex + matchedLength,
+        });
+        if (matches.length >= 5) break;
       }
-      if (
-        matches.length ||
-        summary.title.toLocaleLowerCase().includes(normalizedQuery) ||
-        summary.relativePath.toLocaleLowerCase().includes(normalizedQuery)
-      ) {
-        results.push({ note: summary, matches });
+
+      const pathSegments = normalizedPath.split('/');
+      const basename =
+        pathSegments[pathSegments.length - 1]?.replace(/\.md$/u, '') ?? normalizedPath;
+      let score = 0;
+      if (normalizedTitle === normalizedQuery) score += 2_000;
+      else if (normalizedTitle.startsWith(normalizedQuery)) score += 1_200;
+      else if (normalizedTitle.includes(normalizedQuery)) score += 800;
+      if (basename === normalizedQuery) score += 1_500;
+      else if (basename.startsWith(normalizedQuery)) score += 900;
+      else if (normalizedPath.includes(normalizedQuery)) score += 500;
+      for (const term of terms) {
+        if (normalizedTitle === term) score += 300;
+        else if (normalizedTitle.startsWith(term)) score += 180;
+        else if (normalizedTitle.includes(term)) score += 120;
+        if (basename.includes(term)) score += 100;
+        else if (normalizedPath.includes(term)) score += 60;
+        if (normalizedContent.includes(term)) score += 12;
       }
+      ranked.push({
+        result: { note: summary, matches },
+        score,
+        updatedAt: Number(summary.updatedAt),
+      });
     }
-    return { query, results };
+
+    return {
+      query,
+      results: ranked
+        .sort((left, right) => right.score - left.score || right.updatedAt - left.updatedAt)
+        .slice(0, limit)
+        .map(({ result }) => result),
+    };
   }
 
   async openInObsidian(request: OpenLocalVaultInObsidianReq): Promise<void> {

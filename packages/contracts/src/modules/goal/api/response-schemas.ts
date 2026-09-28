@@ -96,7 +96,7 @@ export type GoalLabelProjection = z.infer<typeof GoalLabelProjectionSchema>;
  *
  * Goal answers only Direction + Measurement.
  * Legacy fields retired: color, importance, priority, category, tags, folderId, parentGoalId.
- * Planning uses calendar-native startDate + precision-preserving target timeframe.
+ * Planning preserves semantic start/target timeframes and derives calendar boundaries only when needed.
  */
 export const GoalClientDTOSchema = z.object({
   id: brandedId<GoalId>(),
@@ -105,7 +105,7 @@ export const GoalClientDTOSchema = z.object({
   summary: z.string().max(255).nullable(),
   description: z.string().max(10000).nullable().default(null),
   status: z.enum(GoalStatus),
-  startDate: YmdSchema.nullable(),
+  start: GoalTimeframeSchema.nullable(),
   target: GoalTimeframeSchema.nullable(),
   completedAt: z.number().nullable(),
   archivedAt: z.number().nullable(),

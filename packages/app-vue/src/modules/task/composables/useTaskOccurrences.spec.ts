@@ -123,6 +123,9 @@ function mountComposable() {
         ),
       ),
     ),
+    listOccurrencesByDateRange: vi
+      .fn()
+      .mockResolvedValue(ok([entity(instance('Pending'))])),
     getPlan: vi
       .fn()
       .mockResolvedValueOnce(ok(entity(template(100))))
@@ -214,5 +217,20 @@ describe('useTaskOccurrences template projection refresh', () => {
     });
     expect(useTaskStore().instances[0]?.checklistState[0]?.completed).toBe(true);
     expect(service.getPlan).toHaveBeenCalledWith('template-a');
+  });
+
+  it('deduplicates repeated range reads inside the stale window and only refetches when forced', async () => {
+    const { composable, service } = mountComposable();
+    const start = Date.UTC(2026, 8, 28, 0, 0, 0, 0);
+    const end = Date.UTC(2026, 8, 28, 23, 59, 59, 999);
+
+    await composable.fetchInstancesByDateRange(start, end);
+    await composable.fetchInstancesByDateRange(start, end);
+
+    expect(service.listOccurrencesByDateRange).toHaveBeenCalledTimes(1);
+    expect(service.listOccurrencesByDateRange).toHaveBeenCalledWith(start, end);
+
+    await composable.fetchInstancesByDateRange(start, end, { force: true });
+    expect(service.listOccurrencesByDateRange).toHaveBeenCalledTimes(2);
   });
 });

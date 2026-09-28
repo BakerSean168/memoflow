@@ -100,6 +100,7 @@ export class TaskPlanController {
       importance: input.importance,
       labelIds: input.labelIds,
       goalBinding: input.goalBinding,
+      checklist: input.checklist,
       completionPolicy: input.completionPolicy,
     };
 
@@ -115,10 +116,7 @@ export class TaskPlanController {
   /**
    * Get plan by ID
    */
-  async getPlan(
-    id: string,
-    ctx: Context,
-  ): Promise<Result<TaskPlanClientDTO | null>> {
+  async getPlan(id: string, ctx: Context): Promise<Result<TaskPlanClientDTO | null>> {
     const result = await this.useCases.getPlan(id, ctx.identityId);
 
     if (!isOk(result)) {
@@ -165,6 +163,7 @@ export class TaskPlanController {
       importance: input.importance,
       labelIds: input.labelIds,
       goalBinding: input.goalBinding,
+      checklist: input.checklist,
       completionPolicy: input.completionPolicy,
     });
   }

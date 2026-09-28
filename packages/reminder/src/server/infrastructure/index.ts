@@ -9,12 +9,19 @@ export {
 export {
   ROUTINE_WALLCLOCK_HANDLER_KEY,
   ROUTINE_WALLCLOCK_PAYLOAD_VERSION,
+  ROUTINE_ELAPSED_HANDLER_KEY,
+  ROUTINE_ELAPSED_PAYLOAD_VERSION,
   ROUTINE_SCHEDULING_OWNER_TYPE,
+  buildRoutineElapsedIntent,
+  buildRoutineElapsedPayload,
+  buildRoutineElapsedSchedulingKey,
   buildRoutineWallClockIntent,
   buildRoutineWallClockOwner,
   buildRoutineWallClockPayload,
   buildRoutineWallClockSchedulingKey,
+  parseRoutineElapsedPayload,
   parseRoutineWallClockPayload,
+  type RoutineElapsedOccurrencePayload,
   type RoutineWallClockOccurrencePayload,
 } from './routine-schedule/routine-schedule-contract';
 export {
@@ -40,10 +47,13 @@ export {
   type RoutineScheduleExecutionSource,
 } from './routine-schedule/routine-schedule-execution-source';
 export { createRoutineWallClockScheduledHandler } from './routine-schedule/routine-wall-clock-scheduled-handler';
+export { createRoutineElapsedScheduledHandler } from './routine-schedule/routine-elapsed-scheduled-handler';
 export { createInMemoryRoutineOccurrenceStore } from './routine-schedule/routine-occurrence-store.in-memory';
 export {
   createInMemoryRoutineNotificationWriter,
+  createRoutineOccurrenceNotificationWriter,
   ROUTINE_NOTIFICATION_SOURCE,
+  buildRoutineOccurrenceNotificationRequest,
   buildRoutineNotificationRequestedOutboxInput,
 } from './routine-schedule/routine-occurrence-notification-writer';
 export { PrismaProtocolSessionStore } from './routine-vnext/protocol-session-store.prisma';

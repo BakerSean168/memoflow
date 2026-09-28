@@ -4,6 +4,7 @@ import { findRoutineMethod, type RoutineMethodId } from '../../../method-library
 import {
   ProfileMembership,
   RoutineDefinition,
+  RoutinePreferences,
   RoutineProfile,
   type RoutineTrigger,
 } from '../../domain/routine';
@@ -18,6 +19,7 @@ import {
 import type {
   ProtocolSessionStore,
   RoutineProfileStore,
+  RoutinePreferencesStore,
   RoutineRuntimeContextStore,
   RoutineTemporaryOverrideStore,
   RoutineOccurrenceTruthStore,
@@ -59,6 +61,12 @@ export interface RoutineMembershipReceipt {
   readonly version: number;
 }
 
+export interface RoutinePreferencesReceipt {
+  readonly identityId: string;
+  readonly globalEnabled: boolean;
+  readonly version: number;
+}
+
 export interface RoutineRuntimeContextReceipt {
   readonly profileId: string;
   readonly identityId: string;
@@ -82,6 +90,13 @@ export interface RoutineProtocolSessionReceipt {
 }
 
 export interface RoutineCoachCommandPort {
+  updatePreferences(input: {
+    readonly identityId: string;
+    readonly globalEnabled: boolean;
+    readonly expectedVersion: number;
+    readonly at?: number;
+  }): Promise<RoutinePreferencesReceipt>;
+
   createRoutine(input: {
     readonly identityId: string;
     readonly routineId?: string;
@@ -215,6 +230,7 @@ export interface RoutineCoachCommandPort {
 
 export interface CreateRoutineCoachCommandServiceOptions {
   readonly routineProfileStore: RoutineProfileStore;
+  readonly routinePreferencesStore?: RoutinePreferencesStore;
   readonly runtimeContextStore: RoutineRuntimeContextStore;
   readonly temporaryOverrideStore: RoutineTemporaryOverrideStore;
   readonly occurrenceTruthStore: RoutineOccurrenceTruthStore;
@@ -231,6 +247,10 @@ export interface CreateRoutineCoachCommandServiceOptions {
     readonly identityId: string;
     readonly profileId: string;
     readonly active: boolean;
+  }) => void | Promise<void>;
+  readonly onGlobalEnabledChanged?: (input: {
+    readonly identityId: string;
+    readonly globalEnabled: boolean;
   }) => void | Promise<void>;
   readonly now?: () => number;
 }
@@ -286,6 +306,74 @@ export function createRoutineCoachCommandService(
   };
 
   return {
+    async updatePreferences(input) {
+      const store = options.routinePreferencesStore;
+      if (!store) throw new TypeError('Routine preferences store is unavailable');
+      const existing = await store.find({ identityId: input.identityId });
+
+      if (!existing) {
+        if (input.expectedVersion !== 0) {
+          throw routineConflict('Routine preferences version conflict');
+        }
+        const preferences = RoutinePreferences.create({
+          identityId: input.identityId,
+          globalEnabled: input.globalEnabled,
+          now: new Date(input.at ?? now()),
+        });
+        try {
+          await store.create({ preferences });
+        } catch {
+          throw routineConflict('Routine preferences version conflict');
+        }
+        await options.onGlobalEnabledChanged?.({
+          identityId: input.identityId,
+          globalEnabled: preferences.globalEnabled,
+        });
+        const definitions = await options.routineProfileStore.listDefinitions({
+          identityId: input.identityId,
+        });
+        for (const definition of definitions) {
+          await notifyScheduleChanged(input.identityId, definition.id);
+        }
+        return {
+          identityId: preferences.identityId,
+          globalEnabled: preferences.globalEnabled,
+          version: preferences.version,
+        };
+      }
+
+      if (existing.version !== input.expectedVersion) {
+        throw routineConflict('Routine preferences version conflict');
+      }
+      const previousVersion = existing.version;
+      const changed = existing.setGlobalEnabled(input.globalEnabled, new Date(input.at ?? now()));
+      if (changed) {
+        try {
+          await store.update({
+            preferences: existing,
+            expectedVersion: previousVersion,
+          });
+        } catch {
+          throw routineConflict('Routine preferences version conflict');
+        }
+        await options.onGlobalEnabledChanged?.({
+          identityId: input.identityId,
+          globalEnabled: existing.globalEnabled,
+        });
+        const definitions = await options.routineProfileStore.listDefinitions({
+          identityId: input.identityId,
+        });
+        for (const definition of definitions) {
+          await notifyScheduleChanged(input.identityId, definition.id);
+        }
+      }
+      return {
+        identityId: existing.identityId,
+        globalEnabled: existing.globalEnabled,
+        version: existing.version,
+      };
+    },
+
     async createRoutine(input) {
       const at = input.at ?? now();
       const profileIds = [...(input.profileIds ?? [])];
@@ -651,6 +739,12 @@ export function createRoutineCoachCommandService(
       });
       if (input.action === 'snooze') {
         await notifyOverrideChanged(input.identityId, input.routineId);
+      }
+      if (input.action === 'complete' || input.action === 'skip') {
+        // Durable Elapsed ownership depends on business resolution truth. A
+        // terminal response may reset the last-satisfied anchor or advance the
+        // routine-activation generation, so reconcile the Scheduler owner now.
+        await notifyScheduleChanged(input.identityId, input.routineId);
       }
       return receipt;
     },

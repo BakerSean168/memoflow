@@ -38,6 +38,15 @@ export class PowerSyncGoalMapper {
       summary: row.summary ? String(row.summary) : null,
       description: row.description ? String(row.description) : null,
       status: String(row.status),
+      // Desktop upgrades can open a preserved PowerSync cache before the
+      // first cloud refresh. Legacy Goal rows only had start_date, whose
+      // product semantics were exact-day precision. Keep this compatibility
+      // bridge PowerSync-local; Prisma rows remain fail-closed on partial pairs.
+      startKind: row.start_kind
+        ? String(row.start_kind)
+        : row.start_date
+          ? 'day'
+          : null,
       startDate: row.start_date ? String(row.start_date) : null,
       targetKind: row.target_kind ? String(row.target_kind) : null,
       targetEndDate: row.target_end_date ? String(row.target_end_date) : null,

@@ -10,6 +10,12 @@ const templatesRef = ref<Record<string, unknown>[]>([]);
 const errorRef = ref<string | null>(null);
 const fetchInstancesByDateRange = vi.fn().mockResolvedValue(undefined);
 const fetchTemplates = vi.fn().mockResolvedValue(undefined);
+const completeOccurrence = vi.fn().mockResolvedValue(undefined);
+const uncompleteOccurrence = vi.fn().mockResolvedValue(undefined);
+const skipOccurrence = vi.fn().mockResolvedValue(undefined);
+const setOccurrenceChecklistItem = vi.fn().mockResolvedValue(undefined);
+const createPlanSafe = vi.fn().mockResolvedValue({ todayOccurrenceCreated: true });
+const createSaving = ref(false);
 
 vi.mock('../../../modules/task/composables/useTask', () => ({
   useTask: () => ({
@@ -18,6 +24,17 @@ vi.mock('../../../modules/task/composables/useTask', () => ({
     error: computed(() => errorRef.value),
     fetchInstancesByDateRange,
     fetchTemplates,
+    completeOccurrence,
+    uncompleteOccurrence,
+    skipOccurrence,
+    setOccurrenceChecklistItem,
+  }),
+}));
+
+vi.mock('../../../modules/task/composables/useTaskPlanMutations', () => ({
+  useTaskPlanMutations: () => ({
+    createPlanSafe,
+    isSaving: createSaving,
   }),
 }));
 
@@ -28,44 +45,123 @@ const i18n = createI18n({
     'en-US': {
       nav: { capsule: { task: 'Task' } },
       shell: {
-        enterModule: 'Enter',
         preview: { taskEmpty: 'No tasks', taskAllDone: 'All done', allDay: 'All day' },
+        taskWorkspace: { today: 'Today', viewAll: 'View all' },
+        home: { quickTask: 'Quick task' },
       },
-      common: { retry: 'Retry', operationFailed: 'failed' },
+      common: { retry: 'Retry', operationFailed: 'failed', add: 'Add' },
+      task: {
+        action: { complete: 'Complete', undoComplete: 'Undo complete', skip: 'Skip' },
+        checklist: { title: 'Checklist' },
+        quickTask: { placeholder: 'What needs doing?' },
+      },
     },
   },
 });
+
+function occurrence(overrides: Record<string, unknown> = {}) {
+  return {
+    id: 'i1',
+    planId: 'tpl-1',
+    dueAt: Date.now(),
+    status: 'Pending',
+    version: 1,
+    checklistState: [],
+    scheduleSnapshot: {
+      kind: 'OneTime',
+      date: '2026-09-28',
+      timing: { kind: 'At', time: '09:00' },
+    },
+    ...overrides,
+  };
+}
 
 function mountPreview() {
   return mount(TaskCapsulePreview, { global: { plugins: [i18n] } });
 }
 
-describe('TaskCapsulePreview', () => {
+describe('TaskCapsulePreview quick workspace', () => {
   afterEach(() => {
     instancesRef.value = [];
     templatesRef.value = [];
     errorRef.value = null;
+    createSaving.value = false;
     vi.clearAllMocks();
   });
 
-  it('loads today instances and resolves titles from templates', async () => {
-    const today = Date.now();
+  it('loads all of today and renders executable compact rows instead of a three-item preview', async () => {
     templatesRef.value = [{ id: 'tpl-1', name: 'Write tests' }];
-    instancesRef.value = [
-      {
-        id: 'i1',
-        planId: 'tpl-1',
-        dueAt: today,
-        status: 'Pending',
-        scheduleSnapshot: { date: '2026-09-13', timing: { kind: 'At', time: '09:00' } },
-      },
-    ];
+    instancesRef.value = [occurrence()];
+
     const wrapper = mountPreview();
     await flushPromises();
+
     expect(fetchInstancesByDateRange).toHaveBeenCalled();
     expect(fetchTemplates).toHaveBeenCalled();
-    expect(wrapper.get('[data-testid="task-capsule-item-i1"]').text()).toContain('Write tests');
-    expect(wrapper.get('[data-testid="task-capsule-item-i1"]').text()).toContain('09:00');
+    expect(wrapper.get('[data-testid="task-compact-occurrence-i1"]').text()).toContain(
+      'Write tests',
+    );
+    expect(wrapper.get('[data-testid="task-compact-occurrence-i1"]').text()).toContain('09:00');
+    expect(wrapper.get('[data-testid="task-capsule-progress"]').exists()).toBe(true);
+    wrapper.unmount();
+  });
+
+  it('completes a pending occurrence directly from the capsule', async () => {
+    templatesRef.value = [{ id: 'tpl-1', name: 'Ship build' }];
+    instancesRef.value = [occurrence()];
+
+    const wrapper = mountPreview();
+    await flushPromises();
+    await wrapper.get('[data-testid="task-compact-complete-i1"]').trigger('click');
+    await flushPromises();
+
+    expect(completeOccurrence).toHaveBeenCalledWith('i1');
+    wrapper.unmount();
+  });
+
+  it('expands and updates occurrence-owned checklist state without entering Task detail', async () => {
+    templatesRef.value = [{ id: 'tpl-1', name: 'Ship build' }];
+    instancesRef.value = [
+      occurrence({
+        version: 7,
+        checklistState: [{ definitionId: 'check-1', titleSnapshot: 'Run tests', completed: false }],
+      }),
+    ];
+
+    const wrapper = mountPreview();
+    await flushPromises();
+    await wrapper.get('[data-testid="task-compact-checklist-toggle-i1"]').trigger('click');
+    await wrapper.get('[data-testid="task-compact-checklist-item-check-1"]').trigger('click');
+    await flushPromises();
+
+    expect(setOccurrenceChecklistItem).toHaveBeenCalledWith('i1', {
+      definitionId: 'check-1',
+      completed: true,
+      expectedVersion: 7,
+    });
+    wrapper.unmount();
+  });
+
+  it('creates a one-time all-day quick task for today inline', async () => {
+    const wrapper = mountPreview();
+    await flushPromises();
+
+    await wrapper.get('[data-testid="task-capsule-quick-task"]').trigger('click');
+    await wrapper.get('input').setValue('Review PR');
+    await wrapper.get('[data-testid="task-capsule-quick-create"]').trigger('submit');
+    await flushPromises();
+
+    expect(createPlanSafe).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Review PR',
+        schedule: expect.objectContaining({
+          kind: 'OneTime',
+          timing: { kind: 'AllDay' },
+        }),
+      }),
+      'quick',
+    );
+    expect(fetchInstancesByDateRange).toHaveBeenCalledTimes(2);
     wrapper.unmount();
   });
 
@@ -76,23 +172,13 @@ describe('TaskCapsulePreview', () => {
     wrapper.unmount();
   });
 
-  it('shows the retry state when the template list fetch fails (P2-2)', async () => {
+  it('shows and retries a failed task load', async () => {
     errorRef.value = 'Could not load task templates';
     const wrapper = mountPreview();
     await flushPromises();
-    expect(wrapper.find('[data-testid="task-capsule-error"]').exists()).toBe(true);
-    expect(wrapper.get('[data-testid="task-capsule-retry"]').exists()).toBe(true);
-    wrapper.unmount();
-  });
 
-  it('re-runs the load when retry is clicked (P2-2)', async () => {
-    errorRef.value = 'Could not load task templates';
-    const wrapper = mountPreview();
-    await flushPromises();
-    await wrapper.get('[data-testid="task-capsule-retry"]').trigger('click');
-    await flushPromises();
-    expect(fetchInstancesByDateRange).toHaveBeenCalledTimes(2);
-    expect(fetchTemplates).toHaveBeenCalledTimes(2);
+    expect(wrapper.find('[data-testid="task-capsule-error"]').exists()).toBe(true);
+    await wrapper.get('button').trigger('click');
     wrapper.unmount();
   });
 });

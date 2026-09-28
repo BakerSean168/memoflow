@@ -3,11 +3,13 @@ import {
   createElapsedTrigger,
   ProfileMembership,
   RoutineDefinition,
+  RoutinePreferences,
   RoutineProfile,
 } from '../../domain/routine';
 import { createInMemoryProtocolSessionStore } from '../../runtime/protocol';
 import type {
   RoutineOccurrenceTruthStore,
+  RoutinePreferencesStore,
   RoutineProfileStore,
   RoutineTemporaryOverrideStore,
 } from '../../domain/ports';
@@ -34,7 +36,13 @@ function profileStore(): RoutineProfileStore {
         );
       }
     }),
-    findDefinition: vi.fn(async ({ routineId }) => definitions.get(routineId) ?? null),
+    findDefinition: vi.fn(async ({ identityId, routineId }) => {
+      const definition = definitions.get(routineId);
+      return definition?.identityId === identityId ? definition : null;
+    }),
+    listDefinitions: vi.fn(async ({ identityId }) =>
+      [...definitions.values()].filter((definition) => definition.identityId === identityId),
+    ),
     deleteDefinition: vi.fn(async ({ routineId }) => {
       definitions.delete(routineId);
     }),
@@ -96,6 +104,28 @@ function profileStore(): RoutineProfileStore {
   };
 }
 
+function preferencesStore(): RoutinePreferencesStore & {
+  current: { value: RoutinePreferences | null };
+} {
+  const current: { value: RoutinePreferences | null } = { value: null };
+  return {
+    current,
+    find: vi.fn(async () =>
+      current.value ? RoutinePreferences.load(current.value.snapshot()) : null,
+    ),
+    create: vi.fn(async ({ preferences }) => {
+      if (current.value) throw new Error('Routine preferences already exist');
+      current.value = RoutinePreferences.load(preferences.snapshot());
+    }),
+    update: vi.fn(async ({ preferences, expectedVersion }) => {
+      if (!current.value || current.value.version !== expectedVersion) {
+        throw new Error('Routine preferences version conflict');
+      }
+      current.value = RoutinePreferences.load(preferences.snapshot());
+    }),
+  };
+}
+
 function occurrenceTruthStore(): RoutineOccurrenceTruthStore {
   return {
     ensureOpenOccurrence: vi.fn(),
@@ -120,6 +150,81 @@ function overrideStore(): RoutineTemporaryOverrideStore & { current: Map<string,
 }
 
 describe('RoutineCoachCommandService', () => {
+  it('updates the identity-scoped global Routine gate without rewriting child state', async () => {
+    const profiles = profileStore();
+    const routine = RoutineDefinition.create({
+      id: 'r-1',
+      identityId: 'i-1',
+      name: 'Move',
+      enabled: true,
+    });
+    const secondRoutine = RoutineDefinition.create({
+      id: 'r-2',
+      identityId: 'i-1',
+      name: 'Drink water',
+      enabled: true,
+    });
+    await profiles.upsertDefinition(routine);
+    await profiles.upsertDefinition(secondRoutine);
+    const preferences = preferencesStore();
+    const scheduleChanged = vi.fn();
+    const globalChanged = vi.fn();
+    const service = createRoutineCoachCommandService({
+      routineProfileStore: profiles,
+      routinePreferencesStore: preferences,
+      runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
+      temporaryOverrideStore: overrideStore(),
+      occurrenceTruthStore: occurrenceTruthStore(),
+      protocolSessionStore: createInMemoryProtocolSessionStore(),
+      onScheduleChanged: scheduleChanged,
+      onGlobalEnabledChanged: globalChanged,
+      now: () => 1_000,
+    });
+
+    await expect(
+      service.updatePreferences({
+        identityId: 'i-1',
+        globalEnabled: false,
+        expectedVersion: 0,
+      }),
+    ).resolves.toEqual({
+      identityId: 'i-1',
+      globalEnabled: false,
+      version: 1,
+    });
+
+    expect(preferences.current.value?.globalEnabled).toBe(false);
+    expect(routine.enabled).toBe(true);
+    expect(globalChanged).toHaveBeenCalledWith({
+      identityId: 'i-1',
+      globalEnabled: false,
+    });
+    expect(scheduleChanged).toHaveBeenCalledTimes(2);
+    expect(scheduleChanged).toHaveBeenNthCalledWith(1, {
+      identityId: 'i-1',
+      routineId: 'r-1',
+    });
+    expect(scheduleChanged).toHaveBeenNthCalledWith(2, {
+      identityId: 'i-1',
+      routineId: 'r-2',
+    });
+
+    await expect(
+      service.updatePreferences({
+        identityId: 'i-1',
+        globalEnabled: true,
+        expectedVersion: 1,
+      }),
+    ).resolves.toEqual({
+      identityId: 'i-1',
+      globalEnabled: true,
+      version: 2,
+    });
+    expect(routine.enabled).toBe(true);
+    expect(secondRoutine.enabled).toBe(true);
+    expect(scheduleChanged).toHaveBeenCalledTimes(4);
+  });
+
   it('creates a canonical RoutineDefinition and memberships atomically', async () => {
     const profiles = profileStore();
     const now = 1_000;
@@ -399,6 +504,67 @@ describe('RoutineCoachCommandService', () => {
       }),
     );
     expect(changed).toHaveBeenCalledWith({ identityId: 'i-1', routineId: 'r-1' });
+  });
+
+  it('reconciles the Scheduler owner after a terminal Routine occurrence response', async () => {
+    const truth = occurrenceTruthStore();
+    const occurrence = {
+      id: 'o-elapsed-1',
+      identityId: 'i-1',
+      routineId: 'r-1',
+      occurrenceKey: 'routine:r-1:elapsed:activation-1000:1',
+      triggerKind: 'Elapsed' as const,
+      scheduledFor: 61_000 as never,
+      becameDueAt: 61_000 as never,
+      sourceRevision: '1',
+      resolutionState: 'Open' as const,
+      resolvedAt: null,
+      resolutionKind: null,
+      resolutionReason: null,
+    };
+    vi.mocked(truth.findOccurrence).mockResolvedValue(occurrence);
+    vi.mocked(truth.applyInteraction).mockResolvedValue({
+      interaction: {
+        id: 'interaction-complete-1',
+        idempotencyKey: 'command-complete-1',
+        identityId: 'i-1',
+        routineId: 'r-1',
+        occurrenceKey: occurrence.occurrenceKey,
+        action: 'Completed',
+        actedAt: 70_000 as never,
+        responseLatencyMs: 9_000,
+        snoozeDurationMs: null,
+        metadata: null,
+      },
+      occurrence: {
+        ...occurrence,
+        resolutionState: 'Satisfied',
+        resolvedAt: 70_000 as never,
+        resolutionKind: 'ExplicitComplete',
+      },
+      replayed: false,
+    });
+    const scheduleChanged = vi.fn();
+    const service = createRoutineCoachCommandService({
+      routineProfileStore: profileStore(),
+      runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
+      temporaryOverrideStore: overrideStore(),
+      occurrenceTruthStore: truth,
+      protocolSessionStore: createInMemoryProtocolSessionStore(),
+      onScheduleChanged: scheduleChanged,
+      now: () => 70_000,
+    });
+
+    await service.respondToOccurrence({
+      commandId: 'command-complete-1',
+      identityId: 'i-1',
+      routineId: 'r-1',
+      occurrenceKey: occurrence.occurrenceKey,
+      action: 'complete',
+    });
+
+    expect(scheduleChanged).toHaveBeenCalledTimes(1);
+    expect(scheduleChanged).toHaveBeenCalledWith({ identityId: 'i-1', routineId: 'r-1' });
   });
 
   it('starts a Pomodoro through the deterministic ProtocolSession runtime', async () => {

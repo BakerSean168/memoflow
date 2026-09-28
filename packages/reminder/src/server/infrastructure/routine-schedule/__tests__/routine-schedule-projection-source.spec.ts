@@ -7,9 +7,12 @@ import {
   type RoutineScheduleStateReader,
 } from '../routine-schedule-projection-source';
 import {
+  ROUTINE_ELAPSED_HANDLER_KEY,
+  ROUTINE_ELAPSED_PAYLOAD_VERSION,
   ROUTINE_SCHEDULING_OWNER_TYPE,
   ROUTINE_WALLCLOCK_HANDLER_KEY,
   ROUTINE_WALLCLOCK_PAYLOAD_VERSION,
+  buildRoutineElapsedSchedulingKey,
   buildRoutineWallClockSchedulingKey,
 } from '../routine-schedule-contract';
 import {
@@ -77,6 +80,20 @@ describe('createRoutineScheduleProjectionSource (ROUTINE-3401)', () => {
     });
   });
 
+  it('projects nothing while the identity-scoped global Routine gate is disabled', async () => {
+    const source = createSource(
+      createReader({
+        snapshot: {
+          definition: buildFixtureFRoutine(),
+          globalEnabled: false,
+          durableProfileGateOpen: true,
+        },
+      }),
+    );
+    const plan = await source.buildRoutinePlan(FIXTURE_F.routineId, FIXTURE_F.identityId);
+    expect(plan.desired).toEqual([]);
+  });
+
   it('projects nothing when every durable Profile/Membership path is gated off', async () => {
     const source = createSource(
       createReader({
@@ -101,12 +118,53 @@ describe('createRoutineScheduleProjectionSource (ROUTINE-3401)', () => {
     expect(plan.owner.id).toBe(FIXTURE_F.routineId);
   });
 
-  it('projects nothing for local-runtime triggers (Elapsed stays Wave 4)', async () => {
+  it('projects durable last-satisfied Elapsed without a Desktop runtime', async () => {
+    const activatedAt = Date.parse('2026-08-25T06:00:00.000Z');
     const source = createSource(
       createReader({
         snapshot: {
           definition: buildFixtureFRoutine({
-            trigger: createElapsedTrigger({ durationMs: 60_000 }),
+            trigger: createElapsedTrigger({ durationMs: 60 * 60_000 }),
+            activatedAt: new Date(activatedAt),
+          }),
+          durableProfileGateOpen: true,
+          elapsedOccurrences: [],
+        },
+      }),
+    );
+
+    const plan = await source.buildRoutinePlan(FIXTURE_F.routineId, FIXTURE_F.identityId);
+
+    expect(plan.desired).toHaveLength(1);
+    expect(plan.desired[0]).toMatchObject({
+      handlerKey: ROUTINE_ELAPSED_HANDLER_KEY,
+      payloadVersion: ROUTINE_ELAPSED_PAYLOAD_VERSION,
+      runAt: activatedAt + 60 * 60_000,
+      schedulingKey: buildRoutineElapsedSchedulingKey(
+        FIXTURE_F.routineId,
+        'routine:' + FIXTURE_F.routineId + ':elapsed:activation-' + activatedAt + ':1',
+      ),
+      payload: {
+        routineId: FIXTURE_F.routineId,
+        identityId: FIXTURE_F.identityId,
+        occurrenceKey:
+          'routine:' + FIXTURE_F.routineId + ':elapsed:activation-' + activatedAt + ':1',
+        scheduledFor: activatedAt + 60 * 60_000,
+        dueAt: activatedAt + 60 * 60_000,
+        sourceRevision: FIXTURE_F.version,
+      },
+    });
+  });
+
+  it('keeps profile-activation Elapsed local and out of the Scheduler', async () => {
+    const source = createSource(
+      createReader({
+        snapshot: {
+          definition: buildFixtureFRoutine({
+            trigger: createElapsedTrigger({
+              durationMs: 60_000,
+              anchor: 'profile-activation',
+            }),
           }),
           durableProfileGateOpen: true,
         },
@@ -114,6 +172,119 @@ describe('createRoutineScheduleProjectionSource (ROUTINE-3401)', () => {
     );
     const plan = await source.buildRoutinePlan(FIXTURE_F.routineId, FIXTURE_F.identityId);
     expect(plan.desired).toEqual([]);
+  });
+
+  it('does not project another durable Elapsed while its business occurrence is open', async () => {
+    const activatedAt = Date.parse('2026-08-25T06:00:00.000Z');
+    const occurrenceKey =
+      'routine:' + FIXTURE_F.routineId + ':elapsed:activation-' + activatedAt + ':1';
+    const source = createSource(
+      createReader({
+        snapshot: {
+          definition: buildFixtureFRoutine({
+            trigger: createElapsedTrigger({ durationMs: 60 * 60_000 }),
+            activatedAt: new Date(activatedAt),
+          }),
+          durableProfileGateOpen: true,
+          elapsedOccurrences: [
+            {
+              occurrenceKey,
+              sourceRevision: String(FIXTURE_F.version),
+              resolutionState: 'Open',
+              resolvedAt: null,
+            },
+          ],
+        },
+      }),
+    );
+
+    expect(
+      (await source.buildRoutinePlan(FIXTURE_F.routineId, FIXTURE_F.identityId)).desired,
+    ).toEqual([]);
+  });
+
+  it('projects a distinct snooze wake-up for the same open Elapsed occurrence', async () => {
+    const activatedAt = Date.parse('2026-08-25T06:00:00.000Z');
+    const occurrenceKey =
+      'routine:' + FIXTURE_F.routineId + ':elapsed:activation-' + activatedAt + ':1';
+    const snoozeUntil = Date.parse('2026-08-25T07:10:00.000Z');
+    const notificationOccurrenceKey = occurrenceKey + ':snooze:' + snoozeUntil;
+    const source = createSource(
+      createReader({
+        snapshot: {
+          definition: buildFixtureFRoutine({
+            trigger: createElapsedTrigger({ durationMs: 60 * 60_000 }),
+            activatedAt: new Date(activatedAt),
+          }),
+          durableProfileGateOpen: true,
+          temporaryOverride: createTemporaryOverride({
+            snoozeUntil,
+            expiresAt: snoozeUntil,
+            reason: 'user snoozed the open reminder',
+            source: 'user',
+          }),
+          elapsedOccurrences: [
+            {
+              occurrenceKey,
+              sourceRevision: String(FIXTURE_F.version),
+              resolutionState: 'Open',
+              resolvedAt: null,
+            },
+          ],
+        },
+      }),
+    );
+
+    const plan = await source.buildRoutinePlan(FIXTURE_F.routineId, FIXTURE_F.identityId);
+
+    expect(plan.desired).toHaveLength(1);
+    expect(plan.desired[0]).toMatchObject({
+      handlerKey: ROUTINE_ELAPSED_HANDLER_KEY,
+      runAt: snoozeUntil,
+      schedulingKey: buildRoutineElapsedSchedulingKey(
+        FIXTURE_F.routineId,
+        notificationOccurrenceKey,
+      ),
+      payload: {
+        occurrenceKey,
+        notificationOccurrenceKey,
+        scheduledFor: snoozeUntil,
+        dueAt: snoozeUntil,
+      },
+    });
+  });
+
+  it('re-anchors last-satisfied Elapsed to its durable completion time', async () => {
+    const activatedAt = Date.parse('2026-08-25T06:00:00.000Z');
+    const resolvedAt = Date.parse('2026-08-25T07:05:00.000Z');
+    const source = createSource(
+      createReader({
+        snapshot: {
+          definition: buildFixtureFRoutine({
+            trigger: createElapsedTrigger({ durationMs: 60 * 60_000 }),
+            activatedAt: new Date(activatedAt),
+          }),
+          durableProfileGateOpen: true,
+          elapsedOccurrences: [
+            {
+              occurrenceKey:
+                'routine:' + FIXTURE_F.routineId + ':elapsed:activation-' + activatedAt + ':1',
+              sourceRevision: String(FIXTURE_F.version),
+              resolutionState: 'Satisfied',
+              resolvedAt,
+            },
+          ],
+        },
+      }),
+    );
+
+    const plan = await source.buildRoutinePlan(FIXTURE_F.routineId, FIXTURE_F.identityId);
+    expect(plan.desired).toHaveLength(1);
+    expect(plan.desired[0]!.runAt).toBe(resolvedAt + 60 * 60_000);
+    expect(plan.desired[0]!.payload).toMatchObject({
+      occurrenceKey: 'routine:' + FIXTURE_F.routineId + ':elapsed:satisfied-' + resolvedAt + ':1',
+      dueAt: resolvedAt + 60 * 60_000,
+    });
   });
 
   it('projects nothing when the snapshot is missing', async () => {

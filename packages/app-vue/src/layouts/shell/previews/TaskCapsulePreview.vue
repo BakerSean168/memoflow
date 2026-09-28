@@ -1,89 +1,179 @@
 <script setup lang="ts">
 /**
- * TaskCapsulePreview — 任务胶囊摘要（§10）
- * 复用今日实例拉取逻辑；不在 header mount 时请求，仅首次打开加载。
+ * Task capsule quick workspace.
+ *
+ * This surface is intentionally execution-oriented: today's occurrences can be
+ * completed, skipped, and have their occurrence-owned checklist updated without
+ * entering the full Task module. Planning/configuration remains Task-owned.
  */
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useTask } from '../../../modules/task/composables/useTask';
+import { ArrowRight, CheckCircle2, Plus, RotateCcw } from '@lucide/vue';
+import { Button, Input } from '@memoflow/ui-vue-shadcn';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
-import { startOfDayMs, endOfDayMs, isTodayMs } from '../../../shared/utils/product-time';
+import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { useTask } from '../../../modules/task/composables/useTask';
+import { useTaskPlanMutations } from '../../../modules/task/composables/useTaskPlanMutations';
+import TaskOccurrenceCompactRow from '../../../modules/task/components/TaskOccurrenceCompactRow.vue';
+import {
+  endOfDayMs,
+  getProductTodayYmd,
+  isTodayMs,
+  startOfDayMs,
+} from '../../../shared/utils/product-time';
 
-const RECENT_LIMIT = 3;
-const CACHE_MS = 45_000;
 const TEMPLATE_FETCH_LIMIT = 200;
 
-defineEmits<{
+const emit = defineEmits<{
   'view-all': [];
   select: [id: string];
 }>();
 
 const { t } = useI18n();
 const task = useTask();
+const { createPlanSafe, isSaving: isCreatingQuickTask } = useTaskPlanMutations();
 
-const loadedAt = ref(0);
 const localError = ref<string | null>(null);
 const isLoading = ref(false);
+const busyOccurrenceId = ref<string | null>(null);
+const quickTaskOpen = ref(false);
+const quickTaskTitle = ref('');
 
 function getTodayRange() {
-  const now = new Date();
+  const now = Date.now();
   return {
-    startDate: startOfDayMs(now.getTime()),
-    endDate: endOfDayMs(now.getTime()),
+    startDate: startOfDayMs(now),
+    endDate: endOfDayMs(now),
   };
 }
 
-const todayInstances = computed<TaskOccurrenceClientDTO[]>(() => {
-  return (task.instances.value ?? []).filter((inst) => isTodayMs(inst.dueAt));
-});
-
-const pending = computed(() =>
-  todayInstances.value
-    .filter((i) => i.status !== 'Completed' && i.status !== 'Skipped' && i.status !== 'Missed')
-    .slice(0, RECENT_LIMIT),
+const todayInstances = computed<TaskOccurrenceClientDTO[]>(() =>
+  (task.instances.value ?? []).filter((inst) => isTodayMs(inst.dueAt)),
 );
 
 const completedCount = computed(
-  () => todayInstances.value.filter((i) => i.status === 'Completed').length,
+  () => todayInstances.value.filter((inst) => inst.status === 'Completed').length,
 );
+
+const progressPct = computed(() => {
+  if (todayInstances.value.length === 0) return 0;
+  return Math.round((completedCount.value / todayInstances.value.length) * 100);
+});
 
 const templateMap = computed(() => {
   const map = new Map<string, TaskPlanClientDTO>();
-  for (const tpl of task.templates.value ?? []) {
-    map.set(String(tpl.id), tpl);
+  for (const template of task.templates.value ?? []) {
+    map.set(String(template.id), template);
   }
   return map;
 });
 
-function timeLabel(inst: TaskOccurrenceClientDTO): string {
-  const timing = inst.scheduleSnapshot.timing;
-  if (timing.kind === 'At') return timing.time;
-  if (timing.kind === 'Window') return timing.start;
-  return t('shell.preview.allDay');
-}
+const visibleOccurrences = computed(() => {
+  const active = todayInstances.value
+    .filter(
+      (inst) =>
+        inst.status !== 'Completed' && inst.status !== 'Skipped' && inst.status !== 'Missed',
+    )
+    .sort((a, b) => a.dueAt - b.dueAt);
+  const terminal = todayInstances.value
+    .filter(
+      (inst) =>
+        inst.status === 'Completed' || inst.status === 'Skipped' || inst.status === 'Missed',
+    )
+    .sort((a, b) => a.dueAt - b.dueAt);
+  return [...active, ...terminal];
+});
 
-function titleOf(inst: TaskOccurrenceClientDTO): string {
-  const plan = templateMap.value.get(String(inst.planId));
-  return plan?.name || String(inst.planId);
-}
+const visibleRows = computed(() =>
+  visibleOccurrences.value.flatMap((occurrence) => {
+    const template = templateMap.value.get(String(occurrence.planId));
+    return template ? [{ occurrence, template }] : [];
+  }),
+);
 
-async function load(force = false) {
-  if (!force && loadedAt.value && Date.now() - loadedAt.value < CACHE_MS) return;
+async function load(force = false): Promise<void> {
   isLoading.value = true;
   localError.value = null;
   try {
     const range = getTodayRange();
     await Promise.all([
-      task.fetchInstancesByDateRange(range.startDate, range.endDate),
+      task.fetchInstancesByDateRange(range.startDate, range.endDate, { force }),
       task.fetchTemplates({ page: 1, limit: TEMPLATE_FETCH_LIMIT }),
     ]);
     if (task.error?.value) localError.value = String(task.error.value);
-    loadedAt.value = Date.now();
-  } catch (e) {
-    localError.value = e instanceof Error ? e.message : t('common.operationFailed');
+  } catch (error) {
+    localError.value = error instanceof Error ? error.message : t('common.operationFailed');
   } finally {
     isLoading.value = false;
   }
+}
+
+async function runOccurrenceAction(
+  occurrenceId: string,
+  action: (id: string) => Promise<unknown>,
+): Promise<void> {
+  if (busyOccurrenceId.value) return;
+  busyOccurrenceId.value = occurrenceId;
+  try {
+    await action(occurrenceId);
+  } finally {
+    busyOccurrenceId.value = null;
+  }
+}
+
+function completeOccurrence(id: string): Promise<void> {
+  return runOccurrenceAction(id, task.completeOccurrence);
+}
+
+function uncompleteOccurrence(id: string): Promise<void> {
+  return runOccurrenceAction(id, task.uncompleteOccurrence);
+}
+
+function skipOccurrence(id: string): Promise<void> {
+  return runOccurrenceAction(id, task.skipOccurrence);
+}
+
+function setOccurrenceChecklistItem(
+  occurrenceId: string,
+  definitionId: string,
+  completed: boolean,
+  expectedVersion: number,
+): Promise<void> {
+  return runOccurrenceAction(occurrenceId, (id) =>
+    task.setOccurrenceChecklistItem(id, {
+      definitionId,
+      completed,
+      expectedVersion,
+    }),
+  );
+}
+
+async function createQuickTask(): Promise<void> {
+  const title = quickTaskTitle.value.trim();
+  if (!title || isCreatingQuickTask.value) return;
+
+  const saved = await createPlanSafe(
+    {
+      name: title,
+      description: null,
+      schedule: {
+        kind: 'OneTime',
+        date: getProductTodayYmd(),
+        timing: { kind: 'AllDay' },
+      },
+      reminderConfig: null,
+      importance: ImportanceLevel.Moderate,
+      labelIds: [],
+      goalBinding: null,
+      checklist: [],
+    },
+    'quick',
+  );
+
+  if (!saved) return;
+  quickTaskTitle.value = '';
+  quickTaskOpen.value = false;
+  await load(true);
 }
 
 onMounted(() => {
@@ -92,68 +182,135 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex max-h-80 flex-col" data-testid="task-capsule-preview">
-    <div class="mb-2 flex items-center justify-between gap-2 border-b border-border/40 pb-1.5">
-      <p class="text-xs font-bold">{{ t('nav.capsule.task') }}</p>
-      <span class="font-mono text-[10px] text-muted-foreground" data-testid="task-capsule-count">
-        {{ completedCount }}/{{ todayInstances.length }}
-      </span>
+  <div
+    class="flex max-h-[32rem] min-h-0 flex-col"
+    data-testid="task-capsule-preview"
+    data-capsule-workspace="task"
+  >
+    <div class="shrink-0 border-b border-border/50 pb-2">
+      <div class="flex items-center justify-between gap-3">
+        <div>
+          <p class="text-xs font-semibold text-foreground">{{ t('nav.capsule.task') }}</p>
+          <p class="mt-0.5 text-[10px] text-muted-foreground">
+            {{ t('shell.taskWorkspace.today') }}
+          </p>
+        </div>
+        <span
+          class="rounded-full bg-muted/70 px-2 py-0.5 font-mono text-[10px] tabular-nums text-muted-foreground"
+          data-testid="task-capsule-count"
+        >
+          {{ completedCount }}/{{ todayInstances.length }}
+        </span>
+      </div>
+
+      <div v-if="todayInstances.length" class="mt-2 h-1 overflow-hidden rounded-full bg-muted">
+        <div
+          class="h-full rounded-full bg-emerald-500 transition-[width] duration-300"
+          :style="{ width: `${progressPct}%` }"
+          data-testid="task-capsule-progress"
+        />
+      </div>
     </div>
 
     <div
-      v-if="isLoading && pending.length === 0"
-      class="space-y-2 py-2"
+      v-if="isLoading && todayInstances.length === 0"
+      class="space-y-1.5 py-3"
       data-testid="task-capsule-loading"
     >
-      <div v-for="i in 3" :key="i" class="h-8 animate-pulse rounded bg-muted" />
+      <div v-for="index in 4" :key="index" class="h-10 animate-pulse rounded-lg bg-muted/70" />
     </div>
 
-    <div v-else-if="localError" class="space-y-2 py-3 text-center" data-testid="task-capsule-error">
-      <p class="text-[11px] text-muted-foreground">{{ localError }}</p>
-      <button
-        type="button"
-        class="text-[11px] font-medium text-primary"
-        data-testid="task-capsule-retry"
-        @click="load(true)"
-      >
+    <div
+      v-else-if="localError"
+      class="flex flex-col items-center gap-2 py-5 text-center"
+      data-testid="task-capsule-error"
+    >
+      <p class="max-w-64 text-[11px] leading-4 text-muted-foreground">{{ localError }}</p>
+      <Button type="button" variant="ghost" size="sm" class="h-7 text-[11px]" @click="load(true)">
+        <RotateCcw class="mr-1.5 h-3.5 w-3.5" />
         {{ t('common.retry') }}
-      </button>
+      </Button>
     </div>
 
     <div
       v-else-if="todayInstances.length === 0"
-      class="py-4 text-center text-[11px] text-muted-foreground"
+      class="flex flex-col items-center justify-center py-7 text-center"
       data-testid="task-capsule-empty"
     >
-      {{ t('shell.preview.taskEmpty') }}
+      <CheckCircle2 class="mb-2 h-6 w-6 text-muted-foreground/45" />
+      <p class="text-[11px] text-muted-foreground">{{ t('shell.preview.taskEmpty') }}</p>
     </div>
 
-    <ul v-else class="min-h-0 flex-1 space-y-1 overflow-y-auto" data-testid="task-capsule-list">
-      <li v-for="inst in pending" :key="inst.id">
+    <div
+      v-else
+      class="min-h-0 flex-1 overflow-y-auto py-1.5 pr-0.5"
+      data-testid="task-capsule-list"
+    >
+      <TaskOccurrenceCompactRow
+        v-for="row in visibleRows"
+        :key="row.occurrence.id"
+        :occurrence="row.occurrence"
+        :template="row.template"
+        :busy="busyOccurrenceId === String(row.occurrence.id)"
+        @open-plan="emit('select', $event)"
+        @complete="completeOccurrence"
+        @uncomplete="uncompleteOccurrence"
+        @skip="skipOccurrence"
+        @checklist-change="setOccurrenceChecklistItem"
+      />
+    </div>
+
+    <div class="shrink-0 border-t border-border/50 pt-2">
+      <form
+        v-if="quickTaskOpen"
+        class="flex items-center gap-1.5"
+        data-testid="task-capsule-quick-create"
+        @submit.prevent="createQuickTask"
+      >
+        <Input
+          v-model="quickTaskTitle"
+          class="h-8 flex-1 text-xs"
+          :placeholder="t('task.quickTask.placeholder')"
+          :disabled="isCreatingQuickTask"
+          maxlength="200"
+          autofocus
+          @keydown.escape.prevent="
+            quickTaskOpen = false;
+            quickTaskTitle = '';
+          "
+        />
+        <Button
+          type="submit"
+          size="sm"
+          class="h-8 px-2.5 text-xs"
+          :disabled="!quickTaskTitle.trim() || isCreatingQuickTask"
+          :loading="isCreatingQuickTask"
+        >
+          {{ t('common.add') }}
+        </Button>
+      </form>
+
+      <div v-else class="flex items-center justify-between gap-2">
         <button
           type="button"
-          class="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-accent"
-          :data-testid="`task-capsule-item-${inst.id}`"
-          @click="$emit('select', String(inst.id))"
+          class="flex h-8 items-center gap-1.5 rounded-md px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          data-testid="task-capsule-quick-task"
+          @click="quickTaskOpen = true"
         >
-          <span class="shrink-0 font-mono text-[10px] text-muted-foreground">{{
-            timeLabel(inst)
-          }}</span>
-          <span class="min-w-0 flex-1 truncate text-[11px] font-medium">{{ titleOf(inst) }}</span>
+          <Plus class="h-3.5 w-3.5" />
+          {{ t('shell.home.quickTask') }}
         </button>
-      </li>
-      <li v-if="pending.length === 0" class="py-2 text-center text-[11px] text-muted-foreground">
-        {{ t('shell.preview.taskAllDone') }}
-      </li>
-    </ul>
 
-    <button
-      type="button"
-      class="mt-2 block w-full rounded-lg border border-border/60 bg-accent py-1.5 text-center text-xs font-medium transition-colors hover:bg-accent/80"
-      data-testid="task-capsule-view-all"
-      @click="$emit('view-all')"
-    >
-      {{ t('shell.enterModule') }}
-    </button>
+        <button
+          type="button"
+          class="flex h-8 items-center gap-1 rounded-md px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          data-testid="task-capsule-view-all"
+          @click="emit('view-all')"
+        >
+          {{ t('shell.taskWorkspace.viewAll') }}
+          <ArrowRight class="h-3.5 w-3.5" />
+        </button>
+      </div>
+    </div>
   </div>
 </template>

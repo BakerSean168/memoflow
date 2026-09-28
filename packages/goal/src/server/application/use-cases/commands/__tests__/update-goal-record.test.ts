@@ -12,7 +12,7 @@ function createGoalWithSum() {
     identityId: 'identity-1' as never,
     name: 'Running distance',
     summary: null,
-    startDate: null,
+    start: null,
     target: null,
     reminderConfig: null,
   });
@@ -86,7 +86,7 @@ describe('UpdateGoalRecordUseCase', () => {
       identityId: 'identity-1' as never,
       name: 'Reach 70 kg',
       summary: null,
-      startDate: null,
+      start: null,
       target: null,
       reminderConfig: null,
     });

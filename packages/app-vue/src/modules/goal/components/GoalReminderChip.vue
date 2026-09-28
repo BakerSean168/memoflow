@@ -1,93 +1,76 @@
 <template>
-  <Popover>
-    <PopoverTrigger as-child>
-      <ProductPropertyChip :disabled="disabled" data-testid="goal-reminder-chip">
+  <DropdownMenu>
+    <DropdownMenuTrigger as-child>
+      <Button
+        v-if="variant === 'header'"
+        type="button"
+        variant="ghost"
+        :size="hasReminder ? 'sm' : 'icon'"
+        class="h-8 gap-1.5 text-muted-foreground"
+        :disabled="disabled"
+        :aria-label="t('goal.reminder.reminder')"
+        data-testid="goal-reminder-header"
+      >
+        <Bell class="h-4 w-4" />
+        <span v-if="hasReminder" class="max-w-44 truncate">{{ summary }}</span>
+      </Button>
+      <ProductPropertyChip
+        v-else
+        :disabled="disabled"
+        data-testid="goal-reminder-chip"
+        :active="hasReminder"
+      >
         <template #icon><Bell class="h-3.5 w-3.5" /></template>
         {{ summary }}
       </ProductPropertyChip>
-    </PopoverTrigger>
-    <PopoverContent align="start" class="w-80 max-w-[calc(100vw-2rem)] space-y-4 p-3">
-      <div>
-        <p class="text-sm font-medium">{{ t('goal.dialog.sectionReminder') }}</p>
-        <p class="mt-1 text-xs text-muted-foreground">{{ t('goal.dialog.reminderChipHint') }}</p>
-      </div>
+    </DropdownMenuTrigger>
 
-      <div class="space-y-3">
-        <div class="rounded-md border p-3">
-          <div class="flex items-center justify-between gap-3">
-            <div>
-              <p class="text-sm font-medium">{{ t('goal.dialog.triggerRemainingDays') }}</p>
-              <p class="text-xs text-muted-foreground">{{ t('goal.dialog.remainingDaysHint') }}</p>
-            </div>
-            <Switch
-              :model-value="remainingEnabled"
-              :aria-label="t('goal.dialog.triggerRemainingDays')"
-              :disabled="!target"
-              @update:model-value="toggleRemaining"
-            />
-          </div>
-          <div v-if="remainingEnabled" class="mt-3 flex items-center gap-2">
-            <Input
-              v-model.number="remainingDays"
-              type="number"
-              min="0"
-              class="w-24"
-              @update:model-value="commitRemaining"
-            />
-            <span class="text-xs text-muted-foreground">{{
-              t('goal.dialog.daysBeforeTarget')
-            }}</span>
-          </div>
-          <p v-else-if="!target" class="mt-2 text-xs text-muted-foreground">
-            {{ t('goal.dialog.reminderRemainingDaysRequiresTargetDate') }}
-          </p>
-        </div>
+    <DropdownMenuContent align="end" class="w-96 max-w-[calc(100vw-2rem)]">
+      <DropdownMenuLabel class="flex items-center justify-between gap-3">
+        <span>{{
+          hasReminder ? t('goal.reminder.rescheduleReminder') : t('goal.reminder.addReminder')
+        }}</span>
+        <span
+          v-if="hasReminder"
+          class="max-w-40 truncate text-xs font-normal text-muted-foreground"
+        >
+          {{ summary }}
+        </span>
+      </DropdownMenuLabel>
+      <DropdownMenuSeparator />
+      <GoalReminderMenuItems
+        :model-value="modelValue"
+        :start="start"
+        :target="target"
+        :disabled="disabled"
+        @update:model-value="emit('update:modelValue', $event)"
+        @request-custom-time="openCustomReminderPicker"
+      />
+    </DropdownMenuContent>
+  </DropdownMenu>
 
-        <div class="rounded-md border p-3">
-          <div class="flex items-center justify-between gap-3">
-            <div>
-              <p class="text-sm font-medium">{{ t('goal.dialog.triggerTimeProgress') }}</p>
-              <p class="text-xs text-muted-foreground">{{ t('goal.dialog.timeProgressHint') }}</p>
-            </div>
-            <Switch
-              :model-value="progressEnabled"
-              :aria-label="t('goal.dialog.triggerTimeProgress')"
-              :disabled="!startDate || !target"
-              @update:model-value="toggleProgress"
-            />
-          </div>
-          <div v-if="progressEnabled" class="mt-3 flex items-center gap-2">
-            <Input
-              v-model.number="progressPercent"
-              type="number"
-              min="1"
-              max="100"
-              class="w-24"
-              @update:model-value="commitProgress"
-            />
-            <span class="text-xs text-muted-foreground">%</span>
-          </div>
-          <p v-else-if="!startDate || !target" class="mt-2 text-xs text-muted-foreground">
-            {{ t('goal.dialog.reminderTimeProgressRequiresRange') }}
-          </p>
-        </div>
-      </div>
-
-      <Button
-        v-if="modelValue"
-        type="button"
-        variant="ghost"
-        size="sm"
-        @click="emit('update:modelValue', null)"
-      >
-        {{ t('common.clear') }}
-      </Button>
-    </PopoverContent>
-  </Popover>
+  <ProductDateTimePicker
+    :open="customReminderPickerOpen"
+    :model-value="null"
+    :title="t('goal.reminder.customDialogTitle')"
+    :description="t('goal.reminder.customDialogDescription')"
+    :time-label="t('goal.reminder.customClockTime')"
+    :hour-label="t('goal.reminder.hour')"
+    :minute-label="t('goal.reminder.minute')"
+    :cancel-label="t('common.cancel')"
+    :apply-label="t('goal.reminder.setReminder')"
+    :return-to-today-label="t('goal.dialog.returnToToday')"
+    :invalid-time-text="t('goal.reminder.invalidClockTime')"
+    :past-time-text="t('goal.reminder.pastTime')"
+    :min-value="customReminderMinValue"
+    test-id="goal-reminder-chip-custom-picker"
+    @update:open="customReminderPickerOpen = $event"
+    @apply="addCustomAbsoluteReminder"
+  />
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Bell } from '@lucide/vue';
 import {
@@ -97,101 +80,88 @@ import {
 } from '@memoflow/contracts/goal';
 import {
   Button,
-  Input,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-  Switch,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@memoflow/ui-vue-shadcn';
-import { ProductPropertyChip } from '../../../shared/components';
+import { ProductDateTimePicker, ProductPropertyChip } from '../../../shared/components';
+import {
+  formatProductDateTime,
+  formatProductRelative,
+  getProductTime,
+} from '../../../shared/utils/product-time';
+import GoalReminderMenuItems from './GoalReminderMenuItems.vue';
 
 const props = withDefaults(
   defineProps<{
     modelValue: GoalReminderConfigDTO | null;
-    startDate: string | null;
+    start: GoalTimeframe | null;
     target: GoalTimeframe | null;
     disabled?: boolean;
+    variant?: 'property' | 'header';
   }>(),
-  { disabled: false },
+  { disabled: false, variant: 'property' },
 );
+
 const emit = defineEmits<{ 'update:modelValue': [GoalReminderConfigDTO | null] }>();
 const { t } = useI18n();
-const remainingDays = ref(7);
-const progressPercent = ref(50);
+const customReminderPickerOpen = ref(false);
+const customReminderMinValue = ref(Number(getProductTime().now()));
 
-const remainingTrigger = computed(() =>
-  props.modelValue?.triggers.find((trigger) => trigger.type === ReminderTriggerType.RemainingDays),
+const activeTrigger = computed(
+  () => props.modelValue?.triggers.find((trigger) => trigger.enabled) ?? null,
 );
-const progressTrigger = computed(() =>
-  props.modelValue?.triggers.find(
-    (trigger) => trigger.type === ReminderTriggerType.TimeProgressPercentage,
-  ),
-);
-const remainingEnabled = computed(() => Boolean(remainingTrigger.value?.enabled));
-const progressEnabled = computed(() => Boolean(progressTrigger.value?.enabled));
-const enabledCount = computed(
-  () => props.modelValue?.triggers.filter((trigger) => trigger.enabled).length ?? 0,
-);
-const summary = computed(() =>
-  enabledCount.value > 0
-    ? t('goal.dialog.reminderCount', { count: enabledCount.value })
-    : t('goal.dialog.reminder'),
-);
+const hasReminder = computed(() => Boolean(props.modelValue?.enabled && activeTrigger.value));
 
-watch(
-  () => props.modelValue,
-  (value) => {
-    const remaining = value?.triggers.find(
-      (trigger) => trigger.type === ReminderTriggerType.RemainingDays,
-    );
-    const progress = value?.triggers.find(
-      (trigger) => trigger.type === ReminderTriggerType.TimeProgressPercentage,
-    );
-    if (remaining) remainingDays.value = remaining.value;
-    if (progress) progressPercent.value = progress.value;
-  },
-  { immediate: true, deep: true },
-);
-
-function replaceTrigger(type: string, enabled: boolean, value: number): void {
-  const existing = props.modelValue?.triggers.filter((trigger) => trigger.type !== type) ?? [];
-  const triggers = enabled ? [...existing, { type, value, enabled: true }] : existing;
-  emit(
-    'update:modelValue',
-    triggers.length > 0 ? ({ enabled: true, triggers } as GoalReminderConfigDTO) : null,
-  );
+function openCustomReminderPicker(): void {
+  customReminderMinValue.value = Number(getProductTime().now());
+  customReminderPickerOpen.value = true;
 }
 
-function toggleRemaining(enabled: boolean): void {
-  if (enabled && !props.target) return;
-  replaceTrigger(
-    ReminderTriggerType.RemainingDays,
-    enabled,
-    Math.max(0, Number(remainingDays.value) || 0),
+function addCustomAbsoluteReminder(value: number): void {
+  const now = Number(getProductTime().now());
+  const rounded = Math.floor(value / 60_000) * 60_000;
+  if (!Number.isFinite(rounded) || rounded <= now) return;
+
+  const existing = (props.modelValue?.triggers ?? []).filter(
+    (trigger) =>
+      trigger.enabled && (trigger.type !== ReminderTriggerType.AbsoluteAt || trigger.value > now),
   );
+  if (
+    existing.some(
+      (trigger) => trigger.type === ReminderTriggerType.AbsoluteAt && trigger.value === rounded,
+    )
+  ) {
+    return;
+  }
+  if (existing.length >= 10) return;
+
+  emit('update:modelValue', {
+    enabled: true,
+    triggers: [
+      ...existing,
+      { type: ReminderTriggerType.AbsoluteAt, value: rounded, enabled: true },
+    ],
+  });
 }
-function toggleProgress(enabled: boolean): void {
-  if (enabled && (!props.startDate || !props.target)) return;
-  replaceTrigger(
-    ReminderTriggerType.TimeProgressPercentage,
-    enabled,
-    Math.max(1, Math.min(100, Number(progressPercent.value) || 50)),
-  );
-}
-function commitRemaining(): void {
-  if (!remainingEnabled.value) return;
-  replaceTrigger(
-    ReminderTriggerType.RemainingDays,
-    true,
-    Math.max(0, Number(remainingDays.value) || 0),
-  );
-}
-function commitProgress(): void {
-  if (!progressEnabled.value) return;
-  replaceTrigger(
-    ReminderTriggerType.TimeProgressPercentage,
-    true,
-    Math.max(1, Math.min(100, Number(progressPercent.value) || 50)),
-  );
-}
+
+const summary = computed(() => {
+  const trigger = activeTrigger.value;
+  if (!trigger) return t('goal.reminder.reminder');
+
+  if (trigger.type === ReminderTriggerType.AbsoluteAt) {
+    return formatProductRelative(trigger.value, formatProductDateTime(trigger.value));
+  }
+
+  if (trigger.type === ReminderTriggerType.RemainingDays) {
+    if (trigger.value === 0) return t('goal.reminder.onTargetDay');
+    return t('goal.reminder.daysBeforeTarget', { count: trigger.value });
+  }
+
+  return t('goal.dialog.reminderCount', {
+    count: props.modelValue?.triggers.filter((item) => item.enabled).length ?? 1,
+  });
+});
 </script>

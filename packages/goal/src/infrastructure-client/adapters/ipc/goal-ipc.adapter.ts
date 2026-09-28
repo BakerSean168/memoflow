@@ -56,8 +56,8 @@ export class GoalIpcAdapter implements IGoalApiClient {
     status?: string[];
     systemView?: GoalSystemView;
     labelIdsAll?: string[];
-    startDate?: number;
-    endDate?: number;
+    targetStart?: import('@memoflow/contracts/primitives').Ymd;
+    targetEnd?: import('@memoflow/contracts/primitives').Ymd;
     includeChildren?: boolean;
   }): Promise<Result<QueryGoalsRes>> {
     return this.ipcClient.invoke(GoalChannels.LIST, params);

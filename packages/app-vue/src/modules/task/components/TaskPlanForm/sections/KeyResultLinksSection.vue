@@ -1,36 +1,20 @@
 <template>
-  <section class="space-y-4" aria-labelledby="task-kr-link-heading">
-    <header class="flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <Target class="h-5 w-5" />
-        <h3 id="task-kr-link-heading" class="text-sm font-semibold">
-          {{ t('task.krLinks.title') }}
-        </h3>
-      </div>
-      <Badge v-if="hasGoalBinding" variant="default" class="bg-success">
-        <CheckCircle class="h-3 w-3 mr-1" />
-        {{ t('task.krLinks.linkedCount') }}
-      </Badge>
-    </header>
-
+  <section class="space-y-4">
     <div>
-      <!-- 提示信息 -->
-      <Alert v-if="!hasGoalBinding" class="mb-4">
-        <Info class="h-4 w-4" />
-        <AlertDescription class="text-xs">
-          {{ t('task.krLinks.hint') }}
-        </AlertDescription>
-      </Alert>
-
       <!-- 启用开关 -->
-      <div class="flex items-center gap-2 mb-4">
+      <div class="mb-4 flex items-center justify-between gap-3 rounded-lg bg-muted/25 px-2.5 py-2">
+        <div class="flex min-w-0 items-center gap-2">
+          <Target class="h-4 w-4 shrink-0 text-muted-foreground" />
+          <Label for="task-key-result-link-enabled" class="cursor-pointer">
+            {{ t('task.krLinks.enable') }}
+          </Label>
+        </div>
         <Switch
           id="task-key-result-link-enabled"
           data-testid="task-goal-binding-toggle"
           :model-value="linkEnabled"
           @update:model-value="handleLinkToggle"
         />
-        <Label for="task-key-result-link-enabled">{{ t('task.krLinks.enable') }}</Label>
       </div>
 
       <!-- 关联配置表单 -->
@@ -144,20 +128,22 @@
           </p>
         </div>
 
-        <div class="mb-3 rounded-md border p-3">
-          <div class="flex items-center gap-2">
-            <Switch
-              id="task-goal-contribution-enabled"
-              data-testid="task-goal-contribution-toggle"
-              :model-value="contributionEnabled"
-              :disabled="!selectedGoalId || !selectedKeyResultId"
-              @update:model-value="handleContributionToggle"
-            />
-            <Label for="task-goal-contribution-enabled">{{
-              t('task.krLinks.contributionEnable')
-            }}</Label>
+        <div
+          class="mb-3 flex items-center justify-between gap-3 rounded-lg bg-muted/25 px-2.5 py-2"
+        >
+          <div class="flex min-w-0 items-center gap-2">
+            <PlusCircle class="h-4 w-4 shrink-0 text-muted-foreground" />
+            <Label for="task-goal-contribution-enabled" class="cursor-pointer">
+              {{ t('task.krLinks.contributionEnable') }}
+            </Label>
           </div>
-          <p class="mt-1 text-xs text-muted-foreground">{{ t('task.krLinks.contributionHint') }}</p>
+          <Switch
+            id="task-goal-contribution-enabled"
+            data-testid="task-goal-contribution-toggle"
+            :model-value="contributionEnabled"
+            :disabled="!selectedGoalId || !selectedKeyResultId"
+            @update:model-value="handleContributionToggle"
+          />
         </div>
 
         <!-- 增量值设置 -->
@@ -248,8 +234,6 @@ import type { TaskPlanViewModel, GoalBindingOption, KeyResultBindingOption } fro
 import {
   Card,
   CardContent,
-  Alert,
-  AlertDescription,
   Switch,
   Label,
   Select,
@@ -261,16 +245,7 @@ import {
   Badge,
   Button,
 } from '@memoflow/ui-vue-shadcn';
-import {
-  Target,
-  CheckCircle,
-  Info,
-  Flag,
-  PlusCircle,
-  Link2,
-  LoaderCircle,
-  RotateCw,
-} from '@lucide/vue';
+import { Target, Flag, PlusCircle, Link2, LoaderCircle, RotateCw } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import { normalizeSelectString } from '../../../../../shared/utils/normalize-select-string';
 
@@ -301,10 +276,6 @@ const contributionEnabled = ref(false);
 const incrementValue = ref<number>(1);
 const progressTrigger = ref<TaskGoalBindingTriggerValue>(TaskGoalBindingTrigger.EachCompletion);
 // ===== 计算属性 =====
-const hasGoalBinding = computed(() => {
-  return Boolean(props.modelValue.goalBinding?.goalId);
-});
-
 const hasCompleteBinding = computed(() => {
   return (
     linkEnabled.value &&

@@ -46,6 +46,7 @@ import { DesktopTaskPlanMutationAdapter } from '../modules/ai/task-plan-mutation
 import { DesktopRoutineAICommandAdapter } from '../modules/ai/routine-command.adapter';
 import { DesktopPlannerAIReadAdapter } from '../modules/ai/planner-read.adapter';
 import { DesktopNotificationAIReadAdapter } from '../modules/ai/notification-read.adapter';
+import { DesktopSelectedEntityContextReadAdapter } from '../modules/ai/selected-entity-context-read.adapter';
 
 export interface ComposeAIElectronDependencies {
   readonly db: IElectronDatabase;
@@ -75,9 +76,7 @@ export interface ComposedAIElectron {
   readonly portableCapability: AIModuleInstance['portableCapability'];
 }
 
-export function composeAI(
-  dependencies: ComposeAIElectronDependencies,
-): ComposedAIElectron {
+export function composeAI(dependencies: ComposeAIElectronDependencies): ComposedAIElectron {
   const {
     conversationRepository,
     providerConfigRepository,
@@ -119,6 +118,11 @@ export function composeAI(
       dependencies.userTimeContextPort,
     ),
     notificationReadPort: new DesktopNotificationAIReadAdapter(dependencies.notificationInbox),
+    selectedEntityContextReadPort: new DesktopSelectedEntityContextReadAdapter(
+      dependencies.goalApplicationPort,
+      dependencies.taskApplicationPort,
+    ),
+    analyticsReadPort: dependencies.analyticsReadPort,
     contextAssembler,
   });
 

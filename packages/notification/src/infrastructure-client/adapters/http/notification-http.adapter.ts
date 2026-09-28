@@ -15,6 +15,8 @@ import type {
 } from '../types';
 import type {
   BatchOperationResultDTO,
+  ExecuteNotificationActionReq,
+  ExecuteNotificationActionRes,
   NotificationClientDTO,
   NotificationPreferenceClientDTO,
   UpdateNotificationPreferenceReq,
@@ -75,6 +77,12 @@ export class NotificationHttpAdapter implements INotificationApiClient {
 
   async batchDeleteNotifications(ids: string[]): Promise<Result<BatchOperationResultDTO>> {
     return this.httpClient.post(`${this.baseUrl}/batch-delete`, { notificationIds: ids });
+  }
+
+  async executeAction(
+    request: ExecuteNotificationActionReq,
+  ): Promise<Result<ExecuteNotificationActionRes>> {
+    return this.httpClient.post(`${this.baseUrl}/actions`, request);
   }
 
   async getUnreadCount(): Promise<Result<UnreadCountResponse>> {

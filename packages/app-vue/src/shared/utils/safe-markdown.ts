@@ -8,6 +8,17 @@
  */
 
 import MarkdownIt, { type StateBlock, type StateCore, type StateInline, type Token } from 'markdown-it';
+import hljs from 'highlight.js/lib/core';
+import bash from 'highlight.js/lib/languages/bash';
+import css from 'highlight.js/lib/languages/css';
+import javascript from 'highlight.js/lib/languages/javascript';
+import json from 'highlight.js/lib/languages/json';
+import markdown from 'highlight.js/lib/languages/markdown';
+import python from 'highlight.js/lib/languages/python';
+import sql from 'highlight.js/lib/languages/sql';
+import typescript from 'highlight.js/lib/languages/typescript';
+import xml from 'highlight.js/lib/languages/xml';
+import yaml from 'highlight.js/lib/languages/yaml';
 // Residual 943: escapeHtml dual retired — @memoflow/utils/shared sole helper.
 import { escapeHtml } from '@memoflow/utils/shared';
 
@@ -43,6 +54,26 @@ const ALLOWED_CALLOUT_TYPES = new Set([
 
 const BLOCK_ID_PATTERN = /(?:^|\s)\^([A-Za-z0-9-]+)\s*$/;
 const CALLOUT_MARKER_PATTERN = /^\[!([A-Za-z0-9_-]+)\]([+-])?(?:[ \t]+(.*))?$/;
+const FRONTMATTER_PATTERN = /^---[ \t]*\r?\n[\s\S]*?\r?\n---[ \t]*(?:\r?\n|$)/;
+
+hljs.registerLanguage('bash', bash);
+hljs.registerLanguage('shell', bash);
+hljs.registerLanguage('sh', bash);
+hljs.registerLanguage('css', css);
+hljs.registerLanguage('javascript', javascript);
+hljs.registerLanguage('js', javascript);
+hljs.registerLanguage('json', json);
+hljs.registerLanguage('markdown', markdown);
+hljs.registerLanguage('md', markdown);
+hljs.registerLanguage('python', python);
+hljs.registerLanguage('py', python);
+hljs.registerLanguage('sql', sql);
+hljs.registerLanguage('typescript', typescript);
+hljs.registerLanguage('ts', typescript);
+hljs.registerLanguage('html', xml);
+hljs.registerLanguage('xml', xml);
+hljs.registerLanguage('yaml', yaml);
+hljs.registerLanguage('yml', yaml);
 
 interface VaultReference {
   alias: string;
@@ -380,6 +411,15 @@ const md = new MarkdownIt({
   linkify: true,
   typographer: true,
   breaks: true,
+  highlight(source, language) {
+    const normalized = language.trim().toLowerCase();
+    if (!normalized || !hljs.getLanguage(normalized)) return '';
+    try {
+      return hljs.highlight(source, { language: normalized, ignoreIllegals: true }).value;
+    } catch {
+      return '';
+    }
+  },
 });
 
 md.validateLink = (url) => isAllowedHref(url);
@@ -416,11 +456,16 @@ md.renderer.rules.link_open = (tokens, idx, options, env, self) => {
   return defaultLinkOpen(tokens, idx, options, env, self);
 };
 
+/** Remove a leading YAML frontmatter block before reading-mode rendering. */
+export function stripMarkdownFrontmatter(source: string): string {
+  return source.replace(FRONTMATTER_PATTERN, '').replace(/^\s*\r?\n/, '');
+}
+
 /** Render Markdown to HTML with raw HTML disabled. */
 export function renderSafeMarkdown(source: string): string {
   if (!source) return '';
   try {
-    return md.render(source);
+    return md.render(stripMarkdownFrontmatter(source));
   } catch {
     // Never throw into v-html consumers.
     return escapeHtml(source);

@@ -1,79 +1,87 @@
 <template>
   <div class="flex h-full min-h-0 flex-col overflow-hidden" data-testid="notification-center">
-    <!-- Phase 4：统一 ModuleHeader 约定（leading=计数，actions=mark-all-read，subnav=all/unread）。 -->
-    <ModuleHeader data-testid="notification-page-toolbar">
-      <template #leading>
-        <p class="min-w-0 truncate text-xs text-muted-foreground" data-testid="notification-count">
-          {{ t('notification.filter.all') }} · {{ notifications.length }}
-        </p>
-        <Badge
-          v-if="unreadCount > 0"
-          variant="destructive"
-          class="shrink-0 text-xs"
-          data-testid="notification-unread-badge"
-        >
-          {{ t('notification.filter.unreadBadge', { count: unreadCount }) }}
-        </Badge>
-      </template>
-      <template #actions>
+    <!-- 与 Goal / Task 保持同一套 Linear-style 单行工具栏：筛选、计数、批量动作只占一层。 -->
+    <header
+      class="z-10 flex min-h-14 shrink-0 items-center gap-2 border-b border-border/80 bg-background/80 px-3 py-2 backdrop-blur-sm @2xl/panel:px-6"
+      data-testid="notification-page-toolbar"
+    >
+      <div
+        class="inline-flex h-8 min-w-0 items-center rounded-lg bg-muted/55 p-0.5"
+        role="tablist"
+        :aria-label="t('notification.title')"
+      >
         <Button
-          data-testid="mark-all-read-button"
-          variant="outline"
+          v-for="tab in filterTabs"
+          :key="tab.value"
+          :data-testid="`notification-filter-${tab.value}`"
+          variant="ghost"
           size="sm"
-          class="h-8 shrink-0 px-2 @xl/panel:px-3"
-          :aria-label="t('notification.action.markAllRead')"
-          :disabled="!hasUnread"
-          @click="handleMarkAllRead"
+          role="tab"
+          :aria-selected="selectedFilter === tab.value"
+          :class="[
+            'h-7 gap-1.5 rounded-md px-2.5 text-xs font-medium shadow-none transition-[background-color,color,box-shadow] hover:bg-background/70 hover:text-foreground',
+            selectedFilter === tab.value
+              ? 'bg-background text-foreground shadow-sm'
+              : 'text-muted-foreground',
+          ]"
+          @click="selectedFilter = tab.value"
         >
-          <CheckCheck class="h-4 w-4 @xl/panel:mr-1.5" />
-          <span class="hidden @xl/panel:inline">{{ t('notification.action.markAllRead') }}</span>
-        </Button>
-      </template>
-      <template #subnav>
-        <div
-          class="flex min-w-0 items-center gap-1"
-          role="tablist"
-          :aria-label="t('notification.title')"
-        >
-          <Button
-            v-for="tab in filterTabs"
-            :key="tab.value"
-            :data-testid="`notification-filter-${tab.value}`"
-            variant="ghost"
-            size="sm"
-            role="tab"
-            :aria-selected="selectedFilter === tab.value"
-            :class="[
-              'h-8 px-2 text-muted-foreground hover:text-foreground @xl/panel:px-3',
-              selectedFilter === tab.value ? 'bg-secondary font-medium text-foreground' : '',
-            ]"
-            @click="selectedFilter = tab.value"
+          <span>{{ tab.label }}</span>
+          <span
+            :data-testid="
+              tab.value === 'unread' && tab.count > 0 ? 'notification-unread-badge' : undefined
+            "
+            class="min-w-4 text-center text-[10px] tabular-nums"
+            :class="
+              selectedFilter === tab.value ? 'text-foreground/65' : 'text-muted-foreground/70'
+            "
           >
-            {{ tab.label }}
-          </Button>
-        </div>
-      </template>
-    </ModuleHeader>
+            {{ tab.count }}
+          </span>
+        </Button>
+      </div>
 
-    <!-- 信箱是读列表：max-w-4xl（§11-3） -->
+      <Button
+        data-testid="mark-all-read-button"
+        variant="ghost"
+        size="sm"
+        class="ml-auto h-8 shrink-0 gap-1.5 px-2.5 text-xs text-muted-foreground hover:text-foreground"
+        :aria-label="t('notification.action.markAllRead')"
+        :disabled="!hasUnread"
+        @click="handleMarkAllRead"
+      >
+        <CheckCheck class="h-3.5 w-3.5" />
+        <span class="hidden @lg/panel:inline">{{ t('notification.action.markAllRead') }}</span>
+      </Button>
+    </header>
+
+    <!-- 信箱保持阅读宽度，略放宽到 5xl 以匹配 Goal / Task 的主内容列。 -->
     <div
-      class="min-h-0 flex-1 overflow-y-auto p-3"
+      class="min-h-0 flex-1 overflow-y-auto px-4 py-3 @2xl/panel:px-6"
       data-testid="notification-scroll-host"
       data-scroll-host="notification"
     >
-      <div class="mx-auto max-w-4xl">
+      <div class="mx-auto max-w-5xl">
         <!-- 加载 = 行骨架（§0.3 禁整页 spinner） -->
         <div
           v-if="isLoading"
-          class="space-y-3 py-2"
+          class="overflow-hidden rounded-xl border border-border/60 bg-card/30"
           data-testid="notification-list-skeleton"
           role="status"
           :aria-label="t('notification.loading')"
         >
-          <div v-for="i in 6" :key="i" class="flex items-start gap-3 px-2 py-2">
-            <Skeleton class="mt-1 h-2 w-2 rounded-full" />
-            <div class="flex-1 space-y-1.5">
-              <Skeleton class="h-4 w-2/3" />
+          <div
+            v-for="i in 6"
+            :key="i"
+            class="flex items-start gap-3 border-b border-border/60 px-4 py-3.5 last:border-b-0"
+          >
+            <Skeleton class="h-9 w-9 shrink-0 rounded-lg" />
+            <div class="min-w-0 flex-1 space-y-2 pt-0.5">
+              <div class="flex items-center justify-between gap-6">
+                <Skeleton class="h-3.5 w-2/5" />
+                <Skeleton class="h-3 w-14" />
+              </div>
+              <Skeleton class="h-3 w-4/5" />
               <Skeleton class="h-3 w-1/3" />
             </div>
           </div>
@@ -81,33 +89,65 @@
 
         <div
           v-else-if="isError"
-          class="flex flex-col items-center gap-3 py-16 text-center"
+          class="flex min-h-72 flex-col items-center justify-center px-6 text-center"
           data-testid="notifications-error-state"
           role="alert"
         >
-          <p class="text-sm text-muted-foreground">{{ t('notification.error.fetchFailed') }}</p>
-          <Button variant="outline" size="sm" data-testid="notifications-retry" @click="refetch">
+          <div
+            class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl border border-destructive/15 bg-destructive/5 text-destructive"
+          >
+            <CircleAlert class="h-5 w-5" />
+          </div>
+          <p class="text-sm font-medium text-foreground">
+            {{ t('notification.error.fetchFailed') }}
+          </p>
+          <p class="mt-1 max-w-sm text-xs leading-5 text-muted-foreground">
+            {{ t('notification.error.fetchFailedDescription') }}
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            class="mt-4 h-8"
+            data-testid="notifications-retry"
+            @click="refetch"
+          >
+            <RefreshCw class="mr-1.5 h-3.5 w-3.5" />
             {{ t('notification.action.retry') }}
           </Button>
         </div>
 
-        <!-- 未读 Tab 空 = 已全部处理；全部空 = 空信箱（无按钮，§11-7） -->
+        <!-- 空态保持克制：不铺大卡片，不用高饱和成功色，只提供一个清晰的完成状态锚点。 -->
         <template v-else-if="filteredNotifications.length === 0">
           <div
             v-if="selectedFilter === 'unread'"
-            class="flex flex-col items-center gap-2 py-16 text-center"
+            class="flex min-h-[22rem] flex-col items-center justify-center px-6 text-center"
             data-testid="notifications-unread-empty"
           >
-            <CheckCheck class="h-8 w-8 text-success" />
-            <p class="text-sm text-muted-foreground">{{ t('notification.allCaughtUp') }}</p>
+            <div
+              class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-success/15 bg-success/5 text-success/80 shadow-sm"
+            >
+              <CheckCheck class="h-5 w-5" />
+            </div>
+            <p class="text-sm font-medium text-foreground">{{ t('notification.allCaughtUp') }}</p>
+            <p class="mt-1 max-w-sm text-xs leading-5 text-muted-foreground">
+              {{ t('notification.unreadEmptyDescription') }}
+            </p>
           </div>
-          <AppEmptyState
+          <div
             v-else
-            :icon="Bell"
-            :title="t('notification.empty')"
-            :description="t('notification.emptyDescription')"
-            testid="notifications-empty-state"
-          />
+            class="flex min-h-[22rem] flex-col items-center justify-center px-6 text-center"
+            data-testid="notifications-empty-state"
+          >
+            <div
+              class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-border/60 bg-muted/25 text-muted-foreground shadow-sm"
+            >
+              <Bell class="h-5 w-5" />
+            </div>
+            <p class="text-sm font-medium text-foreground">{{ t('notification.empty') }}</p>
+            <p class="mt-1 max-w-sm text-xs leading-5 text-muted-foreground">
+              {{ t('notification.emptyDescription') }}
+            </p>
+          </div>
         </template>
 
         <div v-else data-testid="notifications-list">
@@ -115,6 +155,7 @@
             :notifications="filteredNotifications"
             :loading="isLoading"
             @mark-read="handleMarkRead"
+            @execute-action="handleExecuteAction"
             @delete="handleDelete"
             @notification-click="handleNotificationClick"
           />
@@ -129,10 +170,8 @@ import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
-import { Bell, CheckCheck } from '@lucide/vue';
-import { Badge, Button, Skeleton } from '@memoflow/ui-vue-shadcn';
-import AppEmptyState from '../../../components/shared/AppEmptyState.vue';
-import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
+import { Bell, CheckCheck, CircleAlert, RefreshCw } from '@lucide/vue';
+import { Button, Skeleton } from '@memoflow/ui-vue-shadcn';
 import NotificationList from '../components/NotificationList.vue';
 import { useNotificationListQuery } from '../composables/useNotificationListQuery';
 import { useNotificationUnreadQuery } from '../composables/useNotificationUnreadQuery';
@@ -143,7 +182,7 @@ import { resolveNotificationDestination } from '../desktop/notification-click-na
 
 const { notifications, isLoading, isError, refetch } = useNotificationListQuery();
 const { unreadCount, hasUnread } = useNotificationUnreadQuery();
-const { markAsRead, markAllAsRead, dismiss } = useNotificationMutations();
+const { markAsRead, markAllAsRead, dismiss, executeAction } = useNotificationMutations();
 
 const store = useNotificationStore();
 
@@ -157,8 +196,16 @@ const selectedFilter = computed({
 });
 
 const filterTabs = computed(() => [
-  { label: t('notification.filter.all'), value: 'all' as const },
-  { label: t('notification.filter.unread'), value: 'unread' as const },
+  {
+    label: t('notification.filter.all'),
+    value: 'all' as const,
+    count: notifications.value.length,
+  },
+  {
+    label: t('notification.filter.unread'),
+    value: 'unread' as const,
+    count: unreadCount.value,
+  },
 ]);
 
 const filteredNotifications = computed(() => {
@@ -180,6 +227,31 @@ async function handleMarkRead(id: string) {
 async function handleMarkAllRead() {
   await markAllAsRead.mutateAsync();
   toast.success(t('notification.toast.allMarkedRead'));
+}
+
+async function handleExecuteAction(input: { notificationId: string; actionKey: string }) {
+  try {
+    const result = await executeAction.mutateAsync(input);
+    if (result.interaction.outcome !== 'accepted') {
+      toast.error(t('notification.toast.actionRejected'));
+      return;
+    }
+    if (input.actionKey === 'complete') {
+      toast.success(t('notification.toast.routineCompleted'));
+      return;
+    }
+    if (input.actionKey.startsWith('snooze')) {
+      toast.success(t('notification.toast.routineSnoozed'));
+      return;
+    }
+    if (input.actionKey === 'archive') {
+      toast.success(t('notification.toast.archived'));
+      return;
+    }
+    toast.success(t('notification.toast.actionCompleted'));
+  } catch {
+    // useNotificationMutations owns translated error reporting.
+  }
 }
 
 async function handleDelete(id: string) {

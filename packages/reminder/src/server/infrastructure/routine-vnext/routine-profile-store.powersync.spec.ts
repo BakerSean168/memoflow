@@ -24,6 +24,7 @@ function createDb(failMembershipInsert = false): IElectronDatabase & { close(): 
       description TEXT,
       enabled INTEGER NOT NULL,
       trigger_json TEXT,
+      activated_at TEXT,
       version INTEGER NOT NULL,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL

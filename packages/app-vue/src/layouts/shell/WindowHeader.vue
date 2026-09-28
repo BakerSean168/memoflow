@@ -44,6 +44,7 @@ export interface WindowHeaderCapsule {
   route: string;
   icon: Component;
   placement?: 'primary' | 'utility';
+  previewSize?: 'compact' | 'default' | 'wide';
   /** 未读/待办计数（如 notification unread）；null 表示不显示 badge（Phase 5 / UI-008）。 */
   badge?: number | null;
 }
@@ -149,6 +150,7 @@ const utilityCapsules = computed(() =>
           :route="entry.route"
           :icon="entry.icon"
           :badge="entry.badge"
+          :preview-size="entry.previewSize"
           @open="emit('open-module', $event)"
           v-slot="{ closePreview }"
         >
@@ -182,6 +184,7 @@ const utilityCapsules = computed(() =>
           :route="entry.route"
           :icon="entry.icon"
           :badge="entry.badge"
+          :preview-size="entry.previewSize"
           @open="emit('open-module', $event)"
           v-slot="{ closePreview }"
         >

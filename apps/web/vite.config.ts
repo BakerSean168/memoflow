@@ -41,6 +41,7 @@ function createTailwindPlugins(useBundledDev: boolean): Plugin[] {
 
 const webBundledDevWorkspaceEntries = [
   ['@memoflow/http-client', 'packages/http-client/src/index.ts'],
+  ['@memoflow/time', 'packages/time/src/index.ts'],
   ['@memoflow/utils/shared', 'packages/utils/src/shared/index.ts'],
 ] as const;
 

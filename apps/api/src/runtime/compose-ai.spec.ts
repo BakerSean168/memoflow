@@ -80,6 +80,13 @@ vi.mock('../modules/ai/notification-read.adapter', () => ({
     return { tag: 'notification-read', inbox };
   }),
 }));
+vi.mock('../modules/ai/selected-entity-context-read.adapter', () => ({
+  SelectedEntityContextAIReadAdapter: vi.fn(function SelectedEntityContextAIReadAdapterMock(
+    ...args: unknown[]
+  ) {
+    return { tag: 'selected-entity-context-read', args };
+  }),
+}));
 
 import {
   AIEvaluationReportFileAdapter,
@@ -101,6 +108,7 @@ import { TaskPlanMutationAdapter } from '../modules/ai/task-plan-mutation.adapte
 import { RoutineAICommandAdapter } from '../modules/ai/routine-command.adapter';
 import { PlannerAIReadAdapter } from '../modules/ai/planner-read.adapter';
 import { NotificationAIReadAdapter } from '../modules/ai/notification-read.adapter';
+import { SelectedEntityContextAIReadAdapter } from '../modules/ai/selected-entity-context-read.adapter';
 import { composeAI } from './compose-ai';
 
 const fakeDb = { tag: 'fake-db' } as unknown as PrismaClient;
@@ -198,6 +206,10 @@ describe('API composeAI Mastra-only ownership', () => {
       userTimeContextPort,
     );
     expect(NotificationAIReadAdapter).toHaveBeenCalledWith(notificationInbox);
+    expect(SelectedEntityContextAIReadAdapter).toHaveBeenCalledWith(
+      goalApplicationPort,
+      taskApplicationPort,
+    );
 
     expect(KnowledgeCapturePersistenceAdapter).toHaveBeenCalledWith(persistence);
 
@@ -216,6 +228,9 @@ describe('API composeAI Mastra-only ownership', () => {
       routineCommandPort: vi.mocked(RoutineAICommandAdapter).mock.results[0].value,
       plannerReadPort: vi.mocked(PlannerAIReadAdapter).mock.results[0].value,
       notificationReadPort: vi.mocked(NotificationAIReadAdapter).mock.results[0].value,
+      selectedEntityContextReadPort: vi.mocked(SelectedEntityContextAIReadAdapter).mock.results[0]
+        .value,
+      analyticsReadPort: vi.mocked(ControlledAnalyticsReadAdapter).mock.results[0].value,
       contextAssembler: expect.any(AIContextAssembler),
     });
   });

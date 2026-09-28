@@ -82,6 +82,8 @@ describe('RescheduleTaskOccurrenceUseCase (PLAN-4303)', () => {
     });
 
     expect(result).toBeErrorWithCode('CONFLICT');
+    if (result.ok) throw new Error('expected conflict result');
+    expect(result.error.details?.[0]?.code).toBe('TASK_OCCURRENCE_VERSION_CONFLICT');
     expect(occurrence.version).toBe(1);
     expect(repo.findByPlanIdAndDateRange).not.toHaveBeenCalled();
     expect(repo.save).not.toHaveBeenCalled();
@@ -112,6 +114,8 @@ describe('RescheduleTaskOccurrenceUseCase (PLAN-4303)', () => {
     });
 
     expect(result).toBeErrorWithCode('CONFLICT');
+    if (result.ok) throw new Error('expected conflict result');
+    expect(result.error.details?.[0]?.code).toBe('TASK_OCCURRENCE_TARGET_DATE_CONFLICT');
     expect(repo.save).not.toHaveBeenCalled();
   });
 

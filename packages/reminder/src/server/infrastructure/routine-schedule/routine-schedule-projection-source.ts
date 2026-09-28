@@ -1,22 +1,29 @@
 import type { ScheduledIntent, SchedulingOwner } from '@memoflow/contracts/schedule';
 import { asInstant, type RecurrenceEnginePort } from '@memoflow/time';
 import {
+  computeDurableElapsedNextOccurrence,
   computeRoutineNextEligibleOccurrence,
   requiresDurableScheduleProjection,
   RoutineDefinition,
+  type DurableElapsedOccurrenceSnapshot,
+  type ElapsedTrigger,
   type RoutineTemporaryOverride,
   type RoutineTrigger,
   type WallClockTrigger,
 } from '../../domain/routine';
 import {
+  buildRoutineElapsedIntent,
   buildRoutineWallClockIntent,
   buildRoutineWallClockOwner,
+  type RoutineElapsedOccurrencePayload,
   type RoutineWallClockOccurrencePayload,
 } from './routine-schedule-contract';
 
 /** Runtime snapshot consumed by the durable projection lane. */
 export interface RoutineScheduleSnapshot {
   readonly definition: RoutineDefinition;
+  /** Identity-scoped master Routine gate. Omitted means the default enabled state. */
+  readonly globalEnabled?: boolean;
   /**
    * Durable cloud-side Profile/Membership gate. Host-local `profile active`
    * RuntimeContext is deliberately excluded from Scheduler authority.
@@ -24,6 +31,8 @@ export interface RoutineScheduleSnapshot {
   readonly durableProfileGateOpen: boolean;
   /** Durable snooze/suppress runtime state served by the state reader. */
   readonly temporaryOverride?: RoutineTemporaryOverride | null;
+  /** Durable Elapsed business facts used to derive the next anchor/generation. */
+  readonly elapsedOccurrences?: readonly DurableElapsedOccurrenceSnapshot[];
 }
 
 /**
@@ -42,7 +51,9 @@ export interface RoutineScheduleStateReader {
 
 export interface RoutineScheduleProjectionPlan {
   readonly owner: SchedulingOwner;
-  readonly desired: readonly ScheduledIntent<RoutineWallClockOccurrencePayload>[];
+  readonly desired: readonly ScheduledIntent<
+    RoutineWallClockOccurrencePayload | RoutineElapsedOccurrencePayload
+  >[];
 }
 
 export interface RoutineScheduleProjectionSource {
@@ -78,9 +89,8 @@ export interface RoutineScheduleChangedEvent {
 /**
  * NOTE: this stays a TYPE LITERAL, not an interface. `TypedEventMap` constrains
  * the keyed payload map to `Record<string, unknown>`, and only a type literal
- * carries an implicit string index signature (`keyof Map` is exactly the two
- * declared keys, never `string | number`). Interfaces do NOT — they would widen
- * to `string` and instantly break every `Subscriber<...>` wiring.
+ * carries an implicit string index signature. Interfaces do NOT — they would
+ * widen to `string` and instantly break every `Subscriber<...>` wiring.
  */
 export type RoutineScheduleProjectionEventMap = {
   readonly 'routine:occurrence-committed': RoutineOccurrenceCommittedEvent;
@@ -117,14 +127,11 @@ export function createRoutineScheduleProjectionEventHandlers(
   };
 }
 
-/**
- * Only a scheduler-owned WallClock trigger produces a durable invocation here.
- * Elapsed / ActiveUsage keep their `local-runtime` timing owner (Wave 4); this
- * projection never schedules them.
- */
-function durableWallClockTrigger(trigger: RoutineTrigger | null): WallClockTrigger | null {
-  if (!trigger) return null;
-  return requiresDurableScheduleProjection(trigger) ? trigger : null;
+function durableTrigger(
+  trigger: RoutineTrigger | null,
+): WallClockTrigger | Extract<ElapsedTrigger, { timingOwner: 'scheduler' }> | null {
+  if (!trigger || !requiresDurableScheduleProjection(trigger)) return null;
+  return trigger;
 }
 
 export function createRoutineScheduleProjectionSource(deps: {
@@ -152,13 +159,59 @@ export function createRoutineScheduleProjectionSource(deps: {
 
       const { definition } = snapshot;
       const canonicalOwner = buildRoutineWallClockOwner(definition.id, definition.identityId);
-      if (!definition.enabled || !snapshot.durableProfileGateOpen) {
+      if (
+        snapshot.globalEnabled === false ||
+        !definition.enabled ||
+        !snapshot.durableProfileGateOpen
+      ) {
         return { owner: canonicalOwner, desired: [] };
       }
 
-      const trigger = durableWallClockTrigger(definition.trigger);
+      const trigger = durableTrigger(definition.trigger);
       if (!trigger) {
         return { owner: canonicalOwner, desired: [] };
+      }
+
+      if (trigger.type === 'Elapsed') {
+        const openOccurrence = (snapshot.elapsedOccurrences ?? []).find(
+          (occurrence) => occurrence.resolutionState === 'Open',
+        );
+        const snoozeUntil = snapshot.temporaryOverride?.snoozeUntil ?? null;
+        if (openOccurrence && snoozeUntil != null) {
+          const wakeAt = Number(snoozeUntil);
+          const notificationOccurrenceKey = openOccurrence.occurrenceKey + ':snooze:' + wakeAt;
+          const intent = buildRoutineElapsedIntent({
+            routineId: definition.id,
+            identityId: definition.identityId,
+            routineName: definition.name,
+            occurrenceKey: openOccurrence.occurrenceKey,
+            notificationOccurrenceKey,
+            scheduledFor: wakeAt,
+            dueAt: wakeAt,
+            sourceRevision: definition.version,
+          });
+          return { owner: canonicalOwner, desired: [intent] };
+        }
+
+        const occurrence = computeDurableElapsedNextOccurrence({
+          routineId: definition.id,
+          trigger,
+          activatedAt: definition.activatedAt,
+          occurrences: snapshot.elapsedOccurrences ?? [],
+          temporaryOverride: snapshot.temporaryOverride ?? null,
+        });
+        if (!occurrence) return { owner: canonicalOwner, desired: [] };
+
+        const intent = buildRoutineElapsedIntent({
+          routineId: definition.id,
+          identityId: definition.identityId,
+          routineName: definition.name,
+          occurrenceKey: occurrence.occurrenceKey,
+          scheduledFor: Number(occurrence.runAt),
+          dueAt: Number(occurrence.dueAt),
+          sourceRevision: definition.version,
+        });
+        return { owner: canonicalOwner, desired: [intent] };
       }
 
       const occurrence = computeRoutineNextEligibleOccurrence({

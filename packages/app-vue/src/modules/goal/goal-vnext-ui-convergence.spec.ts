@@ -11,6 +11,9 @@ describe('GOAL-7209 UI convergence lock', () => {
   it('keeps manual Goal create compact and precision preserving', () => {
     const dialog = source('app-vue/src/modules/goal/components/dialogs/GoalDialog.vue');
     const timeframe = source('app-vue/src/shared/components/ProductTimeframePicker.vue');
+    const temporalSurface = source(
+      'app-vue/src/shared/components/ProductTemporalPickerSurface.vue',
+    );
 
     expect(dialog).toContain('data-testid="goal-property-chips"');
     expect(dialog).toContain('GoalTimeframePicker');
@@ -23,22 +26,25 @@ describe('GOAL-7209 UI convergence lock', () => {
     expect(dialog).not.toContain('draft.feasibilityAnalysis');
 
     for (const kind of ['day', 'month', 'quarter', 'halfYear', 'year']) {
-      expect(timeframe).toContain(`value="${kind}"`);
+      expect(temporalSurface).toContain(`value: '${kind}'`);
     }
     expect(timeframe).toContain('goalTimeframeLabel');
     expect(timeframe).toContain('parseExplicitProductDateInput');
-    expect(timeframe).toContain('<Calendar');
-    expect(timeframe).not.toContain('goalTimeframeEndBoundary');
+    expect(timeframe).toContain('ProductTemporalPickerSurface');
+    expect(temporalSurface).toContain('<Calendar');
+    expect(timeframe).toContain('goalTimeframeEndBoundary');
+    expect(timeframe).toContain('goalTimeframeStartBoundary');
+    expect(temporalSurface).not.toContain('goalTimeframeEndBoundary');
   });
 
   it('renders Goal Workspace through owner read models instead of foreign repositories', () => {
     const detail = source('app-vue/src/modules/goal/views/GoalDetailView.vue');
 
     expect(detail).toContain('useGoalWorkspace(goalId)');
-    expect(detail).toContain('workspace.taskContext');
-    expect(detail).toContain('workspace.knowledgeContext');
+    expect(detail).toContain('workspace.value?.taskContext');
+    expect(detail).toContain('workspace.value?.knowledgeContext');
     expect(detail).toContain('workspace.recentProgress');
-    expect(detail).toContain('workspace.recentReviews');
+    expect(detail).toContain('workspace.value?.recentReviews');
     expect(detail).toContain('isPastGoalTarget');
     expect(detail).toContain("name: 'task-list'");
     expect(detail).toContain("path: '/repository'");

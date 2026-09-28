@@ -20,6 +20,7 @@ describe('PowerSyncAppSchema', () => {
     expect(PowerSyncAppSchema.props).toHaveProperty('invocation_attempts');
     expect(PowerSyncAppSchema.props).toHaveProperty('notifications');
     expect(PowerSyncAppSchema.props).toHaveProperty('routine_definitions');
+    expect(PowerSyncAppSchema.props).toHaveProperty('routine_preferences');
     expect(PowerSyncAppSchema.props).toHaveProperty('notification_delivery_decisions');
     expect(PowerSyncAppSchema.props).toHaveProperty('ai_conversations');
     for (const retired of [
@@ -33,6 +34,18 @@ describe('PowerSyncAppSchema', () => {
       expect(PowerSyncAppSchema.props).not.toHaveProperty(retired);
     }
     expect(PowerSyncAppSchema.tables).toHaveLength(Object.keys(PowerSyncAppSchema.props).length);
+  });
+
+  it('syncs the Routine durable activation boundary with definition state', () => {
+    expect(getColumnType('routine_definitions', 'identity_id')).toBe('TEXT');
+    expect(getColumnType('routine_definitions', 'trigger_json')).toBe('TEXT');
+    expect(getColumnType('routine_definitions', 'activated_at')).toBe('TEXT');
+  });
+
+  it('syncs the identity-scoped Routine master gate as durable state', () => {
+    expect(getColumnType('routine_preferences', 'identity_id')).toBe('TEXT');
+    expect(getColumnType('routine_preferences', 'global_enabled')).toBe('INTEGER');
+    expect(getColumnType('routine_preferences', 'version')).toBe('INTEGER');
   });
 
   it('keeps canonical preference namespace rows as independent typed sync units', () => {

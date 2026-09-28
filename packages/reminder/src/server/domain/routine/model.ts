@@ -1,4 +1,8 @@
 import { randomUUID } from 'node:crypto';
+import {
+  ROUTINE_DESCRIPTION_MAX_LENGTH,
+  ROUTINE_NAME_MAX_LENGTH,
+} from '@memoflow/contracts/routine';
 import type { RoutineTrigger } from './trigger';
 
 /** Canonical Routine Coach definition (ADR-059). */
@@ -9,6 +13,8 @@ export interface RoutineDefinitionState {
   description: string | null;
   enabled: boolean;
   trigger: RoutineTrigger | null;
+  /** Durable boundary for scheduler-owned Elapsed(routine-activation). */
+  activatedAt: Date | null;
   version: number;
   createdAt: Date;
   updatedAt: Date;
@@ -24,19 +30,22 @@ export class RoutineDefinition {
     description?: string | null;
     enabled?: boolean;
     trigger?: RoutineTrigger | null;
+    activatedAt?: Date | null;
     now?: Date;
   }): RoutineDefinition {
     assertNonEmpty(input.identityId, 'identityId');
     const id = input.id === undefined ? randomUUID() : input.id;
     assertNonEmpty(id, 'id');
     const now = input.now ?? new Date();
+    const enabled = input.enabled ?? true;
     return new RoutineDefinition({
       id,
       identityId: input.identityId,
       name: normalizeName(input.name),
       description: normalizeDescription(input.description),
-      enabled: input.enabled ?? true,
+      enabled,
       trigger: input.trigger ?? null,
+      activatedAt: enabled ? (input.activatedAt ?? now) : null,
       version: 1,
       createdAt: now,
       updatedAt: now,
@@ -44,9 +53,16 @@ export class RoutineDefinition {
   }
 
   static load(
-    state: Omit<RoutineDefinitionState, 'trigger'> & { trigger?: RoutineTrigger | null },
+    state: Omit<RoutineDefinitionState, 'trigger' | 'activatedAt'> & {
+      trigger?: RoutineTrigger | null;
+      activatedAt?: Date | null;
+    },
   ): RoutineDefinition {
-    return new RoutineDefinition({ ...state, trigger: state.trigger ?? null });
+    return new RoutineDefinition({
+      ...state,
+      trigger: state.trigger ?? null,
+      activatedAt: state.activatedAt ?? (state.enabled ? state.createdAt : null),
+    });
   }
 
   get id(): string {
@@ -66,6 +82,9 @@ export class RoutineDefinition {
   }
   get trigger(): RoutineTrigger | null {
     return this.state.trigger;
+  }
+  get activatedAt(): Date | null {
+    return this.state.activatedAt;
   }
   get version(): number {
     return this.state.version;
@@ -109,10 +128,14 @@ export class RoutineDefinition {
     ) {
       return false;
     }
+    const enabledChanged = nextEnabled !== this.state.enabled;
     this.state.name = nextName;
     this.state.description = nextDescription;
     this.state.enabled = nextEnabled;
     this.state.trigger = nextTrigger;
+    if (enabledChanged) {
+      this.state.activatedAt = nextEnabled ? now : null;
+    }
     this.touch(now);
     return true;
   }
@@ -327,11 +350,19 @@ export class ProfileMembership {
 
 function normalizeName(value: string): string {
   assertNonEmpty(value, 'name');
-  return value.trim();
+  const normalized = value.trim();
+  if (normalized.length > ROUTINE_NAME_MAX_LENGTH) {
+    throw new TypeError(`name must not exceed ${ROUTINE_NAME_MAX_LENGTH} characters`);
+  }
+  return normalized;
 }
 
 function normalizeDescription(value: string | null | undefined): string | null {
-  return value?.trim() || null;
+  const normalized = value?.trim() || null;
+  if (normalized && normalized.length > ROUTINE_DESCRIPTION_MAX_LENGTH) {
+    throw new TypeError(`description must not exceed ${ROUTINE_DESCRIPTION_MAX_LENGTH} characters`);
+  }
+  return normalized;
 }
 
 function routineTriggerEquals(left: RoutineTrigger | null, right: RoutineTrigger | null): boolean {

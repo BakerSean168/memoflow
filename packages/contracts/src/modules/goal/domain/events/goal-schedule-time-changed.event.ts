@@ -14,6 +14,6 @@ export interface GoalScheduleTimeChangedEvent {
   /** Updated goal snapshot */
   goal: GoalServerDTO;
 
-  /** Changed planning-time fields (`startDate` / `target`) */
+  /** Changed semantic planning-time fields (`start` / `target`) */
   changes: string[];
 }

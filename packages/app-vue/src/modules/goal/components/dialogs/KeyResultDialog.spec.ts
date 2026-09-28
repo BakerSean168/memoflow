@@ -66,8 +66,9 @@ describe('KeyResultDialog submission lifecycle', () => {
     await nextTick();
 
     await new DOMWrapper(
-      document.querySelector<HTMLInputElement>('[data-testid="key-result-title-input"]')!,
+      document.querySelector<HTMLInputElement>('[data-testid="draft-kr-title-input"]')!,
     ).setValue('Reliable delivery');
+    await dom('draft-kr-target-input').setValue('100');
     await new DOMWrapper(
       document.querySelector<HTMLElement>('[data-testid="save-key-result-button"]')!,
     ).trigger('click');
@@ -83,7 +84,7 @@ describe('KeyResultDialog submission lifecycle', () => {
     await nextTick();
 
     expect(
-      document.querySelector<HTMLInputElement>('[data-testid="key-result-title-input"]')?.value,
+      document.querySelector<HTMLInputElement>('[data-testid="draft-kr-title-input"]')?.value,
     ).toBe('Reliable delivery');
     expect(document.querySelector('[role="alert"]')).not.toBeNull();
     wrapper.unmount();
@@ -100,8 +101,9 @@ describe('KeyResultDialog submission lifecycle', () => {
     await nextTick();
 
     await new DOMWrapper(
-      document.querySelector<HTMLInputElement>('[data-testid="key-result-title-input"]')!,
+      document.querySelector<HTMLInputElement>('[data-testid="draft-kr-title-input"]')!,
     ).setValue('Reliable delivery');
+    await dom('draft-kr-target-input').setValue('100');
     await new DOMWrapper(
       document.querySelector<HTMLElement>('[data-testid="save-key-result-button"]')!,
     ).trigger('click');
@@ -122,10 +124,38 @@ describe('KeyResultDialog submission lifecycle', () => {
     wrapper.vm.openForCreateKeyResult('goal-1');
     await nextTick();
 
-    expect((dom('key-result-initial-input').element as HTMLInputElement).value).toBe('0');
-    expect((dom('key-result-current-input').element as HTMLInputElement).value).toBe('0');
-    expect((dom('key-result-target-input').element as HTMLInputElement).value).toBe('100');
+    expect((dom('draft-kr-initial-input').element as HTMLInputElement).value).toBe('0');
+    expect((dom('draft-kr-current-input').element as HTMLInputElement).value).toBe('0');
+    expect((dom('draft-kr-target-input').element as HTMLInputElement).value).toBe('');
     expect(document.body.textContent).not.toContain('Progress baseline');
+    wrapper.unmount();
+  });
+
+  it('uses the same trajectory card as the Goal form and keeps Current following Initial until edited', async () => {
+    const onSubmit = vi.fn().mockResolvedValue(true);
+    const wrapper = mount(KeyResultDialog, {
+      props: {
+        onSubmit,
+        goalStart: { kind: 'day', date: '2026-09-27' },
+        goalTarget: { kind: 'day', date: '2026-09-30' },
+      },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    wrapper.vm.openForCreateKeyResult('goal-1');
+    await nextTick();
+
+    expect(document.querySelector('[data-testid="kr-card-editor"]')).not.toBeNull();
+    expect(document.querySelector('[data-testid="kr-trajectory-editor"]')).not.toBeNull();
+
+    await dom('draft-kr-initial-input').setValue('25');
+    await nextTick();
+    expect((dom('draft-kr-current-input').element as HTMLInputElement).value).toBe('25');
+
+    await dom('draft-kr-current-input').setValue('30');
+    await dom('draft-kr-initial-input').setValue('40');
+    await nextTick();
+    expect((dom('draft-kr-current-input').element as HTMLInputElement).value).toBe('30');
     wrapper.unmount();
   });
 
@@ -139,10 +169,10 @@ describe('KeyResultDialog submission lifecycle', () => {
     wrapper.vm.openForCreateKeyResult('goal-1');
     await nextTick();
 
-    await dom('key-result-title-input').setValue('Reduce weight');
-    await dom('key-result-initial-input').setValue('100');
-    await dom('key-result-current-input').setValue('80');
-    await dom('key-result-target-input').setValue('50');
+    await dom('draft-kr-title-input').setValue('Reduce weight');
+    await dom('draft-kr-initial-input').setValue('100');
+    await dom('draft-kr-current-input').setValue('80');
+    await dom('draft-kr-target-input').setValue('50');
     await dom('save-key-result-button').trigger('click');
     await flushPromises();
 
@@ -169,10 +199,10 @@ describe('KeyResultDialog submission lifecycle', () => {
     wrapper.vm.openForCreateKeyResult('goal-1');
     await nextTick();
 
-    await dom('key-result-title-input').setValue('Invalid span');
-    await dom('key-result-initial-input').setValue('50');
-    await dom('key-result-current-input').setValue('50');
-    await dom('key-result-target-input').setValue('50');
+    await dom('draft-kr-title-input').setValue('Invalid span');
+    await dom('draft-kr-initial-input').setValue('50');
+    await dom('draft-kr-current-input').setValue('50');
+    await dom('draft-kr-target-input').setValue('50');
     await dom('save-key-result-button').trigger('click');
     await nextTick();
 

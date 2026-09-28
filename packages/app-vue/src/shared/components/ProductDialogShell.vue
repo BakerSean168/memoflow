@@ -2,8 +2,9 @@
   <DialogContent
     :class="
       cn(
-        'flex max-h-[min(90vh,760px)] min-h-0 flex-col gap-0 overflow-hidden rounded-xl border-border/80 bg-card p-0',
+        'flex min-h-0 flex-col gap-0 overflow-hidden rounded-xl border-border/80 bg-card p-0',
         sizeClass,
+        heightClass,
         contentClass,
       )
     "
@@ -75,6 +76,7 @@ const props = withDefaults(
     open: boolean;
     testId: string;
     size?: 'sm' | 'md' | 'lg';
+    heightMode?: 'content' | 'workspace';
     contentClass?: HTMLAttributes['class'];
     bodyClass?: HTMLAttributes['class'];
     initialFocusSelector?: string;
@@ -82,6 +84,7 @@ const props = withDefaults(
   }>(),
   {
     size: 'md',
+    heightMode: 'content',
     contentClass: undefined,
     bodyClass: undefined,
     initialFocusSelector: undefined,
@@ -96,6 +99,14 @@ const sizeClass = computed(
       md: 'sm:max-w-[680px]',
       lg: 'sm:max-w-[960px]',
     })[props.size],
+);
+
+const heightClass = computed(
+  () =>
+    ({
+      content: 'max-h-[min(90vh,760px)]',
+      workspace: 'h-[calc(100dvh-2rem)] max-h-[1100px] sm:h-[calc(100dvh-3rem)]',
+    })[props.heightMode],
 );
 
 function handleOpenAutoFocus(event: Event): void {

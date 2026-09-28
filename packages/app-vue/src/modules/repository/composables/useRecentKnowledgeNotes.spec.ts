@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ok, fail } from '@memoflow/contracts/result';
 
 const provideMap = new Map<symbol, unknown>();
@@ -20,58 +20,103 @@ vi.mock('../../../shared/utils/useStrictInject', () => ({
 }));
 
 import { DESKTOP_BRIDGE_KEY, REPOSITORY_SERVICE_KEY } from '../../../di/keys';
+import {
+  createTestServerStateRuntime,
+  SERVER_STATE_IDENTITY_SCOPE_KEY,
+  SERVER_STATE_RUNTIME_KEY,
+} from '../../../platform/server-state';
 import { useRecentKnowledgeNotes } from './useRecentKnowledgeNotes';
+
+let runtime: ReturnType<typeof createTestServerStateRuntime>;
 
 describe('useRecentKnowledgeNotes', () => {
   beforeEach(() => {
     provideMap.clear();
+    runtime = createTestServerStateRuntime();
+    provideMap.set(SERVER_STATE_RUNTIME_KEY, runtime);
+    provideMap.set(SERVER_STATE_IDENTITY_SCOPE_KEY, () => 'test-identity');
   });
 
-  it('loads GitHub note projections on web', async () => {
+  afterEach(() => {
+    runtime.dispose();
+  });
+
+  it('loads globally recent GitHub note projections on web', async () => {
+    const listKnowledgeNoteProjections = vi.fn(async () =>
+      ok({
+        notes: [
+          {
+            id: 'note-2',
+            connectionId: 'conn-1',
+            knowledgeDocumentId: null,
+            relativePath: 'b.md',
+            title: 'B',
+            contentHash: 'h2',
+            updatedAt: 20,
+          },
+          {
+            id: 'note-1',
+            connectionId: 'conn-1',
+            knowledgeDocumentId: null,
+            relativePath: 'a.md',
+            title: 'A',
+            contentHash: 'h1',
+            updatedAt: 10,
+          },
+        ],
+        total: 2,
+        nextCursor: null,
+      }),
+    );
     provideMap.set(REPOSITORY_SERVICE_KEY, {
-      listKnowledgeNoteProjections: vi.fn(async () =>
-        ok({
-          notes: [
-            {
-              id: 'note-2',
-              connectionId: 'conn-1',
-              relativePath: 'b.md',
-              title: 'B',
-              commitSha: 'c2',
-              blobSha: 'b2',
-              contentHash: 'h2',
-              frontmatter: {},
-              markdownContent: '# B',
-              createdAt: 1,
-              updatedAt: 20,
-              deletedAt: null,
-            },
-            {
-              id: 'note-1',
-              connectionId: 'conn-1',
-              relativePath: 'a.md',
-              title: 'A',
-              commitSha: 'c1',
-              blobSha: 'b1',
-              contentHash: 'h1',
-              frontmatter: {},
-              markdownContent: '# A',
-              createdAt: 1,
-              updatedAt: 10,
-              deletedAt: null,
-            },
-          ],
-        }),
-      ),
+      listKnowledgeNoteProjections,
       scanLocalVault: vi.fn(),
     });
 
     const recent = useRecentKnowledgeNotes();
     await recent.load(5);
 
+    expect(listKnowledgeNoteProjections).toHaveBeenCalledWith({ limit: 5, sort: 'recent' });
     expect(recent.error.value).toBeNull();
     expect(recent.notes.value.map((note) => note.id)).toEqual(['note-2', 'note-1']);
     expect(recent.notes.value[0]?.source).toBe('projection');
+  });
+
+  it('reuses a fresh recent-note projection across lightweight reads and refreshes only when forced', async () => {
+    const listKnowledgeNoteProjections = vi.fn(async () =>
+      ok({
+        notes: [
+          {
+            id: 'note-1',
+            connectionId: 'conn-1',
+            knowledgeDocumentId: null,
+            relativePath: 'a.md',
+            title: 'A',
+            contentHash: 'h1',
+            updatedAt: 10,
+          },
+        ],
+        total: 1,
+        nextCursor: null,
+      }),
+    );
+    provideMap.set(REPOSITORY_SERVICE_KEY, {
+      listKnowledgeNoteProjections,
+      scanLocalVault: vi.fn(),
+    });
+
+    const first = useRecentKnowledgeNotes();
+    await first.ensure(5);
+    await first.ensure(5);
+    expect(listKnowledgeNoteProjections).toHaveBeenCalledTimes(1);
+
+    const second = useRecentKnowledgeNotes();
+    await second.ensure(5);
+    expect(second.notes.value[0]?.title).toBe('A');
+    expect(listKnowledgeNoteProjections).toHaveBeenCalledTimes(1);
+
+    await second.load(5);
+    expect(listKnowledgeNoteProjections).toHaveBeenCalledTimes(2);
   });
 
   it('loads local vault notes on desktop', async () => {
@@ -84,6 +129,7 @@ describe('useRecentKnowledgeNotes', () => {
           notes: [
             {
               relativePath: 'older.md',
+              knowledgeDocumentId: 'kdoc_11111111-1111-4111-8111-111111111111',
               title: 'Older',
               excerpt: '',
               tags: [],
@@ -93,6 +139,7 @@ describe('useRecentKnowledgeNotes', () => {
             },
             {
               relativePath: 'newer.md',
+              knowledgeDocumentId: 'kdoc_22222222-2222-4222-8222-222222222222',
               title: 'Newer',
               excerpt: '',
               tags: [],
@@ -112,6 +159,9 @@ describe('useRecentKnowledgeNotes', () => {
     expect(recent.error.value).toBeNull();
     expect(recent.notes.value.map((note) => note.id)).toEqual(['newer.md', 'older.md']);
     expect(recent.notes.value[0]?.source).toBe('local-vault');
+    expect(recent.notes.value[0]?.knowledgeDocumentId).toBe(
+      'kdoc_22222222-2222-4222-8222-222222222222',
+    );
   });
 
   it('treats missing projections as an empty list', async () => {

@@ -19,7 +19,7 @@ function createIntegrationGoal(identityId: string) {
     identityId: identityId as IdentityId,
     name: 'Harden AI Oracle',
     summary: 'Turn persistence tests into a reliable oracle',
-    startDate: requireYmd('2026-04-01'),
+    start: { kind: 'quarter', year: 2026, quarter: 2 },
     target: { kind: 'quarter', year: 2026, quarter: 2 },
     reminderConfig: GoalReminderConfig.create({
       enabled: true,
@@ -97,10 +97,11 @@ describe('GoalPrismaRepository integration', () => {
 
     expect(loaded).not.toBeNull();
     expect(loaded?.identityId).toBe(identityId);
+    expect(row?.startKind).toBe('quarter');
     expect(row?.startDate).toBe('2026-04-01');
     expect(row?.targetKind).toBe('quarter');
     expect(row?.targetEndDate).toBe('2026-06-30');
-    expect(loaded?.startDate).toBe('2026-04-01');
+    expect(loaded?.start).toEqual({ kind: 'quarter', year: 2026, quarter: 2 });
     expect(loaded?.target).toEqual({ kind: 'quarter', year: 2026, quarter: 2 });
     expect('importance' in (loaded as object)).toBe(false);
     expect(loaded?.reminderConfig?.enabled).toBe(true);
@@ -127,7 +128,7 @@ describe('GoalPrismaRepository integration', () => {
       identityId: identityId as IdentityId,
       name: 'Only work label',
       summary: null,
-      startDate: null,
+      start: null,
       target: null,
       reminderConfig: null,
     });
@@ -192,7 +193,7 @@ describe('GoalPrismaRepository integration', () => {
       identityId: identityId as IdentityId,
       name: 'Keep default E2E small',
       summary: null,
-      startDate: null,
+      start: null,
       target: null,
       reminderConfig: null,
     });
@@ -200,7 +201,7 @@ describe('GoalPrismaRepository integration', () => {
       identityId: otherIdentityId as IdentityId,
       name: 'Foreign goal',
       summary: null,
-      startDate: null,
+      start: null,
       target: null,
       reminderConfig: null,
     });

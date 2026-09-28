@@ -3,143 +3,28 @@
     class="task-management-view flex h-full min-h-0 flex-col bg-background"
     data-testid="task-management-view"
   >
-    <ModuleHeader data-testid="task-page-toolbar">
-      <template #leading>
-        <div class="min-w-0">
-          <h1 class="truncate text-sm font-semibold">{{ t('task.management.title') }}</h1>
-          <p class="hidden truncate text-xs text-muted-foreground @2xl/panel:block">
-            {{ t('task.management.subtitle') }}
-          </p>
-        </div>
-      </template>
-      <template #actions>
-        <Button
-          data-testid="create-task-plan-button"
-          data-primary-action="create-task"
-          @click="openCreateDialog"
-        >
-          <Plus class="mr-2 h-4 w-4" />
-          {{ t('task.action.create') }}
-        </Button>
-      </template>
-
-      <template #subnav>
-        <div
-          class="flex min-w-0 flex-1 flex-wrap items-center gap-2"
-          data-testid="task-surface-tabs"
-        >
-          <Button
-            v-for="surface in surfaces"
-            :key="surface"
-            size="sm"
-            :variant="activeSurface === surface ? 'default' : 'ghost'"
-            :data-testid="`task-surface-${surface}`"
-            @click="activeSurface = surface"
-          >
-            {{ t(`task.management.surface.${surface}`) }}
-            <Badge v-if="surface !== 'plans'" variant="secondary" class="ml-2">
-              {{ surfaceCounts[surface] }}
-            </Badge>
-          </Button>
-        </div>
-      </template>
-    </ModuleHeader>
+    <TaskPageToolbar
+      :active-surface="activeSurface"
+      :visible-item-count="visibleItemCount"
+      :status-filter="statusFilter"
+      :label-filter-ids="labelFilterIds"
+      :label-options="availableLabels"
+      :occurrence-sort="occurrenceSort"
+      :goal-scope-label="goalScopeLabel"
+      @update:active-surface="activeSurface = $event"
+      @update:status-filter="statusFilter = $event"
+      @update:label-filter-ids="labelFilterIds = $event"
+      @update:occurrence-sort="occurrenceSort = $event"
+      @clear-goal-scope="clearGoalScope"
+      @create-task="openCreateDialog"
+    />
 
     <main
       class="flex min-h-0 flex-1 flex-col overflow-y-auto px-3 py-3 @md/panel:px-5 @md/panel:py-4"
       data-scroll-host="task-management"
       data-testid="task-management-scroll-host"
     >
-      <div class="mx-auto flex w-full max-w-5xl flex-col gap-4">
-        <div
-          v-if="queryGoalId"
-          class="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/30 px-3 py-2 text-sm"
-          data-testid="task-goal-deeplink-filter"
-        >
-          <span class="text-muted-foreground">
-            Goal {{ queryGoalId
-            }}<template v-if="queryKeyResultId"> · KR {{ queryKeyResultId }}</template>
-          </span>
-          <Button size="sm" variant="ghost" @click="router.replace({ name: 'task-list' })">
-            {{ t('common.clear') }}
-          </Button>
-        </div>
-
-        <section
-          class="grid gap-2 rounded-xl border bg-card p-3 @2xl/panel:grid-cols-[minmax(0,1fr)_repeat(3,minmax(9rem,auto))]"
-          data-testid="task-filter-bar"
-        >
-          <label class="relative block min-w-0">
-            <Search
-              class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-            />
-            <Input
-              v-model="searchQuery"
-              :placeholder="t('task.management.searchPlaceholder')"
-              class="pl-9"
-              data-testid="task-search-input"
-            />
-          </label>
-
-          <select
-            v-model="statusFilter"
-            class="h-9 rounded-md border bg-background px-3 text-sm"
-            data-testid="task-status-filter"
-            :aria-label="t('task.management.filter.status')"
-          >
-            <option value="all">{{ t('task.management.filter.allStatuses') }}</option>
-            <option v-for="status in instanceStatuses" :key="status" :value="status">
-              {{ t(`task.occurrence.status.${status.toLowerCase()}`) }}
-            </option>
-          </select>
-
-          <select
-            v-model="labelFilter"
-            class="h-9 rounded-md border bg-background px-3 text-sm"
-            data-testid="task-label-filter"
-            :aria-label="t('task.management.filter.label')"
-          >
-            <option value="all">{{ t('task.management.filter.allLabels') }}</option>
-            <option v-for="label in availableLabels" :key="label.id" :value="label.id">
-              {{ label.name }}
-            </option>
-          </select>
-
-          <select
-            v-model="goalFilter"
-            class="h-9 rounded-md border bg-background px-3 text-sm"
-            data-testid="task-goal-filter"
-            :aria-label="t('task.management.filter.goal')"
-          >
-            <option value="all">{{ t('task.management.filter.allGoals') }}</option>
-            <option value="linked">{{ t('task.management.filter.goalLinked') }}</option>
-            <option value="unlinked">{{ t('task.management.filter.goalUnlinked') }}</option>
-          </select>
-        </section>
-
-        <div
-          v-if="activeSurface !== 'plans'"
-          class="flex items-center justify-between gap-3 text-xs text-muted-foreground"
-        >
-          <p>
-            {{
-              activeSurface === 'today'
-                ? t('task.management.todayExplanation')
-                : t('task.management.upcomingExplanation')
-            }}
-          </p>
-          <select
-            v-model="occurrenceSort"
-            class="h-8 rounded-md border bg-background px-2"
-            data-testid="task-occurrence-sort"
-            :aria-label="t('task.management.filter.sort')"
-          >
-            <option value="time">{{ t('task.management.sort.time') }}</option>
-            <option value="status">{{ t('task.management.sort.status') }}</option>
-            <option value="title">{{ t('task.management.sort.title') }}</option>
-          </select>
-        </div>
-
+      <div class="flex w-full flex-col">
         <div
           v-if="isLoading"
           class="flex min-h-64 items-center justify-center text-sm text-muted-foreground"
@@ -166,62 +51,27 @@
         </div>
 
         <template v-else-if="activeSurface === 'plans'">
-          <div
-            v-if="filteredPlans.length"
-            class="grid gap-3 @2xl/panel:grid-cols-2"
-            data-testid="task-plan-list"
-          >
-            <article
+          <div v-if="filteredPlans.length" data-testid="task-plan-list">
+            <div
+              class="hidden grid-cols-[minmax(0,1fr)_11rem_8rem_10rem] items-center gap-x-6 border-b border-border/70 px-3 py-2 pr-12 text-[11px] font-medium text-muted-foreground @2xl/panel:grid"
+              data-testid="task-plan-list-column-header"
+            >
+              <span>{{ t('task.management.planColumn') }}</span>
+              <span>{{ t('task.management.scheduleColumn') }}</span>
+              <span>{{ t('task.management.goalColumn') }}</span>
+              <div class="grid grid-cols-[2.5rem_5rem] items-center gap-2">
+                <span class="text-right">{{ t('task.management.progressColumn') }}</span>
+                <span aria-hidden="true" />
+              </div>
+            </div>
+            <TaskPlanRow
               v-for="template in filteredPlans"
               :key="template.id"
-              class="rounded-xl border bg-card p-4 shadow-sm"
-              data-testid="task-plan-card"
-              :data-task-id="template.id"
-            >
-              <button
-                type="button"
-                class="w-full rounded-lg text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                @click="openTaskDetail(template.id)"
-              >
-                <div class="flex items-start justify-between gap-3">
-                  <div class="min-w-0">
-                    <h2 class="truncate font-semibold">{{ template.title }}</h2>
-                    <p
-                      v-if="template.description"
-                      class="mt-1 line-clamp-2 text-sm text-muted-foreground"
-                    >
-                      {{ template.description }}
-                    </p>
-                  </div>
-                  <Badge variant="secondary">{{ template.statusText }}</Badge>
-                </div>
-                <div class="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
-                  <span>{{ template.importanceText }}</span>
-                  <span aria-hidden="true">·</span>
-                  <span>{{ template.recurrenceText }}</span>
-                  <template v-if="template.goalBinding">
-                    <span aria-hidden="true">·</span>
-                    <span>{{ t('task.occurrence.goalLinked') }}</span>
-                  </template>
-                </div>
-              </button>
-              <div class="mt-4 flex flex-wrap justify-end gap-1 border-t pt-3">
-                <Button variant="ghost" size="sm" @click="openEditDialog(template)">
-                  {{ t('common.edit') }}
-                </Button>
-                <Button variant="ghost" size="sm" @click="archive(template.id)">
-                  {{ t('task.action.archive') }}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  class="text-destructive"
-                  @click="remove(template)"
-                >
-                  {{ t('common.delete') }}
-                </Button>
-              </div>
-            </article>
+              :plan="template"
+              @view="openTaskDetail(template.id)"
+              @archive="archive(template.id)"
+              @delete="remove(template)"
+            />
           </div>
           <div
             v-else
@@ -239,7 +89,7 @@
         <template v-else>
           <div
             v-if="visibleOccurrences.length"
-            class="grid gap-3"
+            class="border-y border-border/70"
             data-testid="task-occurrence-list"
           >
             <TaskOccurrenceRow
@@ -280,9 +130,10 @@
 
     <TaskPlanDialog
       v-model="showDialog"
-      :mode="dialogMode"
-      :template="selectedTemplate"
+      mode="create"
+      :template="null"
       :saving="isSaving"
+      :initial-goal-binding="createInitialGoalBinding"
       @save="handleSubmit"
       @cancel="closeDialog"
     />
@@ -294,21 +145,14 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { Badge, Button, Input, useConfirm } from '@memoflow/ui-vue-shadcn';
-import {
-  CalendarCheck2,
-  CircleAlert,
-  ListChecks,
-  Loader2,
-  Plus,
-  RefreshCw,
-  Search,
-} from '@lucide/vue';
+import { Button, useConfirm } from '@memoflow/ui-vue-shadcn';
+import { CalendarCheck2, CircleAlert, ListChecks, Loader2, RefreshCw } from '@lucide/vue';
 import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
 import type { GoalId, KeyResultId } from '@memoflow/contracts/primitives';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
-import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
 import TaskOccurrenceRow from '../components/TaskOccurrenceRow.vue';
+import TaskPageToolbar from '../components/TaskPageToolbar.vue';
+import TaskPlanRow from '../components/TaskPlanRow.vue';
 import TaskPlanDialog from '../components/dialogs/TaskPlanDialog.vue';
 import type { TaskPlanViewModel } from '../components/types';
 import { useTaskStore } from '../stores/task-store';
@@ -329,24 +173,14 @@ import {
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
-const surfaces = ['today', 'upcoming', 'plans'] as const;
-const instanceStatuses: TaskOccurrenceClientDTO['status'][] = [
-  'Pending',
-  'InProgress',
-  'Completed',
-  'Missed',
-  'Skipped',
-];
+type TaskSurface = 'today' | 'upcoming' | 'plans';
 
-const activeSurface = ref<(typeof surfaces)[number]>('today');
-const searchQuery = ref('');
+const activeSurface = ref<TaskSurface>('today');
 const statusFilter = ref<'all' | TaskOccurrenceClientDTO['status']>('all');
-const labelFilter = ref('all');
-const goalFilter = ref<'all' | 'linked' | 'unlinked'>('all');
+const labelFilterIds = ref<string[]>([]);
 const occurrenceSort = ref<TaskOccurrenceSort>('time');
 const showDialog = ref(false);
-const dialogMode = ref<'create' | 'edit'>('create');
-const selectedTemplate = ref<TaskPlanViewModel | null>(null);
+const createInitialGoalBinding = ref<TaskPlanViewModel['goalBinding']>(null);
 const busyOccurrenceId = ref<string | null>(null);
 
 const queryGoalId = computed(() =>
@@ -359,6 +193,12 @@ const queryKeyResultId = computed(() =>
     ? route.query.keyResultId
     : null,
 );
+const goalScopeLabel = computed(() => {
+  if (!queryGoalId.value) return null;
+  return queryKeyResultId.value
+    ? `Goal ${queryGoalId.value} · KR ${queryKeyResultId.value}`
+    : `Goal ${queryGoalId.value}`;
+});
 const taskListParams = computed(() => ({
   page: 1,
   limit: 500,
@@ -370,13 +210,7 @@ const {
   isError: templatesError,
   refetch: refetchTemplates,
 } = useTaskPlanListQuery(taskListParams);
-const {
-  createPlanSafe,
-  updatePlanSafe,
-  archivePlanSafe,
-  deletePlanSafe,
-  isSaving,
-} = useTaskPlanMutations();
+const { createPlanSafe, archivePlanSafe, deletePlanSafe, isSaving } = useTaskPlanMutations();
 const {
   fetchInstances: fetchOccurrencesMutation,
   completeOccurrence: completeOccurrenceMutation,
@@ -411,23 +245,11 @@ function templateMatchesFilters(templateId: string): boolean {
   if (queryGoalId.value && template.goalBinding?.goalId !== queryGoalId.value) return false;
   if (queryKeyResultId.value && template.goalBinding?.keyResultId !== queryKeyResultId.value)
     return false;
-  const query = searchQuery.value.trim().toLowerCase();
   if (
-    query &&
-    ![template.name, template.description ?? '', ...template.labels.map((label) => label.name)]
-      .join(' ')
-      .toLowerCase()
-      .includes(query)
-  ) {
-    return false;
-  }
-  if (
-    labelFilter.value !== 'all' &&
-    !template.labels.some((label) => label.id === labelFilter.value)
+    labelFilterIds.value.length > 0 &&
+    !labelFilterIds.value.every((labelId) => template.labels.some((label) => label.id === labelId))
   )
     return false;
-  if (goalFilter.value === 'linked' && !template.goalBinding) return false;
-  if (goalFilter.value === 'unlinked' && template.goalBinding) return false;
   return true;
 }
 
@@ -463,13 +285,6 @@ const occurrencePositions = computed(
       ]),
     ),
 );
-const surfaceCounts = computed(() => ({
-  today: instances.value.filter((occurrence) => isTaskOccurrenceOnSurface(occurrence, 'today'))
-    .length,
-  upcoming: instances.value.filter((occurrence) =>
-    isTaskOccurrenceOnSurface(occurrence, 'upcoming'),
-  ).length,
-}));
 const filteredPlans = computed(() =>
   planViewModels.value.filter((template) => {
     if (!templateMatchesFilters(String(template.id))) return false;
@@ -481,28 +296,37 @@ const filteredPlans = computed(() =>
     return false;
   }),
 );
+const visibleItemCount = computed(() =>
+  activeSurface.value === 'plans' ? filteredPlans.value.length : visibleOccurrences.value.length,
+);
 
 async function reloadSurface() {
   await Promise.all([refetchTemplates(), fetchOccurrencesMutation({ page: 1, limit: 500 })]);
 }
 
 function openCreateDialog() {
-  dialogMode.value = 'create';
-  selectedTemplate.value = null;
+  createInitialGoalBinding.value = null;
   showDialog.value = true;
 }
-function openEditDialog(template: TaskPlanViewModel) {
-  dialogMode.value = 'edit';
-  selectedTemplate.value = template;
+
+function openBoundTaskCreateDialog(goalId: string, keyResultId?: string | null) {
+  createInitialGoalBinding.value = {
+    goalId,
+    keyResultId: keyResultId || null,
+  };
   showDialog.value = true;
 }
 function openTaskDetail(id: string) {
   void router.push({ name: 'task-detail', params: { id } });
 }
 
+function clearGoalScope() {
+  void router.replace({ name: 'task-list' });
+}
+
 function closeDialog() {
   showDialog.value = false;
-  selectedTemplate.value = null;
+  createInitialGoalBinding.value = null;
 }
 
 function goalBinding(vm: TaskPlanViewModel) {
@@ -525,10 +349,7 @@ async function handleSubmit(vm: TaskPlanViewModel) {
     goalBinding: goalBinding(vm),
     checklist: vm.checklist,
   };
-  const saved =
-    dialogMode.value === 'edit' && vm.id
-      ? await updatePlanSafe(vm.id, common)
-      : await createPlanSafe(common);
+  const saved = await createPlanSafe(common);
   if (saved) {
     closeDialog();
     await reloadSurface();
@@ -573,10 +394,20 @@ const setOccurrenceChecklistItem = (
 watch(
   [queryGoalId, queryKeyResultId],
   ([goalId]) => {
-    if (goalId) {
-      activeSurface.value = 'plans';
-      goalFilter.value = 'linked';
-    }
+    if (goalId) activeSurface.value = 'plans';
+  },
+  { immediate: true },
+);
+
+watch(
+  () => [route.query.create, route.query.createGoalId, route.query.createKeyResultId] as const,
+  ([create, createGoalId, createKeyResultId]) => {
+    if (create !== '1' || typeof createGoalId !== 'string' || createGoalId.length === 0) return;
+    openBoundTaskCreateDialog(
+      createGoalId,
+      typeof createKeyResultId === 'string' ? createKeyResultId : null,
+    );
+    void router.replace({ name: 'task-list' });
   },
   { immediate: true },
 );

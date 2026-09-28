@@ -100,6 +100,7 @@ const goals = new Table({
   summary: column.text,
   description: column.text,
   status: column.text,
+  start_kind: column.text,
   start_date: column.text,
   target_kind: column.text,
   target_end_date: column.text,
@@ -378,6 +379,15 @@ const routine_definitions = new Table({
   description: column.text,
   enabled: column.integer,
   trigger_json: column.text,
+  activated_at: column.text,
+  version: column.integer,
+  created_at: column.text,
+  updated_at: column.text,
+});
+
+const routine_preferences = new Table({
+  identity_id: column.text,
+  global_enabled: column.integer,
   version: column.integer,
   created_at: column.text,
   updated_at: column.text,
@@ -823,6 +833,7 @@ export const PowerSyncAppSchema = new Schema({
   schedule_domain_event_outbox,
   // Reminder
   routine_definitions,
+  routine_preferences,
   routine_profiles,
   routine_profile_memberships,
   routine_occurrences,

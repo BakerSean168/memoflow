@@ -37,7 +37,12 @@ import type {
   AdoptKnowledgeDocumentResponse,
   KnowledgeNoteProjectionClientDTO,
   KnowledgeNoteProjectionListResponse,
+  KnowledgeNoteTreeResponse,
   ListKnowledgeNoteProjectionsReq,
+  ListReferenceableKnowledgeDocumentsReq,
+  ReferenceableKnowledgeDocumentListResponse,
+  ListKnowledgeNoteTreeReq,
+  ResolveKnowledgeNoteReferenceReq,
   GetKnowledgeNoteLinkGraphReq,
   KnowledgeNoteLinkGraphResponse,
   KnowledgeAttachmentContentResponse,
@@ -125,14 +130,37 @@ export class RepositoryClientService implements IRepositoryApiClient {
 
   listKnowledgeNoteProjections(
     request?: ListKnowledgeNoteProjectionsReq,
+    options?: { signal?: AbortSignal },
   ): Promise<Result<KnowledgeNoteProjectionListResponse>> {
-    return this.repositoryApi.listKnowledgeNoteProjections(request);
+    return this.repositoryApi.listKnowledgeNoteProjections(request, options);
+  }
+
+  listReferenceableKnowledgeDocuments(
+    request?: ListReferenceableKnowledgeDocumentsReq,
+    options?: { signal?: AbortSignal },
+  ): Promise<Result<ReferenceableKnowledgeDocumentListResponse>> {
+    return this.repositoryApi.listReferenceableKnowledgeDocuments(request, options);
+  }
+
+  listKnowledgeNoteTree(
+    request?: ListKnowledgeNoteTreeReq,
+    options?: { signal?: AbortSignal },
+  ): Promise<Result<KnowledgeNoteTreeResponse>> {
+    return this.repositoryApi.listKnowledgeNoteTree(request, options);
+  }
+
+  resolveKnowledgeNoteReference(
+    request: ResolveKnowledgeNoteReferenceReq,
+    options?: { signal?: AbortSignal },
+  ): Promise<Result<KnowledgeNoteProjectionClientDTO>> {
+    return this.repositoryApi.resolveKnowledgeNoteReference(request, options);
   }
 
   getKnowledgeNoteProjection(
     projectionId: string,
+    options?: { signal?: AbortSignal },
   ): Promise<Result<KnowledgeNoteProjectionClientDTO>> {
-    return this.repositoryApi.getKnowledgeNoteProjection(projectionId);
+    return this.repositoryApi.getKnowledgeNoteProjection(projectionId, options);
   }
 
   getKnowledgeNoteLinkGraph(

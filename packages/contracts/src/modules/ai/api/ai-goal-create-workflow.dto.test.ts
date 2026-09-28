@@ -12,7 +12,7 @@ const draft = {
     name: 'Pass JLPT N1',
     summary: 'Build a sustainable preparation plan.',
     status: 'InProgress',
-    startDate: '2026-09-15',
+    start: { kind: 'day', date: '2026-09-15' },
     target: { kind: 'year', year: 2027 },
     labels: ['Learning'],
   },

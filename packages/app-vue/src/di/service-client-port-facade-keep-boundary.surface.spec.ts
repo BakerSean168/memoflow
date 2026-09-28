@@ -28,6 +28,7 @@ describe('DI I*Service ClientPort facade keep-boundary (residual 927)', () => {
     ['IRoutineService', 'RoutineClientPort'],
     ['IRepositoryService', 'RepositoryClientPort'],
     ['INotificationService', 'NotificationClientPort'],
+    ['IGoalKnowledgeService', 'GoalKnowledgeClientPort'],
     ['ISettingService', 'SettingClientPort'],
     ['IDataPortabilityService', 'DataPortabilityClientPort'],
     ['IAIClient', 'AIClientPort'],
@@ -58,12 +59,13 @@ describe('DI I*Service ClientPort facade keep-boundary (residual 927)', () => {
     expect(types).toContain("from '@memoflow/goal/client'");
     expect(types).toContain("from '@memoflow/ai/client'");
     expect(types).toContain("from '@memoflow/repository/client'");
+    expect(types).toContain("from '@memoflow/relation/client'");
     expect(types).toContain("from '@memoflow/reminder/client'");
     expect(types).toContain("from '@memoflow/label/client'");
-    // IAIClient is intentionally named Client; the remaining twelve are I*Service aliases
+    // IAIClient is intentionally named Client; the remaining service facades stay I*Service aliases.
     const serviceAliasCount = (types.match(/^export type I\w+Service = \w+ClientPort;/gm) ?? [])
       .length;
-    expect(serviceAliasCount).toBe(12);
+    expect(serviceAliasCount).toBe(13);
     expect(types).toContain('export type IAIClient = AIClientPort;');
   });
 });

@@ -10,6 +10,8 @@
 import type { Result } from '@memoflow/contracts/result';
 import type {
   BatchOperationResultDTO,
+  ExecuteNotificationActionReq,
+  ExecuteNotificationActionRes,
   NotificationClientDTO,
   NotificationPreferenceClientDTO,
   UnreadCountResponse,
@@ -68,6 +70,9 @@ export interface INotificationApiClient {
   markAllAsRead(): Promise<Result<{ count: number }>>;
   deleteNotification(id: string): Promise<Result<null>>;
   batchDeleteNotifications(ids: string[]): Promise<Result<BatchOperationResultDTO>>;
+  executeAction(
+    request: ExecuteNotificationActionReq,
+  ): Promise<Result<ExecuteNotificationActionRes>>;
   getUnreadCount(): Promise<Result<UnreadCountResponse>>;
   /** Residual 197: identity comes from transport auth, not client body dual-track. */
   getPreferences(): Promise<Result<NotificationPreferenceClientDTO>>;

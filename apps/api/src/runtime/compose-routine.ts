@@ -27,17 +27,23 @@ export interface ComposedRoutine {
 export function composeRoutine(dependencies: ComposeRoutineDependencies): ComposedRoutine {
   const repositories = createRoutinePrismaRepositories(dependencies.db);
   const runtimeContextStore = createInMemoryRoutineRuntimeContextStore();
+  const scheduleChanged = createRoutineScheduleChangedNotifier();
   const routineCommandPort = createRoutineCoachCommandService({
     routineProfileStore: repositories.routineProfileStore,
+    routinePreferencesStore: repositories.routinePreferencesStore,
     runtimeContextStore,
     temporaryOverrideStore: repositories.routineTemporaryOverrideStore,
     occurrenceTruthStore: repositories.routineOccurrenceTruthStore,
     protocolSessionStore: repositories.protocolSessionStore,
     onOverrideChanged: createRoutineOverrideChangedNotifier(),
-    onScheduleChanged: createRoutineScheduleChangedNotifier(),
+    // Identity-wide global-gate reconciliation is centralized inside the
+    // command service through onScheduleChanged. Do not layer a second host
+    // callback here or every Routine receives duplicate projection events.
+    onScheduleChanged: scheduleChanged,
   });
   const routineQueryPort = createRoutineConfigurationQueryService({
     routineProfileStore: repositories.routineProfileStore,
+    routinePreferencesStore: repositories.routinePreferencesStore,
     runtimeContextStore,
     temporaryOverrideStore: repositories.routineTemporaryOverrideStore,
     localRuntimeAvailable: false,

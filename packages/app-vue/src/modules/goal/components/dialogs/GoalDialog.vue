@@ -4,6 +4,7 @@
       :open="open"
       test-id="goal-dialog"
       size="lg"
+      height-mode="workspace"
       initial-focus-selector="[data-testid='goal-name-input']"
     >
       <template #title>
@@ -23,7 +24,7 @@
         </Button>
       </template>
 
-      <form id="goal-form" class="space-y-6" @submit.prevent="save">
+      <form id="goal-form" class="flex min-h-full flex-col gap-6" @submit.prevent="save">
         <section
           class="space-y-4 border-b border-border/70 pb-5"
           data-testid="goal-identity-section"
@@ -92,16 +93,16 @@
               :base-status="persistedStatus"
               :disabled="isSaving"
             />
-            <ProductDatePicker
-              v-model="startDateModel"
+            <GoalTimeframePicker
+              v-model="draft.start"
               :label="t('goal.dialog.startDate')"
-              :placeholder="t('goal.dialog.startDate')"
-              :input-placeholder="t('common.productDateInputPlaceholder')"
-              :format-hint="t('common.productDateInputHint')"
-              :invalid-text="t('common.productDateInputInvalid')"
-              :clear-label="t('common.clear')"
               test-id="goal-start-chip"
               :aria-label="t('goal.dialog.startDate')"
+              :placeholder="t('goal.dialog.startDate')"
+              :max-start-boundary="
+                draft.target ? goalTimeframeEndBoundary(draft.target) : undefined
+              "
+              :constraint-text="t('goal.dialog.startAfterTarget')"
             />
 
             <GoalTimeframePicker
@@ -109,6 +110,8 @@
               test-id="goal-target-chip"
               :aria-label="t('goal.dialog.target')"
               :placeholder="t('goal.dialog.target')"
+              :min-end-boundary="draft.start ? goalTimeframeStartBoundary(draft.start) : undefined"
+              :constraint-text="t('goal.dialog.targetBeforeStart')"
             />
 
             <LabelPicker
@@ -126,7 +129,7 @@
 
             <GoalReminderChip
               v-model="draft.reminderConfig"
-              :start-date="draft.startDate || null"
+              :start="draft.start"
               :target="draft.target"
             />
 
@@ -201,7 +204,10 @@
 
         <GoalKeyResultDraftEditor
           v-model="draft.keyResults"
+          class="mt-auto"
           :disabled="isSaving"
+          :goal-start="draft.start"
+          :goal-target="draft.target"
           @editing-change="krEditorOpen = $event"
         />
       </form>
@@ -230,6 +236,8 @@ import { NotebookText, Sparkles } from '@lucide/vue';
 import {
   GoalStatus,
   ReminderTriggerType,
+  goalTimeframeEndBoundary,
+  goalTimeframeStartBoundary,
   type GoalStatus as GoalStatusValue,
   type GoalReminderConfigDTO,
   type GoalClientDTO,
@@ -248,7 +256,6 @@ import {
 import {
   LabelPicker,
   ProductAutoTextarea,
-  ProductDatePicker,
   ProductDialogShell,
   ProductPropertyChip,
 } from '../../../../shared/components';
@@ -256,10 +263,6 @@ import GoalReminderChip from '../GoalReminderChip.vue';
 import GoalTimeframePicker from '../GoalTimeframePicker.vue';
 import GoalStatusPicker from '../GoalStatusPicker.vue';
 import GoalKeyResultDraftEditor from '../GoalKeyResultDraftEditor.vue';
-import {
-  fromProductYmdInputValue,
-  toProductYmdInputValue,
-} from '../../../../shared/utils/product-time';
 import { useLabelCatalog } from '../../../../shared/composables/useLabelCatalog';
 import { useGoal } from '../../composables/useGoal';
 import { useTransientFeedback } from '../../../../shared/composables/useTransientFeedback';
@@ -288,7 +291,7 @@ const draft = reactive({
   summary: '',
   description: '',
   status: GoalStatus.Planned as GoalStatusValue,
-  startDate: '',
+  start: null as GoalTimeframe | null,
   target: null as GoalTimeframe | null,
   reminderConfig: null as GoalReminderConfigDTO | null,
   labelIds: [] as string[],
@@ -302,13 +305,6 @@ const summaryLimitFeedback = useTransientFeedback();
 const descriptionLimitFeedback = useTransientFeedback();
 const krEditorOpen = ref(false);
 const persistedStatus = computed(() => props.goal?.status ?? GoalStatus.Planned);
-const startDateModel = computed({
-  get: () => fromProductYmdInputValue(draft.startDate) ?? null,
-  set: (value) => {
-    draft.startDate = value ?? '';
-  },
-});
-
 function snapshotDraft(): string {
   return JSON.stringify(draft);
 }
@@ -331,7 +327,7 @@ function reset(): void {
   draft.summary = props.goal?.summary ?? '';
   draft.description = props.goal?.description ?? '';
   draft.status = props.goal?.status ?? GoalStatus.Planned;
-  draft.startDate = toProductYmdInputValue(props.goal?.startDate);
+  draft.start = props.goal?.start ? { ...props.goal.start } : null;
   draft.target = props.goal?.target ? { ...props.goal.target } : null;
   draft.reminderConfig = props.goal?.reminderConfig
     ? {
@@ -377,8 +373,16 @@ async function createAndSelectLabel(name: string): Promise<void> {
   }
 }
 
+function validatePlanningWindow(): boolean {
+  if (!draft.start || !draft.target) return true;
+  if (goalTimeframeStartBoundary(draft.start) <= goalTimeframeEndBoundary(draft.target)) {
+    return true;
+  }
+  formError.value = t('goal.dialog.invalidPlanningWindow');
+  return false;
+}
+
 function validateReminderConfig(): boolean {
-  formError.value = null;
   const config = draft.reminderConfig;
   if (!config?.enabled) return true;
   for (const trigger of config.triggers.filter((item) => item.enabled)) {
@@ -388,7 +392,7 @@ function validateReminderConfig(): boolean {
     }
     if (
       trigger.type === ReminderTriggerType.TimeProgressPercentage &&
-      (!draft.startDate || !draft.target)
+      (!draft.start || !draft.target)
     ) {
       formError.value = t('goal.dialog.reminderTimeProgressRequiresRange');
       return false;
@@ -398,15 +402,21 @@ function validateReminderConfig(): boolean {
 }
 
 async function save(): Promise<void> {
-  if (!draft.name.trim() || krEditorOpen.value || !validateReminderConfig()) return;
+  formError.value = null;
+  if (
+    !draft.name.trim() ||
+    krEditorOpen.value ||
+    !validatePlanningWindow() ||
+    !validateReminderConfig()
+  )
+    return;
   const labelIds = [...draft.labelIds];
   const keyResults = draft.keyResults.map((item) => ({ ...item }));
-  const startDate = fromProductYmdInputValue(draft.startDate);
   const common = {
     name: draft.name.trim(),
     summary: draft.summary.trim() || undefined,
     description: draft.description.trim() || undefined,
-    startDate: startDate ?? undefined,
+    start: draft.start ?? undefined,
     target: draft.target ?? undefined,
     labelIds,
   };
@@ -417,7 +427,7 @@ async function save(): Promise<void> {
       ...common,
       summary: common.summary ?? null,
       description: common.description ?? null,
-      startDate: common.startDate ?? null,
+      start: common.start ?? null,
       target: common.target ?? null,
       reminderConfig: draft.reminderConfig,
       keyResults,

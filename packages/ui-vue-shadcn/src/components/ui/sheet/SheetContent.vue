@@ -18,6 +18,7 @@ import { sheetVariants } from '.'
 interface SheetContentProps extends DialogContentProps {
   class?: HTMLAttributes['class']
   side?: SheetVariants['side']
+  hideClose?: boolean
 }
 
 defineOptions({
@@ -29,7 +30,7 @@ const props = defineProps<SheetContentProps>()
 const emits = defineEmits<DialogContentEmits>()
 
 const delegatedProps = computed(() => {
-  const { class: _, side, ...delegated } = props
+  const { class: _class, side: _side, hideClose: _hideClose, ...delegated } = props
 
   return delegated
 })
@@ -49,6 +50,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
       <slot />
 
       <DialogClose
+        v-if="!props.hideClose"
         class="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary"
       >
         <Cross2Icon class="w-4 h-4" />

@@ -40,7 +40,12 @@ import type {
   AdoptKnowledgeDocumentResponse,
   KnowledgeNoteProjectionClientDTO,
   KnowledgeNoteProjectionListResponse,
+  KnowledgeNoteTreeResponse,
   ListKnowledgeNoteProjectionsReq,
+  ListReferenceableKnowledgeDocumentsReq,
+  ReferenceableKnowledgeDocumentListResponse,
+  ListKnowledgeNoteTreeReq,
+  ResolveKnowledgeNoteReferenceReq,
   GetKnowledgeNoteLinkGraphReq,
   KnowledgeNoteLinkGraphResponse,
   KnowledgeAttachmentContentResponse,
@@ -154,22 +159,72 @@ export class RepositoryHttpAdapter implements IRepositoryApiClient {
 
   async listKnowledgeNoteProjections(
     request: ListKnowledgeNoteProjectionsReq = { limit: 50 },
+    options?: { signal?: AbortSignal },
   ): Promise<Result<KnowledgeNoteProjectionListResponse>> {
     return this.httpClient.get(`${this.baseUrl}/knowledge-notes`, {
+      ...(options?.signal ? { signal: options.signal } : {}),
       params: {
         ...(request.connectionId ? { connectionId: request.connectionId } : {}),
         ...(request.query ? { query: request.query } : {}),
+        ...(request.cursor ? { cursor: request.cursor } : {}),
+        ...(request.includeHidden !== undefined
+          ? { includeHidden: request.includeHidden ? 'true' : 'false' }
+          : {}),
+        ...(request.sort ? { sort: request.sort } : {}),
         limit: request.limit,
+      },
+    });
+  }
+
+  async listReferenceableKnowledgeDocuments(
+    request: ListReferenceableKnowledgeDocumentsReq = { limit: 24 },
+    options?: { signal?: AbortSignal },
+  ): Promise<Result<ReferenceableKnowledgeDocumentListResponse>> {
+    return this.httpClient.get(`${this.baseUrl}/knowledge-documents/referenceable`, {
+      ...(options?.signal ? { signal: options.signal } : {}),
+      params: {
+        ...(request.query ? { query: request.query } : {}),
+        ...(request.cursor ? { cursor: request.cursor } : {}),
+        limit: request.limit,
+      },
+    });
+  }
+
+  async listKnowledgeNoteTree(
+    request: ListKnowledgeNoteTreeReq = { parent: '', includeHidden: false },
+    options?: { signal?: AbortSignal },
+  ): Promise<Result<KnowledgeNoteTreeResponse>> {
+    return this.httpClient.get(`${this.baseUrl}/knowledge-notes/tree`, {
+      ...(options?.signal ? { signal: options.signal } : {}),
+      params: {
+        ...(request.connectionId ? { connectionId: request.connectionId } : {}),
+        ...(request.parent ? { parent: request.parent } : {}),
+        includeHidden: request.includeHidden ? 'true' : 'false',
+      },
+    });
+  }
+
+  async resolveKnowledgeNoteReference(
+    request: ResolveKnowledgeNoteReferenceReq,
+    options?: { signal?: AbortSignal },
+  ): Promise<Result<KnowledgeNoteProjectionClientDTO>> {
+    return this.httpClient.get(`${this.baseUrl}/knowledge-notes/resolve`, {
+      ...(options?.signal ? { signal: options.signal } : {}),
+      params: {
+        ...(request.connectionId ? { connectionId: request.connectionId } : {}),
+        reference: request.reference,
       },
     });
   }
 
   async getKnowledgeNoteProjection(
     projectionId: string,
+    options?: { signal?: AbortSignal },
   ): Promise<Result<KnowledgeNoteProjectionClientDTO>> {
-    return this.httpClient.get(
-      `${this.baseUrl}/knowledge-notes/${encodeURIComponent(projectionId)}`,
-    );
+    const url = `${this.baseUrl}/knowledge-notes/${encodeURIComponent(projectionId)}`;
+    return options?.signal
+      ? this.httpClient.get(url, { signal: options.signal })
+      : this.httpClient.get(url);
   }
 
   async getKnowledgeNoteLinkGraph(

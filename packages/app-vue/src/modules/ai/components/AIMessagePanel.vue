@@ -1,11 +1,11 @@
 <template>
   <div
     ref="viewport"
-    class="min-h-0 flex-1 overflow-y-auto px-4 py-4 @md/ai:px-6"
+    class="min-h-0 flex-1 overflow-y-auto px-4 py-6 @md/ai:px-7 @xl/ai:px-10"
     data-testid="ai-message-panel"
   >
     <div
-      class="mx-auto flex w-full max-w-4xl flex-col gap-4"
+      class="mx-auto flex w-full max-w-3xl flex-col gap-6"
       role="log"
       aria-live="polite"
       aria-relevant="additions text"
@@ -15,37 +15,53 @@
         <article
           v-for="item in timeline"
           :key="item.id"
-          class="flex"
+          class="flex w-full"
           :class="item.role === 'user' ? 'justify-end' : 'justify-start'"
         >
           <div
-            class="max-w-[88%] rounded-2xl px-3 py-3 text-sm leading-7 @md/ai:max-w-[82%] @md/ai:px-4 @xl/ai:max-w-[78%]"
-            :class="
-              item.role === 'user'
-                ? 'bg-primary text-primary-foreground'
-                : 'border bg-card text-card-foreground'
-            "
+            v-if="item.role === 'user'"
+            class="max-w-[88%] rounded-[14px] bg-muted/70 px-4 py-2.5 text-sm leading-7 text-foreground @md/ai:max-w-[82%] @xl/ai:max-w-[78%]"
           >
-            <p class="mb-2 text-[11px] uppercase tracking-[0.18em] opacity-70">
-              {{
-                item.role === 'user'
-                  ? t('aiAssistant.dialogs.chat.you')
-                  : t('aiAssistant.dialogs.chat.assistant')
-              }}
+            <div v-if="item.attachments?.length" class="mb-2 flex flex-wrap gap-1.5">
+              <span
+                v-for="(attachment, attachmentIndex) in item.attachments"
+                :key="`${item.id}:attachment:${attachmentIndex}`"
+                class="inline-flex max-w-[15rem] items-center gap-1.5 rounded-md bg-background/35 px-2 py-1 text-xs leading-5 text-muted-foreground"
+                data-testid="ai-message-attachment"
+              >
+                <ImageIcon
+                  v-if="attachment.mediaType.startsWith('image/')"
+                  class="h-3.5 w-3.5 shrink-0"
+                />
+                <Paperclip v-else class="h-3.5 w-3.5 shrink-0" />
+                <span class="truncate">{{ attachment.filename || attachment.mediaType }}</span>
+              </span>
+            </div>
+            <p v-if="item.content.trim()" class="whitespace-pre-wrap break-words">
+              {{ item.content }}
             </p>
-            <p class="whitespace-pre-wrap break-words">
-              {{ item.content || typingPlaceholder(item) }}
-            </p>
-            <p
-              v-if="
-                item.role === 'assistant' && (item.status === 'aborted' || item.status === 'error')
-              "
-              class="mt-2 text-xs"
-              :class="item.status === 'error' ? 'text-destructive' : 'text-muted-foreground'"
-              :role="item.status === 'error' ? 'alert' : 'status'"
+          </div>
+
+          <div v-else class="flex w-full min-w-0 gap-3">
+            <div
+              class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted/70 text-muted-foreground"
+              aria-hidden="true"
             >
-              {{ getMessageStatusLabel(item) }}
-            </p>
+              <Bot class="h-3.5 w-3.5" />
+            </div>
+            <div class="min-w-0 flex-1 pt-0.5 text-sm leading-7 text-foreground">
+              <p class="whitespace-pre-wrap break-words">
+                {{ item.content || typingPlaceholder(item) }}
+              </p>
+              <p
+                v-if="item.status === 'aborted' || item.status === 'error'"
+                class="mt-2 text-xs"
+                :class="item.status === 'error' ? 'text-destructive' : 'text-muted-foreground'"
+                :role="item.status === 'error' ? 'alert' : 'status'"
+              >
+                {{ getMessageStatusLabel(item) }}
+              </p>
+            </div>
           </div>
         </article>
 
@@ -55,123 +71,116 @@
         </div>
       </template>
 
-      <!-- Welcome / idle (no messages) -->
-      <div v-else class="flex min-h-[20rem] flex-col items-center justify-center gap-6 py-4">
-        <div class="w-full max-w-2xl space-y-4" data-testid="ai-welcome-state">
-          <div class="rounded-3xl border bg-card p-6 text-left">
-            <div
-              class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground"
-            >
-              <component
-                :is="
-                  toolMode === 'knowledge-capture'
-                    ? NotebookPen
-                    : toolMode === 'goal-create'
-                      ? Sparkles
-                      : toolMode === 'task-create'
-                        ? ClipboardCheck
-                        : toolMode === 'knowledge-qa'
-                          ? Search
-                          : Bot
-                "
-                class="h-5 w-5"
-              />
-            </div>
-            <h2 class="text-base font-medium text-foreground">
-              {{
-                toolMode === 'chat'
-                  ? t('aiAssistant.chatPage.welcomeTitle')
-                  : t(`aiAssistant.chatPage.toolIntro.${getToolLocaleKey(toolMode)}.title`)
-              }}
-            </h2>
-            <p class="mt-2 text-sm leading-6 text-muted-foreground">
-              {{
-                toolMode === 'chat'
-                  ? t('aiAssistant.chatPage.welcomeDescription')
-                  : t(`aiAssistant.chatPage.toolIntro.${getToolLocaleKey(toolMode)}.description`)
-              }}
-            </p>
+      <!-- Welcome / idle (no messages): content sits directly on the canvas, not in a dashboard card. -->
+      <div v-else class="flex min-h-[24rem] flex-col items-center justify-center py-10">
+        <div class="w-full max-w-xl text-center" data-testid="ai-welcome-state">
+          <div
+            class="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-muted/60 text-muted-foreground"
+          >
+            <component
+              :is="
+                toolMode === 'knowledge-capture'
+                  ? NotebookPen
+                  : toolMode === 'goal-create'
+                    ? Sparkles
+                    : toolMode === 'task-create'
+                      ? ClipboardCheck
+                      : toolMode === 'knowledge-qa'
+                        ? Search
+                        : Bot
+              "
+              class="h-[18px] w-[18px]"
+            />
           </div>
+          <h2 class="mt-4 text-xl font-semibold tracking-[-0.02em] text-foreground">
+            {{
+              toolMode === 'chat'
+                ? t('aiAssistant.chatPage.welcomeTitle')
+                : t(`aiAssistant.chatPage.toolIntro.${getToolLocaleKey(toolMode)}.title`)
+            }}
+          </h2>
+          <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">
+            {{
+              toolMode === 'chat'
+                ? t('aiAssistant.chatPage.welcomeDescription')
+                : t(`aiAssistant.chatPage.toolIntro.${getToolLocaleKey(toolMode)}.description`)
+            }}
+          </p>
 
           <div
             v-if="toolMode === 'chat' && !hasModels"
-            class="border-t border-border pt-4"
+            class="mt-6"
             data-testid="ai-welcome-no-model"
           >
-            <h3 class="text-sm font-medium text-foreground">
-              {{ t('aiAssistant.chatPage.noModel.title') }}
-            </h3>
-            <p class="mt-1 text-xs leading-5 text-muted-foreground">
-              {{ t('aiAssistant.chatPage.noModel.description') }}
-            </p>
-            <div class="mt-3 flex flex-wrap gap-2">
+            <div
+              class="mx-auto flex max-w-md items-center gap-2.5 rounded-xl bg-muted/35 px-3 py-2.5 text-left"
+            >
+              <Settings2 class="h-4 w-4 shrink-0 text-muted-foreground" />
+              <span class="min-w-0 flex-1 text-xs leading-5 text-muted-foreground">
+                {{ t('aiAssistant.chatPage.noModel.description') }}
+              </span>
               <button
                 type="button"
-                class="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+                class="shrink-0 rounded-md px-2 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
                 data-testid="ai-welcome-configure-ai"
                 @click="$emit('configure-ai')"
               >
-                <Settings2 class="h-3.5 w-3.5" />
                 {{ t('aiAssistant.chatPage.noModel.configure') }}
               </button>
+            </div>
+
+            <div class="mx-auto mt-4 grid max-w-md gap-1 sm:grid-cols-2">
               <button
                 type="button"
-                class="inline-flex h-9 items-center gap-1.5 rounded-md border border-border px-3 text-xs font-medium text-foreground hover:bg-muted"
+                class="group flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm text-muted-foreground transition-colors hover:bg-muted/55 hover:text-foreground"
                 data-testid="ai-welcome-create-goal"
                 @click="$emit('create-goal')"
               >
-                <Target class="h-3.5 w-3.5" />
-                {{ t('aiAssistant.chatPage.noModel.createGoal') }}
+                <span
+                  class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted/60 text-muted-foreground transition-colors group-hover:text-foreground"
+                >
+                  <Target class="h-3.5 w-3.5" />
+                </span>
+                <span class="truncate">{{ t('aiAssistant.chatPage.noModel.createGoal') }}</span>
               </button>
               <button
                 type="button"
-                class="inline-flex h-9 items-center gap-1.5 rounded-md border border-border px-3 text-xs font-medium text-foreground hover:bg-muted"
+                class="group flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm text-muted-foreground transition-colors hover:bg-muted/55 hover:text-foreground"
                 data-testid="ai-welcome-quick-task"
                 @click="$emit('quick-task')"
               >
-                <Plus class="h-3.5 w-3.5" />
-                {{ t('aiAssistant.chatPage.noModel.quickTask') }}
+                <span
+                  class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted/60 text-muted-foreground transition-colors group-hover:text-foreground"
+                >
+                  <Plus class="h-3.5 w-3.5" />
+                </span>
+                <span class="truncate">{{ t('aiAssistant.chatPage.noModel.quickTask') }}</span>
               </button>
             </div>
           </div>
 
-          <!-- Shortcut cards: prefill composer + set tool mode (V2 §6.0; residual 429 task-create) -->
-          <div v-else-if="toolMode === 'chat'" class="grid gap-2 @xl/ai:grid-cols-2">
+          <!-- Compact shortcut rows: suggestions, not dashboard cards. -->
+          <div
+            v-else-if="toolMode === 'chat'"
+            class="mx-auto mt-7 grid max-w-lg gap-1 sm:grid-cols-2"
+          >
             <button
               v-for="entry in shortcutEntries"
               :key="entry.mode"
               type="button"
-              class="rounded-2xl border bg-card p-4 text-left transition-colors hover:border-ring hover:bg-muted/40"
+              class="group flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm text-muted-foreground transition-colors hover:bg-muted/55 hover:text-foreground"
+              :title="t(`aiAssistant.chatPage.shortcuts.${entry.localeKey}.description`)"
               :data-testid="`ai-welcome-entry-${entry.mode}`"
               @click="$emit('select-shortcut', entry.mode)"
             >
-              <component :is="entry.icon" class="h-4 w-4 text-muted-foreground" />
-              <p class="mt-2 text-sm font-medium text-foreground">
+              <span
+                class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted/60 text-muted-foreground transition-colors group-hover:text-foreground"
+              >
+                <component :is="entry.icon" class="h-3.5 w-3.5" />
+              </span>
+              <span class="truncate font-medium">
                 {{ t(`aiAssistant.chatPage.shortcuts.${entry.localeKey}.title`) }}
-              </p>
-              <p class="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
-                {{ t(`aiAssistant.chatPage.shortcuts.${entry.localeKey}.description`) }}
-              </p>
-            </button>
-          </div>
-
-          <!-- Tool-mode empty: keep workflow entry cards -->
-          <div v-else class="grid gap-2 @xl/ai:grid-cols-2">
-            <button
-              v-for="entry in workflowEntries"
-              :key="entry.mode"
-              type="button"
-              class="rounded-2xl border bg-card p-4 text-left transition-colors hover:border-ring hover:bg-muted/40"
-              :data-testid="`ai-welcome-entry-${entry.mode}`"
-              @click="$emit('select-tool', entry.mode)"
-            >
-              <component :is="entry.icon" class="h-4 w-4 text-muted-foreground" />
-              <p class="mt-2 text-sm font-medium text-foreground">
-                {{ t(`aiAssistant.chatPage.toolIntro.${entry.localeKey}.title`) }}
-              </p>
-              <p class="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
-                {{ t(`aiAssistant.chatPage.toolIntro.${entry.localeKey}.description`) }}
-              </p>
+              </span>
             </button>
           </div>
         </div>
@@ -179,7 +188,7 @@
         <!-- Workflow surface also available before first message (tool mode) -->
         <div
           v-if="showWorkflowSurface"
-          class="w-full max-w-2xl space-y-3"
+          class="mt-6 w-full max-w-xl space-y-3"
           data-testid="ai-workflow-message-surface"
         >
           <slot name="workflow-surface" />
@@ -194,8 +203,9 @@ import { ref } from 'vue';
 import {
   Bot,
   ClipboardCheck,
-  MessageSquare,
   NotebookPen,
+  ImageIcon,
+  Paperclip,
   Plus,
   Search,
   Settings2,
@@ -222,7 +232,6 @@ withDefaults(
 );
 
 defineEmits<{
-  'select-tool': [mode: WorkflowMode];
   'select-shortcut': [mode: WorkflowMode];
   'configure-ai': [];
   'create-goal': [];
@@ -230,27 +239,11 @@ defineEmits<{
 }>();
 
 const shortcutEntries = [
-  { mode: 'chat' as const, localeKey: 'chat', icon: MessageSquare },
   { mode: 'goal-create' as const, localeKey: 'goalCreate', icon: Sparkles },
   { mode: 'task-create' as const, localeKey: 'taskCreate', icon: ClipboardCheck },
   { mode: 'knowledge-capture' as const, localeKey: 'knowledgeCapture', icon: NotebookPen },
   { mode: 'knowledge-qa' as const, localeKey: 'knowledgeQa', icon: Search },
 ];
-
-const workflowEntries = [
-  { mode: 'goal-create' as const, localeKey: getToolLocaleKey('goal-create'), icon: Sparkles },
-  {
-    mode: 'task-create' as const,
-    localeKey: getToolLocaleKey('task-create'),
-    icon: ClipboardCheck,
-  },
-  {
-    mode: 'knowledge-capture' as const,
-    localeKey: getToolLocaleKey('knowledge-capture'),
-    icon: NotebookPen,
-  },
-  { mode: 'knowledge-qa' as const, localeKey: getToolLocaleKey('knowledge-qa'), icon: Search },
-] as const;
 
 const viewport = ref<HTMLElement | null>(null);
 

@@ -71,10 +71,10 @@ export class UpdateGoalUseCase {
       description: input.description,
     });
 
-    // 4. Update calendar-native planning time without inventing a deadline.
-    if (input.startDate !== undefined || input.target !== undefined) {
+    // 4. Update semantic planning time; boundary dates are derived only by consumers.
+    if (input.start !== undefined || input.target !== undefined) {
       goal.updatePlanningTime({
-        startDate: input.startDate !== undefined ? (input.startDate ?? null) : undefined,
+        start: input.start !== undefined ? (input.start ?? null) : undefined,
         target: input.target !== undefined ? (input.target ?? null) : undefined,
       });
     }

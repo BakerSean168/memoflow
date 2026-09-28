@@ -129,6 +129,7 @@ describe('i18n key completeness (production locales)', () => {
       'goal.list.createToStart',
       'goal.list.askAi',
       'goal.list.newGoal',
+      'goal.dialog.timeframeInputPlaceholder',
       'goal.dialog.targetPrecisionHint',
       'goal.dialog.reminder',
       'goal.dialog.createGoal',

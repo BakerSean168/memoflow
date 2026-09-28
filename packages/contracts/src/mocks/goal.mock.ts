@@ -50,7 +50,7 @@ export function createMockGoal(overrides: Partial<GoalClientDTO> = {}): GoalClie
       'Completed',
       'Abandoned',
     ] as const),
-    startDate: faker.datatype.boolean() ? requireYmd('2026-01-15') : null,
+    start: faker.datatype.boolean() ? { kind: 'day', date: requireYmd('2026-01-15') } : null,
     target: faker.datatype.boolean() ? { kind: 'quarter', year: 2026, quarter: 4 } : null,
     completedAt: null,
     archivedAt: null,

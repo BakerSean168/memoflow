@@ -37,16 +37,14 @@
       @update:model-value="emit('update-labels', $event)"
     />
 
-    <Button
-      size="sm"
-      class="ml-auto h-8"
+    <ResponsivePrimaryAction
+      class="ml-auto"
+      :label="t('goal.list.newGoal')"
+      :icon="Plus"
       data-testid="create-goal-entry"
       data-primary-action="create-goal"
       @click="emit('create-goal')"
-    >
-      <Plus class="mr-1 h-4 w-4" />
-      {{ t('goal.list.newGoal') }}
-    </Button>
+    />
   </header>
 </template>
 
@@ -62,7 +60,11 @@ import {
   DropdownMenuTrigger,
 } from '@memoflow/ui-vue-shadcn';
 import type { GoalSystemView } from '@memoflow/contracts/goal';
-import { LabelFilterPopover, type LabelPickerOption } from '../../../shared/components';
+import {
+  LabelFilterPopover,
+  ResponsivePrimaryAction,
+  type LabelPickerOption,
+} from '../../../shared/components';
 
 const props = defineProps<{
   systemViews: Array<{ id: GoalSystemView; label: string }>;

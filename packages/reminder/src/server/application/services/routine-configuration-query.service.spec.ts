@@ -3,11 +3,13 @@ import {
   ProfileMembership,
   RoutineDefinition,
   RoutineProfile,
+  createElapsedTrigger,
   createTemporaryOverride,
   createWallClockTrigger,
 } from '../../domain/routine';
 import type {
   RoutineProfileStore,
+  RoutinePreferencesStore,
   RoutineRuntimeContextStore,
   RoutineTemporaryOverrideStore,
 } from '../../domain/ports';
@@ -21,12 +23,10 @@ describe('RoutineConfigurationQueryService', () => {
       identityId: 'identity-1',
       name: 'Stand',
       description: 'Move',
-      trigger: {
-        type: 'Elapsed',
-        timingOwner: 'local-runtime',
+      trigger: createElapsedTrigger({
         durationMs: 3_000_000,
         anchor: 'last-satisfied',
-      },
+      }),
       now,
     });
     const profile = RoutineProfile.create({
@@ -83,6 +83,7 @@ describe('RoutineConfigurationQueryService', () => {
     expect(snapshot.memberships).toEqual([
       expect.objectContaining({ routineId: 'routine-1', profileId: 'profile-1', enabled: true }),
     ]);
+    expect(snapshot.preferences).toEqual({ globalEnabled: true, version: 0 });
     expect(snapshot.runtimeContext).toEqual({ activeProfileIds: ['profile-1'] });
     expect(snapshot.capabilities).toEqual({ localRuntime: true });
     expect(snapshot.overrides).toEqual([
@@ -150,6 +151,30 @@ describe('RoutineConfigurationQueryService', () => {
       `routine:routine-wall-clock:oc:${Date.parse('2026-09-21T01:30:00.000Z')}`,
     );
   });
+  it('returns no upcoming occurrences when the global Routine gate is disabled', async () => {
+    const routineProfileStore = {
+      listDefinitions: vi.fn(),
+    } as unknown as RoutineProfileStore;
+    const routinePreferencesStore = {
+      find: vi.fn().mockResolvedValue({ globalEnabled: false, version: 2 }),
+    } as unknown as RoutinePreferencesStore;
+    const query = createRoutineConfigurationQueryService({
+      routineProfileStore,
+      routinePreferencesStore,
+      runtimeContextStore: { get: vi.fn() } as unknown as RoutineRuntimeContextStore,
+      temporaryOverrideStore: {} as RoutineTemporaryOverrideStore,
+    });
+
+    const result = await query.getUpcomingOccurrences('identity-1', {
+      start: Date.parse('2026-09-21T00:00:00.000Z'),
+      end: Date.parse('2026-09-22T23:59:59.999Z'),
+      limit: 10,
+    });
+
+    expect(result.occurrences).toEqual([]);
+    expect(routineProfileStore.listDefinitions).not.toHaveBeenCalled();
+  });
+
   it('suppresses WallClock owner reads when every durable Profile/Membership path is gated off', async () => {
     const now = new Date('2026-09-21T00:00:00.000Z');
     const routine = RoutineDefinition.create({

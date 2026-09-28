@@ -21,6 +21,7 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
         description: data.description,
         enabled: data.enabled,
         triggerJson: data.triggerJson,
+        activatedAt: data.activatedAt,
         version: data.version,
         updatedAt: data.updatedAt,
       },
@@ -43,6 +44,7 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
         description: data.description,
         enabled: data.enabled,
         triggerJson: data.triggerJson,
+        activatedAt: data.activatedAt,
         version: data.version,
         updatedAt: data.updatedAt,
       },
@@ -363,6 +365,7 @@ function mapDefinition(row: {
   description: string | null;
   enabled: boolean;
   triggerJson: string | null;
+  activatedAt: Date | null;
   version: number;
   createdAt: Date;
   updatedAt: Date;
@@ -374,6 +377,7 @@ function mapDefinition(row: {
     description: row.description,
     enabled: row.enabled,
     trigger: deserializeRoutineTrigger(row.triggerJson),
+    activatedAt: row.activatedAt,
     version: row.version,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,

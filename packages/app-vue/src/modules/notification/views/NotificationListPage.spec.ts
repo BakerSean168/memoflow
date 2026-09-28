@@ -26,6 +26,12 @@ const viewMocks = vi.hoisted(() => ({
   dismiss: {
     mutateAsync: vi.fn(async () => undefined),
   },
+  executeAction: {
+    mutateAsync: vi.fn(async () => ({
+      interaction: { outcome: 'accepted' },
+      action: { actionKey: 'complete' },
+    })),
+  },
   store: {
     readFilter: 'all' as 'all' | 'unread',
     setReadFilter: vi.fn<(value: 'all' | 'unread') => void>(),
@@ -54,6 +60,7 @@ vi.mock('../composables/useNotificationMutations', () => ({
     markAsRead: viewMocks.markAsRead,
     markAllAsRead: viewMocks.markAllAsRead,
     dismiss: viewMocks.dismiss,
+    executeAction: viewMocks.executeAction,
   }),
 }));
 
@@ -62,7 +69,7 @@ vi.mock('../stores/notification-store', () => ({
 }));
 
 vi.mock('vue-sonner', () => ({
-  toast: { success: vi.fn() },
+  toast: { success: vi.fn(), error: vi.fn() },
 }));
 
 vi.mock('@memoflow/ui-vue-shadcn', async () => {
@@ -144,13 +151,13 @@ vi.mock('../components/NotificationList.vue', async () => {
       props: {
         notifications: { type: Array, default: () => [] },
       },
-      emits: ['notification-click', 'mark-read', 'delete'],
+      emits: ['notification-click', 'mark-read', 'execute-action', 'delete'],
       setup(props, { emit }) {
         return () =>
           h(
             'div',
             { 'data-testid': 'notification-list-stub' },
-            (props.notifications as NotificationClientDTO[]).map((notification) =>
+            (props.notifications as NotificationClientDTO[]).flatMap((notification) => [
               h(
                 'button',
                 {
@@ -160,7 +167,24 @@ vi.mock('../components/NotificationList.vue', async () => {
                 },
                 notification.title,
               ),
-            ),
+              ...(notification.actions ?? [])
+                .filter((action) => action.kind === 'owner-command')
+                .map((action) =>
+                  h(
+                    'button',
+                    {
+                      type: 'button',
+                      'data-testid': `notification-action-${notification.id}-${action.actionKey}`,
+                      onClick: () =>
+                        emit('execute-action', {
+                          notificationId: notification.id,
+                          actionKey: action.actionKey,
+                        }),
+                    },
+                    action.actionKey,
+                  ),
+                ),
+            ]),
           );
       },
     }),
@@ -285,6 +309,39 @@ describe('NotificationListPage', () => {
       path: '/tasks/task-42',
       query: { view: 'today' },
     });
+  });
+
+  it('executes Routine typed actions without treating them as read-state mutations', async () => {
+    const notification = createNotification({
+      id: 'routine-reminder',
+      workflowKey: 'routine.intervention',
+      category: 'Reminder',
+      relatedEntityType: 'Routine',
+      relatedEntityId: 'routine-1',
+      actions: [
+        {
+          kind: 'owner-command',
+          actionKey: 'complete',
+          labelKey: 'routine.action.complete',
+          owner: { type: 'routine-occurrence', id: 'occurrence-1' },
+          commandKey: 'routine.complete',
+          input: { routineId: 'routine-1', occurrenceKey: 'occurrence-1' },
+        },
+      ],
+    });
+    viewMocks.notifications.value = [notification];
+    const { wrapper } = await mountPage();
+
+    await wrapper
+      .get('[data-testid="notification-action-routine-reminder-complete"]')
+      .trigger('click');
+    await flushPromises();
+
+    expect(viewMocks.executeAction.mutateAsync).toHaveBeenCalledWith({
+      notificationId: 'routine-reminder',
+      actionKey: 'complete',
+    });
+    expect(viewMocks.markAsRead.mutate).not.toHaveBeenCalled();
   });
 
   it('uses category fallback and contains rejected web navigation', async () => {

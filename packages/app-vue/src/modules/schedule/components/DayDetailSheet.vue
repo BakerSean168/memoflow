@@ -20,50 +20,48 @@
         >
           <div
             v-for="event in events"
-            :key="event.id"
+            :key="plannerProjectionKeyForUi(event)"
             class="flex items-start transition-colors focus-within:bg-muted/30 focus-within:ring-2 focus-within:ring-inset focus-within:ring-ring hover:bg-muted/30"
           >
             <button
               type="button"
-              :data-testid="`schedule-event-${event.id}`"
+              :data-testid="`schedule-event-${event.sourceType}-${event.sourceId}`"
               :aria-label="t('schedule.calendar.openEvent', { title: event.title })"
               class="flex min-w-0 flex-1 items-start gap-3 p-3 text-left focus-visible:outline-none"
               @click="emit('event-click', event)"
             >
               <span
                 class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full"
-                :class="{
-                  'bg-primary': event.source === 'schedule',
-                  'bg-success': event.source === 'goal',
-                  'bg-info': event.source === 'task',
-                }"
+                :class="sourceDotClass(event)"
               />
               <span class="min-w-0 flex-1">
                 <span class="block truncate text-sm font-medium">{{ event.title }}</span>
-                <span class="block text-xs text-muted-foreground">{{
-                  formatTimeRange(event)
-                }}</span>
+                <span class="block text-xs text-muted-foreground">
+                  {{ formatPlannerProjectionTimeRange(event, t('schedule.calendar.allDay')) }}
+                </span>
                 <span
-                  class="mt-1 inline-block rounded px-1.5 py-0.5 text-[10px] font-medium"
-                  :class="{
-                    'bg-primary/10 text-primary': event.source === 'schedule',
-                    'bg-success/15 text-success': event.source === 'goal',
-                    'bg-info/15 text-info': event.source === 'task',
-                  }"
+                  class="mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium"
+                  :class="sourceBadgeClass(event)"
                 >
-                  {{ calendarEventSourceLabel(event.source, t) }}
+                  {{ t(`schedule.source.${event.sourceType}`) }}
                 </span>
               </span>
-              <AlertCircle v-if="event.hasConflict" class="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+              <AlertCircle
+                v-if="hasConflict(event)"
+                class="mt-0.5 h-4 w-4 shrink-0 text-warning"
+              />
             </button>
-            <!-- Complete button: only for task instances that are not yet completed -->
+
             <button
-              v-if="event.source === 'task' && event.instanceStatus !== 'Completed'"
+              v-if="
+                event.sourceType === 'task' &&
+                event.displayMetadata.status !== 'Completed'
+              "
               type="button"
               :aria-label="t('task.action.complete')"
               class="m-2 ml-0 shrink-0 rounded-md p-2 text-muted-foreground transition-colors hover:bg-success/10 hover:text-success focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               :title="t('task.action.complete')"
-              @click="emit('complete-task', event.originalId)"
+              @click="emit('complete-task', event.ownerCommandTarget.ownerId)"
             >
               <CheckCircle2 class="h-4 w-4" />
             </button>
@@ -85,6 +83,11 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { AlertCircle, Calendar, CheckCircle2 } from '@lucide/vue';
+import type {
+  CalendarEventProjection,
+  PlannerConflictProjection,
+} from '@memoflow/contracts/schedule';
+import { plannerConflictSourceKeys } from '@memoflow/schedule/client';
 import {
   Sheet,
   SheetContent,
@@ -94,38 +97,66 @@ import {
   SheetTitle,
   Button,
 } from '@memoflow/ui-vue-shadcn';
-import { calendarEventSourceLabel, type CalendarEventItem } from '../composables/useCalendarView';
-import { formatCalendarEventTimeRange } from '../../../shared/utils/format-calendar-event-time-range';
 import { getProductTime } from '../../../shared/utils/product-time';
+import {
+  formatPlannerProjectionTimeRange,
+  plannerProjectionKeyForUi,
+} from '../planner/planner-presentation';
 
 interface Props {
   open: boolean;
   date: Date | null;
-  events: CalendarEventItem[];
+  events: CalendarEventProjection[];
+  conflicts?: PlannerConflictProjection[];
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  conflicts: () => [],
+});
+
 const emit = defineEmits<{
   (e: 'update:open', value: boolean): void;
-  (e: 'event-click', event: CalendarEventItem): void;
+  (e: 'event-click', event: CalendarEventProjection): void;
   (e: 'view-in-day', date: Date | null): void;
   (e: 'complete-task', originalId: string): void;
 }>();
 
 const { t } = useI18n();
 
+const conflictKeys = computed(() => plannerConflictSourceKeys(props.conflicts));
+
 const dateTitle = computed(() => {
   if (!props.date) return '';
   return getProductTime().format.slot('periodDay', props.date.getTime());
 });
 
-/**
- * Residual 1213 keep-boundary: app-vue schedule event/all-day time range (vs app-react Intl pair).
- * Residual 1273: local dual retired onto formatCalendarEventTimeRange sole.
- * Residual 1291: sourceLabel dual retired onto calendarEventSourceLabel sole.
- * Soft residual 1213: app-react useScheduleAgenda formatTimeRange is Intl zh-CN pair (no force-merge).
- */
-function formatTimeRange(event: CalendarEventItem): string {
-  return formatCalendarEventTimeRange(event, t('schedule.calendar.allDay'));
+function hasConflict(event: CalendarEventProjection): boolean {
+  return conflictKeys.value.has(plannerProjectionKeyForUi(event));
+}
+
+function sourceDotClass(event: CalendarEventProjection): string {
+  switch (event.sourceType) {
+    case 'schedule':
+      return 'bg-primary';
+    case 'task':
+      return 'bg-info';
+    case 'goal':
+      return 'bg-success';
+    case 'routine':
+      return 'bg-muted-foreground';
+  }
+}
+
+function sourceBadgeClass(event: CalendarEventProjection): string {
+  switch (event.sourceType) {
+    case 'schedule':
+      return 'bg-primary/10 text-primary';
+    case 'task':
+      return 'bg-info/15 text-info';
+    case 'goal':
+      return 'bg-success/15 text-success';
+    case 'routine':
+      return 'bg-muted text-muted-foreground';
+  }
 }
 </script>

@@ -12,7 +12,10 @@
  */
 
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { NotificationRequestedWriterPort } from '@memoflow/contracts/notification';
 import {
+  buildRoutineOccurrenceNotificationRequest,
+  createRoutineOccurrenceNotificationWriter,
   createRoutinePowerSyncRepositories,
   createRoutinePortableCapability,
   loadPowerSyncRoutineLocalRegistrations,
@@ -47,6 +50,12 @@ export interface ComposeRoutineDesktopDependencies {
   readonly db: IElectronDatabase;
   /** Active profile owner used to project only this tenant's local Routine lanes. */
   readonly identityId: string;
+  /**
+   * Canonical NotificationRequested writer shared with the Notification module.
+   * Local Routine due events must persist the same notification intent as the
+   * Scheduler/WallClock lane.
+   */
+  readonly notificationRequestedWriter: NotificationRequestedWriterPort;
   /** Optional per-profile sink for protocol break completion credit. */
   readonly protocolBreakCreditRuntime?: ProtocolBreakCreditRuntime;
   readonly idleSensor?: IdleSensorPort;
@@ -101,6 +110,9 @@ export function composeRoutine(
   dependencies: ComposeRoutineDesktopDependencies,
 ): ComposedRoutineDesktop {
   const repositories = createRoutinePowerSyncRepositories(dependencies.db);
+  const notificationWriter = createRoutineOccurrenceNotificationWriter(
+    dependencies.notificationRequestedWriter,
+  );
   const runtimeContextStore = createInMemoryRoutineRuntimeContextStore();
   let refreshLocalRoutineRegistrations: () => Promise<void> = async () => {};
   let occurrencePersistenceTail: Promise<void> = Promise.resolve();
@@ -109,12 +121,10 @@ export function composeRoutine(
     work: () => Promise<void>,
     onFailure?: () => void,
   ): void => {
-    occurrencePersistenceTail = occurrencePersistenceTail
-      .then(work)
-      .catch((error) => {
-        occurrencePersistenceFailure = error;
-        onFailure?.();
-      });
+    occurrencePersistenceTail = occurrencePersistenceTail.then(work).catch((error) => {
+      occurrencePersistenceFailure = error;
+      onFailure?.();
+    });
   };
   const flushRoutineOccurrencePersistence = async (): Promise<void> => {
     await occurrencePersistenceTail;
@@ -127,6 +137,7 @@ export function composeRoutine(
 
   const routineCommandPort = createRoutineCoachCommandService({
     routineProfileStore: repositories.routineProfileStore,
+    routinePreferencesStore: repositories.routinePreferencesStore,
     runtimeContextStore,
     temporaryOverrideStore: repositories.routineTemporaryOverrideStore,
     occurrenceTruthStore: repositories.routineOccurrenceTruthStore,
@@ -135,10 +146,14 @@ export function composeRoutine(
     onProfileActiveChanged: async ({ identityId }) => {
       if (identityId === dependencies.identityId) await refreshLocalRoutineRegistrations();
     },
+    onGlobalEnabledChanged: async ({ identityId }) => {
+      if (identityId === dependencies.identityId) await refreshLocalRoutineRegistrations();
+    },
   });
 
   const routineQueryPort = createRoutineConfigurationQueryService({
     routineProfileStore: repositories.routineProfileStore,
+    routinePreferencesStore: repositories.routinePreferencesStore,
     runtimeContextStore,
     temporaryOverrideStore: repositories.routineTemporaryOverrideStore,
     localRuntimeAvailable: true,
@@ -173,6 +188,26 @@ export function composeRoutine(
             sourceRevision: event.generation,
           });
           if (occurrence.resolutionState !== 'Open') return;
+          const routine = await repositories.routineProfileStore.findDefinition({
+            identityId: event.identityId,
+            routineId: event.routineId,
+          });
+          if (!routine) {
+            throw new Error(
+              `Routine '${event.routineId}' disappeared before ActiveUsage due delivery`,
+            );
+          }
+          await notificationWriter.enqueueRoutineOccurrenceRequested(
+            buildRoutineOccurrenceNotificationRequest({
+              identityId: event.identityId,
+              routineId: event.routineId,
+              occurrenceKey: event.occurrenceKey,
+              scheduledFor: Number(occurrence.becameDueAt),
+              sourceRevision: event.generation,
+              routineName: routine.name,
+              routineDescription: routine.description,
+            }),
+          );
           interventionRuntime.createDue({
             identityId: event.identityId,
             routineId: event.routineId,
@@ -220,6 +255,24 @@ export function composeRoutine(
             sourceRevision: event.anchorRevision,
           });
           if (occurrence.resolutionState !== 'Open') return;
+          const routine = await repositories.routineProfileStore.findDefinition({
+            identityId: event.identityId,
+            routineId: event.routineId,
+          });
+          if (!routine) {
+            throw new Error(`Routine '${event.routineId}' disappeared before Elapsed due delivery`);
+          }
+          await notificationWriter.enqueueRoutineOccurrenceRequested(
+            buildRoutineOccurrenceNotificationRequest({
+              identityId: event.identityId,
+              routineId: event.routineId,
+              occurrenceKey: event.occurrenceKey,
+              scheduledFor: Number(occurrence.becameDueAt),
+              sourceRevision: event.anchorRevision,
+              routineName: routine.name,
+              routineDescription: routine.description,
+            }),
+          );
           interventionRuntime.createDue({
             identityId: event.identityId,
             routineId: event.routineId,
@@ -330,8 +383,7 @@ export function composeRoutine(
         activeUsage: {
           ...activeUsage,
           restoredSnapshot:
-            restoredActiveUsageSnapshots.get(activeUsage.routineId) ??
-            activeUsage.restoredSnapshot,
+            restoredActiveUsageSnapshots.get(activeUsage.routineId) ?? activeUsage.restoredSnapshot,
         },
         credit: credits.get(activeUsage.routineId) ?? null,
       });

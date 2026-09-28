@@ -4,6 +4,7 @@ import {
   GoalTimeframeSchema,
   compareGoalTimeframesByEnd,
   goalTimeframeEndBoundary,
+  goalTimeframeFromStartBoundary,
   goalTimeframeFromEndBoundary,
   goalTimeframeLabel,
   goalTimeframeStartBoundary,
@@ -47,13 +48,22 @@ describe('GoalTimeframe', () => {
   });
 
   it.each(boundaryCases)(
-    'round-trips normalized persistence pair for %#',
+    'round-trips normalized start persistence pair for %#',
+    (target, start) => {
+      expect(goalTimeframeFromStartBoundary(target.kind, requireYmd(start))).toEqual(target);
+    },
+  );
+
+  it.each(boundaryCases)(
+    'round-trips normalized target persistence pair for %#',
     (target, _start, end) => {
       expect(goalTimeframeFromEndBoundary(target.kind, requireYmd(end))).toEqual(target);
     },
   );
 
   it('rejects non-canonical normalized persistence pairs', () => {
+    expect(() => goalTimeframeFromStartBoundary('quarter', requireYmd('2026-11-01'))).toThrow();
+    expect(() => goalTimeframeFromStartBoundary('year', requireYmd('2026-02-01'))).toThrow();
     expect(() => goalTimeframeFromEndBoundary('quarter', requireYmd('2026-11-30'))).toThrow();
     expect(() => goalTimeframeFromEndBoundary('year', requireYmd('2026-11-30'))).toThrow();
   });

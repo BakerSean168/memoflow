@@ -25,6 +25,101 @@ describe('AI vNext runtime contracts', () => {
     expect(result.success).toBe(false);
   });
 
+  it('accepts bounded attachments and explicit entity context without client-owned provenance', () => {
+    const parsed = AssistantRuntimeClientCommandSchema.parse({
+      type: 'message',
+      conversationId: 'conversation-1',
+      content: 'compare these',
+      surface: 'web',
+      attachments: [
+        {
+          data: 'data:image/png;base64,aGVsbG8=',
+          mediaType: 'image/png',
+          filename: 'screen.png',
+        },
+      ],
+      selectedEntities: [
+        { entityType: 'goal', id: 'goal-1', label: 'Ship v1' },
+        { entityType: 'task', id: 'task-1', label: 'Review release' },
+      ],
+    });
+
+    expect(parsed.attachments).toHaveLength(1);
+    expect(parsed.selectedEntities).toEqual([
+      { entityType: 'goal', id: 'goal-1', label: 'Ship v1' },
+      { entityType: 'task', id: 'task-1', label: 'Review release' },
+    ]);
+    expect(
+      AssistantRuntimeClientCommandSchema.safeParse({
+        ...parsed,
+        selectedEntities: [
+          {
+            entityType: 'goal',
+            id: 'goal-1',
+            label: 'Ship v1',
+            source: 'attacker-controlled',
+          },
+        ],
+      }).success,
+    ).toBe(false);
+
+    expect(
+      AssistantRuntimeClientCommandSchema.safeParse({
+        ...parsed,
+        attachments: [{ data: 'https://example.invalid/screen.png', mediaType: 'image/png' }],
+      }).success,
+    ).toBe(false);
+
+    expect(
+      AssistantRuntimeClientCommandSchema.safeParse({
+        ...parsed,
+        attachments: [{ data: 'data:image/jpeg;base64,aGVsbG8=', mediaType: 'image/png' }],
+      }).success,
+    ).toBe(false);
+
+    expect(
+      AssistantRuntimeClientCommandSchema.safeParse({
+        ...parsed,
+        attachments: [
+          { data: 'data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=', mediaType: 'image/svg+xml' },
+        ],
+      }).success,
+    ).toBe(false);
+
+    expect(
+      AssistantRuntimeClientCommandSchema.safeParse({
+        ...parsed,
+        selectedEntities: [{ entityType: 'conversation', id: 'conversation-2' }],
+      }).success,
+    ).toBe(false);
+
+    expect(
+      AssistantRuntimeClientCommandSchema.safeParse({
+        ...parsed,
+        attachments: [
+          { data: `data:text/plain;base64,${'a'.repeat(950_000)}`, mediaType: 'text/plain' },
+          { data: `data:text/plain;base64,${'a'.repeat(950_000)}`, mediaType: 'text/plain' },
+        ],
+      }).success,
+    ).toBe(false);
+
+    expect(
+      AssistantRuntimeClientCommandSchema.safeParse({
+        ...parsed,
+        content: '',
+      }).success,
+    ).toBe(true);
+
+    expect(
+      AssistantRuntimeClientCommandSchema.safeParse({
+        type: 'message',
+        conversationId: 'conversation-1',
+        content: '   ',
+        surface: 'web',
+      }).success,
+    ).toBe(false);
+  });
+
   it('rejects identity injection and private fields on assistant history transport', () => {
     expect(
       AssistantRuntimeHistoryClientRequestSchema.safeParse({

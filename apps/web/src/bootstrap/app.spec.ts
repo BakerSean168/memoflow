@@ -51,6 +51,15 @@ const mocks = vi.hoisted(() => {
     })),
     usePresentationPreferenceStore: vi.fn(() => ({ theme: 'dark', locale: 'zh-CN' })),
     applyThemeMode: vi.fn(),
+    presentWebLiveNotification: vi.fn(),
+    executeWebNotificationAction: vi.fn(async () => ({
+      ok: true,
+      data: {
+        interaction: {
+          outcome: 'accepted',
+        },
+      },
+    })),
     createNotificationStartupHook: vi.fn(() => notificationHook),
     installWebServerStateRuntime: vi.fn(() => serverStateRuntime),
     getWebServerStateRuntime: vi.fn(() => serverStateRuntime),
@@ -95,6 +104,7 @@ vi.mock('@memoflow/app-vue/web-bootstrap', () => ({
   createAppRouter: mocks.createAppRouter,
   useAuthenticationStore: mocks.useAuthenticationStore,
   applyThemeMode: mocks.applyThemeMode,
+  presentWebLiveNotification: mocks.presentWebLiveNotification,
   usePresentationPreferenceStore: mocks.usePresentationPreferenceStore,
 }));
 
@@ -124,6 +134,7 @@ vi.mock('../App.vue', () => ({
 
 vi.mock('../platform/di-app', () => ({
   installAppServices: { name: 'install-app-services' },
+  executeWebNotificationAction: mocks.executeWebNotificationAction,
 }));
 
 vi.mock('../platform/server-state', () => ({
@@ -194,6 +205,7 @@ describe('bootstrapMainApp', () => {
     expect(mocks.createNotificationSseInvalidationSource).toHaveBeenCalledWith(
       expect.objectContaining({
         url: expect.stringContaining('/api/v1/notifications/sse'),
+        presentInAppDispatch: expect.any(Function),
       }),
     );
     expect(mocks.sseSource.start).toHaveBeenCalledTimes(1);
@@ -204,7 +216,31 @@ describe('bootstrapMainApp', () => {
     // SSE cursor is scoped by identity (P2-5): writing under the identity key round-trips.
     const sseOptions = mocks.createNotificationSseInvalidationSource.mock.calls[0]?.[0] as {
       cursorStore: { get(): string | undefined; set(cursor: string): void };
+      presentInAppDispatch(event: unknown): void;
     };
+    const liveEvent = { id: 'n-live', title: 'Stand & Move' };
+    sseOptions.presentInAppDispatch(liveEvent);
+    expect(mocks.presentWebLiveNotification).toHaveBeenCalledWith(
+      liveEvent,
+      expect.objectContaining({
+        executeAction: mocks.executeWebNotificationAction,
+        onActionSettled: expect.any(Function),
+        translate: mocks.translateMessageKey,
+      }),
+    );
+    const presenterOptions = mocks.presentWebLiveNotification.mock.calls[0]?.[1] as {
+      onActionSettled?: (request: { notificationId: string; actionKey: string }) => void;
+    };
+    presenterOptions.onActionSettled?.({
+      notificationId: 'n-live',
+      actionKey: 'complete',
+    });
+    expect(mocks.serverStateRuntime.dispatcher.invalidate).toHaveBeenCalledWith({
+      target: 'notification',
+      identityScope: 'cloud-1',
+      source: 'mutation',
+      entityId: 'n-live',
+    });
     const identityCursorKey = `memoflow:notifications:sse-cursor:${mocks.authStore.getIdentityId ?? ''}`;
     sseOptions.cursorStore.set('cursor-1');
     expect(localStorage.getItem(identityCursorKey)).toBe('cursor-1');

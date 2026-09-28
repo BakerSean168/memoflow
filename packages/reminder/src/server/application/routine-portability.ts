@@ -8,6 +8,10 @@ import {
   type PortableReferenceV3,
 } from '@memoflow/contracts/data-portability';
 import { TimeZoneIdSchema, YmdSchema } from '@memoflow/contracts/primitives';
+import {
+  ROUTINE_DESCRIPTION_MAX_LENGTH,
+  ROUTINE_NAME_MAX_LENGTH,
+} from '@memoflow/contracts/routine';
 import type {
   ProfileMembership,
   RoutineDefinition,
@@ -18,6 +22,7 @@ import type {
 import {
   ProfileMembership as ProfileMembershipEntity,
   RoutineDefinition as RoutineDefinitionEntity,
+  RoutinePreferences,
   RoutineProfile as RoutineProfileEntity,
   createTemporaryOverride,
 } from '../domain/routine';
@@ -28,6 +33,7 @@ import {
   ROUTINE_OCCURRENCE_TRIGGER_KINDS,
   type RoutineOccurrenceFact,
   type RoutineOccurrenceTruthStore,
+  type RoutinePreferencesStore,
   type RoutineProfileStore,
   type RoutineTemporaryOverrideStore,
 } from '../domain/ports';
@@ -41,7 +47,7 @@ const HmSchema = z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/);
 const RecurrenceFrequencySchema = z.enum(['daily', 'weekly', 'monthly', 'yearly']);
 const WeekdaySchema = z.number().int().min(0).max(6);
 
-const RoutineTriggerPortableSchema = z.discriminatedUnion('type', [
+const RoutineTriggerPortableSchema = z.union([
   z
     .object({
       type: z.literal('WallClock'),
@@ -60,14 +66,24 @@ const RoutineTriggerPortableSchema = z.discriminatedUnion('type', [
         .strict(),
     })
     .strict(),
-  z
-    .object({
-      type: z.literal('Elapsed'),
-      timingOwner: z.literal('local-runtime'),
-      durationMs: z.number().finite().positive(),
-      anchor: z.enum(['routine-activation', 'profile-activation', 'last-satisfied']),
-    })
-    .strict(),
+  z.union([
+    z
+      .object({
+        type: z.literal('Elapsed'),
+        timingOwner: z.literal('scheduler'),
+        durationMs: z.number().finite().positive(),
+        anchor: z.enum(['routine-activation', 'last-satisfied']),
+      })
+      .strict(),
+    z
+      .object({
+        type: z.literal('Elapsed'),
+        timingOwner: z.literal('local-runtime'),
+        durationMs: z.number().finite().positive(),
+        anchor: z.literal('profile-activation'),
+      })
+      .strict(),
+  ]),
   z
     .object({
       type: z.literal('ActiveUsage'),
@@ -75,7 +91,10 @@ const RoutineTriggerPortableSchema = z.discriminatedUnion('type', [
       requiredActiveMs: z.number().finite().positive(),
       anchor: z.enum(['profile-activation', 'last-satisfied']),
       naturalBreakCredit: z
-        .object({ idleDurationMs: z.number().finite().positive(), effect: z.literal('satisfy-and-reset') })
+        .object({
+          idleDurationMs: z.number().finite().positive(),
+          effect: z.literal('satisfy-and-reset'),
+        })
         .strict()
         .nullable(),
       protocolBreakCredit: z
@@ -131,18 +150,19 @@ const RoutineTemporaryOverridePortableSchema = z
 const RoutinePortableDefinitionSchema = z
   .object({
     ref: RoutinePortableReferenceV3Schema,
-    name: z.string().trim().min(1).max(200),
-    description: z.string().nullable(),
+    name: z.string().trim().min(1).max(ROUTINE_NAME_MAX_LENGTH),
+    description: z.string().max(ROUTINE_DESCRIPTION_MAX_LENGTH).nullable(),
     enabled: z.boolean(),
     trigger: RoutineTriggerPortableSchema.nullable(),
+    activatedAt: PortableInstantSchema.nullable().optional(),
   })
   .strict();
 
 const RoutinePortableProfileSchema = z
   .object({
     ref: RoutinePortableReferenceV3Schema,
-    name: z.string().trim().min(1).max(200),
-    description: z.string().nullable(),
+    name: z.string().trim().min(1).max(ROUTINE_NAME_MAX_LENGTH),
+    description: z.string().max(ROUTINE_DESCRIPTION_MAX_LENGTH).nullable(),
     enabled: z.boolean(),
   })
   .strict();
@@ -206,6 +226,12 @@ const RoutinePortableInteractionSchema = z
 
 export const RoutinePortablePayloadV3Schema = z
   .object({
+    preferences: z
+      .object({
+        globalEnabled: z.boolean(),
+      })
+      .strict()
+      .default({ globalEnabled: true }),
     definitions: z.array(RoutinePortableDefinitionSchema),
     profiles: z.array(RoutinePortableProfileSchema),
     memberships: z.array(RoutinePortableMembershipSchema),
@@ -218,7 +244,11 @@ export const RoutinePortablePayloadV3Schema = z
     const refs = new Set<string>();
     const addRef = (ref: string, path: (string | number)[]) => {
       if (refs.has(ref)) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, path, message: `Duplicate Routine ref: ${ref}` });
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path,
+          message: `Duplicate Routine ref: ${ref}`,
+        });
       }
       refs.add(ref);
     };
@@ -341,7 +371,11 @@ function stableUuid(seed: string): string {
   return `${raw.slice(0, 8)}-${raw.slice(8, 12)}-${raw.slice(12, 16)}-${raw.slice(16, 20)}-${raw.slice(20)}`;
 }
 
-function targetId(context: PortableCapabilityExecutionContext, ref: PortableReferenceV3, kind: string): string {
+function targetId(
+  context: PortableCapabilityExecutionContext,
+  ref: PortableReferenceV3,
+  kind: string,
+): string {
   if (!context.batchId) throw new Error('routines@3 requires a portability batch id');
   return `portable-${kind}-${stableUuid(`portable:${context.identityId}:${context.batchId}:routine:${kind}:${ref}`)}`;
 }
@@ -355,9 +389,13 @@ function occurrenceKey(routineId: string, key: string): string {
   return `${routineId}\u0000${key}`;
 }
 
-function portableTrigger(trigger: RoutineTrigger | null): RoutinePortablePayloadV3['definitions'][number]['trigger'] {
+function portableTrigger(
+  trigger: RoutineTrigger | null,
+): RoutinePortablePayloadV3['definitions'][number]['trigger'] {
   if (!trigger) return null;
-  return JSON.parse(JSON.stringify(trigger)) as RoutinePortablePayloadV3['definitions'][number]['trigger'];
+  return JSON.parse(
+    JSON.stringify(trigger),
+  ) as RoutinePortablePayloadV3['definitions'][number]['trigger'];
 }
 
 function portableDefinitionSortKey(definition: RoutineDefinition): string {
@@ -409,24 +447,36 @@ function same(left: unknown, right: unknown): boolean {
   return JSON.stringify(left) === JSON.stringify(right);
 }
 
-function assertDefinitionMatches(definition: RoutineDefinition, incoming: RoutinePortablePayloadV3['definitions'][number]): void {
+function assertDefinitionMatches(
+  definition: RoutineDefinition,
+  incoming: RoutinePortablePayloadV3['definitions'][number],
+): void {
   if (
     definition.name !== incoming.name ||
     definition.description !== incoming.description ||
     definition.enabled !== incoming.enabled ||
-    !same(portableTrigger(definition.trigger), incoming.trigger)
+    !same(portableTrigger(definition.trigger), incoming.trigger) ||
+    (incoming.activatedAt !== undefined &&
+      (definition.activatedAt?.getTime() ?? null) !== incoming.activatedAt)
   ) {
-    throw new Error(`routines@3 deterministic target conflicts with portable definition ${incoming.ref}`);
+    throw new Error(
+      `routines@3 deterministic target conflicts with portable definition ${incoming.ref}`,
+    );
   }
 }
 
-function assertProfileMatches(profile: RoutineProfile, incoming: RoutinePortablePayloadV3['profiles'][number]): void {
+function assertProfileMatches(
+  profile: RoutineProfile,
+  incoming: RoutinePortablePayloadV3['profiles'][number],
+): void {
   if (
     profile.name !== incoming.name ||
     profile.description !== incoming.description ||
     profile.enabled !== incoming.enabled
   ) {
-    throw new Error(`routines@3 deterministic target conflicts with portable profile ${incoming.ref}`);
+    throw new Error(
+      `routines@3 deterministic target conflicts with portable profile ${incoming.ref}`,
+    );
   }
 }
 
@@ -437,10 +487,13 @@ function assertOccurrenceIdentityMatches(
   if (
     current.occurrenceKey !== incoming.occurrenceKey ||
     current.triggerKind !== incoming.triggerKind ||
-    (current.scheduledFor == null ? null : Number(current.scheduledFor)) !== incoming.scheduledFor ||
+    (current.scheduledFor == null ? null : Number(current.scheduledFor)) !==
+      incoming.scheduledFor ||
     Number(current.becameDueAt) !== incoming.becameDueAt
   ) {
-    throw new Error(`routines@3 occurrence target conflicts with portable occurrence ${incoming.ref}`);
+    throw new Error(
+      `routines@3 occurrence target conflicts with portable occurrence ${incoming.ref}`,
+    );
   }
 }
 
@@ -460,7 +513,9 @@ function assertOccurrenceCanConverge(
   if (current.resolutionState === 'Open' && incoming.resolutionState !== 'Open') {
     return 'resolve';
   }
-  throw new Error(`routines@3 occurrence target conflicts with portable occurrence ${incoming.ref}`);
+  throw new Error(
+    `routines@3 occurrence target conflicts with portable occurrence ${incoming.ref}`,
+  );
 }
 
 function interactionInput(
@@ -502,35 +557,56 @@ export class RoutinePortableCapability implements PortableCapability<RoutinePort
     private readonly profileStore: RoutineProfileStore,
     private readonly overrideStore: RoutineTemporaryOverrideStore,
     private readonly occurrenceStore: RoutineOccurrenceTruthStore,
+    private readonly preferencesStore?: RoutinePreferencesStore,
   ) {}
 
   async export(context: PortableCapabilityExecutionContext): Promise<RoutinePortablePayloadV3> {
-    const definitions = (await this.profileStore.listDefinitions({ identityId: context.identityId }))
+    const preferences = this.preferencesStore
+      ? await this.preferencesStore.find({ identityId: context.identityId })
+      : null;
+    const definitions = (
+      await this.profileStore.listDefinitions({ identityId: context.identityId })
+    )
       .slice()
       .sort((a, b) => portableDefinitionSortKey(a).localeCompare(portableDefinitionSortKey(b)));
     const profiles = (await this.profileStore.listProfiles({ identityId: context.identityId }))
       .slice()
       .sort((a, b) => portableProfileSortKey(a).localeCompare(portableProfileSortKey(b)));
-    const definitionRefs = new Map(definitions.map((definition) => [definition.id, context.references.declareExportReference(this.key, definition.id)]));
-    const profileRefs = new Map(profiles.map((profile) => [profile.id, context.references.declareExportReference(this.key, profile.id)]));
+    const definitionRefs = new Map(
+      definitions.map((definition) => [
+        definition.id,
+        context.references.declareExportReference(this.key, definition.id),
+      ]),
+    );
+    const profileRefs = new Map(
+      profiles.map((profile) => [
+        profile.id,
+        context.references.declareExportReference(this.key, profile.id),
+      ]),
+    );
     const routineIds = definitions.map((definition) => definition.id);
     const memberships = await this.profileStore.listMembershipsForRoutines({
       identityId: context.identityId,
       routineIds,
     });
 
-    const occurrences = (await this.occurrenceStore.listOccurrences({ identityId: context.identityId }))
+    const occurrences = (
+      await this.occurrenceStore.listOccurrences({ identityId: context.identityId })
+    )
       .slice()
       .sort((a, b) => {
         const leftRef = definitionRefs.get(a.routineId);
         const rightRef = definitionRefs.get(b.routineId);
         if (!leftRef || !rightRef) return a.routineId.localeCompare(b.routineId);
-        return portableOccurrenceSortKey(a, leftRef).localeCompare(portableOccurrenceSortKey(b, rightRef));
+        return portableOccurrenceSortKey(a, leftRef).localeCompare(
+          portableOccurrenceSortKey(b, rightRef),
+        );
       });
     const occurrenceRefs = new Map<string, PortableReferenceV3>();
     const portableOccurrences = occurrences.map((occurrence) => {
       const routineRef = definitionRefs.get(occurrence.routineId);
-      if (!routineRef) throw new Error(`routines@3 occurrence has unknown routine owner: ${occurrence.routineId}`);
+      if (!routineRef)
+        throw new Error(`routines@3 occurrence has unknown routine owner: ${occurrence.routineId}`);
       const ref = context.references.declareExportReference(this.key, occurrence.id);
       occurrenceRefs.set(occurrenceKey(occurrence.routineId, occurrence.occurrenceKey), ref);
       return {
@@ -547,7 +623,9 @@ export class RoutinePortableCapability implements PortableCapability<RoutinePort
       };
     });
 
-    const interactions = (await this.occurrenceStore.listInteractionsForIdentity({ identityId: context.identityId }))
+    const interactions = (
+      await this.occurrenceStore.listInteractionsForIdentity({ identityId: context.identityId })
+    )
       .slice()
       .sort((a, b) => {
         const leftOccurrenceRef = occurrenceRefs.get(occurrenceKey(a.routineId, a.occurrenceKey));
@@ -569,7 +647,9 @@ export class RoutinePortableCapability implements PortableCapability<RoutinePort
         );
       });
     const portableInteractions = interactions.map((interaction) => {
-      const occurrenceRef = occurrenceRefs.get(occurrenceKey(interaction.routineId, interaction.occurrenceKey));
+      const occurrenceRef = occurrenceRefs.get(
+        occurrenceKey(interaction.routineId, interaction.occurrenceKey),
+      );
       if (!occurrenceRef) {
         throw new Error(
           `routines@3 interaction has unknown occurrence owner: ${interaction.routineId}:${interaction.occurrenceKey}`,
@@ -599,12 +679,14 @@ export class RoutinePortableCapability implements PortableCapability<RoutinePort
     }
 
     return RoutinePortablePayloadV3Schema.parse({
+      preferences: { globalEnabled: preferences?.globalEnabled ?? true },
       definitions: definitions.map((definition) => ({
         ref: definitionRefs.get(definition.id),
         name: definition.name,
         description: definition.description,
         enabled: definition.enabled,
         trigger: portableTrigger(definition.trigger),
+        activatedAt: definition.activatedAt?.getTime() ?? null,
       })),
       profiles: profiles.map((profile) => ({
         ref: profileRefs.get(profile.id),
@@ -652,9 +734,23 @@ export class RoutinePortableCapability implements PortableCapability<RoutinePort
     let updated = 0;
     let skipped = 0;
 
+    if (this.preferencesStore) {
+      const currentPreferences = await this.preferencesStore.find({
+        identityId: context.identityId,
+      });
+      if (!currentPreferences) created += 1;
+      else if (currentPreferences.globalEnabled === target.preferences.globalEnabled) skipped += 1;
+      else updated += 1;
+    } else if (target.preferences.globalEnabled === false) {
+      throw new Error('routines@3 global preferences store is unavailable');
+    }
+
     for (const definition of target.definitions) {
       const id = targetId(context, definition.ref, 'definition');
-      const current = await this.profileStore.findDefinition({ identityId: context.identityId, routineId: id });
+      const current = await this.profileStore.findDefinition({
+        identityId: context.identityId,
+        routineId: id,
+      });
       if (current) {
         assertDefinitionMatches(current, definition);
         skipped += 1;
@@ -663,7 +759,10 @@ export class RoutinePortableCapability implements PortableCapability<RoutinePort
     }
     for (const profile of target.profiles) {
       const id = targetId(context, profile.ref, 'profile');
-      const current = await this.profileStore.findProfile({ identityId: context.identityId, profileId: id });
+      const current = await this.profileStore.findProfile({
+        identityId: context.identityId,
+        profileId: id,
+      });
       if (current) {
         assertProfileMatches(current, profile);
         skipped += 1;
@@ -673,10 +772,15 @@ export class RoutinePortableCapability implements PortableCapability<RoutinePort
 
     const memberships = await this.profileStore.listMembershipsForRoutines({
       identityId: context.identityId,
-      routineIds: target.definitions.map((definition) => targetId(context, definition.ref, 'definition')),
+      routineIds: target.definitions.map((definition) =>
+        targetId(context, definition.ref, 'definition'),
+      ),
     });
     const existingMemberships = new Map(
-      memberships.map((membership) => [`${membership.routineId}\u0000${membership.profileId}`, membership]),
+      memberships.map((membership) => [
+        `${membership.routineId}\u0000${membership.profileId}`,
+        membership,
+      ]),
     );
     const desiredMembershipKeys = new Set<string>();
     for (const membership of target.memberships) {
@@ -691,7 +795,8 @@ export class RoutinePortableCapability implements PortableCapability<RoutinePort
     }
     // A portable payload is a complete owner snapshot for the M:N edge set.
     for (const current of existingMemberships.values()) {
-      if (!desiredMembershipKeys.has(`${current.routineId}\u0000${current.profileId}`)) updated += 1;
+      if (!desiredMembershipKeys.has(`${current.routineId}\u0000${current.profileId}`))
+        updated += 1;
     }
 
     for (const definition of target.definitions) {
@@ -703,7 +808,8 @@ export class RoutinePortableCapability implements PortableCapability<RoutinePort
       const incoming = overridesByRoutineRef.get(definition.ref);
       if (!current && incoming) created += 1;
       else if (current && !incoming) updated += 1;
-      else if (current && incoming && !same(portableOverride(definition.ref, current), incoming)) updated += 1;
+      else if (current && incoming && !same(portableOverride(definition.ref, current), incoming))
+        updated += 1;
       else if (current && incoming) skipped += 1;
     }
 
@@ -728,11 +834,17 @@ export class RoutinePortableCapability implements PortableCapability<RoutinePort
     const existingInteractions = await this.occurrenceStore.listInteractionsForIdentity({
       identityId: context.identityId,
     });
-    const existingByKey = new Map(existingInteractions.map((interaction) => [interaction.idempotencyKey, interaction]));
+    const existingByKey = new Map(
+      existingInteractions.map((interaction) => [interaction.idempotencyKey, interaction]),
+    );
     for (const interaction of target.interactions) {
-      const occurrence = target.occurrences.find((candidate) => candidate.ref === interaction.occurrenceRef);
+      const occurrence = target.occurrences.find(
+        (candidate) => candidate.ref === interaction.occurrenceRef,
+      );
       if (!occurrence) {
-        throw new Error(`routines@3 interaction references an unknown occurrence: ${interaction.occurrenceRef}`);
+        throw new Error(
+          `routines@3 interaction references an unknown occurrence: ${interaction.occurrenceRef}`,
+        );
       }
       const routineId = context.references.resolveImportedReference(occurrence.routineRef);
       context.references.resolveImportedReference(interaction.occurrenceRef);
@@ -746,7 +858,9 @@ export class RoutinePortableCapability implements PortableCapability<RoutinePort
           current.responseLatencyMs !== interaction.responseLatencyMs ||
           current.snoozeDurationMs !== interaction.snoozeDurationMs
         ) {
-          throw new Error(`routines@3 interaction target conflicts with portable interaction ${interaction.ref}`);
+          throw new Error(
+            `routines@3 interaction target conflicts with portable interaction ${interaction.ref}`,
+          );
         }
         skipped += 1;
       } else created += 1;
@@ -758,10 +872,18 @@ export class RoutinePortableCapability implements PortableCapability<RoutinePort
 
     // Keep these maps live in the validation path so a future schema extension
     // cannot silently bypass its owner-reference graph checks.
-    if (definitionsByRef.size !== target.definitions.length || profilesByRef.size !== target.profiles.length) {
+    if (
+      definitionsByRef.size !== target.definitions.length ||
+      profilesByRef.size !== target.profiles.length
+    ) {
       throw new Error('routines@3 portable reference graph is not unique');
     }
-    return { created, updated, skipped, warnings: ['RuntimeContext and scheduler reliability state are not portable.'] };
+    return {
+      created,
+      updated,
+      skipped,
+      warnings: ['RuntimeContext and scheduler reliability state are not portable.'],
+    };
   }
 
   async apply(
@@ -775,9 +897,40 @@ export class RoutinePortableCapability implements PortableCapability<RoutinePort
     let skipped = 0;
     const overrideByRoutineRef = new Map(target.overrides.map((item) => [item.routineRef, item]));
 
+    if (this.preferencesStore) {
+      const currentPreferences = await this.preferencesStore.find({
+        identityId: context.identityId,
+      });
+      if (!currentPreferences) {
+        await this.preferencesStore.create({
+          preferences: RoutinePreferences.create({
+            identityId: context.identityId,
+            globalEnabled: target.preferences.globalEnabled,
+            now,
+          }),
+        });
+        created += 1;
+      } else if (currentPreferences.globalEnabled === target.preferences.globalEnabled) {
+        skipped += 1;
+      } else {
+        const expectedVersion = currentPreferences.version;
+        currentPreferences.setGlobalEnabled(target.preferences.globalEnabled, now);
+        await this.preferencesStore.update({
+          preferences: currentPreferences,
+          expectedVersion,
+        });
+        updated += 1;
+      }
+    } else if (target.preferences.globalEnabled === false) {
+      throw new Error('routines@3 global preferences store is unavailable');
+    }
+
     for (const definition of target.definitions) {
       const id = targetId(context, definition.ref, 'definition');
-      const current = await this.profileStore.findDefinition({ identityId: context.identityId, routineId: id });
+      const current = await this.profileStore.findDefinition({
+        identityId: context.identityId,
+        routineId: id,
+      });
       if (current) {
         assertDefinitionMatches(current, definition);
         skipped += 1;
@@ -790,6 +943,8 @@ export class RoutinePortableCapability implements PortableCapability<RoutinePort
             description: definition.description,
             enabled: definition.enabled,
             trigger: definition.trigger as RoutineTrigger | null,
+            activatedAt:
+              definition.activatedAt == null ? undefined : new Date(definition.activatedAt),
             now,
           }),
         );
@@ -799,7 +954,10 @@ export class RoutinePortableCapability implements PortableCapability<RoutinePort
     }
     for (const profile of target.profiles) {
       const id = targetId(context, profile.ref, 'profile');
-      const current = await this.profileStore.findProfile({ identityId: context.identityId, profileId: id });
+      const current = await this.profileStore.findProfile({
+        identityId: context.identityId,
+        profileId: id,
+      });
       if (current) {
         assertProfileMatches(current, profile);
         skipped += 1;
@@ -838,7 +996,9 @@ export class RoutinePortableCapability implements PortableCapability<RoutinePort
     }
     const currentMemberships = await this.profileStore.listMembershipsForRoutines({
       identityId: context.identityId,
-      routineIds: target.definitions.map((definition) => context.references.resolveImportedReference(definition.ref)),
+      routineIds: target.definitions.map((definition) =>
+        context.references.resolveImportedReference(definition.ref),
+      ),
     });
     const currentMembershipsByRoutine = new Map<string, ProfileMembership[]>();
     for (const membership of currentMemberships) {
@@ -850,8 +1010,12 @@ export class RoutinePortableCapability implements PortableCapability<RoutinePort
       const routineId = context.references.resolveImportedReference(routineRef);
       const desired = membershipsByRoutine.get(routineRef) ?? [];
       const current = currentMembershipsByRoutine.get(routineId) ?? [];
-      const currentComparable = current.map(membershipSnapshot).sort((a, b) => a.profileId.localeCompare(b.profileId));
-      const desiredComparable = desired.map(membershipSnapshot).sort((a, b) => a.profileId.localeCompare(b.profileId));
+      const currentComparable = current
+        .map(membershipSnapshot)
+        .sort((a, b) => a.profileId.localeCompare(b.profileId));
+      const desiredComparable = desired
+        .map(membershipSnapshot)
+        .sort((a, b) => a.profileId.localeCompare(b.profileId));
       if (same(currentComparable, desiredComparable)) {
         skipped += current.length > 0 || desired.length > 0 ? 1 : 0;
       } else {
@@ -882,7 +1046,10 @@ export class RoutinePortableCapability implements PortableCapability<RoutinePort
         if (current) updated += 1;
         else created += 1;
       } else if (current) {
-        await this.overrideStore.clearRoutineTemporaryOverride({ identityId: context.identityId, routineId });
+        await this.overrideStore.clearRoutineTemporaryOverride({
+          identityId: context.identityId,
+          routineId,
+        });
         updated += 1;
       }
     }
@@ -931,11 +1098,18 @@ export class RoutinePortableCapability implements PortableCapability<RoutinePort
     const existingInteractions = await this.occurrenceStore.listInteractionsForIdentity({
       identityId: context.identityId,
     });
-    const existingByKey = new Map(existingInteractions.map((interaction) => [interaction.idempotencyKey, interaction]));
+    const existingByKey = new Map(
+      existingInteractions.map((interaction) => [interaction.idempotencyKey, interaction]),
+    );
     for (const interaction of target.interactions) {
       const current = existingByKey.get(interactionInput(context, interaction.ref));
-      const occurrence = target.occurrences.find((candidate) => candidate.ref === interaction.occurrenceRef);
-      if (!occurrence) throw new Error(`routines@3 interaction references an unknown occurrence: ${interaction.occurrenceRef}`);
+      const occurrence = target.occurrences.find(
+        (candidate) => candidate.ref === interaction.occurrenceRef,
+      );
+      if (!occurrence)
+        throw new Error(
+          `routines@3 interaction references an unknown occurrence: ${interaction.occurrenceRef}`,
+        );
       const routineId = context.references.resolveImportedReference(occurrence.routineRef);
       context.references.resolveImportedReference(interaction.occurrenceRef);
       if (current) {
@@ -947,7 +1121,9 @@ export class RoutinePortableCapability implements PortableCapability<RoutinePort
           current.responseLatencyMs !== interaction.responseLatencyMs ||
           current.snoozeDurationMs !== interaction.snoozeDurationMs
         ) {
-          throw new Error(`routines@3 interaction target conflicts with portable interaction ${interaction.ref}`);
+          throw new Error(
+            `routines@3 interaction target conflicts with portable interaction ${interaction.ref}`,
+          );
         }
         skipped += 1;
         context.references.bindImportedReference(interaction.ref, current.id);
@@ -955,7 +1131,9 @@ export class RoutinePortableCapability implements PortableCapability<RoutinePort
       }
       const override = overrideByRoutineRef.get(occurrence.routineRef);
       if (interaction.action === 'Snoozed' && !override) {
-        throw new Error(`routines@3 Snoozed interaction requires a portable override: ${interaction.ref}`);
+        throw new Error(
+          `routines@3 Snoozed interaction requires a portable override: ${interaction.ref}`,
+        );
       }
       const receipt = await this.occurrenceStore.applyInteraction({
         idempotencyKey: interactionInput(context, interaction.ref),
@@ -984,6 +1162,7 @@ export class RoutinePortableCapability implements PortableCapability<RoutinePort
 
 export function createRoutinePortableCapability(repositories: {
   readonly routineProfileStore: RoutineProfileStore;
+  readonly routinePreferencesStore: RoutinePreferencesStore;
   readonly routineTemporaryOverrideStore: RoutineTemporaryOverrideStore;
   readonly routineOccurrenceTruthStore: RoutineOccurrenceTruthStore;
 }): RoutinePortableCapability {
@@ -991,5 +1170,6 @@ export function createRoutinePortableCapability(repositories: {
     repositories.routineProfileStore,
     repositories.routineTemporaryOverrideStore,
     repositories.routineOccurrenceTruthStore,
+    repositories.routinePreferencesStore,
   );
 }

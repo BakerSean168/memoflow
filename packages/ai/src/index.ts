@@ -78,6 +78,10 @@ export {
   projectNotificationFact,
   projectNotificationInboxPage,
 } from './server/application/services/notification-owner-projection';
+export {
+  projectSelectedGoalContext,
+  projectSelectedTaskContext,
+} from './server/application/services/selected-entity-owner-projection';
 // Host capability ports are re-exported through the package root so desktop
 // composers import only `@memoflow/ai` (no `/ports` subpath).
 export type {
@@ -95,6 +99,9 @@ export type {
   AIModelCapabilitySnapshotInput,
   AIModelCatalogSnapshotInput,
   IKnowledgeSourcePort,
+  IAISelectedEntityContextReadPort,
+  AISelectedEntityContextProjection,
+  AISelectedEntityContextReadInput,
   IKnowledgeNotePersistencePort,
   IAIRoutineCommandPort,
   IAIPlannerReadPort,

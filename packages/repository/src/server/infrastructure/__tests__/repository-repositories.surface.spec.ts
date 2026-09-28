@@ -111,6 +111,7 @@ describe('repository factories surface', () => {
     const projectionService = {
       start: () => undefined,
       stop: () => undefined,
+      reconcileNow: async () => undefined,
     } as IKnowledgeRepositoryProjectionService;
     const noteCommitService = {} as IKnowledgeNoteCommitService;
 

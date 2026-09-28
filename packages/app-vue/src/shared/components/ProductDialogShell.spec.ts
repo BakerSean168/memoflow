@@ -77,6 +77,65 @@ describe('ProductDialogShell', () => {
 
     wrapper.unmount();
   });
+  it('supports a viewport-bounded workspace height without changing the default content mode', async () => {
+    const WorkspaceHost = defineComponent({
+      components: { AppDialog, ProductDialogShell },
+      template: `
+        <AppDialog :open="true">
+          <ProductDialogShell
+            :open="true"
+            test-id="workspace-height-dialog"
+            height-mode="workspace"
+          >
+            <template #title>Workspace form</template>
+            <div>Body</div>
+            <template #footer><button>Save</button></template>
+          </ProductDialogShell>
+        </AppDialog>
+      `,
+    });
+
+    const workspaceWrapper = mount(WorkspaceHost, { attachTo: document.body });
+    await flushPromises();
+
+    const workspaceDialog = document.body.querySelector<HTMLElement>(
+      '[data-testid="workspace-height-dialog"]',
+    )!;
+    const workspaceBody = workspaceDialog.querySelector<HTMLElement>(
+      '[data-testid="product-dialog-body"]',
+    )!;
+
+    expect(workspaceDialog.classList.contains('h-[calc(100dvh-2rem)]')).toBe(true);
+    expect(workspaceDialog.classList.contains('sm:h-[calc(100dvh-3rem)]')).toBe(true);
+    expect(workspaceDialog.classList.contains('max-h-[1100px]')).toBe(true);
+    expect(workspaceBody.classList.contains('flex-1')).toBe(true);
+    expect(workspaceBody.classList.contains('overflow-y-auto')).toBe(true);
+    workspaceWrapper.unmount();
+
+    const ContentHost = defineComponent({
+      components: { AppDialog, ProductDialogShell },
+      template: `
+        <AppDialog :open="true">
+          <ProductDialogShell :open="true" test-id="content-height-dialog">
+            <template #title>Compact form</template>
+            <div>Body</div>
+            <template #footer><button>Save</button></template>
+          </ProductDialogShell>
+        </AppDialog>
+      `,
+    });
+
+    const contentWrapper = mount(ContentHost, { attachTo: document.body });
+    await flushPromises();
+    const contentDialog = document.body.querySelector<HTMLElement>(
+      '[data-testid="content-height-dialog"]',
+    )!;
+
+    expect(contentDialog.classList.contains('max-h-[min(90vh,760px)]')).toBe(true);
+    expect(contentDialog.classList.contains('h-[calc(100dvh-2rem)]')).toBe(false);
+    contentWrapper.unmount();
+  });
+
   it('renders reusable header actions separately from the title', async () => {
     const Host = defineComponent({
       components: { AppDialog, ProductDialogShell },

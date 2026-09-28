@@ -22,7 +22,10 @@ import type { AxiosRequestConfig } from 'axios';
  * Throw 风格 IHttpClient / AxiosHttpClient 双轨已删除。
  */
 export interface IResultHttpClient {
-  get<T = unknown>(url: string, config?: { params?: Record<string, unknown> }): Promise<import('@memoflow/contracts/result').Result<T>>;
+  get<T = unknown>(
+    url: string,
+    config?: { params?: Record<string, unknown>; signal?: AbortSignal },
+  ): Promise<import('@memoflow/contracts/result').Result<T>>;
   post<T = unknown>(url: string, data?: unknown, config?: { params?: Record<string, unknown> }): Promise<import('@memoflow/contracts/result').Result<T>>;
   put<T = unknown>(url: string, data?: unknown, config?: { params?: Record<string, unknown> }): Promise<import('@memoflow/contracts/result').Result<T>>;
   patch<T = unknown>(url: string, data?: unknown, config?: { params?: Record<string, unknown> }): Promise<import('@memoflow/contracts/result').Result<T>>;

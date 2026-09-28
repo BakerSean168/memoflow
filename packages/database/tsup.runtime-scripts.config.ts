@@ -5,6 +5,7 @@ export default defineConfig({
     'scripts/prepare-ai-knowledge-index-pgvector.ts',
     'scripts/prepare-ai-vnext-runtime-state-retirement.ts',
     'scripts/prepare-goal-record-source-correlation.ts',
+    'scripts/prepare-goal-start-timeframe-semantics.ts',
     'scripts/prepare-notification-preference-hierarchy.ts',
     'scripts/prepare-vnext-unique-constraints.ts',
     'scripts/prepare-ai-provider-onboarding-sessions.ts',

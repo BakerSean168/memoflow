@@ -14,6 +14,7 @@ export {
   isPastGoalTarget,
   compareGoalTimeframesByEnd,
   goalTimeframeLabel,
+  goalTimeframeFromStartBoundary,
   goalTimeframeFromEndBoundary,
 } from './goal-timeframe';
 export type { GoalTimeframe, GoalTimeframeKind } from './goal-timeframe';
@@ -47,6 +48,10 @@ export { GoalStatus } from './goal-status';
 export { GoalSystemView } from './goal-system-view';
 
 export { KeyResultCalculationMethod } from './key-result-calculation-method';
+export {
+  KEY_RESULT_TITLE_MAX_LENGTH,
+  KEY_RESULT_DESCRIPTION_MAX_LENGTH,
+} from './key-result-limits';
 
 export { ReminderTriggerType } from './reminder-trigger-type';
 

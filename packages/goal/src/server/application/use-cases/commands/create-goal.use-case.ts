@@ -117,7 +117,7 @@ export class CreateGoalUseCase implements GoalPortabilityApplicationPort {
         name: input.name,
         summary: input.summary ?? null,
         description: input.description ?? null,
-        startDate: input.startDate ?? null,
+        start: input.start ?? null,
         target: input.target ?? null,
         reminderConfig: input.reminderConfig
           ? GoalReminderConfig.fromDTO(input.reminderConfig)
@@ -215,7 +215,7 @@ export class CreateGoalUseCase implements GoalPortabilityApplicationPort {
         name: input.name,
         summary: input.summary ?? null,
         description: input.description ?? null,
-        startDate: input.startDate ?? null,
+        start: input.start ?? null,
         target: input.target ?? null,
         reminderConfig: input.reminderConfig
           ? GoalReminderConfig.fromDTO(input.reminderConfig)

@@ -9,7 +9,7 @@ function createGoal() {
     identityId: IdentityId.of('IdentityId_550e8400-e29b-41d4-a716-446655440021'),
     name: 'Graduate',
     summary: 'Finish the degree',
-    startDate: requireYmd('2026-09-01'),
+    start: { kind: 'day', date: requireYmd('2026-09-01') },
     target: { kind: 'quarter', year: 2026, quarter: 4 },
     reminderConfig: null,
   });
@@ -81,7 +81,7 @@ describe('GOAL-7202 canonical lifecycle', () => {
 
   it('preserves Target Timeframe precision in aggregate state', () => {
     const goal = createGoal();
-    expect(goal.startDate).toBe('2026-09-01');
+    expect(goal.start).toEqual({ kind: 'day', date: '2026-09-01' });
     expect(goal.target).toEqual({ kind: 'quarter', year: 2026, quarter: 4 });
     goal.updatePlanningTime({ target: { kind: 'halfYear', year: 2027, half: 1 } });
     expect(goal.target).toEqual({ kind: 'halfYear', year: 2027, half: 1 });

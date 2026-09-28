@@ -178,6 +178,7 @@ model KnowledgeNoteProjection {
 
   @@unique([bindingId, relativePath])
   @@index([bindingId, commitSha])
+  @@index([bindingId, updatedAt], map: "knote_binding_updated_idx")
   @@index([knowledgeDocumentId])
   @@index([contentHash])
   @@map("knowledge_note_projections")

@@ -4,10 +4,10 @@
  * Goal answers only Direction + Measurement.
  * Legacy fields retired: color, importance, priority, category, tags,
  * folderId, parentGoalId, rollupPolicy.
- * Planning uses calendar-native startDate + precision-preserving target timeframe.
+ * Planning preserves semantic start/target timeframes; boundary dates are derived projections.
  */
 
-import type { TransferDate, GoalId, IdentityId, Ymd } from '../../../primitives';
+import type { TransferDate, GoalId, IdentityId } from '../../../primitives';
 import type { GoalStatus } from '../value-objects/goal-status';
 import type { KeyResultServerDTO } from '../entities/key-result-server';
 import type { GoalReviewServerDTO } from '../entities/goal-review-server';
@@ -24,7 +24,7 @@ export interface GoalServerDTO {
   summary: string | null;
   description: string | null;
   status: GoalStatus;
-  startDate: Ymd | null;
+  start: GoalTimeframe | null;
   target: GoalTimeframe | null;
   completedAt: TransferDate | null;
   archivedAt: TransferDate | null;

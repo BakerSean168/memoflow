@@ -143,6 +143,16 @@ export function getProductTodayYmd(): Ymd {
   return sessionTime.calendar.toYmd(sessionTime.now());
 }
 
+/** Current product presentation locale without exposing the TimeFacade to UI components. */
+export function getProductLocale(): string {
+  return sessionTime.presentation.locale;
+}
+
+/** Current product week-start preference without exposing the TimeFacade to UI components. */
+export function getProductWeekStartsOn(): 0 | 1 | 2 | 3 | 4 | 5 | 6 {
+  return sessionTime.context.weekStartsOn as 0 | 1 | 2 | 3 | 4 | 5 | 6;
+}
+
 export function formatProductDate(
   value: number | string | Date | null | undefined,
   empty?: EmptyLabel,

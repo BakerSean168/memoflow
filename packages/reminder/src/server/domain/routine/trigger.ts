@@ -16,8 +16,11 @@ import {
 /**
  * Timing truth is explicit in the trigger type itself.
  *
- * WallClock -> durable Scheduler (projection is Wave 3)
- * Elapsed / ActiveUsage -> deterministic desktop/local runtime (Wave 4)
+ * WallClock -> durable Scheduler.
+ * Elapsed -> owner derives from anchor semantics:
+ *   - routine-activation / last-satisfied -> durable Scheduler
+ *   - profile-activation -> deterministic local runtime
+ * ActiveUsage -> deterministic local runtime because it consumes device activity.
  */
 export type RoutineTimingOwner = 'scheduler' | 'local-runtime';
 
@@ -43,12 +46,19 @@ export interface WallClockTrigger {
 
 export type ElapsedAnchor = 'routine-activation' | 'profile-activation' | 'last-satisfied';
 
-export interface ElapsedTrigger {
-  type: 'Elapsed';
-  timingOwner: 'local-runtime';
-  durationMs: number;
-  anchor: ElapsedAnchor;
-}
+export type ElapsedTrigger =
+  | {
+      type: 'Elapsed';
+      timingOwner: 'scheduler';
+      durationMs: number;
+      anchor: 'routine-activation' | 'last-satisfied';
+    }
+  | {
+      type: 'Elapsed';
+      timingOwner: 'local-runtime';
+      durationMs: number;
+      anchor: 'profile-activation';
+    };
 
 export type ActiveUsageAnchor = 'profile-activation' | 'last-satisfied';
 
@@ -146,12 +156,20 @@ export function createElapsedTrigger(input: {
   anchor?: ElapsedAnchor;
 }): ElapsedTrigger {
   assertPositiveFinite(input.durationMs, 'durationMs');
-  return {
-    type: 'Elapsed',
-    timingOwner: 'local-runtime',
-    durationMs: input.durationMs,
-    anchor: input.anchor ?? 'last-satisfied',
-  };
+  const anchor = input.anchor ?? 'last-satisfied';
+  return anchor === 'profile-activation'
+    ? {
+        type: 'Elapsed',
+        timingOwner: 'local-runtime',
+        durationMs: input.durationMs,
+        anchor,
+      }
+    : {
+        type: 'Elapsed',
+        timingOwner: 'scheduler',
+        durationMs: input.durationMs,
+        anchor,
+      };
 }
 
 export function createActiveUsageTrigger(input: {
@@ -222,10 +240,13 @@ export function wallClockOccurrencesBetween(
   return engine.between(toRecurrenceSchedule(trigger), range);
 }
 
+export type DurableRoutineTrigger =
+  WallClockTrigger | Extract<ElapsedTrigger, { timingOwner: 'scheduler' }>;
+
 export function requiresDurableScheduleProjection(
   trigger: RoutineTrigger,
-): trigger is WallClockTrigger {
-  return trigger.type === 'WallClock';
+): trigger is DurableRoutineTrigger {
+  return trigger.timingOwner === 'scheduler';
 }
 
 export function timingOwnerOf(trigger: RoutineTrigger): RoutineTimingOwner {

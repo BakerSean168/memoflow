@@ -9,6 +9,7 @@ model RoutineDefinition {
   description String?
   enabled     Boolean  @default(true)
   triggerJson String?  @map("trigger_json")
+  activatedAt DateTime? @map("activated_at")
   version     Int      @default(1)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
@@ -22,6 +23,20 @@ model RoutineDefinition {
   @@unique([identityId, id])
   @@index([identityId, enabled])
   @@map("routine_definitions")
+}
+
+model RoutinePreference {
+  id            String   @id
+  identityId    String   @unique @map("identity_id")
+  globalEnabled Boolean  @default(true) @map("global_enabled")
+  version       Int      @default(1)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
+
+  @@index([identityId, globalEnabled])
+  @@map("routine_preferences")
 }
 
 model RoutineProfile {

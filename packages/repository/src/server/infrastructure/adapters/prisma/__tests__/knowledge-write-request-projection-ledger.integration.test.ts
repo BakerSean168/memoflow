@@ -185,8 +185,8 @@ class ThrowingProjectionRepository implements IKnowledgeNoteProjectionRepository
 
   listByIdentity(
     identityId: string,
-    options: { connectionId?: string; query?: string; limit: number },
-  ): Promise<KnowledgeNoteProjectionClientDTO[]> {
+    options: { connectionId?: string; query?: string; cursor?: string; limit: number },
+  ) {
     return this.delegate.listByIdentity(identityId, options);
   }
 
@@ -1221,7 +1221,7 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
     expect(after?.projectionAttempts).toBe(0);
 
     const projections = await runtime.projectionRepo.listByIdentity(seed.identityId, { limit: 10 });
-    expect(projections.find((p) => p.relativePath === 'notes/audit-missing.md')).toBeUndefined();
+    expect(projections.notes.find((p) => p.relativePath === 'notes/audit-missing.md')).toBeUndefined();
 
     moduleWithoutAudit.dispose();
     await runtime.close();
@@ -1266,7 +1266,7 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
     expect(after?.projectionAttempts).toBe(0);
 
     const projections = await runtime.projectionRepo.listByIdentity(seed.identityId, { limit: 10 });
-    expect(projections.find((p) => p.relativePath === 'notes/audit-write-fail.md')).toBeUndefined();
+    expect(projections.notes.find((p) => p.relativePath === 'notes/audit-write-fail.md')).toBeUndefined();
 
     moduleWithFailingAudit.dispose();
     await runtime.close();

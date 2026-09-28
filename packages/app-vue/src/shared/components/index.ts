@@ -16,4 +16,8 @@ export { default as ProductPropertyChip } from './ProductPropertyChip.vue';
 export { default as ProductAutoTextarea } from './ProductAutoTextarea.vue';
 export { default as ProductExpandableSection } from './ProductExpandableSection.vue';
 export { default as ProductDatePicker } from './ProductDatePicker.vue';
+export { default as ProductDateTimePicker } from './ProductDateTimePicker.vue';
 export { default as ProductTimeframePicker } from './ProductTimeframePicker.vue';
+export { default as ResponsiveSegmentedFilter } from './ResponsiveSegmentedFilter.vue';
+export { default as ResponsivePrimaryAction } from './ResponsivePrimaryAction.vue';
+export type { ResponsiveSegmentedFilterOption } from './responsive-segmented-filter.types';

@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  resolveGovernanceSurfacePolicy,
-  shouldRenderGovernanceSegment,
-} from './governance-surface-policy';
+import { resolveGovernanceSurfacePolicy } from './governance-surface-policy';
 
 describe('Governance development/diagnostic surface policy (GOV-1902)', () => {
   it('keeps the route registered in every environment', () => {
@@ -11,13 +8,10 @@ describe('Governance development/diagnostic surface policy (GOV-1902)', () => {
     ).toEqual({ routeRegistered: true, navigationVisible: false });
   });
 
-  it('hides the normal Note navigation entry in production but keeps a direct Governance route self-describing', () => {
-    const productionPolicy = resolveGovernanceSurfacePolicy({
-      isDevelopment: false,
-      diagnosticSurfaceEnabled: false,
-    });
-    expect(shouldRenderGovernanceSegment('notes', productionPolicy)).toBe(false);
-    expect(shouldRenderGovernanceSegment('governance', productionPolicy)).toBe(true);
+  it('hides normal Governance navigation in production', () => {
+    expect(
+      resolveGovernanceSurfacePolicy({ isDevelopment: false, diagnosticSurfaceEnabled: false }),
+    ).toEqual({ routeRegistered: true, navigationVisible: false });
   });
 
   it('advertises Governance in development', () => {

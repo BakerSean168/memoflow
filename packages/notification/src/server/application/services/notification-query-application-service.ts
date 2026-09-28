@@ -1,10 +1,14 @@
 import type {
   NotificationClientDTO,
+  NotificationInteractionDTO,
   NotificationQuery,
 } from '@memoflow/contracts/notification';
 import type { Result } from '@memoflow/contracts/result';
 import { fail, ok } from '@memoflow/contracts/result';
-import type { INotificationRepository } from '../../domain/repositories';
+import type {
+  INotificationInteractionRepository,
+  INotificationRepository,
+} from '../../domain/repositories';
 import { toNotificationClientDTO } from '../use-cases/commands/notification-dto-converters';
 
 export interface NotificationListQuery extends NotificationQuery {
@@ -28,7 +32,10 @@ const IMPORTANCE_ORDER: Record<string, number> = {
 };
 
 export class NotificationQueryApplicationService {
-  constructor(private readonly notificationRepository: INotificationRepository) {}
+  constructor(
+    private readonly notificationRepository: INotificationRepository,
+    private readonly interactionRepository: INotificationInteractionRepository,
+  ) {}
 
   async listNotifications(query: NotificationListQuery): Promise<Result<NotificationListPage>> {
     if (!query.identityId) {
@@ -43,38 +50,57 @@ export class NotificationQueryApplicationService {
     const offset = Math.max((page - 1) * pageSize, 0);
     const archiveState = query.archiveState ?? 'active';
 
-    const notifications = query.relatedEntityType && query.relatedEntityId
-      ? await this.notificationRepository.findByRelatedEntity(
-          query.identityId,
-          query.relatedEntityType,
-          query.relatedEntityId,
-          { archiveState },
-        )
-      : await this.notificationRepository.findByIdentityId(query.identityId, {
-          includeDeleted: false,
-          includeRead: query.isRead === false ? false : true,
-          archiveState,
-        });
+    const notifications =
+      query.relatedEntityType && query.relatedEntityId
+        ? await this.notificationRepository.findByRelatedEntity(
+            query.identityId,
+            query.relatedEntityType,
+            query.relatedEntityId,
+            { archiveState },
+          )
+        : await this.notificationRepository.findByIdentityId(query.identityId, {
+            includeDeleted: false,
+            includeRead: query.isRead === false ? false : true,
+            archiveState,
+          });
 
     const filtered = notifications
       .map((notification) => toNotificationClientDTO(notification.toServerDTO()))
       .filter((notification) => notification.identityId === query.identityId)
       .filter((notification) => notification.deletedAt === null)
-      .filter((notification) => archiveState === 'all' || (archiveState === 'archived' ? notification.archivedAt !== null : notification.archivedAt === null))
+      .filter(
+        (notification) =>
+          archiveState === 'all' ||
+          (archiveState === 'archived'
+            ? notification.archivedAt !== null
+            : notification.archivedAt === null),
+      )
       .filter((notification) => query.isRead === undefined || notification.isRead === query.isRead)
       .filter((notification) => !query.type || notification.type === query.type)
       .filter((notification) => !query.category || notification.category === query.category)
-      .filter((notification) => !query.workflowKey || notification.workflowKey === query.workflowKey)
+      .filter(
+        (notification) => !query.workflowKey || notification.workflowKey === query.workflowKey,
+      )
       .filter((notification) => !query.topic || notification.topic === query.topic)
       .filter((notification) => this.matchesKeyword(notification, query.keyword))
-      .filter((notification) => query.startDate === undefined || notification.createdAt >= query.startDate)
-      .filter((notification) => query.endDate === undefined || notification.createdAt <= query.endDate)
+      .filter(
+        (notification) =>
+          query.startDate === undefined || notification.createdAt >= query.startDate,
+      )
+      .filter(
+        (notification) => query.endDate === undefined || notification.createdAt <= query.endDate,
+      )
       .sort((left, right) => this.compareNotifications(left, right, query.sortBy, query.sortOrder));
 
     const pagedNotifications = filtered.slice(offset, offset + pageSize);
+    const interactions = await this.interactionRepository.listByNotifications(
+      query.identityId,
+      pagedNotifications.map((notification) => String(notification.id)),
+    );
+    const presentedNotifications = this.applyInteractionState(pagedNotifications, interactions);
 
     return ok({
-      notifications: pagedNotifications,
+      notifications: presentedNotifications,
       total: filtered.length,
       page,
       pageSize,
@@ -88,7 +114,38 @@ export class NotificationQueryApplicationService {
       return fail({ code: 'NOT_FOUND', message: 'notification not found' });
     }
 
-    return ok(toNotificationClientDTO(notification.toServerDTO()));
+    const dto = toNotificationClientDTO(notification.toServerDTO());
+    const interactions = await this.interactionRepository.listByNotification(identityId, id);
+    return ok(this.applyInteractionState([dto], interactions)[0]!);
+  }
+
+  /**
+   * Owner-command interactions are durable business provenance. Once one is
+   * accepted, the source notification is handled and must not keep presenting
+   * stale Complete/Snooze buttons. Read/unread remains an independent state.
+   */
+  private applyInteractionState(
+    notifications: readonly NotificationClientDTO[],
+    interactions: readonly NotificationInteractionDTO[],
+  ): NotificationClientDTO[] {
+    const handledNotificationIds = new Set(
+      interactions
+        .filter(
+          (interaction) =>
+            interaction.actionKind === 'owner-command' && interaction.outcome === 'accepted',
+        )
+        .map((interaction) => String(interaction.notificationId)),
+    );
+
+    return notifications.map((notification) => {
+      if (!handledNotificationIds.has(String(notification.id)) || !notification.actions) {
+        return notification;
+      }
+      return {
+        ...notification,
+        actions: notification.actions.filter((action) => action.kind !== 'owner-command'),
+      };
+    });
   }
 
   private matchesKeyword(notification: NotificationClientDTO, keyword?: string): boolean {
@@ -101,8 +158,10 @@ export class NotificationQueryApplicationService {
       return true;
     }
 
-    return notification.title.toLowerCase().includes(normalized)
-      || notification.content.toLowerCase().includes(normalized);
+    return (
+      notification.title.toLowerCase().includes(normalized) ||
+      notification.content.toLowerCase().includes(normalized)
+    );
   }
 
   private compareNotifications(

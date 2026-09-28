@@ -108,15 +108,15 @@ test.describe('Local Docker core product Phase D', () => {
     await expect(taskDialog).toBeVisible();
     await expect(page.getByTestId('task-plan-title-input')).toBeFocused();
     await expect(page.getByTestId('task-plan-property-chips')).toBeVisible();
-    await expect(page.getByTestId('task-plan-property-editor')).toHaveCount(0);
+    await expect(page.getByTestId('task-reminder-popover')).toHaveCount(0);
     await page.keyboard.type(taskPlanName);
     await taskDialog.getByTestId('task-reminder-chip').press('Enter');
     await expect(taskDialog.getByTestId('task-reminder-chip')).toHaveAttribute(
       'aria-pressed',
       'true',
     );
-    await expect(page.getByTestId('task-plan-property-editor')).toBeVisible();
-    await expect(taskDialog.getByRole('heading', { name: '提醒设置', exact: true })).toBeVisible();
+    await expect(page.getByTestId('task-reminder-popover')).toBeVisible();
+    await expect(page.getByRole('heading', { name: '提醒设置', exact: true })).toBeVisible();
     await expectDialogGeometry(taskDialog);
     await expectNoSeriousAxeViolations(page, '[data-testid="task-plan-dialog"]');
 

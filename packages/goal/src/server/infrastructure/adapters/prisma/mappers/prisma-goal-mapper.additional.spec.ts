@@ -9,6 +9,7 @@ describe('PrismaGoalMapper additional coverage', () => {
       name: 'Goal',
       summary: null,
       status: 'InProgress',
+      startKind: 'day',
       startDate: '2026-01-15',
       targetKind: 'quarter',
       targetEndDate: '2026-12-31',
@@ -75,6 +76,7 @@ describe('PrismaGoalMapper additional coverage', () => {
 
     const dto = PrismaGoalMapper.toDomainDTO(row);
 
+    expect(dto.startKind).toBe('day');
     expect(dto.startDate).toBe('2026-01-15');
     expect(dto.targetKind).toBe('quarter');
     expect(dto.targetEndDate).toBe('2026-12-31');
@@ -105,6 +107,7 @@ describe('PrismaGoalMapper additional coverage', () => {
       name: 'Goal2',
       summary: 'desc',
       status: 'Completed',
+      startKind: null,
       startDate: null,
       targetKind: null,
       targetEndDate: null,
@@ -193,6 +196,7 @@ describe('PrismaGoalMapper fallback branches (R4)', () => {
       name: 'Goal',
       summary: null,
       status: 'InProgress',
+      startKind: 'day',
       startDate: '2026-01-01',
       targetKind: null,
       targetEndDate: null,
@@ -216,6 +220,7 @@ describe('PrismaGoalMapper fallback branches (R4)', () => {
     expect(raw.version).toBe(1);
     expect(raw.reminderConfig).toBeNull();
     expect(raw.keyResults).toBeNull();
+    expect(raw.startKind).toBe('day');
     expect(raw.startDate).toBe('2026-01-01');
     expect(raw.createdAt).toBe(1_000);
     expect(raw.updatedAt).toBe(2_000);

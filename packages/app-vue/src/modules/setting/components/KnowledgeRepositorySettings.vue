@@ -351,6 +351,19 @@
         </div>
 
         <div
+          v-else-if="webInstallationPending"
+          class="rounded-md border border-dashed p-5"
+          data-testid="knowledge-repository-installation-pending"
+        >
+          <p class="text-sm font-medium">
+            {{ t('setting.knowledgeRepository.pendingAuthorizationTitle') }}
+          </p>
+          <p class="mt-1 text-xs leading-5 text-muted-foreground">
+            {{ t('setting.knowledgeRepository.pendingAuthorizationDescription') }}
+          </p>
+        </div>
+
+        <div
           v-else-if="!installationRepositories.length"
           class="rounded-md border border-dashed p-5"
         >
@@ -387,9 +400,11 @@
             <Loader2 v-if="busyAction === 'start'" class="mr-2 h-4 w-4 animate-spin" />
             <ExternalLink v-else class="mr-2 h-4 w-4" />
             {{
-              connections.length
-                ? t('setting.knowledgeRepository.connectAnother')
-                : t('setting.knowledgeRepository.startConnect')
+              webInstallationPending && !desktopBridge
+                ? t('setting.knowledgeRepository.checkAuthorization')
+                : connections.length
+                  ? t('setting.knowledgeRepository.connectAnother')
+                  : t('setting.knowledgeRepository.startConnect')
             }}
           </Button>
         </div>
@@ -546,6 +561,7 @@ const isGuest = computed(() => desktopAccess.value?.profile?.profileKind === 'gu
 const connections = ref<KnowledgeRemoteBindingClientDTO[]>([]);
 const installationRepositories = ref<GitHubInstallationRepositoryDTO[]>([]);
 const pendingInstallationId = ref<string | null>(null);
+const webInstallationPending = ref(false);
 const localVaultBindingSnapshot = ref<LocalVaultBindingSnapshotDTO | null>(null);
 const localVaultBinding = computed(() => localVaultBindingSnapshot.value?.binding ?? null);
 const localVaultAvailable = computed(
@@ -567,7 +583,42 @@ const busy = computed(() => busyAction.value !== null);
 const GITHUB_NEW_PRIVATE_REPOSITORY_URL =
   'https://github.com/new?name=memory-flow-notes&visibility=private';
 const INSTALLATION_POLL_INTERVAL_MS = 1_500;
+const WEB_INSTALLATION_INTENT_SESSION_KEY =
+  'memoflow:knowledge-repository:web-installation-intent';
 let installationPollGeneration = 0;
+
+function rememberWebInstallationIntent(intentId: string): void {
+  if (desktopBridge || typeof window === 'undefined') return;
+  try {
+    window.sessionStorage.setItem(WEB_INSTALLATION_INTENT_SESSION_KEY, intentId);
+  } catch {
+    // Session persistence is a resilience aid only; the callback query remains canonical.
+  }
+}
+
+function readRememberedWebInstallationIntent(): string | null {
+  if (desktopBridge || typeof window === 'undefined') return null;
+  try {
+    return window.sessionStorage.getItem(WEB_INSTALLATION_INTENT_SESSION_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function clearRememberedWebInstallationIntent(intentId?: string): void {
+  if (desktopBridge || typeof window === 'undefined') return;
+  try {
+    if (
+      intentId &&
+      window.sessionStorage.getItem(WEB_INSTALLATION_INTENT_SESSION_KEY) !== intentId
+    ) {
+      return;
+    }
+    window.sessionStorage.removeItem(WEB_INSTALLATION_INTENT_SESSION_KEY);
+  } catch {
+    // Ignore unavailable storage; server-side intent state remains authoritative.
+  }
+}
 
 function queryValue(value: unknown): string | undefined {
   return typeof value === 'string' && value.length > 0 ? value : undefined;
@@ -697,6 +748,17 @@ async function startInstallation(): Promise<void> {
     return;
   }
 
+  if (!desktopBridge) {
+    rememberWebInstallationIntent(result.data.intentId);
+    if (result.data.requiresExternalBrowser === false) {
+      webInstallationPending.value = false;
+      await applyFinalizedInstallationIntent(result.data.intentId);
+      busyAction.value = null;
+      return;
+    }
+    webInstallationPending.value = true;
+  }
+
   if (desktopBridge) {
     if (result.data.requiresExternalBrowser !== false) {
       try {
@@ -724,6 +786,7 @@ async function applyFinalizedInstallationIntent(intentId: string): Promise<boole
   }
   pendingInstallationId.value = result.data.installationId;
   installationRepositories.value = result.data.repositories;
+  webInstallationPending.value = false;
   errorMessage.value = '';
   return true;
 }
@@ -787,6 +850,42 @@ async function createPrivateRepository(): Promise<void> {
   busyAction.value = null;
 }
 
+async function restoreRememberedWebInstallation(): Promise<void> {
+  const intentId = readRememberedWebInstallationIntent();
+  if (!intentId || installationRepositories.value.length > 0) return;
+
+  const status = await service.getKnowledgeRepositoryInstallationIntentStatus(intentId);
+  if (!status.ok) {
+    if (['NOT_FOUND', 'VALIDATION_ERROR'].includes(status.error.code)) {
+      clearRememberedWebInstallationIntent(intentId);
+    }
+    return;
+  }
+
+  if (status.data.status === 'CallbackReceived' || status.data.status === 'Finalized') {
+    webInstallationPending.value = false;
+    busyAction.value = 'complete';
+    await applyFinalizedInstallationIntent(intentId);
+    busyAction.value = null;
+    return;
+  }
+
+  if (status.data.status === 'Consumed') {
+    webInstallationPending.value = false;
+    clearRememberedWebInstallationIntent(intentId);
+    await loadConnections();
+    return;
+  }
+
+  if (status.data.status === 'Expired') {
+    webInstallationPending.value = false;
+    clearRememberedWebInstallationIntent(intentId);
+    return;
+  }
+
+  webInstallationPending.value = status.data.status === 'Pending';
+}
+
 async function completeInstallationFromQuery(): Promise<void> {
   const intentId = queryValue(route.query.installation_intent);
   const state = queryValue(route.query.state);
@@ -803,15 +902,22 @@ async function completeInstallationFromQuery(): Promise<void> {
   busyAction.value = 'complete';
   let completed = false;
   if (intentId) {
+    rememberWebInstallationIntent(intentId);
     const status = await service.getKnowledgeRepositoryInstallationIntentStatus(intentId);
     if (status.ok && ['CallbackReceived', 'Finalized'].includes(status.data.status)) {
+      webInstallationPending.value = false;
       completed = await applyFinalizedInstallationIntent(intentId);
     } else if (status.ok && status.data.status === 'Consumed') {
+      webInstallationPending.value = false;
+      clearRememberedWebInstallationIntent(intentId);
       await loadConnections();
       completed = true;
     } else if (status.ok && status.data.status === 'Expired') {
+      webInstallationPending.value = false;
+      clearRememberedWebInstallationIntent(intentId);
       errorMessage.value = t('setting.knowledgeRepository.installationExpired');
     } else {
+      webInstallationPending.value = status.ok && status.data.status === 'Pending';
       errorMessage.value = status.ok
         ? t('setting.knowledgeRepository.installationPending')
         : resultError(status, t('setting.knowledgeRepository.completeFailed'));
@@ -878,6 +984,8 @@ async function connectRepository(repository: GitHubInstallationRepositoryDTO): P
   if (result.ok) {
     installationRepositories.value = [];
     pendingInstallationId.value = null;
+    webInstallationPending.value = false;
+    clearRememberedWebInstallationIntent();
     await loadConnections();
   } else {
     errorMessage.value = resultError(result, t('setting.knowledgeRepository.connectFailed'));
@@ -1086,5 +1194,6 @@ onMounted(async () => {
   }
   await Promise.all([loadConnections(), loadLocalVault()]);
   await completeInstallationFromQuery();
+  await restoreRememberedWebInstallation();
 });
 </script>

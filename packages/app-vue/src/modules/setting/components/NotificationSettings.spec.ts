@@ -25,6 +25,12 @@ const messages = {
     notifications: {
       title: 'Notifications',
       description: 'desc',
+      browserTitle: 'This browser',
+      browserDescription: 'browser desc',
+      browserSystemNotification: 'Browser system notifications',
+      browserSystemNotificationDescription: 'browser system desc',
+      browserSecureContextRequired: 'browser requires https',
+      browserPermissionDenied: 'browser denied',
       deviceTitle: 'On this device',
       presentationMode: 'Custom',
       presentationModeDescription: 'custom desc',
@@ -204,6 +210,63 @@ describe('NotificationSettings residual 199', () => {
     expect(wrapper.find('[data-testid="notification-device-card"]').exists()).toBe(false);
     expect(service.updatePreferences).not.toHaveBeenCalled();
     expect(devicePreferencePort.update).not.toHaveBeenCalled();
+  });
+
+  it('requests browser permission from an explicit Web setting without changing server delivery preferences', async () => {
+    class TestNotification {
+      static permission: NotificationPermission = 'default';
+      static requestPermission = vi.fn(async () => {
+        TestNotification.permission = 'granted';
+        return 'granted' as const;
+      });
+    }
+    vi.stubGlobal('Notification', TestNotification);
+    Object.defineProperty(window, 'isSecureContext', {
+      configurable: true,
+      value: true,
+    });
+    localStorage.clear();
+
+    const wrapper = mountSettings(null);
+    await flushPromises();
+
+    expect(wrapper.get('[data-testid="notification-browser-card"]').exists()).toBe(true);
+    await wrapper.get('[data-testid="notification-browser-system-switch"]').trigger('click');
+    await flushPromises();
+
+    expect(TestNotification.requestPermission).toHaveBeenCalledTimes(1);
+    expect(
+      wrapper.get('[data-testid="notification-browser-system-switch"]').attributes('data-checked'),
+    ).toBe('true');
+    expect(service.updatePreferences).not.toHaveBeenCalled();
+
+    vi.unstubAllGlobals();
+    localStorage.clear();
+  });
+
+  it('keeps the browser notification control visible but disabled on an insecure Web origin', async () => {
+    class TestNotification {
+      static permission: NotificationPermission = 'default';
+      static requestPermission = vi.fn(async () => 'granted' as const);
+    }
+    vi.stubGlobal('Notification', TestNotification);
+    Object.defineProperty(window, 'isSecureContext', {
+      configurable: true,
+      value: false,
+    });
+
+    const wrapper = mountSettings(null);
+    await flushPromises();
+
+    expect(wrapper.get('[data-testid="notification-browser-card"]').text()).toContain(
+      'browser requires https',
+    );
+    expect(
+      wrapper.get('[data-testid="notification-browser-system-switch"]').attributes('disabled'),
+    ).toBeDefined();
+    expect(TestNotification.requestPermission).not.toHaveBeenCalled();
+
+    vi.unstubAllGlobals();
   });
 
   it('hides the device card when the device port fails to load', async () => {

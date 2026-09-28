@@ -1,9 +1,13 @@
 <template>
   <div
-    class="flex h-full min-h-0 flex-col overflow-hidden"
+    class="flex min-h-0 flex-col overflow-hidden"
+    :class="compact ? 'h-auto' : 'h-full'"
     data-testid="knowledge-projection-relations"
   >
-    <div class="flex min-h-11 flex-wrap items-center gap-2 border-b px-4 py-2">
+    <div
+      class="flex min-h-10 flex-wrap items-center gap-2"
+      :class="compact ? 'px-3 py-2' : 'border-b px-4 py-2'"
+    >
       <span class="text-xs font-medium text-muted-foreground">{{
         t('repository.projection.graphDepth')
       }}</span>
@@ -32,7 +36,7 @@
       <Badge v-if="graph?.truncated" variant="secondary">{{
         t('repository.projection.graphTruncated')
       }}</Badge>
-      <span v-if="graph" class="text-xs text-muted-foreground">
+      <span v-if="graph && !compact" class="text-xs text-muted-foreground">
         {{
           t('repository.projection.graphSummary', {
             nodes: graph.nodes.length,
@@ -74,8 +78,14 @@
       </div>
     </div>
     <div v-else-if="graph" class="min-h-0 flex-1 overflow-auto">
-      <div class="grid min-h-full grid-cols-1 @3xl/panel:grid-cols-2">
-        <section class="border-b p-4 @3xl/panel:border-r">
+      <div
+        class="grid min-h-full grid-cols-1"
+        :class="compact ? '' : '@3xl/panel:grid-cols-2'"
+      >
+        <section
+          class="border-b"
+          :class="compact ? 'px-3 py-3' : 'p-4 @3xl/panel:border-r'"
+        >
           <RelationHeading
             :icon="ArrowUpRight"
             :title="t('repository.projection.outgoingLinks')"
@@ -86,7 +96,7 @@
               v-for="item in directOutgoingLinks"
               :key="item.edge.id"
               type="button"
-              class="block w-full border-b px-2 py-2 text-left hover:bg-accent/60"
+              class="block w-full rounded-md px-2 py-2 text-left hover:bg-accent/60"
               :data-testid="'knowledge-projection-graph-node-' + item.node.projectionId"
               @click="emit('select', item.node.projectionId)"
             >
@@ -101,7 +111,7 @@
           </div>
         </section>
 
-        <section class="border-b p-4">
+        <section class="border-b" :class="compact ? 'px-3 py-3' : 'p-4'">
           <RelationHeading
             :icon="CornerDownLeft"
             :title="t('repository.projection.backlinks')"
@@ -112,7 +122,7 @@
               v-for="item in directBacklinks"
               :key="item.edge.id"
               type="button"
-              class="block w-full border-b px-2 py-2 text-left hover:bg-accent/60"
+              class="block w-full rounded-md px-2 py-2 text-left hover:bg-accent/60"
               :data-testid="'knowledge-projection-graph-node-' + item.node.projectionId"
               @click="emit('select', item.node.projectionId)"
             >
@@ -127,7 +137,10 @@
           </div>
         </section>
 
-        <section class="border-b p-4 @3xl/panel:border-r">
+        <section
+          class="border-b"
+          :class="compact ? 'px-3 py-3' : 'p-4 @3xl/panel:border-r'"
+        >
           <RelationHeading
             :icon="Network"
             :title="t('repository.projection.relatedNotes')"
@@ -138,7 +151,7 @@
               v-for="node in relatedNodes"
               :key="node.projectionId"
               type="button"
-              class="min-w-0 border-b px-2 py-2 text-left hover:bg-accent/60"
+              class="min-w-0 rounded-md px-2 py-2 text-left hover:bg-accent/60"
               @click="emit('select', node.projectionId)"
             >
               <span class="block truncate text-sm font-medium">{{ node.title }}</span>
@@ -153,14 +166,18 @@
           </div>
         </section>
 
-        <section class="border-b p-4">
+        <section class="border-b" :class="compact ? 'px-3 py-3' : 'p-4'">
           <RelationHeading
             :icon="Unlink"
             :title="t('repository.projection.unresolvedLinks')"
             :count="centerUnresolvedLinks.length"
           />
           <div class="mt-3 space-y-1">
-            <div v-for="link in centerUnresolvedLinks" :key="link.id" class="border-b px-2 py-2">
+            <div
+              v-for="link in centerUnresolvedLinks"
+              :key="link.id"
+              class="rounded-md px-2 py-2"
+            >
               <p class="truncate text-sm font-medium">{{ link.displayText }}</p>
               <p class="mt-0.5 truncate text-xs text-muted-foreground">
                 {{
@@ -193,7 +210,9 @@ import type {
 import { REPOSITORY_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 
-const props = defineProps<{ projectionId: string }>();
+const props = withDefaults(defineProps<{ projectionId: string; compact?: boolean }>(), {
+  compact: false,
+});
 const emit = defineEmits<{ select: [projectionId: string] }>();
 const { t } = useI18n();
 const service = useStrictInject(REPOSITORY_SERVICE_KEY, 'RepositoryService');

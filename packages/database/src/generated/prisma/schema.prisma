@@ -38,6 +38,7 @@ model Account {
   goalLabels                    GoalLabel[]
   taskLabels                    TaskLabel[]
   routineDefinitions            RoutineDefinition[]
+  routinePreference             RoutinePreference?
   routineTemporaryOverrides     RoutineTemporaryOverride[]
   routineProfiles               RoutineProfile[]
   routineProfileMemberships     RoutineProfileMembership[]
@@ -338,6 +339,7 @@ model Goal {
   summary        String?
   description    String?
   status         String    @default("Planned")
+  startKind      String?   @map("start_kind")
   startDate      String?   @map("start_date")
   targetKind     String?   @map("target_kind")
   targetEndDate  String?   @map("target_end_date")
@@ -915,15 +917,16 @@ model OperationAuditLog {
 // ==========================================
 
 model RoutineDefinition {
-  id          String   @id
-  identityId  String   @map("identity_id")
+  id          String    @id
+  identityId  String    @map("identity_id")
   name        String
   description String?
-  enabled     Boolean  @default(true)
-  triggerJson String?  @map("trigger_json")
-  version     Int      @default(1)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  enabled     Boolean   @default(true)
+  triggerJson String?   @map("trigger_json")
+  activatedAt DateTime? @map("activated_at")
+  version     Int       @default(1)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
 
   account           Account                    @relation(fields: [identityId], references: [id], onDelete: Cascade)
   memberships       RoutineProfileMembership[]
@@ -934,6 +937,20 @@ model RoutineDefinition {
   @@unique([identityId, id])
   @@index([identityId, enabled])
   @@map("routine_definitions")
+}
+
+model RoutinePreference {
+  id            String   @id
+  identityId    String   @unique @map("identity_id")
+  globalEnabled Boolean  @default(true) @map("global_enabled")
+  version       Int      @default(1)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
+
+  @@index([identityId, globalEnabled])
+  @@map("routine_preferences")
 }
 
 model RoutineProfile {
@@ -1281,6 +1298,7 @@ model KnowledgeNoteProjection {
 
   @@unique([bindingId, relativePath])
   @@index([bindingId, commitSha])
+  @@index([bindingId, updatedAt], map: "knote_binding_updated_idx")
   @@index([knowledgeDocumentId])
   @@index([contentHash])
   @@map("knowledge_note_projections")

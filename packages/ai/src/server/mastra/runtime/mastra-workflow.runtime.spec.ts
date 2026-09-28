@@ -37,7 +37,7 @@ const draft = GoalPlanDraftContentSchema.parse({
     name: 'Ship the Mastra reference workflow',
     summary: 'Make durable workflow semantics the production path.',
     status: 'Planned',
-    startDate: '2026-08-20',
+    start: { kind: 'day', date: '2026-08-20' },
     target: { kind: 'month', year: 2026, month: 9 },
     labels: [],
   },
@@ -159,7 +159,19 @@ async function createRuntime(file = join(tmpdir(), `memoflow-mastra-runtime-${ra
       createTaskPlan,
     },
     knowledgeCaptureMutationPort: { createConfirmedKnowledgeNote },
+    knowledgeSourcePort: {
+      listRelevantNotes: vi.fn(async () => []),
+      listIndexableNotes: vi.fn(async () => []),
+      getNoteById: vi.fn(async () => null),
+    },
     usageReadPort: { summarizeUsage },
+    routineCommandPort: {} as never,
+    plannerReadPort: {} as never,
+    notificationReadPort: {} as never,
+    selectedEntityContextReadPort: {
+      getSelectedEntityContext: vi.fn(async () => null),
+    },
+    analyticsReadPort: { buildContext: vi.fn() } as never,
     contextAssembler: new AIContextAssembler(TEST_USER_TIME_CONTEXT_PORT),
   });
   vi.spyOn(runtime.goalPlanner, 'plan').mockResolvedValue({

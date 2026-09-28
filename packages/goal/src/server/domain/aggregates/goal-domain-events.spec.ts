@@ -7,7 +7,7 @@ function createGoalAggregate(): Goal {
     identityId: 'IdentityId_550e8400-e29b-41d4-a716-446655440001' as any,
     name: 'Launch Goal',
     summary: 'Ship the launch plan',
-    startDate: null,
+    start: null,
     target: null,
     reminderConfig: null,
   });

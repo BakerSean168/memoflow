@@ -1,8 +1,8 @@
 /**
  * GoalReminderConfig 值对象
- * 
+ *
  * 【规范说明：Class 类型值对象 - 参考 domain-class-value-object-spec.md】
- * 
+ *
  * 目标提醒配置：包含总开关和多个触发器配置
  * 不可变性（所有修改返回新实例）
  */
@@ -17,13 +17,15 @@ import type {
 
 /**
  * GoalReminderConfig 值对象实现
- * 
+ *
  * 包含：
  * - enabled: 提醒总开关
  * - triggers: 触发器列表（支持多个不同类型的触发器）
  */
-export class GoalReminderConfig extends ValueObject<GoalReminderConfigDTO> implements IGoalReminderConfig {
-
+export class GoalReminderConfig
+  extends ValueObject<GoalReminderConfigDTO>
+  implements IGoalReminderConfig
+{
   private constructor(props: GoalReminderConfigDTO) {
     super(props);
   }
@@ -77,17 +79,10 @@ export class GoalReminderConfig extends ValueObject<GoalReminderConfigDTO> imple
       if (trigger.value < 0) {
         throw new Error('Trigger value must be non-negative');
       }
-      if (trigger.value > 100 && !this.isDayTrigger(trigger.type)) {
+      if (trigger.type === 'TimeProgressPercentage' && trigger.value > 100) {
         throw new Error('Trigger value must be between 0-100 for percentage triggers');
       }
     }
-  }
-
-  /**
-   * 判断是否为天数类型触发器
-   */
-  private static isDayTrigger(type: ReminderTriggerType): boolean {
-    return type === 'RemainingDays';
   }
 
   // ================= Getters（只读暴露）=================
@@ -123,9 +118,7 @@ export class GoalReminderConfig extends ValueObject<GoalReminderConfigDTO> imple
    * 移除触发器（根据类型和值）
    */
   public removeTrigger(type: ReminderTriggerType, value: number): GoalReminderConfig {
-    const triggers = this.props.triggers.filter(
-      (t) => !(t.type === type && t.value === value),
-    );
+    const triggers = this.props.triggers.filter((t) => !(t.type === type && t.value === value));
     return new GoalReminderConfig({ ...this.props, triggers });
   }
 
@@ -184,5 +177,4 @@ export class GoalReminderConfig extends ValueObject<GoalReminderConfigDTO> imple
       triggers: [...this.props.triggers],
     };
   }
-
 }

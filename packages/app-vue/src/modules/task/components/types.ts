@@ -110,5 +110,3 @@ export interface TaskPlanFormEmits {
 // ── 任务库列表过滤 / 视图模式（UI_PAGE_REDESIGN_PLAN §6）──
 
 export type TaskStatusFilter = 'ALL' | 'ACTIVE' | 'PAUSED' | 'CLOSED' | 'ARCHIVED';
-
-export type TaskViewMode = 'card';

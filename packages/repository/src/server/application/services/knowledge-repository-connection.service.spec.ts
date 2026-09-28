@@ -321,6 +321,75 @@ describe('KnowledgeRepositoryConnectionService', () => {
     ).resolves.toMatchObject({ ok: true });
   });
 
+  it('resumes a recent finalized Web intent without requiring a no-op GitHub Save callback', async () => {
+    let now = SERVICE_NOW;
+    const github = createGithubClient();
+    const { service } = createService(github, undefined, () => now);
+    const started = await service.startInstallation('identity-1', {
+      clientKind: 'web',
+      returnUrl: 'https://app.example.test/settings?tab=repository',
+    });
+    if (!started.ok) throw new Error('expected ok');
+    const state = new URL(started.data.installationUrl).searchParams.get('state')!;
+
+    now += 1_000;
+    await service.receiveInstallationSetup({
+      state,
+      installationId: 'installation-1',
+      setupAction: 'update',
+    });
+    await expect(
+      service.finalizeInstallationIntent('identity-1', started.data.intentId),
+    ).resolves.toMatchObject({
+      ok: true,
+      data: { installationId: 'installation-1', githubAccountId: 'github-account-1' },
+    });
+
+    now += 1_000;
+    const retried = await service.startInstallation('identity-1', {
+      clientKind: 'web',
+      returnUrl: 'https://app.example.test/settings?tab=repository',
+    });
+    expect(retried).toMatchObject({
+      ok: true,
+      data: {
+        intentId: started.data.intentId,
+        requiresExternalBrowser: false,
+        expiresAt: now + 10 * 60 * 1_000,
+      },
+    });
+    if (!retried.ok) throw new Error('expected retry');
+    expect(new URL(retried.data.installationUrl).searchParams.has('state')).toBe(false);
+    expect(github.getInstallationInventory).toHaveBeenCalledWith('installation-1');
+  });
+
+  it('does not recover a Web callback before authenticated finalize', async () => {
+    let now = SERVICE_NOW;
+    const { service } = createService(createGithubClient(), undefined, () => now);
+    const started = await service.startInstallation('identity-1', {
+      clientKind: 'web',
+      returnUrl: 'https://app.example.test/settings?tab=repository',
+    });
+    if (!started.ok) throw new Error('expected ok');
+    const state = new URL(started.data.installationUrl).searchParams.get('state')!;
+
+    now += 1_000;
+    await service.receiveInstallationSetup({
+      state,
+      installationId: 'installation-1',
+      setupAction: 'update',
+    });
+
+    const retried = await service.startInstallation('identity-1', {
+      clientKind: 'web',
+      returnUrl: 'https://app.example.test/settings?tab=repository',
+    });
+    expect(retried).toMatchObject({ ok: true, data: { requiresExternalBrowser: true } });
+    if (!retried.ok) throw new Error('expected retry');
+    expect(retried.data.intentId).not.toBe(started.data.intentId);
+    expect(new URL(retried.data.installationUrl).searchParams.has('state')).toBe(true);
+  });
+
   it('resumes a recent verified Desktop callback after TTL without requiring another GitHub update', async () => {
     let now = SERVICE_NOW;
     const github = createGithubClient();

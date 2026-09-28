@@ -4,7 +4,6 @@ import { createMockRepo } from '@memoflow/test-utils/mocks';
 import type { IGoalRepository } from '../../../../domain/repositories/i-goal-repository';
 import { Goal, GoalLabelOwnershipError, GoalPolicy } from '../../../../domain';
 import { UpdateGoalUseCase } from '../update-goal.use-case';
-import { requireYmd } from '@memoflow/contracts/primitives';
 
 // ============================================================
 // Helpers
@@ -15,7 +14,7 @@ function createTestGoal(name = 'Original Goal'): Goal {
     identityId: 'test-identity-id' as any,
     name,
     summary: null,
-    startDate: null,
+    start: null,
     target: null,
     reminderConfig: null,
   });
@@ -181,20 +180,20 @@ describe('UpdateGoalUseCase', () => {
     expect(goalRepo.saveRootWithExpectedVersion).not.toHaveBeenCalled();
   });
 
-  it('updates calendar-native start date and Target Timeframe', async () => {
+  it('updates semantic start and target timeframes without collapsing precision', async () => {
     const goal = createTestGoal();
     vi.mocked(goalRepo.findByIdForIdentity).mockResolvedValue(goal);
-    const startDate = requireYmd('2026-10-01');
+    const start = { kind: 'quarter' as const, year: 2026, quarter: 3 as const };
     const target = { kind: 'quarter' as const, year: 2026, quarter: 4 as const };
 
     const result = await useCase.execute(goal.id, 'identity-1', {
-      startDate,
+      start,
       target,
       expectedVersion: 1,
     });
 
     expect(result).toBeOk();
-    expect(goal.startDate).toBe(startDate);
+    expect(goal.start).toEqual(start);
     expect(goal.target).toEqual(target);
   });
 

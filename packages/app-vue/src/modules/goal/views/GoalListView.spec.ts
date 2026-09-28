@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import { shallowMount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { defineComponent, h, ref } from 'vue';
@@ -37,6 +39,17 @@ const EmptyStateStub = defineComponent({
 });
 
 describe('GoalListView', () => {
+  it('uses the full panel width and defines the wide-screen list columns', () => {
+    const source = fs.readFileSync(path.resolve(__dirname, './GoalListView.vue'), 'utf8');
+
+    expect(source).toContain('class="w-full py-2"');
+    expect(source).not.toContain('max-w-5xl');
+    expect(source).toContain('goal-list-column-header');
+    expect(source).toContain('goal.list.keyResultsColumn');
+    expect(source).toContain('goal.list.targetColumn');
+    expect(source).toContain('goal.list.progressColumn');
+  });
+
   it('leaves toolbar controls to GoalModuleLayout and owns only the row/empty content surface', () => {
     const wrapper = shallowMount(GoalListView, {
       global: {

@@ -1,11 +1,16 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
-import type { KnowledgeDocumentRef } from '@memoflow/contracts/repository';
+import {
+  KnowledgeDocumentIdSchema,
+  type KnowledgeDocumentRef,
+} from '@memoflow/contracts/repository';
 import { useAI } from './useAI';
 import { useGoal } from '../../goal/composables/useGoal';
+import { useTask } from '../../task/composables/useTask';
 import { useRecentKnowledgeNotes } from '../../repository/composables/useRecentKnowledgeNotes';
+import { useReferenceableKnowledgeNotes } from '../../repository/composables/useReferenceableKnowledgeNotes';
 import { useAIChatSession } from './useAIChatSession';
 import { useAIModelSelection } from './useAIModelSelection';
 import { useAIGoalWorkflow } from './useAIGoalWorkflow';
@@ -15,6 +20,10 @@ import { useAIKnowledgeQaWorkflow } from './useAIKnowledgeQaWorkflow';
 import { useAIWorkflowPersistence } from './useAIWorkflowPersistence';
 import { useAIFormatters } from './useAIFormatters';
 import { getToolLocaleKey, normalizeWorkflowMode } from './types';
+import {
+  surfaceDescriptorToContextEntity,
+  type AIActiveSurfaceDescriptor,
+} from './surface-context';
 import {
   adjustComposerHeight as createAdjustComposerHeight,
   bindChatViewLifecycle,
@@ -34,6 +43,7 @@ import {
 import type {
   AIWorkspaceRecentGoal,
   AIWorkspaceRecentKnowledgeNote,
+  AIWorkspaceRecentTask,
   ConversationSummary,
   ProviderListItem,
   WorkflowMode,
@@ -41,6 +51,8 @@ import type {
 
 export interface UseAIChatViewOptions {
   getComposerTextarea: () => HTMLTextAreaElement | null;
+  /** Visible business tab beside chat; used as removable implicit Goal/Task context. */
+  getActiveSurface?: () => AIActiveSurfaceDescriptor | null;
 }
 
 /**
@@ -49,6 +61,7 @@ export interface UseAIChatViewOptions {
  */
 export function useAIChatView(options: UseAIChatViewOptions) {
   const { t } = useI18n();
+  const route = useRoute();
   const router = useRouter();
   const { service, providers, loadProviders } = useAI();
   const assistantRuntime = useStrictInject(AI_ASSISTANT_RUNTIME_KEY, 'AIAssistantRuntime');
@@ -56,7 +69,9 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   const workflowRuntime = useStrictInject(AI_WORKFLOW_RUNTIME_KEY, 'AIWorkflowRuntime');
   const assistantSurface = useStrictInject(ASSISTANT_SURFACE_KEY, 'AIRuntimeSurface');
   const { goals, fetchGoals, createGoal } = useGoal();
+  const task = useTask();
   const recentKnowledgeNotes = useRecentKnowledgeNotes();
+  const referenceableKnowledgeNotes = useReferenceableKnowledgeNotes();
   const formatters = useAIFormatters();
 
   async function requestOpenKnowledgeNote(note: string | KnowledgeDocumentRef): Promise<void> {
@@ -99,12 +114,49 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       })),
   );
 
+  const referenceGoalList = computed<AIWorkspaceRecentGoal[]>(() =>
+    [...goals.value]
+      .filter((goal) => !goal.deletedAt)
+      .sort((left, right) => Number(right.updatedAt ?? 0) - Number(left.updatedAt ?? 0))
+      .slice(0, 50)
+      .map((goal) => ({
+        id: String(goal.id),
+        title: goal.name,
+        status: String(goal.status),
+        updatedAt: Number(goal.updatedAt ?? 0),
+        progress: goal.overallProgress,
+      })),
+  );
+
+  const recentTaskList = computed<AIWorkspaceRecentTask[]>(() =>
+    [...(task.templates.value ?? [])]
+      .sort((left, right) => Number(right.updatedAt ?? 0) - Number(left.updatedAt ?? 0))
+      .slice(0, 8)
+      .map((item) => ({
+        id: String(item.id),
+        title: item.name,
+        updatedAt: Number(item.updatedAt ?? 0),
+      })),
+  );
+
+  const referenceTaskList = computed<AIWorkspaceRecentTask[]>(() =>
+    [...(task.templates.value ?? [])]
+      .sort((left, right) => Number(right.updatedAt ?? 0) - Number(left.updatedAt ?? 0))
+      .slice(0, 50)
+      .map((item) => ({
+        id: String(item.id),
+        title: item.name,
+        updatedAt: Number(item.updatedAt ?? 0),
+      })),
+  );
+
   const recentKnowledgeNoteList = computed<AIWorkspaceRecentKnowledgeNote[]>(() =>
     [...recentKnowledgeNotes.notes.value]
       .sort((left, right) => Number(right.updatedAt) - Number(left.updatedAt))
       .slice(0, 5)
       .map((note) => ({
         id: note.id,
+        contextId: note.knowledgeDocumentId,
         title: note.title,
         path: note.path,
         updatedAt: note.updatedAt,
@@ -255,13 +307,96 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     }
   }
 
+  const referenceKnowledgeNoteList = computed<AIWorkspaceRecentKnowledgeNote[]>(() =>
+    referenceableKnowledgeNotes.notes.value.slice(0, 20).map((note) => ({
+      id: note.documentId,
+      contextId: note.documentId,
+      title: note.title,
+      path: note.path,
+      updatedAt: note.updatedAt,
+    })),
+  );
+
   async function loadWorkspaceLists() {
     await Promise.all([
       chatSession.loadConversationList(service),
       fetchGoals().catch(() => undefined),
+      task.fetchTemplates({ page: 1, limit: 50 }).catch(() => undefined),
       loadRecentKnowledgeNotes().catch(() => undefined),
+      referenceableKnowledgeNotes.load({ limit: 20 }).catch(() => undefined),
     ]);
   }
+
+  function syncSurfaceContext() {
+    const shellEntity = surfaceDescriptorToContextEntity(options.getActiveSurface?.());
+    if (shellEntity) {
+      chatSession.setSurfaceContextEntity(shellEntity);
+      return;
+    }
+
+    const id = typeof route.params.id === 'string' ? route.params.id : '';
+    if (route.name === 'goal-detail' && id) {
+      const goal = goals.value.find((item) => String(item.id) === id);
+      chatSession.setSurfaceContextEntity({
+        entityType: 'goal',
+        id,
+        label: goal?.name || t('aiAssistant.chatPage.context.currentGoal'),
+      });
+      return;
+    }
+    if (route.name === 'task-detail' && id) {
+      const item = task.templates.value?.find((template) => String(template.id) === id);
+      chatSession.setSurfaceContextEntity({
+        entityType: 'task',
+        id,
+        label: item?.name || t('aiAssistant.chatPage.context.currentTask'),
+      });
+      return;
+    }
+    if (route.name === 'repository') {
+      const rawNote = route.query.note;
+      const noteRef =
+        typeof rawNote === 'string'
+          ? rawNote
+          : Array.isArray(rawNote) && typeof rawNote[0] === 'string'
+            ? rawNote[0]
+            : '';
+      if (noteRef) {
+        const note = recentKnowledgeNotes.notes.value.find(
+          (item) =>
+            item.id === noteRef || item.path === noteRef || item.knowledgeDocumentId === noteRef,
+        );
+        const knowledgeDocumentId =
+          note?.knowledgeDocumentId ??
+          (KnowledgeDocumentIdSchema.safeParse(noteRef).success ? noteRef : null);
+        if (knowledgeDocumentId) {
+          chatSession.setSurfaceContextEntity({
+            entityType: 'knowledge_document',
+            id: knowledgeDocumentId,
+            label: note?.title || t('aiAssistant.chatPage.context.currentNote'),
+          });
+          return;
+        }
+      }
+    }
+    chatSession.setSurfaceContextEntity(null);
+  }
+
+  watch(
+    [
+      () => route.name,
+      () => route.params.id,
+      () => route.query.note,
+      goals,
+      task.templates,
+      recentKnowledgeNotes.notes,
+      () => options.getActiveSurface?.()?.module ?? '',
+      () => options.getActiveSurface?.()?.route ?? '',
+      () => options.getActiveSurface?.()?.title ?? '',
+    ],
+    () => syncSurfaceContext(),
+    { immediate: true },
+  );
 
   persistence.bindPersistenceWatcher(chatSession.chatConversationId);
 
@@ -273,12 +408,6 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       ? t('aiAssistant.chatPage.workflow.tools.chat')
       : t(`aiAssistant.chatPage.workflow.tools.${getToolLocaleKey(toolMode.value)}`),
   );
-  const currentToolButtonLabel = computed(() =>
-    toolMode.value === 'chat'
-      ? t('aiAssistant.chatPage.workflow.toolButton')
-      : currentToolLabel.value,
-  );
-
   const workflowStatusText = computed(() =>
     getWorkflowStatusText(
       {
@@ -325,6 +454,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
         modelSelection.getPersistedModelKey,
       );
       await restoreWorkflowState(item.id);
+      syncSurfaceContext();
     } finally {
       persistence.suspendWorkflowPersistence.value = false;
     }
@@ -342,6 +472,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     chatSession.startNewConversation(normalizedMode);
     resetWorkflowArtifacts();
     toolMode.value = normalizedMode;
+    syncSurfaceContext();
   }
 
   function exitToolMode() {
@@ -362,6 +493,10 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     },
     { watch, onBeforeUnmount, nextTick: (cb) => void nextTick().then(cb) },
   );
+
+  onBeforeUnmount(() => {
+    referenceableKnowledgeNotes.cancel();
+  });
 
   onMounted(() =>
     initializeChatView({
@@ -392,7 +527,11 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       conversationList: chatSession.conversationList,
       conversationListLoading: chatSession.conversationListLoading,
       recentGoalList,
+      recentTaskList,
       recentKnowledgeNoteList,
+      referenceGoalList,
+      referenceTaskList,
+      referenceKnowledgeNoteList,
       recentKnowledgeNotesEmailVerificationRequired: computed(
         () => recentKnowledgeNotes.emailVerificationRequired.value,
       ),
@@ -401,6 +540,12 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       ),
       messagesViewport: chatSession.messagesViewport,
       lastRuntimeUsage: chatSession.lastRuntimeUsage,
+      composerAttachments: chatSession.composerAttachments,
+      composerContextEntities: chatSession.composerContextEntities,
+      addComposerFiles: chatSession.addComposerFiles,
+      removeComposerAttachment: chatSession.removeComposerAttachment,
+      toggleExplicitContextEntity: chatSession.toggleExplicitContextEntity,
+      removeContextEntity: chatSession.removeContextEntity,
       selectConversation,
       openRecentGoal,
       openRecentKnowledgeNote,
@@ -437,7 +582,6 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       toolMode,
       currentConversationLabel,
       currentToolLabel,
-      currentToolButtonLabel,
       workflowStatusText,
       canRunWorkflowActions,
       exitToolMode,

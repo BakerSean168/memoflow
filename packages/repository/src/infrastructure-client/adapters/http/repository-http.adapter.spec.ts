@@ -83,16 +83,63 @@ describe('RepositoryHttpAdapter knowledge repository connections', () => {
     );
   });
 
+  it('uses the dedicated referenceable knowledge-document endpoint', async () => {
+    const httpClient = createResultHttpClientStub();
+    const adapter = new RepositoryHttpAdapter(httpClient);
+    const abortController = new AbortController();
+
+    await adapter.listReferenceableKnowledgeDocuments(
+      {
+        query: '1Password',
+        cursor: 'r~1759017600000~projection-181',
+        limit: 24,
+      },
+      { signal: abortController.signal },
+    );
+
+    expect(httpClient.get).toHaveBeenCalledWith('/repositories/knowledge-documents/referenceable', {
+      signal: abortController.signal,
+      params: {
+        query: '1Password',
+        cursor: 'r~1759017600000~projection-181',
+        limit: 24,
+      },
+    });
+  });
+
   it('uses the projection read and confirmed-create endpoints', async () => {
     const httpClient = createResultHttpClientStub();
     const adapter = new RepositoryHttpAdapter(httpClient);
 
-    await adapter.listKnowledgeNoteProjections({
-      connectionId: 'connection/1',
-      query: 'distributed systems',
-      limit: 25,
+    const abortController = new AbortController();
+    await adapter.listKnowledgeNoteProjections(
+      {
+        connectionId: 'connection/1',
+        query: 'distributed systems',
+        cursor: 'q~2500~1759017600000~projection-25',
+        sort: 'recent',
+        limit: 25,
+      },
+      { signal: abortController.signal },
+    );
+    await adapter.listKnowledgeNoteTree(
+      {
+        connectionId: 'connection/1',
+        parent: 'assets',
+        includeHidden: true,
+      },
+      { signal: abortController.signal },
+    );
+    await adapter.resolveKnowledgeNoteReference(
+      {
+        connectionId: 'connection/1',
+        reference: 'KnowledgeDocumentId_11111111-1111-4111-8111-111111111111',
+      },
+      { signal: abortController.signal },
+    );
+    await adapter.getKnowledgeNoteProjection('projection/1', {
+      signal: abortController.signal,
     });
-    await adapter.getKnowledgeNoteProjection('projection/1');
     await adapter.getKnowledgeNoteLinkGraph('projection/1', { depth: 2, maxNodes: 30 });
     await adapter.listKnowledgeAttachmentProjections({
       connectionId: 'connection/1',
@@ -113,26 +160,45 @@ describe('RepositoryHttpAdapter knowledge repository connections', () => {
     });
 
     expect(httpClient.get).toHaveBeenNthCalledWith(1, '/repositories/knowledge-notes', {
+      signal: abortController.signal,
       params: {
         connectionId: 'connection/1',
         query: 'distributed systems',
+        cursor: 'q~2500~1759017600000~projection-25',
+        sort: 'recent',
         limit: 25,
       },
     });
+    expect(httpClient.get).toHaveBeenNthCalledWith(2, '/repositories/knowledge-notes/tree', {
+      signal: abortController.signal,
+      params: {
+        connectionId: 'connection/1',
+        parent: 'assets',
+        includeHidden: 'true',
+      },
+    });
+    expect(httpClient.get).toHaveBeenNthCalledWith(3, '/repositories/knowledge-notes/resolve', {
+      signal: abortController.signal,
+      params: {
+        connectionId: 'connection/1',
+        reference: 'KnowledgeDocumentId_11111111-1111-4111-8111-111111111111',
+      },
+    });
     expect(httpClient.get).toHaveBeenNthCalledWith(
-      2,
+      4,
       '/repositories/knowledge-notes/projection%2F1',
+      { signal: abortController.signal },
     );
     expect(httpClient.get).toHaveBeenNthCalledWith(
-      3,
+      5,
       '/repositories/knowledge-notes/projection%2F1/link-graph',
       { params: { depth: 2, maxNodes: 30 } },
     );
-    expect(httpClient.get).toHaveBeenNthCalledWith(4, '/repositories/knowledge-attachments', {
+    expect(httpClient.get).toHaveBeenNthCalledWith(6, '/repositories/knowledge-attachments', {
       params: { connectionId: 'connection/1', query: 'diagram', limit: 20 },
     });
     expect(httpClient.get).toHaveBeenNthCalledWith(
-      5,
+      7,
       '/repositories/knowledge-attachments/attachment%2F1/content',
     );
     expect(httpClient.post).toHaveBeenCalledWith(

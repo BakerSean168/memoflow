@@ -166,6 +166,7 @@ describe('PowerSyncGoalWriteTransactionRunner receipt rollback (W4 P1-1)', () =>
     name TEXT NOT NULL,
     summary TEXT,
     status TEXT NOT NULL,
+    start_kind TEXT,
     start_date TEXT,
     target_kind TEXT,
     target_end_date TEXT,

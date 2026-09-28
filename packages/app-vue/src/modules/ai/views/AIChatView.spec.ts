@@ -12,12 +12,30 @@ import { describe, expect, it } from 'vitest';
  */
 describe('AIChatView Mastra-native workbench', () => {
   const source = readFileSync(resolve(__dirname, 'AIChatView.vue'), 'utf8');
-  const viewComposable = readFileSync(resolve(__dirname, '../composables/useAIChatView.ts'), 'utf8');
-  const sidebar = readFileSync(resolve(__dirname, '../components/AIConversationSidebar.vue'), 'utf8');
-  const actionBar = readFileSync(resolve(__dirname, '../components/AIWorkflowActionBar.vue'), 'utf8');
-  const goalPanel = readFileSync(resolve(__dirname, '../components/AIGoalWorkflowPanel.vue'), 'utf8');
-  const taskPanel = readFileSync(resolve(__dirname, '../components/AITaskWorkflowPanel.vue'), 'utf8');
-  const capturePanel = readFileSync(resolve(__dirname, '../components/AIKnowledgeCapturePanel.vue'), 'utf8');
+  const viewComposable = readFileSync(
+    resolve(__dirname, '../composables/useAIChatView.ts'),
+    'utf8',
+  );
+  const sidebar = readFileSync(
+    resolve(__dirname, '../components/AIConversationSidebar.vue'),
+    'utf8',
+  );
+  const actionBar = readFileSync(
+    resolve(__dirname, '../components/AIWorkflowActionBar.vue'),
+    'utf8',
+  );
+  const goalPanel = readFileSync(
+    resolve(__dirname, '../components/AIGoalWorkflowPanel.vue'),
+    'utf8',
+  );
+  const taskPanel = readFileSync(
+    resolve(__dirname, '../components/AITaskWorkflowPanel.vue'),
+    'utf8',
+  );
+  const capturePanel = readFileSync(
+    resolve(__dirname, '../components/AIKnowledgeCapturePanel.vue'),
+    'utf8',
+  );
 
   it('composes only canonical workflow projections in the right workbench', () => {
     expect(source).toContain('AIGoalWorkflowPanel');
@@ -53,11 +71,14 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(viewComposable).not.toContain('resumeAgentRun');
   });
 
-  it('uses direct knowledge query projection instead of a runtime run lifecycle', () => {
+  it('auto-routes knowledge queries from the unified composer instead of exposing a manual QA trigger', () => {
     expect(viewComposable).toContain('useAIKnowledgeQaWorkflow');
+    expect(source).toContain('inferWorkflowMode(chatMessage.value)');
+    expect(source).toContain(
+      "else if (inferredMode === 'knowledge-qa') await askKnowledgeFromConversation()",
+    );
     expect(source).toContain(':knowledge-answer="knowledgeAnswer"');
-    expect(source).toContain(':can-ask-knowledge="canAskKnowledge"');
-    expect(source).toContain(':ask-knowledge-from-conversation="askKnowledgeFromConversation"');
+    expect(actionBar).not.toContain('data-testid="knowledge-qa-ask"');
     expect(goalPanel).toContain('data-testid="knowledge-answer-panel"');
   });
 
@@ -76,7 +97,7 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(goalPanel).toContain("suspension?.type === 'goal_draft_review'");
     expect(goalPanel).toContain("suspension?.type === 'recovery_required'");
     expect(source).toContain("goalWorkflowRun.value?.status !== 'completed'");
-    expect(source).toContain("route: `/goals/${automatedGoalId.value}`");
+    expect(source).toContain('route: `/goals/${automatedGoalId.value}`');
     expect(source).toContain("intent: 'deeplink'");
   });
 
@@ -87,6 +108,21 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(source).toContain('SHELL_WORKFLOW_MOUNT_KEY');
   });
 
+  it('projects the currently open goal, task, or registered knowledge note into composer context without a manual mode selector', () => {
+    expect(viewComposable).toContain("route.name === 'goal-detail'");
+    expect(viewComposable).toContain("entityType: 'goal'");
+    expect(viewComposable).toContain("route.name === 'task-detail'");
+    expect(viewComposable).toContain("entityType: 'task'");
+    expect(viewComposable).toContain("route.name === 'repository'");
+    expect(viewComposable).toContain("entityType: 'knowledge_document'");
+    expect(viewComposable).toContain('item.knowledgeDocumentId === noteRef');
+    expect(viewComposable).toContain('setSurfaceContextEntity');
+    expect(viewComposable).toContain('surfaceDescriptorToContextEntity');
+    expect(source).toContain('getActiveSurface: () =>');
+    expect(source).toContain("shellStore.panelSurface !== 'business'");
+    expect(source).not.toContain('ai-chat-tool-menu-trigger');
+  });
+
   it('preserves mobile conversation navigation without runtime-history rows', () => {
     expect(source).toContain('data-testid="ai-mobile-sidebar-toggle"');
     expect(source).toContain('data-testid="ai-mobile-sidebar-panel"');
@@ -95,9 +131,14 @@ describe('AIChatView Mastra-native workbench', () => {
     expect(source).toContain('@select-knowledge-note="openRecentKnowledgeNoteFromMobile"');
   });
 
-  it('offers knowledge.capture once and removes the retired generation mode from product UI', () => {
+  it('auto-routes knowledge.capture and does not expose workflow-start controls in product UI', () => {
     expect(source).toContain('knowledgeCaptureWorkflow');
-    expect(actionBar).toContain("toolMode === 'knowledge-capture'");
+    expect(source).toContain(
+      "else if (inferredMode === 'knowledge-capture') await startKnowledgeCaptureRun()",
+    );
+    expect(actionBar).not.toContain('knowledge-capture-agent-start-run');
+    expect(actionBar).not.toContain('task-agent-start-run');
+    expect(actionBar).not.toContain('goal-agent-start-run');
     expect(source).not.toContain('knowledge-generate');
     expect(actionBar).not.toContain('knowledge-generate');
   });

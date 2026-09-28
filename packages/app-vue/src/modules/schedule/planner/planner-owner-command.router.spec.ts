@@ -69,10 +69,44 @@ describe('PlannerOwnerCommandRouter (PLAN-4303)', () => {
     expect(outcome).toEqual({
       status: 'conflict',
       code: 'CONFLICT',
+      message: 'Task occurrence was changed elsewhere',
+      reason: 'generic',
+      ownerType: 'task.occurrence',
     });
     expect(revert).toHaveBeenCalledTimes(1);
     expect(projection.start).toBe(at14);
     expect(projection.revision).toBe(3);
+  });
+
+  it('maps structured Task target-day conflicts into Planner feedback semantics', async () => {
+    const rescheduleOccurrence = vi.fn().mockResolvedValue(
+      fail({
+        code: 'CONFLICT',
+        message: 'Task occurrence already exists on target day (task-occurrence-2)',
+        details: [
+          {
+            field: 'scheduleSnapshot.date',
+            code: 'TASK_OCCURRENCE_TARGET_DATE_CONFLICT',
+            message: 'Another occurrence from this task plan already exists on the target day',
+            value: '2026-08-27',
+          },
+        ],
+      }),
+    );
+    const router = createPlannerOwnerCommandRouter({ task: { rescheduleOccurrence }, time });
+
+    const outcome = await router.route({
+      kind: 'move',
+      projection: taskProjection(),
+      nextRange: { allDay: false, start: at16, end: null },
+    });
+
+    expect(outcome).toMatchObject({
+      status: 'conflict',
+      code: 'CONFLICT',
+      reason: 'target-date-occupied',
+      ownerType: 'task.occurrence',
+    });
   });
 
   it('keeps the optimistic visual move when the Task owner accepts it', async () => {

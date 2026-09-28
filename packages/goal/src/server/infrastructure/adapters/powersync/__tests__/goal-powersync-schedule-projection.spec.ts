@@ -6,6 +6,7 @@ import type {
   IElectronDatabaseTransaction,
 } from '@memoflow/contracts/electron';
 import { GoalPowerSyncRepository } from '../goal-powersync.repository';
+import { PowerSyncGoalMapper } from '../mappers/powersync-goal.mapper';
 import { createGoalScheduleProjectionSource } from '../../../schedule-projection-source';
 import { createTimeContext } from '@memoflow/time';
 
@@ -61,6 +62,7 @@ const GOALS_SQL = `CREATE TABLE IF NOT EXISTS goals (
   name TEXT NOT NULL,
   summary TEXT,
   status TEXT NOT NULL,
+  start_kind TEXT,
   start_date TEXT,
   target_kind TEXT,
   target_end_date TEXT,
@@ -128,6 +130,32 @@ describe('GoalPowerSyncRepository scheduling identity (GOAL-3201 startup reconci
       { id: 'goal-archived', identityId: 'identity-1' },
       { id: 'goal-deleted', identityId: 'identity-2' },
     ]);
+  });
+
+  it('reads a preserved legacy local start_date as day precision before first cloud refresh', () => {
+    const now = new Date().toISOString();
+    const goal = PowerSyncGoalMapper.toDomain({
+      id: 'goal-legacy-start',
+      identity_id: 'identity-1',
+      name: 'Legacy Goal',
+      summary: null,
+      description: null,
+      status: 'Planned',
+      start_kind: null,
+      start_date: '2026-04-15',
+      target_kind: null,
+      target_end_date: null,
+      completed_at: null,
+      archived_at: null,
+      sort_order: 0,
+      reminder_config: null,
+      version: 1,
+      created_at: now,
+      updated_at: now,
+      deleted_at: null,
+    });
+
+    expect(goal.start).toEqual({ kind: 'day', date: '2026-04-15' });
   });
 
   it('feeds the projection source listGoalRefs consumed by the runtime reconcile', async () => {

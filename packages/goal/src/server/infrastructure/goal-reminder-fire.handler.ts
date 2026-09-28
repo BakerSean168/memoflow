@@ -29,7 +29,6 @@ import {
   ReminderTriggerType,
   type GoalServerDTO,
 } from '@memoflow/contracts/goal';
-import { YmdSchema } from '@memoflow/contracts/primitives';
 import {
   NotificationCategory,
   NotificationChannelType,
@@ -63,15 +62,35 @@ export const GOAL_REMINDER_WORKFLOW_KEY = 'goal.reminder' as const;
  * The registry validates every invocation payload against this schema before
  * the handler runs.
  */
-export const GoalReminderFirePayloadSchema = z.object({
-  goalId: z.string().min(1),
-  goalTitle: z.string(),
-  triggerType: z.enum(ReminderTriggerType),
-  triggerValue: z.number(),
-  startDate: YmdSchema.nullable(),
-  target: GoalTimeframeSchema.nullable(),
-  reminderTime: z.number().int(),
-});
+const GoalReminderFirePayloadCanonicalSchema = z
+  .object({
+    goalId: z.string().min(1),
+    goalTitle: z.string(),
+    triggerType: z.enum(ReminderTriggerType),
+    triggerValue: z.number(),
+    start: GoalTimeframeSchema.nullable(),
+    target: GoalTimeframeSchema.nullable(),
+    reminderTime: z.number().int(),
+  })
+  .strict();
+
+/**
+ * payloadVersion 2 existed before Goal start precision was generalized. Queued
+ * v2 invocations may therefore still carry `startDate: Ymd | null`. Decode
+ * that legacy exact-date shape into the new semantic day timeframe while
+ * keeping the canonical output free of the retired field.
+ */
+export const GoalReminderFirePayloadSchema = z.preprocess((input) => {
+  if (typeof input !== 'object' || input === null || Array.isArray(input)) return input;
+  const record = input as Record<string, unknown>;
+  if ('start' in record || !('startDate' in record)) return input;
+
+  const { startDate, ...rest } = record;
+  return {
+    ...rest,
+    start: startDate === null ? null : { kind: 'day', date: startDate },
+  };
+}, GoalReminderFirePayloadCanonicalSchema);
 export type GoalReminderFirePayload = z.infer<typeof GoalReminderFirePayloadSchema>;
 
 export interface CreateGoalReminderFireHandlerDeps {
@@ -110,8 +129,8 @@ function ineligibleReason(
   if (goal.deletedAt) {
     return { code: 'GOAL_DELETED', message: 'Goal has been deleted.' };
   }
-  if (goal.status !== GoalStatus.InProgress) {
-    return { code: 'GOAL_NOT_IN_PROGRESS', message: 'Goal is not in progress.' };
+  if (goal.status !== GoalStatus.Planned && goal.status !== GoalStatus.InProgress) {
+    return { code: 'GOAL_NOT_IN_PROGRESS', message: 'Goal is not active.' };
   }
   const enabled = goal.reminderConfig?.enabled === true;
   if (!enabled) {
@@ -133,6 +152,12 @@ function buildReminderContent(
   goal: GoalServerDTO,
   payload: GoalReminderFirePayload,
 ): { title: string; content: string } {
+  if (payload.triggerType === ReminderTriggerType.AbsoluteAt) {
+    return {
+      title: `目标提醒：${goal.name}`,
+      content: goal.summary ?? `该回来看一下目标「${goal.name}」了。`,
+    };
+  }
   if (payload.triggerType === ReminderTriggerType.RemainingDays) {
     return {
       title: `目标提醒：${goal.name}`,

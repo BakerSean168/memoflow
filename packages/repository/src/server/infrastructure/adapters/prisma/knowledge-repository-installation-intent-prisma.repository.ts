@@ -75,6 +75,28 @@ export class KnowledgeRepositoryInstallationIntentPrismaRepository implements IK
     );
   }
 
+  async findLatestRecoverableFinalized(
+    identityId: string,
+    routeKey: string,
+    clientKind: KnowledgeRepositoryInstallationIntentRecord['clientKind'],
+    notBefore: number,
+  ): Promise<KnowledgeRepositoryInstallationIntentRecord | null> {
+    return this.toRecord(
+      await this.db.knowledgeRepositoryInstallationIntent.findFirst({
+        where: {
+          identityId,
+          routeKey,
+          clientKind,
+          status: 'Finalized',
+          installationId: { not: null },
+          providerAccountId: { not: null },
+          callbackReceivedAt: { gte: new Date(notBefore) },
+        },
+        orderBy: { finalizedAt: 'desc' },
+      }),
+    );
+  }
+
   async renewVerifiedForRetry(input: {
     identityId: string;
     intentId: string;

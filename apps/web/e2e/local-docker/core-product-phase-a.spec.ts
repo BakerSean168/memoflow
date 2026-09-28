@@ -113,7 +113,7 @@ test.describe('Local Docker core product Phase A', () => {
     await page.getByTestId('task-plan-title-input').fill(taskName);
     await page.getByTestId('task-plan-description-input').fill(taskDescription);
     await page.getByTestId('task-goal-chip').click();
-    await expect(page.getByTestId('task-plan-property-editor')).toBeVisible();
+    await expect(page.getByTestId('task-goal-popover')).toBeVisible();
 
     const toggle = page.getByTestId('task-goal-binding-toggle');
     const fixtures = [primary, alternate];
@@ -168,6 +168,7 @@ test.describe('Local Docker core product Phase A', () => {
       contribution: { value: 1, trigger: 'EachCompletion' },
     });
 
+    await page.getByTestId('task-surface-trigger').click();
     await page.getByTestId('task-surface-plans').click();
     const taskCard = page
       .getByTestId('task-plan-card')
@@ -305,7 +306,7 @@ async function createTaskPlanWithContext(
     .fill('GOAL-7205 context-only runtime proof.');
 
   await page.getByTestId('task-goal-chip').click();
-  await expect(page.getByTestId('task-plan-property-editor')).toBeVisible();
+  await expect(page.getByTestId('task-goal-popover')).toBeVisible();
   const toggle = page.getByTestId('task-goal-binding-toggle');
   await toggle.click();
   await expect(toggle).toHaveAttribute('data-state', 'checked');

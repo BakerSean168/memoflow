@@ -96,8 +96,21 @@ function buildApplicationPort(deps: RepositoryModuleDependencies): RepositoryApp
       connectionService
         ? connectionService.refreshObservation(ctx.identityId, connectionId)
         : unavailable(),
-    connectKnowledgeRepository: async (ctx, request) =>
-      connectionService ? connectionService.connect(ctx.identityId, request) : unavailable(),
+    connectKnowledgeRepository: async (ctx, request) => {
+      if (!connectionService) return unavailable();
+      const result = await connectionService.connect(ctx.identityId, request);
+      if (result.ok && projectionService) {
+        // A newly connected repository starts at a Lagging checkpoint. Do not
+        // wait for the 15-minute safety reconciliation interval: enqueue an
+        // immediate rebuild so the Notes workspace can converge within seconds.
+        void projectionService.reconcileNow().catch((error) => {
+          logger.warn('Immediate knowledge projection reconciliation failed after connect', {
+            error,
+          });
+        });
+      }
+      return result;
+    },
     disconnectKnowledgeRepository: async (ctx, connectionId, purgeCloudData) =>
       connectionService
         ? connectionService.disconnect(ctx.identityId, connectionId, purgeCloudData)
@@ -141,7 +154,19 @@ function buildApplicationPort(deps: RepositoryModuleDependencies): RepositoryApp
     listKnowledgeNoteProjections: async (ctx, request) =>
       projectionService
         ? projectionService.listNotes(ctx.identityId, request)
-        : Promise.resolve(ok({ notes: [] })),
+        : Promise.resolve(ok({ notes: [], total: 0, nextCursor: null })),
+    listReferenceableKnowledgeDocuments: async (ctx, request) =>
+      projectionService
+        ? projectionService.listReferenceableDocuments(ctx.identityId, request)
+        : Promise.resolve(ok({ documents: [], total: 0, nextCursor: null })),
+    listKnowledgeNoteTree: async (ctx, request) =>
+      projectionService
+        ? projectionService.listNoteTree(ctx.identityId, request)
+        : Promise.resolve(ok({ parent: request.parent, nodes: [], metadata: null })),
+    resolveKnowledgeNoteReference: async (ctx, request) =>
+      projectionService
+        ? projectionService.resolveNoteReference(ctx.identityId, request)
+        : unavailable(),
     getKnowledgeNoteProjection: async (ctx, projectionId) =>
       projectionService ? projectionService.getNote(ctx.identityId, projectionId) : unavailable(),
     getKnowledgeNoteLinkGraph: async (ctx, projectionId, request) =>

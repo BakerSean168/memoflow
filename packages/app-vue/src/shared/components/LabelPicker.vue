@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { ChevronDown, ChevronsUpDown, Tag } from '@lucide/vue';
+import { ChevronsUpDown, Tag } from '@lucide/vue';
 import { Badge, Button, Popover, PopoverContent, PopoverTrigger } from '@memoflow/ui-vue-shadcn';
 import LabelCommandPanel from './LabelCommandPanel.vue';
 import type { LabelPickerOption } from './label-selection.types';
@@ -65,7 +65,7 @@ function updateSelection(value: string[]): void {
         class="min-w-0 justify-between gap-2"
         :class="
           compact
-            ? 'h-8 w-auto max-w-56 rounded-md border-transparent bg-muted/40 px-2.5 font-normal shadow-none hover:bg-muted/70'
+            ? 'h-8 w-auto max-w-56 rounded-full border-border/70 bg-background/60 px-3 font-normal text-muted-foreground shadow-none transition-colors hover:border-foreground/20 hover:bg-muted/40 hover:text-foreground'
             : 'w-full'
         "
         role="combobox"
@@ -103,8 +103,7 @@ function updateSelection(value: string[]): void {
             +{{ hiddenCount }}
           </Badge>
         </span>
-        <ChevronDown v-if="compact" class="h-3.5 w-3.5 shrink-0 opacity-60" aria-hidden="true" />
-        <ChevronsUpDown v-else class="h-4 w-4 shrink-0 opacity-50" aria-hidden="true" />
+        <ChevronsUpDown v-if="!compact" class="h-4 w-4 shrink-0 opacity-50" aria-hidden="true" />
       </Button>
     </PopoverTrigger>
     <PopoverContent align="start" class="w-80 max-w-[calc(100vw-2rem)] p-0">

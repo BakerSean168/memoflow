@@ -14,7 +14,8 @@ import {
   createScheduledInvocationSchedulingPort,
 } from '@memoflow/scheduler';
 import {
-  createRoutineWallClockExecutionSource,
+  createRoutineElapsedScheduledHandler,
+  createRoutineScheduleExecutionSource,
   createRoutineWallClockScheduledHandler,
 } from '@memoflow/reminder/schedule-execution/routine';
 import type {
@@ -71,8 +72,7 @@ export function createScheduleOrchestrationModule(
         return schedulingPort.reconcile(plan.owner, plan.desired);
       },
       buildOwner: (ref) => options.taskProjection.source.buildPlanOwner(ref.planId, ref.identityId),
-      listSchedulerOwners: () =>
-        invocationRepository.listOwnersByType(TASK_SCHEDULING_OWNER_TYPE),
+      listSchedulerOwners: () => invocationRepository.listOwnersByType(TASK_SCHEDULING_OWNER_TYPE),
       removeOwner: (owner) => schedulingPort.removeOwner(owner),
       describeOwner: (owner) => `${owner.identityId}/${owner.id}`,
     }),
@@ -85,8 +85,7 @@ export function createScheduleOrchestrationModule(
         return schedulingPort.reconcile(plan.owner, plan.desired);
       },
       buildOwner: (ref) => options.goalProjection.source.buildGoalOwner(ref.goalId, ref.identityId),
-      listSchedulerOwners: () =>
-        invocationRepository.listOwnersByType(GOAL_SCHEDULING_OWNER_TYPE),
+      listSchedulerOwners: () => invocationRepository.listOwnersByType(GOAL_SCHEDULING_OWNER_TYPE),
       removeOwner: (owner) => schedulingPort.removeOwner(owner),
       describeOwner: (owner) => `${owner.identityId}/${owner.id}`,
     }),
@@ -97,7 +96,7 @@ export function createScheduleOrchestrationModule(
   if (routineProjection && routineSource) {
     const routineCommittedPublisher =
       createTypedEventPublisher<RoutineScheduleProjectionEventMap>(eventBus);
-    const routineExecutionSource = createRoutineWallClockExecutionSource({
+    const routineExecutionSource = createRoutineScheduleExecutionSource({
       ...routineSource,
       publishOccurrenceCommitted: (event) => {
         routineCommittedPublisher.send('routine:occurrence-committed', event);
@@ -105,6 +104,9 @@ export function createScheduleOrchestrationModule(
     });
     handlerRegistry.register(
       createRoutineWallClockScheduledHandler({ executionSource: routineExecutionSource }),
+    );
+    handlerRegistry.register(
+      createRoutineElapsedScheduledHandler({ executionSource: routineExecutionSource }),
     );
     incrementalRuntimes.push(
       createRoutineProjectionRuntime({

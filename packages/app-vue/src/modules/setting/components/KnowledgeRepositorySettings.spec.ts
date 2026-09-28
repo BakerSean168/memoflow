@@ -91,6 +91,11 @@ const messages = {
       purgeLocalAndGithubPreserved: 'Local Vault and GitHub are preserved.',
       retainCloudDataDescription: 'Cloud projections are retained for reconnecting.',
       startFailed: 'Start failed',
+      installationPending: 'Installation pending',
+      pendingAuthorizationTitle: 'Waiting for GitHub authorization',
+      pendingAuthorizationDescription: 'Use Check authorization to resume a verified authorization.',
+      checkAuthorization: 'Check authorization',
+      installationExpired: 'Installation expired',
       reconciliation: {
         preview: 'Check first sync',
         previewFailed: 'Preflight failed',
@@ -340,6 +345,7 @@ describe('KnowledgeRepositorySettings', () => {
     routerMocks.replace.mockClear();
     confirmMock.mockClear();
     confirmMock.mockResolvedValue(true);
+    window.sessionStorage.clear();
   });
 
   it('opens GitHub-hosted private repository creation without requesting broader OAuth access', async () => {
@@ -586,6 +592,136 @@ describe('KnowledgeRepositorySettings', () => {
       githubRepositoryId: 'repository-1',
       knowledgeSpaceId: KNOWLEDGE_SPACE_ID,
     });
+  });
+
+  it('shows a pending Web authorization state after returning without a GitHub callback', async () => {
+    window.sessionStorage.setItem(
+      'memoflow:knowledge-repository:web-installation-intent',
+      'intent-web-pending',
+    );
+    const getKnowledgeRepositoryInstallationIntentStatus = vi.fn(async () =>
+      ok({
+        intentId: 'intent-web-pending',
+        status: 'Pending' as const,
+        clientKind: 'web' as const,
+        expiresAt: Date.now() + 600_000,
+        installationId: null,
+      }),
+    );
+    const wrapper = mountSettings(
+      createService({
+        getKnowledgeRepositoryInstallationIntentStatus,
+      }),
+    );
+    await flushPromises();
+
+    expect(wrapper.get('[data-testid="knowledge-repository-installation-pending"]').text()).toContain(
+      'Waiting for GitHub authorization',
+    );
+    expect(wrapper.get('[data-testid="github-repository-connect"]').text()).toContain(
+      'Check authorization',
+    );
+  });
+
+  it('restores a verified Web installation after a settings-page refresh', async () => {
+    window.sessionStorage.setItem(
+      'memoflow:knowledge-repository:web-installation-intent',
+      'intent-web-restored',
+    );
+    const getKnowledgeRepositoryInstallationIntentStatus = vi.fn(async () =>
+      ok({
+        intentId: 'intent-web-restored',
+        status: 'Finalized' as const,
+        clientKind: 'web' as const,
+        expiresAt: Date.now() + 600_000,
+        installationId: 'installation-1',
+      }),
+    );
+    const finalizeKnowledgeRepositoryInstallationIntent = vi.fn(async () =>
+      ok({
+        installationId: 'installation-1',
+        githubAccountId: '42',
+        returnUrl: 'https://app.example.test/settings?tab=repository',
+        repositories: [
+          {
+            id: 'repository-1',
+            nodeId: 'R_1',
+            fullName: 'owner/thought-forest',
+            ownerId: '42',
+            private: true,
+            archived: false,
+            disabled: false,
+            defaultBranch: 'main',
+            permissions: { admin: false, push: true, pull: true },
+          },
+        ],
+      }),
+    );
+
+    const wrapper = mountSettings(
+      createService({
+        getKnowledgeRepositoryInstallationIntentStatus,
+        finalizeKnowledgeRepositoryInstallationIntent,
+      }),
+    );
+    await flushPromises();
+
+    expect(getKnowledgeRepositoryInstallationIntentStatus).toHaveBeenCalledWith(
+      'intent-web-restored',
+    );
+    expect(finalizeKnowledgeRepositoryInstallationIntent).toHaveBeenCalledWith(
+      'intent-web-restored',
+    );
+    expect(wrapper.text()).toContain('owner/thought-forest');
+  });
+
+  it('resumes a finalized Web authorization without reopening GitHub', async () => {
+    const startKnowledgeRepositoryInstallation = vi.fn(async () =>
+      ok({
+        intentId: 'intent-web-resumed',
+        installationUrl: 'https://github.com/apps/memoflow/installations/new',
+        expiresAt: Date.now() + 600_000,
+        requiresExternalBrowser: false,
+      }),
+    );
+    const finalizeKnowledgeRepositoryInstallationIntent = vi.fn(async () =>
+      ok({
+        installationId: 'installation-1',
+        githubAccountId: '42',
+        returnUrl: 'https://app.example.test/settings?tab=repository',
+        repositories: [
+          {
+            id: 'repository-1',
+            nodeId: 'R_1',
+            fullName: 'owner/thought-forest',
+            ownerId: '42',
+            private: true,
+            archived: false,
+            disabled: false,
+            defaultBranch: 'main',
+            permissions: { admin: false, push: true, pull: true },
+          },
+        ],
+      }),
+    );
+    const wrapper = mountSettings(
+      createService({
+        startKnowledgeRepositoryInstallation,
+        finalizeKnowledgeRepositoryInstallationIntent,
+      }),
+    );
+    await flushPromises();
+
+    await wrapper.get('[data-testid="github-repository-connect"]').trigger('click');
+    await flushPromises();
+
+    expect(finalizeKnowledgeRepositoryInstallationIntent).toHaveBeenCalledWith(
+      'intent-web-resumed',
+    );
+    expect(wrapper.text()).toContain('owner/thought-forest');
+    expect(
+      window.sessionStorage.getItem('memoflow:knowledge-repository:web-installation-intent'),
+    ).toBe('intent-web-resumed');
   });
 
   it('resumes a verified Desktop installation without reopening GitHub', async () => {

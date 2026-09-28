@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ok } from '@memoflow/contracts/result';
+import type { KnowledgeRemoteBindingClientDTO } from '@memoflow/contracts/repository';
 import type { KnowledgeRepositoryConnectionService } from '../application/services/knowledge-repository-connection.service';
+import type { IKnowledgeRepositoryProjectionService } from '../application/ports/knowledge-repository-projection.service.port';
 import { createRepositoryModule } from './repository.module';
 
 function createModule() {
@@ -49,7 +51,7 @@ describe('repository module GitHub credential boundary', () => {
         { identityId: 'identity-without-github-app' },
         { limit: 20 },
       ),
-    ).resolves.toEqual(ok({ notes: [] }));
+    ).resolves.toEqual(ok({ notes: [], total: 0, nextCursor: null }));
   });
 
   it('rejects installation token issuance for browser contexts', async () => {
@@ -134,6 +136,41 @@ describe('repository module GitHub credential boundary', () => {
     expect(confirmHead).toHaveBeenCalledWith('identity-desktop', 'connection-1', {
       headSha: 'a'.repeat(40),
     });
+  });
+
+  it('starts projection reconciliation immediately after a repository is connected', async () => {
+    const connect = vi.fn(async () =>
+      ok({
+        id: 'connection-1',
+      } as unknown as KnowledgeRemoteBindingClientDTO),
+    );
+    const reconcileNow = vi.fn(async () => undefined);
+    const module = createRepositoryModule({
+      knowledgeRepositoryConnectionService: {
+        connect,
+      } as unknown as KnowledgeRepositoryConnectionService,
+      knowledgeRepositoryProjectionService: {
+        start: () => undefined,
+        stop: () => undefined,
+        reconcileNow,
+      } as unknown as IKnowledgeRepositoryProjectionService,
+    });
+
+    await expect(
+      module.api.connectKnowledgeRepository(
+        { identityId: 'identity-browser', device: { deviceType: 'Browser' } },
+        {
+          installationId: 'installation-1',
+          githubRepositoryId: 'repository-1',
+        },
+      ),
+    ).resolves.toMatchObject({ ok: true, data: { id: 'connection-1' } });
+
+    expect(connect).toHaveBeenCalledWith('identity-browser', {
+      installationId: 'installation-1',
+      githubRepositoryId: 'repository-1',
+    });
+    expect(reconcileNow).toHaveBeenCalledTimes(1);
   });
 
   it('reports write-request list/replay as unavailable when the GitHub App is not configured', async () => {

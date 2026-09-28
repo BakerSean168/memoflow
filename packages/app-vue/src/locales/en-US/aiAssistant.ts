@@ -15,13 +15,12 @@ export default {
     title: 'AI Chat',
     subtitle:
       'Keep conversations, model selection, and the composer in one dedicated workspace, similar to Gemini or GPT.',
-    welcomeTitle: 'What do you want to move forward today?',
+    welcomeTitle: 'What do you want to work on?',
     welcomeDescription:
-      'Pick a shortcut card to start, or type below. Once messages exist, this becomes the conversation timeline.',
+      'Describe a goal, task, or idea directly, or start from one of the shortcuts below.',
     noModel: {
-      title: 'Start with goals and tasks',
-      description:
-        'Core planning works without a model. Connect AI when you want conversational planning.',
+      title: 'AI is not configured',
+      description: 'AI is not configured; goals and tasks can still be created directly.',
       configure: 'Configure AI',
       createGoal: 'Create first goal',
       quickTask: "Add today's task",
@@ -41,6 +40,34 @@ export default {
       hide: 'Hide context',
       empty: 'The workbench is empty — ask the AI to create a goal, task, or note.',
       todayOverview: 'Today',
+      referenceGoal: 'Reference goal',
+      referenceTask: 'Reference task',
+      referenceNote: 'Reference knowledge note',
+      noGoals: 'No goals to reference',
+      noTasks: 'No tasks to reference',
+      noNotes: 'No notes to reference',
+      currentGoal: 'Current goal',
+      currentTask: 'Current task',
+      currentNote: 'Current note',
+      fromCurrentView: 'From the currently open view',
+      mentionHint: 'Reference a goal, task, or knowledge note',
+      mentionMoreHint: 'Type @ to search more',
+      goal: 'Goal',
+      task: 'Task',
+      note: 'Note',
+      tooMany: 'You can reference up to {count} context items at a time.',
+    },
+    attachments: {
+      addContext: 'Add attachment or context',
+      upload: 'Upload file or image',
+      dropHere: 'Drop to add files',
+      file: 'Attachment',
+      tooMany: 'You can add up to {count} attachments at a time.',
+      tooLarge: '“{name}” is too large. The current per-file limit is 1 MB.',
+      totalTooLarge: 'The attachments are too large in total. Remove some files and try again.',
+      unsupportedType:
+        '“{name}” is not supported yet. Images, PDF, TXT, and Markdown are supported.',
+      readFailed: 'Could not read “{name}”.',
     },
     sidebar: {
       open: 'Open sidebar',
@@ -113,7 +140,7 @@ export default {
     },
     workflow: {
       activeMode: 'Active Intent',
-      toolButton: 'Intent',
+      toolButton: 'Actions',
       goalCollectingHint:
         'Keep adding context in chat, then generate a structured goal draft when ready.',
       goalClarificationHint:
@@ -135,7 +162,7 @@ export default {
       createKnowledgeNote: 'Create Knowledge Note',
       openCreatedNote: 'Open Note',
       startAnotherNote: 'New Note Chat',
-      exitTool: 'Exit Intent',
+      exitTool: 'End current flow',
       ungroundedHint:
         'The answer is not sufficiently grounded in your note evidence, so note creation is disabled. Add sources or rephrase the question.',
       goalClarificationTitle: 'Goal Clarification',
@@ -164,6 +191,7 @@ export default {
         'Review the generated task draft, then approve to create the task template.',
       taskLinkedGoalLabel: 'Link goal (optional)',
       taskLinkedGoalNone: 'No linked goal',
+      linkedGoalFromContext: 'Goal linked from the current context',
       knowledgeCaptureCollectingHint:
         'Describe the knowledge topic in chat, then start the Knowledge Capture workflow. The reviewed note draft appears here.',
       knowledgeCaptureAwaitingApprovalHint:
@@ -171,6 +199,7 @@ export default {
     },
     emptyModelsHint: 'No AI models are configured. Connect a provider in Settings first.',
     emptyModelsConfigure: 'Configure models',
+    emptyModelsInline: 'Configure AI',
     quickEntryDisabled: 'Quick actions are disabled until a model is available',
   },
   actions: {
@@ -361,7 +390,7 @@ export default {
       noSavedConversations: 'No saved conversations yet.',
       conversationName: 'Conversation Name',
       conversationPlaceholder: 'Conversation name',
-      messagePlaceholder: 'Ask a question, brainstorm, or request a quick draft...',
+      messagePlaceholder: 'Describe what you want to get done, or ask a question…',
       provider: 'Provider',
       providerPlaceholder: 'Select provider',
       model: 'Model',

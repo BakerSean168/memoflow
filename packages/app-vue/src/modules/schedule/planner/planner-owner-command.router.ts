@@ -11,6 +11,11 @@ const MINUTE_MS = 60_000;
 
 export type PlannerMutationKind = 'move' | 'resize';
 
+export type PlannerMutationConflictReason =
+  | 'target-date-occupied'
+  | 'stale-version'
+  | 'generic';
+
 export interface PlannerMutationRequest {
   readonly kind: PlannerMutationKind;
   readonly projection: CalendarEventProjection;
@@ -22,8 +27,19 @@ export type PlannerMutationOutcome =
       readonly status: 'applied';
       readonly ownerType: CalendarEventProjection['ownerCommandTarget']['ownerType'];
     }
-  | { readonly status: 'conflict'; readonly code: string }
-  | { readonly status: 'failed'; readonly code: string }
+  | {
+      readonly status: 'conflict';
+      readonly code: string;
+      readonly message: string;
+      readonly reason: PlannerMutationConflictReason;
+      readonly ownerType: CalendarEventProjection['ownerCommandTarget']['ownerType'];
+    }
+  | {
+      readonly status: 'failed';
+      readonly code: string;
+      readonly message: string;
+      readonly ownerType: CalendarEventProjection['ownerCommandTarget']['ownerType'];
+    }
   | { readonly status: 'read-only'; readonly message: string }
   | { readonly status: 'unsupported'; readonly message: string }
   | { readonly status: 'invalid'; readonly message: string };
@@ -65,16 +81,46 @@ function isEditable(request: PlannerMutationRequest): boolean {
     : request.projection.editableCapabilities.resize;
 }
 
+function conflictReason(
+  result: Extract<Result<unknown>, { ok: false }>,
+  code: string,
+  message: string,
+): PlannerMutationConflictReason {
+  const detailCodes = new Set((result.error.details ?? []).map((detail) => detail.code));
+
+  if (detailCodes.has('TASK_OCCURRENCE_TARGET_DATE_CONFLICT')) {
+    return 'target-date-occupied';
+  }
+
+  if (
+    detailCodes.has('TASK_OCCURRENCE_VERSION_CONFLICT') ||
+    code === 'VERSION_CONFLICT' ||
+    code === 'OPTIMISTIC_CONCURRENCY' ||
+    message.toLowerCase().includes('version conflict')
+  ) {
+    return 'stale-version';
+  }
+
+  return 'generic';
+}
+
 function resultOutcome(
   result: Result<unknown>,
   ownerType: CalendarEventProjection['ownerCommandTarget']['ownerType'],
 ): PlannerMutationOutcome {
   if (result.ok) return { status: 'applied', ownerType };
   const code = String(result.error.code ?? 'UNKNOWN_ERROR');
+  const message = String(result.error.message ?? '');
   if (code === 'CONFLICT' || code === 'VERSION_CONFLICT' || code === 'OPTIMISTIC_CONCURRENCY') {
-    return { status: 'conflict', code };
+    return {
+      status: 'conflict',
+      code,
+      message,
+      reason: conflictReason(result, code, message),
+      ownerType,
+    };
   }
-  return { status: 'failed', code };
+  return { status: 'failed', code, message, ownerType };
 }
 
 function minutesFromDayStart(time: PlannerMutationTimePort, instant: Instant): number | null {
@@ -214,7 +260,7 @@ export function createPlannerOwnerCommandRouter(
           }
           const requestBody =
             semantic === 'goal-start'
-              ? { startDate: nextDay, expectedVersion: projection.revision }
+              ? { start: { kind: 'day' as const, date: nextDay }, expectedVersion: projection.revision }
               : {
                   target: { kind: 'day' as const, date: nextDay },
                   expectedVersion: projection.revision,

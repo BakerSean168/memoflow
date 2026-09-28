@@ -1,53 +1,42 @@
 <template>
-  <section class="space-y-4" aria-labelledby="task-time-config-heading">
-    <h3 id="task-time-config-heading" class="flex items-center text-sm font-semibold">
-      <Clock3 class="mr-2 h-5 w-5" />
-      {{ t('task.timeConfig.title') }}
-    </h3>
+  <section class="space-y-4">
     <div>
-      <!-- 时间类型选择 -->
       <div class="mb-4">
-        <Label class="mb-2 block">{{ t('task.timeConfig.timeType') }}</Label>
-        <RadioGroup
+        <div class="px-1 pb-1.5 text-xs text-muted-foreground">
+          {{ t('task.timeConfig.timeType') }}
+        </div>
+        <div
+          class="space-y-0.5"
+          role="radiogroup"
           :aria-label="t('task.timeConfig.timeType')"
-          :model-value="timeType"
-          @update:model-value="
-            (v) => {
-              if (isEditMode || typeof v !== 'string') return;
-              timeType = v as TaskTimeType;
-              handleTimeTypeChange();
-            }
-          "
+          data-testid="task-time-type-menu"
         >
-          <div class="flex items-center space-x-2">
-            <RadioGroupItem :value="TaskTimeType.AllDay" id="time-all-day" :disabled="isEditMode" />
-            <Label for="time-all-day">{{ t('task.timeConfig.allDay') }}</Label>
-          </div>
-          <div class="flex items-center space-x-2">
-            <RadioGroupItem
-              :value="TaskTimeType.TimePoint"
-              id="time-point"
-              :disabled="isEditMode"
+          <Button
+            v-for="option in timeTypeOptions"
+            :key="option.value"
+            type="button"
+            variant="ghost"
+            class="h-9 w-full justify-start gap-2 rounded-md px-2 font-normal"
+            :class="timeType === option.value ? 'bg-accent text-accent-foreground' : ''"
+            :disabled="isEditMode"
+            role="radio"
+            :aria-checked="timeType === option.value"
+            :data-testid="`task-time-type-${option.value}`"
+            @click="selectTimeType(option.value)"
+          >
+            <component :is="option.icon" class="h-4 w-4 shrink-0 text-muted-foreground" />
+            <span class="min-w-0 flex-1 text-left">{{ option.title }}</span>
+            <Check
+              class="h-4 w-4 shrink-0"
+              :class="timeType === option.value ? 'opacity-100' : 'opacity-0'"
             />
-            <Label for="time-point">{{ t('task.timeConfig.timePoint') }}</Label>
-          </div>
-          <div class="flex items-center space-x-2">
-            <RadioGroupItem
-              :value="TaskTimeType.TimeRange"
-              id="time-range"
-              :disabled="isEditMode"
-            />
-            <Label for="time-range">{{ t('task.timeConfig.timeRange') }}</Label>
-          </div>
-        </RadioGroup>
-        <p v-if="isEditMode" class="mt-1 text-xs text-muted-foreground">
-          {{ t('task.timeConfig.timeTypeFixedHint') }}
-        </p>
+          </Button>
+        </div>
       </div>
 
       <!-- 日期范围 -->
-      <div class="grid grid-cols-12 gap-4">
-        <div class="col-span-12 md:col-span-6">
+      <div>
+        <div>
           <Label for="task-start-date" class="mb-1.5 block">{{
             t('task.timeConfig.startDate')
           }}</Label>
@@ -64,15 +53,12 @@
             :aria-label="t('task.timeConfig.startDate')"
             :disabled="isEditMode"
           />
-          <p v-if="isEditMode" class="mt-1 text-xs text-muted-foreground">
-            {{ t('task.timeConfig.startDateFixedHint') }}
-          </p>
         </div>
       </div>
 
       <!-- 时间点输入 (仅当选择 TimePoint 时显示) -->
-      <div v-if="timeType === TaskTimeType.TimePoint" class="grid grid-cols-12 gap-4 mt-4">
-        <div class="col-span-12 md:col-span-6">
+      <div v-if="timeType === TaskTimeType.TimePoint" class="mt-4">
+        <div>
           <Label id="task-specific-time-label" class="mb-1.5 block">{{
             t('task.timeConfig.specificTime')
           }}</Label>
@@ -115,13 +101,12 @@
               </SelectContent>
             </Select>
           </div>
-          <p class="text-xs text-muted-foreground mt-1">{{ t('task.timeConfig.enterTime') }}</p>
         </div>
       </div>
 
       <!-- 时间段输入 (仅当选择 TimeRange 时显示) -->
-      <div v-if="timeType === TaskTimeType.TimeRange" class="grid grid-cols-12 gap-4 mt-4">
-        <div class="col-span-12 md:col-span-6">
+      <div v-if="timeType === TaskTimeType.TimeRange" class="mt-4 grid gap-4 sm:grid-cols-2">
+        <div>
           <Label class="mb-1.5 block">{{ t('task.timeConfig.startTime') }}</Label>
           <div class="flex gap-2 items-center mt-2">
             <Select
@@ -159,7 +144,7 @@
             </Select>
           </div>
         </div>
-        <div class="col-span-12 md:col-span-6">
+        <div>
           <Label class="mb-1.5 block">{{ t('task.timeConfig.endTime') }}</Label>
           <div class="flex gap-2 items-center mt-2">
             <Select
@@ -197,9 +182,6 @@
             </Select>
           </div>
         </div>
-        <div class="col-span-12">
-          <p class="text-xs text-muted-foreground">{{ t('task.timeConfig.enterFullRange') }}</p>
-        </div>
       </div>
 
       <!-- 验证提示 -->
@@ -217,9 +199,8 @@ import { TaskPlanScheduleSchema, TaskTimingSchema } from '@memoflow/contracts/ta
 import type { TaskPlanSchedule, TaskTiming } from '@memoflow/contracts/task';
 import type { TaskPlanViewModel } from '../../types';
 import {
+  Button,
   Label,
-  RadioGroup,
-  RadioGroupItem,
   Alert,
   AlertDescription,
   Select,
@@ -228,10 +209,10 @@ import {
   SelectContent,
   SelectItem,
 } from '@memoflow/ui-vue-shadcn';
-import { Clock3 } from '@lucide/vue';
 import { translateResultError } from '../../../../../shared/utils/translate-result-error';
 import { padTwoDigits } from '../../../../../shared/utils/pad-two-digits';
 import { ProductDatePicker } from '../../../../../shared/components';
+import { CalendarDays, Check, Clock3, Timer } from '@lucide/vue';
 import { requireYmd, type Ymd } from '@memoflow/contracts/primitives';
 
 const { t } = useI18n();
@@ -260,6 +241,23 @@ const emit = defineEmits<{
 const hourOptions = Array.from({ length: 24 }, (_, i) => padTwoDigits(i));
 const minuteOptions = Array.from({ length: 60 }, (_, i) => padTwoDigits(i));
 const timeType = ref<TaskTimeType>(TaskTimeType.AllDay);
+const timeTypeOptions = computed(() => [
+  {
+    value: TaskTimeType.AllDay,
+    title: t('task.timeConfig.allDay'),
+    icon: CalendarDays,
+  },
+  {
+    value: TaskTimeType.TimePoint,
+    title: t('task.timeConfig.timePoint'),
+    icon: Clock3,
+  },
+  {
+    value: TaskTimeType.TimeRange,
+    title: t('task.timeConfig.timeRange'),
+    icon: Timer,
+  },
+]);
 const startDate = ref('');
 const startDateModel = computed<Ymd | null>({
   get: () => (startDate.value ? requireYmd(startDate.value) : null),
@@ -375,6 +373,12 @@ function rebuildTimeRange(): void {
     return;
   }
   emitSchedule({ timing: buildTiming() });
+}
+
+function selectTimeType(value: TaskTimeType): void {
+  if (isEditMode || timeType.value === value) return;
+  timeType.value = value;
+  handleTimeTypeChange();
 }
 
 function handleTimeTypeChange(): void {

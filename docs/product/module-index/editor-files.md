@@ -24,7 +24,6 @@ Desktop Obsidian 打开入口落在 repository 工作区与共享 Markdown 工�
 | [`packages/app-vue/src/modules/repository/views/RepositoryEntryView.vue`](../../../packages/app-vue/src/modules/repository/views/RepositoryEntryView.vue)                           | Web/Desktop 入口分发                            |
 | [`packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue`](../../../packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue) | Web 投影只读工作区 + confirmed create           |
 | [`packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue`](../../../packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue)                   | Desktop Local Vault 浏览/预览/Obsidian 打开     |
-| [`packages/app-vue/src/modules/repository/views/NoteModuleLayout.vue`](../../../packages/app-vue/src/modules/repository/views/NoteModuleLayout.vue)                                 | Note 模块壳（笔记 / 规范分段）                  |
 
 ## 安全 Markdown 与共享工具
 

@@ -20,4 +20,10 @@ describe('ProductPropertyChip', () => {
     const wrapper = mount(ProductPropertyChip, { slots: { default: 'Target: Q4' } });
     expect(wrapper.get('button').attributes('aria-pressed')).toBeUndefined();
   });
+
+  it('keeps value chips in the quiet neutral visual family', () => {
+    const button = mount(ProductPropertyChip, { slots: { default: '2026年9月12日' } }).get('button');
+    expect(button.classes()).toContain('bg-background/60');
+    expect(button.classes()).toContain('text-muted-foreground');
+  });
 });

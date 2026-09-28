@@ -1,12 +1,15 @@
 import { LeaseFencingException } from '@memoflow/contracts/reliable-messaging';
 import type { RecurrenceEnginePort } from '@memoflow/time';
 import {
+  computeDurableElapsedNextOccurrence,
   computeRoutineNextEligibleOccurrence,
   requiresDurableScheduleProjection,
   RoutineDefinition,
+  type ElapsedTrigger,
   type WallClockTrigger,
 } from '../../domain/routine';
 import type { RoutineOccurrenceNotificationWriterPort } from '../../domain/ports/routine-occurrence-notification-writer.port';
+import { buildRoutineOccurrenceNotificationRequest } from './routine-occurrence-notification-writer';
 import type { RoutineOccurrenceStore } from '../../domain/ports/routine-occurrence-store.port';
 import type { RoutineTemporaryOverrideStore } from '../../domain/ports/routine-temporary-override-store.port';
 import type {
@@ -27,7 +30,11 @@ export interface RoutineScheduleExecutionInput {
   readonly identityId: string;
   readonly routineId: string;
   readonly occurrenceKey: string;
+  /** Distinct NotificationRequested idempotency key for snooze re-presentation. */
+  readonly notificationOccurrenceKey?: string;
+  readonly triggerKind?: 'WallClock' | 'Elapsed';
   readonly scheduledFor: number;
+  readonly dueAt?: number;
   readonly sourceRevision: string | number | null;
 }
 
@@ -59,7 +66,7 @@ export interface RoutineScheduleExecutionDeps {
   readonly publishOccurrenceCommitted?: (event: RoutineOccurrenceCommittedEvent) => void;
 }
 
-export function createRoutineWallClockExecutionSource(
+export function createRoutineScheduleExecutionSource(
   deps: RoutineScheduleExecutionDeps,
 ): RoutineScheduleExecutionSource {
   const now = deps.now ?? Date.now;
@@ -76,8 +83,16 @@ export function createRoutineWallClockExecutionSource(
         return { kind: 'skipped', reason: 'routine-unavailable', occurrenceId: null };
       }
 
-      const trigger = toDurableWallClock(snapshot.definition);
-      if (!snapshot.definition.enabled || !snapshot.durableProfileGateOpen || !trigger) {
+      const trigger = snapshot.definition.trigger;
+      const triggerKind = input.triggerKind ?? 'WallClock';
+      if (
+        snapshot.globalEnabled === false ||
+        !snapshot.definition.enabled ||
+        !snapshot.durableProfileGateOpen ||
+        !trigger ||
+        !requiresDurableScheduleProjection(trigger) ||
+        trigger.type !== triggerKind
+      ) {
         return { kind: 'skipped', reason: 'routine-unavailable', occurrenceId: null };
       }
 
@@ -88,41 +103,82 @@ export function createRoutineWallClockExecutionSource(
         return { kind: 'skipped', reason: 'revision-drifted', occurrenceId: null };
       }
 
-      const eligible = computeRoutineNextEligibleOccurrence({
-        routineId: input.routineId,
-        engine: deps.recurrenceEngine,
-        trigger,
-        after: input.scheduledFor - 1,
-        temporaryOverride: snapshot.temporaryOverride,
-      });
-      if (
-        !eligible ||
-        Number(eligible.occurrenceAt) !== input.scheduledFor ||
-        eligible.occurrenceKey !== input.occurrenceKey
-      ) {
-        return { kind: 'skipped', reason: 'no-eligible-occurrence', occurrenceId: null };
+      if (trigger.type === 'WallClock') {
+        const eligible = computeRoutineNextEligibleOccurrence({
+          routineId: input.routineId,
+          engine: deps.recurrenceEngine,
+          trigger,
+          after: input.scheduledFor - 1,
+          temporaryOverride: snapshot.temporaryOverride,
+        });
+        if (
+          !eligible ||
+          Number(eligible.occurrenceAt) !== input.scheduledFor ||
+          eligible.occurrenceKey !== input.occurrenceKey
+        ) {
+          return { kind: 'skipped', reason: 'no-eligible-occurrence', occurrenceId: null };
+        }
+      } else {
+        const alreadyOpen = (snapshot.elapsedOccurrences ?? []).some(
+          (occurrence) =>
+            occurrence.occurrenceKey === input.occurrenceKey &&
+            occurrence.resolutionState === 'Open',
+        );
+        if (alreadyOpen && input.notificationOccurrenceKey != null) {
+          const snoozeUntil = snapshot.temporaryOverride?.snoozeUntil ?? null;
+          const expectedNotificationOccurrenceKey =
+            input.occurrenceKey + ':snooze:' + input.scheduledFor;
+          if (
+            snoozeUntil == null ||
+            Number(snoozeUntil) !== input.scheduledFor ||
+            input.notificationOccurrenceKey !== expectedNotificationOccurrenceKey
+          ) {
+            return { kind: 'skipped', reason: 'no-eligible-occurrence', occurrenceId: null };
+          }
+        }
+        if (!alreadyOpen) {
+          const eligible = computeDurableElapsedNextOccurrence({
+            routineId: input.routineId,
+            trigger,
+            activatedAt: snapshot.definition.activatedAt,
+            occurrences: snapshot.elapsedOccurrences ?? [],
+            temporaryOverride: snapshot.temporaryOverride ?? null,
+          });
+          if (
+            !eligible ||
+            Number(eligible.runAt) !== input.scheduledFor ||
+            Number(eligible.dueAt) !== (input.dueAt ?? input.scheduledFor) ||
+            eligible.occurrenceKey !== input.occurrenceKey
+          ) {
+            return { kind: 'skipped', reason: 'no-eligible-occurrence', occurrenceId: null };
+          }
+        }
       }
 
       const lease = await deps.occurrenceStore.claimOccurrence({
         identityId: input.identityId,
         routineId: input.routineId,
         occurrenceKey: input.occurrenceKey,
+        triggerKind,
         scheduledFor: input.scheduledFor,
+        becameDueAt: input.dueAt ?? input.scheduledFor,
         sourceRevision: input.sourceRevision,
         claimedAt: nowMs,
         leaseExpiresAt: nowMs + ROUTINE_OCCURRENCE_LEASE_MS,
       });
 
-      const notificationRequest = {
+      const notificationRequest = buildRoutineOccurrenceNotificationRequest({
         identityId: input.identityId,
         routineId: input.routineId,
         occurrenceKey: input.occurrenceKey,
-        scheduledFor: input.scheduledFor,
+        ...(input.notificationOccurrenceKey
+          ? { notificationOccurrenceKey: input.notificationOccurrenceKey }
+          : {}),
+        scheduledFor: input.dueAt ?? input.scheduledFor,
         sourceRevision: input.sourceRevision,
-        title: `例行提醒：${snapshot.definition.name}`,
-        content:
-          snapshot.definition.description ?? `已到「${snapshot.definition.name}」的执行时间。`,
-      };
+        routineName: snapshot.definition.name,
+        routineDescription: snapshot.definition.description,
+      });
 
       if (lease.alreadyFinalized) {
         // Crash/retry replay: the durable commit already landed, so we only
@@ -133,17 +189,26 @@ export function createRoutineWallClockExecutionSource(
         // crash; the projection runtime dedups the re-published occurrence).
         try {
           await deps.notificationWriter.enqueueRoutineOccurrenceRequested(notificationRequest);
+          if (input.notificationOccurrenceKey != null && deps.temporaryOverrideStore != null) {
+            await deps.temporaryOverrideStore.clearRoutineTemporaryOverride({
+              identityId: input.identityId,
+              routineId: input.routineId,
+            });
+          }
         } catch (error) {
           return { kind: 'retryable', error: serializeError(error) };
         }
 
-        const nextEligibleAfterReplay = computeRoutineNextEligibleOccurrence({
-          routineId: input.routineId,
-          engine: deps.recurrenceEngine,
-          trigger,
-          after: input.scheduledFor,
-          temporaryOverride: snapshot.temporaryOverride,
-        });
+        const nextEligibleAfterReplay =
+          trigger.type === 'WallClock'
+            ? computeRoutineNextEligibleOccurrence({
+                routineId: input.routineId,
+                engine: deps.recurrenceEngine,
+                trigger,
+                after: input.scheduledFor,
+                temporaryOverride: snapshot.temporaryOverride,
+              })
+            : null;
         deps.publishOccurrenceCommitted?.({
           routineId: input.routineId,
           identityId: input.identityId,
@@ -161,13 +226,16 @@ export function createRoutineWallClockExecutionSource(
         };
       }
 
-      const nextEligible = computeRoutineNextEligibleOccurrence({
-        routineId: input.routineId,
-        engine: deps.recurrenceEngine,
-        trigger,
-        after: input.scheduledFor,
-        temporaryOverride: snapshot.temporaryOverride,
-      });
+      const nextEligible =
+        trigger.type === 'WallClock'
+          ? computeRoutineNextEligibleOccurrence({
+              routineId: input.routineId,
+              engine: deps.recurrenceEngine,
+              trigger,
+              after: input.scheduledFor,
+              temporaryOverride: snapshot.temporaryOverride,
+            })
+          : null;
       const nextOccurrenceAt = nextEligible ? Number(nextEligible.occurrenceAt) : null;
 
       try {
@@ -228,8 +296,5 @@ function serializeError(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-function toDurableWallClock(definition: RoutineDefinition): WallClockTrigger | null {
-  const trigger = definition.trigger ?? null;
-  if (!trigger || !requiresDurableScheduleProjection(trigger)) return null;
-  return trigger;
-}
+/** Backward-compatible factory name for existing composition imports. */
+export const createRoutineWallClockExecutionSource = createRoutineScheduleExecutionSource;

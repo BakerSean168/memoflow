@@ -104,6 +104,46 @@ describe('createNotificationSseInvalidationSource (Step 3)', () => {
     source.stop();
   });
 
+  it('presents full live InApp deliveries but never replays metadata-only catch-up receipts', async () => {
+    const present = vi.fn();
+    const source = makeSource({ presentInAppDispatch: present });
+    source.start();
+
+    const es = FakeEventSource.instances[0];
+    es.emit('notification', {
+      data: JSON.stringify({
+        id: 'n-live',
+        operationId: 'op-live',
+        identityId: 'identity-1',
+        title: 'Stand & Move',
+        body: 'Take a short movement break.',
+        category: 'Reminder',
+        type: 'Reminder',
+      }),
+      lastEventId: 'cursor-live',
+    });
+    es.emit('notification', {
+      data: JSON.stringify({
+        operationId: 'op-catchup',
+        identityId: 'identity-1',
+        source: 'notification',
+        status: 'succeeded',
+      }),
+      lastEventId: 'cursor-catchup',
+    });
+    await Promise.resolve();
+
+    expect(present).toHaveBeenCalledTimes(1);
+    expect(present).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'n-live',
+        operationId: 'op-live',
+        title: 'Stand & Move',
+      }),
+    );
+    source.stop();
+  });
+
   it('persists the last event id to the cursor store', async () => {
     const cursorStore = memoryCursorStore();
     const source = makeSource({ cursorStore });

@@ -375,6 +375,8 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                   providerId: messageCommand.providerId,
                   modelId: messageCommand.modelId,
                   locale: messageCommand.locale,
+                  attachments: messageCommand.attachments,
+                  selectedEntities: messageCommand.selectedEntities,
                   signal: abortController.signal,
                 })) {
                   const validated = AssistantRuntimeEventSchema.parse(runtimeEvent);

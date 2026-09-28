@@ -1,8 +1,13 @@
 import { z } from 'zod';
 import { TimeZoneIdSchema, YmdSchema } from '../../primitives';
 
+export const ROUTINE_NAME_MAX_LENGTH = 100;
+export const ROUTINE_DESCRIPTION_MAX_LENGTH = 2000;
+
 const HmSchema = z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/);
 const PositiveMsSchema = z.number().finite().positive();
+const RoutineNameSchema = z.string().trim().min(1).max(ROUTINE_NAME_MAX_LENGTH);
+const RoutineDescriptionSchema = z.string().max(ROUTINE_DESCRIPTION_MAX_LENGTH);
 
 export const RoutineWallClockTriggerSchema = z.object({
   type: z.literal('WallClock'),
@@ -19,12 +24,20 @@ export const RoutineWallClockTriggerSchema = z.object({
   }),
 });
 
-export const RoutineElapsedTriggerSchema = z.object({
-  type: z.literal('Elapsed'),
-  timingOwner: z.literal('local-runtime'),
-  durationMs: PositiveMsSchema,
-  anchor: z.enum(['routine-activation', 'profile-activation', 'last-satisfied']),
-});
+export const RoutineElapsedTriggerSchema = z.union([
+  z.object({
+    type: z.literal('Elapsed'),
+    timingOwner: z.literal('scheduler'),
+    durationMs: PositiveMsSchema,
+    anchor: z.enum(['routine-activation', 'last-satisfied']),
+  }),
+  z.object({
+    type: z.literal('Elapsed'),
+    timingOwner: z.literal('local-runtime'),
+    durationMs: PositiveMsSchema,
+    anchor: z.literal('profile-activation'),
+  }),
+]);
 
 export const RoutineActiveUsageTriggerSchema = z.object({
   type: z.literal('ActiveUsage'),
@@ -45,7 +58,7 @@ export const RoutineActiveUsageTriggerSchema = z.object({
     .nullable(),
 });
 
-export const RoutineTriggerSchema = z.discriminatedUnion('type', [
+export const RoutineTriggerSchema = z.union([
   RoutineWallClockTriggerSchema,
   RoutineElapsedTriggerSchema,
   RoutineActiveUsageTriggerSchema,
@@ -53,8 +66,8 @@ export const RoutineTriggerSchema = z.discriminatedUnion('type', [
 
 export const RoutineDefinitionSchema = z.object({
   id: z.string().trim().min(1),
-  name: z.string().trim().min(1).max(200),
-  description: z.string().nullable(),
+  name: RoutineNameSchema,
+  description: RoutineDescriptionSchema.nullable(),
   enabled: z.boolean(),
   trigger: RoutineTriggerSchema.nullable(),
   version: z.number().int().positive(),
@@ -64,8 +77,8 @@ export const RoutineDefinitionSchema = z.object({
 
 export const RoutineProfileSchema = z.object({
   id: z.string().trim().min(1),
-  name: z.string().trim().min(1).max(200),
-  description: z.string().nullable(),
+  name: RoutineNameSchema,
+  description: RoutineDescriptionSchema.nullable(),
   enabled: z.boolean(),
   active: z.boolean(),
   version: z.number().int().positive(),
@@ -94,10 +107,21 @@ export const RoutineRuntimeContextSchema = z.object({
   activeProfileIds: z.array(z.string().trim().min(1)),
 });
 
+export const RoutinePreferencesSchema = z.object({
+  globalEnabled: z.boolean(),
+  version: z.number().int().nonnegative(),
+});
+
+export const UpdateRoutinePreferencesRequestSchema = z.object({
+  globalEnabled: z.boolean(),
+  expectedVersion: z.number().int().nonnegative(),
+});
+
 export const RoutineConfigurationSnapshotSchema = z.object({
   definitions: z.array(RoutineDefinitionSchema),
   profiles: z.array(RoutineProfileSchema),
   memberships: z.array(RoutineMembershipSchema),
+  preferences: RoutinePreferencesSchema,
   runtimeContext: RoutineRuntimeContextSchema,
   capabilities: z.object({
     localRuntime: z.boolean(),
@@ -133,8 +157,8 @@ export const RoutineUpcomingResponseSchema = z.object({
 });
 
 export const CreateRoutineRequestSchema = z.object({
-  name: z.string().trim().min(1).max(200),
-  description: z.string().nullable().optional(),
+  name: RoutineNameSchema,
+  description: RoutineDescriptionSchema.nullable().optional(),
   trigger: RoutineTriggerSchema.nullable().optional(),
   profileIds: z.array(z.string().trim().min(1)).default([]),
 });
@@ -142,8 +166,8 @@ export const CreateRoutineRequestSchema = z.object({
 export const UpdateRoutineRequestSchema = z
   .object({
     expectedVersion: z.number().int().positive(),
-    name: z.string().trim().min(1).max(200).optional(),
-    description: z.string().nullable().optional(),
+    name: RoutineNameSchema.optional(),
+    description: RoutineDescriptionSchema.nullable().optional(),
     enabled: z.boolean().optional(),
     trigger: RoutineTriggerSchema.nullable().optional(),
   })
@@ -161,16 +185,16 @@ export const DeleteRoutineRequestSchema = z.object({
 });
 
 export const CreateRoutineProfileRequestSchema = z.object({
-  name: z.string().trim().min(1).max(200),
-  description: z.string().nullable().optional(),
+  name: RoutineNameSchema,
+  description: RoutineDescriptionSchema.nullable().optional(),
   enabled: z.boolean().optional(),
 });
 
 export const UpdateRoutineProfileRequestSchema = z
   .object({
     expectedVersion: z.number().int().positive(),
-    name: z.string().trim().min(1).max(200).optional(),
-    description: z.string().nullable().optional(),
+    name: RoutineNameSchema.optional(),
+    description: RoutineDescriptionSchema.nullable().optional(),
     enabled: z.boolean().optional(),
   })
   .refine(
@@ -228,6 +252,8 @@ export type RoutineProfileDto = z.infer<typeof RoutineProfileSchema>;
 export type RoutineMembershipDto = z.infer<typeof RoutineMembershipSchema>;
 export type RoutineTemporaryOverrideDto = z.infer<typeof RoutineTemporaryOverrideSchema>;
 export type RoutineRuntimeContextDto = z.infer<typeof RoutineRuntimeContextSchema>;
+export type RoutinePreferencesDto = z.infer<typeof RoutinePreferencesSchema>;
+export type UpdateRoutinePreferencesRequest = z.infer<typeof UpdateRoutinePreferencesRequestSchema>;
 export type RoutineConfigurationSnapshot = z.infer<typeof RoutineConfigurationSnapshotSchema>;
 export type RoutineUpcomingQuery = z.infer<typeof RoutineUpcomingQuerySchema>;
 export type RoutineUpcomingOccurrence = z.infer<typeof RoutineUpcomingOccurrenceSchema>;

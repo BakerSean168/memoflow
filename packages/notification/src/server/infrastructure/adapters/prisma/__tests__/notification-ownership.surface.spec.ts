@@ -140,8 +140,8 @@ describe('notification ownership surface', () => {
   });
 
   it('query and maintenance paths pass identity into related/delete after domain-service retirement', () => {
-    expect(queryService).toContain(
-      'findByRelatedEntity(\n          query.identityId,\n          query.relatedEntityType,',
+    expect(queryService).toMatch(
+      /findByRelatedEntity\(\s*query\.identityId,\s*query\.relatedEntityType,/,
     );
     expect(maintenance).toContain('deleteMany(data.identityId, expiredIds)');
   });

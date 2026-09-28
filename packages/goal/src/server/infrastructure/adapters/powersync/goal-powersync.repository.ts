@@ -17,7 +17,7 @@ import type { GoalPowerSyncDatabase, PowerSyncLockContext } from './shared';
 import { toDbDateTime } from './shared';
 import { PowerSyncGoalMapper } from './mappers/powersync-goal.mapper';
 import type { RawKeyResultData, RawGoalReviewData } from './mappers/powersync-goal.mapper';
-import { encodeGoalTimeframe } from '../goal-timeframe-persistence';
+import { encodeGoalStartTimeframe, encodeGoalTimeframe } from '../goal-timeframe-persistence';
 
 const eventBusAdapter = createEventBusAdapter(eventBus);
 
@@ -209,6 +209,7 @@ export class GoalPowerSyncRepository
 
   protected async persist(goal: Goal): Promise<void> {
     const dto = goal.toServerDTO(true);
+    const start = encodeGoalStartTimeframe(dto.start);
     const target = encodeGoalTimeframe(dto.target);
 
     const persistInTransaction = async (tx: PowerSyncLockContext) => {
@@ -225,6 +226,7 @@ export class GoalPowerSyncRepository
                summary = ?,
                description = ?,
                status = ?,
+               start_kind = ?,
                start_date = ?,
                target_kind = ?,
                target_end_date = ?,
@@ -242,7 +244,8 @@ export class GoalPowerSyncRepository
             dto.summary,
             dto.description,
             dto.status,
-            dto.startDate,
+            start.startKind,
+            start.startDate,
             target.targetKind,
             target.targetEndDate,
             toDbDateTime(dto.completedAt),
@@ -259,9 +262,9 @@ export class GoalPowerSyncRepository
         await tx.execute(
           `INSERT INTO goals (
              id, identity_id, name, summary, description, status,
-             start_date, target_kind, target_end_date, completed_at, archived_at, sort_order, reminder_config,
+             start_kind, start_date, target_kind, target_end_date, completed_at, archived_at, sort_order, reminder_config,
              version, created_at, updated_at, deleted_at
-           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             dto.id,
             dto.identityId,
@@ -269,7 +272,8 @@ export class GoalPowerSyncRepository
             dto.summary,
             dto.description,
             dto.status,
-            dto.startDate,
+            start.startKind,
+            start.startDate,
             target.targetKind,
             target.targetEndDate,
             toDbDateTime(dto.completedAt),
@@ -328,9 +332,10 @@ export class GoalPowerSyncRepository
 
   private async persistWithExpectedVersion(goal: Goal, expectedVersion: number): Promise<void> {
     const dto = goal.toServerDTO(false);
+    const start = encodeGoalStartTimeframe(dto.start);
     const target = encodeGoalTimeframe(dto.target);
     const result = await this.db.execute(
-      `UPDATE goals SET name = ?, summary = ?, description = ?, status = ?, start_date = ?, target_kind = ?, target_end_date = ?, completed_at = ?, archived_at = ?,
+      `UPDATE goals SET name = ?, summary = ?, description = ?, status = ?, start_kind = ?, start_date = ?, target_kind = ?, target_end_date = ?, completed_at = ?, archived_at = ?,
        reminder_config = ?, version = ?, updated_at = ?, deleted_at = ?
        WHERE id = ? AND identity_id = ? AND version = ?`,
       [
@@ -338,7 +343,8 @@ export class GoalPowerSyncRepository
         dto.summary,
         dto.description,
         dto.status,
-        dto.startDate,
+        start.startKind,
+        start.startDate,
         target.targetKind,
         target.targetEndDate,
         toDbDateTime(dto.completedAt),

@@ -7,7 +7,7 @@ import {
 } from './schedule-projection-source';
 import { buildSchedulingKey } from '@memoflow/contracts/schedule';
 import { GoalStatus, ReminderTriggerType, type GoalTimeframe } from '@memoflow/contracts/goal';
-import { requireYmd, type Ymd } from '@memoflow/contracts/primitives';
+import { requireYmd } from '@memoflow/contracts/primitives';
 import { createTimeContext, createTimeFacade } from '@memoflow/time';
 
 const TEST_TIME_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
@@ -23,7 +23,7 @@ type GoalDto = {
   archivedAt: number | null;
   completedAt: number | null;
   deletedAt: number | null;
-  startDate: Ymd | null;
+  start: GoalTimeframe | null;
   target: GoalTimeframe | null;
   reminderConfig: {
     enabled: boolean;
@@ -41,7 +41,7 @@ function buildGoalDto(overrides: Partial<GoalDto> = {}): GoalDto {
     archivedAt: null,
     completedAt: null,
     deletedAt: null,
-    startDate: requireYmd('2030-01-10'),
+    start: { kind: 'day', date: requireYmd('2030-01-10') },
     target: { kind: 'day', date: requireYmd('2030-01-20') },
     reminderConfig: {
       enabled: true,
@@ -103,8 +103,9 @@ describe('createGoalScheduleProjectionSource', () => {
     });
     expect(plan.desired).toHaveLength(1);
 
-    const expectedRunAt = createTimeFacade({ context: TEST_TIME_CONTEXT }).codec.startOfYmd(
+    const expectedRunAt = createTimeFacade({ context: TEST_TIME_CONTEXT }).input.combine(
       requireYmd('2030-01-13'),
+      '09:00',
     );
     const intent = plan.desired[0];
     expect(intent?.handlerKey).toBe(GOAL_REMINDER_HANDLER_KEY);
@@ -116,16 +117,49 @@ describe('createGoalScheduleProjectionSource', () => {
       goalTitle: 'Launch 1.0',
       triggerType: ReminderTriggerType.RemainingDays,
       triggerValue: 7,
-      startDate: goalDto.startDate,
+      start: goalDto.start,
       target: goalDto.target,
       reminderTime: expectedRunAt,
     });
     expect(intent?.sourceRevision).toBe('3');
-    expect(intent?.observability?.name).toBe('Launch 1.0 · 剩余 7 天提醒');
+    expect(intent?.observability?.name).toBe('Launch 1.0 · 目标日前 7 天提醒');
 
     const expectedKey = buildSchedulingKey('goal.reminder', 'GoalId_goal-1', 'remaining:7');
     expect(intent?.schedulingKey).toBe(expectedKey);
     expect(again.desired.map((item) => item.schedulingKey)).toEqual([expectedKey]);
+
+    vi.useRealTimers();
+  });
+
+  it('projects an absolute reminder unchanged for a planned Goal without target dates', async () => {
+    const now = new Date('2030-01-01T00:00:00.000Z').getTime();
+    const remindAt = new Date('2030-01-05T12:30:00.000Z').getTime();
+    vi.useFakeTimers();
+    vi.setSystemTime(now);
+
+    const goalDto = buildGoalDto({
+      status: GoalStatus.Planned,
+      start: null,
+      target: null,
+      reminderConfig: {
+        enabled: true,
+        triggers: [{ enabled: true, type: ReminderTriggerType.AbsoluteAt, value: remindAt }],
+      },
+    });
+    const source = createSource({
+      findByIdForIdentity: vi.fn().mockResolvedValue({
+        toServerDTO: vi.fn().mockReturnValue(goalDto),
+      }),
+    });
+
+    const plan = await source.buildGoalPlan('GoalId_goal-1', 'IdentityId_goal-owner');
+
+    expect(plan.desired).toHaveLength(1);
+    expect(plan.desired[0]?.runAt).toBe(remindAt);
+    expect(plan.desired[0]?.schedulingKey).toBe(
+      buildSchedulingKey('goal.reminder', 'GoalId_goal-1', `absolute:${remindAt}`),
+    );
+    expect(plan.desired[0]?.observability?.name).toBe('Launch 1.0 · 定时提醒');
 
     vi.useRealTimers();
   });
@@ -165,7 +199,7 @@ describe('createGoalScheduleProjectionSource', () => {
       process.env.TZ = 'Asia/Tokyo';
       const fromTokyoHost = await source.buildGoalPlan('GoalId_goal-1', 'IdentityId_goal-owner');
 
-      expect(fromUtcHost.desired[0]?.runAt).toBe(Date.parse('2030-03-09T05:00:00.000Z'));
+      expect(fromUtcHost.desired[0]?.runAt).toBe(Date.parse('2030-03-09T14:00:00.000Z'));
       expect(fromTokyoHost.desired[0]?.runAt).toBe(fromUtcHost.desired[0]?.runAt);
       expect(userTimeContextPort.getUserTimeContext).toHaveBeenCalledWith('IdentityId_goal-owner');
     } finally {
@@ -195,7 +229,10 @@ describe('createGoalScheduleProjectionSource', () => {
 
     expect(plan.desired).toHaveLength(1);
     expect(plan.desired[0]?.runAt).toBe(
-      createTimeFacade({ context: TEST_TIME_CONTEXT }).codec.startOfYmd(requireYmd('2030-12-24')),
+      createTimeFacade({ context: TEST_TIME_CONTEXT }).input.combine(
+        requireYmd('2030-12-24'),
+        '09:00',
+      ),
     );
     expect(plan.desired[0]?.payload.target).toEqual({ kind: 'quarter', year: 2030, quarter: 4 });
 
@@ -228,6 +265,44 @@ describe('createGoalScheduleProjectionSource', () => {
       buildSchedulingKey('goal.reminder', 'GoalId_goal-1', 'progress:50'),
     );
     expect(plan.desired[0]?.observability?.name).toBe('Launch 1.0 · 进度 50% 提醒');
+
+    vi.useRealTimers();
+  });
+
+  it('uses a coarse start boundary and target end boundary without losing semantic precision', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2030-09-01T00:00:00.000Z'));
+
+    const goalDto = buildGoalDto({
+      start: { kind: 'quarter', year: 2030, quarter: 4 },
+      target: { kind: 'quarter', year: 2031, quarter: 2 },
+      reminderConfig: {
+        enabled: true,
+        triggers: [{ enabled: true, type: ReminderTriggerType.TimeProgressPercentage, value: 50 }],
+      },
+    });
+    const source = createSource({
+      findByIdForIdentity: vi.fn().mockResolvedValue({
+        toServerDTO: vi.fn().mockReturnValue(goalDto),
+      }),
+    });
+
+    const plan = await source.buildGoalPlan('GoalId_goal-1', 'IdentityId_goal-owner');
+
+    expect(plan.desired).toHaveLength(1);
+    expect(plan.desired[0]?.runAt).toBe(
+      createTimeFacade({ context: TEST_TIME_CONTEXT }).codec.startOfYmd(requireYmd('2031-02-14')),
+    );
+    expect(plan.desired[0]?.payload.start).toEqual({
+      kind: 'quarter',
+      year: 2030,
+      quarter: 4,
+    });
+    expect(plan.desired[0]?.payload.target).toEqual({
+      kind: 'quarter',
+      year: 2031,
+      quarter: 2,
+    });
 
     vi.useRealTimers();
   });

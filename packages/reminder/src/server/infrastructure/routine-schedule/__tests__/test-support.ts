@@ -3,6 +3,7 @@ import {
   computeRoutineNextEligibleOccurrence,
   createWallClockTrigger,
   RoutineDefinition,
+  type RoutineTrigger,
   type WallClockTrigger,
 } from '../../../domain/routine';
 
@@ -19,9 +20,7 @@ export const FIXTURE_F = {
 
 export const recurrenceEngine = createRecurrenceEngine();
 
-export function fixtureTrigger(options?: {
-  count?: number | null;
-}): WallClockTrigger {
+export function fixtureTrigger(options?: { count?: number | null }): WallClockTrigger {
   return createWallClockTrigger({
     localTime: FIXTURE_F.localTime,
     timeZone: FIXTURE_F.timeZone,
@@ -38,7 +37,8 @@ export function fixtureTrigger(options?: {
 export function buildFixtureFRoutine(options?: {
   enabled?: boolean;
   version?: number;
-  trigger?: WallClockTrigger | null;
+  trigger?: RoutineTrigger | null;
+  activatedAt?: Date | null;
 }): RoutineDefinition {
   return RoutineDefinition.load({
     id: FIXTURE_F.routineId,
@@ -47,6 +47,7 @@ export function buildFixtureFRoutine(options?: {
     description: '屋内灯光关闭，进入休息时间。',
     enabled: options?.enabled ?? true,
     trigger: options?.trigger !== undefined ? options.trigger : fixtureTrigger(),
+    activatedAt: options?.activatedAt ?? new Date(Date.parse('2026-08-01T00:00:00.000Z')),
     version: options?.version ?? FIXTURE_F.version,
     createdAt: new Date(Date.parse('2026-08-01T00:00:00.000Z')),
     updatedAt: new Date(Date.parse('2026-08-24T00:00:00.000Z')),

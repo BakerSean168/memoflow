@@ -10,6 +10,8 @@
 import type { Result } from '@memoflow/contracts/result';
 import type {
   BatchOperationResultDTO,
+  ExecuteNotificationActionReq,
+  ExecuteNotificationActionRes,
   NotificationClientDTO,
   NotificationPreferenceClientDTO,
   UpdateNotificationPreferenceReq,
@@ -43,6 +45,7 @@ export class NotificationClientService implements INotificationApiClient {
     this.markAllAsRead = this.markAllAsRead.bind(this);
     this.deleteNotification = this.deleteNotification.bind(this);
     this.batchDeleteNotifications = this.batchDeleteNotifications.bind(this);
+    this.executeAction = this.executeAction.bind(this);
     this.getUnreadCount = this.getUnreadCount.bind(this);
     this.getPreferences = this.getPreferences.bind(this);
     this.updatePreferences = this.updatePreferences.bind(this);
@@ -92,6 +95,12 @@ export class NotificationClientService implements INotificationApiClient {
 
   async batchDeleteNotifications(ids: string[]): Promise<Result<BatchOperationResultDTO>> {
     return this.notificationApi.batchDeleteNotifications(ids);
+  }
+
+  async executeAction(
+    request: ExecuteNotificationActionReq,
+  ): Promise<Result<ExecuteNotificationActionRes>> {
+    return this.notificationApi.executeAction(request);
   }
 
   async getUnreadCount(): Promise<Result<UnreadCountResponse>> {

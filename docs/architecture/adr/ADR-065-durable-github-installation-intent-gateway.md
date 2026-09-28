@@ -43,7 +43,11 @@ Pending -> CallbackReceived -> Finalized -> Consumed
 
 普通 provider-state lease 到期后任何非终态均视为 `Expired`，且原始 state 不再可用。
 
-2026-09-06 的 Windows live acceptance 补充一个严格受限的 **authenticated retry lease**：若同一 MemoFlow identity 在最近 24 小时内已经通过真实 Setup Gateway callback 得到 `CallbackReceived` / `Finalized`（且尚未 `Consumed`），Desktop 可在 authenticated `start` 时请求恢复。Server 必须重新调用 GitHub App inventory，确认 installation 未 suspended、Contents write 仍成立且 provider account 未漂移，然后只把该 verified intent 的 live `expiresAt` 续签为新的 10 分钟窗口。`Pending` / `Consumed` 永不恢复，Web flow 不使用此路径；恢复过程不持久化 raw state、OAuth token 或 installation token。
+2026-09-06 的 Windows live acceptance 补充一个严格受限的 **authenticated retry lease**：若同一 MemoFlow identity 在最近 24 小时内已经通过真实 Setup Gateway callback 得到 `CallbackReceived` / `Finalized`（且尚未 `Consumed`），Desktop 可在 authenticated `start` 时请求恢复。Server 必须重新调用 GitHub App inventory，确认 installation 未 suspended、Contents write 仍成立且 provider account 未漂移，然后只把该 verified intent 的 live `expiresAt` 续签为新的 10 分钟窗口。
+
+2026-09-27 的 Web dev acceptance 暴露了同一 GitHub provider 语义在浏览器中的另一种失败方式：Web 已经完成 authenticated `finalize`，但 repository-selection UI 因刷新/重新挂载丢失；随后用户再次进入 GitHub configuration 并点击 Save，如果 repository selection 没有实际变化，GitHub 不会产生新的 Setup callback。为避免要求用户人为增删仓库，Web 允许恢复 **最近 24 小时、同 identity、同 route、`clientKind=web` 且已经 `Finalized` 的未消费 intent**。Web 不恢复仅有 `CallbackReceived` 的 proof；这保证浏览器恢复路径仍然要求此前已经经过 authenticated finalize。恢复时同样必须重新验证 GitHub installation inventory，并只续签该 intent 的 10 分钟 live lease。
+
+`Pending` / `Consumed` 永不恢复；恢复过程不持久化 raw state、OAuth token 或 installation token。
 
 记录包含 identity owner、client kind、environment route key、relative return path、installation/account metadata 与时间戳，但**不得**持久化 GitHub App private key、installation token、OAuth token 或原始 state。
 
@@ -140,20 +144,21 @@ GitHub callback 到达 gateway 后只记录 `CallbackReceived` 并显示“可�
 
 ### 2.7a Existing-installation / failed-client retry
 
-GitHub 对已经安装且 repository selection **没有发生变化**的 App 配置页不会产生新的 Setup callback；`Redirect on update` 只在 installation 实际更新时触发。Desktop 因本地崩溃、IPC defect 或升级中断而错过 finalize 时，强迫用户先增删仓库再 Save 既不可靠，也扩大误操作风险。
+GitHub 对已经安装且 repository selection **没有发生变化**的 App 配置页不会产生新的 Setup callback；`Redirect on update` 只在 installation 实际更新时触发。Desktop 因本地崩溃、IPC defect 或升级中断而错过 finalize，或 Web 已完成 finalize 但 repository-selection UI 因刷新/重新挂载丢失时，强迫用户先增删仓库再 Save 既不可靠，也扩大误操作风险。
 
-因此 Desktop retry 采用已有 verified callback 的短期恢复，而不是新增 OAuth 权限或伪造 callback：
+因此 retry 采用已有 verified proof 的短期恢复，而不是新增 OAuth 权限或伪造 callback。Desktop 可以恢复 `CallbackReceived|Finalized`；Web 只允许恢复更强的 `Finalized` proof：
 
 ```text
-authenticated Desktop start
--> find same-identity/same-route CallbackReceived|Finalized proof (callback <= 24h)
+authenticated start
+-> Desktop: find same-identity/same-route CallbackReceived|Finalized proof (callback <= 24h)
+-> Web: find same-identity/same-route/clientKind=web Finalized proof (callback <= 24h)
 -> revalidate installation through GitHub App API
 -> require same provider account + not suspended + Contents write
 -> CAS-renew the same unconsumed intent for 10m
--> STATUS -> authenticated FINALIZE -> repository inventory
+-> authenticated FINALIZE (idempotent when already Finalized) -> repository inventory
 ```
 
-新客户端在该路径收到 `requiresExternalBrowser=false`，不得再打开无效的 GitHub configuration page；旧客户端忽略该字段仍保持安全，只会多打开一个不具授权效果的页面。首次安装、过旧 proof、identity/account drift、无 verified callback、以及 `Consumed` intent 仍必须走新的 provider-state + Setup callback。GitHub 服务不可用时恢复请求 fail closed，不通过创建额外 Pending intent 隐藏错误。
+新客户端在该路径收到 `requiresExternalBrowser=false`，不得再打开无效的 GitHub configuration page；Web 直接用返回的 exact intent id 执行 authenticated finalize 并恢复 repository inventory，Desktop 继续走 status/finalize。旧客户端忽略该字段仍保持安全，只会多打开一个不具授权效果的页面。首次安装、过旧 proof、identity/account drift、无 verified proof、Web 只有 `CallbackReceived`、以及 `Consumed` intent 仍必须走新的 provider-state + Setup callback。GitHub 服务不可用时恢复请求 fail closed，不通过创建额外 Pending intent 隐藏错误。
 
 该恢复路径不改变 §2.3/§2.4 的授权边界：公开 callback 本身仍不能 connect，恢复后仍必须由原 MemoFlow identity authenticated finalize，并由 connect transaction 原子 consume。
 

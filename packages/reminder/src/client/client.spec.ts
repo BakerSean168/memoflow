@@ -11,6 +11,7 @@ describe('Routine client seam', () => {
           definitions: [],
           profiles: [],
           memberships: [],
+          preferences: { globalEnabled: true, version: 0 },
           runtimeContext: { activeProfileIds: [] },
           capabilities: { localRuntime: false },
           overrides: [],
@@ -25,11 +26,16 @@ describe('Routine client seam', () => {
     const client = createRoutineHttpClient(http);
 
     await client.getConfigurationSnapshot();
+    await client.updatePreferences({ globalEnabled: false, expectedVersion: 0 });
     await client.getUpcomingOccurrences({ start: 100, end: 200, limit: 10 });
     await client.createRoutine({ name: 'Stand', profileIds: [] });
     await client.createProfile({ name: 'Work' });
 
     expect(http.get).toHaveBeenCalledWith('/routines/configuration');
+    expect(http.patch).toHaveBeenCalledWith('/routines/preferences', {
+      globalEnabled: false,
+      expectedVersion: 0,
+    });
     expect(http.get).toHaveBeenCalledWith('/routines/upcoming', {
       params: { start: 100, end: 200, limit: 10 },
     });
@@ -46,6 +52,7 @@ describe('Routine client seam', () => {
           definitions: [],
           profiles: [],
           memberships: [],
+          preferences: { globalEnabled: true, version: 0 },
           runtimeContext: { activeProfileIds: [] },
           capabilities: { localRuntime: true },
           overrides: [],
@@ -55,9 +62,14 @@ describe('Routine client seam', () => {
     const client = createRoutineIpcClient(ipc);
 
     await client.getConfigurationSnapshot();
+    await client.updatePreferences({ globalEnabled: false, expectedVersion: 0 });
     await client.getUpcomingOccurrences({ start: 100, end: 200, limit: 10 });
 
     expect(ipc.invoke).toHaveBeenCalledWith(RoutineChannels.CONFIGURATION_GET);
+    expect(ipc.invoke).toHaveBeenCalledWith(RoutineChannels.PREFERENCES_UPDATE, {
+      globalEnabled: false,
+      expectedVersion: 0,
+    });
     expect(ipc.invoke).toHaveBeenCalledWith(RoutineChannels.UPCOMING_GET, {
       start: 100,
       end: 200,

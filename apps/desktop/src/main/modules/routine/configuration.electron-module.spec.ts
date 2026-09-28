@@ -22,6 +22,7 @@ describe('Routine Configuration Electron module', () => {
       definitions: [],
       profiles: [],
       memberships: [],
+      preferences: { globalEnabled: true, version: 0 },
       runtimeContext: { activeProfileIds: [] },
       capabilities: { localRuntime: true },
       overrides: [],
@@ -58,6 +59,11 @@ describe('Routine Configuration Electron module', () => {
   });
 
   it('injects identity, validates canonical mutation input, and refreshes local registrations', async () => {
+    const updatePreferences = vi.fn().mockResolvedValue({
+      identityId: 'identity-1',
+      globalEnabled: false,
+      version: 1,
+    });
     const createRoutine = vi.fn().mockResolvedValue({
       routineId: 'routine-1',
       identityId: 'identity-1',
@@ -66,7 +72,7 @@ describe('Routine Configuration Electron module', () => {
     });
     const afterMutation = vi.fn().mockResolvedValue(undefined);
     const module = createRoutineConfigurationElectronModule({
-      commandPort: { createRoutine } as unknown as RoutineCoachCommandPort,
+      commandPort: { createRoutine, updatePreferences } as unknown as RoutineCoachCommandPort,
       queryPort: {} as RoutineConfigurationQueryPort,
       afterMutation,
     });
@@ -74,6 +80,20 @@ describe('Routine Configuration Electron module', () => {
     module.register({
       db: {} as never,
       auth: { requireRequestContext: vi.fn().mockResolvedValue({ identityId: 'identity-1' }) },
+    });
+
+    const preferencesResult = await handlers.get(RoutineChannels.PREFERENCES_UPDATE)?.(
+      {},
+      { globalEnabled: false, expectedVersion: 0 },
+    );
+    expect(preferencesResult).toEqual({
+      ok: true,
+      data: { globalEnabled: false, version: 1 },
+    });
+    expect(updatePreferences).toHaveBeenCalledWith({
+      identityId: 'identity-1',
+      globalEnabled: false,
+      expectedVersion: 0,
     });
 
     const result = await handlers.get(RoutineChannels.CREATE)?.(
@@ -90,7 +110,7 @@ describe('Routine Configuration Electron module', () => {
       profileIds: [],
     });
     expect(JSON.stringify(createRoutine.mock.calls)).not.toContain('attacker-controlled');
-    expect(afterMutation).toHaveBeenCalledTimes(1);
+    expect(afterMutation).toHaveBeenCalledTimes(2);
 
     module.destroy?.();
   });

@@ -103,37 +103,29 @@
         <aside
           class="flex min-h-0 flex-col border-b bg-sidebar @3xl/panel:border-b-0 @3xl/panel:border-r"
         >
-          <div class="flex items-center gap-2 border-b p-3">
-            <div class="relative min-w-0 flex-1">
+          <div class="border-b px-3 py-2.5">
+            <div class="relative w-full max-w-[15rem]">
               <Search
-                class="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                class="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
               />
               <Input
                 v-model="searchQuery"
-                class="h-8 pl-8 pr-8"
+                class="h-8 rounded-md pl-8 pr-8 text-sm"
                 :placeholder="t('repository.localVault.searchPlaceholder')"
                 data-testid="local-vault-search"
                 @keyup.enter="search"
+                @keyup.esc="clearSearch"
               />
               <button
                 v-if="searchQuery"
                 type="button"
-                class="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                class="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
                 :aria-label="t('common.clear')"
                 @click="clearSearch"
               >
                 <X class="h-3.5 w-3.5" />
               </button>
             </div>
-            <Button
-              size="icon"
-              variant="secondary"
-              class="h-8 w-8"
-              :aria-label="t('common.search')"
-              @click="search"
-            >
-              <Search class="h-4 w-4" />
-            </Button>
           </div>
 
           <div class="min-h-0 flex-1 overflow-auto">
@@ -145,6 +137,7 @@
               :class="{ 'bg-accent': activeNote?.relativePath === note.relativePath }"
               :data-testid="`local-vault-note-${note.relativePath}`"
               @click="openNote(note)"
+              @dblclick="openInObsidian(note.relativePath)"
             >
               <span class="block truncate text-sm font-medium">{{ note.title }}</span>
               <span class="mt-1 block truncate text-xs text-muted-foreground">{{
@@ -197,11 +190,11 @@
               </Button>
             </div>
             <div class="min-h-0 flex-1 overflow-y-auto" data-scroll-host="local-vault-preview">
-              <article
-                class="preview-content mx-auto max-w-3xl px-5 py-5"
+              <KnowledgeMarkdownPreview
+                :markdown="activeNote.contentMarkdown"
+                :title="activeNote.title"
                 data-testid="local-vault-preview"
-                v-html="renderedMarkdown"
-                @click="handlePreviewClick"
+                @vault-link="openWikiLink"
               />
             </div>
           </div>
@@ -221,7 +214,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, watch } from 'vue';
+import { onBeforeUnmount, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import {
@@ -238,7 +231,7 @@ import {
   X,
 } from '@lucide/vue';
 import { Badge, Button, Input, useConfirm } from '@memoflow/ui-vue-shadcn';
-import { renderSafeMarkdown } from '../../../shared/utils/safe-markdown';
+import KnowledgeMarkdownPreview from '../components/KnowledgeMarkdownPreview.vue';
 import { useLocalVault } from '../composables/useLocalVault';
 
 const { t } = useI18n();
@@ -295,9 +288,21 @@ watch(
   },
 );
 
-const renderedMarkdown = computed(() =>
-  renderSafeMarkdown(activeNote.value?.contentMarkdown ?? ''),
-);
+const LOCAL_SEARCH_DEBOUNCE_MS = 220;
+let localSearchTimer: ReturnType<typeof setTimeout> | null = null;
+
+watch(searchQuery, () => {
+  if (localSearchTimer) clearTimeout(localSearchTimer);
+  localSearchTimer = setTimeout(() => {
+    localSearchTimer = null;
+    if (searchQuery.value.trim()) void search();
+    else clearSearch();
+  }, LOCAL_SEARCH_DEBOUNCE_MS);
+});
+
+onBeforeUnmount(() => {
+  if (localSearchTimer) clearTimeout(localSearchTimer);
+});
 
 function resultExcerpt(relativePath: string): string {
   const result = searchResults.value.find((item) => item.note.relativePath === relativePath);
@@ -315,60 +320,4 @@ async function confirmDetach(): Promise<void> {
   if (confirmed) await detachVault();
 }
 
-function handlePreviewClick(event: MouseEvent): void {
-  const element = (event.target as HTMLElement | null)?.closest<HTMLElement>('[data-vault-note]');
-  const title = element?.dataset['vaultNote'];
-  if (!title) return;
-  event.preventDefault();
-  void openWikiLink(title);
-}
 </script>
-
-<style scoped>
-.preview-content {
-  line-height: 1.6;
-}
-
-.preview-content :deep(.callout) {
-  margin: 1rem 0;
-  border-left: 3px solid hsl(var(--primary));
-  border-radius: 0.25rem;
-  background: hsl(var(--muted) / 0.45);
-  padding: 0.75rem 1rem;
-}
-
-.preview-content :deep(.callout-title) {
-  display: inline-block;
-  margin-bottom: 0.35rem;
-  font-weight: 600;
-}
-
-.preview-content :deep(mark) {
-  border-radius: 0.125rem;
-  background: hsl(var(--accent));
-  padding: 0 0.125rem;
-}
-
-.preview-content :deep(.internal-link) {
-  color: hsl(var(--primary));
-}
-
-.preview-content :deep(.vault-embed) {
-  border-bottom: 1px dashed hsl(var(--primary) / 0.7);
-}
-
-.preview-content :deep(.contains-task-list) {
-  list-style: none;
-  padding-left: 1.25rem;
-}
-
-.preview-content :deep(.task-list-item) {
-  display: flex;
-  align-items: baseline;
-  gap: 0.45rem;
-}
-
-.preview-content :deep(.task-list-item-checkbox) {
-  flex: 0 0 auto;
-}
-</style>

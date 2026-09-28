@@ -20,14 +20,11 @@ describe('Governance development surface wiring (GOV-1902)', () => {
     expect(policy).toContain("VITE_ENABLE_GOVERNANCE_DEV_SURFACE === 'true'");
   });
 
-  it('keeps the Note shell connected without advertising Governance by default in production', () => {
-    const segmentBar = read(
-      'packages/app-vue/src/modules/repository/components/NoteSegmentBar.vue',
-    );
+  it('uses its own routed surface', () => {
+    const governanceRouter = read('packages/app-vue/src/modules/governance/router/index.ts');
 
-    expect(segmentBar).toContain('shouldRenderGovernanceSegment(props.active)');
-    expect(segmentBar).toContain("value: 'governance'");
-    expect(segmentBar).toContain("label: t('repository.segments.governance')");
+    expect(governanceRouter).toContain('component: RouterView');
+    expect(governanceRouter).toContain("path: '/governance'");
   });
 
   it('defaults production, staging and test navigation to hidden while documenting the opt-in flag', () => {
@@ -49,6 +46,6 @@ describe('Governance development surface wiring (GOV-1902)', () => {
     ]) {
       expect(smoke).toContain(view);
     }
-    expect(smoke).toContain("revisionNumber: 2, changeType: 'Updated'");
+    expect(smoke).toContain('revisionNumber: 2, changeType: \'Updated\'');
   });
 });

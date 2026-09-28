@@ -32,6 +32,7 @@ describe('migrator interface', () => {
     expect(labels).toEqual([
       'prepare pgvector',
       'retire legacy AI runtime state',
+      'prepare Goal start timeframe semantics',
       'prepare goal-record source correlation',
       'prepare notification preference hierarchy',
       'prepare vNext unique constraints',

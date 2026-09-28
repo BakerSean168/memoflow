@@ -51,6 +51,7 @@ export type TimeDisplaySlot =
   | 'periodDay'
   | 'periodMonth'
   | 'periodWeekDay'
+  | 'periodRangeDay'
   | 'chartMonthDay'
   | 'monthDayWeekday';
 

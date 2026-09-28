@@ -13,7 +13,7 @@ import type {
 } from '@memoflow/contracts/goal';
 import { GoalStatus } from '@memoflow/contracts/goal';
 import { IdentityId } from '@memoflow/domain-shared';
-import { decodeGoalStartDate, decodeGoalTimeframe } from '../../goal-timeframe-persistence';
+import { decodeGoalStartTimeframe, decodeGoalTimeframe } from '../../goal-timeframe-persistence';
 import { GoalId, GoalReviewId, KeyResultId } from '../../../../domain';
 import {
   KeyResult,
@@ -35,6 +35,7 @@ export interface RawGoalData {
   summary: string | null;
   description: string | null;
   status: string;
+  startKind: string | null;
   startDate: string | null;
   targetKind: string | null;
   targetEndDate: string | null;
@@ -138,7 +139,7 @@ export function rawDataToGoalState(raw: RawGoalData): GoalState {
     summary: raw.summary ?? null,
     description: raw.description ?? null,
     status: raw.status as GoalStatus,
-    startDate: decodeGoalStartDate(raw.startDate),
+    start: decodeGoalStartTimeframe(raw.startKind, raw.startDate),
     target: decodeGoalTimeframe(raw.targetKind, raw.targetEndDate),
     completedAt: raw.completedAt ? Number(raw.completedAt) : null,
     archivedAt: raw.archivedAt ? Number(raw.archivedAt) : null,

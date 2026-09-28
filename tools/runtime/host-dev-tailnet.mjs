@@ -77,10 +77,11 @@ function updateLocalEnv(values) {
   writeFileSync(localEnvPath, `${updated.join('\n').replace(/\n+$/u, '')}\n`);
 }
 
-function printStatus(publicOrigin, githubRedirectURI) {
+function printStatus(publicOrigin, publicApiOrigin, githubRedirectURI) {
   console.log('[host-dev:tailnet] ingress: Tailscale TLS termination + raw TCP forwarding');
   console.log(`[host-dev:tailnet] public Web/HMR: ${publicOrigin}`);
   console.log(`[host-dev:tailnet] browser API/Auth: ${publicOrigin}/api`);
+  console.log(`[host-dev:tailnet] direct API/gateway: ${publicApiOrigin}`);
   console.log(`[host-dev:tailnet] upstream Web: http://127.0.0.1:${profile.ports.web}`);
   console.log(`[host-dev:tailnet] Vite API proxy: http://127.0.0.1:${profile.ports.api}`);
   console.log(`[host-dev:tailnet] GitHub OAuth callback: ${githubRedirectURI}`);
@@ -93,6 +94,7 @@ function printStatus(publicOrigin, githubRedirectURI) {
 if (action === 'up' || action === 'status') {
   const { dnsName } = tailnetIdentity();
   const publicOrigin = `https://${dnsName}:${profile.ports.web}`;
+  const publicApiOrigin = `https://${dnsName}:${profile.ports.api}`;
   const githubRedirectURI = `https://${dnsName}:${oauthIngressProfile.ports.api}${githubCallbackPath}`;
 
   if (action === 'up') {
@@ -114,6 +116,17 @@ if (action === 'up' || action === 'status') {
       `--tls-terminated-tcp=${profile.ports.web}`,
       `tcp://127.0.0.1:${profile.ports.web}`,
     ]);
+    // GitHub App installation setup routing needs a stable externally reachable
+    // API origin for the host-dev route target. Browser traffic still uses the
+    // Vite same-origin proxy on :20220; this direct ingress is tailnet-only and
+    // exists for callback/gateway hops such as the durable installation intent.
+    run('tailscale', [
+      'serve',
+      '--bg',
+      '--yes',
+      `--https=${profile.ports.api}`,
+      `http://127.0.0.1:${profile.ports.api}`,
+    ]);
 
     // The shared MemoFlow Dev Test GitHub App already owns the canonical
     // prod-like callback on :20201. Preserve that registered external URL and
@@ -129,11 +142,12 @@ if (action === 'up' || action === 'status') {
     ]);
   }
 
-  printStatus(publicOrigin, githubRedirectURI);
+  printStatus(publicOrigin, publicApiOrigin, githubRedirectURI);
   run('tailscale', ['serve', 'status']);
 } else if (action === 'down') {
   runBestEffort('tailscale', ['serve', `--https=${profile.ports.web}`, 'off']);
   runBestEffort('tailscale', ['serve', `--tls-terminated-tcp=${profile.ports.web}`, 'off']);
+  runBestEffort('tailscale', ['serve', `--https=${profile.ports.api}`, 'off']);
   runBestEffort('tailscale', [
     'serve',
     `--https=${oauthIngressProfile.ports.api}`,

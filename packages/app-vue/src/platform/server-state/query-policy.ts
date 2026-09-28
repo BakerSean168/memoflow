@@ -19,6 +19,14 @@ export const GOVERNANCE_STALE_TIME_MS = 30_000;
 /** Task template stale time: 60s. 任务模板 staleTime：60 秒。 */
 export const TASK_TEMPLATE_STALE_TIME_MS = 60_000;
 
+/** High-frequency shell/Planner read policies. */
+export const TASK_OCCURRENCE_STALE_TIME_MS = 30_000;
+export const SCHEDULE_CALENDAR_STALE_TIME_MS = 30_000;
+export const PLANNER_OWNER_STALE_TIME_MS = 60_000;
+export const GOAL_HOME_STALE_TIME_MS = 45_000;
+export const RECENT_KNOWLEDGE_STALE_TIME_MS = 60_000;
+export const ROUTINE_UPCOMING_STALE_TIME_MS = 30_000;
+
 /** Garbage collection time: 10min, memory-only (never offline storage). 10 分钟，仅内存。 */
 export const SERVER_STATE_GC_TIME_MS = 10 * 60_000;
 

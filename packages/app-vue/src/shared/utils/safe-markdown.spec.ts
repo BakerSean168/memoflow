@@ -1,8 +1,25 @@
 /** @vitest-environment node */
 import { describe, expect, it } from 'vitest';
-import { renderSafeMarkdown, renderSafeMarkdownExcerpt } from './safe-markdown';
+import { renderSafeMarkdown, renderSafeMarkdownExcerpt, stripMarkdownFrontmatter } from './safe-markdown';
 
 describe('renderSafeMarkdown', () => {
+  it('removes YAML frontmatter from reading-mode output', () => {
+    const source = `---\ntitle: Example\ntags: [one, two]\n---\n\n# Visible heading\n\nBody`;
+    expect(stripMarkdownFrontmatter(source)).toContain('# Visible heading');
+    const html = renderSafeMarkdown(source);
+    expect(html).not.toContain('title: Example');
+    expect(html).not.toContain('tags:');
+    expect(html).toContain('<h1');
+    expect(html).toContain('Visible heading');
+  });
+
+  it('adds safe syntax highlighting for known fenced-code languages', () => {
+    const html = renderSafeMarkdown('```ts\nconst answer: number = 42\n```');
+    expect(html).toContain('class="language-ts"');
+    expect(html).toContain('hljs-keyword');
+    expect(html).not.toContain('<script>');
+  });
+
   it('does not execute or pass through raw HTML script tags', () => {
     const html = renderSafeMarkdown('Hello <script>alert(1)</script> **world**');
     expect(html).not.toContain('<script>');

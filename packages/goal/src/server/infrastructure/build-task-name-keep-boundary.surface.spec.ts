@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 /**
  * Residual 1177: buildIntentName keep-boundary (goal vs task schedule projections).
- * - goal: GoalServerDTO + ReminderTrigger → RemainingDays / progress % Chinese name
+ * - goal: GoalServerDTO + ReminderTrigger → absolute / target-relative / legacy progress naming
  * - task: TASK-3101 neutral ScheduledIntent observability name keeps the same
  *   TaskPlan + Relative/Absolute business wording without ScheduleTask coupling.
  * Soft residual 1168: mapImportanceToTaskPriority dual-retired sole remains separate.
@@ -24,15 +24,16 @@ describe('buildIntentName keep-boundary (residual 1177)', () => {
     expect(goal).toMatch(/function buildIntentName\b/);
     expect(goal).toContain('GoalServerDTO');
     expect(goal).toContain('ReminderTrigger');
+    expect(goal).toContain('AbsoluteAt');
     expect(goal).toContain('RemainingDays');
-    expect(goal).toContain('剩余');
+    expect(goal).toContain('目标日前');
     expect(goal).toContain('进度');
     const body = goal.match(/function buildIntentName\([\s\S]*?\n\}/)?.[0] ?? '';
     expect(body).toContain('goal.name');
     expect(body).toContain('trigger.value');
     expect(body).not.toContain('template.name');
     expect(body).not.toContain('formatUnit');
-    expect(body).not.toContain('定时提醒');
+    expect(body).toContain('定时提醒');
   });
 
   it('keeps Goal legacy naming distinct from Task neutral intent observability naming', () => {
@@ -51,13 +52,16 @@ describe('buildIntentName keep-boundary (residual 1177)', () => {
     expect(body).not.toContain('GoalServerDTO');
   });
 
-  it('runtime: documents goal remaining/progress vs task relative/absolute naming contracts', () => {
+  it('runtime: documents goal absolute/relative/legacy-progress vs task naming contracts', () => {
     function goalBuildIntentName(
       goalName: string,
-      trigger: { type: 'RemainingDays' | 'TimeProgressPercentage'; value: number },
+      trigger: { type: 'AbsoluteAt' | 'RemainingDays' | 'TimeProgressPercentage'; value: number },
     ): string {
+      if (trigger.type === 'AbsoluteAt') {
+        return `${goalName} · 定时提醒`;
+      }
       if (trigger.type === 'RemainingDays') {
-        return `${goalName} · 剩余 ${trigger.value} 天提醒`;
+        return `${goalName} · 目标日前 ${trigger.value} 天提醒`;
       }
       return `${goalName} · 进度 ${trigger.value}% 提醒`;
     }
@@ -82,8 +86,11 @@ describe('buildIntentName keep-boundary (residual 1177)', () => {
       }
       return `${planName} · 定时提醒`;
     }
+    expect(goalBuildIntentName('读完书', { type: 'AbsoluteAt', value: 1 })).toBe(
+      '读完书 · 定时提醒',
+    );
     expect(goalBuildIntentName('读完书', { type: 'RemainingDays', value: 3 })).toBe(
-      '读完书 · 剩余 3 天提醒',
+      '读完书 · 目标日前 3 天提醒',
     );
     expect(goalBuildIntentName('读完书', { type: 'TimeProgressPercentage', value: 50 })).toBe(
       '读完书 · 进度 50% 提醒',

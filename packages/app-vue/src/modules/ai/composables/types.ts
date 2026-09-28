@@ -1,6 +1,8 @@
 import type { CreateGoalReq } from '@memoflow/contracts/goal';
 import type { Ref } from 'vue';
 import type {
+  AIContextEntityType,
+  AssistantRuntimeAttachment,
   ConversationListRes,
   GoalPlanDraft,
   GoalPlanKnowledge,
@@ -73,11 +75,29 @@ export type WorkflowMode =
 
 export type MessageStatus = 'generating' | 'success' | 'error' | 'aborted';
 
+export type ChatAttachmentView = {
+  mediaType: string;
+  filename?: string;
+};
+
+export type ComposerAttachment = AssistantRuntimeAttachment & {
+  id: string;
+  size: number;
+};
+
+export type ComposerContextEntity = {
+  entityType: AIContextEntityType;
+  id: string;
+  label: string;
+  origin: 'explicit' | 'surface';
+};
+
 export type ChatItem = {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   status: MessageStatus;
+  attachments?: ChatAttachmentView[];
   errorMessage?: string;
 };
 
@@ -118,8 +138,16 @@ export type AIWorkspaceRecentGoal = {
   updatedAt: number;
   progress: number | null;
 };
-export type AIWorkspaceRecentKnowledgeNote = {
+export type AIWorkspaceRecentTask = {
   id: string;
+  title: string;
+  updatedAt: number;
+};
+export type AIWorkspaceRecentKnowledgeNote = {
+  /** Navigation id/path used by the Repository surface. */
+  id: string;
+  /** Stable KnowledgeDocument owner id used when attaching note context to AI. */
+  contextId: string | null;
   title: string;
   path: string;
   updatedAt: number;
@@ -149,7 +177,7 @@ export type EditableGoal = {
   name: string;
   summary: string;
   status: GoalPlanDraft['goal']['status'];
-  startDate: GoalPlanDraft['goal']['startDate'];
+  start: GoalPlanDraft['goal']['start'];
   target: GoalPlanDraft['goal']['target'];
 };
 
@@ -213,7 +241,7 @@ export function createEmptyGoalDraft(): EditableGoal {
     name: '',
     summary: '',
     status: 'Planned',
-    startDate: null,
+    start: null,
     target: null,
   };
 }

@@ -44,232 +44,171 @@
     </div>
 
     <template v-else>
-      <header class="flex min-w-0 flex-wrap items-center gap-3 border-b px-4 py-3">
-        <div class="min-w-0 flex-1">
-          <div class="flex min-w-0 items-center gap-2">
-            <BookOpen class="h-4 w-4 shrink-0 text-muted-foreground" />
-            <h1 class="truncate text-sm font-semibold">{{ t('repository.projection.title') }}</h1>
-            <Badge variant="secondary">{{ notes.length }}</Badge>
-          </div>
-          <p class="mt-1 truncate text-xs text-muted-foreground">
-            {{ selectedConnection ? repositoryDisplayName(selectedConnection) : '' }} ·
-            {{ selectedConnection ? repositoryDefaultBranch(selectedConnection) : '—' }}
-            <span v-if="selectedConnection?.projectionCheckpoint?.projectedCommitSha">
-              ·
-              {{
-                t('repository.projection.commit', {
-                  sha: selectedConnection.projectionCheckpoint!.projectedCommitSha!.slice(0, 8),
-                })
-              }}
-            </span>
-          </p>
-        </div>
-
-        <select
-          v-if="connections.length > 1"
-          v-model="selectedConnectionId"
-          class="h-8 max-w-[18rem] rounded-md border bg-background px-2 text-sm"
-          :aria-label="t('repository.projection.connectionLabel')"
-          data-testid="knowledge-projection-connection-select"
-          @change="handleConnectionChange"
-        >
-          <option v-for="connection in connections" :key="connection.id" :value="connection.id">
-            {{ repositoryDisplayName(connection) }}
-          </option>
-        </select>
-        <Badge
-          :variant="
-            selectedConnection?.observation?.eligibility.state === 'Ready' ? 'secondary' : 'outline'
-          "
-        >
-          {{
-            selectedConnection
-              ? providerStateLabel(selectedConnection)
-              : t('repository.projection.providerStatus.Unchecked')
-          }}
-        </Badge>
+      <header
+        class="flex h-11 min-w-0 shrink-0 items-center gap-2 border-b border-border/70 px-2.5"
+        data-testid="knowledge-projection-document-toolbar"
+      >
         <Button
           variant="ghost"
           size="icon"
-          class="h-8 w-8"
-          :aria-label="t('repository.projection.refresh')"
-          :title="t('repository.projection.refresh')"
-          :disabled="loadingNotes"
-          data-testid="knowledge-projection-refresh"
-          @click="loadNotes"
+          class="h-8 w-8 shrink-0"
+          :aria-label="
+            isNarrow || !catalogVisible
+              ? t('repository.projection.openCatalog')
+              : t('repository.projection.hideCatalog')
+          "
+          :title="
+            isNarrow || !catalogVisible
+              ? t('repository.projection.openCatalog')
+              : t('repository.projection.hideCatalog')
+          "
+          data-testid="knowledge-projection-toggle-catalog"
+          @click="toggleCatalog"
         >
-          <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loadingNotes }" />
+          <PanelLeftOpen v-if="isNarrow || !catalogVisible" class="h-4 w-4" />
+          <PanelLeftClose v-else class="h-4 w-4" />
         </Button>
-        <Button
-          size="sm"
-          :disabled="selectedConnection?.observation?.eligibility.state !== 'Ready'"
-          data-testid="knowledge-projection-create"
-          @click="openCreateDialog"
-        >
-          <FilePlus class="mr-2 h-4 w-4" />
-          {{ t('repository.projection.createAction') }}
-        </Button>
-      </header>
 
-      <div
-        class="grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(14rem,38%)_minmax(0,1fr)] @3xl/panel:grid-cols-[minmax(15rem,22rem)_minmax(0,1fr)] @3xl/panel:grid-rows-1"
-      >
-        <aside
-          class="flex min-h-0 flex-col border-b bg-sidebar @3xl/panel:border-b-0 @3xl/panel:border-r"
-        >
-          <div class="flex items-center gap-2 border-b p-3">
-            <div class="relative min-w-0 flex-1">
-              <Search
-                class="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-              />
-              <Input
-                v-model="searchQuery"
-                class="h-8 pl-8 pr-8"
-                :placeholder="t('repository.projection.searchPlaceholder')"
-                data-testid="knowledge-projection-search"
-                @keyup.enter="loadNotes"
-              />
-              <button
-                v-if="searchQuery"
-                type="button"
-                class="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                :aria-label="t('common.clear')"
-                @click="clearSearch"
-              >
-                <X class="h-3.5 w-3.5" />
-              </button>
-            </div>
-            <Button
-              size="icon"
-              variant="secondary"
-              class="h-8 w-8"
-              :aria-label="t('common.search')"
-              data-testid="knowledge-projection-search-submit"
-              @click="loadNotes"
-            >
-              <Search class="h-4 w-4" />
-            </Button>
-          </div>
+        <div class="flex min-w-0 flex-1 items-center gap-2">
+          <template v-if="selectedNote">
+            <h1 class="min-w-0 max-w-[46%] truncate text-sm font-semibold tracking-tight">
+              {{ selectedNote.title }}
+            </h1>
+            <span class="min-w-0 truncate text-[11px] text-muted-foreground">
+              {{ selectedNote.relativePath }}
+            </span>
+            <span class="shrink-0 text-[11px] text-muted-foreground" aria-hidden="true">·</span>
+            <span class="shrink-0 text-[11px] text-muted-foreground">
+              {{ formatUpdatedAt(selectedNote.updatedAt) }}
+            </span>
+          </template>
+          <span v-else class="truncate text-sm font-medium text-muted-foreground">
+            {{ t('repository.projection.catalogTitle') }}
+          </span>
+          <Loader2
+            v-if="loadingDetail"
+            class="h-3.5 w-3.5 shrink-0 animate-spin text-muted-foreground"
+          />
+        </div>
 
-          <div class="min-h-0 flex-1 overflow-auto">
-            <button
-              v-for="note in notes"
-              :key="note.id"
-              type="button"
-              class="block w-full border-b px-3 py-2.5 text-left hover:bg-accent/60"
-              :class="{ 'bg-accent': selectedNote?.id === note.id }"
-              :data-testid="`knowledge-projection-note-${note.id}`"
-              @click="selectedNoteId = note.id"
-            >
-              <span class="block truncate text-sm font-medium">{{ note.title }}</span>
-              <span class="mt-1 block truncate text-xs text-muted-foreground">{{
-                note.relativePath
-              }}</span>
-              <span class="mt-1 block text-[11px] text-muted-foreground">
-                <span>{{ note.commitSha.slice(0, 8) }}</span>
-              </span>
-            </button>
-            <div
-              v-if="!loadingNotes && notes.length === 0"
-              class="grid h-32 place-items-center px-4 text-center text-sm text-muted-foreground"
-            >
-              {{
-                searchQuery
-                  ? t('repository.projection.noSearchResults')
-                  : t('repository.projection.noNotes')
-              }}
-            </div>
-            <div v-if="loadingNotes" class="grid h-32 place-items-center text-muted-foreground">
-              <Loader2 class="h-4 w-4 animate-spin" />
-            </div>
-          </div>
-        </aside>
+        <template v-if="selectedNote">
+          <Button
+            variant="ghost"
+            size="icon"
+            class="h-8 w-8 shrink-0"
+            :class="contextOpen ? 'bg-accent text-accent-foreground' : ''"
+            :aria-label="t('repository.projection.contextTitle')"
+            :title="t('repository.projection.contextTitle')"
+            data-testid="knowledge-projection-context-toggle"
+            @click="contextOpen = !contextOpen"
+          >
+            <PanelRight class="h-4 w-4" />
+          </Button>
 
-        <main class="min-h-0 overflow-hidden">
-          <div v-if="selectedNote" class="flex h-full min-h-0 flex-col">
-            <div class="flex min-w-0 flex-wrap items-start gap-3 border-b px-4 py-3">
-              <FileText class="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-              <div class="min-w-0 flex-1">
-                <h2 class="truncate text-sm font-semibold">{{ selectedNote.title }}</h2>
-                <p class="mt-1 truncate text-xs text-muted-foreground">
-                  {{ selectedNote.relativePath }}
-                </p>
-                <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                  <span>{{
-                    t('repository.projection.commit', { sha: selectedNote.commitSha.slice(0, 8) })
-                  }}</span>
-                </div>
-              </div>
-              <div
-                class="inline-flex h-8 shrink-0 items-center rounded-md border bg-muted/30 p-0.5"
-                role="tablist"
-                :aria-label="t('repository.projection.noteViews')"
-              >
-                <button
-                  type="button"
-                  role="tab"
-                  class="flex h-7 items-center gap-1.5 rounded px-2 text-xs"
-                  :class="
-                    noteView === 'preview'
-                      ? 'bg-background text-foreground shadow-sm'
-                      : 'text-muted-foreground'
-                  "
-                  :aria-selected="noteView === 'preview'"
-                  data-testid="knowledge-projection-preview-tab"
-                  @click="noteView = 'preview'"
-                >
-                  <FileText class="h-3.5 w-3.5" />
-                  {{ t('repository.projection.previewTab') }}
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  class="flex h-7 items-center gap-1.5 rounded px-2 text-xs"
-                  :class="
-                    noteView === 'relations'
-                      ? 'bg-background text-foreground shadow-sm'
-                      : 'text-muted-foreground'
-                  "
-                  :aria-selected="noteView === 'relations'"
-                  data-testid="knowledge-projection-relations-tab"
-                  @click="noteView = 'relations'"
-                >
-                  <Network class="h-3.5 w-3.5" />
-                  {{ t('repository.projection.relationsTab') }}
-                </button>
-              </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
               <Button
+                variant="ghost"
+                size="icon"
+                class="h-8 w-8 shrink-0"
+                :aria-label="t('common.more')"
+                data-testid="knowledge-projection-more"
+              >
+                <Ellipsis class="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" class="w-52">
+              <DropdownMenuItem @click="copyNotePath">
+                <Copy class="mr-2 h-3.5 w-3.5" />
+                {{
+                  pathCopied
+                    ? t('repository.projection.pathCopied')
+                    : t('repository.projection.copyPath')
+                }}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
                 v-if="selectedNote.knowledgeDocumentId === null"
-                size="sm"
-                variant="outline"
                 data-testid="knowledge-projection-adopt"
                 @click="openAdoptionDialog"
               >
                 <Link2 class="mr-2 h-3.5 w-3.5" />
-                {{ t('repository.projection.adoptAction') }}
-              </Button>
-              <Badge v-else variant="outline" data-testid="knowledge-projection-document-id">
-                {{ selectedNote.knowledgeDocumentId }}
-              </Badge>
-              <Badge variant="outline">{{ t('repository.projection.readOnly') }}</Badge>
-            </div>
-            <div
-              v-if="noteView === 'preview'"
-              class="min-h-0 flex-1 overflow-y-auto"
-              data-scroll-host="repository-preview"
-            >
-              <article
-                class="preview-content mx-auto max-w-3xl px-5 py-5"
+                {{ t('repository.projection.stableReferenceAction') }}
+              </DropdownMenuItem>
+              <DropdownMenuItem v-else disabled data-testid="knowledge-projection-document-id">
+                <Check class="mr-2 h-3.5 w-3.5" />
+                {{ t('repository.projection.stableReferenceReady') }}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </template>
+      </header>
+
+      <div class="flex min-h-0 flex-1 overflow-hidden">
+        <aside
+          v-if="catalogVisible && !isNarrow"
+          class="w-[min(20rem,32%)] shrink-0 border-r"
+          data-testid="knowledge-projection-catalog-inline"
+        >
+          <KnowledgeNoteCatalog
+            v-model:search-query="searchQuery"
+            :notes="notes"
+            :tree-children="treeChildren"
+            :expanded-directories="expandedDirectories"
+            :loading-directories="loadingDirectories"
+            :selected-note-id="selectedNoteId"
+            :loaded-count-label="loadedCountLabel"
+            :next-cursor="nextCursor"
+            :loading="loadingNotes"
+            :loading-more="loadingMore"
+            :tree-loading="treeLoading"
+            :syncing="projectionSyncing"
+            :refreshing="loadingNotes || loadingConnections || treeLoading"
+            :repository-name="repositoryShortName"
+            :repository-display-name="
+              selectedConnection ? repositoryDisplayName(selectedConnection) : ''
+            "
+            :default-branch="selectedConnection ? repositoryDefaultBranch(selectedConnection) : '—'"
+            :note-count-label="noteCountLabel"
+            :provider-needs-attention="providerNeedsAttention"
+            :provider-warning-label="
+              selectedConnection ? providerStateLabel(selectedConnection) : ''
+            "
+            :connections="connections"
+            :selected-connection-id="selectedConnectionId"
+            :hidden-directories="treeMetadata?.hiddenDirectories ?? []"
+            :hidden-note-count="treeMetadata?.hiddenNoteCount ?? 0"
+            :include-hidden="includeHiddenDirectories"
+            @select="selectNote"
+            @search="loadNotes()"
+            @clear-search="clearSearch"
+            @load-more="loadMoreNotes"
+            @refresh="loadConnections"
+            @connection-change="selectConnection"
+            @toggle-directory="toggleDirectory"
+            @toggle-hidden="toggleHiddenDirectories"
+          />
+        </aside>
+
+        <main class="min-w-0 flex-1 overflow-hidden">
+          <div
+            v-if="loadingDetail && !selectedNote"
+            class="grid h-full min-h-48 place-items-center text-muted-foreground"
+          >
+            <Loader2 class="h-5 w-5 animate-spin" />
+          </div>
+
+          <div v-else-if="selectedNote" class="h-full min-h-0">
+            <div class="h-full min-h-0 overflow-y-auto" data-scroll-host="repository-preview">
+              <KnowledgeMarkdownPreview
+                :markdown="selectedNote.markdownContent"
+                :title="selectedNote.title"
                 data-testid="knowledge-projection-preview"
-                v-html="renderedMarkdown"
+                @vault-link="openWikiLink"
               />
             </div>
-            <KnowledgeProjectionRelationsView
-              v-else
-              :projection-id="selectedNote.id"
-              @select="selectGraphNode"
-            />
           </div>
+
           <div v-else class="grid h-full min-h-48 place-items-center px-6 text-center">
             <div>
               <BookOpen class="mx-auto h-8 w-8 text-muted-foreground" />
@@ -280,140 +219,82 @@
             </div>
           </div>
         </main>
-      </div>
-    </template>
 
-    <Dialog v-model:open="createDialogOpen">
-      <ProductDialogShell
-        :open="createDialogOpen"
-        test-id="knowledge-projection-create-dialog"
-        size="md"
-        initial-focus-selector="#projection-note-title"
-      >
-        <template #title>{{
-          stage === 'draft'
-            ? t('repository.projection.createTitle')
-            : t('repository.projection.confirmTitle')
-        }}</template>
-        <template #description>{{
-          stage === 'draft'
-            ? t('repository.projection.createDescription')
-            : t('repository.projection.confirmDescription')
-        }}</template>
-
-        <div v-if="stage === 'draft'" class="space-y-4">
-          <div class="grid gap-2 @sm/panel:grid-cols-2">
-            <div class="space-y-2">
-              <Label for="projection-note-title">{{ t('repository.projection.noteTitle') }}</Label>
-              <Input
-                id="projection-note-title"
-                v-model="draft.title"
-                data-testid="knowledge-projection-title"
-              />
-            </div>
-            <div class="space-y-2">
-              <Label for="projection-note-path">{{ t('repository.projection.notePath') }}</Label>
-              <Input
-                id="projection-note-path"
-                v-model="draft.proposedPath"
-                placeholder="notes/example.md"
-                data-testid="knowledge-projection-path"
-              />
-            </div>
-          </div>
-          <div class="space-y-2">
-            <Label for="projection-note-content">{{
-              t('repository.projection.noteContent')
-            }}</Label>
-            <Textarea
-              id="projection-note-content"
-              v-model="draft.content"
-              rows="12"
-              class="resize-y font-mono text-sm"
-              data-testid="knowledge-projection-content"
-            />
-          </div>
-          <div class="space-y-2">
-            <Label for="projection-note-reason">{{ t('repository.projection.noteReason') }}</Label>
-            <Input
-              id="projection-note-reason"
-              v-model="draft.reason"
-              data-testid="knowledge-projection-reason"
-            />
-          </div>
-        </div>
-
-        <div v-else class="space-y-4">
-          <div class="grid gap-3 rounded-md border bg-muted/20 p-3 text-sm @sm/panel:grid-cols-2">
-            <div>
-              <span class="text-muted-foreground">{{ t('repository.projection.noteTitle') }}</span>
-              <p class="font-medium">{{ draft.title }}</p>
-            </div>
-            <div>
-              <span class="text-muted-foreground">{{ t('repository.projection.notePath') }}</span>
-              <p class="font-mono text-xs">{{ draft.proposedPath }}</p>
-            </div>
-            <div class="sm:col-span-2">
-              <span class="text-muted-foreground">{{ t('repository.projection.noteReason') }}</span>
-              <p>{{ draft.reason }}</p>
-            </div>
-            <div class="sm:col-span-2">
-              <span class="text-muted-foreground">{{ t('repository.projection.documentId') }}</span>
-              <p class="font-mono text-xs" data-testid="knowledge-projection-create-document-id">
-                memoflow_id: {{ proposal.knowledgeDocumentId }}
-              </p>
-            </div>
-          </div>
-          <div class="max-h-72 overflow-auto rounded-md border bg-muted/10 p-4">
-            <article class="preview-content" v-html="draftPreview" />
-          </div>
-          <p class="text-xs text-muted-foreground">
-            {{ t('repository.projection.confirmImmutable') }}
-          </p>
-        </div>
-
-        <p
-          v-if="createError"
-          class="text-sm text-destructive"
-          role="alert"
-          data-testid="knowledge-projection-create-error"
+        <aside
+          v-if="contextOpen && selectedNote && !isNarrow"
+          class="w-72 shrink-0 border-l"
+          data-testid="knowledge-projection-context-inline"
         >
-          {{ createError }}
-        </p>
-        <template #footer>
-          <Button variant="ghost" :disabled="creating" @click="closeCreateDialog">{{
-            t('common.cancel')
-          }}</Button>
-          <Button
-            v-if="stage === 'review'"
-            variant="outline"
-            :disabled="creating"
-            data-testid="knowledge-projection-edit"
-            @click="editDraft"
-          >
-            {{ t('common.back') }}
-          </Button>
-          <Button
-            v-if="stage === 'draft'"
-            :disabled="!canReview || creating"
-            data-testid="knowledge-projection-review"
-            @click="reviewDraft"
-          >
-            <CheckCircle class="mr-2 h-4 w-4" />{{ t('repository.projection.reviewAction') }}
-          </Button>
-          <Button
-            v-else
-            :disabled="creating"
-            data-testid="knowledge-projection-confirm"
-            @click="confirmCreate"
-          >
-            <Loader2 v-if="creating" class="mr-2 h-4 w-4 animate-spin" />
-            <GitCommitHorizontal v-else class="mr-2 h-4 w-4" />
-            {{ t('repository.projection.confirmAction') }}
-          </Button>
-        </template>
-      </ProductDialogShell>
-    </Dialog>
+          <KnowledgeNoteContextPanel
+            :note="selectedNote"
+            @select="handleContextSelect"
+            @close="contextOpen = false"
+          />
+        </aside>
+      </div>
+
+      <Sheet :open="catalogOpen && isNarrow" @update:open="catalogOpen = $event">
+        <SheetContent hide-close side="left" class="w-[min(88vw,22rem)] p-0">
+          <SheetHeader class="sr-only">
+            <SheetTitle>{{ t('repository.projection.catalogTitle') }}</SheetTitle>
+          </SheetHeader>
+          <KnowledgeNoteCatalog
+            v-model:search-query="searchQuery"
+            :notes="notes"
+            :tree-children="treeChildren"
+            :expanded-directories="expandedDirectories"
+            :loading-directories="loadingDirectories"
+            :selected-note-id="selectedNoteId"
+            :loaded-count-label="loadedCountLabel"
+            :next-cursor="nextCursor"
+            :loading="loadingNotes"
+            :loading-more="loadingMore"
+            :tree-loading="treeLoading"
+            :syncing="projectionSyncing"
+            :refreshing="loadingNotes || loadingConnections || treeLoading"
+            :repository-name="repositoryShortName"
+            :repository-display-name="
+              selectedConnection ? repositoryDisplayName(selectedConnection) : ''
+            "
+            :default-branch="selectedConnection ? repositoryDefaultBranch(selectedConnection) : '—'"
+            :note-count-label="noteCountLabel"
+            :provider-needs-attention="providerNeedsAttention"
+            :provider-warning-label="
+              selectedConnection ? providerStateLabel(selectedConnection) : ''
+            "
+            :connections="connections"
+            :selected-connection-id="selectedConnectionId"
+            :hidden-directories="treeMetadata?.hiddenDirectories ?? []"
+            :hidden-note-count="treeMetadata?.hiddenNoteCount ?? 0"
+            :include-hidden="includeHiddenDirectories"
+            closable
+            @select="selectFromCatalogSheet"
+            @search="loadNotes()"
+            @clear-search="clearSearch"
+            @load-more="loadMoreNotes"
+            @refresh="loadConnections"
+            @close="catalogOpen = false"
+            @connection-change="selectConnection"
+            @toggle-directory="toggleDirectory"
+            @toggle-hidden="toggleHiddenDirectories"
+          />
+        </SheetContent>
+      </Sheet>
+
+      <Sheet :open="contextOpen && isNarrow" @update:open="contextOpen = $event">
+        <SheetContent hide-close side="right" class="w-[min(92vw,24rem)] p-0">
+          <SheetHeader class="sr-only">
+            <SheetTitle>{{ t('repository.projection.contextTitle') }}</SheetTitle>
+          </SheetHeader>
+          <KnowledgeNoteContextPanel
+            v-if="selectedNote"
+            :note="selectedNote"
+            @select="handleContextSelect"
+            @close="contextOpen = false"
+          />
+        </SheetContent>
+      </Sheet>
+    </template>
 
     <Dialog v-model:open="adoptionDialogOpen">
       <ProductDialogShell
@@ -435,7 +316,7 @@
               memoflow_id: {{ adoptionProposal.knowledgeDocumentId }}
             </p>
           </div>
-          <p class="text-xs text-muted-foreground">
+          <p class="text-xs leading-5 text-muted-foreground">
             {{ t('repository.projection.adoptImmutable') }}
           </p>
         </div>
@@ -468,50 +349,140 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
-import { usePanelSurfaceStatus } from '../../../layouts/shell/usePanelSurfaceStatus';
-import type { PanelSurfaceStatus } from '../../../layouts/shell/useAppShellStore';
 import {
   BookOpen,
-  CheckCircle,
+  Check,
   CloudOff,
-  FilePlus,
-  FileText,
+  Copy,
+  Ellipsis,
   GitCommitHorizontal,
   Link2,
   Loader2,
-  Network,
-  RefreshCw,
-  Search,
-  X,
+  PanelLeftClose,
+  PanelLeftOpen,
+  PanelRight,
 } from '@lucide/vue';
-import { Badge, Button, Dialog, Input, Label, Textarea } from '@memoflow/ui-vue-shadcn';
 import {
-  CreateConfirmedKnowledgeNoteSchema,
+  Button,
+  Dialog,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@memoflow/ui-vue-shadcn';
+import {
   AdoptKnowledgeDocumentSchema,
   KnowledgeDocumentIdSchema,
-  type CreateConfirmedKnowledgeNoteReq,
   type AdoptKnowledgeDocumentReq,
   type KnowledgeNoteProjectionClientDTO,
+  type KnowledgeNoteProjectionSummaryDTO,
+  type KnowledgeNoteTreeMetadataDTO,
+  type KnowledgeNoteTreeNodeDTO,
   type KnowledgeRemoteBindingClientDTO,
 } from '@memoflow/contracts/repository';
+import { usePanelSurfaceStatus } from '../../../layouts/shell/usePanelSurfaceStatus';
+import { usePanelWidth } from '../../../layouts/shell/usePanelWidth';
+import type { PanelSurfaceStatus } from '../../../layouts/shell/useAppShellStore';
 import { ProductDialogShell } from '../../../shared/components';
-import { renderSafeMarkdown } from '../../../shared/utils/safe-markdown';
 import { REPOSITORY_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
-import KnowledgeProjectionRelationsView from '../components/KnowledgeProjectionRelationsView.vue';
+import KnowledgeMarkdownPreview from '../components/KnowledgeMarkdownPreview.vue';
+import KnowledgeNoteCatalog from '../components/KnowledgeNoteCatalog.vue';
+import KnowledgeNoteContextPanel from '../components/KnowledgeNoteContextPanel.vue';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const service = useStrictInject(REPOSITORY_SERVICE_KEY, 'RepositoryService');
+const { isNarrow } = usePanelWidth();
+
+const PAGE_SIZE = 50;
+const DETAIL_CACHE_LIMIT = 24;
+const SEARCH_DEBOUNCE_MS = 220;
+const PROJECTION_AUTO_REFRESH_MS = 1_500;
 
 const connections = ref<KnowledgeRemoteBindingClientDTO[]>([]);
 const selectedConnectionId = ref('');
-const notes = ref<KnowledgeNoteProjectionClientDTO[]>([]);
+const notes = ref<KnowledgeNoteProjectionSummaryDTO[]>([]);
+const totalNotes = ref(0);
+const repositoryTotalNotes = ref(0);
+const nextCursor = ref<string | null>(null);
+const treeChildren = ref<Record<string, KnowledgeNoteTreeNodeDTO[]>>({});
+const expandedDirectories = ref<string[]>([]);
+const loadingDirectories = ref<string[]>([]);
+const treeMetadata = ref<KnowledgeNoteTreeMetadataDTO | null>(null);
+const treeLoading = ref(false);
+const includeHiddenDirectories = ref(false);
 const selectedNoteId = ref('');
+const selectedNote = ref<KnowledgeNoteProjectionClientDTO | null>(null);
+const searchQuery = ref('');
+const catalogOpen = ref(false);
+const catalogVisible = ref(true);
+const contextOpen = ref(false);
+const pathCopied = ref(false);
+const loadingConnections = ref(true);
+const loadingNotes = ref(false);
+const loadingMore = ref(false);
+const loadingDetail = ref(false);
+const errorMessage = ref('');
+const adoptionDialogOpen = ref(false);
+const adopting = ref(false);
+const adoptionError = ref('');
+const adoptionProposal = ref<(AdoptKnowledgeDocumentReq & { relativePath: string }) | null>(null);
+
+const detailCache = new Map<
+  string,
+  { contentHash: string; note: KnowledgeNoteProjectionClientDTO }
+>();
+let noteLoadSequence = 0;
+let detailLoadSequence = 0;
+let noteListAbortController: AbortController | null = null;
+let detailAbortController: AbortController | null = null;
+const treeAbortControllers = new Map<string, AbortController>();
+let searchTimer: ReturnType<typeof setTimeout> | null = null;
+let projectionRefreshTimer: ReturnType<typeof setTimeout> | null = null;
+
+const surfaceStatus = computed<PanelSurfaceStatus>(() => {
+  if (adopting.value) return 'busy';
+  return adoptionDialogOpen.value ? 'dirty' : 'clean';
+});
+usePanelSurfaceStatus(surfaceStatus);
+
+const selectedConnection = computed(
+  () =>
+    connections.value.find((connection) => connection.id === selectedConnectionId.value) ?? null,
+);
+const projectionSyncing = computed(() => {
+  const state = selectedConnection.value?.projectionCheckpoint?.state;
+  return state === 'Lagging' || state === 'Rebuilding';
+});
+const repositoryShortName = computed(() => {
+  const fullName = selectedConnection.value ? repositoryDisplayName(selectedConnection.value) : '';
+  const parts = fullName.split('/');
+  return parts[parts.length - 1] || t('repository.projection.title');
+});
+const providerNeedsAttention = computed(
+  () =>
+    Boolean(selectedConnection.value) &&
+    selectedConnection.value?.observation?.eligibility.state !== 'Ready',
+);
+const noteCountLabel = computed(() =>
+  new Intl.NumberFormat(locale.value).format(repositoryTotalNotes.value),
+);
+const loadedCountLabel = computed(() =>
+  t('repository.projection.loadedCount', {
+    loaded: new Intl.NumberFormat(locale.value).format(notes.value.length),
+    total: new Intl.NumberFormat(locale.value).format(totalNotes.value),
+  }),
+);
 
 function noteQueryId(): string {
   const raw = route.query.note;
@@ -520,10 +491,54 @@ function noteQueryId(): string {
   return '';
 }
 
+function normalizeLookup(value: string): string {
+  return value
+    .normalize('NFKC')
+    .trim()
+    .replace(/\\/g, '/')
+    .replace(/\.md$/i, '')
+    .toLocaleLowerCase();
+}
+
+function summaryFromDetail(
+  note: KnowledgeNoteProjectionClientDTO,
+): KnowledgeNoteProjectionSummaryDTO {
+  return {
+    id: note.id,
+    connectionId: note.connectionId,
+    knowledgeDocumentId: note.knowledgeDocumentId,
+    relativePath: note.relativePath,
+    title: note.title,
+    contentHash: note.contentHash,
+    updatedAt: note.updatedAt,
+  };
+}
+
+function getCachedDetail(
+  projectionId: string,
+): { contentHash: string; note: KnowledgeNoteProjectionClientDTO } | undefined {
+  const cached = detailCache.get(projectionId);
+  if (!cached) return undefined;
+  detailCache.delete(projectionId);
+  detailCache.set(projectionId, cached);
+  return cached;
+}
+
+function setCachedDetail(note: KnowledgeNoteProjectionClientDTO): void {
+  detailCache.delete(note.id);
+  detailCache.set(note.id, { contentHash: note.contentHash, note });
+  while (detailCache.size > DETAIL_CACHE_LIMIT) {
+    const oldestKey = detailCache.keys().next().value as string | undefined;
+    if (!oldestKey) break;
+    detailCache.delete(oldestKey);
+  }
+}
+
 async function applyNoteQuerySelection(): Promise<void> {
   const requested = noteQueryId();
-  if (!requested) return;
-  if (selectedNoteId.value === requested) return;
+  const connectionId = selectedConnectionId.value;
+  if (!requested || !connectionId) return;
+
   const listed = notes.value.find(
     (note) =>
       note.id === requested ||
@@ -531,68 +546,32 @@ async function applyNoteQuerySelection(): Promise<void> {
       note.relativePath === requested,
   );
   if (listed) {
-    selectedNoteId.value = listed.id;
+    await selectNote(listed.id);
     return;
   }
-  await selectGraphNode(requested);
+
+  detailAbortController?.abort();
+  const abortController = new AbortController();
+  detailAbortController = abortController;
+  const sequence = ++detailLoadSequence;
+  loadingDetail.value = true;
+  const result = await service.resolveKnowledgeNoteReference(
+    { connectionId, reference: requested },
+    { signal: abortController.signal },
+  );
+  if (sequence !== detailLoadSequence) return;
+  if (detailAbortController === abortController) detailAbortController = null;
+  loadingDetail.value = false;
+  if (!result.ok || result.data.connectionId !== connectionId) {
+    if (!result.ok && result.error.code !== 'NOT_FOUND') errorMessage.value = result.error.message;
+    return;
+  }
+
+  selectedNoteId.value = result.data.id;
+  selectedNote.value = result.data;
+  setCachedDetail(result.data);
+  if (!searchQuery.value.trim()) await revealTreePath(result.data.relativePath);
 }
-
-const noteView = ref<'preview' | 'relations'>('preview');
-const searchQuery = ref('');
-const loadingConnections = ref(true);
-const loadingNotes = ref(false);
-const errorMessage = ref('');
-const createDialogOpen = ref(false);
-const stage = ref<'draft' | 'review'>('draft');
-const creating = ref(false);
-const createError = ref('');
-const adoptionDialogOpen = ref(false);
-const adopting = ref(false);
-const adoptionError = ref('');
-const adoptionProposal = ref<(AdoptKnowledgeDocumentReq & { relativePath: string }) | null>(null);
-const proposal = ref({
-  proposalId: '',
-  requestId: '',
-  knowledgeDocumentId: createKnowledgeDocumentId(),
-  revision: 1,
-});
-const draft = ref({ title: '', proposedPath: '', content: '', reason: '' });
-const reviewedProposal = ref<{
-  fingerprint: string;
-  request: CreateConfirmedKnowledgeNoteReq;
-} | null>(null);
-let noteLoadSequence = 0;
-
-// Phase 0 / UI-004：知识库创建确认流打开即视为未完成操作——统一离开协议
-// （设置场景守卫 / Tab 切换 / 关面板）要求确认；创建提交中标记 busy 禁止离开。
-// 每次求值都读取两个源，避免提前 return 清空响应式依赖。
-const surfaceStatus = computed<PanelSurfaceStatus>(() => {
-  const creatingNow = creating.value || adopting.value;
-  const dialogOpen = createDialogOpen.value || adoptionDialogOpen.value;
-  if (creatingNow) return 'busy';
-  return dialogOpen ? 'dirty' : 'clean';
-});
-usePanelSurfaceStatus(surfaceStatus);
-
-const selectedConnection = computed(
-  () =>
-    connections.value.find((connection) => connection.id === selectedConnectionId.value) ?? null,
-);
-const selectedNote = computed(
-  () => notes.value.find((note) => note.id === selectedNoteId.value) ?? null,
-);
-const renderedMarkdown = computed(() =>
-  renderSafeMarkdown(selectedNote.value?.markdownContent ?? ''),
-);
-const draftPreview = computed(() => renderSafeMarkdown(draft.value.content));
-const canReview = computed(
-  () =>
-    Boolean(selectedConnection.value?.id) &&
-    draft.value.title.trim().length > 0 &&
-    draft.value.proposedPath.trim().length > 0 &&
-    draft.value.content.trim().length > 0 &&
-    draft.value.reason.trim().length > 0,
-);
 
 function createUuidV4(): string {
   if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
@@ -614,7 +593,7 @@ function createId(prefix: string): string {
   return `${prefix}-${createUuidV4()}`;
 }
 
-function createKnowledgeDocumentId(): CreateConfirmedKnowledgeNoteReq['knowledgeDocumentId'] {
+function createKnowledgeDocumentId(): AdoptKnowledgeDocumentReq['knowledgeDocumentId'] {
   return KnowledgeDocumentIdSchema.parse(`kdoc_${createUuidV4()}`);
 }
 
@@ -630,6 +609,183 @@ function providerStateLabel(binding: KnowledgeRemoteBindingClientDTO): string {
   return t(
     `repository.projection.providerStatus.${binding.observation?.eligibility.state ?? 'Unchecked'}`,
   );
+}
+
+function formatUpdatedAt(timestamp: number): string {
+  return new Intl.DateTimeFormat(locale.value, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }).format(new Date(timestamp));
+}
+
+function clearSearchTimer(): void {
+  if (searchTimer) clearTimeout(searchTimer);
+  searchTimer = null;
+}
+
+function clearProjectionRefreshTimer(): void {
+  if (projectionRefreshTimer) clearTimeout(projectionRefreshTimer);
+  projectionRefreshTimer = null;
+}
+
+function resetTree(): void {
+  for (const controller of treeAbortControllers.values()) controller.abort();
+  treeAbortControllers.clear();
+  treeChildren.value = {};
+  expandedDirectories.value = [];
+  loadingDirectories.value = [];
+  treeMetadata.value = null;
+  treeLoading.value = false;
+}
+
+async function loadTreeDirectory(parent: string, force = false): Promise<void> {
+  const connectionId = selectedConnectionId.value;
+  if (!connectionId) return;
+  if (!force && treeChildren.value[parent]) return;
+
+  treeAbortControllers.get(parent)?.abort();
+  const abortController = new AbortController();
+  treeAbortControllers.set(parent, abortController);
+  loadingDirectories.value = [...new Set([...loadingDirectories.value, parent])];
+  if (parent === '') treeLoading.value = true;
+  errorMessage.value = '';
+
+  const result = await service.listKnowledgeNoteTree(
+    {
+      connectionId,
+      parent,
+      includeHidden: includeHiddenDirectories.value,
+    },
+    { signal: abortController.signal },
+  );
+  if (treeAbortControllers.get(parent) !== abortController) return;
+  treeAbortControllers.delete(parent);
+  loadingDirectories.value = loadingDirectories.value.filter((path) => path !== parent);
+  if (parent === '') treeLoading.value = false;
+
+  if (!result.ok) {
+    errorMessage.value = result.error.message;
+    return;
+  }
+
+  treeChildren.value = {
+    ...treeChildren.value,
+    [parent]: result.data.nodes,
+  };
+  if (result.data.metadata) {
+    treeMetadata.value = result.data.metadata;
+    repositoryTotalNotes.value = result.data.metadata.total;
+  }
+
+  if (parent === '' && !selectedNote.value && !noteQueryId() && !searchQuery.value.trim()) {
+    const firstRootNote = result.data.nodes.find((node) => node.kind === 'note');
+    if (firstRootNote?.kind === 'note') await selectNote(firstRootNote.projectionId);
+  }
+}
+
+async function revealTreePath(relativePath: string): Promise<void> {
+  if (searchQuery.value.trim()) return;
+  const segments = relativePath.split('/').filter(Boolean);
+  if (segments.length <= 1) return;
+
+  const hiddenDirectories = treeMetadata.value?.hiddenDirectories ?? [];
+  const directoryPaths = segments
+    .slice(0, -1)
+    .map((_, index) => segments.slice(0, index + 1).join('/'));
+  if (
+    !includeHiddenDirectories.value &&
+    directoryPaths.some(
+      (path) =>
+        path
+          .split('/')
+          .some(
+            (segment) =>
+              segment.startsWith('.') || segment === 'node_modules' || segment === 'generated',
+          ) || hiddenDirectories.includes(path),
+    )
+  ) {
+    return;
+  }
+
+  const directorySegments = segments.slice(0, -1);
+  for (let index = 1; index <= directorySegments.length; index += 1) {
+    const directory = directorySegments.slice(0, index).join('/');
+    if (!expandedDirectories.value.includes(directory)) {
+      expandedDirectories.value = [...expandedDirectories.value, directory];
+    }
+    await loadTreeDirectory(directory);
+  }
+}
+
+async function toggleDirectory(relativePath: string): Promise<void> {
+  if (expandedDirectories.value.includes(relativePath)) {
+    expandedDirectories.value = expandedDirectories.value.filter(
+      (directory) => directory !== relativePath,
+    );
+    return;
+  }
+  expandedDirectories.value = [...expandedDirectories.value, relativePath];
+  await loadTreeDirectory(relativePath);
+}
+
+async function toggleHiddenDirectories(includeHidden: boolean): Promise<void> {
+  includeHiddenDirectories.value = includeHidden;
+  try {
+    localStorage.setItem('memoflow:knowledge-tree:include-hidden', includeHidden ? '1' : '0');
+  } catch {
+    // Storage may be unavailable in hardened browser contexts.
+  }
+  resetTree();
+  await loadTreeDirectory('', true);
+  if (searchQuery.value.trim()) {
+    await loadNotes();
+    return;
+  }
+  if (selectedNote.value) await revealTreePath(selectedNote.value.relativePath);
+}
+
+async function loadCatalogRoot(force = false): Promise<void> {
+  notes.value = [];
+  totalNotes.value = 0;
+  nextCursor.value = null;
+  await loadTreeDirectory('', force);
+  if (selectedNote.value) await revealTreePath(selectedNote.value.relativePath);
+  const requested = noteQueryId();
+  if (requested) await applyNoteQuerySelection();
+  scheduleProjectionRefresh();
+}
+
+function scheduleProjectionRefresh(): void {
+  clearProjectionRefreshTimer();
+  const hasCatalogContent =
+    searchQuery.value.trim().length > 0
+      ? notes.value.length > 0
+      : (treeChildren.value['']?.length ?? 0) > 0;
+  if (!projectionSyncing.value || hasCatalogContent) {
+    return;
+  }
+  projectionRefreshTimer = setTimeout(() => {
+    projectionRefreshTimer = null;
+    void refreshProjectionProgress();
+  }, PROJECTION_AUTO_REFRESH_MS);
+}
+
+async function refreshProjectionProgress(): Promise<void> {
+  const connectionId = selectedConnectionId.value;
+  if (!connectionId) return;
+  const result = await service.listKnowledgeRepositoryConnections();
+  if (!result.ok) {
+    scheduleProjectionRefresh();
+    return;
+  }
+  connections.value = result.data.connections;
+  if (!connections.value.some((connection) => connection.id === connectionId)) {
+    await loadConnections();
+    return;
+  }
+  if (searchQuery.value.trim()) await loadNotes();
+  else await loadCatalogRoot(true);
 }
 
 async function loadConnections(): Promise<void> {
@@ -655,35 +811,73 @@ async function loadConnections(): Promise<void> {
   if (!selectedConnectionId.value) {
     noteLoadSequence += 1;
     notes.value = [];
+    totalNotes.value = 0;
+    repositoryTotalNotes.value = 0;
+    nextCursor.value = null;
     selectedNoteId.value = '';
+    selectedNote.value = null;
     loadingNotes.value = false;
+    resetTree();
     return;
   }
-  await loadNotes();
+  if (searchQuery.value.trim()) await loadNotes();
+  else await loadCatalogRoot(true);
 }
 
-async function loadNotes(): Promise<void> {
+async function loadNotes(options: { append?: boolean } = {}): Promise<void> {
   const connectionId = selectedConnectionId.value;
   if (!connectionId) return;
+  const append = options.append === true;
+  const cursor = append ? (nextCursor.value ?? undefined) : undefined;
+  if (append && !cursor) return;
+
+  noteListAbortController?.abort();
+  const abortController = new AbortController();
+  noteListAbortController = abortController;
   const sequence = ++noteLoadSequence;
-  loadingNotes.value = true;
+  if (append) loadingMore.value = true;
+  else loadingNotes.value = true;
   errorMessage.value = '';
-  const result = await service.listKnowledgeNoteProjections({
-    connectionId,
-    query: searchQuery.value.trim() || undefined,
-    limit: 100,
-  });
+
+  const result = await service.listKnowledgeNoteProjections(
+    {
+      connectionId,
+      query: searchQuery.value.trim() || undefined,
+      cursor,
+      ...(includeHiddenDirectories.value ? { includeHidden: true } : {}),
+      limit: PAGE_SIZE,
+    },
+    { signal: abortController.signal },
+  );
   if (sequence !== noteLoadSequence) return;
+  if (noteListAbortController === abortController) noteListAbortController = null;
   if (!result.ok) {
     errorMessage.value = result.error.message;
-    notes.value = [];
+    if (!append) {
+      notes.value = [];
+      totalNotes.value = 0;
+      nextCursor.value = null;
+    }
     loadingNotes.value = false;
+    loadingMore.value = false;
     return;
   }
 
-  notes.value = result.data.notes;
+  const incoming = result.data.notes;
+  if (append) {
+    const existing = new Set(notes.value.map((note) => note.id));
+    notes.value = [...notes.value, ...incoming.filter((note) => !existing.has(note.id))];
+  } else {
+    notes.value = incoming;
+  }
+  totalNotes.value = result.data.total;
+  if (!searchQuery.value.trim()) repositoryTotalNotes.value = result.data.total;
+  nextCursor.value = result.data.nextCursor;
+  loadingNotes.value = false;
+  loadingMore.value = false;
+
   const requested = noteQueryId();
-  if (requested) {
+  if (requested && !append) {
     const matched = notes.value.find(
       (note) =>
         note.id === requested ||
@@ -691,42 +885,185 @@ async function loadNotes(): Promise<void> {
         note.relativePath === requested,
     );
     if (matched) {
-      selectedNoteId.value = matched.id;
+      await selectNote(matched.id);
     } else {
-      loadingNotes.value = false;
       await selectGraphNode(requested);
-      return;
     }
-  } else if (!notes.value.some((note) => note.id === selectedNoteId.value)) {
-    selectedNoteId.value = notes.value[0]?.id ?? '';
+  } else if (!append && !notes.value.some((note) => note.id === selectedNoteId.value)) {
+    const first = notes.value[0];
+    if (first) await selectNote(first.id);
+    else {
+      selectedNoteId.value = '';
+      selectedNote.value = null;
+    }
+  } else if (!append && selectedNoteId.value) {
+    const summary = notes.value.find((note) => note.id === selectedNoteId.value);
+    if (summary) {
+      const cached = getCachedDetail(summary.id);
+      if (!cached || cached.contentHash !== summary.contentHash) {
+        await selectNote(summary.id, true);
+      }
+    }
   }
-  loadingNotes.value = false;
+  scheduleProjectionRefresh();
+}
+
+function loadMoreNotes(): void {
+  void loadNotes({ append: true });
+}
+
+async function selectNote(projectionId: string, force = false): Promise<void> {
+  if (!projectionId) return;
+  selectedNoteId.value = projectionId;
+  detailAbortController?.abort();
+  detailAbortController = null;
+  const sequence = ++detailLoadSequence;
+  const summary = notes.value.find((note) => note.id === projectionId);
+  const cached = getCachedDetail(projectionId);
+  if (!force && cached && (!summary || cached.contentHash === summary.contentHash)) {
+    selectedNote.value = cached.note;
+    loadingDetail.value = false;
+    return;
+  }
+
+  const abortController = new AbortController();
+  detailAbortController = abortController;
+  loadingDetail.value = true;
+  const result = await service.getKnowledgeNoteProjection(projectionId, {
+    signal: abortController.signal,
+  });
+  if (sequence !== detailLoadSequence) return;
+  if (detailAbortController === abortController) detailAbortController = null;
+  loadingDetail.value = false;
+  if (!result.ok) {
+    errorMessage.value = result.error.message;
+    return;
+  }
+  selectedNote.value = result.data;
+  setCachedDetail(result.data);
+  if (!searchQuery.value.trim()) await revealTreePath(result.data.relativePath);
 }
 
 async function selectGraphNode(projectionId: string): Promise<void> {
-  if (projectionId === selectedNoteId.value) return;
-  let target = notes.value.find((note) => note.id === projectionId);
-  if (!target) {
-    const result = await service.getKnowledgeNoteProjection(projectionId);
-    if (!result.ok) {
-      errorMessage.value = result.error.message;
-      return;
-    }
-    if (result.data.connectionId !== selectedConnectionId.value) return;
-    target = result.data;
-    notes.value = [target, ...notes.value];
+  if (!projectionId) return;
+  const listed = notes.value.find((note) => note.id === projectionId);
+  if (listed) {
+    await selectNote(listed.id);
+    return;
   }
-  selectedNoteId.value = target.id;
+
+  detailAbortController?.abort();
+  const abortController = new AbortController();
+  detailAbortController = abortController;
+  const sequence = ++detailLoadSequence;
+  loadingDetail.value = true;
+  const result = await service.getKnowledgeNoteProjection(projectionId, {
+    signal: abortController.signal,
+  });
+  if (sequence !== detailLoadSequence) return;
+  if (detailAbortController === abortController) detailAbortController = null;
+  loadingDetail.value = false;
+  if (!result.ok) {
+    errorMessage.value = result.error.message;
+    return;
+  }
+  if (result.data.connectionId !== selectedConnectionId.value) return;
+  const summary = summaryFromDetail(result.data);
+  notes.value = [summary, ...notes.value];
+  setCachedDetail(result.data);
+  selectedNoteId.value = result.data.id;
+  selectedNote.value = result.data;
+  if (!searchQuery.value.trim()) await revealTreePath(result.data.relativePath);
+}
+
+async function openWikiLink(target: string): Promise<void> {
+  const connectionId = selectedConnectionId.value;
+  if (!connectionId) return;
+  const normalizedTarget = normalizeLookup(target);
+  const result = await service.listKnowledgeNoteProjections({
+    connectionId,
+    query: target,
+    ...(includeHiddenDirectories.value ? { includeHidden: true } : {}),
+    limit: 25,
+  });
+  if (!result.ok) return;
+
+  const matched =
+    result.data.notes.find((note) => normalizeLookup(note.title) === normalizedTarget) ??
+    result.data.notes.find((note) => normalizeLookup(note.relativePath) === normalizedTarget) ??
+    result.data.notes.find((note) => {
+      const segments = note.relativePath.split('/');
+      const basename = segments[segments.length - 1] ?? note.relativePath;
+      return normalizeLookup(basename) === normalizedTarget;
+    }) ??
+    result.data.notes[0];
+
+  if (!matched) return;
+  if (!notes.value.some((note) => note.id === matched.id)) {
+    notes.value = [matched, ...notes.value];
+  }
+  await selectNote(matched.id);
+}
+
+async function selectFromCatalogSheet(projectionId: string): Promise<void> {
+  catalogOpen.value = false;
+  await selectNote(projectionId);
+}
+
+async function handleContextSelect(projectionId: string): Promise<void> {
+  if (isNarrow.value) contextOpen.value = false;
+  await selectGraphNode(projectionId);
+}
+
+function toggleCatalog(): void {
+  if (isNarrow.value) {
+    catalogOpen.value = true;
+    return;
+  }
+  catalogVisible.value = !catalogVisible.value;
+}
+
+function selectConnection(connectionId: string): void {
+  if (!connectionId || connectionId === selectedConnectionId.value) return;
+  selectedConnectionId.value = connectionId;
+  handleConnectionChange();
+}
+
+async function copyNotePath(): Promise<void> {
+  const note = selectedNote.value;
+  if (!note) return;
+  try {
+    await navigator.clipboard?.writeText(note.relativePath);
+    pathCopied.value = true;
+    window.setTimeout(() => {
+      pathCopied.value = false;
+    }, 1_500);
+  } catch {
+    pathCopied.value = false;
+  }
 }
 
 function handleConnectionChange(): void {
+  clearProjectionRefreshTimer();
+  catalogOpen.value = false;
+  contextOpen.value = false;
   selectedNoteId.value = '';
-  void loadNotes();
+  selectedNote.value = null;
+  notes.value = [];
+  totalNotes.value = 0;
+  repositoryTotalNotes.value = 0;
+  nextCursor.value = null;
+  resetTree();
+  void loadCatalogRoot(true);
 }
 
 function clearSearch(): void {
+  clearSearchTimer();
+  if (!searchQuery.value) {
+    void loadCatalogRoot();
+    return;
+  }
   searchQuery.value = '';
-  void loadNotes();
 }
 
 function openRepositorySettings(): void {
@@ -771,111 +1108,56 @@ async function confirmAdoption(): Promise<void> {
 
   adoptionDialogOpen.value = false;
   adopting.value = false;
-  await loadNotes();
-  const adopted = notes.value.find(
-    (note) =>
-      note.knowledgeDocumentId === result.data.knowledgeDocumentId ||
-      note.relativePath === result.data.relativePath,
-  );
-  if (adopted) selectedNoteId.value = adopted.id;
-}
-
-function openCreateDialog(): void {
-  stage.value = 'draft';
-  createError.value = '';
-  proposal.value = {
-    proposalId: createId('proposal'),
-    requestId: createId('request'),
-    knowledgeDocumentId: createKnowledgeDocumentId(),
-    revision: 1,
-  };
-  draft.value = { title: '', proposedPath: '', content: '', reason: '' };
-  reviewedProposal.value = null;
-  createDialogOpen.value = true;
-}
-
-function closeCreateDialog(): void {
-  if (creating.value) return;
-  createDialogOpen.value = false;
-}
-
-function editDraft(): void {
-  stage.value = 'draft';
-  createError.value = '';
-}
-
-function reviewDraft(): void {
-  createError.value = '';
-  const parsed = CreateConfirmedKnowledgeNoteSchema.safeParse({
-    connectionId: selectedConnectionId.value,
-    proposalId: proposal.value.proposalId,
-    revision: proposal.value.revision,
-    requestId: proposal.value.requestId,
-    knowledgeDocumentId: proposal.value.knowledgeDocumentId,
-    proposedPath: draft.value.proposedPath,
-    title: draft.value.title,
-    frontmatter: {},
-    content: draft.value.content,
-    reason: draft.value.reason,
-  });
-  if (!parsed.success) {
-    createError.value = parsed.error.issues[0]?.message ?? t('repository.projection.invalidDraft');
-    return;
-  }
-
-  const fingerprint = JSON.stringify({
-    connectionId: parsed.data.connectionId,
-    proposedPath: parsed.data.proposedPath,
-    title: parsed.data.title,
-    frontmatter: parsed.data.frontmatter,
-    content: parsed.data.content,
-    reason: parsed.data.reason,
-  });
-  const metadata =
-    reviewedProposal.value && reviewedProposal.value.fingerprint !== fingerprint
-      ? {
-          proposalId: proposal.value.proposalId,
-          revision: proposal.value.revision + 1,
-          requestId: createId('request'),
-          knowledgeDocumentId: proposal.value.knowledgeDocumentId,
-        }
-      : proposal.value;
-
-  proposal.value = metadata;
-  draft.value = {
-    title: parsed.data.title,
-    proposedPath: parsed.data.proposedPath,
-    content: parsed.data.content,
-    reason: parsed.data.reason,
-  };
-  reviewedProposal.value = {
-    fingerprint,
-    request: { ...parsed.data, ...metadata },
-  };
-  stage.value = 'review';
-}
-
-async function confirmCreate(): Promise<void> {
-  const reviewedRequest = reviewedProposal.value?.request;
-  if (!reviewedRequest || stage.value !== 'review') return;
-  creating.value = true;
-  createError.value = '';
-  const result = await service.createConfirmedKnowledgeNote(reviewedRequest);
-  if (!result.ok) {
-    createError.value = result.error.message;
-    creating.value = false;
-    return;
-  }
-
-  createDialogOpen.value = false;
-  creating.value = false;
-  await loadConnections();
-  const created = notes.value.find((note) => note.relativePath === result.data.relativePath);
-  if (created) selectedNoteId.value = created.id;
+  const selectedId = selectedNoteId.value;
+  detailCache.delete(selectedId);
+  if (searchQuery.value.trim()) await loadNotes();
+  else await loadCatalogRoot(true);
+  if (selectedId) await selectNote(selectedId, true);
 }
 
 onMounted(() => {
+  try {
+    includeHiddenDirectories.value =
+      localStorage.getItem('memoflow:knowledge-tree:include-hidden') === '1';
+  } catch {
+    includeHiddenDirectories.value = false;
+  }
   void loadConnections();
+});
+
+onBeforeUnmount(() => {
+  noteLoadSequence += 1;
+  detailLoadSequence += 1;
+  noteListAbortController?.abort();
+  detailAbortController?.abort();
+  for (const controller of treeAbortControllers.values()) controller.abort();
+  treeAbortControllers.clear();
+  noteListAbortController = null;
+  detailAbortController = null;
+  clearSearchTimer();
+  clearProjectionRefreshTimer();
+});
+
+watch(searchQuery, (query) => {
+  clearSearchTimer();
+  searchTimer = setTimeout(() => {
+    searchTimer = null;
+    if (query.trim()) void loadNotes();
+    else void loadCatalogRoot();
+  }, SEARCH_DEBOUNCE_MS);
+});
+
+watch(isNarrow, (narrow) => {
+  if (!narrow) catalogOpen.value = false;
+});
+
+watch(selectedNote, (note) => {
+  if (!note) return;
+  const canonicalReference = note.knowledgeDocumentId ?? note.id;
+  if (noteQueryId() === canonicalReference) return;
+  void router.replace({
+    query: { ...route.query, note: canonicalReference },
+  });
 });
 
 watch(
@@ -885,60 +1167,3 @@ watch(
   },
 );
 </script>
-
-<style scoped>
-.preview-content :deep(pre) {
-  overflow-x: auto;
-  border-radius: 0.375rem;
-  background: hsl(var(--muted));
-  padding: 0.75rem;
-}
-
-.preview-content :deep(code) {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.875em;
-}
-
-.preview-content :deep(.internal-link) {
-  color: hsl(var(--primary));
-}
-
-.preview-content :deep(.callout) {
-  margin: 1rem 0;
-  border-left: 3px solid hsl(var(--primary));
-  border-radius: 0.25rem;
-  background: hsl(var(--muted) / 0.45);
-  padding: 0.75rem 1rem;
-}
-
-.preview-content :deep(.callout-title) {
-  display: inline-block;
-  margin-bottom: 0.35rem;
-  font-weight: 600;
-}
-
-.preview-content :deep(mark) {
-  border-radius: 0.125rem;
-  background: hsl(var(--accent));
-  padding: 0 0.125rem;
-}
-
-.preview-content :deep(.vault-embed) {
-  border-bottom: 1px dashed hsl(var(--primary) / 0.7);
-}
-
-.preview-content :deep(.contains-task-list) {
-  list-style: none;
-  padding-left: 1.25rem;
-}
-
-.preview-content :deep(.task-list-item) {
-  display: flex;
-  align-items: baseline;
-  gap: 0.45rem;
-}
-
-.preview-content :deep(.task-list-item-checkbox) {
-  flex: 0 0 auto;
-}
-</style>

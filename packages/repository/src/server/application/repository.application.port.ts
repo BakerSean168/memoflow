@@ -21,7 +21,12 @@ import type {
   AdoptKnowledgeDocumentResponse,
   KnowledgeNoteProjectionClientDTO,
   KnowledgeNoteProjectionListResponse,
+  KnowledgeNoteTreeResponse,
   ListKnowledgeNoteProjectionsReq,
+  ListReferenceableKnowledgeDocumentsReq,
+  ReferenceableKnowledgeDocumentListResponse,
+  ListKnowledgeNoteTreeReq,
+  ResolveKnowledgeNoteReferenceReq,
   GetKnowledgeNoteLinkGraphReq,
   KnowledgeNoteLinkGraphResponse,
   KnowledgeAttachmentContentResponse,
@@ -101,6 +106,18 @@ export interface RepositoryApplicationPort {
     ctx: Context,
     request: ListKnowledgeNoteProjectionsReq,
   ): Promise<Result<KnowledgeNoteProjectionListResponse>>;
+  listReferenceableKnowledgeDocuments(
+    ctx: Context,
+    request: ListReferenceableKnowledgeDocumentsReq,
+  ): Promise<Result<ReferenceableKnowledgeDocumentListResponse>>;
+  listKnowledgeNoteTree(
+    ctx: Context,
+    request: ListKnowledgeNoteTreeReq,
+  ): Promise<Result<KnowledgeNoteTreeResponse>>;
+  resolveKnowledgeNoteReference(
+    ctx: Context,
+    request: ResolveKnowledgeNoteReferenceReq,
+  ): Promise<Result<KnowledgeNoteProjectionClientDTO>>;
   getKnowledgeNoteProjection(
     ctx: Context,
     projectionId: string,

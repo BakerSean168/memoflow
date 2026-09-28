@@ -62,9 +62,12 @@
     </div>
 
     <section class="@container/ai flex min-w-0 flex-1 flex-col overflow-hidden">
-      <header v-show="!composerOnly" class="border-b bg-background px-4 py-3 @md/ai:px-6">
-        <div class="flex items-center justify-between gap-3">
-          <h1 class="truncate text-lg font-medium text-foreground">
+      <header
+        v-show="!composerOnly"
+        class="flex h-12 shrink-0 items-center border-b border-border/45 bg-background px-4 @md/ai:px-6"
+      >
+        <div class="flex w-full items-center justify-between gap-3">
+          <h1 class="truncate text-sm font-semibold tracking-[-0.01em] text-foreground">
             {{ currentConversationLabel }}
           </h1>
           <div class="flex items-center gap-2">
@@ -122,35 +125,21 @@
         :timeline="chatTimeline"
         :tool-mode="toolMode"
         :has-models="modelGroups.length > 0"
-        :show-workflow-surface="hasWorkflowContext"
-        @select-tool="startNewConversation"
         @select-shortcut="handleWelcomeShortcut"
         @configure-ai="openAISettings"
         @create-goal="openGoalWithoutAI"
         @quick-task="openQuickTaskWithoutAI"
-      >
-        <template #workflow-surface>
-          <p
-            v-if="workflowStatusText"
-            class="rounded-2xl border bg-muted/20 px-4 py-3 text-sm leading-6 text-muted-foreground"
-            data-testid="ai-workflow-status-inline"
-          >
-            {{ workflowStatusText }}
-          </p>
-        </template>
-      </AIMessagePanel>
+      />
 
       <div v-show="!composerOnly" class="px-4 @md/ai:px-6">
-        <div class="mx-auto w-full max-w-4xl">
+        <div class="mx-auto w-full max-w-3xl">
           <AIWorkflowActionBar
             :tool-mode="toolMode"
             :workflow-status-text="workflowStatusText"
             :goal-clarification="goalClarification"
             :automated-goal-id="automatedGoalId"
-            :goal-agent-loading="goalAgentLoading"
             :goal-agent-resuming="goalAgentResuming"
             :show-goal-draft-editor="showGoalDraftEditor"
-            :can-run-goal-agent="canRunGoalAgent"
             :can-resume-goal-agent-clarification="canResumeGoalAgentClarification"
             :can-continue-goal-agent-execution="canContinueGoalAgentExecution"
             :can-retry-goal-agent-execution="canRetryGoalAgentExecution"
@@ -158,18 +147,7 @@
             :goal-agent-waiting-for-approval="goalAgentWaitingForApproval"
             :goal-agent-waiting-for-execution="goalAgentWaitingForExecution"
             :knowledge-answer="knowledgeAnswer"
-            :knowledge-query-loading="knowledgeQueryLoading"
-            :can-ask-knowledge="canAskKnowledge"
-            :task-agent-loading="taskAgentLoading"
-            :can-run-task-agent="canRunTaskAgent"
             :linked-goal-id="linkedGoalId"
-            :recent-goals="recentGoalList"
-            :knowledge-capture-loading="knowledgeCaptureLoading"
-            :can-run-knowledge-capture="canRunKnowledgeCapture"
-            :start-goal-agent-run="startGoalAgentRun"
-            :start-task-agent-run="startTaskAgentRun"
-            :set-linked-goal-id="setLinkedGoalId"
-            :start-knowledge-capture-run="startKnowledgeCaptureRun"
             :submit-goal-agent-clarification="submitGoalAgentClarification"
             :confirm-goal-agent-run="confirmGoalAgentRun"
             :cancel-goal-agent-run="cancelGoalAgentRun"
@@ -177,7 +155,6 @@
             :retry-goal-agent-execution="retryGoalAgentExecution"
             :toggle-goal-draft-editor="toggleGoalDraftEditor"
             :open-automated-goal="openAutomatedGoal"
-            :ask-knowledge-from-conversation="askKnowledgeFromConversation"
             :exit-tool-mode="exitToolMode"
           />
         </div>
@@ -189,15 +166,22 @@
           v-model="chatMessage"
           :loading="chatLoading"
           :can-send="canSendMessage"
-          :tool-button-label="currentToolButtonLabel"
+          :attachments="composerAttachments"
+          :context-entities="composerContextEntities"
+          :recent-goals="referenceGoalList"
+          :recent-tasks="referenceTaskList"
+          :recent-knowledge-notes="referenceKnowledgeNoteList"
           :model-groups="modelGroups"
           :selected-model-key="selectedModelKey"
           :density="composerDensity"
-          @send="handleSendChat"
+          @send="handleComposerSend"
           @stop="stopGenerating"
-          @start-conversation="startNewConversation"
           @select-model="selectModel"
           @open-settings="openAISettings"
+          @add-files="addComposerFiles"
+          @remove-attachment="removeComposerAttachment"
+          @toggle-context-entity="toggleExplicitContextEntity"
+          @remove-context-entity="removeContextEntity"
         />
       </Teleport>
       <AIFooterComposer
@@ -206,15 +190,22 @@
         v-model="chatMessage"
         :loading="chatLoading"
         :can-send="canSendMessage"
-        :tool-button-label="currentToolButtonLabel"
+        :attachments="composerAttachments"
+        :context-entities="composerContextEntities"
+        :recent-goals="referenceGoalList"
+        :recent-tasks="referenceTaskList"
+        :recent-knowledge-notes="referenceKnowledgeNoteList"
         :model-groups="modelGroups"
         :selected-model-key="selectedModelKey"
         :density="composerDensity"
-        @send="handleSendChat"
+        @send="handleComposerSend"
         @stop="stopGenerating"
-        @start-conversation="startNewConversation"
         @select-model="selectModel"
         @open-settings="openAISettings"
+        @add-files="addComposerFiles"
+        @remove-attachment="removeComposerAttachment"
+        @toggle-context-entity="toggleExplicitContextEntity"
+        @remove-context-entity="removeContextEntity"
       />
     </section>
 
@@ -305,6 +296,7 @@ import {
 } from '../../../di/keys';
 import type { ComposerDensity } from '../../../layouts/shell/panel-geometry';
 import { useAIChatView } from '../composables/useAIChatView';
+import { inferWorkflowMode } from '../composables/workflow-intent';
 import type { ConversationSummary, WorkflowMode } from '../composables/types';
 
 const { t } = useI18n();
@@ -341,7 +333,24 @@ const {
   knowledgeCaptureWorkflow,
   formatters,
   common,
-} = useAIChatView({ getComposerTextarea: () => composerRef.value?.composerTextarea ?? null });
+} = useAIChatView({
+  getComposerTextarea: () => composerRef.value?.composerTextarea ?? null,
+  getActiveSurface: () => {
+    if (
+      !shellStore ||
+      !shellStore.rightPanelOpen ||
+      shellStore.panelSurface !== 'business' ||
+      !shellStore.activeTab
+    ) {
+      return null;
+    }
+    return {
+      module: shellStore.activeTab.module,
+      route: shellStore.activeTab.route,
+      title: shellStore.activeTab.title,
+    };
+  },
+});
 
 const {
   chatMessage,
@@ -352,17 +361,26 @@ const {
   conversationListLoading,
   recentGoalList,
   recentKnowledgeNoteList,
+  referenceGoalList,
+  referenceTaskList,
+  referenceKnowledgeNoteList,
   recentKnowledgeNotesEmailVerificationRequired,
   recentKnowledgeNotesErrorMessageKey,
   messagesViewport,
   lastRuntimeUsage,
+  composerAttachments,
+  composerContextEntities,
+  addComposerFiles,
+  removeComposerAttachment,
+  toggleExplicitContextEntity,
+  removeContextEntity,
   selectConversation: selectConversationBase,
   openRecentGoal,
   openRecentKnowledgeNote,
   deleteConversation,
   loadConversationList,
   startNewConversation: startNewConversationBase,
-  handleSendChat,
+  handleSendChat: handleSendChatBase,
   stopGenerating,
 } = session;
 
@@ -373,13 +391,11 @@ const {
   goalWorkflowRun,
   clarificationAnswers,
   showGoalDraftEditor,
-  goalAgentLoading,
   goalAgentResuming,
   editableGoal,
   editableKeyResults,
   editableTasks,
   editableKnowledge,
-  canRunGoalAgent,
   canResumeGoalAgentClarification,
   canContinueGoalAgentExecution,
   canRetryGoalAgentExecution,
@@ -406,20 +422,13 @@ const {
   toggleGoalDraftEditor,
 } = goalWorkflow;
 
-const {
-  knowledgeQueryLoading,
-  knowledgeAnswer,
-  canAskKnowledge,
-  askKnowledgeFromConversation,
-  openKnowledgeCitation,
-} = knowledgeQaWorkflow;
+const { knowledgeAnswer, askKnowledgeFromConversation, openKnowledgeCitation } =
+  knowledgeQaWorkflow;
 
 const {
-  taskAgentLoading,
   taskWorkflowRun,
   showTaskDraftEditor,
   editableTask,
-  canRunTaskAgent,
   linkedGoalId,
   setLinkedGoalId,
   startTaskAgentRun,
@@ -432,8 +441,6 @@ const {
 const {
   knowledgeCaptureRun,
   showKnowledgeDraftEditor,
-  canRunKnowledgeCapture,
-  knowledgeCaptureLoading,
   startKnowledgeCaptureRun,
   cancelKnowledgeCaptureRun,
   confirmKnowledgeCaptureRun,
@@ -445,7 +452,6 @@ const {
   toolMode,
   currentConversationLabel,
   currentToolLabel,
-  currentToolButtonLabel,
   workflowStatusText,
   exitToolMode,
   openSettings,
@@ -523,8 +529,45 @@ function handleWelcomeShortcut(mode: WorkflowMode) {
     'knowledge-capture': 'aiAssistant.chatPage.shortcuts.knowledgeGenerate.prefill',
     'knowledge-qa': 'aiAssistant.chatPage.shortcuts.knowledgeQa.prefill',
   }[mode];
-  startNewConversation(mode);
+  startNewConversation('chat');
   if (prefillKey) chatMessage.value = t(prefillKey);
+}
+
+const workflowInProgress = computed(() => {
+  const active =
+    toolMode.value === 'goal-create'
+      ? goalWorkflowRun.value
+      : toolMode.value === 'task-create'
+        ? taskWorkflowRun.value
+        : toolMode.value === 'knowledge-capture'
+          ? knowledgeCaptureRun.value
+          : null;
+  return Boolean(active && !['completed', 'failed', 'cancelled'].includes(active.status));
+});
+
+async function handleComposerSend() {
+  const inferredMode = workflowInProgress.value
+    ? toolMode.value
+    : inferWorkflowMode(chatMessage.value);
+
+  if (!workflowInProgress.value && inferredMode !== toolMode.value) {
+    if (toolMode.value !== 'chat') exitToolMode();
+    toolMode.value = inferredMode;
+  }
+
+  if (inferredMode === 'task-create') {
+    const selectedGoal = composerContextEntities.value.find(
+      (entity) => entity.entityType === 'goal',
+    );
+    setLinkedGoalId(selectedGoal?.id ?? null);
+  }
+
+  await handleSendChatBase();
+
+  if (inferredMode === 'goal-create') await startGoalAgentRun();
+  else if (inferredMode === 'task-create') await startTaskAgentRun();
+  else if (inferredMode === 'knowledge-capture') await startKnowledgeCaptureRun();
+  else if (inferredMode === 'knowledge-qa') await askKnowledgeFromConversation();
 }
 
 function toggleContextPanel() {

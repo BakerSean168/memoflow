@@ -26,7 +26,7 @@ function makeEvent(
   } as NotificationDispatchInAppEvent;
 }
 
-describe('createNotificationStartupHook (Step 3: eventBus → dispatcher only)', () => {
+describe('createNotificationStartupHook (eventBus → presentation + dispatcher)', () => {
   let runtime: ReturnType<typeof createTestServerStateRuntime>;
 
   beforeEach(() => {
@@ -56,6 +56,43 @@ describe('createNotificationStartupHook (Step 3: eventBus → dispatcher only)',
       entityId: 'n-1',
       dedupeKey: 'op-1',
     });
+    hook.stop();
+  });
+
+  it('offers an identity-matched InApp dispatch to the optional host presentation without replacing invalidation', async () => {
+    const present = vi.fn();
+    const hook = createNotificationStartupHook({
+      dispatcher: runtime.dispatcher,
+      identityScope: () => 'identity-1',
+      presentInAppDispatch: present,
+    });
+    const invalidate = vi.spyOn(runtime.dispatcher, 'invalidate');
+    hook.start();
+
+    const event = makeEvent({ operationId: 'op-present' });
+    publisher.send('notification:dispatch_in_app', event);
+    await Promise.resolve();
+
+    expect(present).toHaveBeenCalledWith(event);
+    expect(invalidate).toHaveBeenCalledTimes(1);
+    hook.stop();
+  });
+
+  it('contains presentation failures so Notification Inbox invalidation still proceeds', async () => {
+    const hook = createNotificationStartupHook({
+      dispatcher: runtime.dispatcher,
+      identityScope: () => 'identity-1',
+      presentInAppDispatch: () => {
+        throw new Error('device surface unavailable');
+      },
+    });
+    const invalidate = vi.spyOn(runtime.dispatcher, 'invalidate');
+    hook.start();
+
+    publisher.send('notification:dispatch_in_app', makeEvent({ operationId: 'op-fallback' }));
+    await Promise.resolve();
+
+    expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ dedupeKey: 'op-fallback' }));
     hook.stop();
   });
 

@@ -1,10 +1,12 @@
 import type { ScheduledIntent, SchedulingOwner } from '@memoflow/contracts/schedule';
 import { buildSchedulingKey } from '@memoflow/contracts/schedule';
 
-/** Neutral scheduler-handler key: durable wall-clock occurrence of a Routine. */
+/** Neutral scheduler-handler keys for durable Routine timing lanes. */
 export const ROUTINE_WALLCLOCK_HANDLER_KEY = 'routine.wallclock.fire';
+export const ROUTINE_ELAPSED_HANDLER_KEY = 'routine.elapsed.fire';
 
 export const ROUTINE_WALLCLOCK_PAYLOAD_VERSION = 1;
+export const ROUTINE_ELAPSED_PAYLOAD_VERSION = 1;
 
 export const ROUTINE_SCHEDULING_OWNER_TYPE = 'routine.routine';
 
@@ -13,6 +15,22 @@ export interface RoutineWallClockOccurrencePayload {
   readonly identityId: string;
   readonly occurrenceKey: string;
   readonly scheduledFor: number;
+  readonly sourceRevision: string | number | null;
+}
+
+export interface RoutineElapsedOccurrencePayload {
+  readonly routineId: string;
+  readonly identityId: string;
+  readonly occurrenceKey: string;
+  /**
+   * Optional NotificationRequested idempotency instance. Snooze wake-ups use a
+   * distinct value while still targeting the same business occurrenceKey.
+   */
+  readonly notificationOccurrenceKey?: string;
+  /** Actual Scheduler wake-up time; may be shifted by a temporary override. */
+  readonly scheduledFor: number;
+  /** Canonical business due boundary before any snooze/suppress delay. */
+  readonly dueAt: number;
   readonly sourceRevision: string | number | null;
 }
 
@@ -56,11 +74,66 @@ export function parseRoutineWallClockPayload(payload: unknown): RoutineWallClock
   return { routineId, identityId, occurrenceKey, scheduledFor, sourceRevision };
 }
 
-export function buildRoutineWallClockOwner(
-  routineId: string,
-  identityId: string,
-): SchedulingOwner {
+export function buildRoutineElapsedPayload(input: {
+  readonly routineId: string;
+  readonly identityId: string;
+  readonly occurrenceKey: string;
+  readonly notificationOccurrenceKey?: string;
+  readonly scheduledFor: number;
+  readonly dueAt: number;
+  readonly sourceRevision?: string | number | null;
+}): RoutineElapsedOccurrencePayload {
+  return {
+    routineId: input.routineId,
+    identityId: input.identityId,
+    occurrenceKey: input.occurrenceKey,
+    ...(input.notificationOccurrenceKey
+      ? { notificationOccurrenceKey: input.notificationOccurrenceKey }
+      : {}),
+    scheduledFor: input.scheduledFor,
+    dueAt: input.dueAt,
+    sourceRevision: input.sourceRevision ?? null,
+  };
+}
+
+export function parseRoutineElapsedPayload(payload: unknown): RoutineElapsedOccurrencePayload {
+  if (!isRecord(payload)) {
+    throw new TypeError('Routine elapsed payload must be an object');
+  }
+  const routineId = requireString(payload.routineId, 'routineId');
+  const identityId = requireString(payload.identityId, 'identityId');
+  const occurrenceKey = requireString(payload.occurrenceKey, 'occurrenceKey');
+  const notificationOccurrenceKey =
+    payload.notificationOccurrenceKey == null
+      ? undefined
+      : requireString(payload.notificationOccurrenceKey, 'notificationOccurrenceKey');
+  const scheduledFor = requireFiniteNumber(payload.scheduledFor, 'scheduledFor');
+  const dueAt = requireFiniteNumber(payload.dueAt, 'dueAt');
+  const sourceRevision = payload.sourceRevision ?? null;
+  if (
+    sourceRevision !== null &&
+    typeof sourceRevision !== 'string' &&
+    typeof sourceRevision !== 'number'
+  ) {
+    throw new TypeError('sourceRevision must be a string, a number, or null');
+  }
+  return {
+    routineId,
+    identityId,
+    occurrenceKey,
+    ...(notificationOccurrenceKey ? { notificationOccurrenceKey } : {}),
+    scheduledFor,
+    dueAt,
+    sourceRevision,
+  };
+}
+
+export function buildRoutineWallClockOwner(routineId: string, identityId: string): SchedulingOwner {
   return { identityId, type: ROUTINE_SCHEDULING_OWNER_TYPE, id: routineId };
+}
+
+export function buildRoutineElapsedSchedulingKey(routineId: string, occurrenceKey: string): string {
+  return buildSchedulingKey('routine.elapsed', routineId, occurrenceKey);
 }
 
 export function buildRoutineWallClockSchedulingKey(
@@ -88,6 +161,33 @@ export function buildRoutineWallClockIntent(input: {
     observability: {
       name: input.routineName,
       tags: [ROUTINE_SCHEDULING_OWNER_TYPE],
+    },
+  };
+}
+
+export function buildRoutineElapsedIntent(input: {
+  readonly routineId: string;
+  readonly identityId: string;
+  readonly routineName: string;
+  readonly occurrenceKey: string;
+  readonly notificationOccurrenceKey?: string;
+  readonly scheduledFor: number;
+  readonly dueAt: number;
+  readonly sourceRevision?: string | number | null;
+}): ScheduledIntent<RoutineElapsedOccurrencePayload> {
+  return {
+    schedulingKey: buildRoutineElapsedSchedulingKey(
+      input.routineId,
+      input.notificationOccurrenceKey ?? input.occurrenceKey,
+    ),
+    handlerKey: ROUTINE_ELAPSED_HANDLER_KEY,
+    runAt: input.scheduledFor,
+    payloadVersion: ROUTINE_ELAPSED_PAYLOAD_VERSION,
+    payload: buildRoutineElapsedPayload(input),
+    sourceRevision: input.sourceRevision ?? undefined,
+    observability: {
+      name: input.routineName,
+      tags: [ROUTINE_SCHEDULING_OWNER_TYPE, 'elapsed'],
     },
   };
 }

@@ -81,4 +81,19 @@ export class NotificationInteractionPrismaRepository implements INotificationInt
     });
     return rows.map(toDTO);
   }
+
+  async listByNotifications(
+    identityId: string,
+    notificationIds: readonly string[],
+  ): Promise<NotificationInteractionDTO[]> {
+    if (notificationIds.length === 0) return [];
+    const rows = await this.prisma.notificationInteraction.findMany({
+      where: {
+        identityId,
+        notificationId: { in: Array.from(notificationIds) },
+      },
+      orderBy: { occurredAt: 'asc' },
+    });
+    return rows.map(toDTO);
+  }
 }

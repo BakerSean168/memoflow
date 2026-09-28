@@ -63,6 +63,13 @@ vi.mock('../modules/ai/notification-read.adapter', () => ({
     return { tag: 'desktop-notification-read', inbox };
   }),
 }));
+vi.mock('../modules/ai/selected-entity-context-read.adapter', () => ({
+  DesktopSelectedEntityContextReadAdapter: vi.fn(
+    function DesktopSelectedEntityContextReadAdapterMock(...args: unknown[]) {
+      return { tag: 'desktop-selected-entity-context-read', args };
+    },
+  ),
+}));
 
 import {
   AIEvaluationReportFileAdapter,
@@ -81,6 +88,7 @@ import { DesktopTaskPlanMutationAdapter } from '../modules/ai/task-plan-mutation
 import { DesktopRoutineAICommandAdapter } from '../modules/ai/routine-command.adapter';
 import { DesktopPlannerAIReadAdapter } from '../modules/ai/planner-read.adapter';
 import { DesktopNotificationAIReadAdapter } from '../modules/ai/notification-read.adapter';
+import { DesktopSelectedEntityContextReadAdapter } from '../modules/ai/selected-entity-context-read.adapter';
 import { composeAI } from './compose-ai';
 
 const db = { tag: 'desktop-db' } as never;
@@ -176,6 +184,10 @@ describe('Desktop composeAI Mastra-only ownership', () => {
       userTimeContextPort,
     );
     expect(DesktopNotificationAIReadAdapter).toHaveBeenCalledWith(notificationInbox);
+    expect(DesktopSelectedEntityContextReadAdapter).toHaveBeenCalledWith(
+      goalApplicationPort,
+      taskApplicationPort,
+    );
     expect(KnowledgeCapturePersistenceAdapter).toHaveBeenCalledWith(knowledgeNotePersistence);
 
     expect(MastraAIRuntime).toHaveBeenCalledTimes(1);
@@ -193,6 +205,9 @@ describe('Desktop composeAI Mastra-only ownership', () => {
       routineCommandPort: vi.mocked(DesktopRoutineAICommandAdapter).mock.results[0].value,
       plannerReadPort: vi.mocked(DesktopPlannerAIReadAdapter).mock.results[0].value,
       notificationReadPort: vi.mocked(DesktopNotificationAIReadAdapter).mock.results[0].value,
+      selectedEntityContextReadPort: vi.mocked(DesktopSelectedEntityContextReadAdapter).mock
+        .results[0].value,
+      analyticsReadPort,
       contextAssembler: expect.any(AIContextAssembler),
     });
   });

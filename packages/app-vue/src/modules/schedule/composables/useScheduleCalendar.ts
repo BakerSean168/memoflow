@@ -8,6 +8,9 @@ import type {
 import type { Result } from '@memoflow/contracts/result';
 import { fail } from '@memoflow/contracts/result';
 import type { ScheduleContext } from './useScheduleContext';
+import { useServerStateIdentityScope, useServerStateRuntime } from '../../../platform/server-state';
+import { scheduleCalendarQueryKeys } from '../../../platform/server-state/query-keys';
+import { SCHEDULE_CALENDAR_STALE_TIME_MS } from '../../../platform/server-state/query-policy';
 
 function overlapsPlannerWindow(
   entry: CalendarEntryClientDTO,
@@ -27,25 +30,48 @@ function overlapsPlannerWindow(
 
 export function useScheduleCalendar(ctx: ScheduleContext) {
   const { store, service, handleError } = ctx;
+  const runtime = useServerStateRuntime();
+  const resolveIdentityScope = useServerStateIdentityScope();
+
+  function patchCachedEntries(
+    update: (current: CalendarEntryClientDTO[]) => CalendarEntryClientDTO[],
+  ): void {
+    runtime.queryClient.setQueryData<CalendarEntryClientDTO[]>(
+      scheduleCalendarQueryKeys.entries(resolveIdentityScope()),
+      (current) => update(current ?? []),
+    );
+  }
 
   async function fetchCalendarEntries(
     startTime: number,
     endTime: number,
   ): Promise<CalendarEntryClientDTO[]> {
-    store.setLoading(true);
+    const queryKey = scheduleCalendarQueryKeys.entries(resolveIdentityScope());
+    const cachedEntries = runtime.queryClient.getQueryData<CalendarEntryClientDTO[]>(queryKey);
+    if (cachedEntries) {
+      store.setCalendarEntries(
+        cachedEntries.filter((entry) => overlapsPlannerWindow(entry, startTime, endTime)),
+      );
+    }
+    store.setLoading(cachedEntries === undefined);
     store.setError(null);
     try {
-      // P4-2301A: fetch owner facts without coercing AllDay Ymd values into host-local instants.
-      // P4-2301B will replace this compatibility filter with the canonical Planner read model.
-      const result = await service.getSchedulesByAccount();
-      if (result.ok) {
-        const entries = result.data.filter((entry) =>
-          overlapsPlannerWindow(entry, startTime, endTime),
-        );
-        store.setCalendarEntries(entries);
-        return entries;
-      }
-      handleError(result.error, 'schedule.error.loadCalendarEntriesFailed');
+      // P4-2301A: cache the owner facts before applying the current Planner-window projection.
+      // The cache survives shell Popover unmounts and prevents hover-driven duplicate I/O.
+      const allEntries = await runtime.queryClient.fetchQuery<CalendarEntryClientDTO[]>({
+        queryKey,
+        staleTime: SCHEDULE_CALENDAR_STALE_TIME_MS,
+        queryFn: async () => {
+          const result = await service.getSchedulesByAccount();
+          if (!result.ok) throw result.error;
+          return result.data;
+        },
+      });
+      const entries = allEntries.filter((entry) => overlapsPlannerWindow(entry, startTime, endTime));
+      store.setCalendarEntries(entries);
+      return entries;
+    } catch (error) {
+      handleError(error, 'schedule.error.loadCalendarEntriesFailed');
       return [];
     } finally {
       store.setLoading(false);
@@ -63,6 +89,7 @@ export function useScheduleCalendar(ctx: ScheduleContext) {
       if (result.ok) {
         const createdEntry = 'schedule' in result.data ? result.data.schedule : result.data;
         store.setCalendarEntries([...store.calendarEntries, createdEntry]);
+        patchCachedEntries((current) => [...current, createdEntry]);
         return createdEntry;
       }
       handleError(result.error, 'schedule.error.createCalendarEntryFailed');
@@ -84,8 +111,12 @@ export function useScheduleCalendar(ctx: ScheduleContext) {
         sanitizeForIpc(data) as unknown as UpdateScheduleRequest,
       );
       if (result.ok) {
-        store.setCalendarEntries(
-          store.calendarEntries.map((entry) => (String(entry.id) === id ? result.data : entry)),
+        const nextEntries = store.calendarEntries.map((entry) =>
+          String(entry.id) === id ? result.data : entry,
+        );
+        store.setCalendarEntries(nextEntries);
+        patchCachedEntries((current) =>
+          current.map((entry) => (String(entry.id) === id ? result.data : entry)),
         );
       } else {
         handleError(result.error, 'schedule.error.updateCalendarEntryFailed');
@@ -111,7 +142,9 @@ export function useScheduleCalendar(ctx: ScheduleContext) {
       }
       const result = await service.deleteSchedule(id, version);
       if (result.ok) {
-        store.setCalendarEntries(store.calendarEntries.filter((e) => e.id !== id));
+        const nextEntries = store.calendarEntries.filter((e) => e.id !== id);
+        store.setCalendarEntries(nextEntries);
+        patchCachedEntries((current) => current.filter((entry) => String(entry.id) !== id));
         return true;
       }
       handleError(result.error, 'schedule.error.deleteCalendarEntryFailed');

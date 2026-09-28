@@ -17,7 +17,17 @@
  */
 
 import type { QueryClient, QueryKey } from '@tanstack/vue-query';
-import { governanceQueryKeys, notificationQueryKeys, taskPlanQueryKeys } from './query-keys';
+import {
+  goalHomeQueryKeys,
+  governanceQueryKeys,
+  notificationQueryKeys,
+  plannerOwnerQueryKeys,
+  recentKnowledgeQueryKeys,
+  routineUpcomingQueryKeys,
+  scheduleCalendarQueryKeys,
+  taskOccurrenceQueryKeys,
+  taskPlanQueryKeys,
+} from './query-keys';
 
 /**
  * Typed invalidation intent produced by mutation lifecycles and realtime adapters.
@@ -243,6 +253,12 @@ export function createServerStateInvalidationDispatcher(
       for (const key of [
         notificationQueryKeys.identity,
         taskPlanQueryKeys.identity,
+        taskOccurrenceQueryKeys.identity,
+        scheduleCalendarQueryKeys.identity,
+        plannerOwnerQueryKeys.identity,
+        goalHomeQueryKeys.identity,
+        recentKnowledgeQueryKeys.identity,
+        routineUpcomingQueryKeys.identity,
         governanceQueryKeys.identity,
       ]) {
         queryClient.removeQueries({ queryKey: key(identityScope) });

@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from 'vitest';
-import { asInstant, createTimeContext } from '@memoflow/time';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { asInstant } from '@memoflow/time';
 import type {
   IElectronDatabase,
   IElectronDatabaseQueryResult,
@@ -51,6 +51,7 @@ class RoutineDb implements IElectronDatabase {
         },
       ] as T[];
     }
+    if (sql.includes('FROM routine_preferences')) return [] as T[];
     if (sql.includes('FROM routine_temporary_overrides')) return [] as T[];
     if (sql.includes('FROM routine_occurrences')) {
       return [...this.occurrences.values()]
@@ -77,6 +78,19 @@ class RoutineDb implements IElectronDatabase {
   }
 
   async getOptional<T>(sql: string, parameters: unknown[] = []): Promise<T | null> {
+    if (sql.includes('FROM routine_definitions')) {
+      return {
+        id: 'routine-opaque',
+        identity_id: 'identity-1',
+        name: 'Stand & Move',
+        description: 'Take a short movement break.',
+        enabled: 1,
+        trigger_json: this.triggerJson,
+        version: 1,
+        created_at: this.definitionUpdatedAt,
+        updated_at: this.definitionUpdatedAt,
+      } as T;
+    }
     if (sql.includes('FROM routine_profiles')) {
       return {
         id: 'profile-1',
@@ -92,9 +106,8 @@ class RoutineDb implements IElectronDatabase {
     if (sql.includes('FROM routine_interactions')) {
       if (sql.includes('idempotency_key = ?')) {
         return (
-          ([...this.interactions.values()].find(
-            (row) => row.idempotency_key === parameters[0],
-          ) as T | undefined) ?? null
+          ([...this.interactions.values()].find((row) => row.idempotency_key === parameters[0]) as
+            T | undefined) ?? null
         );
       }
       if (sql.includes('id = ?')) {
@@ -103,8 +116,8 @@ class RoutineDb implements IElectronDatabase {
     }
     if (sql.includes('FROM routine_occurrences')) {
       return (
-        (this.occurrences.get(this.occurrenceKey(parameters[0], parameters[1], parameters[2])) as T | undefined) ??
-        null
+        (this.occurrences.get(this.occurrenceKey(parameters[0], parameters[1], parameters[2])) as
+          T | undefined) ?? null
       );
     }
     return null;
@@ -119,11 +132,36 @@ class RoutineDb implements IElectronDatabase {
   async execute(sql: string, parameters: unknown[] = []): Promise<IElectronDatabaseQueryResult> {
     if (sql.includes('INSERT INTO routine_occurrences')) {
       const [
-        id, identityId, routineId, , occurrenceKey, scheduledFor, sourceRevision, , status,
-        triggerKind, becameDueAt, resolutionState, resolvedAt, resolutionKind, resolutionReason,
-        attempt, ownerToken, claimId, fencingToken, leaseExpiresAt, lastError, nextRetryAt,
-        deadLetterAt, correlationId, causationId, historyJson, nextOccurrenceAt, createdAt,
-        updatedAt, finishedAt,
+        id,
+        identityId,
+        routineId,
+        ,
+        occurrenceKey,
+        scheduledFor,
+        sourceRevision,
+        ,
+        status,
+        triggerKind,
+        becameDueAt,
+        resolutionState,
+        resolvedAt,
+        resolutionKind,
+        resolutionReason,
+        attempt,
+        ownerToken,
+        claimId,
+        fencingToken,
+        leaseExpiresAt,
+        lastError,
+        nextRetryAt,
+        deadLetterAt,
+        correlationId,
+        causationId,
+        historyJson,
+        nextOccurrenceAt,
+        createdAt,
+        updatedAt,
+        finishedAt,
       ] = parameters;
       this.occurrences.set(this.occurrenceKey(identityId, routineId, occurrenceKey), {
         id,
@@ -185,11 +223,21 @@ class RoutineDb implements IElectronDatabase {
       return { rowsAffected: 1 };
     }
     if (sql.includes('UPDATE routine_occurrences')) {
-      const [state, resolvedAt, resolutionKind, resolutionReason, updatedAt, id, identityId, routineId] =
-        parameters;
+      const [
+        state,
+        resolvedAt,
+        resolutionKind,
+        resolutionReason,
+        updatedAt,
+        id,
+        identityId,
+        routineId,
+      ] = parameters;
       const entry = [...this.occurrences.entries()].find(
         ([, row]) =>
-          row.id === id && row.identity_id === identityId && row.routine_id === routineId &&
+          row.id === id &&
+          row.identity_id === identityId &&
+          row.routine_id === routineId &&
           row.resolution_state === 'Open',
       );
       if (!entry) return { rowsAffected: 0 };
@@ -202,7 +250,6 @@ class RoutineDb implements IElectronDatabase {
     }
     return { rowsAffected: 0 };
   }
-
 
   seedOccurrence(input: {
     occurrenceKey: string;
@@ -223,16 +270,17 @@ class RoutineDb implements IElectronDatabase {
       trigger_kind: input.triggerKind,
       became_due_at: new Date(input.becameDueAt).toISOString(),
       resolution_state: input.resolutionState,
-      resolved_at:
-        input.resolvedAt == null ? null : new Date(input.resolvedAt).toISOString(),
-      resolution_kind:
-        input.resolutionState === 'Satisfied' ? 'ExplicitComplete' : null,
+      resolved_at: input.resolvedAt == null ? null : new Date(input.resolvedAt).toISOString(),
+      resolution_kind: input.resolutionState === 'Satisfied' ? 'ExplicitComplete' : null,
       resolution_reason: null,
     });
   }
 
   occurrence(occurrenceKey: string): Record<string, unknown> | null {
-    return this.occurrences.get(this.occurrenceKey('identity-1', 'routine-opaque', occurrenceKey)) ?? null;
+    return (
+      this.occurrences.get(this.occurrenceKey('identity-1', 'routine-opaque', occurrenceKey)) ??
+      null
+    );
   }
 
   async writeTransaction<T>(
@@ -272,10 +320,6 @@ class ControlledIdleSensor implements IdleSensorPort {
 const notificationWriter = {
   enqueueNotificationRequested: vi.fn(),
 } as unknown as NotificationRequestedWriterPort;
-const userTimeContextPort = {
-  getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
-};
-
 const trigger = createActiveUsageTrigger({
   requiredActiveMs: 1_000,
   naturalBreakCredit: { idleDurationMs: 500 },
@@ -295,7 +339,6 @@ function createComposition(
       db,
       identityId: 'identity-1',
       notificationRequestedWriter: notificationWriter,
-      userTimeContextPort,
       idleSensor,
       interventionPolicy: {
         gentleDurationMs: 100,
@@ -308,6 +351,10 @@ function createComposition(
 }
 
 describe('composeRoutine local Routine vertical slice', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('projects durable ActiveUsage state and turns threshold due into InterventionRuntime truth', async () => {
     const { composed } = createComposition();
     await composed.routineCommandPort.setProfileActive({
@@ -326,14 +373,27 @@ describe('composeRoutine local Routine vertical slice', () => {
       generation: 1,
       thresholdSignaled: true,
     });
-    expect(
-      composed.interventionRuntime.getSnapshot('routine:routine-opaque:active-usage:1'),
-    ).toMatchObject({
+    const occurrenceKey = 'routine:routine-opaque:active-usage:1';
+    expect(composed.interventionRuntime.getSnapshot(occurrenceKey)).toMatchObject({
       identityId: 'identity-1',
       routineId: 'routine-opaque',
       state: 'Due',
       policy: { strictEnabled: false },
     });
+    expect(notificationWriter.enqueueNotificationRequested).toHaveBeenCalledTimes(1);
+    expect(notificationWriter.enqueueNotificationRequested).toHaveBeenCalledWith(
+      expect.objectContaining({
+        envelope: expect.objectContaining({
+          workflowKey: 'routine.intervention',
+          occurrenceKey,
+          content: expect.objectContaining({
+            title: '例行提醒：Stand & Move',
+            content: 'Take a short movement break.',
+          }),
+        }),
+      }),
+      expect.anything(),
+    );
   });
 
   it('refreshes local ActiveUsage gates after profile deactivation', async () => {
@@ -475,98 +535,84 @@ describe('composeRoutine local Routine vertical slice', () => {
     });
   });
 
-  it('projects Elapsed definition revision into one durable open occurrence before presentation', async () => {
+  it('keeps profile-activation Elapsed on the Desktop local runtime', async () => {
     const t0 = Date.parse('2026-09-17T04:00:00.000Z');
-    const elapsedTrigger = createElapsedTrigger({
-      durationMs: 1_000,
-      anchor: 'routine-activation',
-    });
-    const { composed, db } = createComposition(
-      new ControlledIdleSensor(),
-      elapsedTrigger,
-      new Date(t0).toISOString(),
-    );
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(t0);
+    try {
+      const elapsedTrigger = createElapsedTrigger({
+        durationMs: 1_000,
+        anchor: 'profile-activation',
+      });
+      const { composed, db } = createComposition(
+        new ControlledIdleSensor(),
+        elapsedTrigger,
+        new Date(t0).toISOString(),
+      );
 
-    await composed.routineCommandPort.setProfileActive({
-      identityId: 'identity-1',
-      profileId: 'profile-1',
-      active: true,
-    });
-    composed.elapsedRuntime.advance(asInstant(t0 + 999));
-    expect(composed.interventionRuntime.listActive()).toEqual([]);
+      await composed.routineCommandPort.setProfileActive({
+        identityId: 'identity-1',
+        profileId: 'profile-1',
+        active: true,
+        at: t0,
+      });
+      composed.elapsedRuntime.advance(asInstant(t0 + 999));
+      expect(composed.interventionRuntime.listActive()).toEqual([]);
 
-    composed.elapsedRuntime.advance(asInstant(t0 + 1_000));
-    await composed.flushRoutineOccurrencePersistence();
+      composed.elapsedRuntime.advance(asInstant(t0 + 1_000));
+      await composed.flushRoutineOccurrencePersistence();
 
-    const occurrenceKey = 'routine:routine-opaque:elapsed:definition-1:1';
-    expect(composed.elapsedRuntime.getSnapshot('identity-1', 'routine-opaque')).toMatchObject({
-      anchorAt: t0,
-      anchorRevision: 'definition-1',
-      generation: 1,
-      thresholdSignaled: true,
-    });
-    expect(composed.interventionRuntime.getSnapshot(occurrenceKey)).toMatchObject({
-      identityId: 'identity-1',
-      routineId: 'routine-opaque',
-      state: 'Due',
-      dueAt: t0 + 1_000,
-    });
-    expect(db.occurrence(occurrenceKey)).toMatchObject({
-      trigger_kind: 'Elapsed',
-      scheduled_for: null,
-      source_revision: 'definition-1',
-      resolution_state: 'Open',
-    });
+      const occurrenceKey = `routine:routine-opaque:elapsed:profile-${t0}:1`;
+      expect(composed.elapsedRuntime.getSnapshot('identity-1', 'routine-opaque')).toMatchObject({
+        anchorAt: t0,
+        anchorRevision: `profile-${t0}`,
+        generation: 1,
+        thresholdSignaled: true,
+      });
+      expect(composed.interventionRuntime.getSnapshot(occurrenceKey)).toMatchObject({
+        identityId: 'identity-1',
+        routineId: 'routine-opaque',
+        state: 'Due',
+        dueAt: t0 + 1_000,
+      });
+      expect(db.occurrence(occurrenceKey)).toMatchObject({
+        trigger_kind: 'Elapsed',
+        scheduled_for: null,
+        source_revision: `profile-${t0}`,
+        resolution_state: 'Open',
+      });
+      expect(notificationWriter.enqueueNotificationRequested).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
-  it('restarts Elapsed from the satisfied occurrence without writing runtime anchor into the definition', async () => {
-    const t0 = Date.parse('2026-09-17T05:00:00.000Z');
-    const elapsedTrigger = createElapsedTrigger({ durationMs: 1_000, anchor: 'last-satisfied' });
-    const { composed, db } = createComposition(
-      new ControlledIdleSensor(),
-      elapsedTrigger,
-      new Date(t0).toISOString(),
-    );
-    await composed.routineCommandPort.setProfileActive({
-      identityId: 'identity-1',
-      profileId: 'profile-1',
-      active: true,
-    });
-    composed.elapsedRuntime.advance(asInstant(t0 + 1_000));
-    await composed.flushRoutineOccurrencePersistence();
+  it.each(['routine-activation', 'last-satisfied'] as const)(
+    'does not arm scheduler-owned Elapsed(%s) in the Desktop local runtime',
+    async (anchor) => {
+      const t0 = Date.parse('2026-09-17T05:00:00.000Z');
+      const elapsedTrigger = createElapsedTrigger({ durationMs: 1_000, anchor });
+      const { composed, db } = createComposition(
+        new ControlledIdleSensor(),
+        elapsedTrigger,
+        new Date(t0).toISOString(),
+      );
 
-    const firstKey = 'routine:routine-opaque:elapsed:definition-1:1';
-    const satisfiedAt = t0 + 1_100;
-    await composed.routineCommandPort.respondToOccurrence({
-      commandId: `${firstKey}:v1:complete`,
-      identityId: 'identity-1',
-      routineId: 'routine-opaque',
-      occurrenceKey: firstKey,
-      action: 'complete',
-      at: satisfiedAt,
-    });
-    composed.elapsedRuntime.markSatisfied({
-      identityId: 'identity-1',
-      routineId: 'routine-opaque',
-      at: satisfiedAt,
-    });
+      await composed.routineCommandPort.setProfileActive({
+        identityId: 'identity-1',
+        profileId: 'profile-1',
+        active: true,
+        at: t0,
+      });
+      await composed.refreshLocalRoutineRegistrations();
 
-    await composed.refreshLocalRoutineRegistrations();
-    expect(composed.elapsedRuntime.getSnapshot('identity-1', 'routine-opaque')).toMatchObject({
-      anchorAt: satisfiedAt,
-      anchorRevision: `satisfied-${satisfiedAt}`,
-      generation: 1,
-      thresholdSignaled: false,
-    });
+      expect(composed.elapsedRuntime.getSnapshot('identity-1', 'routine-opaque')).toBeNull();
 
-    composed.elapsedRuntime.advance(asInstant(satisfiedAt + 1_000));
-    await composed.flushRoutineOccurrencePersistence();
-    const nextKey = `routine:routine-opaque:elapsed:satisfied-${satisfiedAt}:1`;
-    expect(db.occurrence(nextKey)).toMatchObject({
-      trigger_kind: 'Elapsed',
-      scheduled_for: null,
-      resolution_state: 'Open',
-    });
-  });
+      composed.elapsedRuntime.advance(asInstant(t0 + 60_000));
+      await composed.flushRoutineOccurrencePersistence();
 
+      expect(db.occurrence(`routine:routine-opaque:elapsed:activation-${t0}:1`)).toBeNull();
+      expect(notificationWriter.enqueueNotificationRequested).not.toHaveBeenCalled();
+    },
+  );
 });

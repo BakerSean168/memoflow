@@ -11,9 +11,14 @@ import type {
   ListKnowledgeAttachmentProjectionsReq,
   KnowledgeNoteProjectionClientDTO,
   KnowledgeNoteProjectionListResponse,
+  KnowledgeNoteTreeResponse,
   KnowledgeNoteLinkGraphResponse,
   GetKnowledgeNoteLinkGraphReq,
   ListKnowledgeNoteProjectionsReq,
+  ListReferenceableKnowledgeDocumentsReq,
+  ReferenceableKnowledgeDocumentListResponse,
+  ListKnowledgeNoteTreeReq,
+  ResolveKnowledgeNoteReferenceReq,
   ListKnowledgeWriteRequestsReq,
   ListKnowledgeWriteRequestsRes,
   GitHubInstallationRepositoryDTO,
@@ -276,8 +281,36 @@ export class KnowledgeRepositoryProjectionService {
     identityId: string,
     request: ListKnowledgeNoteProjectionsReq,
   ): Promise<Result<KnowledgeNoteProjectionListResponse>> {
-    const notes = await this.options.projectionRepository.listByIdentity(identityId, request);
-    return ok({ notes });
+    return ok(await this.options.projectionRepository.listByIdentity(identityId, request));
+  }
+
+  async listReferenceableDocuments(
+    identityId: string,
+    request: ListReferenceableKnowledgeDocumentsReq,
+  ): Promise<Result<ReferenceableKnowledgeDocumentListResponse>> {
+    return ok(
+      await this.options.projectionRepository.listReferenceableByIdentity(identityId, request),
+    );
+  }
+
+  async listNoteTree(
+    identityId: string,
+    request: ListKnowledgeNoteTreeReq,
+  ): Promise<Result<KnowledgeNoteTreeResponse>> {
+    return ok(await this.options.projectionRepository.listTreeByIdentity(identityId, request));
+  }
+
+  async resolveNoteReference(
+    identityId: string,
+    request: ResolveKnowledgeNoteReferenceReq,
+  ): Promise<Result<KnowledgeNoteProjectionClientDTO>> {
+    const note = await this.options.projectionRepository.resolveReferenceForIdentity(
+      identityId,
+      request,
+    );
+    return note
+      ? ok(note)
+      : fail({ code: 'NOT_FOUND', message: 'Knowledge note projection was not found' });
   }
 
   async getNote(

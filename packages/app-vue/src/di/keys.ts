@@ -27,6 +27,7 @@ import type {
   IRepositoryService,
   IRoutineService,
   INotificationService,
+  IGoalKnowledgeService,
   ISettingService,
   IDataPortabilityService,
   IAIClient,
@@ -50,11 +51,11 @@ export const REPOSITORY_SERVICE_KEY: InjectionKey<IRepositoryService> = Symbol('
 export const ROUTINE_SERVICE_KEY: InjectionKey<IRoutineService> = Symbol('RoutineService');
 export const NOTIFICATION_SERVICE_KEY: InjectionKey<INotificationService> =
   Symbol('NotificationService');
+export const GOAL_KNOWLEDGE_SERVICE_KEY: InjectionKey<IGoalKnowledgeService> =
+  Symbol('GoalKnowledgeService');
 export interface DesktopNotificationDevicePreferencePort {
   get(): Promise<Result<DesktopNotificationPreference>>;
-  update(
-    patch: DesktopNotificationPreferencePatch,
-  ): Promise<Result<DesktopNotificationPreference>>;
+  update(patch: DesktopNotificationPreferencePatch): Promise<Result<DesktopNotificationPreference>>;
   reset(): Promise<Result<DesktopNotificationPreference>>;
 }
 export const DESKTOP_NOTIFICATION_DEVICE_PREFERENCE_KEY: InjectionKey<DesktopNotificationDevicePreferencePort> =
