@@ -792,7 +792,7 @@ import {
 } from '../../../shared/components';
 import LabelCommandPanel from '../../../shared/components/LabelCommandPanel.vue';
 import { useLabelCatalog } from '../../../shared/composables/useLabelCatalog';
-import { formatProductDateTime, getProductTime } from '../../../shared/utils/product-time';
+import { getProductTime } from '../../../shared/utils/product-time';
 import TaskOccurrenceRow from '../components/TaskOccurrenceRow.vue';
 import TaskReminderMenuItems from '../components/TaskReminderMenuItems.vue';
 import ChecklistSection from '../components/TaskPlanForm/sections/ChecklistSection.vue';
@@ -806,6 +806,7 @@ import { useTaskOccurrences } from '../composables/useTaskOccurrences';
 import { useTaskPlanWorkspaceQuery } from '../composables/useTaskPlanWorkspaceQuery';
 import { useTaskPlanMutations } from '../composables/useTaskPlanMutations';
 import {
+  formatTaskReminderAbsoluteTime,
   getTaskPlanScheduleDate,
   getTaskPlanScheduleTimeDisplay,
   mapTaskPlanDtoToViewModel,
@@ -1028,7 +1029,7 @@ function reminderTriggerKey(trigger: TaskReminderConfigDTO['triggers'][number]):
 
 function reminderTriggerLabel(trigger: TaskReminderConfigDTO['triggers'][number]): string {
   if (trigger.type === TaskReminderType.Absolute && trigger.absoluteTime != null) {
-    return formatProductDateTime(trigger.absoluteTime);
+    return formatTaskReminderAbsoluteTime(trigger.absoluteTime);
   }
   if (
     trigger.type === TaskReminderType.Relative &&

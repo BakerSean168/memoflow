@@ -524,6 +524,9 @@
             </div>
           </div>
           <Progress v-if="keyResults.length" class="h-1" :model-value="goal.overallProgress" />
+          <p v-else class="text-xs text-muted-foreground" data-testid="goal-progress-needs-kr">
+            {{ t('goal.detail.progressNeedsKr') }}
+          </p>
 
           <div v-if="keyResults.length" class="divide-y border-y border-border/70">
             <article v-for="kr in keyResults" :key="kr.id" class="p-4">

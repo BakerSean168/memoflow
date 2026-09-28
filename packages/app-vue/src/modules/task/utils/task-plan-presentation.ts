@@ -3,7 +3,7 @@ import type { TaskPlanClientDTO, TaskPlanSchedule } from '@memoflow/contracts/ta
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { TaskPlanScheduleSchema } from '@memoflow/contracts/task';
 import type { TaskPlanViewModel } from '../components/types';
-import { formatProductDate } from '../../../shared/utils/product-time';
+import { formatProductDate, formatProductDateTime } from '../../../shared/utils/product-time';
 
 type Translate = ComposerTranslation<Record<string, never>, string>;
 
@@ -65,6 +65,11 @@ export function getTaskPlanScheduleTimeDisplay(
 
 export function getTaskPlanScheduleDate(schedule: TaskPlanSchedule): string {
   return scheduleDate(schedule);
+}
+
+/** Keep absolute reminder timestamp presentation behind the Task presentation boundary. */
+export function formatTaskReminderAbsoluteTime(value: number): string {
+  return formatProductDateTime(value);
 }
 
 export function getTaskRecurrenceText(t: Translate, dto: TaskPlanClientDTO): string {

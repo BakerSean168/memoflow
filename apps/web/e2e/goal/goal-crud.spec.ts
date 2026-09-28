@@ -233,6 +233,32 @@ test.describe('Goal vNext product surface', () => {
     await expect(page.getByTestId('goal-detail-summary')).toHaveValue(goalSummary);
   });
 
+  test('[P0] edits Goal identity directly on the detail workspace without a global edit mode', async ({
+    page,
+  }) => {
+    const goalName = `E2E Inline Goal ${Date.now()}`;
+    const updatedName = `E2E Inline Updated ${Date.now()}`;
+    const createdRow = await createGoal(page, {
+      name: goalName,
+      summary: 'Inline editing contract.',
+    });
+
+    await openGoalDetail(createdRow);
+    await expect(page.getByTestId('goal-detail-view')).toBeVisible({
+      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+    });
+    await expect(
+      page.getByTestId('goal-detail-toolbar').getByRole('button', { name: /^(Edit|编辑)$/ }),
+    ).toHaveCount(0);
+
+    const title = page.getByTestId('goal-detail-title');
+    await title.fill(updatedName);
+    await title.press('Enter');
+
+    await page.reload();
+    await expect(page.getByTestId('goal-detail-title')).toHaveValue(updatedName);
+  });
+
   test('[P0] exposes only vNext system views and preserves Label filter state while resizing', async ({
     page,
   }) => {
