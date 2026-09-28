@@ -7,6 +7,11 @@ import type {
   GitHubInstallationRepositoryDTO,
   KnowledgeRemoteBindingClientDTO,
   KnowledgeRemoteBindingServerDTO,
+  KnowledgeNoteProjectionClientDTO,
+  KnowledgeNoteProjectionListResponse,
+  KnowledgeNoteTreeResponse,
+  ListReferenceableKnowledgeDocumentsReq,
+  ReferenceableKnowledgeDocumentListResponse,
 } from '@memoflow/contracts/repository';
 import { KnowledgeDocumentIdSchema } from '@memoflow/contracts/repository';
 import type { IdentityId } from '@memoflow/contracts/primitives';
@@ -195,8 +200,40 @@ class LiveProjectionRepository implements IKnowledgeNoteProjectionRepository {
     for (const relativePath of deletedPaths) this.notes.delete(relativePath);
   }
 
-  async listByIdentity(): Promise<never[]> {
-    return [];
+  async listByIdentity(
+    _identityId: string,
+    _options: {
+      connectionId?: string;
+      query?: string;
+      cursor?: string;
+      includeHidden?: boolean;
+      sort?: 'path' | 'recent';
+      limit: number;
+    },
+  ): Promise<KnowledgeNoteProjectionListResponse> {
+    return { notes: [], total: 0, nextCursor: null };
+  }
+
+  async listReferenceableByIdentity(
+    _identityId: string,
+    _options: ListReferenceableKnowledgeDocumentsReq,
+  ): Promise<ReferenceableKnowledgeDocumentListResponse> {
+    return { documents: [], total: 0, nextCursor: null };
+  }
+
+  async listTreeByIdentity(
+    _identityId: string,
+    options: { connectionId?: string; parent: string; includeHidden: boolean },
+  ): Promise<KnowledgeNoteTreeResponse> {
+    return {
+      parent: options.parent,
+      nodes: [],
+      metadata: { total: 0, visibleTotal: 0, hiddenNoteCount: 0, hiddenDirectories: [] },
+    };
+  }
+
+  async resolveReferenceForIdentity(): Promise<KnowledgeNoteProjectionClientDTO | null> {
+    return null;
   }
 
   async findByIdForIdentity(): Promise<null> {

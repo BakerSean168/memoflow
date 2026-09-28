@@ -141,10 +141,11 @@
       "inputs": [
         "{workspaceRoot}/tools/agent-skills/validate-local-deploy/scripts/image-freshness.spec.mjs",
         "{workspaceRoot}/tools/docker/local-compose.env-shadow.spec.mjs",
-        "{workspaceRoot}/tools/runtime/load-profiles.spec.mjs"
+        "{workspaceRoot}/tools/runtime/load-profiles.spec.mjs",
+        "{workspaceRoot}/tools/runtime/host-dev-env.spec.mjs"
       ],
       "options": {
-        "command": "node --test tools/agent-skills/validate-local-deploy/scripts/image-freshness.spec.mjs tools/docker/local-compose.env-shadow.spec.mjs tools/runtime/load-profiles.spec.mjs"
+        "command": "node --test tools/agent-skills/validate-local-deploy/scripts/image-freshness.spec.mjs tools/docker/local-compose.env-shadow.spec.mjs tools/runtime/load-profiles.spec.mjs tools/runtime/host-dev-env.spec.mjs"
       }
     },
     "local-registry": {

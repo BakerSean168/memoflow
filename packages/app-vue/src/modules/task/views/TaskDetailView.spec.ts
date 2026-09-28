@@ -26,7 +26,7 @@ describe('TaskDetailView occurrence correction and plan settings', () => {
     expect(source).toContain('task-detail-importance-chip');
     expect(source).toContain('<LabelCommandPanel');
     expect(source).toContain('reminderTriggerLabel');
-    expect(source).toContain('formatProductDateTime');
+    expect(source).toContain('formatTaskReminderAbsoluteTime');
     expect(source).toContain('hasMorePropertiesMenuItems');
     expect(source).toContain('<DropdownMenuSub');
     expect(source).toContain('<DropdownMenuCheckboxItem');

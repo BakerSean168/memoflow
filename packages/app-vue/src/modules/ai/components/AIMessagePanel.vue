@@ -129,7 +129,7 @@
               </button>
             </div>
 
-            <div class="mx-auto mt-4 grid max-w-md gap-1 sm:grid-cols-2">
+            <div class="mx-auto mt-4 grid max-w-md gap-1 @sm/ai:grid-cols-2">
               <button
                 type="button"
                 class="group flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm text-muted-foreground transition-colors hover:bg-muted/55 hover:text-foreground"
@@ -162,7 +162,7 @@
           <!-- Compact shortcut rows: suggestions, not dashboard cards. -->
           <div
             v-else-if="toolMode === 'chat'"
-            class="mx-auto mt-7 grid max-w-lg gap-1 sm:grid-cols-2"
+            class="mx-auto mt-7 grid max-w-lg gap-1 @sm/ai:grid-cols-2"
           >
             <button
               v-for="entry in shortcutEntries"

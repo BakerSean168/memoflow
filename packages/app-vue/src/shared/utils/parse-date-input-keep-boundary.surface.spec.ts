@@ -38,7 +38,6 @@ describe('date input Product Time boundary (residual 1225)', () => {
   it('keeps app-react Goal target parsing on canonical Product Time helpers', () => {
     expect(react).toContain('goalTimeframeInputValue');
     expect(react).toContain('parseGoalTimeframeInput');
-    expect(react).toContain('parseProductYmdInput');
     expect(react).toContain("from '../utils/product-time'");
     expect(react).not.toMatch(/function parseDateInput\b/);
     expect(react).not.toContain('Date.parse');

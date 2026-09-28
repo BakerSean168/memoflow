@@ -152,6 +152,7 @@
                   class="h-8 w-8 shrink-0 rounded-lg p-0 text-muted-foreground hover:bg-muted/70 hover:text-foreground"
                   data-testid="ai-chat-add-context"
                   :title="t('aiAssistant.chatPage.attachments.addContext')"
+                  :aria-label="t('aiAssistant.chatPage.attachments.addContext')"
                 >
                   <Plus class="h-4 w-4" />
                 </Button>
@@ -299,6 +300,7 @@
             class="h-8 w-8 shrink-0 rounded-full p-0"
             data-testid="ai-chat-stop-generating"
             :title="t('aiAssistant.dialogs.chat.stopGenerating')"
+            :aria-label="t('aiAssistant.dialogs.chat.stopGenerating')"
             @click="$emit('stop')"
           >
             <Square class="h-3.5 w-3.5" />
@@ -310,6 +312,7 @@
             :disabled="!canSubmit"
             data-testid="ai-chat-send-message"
             :title="t('aiAssistant.dialogs.chat.sendMessage')"
+            :aria-label="t('aiAssistant.dialogs.chat.sendMessage')"
             @click="$emit('send')"
           >
             <ArrowUp class="h-4 w-4" />

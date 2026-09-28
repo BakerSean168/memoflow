@@ -11,9 +11,9 @@ const notificationSource = readFileSync(
 describe('Notification single-page architecture', () => {
   it('owns one inbox toolbar without panel-tier structure branches', () => {
     expect(notificationSource).toContain('data-testid="notification-page-toolbar"');
-    // Phase 4：页头由共享 ModuleHeader 承载（无手写 <header> 变体）。
-    expect(notificationSource).toContain('<ModuleHeader');
-    expect(notificationSource.match(/<header/g)).toBeNull();
+    // Notification owns one compact Linear-style toolbar without panel-tier branching.
+    expect(notificationSource).toContain('<header');
+    expect(notificationSource.match(/<header/g)?.length).toBe(1);
     expect(notificationSource).not.toContain('FilterBar');
     expect(notificationSource).not.toContain('usePanelWidth');
     expect(notificationSource).not.toContain('isNarrow');

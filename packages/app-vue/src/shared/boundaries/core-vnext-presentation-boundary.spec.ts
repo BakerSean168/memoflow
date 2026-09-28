@@ -30,8 +30,9 @@ describe('Core vNext presentation boundaries', () => {
 
   it('keeps a stable canonical create-task action anchor', () => {
     const source = read('modules/task/views/TaskManagementView.vue');
-    expect(source).toContain('data-testid="create-task-plan-button"');
-    expect(source).toContain('data-primary-action="create-task"');
+    const toolbar = read('modules/task/components/TaskPageToolbar.vue');
+    expect(toolbar).toContain('data-testid="create-task-plan-button"');
+    expect(toolbar).toContain('data-primary-action="create-task"');
     expect(source).not.toContain('TaskDAG');
     expect(source).not.toContain('DependencyManager');
   });
