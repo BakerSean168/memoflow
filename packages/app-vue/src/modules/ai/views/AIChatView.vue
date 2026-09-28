@@ -296,7 +296,7 @@ import {
 } from '../../../di/keys';
 import type { ComposerDensity } from '../../../layouts/shell/panel-geometry';
 import { useAIChatView } from '../composables/useAIChatView';
-import { inferWorkflowMode } from '../composables/workflow-intent';
+import { inferWorkflowMode } from '../composables/workflowIntent';
 import type { ConversationSummary, WorkflowMode } from '../composables/types';
 
 const { t } = useI18n();

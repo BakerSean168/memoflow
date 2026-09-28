@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { inferWorkflowMode } from './workflow-intent';
+import { inferWorkflowMode } from './workflowIntent';
 
 describe('inferWorkflowMode', () => {
   it.each([

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { surfaceDescriptorToContextEntity } from './surface-context';
+import { surfaceDescriptorToContextEntity } from './surfaceContext';
 
 describe('surfaceDescriptorToContextEntity', () => {
   it('maps visible goal/task detail tabs to implicit entity context', () => {

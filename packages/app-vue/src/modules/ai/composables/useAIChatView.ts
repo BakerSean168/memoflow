@@ -23,7 +23,7 @@ import { getToolLocaleKey, normalizeWorkflowMode } from './types';
 import {
   surfaceDescriptorToContextEntity,
   type AIActiveSurfaceDescriptor,
-} from './surface-context';
+} from './surfaceContext';
 import {
   adjustComposerHeight as createAdjustComposerHeight,
   bindChatViewLifecycle,
