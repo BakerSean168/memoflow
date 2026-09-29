@@ -1002,7 +1002,7 @@ function panelCacheKey(
   --workspace-pane-radius: var(--radius-pane);
   gap: var(--workspace-gap);
   padding: var(--workspace-inset);
-  background: hsl(var(--background));
+  background: hsl(var(--workspace-canvas));
 }
 
 .workspace-main--split {
@@ -1012,21 +1012,24 @@ function panelCacheKey(
 .workspace-pane {
   border-radius: var(--workspace-pane-radius);
   box-shadow:
-    0 0 0 1px hsl(var(--border-subtle) / 0.9),
-    0 1px 2px hsl(0 0% 0% / 0.18),
-    inset 0 1px 0 hsl(var(--foreground) / 0.025);
+    0 0 0 1px hsl(var(--border-strong) / 0.62),
+    0 2px 8px hsl(0 0% 0% / 0.18),
+    inset 0 1px 0 hsl(var(--foreground) / 0.035);
 }
 
 .workspace-pane--navigation {
-  background: hsl(var(--sidebar));
+  --background: var(--workspace-navigation);
+  background: hsl(var(--workspace-navigation));
 }
 
 .workspace-pane--primary {
-  background: hsl(var(--surface));
+  --background: var(--workspace-primary);
+  background: hsl(var(--workspace-primary));
 }
 
 .workspace-pane--business {
-  background: hsl(var(--surface-raised));
+  --background: var(--workspace-business);
+  background: hsl(var(--workspace-business));
 }
 
 .workspace-resizer {
@@ -1041,16 +1044,32 @@ function panelCacheKey(
   outline: none;
 }
 
+.workspace-resizer::before {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 50%;
+  width: 1px;
+  border-radius: 999px;
+  background: hsl(var(--border-strong) / 0.58);
+  content: '';
+  opacity: 0.65;
+  transform: translateX(-50%);
+  transition:
+    opacity 120ms ease-out,
+    background-color 120ms ease-out;
+}
+
 .workspace-resizer::after {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 2px;
-  height: 44px;
+  width: 3px;
+  height: 52px;
   border-radius: 999px;
-  background: hsl(var(--foreground-subtle) / 0.72);
+  background: hsl(var(--foreground-subtle) / 0.78);
   content: '';
-  opacity: 0.38;
+  opacity: 0.7;
   transform: translate(-50%, -50%);
   transition:
     height 120ms ease-out,
@@ -1060,13 +1079,19 @@ function panelCacheKey(
 
 .workspace-resizer:hover,
 .workspace-resizer:focus-visible {
-  background: hsl(var(--primary) / 0.055);
+  background: hsl(var(--primary) / 0.08);
+}
+
+.workspace-resizer:hover::before,
+.workspace-resizer:focus-visible::before {
+  background: hsl(var(--primary) / 0.56);
+  opacity: 0.9;
 }
 
 .workspace-resizer:hover::after,
 .workspace-resizer:focus-visible::after {
-  height: 56px;
-  background: hsl(var(--primary) / 0.82);
+  height: 68px;
+  background: hsl(var(--primary) / 0.95);
   opacity: 1;
 }
 

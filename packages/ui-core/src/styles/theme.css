@@ -147,6 +147,12 @@
     --surface: 0 0% 99%;
     --surface-raised: 0 0% 100%;
     --surface-overlay: 0 0% 100%;
+
+    /* Workspace shell planes: canvas -> primary -> navigation/business. */
+    --workspace-canvas: 240 6% 96%;
+    --workspace-navigation: 0 0% 100%;
+    --workspace-primary: 0 0% 99%;
+    --workspace-business: 0 0% 98%;
     --hover: 240 4.8% 95.9%;
     --selected: 240 4.8% 93%;
     --border-subtle: 240 5.9% 93%;
@@ -220,6 +226,12 @@
     --surface: 0 0% 8%;
     --surface-raised: 0 0% 10%;
     --surface-overlay: 0 0% 13%;
+
+    /* Inset workspace contrast must survive large dark surfaces. */
+    --workspace-canvas: 0 0% 3.5%;
+    --workspace-navigation: 0 0% 7.5%;
+    --workspace-primary: 0 0% 6.25%;
+    --workspace-business: 0 0% 8.5%;
     --hover: 0 0% 14%;
     --selected: 0 0% 16%;
     --border-subtle: 0 0% 13%;
