@@ -91,16 +91,16 @@ const utilityCapsules = computed(() =>
 
 <template>
   <header
-    class="window-header flex h-12 shrink-0 items-center justify-between gap-2 border-b border-border bg-background px-3 text-xs"
+    class="window-header flex h-12 shrink-0 items-center justify-between gap-1.5 border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.96)] px-2.5 text-xs shadow-[0_1px_0_hsl(var(--border)/0.06)] backdrop-blur-sm"
     :class="[isDesktop ? 'window-header--drag' : '', isMac ? 'pl-20' : '']"
     data-testid="window-header"
     :data-header-mode="props.mode ?? 'workspace'"
   >
     <!-- 左：所有场景共享侧栏 + history 控件；Settings 只替换中间内容。 -->
-    <div class="flex shrink-0 items-center gap-2">
+    <div class="flex shrink-0 items-center gap-1.5">
       <button
         type="button"
-        class="rounded p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+        class="flex h-8 w-8 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
         :title="sidebarCollapsed ? t('common.expand') : t('common.collapse')"
         :aria-label="sidebarCollapsed ? t('common.expand') : t('common.collapse')"
         data-testid="shell-sidebar-toggle"
@@ -112,7 +112,7 @@ const utilityCapsules = computed(() =>
       <div class="flex items-center gap-1">
         <button
           type="button"
-          class="rounded p-1 text-muted-foreground/60 transition-colors hover:bg-accent hover:text-foreground"
+          class="flex h-7 w-7 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
           :title="t('shell.back')"
           :aria-label="t('shell.back')"
           @click="emit('go-back')"
@@ -121,7 +121,7 @@ const utilityCapsules = computed(() =>
         </button>
         <button
           type="button"
-          class="rounded p-1 text-muted-foreground/60 transition-colors hover:bg-accent hover:text-foreground"
+          class="flex h-7 w-7 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
           :title="t('shell.forward')"
           :aria-label="t('shell.forward')"
           @click="emit('go-forward')"
@@ -138,7 +138,7 @@ const utilityCapsules = computed(() =>
     >
       <nav
         v-if="primaryCapsules.length"
-        class="no-drag flex min-w-0 items-center gap-1 overflow-x-auto py-1"
+        class="no-drag flex min-w-0 items-center gap-1 overflow-hidden py-1"
         :aria-label="t('shell.moduleNav')"
         data-testid="shell-primary-capsules"
       >
@@ -169,10 +169,10 @@ const utilityCapsules = computed(() =>
     </div>
 
     <!-- 右：日程/通知入口、面板与桌面窗控。 -->
-    <div class="flex shrink-0 items-center gap-3">
+    <div class="flex shrink-0 items-center gap-2">
       <nav
         v-if="props.mode !== 'settings' && utilityCapsules.length"
-        class="no-drag flex max-w-[35vw] items-center gap-1 overflow-x-auto"
+        class="no-drag flex max-w-[35vw] items-center gap-1 overflow-hidden"
         :aria-label="t('shell.moduleNav')"
         data-testid="shell-utility-capsules"
       >
@@ -194,7 +194,7 @@ const utilityCapsules = computed(() =>
       <button
         v-if="props.mode !== 'settings'"
         type="button"
-        class="relative rounded p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+        class="relative flex h-8 w-8 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
         data-testid="shell-right-panel-toggle"
         :title="rightPanelOpen ? t('shell.hideSidePanel') : t('shell.showSidePanel')"
         :aria-label="rightPanelOpen ? t('shell.hideSidePanel') : t('shell.showSidePanel')"
