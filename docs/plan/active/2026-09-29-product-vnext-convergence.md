@@ -1320,18 +1320,22 @@ The broad module audits are now discovery-complete. Do not reopen them as generi
 
 # 19. Immediate next actions
 
+Execution-level ticket breakdown: [Product vNext Execution Master Plan](./2026-09-29-product-vnext-execution-master-plan.md).
+
 1. Keep `product/vnext-convergence` on top of the current `main` baseline.
 2. Preserve the updated Goal and Task product North Stars frozen on 2026-09-29.
 3. Treat the Task second-pass audit, Remaining Modules Full Surface / UI Audit, ADR-112 and the Native Surface product doc as discovery-complete evidence.
-4. Implement Task Quick Surface + occurrence action coordinator before further host-specific Task UI work.
-5. Migrate Schedule day/event inspect toward Dialog + owner Quick Surface composition.
-6. Define Owner Native Edit Session / Surface Orchestrator and prove it with Goal before migrating Task/Knowledge AI workflows.
-7. Do not invest in Governance UI modernization while ADR-113 retirement is unresolved; inventory/decouple Engineering Governance first.
-8. Promote shared UI primitives only after two or more real surfaces demonstrate stable identical grammar.
-9. Make deterministic visual regression part of closure, not an informal screenshot exercise.
+4. Start implementation with the Task lifecycle correctness batch (`TASK-3002A/B/C/D`), while small independent Goal tickets (`GOAL-1101/1104/1401`) may run in parallel.
+5. After lifecycle truth is stable, implement Task Home/Quick Surface/action coordinator and the Goal Record foundation required by Task→KR measurement.
+6. Migrate Schedule day/event inspect toward Dialog + owner Quick Surface composition only after the Task Quick/action contract is available.
+7. Define Owner Native Edit Session / Surface Orchestrator and prove it with Goal before migrating Task/Knowledge AI workflows.
+8. Do not invest in Governance UI modernization while ADR-113 retirement is unresolved; inventory/decouple Engineering Governance first.
+9. Promote shared UI primitives only after two or more real surfaces demonstrate stable identical grammar.
+10. Make deterministic visual regression part of closure, not an informal screenshot exercise.
 
 # 20. Discovery references
 
+- [Product vNext Execution Master Plan](./2026-09-29-product-vnext-execution-master-plan.md)
 - [Goal vNext Workspace & Create UI](../../product/goal-vnext-workspace-and-create-ui.md)
 - [Cross-module convergence audit](../../analysis/2026-09-29-product-vnext-module-convergence-audit.md)
 - [Task vNext second-pass deep audit](../../analysis/2026-09-29-task-vnext-second-pass-deep-audit.md)
