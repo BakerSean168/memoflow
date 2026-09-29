@@ -674,6 +674,10 @@ Goal 是后续 property/direct-manipulation/measurement/review grammar 的第一
 
 **Acceptance:** Today row 点击可深入查看但不新增 TaskOccurrenceDetailView。
 
+**Execution (2026-09-29): Implemented / validated.** Today 的 full occurrence row body 现在打开本地 `TaskOccurrenceInspectDialog`；`View Plan` 才显式进入 `/tasks/:planId`。Inspect 展示 status / schedule snapshot / actual start / checklist snapshot / result / note / Goal-KR context，并复用 TASK-3401 的 canonical action coordinator 执行 Complete / Uncomplete / Missed / Skip / Checklist。未新增 occurrence route，也未引入第二套 mutation path。selected occurrence 会跟随 store correction；即使 bounded Today refresh 后该 occurrence 离开列表，coordinator 返回的最新 DTO 仍维持 Inspect 的正确状态；identity change 会清空 selection。
+
+**Validation:** focused Vue tests 5 files / 52 tests PASS；`app-vue:typecheck` PASS；changed-file ESLint PASS；`memoflow:governance-check` PASS；`git diff --check` PASS；Playwright discovery 找到含 Today -> Inspect -> View Plan 的 1 个 Chromium case。实际 browser E2E 尝试两次，但均在到达 Task assertions 前被 auth/workspace bootstrap 阻塞（一次等待 sign-up response 超时；一次注册后停留 startup splash 等待 `app-shell`），因此作为 infrastructure/startup validation caveat，不视为 3201 product-code failure。详见 [archived implementation plan](../archive/2026-09-29-task-3201-occurrence-inspect.md)。
+
 **Dependencies:** TASK-3401.
 
 ---
