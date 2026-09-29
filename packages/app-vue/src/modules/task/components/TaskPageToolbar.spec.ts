@@ -19,16 +19,25 @@ const i18n = createI18n({
         management: {
           surface: {
             today: 'Today',
-            upcoming: 'Upcoming',
             plans: 'Plans',
           },
           filter: {
             status: 'Status',
+            planState: 'Plan state',
             allStatuses: 'All statuses',
             label: 'Filter by label',
             matchesAllLabels: 'Matches all selected labels',
             sort: 'Sort',
             viewOptions: 'Filter and sort',
+          },
+          planState: {
+            all: 'All plan states',
+            active: 'Active',
+            paused: 'Paused',
+            succeeded: 'Succeeded',
+            failed: 'Failed',
+            abandoned: 'Ended',
+            archived: 'Archived',
           },
           sort: {
             time: 'Time',
@@ -67,7 +76,8 @@ function mountToolbar() {
     props: {
       activeSurface: 'today',
       visibleItemCount: 3,
-      statusFilter: 'all',
+      occurrenceStatusFilter: 'all',
+      planStateFilter: 'all',
       labelFilterIds: ['work'],
       labelOptions,
       occurrenceSort: 'time',
@@ -87,12 +97,15 @@ describe('TaskPageToolbar', () => {
     for (const selector of [
       'task-surface-trigger',
       'task-status-filter',
+      'task-plan-state-filter',
       'task-compact-view-options',
       'task-occurrence-sort',
     ]) {
       expect(source).toContain(`data-testid="${selector}"`);
     }
     expect(source).toContain('{{ currentSurfaceLabel }}');
+    expect(source).toContain("const surfaces: TaskSurface[] = ['today', 'plans']");
+    expect(source).not.toContain("'upcoming'");
     expect(source).toContain('{{ visibleItemCount }}');
     expect(wrapper.findComponent(LabelFilterPopover).exists()).toBe(true);
     expect(source).toContain('<ResponsivePrimaryAction');
@@ -112,11 +125,15 @@ describe('TaskPageToolbar', () => {
     expect(wrapper.emitted('createTask')).toHaveLength(1);
   });
 
-  it('hides occurrence-only status and sorting controls on the Plans surface', async () => {
+  it('switches from occurrence controls to an independent plan-state filter on Plans', async () => {
     const wrapper = mountToolbar();
-    await wrapper.setProps({ activeSurface: 'plans' });
+    await wrapper.setProps({ activeSurface: 'plans', planStateFilter: 'failed' });
 
-    expect(wrapper.find('[data-testid="task-status-filter"]').exists()).toBe(false);
-    expect(wrapper.find('[data-testid="task-occurrence-sort"]').exists()).toBe(false);
+    expect(source).toContain("v-if=\"activeSurface === 'today'\"");
+    expect(source).toContain('data-testid="task-plan-state-filter"');
+    expect(source).toContain("props.planStateFilter === 'all'");
+    expect(source).toContain('planStateLabel(props.planStateFilter)');
+    expect(wrapper.props('planStateFilter')).toBe('failed');
+    expect(wrapper.props('occurrenceStatusFilter')).toBe('all');
   });
 });

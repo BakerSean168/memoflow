@@ -6,13 +6,15 @@
     <TaskPageToolbar
       :active-surface="activeSurface"
       :visible-item-count="visibleItemCount"
-      :status-filter="statusFilter"
+      :occurrence-status-filter="occurrenceStatusFilter"
+      :plan-state-filter="planStateFilter"
       :label-filter-ids="labelFilterIds"
       :label-options="availableLabels"
       :occurrence-sort="occurrenceSort"
       :goal-scope-label="goalScopeLabel"
       @update:active-surface="activeSurface = $event"
-      @update:status-filter="statusFilter = $event"
+      @update:occurrence-status-filter="occurrenceStatusFilter = $event"
+      @update:plan-state-filter="planStateFilter = $event"
       @update:label-filter-ids="labelFilterIds = $event"
       @update:occurrence-sort="occurrenceSort = $event"
       @clear-goal-scope="clearGoalScope"
@@ -89,23 +91,39 @@
         <template v-else>
           <div
             v-if="visibleOccurrences.length"
-            class="border-y border-[hsl(var(--border-subtle))]"
+            class="space-y-4"
             data-testid="task-occurrence-list"
           >
-            <TaskOccurrenceRow
-              v-for="occurrence in visibleOccurrences"
-              :key="occurrence.id"
-              :occurrence="occurrence"
-              :template="templateById.get(String(occurrence.planId))!"
-              :position="occurrencePositions.get(String(occurrence.id))"
-              :busy="busyOccurrenceId === String(occurrence.id)"
-              @open-plan="openTaskDetail"
-              @complete="completeOccurrence"
-              @uncomplete="uncompleteOccurrence"
-              @missed="markOccurrenceMissed"
-              @skip="skipOccurrence"
-              @checklist-change="setOccurrenceChecklistItem"
-            />
+            <section
+              v-for="group in occurrenceGroups"
+              :key="group.key"
+              :data-testid="`task-occurrence-group-${group.key}`"
+            >
+              <div class="flex items-center gap-2 border-b border-[hsl(var(--border-subtle))] px-1 pb-2">
+                <h2 class="text-xs font-medium text-muted-foreground">
+                  {{ group.label }}
+                </h2>
+                <span class="text-[11px] tabular-nums text-muted-foreground/80">
+                  {{ group.occurrences.length }}
+                </span>
+              </div>
+              <div class="border-b border-[hsl(var(--border-subtle))]">
+                <TaskOccurrenceRow
+                  v-for="occurrence in group.occurrences"
+                  :key="occurrence.id"
+                  :occurrence="occurrence"
+                  :template="templateById.get(String(occurrence.planId))!"
+                  :position="occurrencePositions.get(String(occurrence.id))"
+                  :busy="busyOccurrenceId === String(occurrence.id)"
+                  @open-plan="openTaskDetail"
+                  @complete="completeOccurrence"
+                  @uncomplete="uncompleteOccurrence"
+                  @missed="markOccurrenceMissed"
+                  @skip="skipOccurrence"
+                  @checklist-change="setOccurrenceChecklistItem"
+                />
+              </div>
+            </section>
           </div>
           <div
             v-else
@@ -113,16 +131,28 @@
             data-testid="task-occurrences-empty-state"
           >
             <CalendarCheck2 class="mb-3 h-8 w-8 text-muted-foreground" />
-            <h2 class="font-semibold">
-              {{
-                activeSurface === 'today'
-                  ? t('task.management.emptyToday')
-                  : t('task.management.emptyUpcoming')
-              }}
-            </h2>
+            <h2 class="font-semibold">{{ t('task.management.emptyToday') }}</h2>
             <p class="mt-1 text-sm text-muted-foreground">
               {{ t('task.management.emptyOccurrenceDescription') }}
             </p>
+          </div>
+
+          <div class="mt-4 flex items-center justify-between gap-3 border-t border-[hsl(var(--border-subtle))] pt-3">
+            <p class="text-xs text-muted-foreground">
+              {{ t('task.management.futureInSchedule') }}
+            </p>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              class="shrink-0"
+              data-testid="task-open-schedule"
+              @click="openSchedule"
+            >
+              <CalendarDays class="mr-1.5 h-4 w-4" />
+              {{ t('task.management.viewSchedule') }}
+              <ArrowRight class="ml-1 h-3.5 w-3.5" />
+            </Button>
           </div>
         </template>
       </div>
@@ -146,7 +176,15 @@ import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Button, useConfirm } from '@memoflow/ui-vue-shadcn';
-import { CalendarCheck2, CircleAlert, ListChecks, Loader2, RefreshCw } from '@lucide/vue';
+import {
+  ArrowRight,
+  CalendarCheck2,
+  CalendarDays,
+  CircleAlert,
+  ListChecks,
+  Loader2,
+  RefreshCw,
+} from '@lucide/vue';
 import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
 import type { GoalId, KeyResultId } from '@memoflow/contracts/primitives';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
@@ -154,7 +192,11 @@ import TaskOccurrenceRow from '../components/TaskOccurrenceRow.vue';
 import TaskPageToolbar from '../components/TaskPageToolbar.vue';
 import TaskPlanRow from '../components/TaskPlanRow.vue';
 import TaskPlanDialog from '../components/dialogs/TaskPlanDialog.vue';
-import type { TaskPlanViewModel } from '../components/types';
+import type {
+  TaskPlanStateFilter,
+  TaskPlanViewModel,
+  TaskSurface,
+} from '../components/types';
 import { useTaskStore } from '../stores/task-store';
 import { useTaskOccurrences } from '../composables/useTaskOccurrences';
 import { useTaskPlanListQuery } from '../composables/useTaskPlanListQuery';
@@ -165,18 +207,20 @@ import {
 } from '../utils/task-plan-presentation';
 import {
   getTaskOccurrencePosition,
-  isTaskOccurrenceOnSurface,
+  isTaskOccurrenceOnTodaySurface,
+  isTaskOccurrenceOverdue,
   sortTaskOccurrences,
   type TaskOccurrenceSort,
 } from '../utils/task-occurrence-presentation';
+import { isTodayMs } from '../../../shared/utils/product-time';
 
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
-type TaskSurface = 'today' | 'upcoming' | 'plans';
 
 const activeSurface = ref<TaskSurface>('today');
-const statusFilter = ref<'all' | TaskOccurrenceClientDTO['status']>('all');
+const occurrenceStatusFilter = ref<'all' | TaskOccurrenceClientDTO['status']>('all');
+const planStateFilter = ref<TaskPlanStateFilter>('all');
 const labelFilterIds = ref<string[]>([]);
 const occurrenceSort = ref<TaskOccurrenceSort>('time');
 const showDialog = ref(false);
@@ -236,8 +280,12 @@ const availableLabels = computed(() => {
   );
   return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name));
 });
-const isLoading = computed(() => templatesLoading.value || instancesLoading.value);
-const loadError = computed(() => templatesError.value || Boolean(instancesError.value));
+const isLoading = computed(
+  () => templatesLoading.value || (activeSurface.value === 'today' && instancesLoading.value),
+);
+const loadError = computed(
+  () => templatesError.value || (activeSurface.value === 'today' && Boolean(instancesError.value)),
+);
 
 function templateMatchesFilters(templateId: string): boolean {
   const template = templateById.value.get(templateId);
@@ -253,24 +301,36 @@ function templateMatchesFilters(templateId: string): boolean {
   return true;
 }
 
-const surfaceOccurrences = computed(() =>
-  instances.value.filter((occurrence) =>
-    isTaskOccurrenceOnSurface(
-      occurrence,
-      activeSurface.value === 'upcoming' ? 'upcoming' : 'today',
-    ),
-  ),
+const todayOccurrences = computed(() =>
+  instances.value.filter((occurrence) => isTaskOccurrenceOnTodaySurface(occurrence)),
 );
 const visibleOccurrences = computed(() =>
   sortTaskOccurrences(
-    surfaceOccurrences.value.filter(
+    todayOccurrences.value.filter(
       (occurrence) =>
         templateMatchesFilters(String(occurrence.planId)) &&
-        (statusFilter.value === 'all' || occurrence.status === statusFilter.value),
+        (occurrenceStatusFilter.value === 'all' ||
+          occurrence.status === occurrenceStatusFilter.value),
     ),
     occurrenceSort.value,
     (templateId) => templateById.value.get(templateId)?.name ?? '',
   ),
+);
+const occurrenceGroups = computed(() =>
+  [
+    {
+      key: 'overdue' as const,
+      label: t('task.management.group.overdue'),
+      occurrences: visibleOccurrences.value.filter(
+        (occurrence) => !isTodayMs(occurrence.dueAt) && isTaskOccurrenceOverdue(occurrence),
+      ),
+    },
+    {
+      key: 'today' as const,
+      label: t('task.management.group.today'),
+      occurrences: visibleOccurrences.value.filter((occurrence) => isTodayMs(occurrence.dueAt)),
+    },
+  ].filter((group) => group.occurrences.length > 0),
 );
 const occurrencePositions = computed(
   () =>
@@ -285,16 +345,29 @@ const occurrencePositions = computed(
       ]),
     ),
 );
+function matchesPlanState(template: TaskPlanViewModel): boolean {
+  switch (planStateFilter.value) {
+    case 'all':
+      return true;
+    case 'active':
+      return !template.isArchived && template.outcome === 'Open' && Boolean(template.isActive);
+    case 'paused':
+      return !template.isArchived && template.outcome === 'Open' && Boolean(template.isPaused);
+    case 'succeeded':
+      return template.outcome === 'Succeeded';
+    case 'failed':
+      return template.outcome === 'Failed';
+    case 'abandoned':
+      return template.outcome === 'Abandoned';
+    case 'archived':
+      return Boolean(template.isArchived);
+  }
+}
+
 const filteredPlans = computed(() =>
-  planViewModels.value.filter((template) => {
-    if (!templateMatchesFilters(String(template.id))) return false;
-    if (statusFilter.value === 'all') return true;
-    if (statusFilter.value === 'Completed') return template.status === 'Closed';
-    if (statusFilter.value === 'Pending' || statusFilter.value === 'InProgress') {
-      return template.status === 'Active';
-    }
-    return false;
-  }),
+  planViewModels.value.filter(
+    (template) => templateMatchesFilters(String(template.id)) && matchesPlanState(template),
+  ),
 );
 const visibleItemCount = computed(() =>
   activeSurface.value === 'plans' ? filteredPlans.value.length : visibleOccurrences.value.length,
@@ -318,6 +391,10 @@ function openBoundTaskCreateDialog(goalId: string, keyResultId?: string | null) 
 }
 function openTaskDetail(id: string) {
   void router.push({ name: 'task-detail', params: { id } });
+}
+
+function openSchedule() {
+  void router.push({ name: 'ScheduleCalendar' });
 }
 
 function clearGoalScope() {

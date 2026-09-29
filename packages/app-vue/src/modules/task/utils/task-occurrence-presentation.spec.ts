@@ -7,7 +7,7 @@ import {
   getTaskOccurrenceDueAt,
   getTaskOccurrencePosition,
   getTaskOccurrenceStatusLabel,
-  isTaskOccurrenceOnSurface,
+  isTaskOccurrenceOnTodaySurface,
   isTaskOccurrenceOverdue,
   sortTaskOccurrences,
 } from './task-occurrence-presentation';
@@ -50,8 +50,9 @@ function occurrence(
 }
 
 describe('task occurrence presentation', () => {
-  it('places today and overdue open occurrences on Today while future occurrences stay Upcoming', () => {
+  it('places today and unresolved overdue occurrences on Today while future occurrences stay out', () => {
     const today = occurrence('today');
+    const todayLater = occurrence('today-later', { dueAt: day + 18 * 60 * 60_000 });
     const yesterdayOpen = occurrence('yesterday', { dueAt: day - 86_400_000 + 9 * 60 * 60_000 });
     const yesterdayCompleted = occurrence('done', {
       dueAt: day - 86_400_000 + 9 * 60 * 60_000,
@@ -59,11 +60,11 @@ describe('task occurrence presentation', () => {
     });
     const tomorrow = occurrence('tomorrow', { dueAt: day + 86_400_000 + 9 * 60 * 60_000 });
 
-    expect(isTaskOccurrenceOnSurface(today, 'today', now)).toBe(true);
-    expect(isTaskOccurrenceOnSurface(yesterdayOpen, 'today', now)).toBe(true);
-    expect(isTaskOccurrenceOnSurface(yesterdayCompleted, 'today', now)).toBe(false);
-    expect(isTaskOccurrenceOnSurface(tomorrow, 'upcoming', now)).toBe(true);
-    expect(isTaskOccurrenceOnSurface(today, 'upcoming', now)).toBe(false);
+    expect(isTaskOccurrenceOnTodaySurface(today, now)).toBe(true);
+    expect(isTaskOccurrenceOnTodaySurface(todayLater, now)).toBe(true);
+    expect(isTaskOccurrenceOnTodaySurface(yesterdayOpen, now)).toBe(true);
+    expect(isTaskOccurrenceOnTodaySurface(yesterdayCompleted, now)).toBe(false);
+    expect(isTaskOccurrenceOnTodaySurface(tomorrow, now)).toBe(false);
   });
 
   it('derives due time and overdue status from the occurrence time config', () => {

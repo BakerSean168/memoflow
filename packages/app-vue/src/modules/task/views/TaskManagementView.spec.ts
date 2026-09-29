@@ -6,19 +6,25 @@ const source = readFileSync(resolve(__dirname, 'TaskManagementView.vue'), 'utf8'
 const toolbarSource = readFileSync(resolve(__dirname, '../components/TaskPageToolbar.vue'), 'utf8');
 
 describe('TaskManagementView occurrence-first surface', () => {
-  it('defaults to Today and keeps Upcoming occurrences separate from long-lived plans', () => {
-    expect(source).toContain("type TaskSurface = 'today' | 'upcoming' | 'plans'");
+  it('converges Task Home to Today and Plans, with future browsing delegated to Schedule', () => {
     expect(source).toContain("ref<TaskSurface>('today')");
     expect(source).toContain('data-testid="task-occurrence-list"');
     expect(source).toContain('data-testid="task-plan-list"');
     expect(source).toContain('<TaskPlanRow');
     expect(source).toContain('task-plan-list-column-header');
+    expect(source).toContain('isTaskOccurrenceOnTodaySurface');
+    expect(source).toContain(':data-testid="`task-occurrence-group-${group.key}`"');
+    expect(source).toContain("key: 'overdue' as const");
+    expect(source).toContain("key: 'today' as const");
+    expect(source).toContain('data-testid="task-open-schedule"');
+    expect(source).toContain("name: 'ScheduleCalendar'");
+    expect(source).not.toContain("'upcoming'");
+    expect(source).not.toContain('emptyUpcoming');
     expect(source).not.toContain('task-plan-card');
     expect(source).not.toContain('openEditDialog');
     expect(source).not.toContain("ref<'create' | 'edit'>");
     expect(source).not.toContain('updatePlanSafe');
     expect(source).toContain('mode="create"');
-    expect(source).toContain('isTaskOccurrenceOnSurface');
   });
 
   it('keeps category/filter/sort/create controls in one Goal-style toolbar', () => {
@@ -27,6 +33,7 @@ describe('TaskManagementView occurrence-first surface', () => {
     for (const selector of [
       'task-surface-trigger',
       'task-status-filter',
+      'task-plan-state-filter',
       'task-label-filter',
       'task-compact-view-options',
       'task-occurrence-sort',
@@ -45,6 +52,17 @@ describe('TaskManagementView occurrence-first surface', () => {
     for (const retired of ['TaskDAG', 'DependencyManager', 'CriticalPath', 'graph mode']) {
       expect(source).not.toContain(retired);
     }
+  });
+
+  it('keeps occurrence and plan-state filters independent across the two surfaces', () => {
+    expect(source).toContain(
+      "const occurrenceStatusFilter = ref<'all' | TaskOccurrenceClientDTO['status']>('all')",
+    );
+    expect(source).toContain("const planStateFilter = ref<TaskPlanStateFilter>('all')");
+    expect(source).toContain('occurrence.status === occurrenceStatusFilter.value');
+    expect(source).toContain('matchesPlanState(template)');
+    expect(source).not.toMatch(/filteredPlans[\s\S]{0,500}occurrenceStatusFilter/);
+    expect(source).not.toMatch(/visibleOccurrences[\s\S]{0,500}planStateFilter/);
   });
 
   it('accepts a create-and-bind intent without turning it into a persistent Goal filter', () => {

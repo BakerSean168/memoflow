@@ -57,14 +57,14 @@ export default {
       'Pausing "{name}" stops new to-dos and deletes future pending or in-progress to-dos. Due and completed history stays unchanged.',
     allDeleted: 'All task plans deleted',
     subtitle:
-      'Act on today’s occurrences first, review what is next, and edit long-lived plans separately.',
+      'Act on what needs attention today and manage long-lived plans here; browse future arrangements in Schedule.',
     surface: {
       today: 'Today',
-      upcoming: 'Upcoming',
       plans: 'Plans',
     },
     filter: {
       status: 'Status',
+      planState: 'Plan state',
       allStatuses: 'All statuses',
       label: 'Filter by label',
       allLabels: 'All labels',
@@ -72,10 +72,23 @@ export default {
       sort: 'Sort',
       viewOptions: 'Filter and sort',
     },
+    planState: {
+      all: 'All plan states',
+      active: 'Active',
+      paused: 'Paused',
+      succeeded: 'Succeeded',
+      failed: 'Failed',
+      abandoned: 'Ended',
+      archived: 'Archived',
+    },
     sort: {
       time: 'Time',
       status: 'Status',
       title: 'Title',
+    },
+    group: {
+      overdue: 'Overdue',
+      today: 'Today',
     },
     moreActions: 'More actions',
     planColumn: 'Task',
@@ -83,13 +96,12 @@ export default {
     goalColumn: 'Goal',
     progressColumn: 'Completion',
     todayExplanation: 'Today also includes unfinished occurrences whose due time has passed.',
-    upcomingExplanation:
-      'Upcoming shows occurrences scheduled after today; plans remain in their own configuration surface.',
     emptyPlans: 'No matching plans',
     emptyPlansDescription: 'Create a plan or clear the current filters.',
     emptyToday: 'Nothing needs action today',
-    emptyUpcoming: 'No upcoming occurrences',
     emptyOccurrenceDescription: 'Create or adjust a plan to generate eligible occurrences.',
+    futureInSchedule: 'Future occurrences are available in Schedule.',
+    viewSchedule: 'View schedule',
   },
   detail: {
     title: 'Task Plan Workspace',
