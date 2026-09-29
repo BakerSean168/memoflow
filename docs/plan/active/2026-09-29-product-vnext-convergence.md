@@ -749,7 +749,8 @@ Deliverable:
 - [Task vNext second-pass deep audit](../../analysis/2026-09-29-task-vnext-second-pass-deep-audit.md);
 - verified P0–P3 ledger;
 - resolved Q1–Q6 product decisions;
-- T2-15 completion-time KR record direction.
+- T2-15 completion-time KR record direction;
+- canonical product docs and ADR-056/057/068/069/075 updated with the resolved Task decisions.
 
 ### PVC-TASK-3002 — Repair Task lifecycle/outcome truth
 
@@ -767,9 +768,9 @@ Implement before broader UI convergence:
 - keep Delete for mistaken creation;
 - keep `archivedAt` secondary/internal rather than a normal lifecycle control.
 
-Before changing the contract, revise/supersede ADR-057's configurable completion-policy section and define the compatibility path for persisted/portable `completionPolicy` data. Do not silently delete the field while old bundles/clients may still carry it.
+ADR-057 has now been revised with the canonical outcome rule and a versioned compatibility path for persisted/portable `completionPolicy` data. Implementation must follow that migration; do not silently delete the field while old bundles/clients may still carry it.
 
-Then converge the hidden completion-policy model toward one product rule:
+Converge the hidden completion-policy model toward one product rule:
 
 ```text
 Overdue -> unresolved
@@ -861,11 +862,14 @@ Requirements:
 - Task completion remains possible through an explicit “complete without record” escape path;
 - uncomplete reverses the source-correlated GoalRecord;
 - re-complete can create the replacement record value;
-- source correlation and record provenance are separate: automatic Task records stay immutable system facts, while user-entered completion measurements remain source-correlated but have a Goal-owned correction path that does not mutate Task completion state.
+- source correlation and record provenance are separate: automatic Task records stay immutable system facts, while user-entered completion measurements remain source-correlated but have a Goal-owned correction path that does not mutate Task completion state;
+- extend the GoalRecord client/read projection so source/provenance can be rendered and corrected intentionally instead of being hidden server-only metadata;
+- converge the duplicate GoalRecord card/presentation implementations behind measurement-aware delta/sample language;
+- resolve the current `recordedAt` client/schema drift explicitly rather than carrying a silently ignored field.
 
 This ticket should also replace the current Sum-biased Goal record composer with a measurement-aware Goal-owned record input/preview primitive so manual Goal records and Task-completion records share one semantic implementation.
 
-Before contract implementation, amend ADR-068's Task-contribution boundary to distinguish `automatic fixed contribution` (still constrained by compatible automatic semantics) from `user-authored completion measurement` (may produce delta/sample records for any supported KR method).
+ADR-056/068/069/075 have now been amended to distinguish `automatic fixed contribution` from `user-authored completion measurement`, preserve Goal ownership, define provenance/correction semantics, and retire Upcoming in favor of Schedule. Contract implementation must follow those revised ADR boundaries.
 
 ---
 

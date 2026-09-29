@@ -5,12 +5,14 @@ tags:
   - goal
 description: Goal vNext 当前功能、产品语义与模块边界
 created: 2026-06-02T00:00:00
-updated: 2026-09-19T00:00:00+00:00
+updated: 2026-09-29T11:38:00+08:00
 ---
 
 # Goal 模块说明
 
 > **当前收敛状态（2026-09-19）：** GOAL-7202~7211 已完成：Goal identity/lifecycle、planning time、KR Measurement V3、Task context 三态、Shared Relation + stable Knowledge identity、Goal Workspace、durable GoalPlanDraft V2、property-chip create/edit、五精度 Target picker、React/Mobile parity、destructive truth cleanup 与最终五层审查/归档均已闭环。旧 GoalTemplate/standalone AI-KR 轨道不得恢复，Task deadline 语义保持不变。详见 [Goal vNext archived plan](../../plan/archive/2026-09-08-goal-vnext-model-convergence.md)。
+>
+> **2026-09-29 Product vNext target：** GoalRecord UI 需要补齐 KR Measurement V3 的完整语义。当前正增量式 `GoalRecordDialog` 只适合部分 Sum KR；目标是 Goal-owned measurement-aware Record Composer，并同时服务手动 Record 与 Task“完成时记录”。
 
 ## 1. 功能定位
 
@@ -22,7 +24,7 @@ Goal 负责个人目标的 **Direction + Measurement**：用户定义想达到�
 - Goal identity：`name + summary`；新 Goal 默认 `Planned`；
 - Planning time：`startDate?: Ymd` + `target?: GoalTimeframe`，Target 支持 Day / Month / Quarter / Half-year / Year 精度；目标周期过去只产生 `Past Target` 展示信号，不产生 Task-style overdue，也不自动改变状态；
 - Key Result Measurement V3：普通产品面只暴露 `initialValue / currentValue / targetValue / unit / optional target timeframe`；统一 calculator 使用 `(current - initial) / (target - initial)`，系统聚合 seed `trackingBaseValue` 仅存在于服务端/可移植备份协议，不进入普通 UI；
-- Goal Record：记录 KR 的真实测量事实；
+- Goal Record：记录 KR 的真实测量事实；Sum record 是 signed delta，Average/Max/Min/Last record 是 sample；
 - Goal Review：记录阶段性复盘；
 - Shared Label：Goal 与 Task 共用 identity-scoped Label registry，创建/更新提交 `labelIds`，多标签筛选使用 `labelIdsAll` AND 语义；
 - Task Link：Task 可以链接 Goal/KR，但 Goal 不反向拥有 Task；
@@ -60,7 +62,9 @@ Web/Desktop 使用 property-chip create/edit 与统一 `GoalTimeframePicker`；G
 - Goal aggregate 是 Goal/KR/Record/Review 的一致性边界；
 - 修改既有 aggregate 使用 `expectedVersion`，冲突显式返回而不是静默覆盖；
 - mutation 返回权威 `GoalMutationReceipt`，客户端按 ID 原子合并；
-- Task contribution 通过自包含、幂等的跨模块事件/settlement 进入 Goal，不共享 repository 或数据库事务；
+- Task fixed contribution 与 Task completion-time user measurement 都通过自包含、幂等的跨模块事件/settlement 进入 Goal，不共享 repository 或数据库事务；
+- Goal 是 GoalRecord / KR aggregation / currentValue 的唯一 write authority；
+- source correlation 与 record provenance 分离：TaskAutomatic 保持不可手工改值，TaskUserMeasurement 保留 source correlation 但允许 Goal-owned correction 修改用户输入值；
 - generic Relation 不属于 Goal；Goal 删除只依赖窄 `GoalRelationCleanupPort`，由 host 注入 transaction-scoped Shared Relation adapter，使 Goal 删除与 edge unlink 在同一 Prisma/PowerSync 数据库事务中原子提交/回滚，且永不删除 KnowledgeDocument；
 - AI 只生成草稿并调用 Goal/Task owner application port，不直接写数据库。
 - Goal Workspace 是独立 read composition：Goal application/read layer 只依赖 structural consumer ports；API/Desktop host 复用 Task/Relation/Goal owner 实例，Goal package 不直接 import Task/Relation/Repository persistence。
@@ -68,6 +72,18 @@ Web/Desktop 使用 property-chip create/edit 与统一 `GoalTimeframePicker`；G
 ## 6. 用户视图
 
 当前列表仍使用 `Active / Completed / All` 这组 **System View** 展示标签，其中 `Active` 视图是 UI/read-model 聚合，包含 `Planned + InProgress`，不是第五种 Goal status。归档与放弃属于历史入口；System View 都是状态/时间派生视图，不是 Label。用户可叠加 Shared Label 过滤。
+
+Record 输入 target：
+
+```text
+Sum
+  本次变化 [delta]
+
+Average / Max / Min / Last
+  本次记录值 [sample]
+```
+
+输入时展示 Current → After → Target 的 live preview。该 preview 与 KR editor 的 trajectory 视觉语言可以一致，但应使用独立 Record Preview contract，不直接把 Initial/Current/Target editor 当成 record composer。
 
 Web/Desktop 与 React/Mobile 均使用同一公开 contracts 与 `GoalWorkspaceReadModel`。Vue/React 详情页都展示 bounded Task/Knowledge context、KR measurement、recent progress/reviews 与轻量 `Past Target` signal；移动端仅压缩布局，不引入第二套 Goal contract，也不存在 Folder/Comparison/Focus 等已退休 UI。
 

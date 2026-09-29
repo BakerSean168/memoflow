@@ -5,7 +5,7 @@ tags:
   - task
 description: Task 模块当前事实与 canonical TaskPlan/TaskOccurrence/TaskWorkspace 模型
 created: 2026-06-02T00:00:00
-updated: 2026-09-14T10:54:47+08:00
+updated: 2026-09-29T11:38:00+08:00
 ---
 
 # Task 模块说明
@@ -22,13 +22,48 @@ Task 负责 **Action + Execution**。
 - Pending/InProgress/Completed/Missed/Skipped occurrence facts；
 - Overdue 派生，不自动将未操作判 Missed；
 - Plan lifecycle `Active/Paused/Closed` 与 outcome `Open/Succeeded/Failed/Abandoned` 分离；
-- finite plan completion policy；
+- 当前仍持久化 `TaskPlanCompletionPolicy`；
 - Daily/Weekly/Monthly/Yearly recurrence；
 - Shared Label；
-- Goal-only / Goal+KR link + optional KR-scoped EachCompletion/PlanCompletion contribution；
+- Goal-only / Goal+KR link + optional KR-scoped fixed EachCompletion/PlanCompletion contribution；
+- durable Task→Goal outbox + Goal-owned source correlation；
 - Planner projection 与 Scheduler single authority；
-- Today / Upcoming / Plans；
+- 当前 UI 仍是 Today / Upcoming / Plans；
 - Prisma / PowerSync 双端 persistence。
+
+## 2.1 2026-09-29 Product vNext target
+
+当前实现之上的收敛目标：
+
+```text
+Task Home        Today | Plans
+Future browsing  Schedule / Calendar
+Quick Task       title -> today/all-day -> create
+Occurrence       inline actions + compact Inspect Dialog/Sheet
+Plan end         Abandon, not Archive
+```
+
+Outcome：
+
+```text
+Overdue -> unresolved
+Completed / Missed / Skipped -> user facts
+finite scope resolved + Missed -> Failed
+finite scope resolved + no Missed -> Succeeded
+infinite recurring -> Open until Abandoned
+```
+
+不向用户暴露 completion-policy 配置。现有 `completionPolicy` 先作为 compatibility contract round-trip，再做 versioned retirement。
+
+Task→KR product rule 收敛为：
+
+```text
+仅关联
+自动记录固定值
+完成时记录
+```
+
+其中“完成时记录”由用户在 Complete 时输入 measurement，可适配 Sum/Average/Max/Min/Last；Goal 继续拥有 GoalRecord aggregation/currentValue 真值。
 
 已退休且不得恢复：TaskFolder、parent/subtask hierarchy、TaskDependency、DAG、CriticalPath、dynamic priority、Task string tags、自定义 Task color、Expired 持久状态。
 
@@ -55,7 +90,8 @@ TaskWorkspace  = Plan + Occurrences + Context
 - reminder policy；
 - checklist definition；
 - optional Goal-level/KR link；
-- lifecycle/outcome/completion policy；
+- lifecycle/outcome；
+- `completionPolicy` 当前存在于 contract/persistence，但 target product 不再暴露配置；
 - Shared Labels / Notes 保持外部 relation/projection。
 
 ### 3.2 Occurrence
@@ -78,10 +114,11 @@ Task Goal link 当前 canonical 语义已经允许：
 ```text
 Task -> Goal
 Task -> Goal + KR
-Task -> Goal + KR + Contribution
+Task -> Goal + KR + fixed Contribution（当前）
+Task -> Goal + KR + completion-time measurement（target）
 ```
 
-`keyResultId` 对普通 Goal context 是可空的；Contribution 仍必须绑定 KR，goal-only / link-only completion 不会生成 Goal progress outbox。公开 Task list 可按 Goal 或 Goal+KR 查询，其中 KR filter 必须同时携带 owning Goal。
+`keyResultId` 对普通 Goal context 是可空的；任何 GoalRecord 写入都必须绑定 KR，goal-only / link-only completion 不会生成 Goal progress outbox。当前 fixed Contribution 走 `EachCompletion / PlanCompletion`；target 增加 completion-time measurement intent，并继续通过 durable Task→Goal outbox 交给 Goal owner。公开 Task list 可按 Goal 或 Goal+KR 查询，其中 KR filter 必须同时携带 owning Goal。
 
 Task 同时拥有 `TaskGoalContextReadPort`，通过 `listTasksByGoal`、`listTasksByKeyResult`、`getTaskGoalContextSummary` 提供 identity-scoped、soft-delete-aware 的 bounded read projection；Goal/Goal Workspace 不直接读取 Task 表或 Task repository。
 

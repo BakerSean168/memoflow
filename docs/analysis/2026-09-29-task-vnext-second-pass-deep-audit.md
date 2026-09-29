@@ -50,6 +50,36 @@ An archived Active recurring plan is still selected by occurrence materializatio
 
 Before broad Task UI convergence, lifecycle/outcome semantics must be repaired.
 
+## 1.1 Decision closure / truth hierarchy
+
+After the 2026-09-29 discussion, use the following hierarchy rather than treating all historical documents as equally current:
+
+```text
+Product behavior truth
+  docs/product/task-vnext-plan-occurrence-workspace.md
+  docs/product/goal-task-vnext.md
+
+Architecture truth
+  ADR-053  personal Goal/Task boundary
+  ADR-056  Task -> Goal record/settlement
+  ADR-057  occurrence/outcome/lifecycle
+  ADR-068  KR Measurement V3 / Record semantics
+  ADR-069  cross-owner context projection
+  ADR-075  Task Workspace / Goal link
+
+Evidence / why
+  this second-pass audit
+
+Execution order
+  docs/plan/active/2026-09-29-product-vnext-convergence.md
+```
+
+Important status distinction:
+
+- sections labeled **current fact** describe the code now;
+- 2026-09-29 ADR amendments labeled **target-design / 待实施** are approved product/architecture direction, not claims that code already behaves that way;
+- implementation tickets must migrate current contracts explicitly before deleting compatibility fields such as `completionPolicy`.
+
 ---
 
 # 2. Evidence set
@@ -1173,6 +1203,45 @@ The existing `GoalRecordDialog.vue` is also Sum-biased despite Measurement V3 su
 
 So the Task limitation is not isolated. MemoFlow needs one canonical measurement-aware record composer.
 
+### GoalRecord client projection also drops source semantics
+
+The authoritative server GoalRecord already persists:
+
+```text
+sourceType
+sourceId
+recordedAt
+```
+
+but `GoalRecordClientDTOSchema` currently projects only:
+
+```text
+id
+goalId
+keyResultId
+value
+valueAfter
+comment
+createdAt
+updatedAt
+```
+
+Therefore the current client cannot distinguish:
+
+```text
+Manual
+TaskAutomatic
+TaskUserMeasurement
+```
+
+or explain which Task produced a record.
+
+At the same time, `UpdateGoalRecordUseCase` rejects **all** records with `sourceType/sourceId` as non-editable system facts. That rule is too coarse once a Task completion can carry a user-authored measurement.
+
+The frontend also contains two separate `GoalRecordCard.vue` implementations; one renders every record with a Plus icon regardless of aggregation method. These should converge behind the same measurement-aware presentation grammar during T2-15 rather than receiving separate fixes.
+
+There is one additional contract drift worth cleaning in the same pass: `useGoalRecords.createGoalRecord()` accepts a `recordedAt` field while `CreateGoalRecordSchema` does not expose it. The implementation plan should either make manual record time an explicit contract or remove the phantom client parameter; do not leave a field that is silently ignored/stripped.
+
 ### Proposed interaction
 
 Task → KR binding should support three product modes:
@@ -1604,9 +1673,9 @@ The critical invariant remains:
 
 External reference pattern:
 
-- Asana explicitly distinguishes project completion from archive and recommends completing before archiving;
-- Linear uses Completed/Canceled as lifecycle states and auto-archives only closed/inactive work later;
-- Todoist uses Archive as “shelve/remove from active list and restore later,” while recurring Tasks have a separate “permanently complete” concept.
+- Asana explicitly distinguishes project completion from archive and recommends completing before archiving: <https://help.asana.com/s/article/understanding-projects>;
+- Linear uses Completed/Canceled as lifecycle states and auto-archives only closed/inactive work later: <https://linear.app/docs/configuring-workflows> and <https://linear.app/docs/delete-archive-issues>;
+- Todoist uses Archive as “shelve/remove from active list and restore later,” while recurring Tasks use a separate `Complete forever` action to end recurrence: <https://www.todoist.com/help/todoist/features/introduction-to-projects-TLTjNftLM> and <https://www.todoist.com/help/articles/complete-a-task-with-a-recurring-date-dmI6SVqdP>.
 
 MemoFlow should follow the same low-cognitive-load split:
 

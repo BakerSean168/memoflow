@@ -8,7 +8,7 @@ tags:
   - domain
 description: Goal / Task vNext 的产品模型、页面信息架构、交互文案与跨模块闭环
 created: 2026-08-25T14:28:00+08:00
-updated: 2026-09-29T08:00:00+08:00
+updated: 2026-09-29T11:38:00+08:00
 ---
 
 # Goal / Task vNext 产品设计
@@ -595,11 +595,14 @@ Task Home 直接保留 `计划` 一级入口。Plan 不再作为隐藏的 Templa
 可操作：
 
 ```text
-编辑重复
+编辑计划
 暂停
 恢复
-放弃计划
+结束计划
+删除误创建
 ```
+
+其中 `结束计划` = Abandon：关闭 Plan、保留历史，并停止 future occurrence / reminder / Schedule projection。普通 Task UX 不提供 Archive；Archive 不承担业务结束语义。
 
 计划历史保留 outcome：
 
@@ -637,7 +640,7 @@ Today 行不新增独立 Occurrence Detail route。高频动作直接行内完�
 ... -> 未完成 / 跳过本次
 ```
 
-若该 Task 配置了“完成时记录”KR，点击完成先打开记录弹窗：
+若该 Task 配置了“完成时记录”KR，点击完成先打开 Goal-owned measurement-aware 记录弹窗：
 
 ```text
 [Target icon] 更新关键结果
@@ -647,7 +650,7 @@ Current 2.8 -> After 3.1 -> Target 4.0
 [仅完成任务] [记录并完成]
 ```
 
-`未完成` = `Missed`；`跳过本次` = 明确豁免，二者不能混用。若任务已过期但尚未确认结果，显示 `已逾期` badge，仍允许补标完成。
+`未完成` = `Missed`；`跳过本次` = 明确豁免，二者不能混用。若任务已过期但尚未确认结果，显示 `已逾期` badge，仍允许补标完成。用户在完成时输入的 KR measurement 与自动 fixed contribution provenance 不同：前者允许通过 Goal-owned correction 修改值，不能要求先撤销 Task completion。
 
 如果来自 recurrence：
 

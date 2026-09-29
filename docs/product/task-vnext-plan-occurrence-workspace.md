@@ -5,7 +5,7 @@ tags:
   - vnext
 description: Task Plan / Occurrence / Workspace 最终产品模型与创建、执行、详情交互
 created: 2026-09-08T19:30:00+08:00
-updated: 2026-09-29T08:00:00+08:00
+updated: 2026-09-29T11:38:00+08:00
 ---
 
 # Task vNext — Plan / Occurrence / Workspace
@@ -47,6 +47,29 @@ weekday
 
 Goal chip 支持只选 Goal；需要把 Task 完成结果写入 KR 时才要求进一步选择 KR。绑定 KR 后支持：仅关联、自动记录固定值、完成时记录。
 
+### 2.1 Quick Task
+
+保留真正的快速捕获路径，不让每次记录动作都进入完整 Plan 表单：
+
+```text
+做什么？
+[________________]
+
+默认：今天 · 全天
+                    创建
+```
+
+Quick Task 用于：
+
+- Task Capsule；
+- Today Overview；
+- AI 快捷入口；
+- 后续可选 global command。
+
+创建后需要 recurrence / Goal / Checklist / Reminder 等复杂配置时，再进入 Task Plan Workspace 或完整 Task dialog。
+
+Quick Task 与 Full Create 是两个 intent，不合并成一个越来越复杂的万能表单。
+
 ## 3. Today / Schedule handoff
 
 Task Home 只保留 `Today | Plans`。Today 以 Occurrence 为核心：
@@ -67,6 +90,32 @@ Overdue 只是提示，并继续留在 Today 的待处理范围：
 
 未来安排不再在 Task 内维护独立 Upcoming 列表。需要查看未来时间分布时进入 Schedule / Calendar，由 Schedule 作为未来安排的唯一浏览入口。
 
+### 3.1 Occurrence interaction
+
+高频执行尽量不离开 Today：
+
+```text
+○ 植物观察打卡                    全天
+  第 5 / 15 次
+  □ 上传照片
+
+[完成]
+... -> [未完成] [跳过]
+```
+
+点击整行只在确实需要更多信息时打开 compact Inspect Dialog / Sheet：
+
+```text
+Occurrence Inspect
+├─ 本次时间/状态
+├─ Checklist snapshot
+├─ Result / note
+├─ Goal/KR context
+└─ 查看计划 -> /tasks/:planId
+```
+
+不新增 `TaskOccurrenceDetailView`。TaskPlan 才是独立 owner workspace。
+
 ## 4. Task Plan Workspace
 
 ```text
@@ -86,6 +135,65 @@ Checklist definition
 Reminder policy
 计划设置
 ```
+
+### 4.1 Lifecycle actions
+
+普通用户只需要：
+
+```text
+Active Plan
+├─ 暂停
+├─ 结束计划
+└─ 删除误创建
+
+Paused Plan
+├─ 恢复
+├─ 结束计划
+└─ 删除误创建
+```
+
+其中：
+
+```text
+结束计划 -> Abandon -> Closed + Abandoned
+```
+
+结束计划必须同时停止：
+
+- future occurrence materialization；
+- 已生成但尚未执行的 future occurrence；
+- future reminders；
+- Schedule 中的 future projection。
+
+`Archive` 不进入普通 Task lifecycle UX。它只保留为 secondary/internal visibility metadata；未来若真的增加 Archives 产品面，再单独设计 Archive/Restore。
+
+### 4.2 Outcome
+
+不向用户显示“完成规则”配置。
+
+```text
+Overdue
+-> unresolved
+
+用户明确：
+Completed / Missed / Skipped
+```
+
+有限 Plan：
+
+```text
+仍有 Pending / InProgress -> Open
+全部已解析 + 无 Missed -> Succeeded
+全部已解析 + 有 Missed -> Failed
+```
+
+无限 recurrence：
+
+```text
+Open until Abandoned
+```
+
+Missed/Skipped 后续允许纠正成 Completed，并重新评估 Plan outcome。Overdue 本身永远不自动变 Missed/Failed。
 
 ## 5. Checklist
 
@@ -115,3 +223,66 @@ Average / Max / Min / Last -> 本次记录值 / sample
 ```
 
 完成时记录弹窗展示 Current / After / Target 的实时预览，但最终 GoalRecord 与 currentValue 仍由 Goal owner 权威计算。Task 完成与 GoalRecord intent 通过 durable Task → Goal outbox 连接，不采用前端双写。
+
+### 6.2 完成时记录 Dialog
+
+示例：
+
+```text
+◎ 更新关键结果
+  每周平均专注时长 · 平均值
+
+本次记录
+[ 3.5 ] 小时
+
+      Current      After        Target
+         ●──────────● - - - - - ○
+        2.8         3.1          4.0
+
+记录后进度 77.5%
+
+[仅完成任务]                  [记录并完成]
+```
+
+输入改变时 After / progress / preview 同步变化。
+
+模式语义：
+
+```text
+Sum
+-> 输入 delta，可为正/负
+
+Average / Max / Min / Last
+-> 输入 sample
+```
+
+Max/Min 的 sample 若不会改变 current，也要明确显示“记录已保存，当前最大/最小值保持不变”。
+
+Task Plan 可以为“完成时记录”保存 suggested/default value，减少重复输入；用户每次仍可以修改实际值。
+
+### 6.3 Source correlation 与用户可修正性
+
+自动 fixed record 与用户 completion-time measurement 都需要关联 occurrence，以保证幂等和撤销；但二者 provenance 不同：
+
+```text
+TaskAutomatic
+-> system fact
+-> 不允许普通手工改值
+
+TaskUserMeasurement
+-> 用户输入事实
+-> 保留 occurrence source
+-> 允许 Goal-owned correction 修改 value/note
+```
+
+用户输错 measurement 时，不要求先撤销 Task 完成再重新完成。
+
+## 7. 明确不做
+
+- 不恢复 Upcoming Task Home；
+- 不新增 TaskOccurrence detail route；
+- 不把 Archive 当“结束计划”；
+- 不让用户配置 `AllowCorrection / StrictNoBackfill`；
+- 不让 Task 自己重写 KR aggregation；
+- 不用前端 `createGoalRecord()` + `completeTask()` 双写；
+- 不把 Goal/KR/Note owned state 复制进 TaskPlan Aggregate。

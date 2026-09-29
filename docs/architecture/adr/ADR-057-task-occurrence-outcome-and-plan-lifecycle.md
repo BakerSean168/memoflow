@@ -9,17 +9,19 @@ tags:
   - missed
 description: Task occurrence 的 Pending/Completed/Missed/Skipped 语义、Overdue 派生状态与 Task Plan outcome 生命周期
 created: 2026-08-25T15:03:00+08:00
-updated: 2026-09-08T09:00:00+08:00
+updated: 2026-09-29T11:38:00+08:00
 ---
 
 > **2026-09-08 Task vNext 后续修订：** ADR-071～075 保留本 ADR 已验证的 Goal settlement / occurrence outcome 语义，并进一步将 TaskTemplate/TaskInstance 收敛为独立 TaskPlan/TaskOccurrence 聚合、Goal-level link、Schedule union、Result/Checklist 与 reminder persistence 单轨。实施完成前当前代码事实仍以源码为准。
+>
+> **2026-09-29 Product vNext 收敛修订（target-design，待实施）：** 用户不再配置 `TaskPlanCompletionPolicy`。Overdue 继续只是未决事实；Occurrence 由用户明确记录为 Completed / Missed / Skipped。有限 Plan 使用一个 canonical derived outcome evaluator：存在未决 occurrence 时保持 Open；全部 required occurrence 已 Completed/Skipped 时 Succeeded；计划范围结束后仍保留显式 Missed 时 Failed。Missed/Skipped 后续可纠正为 Completed，并重新评估 outcome。普通 Task UX 不暴露 Archive；“结束计划”必须走 Abandon，并完整停止未来 occurrence/reminder/Schedule projection。
 
 # ADR-057: Task Occurrence Outcome、Overdue 与 Task Plan 生命周期
 
-**状态：** 已采纳并实施
+**状态：** 已采纳并实施；2026-09-29 产品收敛修订待实施
 **日期：** 2026-08-25  
 **影响范围：** Task domain、contracts、database、recurrence、Task UI、Goal contribution settlement、Schedule projection、AI workflow  
-**关联：** ADR-037、ADR-038、ADR-053、ADR-056
+**关联：** ADR-037、ADR-038、ADR-053、ADR-056、ADR-071～075
 
 ## 2026-09-08 实现状态
 
@@ -54,13 +56,23 @@ Day 7 第二天仍未在 MemoFlow 处理
 
 ## 2. 外部产品语义参考
 
-本决策参考以下成熟开源产品的行为语义，而不复制 copyleft source：
+本决策参考成熟任务/项目产品的行为语义，而不复制实现：
 
 - Loop Habit Tracker：区分完成、明确未完成、跳过/豁免与尚未记录；
 - Vikunja：overdue 是 `未完成 + due date 已过去` 的查询/展示条件，不是 task 终态；
 - Taskwarrior：overdue 是 pending task 的派生属性，生命周期不使用通用 `Failed`；
 - Super Productivity / Tasks.org：recurrence configuration 与 occurrence 分层，重复计划具有独立的生成/结束规则；
-- Plane 等项目工具：completed 与 cancelled 类结果分离，说明“停止继续”不等于“成功完成”。
+- Asana 官方文档明确区分 Complete 与 Archive：Archive 用于收起项目，不更新项目状态，并支持恢复；
+- Linear 官方文档把 Completed / Canceled 作为 lifecycle status，而 Archive 是关闭并静置后的二级存储机制，普通 issue 不提供手动 Archive；
+- Todoist 官方文档把 Archive 定义为把项目暂时移出 active list、以后可 restore 的整理动作。
+
+Archive 参考：
+
+- Asana: <https://help.asana.com/s/article/understanding-projects>
+- Linear: <https://linear.app/docs/delete-archive-issues>
+- Todoist: <https://www.todoist.com/help/todoist/features/introduction-to-projects-TLTjNftLM>
+
+这些产品共同支持本 ADR 的低心智模型：**业务结束状态与 Archive/收纳语义分离**。
 
 研究记录见 `docs/analysis/2026-08-25-goal-task-vnext-open-source-study.md`。
 
@@ -216,27 +228,49 @@ Closed -> outcome in {Succeeded, Failed, Abandoned}
 
 ### 6.1 Succeeded
 
-由 Task-owned completion policy 判断。
+2026-09-29 后，不再让用户选择 completion policy。Task owner 使用一个 canonical derived evaluator。
 
-v1：
+有限 Plan：
 
 ```text
-AllRequiredOccurrencesCompleted
+存在 Pending / InProgress
+-> Open
+
+全部 required occurrence 已解析
+且没有 Missed
+-> Succeeded
 ```
+
+`Skipped` 表示显式豁免，不视为失败；它从 required completion scope 中排除。
+
+无限 recurrence 不会因为若干次 Completed 自动进入 Succeeded；它持续 Open，直到用户显式 Abandon，或未来出现明确的业务关闭规则。
 
 ### 6.2 Failed
 
-不是普通 instance 上的按钮，也不是“用户觉得没做好”。
+不是 occurrence 上的按钮，也不是用户直接选择的 Plan 状态。
 
-只有当 completion policy 可以确定：
+用户只声明 occurrence fact：
 
-> 该计划的成功条件已经无法满足
+```text
+Completed
+Missed
+Skipped
+```
 
-才得到 `Failed` outcome。
+对于有限 Plan，当范围已经结束、所有 occurrence 都已解析，但仍存在一个或多个显式 `Missed` 时，Task owner 派生：
 
-严格 15/15 且不允许补签时，一个 required occurrence 被确认 `Missed` 后即可失败。
+```text
+outcome = Failed
+status  = Closed
+```
 
-若仍支持补录/补签，则只是 overdue/open，不能提前失败。
+关键点：
+
+- due date 过去本身不会失败；
+- Pending/InProgress + Overdue 仍保持 Open；
+- Missed 后续可以被纠正成 Completed；
+- 纠正后重新评估，允许 `Failed -> Succeeded`；
+- 不需要用户理解“严格模式 / 允许补做”之类的额外 policy 概念。
 
 ### 6.3 Abandoned
 
@@ -249,31 +283,62 @@ Failed    = 想成功，但规则判断已经不可能成功
 Abandoned = 本来仍可继续，但用户决定停止
 ```
 
-## 7. Completion Policy 拥有“成功”的定义
+## 7. Canonical Outcome Evaluator 取代用户可配置 Completion Policy
 
-Goal contribution trigger 不承担 Task Plan 成功规则。
+Goal contribution trigger 不承担 Task Plan 成功规则；Task owner 仍然是 outcome eligibility owner。
+
+目标链路：
 
 ```text
 Occurrence facts
--> TaskPlanCompletionPolicy
+-> canonical TaskPlan outcome evaluator
 -> Plan outcome
--> Contribution settlement eligibility
+-> PlanCompletion settlement eligibility
 ```
 
-v1 policy：
+统一规则：
 
 ```text
-AllRequiredOccurrencesCompleted
+Infinite recurring
+  -> Open until explicit Abandon
+
+Finite plan
+  if any Pending/InProgress:
+    Open
+  else if any Missed:
+    Failed
+  else:
+    Succeeded
 ```
 
 其中：
 
-- `Completed`：满足该 occurrence；
-- `Missed`：required occurrence 未满足；
-- `Skipped`：显式豁免，不与 Missed 混为一谈；是否允许豁免由 plan policy/plan definition 决定；
-- `Pending/InProgress`：结果仍未确定。
+- `Completed`：required occurrence 已满足；
+- `Missed`：用户明确确认 required occurrence 没有完成；
+- `Skipped`：显式豁免，从 required scope 中排除；
+- `Pending/InProgress`：事实未决，即使已 Overdue 也不能被推断为 Missed。
 
-第一版不增加 8/10、百分比阈值等通用 policy DSL；等真实第二个需求出现后再扩展。
+### 7.1 `completionPolicy` compatibility migration
+
+当前 contracts / persistence / Portable V3 已经存在：
+
+```text
+AllowCorrection
+StrictNoBackfill
+```
+
+2026-09-29 产品决策是退休“用户可配置 policy”这一产品概念，但不能在实现时无迁移直接删字段。
+
+迁移要求：
+
+1. UI 立即不再暴露 policy 选择；
+2. canonical evaluator 成为新行为真值；
+3. 过渡期继续读取/round-trip 旧 `completionPolicy` 字段，避免 IPC/HTTP/portable restore 断裂；
+4. 新建 Plan 写入单一 compatibility 默认值，不让该字段影响新行为；
+5. 更新 portability/version contract 后，再删除 persistence/DTO 中的字段；
+6. characterization tests 覆盖旧 `AllowCorrection` / `StrictNoBackfill` 输入在迁移后的确定行为。
+
+本 ADR 不引入 8/10、百分比阈值等通用 policy DSL。只有出现真实第二类“计划成功条件”后，才通过新的业务语义扩展，而不是重新暴露通用 completion-policy 配置。
 
 ## 8. 与 ADR-056 `PlanCompletion` 的关系
 
@@ -296,9 +361,11 @@ TaskPlan outcome transitions to Succeeded
 
 因此：
 
-- `Succeeded -> Failed/Open/Abandoned`（因更正或撤销）时重新评估并撤回 settlement；
+- outcome 因 occurrence correction 发生变化时重新评估 settlement；
 - `Failed/Abandoned` 永不产生成功贡献；
-- Goal 不理解 Missed/Skipped/completion policy，只消费 Task 输出的 settlement fact。
+- `Failed -> Succeeded` 时只允许产生一次 PlanCompletion settlement；
+- `Succeeded -> Open/Failed/Abandoned` 时必须撤回既有 settlement；
+- Goal 不理解 Missed/Skipped 或 Task outcome 规则，只消费 Task 输出的 settlement fact。
 
 ## 9. UI 语义
 
@@ -333,7 +400,7 @@ TaskPlan outcome transitions to Succeeded
 6/15 已完成 · 1 次未完成
 
 状态：计划未达成
-原因：第 7 次打卡未完成，活动要求 15/15
+原因：第 7 次打卡未完成
 预期二课贡献：+1
 实际贡献：0
 ```
@@ -341,10 +408,13 @@ TaskPlan outcome transitions to Succeeded
 主动停止时使用：
 
 ```text
-放弃计划
+结束计划
+-> Abandon
 ```
 
-而不是 Delete。
+不是 Delete，也不是 Archive。
+
+普通 Task UI 不显示 Archive。`archivedAt` 继续只是 secondary visibility/storage metadata；未来若增加 Archives 页面，可在 closed history 上提供 Archive/Restore，但不进入主执行路径。
 
 ## 10. 统计语义
 
@@ -376,14 +446,22 @@ completion rate 默认以 required resolved occurrences 为分母；Skipped 是�
 - 删除 `markExpired()` mutation；
 - 删除/替换 `TaskExpirationService`；
 - 增加 markMissed / correctOutcome；
-- 增加 TaskPlan completion evaluator；
-- Plan outcome transition 驱动 ADR-056 settlement re-evaluation。
+- 将可配置 completion policy 收敛为 canonical TaskPlan outcome evaluator；
+- 过渡期保留旧 `completionPolicy` contract round-trip，再按 versioned migration 删除；
+- Plan outcome transition 驱动 ADR-056 settlement re-evaluation；
+- `End plan` 统一走 Abandon；
+- Abandon 除关闭 Plan 外，还必须清理/撤销已经 materialize 的未来未完成 occurrence；
+- Abandon 必须产生 Schedule projection 可消费的 lifecycle signal，使未来日程从 Schedule 中消失；
+- Reminder fire 必须在 Closed/Abandoned Plan 上 fail closed。
 
 ### UI / AI
 
-- Today/Upcoming 对 overdue 使用 derived badge；
-- past unresolved occurrence 提供“已完成 / 未完成”；
+- Task Home 收敛为 `Today | Plans`；未来浏览统一进入 Schedule / Calendar，不再维护独立 Upcoming；
+- Today 对 overdue 使用 derived badge，并保留在待处理范围；
+- past unresolved occurrence 提供“补完成 / 未完成 / 跳过”；
 - `Skipped` 文案只表达豁免；
+- occurrence 详情采用 compact Dialog/Sheet，不新增 Occurrence Detail route；
+- `结束计划` 映射显式 Abandon，不映射 Archive；
 - AI 不得因 due date 过去擅自标 Missed/Failed；
 - AI “放弃整个计划”必须走显式 user-approved Abandon command。
 
@@ -402,9 +480,13 @@ completion rate 默认以 required resolved occurrences 为分母；Skipped 是�
 ### Case B — 确实漏打卡
 
 ```text
-15/15 strict plan
+15 次有限计划
 Day 7 -> Missed
-no-backfill policy
+其他 occurrence 仍未决
+-> Plan Open
+
+计划范围结束且全部 occurrence 已解析
+Day 7 仍然 Missed
 -> Plan Failed
 -> PlanCompletion contribution = 0
 ```
@@ -414,7 +496,8 @@ no-backfill policy
 ```text
 Day 7 -> Skipped/waived
 -> 不解释为 Missed
--> completion policy 按 plan definition 重新评估
+-> 从 required completion scope 排除
+-> canonical outcome evaluator 重新评估
 ```
 
 ### Case D — 主动退出
@@ -431,9 +514,35 @@ Day 7 -> Skipped/waived
 ```text
 误标 Missed
 -> 更正为 Completed
--> plan policy 重新评估
--> 若重新 Succeeded，则只结算一次 Goal contribution
+-> canonical outcome evaluator 重新评估
+-> 若 Failed -> Succeeded，则只结算一次 Goal contribution
 ```
+
+### Case F — 结束计划
+
+```text
+Active recurring Plan
+已有未来 occurrence / reminder / Schedule projection
+
+用户点击“结束计划”
+-> Abandon
+-> Plan Closed + Abandoned
+-> 不再生成新 occurrence
+-> 删除/撤销未来未完成 occurrence
+-> Reminder 不再触发
+-> Schedule 不再展示未来执行
+-> 历史 occurrence 保留
+```
+
+### Case G — Archive 不承担业务结束
+
+```text
+archivedAt != null
+!= Closed
+!= Abandoned
+```
+
+因此普通用户路径不使用 Archive 结束计划。
 
 ## 13. 不采用的方案
 
