@@ -229,12 +229,12 @@ test.describe('AI Goal Workflow', () => {
     );
     expect(hasHorizontalOverflow).toBe(false);
 
-    await page.getByTestId('ai-chat-tool-menu-trigger').click();
-    await page.getByTestId('ai-chat-tool-knowledge-qa').click();
+    await sendComposerMessage(
+      page,
+      'Ask my knowledge base how answers should stay grounded in citations.',
+    );
 
-    await sendComposerMessage(page, 'How should knowledge answers stay grounded in citations?');
-
-    await expect(page.getByTestId('knowledge-qa-ask')).toBeEnabled({
+    await expect(page.getByTestId('knowledge-answer-panel')).toBeVisible({
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
   });
@@ -279,21 +279,13 @@ test.describe('AI Goal Workflow', () => {
   }) => {
     const telemetry = await bootstrapGoalWorkflowSession(page);
 
-    await page.getByTestId('ai-chat-tool-menu-trigger').click();
-    await page.getByTestId('ai-chat-tool-goal-create').click();
-
     await sendComposerMessage(
       page,
       'Create a structured AI workflow goal through the Agent runtime and execute the approved plan.',
     );
 
-    const startButton = page.getByTestId('goal-agent-start-run');
-    await expect(startButton).toBeEnabled({
-      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-    });
-    await startButton.click();
-
-    // ADR-052: goal.create renders in the durable Workflow panel, not a
+    // Unified composer intent detection starts goal.create automatically. ADR-052:
+    // goal.create renders in the durable Workflow panel, not a
     // legacy goal-agent-panel.
     const workflowPanel = page.getByTestId('goal-workflow-panel');
     await expect(workflowPanel).toBeVisible({
@@ -380,13 +372,7 @@ test.describe('AI Goal Workflow', () => {
   }) => {
     const telemetry = await bootstrapGoalWorkflowSession(page);
 
-    await page.getByTestId('ai-chat-tool-menu-trigger').click();
-    await page.getByTestId('ai-chat-tool-task-create').click();
     await sendComposerMessage(page, 'Create a weekly task to review the Mastra-only AI migration.');
-
-    const startButton = page.getByTestId('task-agent-start-run');
-    await expect(startButton).toBeEnabled({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
-    await startButton.click();
 
     const workflowPanel = page.getByTestId('task-workflow-panel');
     await expect(workflowPanel).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
@@ -407,10 +393,7 @@ test.describe('AI Goal Workflow', () => {
   }) => {
     const telemetry = await bootstrapGoalWorkflowSession(page);
 
-    await page.getByTestId('ai-chat-tool-menu-trigger').click();
-    await page.getByTestId('ai-chat-tool-task-create').click();
     await sendComposerMessage(page, 'Draft a task but do not create it until I approve.');
-    await page.getByTestId('task-agent-start-run').click();
 
     const workflowPanel = page.getByTestId('task-workflow-panel');
     await expect(page.getByTestId('task-agent-cancel-run')).toBeVisible({
@@ -430,13 +413,10 @@ test.describe('AI Goal Workflow', () => {
   }) => {
     const telemetry = await bootstrapGoalWorkflowSession(page);
 
-    await page.getByTestId('ai-chat-tool-menu-trigger').click();
-    await page.getByTestId('ai-chat-tool-knowledge-qa').click();
-    await sendComposerMessage(page, 'How should knowledge answers stay grounded in citations?');
-
-    const askButton = page.getByTestId('knowledge-qa-ask');
-    await expect(askButton).toBeEnabled({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
-    await askButton.click();
+    await sendComposerMessage(
+      page,
+      'Ask my knowledge base how answers should stay grounded in citations.',
+    );
 
     const answerPanel = page.getByTestId('knowledge-answer-panel');
     await expect(answerPanel).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
@@ -457,16 +437,10 @@ test.describe('AI Goal Workflow', () => {
   }) => {
     const telemetry = await bootstrapGoalWorkflowSession(page);
 
-    await page.getByTestId('ai-chat-tool-menu-trigger').click();
-    await page.getByTestId('ai-chat-tool-knowledge-capture').click();
     await sendComposerMessage(
       page,
       'Capture this conversation as a reusable note about durable Mastra workflow recovery.',
     );
-
-    const startButton = page.getByTestId('knowledge-capture-agent-start-run');
-    await expect(startButton).toBeEnabled({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
-    await startButton.click();
 
     const workflowPanel = page.getByTestId('knowledge-capture-workflow-panel');
     await expect(workflowPanel).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
@@ -487,19 +461,10 @@ test.describe('AI Goal Workflow', () => {
   }) => {
     const telemetry = await bootstrapGoalWorkflowSession(page);
 
-    await page.getByTestId('ai-chat-tool-menu-trigger').click();
-    await page.getByTestId('ai-chat-tool-knowledge-qa').click();
-
     await sendComposerMessage(
       page,
-      'What does my repository say about the unindexed archive migration plan?',
+      'Ask my knowledge base what it says about the unindexed archive migration plan.',
     );
-
-    const askButton = page.getByTestId('knowledge-qa-ask');
-    await expect(askButton).toBeEnabled({
-      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-    });
-    await askButton.click();
 
     const answerPanel = page.getByTestId('knowledge-answer-panel');
     await expect(answerPanel).toBeVisible({
@@ -526,19 +491,10 @@ test.describe('AI Goal Workflow', () => {
     // Product path is Goal Agent runtime only; legacy generate-draft UI is gone.
     await expect(page.getByTestId('goal-workflow-generate-draft')).toHaveCount(0);
 
-    await page.getByTestId('ai-chat-tool-menu-trigger').click();
-    await page.getByTestId('ai-chat-tool-goal-create').click();
-
     await sendComposerMessage(
       page,
       'Create a structured AI workflow goal through the Agent runtime and cancel before approving execution.',
     );
-
-    const startButton = page.getByTestId('goal-agent-start-run');
-    await expect(startButton).toBeEnabled({
-      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-    });
-    await startButton.click();
 
     const workflowPanel = page.getByTestId('goal-workflow-panel');
     await expect(workflowPanel).toBeVisible({
@@ -777,7 +733,7 @@ function createRestoredGoalWorkflowDraft(): GoalPlanDraft {
       name: 'Restored AI Agent workspace',
       summary: 'A pending approval run restored from local workflow state.',
       status: 'Planned',
-      startDate: '2026-09-12',
+      start: { kind: 'day', date: '2026-09-12' },
       target: { kind: 'year', year: 2026 },
       labels: [],
     },
@@ -818,7 +774,7 @@ function createGoalAgentWorkflowDraft(): GoalPlanDraft {
       name: 'Agent-created AI workflow',
       summary: 'Create a structured goal through the Mastra Workflow runtime.',
       status: 'InProgress',
-      startDate: '2026-09-12',
+      start: { kind: 'day', date: '2026-09-12' },
       target: { kind: 'quarter', year: 2026, quarter: 4 },
       labels: ['ai-vnext'],
     },

@@ -138,6 +138,7 @@
 
               <DropdownMenuItem
                 class="text-destructive focus:bg-destructive/10 focus:text-destructive"
+                :data-testid="`routine-profile-delete-${selectedProfile.id}`"
                 :disabled="mutating || routineCountForProfile(selectedProfile.id) > 0"
                 @click="removeProfile(selectedProfile)"
               >

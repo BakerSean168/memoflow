@@ -115,16 +115,24 @@ test.describe('Schedule calendar workspace', () => {
     const plannerCalendar = page.getByTestId('schedule-fullcalendar');
     await expect(plannerCalendar).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
 
-    const lanes = plannerCalendar.locator('.planner-slot-lane');
-    await expect(lanes.first()).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
-    expect(await lanes.count()).toBeGreaterThan(4);
+    const dayColumn = plannerCalendar.locator('.fc-timegrid-col[data-date]').first();
+    const startSlot = plannerCalendar.locator('.planner-slot-lane[data-time="08:00:00"]');
+    const endSlot = plannerCalendar.locator('.planner-slot-lane[data-time="09:00:00"]');
+    await expect(dayColumn).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    await expect(startSlot).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    await expect(endSlot).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
 
-    const start = await lanes.nth(4).boundingBox();
-    const end = await lanes.nth(6).boundingBox();
+    const day = await dayColumn.boundingBox();
+    const start = await startSlot.boundingBox();
+    const end = await endSlot.boundingBox();
+    expect(day).not.toBeNull();
     expect(start).not.toBeNull();
     expect(end).not.toBeNull();
 
-    const x = start!.x + Math.max(16, start!.width * 0.35);
+    // FullCalendar selection must begin inside a dated time-grid column. The slot-lane
+    // row is only the vertical time geometry; using its own X coordinate can hit the
+    // axis/mirror layer instead of a selectable day cell.
+    const x = day!.x + day!.width / 2;
     await page.mouse.move(x, start!.y + start!.height / 2);
     await page.mouse.down();
     await page.mouse.move(x, end!.y + end!.height / 2, { steps: 8 });

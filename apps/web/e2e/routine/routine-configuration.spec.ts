@@ -27,22 +27,26 @@ test.describe('Routine authenticated product journey', () => {
       timeout: TIMEOUT_CONFIG.NAVIGATION,
     });
 
+    await page.getByTestId('routine-profile-filter').click();
     await page.getByTestId('routine-create-profile-button').click();
     await expect(page.getByTestId('routine-profile-dialog')).toBeVisible();
     await page.getByTestId('routine-profile-name-input').fill(profileName);
     await page.getByTestId('routine-profile-save').click();
     await expect(page.getByTestId('routine-profile-dialog')).toBeHidden();
 
+    await page.getByTestId('routine-profile-filter').click();
     const profile = page
-      .locator('div[data-testid^="routine-profile-"]')
+      .locator('[data-testid^="routine-profile-"]')
       .filter({ hasText: profileName })
       .first();
     await expect(profile).toBeVisible();
     const profileTestId = await profile.getAttribute('data-testid');
     expect(profileTestId).toBeTruthy();
     const profileId = profileTestId!.replace('routine-profile-', '');
+    await profile.click();
 
     await page.getByTestId('routine-create-button').click();
+    await page.getByTestId('routine-create-blank').click();
     await expect(page.getByTestId('routine-editor-dialog')).toBeVisible();
     await page.getByTestId('routine-name-input').fill(routineName);
     await page.getByTestId('routine-trigger-type').selectOption('WallClock');
@@ -70,7 +74,7 @@ test.describe('Routine authenticated product journey', () => {
     await toggle.click();
     await expect(toggle).toHaveAttribute('data-state', 'checked');
 
-    await page.getByTestId(`routine-edit-${routineId}`).click();
+    await createdCard.locator('button').first().click();
     await expect(page.getByTestId('routine-editor-dialog')).toBeVisible();
     await page.getByTestId('routine-name-input').fill(updatedRoutineName);
     await page.locator('#routine-local-time').fill('10:30');
@@ -88,19 +92,24 @@ test.describe('Routine authenticated product journey', () => {
       timeout: TIMEOUT_CONFIG.NAVIGATION,
     });
     await expect(page.getByTestId(`routine-card-${routineId}`)).toContainText(updatedRoutineName);
+    await page.getByTestId('routine-profile-filter').click();
     await expect(page.getByTestId(`routine-profile-${profileId}`)).toContainText(profileName);
+    await page.getByTestId(`routine-profile-${profileId}`).click();
 
-    await page.getByTestId('routine-method-use-stand-and-move').click();
+    await page.getByTestId('routine-create-button').click();
+    await page.getByTestId('routine-template-stand-and-move').click();
     await expect(page.getByTestId('routine-editor-dialog')).toBeVisible();
     await expect(page.getByTestId('routine-name-input')).toHaveValue('Stand & Move');
     await expect(page.getByTestId('routine-trigger-type')).toHaveValue('Elapsed');
     await page.getByTestId('routine-editor-cancel').click();
     await expect(page.getByTestId('routine-editor-dialog')).toBeHidden();
 
+    await page.getByTestId(`routine-more-${routineId}`).click();
     page.once('dialog', async (dialog) => dialog.accept());
     await page.getByTestId(`routine-delete-${routineId}`).click();
     await expect(page.getByTestId(`routine-card-${routineId}`)).toHaveCount(0);
 
+    await page.getByTestId('routine-profile-filter').click();
     page.once('dialog', async (dialog) => dialog.accept());
     await page.getByTestId(`routine-profile-delete-${profileId}`).click();
     await expect(page.getByTestId(`routine-profile-${profileId}`)).toHaveCount(0);

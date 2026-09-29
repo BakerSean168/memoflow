@@ -63,9 +63,9 @@ test.describe('Planner owner-command acceptance', () => {
       hasText: taskName,
     });
     await expect(event).toHaveCount(1, { timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
-    const targetTimeLabel = page.getByText(/^(16:00|16时)$/, { exact: true }).last();
-    await expect(targetTimeLabel).toHaveCount(1, { timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
-    await targetTimeLabel.scrollIntoViewIfNeeded();
+    const targetSlot = page.locator('.planner-slot-lane[data-time="16:00:00"]');
+    await expect(targetSlot).toHaveCount(1, { timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    await targetSlot.scrollIntoViewIfNeeded();
     await expect(event).toBeVisible();
     const before = await event.boundingBox();
     expect(before).not.toBeNull();
@@ -83,7 +83,7 @@ test.describe('Planner owner-command acceptance', () => {
       });
     });
 
-    const target = await targetTimeLabel.boundingBox();
+    const target = await targetSlot.boundingBox();
     expect(target).not.toBeNull();
 
     const requestPromise = page.waitForRequest(

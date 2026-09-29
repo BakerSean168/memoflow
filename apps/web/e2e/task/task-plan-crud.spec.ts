@@ -30,7 +30,7 @@ test.describe('Task Plan CRUD Operations', () => {
     const creation = await createTaskPlan(page, planTitle);
 
     await expect(taskCardByTitle(page, planTitle)).toBeVisible();
-    await expect(taskCardByTitle(page, planTitle)).toContainText(/已启用中|Active/i);
+    await expect(taskCardByTitle(page, planTitle)).toContainText(/已启用|Enabled/i);
     expect(creation.occurrenceCount).toBeGreaterThanOrEqual(0);
     expect(typeof creation.todayOccurrenceCreated).toBe('boolean');
     await expect(
