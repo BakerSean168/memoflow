@@ -128,8 +128,8 @@ export class GoalRecord extends Entity<GoalRecordId> {
     if (!params.keyResultId) {
       throw new Error('KeyResult ID is required');
     }
-    if (typeof params.value !== 'number' || isNaN(params.value)) {
-      throw new Error('Value must be a valid number');
+    if (!Number.isFinite(params.value)) {
+      throw new Error('Value must be a finite number');
     }
     if (params.source && (!params.source.type || !params.source.id.trim())) {
       throw new Error('Goal record source type and ID are required together');

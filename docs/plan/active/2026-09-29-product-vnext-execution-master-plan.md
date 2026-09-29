@@ -358,6 +358,10 @@ Goal 是后续 property/direct-manipulation/measurement/review grammar 的第一
 
 **Acceptance:** 五种 calculation method 都有正确输入语义；0/负值按 domain semantics 处理，不被通用 positive rule 错杀。
 
+**Execution (2026-09-29): Implemented / validated.** `GoalRecordDialog` 现在直接消费 GOAL-1104 的 Goal-owned calculation presentation contract：Sum 作为 signed delta（本次变化），Average/Max/Min/Last 作为 sample（本次记录值）；所有方法允许 finite 的 0/负值，不再存在通用 `> 0`、`min=0.1` 或 10000 上限假设。Sum 提供对称 signed quick deltas，sample methods 不显示 delta quick chips；KR unit 原样呈现。手工 Record create helper 已删除 phantom `recordedAt`，由现有 GoalMutationReceipt 立即刷新 canonical KR currentValue，无额外 refetch。重复的两个 `GoalRecordCard` 已收敛为单一 neutral implementation，兼容 export name 保留。GoalRecord domain create 与 update 均显式 finite-number invariant；shared Zod contract 的 NaN/Infinity 拒绝行为已 characterization。
+
+**Validation:** app-vue focused 4 files / 81 tests PASS；Goal domain/progress 3 files / 24 tests PASS；Goal use-case 3 files / 17 tests PASS；`app-vue:typecheck` PASS；`goal:typecheck` PASS；changed-file ESLint 0 errors（3 个既有 test `no-explicit-any` warnings）；Prettier PASS；`git diff --check` PASS；`memoflow:governance-check` PASS。详见 [archived implementation plan](../archive/2026-09-29-pvc-goal-1201-composer.md)。
+
 **Dependencies:** GOAL-1104.
 
 ---

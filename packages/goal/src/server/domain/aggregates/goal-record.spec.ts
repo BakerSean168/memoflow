@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { CreateGoalRecordSchema, UpdateGoalRecordSchema } from '@memoflow/contracts/goal';
 import { GoalRecord } from './goal-record';
 
 describe('GoalRecord owned entity', () => {
@@ -41,7 +42,7 @@ describe('GoalRecord owned entity', () => {
         identityId: 'IdentityId_1' as never,
         value: Number.NaN,
       }),
-    ).toThrow('Value must be a valid number');
+    ).toThrow('Value must be a finite number');
   });
 
   it('updates notes and loads state without a child concurrency lifecycle', () => {
@@ -82,5 +83,33 @@ describe('GoalRecord owned entity', () => {
       sourceType: 'TASK_INSTANCE',
       sourceId: 'task-occurrence-1',
     });
+  });
+});
+
+describe('manual GoalRecord finite-number contract', () => {
+  const params = {
+    keyResultId: '550e8400-e29b-41d4-a716-446655440000' as never,
+    identityId: 'IdentityId_1' as never,
+    value: 0,
+  };
+  it.each([-5, 0, 10001.125])('accepts signed finite value %s in create and update', (value) => {
+    expect(CreateGoalRecordSchema.safeParse({ ...params, value, expectedVersion: 1 }).success).toBe(
+      true,
+    );
+    expect(UpdateGoalRecordSchema.safeParse({ value, expectedVersion: 1 }).success).toBe(true);
+    const record = GoalRecord.create({ ...params, value });
+    expect(record.value).toBe(value);
+    record.updateValue(value);
+    expect(record.value).toBe(value);
+  });
+  it.each([NaN, Infinity, -Infinity])('rejects %s in the shared schemas and domain', (value) => {
+    expect(CreateGoalRecordSchema.safeParse({ ...params, value, expectedVersion: 1 }).success).toBe(
+      false,
+    );
+    expect(UpdateGoalRecordSchema.safeParse({ value, expectedVersion: 1 }).success).toBe(false);
+    expect(() => GoalRecord.create({ ...params, value })).toThrow('Value must be a finite number');
+    const record = GoalRecord.create(params);
+    expect(() => record.updateValue(value)).toThrow('Value must be a finite number');
+    expect(record.value).toBe(0);
   });
 });
