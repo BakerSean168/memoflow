@@ -327,6 +327,10 @@ Goal 是后续 property/direct-manipulation/measurement/review grammar 的第一
 
 **Acceptance:** feature UI 不再各自 hardcode `Sum/Average/Max/Min/Last` copy。
 
+**Execution (2026-09-29): Implemented / validated.** 已建立 Goal-owned `key-result-calculation-presentation` authority，冻结五种方法顺序与用户语言：`Sum -> 累计/Cumulative`、`Average -> 平均值/Average`、`Max -> 最高值/Maximum`、`Min -> 最低值/Minimum`、`Last -> 最新值/Latest`；同时预先集中 Record input semantic：Sum=`delta` / 本次变化，其他四种=`sample` / 本次记录值。utility 只负责 presentation，不承担 aggregation math，unit 继续来自 KR 自身。Goal KR card/draft editor、KeyResult detail 与 AI Goal draft 已复用同一 authority；Task 当前尚未投影 method/unit，本 ticket 不越权扩展，仍由 TASK-3301A 处理。
+
+**Validation:** focused app-vue suite 7 files / 52 tests PASS；`app-vue:typecheck` PASS；changed-file ESLint PASS；Prettier PASS；`git diff --check` PASS；`memoflow:governance-check` PASS。详见 [implementation report](../../analysis/2026-09-29-pvc-goal-1104-implementation.md)。
+
 **Dependencies:** BASE-001.
 
 ---

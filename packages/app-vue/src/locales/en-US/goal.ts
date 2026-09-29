@@ -556,6 +556,8 @@ export default {
     description: 'Record progress toward this key result',
     save: 'Save',
     incrementValue: 'Increment Value',
+    changeThisTime: 'Change this time',
+    recordedValue: 'Recorded value',
     unit: 'Unit',
     remarks: 'Remarks',
     remarksPlaceholder: 'Add detailed notes about this record...',

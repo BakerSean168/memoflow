@@ -142,8 +142,12 @@
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem v-for="method in calculationMethods" :key="method" :value="method">
-                {{ calculationMethodLabel(method) }}
+              <SelectItem
+                v-for="method in KEY_RESULT_CALCULATION_METHODS"
+                :key="method"
+                :value="method"
+              >
+                {{ getKeyResultCalculationLabel(method, t) }}
               </SelectItem>
             </SelectContent>
           </Select>
@@ -196,7 +200,7 @@ import {
   goalTimeframeLabel,
   KEY_RESULT_DESCRIPTION_MAX_LENGTH,
   KEY_RESULT_TITLE_MAX_LENGTH,
-  KeyResultCalculationMethod,
+  type KeyResultCalculationMethod,
   type GoalTimeframe,
 } from '@memoflow/contracts/goal';
 import {
@@ -214,6 +218,7 @@ import {
 import { ProductAutoTextarea } from '../../../shared/components';
 import { useTransientFeedback } from '../../../shared/composables/useTransientFeedback';
 import { formatProductYmd, getProductTodayYmd } from '../../../shared/utils/product-time';
+import { KEY_RESULT_CALCULATION_METHODS, getKeyResultCalculationLabel } from '../utils';
 import GoalTimeframePicker from './GoalTimeframePicker.vue';
 import GoalKeyResultTrajectoryPlot from './GoalKeyResultTrajectoryPlot.vue';
 
@@ -246,7 +251,6 @@ const { t, locale } = useI18n();
 const titleLimitFeedback = useTransientFeedback();
 const weightOpen = ref(false);
 const descriptionLimitFeedback = useTransientFeedback();
-const calculationMethods = Object.values(KeyResultCalculationMethod);
 const weightLevels = [1, 2, 3, 4, 5] as const;
 
 const normalizedWeight = computed(() =>
@@ -269,16 +273,5 @@ function setWeight(level: (typeof weightLevels)[number]): void {
   if (props.disabled) return;
   weight.value = level;
   weightOpen.value = false;
-}
-
-function calculationMethodLabel(method: KeyResultCalculationMethod): string {
-  const labels: Record<KeyResultCalculationMethod, string> = {
-    Sum: t('goal.dialog.krCalculationSum'),
-    Average: t('goal.dialog.krCalculationAverage'),
-    Max: t('goal.dialog.krCalculationMax'),
-    Min: t('goal.dialog.krCalculationMin'),
-    Last: t('goal.dialog.krCalculationLast'),
-  };
-  return labels[method];
 }
 </script>

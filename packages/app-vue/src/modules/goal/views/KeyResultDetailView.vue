@@ -23,7 +23,7 @@
         <div class="flex items-end justify-between gap-4">
           <div class="min-w-0">
             <p class="truncate text-[11px] text-[hsl(var(--foreground-subtle))]">
-              {{ kr.progress.aggregationMethod }}
+              {{ getKeyResultCalculationLabel(kr.progress.aggregationMethod, t) }}
             </p>
             <p class="mt-1 text-xl font-semibold tracking-[-0.02em]">
               {{ kr.progress.currentValue }} / {{ kr.progress.targetValue }}
@@ -80,6 +80,7 @@ import { Button, Progress } from '@memoflow/ui-vue-shadcn';
 import { goalTimeframeLabel } from '@memoflow/contracts/goal';
 import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
 import { useGoal } from '../composables/useGoal';
+import { getKeyResultCalculationLabel } from '../utils';
 
 const route = useRoute();
 const router = useRouter();

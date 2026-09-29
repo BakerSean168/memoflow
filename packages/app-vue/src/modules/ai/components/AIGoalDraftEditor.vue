@@ -98,8 +98,12 @@
           >
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem v-for="option in methods" :key="option" :value="option">
-                {{ option }}
+              <SelectItem
+                v-for="method in KEY_RESULT_CALCULATION_METHODS"
+                :key="method"
+                :value="method"
+              >
+                {{ getKeyResultCalculationLabel(method, t) }}
               </SelectItem>
             </SelectContent>
           </Select>
@@ -166,7 +170,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { KeyResultCalculationMethod } from '@memoflow/contracts/goal';
 import {
   Button,
   Input,
@@ -178,6 +181,7 @@ import {
   Textarea,
 } from '@memoflow/ui-vue-shadcn';
 import GoalTimeframePicker from '../../goal/components/GoalTimeframePicker.vue';
+import { KEY_RESULT_CALCULATION_METHODS, getKeyResultCalculationLabel } from '../../goal/utils';
 import type { EditableGoal, EditableKeyResult } from '../composables';
 
 const props = defineProps<{
@@ -198,7 +202,6 @@ const hasDraft = computed(() =>
   Boolean(props.goal.name || props.goal.summary || props.keyResults.length),
 );
 const showConfirmAction = computed(() => props.showConfirmAction !== false);
-const methods = Object.values(KeyResultCalculationMethod);
 
 function updateGoalField<K extends keyof EditableGoal>(key: K, value: EditableGoal[K]) {
   emit('update-goal', { ...props.goal, [key]: value });
