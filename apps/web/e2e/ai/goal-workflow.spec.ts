@@ -231,7 +231,7 @@ test.describe('AI Goal Workflow', () => {
 
     await sendComposerMessage(
       page,
-      'Ask my knowledge base how answers should stay grounded in citations.',
+      'Ask my knowledge base how knowledge answers stay grounded in citations.',
     );
 
     await expect(page.getByTestId('knowledge-answer-panel')).toBeVisible({
@@ -415,7 +415,7 @@ test.describe('AI Goal Workflow', () => {
 
     await sendComposerMessage(
       page,
-      'Ask my knowledge base how answers should stay grounded in citations.',
+      'Ask my knowledge base how knowledge answers stay grounded in citations.',
     );
 
     const answerPanel = page.getByTestId('knowledge-answer-panel');

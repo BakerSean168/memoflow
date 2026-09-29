@@ -49,9 +49,12 @@ test.describe('Routine authenticated product journey', () => {
     await page.getByTestId('routine-create-blank').click();
     await expect(page.getByTestId('routine-editor-dialog')).toBeVisible();
     await page.getByTestId('routine-name-input').fill(routineName);
-    await page.getByTestId('routine-trigger-type').selectOption('WallClock');
-    await page.locator('#routine-local-time').fill('09:15');
-    await page.getByTestId(`routine-profile-membership-${profileId}`).check();
+    await page.getByTestId('routine-trigger-type').click();
+    await page.getByTestId('routine-trigger-option-WallClock').click();
+    await page.getByTestId('routine-local-time').fill('09:15');
+    await page.getByTestId('routine-profile-picker').click();
+    await page.getByTestId(`routine-profile-membership-${profileId}`).click();
+    await page.keyboard.press('Escape');
     await page.getByTestId('routine-editor-save').click();
     await expect(page.getByTestId('routine-editor-dialog')).toBeHidden();
 
@@ -77,8 +80,13 @@ test.describe('Routine authenticated product journey', () => {
     await createdCard.locator('button').first().click();
     await expect(page.getByTestId('routine-editor-dialog')).toBeVisible();
     await page.getByTestId('routine-name-input').fill(updatedRoutineName);
-    await page.locator('#routine-local-time').fill('10:30');
-    await expect(page.getByTestId(`routine-profile-membership-${profileId}`)).toBeChecked();
+    await page.getByTestId('routine-local-time').fill('10:30');
+    await page.getByTestId('routine-profile-picker').click();
+    await expect(page.getByTestId(`routine-profile-membership-${profileId}`)).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+    await page.keyboard.press('Escape');
     await page.getByTestId('routine-editor-save').click();
     await expect(page.getByTestId('routine-editor-dialog')).toBeHidden();
 
@@ -100,7 +108,10 @@ test.describe('Routine authenticated product journey', () => {
     await page.getByTestId('routine-template-stand-and-move').click();
     await expect(page.getByTestId('routine-editor-dialog')).toBeVisible();
     await expect(page.getByTestId('routine-name-input')).toHaveValue('Stand & Move');
-    await expect(page.getByTestId('routine-trigger-type')).toHaveValue('Elapsed');
+    await expect(page.getByTestId('routine-trigger-type')).toHaveAttribute(
+      'data-trigger-type',
+      'Elapsed',
+    );
     await page.getByTestId('routine-editor-cancel').click();
     await expect(page.getByTestId('routine-editor-dialog')).toBeHidden();
 

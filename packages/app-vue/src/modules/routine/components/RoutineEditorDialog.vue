@@ -81,6 +81,7 @@
                   :disabled="saving"
                   :aria-label="t('routine.form.triggerType')"
                   data-testid="routine-trigger-type"
+                  :data-trigger-type="triggerType"
                 >
                   <template #icon>
                     <component :is="currentTriggerOption.icon" class="h-3.5 w-3.5" />
@@ -97,6 +98,7 @@
                     v-for="option in triggerOptions"
                     :key="option.value"
                     :value="option.value"
+                    :data-testid="`routine-trigger-option-${option.value}`"
                     class="gap-2"
                   >
                     <component :is="option.icon" class="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -308,6 +310,7 @@
             <input
               v-model="localTime"
               type="time"
+              data-testid="routine-local-time"
               :aria-label="t('routine.form.localTime')"
               :disabled="saving"
               class="routine-borderless-control w-32"

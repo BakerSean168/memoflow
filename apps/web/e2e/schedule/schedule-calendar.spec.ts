@@ -115,7 +115,7 @@ test.describe('Schedule calendar workspace', () => {
     const plannerCalendar = page.getByTestId('schedule-fullcalendar');
     await expect(plannerCalendar).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
 
-    const dayColumn = plannerCalendar.locator('.fc-timegrid-col[data-date]').first();
+    const dayColumn = plannerCalendar.locator('.planner-day-lane').first();
     const startSlot = plannerCalendar.locator('.planner-slot-lane[data-time="08:00:00"]');
     const endSlot = plannerCalendar.locator('.planner-slot-lane[data-time="09:00:00"]');
     await expect(dayColumn).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
