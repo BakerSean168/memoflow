@@ -17,7 +17,7 @@
       <div class="grid grid-cols-12 gap-4">
         <!-- 是否启用重复 -->
         <div class="col-span-12">
-          <div class="flex items-center justify-between gap-3 rounded-lg bg-muted/25 px-2.5 py-2">
+          <div class="flex items-center justify-between gap-3 rounded-lg bg-[hsl(var(--surface-raised)/0.34)] px-2.5 py-2 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)]">
             <div class="flex min-w-0 items-center gap-2">
               <Repeat2 class="h-4 w-4 shrink-0 text-muted-foreground" />
               <Label for="task-recurrence-enabled" class="cursor-pointer">

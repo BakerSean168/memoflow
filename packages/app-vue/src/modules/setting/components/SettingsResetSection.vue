@@ -28,7 +28,10 @@ const target = ref<PreferenceResetTarget>('all');
 </script>
 
 <template>
-  <Card class="border-border/70" data-testid="settings-reset-section">
+  <Card
+    class="border-0 bg-[hsl(var(--surface-raised)/0.24)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)]"
+    data-testid="settings-reset-section"
+  >
     <CardHeader>
       <CardTitle class="flex items-center gap-2">
         <RotateCcw class="h-4 w-4" />
@@ -52,7 +55,7 @@ const target = ref<PreferenceResetTarget>('all');
           <select
             id="settings-reset-category"
             v-model="target"
-            class="w-full rounded-md border bg-background px-3 py-2 text-sm"
+            class="w-full rounded-md border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.68)] px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary/35 focus:ring-2 focus:ring-ring/30"
             data-testid="settings-reset-category"
           >
             <option value="all">{{ t('setting.resetPreferences.categoryAll') }}</option>

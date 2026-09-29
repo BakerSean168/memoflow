@@ -1,39 +1,40 @@
 <template>
   <div class="flex h-full flex-col overflow-hidden bg-background">
-    <!-- Header -->
-    <header
-      class="z-10 flex h-14 shrink-0 items-center justify-between border-b bg-background/50 px-6 backdrop-blur-sm"
-    >
-      <div class="flex items-center gap-3">
+    <ModuleHeader>
+      <template #leading>
         <Button
           variant="ghost"
           size="icon"
-          class="h-8 w-8"
+          class="h-7 w-7"
           :aria-label="t('common.back')"
           @click="$router.push('/notifications')"
         >
-          <ArrowLeft class="h-4 w-4" />
+          <ArrowLeft class="h-3.5 w-3.5" />
         </Button>
-        <Separator orientation="vertical" class="h-4" />
-        <h1 class="text-lg font-medium text-foreground">
+        <h1 class="truncate text-[13px] font-semibold tracking-[-0.01em] text-foreground">
           {{ t('notification.sseMonitor.title') }}
         </h1>
-        <Badge :variant="connected ? 'default' : 'destructive'" class="text-xs">
+        <Badge :variant="connected ? 'secondary' : 'destructive'" class="h-5 text-[10px]">
           {{
             connected
               ? t('notification.sseMonitor.connected')
               : t('notification.sseMonitor.disconnected')
           }}
         </Badge>
-      </div>
+      </template>
 
-      <div class="flex items-center gap-2">
-        <Button variant="outline" size="sm" class="h-8" @click="clearMessages">
+      <template #actions>
+        <Button
+          variant="ghost"
+          size="sm"
+          class="h-7 text-[11px] text-[hsl(var(--foreground-muted))]"
+          @click="clearMessages"
+        >
           {{ t('notification.sseMonitor.clearLog') }}
         </Button>
         <Button
           size="sm"
-          class="h-8"
+          class="h-7 text-[11px]"
           :variant="connected ? 'destructive' : 'default'"
           @click="toggleConnection"
         >
@@ -43,11 +44,11 @@
               : t('notification.sseMonitor.actionConnect')
           }}
         </Button>
-      </div>
-    </header>
+      </template>
+    </ModuleHeader>
 
     <!-- Content -->
-    <ScrollArea class="flex-1 p-6">
+    <ScrollArea class="flex-1 p-4 @2xl/panel:p-6">
       <div class="mx-auto max-w-4xl space-y-2">
         <div
           v-if="messages.length === 0"
@@ -63,7 +64,7 @@
         <div
           v-for="(msg, index) in messages"
           :key="index"
-          class="rounded-lg border bg-card p-3 font-mono text-sm"
+          class="rounded-lg bg-[hsl(var(--surface-raised)/0.32)] p-3 font-mono text-[12px] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)]"
         >
           <div class="mb-1 flex items-center gap-2 text-xs text-muted-foreground">
             <span>{{ formatMessageTime(msg.time) }}</span>
@@ -80,7 +81,8 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ArrowLeft, Radio } from '@lucide/vue';
-import { Button, Badge, ScrollArea, Separator } from '@memoflow/ui-vue-shadcn';
+import { Button, Badge, ScrollArea } from '@memoflow/ui-vue-shadcn';
+import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
 import { getProductTime, productTimeRevision } from '../../../shared/utils/product-time';
 
 interface SSEMessage {

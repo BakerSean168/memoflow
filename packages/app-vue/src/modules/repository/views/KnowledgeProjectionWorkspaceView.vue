@@ -312,11 +312,11 @@
         <template #description>{{ t('repository.projection.adoptDescription') }}</template>
 
         <div v-if="adoptionProposal" class="space-y-3 text-sm">
-          <div class="rounded-md border bg-muted/20 p-3">
+          <div class="rounded-lg bg-[hsl(var(--surface-raised)/0.34)] p-3 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)]">
             <p class="text-xs text-muted-foreground">{{ t('repository.projection.notePath') }}</p>
             <p class="mt-1 font-mono text-xs">{{ adoptionProposal.relativePath }}</p>
           </div>
-          <div class="rounded-md border bg-muted/20 p-3">
+          <div class="rounded-lg bg-[hsl(var(--surface-raised)/0.34)] p-3 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)]">
             <p class="text-xs text-muted-foreground">{{ t('repository.projection.adoptPatch') }}</p>
             <p class="mt-1 font-mono text-xs" data-testid="knowledge-projection-adopt-document-id">
               memoflow_id: {{ adoptionProposal.knowledgeDocumentId }}

@@ -29,7 +29,7 @@
             <div
               v-for="(task, index) in sortedTasks"
               :key="index"
-              class="flex items-start gap-3 p-3 rounded-lg border bg-card"
+              class="flex items-start gap-3 rounded-xl bg-[hsl(var(--surface-raised)/0.3)] p-3 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)]"
             >
               <Checkbox
                 :model-value="task.selected"
@@ -38,7 +38,7 @@
                 class="mt-1"
               />
 
-              <div class="flex-1 space-y-2">
+              <div class="min-w-0 flex-1 space-y-2">
                 <div class="flex items-center gap-2">
                   <Badge :class="getPriorityBadgeClass(task.priority)" class="text-xs">
                     {{ task.priority }}

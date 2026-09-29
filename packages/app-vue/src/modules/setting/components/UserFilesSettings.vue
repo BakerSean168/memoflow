@@ -1,5 +1,5 @@
 <template>
-  <Card>
+  <Card class="border-0 bg-[hsl(var(--surface-raised)/0.24)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)]">
     <CardHeader>
       <CardTitle class="flex items-center">
         <FolderOpen class="h-5 w-5 mr-2" />
@@ -10,7 +10,7 @@
       </p>
     </CardHeader>
 
-    <Separator />
+    <Separator class="bg-[hsl(var(--border-subtle))]" />
 
     <CardContent class="p-4 space-y-4">
       <!-- Current path -->
@@ -18,7 +18,7 @@
         <Label class="text-sm font-medium">{{ t('setting.userFiles.currentDirectory') }}</Label>
         <div class="flex items-center gap-2">
           <code
-            class="flex-1 text-sm bg-muted rounded-md px-3 py-2 overflow-x-auto whitespace-nowrap"
+            class="flex-1 overflow-x-auto whitespace-nowrap rounded-lg bg-[hsl(var(--surface)/0.72)] px-3 py-2 text-[12px] text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.45)]"
           >
             {{ currentPath || '...' }}
           </code>
@@ -31,7 +31,7 @@
         <Label class="text-sm font-medium text-muted-foreground">
           {{ t('setting.userFiles.defaultDirectory') }}
         </Label>
-        <code class="block text-sm bg-muted/50 rounded-md px-3 py-2 text-muted-foreground">
+        <code class="block rounded-lg bg-[hsl(var(--surface)/0.5)] px-3 py-2 text-[12px] text-[hsl(var(--foreground-muted))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.4)]">
           {{ defaultPath }}
         </code>
       </div>

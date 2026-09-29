@@ -143,6 +143,25 @@ describe('MemoFlow product surface polish', () => {
     expect(task).not.toContain('@3xl/panel:grid-cols-4');
   });
 
+  it('keeps high-frequency editors on semantic surfaces instead of nested default cards', () => {
+    const krCard = read('modules/goal/components/GoalKeyResultCardEditor.vue');
+    const krDrafts = read('modules/goal/components/GoalKeyResultDraftEditor.vue');
+    const checklist = read('modules/task/components/TaskPlanForm/sections/ChecklistSection.vue');
+    const reminder = read('modules/task/components/TaskPlanForm/sections/ReminderSection.vue');
+    const schedule = read('modules/schedule/components/CreateScheduleDialog.vue');
+    const taskAi = read('modules/task/components/TaskAIGenerationDialog.vue');
+
+    for (const source of [krCard, krDrafts, checklist, reminder, schedule, taskAi]) {
+      expect(source).toContain('surface-raised');
+      expect(source).not.toContain('border bg-card');
+    }
+
+    expect(krDrafts).not.toContain('border border-border/70 bg-background/20');
+    expect(checklist).not.toContain('border border-border/70 bg-background/20');
+    expect(schedule).not.toContain('border border-border/60 bg-muted/[0.08]');
+    expect(schedule).not.toContain('border border-border/60 bg-background/55');
+  });
+
   it('keeps inbox rows compact without the old high-chroma unread chrome', () => {
     const item = read('modules/notification/components/NotificationItem.vue');
     expect(item).toContain('data-density="compact"');

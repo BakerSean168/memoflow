@@ -50,7 +50,7 @@
         </section>
 
         <section
-          class="rounded-xl border border-border/60 bg-muted/[0.08] p-3.5"
+          class="rounded-xl bg-[hsl(var(--surface-raised)/0.34)] p-3.5 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)]"
           data-testid="schedule-time-panel"
         >
           <div class="flex items-center gap-3">
@@ -126,7 +126,7 @@
           <div v-else class="mt-3 grid gap-2 sm:grid-cols-[1fr_auto_1fr]">
             <button
               type="button"
-              class="group min-w-0 rounded-lg border border-border/60 bg-background/55 px-3 py-2.5 text-left transition-colors hover:border-primary/35 hover:bg-primary/[0.035] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
+              class="group min-w-0 rounded-lg bg-[hsl(var(--surface)/0.68)] px-3 py-2.5 text-left shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)] transition-[background-color,box-shadow] hover:bg-[hsl(var(--hover)/0.72)] hover:shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.72)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
               data-testid="schedule-start-time-button"
               @click="startPickerOpen = true"
             >
@@ -142,7 +142,7 @@
 
             <button
               type="button"
-              class="group min-w-0 rounded-lg border border-border/60 bg-background/55 px-3 py-2.5 text-left transition-colors hover:border-primary/35 hover:bg-primary/[0.035] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
+              class="group min-w-0 rounded-lg bg-[hsl(var(--surface)/0.68)] px-3 py-2.5 text-left shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)] transition-[background-color,box-shadow] hover:bg-[hsl(var(--hover)/0.72)] hover:shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.72)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
               data-testid="schedule-end-time-button"
               @click="endPickerOpen = true"
             >
@@ -202,7 +202,7 @@
                   id="location"
                   v-model="formData.location"
                   :placeholder="t('schedule.createDialog.fieldLocationPlaceholder')"
-                  class="h-9 border-border/60 bg-muted/10 pl-9 shadow-none"
+                  class="h-9 border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.3)] pl-9 shadow-none"
                   maxlength="200"
                 />
               </div>
@@ -232,7 +232,7 @@
                 <Input
                   v-model="newAttendee"
                   :placeholder="t('schedule.createDialog.fieldAttendeePlaceholder')"
-                  class="h-9 border-border/60 bg-muted/10 shadow-none"
+                  class="h-9 border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.3)] shadow-none"
                   @keydown.enter.prevent="addAttendee"
                 />
                 <Button type="button" variant="outline" size="sm" class="h-9" @click="addAttendee">
@@ -245,7 +245,7 @@
 
           <div
             v-if="!formData.allDay"
-            class="flex items-center gap-3 rounded-lg border border-border/50 bg-background/30 px-3 py-2.5"
+            class="flex items-center gap-3 rounded-lg bg-[hsl(var(--surface-raised)/0.3)] px-3 py-2.5 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)]"
             data-testid="schedule-conflict-setting"
           >
             <ShieldCheck class="h-4 w-4 shrink-0 text-success" />

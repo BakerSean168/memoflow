@@ -66,7 +66,7 @@
         <!-- 加载 = 行骨架（§0.3 禁整页 spinner） -->
         <div
           v-if="isLoading"
-          class="overflow-hidden rounded-xl border border-border/60 bg-card/30"
+          class="overflow-hidden rounded-xl bg-[hsl(var(--surface-raised)/0.24)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.48)]"
           data-testid="notification-list-skeleton"
           role="status"
           :aria-label="t('notification.loading')"
@@ -74,7 +74,7 @@
           <div
             v-for="i in 6"
             :key="i"
-            class="flex items-start gap-3 border-b border-border/60 px-4 py-3.5 last:border-b-0"
+            class="flex items-start gap-3 border-b border-[hsl(var(--border-subtle))] px-4 py-3.5 last:border-b-0"
           >
             <Skeleton class="h-9 w-9 shrink-0 rounded-lg" />
             <div class="min-w-0 flex-1 space-y-2 pt-0.5">
@@ -125,7 +125,7 @@
             data-testid="notifications-unread-empty"
           >
             <div
-              class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-success/15 bg-success/5 text-success/80 shadow-sm"
+              class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-success/5 text-success/80 shadow-[inset_0_0_0_1px_hsl(var(--success)/0.14)]"
             >
               <CheckCheck class="h-5 w-5" />
             </div>
@@ -140,7 +140,7 @@
             data-testid="notifications-empty-state"
           >
             <div
-              class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-border/60 bg-muted/25 text-muted-foreground shadow-sm"
+              class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[hsl(var(--surface-raised)/0.42)] text-[hsl(var(--foreground-muted))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.52)]"
             >
               <Bell class="h-5 w-5" />
             </div>

@@ -1,6 +1,6 @@
 <template>
   <figure
-    class="rounded-xl border border-border/55 bg-background/10 p-4 shadow-[0_1px_0_rgba(255,255,255,0.02)]"
+    class="rounded-xl bg-[hsl(var(--surface-raised)/0.32)] p-4 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5),inset_0_1px_0_hsl(var(--foreground)/0.02)]"
     data-testid="kr-card-editor"
   >
     <figcaption>
@@ -69,7 +69,7 @@
               type="button"
               variant="ghost"
               size="sm"
-              class="h-7 shrink-0 gap-2 rounded-full px-2.5 text-xs font-normal text-muted-foreground hover:bg-muted/55 hover:text-foreground"
+              class="h-7 shrink-0 gap-2 rounded-full px-2.5 text-xs font-normal text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
               :disabled="disabled"
               data-testid="draft-kr-weight"
             >
@@ -136,7 +136,7 @@
           <Select v-model="calculationMethod" :disabled="disabled">
             <SelectTrigger
               data-testid="draft-kr-calculation-method"
-              class="h-7 w-auto min-w-20 gap-1.5 rounded-md border-0 bg-transparent px-2 text-xs shadow-none hover:bg-muted/55 focus:ring-1 focus:ring-ring/30"
+              class="h-7 w-auto min-w-20 gap-1.5 rounded-md border-0 bg-transparent px-2 text-xs shadow-none hover:bg-[hsl(var(--hover))] focus:ring-1 focus:ring-ring/30"
             >
               <Sigma class="h-3.5 w-3.5 text-muted-foreground" />
               <SelectValue />
@@ -149,7 +149,7 @@
           </Select>
 
           <div
-            class="group flex h-7 items-center gap-1 rounded-md px-2 text-xs transition-colors hover:bg-muted/55 focus-within:bg-muted/55"
+            class="group flex h-7 items-center gap-1 rounded-md px-2 text-xs transition-colors hover:bg-[hsl(var(--hover))] focus-within:bg-[hsl(var(--hover))]"
           >
             <Plus v-if="!unit" class="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
             <Input
