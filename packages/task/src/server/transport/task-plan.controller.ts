@@ -78,7 +78,11 @@ export class TaskPlanController {
   ): QueryTaskPlansInternal {
     return {
       identityId: IdentityId.of(ctx.identityId),
+      page: filters?.page,
+      limit: filters?.limit,
       status: filters?.status,
+      outcome: filters?.outcome,
+      archiveState: filters?.archiveState,
       goalId: filters?.goalId as GoalId | undefined,
       keyResultId: filters?.keyResultId,
       labelIdsAll: filters?.labelIdsAll,

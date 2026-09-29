@@ -90,6 +90,12 @@ export default {
       overdue: 'Overdue',
       today: 'Today',
     },
+    previousPage: 'Previous',
+    nextPage: 'Next',
+    scope: {
+      goal: 'Goal',
+      keyResult: 'Key result',
+    },
     moreActions: 'More actions',
     planColumn: 'Task',
     scheduleColumn: 'Schedule',

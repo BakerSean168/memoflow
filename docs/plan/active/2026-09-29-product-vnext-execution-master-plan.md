@@ -590,6 +590,10 @@ Goal 是后续 property/direct-manipulation/measurement/review grammar 的第一
 
 ## PVC-TASK-3003B — Bound Task queries and canonical Goal/KR scope
 
+**Execution (2026-09-29): Implemented / validated.** The second repair applies Plan-state/label filters before server paging/counting via optional `status` / `outcome` / `archiveState` / `labelIdsAll`. Today disables the generic Plan page query and uses a bounded Product Time date-range query plus the optional unresolved overdue-open read, fetching only required missing/stale Plan details through canonical detail keys. Goal/KR scope is canonical server scope with readable names/titles. Shared task Zod schemas remain canonical for HTTP/IPC.
+
+**Validation:** Final repair: task 11 files / 162 tests; app-vue 5 files / 50 tests; `task:typecheck`, direct app-vue `vue-tsc` (exit 0), and the final full Nx `app-vue:typecheck` rerun all passed. Changed-file ESLint: 0 errors / 7 `no-explicit-any` test warnings; `memoflow:governance-check` and `git diff --check` passed. An earlier Nx attempt hit transient `ui-vue-shadcn:build` `ENOTEMPTY`, but the clean rerun completed successfully. See [implementation report](../../analysis/2026-09-29-pvc-task-3003b-implementation.md). No TASK-3004/3401, Goal measurement, Schedule dialog, AI or Governance product implementation was started in 3003B.
+
 **Goal:** Today/Plans 不再加载不必要全量历史或假分页。
 
 **Implementation:**

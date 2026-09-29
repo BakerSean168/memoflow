@@ -96,7 +96,7 @@ describe('task plan ownership surface', () => {
       'findByGoalId(identityId: string, goalId: string): Promise<TaskPlan[]>;',
     );
     expect(prisma).toContain('async findByGoalId(identityId: string, goalId: string)');
-    expect(listUseCase).toContain('findByGoalId(request.identityId, request.goalId)');
+    expect(listUseCase).toContain('planRepository.findPage(request.identityId');
     expect(port).not.toContain('findByFolderId');
     expect(prisma).not.toContain('findByFolderId');
   });
@@ -109,6 +109,19 @@ describe('task plan ownership surface', () => {
     expect(prisma).toMatch(/identityId,\s*goalId,\s*keyResultId,\s*deletedAt: null/);
     expect(port).not.toContain('findSubtasks');
     expect(prisma).not.toContain('findSubtasks');
+  });
+
+  it('canonical Plan collection reads are identity-scoped and bounded in both persistence lanes', () => {
+    expect(port).toContain('findPage(');
+    expect(port).toContain('limit: number');
+    expect(port).toContain('offset: number');
+    expect(prisma).toContain('async findPage(');
+    expect(prisma).toContain('skip: query.offset');
+    expect(prisma).toContain('take: query.limit');
+    expect(powersync).toContain('async findPage(');
+    expect(powersync).toContain('LIMIT ? OFFSET ?');
+    expect(listUseCase).toContain('offset: (page - 1) * limit');
+    expect(listUseCase).toContain('keyResultId: String(request.keyResultId)');
   });
 
   it('port deleteBatch requires identityId (residual 156)', () => {

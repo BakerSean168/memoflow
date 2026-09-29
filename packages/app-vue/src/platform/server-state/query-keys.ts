@@ -13,6 +13,7 @@
  */
 
 import type { QueryKey } from '@tanstack/vue-query';
+import type { ListTaskPlanFilters } from '@memoflow/contracts/task';
 import type { RuleSeverity, RuleStatus } from '@memoflow/contracts/governance';
 
 // ─── Notification ─────────────────────────────────────────────────────────────
@@ -81,15 +82,18 @@ export const notificationQueryKeys = {
  * Canonical, transport-safe Task template list query used inside the cache key.
  * 进入 cache key 的规范化任务模板列表查询（仅 transport 接受的 primitive 字段）。
  *
- * Field order is frozen: `page/limit/status/goalId/labelIdsAll`.
- * 字段顺序冻结为：`page/limit/status/goalId/labelIdsAll`。
+ * Field order is frozen: `page/limit/status/goalId/keyResultId/labelIdsAll/outcome/archiveState`.
+ * 字段顺序冻结为：`page/limit/status/goalId/keyResultId/labelIdsAll/outcome/archiveState`。
  */
 export interface CanonicalTaskPlanListQuery {
   page: number;
   limit: number;
   status?: string[];
   goalId?: string;
+  keyResultId?: string;
   labelIdsAll?: string[];
+  outcome?: ListTaskPlanFilters['outcome'];
+  archiveState?: ListTaskPlanFilters['archiveState'];
 }
 
 /** Input accepted by the Task canonicalizer (may omit defaults/undefined). */
@@ -99,7 +103,7 @@ export type TaskPlanListQueryInput = Partial<CanonicalTaskPlanListQuery>;
  * Normalize a string array for the cache key (copy, dedupe, sort).
  * 规范化字符串数组用于 cache key（拷贝、去重、排序）。
  */
-function normalizeStringArray(value: string[] | undefined): string[] | undefined {
+function normalizeStringArray<T extends string>(value: T[] | undefined): T[] | undefined {
   if (value === undefined) return undefined;
   const unique = [...new Set(value)].sort();
   return unique.length > 0 ? unique : undefined;
@@ -112,15 +116,19 @@ function normalizeStringArray(value: string[] | undefined): string[] | undefined
 export function canonicalizeTaskPlanListQuery(
   query?: TaskPlanListQueryInput,
 ): CanonicalTaskPlanListQuery {
-  const { page, limit, status, goalId, labelIdsAll } = query ?? {};
+  const { page, limit, status, goalId, keyResultId, labelIdsAll, outcome, archiveState } = query ?? {};
   const normalizedStatus = normalizeStringArray(status);
   const normalizedLabelIds = normalizeStringArray(labelIdsAll);
+  const normalizedOutcome = normalizeStringArray(outcome);
   return {
     page: page ?? 1,
     limit: limit ?? 20,
     ...(normalizedStatus !== undefined ? { status: normalizedStatus } : {}),
     ...(goalId !== undefined ? { goalId } : {}),
+    ...(keyResultId !== undefined ? { keyResultId } : {}),
     ...(normalizedLabelIds !== undefined ? { labelIdsAll: normalizedLabelIds } : {}),
+    ...(normalizedOutcome !== undefined ? { outcome: normalizedOutcome } : {}),
+    ...(archiveState && archiveState !== 'all' ? { archiveState } : {}),
   };
 }
 
@@ -152,8 +160,8 @@ export const taskOccurrenceQueryKeys = {
   identity: (identityScope: string) => [...taskOccurrenceQueryKeys.all, identityScope] as const,
   ranges: (identityScope: string) =>
     [...taskOccurrenceQueryKeys.identity(identityScope), 'range'] as const,
-  range: (identityScope: string, start: number, end: number) =>
-    [...taskOccurrenceQueryKeys.ranges(identityScope), start, end] as const,
+  range: (identityScope: string, start: number, end: number, includeOverdueOpen = false) =>
+    [...taskOccurrenceQueryKeys.ranges(identityScope), start, end, { includeOverdueOpen }] as const,
 };
 
 export const scheduleCalendarQueryKeys = {

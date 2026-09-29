@@ -243,17 +243,25 @@ describe('TaskPlanController', () => {
 
       await controller.listPlans(
         {
+          page: 3,
+          limit: 25,
           goalId: 'GoalId_550e8400-e29b-41d4-a716-446655440002' as any,
           keyResultId: 'KeyResultId_550e8400-e29b-41d4-a716-446655440003' as any,
           labelIdsAll: ['label-1', 'label-2'],
+          outcome: ['Succeeded', 'Failed'],
+          archiveState: 'all',
         },
         ctx,
       );
 
       const args = (useCases.listPlans as ReturnType<typeof vi.fn>).mock.calls[0][0];
+      expect(args.page).toBe(3);
+      expect(args.limit).toBe(25);
       expect(args.goalId).toBe('GoalId_550e8400-e29b-41d4-a716-446655440002');
       expect(args.keyResultId).toBe('KeyResultId_550e8400-e29b-41d4-a716-446655440003');
       expect(args.labelIdsAll).toEqual(['label-1', 'label-2']);
+      expect(args.outcome).toEqual(['Succeeded', 'Failed']);
+      expect(args.archiveState).toBe('all');
     });
 
     it('should return plans and total', async () => {

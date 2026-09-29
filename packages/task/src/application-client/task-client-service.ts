@@ -221,10 +221,15 @@ export class TaskClientService implements TaskClientPort {
     );
   }
 
-  async listOccurrencesByDateRange(from: number, to: number): Promise<Result<TaskOccurrence[]>> {
+  async listOccurrencesByDateRange(
+    from: number,
+    to: number,
+    options: { includeOverdueOpen?: boolean } = {},
+  ): Promise<Result<TaskOccurrence[]>> {
     const request: GetTaskOccurrencesByRangeReq = {
       startDate: from,
       endDate: to,
+      includeOverdueOpen: options.includeOverdueOpen ?? false,
     };
     const result = await this.instanceApi.getTaskOccurrencesByDateRange(request);
     return mapResult(result, (dtos) =>

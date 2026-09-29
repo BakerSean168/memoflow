@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import type { ImportanceLevel } from '@memoflow/contracts/shared';
-import type { GoalId } from '@memoflow/contracts/primitives';
+import type { GoalId, KeyResultId } from '@memoflow/contracts/primitives';
 import type { LabelClientDTO } from '@memoflow/contracts/label';
 import type { TaskPlanClientDTO, TaskPlanStatus, TaskPlanSchedule } from '@memoflow/contracts/task';
 import type { TaskPlan } from '@memoflow/task/client';
@@ -107,6 +107,7 @@ export function useTaskPlans(
       limit: 100,
       status: filter === 'all' ? undefined : [filter],
       ...(options.goalId ? { goalId: options.goalId as GoalId } : {}),
+      ...(options.keyResultId ? { keyResultId: options.keyResultId as KeyResultId } : {}),
     });
     if (!result.ok) {
       setTemplates([]);
@@ -135,6 +136,7 @@ export function useTaskPlans(
         limit: 100,
         status: statusFilter === 'all' ? undefined : [statusFilter],
         ...(options.goalId ? { goalId: options.goalId as GoalId } : {}),
+        ...(options.keyResultId ? { keyResultId: options.keyResultId as KeyResultId } : {}),
       });
       if (cancelled) return;
       if (!result.ok) {
@@ -151,7 +153,7 @@ export function useTaskPlans(
     return () => {
       cancelled = true;
     };
-  }, [isRemoteAuthenticated, options.goalId, service, statusFilter]);
+  }, [isRemoteAuthenticated, options.goalId, options.keyResultId, service, statusFilter]);
 
   async function refresh() {
     if (!isRemoteAuthenticated) return;

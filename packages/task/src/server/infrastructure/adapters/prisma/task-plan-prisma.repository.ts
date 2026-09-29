@@ -7,12 +7,13 @@
  * Extends AggregateRepositoryBase to automatically publish domain events after persistence.
  */
 
-import type { PrismaClient, TaskPlan as PrismaTaskPlan } from '@memoflow/database';
+import type { Prisma, PrismaClient, TaskPlan as PrismaTaskPlan } from '@memoflow/database';
 import { TaskPlan } from '../../../domain/aggregates/task-plan';
 import {
   TaskLabelOwnershipError,
   type ITaskPlanRepository,
   type TaskFilters,
+  type TaskPlanPageQuery,
 } from '../../../domain/repositories/i-task-plan-repository';
 import type { TaskPlanStatus } from '@memoflow/contracts/task';
 import { LabelColorSchema, type LabelClientDTO } from '@memoflow/contracts/label';
@@ -164,6 +165,46 @@ export class TaskPlanPrismaRepository
       identityId,
       data.map((record: PrismaTaskPlan) => this.mapToEntity(record)),
     );
+  }
+
+  async findPage(
+    identityId: string,
+    query: TaskPlanPageQuery,
+  ): Promise<{ plans: TaskPlan[]; total: number }> {
+    const requiredLabelIds = [...new Set(query.labelIdsAll ?? [])];
+    const where: Prisma.TaskPlanWhereInput = {
+      identityId,
+      deletedAt: null,
+      ...(query.status?.length ? { status: { in: [...query.status] } } : {}),
+      ...(query.outcome?.length ? { outcome: { in: [...query.outcome] } } : {}),
+      ...(query.archiveState === 'active' ? { archivedAt: null } : {}),
+      ...(query.archiveState === 'archived' ? { archivedAt: { not: null } } : {}),
+      ...(query.goalId ? { goalId: query.goalId } : {}),
+      ...(query.keyResultId ? { keyResultId: query.keyResultId } : {}),
+      ...(requiredLabelIds.length
+        ? {
+            AND: requiredLabelIds.map((labelId) => ({
+              labelLinks: { some: { identityId, labelId } },
+            })),
+          }
+        : {}),
+    };
+    const [total, rows] = await Promise.all([
+      this.db.taskPlan.count({ where }),
+      this.db.taskPlan.findMany({
+        where,
+        orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
+        skip: query.offset,
+        take: query.limit,
+      }),
+    ]);
+    return {
+      plans: await this.hydrateTemplates(
+        identityId,
+        rows.map((record: PrismaTaskPlan) => this.mapToEntity(record)),
+      ),
+      total,
+    };
   }
 
   async findByStatus(identityId: string, status: TaskPlanStatus): Promise<TaskPlan[]> {

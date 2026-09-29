@@ -132,6 +132,13 @@ describe('task-occurrence route contracts', () => {
     ).toBe(true);
     expect(
       querySchema.safeParse({
+        startDate: Date.now(),
+        endDate: Date.now() + 60_000,
+        includeOverdueOpen: 'true',
+      }).success,
+    ).toBe(true);
+    expect(
+      querySchema.safeParse({
         startDate: '2026-05-06T00:00:00.000Z',
         endDate: '2026-05-07T00:00:00.000Z',
       }).success,
@@ -361,4 +368,36 @@ describe('task-occurrence route contracts', () => {
       expect(paramsSchema.safeParse({ id: 'bare-string' }).success).toBe(false);
     }
   });
+});
+
+// Exercise the registered HTTP handler, not only its OpenAPI metadata.
+it.each([
+  ['true', true],
+  ['false', false],
+  [undefined, false],
+  ['invalid', null],
+])('parses the overdue range flag %s at the HTTP boundary', async (input, expected) => {
+  const controller = createControllerStub();
+  vi.mocked(controller.getOccurrencesByDateRange).mockResolvedValue({ ok: true, data: [] });
+  const router = registerTaskOccurrenceRoutes(controller, { auth: authMiddleware });
+  const layer = router.stack.find((item) => item.route?.path === '/by-date-range')!;
+  const handler = layer.route!.stack.at(-1)!.handle;
+  const req = {
+    query: { startDate: '1000', endDate: '2000', includeOverdueOpen: input },
+    headers: {},
+    user: { identityId: 'owner' },
+    requestContext: { requestId: 'test', traceId: 'test', startedAt: 1000, source: 'http' },
+  };
+  const res = { status: vi.fn().mockReturnThis(), json: vi.fn().mockReturnThis() };
+  await handler(req as never, res as never, vi.fn());
+  if (expected === null) {
+    expect(controller.getOccurrencesByDateRange).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(400);
+  } else {
+    expect(controller.getOccurrencesByDateRange).toHaveBeenCalledWith('owner', {
+      startDate: 1000,
+      endDate: 2000,
+      includeOverdueOpen: expected,
+    });
+  }
 });

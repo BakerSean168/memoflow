@@ -97,7 +97,7 @@ function entity<T>(dto: T) {
   return { toDTO: vi.fn(() => dto) };
 }
 
-function mountComposable() {
+function mountComposable(resolveIdentityScope = () => 'identity-1') {
   const completed = instance('Completed');
   const pending = instance('Pending');
   const missed = instance('Missed');
@@ -123,9 +123,7 @@ function mountComposable() {
         ),
       ),
     ),
-    listOccurrencesByDateRange: vi
-      .fn()
-      .mockResolvedValue(ok([entity(instance('Pending'))])),
+    listOccurrencesByDateRange: vi.fn().mockResolvedValue(ok([entity(instance('Pending'))])),
     getPlan: vi
       .fn()
       .mockResolvedValueOnce(ok(entity(template(100))))
@@ -149,7 +147,7 @@ function mountComposable() {
         provide: {
           [TASK_SERVICE_KEY as symbol]: service,
           [SERVER_STATE_RUNTIME_KEY]: runtime,
-          [SERVER_STATE_IDENTITY_SCOPE_KEY]: () => 'identity-1',
+          [SERVER_STATE_IDENTITY_SCOPE_KEY]: resolveIdentityScope,
         },
       },
     },
@@ -166,6 +164,49 @@ function mountComposable() {
 
 describe('useTaskOccurrences template projection refresh', () => {
   beforeEach(() => vi.clearAllMocks());
+
+  it('does not publish a failed range read into a different identity', async () => {
+    let identityScope = 'identity-1';
+    const { composable, service } = mountComposable(() => identityScope);
+    let reject!: () => void;
+    service.listOccurrencesByDateRange.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          reject = () =>
+            resolve({
+              ok: false,
+              error: { code: 'INTERNAL_ERROR', message: 'Old identity failure' },
+            });
+        }),
+    );
+    const pending = composable.fetchInstancesByDateRange(1000, 2000);
+    await vi.waitFor(() => expect(reject).toBeTypeOf('function'));
+    identityScope = 'identity-2';
+    useTaskStore().setError('Current identity error');
+    reject();
+    await pending;
+    expect(useTaskStore().error).toBe('Current identity error');
+  });
+
+  it('does not publish a range response after the renderer identity changes', async () => {
+    let identityScope = 'identity-1';
+    const { composable, service } = mountComposable(() => identityScope);
+    const store = useTaskStore();
+    store.setInstances([]);
+    let resolve!: (value: ReturnType<typeof ok<ReturnType<typeof entity>[]>>) => void;
+    service.listOccurrencesByDateRange.mockImplementationOnce(
+      () =>
+        new Promise((done) => {
+          resolve = done;
+        }),
+    );
+    const pending = composable.fetchInstancesByDateRange(1000, 2000);
+    await vi.waitFor(() => expect(resolve).toBeTypeOf('function'));
+    identityScope = 'identity-2';
+    resolve(ok([entity(instance('Pending'))]));
+    expect(await pending).toEqual([]);
+    expect(store.instances).toEqual([]);
+  });
 
   it('refreshes the canonical template projection in the query cache after complete and uncomplete', async () => {
     const { composable, service, runtime } = mountComposable();
@@ -228,9 +269,17 @@ describe('useTaskOccurrences template projection refresh', () => {
     await composable.fetchInstancesByDateRange(start, end);
 
     expect(service.listOccurrencesByDateRange).toHaveBeenCalledTimes(1);
-    expect(service.listOccurrencesByDateRange).toHaveBeenCalledWith(start, end);
+    expect(service.listOccurrencesByDateRange).toHaveBeenCalledWith(start, end, {
+      includeOverdueOpen: false,
+    });
 
     await composable.fetchInstancesByDateRange(start, end, { force: true });
     expect(service.listOccurrencesByDateRange).toHaveBeenCalledTimes(2);
+
+    await composable.fetchInstancesByDateRange(start, end, { includeOverdueOpen: true });
+    expect(service.listOccurrencesByDateRange).toHaveBeenCalledTimes(3);
+    expect(service.listOccurrencesByDateRange).toHaveBeenLastCalledWith(start, end, {
+      includeOverdueOpen: true,
+    });
   });
 });

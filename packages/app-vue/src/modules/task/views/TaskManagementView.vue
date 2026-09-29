@@ -86,6 +86,26 @@
               {{ t('task.management.emptyPlansDescription') }}
             </p>
           </div>
+          <div
+            v-if="planTotal > 100 || planPage > 1"
+            class="mt-4 flex items-center justify-end gap-3"
+            data-testid="task-plan-pagination"
+          >
+            <Button variant="outline" size="sm" :disabled="planPage <= 1" @click="planPage--">
+              {{ t('task.management.previousPage') }}
+            </Button>
+            <span class="text-sm tabular-nums"
+              >{{ planPage }} / {{ Math.max(1, Math.ceil(planTotal / 100)) }}</span
+            >
+            <Button
+              variant="outline"
+              size="sm"
+              :disabled="planPage * 100 >= planTotal"
+              @click="planPage++"
+            >
+              {{ t('task.management.nextPage') }}
+            </Button>
+          </div>
         </template>
 
         <template v-else>
@@ -113,7 +133,6 @@
                   :key="occurrence.id"
                   :occurrence="occurrence"
                   :template="templateById.get(String(occurrence.planId))!"
-                  :position="occurrencePositions.get(String(occurrence.id))"
                   :busy="busyOccurrenceId === String(occurrence.id)"
                   @open-plan="openTaskDetail"
                   @complete="completeOccurrence"
@@ -185,7 +204,7 @@ import {
   Loader2,
   RefreshCw,
 } from '@lucide/vue';
-import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
 import type { GoalId, KeyResultId } from '@memoflow/contracts/primitives';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import TaskOccurrenceRow from '../components/TaskOccurrenceRow.vue';
@@ -206,17 +225,31 @@ import {
   toTaskPlanSchedulePayload,
 } from '../utils/task-plan-presentation';
 import {
-  getTaskOccurrencePosition,
   isTaskOccurrenceOnTodaySurface,
   isTaskOccurrenceOverdue,
   sortTaskOccurrences,
   type TaskOccurrenceSort,
 } from '../utils/task-occurrence-presentation';
-import { isTodayMs } from '../../../shared/utils/product-time';
+import { endOfDayMs, isTodayMs, startOfDayMs } from '../../../shared/utils/product-time';
+import { GOAL_SERVICE_KEY, TASK_SERVICE_KEY } from '../../../di/keys';
+import { unwrap } from '@memoflow/contracts/result';
+import { taskPlanQueryKeys, type TaskPlanListQueryInput } from '../../../platform/server-state/query-keys';
+import { TASK_TEMPLATE_STALE_TIME_MS } from '../../../platform/server-state/query-policy';
+import { useServerStateIdentityScope, useServerStateRuntime } from '../../../platform/server-state';
+import { useStrictInject } from '../../../shared/utils/useStrictInject';
 
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
+const goalService = useStrictInject(GOAL_SERVICE_KEY, 'GoalService');
+
+const resolveIdentityScope = useServerStateIdentityScope();
+const runtime = useServerStateRuntime();
+const taskService = useStrictInject(TASK_SERVICE_KEY, 'TaskService');
+const planPage = ref(1);
+const todayDetailsLoading = ref(false);
+const todayDetailsError = ref(false);
+let todayRequest = 0;
 
 const activeSurface = ref<TaskSurface>('today');
 const occurrenceStatusFilter = ref<'all' | TaskOccurrenceClientDTO['status']>('all');
@@ -226,6 +259,9 @@ const occurrenceSort = ref<TaskOccurrenceSort>('time');
 const showDialog = ref(false);
 const createInitialGoalBinding = ref<TaskPlanViewModel['goalBinding']>(null);
 const busyOccurrenceId = ref<string | null>(null);
+const scopedGoalName = ref<string | null>(null);
+const scopedKeyResultTitle = ref<string | null>(null);
+const occurrencePlanDetails = ref<TaskPlanClientDTO[]>([]);
 
 const queryGoalId = computed(() =>
   typeof route.query.goalId === 'string' && route.query.goalId.length > 0
@@ -239,24 +275,43 @@ const queryKeyResultId = computed(() =>
 );
 const goalScopeLabel = computed(() => {
   if (!queryGoalId.value) return null;
-  return queryKeyResultId.value
-    ? `Goal ${queryGoalId.value} · KR ${queryKeyResultId.value}`
-    : `Goal ${queryGoalId.value}`;
+  const goalLabel = scopedGoalName.value ?? t('task.management.scope.goal');
+  if (!queryKeyResultId.value) return goalLabel;
+  const keyResultLabel = scopedKeyResultTitle.value ?? t('task.management.scope.keyResult');
+  return `${goalLabel} · ${keyResultLabel}`;
 });
+const planStateFilters: Record<TaskPlanStateFilter, TaskPlanListQueryInput> = {
+  all: {},
+  active: { status: ['Active'], outcome: ['Open'], archiveState: 'active' },
+  paused: { status: ['Paused'], outcome: ['Open'], archiveState: 'active' },
+  succeeded: { outcome: ['Succeeded'] },
+  failed: { outcome: ['Failed'] },
+  abandoned: { outcome: ['Abandoned'] },
+  archived: { archiveState: 'archived' },
+};
+watch(
+  [planStateFilter, labelFilterIds, queryGoalId, queryKeyResultId],
+  () => { planPage.value = 1; },
+  { deep: true, flush: 'sync' },
+);
 const taskListParams = computed(() => ({
-  page: 1,
-  limit: 500,
+  page: planPage.value,
+  limit: 100,
+  ...planStateFilters[planStateFilter.value],
+  ...(labelFilterIds.value.length ? { labelIdsAll: labelFilterIds.value } : {}),
   ...(queryGoalId.value ? { goalId: queryGoalId.value } : {}),
+  ...(queryGoalId.value && queryKeyResultId.value ? { keyResultId: queryKeyResultId.value } : {}),
 }));
 const {
   templates,
+  total: planTotal,
   isLoading: templatesLoading,
   isError: templatesError,
   refetch: refetchTemplates,
-} = useTaskPlanListQuery(taskListParams);
+} = useTaskPlanListQuery({ params: taskListParams, enabled: () => activeSurface.value === 'plans' });
 const { createPlanSafe, abandonPlanSafe, deletePlanSafe, isSaving } = useTaskPlanMutations();
 const {
-  fetchInstances: fetchOccurrencesMutation,
+  fetchInstancesByDateRange: fetchOccurrencesByDateRange,
   completeOccurrence: completeOccurrenceMutation,
   uncompleteOccurrence: uncompleteOccurrenceMutation,
   markOccurrenceMissed: markOccurrenceMissedMutation,
@@ -267,24 +322,36 @@ const taskStore = useTaskStore();
 const { instances, isLoading: instancesLoading, error: instancesError } = storeToRefs(taskStore);
 
 const templateById = computed(
-  () => new Map(templates.value.map((template) => [String(template.id), template])),
+  () =>
+    new Map(
+      [...occurrencePlanDetails.value, ...templates.value].map((template) => [
+        String(template.id),
+        template,
+      ]),
+    ),
 );
 const planViewModels = computed(() =>
   templates.value.map((template) => mapTaskPlanDtoToViewModel(template, t)),
 );
 const availableLabels = computed(() => {
   const byId = new Map(
-    templates.value
+    [...templateById.value.values()]
       .flatMap((template) => template.labels)
       .map((label) => [label.id, label] as const),
   );
   return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name));
 });
 const isLoading = computed(
-  () => templatesLoading.value || (activeSurface.value === 'today' && instancesLoading.value),
+  () =>
+    activeSurface.value === 'plans'
+      ? templatesLoading.value
+      : instancesLoading.value || todayDetailsLoading.value,
 );
 const loadError = computed(
-  () => templatesError.value || (activeSurface.value === 'today' && Boolean(instancesError.value)),
+  () =>
+    activeSurface.value === 'plans'
+      ? templatesError.value
+      : Boolean(instancesError.value) || todayDetailsError.value,
 );
 
 function templateMatchesFilters(templateId: string): boolean {
@@ -332,19 +399,6 @@ const occurrenceGroups = computed(() =>
     },
   ].filter((group) => group.occurrences.length > 0),
 );
-const occurrencePositions = computed(
-  () =>
-    new Map(
-      instances.value.map((occurrence) => [
-        String(occurrence.id),
-        getTaskOccurrencePosition(
-          occurrence,
-          instances.value,
-          templateById.value.get(String(occurrence.planId)),
-        ),
-      ]),
-    ),
-);
 function matchesPlanState(template: TaskPlanViewModel): boolean {
   switch (planStateFilter.value) {
     case 'all':
@@ -373,8 +427,70 @@ const visibleItemCount = computed(() =>
   activeSurface.value === 'plans' ? filteredPlans.value.length : visibleOccurrences.value.length,
 );
 
+async function loadTodayOccurrences(force = false) {
+  const request = ++todayRequest;
+  const identityScope = resolveIdentityScope();
+  todayDetailsLoading.value = true;
+  todayDetailsError.value = false;
+  try {
+    const now = Date.now();
+    const occurrences = await fetchOccurrencesByDateRange(startOfDayMs(now), endOfDayMs(now), {
+      force,
+      includeOverdueOpen: true,
+    });
+    if (request !== todayRequest || identityScope !== resolveIdentityScope()) return;
+    const missingPlanIds = [...new Set(occurrences.map((occurrence) => String(occurrence.planId)))];
+    // Read each referenced plan through its canonical identity-scoped detail key.
+    const details = await Promise.all(
+      missingPlanIds.map((planId) =>
+        runtime.queryClient.fetchQuery({
+          queryKey: taskPlanQueryKeys.detail(identityScope, planId),
+          staleTime: force ? 0 : TASK_TEMPLATE_STALE_TIME_MS,
+          queryFn: async () => unwrap(await taskService.getPlan(planId)).toDTO(),
+        }),
+      ),
+    );
+    if (request !== todayRequest || identityScope !== resolveIdentityScope()) return;
+    occurrencePlanDetails.value = details;
+  } catch {
+    if (request === todayRequest && identityScope === resolveIdentityScope())
+      todayDetailsError.value = true;
+  } finally {
+    if (request === todayRequest && identityScope === resolveIdentityScope())
+      todayDetailsLoading.value = false;
+  }
+}
+
 async function reloadSurface() {
-  await Promise.all([refetchTemplates(), fetchOccurrencesMutation({ page: 1, limit: 500 })]);
+  if (activeSurface.value === 'plans') await refetchTemplates();
+  else await loadTodayOccurrences(true);
+}
+
+async function resolveGoalScopeLabel() {
+  const identityScope = resolveIdentityScope();
+  const goalId = queryGoalId.value;
+  const keyResultId = queryKeyResultId.value;
+  scopedGoalName.value = null;
+  scopedKeyResultTitle.value = null;
+  if (!goalId) return;
+
+  const [goalResult, keyResultsResult] = await Promise.all([
+    goalService.getGoal(goalId).catch(() => null),
+    keyResultId ? goalService.getKeyResults(goalId).catch(() => null) : Promise.resolve(null),
+  ]);
+  if (
+    identityScope !== resolveIdentityScope() ||
+    goalId !== queryGoalId.value ||
+    keyResultId !== queryKeyResultId.value
+  )
+    return;
+
+  if (goalResult?.ok) scopedGoalName.value = goalResult.data.name;
+  if (keyResultId && keyResultsResult?.ok) {
+    scopedKeyResultTitle.value =
+      keyResultsResult.data.keyResults.find((keyResult) => String(keyResult.id) === keyResultId)
+        ?.title ?? null;
+  }
 }
 
 function openCreateDialog() {
@@ -472,9 +588,24 @@ watch(
   [queryGoalId, queryKeyResultId],
   ([goalId]) => {
     if (goalId) activeSurface.value = 'plans';
+    void resolveGoalScopeLabel();
   },
   { immediate: true },
 );
+
+watch(resolveIdentityScope, () => {
+  planPage.value = 1;
+  ++todayRequest;
+  occurrencePlanDetails.value = [];
+  todayDetailsLoading.value = false;
+  todayDetailsError.value = false;
+  void resolveGoalScopeLabel();
+  if (activeSurface.value === 'today') void loadTodayOccurrences();
+});
+
+watch(activeSurface, (surface) => {
+  if (surface === 'today') void loadTodayOccurrences();
+});
 
 watch(
   () => [route.query.create, route.query.createGoalId, route.query.createKeyResultId] as const,
@@ -490,6 +621,6 @@ watch(
 );
 
 onMounted(() => {
-  void fetchOccurrencesMutation({ page: 1, limit: 500 });
+  if (activeSurface.value === 'today') void loadTodayOccurrences();
 });
 </script>

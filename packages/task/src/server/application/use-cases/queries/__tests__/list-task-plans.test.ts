@@ -1,143 +1,96 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
 import {
   aOneTimeTask,
-  aLoadedTaskPlan,
   anIdentityId,
   TASK_TEST_USER_TIME_CONTEXT_PORT,
 } from '../../../../../testing';
 import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task-plan-repository';
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
-import { TaskPlanStatus } from '@memoflow/contracts/task';
 import { ListTaskPlansUseCase } from '../list-task-plans.use-case';
 
-// Mock eventBus — preserve all real exports
-vi.mock('@memoflow/utils', async () => {
-  const actual = await vi.importActual<typeof import('@memoflow/utils')>('@memoflow/utils');
-  return {
-    ...actual,
-    eventBus: { send: vi.fn() },
-  };
-});
-
 describe('ListTaskPlansUseCase', () => {
-  let templateRepo: ReturnType<typeof createMockRepo<ITaskPlanRepository>>;
-  let instanceRepo: ReturnType<typeof createMockRepo<ITaskOccurrenceRepository>>;
+  let planRepository: ReturnType<typeof createMockRepo<ITaskPlanRepository>>;
+  let occurrenceRepository: ReturnType<typeof createMockRepo<ITaskOccurrenceRepository>>;
   let useCase: ListTaskPlansUseCase;
-  const testIdentityId = anIdentityId();
+  const identityId = anIdentityId();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    templateRepo = createMockRepo<ITaskPlanRepository>({
-      findByIdentityId: vi.fn().mockResolvedValue([]),
-      findByStatus: vi.fn().mockResolvedValue([]),
-      findByGoalId: vi.fn().mockResolvedValue([]),
-      findByGoalAndKeyResultId: vi.fn().mockResolvedValue([]),
-      save: vi.fn().mockResolvedValue(undefined),
+    planRepository = createMockRepo<ITaskPlanRepository>({
+      findPage: vi.fn().mockResolvedValue({ plans: [], total: 0 }),
     });
-    instanceRepo = createMockRepo<ITaskOccurrenceRepository>({
-      saveMany: vi.fn().mockResolvedValue(undefined),
+    occurrenceRepository = createMockRepo<ITaskOccurrenceRepository>({
+      getPlanStats: vi.fn().mockResolvedValue({}),
     });
 
     useCase = new ListTaskPlansUseCase(
-      templateRepo,
-      instanceRepo,
+      planRepository,
+      occurrenceRepository,
       TASK_TEST_USER_TIME_CONTEXT_PORT,
     );
   });
 
-  describe('filtering', () => {
-    it('should filter by status when status is provided', async () => {
-      const plan = aLoadedTaskPlan({ status: TaskPlanStatus.Active });
-      vi.mocked(templateRepo.findByStatus).mockResolvedValue([plan]);
-
-      const result = await useCase.execute({
-        identityId: testIdentityId,
-        status: [TaskPlanStatus.Active],
-      });
-
-      expect(result).toBeOk();
-      expect(templateRepo.findByStatus).toHaveBeenCalledWith(testIdentityId, TaskPlanStatus.Active);
-      if (result.ok) {
-        expect(result.data.plans).toHaveLength(1);
-        expect(result.data.total).toBe(1);
-      }
-    });
-
-    it('should filter by goalId when provided (and no status)', async () => {
-      await useCase.execute({
-        identityId: testIdentityId,
-        goalId: 'goal-1' as any,
-      });
-
-      expect(templateRepo.findByGoalId).toHaveBeenCalledWith(testIdentityId, 'goal-1');
-    });
-
-    it('uses the Goal+KR owner query when both filters are provided', async () => {
-      await useCase.execute({
-        identityId: testIdentityId,
-        goalId: 'goal-1' as any,
-        keyResultId: 'kr-1' as any,
-      });
-
-      expect(templateRepo.findByGoalAndKeyResultId).toHaveBeenCalledWith(
-        testIdentityId,
-        'goal-1',
-        'kr-1',
-      );
-      expect(templateRepo.findByGoalId).not.toHaveBeenCalled();
-    });
-
-    it('should fallback to findByIdentityId when no filters provided', async () => {
-      await useCase.execute({
-        identityId: testIdentityId,
-      });
-
-      expect(templateRepo.findByIdentityId).toHaveBeenCalledWith(testIdentityId);
-    });
-
-    it('delegates shared Label AND filtering to the repository', async () => {
-      const plan = aOneTimeTask({ title: 'Work + AI' });
-      vi.mocked(templateRepo.findByLabelIdsAll).mockResolvedValue([plan]);
-
-      const result = await useCase.execute({
-        identityId: testIdentityId,
-        labelIdsAll: ['label-work', 'label-ai'],
-      });
-
-      expect(result).toBeOk();
-      expect(templateRepo.findByLabelIdsAll).toHaveBeenCalledWith(testIdentityId, [
-        'label-work',
-        'label-ai',
-      ]);
-      expect(result.ok && result.data.plans.map((item) => item.name)).toEqual(['Work + AI']);
-    });
-  });
-
-  it('should return empty list when no plans found', async () => {
-    const result = await useCase.execute({ identityId: testIdentityId });
+  it('uses a real bounded repository query with the default page contract', async () => {
+    const result = await useCase.execute({ identityId });
 
     expect(result).toBeOk();
+    expect(planRepository.findPage).toHaveBeenCalledWith(identityId, {
+      limit: 20,
+      offset: 0,
+    });
+    expect(occurrenceRepository.getPlanStats).not.toHaveBeenCalled();
+  });
+
+  it('forwards page, Goal/KR, status and Label scope into one server-side page query', async () => {
+    const plan = aOneTimeTask({ title: 'Scoped task' });
+    vi.mocked(planRepository.findPage).mockResolvedValue({ plans: [plan], total: 27 });
+
+    const result = await useCase.execute({
+      identityId,
+      page: 3,
+      limit: 10,
+      status: ['Active', 'Paused'],
+      outcome: ['Open'],
+      archiveState: 'active',
+      goalId: 'GoalId_550e8400-e29b-41d4-a716-446655440002' as never,
+      keyResultId: 'KeyResultId_550e8400-e29b-41d4-a716-446655440003' as never,
+      labelIdsAll: ['label-work', 'label-ai'],
+    });
+
+    expect(result).toBeOk();
+    expect(planRepository.findPage).toHaveBeenCalledWith(identityId, {
+      status: ['Active', 'Paused'],
+      outcome: ['Open'],
+      archiveState: 'active',
+      goalId: 'GoalId_550e8400-e29b-41d4-a716-446655440002',
+      keyResultId: 'KeyResultId_550e8400-e29b-41d4-a716-446655440003',
+      labelIdsAll: ['label-work', 'label-ai'],
+      limit: 10,
+      offset: 20,
+    });
     if (result.ok) {
-      expect(result.data.plans).toEqual([]);
-      expect(result.data.total).toBe(0);
+      expect(result.data.plans).toHaveLength(1);
+      expect(result.data.total).toBe(27);
     }
   });
 
-  it('should return plan client DTOs', async () => {
-    const template1 = aOneTimeTask({ title: 'Task A' });
-    const template2 = aOneTimeTask({ title: 'Task B' });
-    vi.mocked(templateRepo.findByIdentityId).mockResolvedValue([template1, template2]);
+  it('returns repository total independently from the bounded page length', async () => {
+    const first = aOneTimeTask({ title: 'Task A' });
+    const second = aOneTimeTask({ title: 'Task B' });
+    vi.mocked(planRepository.findPage).mockResolvedValue({
+      plans: [first, second],
+      total: 123,
+    });
 
-    const result = await useCase.execute({ identityId: testIdentityId });
+    const result = await useCase.execute({ identityId, page: 1, limit: 2 });
 
     expect(result).toBeOk();
     if (result.ok) {
-      expect(result.data.plans).toHaveLength(2);
-      expect(result.data.plans[0].name).toBe('Task A');
-      expect(result.data.plans[1].name).toBe('Task B');
-      expect(result.data.total).toBe(2);
+      expect(result.data.plans.map((item) => item.name)).toEqual(['Task A', 'Task B']);
+      expect(result.data.total).toBe(123);
     }
+    expect(occurrenceRepository.getPlanStats).toHaveBeenCalledTimes(1);
   });
 });

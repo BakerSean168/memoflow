@@ -5,6 +5,7 @@ import { ImportanceLevel } from '../../../shared/value-objects/importance';
 import type { TaskPlanClientDTO } from '../aggregates/task-plan-client';
 import type { TaskOccurrenceClientDTO } from '../aggregates/task-occurrence-client';
 import { TaskPlanCompletionPolicy } from '../value-objects/task-plan-completion-policy';
+import { TaskPlanOutcome } from '../value-objects/task-plan-outcome';
 import { TaskReminderConfigSchema } from '../value-objects/task-reminder-config';
 import { TaskGoalBindingSchema } from '../value-objects/task-goal-binding';
 import { TaskPlanScheduleSchema } from '../value-objects/task-plan-schedule';
@@ -73,7 +74,11 @@ export type AbandonTaskPlanReq = z.infer<typeof AbandonTaskPlanSchema>;
 // Public transport schema - NO identityId (injected from Context)
 export const ListTaskPlanFiltersSchema = z
   .object({
+    page: z.coerce.number().int().min(1).optional(),
+    limit: z.coerce.number().int().min(1).max(500).optional(),
     status: z.array(z.string()).optional(),
+    outcome: z.array(z.enum(TaskPlanOutcome)).optional(),
+    archiveState: z.enum(['active', 'archived', 'all']).optional(),
     goalId: brandedId<GoalId>().optional(),
     keyResultId: brandedId<KeyResultId>().optional(),
     labelIdsAll: z.array(z.string().min(1)).max(50).optional(),
@@ -100,7 +105,11 @@ export type TaskPlanOccurrencesQuery = z.infer<typeof TaskPlanOccurrencesQuerySc
 // Internal query type (used by controller -> use case) with identityId
 export interface QueryTaskPlansInternal {
   identityId: IdentityId;
+  page?: number;
+  limit?: number;
   status?: string[];
+  outcome?: ListTaskPlanFilters['outcome'];
+  archiveState?: ListTaskPlanFilters['archiveState'];
   goalId?: GoalId;
   keyResultId?: KeyResultId;
   labelIdsAll?: string[];

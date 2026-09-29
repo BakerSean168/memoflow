@@ -80,10 +80,8 @@ export interface ITaskOccurrenceRepository {
    */
   findByStatus(identityId: string, status: TaskOccurrenceStatus): Promise<TaskOccurrence[]>;
 
-  /**
-   * 查找过期的任务实例
-   */
-  findOverdueOccurrences(identityId: string): Promise<TaskOccurrence[]>;
+  /** Open occurrences strictly before one Product Time calendar date. */
+  findOpenBeforeDate(identityId: string, beforeDate: Ymd): Promise<TaskOccurrence[]>;
 
   /**
    * 删除任务实例（identity-scoped）

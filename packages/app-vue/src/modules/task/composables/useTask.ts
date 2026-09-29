@@ -41,6 +41,7 @@ export function useTask() {
       limit: query?.limit ?? store.pagination.pageSize,
       status: query?.status,
       goalId: query?.goalId,
+      keyResultId: query?.keyResultId,
       labelIdsAll: query?.labelIdsAll,
     };
     listRequested.value = true;

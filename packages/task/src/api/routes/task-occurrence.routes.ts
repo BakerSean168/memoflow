@@ -64,7 +64,7 @@ export function registerTaskOccurrenceRoutes(
   });
 
   // GET /by-date-range — Get occurrences by date range (must be before /:id)
-  r.route(
+  r.routeWithValidation(
     {
       method: 'get',
       path: '/by-date-range',
@@ -72,16 +72,20 @@ export function registerTaskOccurrenceRoutes(
       request: {
         query: GetTaskOccurrencesByRangeSchema,
       },
+      validation: {
+        schema: GetTaskOccurrencesByRangeSchema,
+        projectInput: (req) => ({
+          startDate: parseTimestampQuery(req.query?.startDate, Date.now()),
+          endDate: parseTimestampQuery(req.query?.endDate, Date.now() + 86400000 * 7),
+          includeOverdueOpen: req.query?.includeOverdueOpen ?? false,
+        }),
+      },
       responses: {
         200: successResponse(z.array(TaskOccurrenceResponseSchema), '获取成功'),
       },
     },
     [auth],
-    (req, ctx) =>
-      controller.getOccurrencesByDateRange(ctx.identityId, {
-        startDate: parseTimestampQuery(req.query?.startDate, Date.now()),
-        endDate: parseTimestampQuery(req.query?.endDate, Date.now() + 86400000 * 7),
-      }),
+    (data, ctx) => controller.getOccurrencesByDateRange(ctx.identityId, data),
   );
 
   // GET / — List occurrences

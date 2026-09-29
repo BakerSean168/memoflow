@@ -62,7 +62,39 @@ describe('TaskManagementView occurrence-first surface', () => {
     expect(source).toContain('occurrence.status === occurrenceStatusFilter.value');
     expect(source).toContain('matchesPlanState(template)');
     expect(source).not.toMatch(/filteredPlans[\s\S]{0,500}occurrenceStatusFilter/);
-    expect(source).not.toMatch(/visibleOccurrences[\s\S]{0,500}planStateFilter/);
+    expect(
+      source.slice(
+        source.indexOf('const visibleOccurrences'),
+        source.indexOf('const occurrenceGroups'),
+      ),
+    ).not.toContain('planStateFilter');
+  });
+
+  it('uses bounded Today reads and a server-scoped Goal/KR plan query without raw ids', () => {
+    expect(source).toContain('fetchInstancesByDateRange: fetchOccurrencesByDateRange');
+    expect(source).toContain('includeOverdueOpen: true');
+    expect(source).toContain('startOfDayMs(now)');
+    expect(source).toContain('endOfDayMs(now)');
+    expect(source).not.toContain('fetchOccurrencesMutation({ page: 1, limit: 500 })');
+    expect(source).not.toContain('limit: 500');
+    expect(source).toContain('limit: 100');
+    expect(source).toContain('{ keyResultId: queryKeyResultId.value }');
+    expect(source).toContain('goalService.getGoal(goalId)');
+    expect(source).toContain('goalService.getKeyResults(goalId)');
+    expect(source).toContain('scopedGoalName.value');
+    expect(source).toContain('scopedKeyResultTitle.value');
+    expect(source).not.toContain('`Goal ${queryGoalId.value}');
+    expect(source).not.toContain('KR ${queryKeyResultId.value}');
+    expect(source).not.toContain(':position="occurrencePositions');
+  });
+
+  it('exposes bounded Plan pages and reports missing occurrence-plan failures', () => {
+    expect(source).toContain('page: planPage.value');
+    expect(source).toContain('total: planTotal');
+    expect(source).toContain('data-testid="task-plan-pagination"');
+    expect(source).toContain('planPage * 100 >= planTotal');
+    expect(source).toContain('todayDetailsError.value');
+    expect(source).toContain('identityScope !== resolveIdentityScope()');
   });
 
   it('accepts a create-and-bind intent without turning it into a persistent Goal filter', () => {

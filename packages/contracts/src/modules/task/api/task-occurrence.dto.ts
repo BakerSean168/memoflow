@@ -18,6 +18,9 @@ import { TaskOccurrenceResponseSchema } from './response-schemas';
 export const GetTaskOccurrencesByRangeSchema = z.object({
   startDate: z.coerce.number().int(),
   endDate: z.coerce.number().int(),
+  includeOverdueOpen: z
+    .union([z.boolean(), z.enum(['true', 'false']).transform((value) => value === 'true')])
+    .optional(),
 });
 
 export type GetTaskOccurrencesByRangeReq = z.infer<typeof GetTaskOccurrencesByRangeSchema>;

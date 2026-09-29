@@ -103,6 +103,7 @@ export class TaskOccurrenceController {
       identityId,
       request.startDate,
       request.endDate,
+      request.includeOverdueOpen,
     );
 
     if (!isOk(result)) {

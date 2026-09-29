@@ -152,6 +152,7 @@ describe('canonicalizeTaskPlanListQuery', () => {
   it('keeps scalar filters and puts arrays into the frozen field order', () => {
     const canonical = canonicalizeTaskPlanListQuery({
       goalId: 'g-1',
+      keyResultId: 'kr-1',
       status: ['Active'],
       page: 2,
       labelIdsAll: ['x'],
@@ -162,8 +163,43 @@ describe('canonicalizeTaskPlanListQuery', () => {
       'limit',
       'status',
       'goalId',
+      'keyResultId',
       'labelIdsAll',
     ]);
+  });
+
+  it('canonicalizes outcomes without mutating input and treats all archives as unfiltered', () => {
+    const outcome: Array<'Succeeded' | 'Failed'> = ['Succeeded', 'Failed', 'Succeeded'];
+    const a = canonicalizeTaskPlanListQuery({ outcome, archiveState: 'all' });
+    const b = canonicalizeTaskPlanListQuery({ outcome: ['Failed', 'Succeeded'] });
+    expect(a).toEqual(b);
+    expect(a.outcome).toEqual(['Failed', 'Succeeded']);
+    expect(outcome).toEqual(['Succeeded', 'Failed', 'Succeeded']);
+    expect(canonicalizeTaskPlanListQuery({ outcome: [], archiveState: 'all' }))
+      .toEqual(canonicalizeTaskPlanListQuery());
+  });
+
+  it('isolates every outcome and archive filter within identity-scoped list keys', () => {
+    const queries = [
+      canonicalizeTaskPlanListQuery(),
+      ...(['Open', 'Succeeded', 'Failed', 'Abandoned'] as const)
+        .map((outcome) => canonicalizeTaskPlanListQuery({ outcome: [outcome] })),
+      ...(['active', 'archived'] as const)
+        .map((archiveState) => canonicalizeTaskPlanListQuery({ archiveState })),
+    ];
+    const keys = queries.flatMap((query) => ['owner-a', 'owner-b'].map((owner) =>
+      JSON.stringify(taskPlanQueryKeys.list(owner, query)),
+    ));
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  it('keeps Goal/KR scope in the canonical list identity', () => {
+    const goalOnly = canonicalizeTaskPlanListQuery({ goalId: 'g-1' });
+    const scoped = canonicalizeTaskPlanListQuery({ goalId: 'g-1', keyResultId: 'kr-1' });
+    expect(scoped.keyResultId).toBe('kr-1');
+    expect(taskPlanQueryKeys.list('id-1', goalOnly)).not.toEqual(
+      taskPlanQueryKeys.list('id-1', scoped),
+    );
   });
 
   it('produces equal keys for semantically equal requests regardless of array order', () => {

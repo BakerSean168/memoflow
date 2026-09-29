@@ -87,6 +87,12 @@ export default {
       overdue: '逾期未完成',
       today: '今天',
     },
+    previousPage: '上一页',
+    nextPage: '下一页',
+    scope: {
+      goal: 'Goal',
+      keyResult: '关键结果',
+    },
     moreActions: '更多操作',
     planColumn: '任务',
     scheduleColumn: '调度',

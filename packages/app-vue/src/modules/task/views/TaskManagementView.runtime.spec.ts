@@ -1,0 +1,287 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { defineComponent, h, reactive, ref, toValue, type ComputedRef, type Ref } from 'vue';
+import { flushPromises, mount } from '@vue/test-utils';
+import { createI18n } from 'vue-i18n';
+import { createTestPinia } from '@memoflow/test-utils';
+import { ok } from '@memoflow/contracts/result';
+import type { UseTaskPlanListQueryComposableOptions } from '../composables/useTaskPlanListQuery';
+import type { TaskPlanListQueryInput } from '../../../platform/server-state/query-keys';
+import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
+import { GOAL_SERVICE_KEY, TASK_SERVICE_KEY } from '../../../di/keys';
+import {
+  createTestServerStateRuntime,
+  SERVER_STATE_IDENTITY_SCOPE_KEY,
+  SERVER_STATE_RUNTIME_KEY,
+} from '../../../platform/server-state';
+import { useTaskStore } from '../stores/task-store';
+
+type ListParams = TaskPlanListQueryInput;
+const mocks = vi.hoisted(() => ({
+  range: vi.fn(),
+  listParams: undefined as ComputedRef<ListParams> | undefined,
+  listEnabled: undefined as UseTaskPlanListQueryComposableOptions['enabled'],
+  listLoading: undefined as Ref<boolean> | undefined,
+  listError: undefined as Ref<boolean> | undefined,
+  listTotal: undefined as Ref<number> | undefined,
+  refetch: vi.fn(),
+  route: { query: {} as Record<string, string> },
+}));
+vi.mock('vue-router', () => ({
+  useRoute: () => mocks.route,
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+}));
+vi.mock('../composables/useTaskOccurrences', () => ({
+  useTaskOccurrences: () => ({ fetchInstancesByDateRange: mocks.range }),
+}));
+vi.mock('../composables/useTaskPlanListQuery', () => ({
+  useTaskPlanListQuery: (options: UseTaskPlanListQueryComposableOptions) => {
+    mocks.listParams = options.params as ComputedRef<ListParams>;
+    mocks.listEnabled = options.enabled;
+    mocks.listLoading = ref(false);
+    mocks.listError = ref(false);
+    mocks.listTotal = ref(201);
+    return {
+      templates: ref([]),
+      total: mocks.listTotal,
+      isLoading: mocks.listLoading,
+      isError: mocks.listError,
+      refetch: mocks.refetch,
+    };
+  },
+}));
+vi.mock('../composables/useTaskPlanMutations', () => ({
+  useTaskPlanMutations: () => ({ isSaving: ref(false) }),
+}));
+vi.mock('../utils/task-occurrence-presentation', () => ({
+  isTaskOccurrenceOnTodaySurface: () => true,
+  isTaskOccurrenceOverdue: () => false,
+  sortTaskOccurrences: (rows: unknown[]) => rows,
+}));
+vi.mock('../../../shared/utils/product-time', () => ({
+  startOfDayMs: () => 1000,
+  endOfDayMs: () => 2000,
+  isTodayMs: () => true,
+}));
+vi.mock('@memoflow/ui-vue-shadcn', () => ({
+  Button: defineComponent({
+    setup:
+      (_, { slots }) =>
+      () =>
+        h('button', slots.default?.()),
+  }),
+  useConfirm: vi.fn(),
+}));
+vi.mock('../components/dialogs/TaskPlanDialog.vue', () => ({
+  default: defineComponent({ setup: () => () => h('div') }),
+}));
+import TaskManagementView from './TaskManagementView.vue';
+
+const toolbar = defineComponent({
+  name: 'TaskPageToolbar',
+  props: ['goalScopeLabel'],
+  emits: ['update:active-surface', 'update:plan-state-filter', 'update:label-filter-ids'],
+  setup: (props) => () => h('div', props.goalScopeLabel),
+});
+const occurrenceRow = defineComponent({
+  props: ['template'],
+  setup: (props) => () => h('div', props.template.name),
+});
+const wrappers: ReturnType<typeof mount>[] = [];
+afterEach(() => {
+  wrappers.splice(0).forEach((wrapper) => wrapper.unmount());
+});
+beforeEach(() => {
+  vi.clearAllMocks();
+  mocks.route = reactive({ query: {} });
+});
+
+function render(detailFails = false) {
+  const pinia = createTestPinia();
+  const store = useTaskStore(pinia);
+  const occurrences = [
+    { id: 'occurrence', planId: 'outside-page', scheduledAt: 1500, status: 'Pending' },
+  ] as TaskOccurrenceClientDTO[];
+  mocks.range.mockImplementation(async () => {
+    store.setInstances(occurrences);
+    return occurrences;
+  });
+  const getPlan = detailFails
+    ? vi.fn().mockRejectedValue(new Error('offline'))
+    : vi
+        .fn()
+        .mockResolvedValue(
+          ok({
+            toDTO: () => ({
+              id: 'outside-page',
+              name: 'Plan outside page',
+              labels: [],
+              goalBinding: null,
+            }),
+          }),
+        );
+  const goalService = {
+    getGoal: vi.fn().mockResolvedValue(ok({ name: 'Readable Goal' })),
+    getKeyResults: vi
+      .fn()
+      .mockResolvedValue(ok({ keyResults: [{ id: 'kr-id', title: 'Readable KR' }] })),
+  };
+  const runtime = createTestServerStateRuntime();
+  const wrapper = mount(TaskManagementView, {
+    global: {
+      plugins: [
+        pinia,
+        createI18n({
+          legacy: false,
+          locale: 'en',
+          missingWarn: false,
+          fallbackWarn: false,
+          messages: { en: {} },
+        }),
+      ],
+      provide: {
+        [TASK_SERVICE_KEY as symbol]: { getPlan },
+        [GOAL_SERVICE_KEY as symbol]: goalService,
+        [SERVER_STATE_RUNTIME_KEY]: runtime,
+        [SERVER_STATE_IDENTITY_SCOPE_KEY]: () => 'owner',
+      },
+      stubs: { TaskPageToolbar: toolbar, TaskOccurrenceRow: occurrenceRow, TaskPlanRow: true },
+    },
+  });
+  wrappers.push(wrapper);
+  return { wrapper, getPlan, goalService };
+}
+
+describe('Task Management bounded reads', () => {
+  it('renders Today facts whose plan is outside the bounded Plan page', async () => {
+    const { wrapper, getPlan } = render();
+    await flushPromises();
+    expect(mocks.range).toHaveBeenCalledWith(1000, 2000, {
+      force: false,
+      includeOverdueOpen: true,
+    });
+    expect(getPlan).toHaveBeenCalledWith('outside-page');
+    expect(toValue(mocks.listEnabled)).toBe(false);
+    expect(wrapper.text()).toContain('Plan outside page');
+    wrapper.findComponent(toolbar).vm.$emit('update:active-surface', 'plans');
+    await flushPromises();
+    await wrapper.get('[data-testid="task-plan-pagination"] button:last-child').trigger('click');
+    expect(mocks.listParams!.value.page).toBe(2);
+    expect(toValue(mocks.listEnabled)).toBe(true);
+  });
+
+  it('shows a retryable failure instead of silently dropping unresolved plan details', async () => {
+    const { wrapper } = render(true);
+    await flushPromises();
+    expect(wrapper.find('[data-testid="task-error-state"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="task-occurrences-empty-state"]').exists()).toBe(false);
+    await wrapper.get('[data-testid="task-error-state"] button').trigger('click');
+    await flushPromises();
+    expect(mocks.refetch).not.toHaveBeenCalled();
+    expect(mocks.range).toHaveBeenLastCalledWith(1000, 2000, { force: true, includeOverdueOpen: true });
+  });
+
+  it.each([
+    ['all', {}],
+    ['active', { status: ['Active'], outcome: ['Open'], archiveState: 'active' }],
+    ['paused', { status: ['Paused'], outcome: ['Open'], archiveState: 'active' }],
+    ['succeeded', { outcome: ['Succeeded'] }],
+    ['failed', { outcome: ['Failed'] }],
+    ['abandoned', { outcome: ['Abandoned'] }],
+    ['archived', { archiveState: 'archived' }],
+  ])('sends the %s Plan state before paging and resets to page one', async (state, filter) => {
+    const { wrapper } = render();
+    await flushPromises();
+    const controls = wrapper.findComponent(toolbar);
+    controls.vm.$emit('update:active-surface', 'plans');
+    controls.vm.$emit('update:plan-state-filter', state === 'all' ? 'active' : 'all');
+    controls.vm.$emit('update:label-filter-ids', ['a', 'b']);
+    await flushPromises();
+    await wrapper.get('[data-testid="task-plan-pagination"] button:last-child').trigger('click');
+    expect(mocks.listParams!.value.page).toBe(2);
+    controls.vm.$emit('update:plan-state-filter', state);
+    await flushPromises();
+    expect(mocks.listParams!.value).toEqual({ page: 1, limit: 100, labelIdsAll: ['a', 'b'], ...filter });
+    mocks.listTotal!.value = 7;
+    await flushPromises();
+    expect(wrapper.find('[data-testid="task-plan-pagination"]').exists()).toBe(false);
+  });
+
+  it('resets pagination when labels are selected, changed or cleared and Goal/KR scope changes', async () => {
+    const { wrapper } = render();
+    await flushPromises();
+    const controls = wrapper.findComponent(toolbar);
+    controls.vm.$emit('update:active-surface', 'plans');
+    await flushPromises();
+    for (const labels of [['a'], ['a', 'b'], []]) {
+      await wrapper.get('[data-testid="task-plan-pagination"] button:last-child').trigger('click');
+      expect(mocks.listParams!.value.page).toBe(2);
+      controls.vm.$emit('update:label-filter-ids', labels);
+      await flushPromises();
+      expect(mocks.listParams!.value.page).toBe(1);
+      expect(mocks.listParams!.value.labelIdsAll).toEqual(labels.length ? labels : undefined);
+    }
+    const scopes: Record<string, string>[] = [
+      { goalId: 'goal-id' },
+      { goalId: 'goal-id', keyResultId: 'kr-id' },
+      { goalId: 'goal-id', keyResultId: 'other-kr' },
+      { goalId: 'other-goal' },
+      {},
+    ];
+    for (const scope of scopes) {
+      await wrapper.get('[data-testid="task-plan-pagination"] button:last-child').trigger('click');
+      expect(mocks.listParams!.value.page).toBe(2);
+      mocks.route.query = scope;
+      await flushPromises();
+      expect(mocks.listParams!.value).toEqual({ page: 1, limit: 100, ...scope });
+    }
+  });
+
+  it('ignores Plan query loading and errors on Today and includes them on Plans', async () => {
+    const { wrapper } = render();
+    await flushPromises();
+    mocks.listLoading!.value = true;
+    mocks.listError!.value = true;
+    await flushPromises();
+    expect(wrapper.text()).toContain('Plan outside page');
+    expect(wrapper.find('[data-testid="task-loading-state"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="task-error-state"]').exists()).toBe(false);
+
+    wrapper.findComponent(toolbar).vm.$emit('update:active-surface', 'plans');
+    await flushPromises();
+    expect(wrapper.find('[data-testid="task-loading-state"]').exists()).toBe(true);
+    mocks.listLoading!.value = false;
+    await flushPromises();
+    expect(wrapper.find('[data-testid="task-error-state"]').exists()).toBe(true);
+    await wrapper.get('[data-testid="task-error-state"] button').trigger('click');
+    expect(mocks.refetch).toHaveBeenCalledTimes(1);
+    expect(mocks.range).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores Today detail failures on Plans', async () => {
+    const { wrapper } = render(true);
+    await flushPromises();
+    expect(wrapper.find('[data-testid="task-error-state"]').exists()).toBe(true);
+    wrapper.findComponent(toolbar).vm.$emit('update:active-surface', 'plans');
+    await flushPromises();
+    expect(wrapper.find('[data-testid="task-error-state"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="task-plans-empty-state"]').exists()).toBe(true);
+  });
+
+  it('resolves readable deeplink scope and clears it to safe copy on lookup failure', async () => {
+    mocks.route.query = { goalId: 'goal-id', keyResultId: 'kr-id' };
+    const { wrapper, goalService } = render();
+    await flushPromises();
+    expect(wrapper.findComponent(toolbar).props('goalScopeLabel')).toBe(
+      'Readable Goal · Readable KR',
+    );
+    expect(mocks.listParams!.value).toMatchObject({ goalId: 'goal-id', keyResultId: 'kr-id' });
+    goalService.getGoal.mockRejectedValue(new Error('offline'));
+    goalService.getKeyResults.mockRejectedValue(new Error('offline'));
+    mocks.route.query = { goalId: 'missing-goal', keyResultId: 'missing-kr' };
+    await flushPromises();
+    const label = wrapper.findComponent(toolbar).props('goalScopeLabel');
+    expect(label).not.toContain('missing-goal');
+    expect(label).not.toContain('missing-kr');
+    expect(label).not.toContain('Readable');
+  });
+});

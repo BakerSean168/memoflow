@@ -204,8 +204,12 @@ describe('task-plan route contracts', () => {
     const route = getRegisteredRoute(registry, 'get', BASE);
     const querySchema = getQuerySchema(route);
     expect(querySchema).toBeDefined();
-    // Query with status array should pass.
-    expect(querySchema.safeParse({ status: ['active'] }).success).toBe(true);
+    // Query with real page/limit and status should pass.
+    expect(querySchema.safeParse({ page: '2', limit: '50', status: ['active'] }).success).toBe(
+      true,
+    );
+    expect(querySchema.safeParse({ page: 0, limit: 50 }).success).toBe(false);
+    expect(querySchema.safeParse({ page: 1, limit: 501 }).success).toBe(false);
     const goalId = 'IGoalId_550e8400-e29b-41d4-a716-446655440000';
     const keyResultId = 'IKeyResultId_550e8400-e29b-41d4-a716-446655440001';
     expect(querySchema.safeParse({ goalId }).success).toBe(true);
@@ -442,6 +446,56 @@ describe('task plan mutation routes run the real validation adapter (Phase 4)', 
     };
     return res;
   }
+
+  it.each([0, 501])('rejects invalid plan pagination %s before the controller', async (value) => {
+    const controller = createControllerStub();
+    const router = registerTaskPlanRoutes(controller, { auth: authMiddleware });
+    const req = createReq(undefined);
+    req.query = value === 0 ? { page: '0' } : { limit: '501' };
+    const res = createRes();
+    await getHandler(router, 'get', '/')(req, res);
+    expect(res.statusCode).toBe(400);
+    expect(controller.listPlans).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['Open', 'active'],
+    [['Succeeded', 'Failed'], 'all'],
+    [['Abandoned'], 'archived'],
+  ])('passes validated outcome %s and archive state %s to the controller', async (outcome, archiveState) => {
+    const controller = createControllerStub();
+    const router = registerTaskPlanRoutes(controller, { auth: authMiddleware });
+    const req = createReq(undefined);
+    req.query = { page: '2', limit: '10', status: 'Active', labelIdsAll: ['a', 'b'], outcome, archiveState };
+    const res = createRes();
+    await getHandler(router, 'get', '/')(req, res);
+    expect(res.statusCode).toBe(200);
+    expect(controller.listPlans).toHaveBeenCalledWith(
+      expect.objectContaining({
+        page: 2, limit: 10, status: ['Active'], labelIdsAll: ['a', 'b'],
+        outcome: typeof outcome === 'string' ? [outcome] : outcome, archiveState,
+      }),
+      expect.objectContaining({ identityId: 'identity-1' }),
+    );
+  });
+
+  it.each([
+    { outcome: ['Unknown'] },
+    { outcome: ['Open', 'unknown'] },
+    { outcome: 42 },
+    { outcome: { value: 'Open' } },
+    { archiveState: 'deleted' },
+    { archiveState: ['active'] },
+  ])('rejects invalid Plan state filters before the controller: %s', async (query) => {
+    const controller = createControllerStub();
+    const router = registerTaskPlanRoutes(controller, { auth: authMiddleware });
+    const req = createReq(undefined);
+    req.query = query;
+    const res = createRes();
+    await getHandler(router, 'get', '/')(req, res);
+    expect(res.statusCode).toBe(400);
+    expect(controller.listPlans).not.toHaveBeenCalled();
+  });
 
   it('create: malformed name is rejected before the controller', async () => {
     const controller = createControllerStub();
