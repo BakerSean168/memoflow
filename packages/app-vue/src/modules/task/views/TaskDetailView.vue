@@ -41,9 +41,12 @@
               <Play class="mr-2 h-4 w-4 text-muted-foreground" />
               {{ t('task.action.activate') }}
             </DropdownMenuItem>
-            <DropdownMenuItem v-if="!viewModel.isArchived" @click="archive">
-              <Archive class="mr-2 h-4 w-4 text-muted-foreground" />
-              {{ t('task.action.archive') }}
+            <DropdownMenuItem
+              v-if="!viewModel.isArchived && (viewModel.isActive || viewModel.isPaused)"
+              @click="abandon"
+            >
+              <CircleStop class="mr-2 h-4 w-4 text-muted-foreground" />
+              {{ t('task.action.abandon') }}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem class="text-destructive focus:text-destructive" @click="remove">
@@ -121,7 +124,7 @@
                       <template #icon>
                         <CircleDot class="h-3.5 w-3.5" />
                       </template>
-                      {{ viewModel.statusText }}
+                      {{ viewModel.stateText ?? viewModel.statusText }}
                     </ProductPropertyChip>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" class="w-44">
@@ -136,9 +139,12 @@
                       <Play class="mr-2 h-4 w-4 text-muted-foreground" />
                       {{ t('task.action.activate') }}
                     </DropdownMenuItem>
-                    <DropdownMenuItem v-if="!viewModel.isArchived" @click="archive">
-                      <Archive class="mr-2 h-4 w-4 text-muted-foreground" />
-                      {{ t('task.action.archive') }}
+                    <DropdownMenuItem
+                      v-if="!viewModel.isArchived && (viewModel.isActive || viewModel.isPaused)"
+                      @click="abandon"
+                    >
+                      <CircleStop class="mr-2 h-4 w-4 text-muted-foreground" />
+                      {{ t('task.action.abandon') }}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -734,7 +740,7 @@ import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import {
-  Archive,
+  CircleStop,
   ArrowDown,
   ArrowLeft,
   ArrowUp,
@@ -841,7 +847,7 @@ const {
   updatePlanSafe,
   activatePlanSafe,
   pausePlanSafe,
-  archivePlanSafe,
+  abandonPlanSafe,
   deletePlanSafe,
   isSaving,
 } = useTaskPlanMutations();
@@ -1223,8 +1229,8 @@ async function pause() {
 async function activate() {
   if (await activatePlanSafe(id.value)) await refetchWorkspace();
 }
-async function archive() {
-  if (await archivePlanSafe(id.value)) await reloadDetail();
+async function abandon() {
+  if (await abandonPlanSafe(id.value)) await reloadDetail();
 }
 async function remove() {
   const confirmed = await useConfirm({

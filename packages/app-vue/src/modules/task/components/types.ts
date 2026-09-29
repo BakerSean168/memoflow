@@ -1,6 +1,7 @@
 import type {
   ChecklistItemDefinitionDTO,
   TaskGoalBindingTriggerValue,
+  TaskPlanClientDTO,
   TaskPlanSchedule,
 } from '@memoflow/contracts/task';
 import type { LabelClientDTO } from '@memoflow/contracts/label';
@@ -58,6 +59,10 @@ export interface TaskPlanViewModel {
   description?: string;
   status: string;
   statusText?: string;
+  outcome?: TaskPlanClientDTO['outcome'];
+  outcomeText?: string;
+  stateText?: string;
+  isClosed?: boolean;
   isActive?: boolean;
   isPaused?: boolean;
   isArchived?: boolean;

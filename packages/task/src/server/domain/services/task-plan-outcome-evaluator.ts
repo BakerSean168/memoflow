@@ -1,6 +1,5 @@
 import {
   TaskOccurrenceStatus,
-  TaskPlanCompletionPolicy,
   TaskPlanOutcome,
   TaskRecurrenceEndKind,
   RecurrenceFrequency,
@@ -41,25 +40,27 @@ export class TaskPlanOutcomeEvaluator {
       : occurrences;
     if (relevant.length === 0) return TaskPlanOutcome.Open;
 
-    if (
-      plan.completionPolicy === TaskPlanCompletionPolicy.StrictNoBackfill &&
-      relevant.some((occurrence) => occurrence.status === TaskOccurrenceStatus.Missed)
-    ) {
-      return TaskPlanOutcome.Failed;
-    }
-
     if (!this.isScopeFullyKnown(plan, relevant, actualDates, timeContext)) {
       return TaskPlanOutcome.Open;
     }
 
     // Skipped is a waiver: it is excluded from required completion scope.
-    let allRequiredCompleted = true;
-    for (const occurrence of relevant) {
-      if (occurrence.status === TaskOccurrenceStatus.Skipped) continue;
-      if (occurrence.status === TaskOccurrenceStatus.Missed) return TaskPlanOutcome.Open;
-      if (occurrence.status !== TaskOccurrenceStatus.Completed) allRequiredCompleted = false;
+    // A finite plan only resolves after every materialized fact is terminal.
+    if (
+      relevant.some(
+        (occurrence) =>
+          occurrence.status === TaskOccurrenceStatus.Pending ||
+          occurrence.status === TaskOccurrenceStatus.InProgress,
+      )
+    ) {
+      return TaskPlanOutcome.Open;
     }
-    return allRequiredCompleted ? TaskPlanOutcome.Succeeded : TaskPlanOutcome.Open;
+
+    if (relevant.some((occurrence) => occurrence.status === TaskOccurrenceStatus.Missed)) {
+      return TaskPlanOutcome.Failed;
+    }
+
+    return TaskPlanOutcome.Succeeded;
   }
 
   private isFinite(plan: TaskPlan): boolean {

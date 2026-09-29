@@ -22,5 +22,6 @@ export type { TaskOccurrenceDeletedEvent } from './task-occurrence-deleted.event
 export type { TaskOccurrencesGeneratedEvent } from './task-occurrences-generated.event';
 export type { TaskPlanPausedEvent } from './task-plan-paused.event';
 export type { TaskPlanResumedEvent } from './task-plan-resumed.event';
+export type { TaskPlanAbandonedEvent } from './task-plan-abandoned.event';
 export type { TaskUncompletedEvent } from './task-uncompleted.event';
 export type { TaskRescheduledEvent } from './task-rescheduled.event';

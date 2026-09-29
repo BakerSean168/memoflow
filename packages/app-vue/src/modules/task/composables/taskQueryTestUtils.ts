@@ -45,6 +45,8 @@ const i18n = createI18n({
           pauseSuccess: 'Task template paused',
           archiveFailed: 'Could not archive task template',
           archiveSuccess: 'Task template archived',
+          abandonFailed: 'Could not end task template',
+          abandonSuccess: 'Task template ended',
         },
       },
     },

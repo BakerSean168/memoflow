@@ -54,6 +54,7 @@ function makeService(overrides: Record<string, ReturnType<typeof vi.fn>> = {}) {
     activatePlan: vi.fn(),
     pausePlan: vi.fn(),
     archivePlan: vi.fn(),
+    abandonPlan: vi.fn(),
     ...overrides,
   };
 }
@@ -107,6 +108,64 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
     // Pause failure restores the pre-mutation status.
     await api.pausePlanSafe(tpl.id);
     expect(runtime.queryClient.getQueryData(detailKey)?.status).toBe('Active');
+  });
+
+  it('abandon is server-confirmed and does not fake Closed before the server response', async () => {
+    const tpl = template();
+    let resolveAbandon!: (result: Result<ReturnType<typeof entity>>) => void;
+    const pending = new Promise<Result<ReturnType<typeof entity>>>((resolve) => {
+      resolveAbandon = resolve;
+    });
+    const service = makeService({
+      abandonPlan: vi.fn().mockReturnValue(pending),
+    });
+    const { api, runtime } = mountTaskComposable(() => useTaskPlanMutations(), { service });
+    const detailKey = taskPlanQueryKeys.detail(SCOPE, tpl.id);
+    runtime.queryClient.setQueryData(detailKey, tpl);
+
+    const inFlight = api.abandonPlanSafe(tpl.id);
+    await Promise.resolve();
+    expect(runtime.queryClient.getQueryData(detailKey)?.status).toBe('Active');
+    expect(runtime.queryClient.getQueryData(detailKey)?.outcome).toBe('Open');
+
+    resolveAbandon(
+      ok(
+        entity(
+          template({
+            status: 'Closed',
+            outcome: 'Abandoned',
+            closedAt: 2,
+            abandonedReason: null,
+            version: 2,
+          }),
+        ),
+      ),
+    );
+    await inFlight;
+
+    expect(service.abandonPlan).toHaveBeenCalledWith(tpl.id);
+    expect(runtime.queryClient.getQueryData(detailKey)?.status).toBe('Closed');
+    expect(runtime.queryClient.getQueryData(detailKey)?.outcome).toBe('Abandoned');
+  });
+
+  it('legacy archive compatibility mutation is also server-confirmed rather than optimistic Closed', async () => {
+    const tpl = template();
+    let resolveArchive!: (result: Result<ReturnType<typeof entity>>) => void;
+    const pending = new Promise<Result<ReturnType<typeof entity>>>((resolve) => {
+      resolveArchive = resolve;
+    });
+    const service = makeService({ archivePlan: vi.fn().mockReturnValue(pending) });
+    const { api, runtime } = mountTaskComposable(() => useTaskPlanMutations(), { service });
+    const detailKey = taskPlanQueryKeys.detail(SCOPE, tpl.id);
+    runtime.queryClient.setQueryData(detailKey, tpl);
+
+    const inFlight = api.archivePlanSafe(tpl.id);
+    await Promise.resolve();
+    expect(runtime.queryClient.getQueryData(detailKey)?.status).toBe('Active');
+
+    resolveArchive(ok(entity(template({ archivedAt: 2, version: 2 }))));
+    await inFlight;
+    expect(runtime.queryClient.getQueryData(detailKey)?.archivedAt).toBe(2);
   });
 
   it('status mutation derives from the complete cached projection, not a bare {id,status} DTO', async () => {

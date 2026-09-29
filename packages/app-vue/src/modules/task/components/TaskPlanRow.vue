@@ -28,7 +28,7 @@
                 {{ plan.title }}
               </h3>
               <Badge variant="secondary" class="h-5 shrink-0 px-1.5 py-0 text-[10px] font-normal">
-                {{ plan.statusText }}
+                {{ plan.stateText ?? plan.statusText }}
               </Badge>
             </div>
             <div
@@ -79,7 +79,7 @@
               <div class="flex min-w-0 items-center gap-2">
                 <h3 class="truncate text-sm font-medium text-foreground">{{ plan.title }}</h3>
                 <Badge variant="secondary" class="h-5 shrink-0 px-1.5 py-0 text-[10px] font-normal">
-                  {{ plan.statusText }}
+                  {{ plan.stateText ?? plan.statusText }}
                 </Badge>
               </div>
               <p v-if="plan.description" class="mt-1 truncate text-xs text-muted-foreground">
@@ -103,7 +103,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Archive, Trash2 } from '@lucide/vue';
+import { CircleStop, Trash2 } from '@lucide/vue';
 import { Badge, Progress } from '@memoflow/ui-vue-shadcn';
 import { ActionableWrapper, type MenuAction } from '../../../components/shared';
 import type { TaskPlanViewModel } from './types';
@@ -113,7 +113,7 @@ import {
 } from '../utils/task-plan-presentation';
 
 const props = defineProps<{ plan: TaskPlanViewModel }>();
-const emit = defineEmits<{ view: []; archive: []; delete: [] }>();
+const emit = defineEmits<{ view: []; abandon: []; delete: [] }>();
 const { t } = useI18n();
 
 const progress = computed(() =>
@@ -128,21 +128,24 @@ const scheduleText = computed(
       props.plan.schedule,
     )}`,
 );
-const actions = computed<MenuAction[]>(() => [
-  {
-    key: 'archive',
-    label: t('task.action.archive'),
-    icon: Archive,
-    disabled: props.plan.isArchived,
-    handler: () => emit('archive'),
-  },
-  {
+const actions = computed<MenuAction[]>(() => {
+  const items: MenuAction[] = [];
+  if (!props.plan.isArchived && (props.plan.isActive || props.plan.isPaused)) {
+    items.push({
+      key: 'abandon',
+      label: t('task.action.abandon'),
+      icon: CircleStop,
+      handler: () => emit('abandon'),
+    });
+  }
+  items.push({
     key: 'delete',
     label: t('common.delete'),
     icon: Trash2,
     destructive: true,
-    separator: true,
+    separator: items.length > 0,
     handler: () => emit('delete'),
-  },
-]);
+  });
+  return items;
+});
 </script>

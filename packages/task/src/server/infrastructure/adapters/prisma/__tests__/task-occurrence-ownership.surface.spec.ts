@@ -65,6 +65,10 @@ describe('task occurrence ownership surface', () => {
     resolve(__dirname, '../../../../application/use-cases/commands/pause-task-plan.use-case.ts'),
     'utf8',
   );
+  const abandonPlan = readFileSync(
+    resolve(__dirname, '../../../../application/use-cases/commands/abandon-task-plan.use-case.ts'),
+    'utf8',
+  );
   const deletePlan = readFileSync(
     resolve(__dirname, '../../../../application/use-cases/commands/delete-task-plan.use-case.ts'),
     'utf8',
@@ -122,6 +126,8 @@ describe('task occurrence ownership surface', () => {
     expect(listPlans).toContain('{ windowStart, asOf: asOfDate }');
     expect(pausePlan).toContain('deleteIncompleteOccurrencesFrom(');
     expect(pausePlan).toContain('identityId');
+    expect(abandonPlan).toContain('deleteIncompleteOccurrencesFrom(');
+    expect(abandonPlan).toContain('identityId');
     expect(deletePlan).toContain('deleteByPlanId(id, identityId)');
   });
 

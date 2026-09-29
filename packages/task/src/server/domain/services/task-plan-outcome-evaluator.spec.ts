@@ -103,22 +103,28 @@ describe('TaskPlanOutcomeEvaluator (TASK-2202)', () => {
     );
   });
 
-  it('Missed remains Open under correction policy', () => {
-    const { plan, occurrences } = fifteenDayPlan(TaskPlanCompletionPolicy.AllowCorrection);
-    occurrences.slice(0, 14).forEach((occurrence) => occurrence.complete());
-    occurrences[14].markMissed();
-    expect(evaluator.evaluate(plan, occurrences, TASK_TEST_TIME_CONTEXT)).toBe(
-      TaskPlanOutcome.Open,
-    );
-  });
+  it.each(Object.values(TaskPlanCompletionPolicy))(
+    'fully resolved Missed fails regardless of legacy policy: %s',
+    (policy) => {
+      const { plan, occurrences } = fifteenDayPlan(policy);
+      occurrences.slice(0, 14).forEach((occurrence) => occurrence.complete());
+      occurrences[14].markMissed();
+      expect(evaluator.evaluate(plan, occurrences, TASK_TEST_TIME_CONTEXT)).toBe(
+        TaskPlanOutcome.Failed,
+      );
+    },
+  );
 
-  it('Missed makes strict no-backfill success impossible => Failed', () => {
-    const { plan, occurrences } = fifteenDayPlan(TaskPlanCompletionPolicy.StrictNoBackfill);
-    occurrences[6].markMissed('day 7 was required');
-    expect(evaluator.evaluate(plan, occurrences, TASK_TEST_TIME_CONTEXT)).toBe(
-      TaskPlanOutcome.Failed,
-    );
-  });
+  it.each(Object.values(TaskPlanCompletionPolicy))(
+    'Missed stays Open while another occurrence is unresolved: %s',
+    (policy) => {
+      const { plan, occurrences } = fifteenDayPlan(policy);
+      occurrences[6].markMissed('day 7 was required');
+      expect(evaluator.evaluate(plan, occurrences, TASK_TEST_TIME_CONTEXT)).toBe(
+        TaskPlanOutcome.Open,
+      );
+    },
+  );
 
   it('Skipped waives that occurrence from required scope', () => {
     const { plan, occurrences } = fifteenDayPlan();
@@ -129,29 +135,61 @@ describe('TaskPlanOutcomeEvaluator (TASK-2202)', () => {
     );
   });
 
-  it('correction re-evaluates Failed -> Succeeded and uncomplete re-opens to Open', () => {
-    const { plan, occurrences } = fifteenDayPlan(TaskPlanCompletionPolicy.StrictNoBackfill);
-    occurrences.forEach((occurrence) => occurrence.complete());
-    occurrences[14].uncomplete();
-    occurrences[14].markMissed();
-    plan.applyPlanOutcome(evaluator.evaluate(plan, occurrences, TASK_TEST_TIME_CONTEXT), {
-      triggeringTaskOccurrenceId: occurrences[14].id,
-    });
-    expect(plan.outcome).toBe(TaskPlanOutcome.Failed);
+  it.each(Object.values(TaskPlanCompletionPolicy))(
+    'correction re-evaluates Failed -> Succeeded and uncomplete re-opens to Open: %s',
+    (policy) => {
+      const { plan, occurrences } = fifteenDayPlan(policy);
+      occurrences.forEach((occurrence) => occurrence.complete());
+      occurrences[14].uncomplete();
+      occurrences[14].markMissed();
+      plan.applyPlanOutcome(evaluator.evaluate(plan, occurrences, TASK_TEST_TIME_CONTEXT), {
+        triggeringTaskOccurrenceId: occurrences[14].id,
+      });
+      expect(plan.outcome).toBe(TaskPlanOutcome.Failed);
 
-    occurrences[14].complete();
-    plan.applyPlanOutcome(evaluator.evaluate(plan, occurrences, TASK_TEST_TIME_CONTEXT), {
-      triggeringTaskOccurrenceId: occurrences[14].id,
-    });
-    expect(plan.outcome).toBe(TaskPlanOutcome.Succeeded);
-    expect(plan.status).toBe(TaskPlanStatus.Closed);
+      occurrences[14].complete();
+      plan.applyPlanOutcome(evaluator.evaluate(plan, occurrences, TASK_TEST_TIME_CONTEXT), {
+        triggeringTaskOccurrenceId: occurrences[14].id,
+      });
+      expect(plan.outcome).toBe(TaskPlanOutcome.Succeeded);
+      expect(plan.status).toBe(TaskPlanStatus.Closed);
 
-    occurrences[14].uncomplete();
-    plan.applyPlanOutcome(evaluator.evaluate(plan, occurrences, TASK_TEST_TIME_CONTEXT), {
-      triggeringTaskOccurrenceId: occurrences[14].id,
-    });
-    expect(plan.outcome).toBe(TaskPlanOutcome.Open);
-    expect(plan.status).toBe(TaskPlanStatus.Active);
+      occurrences[14].uncomplete();
+      plan.applyPlanOutcome(evaluator.evaluate(plan, occurrences, TASK_TEST_TIME_CONTEXT), {
+        triggeringTaskOccurrenceId: occurrences[14].id,
+      });
+      expect(plan.outcome).toBe(TaskPlanOutcome.Open);
+      expect(plan.status).toBe(TaskPlanStatus.Active);
+    },
+  );
+
+  it('infinite recurrence remains Open even when every materialized occurrence is terminal', () => {
+    const plan = TaskPlan.load(
+      aTaskPlanState({
+        schedule: TaskPlanSchedule.create({
+          kind: TaskPlanScheduleKind.Recurring,
+          startDate: asYmd('2026-03-01'),
+          timing: { kind: TaskTimingKind.AllDay },
+          recurrence: {
+            frequency: RecurrenceFrequency.Daily,
+            interval: 1,
+            byWeekday: [],
+            end: { kind: TaskRecurrenceEndKind.Never },
+          },
+        }),
+      }),
+    );
+    expect(
+      evaluator.evaluate(
+        plan,
+        [
+          completedFact('2026-03-01'),
+          { ...completedFact('2026-03-02'), status: TaskOccurrenceStatus.Missed },
+          { ...completedFact('2026-03-03'), status: TaskOccurrenceStatus.Skipped },
+        ],
+        TASK_TEST_TIME_CONTEXT,
+      ),
+    ).toBe(TaskPlanOutcome.Open);
   });
 
   it('explicit abandon is authoritative and evaluator never overwrites it', () => {

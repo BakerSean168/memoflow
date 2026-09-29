@@ -9,15 +9,18 @@ import { AbandonTaskPlanUseCase } from '../abandon-task-plan.use-case';
 import { createInlineTaskWriteTransactionRunner } from '../task-write-support';
 
 describe('AbandonTaskPlanUseCase (TASK-2202)', () => {
-  it('closes the plan as explicitly Abandoned without using delete', async () => {
+  it('closes the plan as explicitly Abandoned and removes current/future incomplete occurrences', async () => {
     const plan = aOneTimeTask({ title: 'Try for 15 days' });
     const planRepository = createMockRepo<ITaskPlanRepository>({
       findByIdForIdentity: vi.fn().mockResolvedValue(plan),
       save: vi.fn().mockResolvedValue(undefined),
     });
-    const occurrenceRepository = createMockRepo<ITaskOccurrenceRepository>();
+    const occurrenceRepository = createMockRepo<ITaskOccurrenceRepository>({
+      deleteIncompleteOccurrencesFrom: vi.fn().mockResolvedValue(3),
+    });
     const useCase = new AbandonTaskPlanUseCase(
       planRepository,
+      occurrenceRepository,
       createInlineTaskWriteTransactionRunner({ planRepository, occurrenceRepository }),
       TASK_TEST_USER_TIME_CONTEXT_PORT,
     );
@@ -32,5 +35,20 @@ describe('AbandonTaskPlanUseCase (TASK-2202)', () => {
     expect(plan.abandonedReason).toBe('User changed direction');
     expect(plan.deletedAt).toBeNull();
     expect(planRepository.save).toHaveBeenCalledWith(plan);
+    expect(occurrenceRepository.deleteIncompleteOccurrencesFrom).toHaveBeenCalledWith(
+      plan.id,
+      plan.identityId,
+      expect.any(String),
+    );
+    expect(plan.domainEvents).toContainEqual(
+      expect.objectContaining({
+        eventType: 'task:plan-abandoned',
+        payload: expect.objectContaining({
+          taskPlanId: plan.id,
+          identityId: plan.identityId,
+          reason: 'User changed direction',
+        }),
+      }),
+    );
   });
 });

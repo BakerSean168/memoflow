@@ -69,7 +69,7 @@
               :key="template.id"
               :plan="template"
               @view="openTaskDetail(template.id)"
-              @archive="archive(template.id)"
+              @abandon="abandon(template.id)"
               @delete="remove(template)"
             />
           </div>
@@ -210,7 +210,7 @@ const {
   isError: templatesError,
   refetch: refetchTemplates,
 } = useTaskPlanListQuery(taskListParams);
-const { createPlanSafe, archivePlanSafe, deletePlanSafe, isSaving } = useTaskPlanMutations();
+const { createPlanSafe, abandonPlanSafe, deletePlanSafe, isSaving } = useTaskPlanMutations();
 const {
   fetchInstances: fetchOccurrencesMutation,
   completeOccurrence: completeOccurrenceMutation,
@@ -355,8 +355,8 @@ async function handleSubmit(vm: TaskPlanViewModel) {
     await reloadSurface();
   }
 }
-async function archive(id: string) {
-  if (await archivePlanSafe(id)) await refetchTemplates();
+async function abandon(id: string) {
+  if (await abandonPlanSafe(id)) await refetchTemplates();
 }
 async function remove(vm: TaskPlanViewModel) {
   const confirmed = await useConfirm({

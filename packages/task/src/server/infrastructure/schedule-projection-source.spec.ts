@@ -248,6 +248,7 @@ describe('task schedule projection source -> ScheduledIntent', () => {
 
     expect(taskScheduleProjectionEventNames).toContain('task:occurrence-uncompleted');
     expect(taskScheduleProjectionEventNames).toContain('task:rescheduled');
+    expect(taskScheduleProjectionEventNames).toContain('task:plan-abandoned');
     await handlers['task:occurrence-completed']({ ...common, completedAt: 1 } as never);
     await handlers['task:occurrence-skipped']({ ...common, skippedAt: 2 } as never);
     await handlers['task:occurrence-deleted']({ ...common, deletedAt: 3 } as never);
@@ -258,11 +259,12 @@ describe('task schedule projection source -> ScheduledIntent', () => {
       newDueDate: 20,
     } as never);
     await handlers['task:plan-paused']({ ...common, pausedAt: 5 } as never);
-    await handlers['task:deleted']({ ...common, deletedAt: 6 } as never);
+    await handlers['task:plan-abandoned']({ ...common, abandonedAt: 6 } as never);
+    await handlers['task:deleted']({ ...common, deletedAt: 7 } as never);
 
     expect(upsertPlan).toHaveBeenCalledTimes(5);
     expect(upsertPlan).toHaveBeenCalledWith('TaskPlanId_template', 'IdentityId_test');
-    expect(deletePlan).toHaveBeenCalledTimes(2);
+    expect(deletePlan).toHaveBeenCalledTimes(3);
     expect(deletePlan).toHaveBeenCalledWith('TaskPlanId_template', 'IdentityId_test');
   });
 });

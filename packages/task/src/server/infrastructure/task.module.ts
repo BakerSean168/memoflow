@@ -237,6 +237,7 @@ export function createTaskUseCases(dependencies: TaskModuleDependencies): TaskMo
     ),
     abandonTaskPlan: new AbandonTaskPlanUseCase(
       taskPlanRepository,
+      taskOccurrenceRepository,
       taskWriteTransactionRunner,
       dependencies.userTimeContextPort,
     ),

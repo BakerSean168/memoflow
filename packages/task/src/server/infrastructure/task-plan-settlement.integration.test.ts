@@ -224,8 +224,8 @@ describe('SETTLE-3501 finite-plan durable settlement', () => {
     seed.module.dispose();
   });
 
-  it('Fixture A: strict final Missed closes the 15-day plan as Failed and never enqueues Goal settlement', async () => {
-    const seed = await seedFifteenOccurrencePlan(TaskPlanCompletionPolicy.StrictNoBackfill);
+  it.each(Object.values(TaskPlanCompletionPolicy))('Fixture A: resolved final Missed closes as Failed without settlement regardless of compatibility policy: %s', async (completionPolicy) => {
+    const seed = await seedFifteenOccurrencePlan(completionPolicy);
     const prisma = await getPrisma();
 
     const result = await seed.module.api.markTaskOccurrenceMissed(
@@ -244,4 +244,53 @@ describe('SETTLE-3501 finite-plan durable settlement', () => {
 
     seed.module.dispose();
   });
+
+  it('abandon removes current/future incomplete occurrences, preserves history, and excludes the plan from materialization', async () => {
+    const seed = await seedFifteenOccurrencePlan(TaskPlanCompletionPolicy.AllowCorrection);
+    try {
+      const extraOccurrences = [-1, 1, 2, 3, 4, 5].map((offset) =>
+        TaskOccurrence.create({
+          planId: seed.plan.id,
+          identityId: seed.identityId,
+          scheduleSnapshot: canonicalTaskOccurrenceScheduleForTest(
+            Date.now() + offset * DAY_MS,
+            anAllDayTiming(),
+            TASK_TEST_TIME_CONTEXT,
+          ),
+          importanceSnapshot: ImportanceLevel.Moderate,
+        }),
+      );
+      extraOccurrences[2].start();
+      extraOccurrences[3].complete();
+      extraOccurrences[4].skip();
+      extraOccurrences[5].markMissed();
+      await seed.module.taskOccurrenceRepository.saveMany(extraOccurrences);
+      const before = await seed.module.taskOccurrenceRepository.findByPlanId(
+        String(seed.plan.id), String(seed.identityId),
+      );
+      expect((await seed.module.taskPlanRepository.findActiveRecurringPlansForMaterialization())
+        .map((plan) => plan.id)).toContain(seed.plan.id);
+
+      const result = await seed.module.api.abandonTaskPlan(
+        String(seed.plan.id), String(seed.identityId), { reason: 'End plan' },
+      );
+      expect(result.ok).toBe(true);
+      expect(await loadOutcome(seed)).toBe(TaskPlanOutcome.Abandoned);
+      const after = await seed.module.taskOccurrenceRepository.findByPlanId(
+        String(seed.plan.id), String(seed.identityId),
+      );
+      const removed = new Set([
+        seed.finalInstance.id, extraOccurrences[1].id, extraOccurrences[2].id,
+      ]);
+      expect(after.map((occurrence) => occurrence.id).sort()).toEqual(
+        before.filter((occurrence) => !removed.has(occurrence.id))
+          .map((occurrence) => occurrence.id).sort(),
+      );
+      expect((await seed.module.taskPlanRepository.findActiveRecurringPlansForMaterialization())
+        .map((plan) => plan.id)).not.toContain(seed.plan.id);
+    } finally {
+      seed.module.dispose();
+    }
+  });
+
 });
