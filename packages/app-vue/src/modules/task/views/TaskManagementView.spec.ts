@@ -131,3 +131,12 @@ describe('TaskManagementView occurrence-first surface', () => {
     expect(source).not.toContain('runOccurrenceAction');
   });
 });
+
+it('keeps Task Plan as the only detail route and inspect selection local', () => {
+  const routes = readFileSync(resolve(__dirname, '../router/index.ts'), 'utf8');
+  expect(routes.match(/path:/g)).toHaveLength(3);
+  expect(routes).toContain("name: 'task-detail'");
+  expect(routes).not.toMatch(/occurrence|inspect/i);
+  expect(source).toContain('@inspect="openOccurrenceInspect"');
+  expect(source).not.toContain('route.query.occurrence');
+});

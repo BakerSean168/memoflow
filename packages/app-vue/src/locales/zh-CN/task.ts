@@ -1,4 +1,22 @@
 export default {
+  inspect: {
+    description: '本次执行详情',
+    open: '查看 {title} 本次执行',
+    status: '状态',
+    scheduled: '计划时间',
+    actualStart: '实际开始',
+    checklist: '检查清单',
+    recordedAt: '记录时间',
+    duration: '用时',
+    minutes: '{count} 分钟',
+    rating: '评分',
+    note: '备注',
+    reason: '原因',
+    goalContext: '目标 / 关键结果',
+    contextLoading: '正在加载目标信息…',
+    krMissing: '关联的关键结果已不可用',
+    viewPlan: '查看计划',
+  },
   route: {
     management: '任务管理',
     dependencyDemo: '依赖验证演示 (STORY-024)',

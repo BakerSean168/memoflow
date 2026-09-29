@@ -134,7 +134,8 @@
                   :occurrence="occurrence"
                   :template="templateById.get(String(occurrence.planId))!"
                   :busy="busyOccurrenceId === String(occurrence.id)"
-                  @open-plan="openTaskDetail"
+                  :inspect="true"
+                  @inspect="openOccurrenceInspect"
                   @complete="completeOccurrence"
                   @uncomplete="uncompleteOccurrence"
                   @missed="markOccurrenceMissed"
@@ -177,6 +178,22 @@
       </div>
     </main>
 
+    <TaskOccurrenceInspectDialog
+      v-if="selectedOccurrence"
+      :model-value="true"
+      :occurrence="selectedOccurrence"
+      :plan-name="selectedPlanName"
+      :busy="busyOccurrenceId === String(selectedOccurrence.id)"
+      @update:model-value="!$event && (selectedOccurrence = null)"
+      @view-plan="openTaskDetail"
+      @complete="updateInspectedOccurrence(completeOccurrence($event))"
+      @uncomplete="updateInspectedOccurrence(uncompleteOccurrence($event))"
+      @missed="updateInspectedOccurrence(markOccurrenceMissed($event))"
+      @skip="updateInspectedOccurrence(skipOccurrence($event))"
+      @checklist-change="(id, definitionId, completed, version) =>
+        updateInspectedOccurrence(setOccurrenceChecklistItem(id, definitionId, completed, version))"
+    />
+
     <QuickTaskDialog
       v-model="showQuickTaskDialog"
       :saving="isSaving"
@@ -214,6 +231,7 @@ import {
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
 import type { GoalId, KeyResultId } from '@memoflow/contracts/primitives';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
+import TaskOccurrenceInspectDialog from '../components/dialogs/TaskOccurrenceInspectDialog.vue';
 import TaskOccurrenceRow from '../components/TaskOccurrenceRow.vue';
 import TaskPageToolbar from '../components/TaskPageToolbar.vue';
 import TaskPlanRow from '../components/TaskPlanRow.vue';
@@ -334,6 +352,31 @@ const {
 });
 const taskStore = useTaskStore();
 const { instances, isLoading: instancesLoading, error: instancesError } = storeToRefs(taskStore);
+
+const selectedOccurrence = ref<TaskOccurrenceClientDTO | null>(null);
+const selectedPlanName = ref('');
+async function updateInspectedOccurrence(action: Promise<TaskOccurrenceClientDTO | null>) {
+  const identityScope = resolveIdentityScope();
+  const updated = await action;
+  // A corrected overdue occurrence can leave the bounded Today read while Inspect stays open.
+  if (identityScope === resolveIdentityScope() && updated?.id === selectedOccurrence.value?.id) {
+    selectedOccurrence.value = updated;
+  }
+}
+
+function openOccurrenceInspect(id: string) {
+  const occurrence = instances.value.find((item) => String(item.id) === id);
+  if (!occurrence) return;
+  selectedOccurrence.value = occurrence;
+  selectedPlanName.value = templateById.value.get(String(occurrence.planId))?.name ?? '';
+}
+watch(
+  () => instances.value.find((item) => item.id === selectedOccurrence.value?.id),
+  (occurrence) => {
+    if (occurrence) selectedOccurrence.value = occurrence;
+  },
+  { flush: 'sync' },
+);
 
 const templateById = computed(
   () =>
@@ -520,6 +563,7 @@ function openBoundTaskCreateDialog(goalId: string, keyResultId?: string | null) 
   showDialog.value = true;
 }
 function openTaskDetail(id: string) {
+  selectedOccurrence.value = null;
   void router.push({ name: 'task-detail', params: { id } });
 }
 
@@ -602,6 +646,7 @@ watch(
 );
 
 watch(resolveIdentityScope, () => {
+  selectedOccurrence.value = null;
   planPage.value = 1;
   ++todayRequest;
   occurrencePlanDetails.value = [];

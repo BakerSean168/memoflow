@@ -92,6 +92,19 @@ test.describe('Task completion closed loop', () => {
     );
     expect(creation.todayOccurrenceCreated).toBe(true);
 
+    // Today inspects occurrence facts locally; only View Plan leaves the surface.
+    await page.goto('/tasks');
+    const todayRow = page.getByTestId('task-occurrence-row').filter({ hasText: taskName });
+    await todayRow.getByTestId('task-occurrence-body').click();
+    const inspect = page.getByTestId('task-occurrence-inspect');
+    await expect(inspect).toBeVisible();
+    await expect(page).toHaveURL(/\/tasks$/);
+    await expect(inspect).toContainText(goalName);
+    await expect(inspect).toContainText('Complete linked work');
+    await inspect.getByTestId('task-inspect-view-plan').click();
+    await expect(page).toHaveURL(new RegExp(`/tasks/${creation.plan.id}$`));
+    await page.goto('/');
+
     await page.reload({ waitUntil: 'domcontentloaded' });
     const todoWidget = page.getByTestId('daily-todo-widget');
     const taskItem = todoWidget
