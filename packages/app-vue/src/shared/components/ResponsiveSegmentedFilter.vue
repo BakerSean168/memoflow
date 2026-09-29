@@ -3,7 +3,7 @@
     <ToggleGroup
       type="single"
       :model-value="modelValue"
-      class="hidden items-center justify-start gap-0.5 rounded-lg bg-muted/45 p-0.5 @2xl/panel:flex"
+      class="hidden items-center justify-start gap-0.5 rounded-lg bg-[hsl(var(--surface-raised)/0.5)] p-0.5 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)] @2xl/panel:flex"
       :aria-label="accessibleLabel"
       :data-testid="testId ? `${testId}-expanded` : undefined"
       @update:model-value="handleUpdate"
@@ -13,7 +13,7 @@
         :key="option.value"
         :value="option.value"
         size="sm"
-        class="h-7 rounded-md px-2.5 text-xs font-normal text-muted-foreground hover:bg-background/60 hover:text-foreground data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm"
+        class="h-7 rounded-md px-2.5 text-xs font-normal text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover))] hover:text-foreground data-[state=on]:bg-[hsl(var(--surface-overlay))] data-[state=on]:text-foreground data-[state=on]:shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.62)]"
         :disabled="disabled || option.disabled"
         :data-testid="testId ? `${testId}-expanded-${option.value}` : undefined"
       >

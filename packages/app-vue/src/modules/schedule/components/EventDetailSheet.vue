@@ -10,7 +10,7 @@
       </SheetHeader>
 
       <div v-if="event" class="mt-4 space-y-4">
-        <dl class="divide-y border-y border-border/70" data-testid="event-detail-properties">
+        <dl class="divide-y divide-[hsl(var(--border-subtle))] border-y border-[hsl(var(--border-subtle))]" data-testid="event-detail-properties">
           <div class="grid grid-cols-[6rem_minmax(0,1fr)] gap-3 py-3">
             <dt class="text-xs font-medium text-muted-foreground">
               {{ t('schedule.eventDetail.time') }}

@@ -4,20 +4,24 @@
     data-testid="routine-capsule-preview"
     data-capsule-workspace="routine"
   >
-    <div class="flex items-center justify-between gap-3 border-b border-border/50 pb-2">
+    <div class="flex items-center justify-between gap-3 border-b border-[hsl(var(--border-subtle))] pb-2">
       <div>
         <p class="text-xs font-semibold text-foreground">{{ t('routine.title') }}</p>
         <p class="mt-0.5 text-[10px] text-muted-foreground">{{ t('routine.home.title') }}</p>
       </div>
       <span
-        class="rounded-full bg-muted/70 px-2 py-0.5 font-mono text-[10px] text-muted-foreground"
+        class="rounded-full bg-[hsl(var(--surface-raised)/0.68)] px-2 py-0.5 font-mono text-[10px] text-[hsl(var(--foreground-muted))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.4)]"
       >
         {{ occurrences.length }}
       </span>
     </div>
 
     <div v-if="loading && occurrences.length === 0" class="space-y-1.5 py-3">
-      <div v-for="index in 3" :key="index" class="h-10 animate-pulse rounded-lg bg-muted/70" />
+      <div
+        v-for="index in 3"
+        :key="index"
+        class="h-10 animate-pulse rounded-lg bg-[hsl(var(--surface-raised)/0.6)]"
+      />
     </div>
 
     <div
@@ -44,7 +48,7 @@
       <div
         v-for="occurrence in occurrences"
         :key="occurrence.occurrenceKey"
-        class="group flex items-start gap-2 rounded-lg px-1.5 py-1 transition-colors hover:bg-accent/45"
+        class="group flex items-start gap-2 rounded-lg px-1.5 py-1 transition-colors hover:bg-[hsl(var(--hover)/0.55)]"
         data-testid="routine-capsule-occurrence"
       >
         <button
@@ -74,7 +78,7 @@
 
         <button
           type="button"
-          class="mt-0.5 flex h-6 shrink-0 items-center gap-1 rounded-md px-1.5 text-[10px] text-muted-foreground opacity-0 transition-opacity hover:bg-background/70 hover:text-foreground group-hover:opacity-100 focus:opacity-100"
+          class="mt-0.5 flex h-6 shrink-0 items-center gap-1 rounded-md px-1.5 text-[10px] text-[hsl(var(--foreground-subtle))] opacity-0 transition-opacity hover:bg-[hsl(var(--hover))] hover:text-foreground group-hover:opacity-100 focus:opacity-100"
           :disabled="mutatingRoutineId === occurrence.routineId"
           :title="t('routine.card.snooze30')"
           @click="snoozeRoutine(occurrence.routineId)"
@@ -86,10 +90,10 @@
       </div>
     </div>
 
-    <div class="flex shrink-0 justify-end border-t border-border/50 pt-2">
+    <div class="flex shrink-0 justify-end border-t border-[hsl(var(--border-subtle))] pt-2">
       <button
         type="button"
-        class="flex h-8 items-center gap-1 rounded-md px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+        class="flex h-8 items-center gap-1 rounded-md px-2 text-[11px] font-medium text-[hsl(var(--foreground-muted))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground"
         data-testid="routine-capsule-view-all"
         @click="emit('view-all')"
       >

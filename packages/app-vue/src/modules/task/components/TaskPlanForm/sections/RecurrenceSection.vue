@@ -88,7 +88,7 @@
                 :class="
                   selectedDays.includes(day.value)
                     ? 'border-primary bg-primary text-primary-foreground'
-                    : 'border-input bg-background hover:bg-accent'
+                    : 'border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.38)] text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover))] hover:text-foreground'
                 "
                 @click="toggleDay(day.value)"
               >

@@ -65,7 +65,7 @@ function updateSelection(value: string[]): void {
         class="min-w-0 justify-between gap-2"
         :class="
           compact
-            ? 'h-8 w-auto max-w-56 rounded-full border-border/70 bg-background/60 px-3 font-normal text-muted-foreground shadow-none transition-colors hover:border-foreground/20 hover:bg-muted/40 hover:text-foreground'
+            ? 'h-8 w-auto max-w-56 rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.48)] px-3 font-normal text-[hsl(var(--foreground-muted))] shadow-none transition-colors hover:border-[hsl(var(--border))] hover:bg-[hsl(var(--hover))] hover:text-foreground'
             : 'w-full'
         "
         role="combobox"

@@ -121,7 +121,7 @@
         type="number"
         inputmode="decimal"
         data-testid="draft-kr-initial-input"
-        class="h-7 w-20 border-0 bg-transparent px-1.5 text-center text-sm font-semibold tabular-nums shadow-none ring-0 transition-colors hover:bg-muted/45 focus-visible:bg-background/80 focus-visible:ring-1 focus-visible:ring-ring/30"
+        class="h-7 w-20 border-0 bg-transparent px-1.5 text-center text-sm font-semibold tabular-nums shadow-none ring-0 transition-colors hover:bg-[hsl(var(--hover)/0.62)] focus-visible:bg-[hsl(var(--surface-overlay)/0.82)] focus-visible:ring-1 focus-visible:ring-ring/30"
         :disabled="disabled"
       />
     </div>
@@ -166,7 +166,7 @@
         inputmode="decimal"
         placeholder="—"
         data-testid="draft-kr-target-input"
-        class="h-7 w-20 border-0 bg-transparent px-1.5 text-center text-sm font-semibold tabular-nums shadow-none ring-0 transition-colors placeholder:text-muted-foreground/50 hover:bg-muted/45 focus-visible:bg-background/80 focus-visible:ring-1 focus-visible:ring-ring/30"
+        class="h-7 w-20 border-0 bg-transparent px-1.5 text-center text-sm font-semibold tabular-nums shadow-none ring-0 transition-colors placeholder:text-muted-foreground/50 hover:bg-[hsl(var(--hover)/0.62)] focus-visible:bg-[hsl(var(--surface-overlay)/0.82)] focus-visible:ring-1 focus-visible:ring-ring/30"
         :class="hasTarget ? 'text-foreground' : 'text-muted-foreground/60'"
         :disabled="disabled"
       />

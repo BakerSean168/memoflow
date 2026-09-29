@@ -1,6 +1,6 @@
 <template>
-  <Card>
-    <CardHeader>
+  <Card class="border-0 bg-transparent shadow-none">
+    <CardHeader class="px-0 pt-0">
       <div class="flex items-center justify-between">
         <CardTitle>{{ t('schedule.eventList.title') }}</CardTitle>
         <Button @click="$emit('create')">
@@ -10,7 +10,7 @@
       </div>
     </CardHeader>
 
-    <CardContent>
+    <CardContent class="px-0 pb-0">
       <!-- Loading -->
       <div v-if="loading" class="flex justify-center items-center py-8">
         <Loader2 class="h-8 w-8 animate-spin text-primary" />
@@ -42,7 +42,7 @@
         >
           <button
             type="button"
-            class="flex w-full items-start gap-4 rounded-lg border p-4 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            class="flex w-full items-start gap-4 rounded-xl bg-[hsl(var(--surface-raised)/0.28)] p-4 text-left shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.44)] transition-[background-color,box-shadow] hover:bg-[hsl(var(--hover)/0.68)] hover:shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.68)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             @click="emit('schedule-click', schedule)"
           >
             <div class="flex-shrink-0">

@@ -31,7 +31,7 @@
     >
       <div class="mx-auto max-w-5xl space-y-6">
         <article
-          class="space-y-4 border-b border-border/70 pb-5"
+          class="space-y-4 border-b border-[hsl(var(--border-subtle))] pb-5"
           data-testid="goal-workspace-header"
         >
           <div class="space-y-1" data-testid="goal-detail-identity">
@@ -40,7 +40,7 @@
               :max-length="80"
               :rows="1"
               data-testid="goal-detail-title"
-              class="-mx-1 min-h-9 rounded-md px-1 text-2xl font-semibold leading-tight tracking-tight transition-colors hover:bg-muted/40 focus-visible:bg-muted/40"
+              class="-mx-1 min-h-9 rounded-md px-1 text-2xl font-semibold leading-tight tracking-tight transition-colors hover:bg-[hsl(var(--hover)/0.62)] focus-visible:bg-[hsl(var(--selected)/0.72)]"
               :placeholder="t('goal.dialog.goalTitlePlaceholder')"
               :disabled="isSaving || !!goal.archivedAt"
               @blur="saveName"
@@ -52,7 +52,7 @@
               :max-length="255"
               :rows="1"
               data-testid="goal-detail-summary"
-              class="-mx-1 min-h-7 rounded-md px-1 text-sm leading-5 text-muted-foreground transition-colors hover:bg-muted/40 focus-visible:bg-muted/40"
+              class="-mx-1 min-h-7 rounded-md px-1 text-sm leading-5 text-muted-foreground transition-colors hover:bg-[hsl(var(--hover)/0.62)] focus-visible:bg-[hsl(var(--selected)/0.72)]"
               :placeholder="t('goal.dialog.summaryPlaceholder')"
               :disabled="isSaving || !!goal.archivedAt"
               @blur="saveSummary"
@@ -171,7 +171,7 @@
                         >
                           <span
                             v-if="option.color"
-                            class="mr-2 h-2.5 w-2.5 shrink-0 rounded-full border border-border/60"
+                            class="mr-2 h-2.5 w-2.5 shrink-0 rounded-full border border-[hsl(var(--border-subtle))]"
                             :style="{ backgroundColor: option.color }"
                           />
                           <span class="min-w-0 flex-1 truncate">{{ option.name }}</span>
@@ -249,7 +249,7 @@
                     <button type="button" class="max-w-64">
                       <Badge
                         variant="outline"
-                        class="h-7 max-w-full rounded-full border-border/70 bg-background/60 px-2.5 font-normal hover:bg-muted/50"
+                        class="h-7 max-w-full rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal hover:bg-[hsl(var(--hover))]"
                       >
                         <span class="truncate">{{ reminderTriggerLabel(trigger) }}</span>
                       </Badge>
@@ -305,11 +305,11 @@
                   v-for="option in selectedLabelOptions"
                   :key="option.id"
                   variant="outline"
-                  class="h-7 max-w-48 gap-1.5 rounded-full border-border/70 bg-background/60 px-2.5 font-normal"
+                  class="h-7 max-w-48 gap-1.5 rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal"
                 >
                   <span
                     v-if="option.color"
-                    class="h-2 w-2 shrink-0 rounded-full border border-border/60"
+                    class="h-2 w-2 shrink-0 rounded-full border border-[hsl(var(--border-subtle))]"
                     :style="{ backgroundColor: option.color }"
                   />
                   <span class="truncate">{{ option.name }}</span>
@@ -361,7 +361,7 @@
                 >
                   <Badge
                     variant="outline"
-                    class="h-7 max-w-full rounded-full border-border/70 bg-background/60 px-2.5 font-normal hover:bg-muted/50"
+                    class="h-7 max-w-full rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal hover:bg-[hsl(var(--hover))]"
                   >
                     <span class="truncate">{{ task.name }}</span>
                   </Badge>
@@ -403,7 +403,7 @@
                 >
                   <Badge
                     variant="outline"
-                    class="h-7 max-w-full rounded-full border-border/70 bg-background/60 px-2.5 font-normal hover:bg-muted/50"
+                    class="h-7 max-w-full rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal hover:bg-[hsl(var(--hover))]"
                   >
                     <span class="truncate">
                       {{ note.state === 'Resolved' ? note.title : note.documentId }}
@@ -452,7 +452,7 @@
                 <button type="button" class="max-w-72" @click="openLatestReview">
                   <Badge
                     variant="outline"
-                    class="h-7 max-w-full rounded-full border-border/70 bg-background/60 px-2.5 font-normal hover:bg-muted/50"
+                    class="h-7 max-w-full rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal hover:bg-[hsl(var(--hover))]"
                   >
                     <span class="truncate">{{ latestReviewText }}</span>
                   </Badge>
@@ -491,7 +491,7 @@
             :max-length="10000"
             :rows="3"
             data-testid="goal-detail-description"
-            class="-mx-1 min-h-16 rounded-md px-1 text-sm leading-6 text-foreground/90 transition-colors hover:bg-muted/40 focus-visible:bg-muted/40"
+            class="-mx-1 min-h-16 rounded-md px-1 text-sm leading-6 text-foreground/90 transition-colors hover:bg-[hsl(var(--hover)/0.62)] focus-visible:bg-[hsl(var(--selected)/0.72)]"
             :placeholder="t('goal.dialog.descriptionLongPlaceholder')"
             :disabled="isSaving || !!goal.archivedAt"
             @blur="saveDescription"
@@ -528,7 +528,7 @@
             {{ t('goal.detail.progressNeedsKr') }}
           </p>
 
-          <div v-if="keyResults.length" class="divide-y border-y border-border/70">
+          <div v-if="keyResults.length" class="divide-y border-y border-[hsl(var(--border-subtle))]">
             <article v-for="kr in keyResults" :key="kr.id" class="p-4">
               <button
                 type="button"
@@ -612,7 +612,7 @@
           data-testid="goal-workspace-progress"
         >
           <h2 class="font-semibold">{{ t('goal.list.recentProgress') }}</h2>
-          <div class="divide-y border-y border-border/70">
+          <div class="divide-y border-y border-[hsl(var(--border-subtle))]">
             <div v-for="record in workspace.recentProgress" :key="record.id" class="px-4 py-3">
               <div class="flex items-center justify-between gap-3">
                 <p class="text-sm font-medium">{{ keyResultName(record.keyResultId) }}</p>

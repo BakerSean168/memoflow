@@ -151,7 +151,7 @@
               v-for="node in relatedNodes"
               :key="node.projectionId"
               type="button"
-              class="min-w-0 rounded-md px-2 py-2 text-left hover:bg-accent/60"
+              class="min-w-0 rounded-md px-2 py-2 text-left transition-colors hover:bg-[hsl(var(--hover)/0.65)]"
               @click="emit('select', node.projectionId)"
             >
               <span class="block truncate text-sm font-medium">{{ node.title }}</span>

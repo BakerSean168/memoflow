@@ -19,7 +19,7 @@
 
         <div v-else-if="goals.length > 0" data-testid="goal-list">
           <div
-            class="hidden grid-cols-[minmax(0,1fr)_6.5rem_8.5rem_10rem] items-center gap-x-6 border-b border-border/70 px-3 py-2 pr-12 text-[11px] font-medium text-muted-foreground @2xl/panel:grid"
+            class="hidden grid-cols-[minmax(0,1fr)_6.5rem_8.5rem_10rem] items-center gap-x-6 border-b border-[hsl(var(--border-subtle))] px-3 py-2 pr-12 text-[11px] font-medium text-muted-foreground @2xl/panel:grid"
             data-testid="goal-list-column-header"
           >
             <span>{{ t('goal.list.goalColumn') }}</span>

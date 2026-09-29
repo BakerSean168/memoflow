@@ -21,7 +21,7 @@
       @submit.prevent
     >
       <section
-        class="space-y-4 border-b border-border/70 pb-5"
+        class="space-y-4 border-b border-[hsl(var(--border-subtle))] pb-5"
         data-testid="task-plan-identity-section"
       >
         <BasicInfoSection
@@ -51,7 +51,7 @@
             </PopoverTrigger>
             <PopoverContent
               align="start"
-              class="max-h-[70vh] w-[440px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl border-border/80 p-3 shadow-xl"
+              class="max-h-[70vh] w-[440px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl p-3"
               data-testid="task-schedule-popover"
             >
               <TimeConfigSection
@@ -79,7 +79,7 @@
             </PopoverTrigger>
             <PopoverContent
               align="start"
-              class="max-h-[70vh] w-[460px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl border-border/80 p-3 shadow-xl"
+              class="max-h-[70vh] w-[460px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl p-3"
               data-testid="task-recurrence-popover"
             >
               <RecurrenceSection
@@ -103,7 +103,7 @@
             </PopoverTrigger>
             <PopoverContent
               align="start"
-              class="max-h-[70vh] w-[500px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl border-border/80 p-3 shadow-xl"
+              class="max-h-[70vh] w-[500px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl p-3"
               data-testid="task-goal-popover"
             >
               <KeyResultLinksSection
@@ -136,7 +136,7 @@
             </PopoverTrigger>
             <PopoverContent
               align="start"
-              class="max-h-[70vh] w-[560px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl border-border/80 p-3 shadow-xl"
+              class="max-h-[70vh] w-[560px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl p-3"
               data-testid="task-reminder-popover"
             >
               <ReminderSection
@@ -163,7 +163,7 @@
             </PopoverTrigger>
             <PopoverContent
               align="start"
-              class="w-60 rounded-xl border-border/80 p-1.5 shadow-xl"
+              class="w-60 p-1.5"
               data-testid="task-importance-popover"
             >
               <div class="px-2 py-1.5 text-xs text-muted-foreground">

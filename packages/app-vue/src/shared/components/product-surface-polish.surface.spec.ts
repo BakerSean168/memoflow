@@ -10,7 +10,9 @@ describe('MemoFlow product surface polish', () => {
     const goal = read('modules/goal/views/GoalDetailView.vue');
     expect(goal).toContain('<ModuleHeader data-testid="goal-detail-toolbar">');
     expect(goal).toContain('data-testid="goal-detail-identity"');
-    expect(goal).toContain('class="space-y-4 border-b border-border/70 pb-5"');
+    expect(goal).toContain(
+      'class="space-y-4 border-b border-[hsl(var(--border-subtle))] pb-5"',
+    );
     expect(goal).toContain('<GoalStatusPicker');
     expect(goal.match(/<GoalTimeframePicker/g)?.length).toBeGreaterThanOrEqual(2);
     expect(goal).toContain('<GoalReminderMenuItems');
@@ -173,7 +175,9 @@ describe('MemoFlow product surface polish', () => {
     const day = read('modules/schedule/components/DayDetailSheet.vue');
     const detail = read('modules/schedule/components/EventDetailSheet.vue');
     expect(day).toContain('data-testid="schedule-day-event-list"');
-    expect(day).toContain('class="divide-y border-y border-border/70"');
+    expect(day).toContain(
+      'class="divide-y divide-[hsl(var(--border-subtle))] border-y border-[hsl(var(--border-subtle))]"',
+    );
     expect(detail).toContain('data-testid="event-detail-properties"');
   });
 

@@ -1,6 +1,6 @@
 <template>
   <article
-    class="group border-b border-border/70 last:border-b-0"
+    class="group border-b border-[hsl(var(--border-subtle))] last:border-b-0"
     data-testid="task-occurrence-row"
     :data-occurrence-id="occurrence.id"
     :data-occurrence-status="occurrence.status"

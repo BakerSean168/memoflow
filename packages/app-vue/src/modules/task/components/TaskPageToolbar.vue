@@ -1,6 +1,6 @@
 <template>
   <header
-    class="z-10 flex min-h-14 shrink-0 items-center gap-2 border-b bg-background/80 px-3 py-2 backdrop-blur-sm @2xl/panel:px-6"
+    class="z-10 flex min-h-11 shrink-0 items-center gap-2 border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.82)] px-3 py-1.5 shadow-[0_1px_0_hsl(var(--border)/0.04)] backdrop-blur-sm @2xl/panel:px-4"
     data-testid="task-page-toolbar"
   >
     <div class="flex min-w-0 flex-1 items-center gap-1.5" data-testid="task-filter-bar">
@@ -126,7 +126,7 @@
               <ListFilter class="h-4 w-4" />
               <span
                 v-if="activeFilterCount > 0"
-                class="min-w-4 rounded-full bg-muted px-1 text-center text-[10px] tabular-nums text-muted-foreground"
+                class="min-w-4 rounded-full bg-[hsl(var(--selected))] px-1 text-center text-[10px] tabular-nums text-[hsl(var(--foreground-muted))]"
               >
                 {{ activeFilterCount }}
               </span>
@@ -222,7 +222,7 @@
 
       <div
         v-if="goalScopeLabel"
-        class="flex min-w-0 max-w-28 items-center gap-1 rounded-full bg-muted/50 px-2 py-1 text-xs text-muted-foreground @2xl/panel:max-w-64 @2xl/panel:px-2.5"
+        class="flex min-w-0 max-w-28 items-center gap-1 rounded-full bg-[hsl(var(--surface-raised)/0.5)] px-2 py-1 text-xs text-[hsl(var(--foreground-muted))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)] @2xl/panel:max-w-64 @2xl/panel:px-2.5"
         data-testid="task-goal-deeplink-filter"
       >
         <span class="truncate">{{ goalScopeLabel }}</span>

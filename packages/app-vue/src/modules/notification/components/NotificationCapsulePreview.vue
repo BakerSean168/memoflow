@@ -4,7 +4,7 @@
     data-testid="notification-capsule-preview"
     data-capsule-workspace="notification"
   >
-    <div class="mb-2 flex items-center justify-between gap-2 border-b border-border/40 pb-1.5">
+    <div class="mb-2 flex items-center justify-between gap-2 border-b border-[hsl(var(--border-subtle))] pb-1.5">
       <div class="flex items-center gap-2">
         <p class="text-xs font-semibold">{{ t('notification.drawer.title') }}</p>
         <span
@@ -58,7 +58,7 @@
       >
         <button
           type="button"
-          class="flex w-full items-start gap-1.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          class="flex w-full items-start gap-1.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-[hsl(var(--hover))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           :aria-label="item.title"
           @click="handleItemClick(item)"
         >
@@ -106,10 +106,10 @@
       </li>
     </ul>
 
-    <div class="flex shrink-0 justify-end border-t border-border/50 pt-2">
+    <div class="flex shrink-0 justify-end border-t border-[hsl(var(--border-subtle))] pt-2">
       <button
         type="button"
-        class="flex h-8 items-center gap-1 rounded-md px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+        class="flex h-8 items-center gap-1 rounded-md px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground"
         data-testid="notification-capsule-view-all"
         @click="$emit('view-all')"
       >

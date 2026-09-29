@@ -1,6 +1,6 @@
 <template>
-  <div class="flex h-full min-h-0 flex-col bg-sidebar" data-testid="knowledge-note-catalog">
-    <div class="border-b border-border/70 px-3 py-2.5" data-testid="knowledge-catalog-repository">
+  <div class="flex h-full min-h-0 flex-col bg-[hsl(var(--surface)/0.5)]" data-testid="knowledge-note-catalog">
+    <div class="border-b border-[hsl(var(--border-subtle))] px-3 py-2.5" data-testid="knowledge-catalog-repository">
       <div class="flex min-w-0 items-center gap-2">
         <BookOpen class="h-4 w-4 shrink-0 text-muted-foreground" />
         <span class="min-w-0 truncate text-sm font-semibold">{{ repositoryName }}</span>
@@ -99,7 +99,7 @@
       <select
         v-if="connections.length > 1"
         :value="selectedConnectionId"
-        class="mt-2 h-7 w-full rounded-md border border-border/70 bg-background/60 px-2 text-xs"
+        class="mt-2 h-7 w-full rounded-md border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.5)] px-2 text-xs text-foreground outline-none focus:border-primary/35 focus:ring-2 focus:ring-ring/25"
         :aria-label="t('repository.projection.connectionLabel')"
         data-testid="knowledge-projection-connection-select"
         @change="handleConnectionChange"
@@ -119,7 +119,7 @@
           type="text"
           autocomplete="off"
           :model-value="searchQuery"
-          class="h-8 rounded-md border-border/70 bg-background/60 pl-8 pr-8 text-sm shadow-none"
+          class="h-8 rounded-md border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.5)] pl-8 pr-8 text-sm shadow-none"
           :placeholder="t('repository.projection.searchPlaceholder')"
           data-testid="knowledge-projection-search"
           @update:model-value="emit('update:searchQuery', String($event ?? ''))"
@@ -129,7 +129,7 @@
         <button
           v-if="searchQuery"
           type="button"
-          class="absolute right-2 top-1/2 grid h-5 w-5 -translate-y-1/2 place-items-center rounded-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          class="absolute right-2 top-1/2 grid h-5 w-5 -translate-y-1/2 place-items-center rounded-sm text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground"
           :aria-label="t('common.clear')"
           data-testid="knowledge-projection-search-clear"
           @click="emit('clear-search')"
@@ -146,10 +146,10 @@
             v-for="note in notes"
             :key="note.id"
             type="button"
-            class="group block w-full rounded-md px-2.5 py-2 text-left transition-colors hover:bg-accent/55"
+            class="group block w-full rounded-md px-2.5 py-2 text-left transition-colors hover:bg-[hsl(var(--hover)/0.6)]"
             :class="
               selectedNoteId === note.id
-                ? 'bg-accent/75 text-accent-foreground'
+                ? 'bg-[hsl(var(--selected)/0.82)] text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)]'
                 : 'text-foreground'
             "
             :data-testid="`knowledge-projection-note-${note.id}`"
@@ -203,7 +203,7 @@
             <button
               v-if="row.node.kind === 'directory'"
               type="button"
-              class="flex h-7 w-full items-center gap-1 rounded-md pr-2 text-left text-sm text-muted-foreground transition-colors hover:bg-accent/55 hover:text-foreground"
+              class="flex h-7 w-full items-center gap-1 rounded-md pr-2 text-left text-sm text-[hsl(var(--foreground-muted))] transition-colors hover:bg-[hsl(var(--hover)/0.6)] hover:text-foreground"
               :style="{ paddingLeft: `${6 + row.depth * 16}px` }"
               :data-testid="`knowledge-tree-directory-${row.node.relativePath}`"
               @click="emit('toggle-directory', row.node.relativePath)"
@@ -226,10 +226,10 @@
             <button
               v-else
               type="button"
-              class="flex h-7 w-full items-center gap-1.5 rounded-md pr-2 text-left text-sm transition-colors hover:bg-accent/55"
+              class="flex h-7 w-full items-center gap-1.5 rounded-md pr-2 text-left text-sm transition-colors hover:bg-[hsl(var(--hover)/0.6)]"
               :class="
                 selectedNoteId === row.node.projectionId
-                  ? 'bg-accent/75 text-accent-foreground'
+                  ? 'bg-[hsl(var(--selected)/0.82)] text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)]'
                   : 'text-foreground/90'
               "
               :style="{ paddingLeft: `${9 + row.depth * 16}px` }"

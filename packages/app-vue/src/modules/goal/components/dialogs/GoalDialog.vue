@@ -26,7 +26,7 @@
 
       <form id="goal-form" class="flex min-h-full flex-col gap-6" @submit.prevent="save">
         <section
-          class="space-y-4 border-b border-border/70 pb-5"
+          class="space-y-4 border-b border-[hsl(var(--border-subtle))] pb-5"
           data-testid="goal-identity-section"
         >
           <div>

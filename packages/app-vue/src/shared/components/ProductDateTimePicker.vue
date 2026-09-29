@@ -1,13 +1,13 @@
 <template>
   <Dialog :open="open" @update:open="setOpen">
     <DialogContent
-      class="w-[23rem] max-w-[calc(100vw-1.25rem)] gap-0 overflow-hidden rounded-xl border-border/80 bg-[hsl(var(--surface-overlay))] p-0 shadow-2xl dark:border-white/10"
+      class="w-[23rem] max-w-[calc(100vw-1.25rem)] gap-0 overflow-hidden rounded-xl border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay))] p-0 shadow-[0_24px_64px_-26px_rgba(0,0,0,0.62),0_6px_18px_-12px_rgba(0,0,0,0.44),inset_0_1px_0_hsl(var(--foreground)/0.025)]"
       :data-testid="testId"
     >
-      <DialogHeader class="border-b border-border/60 px-5 pb-4 pt-5 text-left">
+      <DialogHeader class="border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.42)] px-5 pb-4 pt-5 text-left">
         <DialogTitle class="flex items-center gap-2 text-[15px] font-semibold tracking-[-0.01em]">
           <span
-            class="flex h-7 w-7 items-center justify-center rounded-lg bg-muted/70 text-muted-foreground"
+            class="flex h-7 w-7 items-center justify-center rounded-lg bg-[hsl(var(--surface-raised)/0.66)] text-[hsl(var(--foreground-muted))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)]"
           >
             <CalendarClock class="h-4 w-4" />
           </span>
@@ -19,7 +19,7 @@
       </DialogHeader>
 
       <div class="p-4">
-        <div class="rounded-xl border border-border/65 bg-background/35 p-3">
+        <div class="rounded-xl bg-[hsl(var(--surface-raised)/0.28)] p-3 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)]">
           <Calendar
             appearance="linear"
             v-model:placeholder="calendarPlaceholder"
@@ -36,7 +36,7 @@
         </div>
 
         <div
-          class="mt-3 flex items-center gap-3 rounded-xl border border-border/65 bg-background/35 px-3 py-2.5"
+          class="mt-3 flex items-center gap-3 rounded-xl bg-[hsl(var(--surface-raised)/0.28)] px-3 py-2.5 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)]"
         >
           <Clock3 class="h-4 w-4 shrink-0 text-muted-foreground" />
           <div class="min-w-0 flex-1">
@@ -53,7 +53,7 @@
               type="text"
               inputmode="numeric"
               maxlength="2"
-              class="h-8 w-11 rounded-md border-border/75 bg-muted/20 px-1 text-center text-sm tabular-nums shadow-none focus-visible:border-primary/50 focus-visible:ring-1 focus-visible:ring-primary/35"
+              class="h-8 w-11 rounded-md border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.34)] px-1 text-center text-sm tabular-nums shadow-none focus-visible:border-primary/50 focus-visible:ring-1 focus-visible:ring-primary/35"
               :aria-label="hourLabel"
               @input="normalizeNumericDraft('hour')"
               @blur="normalizeClockPart('hour')"
@@ -66,7 +66,7 @@
               type="text"
               inputmode="numeric"
               maxlength="2"
-              class="h-8 w-11 rounded-md border-border/75 bg-muted/20 px-1 text-center text-sm tabular-nums shadow-none focus-visible:border-primary/50 focus-visible:ring-1 focus-visible:ring-primary/35"
+              class="h-8 w-11 rounded-md border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.34)] px-1 text-center text-sm tabular-nums shadow-none focus-visible:border-primary/50 focus-visible:ring-1 focus-visible:ring-primary/35"
               :aria-label="minuteLabel"
               @input="normalizeNumericDraft('minute')"
               @blur="normalizeClockPart('minute')"
@@ -87,7 +87,7 @@
       </div>
 
       <DialogFooter
-        class="border-t border-border/60 bg-muted/10 px-4 py-3 sm:justify-end sm:space-x-2"
+        class="border-t border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.42)] px-4 py-3 sm:justify-end sm:space-x-2"
       >
         <Button type="button" variant="ghost" size="sm" @click="setOpen(false)">
           {{ cancelLabel }}

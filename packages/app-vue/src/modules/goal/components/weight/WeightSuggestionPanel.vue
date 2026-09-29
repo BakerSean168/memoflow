@@ -22,9 +22,11 @@
           <Card
             v-for="strategy in strategies"
             :key="strategy.name"
-            class="cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+            class="cursor-pointer border-0 bg-[hsl(var(--surface-raised)/0.28)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)] transition-[background-color,box-shadow,transform] duration-200 hover:-translate-y-px hover:bg-[hsl(var(--surface-raised)/0.62)] hover:shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.68),0_8px_22px_-18px_rgba(0,0,0,0.5)]"
             :class="[
-              selectedStrategy === strategy.name ? 'ring-2 ring-primary bg-primary/5' : 'border',
+              selectedStrategy === strategy.name
+                ? 'bg-primary/[0.07] ring-1 ring-primary/40'
+                : '',
             ]"
             @click="selectedStrategy = strategy.name"
           >
@@ -48,7 +50,7 @@
                     <span class="min-w-[40px] text-xs text-muted-foreground">
                       {{ t('goal.weightSuggestion.keyResultIndex', { index: index + 1 }) }}
                     </span>
-                    <div class="relative mx-2 h-5 flex-1 overflow-hidden rounded-full bg-muted">
+                    <div class="relative mx-2 h-5 flex-1 overflow-hidden rounded-full bg-[hsl(var(--selected))]">
                       <div
                         class="flex h-full items-center justify-center transition-all"
                         :class="getWeightBarClass(weight)"
@@ -84,7 +86,10 @@
         </div>
 
         <!-- KeyResults 预览 -->
-        <Card v-if="keyResults.length > 0" class="mt-4 border">
+        <Card
+          v-if="keyResults.length > 0"
+          class="mt-4 border-0 bg-[hsl(var(--surface-raised)/0.24)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.44)]"
+        >
           <CardHeader class="pb-2">
             <CardTitle class="flex items-center gap-2 text-sm">
               <List class="size-4" />

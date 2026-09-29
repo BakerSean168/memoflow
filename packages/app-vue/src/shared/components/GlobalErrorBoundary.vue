@@ -95,7 +95,7 @@ function handleGoHome() {
           {{ t('common.retry') }}
         </button>
         <button
-          class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors"
+          class="inline-flex h-9 items-center justify-center rounded-md border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.42)] px-4 text-sm font-medium text-foreground shadow-none transition-colors hover:bg-[hsl(var(--hover))]"
           @click="handleGoHome"
         >
           {{ t('common.goHome') }}
@@ -110,7 +110,7 @@ function handleGoHome() {
           {{ t('common.viewErrorDetails') }}
         </summary>
         <pre
-          class="mt-2 max-h-40 overflow-auto rounded-md bg-muted p-3 text-xs text-muted-foreground"
+          class="mt-2 max-h-40 overflow-auto rounded-lg bg-[hsl(var(--surface-raised)/0.34)] p-3 text-xs text-[hsl(var(--foreground-muted))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)]"
           >{{ errorStack }}</pre
         >
       </details>

@@ -89,13 +89,13 @@
         v-else-if="viewModel && currentTemplate"
         class="mx-auto flex w-full max-w-5xl flex-col gap-5"
       >
-        <article class="space-y-4 border-b border-border/70 pb-5" data-testid="task-plan-overview">
+        <article class="space-y-4 border-b border-[hsl(var(--border-subtle))] pb-5" data-testid="task-plan-overview">
           <ProductAutoTextarea
             v-model="titleDraft"
             :max-length="120"
             :rows="1"
             data-testid="task-detail-title"
-            class="-mx-1 min-h-9 rounded-md px-1 text-2xl font-semibold leading-tight tracking-tight transition-colors hover:bg-muted/40 focus-visible:bg-muted/40"
+            class="-mx-1 min-h-9 rounded-md px-1 text-2xl font-semibold leading-tight tracking-tight transition-colors hover:bg-[hsl(var(--hover)/0.62)] focus-visible:bg-[hsl(var(--selected)/0.72)]"
             :placeholder="t('task.basicInfo.titlePlaceholder')"
             :disabled="isSaving || !!viewModel.isArchived"
             @blur="saveTitle"
@@ -159,7 +159,7 @@
                   </PopoverTrigger>
                   <PopoverContent
                     align="start"
-                    class="max-h-[70vh] w-[440px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl border-border/80 p-3 shadow-xl"
+                    class="max-h-[70vh] w-[440px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl p-3"
                   >
                     <TimeConfigSection
                       :model-value="viewModel"
@@ -185,7 +185,7 @@
                   </PopoverTrigger>
                   <PopoverContent
                     align="start"
-                    class="max-h-[70vh] w-[460px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl border-border/80 p-3 shadow-xl"
+                    class="max-h-[70vh] w-[460px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl p-3"
                   >
                     <RecurrenceSection
                       :model-value="viewModel"
@@ -210,7 +210,7 @@
                   </PopoverTrigger>
                   <PopoverContent
                     align="start"
-                    class="w-60 rounded-xl border-border/80 p-1.5 shadow-xl"
+                    class="w-60 p-1.5"
                   >
                     <Button
                       v-for="option in importanceOptions"
@@ -299,7 +299,7 @@
                         >
                           <span
                             v-if="option.color"
-                            class="mr-2 h-2.5 w-2.5 shrink-0 rounded-full border border-border/60"
+                            class="mr-2 h-2.5 w-2.5 shrink-0 rounded-full border border-[hsl(var(--border-subtle))]"
                             :style="{ backgroundColor: option.color }"
                           />
                           <span class="min-w-0 flex-1 truncate">{{ option.name }}</span>
@@ -352,7 +352,7 @@
                 >
                   <Badge
                     variant="outline"
-                    class="h-7 max-w-full rounded-full border-border/70 bg-background/60 px-2.5 font-normal hover:bg-muted/50"
+                    class="h-7 max-w-full rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal hover:bg-[hsl(var(--hover))]"
                   >
                     <Target class="mr-1.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                     <span class="truncate">{{ goalContextText }}</span>
@@ -368,7 +368,7 @@
                 <Badge
                   v-if="goalContextKeyResultName"
                   variant="outline"
-                  class="h-7 max-w-64 rounded-full border-border/70 bg-background/60 px-2.5 font-normal"
+                  class="h-7 max-w-64 rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal"
                 >
                   <span class="truncate">{{ goalContextKeyResultName }}</span>
                 </Badge>
@@ -392,7 +392,7 @@
                   </PopoverTrigger>
                   <PopoverContent
                     align="start"
-                    class="max-h-[70vh] w-[500px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl border-border/80 p-3 shadow-xl"
+                    class="max-h-[70vh] w-[500px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl p-3"
                   >
                     <KeyResultLinksSection
                       :model-value="viewModel"
@@ -422,11 +422,11 @@
                   v-for="label in viewModel.labels"
                   :key="label.id"
                   variant="outline"
-                  class="h-7 max-w-48 gap-1.5 rounded-full border-border/70 bg-background/60 px-2.5 font-normal"
+                  class="h-7 max-w-48 gap-1.5 rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal"
                 >
                   <span
                     v-if="label.color"
-                    class="h-2 w-2 shrink-0 rounded-full border border-border/60"
+                    class="h-2 w-2 shrink-0 rounded-full border border-[hsl(var(--border-subtle))]"
                     :style="{ backgroundColor: label.color }"
                   />
                   <span class="truncate">{{ label.name }}</span>
@@ -478,7 +478,7 @@
                     <button type="button" class="max-w-72">
                       <Badge
                         variant="outline"
-                        class="h-7 max-w-full rounded-full border-border/70 bg-background/60 px-2.5 font-normal hover:bg-muted/50"
+                        class="h-7 max-w-full rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal hover:bg-[hsl(var(--hover))]"
                       >
                         <Bell class="mr-1.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                         <span class="truncate">{{ reminderTriggerLabel(trigger) }}</span>
@@ -538,7 +538,7 @@
                   </PopoverTrigger>
                   <PopoverContent
                     align="start"
-                    class="max-h-[70vh] w-[560px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl border-border/80 p-3 shadow-xl"
+                    class="max-h-[70vh] w-[560px] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl p-3"
                   >
                     <ReminderSection
                       :model-value="viewModel"
@@ -564,7 +564,7 @@
             :max-length="2000"
             :rows="4"
             data-testid="task-detail-description"
-            class="-mx-1 min-h-20 rounded-md px-1 text-sm leading-6 text-foreground/90 transition-colors hover:bg-muted/40 focus-visible:bg-muted/40"
+            class="-mx-1 min-h-20 rounded-md px-1 text-sm leading-6 text-foreground/90 transition-colors hover:bg-[hsl(var(--hover)/0.62)] focus-visible:bg-[hsl(var(--selected)/0.72)]"
             :placeholder="t('task.basicInfo.descPlaceholder')"
             :disabled="isSaving || !!viewModel.isArchived"
             @blur="saveDescription"
@@ -580,7 +580,7 @@
           @update:model-value="saveInlinePlan"
         />
 
-        <section class="border-y border-border/70 py-3" data-testid="task-detail-execution-summary">
+        <section class="border-y border-[hsl(var(--border-subtle))] py-3" data-testid="task-detail-execution-summary">
           <div class="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-3">
             <span class="pt-1.5 text-xs font-medium text-muted-foreground">
               {{ t('task.detail.executionStats') }}
@@ -588,13 +588,13 @@
             <div class="flex min-w-0 flex-wrap items-center gap-1.5">
               <Badge
                 variant="outline"
-                class="h-7 rounded-full border-border/70 bg-background/60 px-2.5 font-normal"
+                class="h-7 rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal"
               >
                 {{ t('task.detail.totalInstances') }} {{ executionSummary.total }}
               </Badge>
               <Badge
                 variant="outline"
-                class="h-7 rounded-full border-border/70 bg-background/60 px-2.5 font-normal"
+                class="h-7 rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal"
               >
                 {{ t('task.detail.completed') }} {{ executionSummary.completed }}
               </Badge>
@@ -603,7 +603,7 @@
               </Badge>
               <Badge
                 variant="outline"
-                class="h-7 rounded-full border-border/70 bg-background/60 px-2.5 font-normal"
+                class="h-7 rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal"
               >
                 {{
                   t('task.detail.openCount', {
@@ -614,14 +614,14 @@
               <Badge
                 v-if="executionSummary.missed"
                 variant="outline"
-                class="h-7 rounded-full border-border/70 bg-background/60 px-2.5 font-normal"
+                class="h-7 rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal"
               >
                 {{ t('task.detail.instanceStatusMissed') }} {{ executionSummary.missed }}
               </Badge>
               <Badge
                 v-if="executionSummary.skipped"
                 variant="outline"
-                class="h-7 rounded-full border-border/70 bg-background/60 px-2.5 font-normal"
+                class="h-7 rounded-full border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.46)] px-2.5 font-normal"
               >
                 {{ t('task.detail.instanceStatusSkipped') }} {{ executionSummary.skipped }}
               </Badge>
@@ -631,7 +631,7 @@
 
         <section data-testid="task-detail-linked-notes">
           <h2 class="font-semibold">{{ t('task.detail.linkedNotes') }}</h2>
-          <div v-if="linkedNotes.length" class="mt-3 divide-y border-y border-border/70">
+          <div v-if="linkedNotes.length" class="mt-3 divide-y border-y border-[hsl(var(--border-subtle))]">
             <div v-for="note in linkedNotes" :key="note.relationId" class="py-3 text-sm">
               <template v-if="note.state === 'Resolved'">
                 <div class="font-medium">{{ note.title }}</div>
@@ -674,7 +674,7 @@
             </div>
           </div>
 
-          <div v-if="templateOccurrences.length" class="border-y border-border/70">
+          <div v-if="templateOccurrences.length" class="border-y border-[hsl(var(--border-subtle))]">
             <TaskOccurrenceRow
               v-for="occurrence in sortedOccurrences"
               :key="occurrence.id"

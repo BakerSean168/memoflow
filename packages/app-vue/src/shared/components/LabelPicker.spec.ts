@@ -36,7 +36,7 @@ describe('LabelPicker (UI-5101)', () => {
     expect(trigger.text()).toContain('+2');
     expect(trigger.text()).not.toContain('Deep Work');
     expect(trigger.classes()).toContain('rounded-full');
-    expect(trigger.classes()).toContain('bg-background/60');
+    expect(trigger.classes()).toContain('bg-[hsl(var(--surface-raised)/0.48)]');
     expect(trigger.find('svg').exists()).toBe(false);
   });
 

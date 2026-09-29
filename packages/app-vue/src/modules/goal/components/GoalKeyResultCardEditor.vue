@@ -96,7 +96,7 @@
           </PopoverTrigger>
           <PopoverContent
             align="end"
-            class="w-44 rounded-xl border-border/70 p-1.5 shadow-xl"
+            class="w-44 p-1.5"
             data-testid="draft-kr-weight-popover"
           >
             <div class="px-2 py-1.5 text-xs text-muted-foreground">

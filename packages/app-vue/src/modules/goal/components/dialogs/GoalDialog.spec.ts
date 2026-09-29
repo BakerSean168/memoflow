@@ -97,7 +97,7 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
       'utf8',
     );
     expect(keyResultEditorSource).toContain('<Transition name="kr-editor-reveal"');
-    expect(keyResultEditorSource).toContain('border border-border/70');
+    expect(keyResultEditorSource).toContain('border-[hsl(var(--border-subtle))]');
     expect(keyResultEditorSource).toContain('transform-origin: bottom');
     expect(keyResultEditorSource).toContain('grid-template-rows 220ms');
     expect(keyResultEditorSource).toContain('prefers-reduced-motion');
@@ -471,7 +471,10 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     await nextTick();
 
     const editor = dom('goal-key-results-editor');
-    expect(editor.classes()).toContain('border');
+    expect(editor.classes()).toContain('bg-[hsl(var(--surface-raised)/0.24)]');
+    expect(editor.classes()).toContain(
+      'shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.48)]',
+    );
     expect(document.querySelector('[data-testid="goal-key-results-empty"]')).toBeNull();
 
     timeframePicker(wrapper, 'goal-target-chip').vm.$emit('update:modelValue', {

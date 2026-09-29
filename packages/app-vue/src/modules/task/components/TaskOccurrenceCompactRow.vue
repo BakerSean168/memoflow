@@ -1,13 +1,13 @@
 <template>
   <article
-    class="group rounded-lg transition-colors hover:bg-accent/45"
+    class="group rounded-lg transition-colors hover:bg-[hsl(var(--hover)/0.55)]"
     :class="{ 'opacity-60': terminal && occurrence.status !== 'Completed' }"
     :data-testid="`task-compact-occurrence-${occurrence.id}`"
   >
     <div class="flex min-h-10 items-start gap-2 px-1.5 py-1.5">
       <button
         type="button"
-        class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-background/70 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+        class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
         :disabled="busy || occurrence.status === 'Skipped' || occurrence.status === 'Missed'"
         :aria-label="
           occurrence.status === 'Completed'
@@ -75,7 +75,7 @@
         <button
           v-if="occurrence.status === 'Pending' || occurrence.status === 'InProgress'"
           type="button"
-          class="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity hover:bg-background/70 hover:text-foreground group-hover:opacity-100 focus:opacity-100"
+          class="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity hover:bg-[hsl(var(--hover))] hover:text-foreground group-hover:opacity-100 focus:opacity-100"
           :aria-label="t('task.action.skip')"
           :title="t('task.action.skip')"
           :disabled="busy"
@@ -88,13 +88,13 @@
 
     <div
       v-if="checklistOpen && occurrence.checklistState.length"
-      class="ml-9 mr-2 border-l border-border/60 pb-1.5 pl-2"
+      class="ml-9 mr-2 border-l border-[hsl(var(--border-subtle))] pb-1.5 pl-2"
       :data-testid="`task-compact-checklist-${occurrence.id}`"
     >
       <label
         v-for="item in occurrence.checklistState"
         :key="item.definitionId"
-        class="flex min-w-0 items-center gap-2 rounded px-1 py-1 text-[11px] hover:bg-background/45"
+        class="flex min-w-0 items-center gap-2 rounded px-1 py-1 text-[11px] hover:bg-[hsl(var(--hover)/0.5)]"
       >
         <Checkbox
           :model-value="item.completed"

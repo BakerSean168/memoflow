@@ -1,6 +1,6 @@
 <template>
   <header
-    class="z-10 flex min-h-14 shrink-0 items-center gap-2 border-b bg-background/80 px-3 py-2 backdrop-blur-sm @2xl/panel:px-6"
+    class="z-10 flex min-h-11 shrink-0 items-center gap-2 border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.82)] px-3 py-1.5 shadow-[0_1px_0_hsl(var(--border)/0.04)] backdrop-blur-sm @2xl/panel:px-4"
     data-testid="goal-page-toolbar"
   >
     <DropdownMenu>
@@ -16,7 +16,7 @@
         <DropdownMenuItem
           v-for="view in systemViews"
           :key="view.id"
-          :class="activeSystemView === view.id ? 'bg-accent' : ''"
+          :class="activeSystemView === view.id ? 'bg-[hsl(var(--selected))]' : ''"
           @click="emit('select-system-view', view.id)"
         >
           {{ view.label }}

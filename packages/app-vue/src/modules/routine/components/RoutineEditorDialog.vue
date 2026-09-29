@@ -15,7 +15,7 @@
         @submit.prevent="submit"
       >
         <section
-          class="space-y-4 border-b border-border/70 pb-5"
+          class="space-y-4 border-b border-[hsl(var(--border-subtle))] pb-5"
           data-testid="routine-identity-section"
         >
           <div>
@@ -388,7 +388,7 @@
                 :class="
                   selectedWeekdays.includes(weekday.value)
                     ? 'bg-muted text-foreground'
-                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                    : 'text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover))] hover:text-foreground'
                 "
                 :aria-pressed="selectedWeekdays.includes(weekday.value)"
                 :disabled="saving"

@@ -15,13 +15,13 @@
 
         <div
           v-if="events.length > 0"
-          class="divide-y border-y border-border/70"
+          class="divide-y divide-[hsl(var(--border-subtle))] border-y border-[hsl(var(--border-subtle))]"
           data-testid="schedule-day-event-list"
         >
           <div
             v-for="event in events"
             :key="plannerProjectionKeyForUi(event)"
-            class="flex items-start transition-colors focus-within:bg-muted/30 focus-within:ring-2 focus-within:ring-inset focus-within:ring-ring hover:bg-muted/30"
+            class="flex items-start transition-colors focus-within:bg-[hsl(var(--selected)/0.5)] focus-within:ring-2 focus-within:ring-inset focus-within:ring-ring hover:bg-[hsl(var(--hover)/0.52)]"
           >
             <button
               type="button"

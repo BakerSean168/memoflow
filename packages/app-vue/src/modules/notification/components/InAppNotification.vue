@@ -10,8 +10,8 @@
         :key="notification.id"
         :class="[
           'flex items-start gap-3 min-w-[320px] max-w-[400px] p-4 mb-3',
-          'bg-background rounded-lg shadow-lg pointer-events-auto',
-          'transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl',
+          'rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay)/0.96)] shadow-[0_18px_46px_-24px_rgba(0,0,0,0.62),inset_0_1px_0_hsl(var(--foreground)/0.03)] backdrop-blur-xl pointer-events-auto',
+          'transition-[transform,box-shadow,background-color] duration-200 hover:-translate-y-px hover:bg-[hsl(var(--surface-overlay))] hover:shadow-[0_20px_50px_-24px_rgba(0,0,0,0.68),inset_0_1px_0_hsl(var(--foreground)/0.03)]',
           priorityBorderClass(notification.priority),
           notification.priority === 'URGENT' && 'animate-pulse-shadow',
         ]"
