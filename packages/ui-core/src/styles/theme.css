@@ -153,6 +153,7 @@
     --workspace-navigation: 0 0% 98%;
     --workspace-primary: 0 0% 100%;
     --workspace-business: 0 0% 99%;
+    --workspace-shadow: 0 0% 0%;
     --hover: 240 4.8% 95.9%;
     --selected: 240 4.8% 93%;
     --border-subtle: 240 5.9% 93%;
@@ -232,6 +233,7 @@
     --workspace-navigation: 0 0% 6.5%;
     --workspace-primary: 0 0% 6.5%;
     --workspace-business: 0 0% 8%;
+    --workspace-shadow: 0 0% 0%;
     --hover: 0 0% 14%;
     --selected: 0 0% 16%;
     --border-subtle: 0 0% 13%;

@@ -55,6 +55,7 @@ import {
   computePanelGeometry,
   panelWidthFromPointer,
   resolveComposerDensity,
+  resolveWorkspaceChromeMetrics,
   sidebarWidthFromPointer,
   workspaceChromeBudget,
   shouldCollapsePanelWidth,
@@ -140,6 +141,13 @@ const shellState = computed<'chat' | 'split' | 'focus'>(() => {
 });
 
 const effectiveViewportWidth = ref(typeof window === 'undefined' ? 1280 : window.innerWidth);
+const workspaceChromeStyle = computed(() => {
+  const { inset, gap } = resolveWorkspaceChromeMetrics(effectiveViewportWidth.value);
+  return {
+    '--workspace-edge-inset': `${inset}px`,
+    '--workspace-sidebar-gap': `${gap}px`,
+  };
+});
 /** 用户 Toggle 是持久化偏好；极窄视口只临时释放侧栏预算。 */
 const showSidebar = computed(
   () => !sidebarCollapsed.value && !shouldAutoCollapseSidebar(effectiveViewportWidth.value),
@@ -151,7 +159,7 @@ const effectiveSidebarWidth = computed(() => {
   const reserved = showPanel.value
     ? BUSINESS_HARD_MIN + (layout.value === 'split' ? AI_HARD_MIN : 0)
     : AI_HARD_MIN;
-  const chrome = workspaceChromeBudget(effectiveViewportWidth.value, sidebarWidth.value);
+  const chrome = workspaceChromeBudget(effectiveViewportWidth.value);
   const dynamicMax = Math.max(
     SIDEBAR_HARD_MIN,
     effectiveViewportWidth.value - reserved - chrome,
@@ -340,7 +348,7 @@ function maxSidebarWidth(): number {
   const reserved = showPanel.value
     ? BUSINESS_HARD_MIN + (shellState.value === 'split' ? AI_HARD_MIN : 0)
     : AI_HARD_MIN;
-  const chrome = workspaceChromeBudget(window.innerWidth, effectiveSidebarWidth.value);
+  const chrome = workspaceChromeBudget(window.innerWidth);
   return Math.max(SIDEBAR_HARD_MIN, window.innerWidth - reserved - chrome);
 }
 
@@ -506,7 +514,7 @@ function startPanelResize(e: PointerEvent) {
   };
 
   const move = (ev: PointerEvent) => {
-    const width = panelWidthFromPointer(ev.clientX, window.innerWidth, occupiedSidebarWidth());
+    const width = panelWidthFromPointer(ev.clientX, window.innerWidth);
     if (shouldCollapsePanelWidth(width)) {
       cleanup(ev.pointerId, false);
       void sync.closePanel();
@@ -818,14 +826,15 @@ function panelCacheKey(
          圆角只表达主工作台层级，内部面板用 divider 分区。 -->
     <div
       v-show="!isSettingsScene"
-      class="workspace-stage relative flex min-h-0 flex-1 overflow-hidden bg-background"
+      class="workspace-stage relative flex min-h-0 flex-1 overflow-hidden"
+      :style="workspaceChromeStyle"
       data-testid="shell-workspace-stage"
     >
       <!-- 会话侧栏只响应自己的 Toggle，和右栏/Focus 独立。 -->
       <Transition name="shell-sidebar">
         <div
           v-if="showSidebar"
-          class="workspace-pane-host relative shrink-0"
+          class="relative shrink-0"
           :class="isSidebarResizing ? 'transition-none' : ''"
           :style="{ width: effectiveSidebarWidth + 'px' }"
           data-testid="shell-sidebar-pane-host"
@@ -999,8 +1008,6 @@ function panelCacheKey(
 
 <style scoped>
 .workspace-stage {
-  --workspace-edge-inset: 6px;
-  --workspace-sidebar-gap: 6px;
   --workspace-well-radius: var(--radius-workspace);
   background: hsl(var(--workspace-shell));
 }
@@ -1018,7 +1025,7 @@ function panelCacheKey(
   background: hsl(var(--workspace-primary));
   box-shadow:
     0 0 0 1px hsl(var(--border-strong) / 0.58),
-    0 6px 22px -18px hsl(0 0% 0% / 0.72),
+    0 6px 22px -18px hsl(var(--workspace-shadow) / 0.72),
     inset 0 1px 0 hsl(var(--foreground) / 0.025);
 }
 
@@ -1091,8 +1098,6 @@ function panelCacheKey(
 
 @media (max-width: 1199px) {
   .workspace-stage {
-    --workspace-edge-inset: 4px;
-    --workspace-sidebar-gap: 4px;
     --workspace-well-radius: var(--radius-surface);
   }
 
@@ -1104,8 +1109,6 @@ function panelCacheKey(
 
 @media (max-width: 767px) {
   .workspace-stage {
-    --workspace-edge-inset: 0px;
-    --workspace-sidebar-gap: 0px;
     --workspace-well-radius: 0px;
   }
 
