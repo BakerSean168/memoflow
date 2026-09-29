@@ -1,9 +1,16 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { defineComponent, ref } from 'vue';
+import { createI18n } from 'vue-i18n';
 import { flushPromises, mount } from '@vue/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
 import { useTask } from '../../composables/useTask';
 import DailyTodoWidget from './DailyTodoWidget.vue';
+
+vi.mock('../../composables/useTaskPlanMutations', () => ({
+  useTaskPlanMutations: () => ({ createPlanSafe: vi.fn(), isSaving: ref(false) }),
+}));
 
 vi.mock('../../composables/useTask', () => ({
   useTask: vi.fn(),
@@ -76,6 +83,7 @@ describe('DailyTodoWidget', () => {
 
     const wrapper = mount(DailyTodoWidget, {
       global: {
+        plugins: [createI18n({ legacy: false, locale: 'en', messages: {} })],
         stubs: {
           Card: PassThroughStub,
           CardHeader: PassThroughStub,
@@ -99,7 +107,7 @@ describe('DailyTodoWidget', () => {
       'width: 0%',
     );
 
-    await wrapper.get('button[title="标记完成"]').trigger('click');
+    await wrapper.get('button[aria-label="task.action.complete"]').trigger('click');
     await flushPromises();
 
     expect(completeOccurrence).toHaveBeenCalledWith('TaskOccurrenceId_today');
@@ -110,7 +118,7 @@ describe('DailyTodoWidget', () => {
     expect(wrapper.get('.h-full.rounded-full.bg-emerald-500').attributes('style')).toContain(
       'width: 100%',
     );
-    const undoButton = wrapper.get('button[title="撤销完成"]');
+    const undoButton = wrapper.get('button[aria-label="task.action.undoComplete"]');
     expect(undoButton.attributes('disabled')).toBeUndefined();
 
     await undoButton.trigger('click');
@@ -140,6 +148,7 @@ describe('DailyTodoWidget', () => {
     const wrapper = mount(DailyTodoWidget, {
       props: { active: false },
       global: {
+        plugins: [createI18n({ legacy: false, locale: 'en', messages: {} })],
         stubs: {
           Card: PassThroughStub,
           CardHeader: PassThroughStub,
@@ -174,4 +183,17 @@ describe('DailyTodoWidget', () => {
     expect(fetchInstancesByDateRange).toHaveBeenCalledTimes(2);
     expect(fetchTemplates).toHaveBeenCalledTimes(2);
   });
+});
+
+it('delegates execution presentation and commands to TaskQuickSurface', () => {
+  const source = readFileSync(resolve(__dirname, 'DailyTodoWidget.vue'), 'utf8');
+  expect(source).toContain('<TaskQuickSurface');
+  for (const command of [
+    'completeOccurrence',
+    'uncompleteOccurrence',
+    'markOccurrenceMissed',
+    'skipOccurrence',
+    'setOccurrenceChecklistItem',
+  ])
+    expect(source).not.toContain(`task.${command}`);
 });

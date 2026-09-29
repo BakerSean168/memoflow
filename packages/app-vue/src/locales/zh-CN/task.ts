@@ -230,6 +230,10 @@ export default {
     saveChanges: '保存更改',
     create: '创建任务计划',
   },
+  quickSurface: {
+    empty: '今日暂无任务安排',
+    viewAll: '查看全部',
+  },
   quickTask: {
     title: '快速任务',
     subtitle: '创建一个今天要完成的待办任务',

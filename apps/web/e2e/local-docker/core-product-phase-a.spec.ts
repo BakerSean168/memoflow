@@ -64,10 +64,13 @@ test.describe('Local Docker core product Phase A', () => {
     await showTodayOverview(page);
     for (const taskName of [goalOnlyTaskName, keyResultTaskName]) {
       const taskItem = page
-        .getByTestId('daily-todo-item')
+        .getByTestId('daily-todo-widget')
+        .locator('[data-task-occurrence-id]')
         .filter({ has: page.getByText(taskName, { exact: true }) });
       await expect(taskItem).toBeVisible({ timeout: TIMEOUT_CONFIG.NAVIGATION });
-      await taskItem.locator('button[title]').click();
+      const occurrenceId = await taskItem.getAttribute('data-task-occurrence-id');
+      expect(occurrenceId).toBeTruthy();
+      await taskItem.getByTestId(`task-compact-complete-${occurrenceId}`).click();
       await expect(taskItem).toHaveAttribute('data-task-status', 'Completed');
       await expectGoalContribution(page, headers, fixture, { currentValue: 0, recordCount: 0 });
     }
@@ -188,13 +191,14 @@ test.describe('Local Docker core product Phase A', () => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await showTodayOverview(page);
     const taskItem = page
-      .getByTestId('daily-todo-item')
+      .getByTestId('daily-todo-widget')
+      .locator('[data-task-occurrence-id]')
       .filter({ has: page.getByText(taskName, { exact: true }) });
     await expect(taskItem).toBeVisible({ timeout: TIMEOUT_CONFIG.NAVIGATION });
     await expect(taskItem).toHaveAttribute('data-task-status', 'Pending');
     const occurrenceId = await taskItem.getAttribute('data-task-occurrence-id');
     expect(occurrenceId).toBeTruthy();
-    const completeButton = page.getByTestId(`complete-today-task-${occurrenceId}`);
+    const completeButton = taskItem.getByTestId(`task-compact-complete-${occurrenceId}`);
 
     await completeButton.click();
     await expect(taskItem).toHaveAttribute('data-task-status', 'Completed');

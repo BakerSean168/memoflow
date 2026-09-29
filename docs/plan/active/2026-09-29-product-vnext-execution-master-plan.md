@@ -633,6 +633,10 @@ Goal 是后续 property/direct-manipulation/measurement/review grammar 的第一
 
 ## PVC-TASK-3401 — Task Quick Surface + canonical action coordinator
 
+**Execution (2026-09-29): Implemented / validated.** Task now owns one occurrence action coordinator for Complete / Uncomplete / Missed / Skip / Checklist, with an explicit future completion-time measurement hook for TASK-3301. Task Home/Detail route their full rows through that coordinator; Task Capsule and DailyTodoWidget reuse `TaskQuickSurface` built from `TaskOccurrenceQuickRow` + `TaskOccurrenceCompactList`. Review repairs restored Missed/Skipped -> Completed correction parity, canonical checklist behavior, and truthful per-occurrence busy presentation. Browser E2E selectors were migrated to shared semantic occurrence/progress contracts. Schedule integration remains deferred to SCHED-4202.
+
+**Validation:** final focused app-vue suite 9 files / 64 tests; selector-migration focused suite 3 files / 19 tests; `app-vue:typecheck --skipNxCache`, changed-file ESLint, and `git diff --check` passed. Playwright discovery/compile found all 4 affected browser tests. Actual `task/task-completion-loop.spec.ts` passed 1/1 (31.3s test; 1.2m total), covering the shared DailyTodo row selector and Task -> Goal EachCompletion closed loop. Local Docker Phase A/B were discovery/compile checked but not executed against a freshly built current-worktree container. See [implementation report](../../analysis/2026-09-29-pvc-task-3401-implementation.md).
+
 **Goal:** Capsule/Home/Schedule 不再各自维护 Task execution UI/action。
 
 **Implementation:**

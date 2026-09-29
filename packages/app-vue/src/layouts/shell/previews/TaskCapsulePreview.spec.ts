@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 /** @vitest-environment jsdom */
 import { computed, ref } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
@@ -103,7 +105,7 @@ describe('TaskCapsulePreview quick workspace', () => {
       'Write tests',
     );
     expect(wrapper.get('[data-testid="task-compact-occurrence-i1"]').text()).toContain('09:00');
-    expect(wrapper.get('[data-testid="task-capsule-progress"]').exists()).toBe(true);
+    expect(wrapper.get('[data-testid="task-quick-progress"]').exists()).toBe(true);
     wrapper.unmount();
   });
 
@@ -147,9 +149,9 @@ describe('TaskCapsulePreview quick workspace', () => {
     const wrapper = mountPreview();
     await flushPromises();
 
-    await wrapper.get('[data-testid="task-capsule-quick-task"]').trigger('click');
+    await wrapper.get('[data-testid="task-quick-quick-task"]').trigger('click');
     await wrapper.get('input').setValue('  Review PR  ');
-    await wrapper.get('[data-testid="task-capsule-quick-create"]').trigger('submit');
+    await wrapper.get('[data-testid="task-quick-quick-create"]').trigger('submit');
     await flushPromises();
 
     expect(createPlanSafe).toHaveBeenCalledWith(
@@ -170,7 +172,7 @@ describe('TaskCapsulePreview quick workspace', () => {
       'quick',
     );
     expect(fetchInstancesByDateRange).toHaveBeenCalledTimes(2);
-    expect(wrapper.find('[data-testid="task-capsule-quick-create"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="task-quick-quick-create"]').exists()).toBe(false);
     expect(wrapper.emitted('select')).toBeUndefined();
     wrapper.unmount();
   });
@@ -179,12 +181,12 @@ describe('TaskCapsulePreview quick workspace', () => {
     createPlanSafe.mockResolvedValueOnce(null);
     const wrapper = mountPreview();
     await flushPromises();
-    await wrapper.get('[data-testid="task-capsule-quick-task"]').trigger('click');
+    await wrapper.get('[data-testid="task-quick-quick-task"]').trigger('click');
     await wrapper.get('input').setValue('Retry later');
-    await wrapper.get('[data-testid="task-capsule-quick-create"]').trigger('submit');
+    await wrapper.get('[data-testid="task-quick-quick-create"]').trigger('submit');
     await flushPromises();
     expect(wrapper.get('input').element.value).toBe('Retry later');
-    expect(wrapper.find('[data-testid="task-capsule-quick-create"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="task-quick-quick-create"]').exists()).toBe(true);
     expect(fetchInstancesByDateRange).toHaveBeenCalledTimes(1);
     wrapper.unmount();
   });
@@ -192,7 +194,7 @@ describe('TaskCapsulePreview quick workspace', () => {
   it('shows empty state when no instances today', async () => {
     const wrapper = mountPreview();
     await flushPromises();
-    expect(wrapper.find('[data-testid="task-capsule-empty"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="task-quick-empty"]').exists()).toBe(true);
     wrapper.unmount();
   });
 
@@ -201,8 +203,21 @@ describe('TaskCapsulePreview quick workspace', () => {
     const wrapper = mountPreview();
     await flushPromises();
 
-    expect(wrapper.find('[data-testid="task-capsule-error"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="task-quick-error"]').exists()).toBe(true);
     await wrapper.get('button').trigger('click');
     wrapper.unmount();
   });
+});
+
+it('delegates execution presentation and commands to TaskQuickSurface', () => {
+  const source = readFileSync(resolve(__dirname, 'TaskCapsulePreview.vue'), 'utf8');
+  expect(source).toContain('<TaskQuickSurface');
+  for (const command of [
+    'completeOccurrence',
+    'uncompleteOccurrence',
+    'markOccurrenceMissed',
+    'skipOccurrence',
+    'setOccurrenceChecklistItem',
+  ])
+    expect(source).not.toContain(`task.${command}`);
 });

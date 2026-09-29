@@ -102,6 +102,7 @@ onBeforeUnmount(() => {
         class="min-h-[9rem]"
         :active="active"
         @view-all="emit('open-route', 'task', '/tasks')"
+        @open-plan="emit('open-route', 'task', `/tasks/${$event}`)"
         @completed="refreshAfterTaskCompletion"
       />
       <RoutineUpcomingWidget

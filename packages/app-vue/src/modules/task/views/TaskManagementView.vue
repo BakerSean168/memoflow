@@ -227,6 +227,7 @@ import type {
 } from '../components/types';
 import { useTaskStore } from '../stores/task-store';
 import { useTaskOccurrences } from '../composables/useTaskOccurrences';
+import { useTaskOccurrenceActionCoordinator } from '../composables/useTaskOccurrenceActionCoordinator';
 import { useTaskPlanListQuery } from '../composables/useTaskPlanListQuery';
 import { useTaskPlanMutations } from '../composables/useTaskPlanMutations';
 import {
@@ -268,7 +269,6 @@ const occurrenceSort = ref<TaskOccurrenceSort>('time');
 const showDialog = ref(false);
 const showQuickTaskDialog = ref(false);
 const createInitialGoalBinding = ref<TaskPlanViewModel['goalBinding']>(null);
-const busyOccurrenceId = ref<string | null>(null);
 const scopedGoalName = ref<string | null>(null);
 const scopedKeyResultTitle = ref<string | null>(null);
 const occurrencePlanDetails = ref<TaskPlanClientDTO[]>([]);
@@ -320,14 +320,18 @@ const {
   refetch: refetchTemplates,
 } = useTaskPlanListQuery({ params: taskListParams, enabled: () => activeSurface.value === 'plans' });
 const { createPlanSafe, abandonPlanSafe, deletePlanSafe, isSaving } = useTaskPlanMutations();
+const occurrenceOperations = useTaskOccurrences();
+const { fetchInstancesByDateRange: fetchOccurrencesByDateRange } = occurrenceOperations;
 const {
-  fetchInstancesByDateRange: fetchOccurrencesByDateRange,
-  completeOccurrence: completeOccurrenceMutation,
-  uncompleteOccurrence: uncompleteOccurrenceMutation,
-  markOccurrenceMissed: markOccurrenceMissedMutation,
-  skipOccurrence: skipOccurrenceMutation,
-  setOccurrenceChecklistItem: setOccurrenceChecklistItemMutation,
-} = useTaskOccurrences();
+  busyOccurrenceId,
+  requestComplete: completeOccurrence,
+  requestUncomplete: uncompleteOccurrence,
+  requestMissed: markOccurrenceMissed,
+  requestSkip: skipOccurrence,
+  requestChecklistChange: setOccurrenceChecklistItem,
+} = useTaskOccurrenceActionCoordinator({
+  operations: occurrenceOperations,
+});
 const taskStore = useTaskStore();
 const { instances, isLoading: instancesLoading, error: instancesError } = storeToRefs(taskStore);
 
@@ -587,27 +591,6 @@ async function remove(vm: TaskPlanViewModel) {
   if (!confirmed) return;
   if (await deletePlanSafe(vm.id)) await reloadSurface();
 }
-async function runOccurrenceAction(id: string, action: (id: string) => Promise<unknown>) {
-  busyOccurrenceId.value = id;
-  try {
-    await action(id);
-  } finally {
-    busyOccurrenceId.value = null;
-  }
-}
-const completeOccurrence = (id: string) => runOccurrenceAction(id, completeOccurrenceMutation);
-const uncompleteOccurrence = (id: string) => runOccurrenceAction(id, uncompleteOccurrenceMutation);
-const markOccurrenceMissed = (id: string) => runOccurrenceAction(id, markOccurrenceMissedMutation);
-const skipOccurrence = (id: string) => runOccurrenceAction(id, skipOccurrenceMutation);
-const setOccurrenceChecklistItem = (
-  occurrenceId: string,
-  definitionId: string,
-  completed: boolean,
-  expectedVersion: number,
-) =>
-  runOccurrenceAction(occurrenceId, (id) =>
-    setOccurrenceChecklistItemMutation(id, { definitionId, completed, expectedVersion }),
-  );
 
 watch(
   [queryGoalId, queryKeyResultId],

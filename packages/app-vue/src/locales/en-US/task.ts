@@ -237,6 +237,10 @@ export default {
     saveChanges: 'Save Changes',
     create: 'Create task plan',
   },
+  quickSurface: {
+    empty: 'No tasks scheduled today',
+    viewAll: 'View all',
+  },
   quickTask: {
     title: 'Quick task',
     subtitle: 'Create a to-do for today',

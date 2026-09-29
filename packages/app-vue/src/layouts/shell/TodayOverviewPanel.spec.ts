@@ -23,7 +23,7 @@ vi.mock('../../modules/goal/composables/useGoalHomeSummary', async () => {
 
 const DailyTodoWidgetStub = defineComponent({
   name: 'DailyTodoWidget',
-  emits: ['view-all', 'completed'],
+  emits: ['view-all', 'open-plan', 'completed'],
   setup(_, { emit }) {
     return () =>
       h('div', { 'data-testid': 'daily-todo-widget' }, [
@@ -143,6 +143,8 @@ describe('TodayOverviewPanel', () => {
     await wrapper.get('[data-testid="goal-progress-widget"] button:nth-child(1)').trigger('click');
     await wrapper.get('[data-testid="goal-progress-widget"] button:nth-child(2)').trigger('click');
 
+    wrapper.getComponent(DailyTodoWidgetStub).vm.$emit('open-plan', 'plan-1');
+
     expect(wrapper.emitted('open-route')).toEqual([
       ['goal', '/goals?dialog=goal'],
       ['task', '/tasks?dialog=quick-task'],
@@ -150,6 +152,7 @@ describe('TodayOverviewPanel', () => {
       ['routine', '/routines'],
       ['goal', '/goals'],
       ['goal', '/goals/goal-1'],
+      ['task', '/tasks/plan-1'],
     ]);
   });
 

@@ -94,8 +94,8 @@ test.describe('Task completion closed loop', () => {
 
     await page.reload({ waitUntil: 'domcontentloaded' });
     const todoWidget = page.getByTestId('daily-todo-widget');
-    const taskItem = page
-      .getByTestId('daily-todo-item')
+    const taskItem = todoWidget
+      .locator('[data-task-occurrence-id]')
       .filter({ has: page.getByText(taskName, { exact: true }) });
     const goalItem = page.locator(
       `[data-testid="goal-progress-item"][data-goal-id="${goalReceipt.goalId}"]`,
@@ -103,10 +103,12 @@ test.describe('Task completion closed loop', () => {
 
     await expect(todoWidget).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
     await expect(taskItem).toHaveAttribute('data-task-status', 'Pending');
-    await expect(page.getByTestId('daily-todo-progress')).toHaveText('0/1');
-    await expect(page.getByTestId('daily-todo-progress-bar')).toHaveAttribute('data-progress', '0');
+    await expect(todoWidget.getByTestId('task-quick-count')).toHaveText('0/1');
+    await expect(todoWidget.getByTestId('task-quick-progress')).toHaveAttribute('data-progress', '0');
     await expect(goalItem.getByTestId('goal-progress-value')).toHaveText('0%');
 
+    const occurrenceId = await taskItem.getAttribute('data-task-occurrence-id');
+    expect(occurrenceId).toBeTruthy();
     const completeRequestPromise = page.waitForRequest(
       (request) =>
         request.method() === 'POST' && new URL(request.url()).pathname.endsWith('/complete'),
@@ -116,7 +118,7 @@ test.describe('Task completion closed loop', () => {
         response.request().method() === 'POST' &&
         new URL(response.url()).pathname.endsWith('/complete'),
     );
-    await taskItem.locator('button[title]').click();
+    await taskItem.getByTestId(`task-compact-complete-${occurrenceId}`).click();
 
     const completeRequest = await completeRequestPromise;
     const completeResponse = await completeResponsePromise;
@@ -124,8 +126,8 @@ test.describe('Task completion closed loop', () => {
     expect(completeResponse.ok(), await completeResponse.text()).toBe(true);
 
     await expect(taskItem).toHaveAttribute('data-task-status', 'Completed');
-    await expect(page.getByTestId('daily-todo-progress')).toHaveText('1/1');
-    await expect(page.getByTestId('daily-todo-progress-bar')).toHaveAttribute(
+    await expect(todoWidget.getByTestId('task-quick-count')).toHaveText('1/1');
+    await expect(todoWidget.getByTestId('task-quick-progress')).toHaveAttribute(
       'data-progress',
       '100',
     );

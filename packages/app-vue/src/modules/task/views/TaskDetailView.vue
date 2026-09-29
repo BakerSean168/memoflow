@@ -809,6 +809,7 @@ import TimeConfigSection from '../components/TaskPlanForm/sections/TimeConfigSec
 import type { TaskPlanViewModel } from '../components/types';
 import { useTaskGoalBindingOptions } from '../composables/useTaskGoalBindingOptions';
 import { useTaskOccurrences } from '../composables/useTaskOccurrences';
+import { useTaskOccurrenceActionCoordinator } from '../composables/useTaskOccurrenceActionCoordinator';
 import { useTaskPlanWorkspaceQuery } from '../composables/useTaskPlanWorkspaceQuery';
 import { useTaskPlanMutations } from '../composables/useTaskPlanMutations';
 import {
@@ -836,7 +837,6 @@ const showLabelsEditor = ref(false);
 const showReminderEditor = ref(false);
 const customReminderPickerOpen = ref(false);
 const customReminderMinValue = ref(Number(getProductTime().now()));
-const busyOccurrenceId = ref<string | null>(null);
 
 const {
   workspace,
@@ -851,13 +851,18 @@ const {
   deletePlanSafe,
   isSaving,
 } = useTaskPlanMutations();
+const occurrenceOperations = useTaskOccurrences();
 const {
-  completeOccurrence: completeOccurrenceMutation,
-  uncompleteOccurrence: uncompleteOccurrenceMutation,
-  markOccurrenceMissed: markOccurrenceMissedMutation,
-  skipOccurrence: skipOccurrenceMutation,
-  setOccurrenceChecklistItem: setOccurrenceChecklistItemMutation,
-} = useTaskOccurrences();
+  busyOccurrenceId,
+  requestComplete: completeOccurrence,
+  requestUncomplete: uncompleteOccurrence,
+  requestMissed: markOccurrenceMissed,
+  requestSkip: skipOccurrence,
+  requestChecklistChange: setOccurrenceChecklistItem,
+} = useTaskOccurrenceActionCoordinator({
+  operations: occurrenceOperations,
+  afterSuccess: () => refetchWorkspace(),
+});
 const {
   goals: goalOptions,
   keyResultsByGoal,
@@ -1246,34 +1251,6 @@ async function remove() {
 async function reloadDetail() {
   await refetchWorkspace();
 }
-async function runOccurrenceAction(occurrenceId: string, action: (id: string) => Promise<unknown>) {
-  busyOccurrenceId.value = occurrenceId;
-  try {
-    if (await action(occurrenceId)) await refetchWorkspace();
-  } finally {
-    busyOccurrenceId.value = null;
-  }
-}
-const completeOccurrence = (occurrenceId: string) =>
-  runOccurrenceAction(occurrenceId, completeOccurrenceMutation);
-const uncompleteOccurrence = (occurrenceId: string) =>
-  runOccurrenceAction(occurrenceId, uncompleteOccurrenceMutation);
-const markOccurrenceMissed = (occurrenceId: string) =>
-  runOccurrenceAction(occurrenceId, markOccurrenceMissedMutation);
-const skipOccurrence = (occurrenceId: string) =>
-  runOccurrenceAction(occurrenceId, skipOccurrenceMutation);
-const setOccurrenceChecklistItem = (
-  occurrenceId: string,
-  definitionId: string,
-  completed: boolean,
-  expectedVersion: number,
-) =>
-  runOccurrenceAction(occurrenceId, (occurrenceIdValue) =>
-    setOccurrenceChecklistItemMutation(occurrenceIdValue, {
-      definitionId,
-      completed,
-      expectedVersion,
-    }),
-  );
+
 const noop = () => undefined;
 </script>

@@ -3,12 +3,14 @@
     class="group rounded-lg transition-colors hover:bg-[hsl(var(--hover)/0.55)]"
     :class="{ 'opacity-60': terminal && occurrence.status !== 'Completed' }"
     :data-testid="`task-compact-occurrence-${occurrence.id}`"
+    :data-task-occurrence-id="occurrence.id"
+    :data-task-status="occurrence.status"
   >
     <div class="flex min-h-10 items-start gap-2 px-1.5 py-1.5">
       <button
         type="button"
         class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
-        :disabled="busy || occurrence.status === 'Skipped' || occurrence.status === 'Missed'"
+        :disabled="mutationDisabled"
         :aria-label="
           occurrence.status === 'Completed'
             ? t('task.action.undoComplete')
@@ -44,6 +46,17 @@
           </span>
         </div>
 
+        <span
+          v-if="occurrence.status === 'Missed' || occurrence.status === 'Skipped'"
+          class="text-[10px] text-muted-foreground"
+        >
+          {{
+            occurrence.status === 'Missed'
+              ? t('task.occurrence.status.missed')
+              : t('task.occurrence.status.skipped')
+          }}
+        </span>
+
         <div
           v-if="occurrence.checklistState.length"
           class="mt-0.5 flex min-w-0 items-center justify-between gap-2"
@@ -72,17 +85,26 @@
         class="flex h-6 w-6 shrink-0 items-center justify-center"
         :data-testid="`task-compact-action-slot-${occurrence.id}`"
       >
-        <button
-          v-if="occurrence.status === 'Pending' || occurrence.status === 'InProgress'"
-          type="button"
-          class="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity hover:bg-[hsl(var(--hover))] hover:text-foreground group-hover:opacity-100 focus:opacity-100"
-          :aria-label="t('task.action.skip')"
-          :title="t('task.action.skip')"
-          :disabled="busy"
-          @click.stop="emit('skip', String(occurrence.id))"
-        >
-          <SkipForward class="h-3.5 w-3.5" />
-        </button>
+        <DropdownMenu v-if="!terminal">
+          <DropdownMenuTrigger as-child>
+            <button
+              type="button"
+              class="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-accent"
+              :disabled="mutationDisabled"
+              :aria-label="t('task.management.moreActions')"
+            >
+              <MoreHorizontal class="h-3.5 w-3.5" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem :disabled="mutationDisabled" @select="requestOutcome('missed')">{{
+              t('task.occurrence.markMissed')
+            }}</DropdownMenuItem>
+            <DropdownMenuItem :disabled="mutationDisabled" @select="requestOutcome('skip')">{{
+              t('task.action.skip')
+            }}</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
 
@@ -98,10 +120,11 @@
       >
         <Checkbox
           :model-value="item.completed"
-          :disabled="busy || terminal"
+          :disabled="mutationDisabled"
           :aria-label="item.titleSnapshot"
           :data-testid="`task-compact-checklist-item-${item.definitionId}`"
           @update:model-value="
+            !mutationDisabled &&
             emit(
               'checklist-change',
               String(occurrence.id),
@@ -125,14 +148,21 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Checkbox } from '@memoflow/ui-vue-shadcn';
-import { ChevronRight, Circle, CircleCheck, Loader2, SkipForward } from '@lucide/vue';
+import {
+  Checkbox,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@memoflow/ui-vue-shadcn';
+import { ChevronRight, Circle, CircleCheck, Loader2, MoreHorizontal } from '@lucide/vue';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
 
 const props = defineProps<{
   occurrence: TaskOccurrenceClientDTO;
   template: TaskPlanClientDTO;
   busy?: boolean;
+  disabled?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -140,6 +170,7 @@ const emit = defineEmits<{
   complete: [occurrenceId: string];
   uncomplete: [occurrenceId: string];
   skip: [occurrenceId: string];
+  missed: [occurrenceId: string];
   'checklist-change': [
     occurrenceId: string,
     definitionId: string,
@@ -150,6 +181,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const checklistOpen = ref(false);
+const mutationDisabled = computed(() => props.busy || props.disabled);
 
 const terminal = computed(
   () =>
@@ -166,15 +198,21 @@ const timeLabel = computed(() => {
   const timing = props.occurrence.scheduleSnapshot.timing;
   if (timing.kind === 'At') return timing.time;
   if (timing.kind === 'Window') return timing.start;
-  return t('shell.preview.allDay');
+  return t('task.timeConfig.allDay');
 });
 
+function requestOutcome(action: 'missed' | 'skip'): void {
+  if (mutationDisabled.value || terminal.value) return;
+  if (action === 'missed') emit('missed', String(props.occurrence.id));
+  else emit('skip', String(props.occurrence.id));
+}
+
 function toggleComplete(): void {
+  if (mutationDisabled.value) return;
   if (props.occurrence.status === 'Completed') {
     emit('uncomplete', String(props.occurrence.id));
     return;
   }
-  if (props.occurrence.status === 'Skipped' || props.occurrence.status === 'Missed') return;
   emit('complete', String(props.occurrence.id));
 }
 </script>
