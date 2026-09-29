@@ -15,12 +15,18 @@ import {
 } from '../../../platform/server-state';
 import { useTaskStore } from '../stores/task-store';
 import type { LocationQuery } from 'vue-router';
+import TaskOccurrenceInspectDialog from '../components/dialogs/TaskOccurrenceInspectDialog.vue';
 import QuickTaskDialog from '../components/dialogs/QuickTaskDialog.vue';
 import TaskPlanDialog from '../components/dialogs/TaskPlanDialog.vue';
 
 type ListParams = TaskPlanListQueryInput;
 const mocks = vi.hoisted(() => ({
   range: vi.fn(),
+  complete: vi.fn(),
+  uncomplete: vi.fn(),
+  missed: vi.fn(),
+  skip: vi.fn(),
+  checklist: vi.fn(),
   listParams: undefined as ComputedRef<ListParams> | undefined,
   listEnabled: undefined as UseTaskPlanListQueryComposableOptions['enabled'],
   listLoading: undefined as Ref<boolean> | undefined,
@@ -37,7 +43,14 @@ vi.mock('vue-router', () => ({
   useRouter: () => ({ push: mocks.push, replace: mocks.replace }),
 }));
 vi.mock('../composables/useTaskOccurrences', () => ({
-  useTaskOccurrences: () => ({ fetchInstancesByDateRange: mocks.range }),
+  useTaskOccurrences: () => ({
+    fetchInstancesByDateRange: mocks.range,
+    completeOccurrence: mocks.complete,
+    uncompleteOccurrence: mocks.uncomplete,
+    markOccurrenceMissed: mocks.missed,
+    skipOccurrence: mocks.skip,
+    setOccurrenceChecklistItem: mocks.checklist,
+  }),
 }));
 vi.mock('../composables/useTaskPlanListQuery', () => ({
   useTaskPlanListQuery: (options: UseTaskPlanListQueryComposableOptions) => {
@@ -162,6 +175,7 @@ function render(detailFails = false) {
         [SERVER_STATE_IDENTITY_SCOPE_KEY]: () => 'owner',
       },
       stubs: {
+        TaskOccurrenceInspectDialog: true,
         TaskPageToolbar: toolbar,
         TaskOccurrenceRow: occurrenceRow,
         TaskPlanRow: true,
@@ -178,7 +192,7 @@ function render(detailFails = false) {
     },
   });
   wrappers.push(wrapper);
-  return { wrapper, getPlan, goalService };
+  return { wrapper, getPlan, goalService, store };
 }
 
 describe('Task Management quick create', () => {
@@ -443,4 +457,66 @@ describe('Task Management bounded reads', () => {
     expect(label).not.toContain('missing-kr');
     expect(label).not.toContain('Readable');
   });
+});
+
+
+describe('Today occurrence inspect', () => {
+  it('opens local inspect instead of navigating, tracks store corrections and navigates only with View Plan', async () => {
+    const { wrapper, store } = render();
+    await flushPromises();
+    wrapper.findComponent(occurrenceRow).vm.$emit('inspect', 'occurrence');
+    await flushPromises();
+    const dialog = wrapper.findComponent(TaskOccurrenceInspectDialog);
+    expect(dialog.props('modelValue')).toBe(true);
+    expect(dialog.props('planName')).toBe('Plan outside page');
+    expect(mocks.push).not.toHaveBeenCalled();
+    expect(mocks.replace).not.toHaveBeenCalled();
+    const updated = { ...store.instances[0], status: 'Completed' as const, version: 2 };
+    store.updateInstance(updated);
+    await flushPromises();
+    expect(dialog.props('occurrence')).toMatchObject({ status: 'Completed', version: 2 });
+    store.setInstances([]);
+    await flushPromises();
+    expect(dialog.props('occurrence')).toMatchObject({ status: 'Completed', version: 2 });
+    expect(dialog.props('modelValue')).toBe(true);
+    mocks.uncomplete.mockResolvedValueOnce({ ...updated, status: 'Pending', version: 3 });
+    dialog.vm.$emit('uncomplete', 'occurrence');
+    await flushPromises();
+    expect(dialog.props('occurrence')).toMatchObject({ status: 'Pending', version: 3 });
+    dialog.vm.$emit('view-plan', 'outside-page');
+    await flushPromises();
+    expect(mocks.push).toHaveBeenCalledWith({ name: 'task-detail', params: { id: 'outside-page' } });
+    expect(wrapper.findComponent(TaskOccurrenceInspectDialog).exists()).toBe(false);
+  });
+});
+
+
+it('uses the same coordinator for row and inspect intents, with selected busy state', async () => {
+  const { wrapper } = render();
+  await flushPromises();
+  const row = wrapper.findComponent(occurrenceRow);
+  row.vm.$emit('inspect', 'occurrence');
+  await flushPromises();
+  const dialog = wrapper.findComponent(TaskOccurrenceInspectDialog);
+  let finish!: () => void;
+  mocks.complete.mockImplementationOnce(() => new Promise<void>((resolve) => { finish = resolve; }));
+  row.vm.$emit('complete', 'occurrence');
+  await flushPromises();
+  expect(dialog.props('busy')).toBe(true);
+  dialog.vm.$emit('skip', 'occurrence');
+  expect(mocks.skip).not.toHaveBeenCalled();
+  finish();
+  await flushPromises();
+  expect(dialog.props('busy')).toBe(false);
+  for (const [event, operation] of [
+    ['complete', mocks.complete], ['uncomplete', mocks.uncomplete],
+    ['missed', mocks.missed], ['skip', mocks.skip],
+  ] as const) {
+    dialog.vm.$emit(event, 'occurrence');
+    await flushPromises();
+    expect(operation).toHaveBeenCalledWith('occurrence');
+  }
+  dialog.vm.$emit('checklist-change', 'occurrence', 'step', true, 9);
+  await flushPromises();
+  expect(mocks.checklist).toHaveBeenCalledWith('occurrence', { definitionId: 'step', completed: true, expectedVersion: 9 });
 });

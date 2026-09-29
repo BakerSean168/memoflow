@@ -15,7 +15,7 @@
         :disabled="busy"
         :aria-label="t('task.action.complete')"
         data-testid="task-occurrence-complete"
-        @click="emit('complete', String(occurrence.id))"
+        @click.stop="emit('complete', String(occurrence.id))"
       >
         <Circle class="h-4 w-4" />
       </Button>
@@ -28,7 +28,7 @@
         :disabled="busy"
         :aria-label="t('task.action.undoComplete')"
         data-testid="task-occurrence-uncomplete"
-        @click="emit('uncomplete', String(occurrence.id))"
+        @click.stop="emit('uncomplete', String(occurrence.id))"
       >
         <CircleCheck class="h-4 w-4" />
       </Button>
@@ -36,8 +36,9 @@
       <button
         type="button"
         class="min-w-0 flex-1 rounded-sm text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/60"
-        :aria-label="t('task.occurrence.openPlan', { title: template.name })"
-        @click="emit('open-plan', String(template.id))"
+        :aria-label="t(inspect ? 'task.inspect.open' : 'task.occurrence.openPlan', { title: template.name })"
+        data-testid="task-occurrence-body"
+        @click="inspect ? emit('inspect', String(occurrence.id)) : emit('open-plan', String(template.id))"
       >
         <div class="flex min-w-0 items-center gap-2">
           <h3
@@ -100,7 +101,7 @@
           :disabled="busy"
           :aria-label="t('task.occurrence.markMissed')"
           data-testid="task-occurrence-missed"
-          @click="emit('missed', String(occurrence.id))"
+          @click.stop="emit('missed', String(occurrence.id))"
         >
           <ClockAlert class="h-4 w-4" />
         </Button>
@@ -113,7 +114,7 @@
           :disabled="busy"
           :aria-label="t('task.action.skip')"
           data-testid="task-occurrence-skip"
-          @click="emit('skip', String(occurrence.id))"
+          @click.stop="emit('skip', String(occurrence.id))"
         >
           <SkipForward class="h-4 w-4" />
         </Button>
@@ -130,6 +131,7 @@
           v-for="item in occurrence.checklistState"
           :key="item.definitionId"
           class="flex min-w-0 items-center gap-2 py-1 text-sm"
+          @click.stop
         >
           <Checkbox
             :model-value="item.completed"
@@ -176,12 +178,14 @@ const props = withDefaults(
     template: TaskPlanClientDTO;
     position?: { position: number; total: number } | null;
     busy?: boolean;
+    inspect?: boolean;
     now?: number;
   }>(),
-  { position: null, busy: false, now: undefined },
+  { position: null, busy: false, inspect: false, now: undefined },
 );
 
 const emit = defineEmits<{
+  inspect: [occurrenceId: string];
   'open-plan': [planId: string];
   complete: [occurrenceId: string];
   uncomplete: [occurrenceId: string];

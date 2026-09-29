@@ -1,4 +1,22 @@
 export default {
+  inspect: {
+    description: 'Occurrence details',
+    open: 'Inspect {title}',
+    status: 'Status',
+    scheduled: 'Scheduled',
+    actualStart: 'Actual start',
+    checklist: 'Checklist',
+    recordedAt: 'Recorded',
+    duration: 'Duration',
+    minutes: '{count} min',
+    rating: 'Rating',
+    note: 'Note',
+    reason: 'Reason',
+    goalContext: 'Goal / Key Result',
+    contextLoading: 'Loading Goal context…',
+    krMissing: 'Linked Key Result is no longer available',
+    viewPlan: 'View Plan',
+  },
   route: {
     management: 'Task Management',
     dependencyDemo: 'Dependency Validation Demo (STORY-024)',
