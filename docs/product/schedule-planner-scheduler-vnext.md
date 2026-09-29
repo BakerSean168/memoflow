@@ -7,7 +7,7 @@ tags:
   - vnext
 description: Schedule/Planner 与 Scheduler/Temporal Engine 的 vNext 产品模型、跨模块时间语义、Planner occupancy/conflict 和内部 invocation North Star
 created: 2026-09-08T20:45:00+08:00
-updated: 2026-09-19T00:00:00+00:00
+updated: 2026-09-29T13:35:00+08:00
 ---
 
 # Schedule / Planner + Scheduler / Temporal Engine vNext
@@ -180,6 +180,27 @@ new projection
 Planner -> Scheduler row
 ```
 
+### 6.1 Planner inspect interaction
+
+BusinessPanel 本身已经是右侧 workspace。Product vNext 默认不再在 Calendar 内继续叠加右侧 Day/Event Sheet，而采用：
+
+```text
+click day   -> PlannerDayDialog
+click event -> PlannerEventDialog
+```
+
+Dialog 负责容器与 context；具体业务内容由 owner Quick Surface 提供。
+
+```text
+PlannerDayDialog
+├─ CalendarEntryQuickRow
+├─ TaskOccurrenceQuickRow
+├─ Goal marker quick info
+└─ Routine occurrence quick info
+```
+
+CalendarEntry edit/delete 由 Schedule owner 执行；Task/Goal/Routine projection 不在 Schedule 内重写 owner mutation semantics。窄容器如确实更适合边侧浏览，可以退化为 Sheet，但 Sheet 不再是默认产品层级。
+
 ## 7. Goal vNext Integration
 
 Goal temporal projection：
@@ -233,6 +254,8 @@ task.occurrence
 ```
 
 而不是旧 `task.instance`。
+
+Task occurrence 的 Complete/Uncomplete/Missed/Skipped/Checklist 交互不由 Planner 自己实现。Schedule host 复用 Task Quick Surface，并通过 Task-owned `TaskOccurrenceActionCoordinator` 发起 action；这样 completion-time KR measurement 不会被 Calendar 快速入口绕过。
 
 ## 9. Routine vNext Integration
 
@@ -447,4 +470,6 @@ display semantics
 - [ADR-081 ScheduledInvocation Model 与 Legacy ScheduleTask 退役](../architecture/adr/ADR-081-scheduled-invocation-model-and-legacy-schedule-task-retirement.md)
 - [ADR-082 Scheduler Invocation Attempt 与 Runtime State Machine](../architecture/adr/ADR-082-scheduler-invocation-attempt-and-runtime-state-machine.md)
 - [ADR-083 Schedule / Scheduler Contract、Diagnostics 与 Persistence Boundary](../architecture/adr/ADR-083-schedule-scheduler-contract-diagnostics-and-persistence-boundary.md)
+- [ADR-112 Owner Native Surface Orchestration](../architecture/adr/ADR-112-owner-native-surface-orchestration-and-quick-surface-reuse.md)
+- [Native Surface Orchestration + Quick Surface vNext](./native-surface-orchestration-and-quick-surfaces.md)
 - [Current System Map](../analysis/2026-09-08-schedule-scheduler-current-system-map.md)

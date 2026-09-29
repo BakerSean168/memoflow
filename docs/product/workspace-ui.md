@@ -6,7 +6,7 @@ tags:
   - desktop
 description: MemoFlow 桌面工作区的信息架构、分栏几何与 UI primitive 当前契约
 created: 2026-08-01T00:00:00+08:00
-updated: 2026-08-06T00:00:00Z
+updated: 2026-09-29T13:35:00+08:00
 ---
 
 # 桌面工作区与 UI 说明
@@ -16,6 +16,8 @@ updated: 2026-08-06T00:00:00Z
 桌面工作区采用“会话侧栏 + AI 对话 + 业务工作区”的三栏模型。顶部保留全局模块复合胶囊：主按钮直接进入 Goal、Task、Note、Reminder、Schedule、Notification，右侧预览按钮展示摘要；业务工作区 Tab 只表达当前已打开的业务上下文，不与全局入口争夺职责。
 
 AI 对话是可收窄的协作列，右侧业务工作区承载 Goal、Task、Schedule、Reminder、Repository 等需要较大编辑面积的内容。业务区在常见桌面尺寸下默认占主导，而不是 AI 区的附属抽屉。
+
+2026-09-29 Product vNext 进一步确定：AI 不长期维护第二套 Goal/Task/Knowledge 编辑面。AI 通过 typed Surface Orchestrator 打开并操控右侧 BusinessPanel 中的 owner-native surface；Mastra internal draft/revision/retry identity 继续保留在 runtime 内部。当前独立 `workflow` surface 在 native parity 完成前保留，之后作为 retirement candidate 评估。详见 ADR-112 与 `native-surface-orchestration-and-quick-surfaces.md`。
 
 ## 几何契约
 

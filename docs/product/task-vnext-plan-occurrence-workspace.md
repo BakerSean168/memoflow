@@ -5,7 +5,7 @@ tags:
   - vnext
 description: Task Plan / Occurrence / Workspace 最终产品模型与创建、执行、详情交互
 created: 2026-09-08T19:30:00+08:00
-updated: 2026-09-29T11:38:00+08:00
+updated: 2026-09-29T13:35:00+08:00
 ---
 
 # Task vNext — Plan / Occurrence / Workspace
@@ -70,6 +70,30 @@ Quick Task 用于：
 
 Quick Task 与 Full Create 是两个 intent，不合并成一个越来越复杂的万能表单。
 
+### 2.2 Task Native Surface family
+
+Task 对外不再维护大量入口特化 UI。用户认知只保留：
+
+```text
+Task Full Surface
++
+Task Quick Surface
+```
+
+Full Surface 是 Task Home / Task Plan Workspace；Quick Surface 是 Capsule、Home、Schedule、Notification、AI contextual work 复用的高频执行层。
+
+目标组件边界：
+
+```text
+TaskOccurrenceQuickRow
+        ↓
+TaskOccurrenceCompactList
+        ↓
+TaskQuickSurface
+```
+
+`TaskCapsulePreview` 只是 Quick Surface 的一个宿主，不是其它模块应该直接复用的业务组件。
+
 ## 3. Today / Schedule handoff
 
 Task Home 只保留 `Today | Plans`。Today 以 Occurrence 为核心：
@@ -103,7 +127,7 @@ Overdue 只是提示，并继续留在 Today 的待处理范围：
 ... -> [未完成] [跳过]
 ```
 
-点击整行只在确实需要更多信息时打开 compact Inspect Dialog / Sheet：
+点击整行只在确实需要更多信息时打开 compact Inspect Dialog；只有窄容器或边侧浏览确有优势时才退化为 Sheet：
 
 ```text
 Occurrence Inspect
@@ -115,6 +139,8 @@ Occurrence Inspect
 ```
 
 不新增 `TaskOccurrenceDetailView`。TaskPlan 才是独立 owner workspace。
+
+所有 Quick Surface 的 Complete/Uncomplete/Missed/Skipped/Checklist action 通过 Task-owned canonical action contract；尤其 Complete 不允许 Capsule/Home/Schedule 直接绕过 completion-time KR measurement。详见 ADR-112。
 
 ## 4. Task Plan Workspace
 
@@ -277,7 +303,22 @@ TaskUserMeasurement
 
 用户输错 measurement 时，不要求先撤销 Task 完成再重新完成。
 
-## 7. 明确不做
+## 7. 组件复用边界
+
+不让 `DailyTodoWidget`、`TaskCapsulePreview`、Schedule Task action panel 分别拥有完整 execution logic。
+
+目标：
+
+```text
+Task owner business logic
+ -> TaskOccurrenceActionCoordinator
+ -> TaskQuickSurface
+ -> Capsule / Home / Schedule hosts
+```
+
+Host 可以选择是否显示 summary、Quick Create、View All，但不能复制 Task completion semantics。
+
+## 8. 明确不做
 
 - 不恢复 Upcoming Task Home；
 - 不新增 TaskOccurrence detail route；
@@ -286,3 +327,9 @@ TaskUserMeasurement
 - 不让 Task 自己重写 KR aggregation；
 - 不用前端 `createGoalRecord()` + `completeTask()` 双写；
 - 不把 Goal/KR/Note owned state 复制进 TaskPlan Aggregate。
+
+## 9. 相关文档
+
+- [ADR-112 Owner Native Surface Orchestration](../architecture/adr/ADR-112-owner-native-surface-orchestration-and-quick-surface-reuse.md)
+- [Native Surface Orchestration + Quick Surface vNext](./native-surface-orchestration-and-quick-surfaces.md)
+- [Task second-pass deep audit](../analysis/2026-09-29-task-vnext-second-pass-deep-audit.md)

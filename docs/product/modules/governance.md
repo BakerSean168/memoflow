@@ -5,16 +5,18 @@ tags:
   - governance
 description: Governance 可执行参考模块与开发模式编码规范工作台
 created: 2026-06-02T00:00:00
-updated: 2026-09-11T00:00:00+09:00
+updated: 2026-09-29T13:35:00+08:00
 ---
 
 # Governance 模块说明
 
 > **2026-09-09 convergence decision:** ADR-110 明确 Governance 永久保留。它既是可以真实管理编码/架构规范的 development workbench，也是 MemoFlow feature architecture 的 executable reference module。ADR-109 的 Knowledge retirement 提案已被取代。
+>
+> **2026-09-29 Product vNext reconsideration:** ADR-113 重新评估这一前提，并提议退休 Product Governance Runtime、保留 `tools/governance + docs/governance + docs/standards + CI` 的 Engineering Governance。ADR-113 最终确认前，本文件以下内容仍描述当前运行时事实，但不再继续投资 Governance UI modernization，也不应以 Governance UI 作为新一轮产品组件抽象的参考依据。
 
-## 1. 功能定位
+## 1. 当前已实施定位（ADR-110）
 
-Governance 有两个正式且长期保留的定位：
+当前实现仍按 ADR-110 具有两个定位；ADR-113 正在重新评估其是否值得长期保留：
 
 1. **开发模式规范工作台**：真实管理编码规范、架构规范、示例、标签、状态和修订历史；
 2. **可执行参考模块**：用一套低业务复杂度但完整的 vertical slice 展示 MemoFlow 标准 feature package 应该如何实现。
@@ -130,26 +132,34 @@ Knowledge 不再是 Governance 的替代目标。
 
 ## 8. 当前优化方向
 
-- development/diagnostic surface policy 已由 `GOV-1902` 固化：开发环境自动展示，生产仅显式诊断开关展示；route 与 feature ownership 始终保留；
-- 保持 reference module 与全仓 canonical feature shape 同步；
-- deterministic published rule bundle 已由 `GOV-1903` 完成：schema v1 + canonical payload + SHA-256 + Active-only + provenance；
-- check/report/autofix-proposal adapter 已由 `GOV-1904` 接入 repository-pinned snapshot；CI 不读取 Rule DB，autofix 只生成 review-required proposal；
-- 更新 authorization policy，使其明确服务开发/reference 场景；
-- 保持 Web/Desktop/Prisma/PowerSync parity 的教材价值。
+在 ADR-113 最终确认前，停止新增 Product Governance UI/业务能力。当前工作只允许：
 
-## 9. 保护项
+- 保持 existing runtime 不因其它重构意外破坏；
+- inventory Product Governance runtime/build/schema/DI blast radius；
+- 识别哪些 `tools/governance` / rule metadata 真正需要保留；
+- 为 Engineering Governance 建立不依赖 Product Governance DB/runtime 的 repository-native input；
+- 若 ADR-113 被拒绝，再重新决定是否投入 Governance UI modernization。
 
-以下不得进入 retirement queue：
+已存在的 GOV-1902~1904 继续作为当前实现事实与 retirement inventory 输入，不再作为继续扩展 Product Governance 的理由。
+
+## 9. 保护项 / retirement 状态
+
+当前运行时在 ADR-113 未采纳前仍受保护，不能无计划删除。
+
+若 ADR-113 被采纳，则以下将进入显式 retirement queue：
 
 - `packages/governance`；
 - Governance contracts；
 - Rule/RuleRevision persistence；
 - API/IPC/client/UI vertical slice；
-- reference-module architecture tests。
+- 仅为 reference feature 存在的 tests/config。
+
+无论 ADR-113 是否采纳，Engineering Governance 的真实 CI/audit 能力必须保留。
 
 ## 10. 相关资料
 
 - [ADR-110](../../architecture/adr/ADR-110-governance-permanent-executable-reference-module.md)
+- [ADR-113 retirement proposal](../../architecture/adr/ADR-113-retire-product-governance-runtime-keep-engineering-governance.md)
 - [Governance Current-System Map](../../analysis/2026-09-09-governance-product-current-system-map.md)
 - [仓库级治理规范](../../governance/README.md)
 - [Governance 文件索引](../module-index/governance-files.md)

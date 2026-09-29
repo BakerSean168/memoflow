@@ -20,8 +20,9 @@ direct manipulation
 + fewer navigation layers
 + compact property surfaces
 + deterministic data facts
-+ optional AI assistance
-+ shared product primitives only after a reference flow is proven
++ owner-native Full / Quick Surfaces
++ AI semantic surface orchestration
++ shared product primitives only after real owner flows prove reuse
 ```
 
 Goal is the first **reference implementation**, not the only scope.
@@ -33,9 +34,15 @@ freeze current integration baseline
         ↓
 finish Goal KR -> Record -> Review vertical loop
         ↓
-extract only the shared grammar proven by Goal
+Task Quick Surface + canonical occurrence actions
         ↓
-audit and converge Task / Schedule / Routine / Knowledge / Notification / Settings+Account / Governance / AI+Shell
+Schedule Dialog + owner Quick Surface composition
+        ↓
+Owner Native Edit Session / AI Surface Orchestrator
+        ↓
+converge Routine / Knowledge / Notification / Settings+Account / Shell
+        ↓
+parallel Governance retirement decision
         ↓
 product-wide drift closure
         ↓
@@ -48,7 +55,7 @@ The plan deliberately avoids premature “one universal entity component” abst
 
 # 1. Target outcome
 
-A user should experience MemoFlow as one coherent product even when moving between Goal, Task, Schedule, Routine, Knowledge, Notification, Settings/Account, Governance and AI.
+A user should experience MemoFlow as one coherent product even when moving between Goal, Task, Schedule, Routine, Knowledge, Notification, Settings/Account and AI. Product Governance is no longer treated as a normal future-facing user module while ADR-113 evaluates retirement.
 
 Observable outcomes:
 
@@ -61,7 +68,8 @@ Observable outcomes:
 7. module toolbars, metadata rows, chips, dialogs, loading/error/empty states share stable product grammar;
 8. responsive behavior follows the business-panel container rather than viewport-only assumptions;
 9. routes, API contracts and owner boundaries remain explicit even if a visual page is retired;
-10. core surfaces have deterministic screenshot and interaction regression coverage.
+10. core surfaces have deterministic screenshot and interaction regression coverage;
+11. AI opens and edits the same owner-native Goal/Task/Knowledge surfaces that users edit manually, rather than maintaining parallel product forms.
 
 ---
 
@@ -871,9 +879,9 @@ This ticket should also replace the current Sum-biased Goal record composer with
 
 ADR-056/068/069/075 have now been amended to distinguish `automatic fixed contribution` from `user-authored completion measurement`, preserve Goal ownership, define provenance/correction semantics, and retire Upcoming in favor of Schedule. Contract implementation must follow those revised ADR boundaries.
 
-### PVC-TASK-3401 — Canonical occurrence action coordinator
+### PVC-TASK-3401 — Canonical occurrence action coordinator + Task Quick Surface
 
-**Why now:** second-pass remaining-module audit found that Task completion is initiated from Task Home/Detail, Task Capsule, Today Overview and Schedule. Once completion-time KR measurement exists, direct `completeOccurrence(id)` calls become interaction bypasses.
+**Why now:** second-pass remaining-module audit found that Task completion is initiated from Task Home/Detail, Task Capsule, Today Overview and Schedule. Once completion-time KR measurement exists, direct `completeOccurrence(id)` calls become interaction bypasses. The same surfaces also duplicate summary/list/row UI.
 
 Converge all user-facing completion entry points onto one Task-owned interaction contract:
 
@@ -893,7 +901,17 @@ Affected presentation entry points currently include:
 - Schedule `DayDetailSheet`;
 - Schedule `TaskEventActionPanel`.
 
-The host may render the dialog, but Task owns the decision and Goal owns measurement aggregation.
+Do not make those hosts import `TaskCapsulePreview.vue`. Extract the owner layer:
+
+```text
+TaskOccurrenceQuickRow
+ -> TaskOccurrenceCompactList
+ -> TaskQuickSurface
+```
+
+Capsule/Home/Schedule then compose the owner Quick Surface according to host needs. The host may render the measurement dialog, but Task owns the decision and Goal owns aggregation.
+
+This ticket is the first implementation slice of ADR-112.
 
 ---
 
@@ -923,14 +941,16 @@ Verified direction:
 
 Reuse canonical date/date-time surfaces while preserving exact Instant/Ymd semantics.
 
-### PVC-SCHED-4201 — Inspect vs edit surfaces
+### PVC-SCHED-4201 — Dialog-based inspect + owner Quick Surface composition
 
 Resolved interaction family:
 
 - direct calendar interaction for move/resize/high-frequency selection;
-- Sheet/Dialog for event inspect;
+- `PlannerDayDialog` / `PlannerEventDialog` are the default inspect containers inside BusinessPanel;
+- Sheet is reserved for narrow/container-specific cases, not the default right-on-right layer;
 - Schedule-owned CalendarEntry can enter edit/delete from inspect;
-- Task/Goal/Routine projections delegate business mutation to the owner;
+- Task occurrence content reuses Task Quick Surface and Task action coordinator;
+- Goal/Routine projections use owner quick/context surfaces and delegate mutation to the owner;
 - no new page is introduced merely for event metadata.
 
 Also converge duplicated source-dot/source-badge mappings into one Schedule projection presentation authority.
@@ -1032,55 +1052,78 @@ Account remains a Settings capability surface; `/account -> /settings?tab=accoun
 
 ---
 
-# 13. Phase 8 — Governance + AI / shell convergence
+# 13. Phase 8 — Native Surface Orchestration + Governance retirement decision
 
 ## Product target
 
-Governance becomes the current executable UI/reference feature for full-page list/detail/editor/history patterns.
+ADR-112 changes the AI convergence target: AI does not maintain a parallel Goal/Task/Knowledge product editor. It orchestrates owner-native business surfaces through typed semantic actions.
 
-AI remains a first-class interaction surface but uses the same product objects and owner actions.
+ADR-113 separately evaluates retiring Product Governance Runtime while preserving Engineering Governance.
 
-### PVC-GOV-7901 — Governance UI reference convergence
+### PVC-GOV-7901 — Product Governance retirement decision / inventory
 
-**Status:** second-pass discovery complete.
+**Status:** proposal track; ADR-113 not yet finally accepted.
 
-Governance is a permanent executable reference module, so its UI must stop teaching older conventions.
+Do not modernize Governance UI while retirement is unresolved.
 
-Converge:
+Inventory and classify:
 
-- Rule list -> canonical Collection surface;
-- Rule detail -> current Entity workspace grammar;
-- Rule editor -> standard Input/Textarea/Select + stable full-page editor shell;
-- Revision history -> same Rule workspace family;
-- loading/error/empty -> shared state grammar;
-- native controls/hand-built spinners/custom router-link buttons -> current primitives.
+- Product Governance runtime/contracts/UI/DB/DI/build references;
+- Engineering Governance assets that must remain;
+- current rule-bundle adapter inputs that depend on Product Governance;
+- AGENT/reference-module policy dependencies.
 
-Keep Rule/RuleRevision routes and audit semantics; unlike Goal KR, Rule is a first-class owner entity.
+If ADR-113 is accepted, create a destructive retirement batch only after Engineering Governance has repository-native inputs. If rejected, then reopen Governance UI convergence as a separate bounded project.
 
-### PVC-AI-8001 — AI chat/composer audit
+### PVC-AI-8001 — Owner Native Edit Session + Surface Orchestrator foundation
 
-**Status:** second-pass discovery complete.
+**Status:** target-design frozen by ADR-112; implementation pending.
 
-Verified direction:
+Define a typed UI/application seam that lets AI:
 
-- keep attachment/context/paste/automatic-intent behavior;
-- keep one specialized composer;
-- hide normal-workflow draft refs, IDs, mutation/reference-map details and low-level codes behind diagnostic/DEV detail;
-- render owner drafts using the same product language as manual Goal/Task/Knowledge surfaces;
-- replace bespoke elevation with semantic elevation tokens;
-- collapse Teleport/non-Teleport composer wiring to one logical mount path without changing shell geometry.
+- open an owner create/edit surface in BusinessPanel;
+- project internal workflow proposal data into the owner edit session;
+- patch/add/remove/focus fields through owner-defined semantic actions;
+- reuse owner validation, dirty state, submit/cancel and leave guards;
+- observe resulting owner state without direct Pinia/DOM mutation.
 
-### PVC-AI-8101 — Goal/Task action presentation
+Mastra `draftRef / revision / receipt / referenceMap` may remain runtime-internal.
 
-AI-generated Goal/KR/Task drafts must reuse the same user-facing concepts as manual owner surfaces; no parallel “AI-only form language”.
+### PVC-AI-8101 — Goal native workflow vertical slice
 
-In particular:
+Replace AI-only Goal/KR editing for one end-to-end `goal.create` path:
 
-- friendly KR calculation labels and Initial / Current / Target grammar;
-- current Goal timeframe/property interactions;
-- current Task schedule/importance/Goal-KR grammar;
-- Task→KR three-mode record semantics once PVC-TASK-3301 lands;
-- no raw owner IDs/draftRefs as normal user copy.
+```text
+chat request
+ -> Mastra proposal
+ -> open native Goal create surface
+ -> AI patches native edit session
+ -> user edits/approves
+ -> owner command
+ -> canonical Goal
+```
+
+Do not delete `AIGoalDraftEditor` until restart/retry/recovery/approval parity is proven.
+
+### PVC-AI-8111 — Task + Knowledge native workflow migration
+
+After Goal proves the surface contract:
+
+- migrate `task.create` into native Task create/edit surface;
+- migrate `knowledge.capture` into native Knowledge surface;
+- reuse Task→KR three-mode completion/record language where relevant;
+- move runtime IDs/receipts to diagnostics.
+
+### PVC-AI-8121 — Retire AI-owned product editors and evaluate workflow surface
+
+Only after Goal/Task/Knowledge native parity:
+
+- retire `AIGoalDraftEditor` / `AITaskDraftEditor` and equivalent AI-only product editing paths;
+- keep clarification/recovery/execution diagnostics;
+- migrate workflow attention/dirty/busy semantics to native sessions;
+- then evaluate removing `BusinessPanel.workflow`.
+
+The workflow surface is not deleted earlier.
 
 ### PVC-SHELL-8201 — Capsule convergence
 
@@ -1251,9 +1294,24 @@ TASK-3002 / TASK-3401 / TASK-3301
 SCHED-4201
 Goal Record/Review closure
         ↓
+AI native-surface foundation
+AI-8001
+        ↓
+Goal native workflow vertical slice
+AI-8101
+        ↓
+Task / Knowledge native workflow migration
+AI-8111
+        ↓
+AI-owned editor / workflow-surface retirement evaluation
+AI-8121
+        ↓
 bounded module visual convergence batches
         ↓
 Phase 9 product-wide grammar + visual regression closure
+
+Parallel:
+GOV-7901 / ADR-113 retirement decision
 ```
 
 The broad module audits are now discovery-complete. Do not reopen them as generic discovery unless implementation uncovers contradictory evidence. Implementation migrations should be grouped by root cause and owner contract; shared primitives are promoted only after multiple converged surfaces prove the same grammar.
@@ -1264,11 +1322,13 @@ The broad module audits are now discovery-complete. Do not reopen them as generi
 
 1. Keep `product/vnext-convergence` on top of the current `main` baseline.
 2. Preserve the updated Goal and Task product North Stars frozen on 2026-09-29.
-3. Treat the Task second-pass audit and Remaining Modules Full Surface / UI Audit as discovery-complete evidence.
-4. Convert verified findings into bounded implementation tickets by dependency/root cause rather than reopening broad module discovery.
-5. Before product-wide visual abstraction, complete owner-correct vertical slices: Task lifecycle/action coordinator, Schedule CalendarEntry inspect/edit/delete, Goal/Task measurement loop.
-6. Promote shared UI primitives only after two or more real surfaces demonstrate stable identical grammar.
-7. Make deterministic visual regression part of closure, not an informal screenshot exercise.
+3. Treat the Task second-pass audit, Remaining Modules Full Surface / UI Audit, ADR-112 and the Native Surface product doc as discovery-complete evidence.
+4. Implement Task Quick Surface + occurrence action coordinator before further host-specific Task UI work.
+5. Migrate Schedule day/event inspect toward Dialog + owner Quick Surface composition.
+6. Define Owner Native Edit Session / Surface Orchestrator and prove it with Goal before migrating Task/Knowledge AI workflows.
+7. Do not invest in Governance UI modernization while ADR-113 retirement is unresolved; inventory/decouple Engineering Governance first.
+8. Promote shared UI primitives only after two or more real surfaces demonstrate stable identical grammar.
+9. Make deterministic visual regression part of closure, not an informal screenshot exercise.
 
 # 20. Discovery references
 
@@ -1276,6 +1336,9 @@ The broad module audits are now discovery-complete. Do not reopen them as generi
 - [Cross-module convergence audit](../../analysis/2026-09-29-product-vnext-module-convergence-audit.md)
 - [Task vNext second-pass deep audit](../../analysis/2026-09-29-task-vnext-second-pass-deep-audit.md)
 - [Remaining Modules Full Surface / UI Audit](../../analysis/2026-09-29-product-vnext-remaining-modules-full-surface-audit.md)
+- [Native Surface Orchestration + Quick Surface vNext](../../product/native-surface-orchestration-and-quick-surfaces.md)
+- [ADR-112 Owner Native Surface Orchestration](../../architecture/adr/ADR-112-owner-native-surface-orchestration-and-quick-surface-reuse.md)
+- [ADR-113 Product Governance retirement proposal](../../architecture/adr/ADR-113-retire-product-governance-runtime-keep-engineering-governance.md)
 - [Workspace UI contract](../../product/workspace-ui.md)
 - [Task vNext](../../product/task-vnext-plan-occurrence-workspace.md)
 - [Routine Coach vNext](../../product/routine-coach-vnext.md)

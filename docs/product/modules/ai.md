@@ -5,7 +5,7 @@ tags:
   - ai
 description: AI 模块当前功能、Mastra durable workflows、Routine tools 与产品读写边界
 created: 2026-06-02T00:00:00
-updated: 2026-09-18T00:00:00+00:00
+updated: 2026-09-29T13:35:00+08:00
 ---
 
 # AI 模块说明
@@ -13,6 +13,8 @@ updated: 2026-09-18T00:00:00+00:00
 > **ADR-111 cutover policy (2026-09-09):** 当前没有需要保留的 MemoFlow 旧业务数据，也不要求兼容旧客户端/旧备份。本文历史推演中仅为旧数据保存设计的 migration/backfill/compatibility window 不再执行；目标模型和真实行为不变量继续有效。实施采用 direct canonical cutover + old-surface deletion + reset/reseed。
 
 > **AI vNext closure (2026-09-18)：** ADR-096～099 已在 AI-9612 exact-head review 中落地并验收。本文件描述实现状态：Mastra 是 Assistant/Workflow/transcript authority；Conversation 只保存产品 shell；ProviderDefinition/Connection/SecretVault 与 capability evidence 分离；AIContextAssembler、stable KnowledgeDocumentId、owner-domain drafts/tools 与 AIExecutionRecord 已接入当前路径。
+>
+> **2026-09-29 Product vNext target：** AI 不再长期维护 AIGoalDraftEditor / AITaskDraftEditor 等第二套业务编辑 UI。目标是 ADR-112 的 Owner Native Surface Orchestration：Mastra 保留 durable internal draft/revision/retry 语义，右侧 BusinessPanel 则打开并操控 Goal/Task/Knowledge 原生 edit session。
 
 ## 1. 功能定位
 
@@ -37,6 +39,33 @@ MastraAIRuntime
 - `task.create`：使用当前 recurrence、Shared Label、Goal Link 与 optional contribution contract；
 - `knowledge.capture`：结构化知识草稿，经确认后由 Repository owner port 持久化；
 - workflow apply 使用稳定 entity/request identity，重试不会重复创建业务对象或 Label。
+
+### 3.1 Native Surface Orchestration target
+
+内部 workflow draft 与用户看到的编辑 UI 分离：
+
+```text
+Mastra internal draft / revision / receipt
+            ↓
+Surface Orchestrator
+            ↓
+Owner Native Edit Session
+            ↓
+Goal / Task / Knowledge native UI
+```
+
+AI 对业务 UI 使用 typed semantic action，而不是 DOM selector/click/type 模拟。Owner surface 继续拥有 validation、dirty/unsaved guard 和 submit/cancel semantics。
+
+`draftRef / workflowRunId / revision / referenceMap` 等 internal identity 可以继续服务 restart/retry/recovery，但不再作为 normal user review UI 的字段。
+
+长期 retirement candidate：
+
+- `AIGoalDraftEditor`；
+- `AITaskDraftEditor`；
+- AI-only Goal/Task form vocabulary；
+- 独立 WorkflowPanel 中由 owner-native surface 能承担的编辑职责。
+
+当前 `BusinessPanel.workflow` surface 在 native parity 完成前仍保留；Goal/Task/Knowledge 三条 native workflow vertical slice、clarification/recovery 与 dirty/busy/attention 迁移全部验证后，再评估删除。
 
 ## 4. Routine command tools（AI-6102）
 
@@ -93,6 +122,8 @@ HTTP 与 Electron IPC 共用相同的 runtime failure projection：capability、
 - [ADR-097 Provider / Secret / Model Capability](../../architecture/adr/ADR-097-ai-provider-connection-secret-and-model-capability-boundary.md)
 - [ADR-098 Context / Knowledge Index / Owner Contract](../../architecture/adr/ADR-098-ai-context-knowledge-index-and-owner-contract-boundary.md)
 - [ADR-099 Workflow Draft / Apply / Execution Record](../../architecture/adr/ADR-099-ai-workflow-draft-apply-and-execution-record-boundary.md)
+- [ADR-112 Owner Native Surface Orchestration](../../architecture/adr/ADR-112-owner-native-surface-orchestration-and-quick-surface-reuse.md)
+- [Native Surface Orchestration + Quick Surface vNext](../native-surface-orchestration-and-quick-surfaces.md)
 - [AI vNext Model Convergence architecture](../../architecture/ai-vnext-model-convergence.md)
 - [AI vNext current-system map](../../analysis/2026-09-09-ai-vnext-model-convergence-current-system-map.md)
 - [AI vNext reference/reuse ledger](../../analysis/2026-09-09-ai-vnext-model-convergence-reference-and-reuse-ledger.md)

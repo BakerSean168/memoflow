@@ -29,6 +29,7 @@ updated: 2026-09-19T00:00:00+00:00
 - [通知模块文件索引](./module-index/notification-files.md)：通知模块相关页面、接口、领域代码、数据结构和测试入口。
 - [AI 模块说明](./modules/ai.md)：AI 模块当前功能、用户路径、业务规则和风险点。
 - [AI 模块文件索引](./module-index/ai-files.md)：AI 模块相关页面、接口、领域代码、数据结构和测试入口。
+- [Native Surface Orchestration + Quick Surface vNext](./native-surface-orchestration-and-quick-surfaces.md)：Owner Full/Quick Surface、AI 原生业务面板操控、Task/Schedule 复用与组件拆分 North Star。
 - [桌面工作区与 UI 说明](./workspace-ui.md)：单导航、分栏几何、窄态、缩放与 UI primitive 规则。
 - [资源库模块说明](./modules/repository.md)：资源库模块当前实现、本地 Vault、可选 GitHub 同步和 Web 快捷创建边界。
 - [资源库模块文件索引](./module-index/repository-files.md)：资源库模块相关页面、接口、领域代码、数据结构和测试入口。

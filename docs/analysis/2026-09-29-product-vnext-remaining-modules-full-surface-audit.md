@@ -26,13 +26,13 @@ The highest-priority remaining findings are P1:
 
 1. Schedule owns CalendarEntry update/delete, and the edit-capable dialog/backend already exist, but the normal calendar inspect path is read-only and exposes no edit/delete.
 2. Task completion is invoked directly from Schedule, Task capsule and Today widget. Once Task supports completion-time KR measurement, those entry points would bypass the canonical measurement prompt unless completion UI is centralized.
-3. Governance is documented as MemoFlow's executable reference module, but its detail/editor/history UI still demonstrates older custom form/page primitives instead of the current product grammar.
-4. AI workflow review surfaces expose draft refs, IDs, mutation/runtime terminology and generic form grids that no longer match the manual Goal/Task product language.
+3. Governance's executable-reference-module role is no longer paying for its runtime/UI maintenance cost; the current UI drift is evidence that the fake reference feature does not stay canonical automatically. Product Governance Runtime should enter retirement evaluation rather than receive another UI modernization pass.
+4. AI workflow review surfaces form a second Goal/Task/Knowledge product UI. The target is no longer merely "make AI draft forms look similar"; AI should orchestrate the owner-native business surfaces and retire AI-owned product editors.
 5. The repository has functional/E2E coverage, but there is still no systematic visual-regression matrix covering the representative surface archetypes of this large UI convergence.
 
 The target is therefore:
 
-> **shared grammar, specialized surfaces, owner-canonical actions.**
+> **shared grammar, specialized surfaces, owner-canonical actions — with owner-native Full/Quick Surfaces as the reuse boundary and AI as a semantic surface orchestrator.**
 
 # 2. Audit scope
 
@@ -120,7 +120,7 @@ Use for:
 - Task Today/Plans
 - Routine definitions
 - Notification inbox
-- Governance rules
+- Governance rules (current implementation only; Product Governance is now a retirement candidate)
 
 Contract:
 
@@ -138,7 +138,7 @@ Use for first-class owner entities that deserve their own route:
 
 - Goal
 - TaskPlan
-- Governance Rule
+- Governance Rule (current implementation only; do not build new UI abstraction around it while ADR-113 is unresolved)
 
 Contract:
 
@@ -229,21 +229,23 @@ Inside a settings section, converge toward:
 
 Do not convert Settings into Goal/Task list pages.
 
-## 3.8 AI collaborator surface
+## 3.8 AI collaborator / surface orchestrator
 
-AI is a collaborator next to owner modules, not a second product model.
+AI is a collaborator next to owner modules, not a second product model and not a second form system.
 
-Contract:
+Target contract:
 
 - one composer;
-- owner-domain draft review must use owner-domain product language;
-- internal IDs, draft refs, mutation counters and execution internals belong in diagnostics, not normal review UI;
-- AI applies changes only through owner ports;
-- AI review should visually resemble the product object that will be created.
+- Mastra may retain internal draft/revision/receipt identity for durable workflow semantics;
+- normal product editing/review happens inside Goal/Task/Knowledge owner-native surfaces in BusinessPanel;
+- AI opens and patches typed owner Edit Sessions through semantic surface actions, not DOM automation;
+- internal IDs, draft refs, mutation counters and execution internals stay diagnostic/internal;
+- AI applies business changes only through owner validation and owner command ports;
+- AIGoalDraftEditor / AITaskDraftEditor and equivalent AI-owned product editors enter retirement after native parity.
 
 ## 3.9 Diagnostic/developer surface
 
-Governance is a real reference workbench; SSE Monitor is a diagnostic page.
+SSE Monitor is a diagnostic page. Product Governance is currently a development/reference workbench but, per ADR-113 proposal, should not be treated as the future canonical UI reference while its retirement is being evaluated.
 
 Diagnostic surfaces may show technical detail, but still use current shared primitives, states, spacing and semantic tokens.
 
@@ -253,8 +255,8 @@ Diagnostic surfaces may show technical detail, but still use current shared prim
 | --- | --- | --- | --- |
 | RUI-01 | P1 | Cross-module Task actions | Schedule, Task capsule and Today widget directly complete Task occurrences and would bypass completion-time KR measurement |
 | RUI-02 | P1 | Schedule | CalendarEntry update/delete exist in owner APIs and edit dialog, but normal event inspect is read-only |
-| RUI-03 | P1 | Governance | Executable reference module still demonstrates old custom page/form primitives |
-| RUI-04 | P1 | AI | Workflow review surfaces expose internal refs/IDs and diverge from current Goal/Task interaction language |
+| RUI-03 | P1 | Governance | Fake Product Governance reference runtime has high maintenance cost and already drifted from real modules; evaluate retirement instead of UI modernization |
+| RUI-04 | P1 | AI | AI owns duplicate Goal/Task/Knowledge editors; migrate to owner-native surface orchestration and retire AI-owned product forms |
 | RUI-05 | P1 | Product-wide QA | No representative screenshot-regression matrix protects the converged surface families |
 | RUI-06 | P2 | Product-wide shell | Header/toolbar/filter variants are implemented ad hoc instead of as documented legal surface variants |
 | RUI-07 | P2 | Routine | WallClock editor uses native date/time/number inputs and free-text IANA timezone |
@@ -649,136 +651,98 @@ The hard-coded redirect fallback is P3 polish.
 
 Do not merge Authentication identity UI into Account or Settings merely for visual uniformity.
 
-# 10. Governance deep audit
+# 10. Governance deep audit — revised direction
 
-## 10.1 Why Governance matters more than an ordinary dev page
+## 10.1 The drift is evidence against the reference-module premise
 
-Governance documentation says it is:
+Governance was intentionally maintained as a complete fake product vertical slice so new work could use it as a live reference.
 
-- a real development workbench;
-- a permanent executable reference feature;
-- the canonical demonstration of MemoFlow feature architecture.
+The second-pass review found the opposite behavior in UI practice: real Goal/Task surfaces moved forward while Governance detail/editor/history retained older native controls, card/page patterns and hand-built states.
 
-That makes UI drift here a P1 reference-contract issue.
+Keeping the fake module canonical therefore requires an additional synchronization project every time the real product architecture changes.
 
-## 10.2 Current UI drift
+That is a structural maintenance tax, not merely a styling defect.
 
-GovernanceListView is partially modern:
+## 10.2 Runtime blast radius is materially larger than the visible UI
 
-- compact h-11 header;
-- FilterBar;
-- AppEmptyState;
-- standard Button/Dropdown components.
+Product Governance currently spans contracts, package/domain/application/infrastructure/transport, Prisma/PowerSync, HTTP/IPC, Web/Desktop clients, Vue routes/views, bundle export and reference-specific tests.
 
-But detail/editor/history are visibly from an older page generation:
+The repository also carries genuinely useful Engineering Governance under `tools/governance`, `docs/governance`, `docs/standards` and CI gates.
 
-- large breadcrumb + h1 blocks;
-- repeated bordered cards;
-- native input/select/textarea controls;
-- hand-built spinners;
-- custom router-link buttons;
-- custom sticky action card;
-- custom badge/status recipes.
+These are different assets and should no longer be conflated.
 
-A new feature author using Governance as a reference would learn the wrong current UI conventions.
+## 10.3 Revised recommendation
 
-## 10.3 Target Governance surface family
+Do **not** spend the next convergence batch modernizing Governance UI.
 
-Rule list:
-- canonical Collection surface;
-- FilterBar remains appropriate;
-- sparse Rule rows;
-- standard state surfaces.
+ADR-113 proposes:
 
-Rule detail:
-- first-class Entity workspace;
-- ModuleHeader;
-- identity/status/severity/tags in current property grammar;
-- standard action menu;
-- code/examples remain content blocks.
+```text
+Retire Product Governance Runtime
+Keep Engineering Governance
+```
 
-Rule editor:
-- a full editor route is justified because good/bad code examples can be large;
-- use standard Input/Textarea/Select;
-- standard page editor header/footer or action rail;
-- no native controls;
-- one scroll owner;
-- responsive side metadata only if it carries real value.
+Until that ADR is finally accepted/rejected:
 
-Revision history:
-- deep route is acceptable because RuleRevision is immutable/auditable and users may navigate revisions;
-- use the same Rule workspace shell rather than a visually unrelated page.
+- ADR-110 remains current implementation history/contract;
+- Governance runtime is not destructively removed;
+- no new shared UI abstraction should be justified by Governance;
+- no additional Governance UI modernization should be prioritized;
+- implementation planning should inventory the retirement blast radius and decouple Engineering Governance inputs first.
 
-Governance should become the **reference implementation for specialized full-page editor/detail surfaces**, while Goal/Task remain the reference for personal business entity surfaces.
+# 11. AI workspace deep audit — revised direction
 
-# 11. AI workspace deep audit
+## 11.1 Runtime/owner boundary remains good
 
-## 11.1 Runtime/owner boundary is good
+Keep Mastra workflow authority, owner-domain application ports, draft/checkpoint/retry identity, bounded context, Knowledge citation identity and provider/secret/capability boundaries.
 
-Keep:
+The problem is not that those internal runtime objects exist. The problem is that they have grown their own user-facing product editors.
 
-- Mastra as runtime/workflow authority;
-- owner-domain application ports;
-- explicit draft/review/approve;
-- bounded context;
-- Knowledge citation identity;
-- provider/secret/capability separation.
+## 11.2 RUI-04 — retire the second product UI
 
-The main drift is now product language and surface presentation.
+Current AI owns `AIGoalDraftEditor`, `AITaskDraftEditor`, workflow review panels and editable Goal/KR/Task/Knowledge overlays.
 
-## 11.2 RUI-04 — AI review is a second product vocabulary
+Making those forms merely "look more like" Goal/Task would preserve the duplication root cause.
 
-Current normal workflow UI exposes examples such as:
+Target is Native Surface Orchestration:
 
-- draftRef;
-- goalRef / keyResultRef;
-- knowledgeSpaceId / documentId;
-- raw aggregation enum names;
-- revision counters;
-- mutation count;
-- result reference map IDs;
-- technical failure operation/code blocks.
+```text
+Mastra plan / internal draft
+        ↓
+typed Surface Orchestrator
+        ↓
+Goal / Task / Knowledge Native Edit Session
+        ↓
+normal owner UI in BusinessPanel
+        ↓
+owner validation + owner command
+```
 
-These are useful diagnostics, but they are not the product object the user is approving.
+The user observes the exact same surface that manual editing uses. A follow-up natural-language instruction patches the active owner edit session rather than an AI-only draft form.
 
-Target:
+This is semantic computer use, not DOM automation. The AI must not rely on selectors/click simulation or bypass owner validation by mutating arbitrary Vue/Pinia state.
 
-AI Goal draft
-→ look and read like Goal Create/KR editor
-→ same friendly calculation method labels
-→ same Initial / Current / Target grammar
-→ same timeframe/property semantics
+## 11.3 Internal draft identity vs user surface
 
-AI Task draft
-→ same Task schedule/importance/Goal-KR language
-→ same target Task→KR modes when PVC-TASK-3301 lands
-→ no raw IDs in normal copy
+`draftRef`, run/revision IDs, receipts and reference maps may remain internally necessary for restart/retry/recovery and deterministic workflow identity.
 
-AI Knowledge capture
-→ same Knowledge document/source language
+They move behind the Surface Orchestrator boundary and stay out of normal product forms.
 
-Diagnostics:
-- draft refs;
-- run IDs;
-- revision IDs;
-- mutation receipts;
-- low-level operation codes
+## 11.4 Workflow surface becomes conditional retirement candidate
 
-move behind DEV/details/diagnostic affordance rather than normal review surface.
+Today BusinessPanel has `home | business | workflow`, and AI teleports dedicated WorkflowPanels into the workflow surface.
 
-## 11.3 Composer
+After Goal/Task/Knowledge native workflow vertical slices provide equivalent review/edit/recovery behavior, the workflow surface itself can be evaluated for retirement:
 
-AIFooterComposer itself is a legitimate specialized control.
+- planning/status remains in chat;
+- business editing/review happens in owner business tabs;
+- diagnostics remains a developer/details concern.
 
-It does not need to use ProductPropertyChip everywhere.
+Do not delete the workflow surface before parity and dirty/busy/attention migration are proven.
 
-But:
+## 11.5 Composer
 
-- arbitrary rgba box shadows should become semantic elevation tokens/utility;
-- the AIChatView template currently wires the same composer once for Teleport and once for non-Teleport fallback;
-- keep one logical composer mount path/wrapper to reduce event/prop drift.
-
-This is P2 maintainability, not a functional redesign.
+AIFooterComposer remains a legitimate specialized control. Its duplicate Teleport/non-Teleport wiring and bespoke elevation are P2 cleanup items, independent of the larger native-surface migration.
 
 # 12. Shell / Capsules / Today Overview deep audit
 
@@ -819,6 +783,8 @@ Create light shared primitives:
 - CapsulePreviewHeader
 - CapsulePreviewFooter
 - CapsulePreviewState
+
+In addition, where the content is an owner business interaction, extract the owner Quick Surface below the capsule host. For Task this means TaskQuickSurface / TaskOccurrenceQuickRow rather than sharing `TaskCapsulePreview.vue` itself.
 
 Do **not** create a universal item row. Goal progress, Task occurrence, Note, Schedule event, Routine occurrence and Notification fact have different semantics.
 
@@ -986,18 +952,16 @@ Collection:
 - Task Today
 - Routine list
 - Notification inbox
-- Governance list
 
 Entity:
 - Goal detail
 - TaskPlan detail
-- Governance Rule detail
 
 Specialized:
 - Schedule month/week/day
 - Knowledge wide/narrow
 - Settings General + one capability-heavy section
-- AI workspace with workflow review
+- AI workspace with owner-native Goal/Task workflow surface
 
 Overlays:
 - Goal/KR or Record composer
@@ -1059,20 +1023,28 @@ The remaining work should be sequenced by interaction risk, not by visual conven
 8. shared Capsule preview shell;
 9. semantic status/source tone mapping.
 
-## Pass C — reference and owner surfaces
+## Pass C — owner Quick Surface and specialized surface convergence
 
-10. Governance becomes current UI reference module;
-11. Routine Product Time controls and toolbar convergence;
-12. Knowledge Web/Desktop presentation convergence;
-13. Notification collection convergence;
-14. Settings/Account property-row and dialog convergence.
+10. extract Task Quick Surface from Capsule/Home/Schedule duplication;
+11. migrate Schedule day/event inspect to Dialog + owner Quick Surface composition;
+12. Routine Product Time controls and toolbar convergence;
+13. Knowledge Web/Desktop presentation convergence;
+14. Notification collection convergence;
+15. Settings/Account property-row and dialog convergence.
 
-## Pass D — AI and shell convergence
+## Pass D — AI native surface convergence
 
-15. AI owner-language draft review;
-16. hide diagnostics from normal workflow review;
-17. single composer host path;
-18. shell/capsule final polish.
+16. define Owner Native Edit Session + typed Surface Orchestrator;
+17. Goal native AI workflow vertical slice;
+18. Task native AI workflow vertical slice;
+19. Knowledge native AI workflow vertical slice;
+20. retire AI-owned product editors after parity;
+21. evaluate BusinessPanel workflow-surface retirement;
+22. single composer host path and shell/capsule final polish.
+
+## Parallel decision track — Governance
+
+ADR-113 evaluates retiring Product Governance Runtime while preserving Engineering Governance. Do not modernize Governance UI unless the retirement proposal is rejected.
 
 ## Pass E — visual closure
 
