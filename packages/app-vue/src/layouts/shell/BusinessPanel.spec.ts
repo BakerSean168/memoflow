@@ -120,7 +120,7 @@ describe('BusinessPanel surfaces', () => {
     const tabList = wrapper.get('[data-testid="business-panel-tab-list"]');
     const activeTab = wrapper.get('[role="tab"]');
 
-    expect(strip.classes()).toContain('h-10');
+    expect(strip.classes()).toContain('h-9');
     expect(tabList.classes()).toContain('overflow-hidden');
     expect(tabList.classes()).not.toContain('overflow-x-auto');
     expect(wrapper.get('[data-testid="business-panel"]').attributes('data-tab-density')).toBe(
@@ -137,7 +137,7 @@ describe('BusinessPanel surfaces', () => {
       expect.arrayContaining(['absolute', 'h-6', 'w-6']),
     );
     expect(wrapper.get('[data-testid="business-panel-focus-toggle"]').classes()).toEqual(
-      expect.arrayContaining(['h-8', 'w-8']),
+      expect.arrayContaining(['h-7', 'w-7']),
     );
   });
 

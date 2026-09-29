@@ -1,8 +1,11 @@
 <template>
-  <Card class="border-border/50 flex flex-col" data-testid="daily-todo-widget">
-    <CardHeader class="pb-2 px-4 pt-4 flex flex-row items-center justify-between shrink-0">
-      <CardTitle class="text-sm font-medium text-foreground flex items-center gap-2">
-        <ListTodo class="w-4 h-4 text-muted-foreground" />
+  <Card
+    class="flex flex-col rounded-xl border-transparent bg-[hsl(var(--surface-raised)/0.56)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.72),inset_0_1px_0_hsl(var(--foreground)/0.02)]"
+    data-testid="daily-todo-widget"
+  >
+    <CardHeader class="flex shrink-0 flex-row items-center justify-between px-3.5 pb-2 pt-3.5">
+      <CardTitle class="flex items-center gap-2 text-[13px] font-semibold text-foreground">
+        <ListTodo class="h-3.5 w-3.5 text-[hsl(var(--foreground-subtle))]" />
         今日待办
       </CardTitle>
       <div class="flex items-center gap-2">
@@ -10,7 +13,12 @@
         <span class="text-[11px] text-muted-foreground font-mono" data-testid="daily-todo-progress">
           {{ completedCount }}/{{ todayInstances.length }}
         </span>
-        <Button variant="ghost" size="sm" class="h-7 text-xs" @click="$emit('view-all')">
+        <Button
+          variant="ghost"
+          size="sm"
+          class="h-6 rounded-md px-1.5 text-[11px] text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
+          @click="$emit('view-all')"
+        >
           查看全部
           <ArrowRight class="w-3 h-3 ml-1" />
         </Button>
@@ -18,8 +26,8 @@
     </CardHeader>
 
     <!-- Progress bar -->
-    <div class="px-4 pb-2 shrink-0">
-      <div class="h-1 rounded-full bg-muted overflow-hidden">
+    <div class="shrink-0 px-3.5 pb-2">
+      <div class="h-1 overflow-hidden rounded-full bg-[hsl(var(--selected))]">
         <div
           class="h-full rounded-full bg-emerald-500 transition-all duration-500"
           :style="{ width: progressPct + '%' }"
@@ -29,7 +37,7 @@
       </div>
     </div>
 
-    <CardContent class="px-4 pb-4 flex-1 overflow-hidden">
+    <CardContent class="flex-1 overflow-hidden px-3.5 pb-3.5">
       <!-- Loading skeleton -->
       <template v-if="isLoading">
         <div class="space-y-2">
@@ -56,7 +64,7 @@
             <div
               v-for="inst in sortedInstances"
               :key="inst.id"
-              class="group flex items-center gap-3 rounded-md px-1 py-1.5 hover:bg-muted/50 transition-colors"
+              class="group flex items-center gap-3 rounded-md px-1.5 py-1.5 transition-colors hover:bg-[hsl(var(--hover))]"
               :class="{ 'opacity-50': inst.status === 'Completed' || inst.status === 'Skipped' }"
               data-testid="daily-todo-item"
               :data-task-occurrence-id="inst.id"
