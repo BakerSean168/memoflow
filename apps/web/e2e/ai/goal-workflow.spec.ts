@@ -239,6 +239,11 @@ test.describe('AI Goal Workflow', () => {
     await panelToggle.click();
     await expect(shell).toHaveAttribute('data-shell-state', 'focus');
     await expect(page.getByTestId('business-panel')).toBeVisible();
+
+    const workflowTab = page.getByTestId('business-panel-workflow');
+    await expect(workflowTab).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    await workflowTab.click();
+
     await expect(page.getByTestId('knowledge-answer-panel')).toBeVisible({
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
