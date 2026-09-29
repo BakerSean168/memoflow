@@ -242,6 +242,33 @@
 
   * {
     @apply border-border;
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border-strong) / 0.5) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    min-height: 2rem;
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background-clip: padding-box;
+    background-color: hsl(var(--border-strong) / 0.46);
+  }
+
+  *:hover::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border-strong) / 0.68);
+  }
+
+  *::-webkit-scrollbar-corner {
+    background: transparent;
   }
 
   body {

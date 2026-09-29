@@ -14,23 +14,23 @@
       :data-notification-type="notification.type"
       data-density="compact"
       :class="[
-        'group relative flex w-full gap-3 px-4 py-3.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
+        'group relative flex w-full gap-3 px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
         notification.isRead
-          ? 'bg-transparent text-muted-foreground hover:bg-muted/20'
-          : 'bg-muted/10 text-foreground hover:bg-muted/25',
+          ? 'bg-transparent text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover)/0.42)]'
+          : 'bg-[hsl(var(--surface-raised)/0.38)] text-foreground hover:bg-[hsl(var(--hover)/0.62)]',
       ]"
       :aria-label="notification.title"
       @click="$emit('click', notification)"
     >
       <span
         v-if="!notification.isRead"
-        class="absolute bottom-3 left-0 top-3 w-0.5 rounded-r-full bg-primary/70"
+        class="absolute bottom-3 left-0 top-3 w-0.5 rounded-r-full bg-primary/60"
         aria-hidden="true"
       />
 
       <div
         :class="[
-          'mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border/40',
+          'mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.52)]',
           typeColorClass,
           notification.isRead ? 'opacity-55 saturate-50' : '',
         ]"
@@ -43,7 +43,7 @@
           <div class="flex min-w-0 items-center gap-2">
             <span
               :class="[
-                'truncate text-sm transition-colors',
+                'truncate text-[13px] transition-colors',
                 notification.isRead
                   ? 'font-medium text-muted-foreground'
                   : 'font-semibold text-foreground',
@@ -64,7 +64,7 @@
           </div>
 
           <time
-            class="shrink-0 pr-8 pt-0.5 text-[11px] tabular-nums text-muted-foreground/70"
+            class="shrink-0 pr-8 pt-0.5 text-[10.5px] tabular-nums text-[hsl(var(--foreground-subtle))]"
             :datetime="String(notification.createdAt)"
           >
             {{ timeDisplay }}
@@ -73,8 +73,10 @@
 
         <p
           :class="[
-            'mt-1 line-clamp-2 text-xs leading-5 transition-colors',
-            notification.isRead ? 'text-muted-foreground/70' : 'text-muted-foreground',
+            'mt-1 line-clamp-2 text-[12px] leading-5 transition-colors',
+            notification.isRead
+              ? 'text-[hsl(var(--foreground-subtle))]'
+              : 'text-[hsl(var(--foreground-muted))]',
           ]"
         >
           {{ notification.content }}
@@ -83,7 +85,7 @@
         <div
           class="mt-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground/75"
         >
-          <span class="rounded-md bg-muted/60 px-1.5 py-0.5 text-muted-foreground">
+          <span class="rounded-md bg-[hsl(var(--selected)/0.7)] px-1.5 py-0.5 text-[hsl(var(--foreground-muted))]">
             {{ presentation.categoryLabel }}
           </span>
           <span class="truncate">{{ presentation.workflowLabel }}</span>

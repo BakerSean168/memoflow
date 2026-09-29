@@ -27,7 +27,9 @@
       data-testid="knowledge-projection-empty"
     >
       <div class="max-w-md text-center">
-        <CloudOff class="mx-auto h-10 w-10 text-muted-foreground" />
+        <div class="mx-auto grid h-12 w-12 place-items-center rounded-xl bg-[hsl(var(--surface-raised)/0.66)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.58)]">
+          <CloudOff class="h-5 w-5 text-[hsl(var(--foreground-muted))]" />
+        </div>
         <h1 class="mt-4 text-xl font-semibold">{{ t('repository.projection.connectTitle') }}</h1>
         <p class="mt-2 text-sm leading-6 text-muted-foreground">
           {{ t('repository.projection.connectDescription') }}
@@ -45,13 +47,13 @@
 
     <template v-else>
       <header
-        class="flex h-11 min-w-0 shrink-0 items-center gap-2 border-b border-border/70 px-2.5"
+        class="flex h-11 min-w-0 shrink-0 items-center gap-2 border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.82)] px-2.5 shadow-[0_1px_0_hsl(var(--border)/0.04)] backdrop-blur-sm"
         data-testid="knowledge-projection-document-toolbar"
       >
         <Button
           variant="ghost"
           size="icon"
-          class="h-8 w-8 shrink-0"
+          class="h-7 w-7 shrink-0 rounded-md text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
           :aria-label="
             isNarrow || !catalogVisible
               ? t('repository.projection.openCatalog')
@@ -71,14 +73,14 @@
 
         <div class="flex min-w-0 flex-1 items-center gap-2">
           <template v-if="selectedNote">
-            <h1 class="min-w-0 max-w-[46%] truncate text-sm font-semibold tracking-tight">
+            <h1 class="min-w-0 max-w-[46%] truncate text-[13px] font-semibold tracking-[-0.01em]">
               {{ selectedNote.title }}
             </h1>
-            <span class="min-w-0 truncate text-[11px] text-muted-foreground">
+            <span class="min-w-0 truncate text-[11px] text-[hsl(var(--foreground-subtle))]">
               {{ selectedNote.relativePath }}
             </span>
-            <span class="shrink-0 text-[11px] text-muted-foreground" aria-hidden="true">·</span>
-            <span class="shrink-0 text-[11px] text-muted-foreground">
+            <span class="shrink-0 text-[11px] text-[hsl(var(--foreground-subtle))]" aria-hidden="true">·</span>
+            <span class="shrink-0 text-[11px] text-[hsl(var(--foreground-subtle))]">
               {{ formatUpdatedAt(selectedNote.updatedAt) }}
             </span>
           </template>
@@ -95,8 +97,12 @@
           <Button
             variant="ghost"
             size="icon"
-            class="h-8 w-8 shrink-0"
-            :class="contextOpen ? 'bg-accent text-accent-foreground' : ''"
+            class="h-7 w-7 shrink-0 rounded-md text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
+            :class="
+              contextOpen
+                ? 'bg-[hsl(var(--selected))] text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)]'
+                : ''
+            "
             :aria-label="t('repository.projection.contextTitle')"
             :title="t('repository.projection.contextTitle')"
             data-testid="knowledge-projection-context-toggle"
@@ -110,7 +116,7 @@
               <Button
                 variant="ghost"
                 size="icon"
-                class="h-8 w-8 shrink-0"
+                class="h-7 w-7 shrink-0 rounded-md text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
                 :aria-label="t('common.more')"
                 data-testid="knowledge-projection-more"
               >
@@ -147,7 +153,7 @@
       <div class="flex min-h-0 flex-1 overflow-hidden">
         <aside
           v-if="catalogVisible && !isNarrow"
-          class="w-[min(20rem,32%)] shrink-0 border-r"
+          class="w-[min(20rem,32%)] shrink-0 border-r border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.42)]"
           data-testid="knowledge-projection-catalog-inline"
         >
           <KnowledgeNoteCatalog
@@ -222,7 +228,7 @@
 
         <aside
           v-if="contextOpen && selectedNote && !isNarrow"
-          class="w-72 shrink-0 border-l"
+          class="w-72 shrink-0 border-l border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.36)]"
           data-testid="knowledge-projection-context-inline"
         >
           <KnowledgeNoteContextPanel

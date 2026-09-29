@@ -18,7 +18,7 @@
       data-testid="local-vault-empty"
     >
       <div class="flex max-w-md flex-col items-center text-center">
-        <div class="grid h-14 w-14 place-items-center border bg-muted/40">
+        <div class="grid h-12 w-12 place-items-center rounded-xl bg-[hsl(var(--surface-raised)/0.66)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.58)]">
           <FolderOpen class="h-7 w-7 text-muted-foreground" />
         </div>
         <h1 class="mt-5 text-xl font-semibold">{{ t('repository.localVault.selectTitle') }}</h1>
@@ -39,14 +39,14 @@
     </div>
 
     <template v-else>
-      <header class="flex min-w-0 flex-wrap items-center gap-3 border-b px-4 py-3">
+      <header class="flex min-h-11 min-w-0 flex-wrap items-center gap-3 border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.82)] px-3 py-2 shadow-[0_1px_0_hsl(var(--border)/0.04)] backdrop-blur-sm @2xl/panel:px-4">
         <div class="min-w-0 flex-1">
           <div class="flex min-w-0 items-center gap-2">
-            <HardDrive class="h-4 w-4 shrink-0 text-muted-foreground" />
-            <h1 class="truncate text-sm font-semibold">{{ binding?.displayName }}</h1>
+            <HardDrive class="h-3.5 w-3.5 shrink-0 text-[hsl(var(--foreground-subtle))]" />
+            <h1 class="truncate text-[13px] font-semibold tracking-[-0.01em]">{{ binding?.displayName }}</h1>
             <Badge variant="secondary" class="shrink-0">{{ notes.length }}</Badge>
           </div>
-          <p class="mt-1 truncate text-xs text-muted-foreground" :title="binding?.rootPath">
+          <p class="mt-0.5 truncate text-[11px] text-[hsl(var(--foreground-subtle))]" :title="binding?.rootPath">
             {{ binding?.rootPath }}
           </p>
         </div>
@@ -54,7 +54,7 @@
           <Button
             variant="ghost"
             size="icon"
-            class="h-8 w-8"
+            class="h-7 w-7 rounded-md text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
             :aria-label="t('repository.localVault.rescan')"
             :title="t('repository.localVault.rescan')"
             :disabled="loading"
@@ -66,7 +66,7 @@
           <Button
             variant="ghost"
             size="icon"
-            class="h-8 w-8"
+            class="h-7 w-7 rounded-md text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
             :aria-label="t('repository.localVault.openRoot')"
             :title="t('repository.localVault.openRoot')"
             @click="openInObsidian()"
@@ -76,7 +76,7 @@
           <Button
             variant="ghost"
             size="icon"
-            class="h-8 w-8"
+            class="h-7 w-7 rounded-md text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
             :aria-label="t('repository.localVault.changeVault')"
             :title="t('repository.localVault.changeVault')"
             @click="selectVault"
@@ -86,7 +86,7 @@
           <Button
             variant="ghost"
             size="icon"
-            class="h-8 w-8 text-destructive hover:text-destructive"
+            class="h-7 w-7 rounded-md text-destructive/75 hover:bg-destructive/10 hover:text-destructive"
             :aria-label="t('repository.localVault.detach')"
             :title="t('repository.localVault.detach')"
             data-testid="local-vault-detach"
@@ -101,16 +101,16 @@
         class="grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(12rem,38%)_minmax(0,1fr)] @3xl/panel:grid-cols-[minmax(15rem,21rem)_minmax(0,1fr)] @3xl/panel:grid-rows-1"
       >
         <aside
-          class="flex min-h-0 flex-col border-b bg-sidebar @3xl/panel:border-b-0 @3xl/panel:border-r"
+          class="flex min-h-0 flex-col border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.55)] @3xl/panel:border-b-0 @3xl/panel:border-r"
         >
-          <div class="border-b px-3 py-2.5">
+          <div class="border-b border-[hsl(var(--border-subtle))] px-2.5 py-2">
             <div class="relative w-full max-w-[15rem]">
               <Search
                 class="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
               />
               <Input
                 v-model="searchQuery"
-                class="h-8 rounded-md pl-8 pr-8 text-sm"
+                class="h-8 rounded-lg border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.5)] pl-8 pr-8 text-[12px] shadow-none"
                 :placeholder="t('repository.localVault.searchPlaceholder')"
                 data-testid="local-vault-search"
                 @keyup.enter="search"
@@ -133,8 +133,11 @@
               v-for="note in displayedNotes"
               :key="note.relativePath"
               type="button"
-              class="block w-full border-b px-3 py-2.5 text-left hover:bg-accent/60"
-              :class="{ 'bg-accent': activeNote?.relativePath === note.relativePath }"
+              class="mx-1.5 my-0.5 block w-[calc(100%-0.75rem)] rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-[hsl(var(--hover))]"
+              :class="{
+                'bg-[hsl(var(--selected)/0.82)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)]':
+                  activeNote?.relativePath === note.relativePath,
+              }"
               :data-testid="`local-vault-note-${note.relativePath}`"
               @click="openNote(note)"
               @dblclick="openInObsidian(note.relativePath)"
@@ -165,7 +168,7 @@
 
         <main class="min-h-0 overflow-hidden">
           <div v-if="activeNote" class="flex h-full min-h-0 flex-col">
-            <div class="flex min-w-0 items-start gap-3 border-b px-4 py-3">
+            <div class="flex min-h-11 min-w-0 items-start gap-3 border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.42)] px-4 py-2.5">
               <FileText class="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
               <div class="min-w-0 flex-1">
                 <h2 class="truncate text-sm font-semibold">{{ activeNote.title }}</h2>

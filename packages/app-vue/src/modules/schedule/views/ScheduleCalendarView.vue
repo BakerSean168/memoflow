@@ -4,11 +4,11 @@
     data-testid="schedule-calendar-view"
   >
     <header
-      class="z-10 flex min-h-14 shrink-0 flex-wrap items-center gap-2 border-b border-border/60 bg-[hsl(var(--surface)/0.9)] px-2 py-2 shadow-[0_1px_0_hsl(var(--border)/0.18)] backdrop-blur-md @2xl/panel:px-4"
+      class="z-10 flex min-h-11 shrink-0 flex-wrap items-center gap-2 border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.82)] px-2 py-1.5 shadow-[0_1px_0_hsl(var(--border)/0.04)] backdrop-blur-sm @2xl/panel:px-4"
       data-testid="schedule-page-toolbar"
     >
       <div
-        class="flex min-w-0 items-center gap-0.5 rounded-lg border border-border/40 bg-muted/25 p-0.5"
+        class="flex min-w-0 items-center gap-0.5 rounded-lg bg-[hsl(var(--surface-raised)/0.55)] p-0.5 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.55)]"
         role="tablist"
         :aria-label="t('schedule.route.calendar')"
         data-testid="schedule-view-tabs"
@@ -22,9 +22,9 @@
           :aria-selected="activeView === tab.value"
           :aria-label="tab.label"
           :class="[
-            'h-7 rounded-md px-2 text-muted-foreground hover:bg-[hsl(var(--hover)/0.7)] hover:text-foreground @xl/panel:px-3',
+            'h-7 rounded-md px-2 text-[hsl(var(--foreground-muted))] shadow-none hover:bg-[hsl(var(--hover))] hover:text-foreground @xl/panel:px-3',
             activeView === tab.value
-              ? 'bg-primary/12 font-semibold text-primary shadow-sm shadow-black/10'
+              ? 'bg-[hsl(var(--surface-overlay))] font-semibold text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.65)]'
               : '',
           ]"
           :data-testid="`schedule-view-tab-${tab.value}`"
@@ -42,7 +42,7 @@
         <Button
           variant="outline"
           size="icon"
-          class="h-8 w-8 shrink-0 rounded-full border-border/55 bg-[hsl(var(--surface-raised)/0.7)] shadow-sm hover:bg-[hsl(var(--hover))]"
+          class="h-7 w-7 shrink-0 rounded-md border-transparent bg-transparent text-[hsl(var(--foreground-muted))] shadow-none hover:bg-[hsl(var(--hover))] hover:text-foreground"
           :aria-label="t('schedule.calendar.previousPeriod')"
           data-testid="schedule-previous-period"
           @click="movePeriod(-1)"
@@ -50,7 +50,7 @@
           <ChevronLeft class="h-4 w-4" />
         </Button>
         <p
-          class="min-w-0 max-w-48 flex-1 truncate px-2 text-center text-sm font-semibold tracking-tight @3xl/panel:w-52 @3xl/panel:flex-none"
+          class="min-w-0 max-w-48 flex-1 truncate px-2 text-center text-[13px] font-semibold tracking-[-0.01em] @3xl/panel:w-52 @3xl/panel:flex-none"
           data-testid="schedule-period-label"
         >
           {{ currentPeriodTitle }}
@@ -58,7 +58,7 @@
         <Button
           variant="outline"
           size="icon"
-          class="h-8 w-8 shrink-0 rounded-full border-border/55 bg-[hsl(var(--surface-raised)/0.7)] shadow-sm hover:bg-[hsl(var(--hover))]"
+          class="h-7 w-7 shrink-0 rounded-md border-transparent bg-transparent text-[hsl(var(--foreground-muted))] shadow-none hover:bg-[hsl(var(--hover))] hover:text-foreground"
           :aria-label="t('schedule.calendar.nextPeriod')"
           data-testid="schedule-next-period"
           @click="movePeriod(1)"
@@ -68,7 +68,7 @@
         <Button
           variant="outline"
           size="sm"
-          class="h-8 shrink-0 border-border/40 bg-transparent px-2 font-medium text-primary hover:bg-primary/10 hover:text-primary"
+          class="h-7 shrink-0 border-transparent bg-transparent px-2 text-[12px] font-medium text-[hsl(var(--foreground-muted))] shadow-none hover:bg-[hsl(var(--hover))] hover:text-foreground"
           data-testid="schedule-today"
           @click="goToToday"
         >

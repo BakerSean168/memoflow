@@ -1,12 +1,10 @@
 <template>
   <div class="flex h-full min-h-0 flex-col overflow-hidden" data-testid="notification-center">
-    <!-- 与 Goal / Task 保持同一套 Linear-style 单行工具栏：筛选、计数、批量动作只占一层。 -->
-    <header
-      class="z-10 flex min-h-14 shrink-0 items-center gap-2 border-b border-border/80 bg-background/80 px-3 py-2 backdrop-blur-sm @2xl/panel:px-6"
-      data-testid="notification-page-toolbar"
-    >
-      <div
-        class="inline-flex h-8 min-w-0 items-center rounded-lg bg-muted/55 p-0.5"
+    <!-- 与 Goal / Task 共用 ModuleHeader：筛选、计数、批量动作只占一层。 -->
+    <ModuleHeader data-testid="notification-page-toolbar">
+      <template #leading>
+        <div
+          class="inline-flex h-8 min-w-0 items-center rounded-lg bg-[hsl(var(--surface-raised)/0.55)] p-0.5 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.55)]"
         role="tablist"
         :aria-label="t('notification.title')"
       >
@@ -19,10 +17,10 @@
           role="tab"
           :aria-selected="selectedFilter === tab.value"
           :class="[
-            'h-7 gap-1.5 rounded-md px-2.5 text-xs font-medium shadow-none transition-[background-color,color,box-shadow] hover:bg-background/70 hover:text-foreground',
+            'h-7 gap-1.5 rounded-md px-2.5 text-xs font-medium shadow-none transition-[background-color,color,box-shadow] hover:bg-[hsl(var(--hover))] hover:text-foreground',
             selectedFilter === tab.value
-              ? 'bg-background text-foreground shadow-sm'
-              : 'text-muted-foreground',
+              ? 'bg-[hsl(var(--surface-overlay))] text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.65)]'
+              : 'text-[hsl(var(--foreground-muted))]',
           ]"
           @click="selectedFilter = tab.value"
         >
@@ -39,21 +37,24 @@
             {{ tab.count }}
           </span>
         </Button>
-      </div>
+        </div>
+      </template>
 
-      <Button
+      <template #actions>
+        <Button
         data-testid="mark-all-read-button"
         variant="ghost"
         size="sm"
-        class="ml-auto h-8 shrink-0 gap-1.5 px-2.5 text-xs text-muted-foreground hover:text-foreground"
+        class="h-8 shrink-0 gap-1.5 px-2.5 text-xs text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
         :aria-label="t('notification.action.markAllRead')"
         :disabled="!hasUnread"
         @click="handleMarkAllRead"
       >
         <CheckCheck class="h-3.5 w-3.5" />
         <span class="hidden @lg/panel:inline">{{ t('notification.action.markAllRead') }}</span>
-      </Button>
-    </header>
+        </Button>
+      </template>
+    </ModuleHeader>
 
     <!-- 信箱保持阅读宽度，略放宽到 5xl 以匹配 Goal / Task 的主内容列。 -->
     <div
@@ -172,6 +173,7 @@ import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import { Bell, CheckCheck, CircleAlert, RefreshCw } from '@lucide/vue';
 import { Button, Skeleton } from '@memoflow/ui-vue-shadcn';
+import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
 import NotificationList from '../components/NotificationList.vue';
 import { useNotificationListQuery } from '../composables/useNotificationListQuery';
 import { useNotificationUnreadQuery } from '../composables/useNotificationUnreadQuery';

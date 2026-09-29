@@ -11,9 +11,9 @@ const notificationSource = readFileSync(
 describe('Notification single-page architecture', () => {
   it('owns one inbox toolbar without panel-tier structure branches', () => {
     expect(notificationSource).toContain('data-testid="notification-page-toolbar"');
-    // Notification owns one compact Linear-style toolbar without panel-tier branching.
-    expect(notificationSource).toContain('<header');
-    expect(notificationSource.match(/<header/g)?.length).toBe(1);
+    // Notification shares the same product header primitive as Goal / Task.
+    expect(notificationSource).toContain('<ModuleHeader data-testid="notification-page-toolbar">');
+    expect(notificationSource).not.toContain('<header');
     expect(notificationSource).not.toContain('FilterBar');
     expect(notificationSource).not.toContain('usePanelWidth');
     expect(notificationSource).not.toContain('isNarrow');

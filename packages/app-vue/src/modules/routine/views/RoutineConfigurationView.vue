@@ -3,19 +3,19 @@
     class="flex h-full min-h-0 flex-col overflow-hidden"
     data-testid="routine-configuration-center"
   >
-    <div
-      class="flex h-11 shrink-0 items-center justify-between gap-2 border-b border-border/70 px-4 @2xl/panel:px-6"
-      data-testid="routine-list-toolbar"
-    >
-      <ResponsiveSegmentedFilter
+    <ModuleHeader data-testid="routine-list-toolbar">
+      <template #leading>
+        <ResponsiveSegmentedFilter
         :model-value="selectedState"
         :options="stateFilters"
         :accessible-label="t('routine.filter.status')"
         test-id="routine-state-filter"
-        @update:model-value="updateStateFilter"
-      />
+          @update:model-value="updateStateFilter"
+        />
+      </template>
 
-      <div class="flex shrink-0 items-center gap-1">
+      <template #actions>
+        <div class="flex shrink-0 items-center gap-1">
         <Badge
           v-if="selectedProfile && !snapshot.preferences.globalEnabled"
           variant="outline"
@@ -184,15 +184,16 @@
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      </div>
-    </div>
+        </div>
+      </template>
+    </ModuleHeader>
 
     <div
       class="min-h-0 flex-1 overflow-y-auto"
       data-testid="routine-scroll-host"
       data-scroll-host="routine"
     >
-      <div class="mx-auto max-w-5xl px-4 py-2 @2xl/panel:px-6">
+      <div class="mx-auto max-w-5xl px-4 py-3 @2xl/panel:px-6">
         <div v-if="loading" class="divide-y" data-testid="routine-list-skeleton">
           <div v-for="index in 6" :key="index" class="flex items-center gap-3 py-4">
             <Skeleton class="h-8 w-8 rounded-md" />
@@ -214,16 +215,20 @@
         </div>
 
         <template v-else>
-          <div v-if="visibleDefinitions.length" data-testid="routine-list">
+          <div
+            v-if="visibleDefinitions.length"
+            class="divide-y divide-[hsl(var(--border-subtle))] border-y border-[hsl(var(--border-subtle))]"
+            data-testid="routine-list"
+          >
             <article
               v-for="routine in visibleDefinitions"
               :key="routine.id"
-              class="group flex min-h-14 items-center gap-3 border-b border-border/70 last:border-b-0"
+              class="group flex min-h-14 items-center gap-3"
               :data-testid="`routine-card-${routine.id}`"
             >
               <button
                 type="button"
-                class="min-w-0 flex-1 text-left transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/60"
+                class="min-w-0 flex-1 text-left transition-colors hover:bg-[hsl(var(--hover)/0.52)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring/60"
                 @click="openEditRoutine(routine)"
               >
                 <div
@@ -232,7 +237,7 @@
                 >
                   <div class="min-w-0">
                     <div class="flex min-w-0 items-center gap-2">
-                      <span class="min-w-0 truncate text-sm font-medium text-foreground">
+                      <span class="min-w-0 truncate text-[13px] font-medium text-foreground">
                         {{ routine.name }}
                       </span>
                       <Badge
@@ -252,7 +257,7 @@
                   </div>
 
                   <div class="flex min-w-0 items-center gap-2">
-                    <span class="truncate text-sm text-muted-foreground">
+                    <span class="truncate text-[12px] text-[hsl(var(--foreground-muted))]">
                       {{ triggerSummary(routine.trigger) }}
                     </span>
                     <Badge
@@ -265,7 +270,7 @@
                     </Badge>
                   </div>
 
-                  <span class="truncate text-sm text-muted-foreground">
+                  <span class="truncate text-[12px] text-[hsl(var(--foreground-muted))]">
                     {{ profileSummary(routine.id) }}
                   </span>
                 </div>
@@ -425,6 +430,7 @@ import {
   type RoutineMethodRecord,
 } from '@memoflow/reminder/method-library';
 import AppEmptyState from '../../../components/shared/AppEmptyState.vue';
+import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
 import { ResponsiveSegmentedFilter } from '../../../shared/components';
 import RoutineEditorDialog, {
   type RoutineEditorPreset,

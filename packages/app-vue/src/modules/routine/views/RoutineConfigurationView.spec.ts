@@ -89,6 +89,12 @@ async function mountRoutineView(client: RoutineClientPort, initialPath = '/routi
       provide: {
         [ROUTINE_SERVICE_KEY as symbol]: client,
       },
+      stubs: {
+        ModuleHeader: {
+          template:
+            '<header><slot name="leading" /><slot name="actions" /><slot name="subnav" /></header>',
+        },
+      },
     },
   });
   return { wrapper, router };
