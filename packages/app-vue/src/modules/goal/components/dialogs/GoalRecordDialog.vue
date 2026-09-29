@@ -1,5 +1,12 @@
 <template>
-  <Dialog :open="visible" @update:open="(val) => (visible = val)">
+  <Dialog
+    :open="visible"
+    @update:open="
+      (val) => {
+        if (!isSubmitting) visible = val;
+      }
+    "
+  >
     <ProductDialogShell
       :open="visible"
       test-id="goal-record-dialog"
@@ -13,37 +20,58 @@
 
       <form id="goal-record-form" class="space-y-5" @submit.prevent="handleSave">
         <div class="space-y-2">
-          <Label for="change-amount">{{ t('goal.recordDialog.incrementValue') }}</Label>
+          <Label for="change-amount">{{ recordPromptLabel }}</Label>
           <div class="relative flex items-center">
-            <Plus class="absolute left-3 h-4 w-4 text-muted-foreground" />
+            <component
+              :is="recordInputKind === 'delta' ? Diff : Ruler"
+              class="absolute left-3 h-4 w-4 text-muted-foreground"
+            />
             <Input
               id="change-amount"
               v-model.number="localRecord.changeAmount"
               type="number"
               class="h-11 pl-9 pr-16 text-lg font-semibold"
-              min="0.1"
-              step="0.1"
+              step="any"
+              :disabled="isSubmitting"
             />
-            <Badge variant="secondary" class="absolute right-3 font-medium">
-              {{ currentKeyResultUnit || t('goal.recordDialog.unit') }}
+            <Badge
+              v-if="currentKeyResultUnit"
+              variant="secondary"
+              class="absolute right-3 font-medium"
+            >
+              {{ currentKeyResultUnit }}
             </Badge>
           </div>
+          <p class="text-xs text-muted-foreground">
+            {{
+              t(
+                recordInputKind === 'delta'
+                  ? 'goal.recordDialog.deltaHelp'
+                  : 'goal.recordDialog.sampleHelp',
+              )
+            }}
+          </p>
           <p v-if="validationError" class="text-xs text-destructive">{{ validationError }}</p>
           <p v-if="submitError" role="alert" class="text-xs text-destructive">
             {{ submitError }}
           </p>
         </div>
 
-        <div class="flex flex-wrap gap-2" :aria-label="t('goal.recordDialog.quickSelect')">
+        <div
+          v-if="recordInputKind === 'delta'"
+          class="flex flex-wrap gap-2"
+          :aria-label="t('goal.recordDialog.quickSelect')"
+        >
           <ProductPropertyChip
             v-for="quickValue in quickValues"
             :key="quickValue"
             :active="localRecord.changeAmount === quickValue"
+            :disabled="isSubmitting"
             :data-testid="`quick-goal-record-${quickValue}`"
             :aria-label="`${t('goal.recordDialog.quickSelect')} ${quickValue}`"
             @click="localRecord.changeAmount = quickValue"
           >
-            +{{ quickValue }}
+            {{ quickValue > 0 ? `+${quickValue}` : quickValue }}
           </ProductPropertyChip>
         </div>
 
@@ -54,6 +82,7 @@
             v-model="localRecord.note"
             :placeholder="t('goal.recordDialog.remarksPlaceholder')"
             :rows="3"
+            :disabled="isSubmitting"
             class="resize-none"
           />
         </div>
@@ -82,10 +111,14 @@ import { computed, watch, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { GoalRecordClientDTO } from '@memoflow/contracts/goal';
 import { Badge, Button, Dialog, Input, Label, Textarea } from '@memoflow/ui-vue-shadcn';
-import { Plus } from '@lucide/vue';
+import { Diff, Ruler } from '@lucide/vue';
 import { ProductDialogShell, ProductPropertyChip } from '../../../../shared/components';
 // composables
 import { useGoal } from '../../composables/useGoal';
+import {
+  KEY_RESULT_CALCULATION_PRESENTATION,
+  getKeyResultRecordPromptLabel,
+} from '../../utils/key-result-calculation-presentation';
 
 const { createGoalRecord, getKeyResultById } = useGoal();
 
@@ -98,37 +131,33 @@ const propRecord = ref<GoalRecordClientDTO | null>(null);
 const isSubmitting = ref(false);
 const submitError = ref('');
 
-const quickValues = [1, 2, 5, 10];
+const quickValues = [-10, -5, -1, 1, 5, 10];
 
 // 本地表单数据：只需要 changeAmount 和 note
-const localRecord = ref({
-  changeAmount: 0,
+const localRecord = ref<{ changeAmount: number | string; note: string }>({
+  changeAmount: '',
   note: '',
 });
 
 const isEditing = computed(() => !!propRecord.value);
 
-const currentKeyResultUnit = computed(() => {
-  const currentKeyResult = getKeyResultById(propKeyResultId.value);
-  return currentKeyResult?.progress?.unit ?? '';
+const currentKeyResult = computed(() => getKeyResultById(propKeyResultId.value));
+const currentKeyResultUnit = computed(() => currentKeyResult.value?.progress.unit);
+const recordInputKind = computed(() => {
+  const method = currentKeyResult.value?.progress.aggregationMethod;
+  return method ? KEY_RESULT_CALCULATION_PRESENTATION[method].recordInputKind : undefined;
 });
-
-const valueRules = computed(() => [
-  (v: number) => !!v || t('goal.recordDialog.valueRequired'),
-  (v: number) => v > 0 || t('goal.recordDialog.valuePositive'),
-  (v: number) => v <= 10000 || t('goal.recordDialog.valueMax'),
-]);
-
+const recordPromptLabel = computed(() => {
+  const method = currentKeyResult.value?.progress.aggregationMethod;
+  return method ? getKeyResultRecordPromptLabel(method, t) : t('goal.recordDialog.recordedValue');
+});
 const validationError = computed(() => {
-  const v = localRecord.value.changeAmount;
-  for (const rule of valueRules.value) {
-    const result = rule(v);
-    if (result !== true) return result;
-  }
-  return '';
+  const value = localRecord.value.changeAmount;
+  return typeof value === 'number' && Number.isFinite(value)
+    ? ''
+    : t('goal.recordDialog.valueFinite');
 });
-
-const isValid = computed(() => !validationError.value && localRecord.value.changeAmount > 0);
+const isValid = computed(() => !!currentKeyResult.value && !validationError.value);
 
 const handleCreateKeyResult = async (): Promise<boolean> => {
   if (!propGoalId.value) {
@@ -142,12 +171,12 @@ const handleCreateKeyResult = async (): Promise<boolean> => {
     return false;
   }
 
-  // ✅ 新的数据模型：value 就是本次记录的独立值
-  // 不需要再加上 previousValue
+  const value = localRecord.value.changeAmount;
+  if (typeof value !== 'number' || !Number.isFinite(value)) return false;
+
   const createdRecord = await createGoalRecord(propGoalId.value, propKeyResultId.value, {
-    value: localRecord.value.changeAmount, // ✅ 直接传递用户输入的值
+    value,
     note: localRecord.value.note,
-    recordedAt: Date.now(),
   });
   if (!createdRecord) {
     submitError.value = t('goal.error.createRecordFailed');
@@ -205,7 +234,7 @@ watch(
       } else {
         // 创建模式：重置表单
         localRecord.value = {
-          changeAmount: 0,
+          changeAmount: '',
           note: '',
         };
       }

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
+import type { KeyResultCalculationMethod } from '@memoflow/contracts/goal';
 import { Goal, GoalRecord } from '../../../../domain';
 import type { IGoalRepository } from '../../../../domain/repositories/i-goal-repository';
 import type { IGoalRecordRepository } from '../../../../domain/repositories/i-goal-record-repository';
@@ -145,6 +146,49 @@ describe('CreateGoalRecordUseCase', () => {
     expect(goal.getKeyResult(keyResult.id)?.progress.currentValue).toBe(44);
     if (result.ok) {
       expect(result.data.recordChanges?.upserted[0]?.valueAfter).toBe(44);
+    }
+  });
+
+  it.each<[{ method: KeyResultCalculationMethod; expected: number }]>([
+    [{ method: 'Sum', expected: 12 }],
+    [{ method: 'Average', expected: -1 }],
+    [{ method: 'Max', expected: 2 }],
+    [{ method: 'Min', expected: -5 }],
+    [{ method: 'Last', expected: -5 }],
+  ])('recalculates $method with zero and negative manual facts', async ({ method, expected }) => {
+    const goal = createTestGoal();
+    const keyResult = goal.createAndAddKeyResult({
+      title: 'Measurement',
+      aggregationMethod: method,
+      initialValue: 0,
+      currentValue: 15,
+      targetValue: 50,
+      weight: 1,
+      unit: 'points',
+    });
+    const history = [2, 0].map((value) =>
+      GoalRecord.create({
+        keyResultId: keyResult.id,
+        identityId: goal.identityId,
+        value,
+      }),
+    );
+    vi.mocked(goalRepository.findByIdForIdentity).mockResolvedValue(goal);
+    vi.mocked(goalRecordRepository.findByKeyResultId).mockResolvedValue(history);
+    const result = await useCase.execute(
+      goal.id,
+      keyResult.id,
+      { value: -5, expectedVersion: goal.version },
+      'identity-1',
+    );
+    expect(result).toBeOk();
+    expect(goal.getKeyResult(keyResult.id)?.progress.currentValue).toBe(expected);
+    if (result.ok) {
+      expect(result.data.readModel.keyResults[0].progress.currentValue).toBe(expected);
+      expect(result.data.recordChanges?.upserted[0]).toMatchObject({
+        value: -5,
+        valueAfter: expected,
+      });
     }
   });
 

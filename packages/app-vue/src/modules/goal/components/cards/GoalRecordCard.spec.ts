@@ -1,3 +1,5 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
@@ -34,6 +36,25 @@ function createRecord(overrides: Partial<GoalRecordClientDTO> = {}): GoalRecordC
 }
 
 describe('GoalRecordCard', () => {
+  it('exports both public names from the single neutral implementation', () => {
+    const index = readFileSync(resolve(__dirname, '../index.ts'), 'utf8');
+    expect(index).toMatch(
+      /default as GoalRecordCard,\s*default as GoalRecordCardFromCards[\s\S]*?from '\.\/cards\/GoalRecordCard.vue'/,
+    );
+    expect(existsSync(resolve(__dirname, '../GoalRecordCard.vue'))).toBe(false);
+    const component = readFileSync(resolve(__dirname, './GoalRecordCard.vue'), 'utf8');
+    expect(component).not.toMatch(/\bPlus\b/);
+  });
+
+  it.each([-5, 0])('renders neutral record value %s without a positive prefix', (value) => {
+    const wrapper = mount(GoalRecordCard, {
+      props: { record: createRecord({ value }) },
+      global: { plugins: [i18n] },
+    });
+    expect(wrapper.text()).toContain(`Record value: ${value}`);
+    expect(wrapper.text()).not.toContain(`+${value}`);
+    wrapper.unmount();
+  });
   it('renders formatted value date and comment for a persisted progress record', () => {
     const record = createRecord();
     const wrapper = mount(GoalRecordCard, {

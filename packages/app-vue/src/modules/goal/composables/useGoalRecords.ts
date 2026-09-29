@@ -45,7 +45,7 @@ export function useGoalRecords() {
   async function createGoalRecord(
     goalId: string,
     keyResultId: string,
-    data: { value: number; note?: string; recordedAt?: number },
+    data: Pick<CreateGoalRecordReq, 'value' | 'note'>,
   ) {
     return createRecord(goalId, {
       keyResultId: keyResultId as CreateGoalRecordReq['keyResultId'],
