@@ -152,18 +152,17 @@ describe('shouldAutoCollapseSidebar', () => {
 });
 
 describe('workspace chrome geometry', () => {
-  it('matches the CSS inset/gutter tiers and pane counts', () => {
+  it('matches the CSS content-well inset tiers', () => {
     expect(resolveWorkspaceChromeMetrics(390)).toEqual({ inset: 0, gap: 0 });
     expect(resolveWorkspaceChromeMetrics(1024)).toEqual({ inset: 4, gap: 4 });
     expect(resolveWorkspaceChromeMetrics(1280)).toEqual({ inset: 6, gap: 6 });
-    expect(workspaceChromeBudget(1280, 260)).toBe(12);
-    expect(workspaceChromeBudget(1280, 0)).toBe(12);
+    expect(workspaceChromeBudget(1280)).toBe(12);
   });
 });
 
 describe('panelWidthFromPointer', () => {
-  it('returns pane widths relative to the inset workspace canvas', () => {
-    const width = panelWidthFromPointer(200, 1200, 260);
+  it('returns panel widths relative to the content-well right inset', () => {
+    const width = panelWidthFromPointer(200, 1200);
     expect(width).toBe(994);
     expect(sidebarWidthFromPointer(263, 1200)).toBe(260);
     expect(shouldCollapsePanelWidth(420)).toBe(true);

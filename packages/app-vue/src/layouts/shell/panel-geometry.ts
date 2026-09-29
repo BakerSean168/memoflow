@@ -49,11 +49,7 @@ export function resolveWorkspaceChromeMetrics(viewportWidth: number): WorkspaceC
  * When the sidebar is visible that left margin is the sidebar-to-well gap;
  * when it is collapsed the same value becomes the shell's left inset.
  */
-export function workspaceChromeBudget(
-  viewportWidth: number,
-  sidebarOccupiedWidth: number,
-): number {
-  void sidebarOccupiedWidth;
+export function workspaceChromeBudget(viewportWidth: number): number {
   const { inset, gap } = resolveWorkspaceChromeMetrics(viewportWidth);
   return inset + gap;
 }
@@ -109,7 +105,7 @@ export function shouldAutoCollapseSidebar(viewportWidth: number): boolean {
 export function computePanelGeometry(input: PanelGeometryInput): PanelGeometry {
   const viewportWidth = Math.max(0, Math.floor(input.viewportWidth));
   const sidebarOccupiedWidth = Math.max(0, Math.floor(input.sidebarOccupiedWidth));
-  const chromeBudget = workspaceChromeBudget(viewportWidth, sidebarOccupiedWidth);
+  const chromeBudget = workspaceChromeBudget(viewportWidth);
   const workspaceWidth = Math.max(0, viewportWidth - sidebarOccupiedWidth - chromeBudget);
   // There is no product maximum. The upper bound is only the current legal
   // split range after reserving the AI minimum; this changes with the window.
@@ -142,12 +138,7 @@ export function computePanelGeometry(input: PanelGeometryInput): PanelGeometry {
 }
 
 /** 拖拽过程中按指针位置计算面板宽度（面板贴右边缘）。 */
-export function panelWidthFromPointer(
-  clientX: number,
-  viewportWidth: number,
-  sidebarOccupiedWidth: number,
-): number {
-  void sidebarOccupiedWidth;
+export function panelWidthFromPointer(clientX: number, viewportWidth: number): number {
   const { inset } = resolveWorkspaceChromeMetrics(viewportWidth);
   // Business content ends at the content well's right inset.
   const raw = Math.max(0, Math.round(viewportWidth - inset - clientX));
