@@ -234,6 +234,11 @@ test.describe('AI Goal Workflow', () => {
       'Ask my knowledge base how knowledge answers stay grounded in citations.',
     );
 
+    // Workflow output lives in the mutually exclusive right-side surface on mobile.
+    // The header badge signals that context is available; switch back to focus to inspect it.
+    await panelToggle.click();
+    await expect(shell).toHaveAttribute('data-shell-state', 'focus');
+    await expect(page.getByTestId('business-panel')).toBeVisible();
     await expect(page.getByTestId('knowledge-answer-panel')).toBeVisible({
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });

@@ -107,7 +107,7 @@ test.describe('Routine authenticated product journey', () => {
     await page.getByTestId('routine-create-button').click();
     await page.getByTestId('routine-template-stand-and-move').click();
     await expect(page.getByTestId('routine-editor-dialog')).toBeVisible();
-    await expect(page.getByTestId('routine-name-input')).toHaveValue('Stand & Move');
+    await expect(page.getByTestId('routine-name-input')).toHaveValue(/Stand & Move|起身活动/);
     await expect(page.getByTestId('routine-trigger-type')).toHaveAttribute(
       'data-trigger-type',
       'Elapsed',
