@@ -56,6 +56,7 @@ import {
   panelWidthFromPointer,
   resolveComposerDensity,
   sidebarWidthFromPointer,
+  workspaceChromeBudget,
   shouldCollapsePanelWidth,
   shouldCollapseSidebarWidth,
   shouldAutoCollapseSidebar,
@@ -150,7 +151,11 @@ const effectiveSidebarWidth = computed(() => {
   const reserved = showPanel.value
     ? BUSINESS_HARD_MIN + (layout.value === 'split' ? AI_HARD_MIN : 0)
     : AI_HARD_MIN;
-  const dynamicMax = Math.max(SIDEBAR_HARD_MIN, effectiveViewportWidth.value - reserved);
+  const chrome = workspaceChromeBudget(effectiveViewportWidth.value, sidebarWidth.value);
+  const dynamicMax = Math.max(
+    SIDEBAR_HARD_MIN,
+    effectiveViewportWidth.value - reserved - chrome,
+  );
   return Math.min(sidebarWidth.value, dynamicMax);
 });
 // ── AI 常驻层（单实例；会话侧栏数据经 defineExpose 上浮） ──
@@ -335,7 +340,8 @@ function maxSidebarWidth(): number {
   const reserved = showPanel.value
     ? BUSINESS_HARD_MIN + (shellState.value === 'split' ? AI_HARD_MIN : 0)
     : AI_HARD_MIN;
-  return Math.max(SIDEBAR_HARD_MIN, window.innerWidth - reserved);
+  const chrome = workspaceChromeBudget(window.innerWidth, effectiveSidebarWidth.value);
+  return Math.max(SIDEBAR_HARD_MIN, window.innerWidth - reserved - chrome);
 }
 
 function startSidebarResize(e: MouseEvent) {
@@ -807,9 +813,9 @@ function panelCacheKey(
       <router-view name="settings" />
     </StandaloneSettingsLayout>
 
-    <!-- 主工作区（STATE A/B/C）：Inset Pane Workspace。
-         大区块由 AppShell 统一提供 canvas gutter / radius / ring；
-         子 surface 不再用互相相撞的 outer border 分区。 -->
+    <!-- 主工作区（STATE A/B/C）：Hybrid Workspace。
+         Sidebar 属于 Shell；Chat + Business 共享一个圆角 content well，
+         圆角只表达主工作台层级，内部面板用 divider 分区。 -->
     <div
       v-show="!isSettingsScene"
       class="workspace-stage relative flex min-h-0 flex-1 overflow-hidden bg-background"
@@ -825,7 +831,7 @@ function panelCacheKey(
           data-testid="shell-sidebar-pane-host"
         >
           <div
-            class="workspace-pane workspace-pane--navigation h-full w-full overflow-hidden"
+            class="workspace-sidebar-shell h-full w-full overflow-hidden"
             data-testid="shell-sidebar-pane"
           >
             <ConversationSidebar
@@ -869,18 +875,15 @@ function panelCacheKey(
       <div
         ref="workspaceMainRef"
         data-testid="shell-workspace-main"
-        class="relative flex min-h-0 min-w-0 flex-1 overflow-visible"
-        :class="[
-          shellState === 'focus' ? 'flex-col' : 'flex-row',
-          shellState === 'split' && showPanel ? 'workspace-main--split' : '',
-        ]"
+        class="workspace-content-well relative flex min-h-0 min-w-0 flex-1 overflow-hidden"
+        :class="shellState === 'focus' ? 'flex-col' : 'flex-row'"
       >
         <!-- AI 工作区（A/B 满列；C 隐藏列但实例保活，Composer 改浮动宿主） -->
         <div
           v-show="shellState !== 'focus'"
           ref="aiColumnRef"
           data-testid="shell-ai-column"
-          class="workspace-pane workspace-pane--primary order-1 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
+          class="workspace-primary-surface order-1 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
         >
           <AIChatView ref="aiRef" class="min-h-0 w-full flex-1" hide-conversation-sidebar />
           <GlobalComposer
@@ -893,7 +896,7 @@ function panelCacheKey(
 
         <!-- 右侧面板 DOM 常驻；Toggle 只显隐，Tab、草稿和工作流上下文继续保活。 -->
         <div
-          class="workspace-pane-host workspace-business-host relative"
+          class="workspace-business-host relative"
           data-testid="shell-business-pane-host"
           :aria-hidden="showPanel ? undefined : 'true'"
           :class="
@@ -913,7 +916,7 @@ function panelCacheKey(
           }"
         >
           <div
-            class="workspace-pane workspace-pane--business h-full min-h-0 w-full overflow-hidden"
+            class="workspace-business-surface h-full min-h-0 w-full overflow-hidden"
             data-testid="shell-business-pane"
           >
             <BusinessPanel
@@ -996,38 +999,43 @@ function panelCacheKey(
 
 <style scoped>
 .workspace-stage {
-  --workspace-inset: 6px;
-  --workspace-gap: 8px;
-  --workspace-resizer-center: 4px;
-  --workspace-pane-radius: var(--radius-pane);
-  gap: var(--workspace-gap);
-  padding: var(--workspace-inset);
-  background: hsl(var(--workspace-canvas));
+  --workspace-edge-inset: 6px;
+  --workspace-sidebar-gap: 6px;
+  --workspace-well-radius: var(--radius-workspace);
+  background: hsl(var(--workspace-shell));
 }
 
-.workspace-main--split {
-  gap: var(--workspace-gap);
-}
-
-.workspace-pane {
-  border-radius: var(--workspace-pane-radius);
-  box-shadow:
-    0 0 0 1px hsl(var(--border-strong) / 0.62),
-    0 2px 8px hsl(0 0% 0% / 0.18),
-    inset 0 1px 0 hsl(var(--foreground) / 0.035);
-}
-
-.workspace-pane--navigation {
+.workspace-sidebar-shell {
   --background: var(--workspace-navigation);
   background: hsl(var(--workspace-navigation));
+  box-shadow: inset -1px 0 0 hsl(var(--border-subtle) / 0.7);
 }
 
-.workspace-pane--primary {
+.workspace-content-well {
+  --background: var(--workspace-primary);
+  margin: 4px var(--workspace-edge-inset) 6px var(--workspace-sidebar-gap);
+  border-radius: var(--workspace-well-radius);
+  background: hsl(var(--workspace-primary));
+  box-shadow:
+    0 0 0 1px hsl(var(--border-strong) / 0.58),
+    0 6px 22px -18px hsl(0 0% 0% / 0.72),
+    inset 0 1px 0 hsl(var(--foreground) / 0.025);
+}
+
+.workspace-primary-surface {
   --background: var(--workspace-primary);
   background: hsl(var(--workspace-primary));
 }
 
-.workspace-pane--business {
+.workspace-business-host {
+  position: relative;
+}
+
+.workspace-content-well.flex-row .workspace-business-host:not([aria-hidden='true']) {
+  box-shadow: -1px 0 0 hsl(var(--border-subtle));
+}
+
+.workspace-business-surface {
   --background: var(--workspace-business);
   background: hsl(var(--workspace-business));
 }
@@ -1037,92 +1045,77 @@ function panelCacheKey(
   top: 0;
   z-index: 40;
   height: 100%;
-  width: 16px;
+  width: 12px;
   cursor: col-resize;
   touch-action: none;
   background: transparent;
   outline: none;
 }
 
-.workspace-resizer::before {
+.workspace-resizer::after {
   position: absolute;
   top: 8px;
   bottom: 8px;
   left: 50%;
   width: 1px;
   border-radius: 999px;
-  background: hsl(var(--border-strong) / 0.58);
+  background: hsl(var(--border-strong) / 0.46);
   content: '';
-  opacity: 0.65;
+  opacity: 0.62;
   transform: translateX(-50%);
   transition:
-    opacity 120ms ease-out,
-    background-color 120ms ease-out;
-}
-
-.workspace-resizer::after {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 3px;
-  height: 52px;
-  border-radius: 999px;
-  background: hsl(var(--foreground-subtle) / 0.78);
-  content: '';
-  opacity: 0.7;
-  transform: translate(-50%, -50%);
-  transition:
-    height 120ms ease-out,
+    width 120ms ease-out,
     opacity 120ms ease-out,
     background-color 120ms ease-out;
 }
 
 .workspace-resizer:hover,
 .workspace-resizer:focus-visible {
-  background: hsl(var(--primary) / 0.08);
-}
-
-.workspace-resizer:hover::before,
-.workspace-resizer:focus-visible::before {
-  background: hsl(var(--primary) / 0.56);
-  opacity: 0.9;
+  background: hsl(var(--primary) / 0.045);
 }
 
 .workspace-resizer:hover::after,
 .workspace-resizer:focus-visible::after {
-  height: 68px;
-  background: hsl(var(--primary) / 0.95);
+  width: 2px;
+  background: hsl(var(--primary) / 0.92);
   opacity: 1;
 }
 
 .workspace-resizer--right {
-  right: calc(var(--workspace-resizer-center) * -1);
-  transform: translateX(50%);
+  right: calc((var(--workspace-sidebar-gap) / -2) - 6px);
 }
 
 .workspace-resizer--left {
-  left: calc(var(--workspace-resizer-center) * -1);
-  transform: translateX(-50%);
+  left: -6px;
 }
 
 @media (max-width: 1199px) {
   .workspace-stage {
-    --workspace-inset: 4px;
-    --workspace-gap: 6px;
-    --workspace-resizer-center: 3px;
-    --workspace-pane-radius: var(--radius-surface);
+    --workspace-edge-inset: 4px;
+    --workspace-sidebar-gap: 4px;
+    --workspace-well-radius: var(--radius-surface);
+  }
+
+  .workspace-content-well {
+    margin-top: 3px;
+    margin-bottom: 4px;
   }
 }
 
 @media (max-width: 767px) {
   .workspace-stage {
-    --workspace-inset: 0px;
-    --workspace-gap: 0px;
-    --workspace-resizer-center: 0px;
-    --workspace-pane-radius: 0px;
+    --workspace-edge-inset: 0px;
+    --workspace-sidebar-gap: 0px;
+    --workspace-well-radius: 0px;
   }
 
-  .workspace-pane {
+  .workspace-content-well {
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .workspace-sidebar-shell {
     box-shadow: none;
   }
 }

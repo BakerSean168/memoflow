@@ -19,16 +19,16 @@ export const SIDEBAR_COLLAPSE_THRESHOLD = 96;
 export const SIDEBAR_AUTO_COLLAPSE_VIEWPORT = 960;
 
 /**
- * Workspace stage chrome. Desktop panes live on an inset canvas instead of
- * meeting on hard border intersections. Geometry must reserve the same budget
- * that CSS consumes so AI / business hard minimums remain truthful.
+ * Hybrid workspace chrome. The sidebar stays flush with the shell while the
+ * shared Chat + Business content well is inset from the shell edge.
+ * Geometry reserves the exact horizontal margins consumed by CSS.
  */
 export const WORKSPACE_COMPACT_BREAKPOINT = 768;
 export const WORKSPACE_DESKTOP_BREAKPOINT = 1200;
 export const WORKSPACE_DESKTOP_INSET = 6;
-export const WORKSPACE_DESKTOP_GAP = 8;
+export const WORKSPACE_DESKTOP_GAP = 6;
 export const WORKSPACE_MID_INSET = 4;
-export const WORKSPACE_MID_GAP = 6;
+export const WORKSPACE_MID_GAP = 4;
 
 export interface WorkspaceChromeMetrics {
   inset: number;
@@ -45,16 +45,17 @@ export function resolveWorkspaceChromeMetrics(viewportWidth: number): WorkspaceC
 }
 
 /**
- * Split geometry always contains AI + business and may also contain sidebar.
- * Return the canvas inset + inter-pane gutters that are unavailable to content.
+ * The content well always consumes a left margin and a right inset.
+ * When the sidebar is visible that left margin is the sidebar-to-well gap;
+ * when it is collapsed the same value becomes the shell's left inset.
  */
 export function workspaceChromeBudget(
   viewportWidth: number,
   sidebarOccupiedWidth: number,
 ): number {
+  void sidebarOccupiedWidth;
   const { inset, gap } = resolveWorkspaceChromeMetrics(viewportWidth);
-  const paneCount = sidebarOccupiedWidth > 0 ? 3 : 2;
-  return inset * 2 + gap * Math.max(0, paneCount - 1);
+  return inset + gap;
 }
 
 /** Global Composer 宿主几何（§8.4）。 */
@@ -147,16 +148,16 @@ export function panelWidthFromPointer(
   sidebarOccupiedWidth: number,
 ): number {
   void sidebarOccupiedWidth;
-  const { inset, gap } = resolveWorkspaceChromeMetrics(viewportWidth);
-  // Pointer is centered in the gutter; content begins half a gutter beyond it.
-  const raw = Math.max(0, Math.round(viewportWidth - inset - clientX - gap / 2));
+  const { inset } = resolveWorkspaceChromeMetrics(viewportWidth);
+  // Business content ends at the content well's right inset.
+  const raw = Math.max(0, Math.round(viewportWidth - inset - clientX));
   return raw;
 }
 
 export function sidebarWidthFromPointer(clientX: number, viewportWidth: number): number {
-  const { inset, gap } = resolveWorkspaceChromeMetrics(viewportWidth);
-  // Pointer is centered in the gutter; sidebar content ends half a gutter before it.
-  return Math.max(0, Math.round(clientX - inset - gap / 2));
+  const { gap } = resolveWorkspaceChromeMetrics(viewportWidth);
+  // Sidebar resizer is centered inside the sidebar-to-content-well gap.
+  return Math.max(0, Math.round(clientX - gap / 2));
 }
 
 export function shouldCollapsePanelWidth(width: number): boolean {

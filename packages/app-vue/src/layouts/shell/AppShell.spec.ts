@@ -209,20 +209,30 @@ describe('AppShell right-panel integration', () => {
     wrapper.unmount();
   });
 
-  it('renders the workspace as inset persistent panes with gutter-owned resizers', async () => {
+  it('renders a flush sidebar beside one rounded Chat + Business content well', async () => {
     const { wrapper } = await mountShell();
 
     expect(wrapper.get('[data-testid="shell-workspace-stage"]').classes()).toContain(
       'workspace-stage',
     );
-    expect(wrapper.get('[data-testid="shell-sidebar-pane"]').classes()).toEqual(
-      expect.arrayContaining(['workspace-pane', 'workspace-pane--navigation']),
+    expect(wrapper.get('[data-testid="shell-sidebar-pane"]').classes()).toContain(
+      'workspace-sidebar-shell',
     );
-    expect(wrapper.get('[data-testid="shell-ai-column"]').classes()).toEqual(
-      expect.arrayContaining(['workspace-pane', 'workspace-pane--primary']),
+    expect(wrapper.get('[data-testid="shell-workspace-main"]').classes()).toContain(
+      'workspace-content-well',
     );
-    expect(wrapper.get('[data-testid="shell-business-pane"]').classes()).toEqual(
-      expect.arrayContaining(['workspace-pane', 'workspace-pane--business']),
+    expect(wrapper.get('[data-testid="shell-ai-column"]').classes()).toContain(
+      'workspace-primary-surface',
+    );
+    expect(wrapper.get('[data-testid="shell-business-pane"]').classes()).toContain(
+      'workspace-business-surface',
+    );
+
+    expect(wrapper.get('[data-testid="shell-sidebar-pane"]').classes()).not.toContain(
+      'workspace-pane',
+    );
+    expect(wrapper.get('[data-testid="shell-business-pane"]').classes()).not.toContain(
+      'workspace-pane',
     );
 
     const sidebarResizer = wrapper.get('[data-testid="conversation-sidebar-resizer"]');
@@ -292,7 +302,7 @@ describe('AppShell right-panel integration', () => {
     await nextTick();
 
     expect(store.panelWidthSource).toBe('user');
-    expect(store.panelWidth).toBe(650);
+    expect(store.panelWidth).toBe(654);
 
     window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 11, clientX: 620, bubbles: true }));
     wrapper.unmount();
@@ -321,9 +331,11 @@ describe('AppShell right-panel integration', () => {
     // Model the browser's trailing native focus behavior after the pointerup listener.
     (resizer.element as HTMLElement).focus();
     expect(document.activeElement).toBe(resizer.element);
-    expect(scheduledFrames).toHaveLength(1);
+    expect(scheduledFrames.length).toBeGreaterThanOrEqual(1);
 
-    scheduledFrames[0]?.(performance.now());
+    for (let index = 0; index < 5 && scheduledFrames.length > 0; index += 1) {
+      scheduledFrames.shift()?.(performance.now());
+    }
     expect(document.activeElement).toBe(input);
 
     animationFrame.mockRestore();

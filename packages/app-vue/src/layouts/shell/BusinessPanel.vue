@@ -162,7 +162,7 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
   >
     <!-- Shell chrome / Tab strip -->
     <div
-      class="flex h-9 shrink-0 items-center gap-1 border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.9)] px-1 shadow-[0_1px_0_hsl(var(--border)/0.05)]"
+      class="flex h-9 shrink-0 items-center gap-1 border-b border-[hsl(var(--border-subtle))] bg-transparent px-1"
       data-testid="business-panel-tab-strip"
     >
       <button
