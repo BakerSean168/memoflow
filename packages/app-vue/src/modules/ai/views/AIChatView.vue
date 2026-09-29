@@ -64,10 +64,10 @@
     <section class="@container/ai flex min-w-0 flex-1 flex-col overflow-hidden">
       <header
         v-show="!composerOnly"
-        class="flex h-12 shrink-0 items-center border-b border-border/45 bg-background px-4 @md/ai:px-6"
+        class="flex h-11 shrink-0 items-center border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.58)] px-4 @md/ai:px-5"
       >
         <div class="flex w-full items-center justify-between gap-3">
-          <h1 class="truncate text-sm font-semibold tracking-[-0.01em] text-foreground">
+          <h1 class="truncate text-[13px] font-semibold tracking-[-0.01em] text-foreground">
             {{ currentConversationLabel }}
           </h1>
           <div class="flex items-center gap-2">
