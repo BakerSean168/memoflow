@@ -162,7 +162,7 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
   >
     <!-- Shell chrome / Tab strip -->
     <div
-      class="flex h-9 shrink-0 items-center gap-1 border-b border-[hsl(var(--border-subtle))] bg-transparent px-1"
+      class="business-panel-tab-strip flex h-9 shrink-0 items-center gap-1 px-1"
       data-testid="business-panel-tab-strip"
     >
       <button
@@ -184,7 +184,7 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
       <div class="flex min-w-0 flex-1 items-center gap-1 overflow-hidden">
         <div
           ref="tabListEl"
-          class="flex min-w-0 flex-1 items-center gap-0.5 overflow-hidden"
+          class="flex min-w-0 flex-1 items-end gap-px overflow-hidden"
           role="tablist"
           :aria-label="t('shell.moduleNav')"
           data-testid="business-panel-tab-list"
@@ -192,19 +192,19 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
           <div
             v-for="tab in tabs"
             :key="tab.id"
-            class="group relative flex h-7 items-center overflow-hidden rounded-md text-[12px] transition-[flex-basis,max-width,background-color,color,box-shadow] duration-150 ease-out motion-reduce:transition-none"
+            class="business-workbench-tab group relative flex h-8 self-end items-center overflow-visible rounded-t-md text-[12px] transition-[flex-basis,max-width,background-color,color,box-shadow] duration-150 ease-out motion-reduce:transition-none"
             :class="[
               tabWidthClass(tab),
               isActiveTab(tab)
-                ? 'bg-[hsl(var(--surface-raised))] text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)),inset_0_1px_0_hsl(var(--foreground)/0.025)]'
-                : 'text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover))] hover:text-foreground',
+                ? 'business-workbench-tab--active text-foreground'
+                : 'business-workbench-tab--inactive text-[hsl(var(--foreground-muted))]',
             ]"
             :data-testid="`business-panel-tab-${tab.id}`"
           >
             <button
               type="button"
               role="tab"
-              class="flex h-7 min-w-0 flex-1 items-center gap-1.5 rounded-md pl-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70"
+              class="flex h-full min-w-0 flex-1 items-center gap-1.5 rounded-t-md pl-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70"
               :class="[
                 showTabLabel(tab) ? 'pr-7' : 'justify-center px-0',
                 tabDensity === 'comfortable' ? 'font-medium' : 'font-normal',
@@ -233,7 +233,7 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
 
             <button
               type="button"
-              class="absolute top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-[opacity,background-color,color] duration-150 hover:bg-[hsl(var(--selected))] hover:text-foreground focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
+              class="absolute top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-[5px] text-[hsl(var(--foreground-subtle))] transition-[opacity,background-color,color] duration-150 hover:bg-[hsl(var(--selected))] hover:text-foreground focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
               :class="[
                 tabDensity === 'icon' && !isActiveTab(tab)
                   ? 'right-1/2 translate-x-1/2'
@@ -254,17 +254,17 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
 
         <div
           v-if="workflowAvailable"
-          class="group relative flex h-7 shrink-0 items-center overflow-hidden rounded-md text-[12px] transition-[background-color,color,box-shadow] duration-150"
+          class="business-workbench-tab group relative flex h-8 shrink-0 self-end items-center overflow-visible rounded-t-md text-[12px] transition-[background-color,color,box-shadow] duration-150"
           :class="[
             panelSurface === 'workflow'
-              ? 'bg-[hsl(var(--surface-raised))] text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)),inset_0_1px_0_hsl(var(--foreground)/0.025)]'
-              : 'text-[hsl(var(--foreground-muted))] hover:bg-[hsl(var(--hover))] hover:text-foreground',
+              ? 'business-workbench-tab--active text-foreground'
+              : 'business-workbench-tab--inactive text-[hsl(var(--foreground-muted))]',
             tabDensity === 'comfortable' ? 'max-w-36' : tabDensity === 'compact' ? 'max-w-24' : 'w-8',
           ]"
         >
           <button
             type="button"
-            class="flex h-7 min-w-0 flex-1 items-center gap-1.5 rounded-md pl-2 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70"
+            class="flex h-full min-w-0 flex-1 items-center gap-1.5 rounded-t-md pl-2 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70"
             :class="tabDensity === 'icon' ? 'justify-center px-0' : 'pr-7'"
             data-testid="business-panel-workflow"
             :aria-current="panelSurface === 'workflow' ? 'page' : undefined"
@@ -285,7 +285,7 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
           </button>
           <button
             type="button"
-            class="absolute right-1 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] opacity-0 transition-[opacity,background-color,color] duration-150 hover:bg-[hsl(var(--selected))] hover:text-foreground group-hover:opacity-70 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
+            class="absolute right-1 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-[5px] text-[hsl(var(--foreground-subtle))] opacity-0 transition-[opacity,background-color,color] duration-150 hover:bg-[hsl(var(--selected))] hover:text-foreground group-hover:opacity-70 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
             :class="tabDensity === 'icon' ? 'right-1/2 translate-x-1/2' : ''"
             :aria-label="t('shell.panel.closeWorkflow')"
             @click.stop="emit('close-workflow')"
@@ -339,3 +339,38 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
 
   </section>
 </template>
+
+<style scoped>
+.business-panel-tab-strip {
+  border-bottom: 1px solid hsl(var(--border-subtle));
+  background: hsl(var(--workspace-primary) / 0.72);
+}
+
+.business-workbench-tab {
+  isolation: isolate;
+}
+
+.business-workbench-tab--inactive:hover {
+  background: hsl(var(--hover) / 0.58);
+  color: hsl(var(--foreground));
+}
+
+.business-workbench-tab--active {
+  z-index: 1;
+  background: hsl(var(--workspace-business));
+  box-shadow:
+    inset 1px 0 0 hsl(var(--border-subtle) / 0.92),
+    inset -1px 0 0 hsl(var(--border-subtle) / 0.92),
+    inset 0 1px 0 hsl(var(--border-strong) / 0.56);
+}
+
+.business-workbench-tab--active::after {
+  position: absolute;
+  right: 1px;
+  bottom: -1px;
+  left: 1px;
+  height: 1px;
+  background: hsl(var(--workspace-business));
+  content: '';
+}
+</style>

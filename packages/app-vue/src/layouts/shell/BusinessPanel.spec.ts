@@ -134,7 +134,7 @@ describe('BusinessPanel surfaces', () => {
     const wrapper = mountPanel('business');
 
     expect(wrapper.get('[data-testid="business-panel-tab-close"]').classes()).toEqual(
-      expect.arrayContaining(['absolute', 'h-6', 'w-6']),
+      expect.arrayContaining(['absolute', 'h-5', 'w-5']),
     );
     expect(wrapper.get('[data-testid="business-panel-focus-toggle"]').classes()).toEqual(
       expect.arrayContaining(['h-7', 'w-7']),
