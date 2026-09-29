@@ -62,6 +62,8 @@ Current surfaces:
   └─ Task Plan workspace
 ```
 
+Second-pass product target removes the duplicated Upcoming surface and converges Task Home to `Today | Plans`; future browsing hands off to Schedule / Calendar.
+
 The Task create dialog already follows the current vNext direction:
 
 - `ProductDialogShell`;
@@ -80,7 +82,7 @@ Task Detail already uses:
 ## 3.2 Good decisions to protect
 
 - Keep `TaskPlan` vs `TaskOccurrence` semantic split.
-- Keep Today/Upcoming occurrence actions fast and separate from Plan configuration.
+- Keep Today occurrence actions fast and separate from Plan configuration; future temporal browsing belongs to Schedule.
 - Keep `/tasks/:id` as a real workspace route. Unlike KR-inside-Goal, a Task Plan is its own owner context.
 - Keep Goal/KR relations as cross-owner references, not Goal-owned Task state.
 - Keep Checklist definition vs occurrence checklist snapshots separate.

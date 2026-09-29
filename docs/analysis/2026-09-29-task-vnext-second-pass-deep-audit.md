@@ -2,7 +2,7 @@
 
 Date: 2026-09-29  
 Branch: `product/vnext-convergence`  
-Status: discovery complete; product decisions pending before detailed Task convergence plan  
+Status: second-pass discovery complete; Q1-Q6 product direction resolved; interactive KR record design proposed
 Parent plan: [MemoFlow Product vNext Convergence](../plan/active/2026-09-29-product-vnext-convergence.md)
 
 ## 1. Executive decision
@@ -32,7 +32,7 @@ Task Plan Workspace
 
 The current Vue implementation has already moved in the right direction:
 
-- Today / Upcoming are occurrence-first;
+- the current Today / Upcoming surfaces are occurrence-first;
 - Task create uses compact property chips;
 - Task Plan has a real workspace route;
 - Task Detail already uses direct inline editing;
@@ -241,16 +241,17 @@ However, the standalone QuickTask route integration is currently broken; see T2-
 | T2-02 | P1 | Hidden occurrence status filter controls Plans result | filter state reused across different owner semantics |
 | T2-03 | **P0** | “End plan” calls Archive and does not end the plan | UI lifecycle semantics diverged from canonical domain |
 | T2-04 | P1 | Plan outcome is dropped from presentation; Abandon exists backend-only | UI still models old status-only Task |
-| T2-05 | P1 | Completion policy exists canonically but is unreachable from normal UI | domain cutover exceeded UI cutover |
+| T2-05 | P1 | Configurable completion policy is a product-model residue and the default can leave finite missed plans Open | domain generalized beyond final product semantics |
 | T2-06 | P1 | UI permits Task contribution to non-Sum KR that Goal rejects later | binding projection strips KR measurement semantics |
 | T2-07 | P2 | Main Task occurrence surface reads full history | older list path bypasses bounded date-range query |
 | T2-08 | P2 | Plan page/limit are phantom client semantics | client/server query contract drift |
 | T2-09 | P2 | KR-scoped Task filter underuses server query and exposes raw IDs | incomplete cross-owner query projection |
 | T2-10 | P2 | DailyTodoWidget remains legacy UI/behavior | older widget bypasses canonical occurrence surface |
 | T2-11 | P2 | Direct-manipulation metadata grammar is only partially converged | Goal/Task copied local presentation recipes |
-| T2-12 | Decision | Task Home IA docs and current implementation disagree | historical product-doc drift |
-| T2-13 | P2 | Archive has no normal restore UX despite being visibility metadata | visibility lifecycle never completed in product UI |
+| T2-12 | Resolved | Task Home IA converges to Today / Plans; Upcoming moves to Schedule | historical product-doc drift |
+| T2-13 | P2 | Archive is exposed in normal lifecycle UX even though it is only visibility metadata | visibility lifecycle leaked into business actions |
 | T2-14 | P3 | Task workspace labels bounded history as generic “Occurrences” | read-model semantics not reflected in copy |
+| T2-15 | P1 | Task → KR recording is fixed-delta/Sum-biased and cannot represent user-entered measurements across KR methods | contribution contract models only automatic positive fixed values |
 
 ---
 
@@ -463,6 +464,28 @@ status = Active
 
 so Archive alone does not make it non-fireable.
 
+### Evidence — Abandon is canonical but not yet operationally complete
+
+The backend already exposes `AbandonTaskPlanUseCase`, and `TaskPlan.abandon()` correctly produces:
+
+```text
+status = Closed
+outcome = Abandoned
+closedAt = now
+```
+
+However, the current Abandon use case only mutates/saves the Plan.
+
+By comparison, Pause explicitly deletes incomplete future occurrences from the effective date.
+
+Current Abandon does **not**:
+
+- delete/reconcile already-materialized incomplete future occurrences;
+- emit a dedicated plan-abandoned event;
+- participate in the Schedule projection event map, which currently knows pause/resume/delete but not abandon.
+
+So simply wiring the UI from Archive to the existing Abandon command is not sufficient. The End Plan vertical slice must also close already-materialized execution/schedule projections.
+
 ### Additional frontend defect
 
 `useTaskPlanMutations` treats Archive as a status mutation and optimistically patches:
@@ -503,7 +526,9 @@ After the user chooses a product action meaning “stop/end this plan”:
 ```text
 status != Active
 future materialization stops
+already-materialized incomplete future occurrences are reconciled/removed
 future reminders are not fireable
+Schedule projection no longer presents future execution for the ended plan
 outcome represents explicit user intent when applicable
 ```
 
@@ -602,7 +627,7 @@ without collapsing them into one string.
 
 ---
 
-## T2-05 — Completion policy is unreachable from normal UI
+## T2-05 — Completion policy is a product-model residue
 
 **Severity:** P1 major
 
@@ -630,33 +655,40 @@ The current Vue Task create/detail flow does not expose or submit it.
 
 ### Impact
 
-Normal UI-created plans use the default correction policy.
+The domain exposes a policy choice that the product no longer needs. More importantly, the current default `AllowCorrection` can leave a finite Plan `Open` even after its scope has ended with an explicit Missed occurrence.
 
-Therefore product semantics such as:
+That does not match the resolved user model:
 
-> finite strict plan becomes Failed when a required occurrence is confirmed Missed
-
-cannot be intentionally configured by a normal user.
+```text
+Overdue -> unresolved
+Missed -> explicit user-confirmed non-completion
+Skipped -> explicit waiver
+Completed -> explicit completion / correction
+```
 
 ### Root cause
 
-Completion/outcome semantics landed in domain/contracts without a corresponding product control.
+Task outcome semantics were generalized before the final product interaction was simplified.
 
-### Recommended direction
+### Resolved direction
 
-Do not put a technical “CompletionPolicy” field into every Task form.
+Do **not** add a completion-policy selector to Task UI.
 
-Expose only when semantically relevant, most likely for finite plans:
+Converge toward one canonical product rule:
 
 ```text
-允许补做
-  错过后仍可以补记完成
+finite plan
+  any Pending/InProgress -> Open
+  all required Completed/Skipped -> Succeeded
+  scope ended + any explicit Missed -> Failed
 
-严格达成
-  确认错过一次后，该计划视为未达成
+infinite recurring plan
+  -> Open until Abandoned
 ```
 
-Exact copy is a product decision.
+Missed/Skipped remain correctable to Completed, so a derived Failed plan can be re-evaluated after user correction.
+
+Overdue alone must never create Missed/Failed.
 
 ---
 
@@ -727,18 +759,21 @@ KeyResultBindingOption
   + unit
 ```
 
-Behavior:
+Behavior after T2-15 convergence:
 
 ```text
 Sum
- -> link-only or automatic contribution
+ -> link-only
+ -> fixed automatic delta
+ -> prompt for completion-time delta
 
 Average/Max/Min/Last
  -> link-only
- -> contribution disabled with clear explanation
+ -> prompt for completion-time sample
+ -> no blind fixed automatic contribution by default
 ```
 
-Task still must not own Goal calculation rules.
+Task still must not own Goal calculation rules. The prompt path is a user-authored Goal measurement transported durably through Task completion, not an automatic fixed contribution.
 
 ---
 
@@ -1015,13 +1050,11 @@ as the current surface.
 
 ### Assessment
 
-The current architecture is coherent with the canonical owner model, but the product documents do not yet have one explicit source of truth.
-
-This needs Q2/Q6 rather than an implementation guess.
+This was a product-source conflict at discovery time. It is now resolved: `Today | Plans` is the Task Home IA; Upcoming is removed in favor of Schedule / Calendar, and occurrence details use compact Dialog/Sheet rather than a new route. The focused Task product documents now carry this target.
 
 ---
 
-## T2-13 — Archive has no normal unarchive/restore product path
+## T2-13 — Archive leaked into the primary Task lifecycle UX
 
 **Severity:** P2 normal
 
@@ -1046,10 +1079,7 @@ Archive was historically used as lifecycle termination even after the domain sep
 
 ### Repair direction
 
-Product Decision Q4:
-
-- either make Archive a complete closed-history visibility feature with restore;
-- or keep Archive internal/secondary and remove it from normal active-plan UX.
+Resolved direction: remove Archive from the normal Task lifecycle UI. `End plan` maps to explicit Abandon. `archivedAt` remains secondary/internal metadata; a future dedicated Archives feature may expose restore semantics, but the vNext primary Task path does not require that feature.
 
 ---
 
@@ -1087,6 +1117,281 @@ Recent activity
 ```
 
 and provide an explicit inspect/load-more path if full history becomes useful.
+
+---
+
+## T2-15 — Task → KR recording is fixed-delta/Sum-biased
+
+**Severity:** P1 major
+
+The current Task → Goal model assumes that a Task contribution can be decided completely when the Task Plan is configured:
+
+```text
+GoalContributionRule
+  value: positive number
+  trigger: EachCompletion | PlanCompletion
+```
+
+For `EachCompletion`, the Task completion event/outbox copies that fixed value into the Goal settlement event.
+
+Goal then currently accepts source-correlated Task records only for `Sum` KRs.
+
+### Why this is too narrow
+
+KR Measurement V3 already has two different record semantics:
+
+```text
+Sum
+  GoalRecord.value = delta
+
+Average / Max / Min / Last
+  GoalRecord.value = sample
+```
+
+A fixed automatic delta is appropriate for some Sum KRs, but not for measurements such as:
+
+- body weight;
+- response latency;
+- daily score;
+- duration;
+- temperature;
+- average study time;
+- best/worst result;
+- most recent value.
+
+Those values often become known only when the Task is completed.
+
+### A broader Goal-side drift is exposed
+
+The existing `GoalRecordDialog.vue` is also Sum-biased despite Measurement V3 supporting all methods:
+
+- UI always renders a Plus icon;
+- input uses `min=0.1`;
+- validation requires `value > 0`;
+- quick values are rendered as `+1 / +2 / +5 / +10`;
+- the field is named `changeAmount`.
+
+So the Task limitation is not isolated. MemoFlow needs one canonical measurement-aware record composer.
+
+### Proposed interaction
+
+Task → KR binding should support three product modes:
+
+```text
+1. 仅关联
+   Task completion does not create a GoalRecord.
+
+2. 自动记录固定值
+   No dialog on completion.
+   Best for simple Sum deltas such as +1 / +5.
+   Existing behavior becomes this explicit mode.
+
+3. 完成时记录
+   Clicking Complete opens a compact measurement dialog.
+   User enters the value known at completion time.
+   Works with Sum / Average / Max / Min / Last.
+   May carry an optional suggested/default value so common cases are one-click but the value is still editable.
+```
+
+The UI should not expose aggregation mechanics as a technical setting. It adapts from the linked KR.
+
+### Method-aware dialog semantics
+
+```text
+Sum
+  label: 本次变化
+  input: signed delta
+  preview: current -> current + delta
+
+Average
+  label: 本次记录值
+  preview: current average -> new average
+
+Max
+  label: 本次记录值
+  preview: current max -> max(current history, input)
+
+Min
+  label: 本次记录值
+  preview: current min -> min(current history, input)
+
+Last
+  label: 本次记录值
+  preview: current -> input
+```
+
+For Max/Min, the dialog should explicitly say when the new sample is recorded but does not change the displayed current value.
+
+### Preview surface
+
+The proposed completion dialog should be visually compact:
+
+```text
+[Target icon]  更新关键结果
+               每周平均专注时长 · Average
+
+本次记录
+[ 3.5 ] 小时
+
+        Current      After        Target
+           ●──────────● - - - - - ○
+          2.8         3.1          4.0
+
+记录后  +7.5%
+[仅完成任务]                 [记录并完成]
+```
+
+The preview should follow the input live.
+
+Reuse the visual grammar of `GoalKeyResultTrajectoryPlot`, but do **not** reuse that component directly: it edits Initial/Current/Target and has a different semantic contract.
+
+Create a record-specific preview surface instead.
+
+### Ownership boundary
+
+The record composer/preview semantics belong to **Goal**, because Goal owns KR aggregation.
+
+Task owns the completion command and the durable completion fact.
+
+The preferred end-to-end flow is:
+
+```text
+Task row Complete
+  -> Task reads linked KR record context
+  -> measurement-aware dialog (when mode = Prompt)
+  -> user enters value
+  -> CompleteTaskOccurrence command carries optional Goal record intent
+  -> Task completion + durable outbox intent commit together
+  -> Goal consumes the outbox
+  -> Goal creates the authoritative GoalRecord
+  -> Goal recalculates currentValue using its own aggregation method
+```
+
+Do not implement this as two unrelated frontend writes:
+
+```text
+create GoalRecord
+then complete Task
+```
+
+because that creates a dual-write failure window.
+
+### Contract direction
+
+The current fixed `GoalContributionRule` should evolve toward a discriminated progress rule, conceptually:
+
+```ts
+type TaskGoalProgressRule =
+  | {
+      mode: 'Fixed';
+      trigger: 'EachCompletion' | 'PlanCompletion';
+      value: number;
+    }
+  | {
+      mode: 'Prompt';
+      trigger: 'EachCompletion';
+      suggestedValue?: number;
+    };
+```
+
+The exact contract name is implementation-plan work.
+
+Important semantics:
+
+- fixed automatic values remain restricted to compatible automatic semantics;
+- fixed Sum deltas should be finite/non-zero rather than globally positive, so decreasing Sum KRs can use values such as `-1`;
+- prompted user measurements may feed any KR aggregation method;
+- prompted values must be finite and may be signed;
+- Task completion must remain possible when Goal context is unavailable;
+- the dialog therefore needs an escape action such as `仅完成任务`;
+- Task → Goal delivery stays durable/idempotent;
+- uncomplete must revert the source-correlated GoalRecord;
+- re-complete may record a new value after the prior source record is reverted;
+- user-entered Task completion records need a correction path that can change the recorded value without forcing the user to falsify the Task completion state.
+
+### Source linkage is not the same as record provenance
+
+The current Goal model treats every source-correlated record as a non-editable system fact:
+
+```text
+sourceType = TASK_INSTANCE | TASK_TEMPLATE
+sourceId   = occurrence/plan id
+```
+
+That rule is correct for automatic fixed contributions, but it becomes too coarse for `Prompt` mode.
+
+A value typed by the user while completing a Task is still correlated to that Task occurrence for idempotency/revert, but the **measurement itself is user-authored**. If the user types `35` instead of `3.5`, they need a correction path without pretending the Task was not completed.
+
+The implementation plan should therefore separate:
+
+```text
+source correlation
+  = which Task fact this GoalRecord came from
+
+record provenance
+  = who/what authored the measurement
+```
+
+Conceptually:
+
+```text
+Manual
+TaskAutomatic
+TaskUserMeasurement
+```
+
+This does not have to be the final persisted enum name, but the invariant is required.
+
+Recommended behavior:
+
+```text
+Manual
+  -> editable through normal Goal record editing
+
+TaskAutomatic
+  -> source-correlated system fact
+  -> not manually editable
+  -> changes through Task correction/revert
+
+TaskUserMeasurement
+  -> source-correlated for idempotency/revert
+  -> value/note correction allowed through a source-aware record correction command
+  -> correction does not mutate Task completion state
+```
+
+Do not solve measurement typos by forcing:
+
+```text
+uncomplete Task
+ -> re-complete Task
+```
+
+because Task completion and the user-entered measurement are two different facts.
+
+### Authoritative preview
+
+Do not duplicate Average/Max/Min/Last aggregation logic ad hoc in Task UI.
+
+Goal should expose or share a canonical record-preview calculation based on a bounded context such as:
+
+```text
+aggregationMethod
+recordCount
+currentValue
+targetValue
+unit
+progressPercentage
+```
+
+The UI may render the preview locally from this canonical Goal-owned calculation.
+
+The final Goal write remains authoritative; the preview is explicitly a preview because concurrent Goal records can change the final result.
+
+### Repair direction
+
+Treat this as a cross-module Goal + Task vertical slice, not a Task form tweak.
+
+It should supersede the narrower T2-06 repair rather than adding a second competing contribution system.
 
 ---
 
@@ -1174,7 +1479,8 @@ Plan filters operate on plan lifecycle/outcome/visibility.
 Includes:
 
 - T2-06;
-- T2-09.
+- T2-09;
+- T2-15.
 
 Invariant:
 
@@ -1203,17 +1509,17 @@ Repair only after Goal reference interaction is stable.
 
 ---
 
-# 9. Product decisions required before the detailed Task implementation plan
+# 9. Resolved product decisions
 
-## Q1 — Keep a true Quick Task path?
+## Q1 — Quick Task
 
-### Option A — keep Quick Task
+**Decision: A — keep a true Quick Task path.**
 
 ```text
 title
  -> today/all-day default
  -> create
- -> optional later configuration
+ -> configure the Plan later only when needed
 ```
 
 Used by:
@@ -1221,149 +1527,188 @@ Used by:
 - AI welcome/shortcut;
 - Today Overview;
 - Task Capsule;
-- possibly global command.
+- optional global command.
 
-Full “New Task” continues to open TaskPlanDialog.
+Full “New Task” continues to open `TaskPlanDialog`.
 
-**Recommended:** A.
-
-Reason: fast capture and full Plan configuration serve different user intent. The existing capsule already demonstrates that quick capture is valuable.
-
-### Option B — remove Quick Task
-
-Every shortcut opens the full Task Plan create dialog.
-
-Simpler code, but increases capture friction.
+The broken `/tasks?dialog=quick-task` contract must therefore be repaired rather than retired.
 
 ---
 
-## Q2 — Should Plans stay a first-class Task Home surface?
+## Q2 — Plans remains first-class
 
-### Option A
+**Decision: A — keep Plans as a primary Task surface.**
 
-```text
-Today | Upcoming | Plans
-```
-
-Current implementation.
-
-### Option B
+After Q5, the intended top-level Task IA becomes:
 
 ```text
-Today | Upcoming
-...
-Manage plans
+Today | Plans
 ```
 
-Plans becomes secondary, closer to the older Goal/Task product document.
-
-### Assessment
-
-TaskPlan is now a real user-facing concept rather than a hidden template implementation detail, so either is defensible.
-
-**Provisional recommendation:** keep Plans first-class unless the intended Task experience is overwhelmingly daily-execution-centric.
+Task Plan is now a real user-facing owner, not an internal template implementation detail.
 
 ---
 
-## Q3 — Expose completion strictness for finite plans?
+## Q3 — Do not expose completion-policy configuration
 
-Recommended product model:
+**Decision: no user-facing completion-rule setting.**
+
+Users should not have to understand:
 
 ```text
-Completion rule
-
-允许补做
-错过后仍可以纠正/补记
-
-严格达成
-确认错过一次后，计划判定未达成
+AllowCorrection
+StrictNoBackfill
 ```
 
-Show only when the plan has a finite completion scope where the distinction matters.
+The product model is simpler:
 
-**Recommended:** yes.
+```text
+Overdue
+  = still unresolved
+
+User explicitly chooses:
+  Completed  已完成 / 补完成
+  Missed     未完成
+  Skipped    跳过 / 豁免
+```
+
+A missed/skipped occurrence may still later be corrected to Completed; the current occurrence aggregate already supports completion from Missed/Skipped.
+
+### Important domain consequence
+
+The current default `AllowCorrection` evaluator does **not** fully match this product model: for a finite plan with a remaining Missed occurrence, it can keep the Plan outcome `Open` indefinitely.
+
+The convergence pass should therefore remove completion policy from user configuration and move toward one canonical derived rule:
+
+```text
+infinite recurring plan
+  -> Open until explicitly Abandoned
+
+finite plan
+  -> any unresolved Pending/InProgress => Open
+  -> all required occurrences Completed/Skipped => Succeeded
+  -> scope finished and any explicit Missed remains => Failed
+```
+
+Because Missed can later be corrected to Completed, a derived Failed plan can be re-evaluated to Succeeded.
+
+The critical invariant remains:
+
+> overdue alone never implies Missed or Failed.
 
 ---
 
-## Q4 — What should normal users see for Archive?
+## Q4 — Archive should not be a normal Task action
 
-Canonical domain already answers what Archive means; the remaining product choice is visibility.
+**Decision from reference review: keep Archive out of the primary Task UX.**
 
-### Recommended model
+External reference pattern:
 
-Active/open plan:
+- Asana explicitly distinguishes project completion from archive and recommends completing before archiving;
+- Linear uses Completed/Canceled as lifecycle states and auto-archives only closed/inactive work later;
+- Todoist uses Archive as “shelve/remove from active list and restore later,” while recurring Tasks have a separate “permanently complete” concept.
 
-```text
-Pause
-End / Abandon
-Delete mistaken creation
-```
-
-Closed plan:
+MemoFlow should follow the same low-cognitive-load split:
 
 ```text
-Archive / hide from normal history
+Open Plan
+  Pause
+  End plan
+  Delete mistaken creation
+
+End plan
+  -> Abandon
+  -> status = Closed
+  -> outcome = Abandoned
+  -> future materialization stops
+  -> future reminders stop
+
+Succeeded / Failed / Abandoned Plans
+  -> remain available in Plan history/filtering
 ```
 
-Archived history:
+Do not show Archive beside normal Plan lifecycle actions.
 
-```text
-Restore / unarchive
-```
+`archivedAt` may remain as internal/legacy/automatic retention metadata. If MemoFlow later introduces an Archives view, Archive can become a secondary closed-history storage action with Restore, but that is not required for the vNext primary path.
 
-Alternative: keep Archive entirely internal and do not expose it in normal UI.
-
-**Recommended:** expose it only as closed-history cleanup, not active-plan termination.
+This directly fixes the current dangerous “End plan = Archive” mismatch.
 
 ---
 
-## Q5 — What does Upcoming mean at scale?
+## Q5 — Remove Upcoming from Task Home
 
-“All future occurrences” is impossible for never-ending recurring plans.
+**Decision: remove the Upcoming Task surface.**
 
-Candidate semantics:
-
-### A — bounded time window
+Future scheduled work already has a better owner:
 
 ```text
-next 30 days
-+ load more
+Schedule / Calendar
 ```
 
-### B — bounded item window
+Task Home should answer:
 
 ```text
-next N occurrences
-+ load more
+Today:
+  what should I act on now?
+  what is overdue and still unresolved?
+
+Plans:
+  how are my action plans configured and progressing?
 ```
 
-### C — grouped near future
+Future calendar browsing belongs to Schedule rather than duplicating a second partial calendar inside Task.
+
+Target Task Home:
 
 ```text
-next 7 days first
-later section lazy-loaded
+Today | Plans
 ```
 
-**Recommended:** C/B hybrid — prioritize near future, then progressively load the next bounded set. Do not materialize/query unbounded future.
+Today may internally group:
+
+```text
+Overdue
+Today
+```
+
+but should not materialize or query an unbounded future list.
 
 ---
 
-## Q6 — What should clicking a Today occurrence open?
+## Q6 — Occurrence inspect uses Dialog/Sheet, not another route
 
-Do not create another deep route by default.
-
-Candidate direction:
+**Decision: use the recommended compact inspect interaction.**
 
 ```text
 Today row
- -> direct actions/checklist inline
- -> click row -> compact Occurrence Inspect Dialog/Sheet if more detail is needed
- -> explicit “View plan” -> /tasks/:planId
+ -> direct Complete / checklist / basic actions
+ -> click row
+ -> Occurrence Inspect Dialog / Sheet
+ -> explicit “View plan”
+ -> /tasks/:planId
 ```
 
-This follows the same “avoid unnecessary navigation depth” principle adopted for Goal KR/Review while preserving Task Plan as a separate owner workspace.
+No `TaskOccurrenceDetailView` route should be added by default.
 
-**Recommended:** this direction.
+This preserves Task Plan as an owner workspace while avoiding another deep navigation layer for individual execution facts.
+
+---
+
+## Q7 — Completion-time KR recording
+
+**Direction accepted for design:** add an optional completion-time record mode so Task completion can capture a real KR measurement instead of only replaying a fixed Sum delta.
+
+The detailed architecture is recorded in T2-15.
+
+Product-level binding choices should converge toward:
+
+```text
+仅关联
+自动记录固定值
+完成时记录
+```
+
+with the last mode adapting automatically to the KR measurement method and showing a live before/after/target preview.
 
 ---
 
@@ -1387,7 +1732,8 @@ This is the correctness foundation.
 Fix:
 
 - T2-06;
-- T2-09.
+- T2-09;
+- T2-15.
 
 Goal measurement semantics must be represented correctly before AI/Task drafts converge.
 

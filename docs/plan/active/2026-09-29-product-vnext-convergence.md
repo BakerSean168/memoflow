@@ -706,49 +706,166 @@ Promote Phase-0 screenshots into CI/review gates for core surfaces.
 
 ## Product target
 
-Keep Task’s canonical Plan/Occurrence split while making the UI behave like the same product as Goal.
+Keep Task’s canonical Plan/Occurrence split, but simplify the user model to two primary Task surfaces:
+
+```text
+Today | Plans
+```
+
+Future temporal browsing belongs to Schedule / Calendar rather than a duplicated Upcoming surface.
 
 Primary paths:
 
 ```text
-Task create
-Task list / Today / Upcoming
+Quick Task capture
+Full Task create
+Today execution + overdue correction
+Occurrence Inspect Dialog/Sheet
 Task Plan workspace
-Occurrence quick execution
 Checklist
-Goal/KR contribution context
+Schedule handoff
+Goal/KR link + completion-time record
 ```
+
+Protected Task semantics:
+
+- Overdue is derived and never auto-Missed;
+- user explicitly chooses Completed / Missed / Skipped;
+- no user-facing completion-policy configuration;
+- Plan outcome remains derived;
+- End Plan means Abandon, never Archive;
+- Archive is not a normal Task action;
+- TaskOccurrence gets no new detail route by default;
+- Goal remains owner of KR aggregation and GoalRecord truth.
 
 ## Audit/implementation tickets
 
-### PVC-TASK-3001 — Task surface audit
+### PVC-TASK-3001 — Task second-pass surface/domain audit
 
-Review:
+**Status:** discovery complete.
 
-- create dialog density;
-- property-chip semantics;
-- Plan vs Occurrence language;
-- Task list row density;
-- Task Detail direct manipulation;
-- checklist editing;
-- reminder/date/recurrence surfaces;
-- Goal/KR binding;
-- deep navigation;
-- empty/loading/error behavior.
+Deliverable:
 
-Deliverable: verified drift ledger and bounded migration set.
+- [Task vNext second-pass deep audit](../../analysis/2026-09-29-task-vnext-second-pass-deep-audit.md);
+- verified P0–P3 ledger;
+- resolved Q1–Q6 product decisions;
+- T2-15 completion-time KR record direction.
+
+### PVC-TASK-3002 — Repair Task lifecycle/outcome truth
+
+**Goal:** one product action has one domain meaning.
+
+Implement before broader UI convergence:
+
+- remove `Archive` from the normal “End plan” path;
+- expose/use explicit Abandon for user-driven plan termination;
+- ensure Abandon stops future occurrence materialization and reminders;
+- reconcile/remove already-materialized incomplete future occurrences when ending a plan;
+- add the missing abandonment projection/event path so Schedule does not retain future execution for an ended plan;
+- present Succeeded / Failed / Abandoned distinctly;
+- remove the invalid optimistic `archive -> Closed` frontend patch;
+- keep Delete for mistaken creation;
+- keep `archivedAt` secondary/internal rather than a normal lifecycle control.
+
+Before changing the contract, revise/supersede ADR-057's configurable completion-policy section and define the compatibility path for persisted/portable `completionPolicy` data. Do not silently delete the field while old bundles/clients may still carry it.
+
+Then converge the hidden completion-policy model toward one product rule:
+
+```text
+Overdue -> unresolved
+Completed / Missed / Skipped -> explicit occurrence facts
+
+finite scope:
+  unresolved occurrence -> Open
+  all required completed/waived -> Succeeded
+  scope ended + explicit Missed remains -> Failed
+
+infinite recurring:
+  -> Open until explicitly Abandoned
+```
+
+### PVC-TASK-3003 — Converge Task Home to Today | Plans
+
+Retire the Task Upcoming surface.
+
+Today:
+
+- owns today + unresolved overdue occurrences;
+- does not query/materialize unbounded future history;
+- groups overdue separately when useful;
+- uses occurrence-specific filters only.
+
+Plans:
+
+- remains first-class;
+- uses Plan lifecycle/outcome filters, not hidden occurrence status state;
+- resolves Goal/KR scope labels to product names, not raw IDs.
+
+Future browsing deep-links/opens Schedule / Calendar.
+
+### PVC-TASK-3004 — Restore canonical Quick Task
+
+Repair the currently disconnected quick-create contract used by AI / Today Overview / shell surfaces.
+
+Quick Task remains intentionally smaller than full Task create:
+
+```text
+title
+ -> today/all-day default
+ -> create
+```
+
+Full Plan configuration remains available after creation and through the normal New Task dialog.
 
 ### PVC-TASK-3101 — Align Task create/detail grammar
 
-Reuse only the primitives proven by Goal while preserving Task-owned Plan/Occurrence semantics.
+After lifecycle and owner behavior are correct, reuse only the primitives proven by Goal while preserving Task-owned Plan/Occurrence semantics.
 
-### PVC-TASK-3201 — Occurrence execution surface
+Do not start this ticket by creating a universal Goal/Task detail component.
+
+### PVC-TASK-3201 — Occurrence execution + inspect surface
 
 Ensure complete/skip/missed/checklist actions remain quick and do not route through Plan editing.
 
-### PVC-TASK-3301 — Task/Goal contribution clarity
+Interaction:
 
-Make it visually clear when a Task contributes to a KR versus merely being related to a Goal.
+```text
+Today row
+ -> direct actions
+ -> click row -> compact Inspect Dialog/Sheet
+ -> View plan -> /tasks/:planId
+```
+
+No `TaskOccurrenceDetailView` by default.
+
+### PVC-TASK-3301 — Measurement-aware Task → KR recording
+
+Replace the current fixed-delta-only mental model with three product modes:
+
+```text
+仅关联
+自动记录固定值
+完成时记录
+```
+
+Requirements:
+
+- fixed automatic mode preserves the low-friction existing use case;
+- fixed Sum deltas may be signed so decreasing KRs are supported;
+- prompt mode works with Sum / Average / Max / Min / Last;
+- Sum record input is a delta;
+- Average/Max/Min/Last input is a sample;
+- Goal owns preview/aggregation semantics;
+- completion dialog shows a live Current → After → Target preview;
+- Task completion plus Goal-record intent uses the durable Task → Goal outbox, not frontend dual writes;
+- Task completion remains possible through an explicit “complete without record” escape path;
+- uncomplete reverses the source-correlated GoalRecord;
+- re-complete can create the replacement record value;
+- source correlation and record provenance are separate: automatic Task records stay immutable system facts, while user-entered completion measurements remain source-correlated but have a Goal-owned correction path that does not mutate Task completion state.
+
+This ticket should also replace the current Sum-biased Goal record composer with a measurement-aware Goal-owned record input/preview primitive so manual Goal records and Task-completion records share one semantic implementation.
+
+Before contract implementation, amend ADR-068's Task-contribution boundary to distinguish `automatic fixed contribution` (still constrained by compatible automatic semantics) from `user-authored completion measurement` (may produce delta/sample records for any supported KR method).
 
 ---
 
