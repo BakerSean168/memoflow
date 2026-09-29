@@ -135,7 +135,12 @@ const i18n = createI18n({
         schedule: 'Schedule',
       },
       shell: {
-        conversation: { today: 'Today', last7Days: 'Last 7 days', earlier: 'Earlier' },
+        conversation: {
+          today: 'Today',
+          last7Days: 'Last 7 days',
+          earlier: 'Earlier',
+          resize: 'Resize conversations',
+        },
         panel: {
           home: 'Today',
           workflow: 'Workflow',
@@ -201,6 +206,40 @@ describe('AppShell right-panel integration', () => {
     expect(wrapper.get('[data-testid="today-overview-panel"]').exists()).toBe(true);
     const workflowSurface = wrapper.get('[data-testid="shell-workflow-surface"]');
     expect(workflowSurface.find('[data-testid="workflow-teleport-probe"]').exists()).toBe(true);
+    wrapper.unmount();
+  });
+
+  it('renders the workspace as inset persistent panes with gutter-owned resizers', async () => {
+    const { wrapper } = await mountShell();
+
+    expect(wrapper.get('[data-testid="shell-workspace-stage"]').classes()).toContain(
+      'workspace-stage',
+    );
+    expect(wrapper.get('[data-testid="shell-sidebar-pane"]').classes()).toEqual(
+      expect.arrayContaining(['workspace-pane', 'workspace-pane--navigation']),
+    );
+    expect(wrapper.get('[data-testid="shell-ai-column"]').classes()).toEqual(
+      expect.arrayContaining(['workspace-pane', 'workspace-pane--primary']),
+    );
+    expect(wrapper.get('[data-testid="shell-business-pane"]').classes()).toEqual(
+      expect.arrayContaining(['workspace-pane', 'workspace-pane--business']),
+    );
+
+    const sidebarResizer = wrapper.get('[data-testid="conversation-sidebar-resizer"]');
+    expect(sidebarResizer.attributes()).toMatchObject({
+      role: 'separator',
+      tabindex: '0',
+      'aria-orientation': 'vertical',
+    });
+    expect(sidebarResizer.classes()).toContain('workspace-resizer--right');
+
+    const businessResizer = wrapper.get('[data-testid="business-panel-resizer"]');
+    expect(businessResizer.attributes()).toMatchObject({
+      role: 'separator',
+      tabindex: '0',
+      'aria-orientation': 'vertical',
+    });
+    expect(businessResizer.classes()).toContain('workspace-resizer--left');
     wrapper.unmount();
   });
 

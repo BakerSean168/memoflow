@@ -167,22 +167,14 @@ describe('BusinessPanel surfaces', () => {
     expect(wrapper.emitted('close-tab')).toEqual([['tab-goal-1']]);
   });
 
-  it('exposes the resize handle as a keyboard-operable separator', async () => {
+  it('delegates outer pane boundaries and resizing to AppShell', () => {
     const wrapper = mountPanel('business');
-    const separator = wrapper.get('[data-testid="business-panel-resizer"]');
+    const panel = wrapper.get('[data-testid="business-panel"]');
 
-    expect(separator.attributes()).toMatchObject({
-      role: 'separator',
-      tabindex: '0',
-      'aria-orientation': 'vertical',
-      'aria-label': 'Resize business panel',
-    });
-    expect(separator.classes()).toEqual(expect.arrayContaining(['left-0', 'z-20']));
-    expect(separator.classes()).not.toContain('-translate-x-1/2');
-
-    await separator.trigger('keydown', { key: 'ArrowLeft' });
-    await separator.trigger('keydown', { key: 'ArrowRight' });
-    expect(wrapper.emitted('resize-by')).toEqual([[24], [-24]]);
+    expect(panel.classes()).toContain('bg-transparent');
+    expect(panel.classes()).not.toContain('border-l');
+    expect(panel.classes()).not.toContain('bg-background');
+    expect(wrapper.find('[data-testid="business-panel-resizer"]').exists()).toBe(false);
   });
 
   it('keeps surface wrappers overflow-hidden with exactly one data-scroll-host each (Phase 2)', () => {

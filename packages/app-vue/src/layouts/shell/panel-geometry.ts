@@ -18,6 +18,45 @@ export const SIDEBAR_COLLAPSE_THRESHOLD = 96;
 /** Below this effective viewport, release the sidebar budget without changing user preference. */
 export const SIDEBAR_AUTO_COLLAPSE_VIEWPORT = 960;
 
+/**
+ * Workspace stage chrome. Desktop panes live on an inset canvas instead of
+ * meeting on hard border intersections. Geometry must reserve the same budget
+ * that CSS consumes so AI / business hard minimums remain truthful.
+ */
+export const WORKSPACE_COMPACT_BREAKPOINT = 768;
+export const WORKSPACE_DESKTOP_BREAKPOINT = 1200;
+export const WORKSPACE_DESKTOP_INSET = 4;
+export const WORKSPACE_DESKTOP_GAP = 4;
+export const WORKSPACE_MID_INSET = 3;
+export const WORKSPACE_MID_GAP = 3;
+
+export interface WorkspaceChromeMetrics {
+  inset: number;
+  gap: number;
+}
+
+export function resolveWorkspaceChromeMetrics(viewportWidth: number): WorkspaceChromeMetrics {
+  const width = Math.max(0, Math.floor(viewportWidth));
+  if (width < WORKSPACE_COMPACT_BREAKPOINT) return { inset: 0, gap: 0 };
+  if (width < WORKSPACE_DESKTOP_BREAKPOINT) {
+    return { inset: WORKSPACE_MID_INSET, gap: WORKSPACE_MID_GAP };
+  }
+  return { inset: WORKSPACE_DESKTOP_INSET, gap: WORKSPACE_DESKTOP_GAP };
+}
+
+/**
+ * Split geometry always contains AI + business and may also contain sidebar.
+ * Return the canvas inset + inter-pane gutters that are unavailable to content.
+ */
+export function workspaceChromeBudget(
+  viewportWidth: number,
+  sidebarOccupiedWidth: number,
+): number {
+  const { inset, gap } = resolveWorkspaceChromeMetrics(viewportWidth);
+  const paneCount = sidebarOccupiedWidth > 0 ? 3 : 2;
+  return inset * 2 + gap * Math.max(0, paneCount - 1);
+}
+
 /** Global Composer 宿主几何（§8.4）。 */
 export const COMPOSER_MAX = 740;
 export const COMPOSER_SIDE_GAP = 28;
@@ -69,7 +108,8 @@ export function shouldAutoCollapseSidebar(viewportWidth: number): boolean {
 export function computePanelGeometry(input: PanelGeometryInput): PanelGeometry {
   const viewportWidth = Math.max(0, Math.floor(input.viewportWidth));
   const sidebarOccupiedWidth = Math.max(0, Math.floor(input.sidebarOccupiedWidth));
-  const workspaceWidth = Math.max(0, viewportWidth - sidebarOccupiedWidth);
+  const chromeBudget = workspaceChromeBudget(viewportWidth, sidebarOccupiedWidth);
+  const workspaceWidth = Math.max(0, viewportWidth - sidebarOccupiedWidth - chromeBudget);
   // There is no product maximum. The upper bound is only the current legal
   // split range after reserving the AI minimum; this changes with the window.
   const panelMax = Math.max(0, workspaceWidth - AI_HARD_MIN);
@@ -107,8 +147,14 @@ export function panelWidthFromPointer(
   sidebarOccupiedWidth: number,
 ): number {
   void sidebarOccupiedWidth;
-  const raw = Math.max(0, Math.round(viewportWidth - clientX));
+  const { inset } = resolveWorkspaceChromeMetrics(viewportWidth);
+  const raw = Math.max(0, Math.round(viewportWidth - inset - clientX));
   return raw;
+}
+
+export function sidebarWidthFromPointer(clientX: number, viewportWidth: number): number {
+  const { inset } = resolveWorkspaceChromeMetrics(viewportWidth);
+  return Math.max(0, Math.round(clientX - inset));
 }
 
 export function shouldCollapsePanelWidth(width: number): boolean {

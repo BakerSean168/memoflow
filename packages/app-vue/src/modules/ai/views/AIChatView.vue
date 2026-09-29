@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex min-h-0 overflow-hidden bg-background"
+    class="flex min-h-0 overflow-hidden bg-transparent"
     :class="composerOnly ? 'h-auto' : 'h-full'"
     data-testid="ai-chat-view"
   >

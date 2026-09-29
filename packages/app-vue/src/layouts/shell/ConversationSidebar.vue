@@ -41,8 +41,6 @@ const props = defineProps<{
   loading?: boolean;
   /** 桌面端顶部留出拖拽/窗控空间的高度补偿。 */
   isDesktop?: boolean;
-  /** Current persisted width for the accessible resize separator. */
-  width?: number;
 }>();
 
 const emit = defineEmits<{
@@ -54,8 +52,6 @@ const emit = defineEmits<{
   (e: 'open-account'): void;
   (e: 'open-cloud-connection'): void;
   (e: 'logout'): void;
-  (e: 'start-resize', event: MouseEvent): void;
-  (e: 'resize-by', delta: number): void;
 }>();
 
 const { t } = useI18n();
@@ -72,7 +68,7 @@ const identityLabel = () => {
 <template>
   <aside
     data-testid="conversation-sidebar"
-    class="conversation-sidebar relative flex h-full flex-col border-r border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.72)] text-sidebar-foreground"
+    class="conversation-sidebar relative flex h-full flex-col bg-transparent text-sidebar-foreground"
   >
     <!-- 头：品牌 + 搜索 -->
     <div class="flex h-11 shrink-0 items-center justify-between px-3">
@@ -206,18 +202,5 @@ const identityLabel = () => {
       </DropdownMenu>
     </div>
 
-    <!-- 拖宽把手 -->
-    <div
-      role="separator"
-      tabindex="0"
-      aria-orientation="vertical"
-      :aria-label="t('shell.conversation.resize')"
-      aria-valuemin="200"
-      :aria-valuenow="width ?? 260"
-      class="absolute right-0 top-0 h-full w-[3px] cursor-col-resize bg-transparent transition-colors hover:bg-primary/40"
-      @mousedown="emit('start-resize', $event)"
-      @keydown.left.prevent="emit('resize-by', -24)"
-      @keydown.right.prevent="emit('resize-by', 24)"
-    />
   </aside>
 </template>

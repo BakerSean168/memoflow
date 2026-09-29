@@ -31,7 +31,6 @@ import {
 } from '@lucide/vue';
 import type { Component } from 'vue';
 import type { BusinessTab, PanelSurface, ShellLayout, ShellModule } from './useAppShellStore';
-import { BUSINESS_HARD_MIN } from './panel-geometry';
 import { providePanelWidth } from './usePanelWidth';
 import {
   resolveBusinessTabDensity,
@@ -54,9 +53,6 @@ const emit = defineEmits<{
   (e: 'show-workflow'): void;
   (e: 'close-workflow'): void;
   (e: 'toggle-focus'): void;
-  (e: 'start-resize', event: PointerEvent): void;
-  (e: 'reset-width'): void;
-  (e: 'resize-by', delta: number): void;
 }>();
 
 const { t } = useI18n();
@@ -160,7 +156,7 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
 
 <template>
   <section
-    class="business-panel relative flex h-full flex-col border-l border-[hsl(var(--border-subtle))] bg-background"
+    class="business-panel relative flex h-full flex-col bg-transparent"
     data-testid="business-panel"
     :data-tab-density="tabDensity"
   >
@@ -341,22 +337,5 @@ function handleTabKeydown(event: KeyboardEvent, tabId: string): void {
       </div>
     </div>
 
-    <!-- 拖宽把手（split 态左边缘；focus 态满屏不需要） -->
-    <div
-      v-if="!isFocused"
-      data-testid="business-panel-resizer"
-      role="separator"
-      tabindex="0"
-      aria-orientation="vertical"
-      :aria-label="t('shell.panel.resize')"
-      :aria-valuemin="BUSINESS_HARD_MIN"
-      :aria-valuenow="Math.round(panelContentWidth ?? 720)"
-      class="absolute left-0 top-0 z-20 h-full w-2 cursor-col-resize bg-transparent transition-colors hover:bg-primary/40 focus-visible:bg-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      :title="t('shell.panel.resize')"
-      @pointerdown="emit('start-resize', $event)"
-      @dblclick.stop="emit('reset-width')"
-      @keydown.left.prevent="emit('resize-by', 24)"
-      @keydown.right.prevent="emit('resize-by', -24)"
-    />
   </section>
 </template>
