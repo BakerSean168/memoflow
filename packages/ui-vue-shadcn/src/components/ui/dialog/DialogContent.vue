@@ -29,12 +29,12 @@ const contentBindings = computed(() => ({
 
 <template>
   <DialogPortal>
-    <DialogOverlay :class="cn('fixed inset-0 z-50 bg-black/80', dialogOverlayMotionClass)" />
+    <DialogOverlay :class="cn('fixed inset-0 z-50 bg-black/60 backdrop-blur-[2px]', dialogOverlayMotionClass)" />
     <DialogContent
       v-bind="contentBindings"
       :class="
         cn(
-          'fixed left-1/2 top-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 border bg-background p-6 shadow-lg sm:rounded-lg',
+          'fixed left-1/2 top-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay))] p-6 shadow-[0_24px_70px_-28px_rgba(0,0,0,0.72),0_8px_24px_-18px_rgba(0,0,0,0.55),inset_0_1px_0_hsl(var(--foreground)/0.03)]',
           dialogContentMotionClass,
           props.class,
         )

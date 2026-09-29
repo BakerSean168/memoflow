@@ -32,7 +32,7 @@ const contentBindings = computed(() => ({
     <DialogOverlay
       :class="
         cn(
-          'fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-black/80',
+          'fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-black/60 backdrop-blur-[2px]',
           dialogOverlayMotionClass,
         )
       "
@@ -41,7 +41,7 @@ const contentBindings = computed(() => ({
         v-bind="contentBindings"
         :class="
           cn(
-            'relative z-50 my-8 grid w-full max-w-lg gap-4 border border-border bg-background p-6 shadow-lg sm:rounded-lg md:w-full',
+            'relative z-50 my-8 grid w-full max-w-lg gap-4 rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay))] p-6 shadow-[0_24px_70px_-28px_rgba(0,0,0,0.72),0_8px_24px_-18px_rgba(0,0,0,0.55),inset_0_1px_0_hsl(var(--foreground)/0.03)] md:w-full',
             dialogContentMotionClass,
             props.class,
           )

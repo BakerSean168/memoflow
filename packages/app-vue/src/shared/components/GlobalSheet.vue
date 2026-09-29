@@ -48,13 +48,16 @@ const DynamicSheetBody = defineComponent({
   >
     <SheetContent
       :side="state.side"
-      :class="cn('flex h-full min-h-0 flex-col overflow-hidden', state.class)"
+      :class="cn('flex h-full min-h-0 flex-col overflow-hidden bg-[hsl(var(--surface-overlay))]', state.class)"
     >
-      <SheetHeader v-if="state.title || state.description">
+      <SheetHeader
+        v-if="state.title || state.description"
+        class="shrink-0 border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.5)] pb-4 pr-8"
+      >
         <SheetTitle v-if="state.title">{{ state.title }}</SheetTitle>
         <SheetDescription v-if="state.description">{{ state.description }}</SheetDescription>
       </SheetHeader>
-      <div class="min-h-0 flex-1 overflow-y-auto py-4">
+      <div class="min-h-0 flex-1 overflow-y-auto py-3">
         <DynamicSheetBody
           v-if="state.component"
           :component="state.component"

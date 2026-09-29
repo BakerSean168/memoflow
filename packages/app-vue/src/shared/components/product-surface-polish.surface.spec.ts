@@ -68,6 +68,22 @@ describe('MemoFlow product surface polish', () => {
     expect(reminder).not.toContain('TimeProgressPercentage');
   });
 
+  it('keeps Goal review and Key Result secondary pages on the shared product header and semantic surfaces', () => {
+    const reviewCreate = read('modules/goal/views/GoalReviewCreationView.vue');
+    const reviewDetail = read('modules/goal/views/GoalReviewDetailView.vue');
+    const keyResultDetail = read('modules/goal/views/KeyResultDetailView.vue');
+
+    for (const source of [reviewCreate, reviewDetail, keyResultDetail]) {
+      expect(source).toContain('<ModuleHeader>');
+      expect(source).not.toContain('min-h-14 items-center gap-2 border-b');
+      expect(source).not.toContain('rounded-lg border bg-card');
+    }
+
+    expect(reviewCreate).toContain('surface-raised');
+    expect(reviewDetail).toContain('Authoritative progress snapshot');
+    expect(keyResultDetail).toContain('border-[hsl(var(--border-subtle))]');
+  });
+
   it('keeps standalone Key Result create/edit on the same trajectory editor as the Goal form', () => {
     const goalDialog = read('modules/goal/components/dialogs/GoalDialog.vue');
     const keyResultDialog = read('modules/goal/components/dialogs/KeyResultDialog.vue');

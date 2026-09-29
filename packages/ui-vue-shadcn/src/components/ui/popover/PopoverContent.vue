@@ -38,7 +38,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
       v-bind="{ ...forwarded, ...$attrs }"
       :class="
         cn(
-          'z-50 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
+          'z-50 w-72 rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay))] p-4 text-popover-foreground shadow-[0_18px_48px_-22px_rgba(0,0,0,0.52),0_4px_14px_-10px_rgba(0,0,0,0.45),inset_0_1px_0_hsl(var(--foreground)/0.025)] outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1',
           props.class,
         )
       "

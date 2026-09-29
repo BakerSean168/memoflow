@@ -1,6 +1,6 @@
 <template>
-  <Card data-testid="ai-settings-panel">
-    <CardHeader class="gap-3">
+  <Card class="border-0 bg-transparent shadow-none" data-testid="ai-settings-panel">
+    <CardHeader class="gap-3 px-0 pt-0">
       <div class="flex flex-wrap items-start justify-between gap-3">
         <div>
           <CardTitle>{{ t('setting.ai.title') }}</CardTitle>
@@ -18,7 +18,7 @@
 
       <div
         v-if="defaultProvider"
-        class="rounded-xl border border-border/60 bg-muted/30 px-4 py-3"
+        class="rounded-xl bg-[hsl(var(--surface-raised)/0.5)] px-4 py-3 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.58),inset_0_1px_0_hsl(var(--foreground)/0.02)]"
         data-testid="ai-provider-default-summary"
       >
         <div class="flex flex-wrap items-center justify-between gap-3">
@@ -36,7 +36,7 @@
       </div>
     </CardHeader>
 
-    <CardContent class="space-y-4">
+    <CardContent class="space-y-4 px-0 pb-0">
       <div class="flex items-start justify-between gap-3">
         <div>
           <h3 class="text-base font-semibold">{{ t('setting.ai.connectedProviders') }}</h3>
@@ -48,7 +48,7 @@
         <div
           v-for="provider in providerItems"
           :key="provider.id"
-          class="rounded-xl border border-border/60 bg-background/70 p-4"
+          class="rounded-xl bg-[hsl(var(--surface-raised)/0.4)] p-4 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.52)]"
         >
           <div class="flex flex-wrap items-start justify-between gap-4">
             <div class="min-w-0 space-y-1.5">
@@ -130,7 +130,7 @@
 
       <div
         v-else
-        class="flex min-h-36 flex-col items-center justify-center rounded-xl border border-dashed border-border/70 px-6 py-8 text-center"
+        class="flex min-h-36 flex-col items-center justify-center rounded-xl bg-[hsl(var(--surface-raised)/0.25)] px-6 py-8 text-center shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.45)]"
         data-testid="ai-provider-empty"
       >
         <p class="font-medium">{{ t('setting.ai.emptyTitle') }}</p>
@@ -141,8 +141,13 @@
   </Card>
 
   <Dialog :open="onboardingOpen" @update:open="handleDialogOpenChange">
-    <DialogContent class="flex max-h-[88vh] min-h-0 max-w-3xl flex-col overflow-hidden p-0" data-testid="ai-provider-onboarding">
-      <DialogHeader class="shrink-0 border-b px-6 py-5 text-left">
+    <DialogContent
+      class="flex max-h-[88vh] min-h-0 max-w-3xl flex-col overflow-hidden rounded-2xl p-0"
+      data-testid="ai-provider-onboarding"
+    >
+      <DialogHeader
+        class="shrink-0 border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.5)] px-5 py-4 text-left"
+      >
         <div class="flex items-center gap-2 text-xs text-muted-foreground">
           <template v-for="(step, index) in flowSteps" :key="step">
             <span v-if="index > 0">—</span>
@@ -164,7 +169,7 @@
               v-for="entry in filteredCatalog"
               :key="entry.id"
               type="button"
-              class="group rounded-xl border border-border/70 p-4 text-left transition-colors hover:border-primary/40 hover:bg-muted/40"
+              class="group rounded-xl bg-[hsl(var(--surface-raised)/0.38)] p-4 text-left shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.52)] transition-[background-color,box-shadow,transform] duration-150 hover:-translate-y-px hover:bg-[hsl(var(--surface-raised)/0.72)] hover:shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.72),0_8px_22px_-18px_rgba(0,0,0,0.5)]"
               :data-testid="`ai-provider-catalog-${entry.id}`"
               @click="selectCatalogEntry(entry)"
             >
@@ -188,7 +193,7 @@
         </div>
 
         <div v-else-if="onboardingStep === 'connection' && selectedCatalog" class="space-y-5">
-          <div class="rounded-xl border border-border/60 bg-muted/25 p-4">
+          <div class="rounded-xl bg-[hsl(var(--surface-raised)/0.4)] p-4 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.52)]">
             <div class="flex items-center gap-3">
               <div class="flex size-10 items-center justify-center rounded-lg bg-muted text-sm font-semibold">
                 {{ providerGlyph(selectedCatalog.id) }}
@@ -212,7 +217,7 @@
           </div>
           <div v-else class="space-y-1">
             <Label>{{ t('setting.ai.endpoint') }}</Label>
-            <p class="break-all rounded-lg border bg-muted/25 px-3 py-2 text-sm text-muted-foreground">
+            <p class="break-all rounded-lg bg-[hsl(var(--surface-raised)/0.42)] px-3 py-2 text-sm text-[hsl(var(--foreground-muted))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)]">
               {{ selectedCatalog.defaultBaseUrl }}
             </p>
           </div>
@@ -245,7 +250,7 @@
         </div>
 
         <div v-else-if="onboardingStep === 'model' && probeResult && selectedCatalog" class="space-y-4">
-          <div class="rounded-xl border border-border/60 bg-muted/25 px-4 py-3 text-sm">
+          <div class="rounded-xl bg-[hsl(var(--surface-raised)/0.4)] px-4 py-3 text-sm shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.52)]">
             <p class="font-medium">{{ t('setting.ai.connectionVerified') }}</p>
             <p class="mt-1 break-all text-xs text-muted-foreground">{{ probeResult.baseUrl }}</p>
           </div>
@@ -265,8 +270,12 @@
                 v-for="model in filteredModels"
                 :key="model.id"
                 type="button"
-                class="w-full rounded-xl border p-3 text-left transition-colors"
-                :class="selectedModelId === model.id ? 'border-primary bg-primary/5' : 'border-border/60 hover:bg-muted/40'"
+                class="w-full rounded-xl p-3 text-left shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)] transition-[background-color,box-shadow]"
+                :class="
+                  selectedModelId === model.id
+                    ? 'bg-primary/[0.08] shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.42)]'
+                    : 'bg-[hsl(var(--surface-raised)/0.28)] hover:bg-[hsl(var(--hover)/0.72)]'
+                "
                 @click="selectModel(model.id)"
               >
                 <div class="flex items-start justify-between gap-3">
@@ -293,13 +302,19 @@
             </div>
           </template>
 
-          <div v-if="needsManualModel" class="space-y-2 rounded-xl border border-dashed border-border/70 p-4">
+          <div
+            v-if="needsManualModel"
+            class="space-y-2 rounded-xl bg-[hsl(var(--surface-raised)/0.24)] p-4 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.45)]"
+          >
             <p class="font-medium">{{ t('setting.ai.manualModelTitle') }}</p>
             <p class="text-sm text-muted-foreground">{{ t('setting.ai.manualModelDescription') }}</p>
             <Input v-model="manualModelId" :placeholder="t('setting.ai.manualModelPlaceholder')" @input="handleManualModelInput" />
           </div>
 
-          <div v-if="effectiveModelId" class="rounded-xl border border-border/60 p-4">
+          <div
+            v-if="effectiveModelId"
+            class="rounded-xl bg-[hsl(var(--surface-raised)/0.34)] p-4 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)]"
+          >
             <div class="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p class="text-xs text-muted-foreground">{{ t('setting.ai.selectedModel') }}</p>
@@ -317,7 +332,9 @@
         </div>
 
         <div v-else-if="onboardingStep === 'review' && probeResult && selectedCatalog" class="space-y-4">
-          <div class="rounded-xl border border-border/60 divide-y divide-border/60">
+          <div
+            class="divide-y divide-[hsl(var(--border-subtle))] rounded-xl bg-[hsl(var(--surface-raised)/0.3)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)]"
+          >
             <div class="grid gap-1 px-4 py-3 sm:grid-cols-[140px_1fr]">
               <span class="text-sm text-muted-foreground">{{ t('setting.ai.providerName') }}</span>
               <span class="text-sm font-medium">{{ connectionName }}</span>
@@ -334,7 +351,7 @@
 
           <div
             v-if="onboardingMode === 'create'"
-            class="flex items-center justify-between gap-4 rounded-xl border border-border/60 px-4 py-3"
+            class="flex items-center justify-between gap-4 rounded-xl bg-[hsl(var(--surface-raised)/0.3)] px-4 py-3 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)]"
           >
             <div>
               <p class="text-sm font-medium">{{ t('setting.ai.markAsDefault') }}</p>
@@ -348,7 +365,7 @@
           </div>
           <div
             v-else
-            class="rounded-xl border border-border/60 bg-muted/25 px-4 py-3 text-sm text-muted-foreground"
+            class="rounded-xl bg-[hsl(var(--surface-raised)/0.3)] px-4 py-3 text-sm text-[hsl(var(--foreground-muted))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)]"
             data-testid="ai-provider-replacement-preserved-metadata"
           >
             {{ t('setting.ai.replacementPreservesMetadata') }}
@@ -360,7 +377,9 @@
         </div>
       </div>
 
-      <DialogFooter class="shrink-0 border-t px-6 py-4">
+      <DialogFooter
+        class="shrink-0 border-t border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.58)] px-5 py-3.5"
+      >
         <div class="flex w-full items-center justify-between gap-3">
           <Button v-if="onboardingStep !== flowSteps[0]" variant="ghost" :disabled="isBusy" @click="goBack">
             {{ t('setting.ai.back') }}
