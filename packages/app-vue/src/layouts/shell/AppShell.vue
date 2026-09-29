@@ -577,6 +577,13 @@ watch([showSidebar, sidebarWidth, sidebarCollapsed], () => {
   onViewportGeometryChange();
 });
 
+watch(rightPanelOpen, (open) => {
+  // Reopening the business/workflow panel changes the geometry budget. A conversation
+  // may have restored its split preference while the app was chat-only, so narrow
+  // viewports must immediately re-apply the viewport-owned focus override.
+  if (open) onViewportGeometryChange();
+});
+
 // ── 业务工作区入口 / 面板动作（导航细节在 useShellRouterSync） ──
 function openHeaderModule(payload: { id: string; route: string }): void {
   if (!headerCapsules.value.some((entry) => entry.id === payload.id)) return;
