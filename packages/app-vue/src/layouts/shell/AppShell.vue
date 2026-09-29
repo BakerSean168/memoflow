@@ -996,11 +996,13 @@ function panelCacheKey(
 
 <style scoped>
 .workspace-stage {
-  --workspace-inset: 4px;
-  --workspace-gap: 4px;
+  --workspace-inset: 6px;
+  --workspace-gap: 8px;
+  --workspace-resizer-center: 4px;
   --workspace-pane-radius: var(--radius-pane);
   gap: var(--workspace-gap);
   padding: var(--workspace-inset);
+  background: hsl(var(--background));
 }
 
 .workspace-main--split {
@@ -1010,61 +1012,79 @@ function panelCacheKey(
 .workspace-pane {
   border-radius: var(--workspace-pane-radius);
   box-shadow:
-    inset 0 0 0 1px hsl(var(--border-subtle)),
-    inset 0 1px 0 hsl(var(--foreground) / 0.02);
+    0 0 0 1px hsl(var(--border-subtle) / 0.9),
+    0 1px 2px hsl(0 0% 0% / 0.18),
+    inset 0 1px 0 hsl(var(--foreground) / 0.025);
 }
 
-.workspace-pane--navigation,
-.workspace-pane--business {
-  background: hsl(var(--surface));
+.workspace-pane--navigation {
+  background: hsl(var(--sidebar));
 }
 
 .workspace-pane--primary {
-  background: hsl(var(--background));
+  background: hsl(var(--surface));
+}
+
+.workspace-pane--business {
+  background: hsl(var(--surface-raised));
 }
 
 .workspace-resizer {
   position: absolute;
   top: 0;
-  z-index: 30;
+  z-index: 40;
   height: 100%;
-  width: calc(var(--workspace-gap) * 2);
+  width: 16px;
   cursor: col-resize;
+  touch-action: none;
   background: transparent;
   outline: none;
 }
 
 .workspace-resizer::after {
   position: absolute;
-  top: 10px;
-  bottom: 10px;
+  top: 50%;
   left: 50%;
-  width: 1px;
+  width: 2px;
+  height: 44px;
   border-radius: 999px;
-  background: hsl(var(--primary) / 0.55);
+  background: hsl(var(--foreground-subtle) / 0.72);
   content: '';
-  opacity: 0;
-  transform: translateX(-50%);
-  transition: opacity 120ms ease-out;
+  opacity: 0.38;
+  transform: translate(-50%, -50%);
+  transition:
+    height 120ms ease-out,
+    opacity 120ms ease-out,
+    background-color 120ms ease-out;
+}
+
+.workspace-resizer:hover,
+.workspace-resizer:focus-visible {
+  background: hsl(var(--primary) / 0.055);
 }
 
 .workspace-resizer:hover::after,
 .workspace-resizer:focus-visible::after {
+  height: 56px;
+  background: hsl(var(--primary) / 0.82);
   opacity: 1;
 }
 
 .workspace-resizer--right {
-  right: calc(var(--workspace-gap) * -1);
+  right: calc(var(--workspace-resizer-center) * -1);
+  transform: translateX(50%);
 }
 
 .workspace-resizer--left {
-  left: calc(var(--workspace-gap) * -1);
+  left: calc(var(--workspace-resizer-center) * -1);
+  transform: translateX(-50%);
 }
 
 @media (max-width: 1199px) {
   .workspace-stage {
-    --workspace-inset: 3px;
-    --workspace-gap: 3px;
+    --workspace-inset: 4px;
+    --workspace-gap: 6px;
+    --workspace-resizer-center: 3px;
     --workspace-pane-radius: var(--radius-surface);
   }
 }
@@ -1073,6 +1093,7 @@ function panelCacheKey(
   .workspace-stage {
     --workspace-inset: 0px;
     --workspace-gap: 0px;
+    --workspace-resizer-center: 0px;
     --workspace-pane-radius: 0px;
   }
 

@@ -280,6 +280,24 @@ describe('AppShell right-panel integration', () => {
     wrapper.unmount();
   });
 
+  it('updates the persisted business width from the visible gutter resizer', async () => {
+    const { wrapper, store } = await mountShell('/goals');
+    const resizer = wrapper.get('[data-testid="business-panel-resizer"]');
+
+    expect(store.panelWidth).toBeNull();
+    await resizer.trigger('pointerdown', { pointerId: 11, clientX: 640 });
+    window.dispatchEvent(
+      new PointerEvent('pointermove', { pointerId: 11, clientX: 620, bubbles: true }),
+    );
+    await nextTick();
+
+    expect(store.panelWidthSource).toBe('user');
+    expect(store.panelWidth).toBe(650);
+
+    window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 11, clientX: 620, bubbles: true }));
+    wrapper.unmount();
+  });
+
   it('restores the active input after a panel-resize pointer gesture settles', async () => {
     const host = document.createElement('div');
     document.body.appendChild(host);

@@ -25,10 +25,10 @@ export const SIDEBAR_AUTO_COLLAPSE_VIEWPORT = 960;
  */
 export const WORKSPACE_COMPACT_BREAKPOINT = 768;
 export const WORKSPACE_DESKTOP_BREAKPOINT = 1200;
-export const WORKSPACE_DESKTOP_INSET = 4;
-export const WORKSPACE_DESKTOP_GAP = 4;
-export const WORKSPACE_MID_INSET = 3;
-export const WORKSPACE_MID_GAP = 3;
+export const WORKSPACE_DESKTOP_INSET = 6;
+export const WORKSPACE_DESKTOP_GAP = 8;
+export const WORKSPACE_MID_INSET = 4;
+export const WORKSPACE_MID_GAP = 6;
 
 export interface WorkspaceChromeMetrics {
   inset: number;
@@ -147,14 +147,16 @@ export function panelWidthFromPointer(
   sidebarOccupiedWidth: number,
 ): number {
   void sidebarOccupiedWidth;
-  const { inset } = resolveWorkspaceChromeMetrics(viewportWidth);
-  const raw = Math.max(0, Math.round(viewportWidth - inset - clientX));
+  const { inset, gap } = resolveWorkspaceChromeMetrics(viewportWidth);
+  // Pointer is centered in the gutter; content begins half a gutter beyond it.
+  const raw = Math.max(0, Math.round(viewportWidth - inset - clientX - gap / 2));
   return raw;
 }
 
 export function sidebarWidthFromPointer(clientX: number, viewportWidth: number): number {
-  const { inset } = resolveWorkspaceChromeMetrics(viewportWidth);
-  return Math.max(0, Math.round(clientX - inset));
+  const { inset, gap } = resolveWorkspaceChromeMetrics(viewportWidth);
+  // Pointer is centered in the gutter; sidebar content ends half a gutter before it.
+  return Math.max(0, Math.round(clientX - inset - gap / 2));
 }
 
 export function shouldCollapsePanelWidth(width: number): boolean {

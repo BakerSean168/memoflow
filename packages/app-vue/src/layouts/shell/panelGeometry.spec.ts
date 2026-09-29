@@ -32,7 +32,7 @@ describe('computePanelGeometry', () => {
   });
 
   it('covers 1024/1200/1440 with sidebar open or collapsed', () => {
-    // 1024 - 260 - 12px workspace chrome = 752, below the 320 + 520 hard minimums.
+    // 1024 - 260 - 20px workspace chrome = 744, below the 320 + 520 hard minimums.
     const at1024Open = computePanelGeometry({
       viewportWidth: 1024,
       sidebarOccupiedWidth: 260,
@@ -60,14 +60,14 @@ describe('computePanelGeometry', () => {
   });
 
   it.each([
-    { viewportWidth: 1024, sidebarOccupiedWidth: 260, canSplit: false, panel: 520, ai: 232 },
-    { viewportWidth: 1024, sidebarOccupiedWidth: 0, canSplit: true, panel: 650, ai: 365 },
-    { viewportWidth: 1200, sidebarOccupiedWidth: 260, canSplit: true, panel: 591, ai: 333 },
-    { viewportWidth: 1200, sidebarOccupiedWidth: 0, canSplit: true, panel: 760, ai: 428 },
-    { viewportWidth: 1280, sidebarOccupiedWidth: 260, canSplit: true, panel: 643, ai: 361 },
-    { viewportWidth: 1280, sidebarOccupiedWidth: 0, canSplit: true, panel: 812, ai: 456 },
-    { viewportWidth: 1440, sidebarOccupiedWidth: 260, canSplit: true, panel: 745, ai: 419 },
-    { viewportWidth: 1440, sidebarOccupiedWidth: 0, canSplit: true, panel: 914, ai: 514 },
+    { viewportWidth: 1024, sidebarOccupiedWidth: 260, canSplit: false, panel: 520, ai: 224 },
+    { viewportWidth: 1024, sidebarOccupiedWidth: 0, canSplit: true, panel: 646, ai: 364 },
+    { viewportWidth: 1200, sidebarOccupiedWidth: 260, canSplit: true, panel: 584, ai: 328 },
+    { viewportWidth: 1200, sidebarOccupiedWidth: 0, canSplit: true, panel: 755, ai: 425 },
+    { viewportWidth: 1280, sidebarOccupiedWidth: 260, canSplit: true, panel: 635, ai: 357 },
+    { viewportWidth: 1280, sidebarOccupiedWidth: 0, canSplit: true, panel: 806, ai: 454 },
+    { viewportWidth: 1440, sidebarOccupiedWidth: 260, canSplit: true, panel: 737, ai: 415 },
+    { viewportWidth: 1440, sidebarOccupiedWidth: 0, canSplit: true, panel: 909, ai: 511 },
   ])(
     'uses the desktop geometry contract at $viewportWidth with sidebar $sidebarOccupiedWidth',
     ({ viewportWidth, sidebarOccupiedWidth, canSplit, panel, ai }) => {
@@ -90,7 +90,7 @@ describe('computePanelGeometry', () => {
       sidebarOccupiedWidth: 0,
       preferredPanelWidth: 480,
     });
-    expect(collapsed.workspaceWidth).toBe(1188);
+    expect(collapsed.workspaceWidth).toBe(1180);
     expect(collapsed.aiWidth).toBeGreaterThan(open.aiWidth);
   });
 
@@ -112,8 +112,8 @@ describe('computePanelGeometry', () => {
       preferredPanelWidth: 1400,
     });
     expect(geo.panelWidth).toBe(1400);
-    expect(geo.aiWidth).toBe(788);
-    expect(geo.panelMax).toBe(1868);
+    expect(geo.aiWidth).toBe(780);
+    expect(geo.panelMax).toBe(1860);
   });
 
   it('makes the business workspace dominant at the 1280px desktop reference size', () => {
@@ -127,7 +127,7 @@ describe('computePanelGeometry', () => {
     expect(geo.canSplit).toBe(true);
     expect(geo.aiWidth).toBeGreaterThanOrEqual(340);
     expect(geo.aiWidth).toBeLessThanOrEqual(390);
-    expect(geo.panelWidth).toBeGreaterThanOrEqual(650);
+    expect(geo.panelWidth).toBeGreaterThanOrEqual(640);
     expect(geo.panelWidth).toBeLessThanOrEqual(700);
     expect(geo.panelWidth).toBeGreaterThan(geo.aiWidth);
   });
@@ -154,18 +154,18 @@ describe('shouldAutoCollapseSidebar', () => {
 describe('workspace chrome geometry', () => {
   it('matches the CSS inset/gutter tiers and pane counts', () => {
     expect(resolveWorkspaceChromeMetrics(390)).toEqual({ inset: 0, gap: 0 });
-    expect(resolveWorkspaceChromeMetrics(1024)).toEqual({ inset: 3, gap: 3 });
-    expect(resolveWorkspaceChromeMetrics(1280)).toEqual({ inset: 4, gap: 4 });
-    expect(workspaceChromeBudget(1280, 260)).toBe(16);
-    expect(workspaceChromeBudget(1280, 0)).toBe(12);
+    expect(resolveWorkspaceChromeMetrics(1024)).toEqual({ inset: 4, gap: 6 });
+    expect(resolveWorkspaceChromeMetrics(1280)).toEqual({ inset: 6, gap: 8 });
+    expect(workspaceChromeBudget(1280, 260)).toBe(28);
+    expect(workspaceChromeBudget(1280, 0)).toBe(20);
   });
 });
 
 describe('panelWidthFromPointer', () => {
   it('returns pane widths relative to the inset workspace canvas', () => {
     const width = panelWidthFromPointer(200, 1200, 260);
-    expect(width).toBe(996);
-    expect(sidebarWidthFromPointer(264, 1200)).toBe(260);
+    expect(width).toBe(990);
+    expect(sidebarWidthFromPointer(270, 1200)).toBe(260);
     expect(shouldCollapsePanelWidth(420)).toBe(true);
     expect(shouldCollapsePanelWidth(520)).toBe(false);
     expect(shouldCollapseSidebarWidth(103)).toBe(true);
