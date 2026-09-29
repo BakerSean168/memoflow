@@ -177,6 +177,13 @@
       </div>
     </main>
 
+    <QuickTaskDialog
+      v-model="showQuickTaskDialog"
+      :saving="isSaving"
+      @save="handleQuickSubmit"
+      @cancel="closeQuickTaskDialog"
+    />
+
     <TaskPlanDialog
       v-model="showDialog"
       mode="create"
@@ -211,6 +218,8 @@ import TaskOccurrenceRow from '../components/TaskOccurrenceRow.vue';
 import TaskPageToolbar from '../components/TaskPageToolbar.vue';
 import TaskPlanRow from '../components/TaskPlanRow.vue';
 import TaskPlanDialog from '../components/dialogs/TaskPlanDialog.vue';
+import QuickTaskDialog from '../components/dialogs/QuickTaskDialog.vue';
+import { buildQuickTaskRequest } from '../utils/quick-task-request';
 import type {
   TaskPlanStateFilter,
   TaskPlanViewModel,
@@ -257,6 +266,7 @@ const planStateFilter = ref<TaskPlanStateFilter>('all');
 const labelFilterIds = ref<string[]>([]);
 const occurrenceSort = ref<TaskOccurrenceSort>('time');
 const showDialog = ref(false);
+const showQuickTaskDialog = ref(false);
 const createInitialGoalBinding = ref<TaskPlanViewModel['goalBinding']>(null);
 const busyOccurrenceId = ref<string | null>(null);
 const scopedGoalName = ref<string | null>(null);
@@ -522,6 +532,21 @@ function closeDialog() {
   createInitialGoalBinding.value = null;
 }
 
+function closeQuickTaskDialog() {
+  showQuickTaskDialog.value = false;
+  if (route.query.dialog !== 'quick-task') return;
+  const query = { ...route.query };
+  delete query.dialog;
+  void router.replace({ query, hash: route.hash });
+}
+
+async function handleQuickSubmit({ title }: { title: string }) {
+  const saved = await createPlanSafe(buildQuickTaskRequest(title), 'quick');
+  if (!saved) return;
+  closeQuickTaskDialog();
+  await loadTodayOccurrences(true);
+}
+
 function goalBinding(vm: TaskPlanViewModel) {
   if (!vm.goalBinding?.goalId) return null;
   return {
@@ -606,6 +631,14 @@ watch(resolveIdentityScope, () => {
 watch(activeSurface, (surface) => {
   if (surface === 'today') void loadTodayOccurrences();
 });
+
+watch(
+  () => route.query.dialog,
+  (dialog) => {
+    showQuickTaskDialog.value = dialog === 'quick-task';
+  },
+  { immediate: true },
+);
 
 watch(
   () => [route.query.create, route.query.createGoalId, route.query.createKeyResultId] as const,

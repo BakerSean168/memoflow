@@ -11,13 +11,12 @@ import { useI18n } from 'vue-i18n';
 import { ArrowRight, CheckCircle2, Plus, RotateCcw } from '@lucide/vue';
 import { Button, Input } from '@memoflow/ui-vue-shadcn';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { useTask } from '../../../modules/task/composables/useTask';
 import { useTaskPlanMutations } from '../../../modules/task/composables/useTaskPlanMutations';
+import { buildQuickTaskRequest } from '../../../modules/task/utils/quick-task-request';
 import TaskOccurrenceCompactRow from '../../../modules/task/components/TaskOccurrenceCompactRow.vue';
 import {
   endOfDayMs,
-  getProductTodayYmd,
   isTodayMs,
   startOfDayMs,
 } from '../../../shared/utils/product-time';
@@ -152,23 +151,7 @@ async function createQuickTask(): Promise<void> {
   const title = quickTaskTitle.value.trim();
   if (!title || isCreatingQuickTask.value) return;
 
-  const saved = await createPlanSafe(
-    {
-      name: title,
-      description: null,
-      schedule: {
-        kind: 'OneTime',
-        date: getProductTodayYmd(),
-        timing: { kind: 'AllDay' },
-      },
-      reminderConfig: null,
-      importance: ImportanceLevel.Moderate,
-      labelIds: [],
-      goalBinding: null,
-      checklist: [],
-    },
-    'quick',
-  );
+  const saved = await createPlanSafe(buildQuickTaskRequest(title), 'quick');
 
   if (!saved) return;
   quickTaskTitle.value = '';

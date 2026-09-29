@@ -612,6 +612,10 @@ Goal 是后续 property/direct-manipulation/measurement/review grammar 的第一
 
 ## PVC-TASK-3004 — Restore Quick Task
 
+**Execution (2026-09-29): Implemented / validated.** `/tasks?dialog=quick-task` now opens the Task-owned `QuickTaskDialog` on direct load and later route changes. Quick create remains title-only and persists a normal one-time Product-Today / AllDay TaskPlan through the existing `createPlanSafe(..., 'quick')` path. `TaskCapsulePreview` keeps its inline host for now but shares the canonical Task-owned request builder. Full `TaskPlanDialog` and create-and-bind behavior remain unchanged.
+
+**Validation:** focused app-vue regression suite 8 files / 66 tests passed; focused runtime spec 20 tests passed after a lint-only stub repair; full `app-vue:typecheck`, changed-file ESLint and `git diff --check` passed. See [implementation report](../../analysis/2026-09-29-pvc-task-3004-implementation.md). No TASK-3401, occurrence inspect, Goal measurement, Schedule dialog or AI workflow refactor was started in this ticket.
+
 **Goal:** AI/Today Overview/Capsule 的快速创建入口真正可用。
 
 **Implementation:**

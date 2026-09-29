@@ -14,6 +14,9 @@ import {
   SERVER_STATE_RUNTIME_KEY,
 } from '../../../platform/server-state';
 import { useTaskStore } from '../stores/task-store';
+import type { LocationQuery } from 'vue-router';
+import QuickTaskDialog from '../components/dialogs/QuickTaskDialog.vue';
+import TaskPlanDialog from '../components/dialogs/TaskPlanDialog.vue';
 
 type ListParams = TaskPlanListQueryInput;
 const mocks = vi.hoisted(() => ({
@@ -24,11 +27,14 @@ const mocks = vi.hoisted(() => ({
   listError: undefined as Ref<boolean> | undefined,
   listTotal: undefined as Ref<number> | undefined,
   refetch: vi.fn(),
-  route: { query: {} as Record<string, string> },
+  createPlanSafe: vi.fn(),
+  replace: vi.fn(),
+  push: vi.fn(),
+  route: { query: {} as LocationQuery, hash: '' },
 }));
 vi.mock('vue-router', () => ({
   useRoute: () => mocks.route,
-  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+  useRouter: () => ({ push: mocks.push, replace: mocks.replace }),
 }));
 vi.mock('../composables/useTaskOccurrences', () => ({
   useTaskOccurrences: () => ({ fetchInstancesByDateRange: mocks.range }),
@@ -50,7 +56,7 @@ vi.mock('../composables/useTaskPlanListQuery', () => ({
   },
 }));
 vi.mock('../composables/useTaskPlanMutations', () => ({
-  useTaskPlanMutations: () => ({ isSaving: ref(false) }),
+  useTaskPlanMutations: () => ({ createPlanSafe: mocks.createPlanSafe, isSaving: ref(false) }),
 }));
 vi.mock('../utils/task-occurrence-presentation', () => ({
   isTaskOccurrenceOnTodaySurface: () => true,
@@ -61,8 +67,10 @@ vi.mock('../../../shared/utils/product-time', () => ({
   startOfDayMs: () => 1000,
   endOfDayMs: () => 2000,
   isTodayMs: () => true,
+  getProductTodayYmd: () => '2026-09-29',
 }));
-vi.mock('@memoflow/ui-vue-shadcn', () => ({
+vi.mock('@memoflow/ui-vue-shadcn', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@memoflow/ui-vue-shadcn')>()),
   Button: defineComponent({
     setup:
       (_, { slots }) =>
@@ -72,14 +80,18 @@ vi.mock('@memoflow/ui-vue-shadcn', () => ({
   useConfirm: vi.fn(),
 }));
 vi.mock('../components/dialogs/TaskPlanDialog.vue', () => ({
-  default: defineComponent({ setup: () => () => h('div') }),
+  default: defineComponent({
+    props: ['modelValue', 'initialGoalBinding', 'mode'],
+    emits: ['save', 'cancel', 'update:modelValue'],
+    setup: () => () => h('div'),
+  }),
 }));
 import TaskManagementView from './TaskManagementView.vue';
 
 const toolbar = defineComponent({
   name: 'TaskPageToolbar',
   props: ['goalScopeLabel'],
-  emits: ['update:active-surface', 'update:plan-state-filter', 'update:label-filter-ids'],
+  emits: ['update:active-surface', 'update:plan-state-filter', 'update:label-filter-ids', 'create-task'],
   setup: (props) => () => h('div', props.goalScopeLabel),
 });
 const occurrenceRow = defineComponent({
@@ -92,7 +104,12 @@ afterEach(() => {
 });
 beforeEach(() => {
   vi.clearAllMocks();
-  mocks.route = reactive({ query: {} });
+  mocks.route = reactive({ query: {}, hash: '' });
+  mocks.replace.mockImplementation(async (location: { query?: LocationQuery; hash?: string }) => {
+    mocks.route.query = location.query ?? {};
+    mocks.route.hash = location.hash ?? '';
+  });
+  mocks.createPlanSafe.mockResolvedValue({ todayOccurrenceCreated: true });
 });
 
 function render(detailFails = false) {
@@ -144,12 +161,154 @@ function render(detailFails = false) {
         [SERVER_STATE_RUNTIME_KEY]: runtime,
         [SERVER_STATE_IDENTITY_SCOPE_KEY]: () => 'owner',
       },
-      stubs: { TaskPageToolbar: toolbar, TaskOccurrenceRow: occurrenceRow, TaskPlanRow: true },
+      stubs: {
+        TaskPageToolbar: toolbar,
+        TaskOccurrenceRow: occurrenceRow,
+        TaskPlanRow: true,
+        Dialog: defineComponent({
+          name: 'DialogStub',
+          props: ['open'],
+          emits: ['update:open'],
+          setup: (props, { slots }) => () => props.open ? h('div', slots.default?.()) : null,
+        }),
+        ProductDialogShell: defineComponent({
+          setup: (_, { slots }) => () => h('div', [slots.default?.(), slots.footer?.()]),
+        }),
+      },
     },
   });
   wrappers.push(wrapper);
   return { wrapper, getPlan, goalService };
 }
+
+describe('Task Management quick create', () => {
+  it('opens the title-only dialog on direct load and refresh without opening the full editor', async () => {
+    mocks.route.query = { dialog: 'quick-task', source: 'today' };
+    for (let load = 0; load < 2; load++) {
+      const { wrapper } = render();
+      await flushPromises();
+      expect(wrapper.findComponent(QuickTaskDialog).props('modelValue')).toBe(true);
+      expect(wrapper.findAll('input')).toHaveLength(1);
+      expect(wrapper.findComponent(TaskPlanDialog).props('modelValue')).toBe(false);
+      wrapper.unmount();
+      wrappers.pop();
+    }
+    expect(mocks.replace).not.toHaveBeenCalled();
+    expect(mocks.createPlanSafe).not.toHaveBeenCalled();
+  });
+
+  it('consumes later route changes and closes when the quick intent is removed', async () => {
+    const { wrapper } = render();
+    await flushPromises();
+    const dialog = wrapper.findComponent(QuickTaskDialog);
+    expect(dialog.props('modelValue')).toBe(false);
+    mocks.route.query = { dialog: 'quick-task' };
+    await flushPromises();
+    expect(dialog.props('modelValue')).toBe(true);
+    mocks.route.query = { dialog: 'another-dialog' };
+    await flushPromises();
+    expect(dialog.props('modelValue')).toBe(false);
+    expect(mocks.replace).not.toHaveBeenCalled();
+  });
+
+  it.each(['cancel', 'dismiss'] as const)('clears only quick dialog state on %s without reopening', async (action) => {
+    const unrelated = { source: 'overview', labels: ['a', 'b'], flag: null };
+    mocks.route.query = { ...unrelated, dialog: 'quick-task' };
+    mocks.route.hash = '#today';
+    const { wrapper } = render();
+    await flushPromises();
+    const dialog = wrapper.findComponent(QuickTaskDialog);
+    await wrapper.get('input').setValue('Unsaved draft');
+    if (action === 'cancel') await dialog.get('button[type="button"]').trigger('click');
+    else dialog.findComponent({ name: 'DialogStub' }).vm.$emit('update:open', false);
+    await flushPromises();
+    expect(dialog.props('modelValue')).toBe(false);
+    expect(mocks.route.query).toEqual(unrelated);
+    expect(mocks.route.hash).toBe('#today');
+    expect(mocks.replace).toHaveBeenCalledTimes(1);
+    mocks.route.query = { ...mocks.route.query, source: 'ai' };
+    await flushPromises();
+    expect(dialog.props('modelValue')).toBe(false);
+    expect(mocks.replace).toHaveBeenCalledTimes(1);
+    expect(mocks.createPlanSafe).not.toHaveBeenCalled();
+    expect(mocks.range).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the draft on failure, then creates the canonical quick plan and refreshes bounded Today on retry', async () => {
+    mocks.route.query = { dialog: 'quick-task', source: 'ai', tags: ['a', 'b'] };
+    mocks.createPlanSafe.mockResolvedValueOnce(null);
+    const { wrapper } = render();
+    await flushPromises();
+    await wrapper.get('input').setValue('  Ship review  ');
+    await wrapper.get('#quick-task-form').trigger('submit');
+    await flushPromises();
+    const expectedRequest = {
+      name: 'Ship review',
+      description: null,
+      schedule: { kind: 'OneTime', date: '2026-09-29', timing: { kind: 'AllDay' } },
+      reminderConfig: null,
+      importance: 'Moderate',
+      labelIds: [],
+      goalBinding: null,
+      checklist: [],
+    };
+    expect(mocks.createPlanSafe).toHaveBeenLastCalledWith(expectedRequest, 'quick');
+    expect(wrapper.findComponent(QuickTaskDialog).props('modelValue')).toBe(true);
+    expect(wrapper.get('input').element.value).toBe('  Ship review  ');
+    expect(mocks.route.query.dialog).toBe('quick-task');
+    expect(mocks.replace).not.toHaveBeenCalled();
+    expect(mocks.range).toHaveBeenCalledTimes(1);
+
+    await wrapper.get('#quick-task-form').trigger('submit');
+    await flushPromises();
+    expect(mocks.createPlanSafe).toHaveBeenCalledTimes(2);
+    expect(mocks.createPlanSafe).toHaveBeenLastCalledWith(expectedRequest, 'quick');
+    expect(wrapper.findComponent(QuickTaskDialog).props('modelValue')).toBe(false);
+    expect(wrapper.findComponent(TaskPlanDialog).props('modelValue')).toBe(false);
+    expect(mocks.route.query).toEqual({ source: 'ai', tags: ['a', 'b'] });
+    expect(mocks.replace).toHaveBeenCalledTimes(1);
+    expect(mocks.range).toHaveBeenCalledTimes(2);
+    expect(mocks.range).toHaveBeenLastCalledWith(1000, 2000, { force: true, includeOverdueOpen: true });
+    expect(mocks.refetch).not.toHaveBeenCalled();
+    expect(mocks.push).not.toHaveBeenCalled();
+  });
+
+  it('refreshes Today even when quick creation is opened over Plans without inheriting its Goal scope', async () => {
+    mocks.route.query = { goalId: 'goal-id', keyResultId: 'kr-id', dialog: 'quick-task' };
+    const { wrapper } = render();
+    await flushPromises();
+    expect(toValue(mocks.listEnabled)).toBe(true);
+    expect(mocks.range).not.toHaveBeenCalled();
+    await wrapper.get('input').setValue('Unbound task');
+    await wrapper.get('#quick-task-form').trigger('submit');
+    await flushPromises();
+    expect(mocks.createPlanSafe.mock.calls[0][0].goalBinding).toBeNull();
+    expect(mocks.route.query).toEqual({ goalId: 'goal-id', keyResultId: 'kr-id' });
+    expect(mocks.range).toHaveBeenCalledWith(1000, 2000, { force: true, includeOverdueOpen: true });
+  });
+
+  it('preserves full create-and-bind and the ordinary New Task editor', async () => {
+    mocks.route.query = { create: '1', createGoalId: 'goal-id', createKeyResultId: 'kr-id' };
+    const { wrapper } = render();
+    await flushPromises();
+    const fullDialog = wrapper.findComponent(TaskPlanDialog);
+    expect(fullDialog.props()).toMatchObject({
+      modelValue: true,
+      mode: 'create',
+      initialGoalBinding: { goalId: 'goal-id', keyResultId: 'kr-id' },
+    });
+    expect(wrapper.findComponent(QuickTaskDialog).props('modelValue')).toBe(false);
+    expect(mocks.listParams!.value).toEqual({ page: 1, limit: 100 });
+    expect(mocks.replace).toHaveBeenCalledWith({ name: 'task-list' });
+    fullDialog.vm.$emit('cancel');
+    await flushPromises();
+    wrapper.findComponent(toolbar).vm.$emit('create-task');
+    await flushPromises();
+    expect(fullDialog.props('modelValue')).toBe(true);
+    expect(fullDialog.props('initialGoalBinding')).toBeNull();
+    expect(wrapper.findComponent(QuickTaskDialog).props('modelValue')).toBe(false);
+  });
+});
 
 describe('Task Management bounded reads', () => {
   it('renders Today facts whose plan is outside the bounded Plan page', async () => {

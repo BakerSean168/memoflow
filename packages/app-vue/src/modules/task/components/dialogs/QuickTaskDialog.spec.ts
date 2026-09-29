@@ -67,6 +67,27 @@ function mountDialog() {
 }
 
 describe('QuickTaskDialog', () => {
+  it('keeps capture title-only with a fixed Today / All day default', () => {
+    const wrapper = mountDialog();
+    expect(wrapper.findAll('input')).toHaveLength(1);
+    expect(wrapper.find('textarea, select').exists()).toBe(false);
+    expect(wrapper.text()).toContain('Today · All day');
+    expect(wrapper.findComponent({ name: 'TaskPlanForm' }).exists()).toBe(false);
+  });
+
+  it('rejects blank titles and prevents another save while pending', async () => {
+    const wrapper = mountDialog();
+    await wrapper.get('input').setValue('   ');
+    await wrapper.get('form').trigger('submit');
+    expect(wrapper.emitted('save')).toBeUndefined();
+    await wrapper.get('input').setValue('Keep this draft');
+    await wrapper.setProps({ saving: true });
+    await wrapper.get('form').trigger('submit');
+    expect(wrapper.emitted('save')).toBeUndefined();
+    expect(wrapper.get('input').element.value).toBe('Keep this draft');
+    expect(wrapper.get('[data-testid="quick-task-save-button"]').attributes('disabled')).toBeDefined();
+  });
+
   it('submits a trimmed title from the compact form', async () => {
     const wrapper = mountDialog();
     await wrapper.get('[data-testid="quick-task-title-input"]').setValue('  Ship review  ');
@@ -95,5 +116,15 @@ describe('QuickTaskDialog', () => {
 
     await wrapper.get('[data-testid="quick-task-title-input"]').setValue('');
     expect(wrapper.emitted('dirty-change')?.at(-1)).toEqual([false]);
+  });
+
+  it('clears draft and dirty state on cancel', async () => {
+    const wrapper = mountDialog();
+    await wrapper.get('input').setValue('Unsaved');
+    await wrapper.get('button[type="button"]').trigger('click');
+    expect(wrapper.emitted('cancel')).toEqual([[]]);
+    expect(wrapper.emitted('update:modelValue')).toEqual([[false]]);
+    expect(wrapper.emitted('dirty-change')?.at(-1)).toEqual([false]);
+    expect(wrapper.get('input').element.value).toBe('');
   });
 });

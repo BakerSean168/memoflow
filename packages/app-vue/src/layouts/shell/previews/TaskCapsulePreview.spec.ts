@@ -4,6 +4,7 @@ import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import TaskCapsulePreview from './TaskCapsulePreview.vue';
+import { getProductTodayYmd } from '../../../shared/utils/product-time';
 
 const instancesRef = ref<Record<string, unknown>[]>([]);
 const templatesRef = ref<Record<string, unknown>[]>([]);
@@ -147,21 +148,44 @@ describe('TaskCapsulePreview quick workspace', () => {
     await flushPromises();
 
     await wrapper.get('[data-testid="task-capsule-quick-task"]').trigger('click');
-    await wrapper.get('input').setValue('Review PR');
+    await wrapper.get('input').setValue('  Review PR  ');
     await wrapper.get('[data-testid="task-capsule-quick-create"]').trigger('submit');
     await flushPromises();
 
     expect(createPlanSafe).toHaveBeenCalledWith(
-      expect.objectContaining({
+      {
         name: 'Review PR',
-        schedule: expect.objectContaining({
+        description: null,
+        schedule: {
           kind: 'OneTime',
+          date: getProductTodayYmd(),
           timing: { kind: 'AllDay' },
-        }),
-      }),
+        },
+        reminderConfig: null,
+        importance: 'Moderate',
+        labelIds: [],
+        goalBinding: null,
+        checklist: [],
+      },
       'quick',
     );
     expect(fetchInstancesByDateRange).toHaveBeenCalledTimes(2);
+    expect(wrapper.find('[data-testid="task-capsule-quick-create"]').exists()).toBe(false);
+    expect(wrapper.emitted('select')).toBeUndefined();
+    wrapper.unmount();
+  });
+
+  it('keeps the inline quick draft on failure', async () => {
+    createPlanSafe.mockResolvedValueOnce(null);
+    const wrapper = mountPreview();
+    await flushPromises();
+    await wrapper.get('[data-testid="task-capsule-quick-task"]').trigger('click');
+    await wrapper.get('input').setValue('Retry later');
+    await wrapper.get('[data-testid="task-capsule-quick-create"]').trigger('submit');
+    await flushPromises();
+    expect(wrapper.get('input').element.value).toBe('Retry later');
+    expect(wrapper.find('[data-testid="task-capsule-quick-create"]').exists()).toBe(true);
+    expect(fetchInstancesByDateRange).toHaveBeenCalledTimes(1);
     wrapper.unmount();
   });
 
