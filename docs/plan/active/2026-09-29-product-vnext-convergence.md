@@ -1054,6 +1054,7 @@ Module audits may run in parallel after the Goal interaction contract is stable 
 
 - [Goal vNext Workspace & Create UI](../../product/goal-vnext-workspace-and-create-ui.md)
 - [Cross-module convergence audit](../../analysis/2026-09-29-product-vnext-module-convergence-audit.md)
+- [Task vNext second-pass deep audit](../../analysis/2026-09-29-task-vnext-second-pass-deep-audit.md)
 - [Workspace UI contract](../../product/workspace-ui.md)
 - [Task vNext](../../product/task-vnext-plan-occurrence-workspace.md)
 - [Routine Coach vNext](../../product/routine-coach-vnext.md)

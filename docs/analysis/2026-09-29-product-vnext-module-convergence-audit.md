@@ -46,6 +46,8 @@ The modules are not equally unfinished.
 
 # 3. Task
 
+> Second-pass deep audit: [Task vNext — Second-pass deep audit](./2026-09-29-task-vnext-second-pass-deep-audit.md). The focused audit supersedes this section for Task-specific severity and repair ordering; the summary below remains the cross-module comparison.
+
 ## 3.1 Current facts
 
 Current surfaces:
